@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,7 @@
 #include "FEProblemBase.h"
 #include "MaterialBase.h"
 #include "MaterialWarehouse.h"
+#include "AutomaticMortarGeneration.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/elem.h"
@@ -188,7 +189,7 @@ loopOverMortarSegments(
       if (assembly.needDual())
         mooseAssert(JxW.size() == expected_length, "Fewer than expected JxW values computed");
 #endif
-    }
+    } // end loop over msm_elems
 
     // Reinit dual shape coeffs if dual shape functions needed
     // lindsayad: is there any need to make sure we do this on both reference and displaced?

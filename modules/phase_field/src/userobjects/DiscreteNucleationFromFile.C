@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,7 @@ DiscreteNucleationFromFile::DiscreteNucleationFromFile(const InputParameters & p
   : DiscreteNucleationInserterBase(parameters),
     _hold_time(getParam<Real>("hold_time")),
     _reader(getParam<FileName>("file")),
-    _history_pointer(0),
+    _history_pointer(declareRestartableData<unsigned int>("history_pointer", 0)),
     _tol(getParam<Real>("tolerance")),
     _nucleation_rate(0.0),
     _fixed_radius(isParamValid("radius")),

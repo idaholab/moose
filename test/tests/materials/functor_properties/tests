@@ -45,7 +45,7 @@
       exodiff = prop-caching_out.e
       detail = 'at the beginning of timesteps'
       cli_args = "Materials/slow_prop/execute_on='timestep_begin'"
-      method = '!dbg' # stl container checking takes forever
+      capabilities = 'method!=dbg' # stl container checking takes forever
     []
     [always]
       type = Exodiff
@@ -53,7 +53,7 @@
       exodiff = prop-caching_out.e
       detail = 'always, so always perform evaluations'
       prereq = 'prop_caching/on_timestep_begin'
-      method = '!dbg' # stl container checking takes forever
+      capabilities = 'method!=dbg' # stl container checking takes forever
     []
     [on_nonlinear]
       type = Exodiff
@@ -62,7 +62,7 @@
       detail = 'on nonlinear iterations'
       cli_args = "Materials/slow_prop/execute_on='nonlinear'"
       prereq = 'prop_caching/always'
-      method = '!dbg' # stl container checking takes forever
+      capabilities = 'method!=dbg' # stl container checking takes forever
     []
     [on_linear]
       type = Exodiff
@@ -71,7 +71,7 @@
       detail = 'on linear iterations'
       cli_args = "Materials/slow_prop/execute_on='linear'"
       prereq = 'prop_caching/on_nonlinear'
-      method = '!dbg' # stl container checking takes forever
+      capabilities = 'method!=dbg' # stl container checking takes forever
     []
   []
   [bad-functor-type-mixing]

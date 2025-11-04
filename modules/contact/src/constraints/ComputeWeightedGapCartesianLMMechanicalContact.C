@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,9 +11,15 @@
 #include "DisplacedProblem.h"
 #include "MortarContactUtils.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
+#include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
+#if METAPHYSICL_MAJOR_VERSION < 2
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
+#else
+#include "metaphysicl/parallel_dynamic_array_wrapper.h"
+#endif
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
@@ -107,7 +113,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
         mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
 }
 
-ADReal ComputeWeightedGapCartesianLMMechanicalContact::computeQpResidual(Moose::MortarType)
+ADReal
+ComputeWeightedGapCartesianLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
   mooseError("We should never call computeQpResidual for ComputeWeightedGapLMMechanicalContact");
 }

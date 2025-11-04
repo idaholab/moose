@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,9 +25,9 @@ protected:
   virtual Real computeValue();
 
   /// The temperature
-  const Moose::Functor<ADReal> & _T;
+  const Moose::Functor<Real> & _T;
   /// The solidus temperature
-  const Moose::Functor<ADReal> & _T_solidus;
+  const Moose::Functor<Real> & _T_solidus;
   /// The liquidus temperture
-  const Moose::Functor<ADReal> & _T_liquidus;
+  const Moose::Functor<Real> & _T_liquidus;
 };

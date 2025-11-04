@@ -15,10 +15,12 @@ This model is a scalar damage model in which the stress $\boldsymbol{\sigma}$ is
 The damage variable $d$ itself is computed as a combination of a series of external scalar damage models defined by the `damage_models` input parameters.
 Two combination types are possible: `Maximum` (default) and `Product`:
 
-\begin{eqnarray}
-    \mathrm{Maximum:} & d = & \mathrm{max}(d_1 ... d_N) \\
-    \mathrm{Product:} & d = & 1 - \Prod\limits_{i=1}^{N} (1 - d_i)
-\end{eqnarray}
+\begin{equation}
+\begin{split}
+    \mathrm{Maximum:} & d = \mathrm{max}(d_1 ... d_N) \\
+    \mathrm{Product:} & d = 1 - \Prod\limits_{i=1}^{N} (1 - d_i)
+\end{split}
+\end{equation}
 
 !syntax parameters /Materials/CombinedScalarDamage
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,6 +44,8 @@ CNSFVHLLCStagnationInletBC::CNSFVHLLCStagnationInletBC(const InputParameters & p
 void
 CNSFVHLLCStagnationInletBC::preComputeWaveSpeed()
 {
+  using std::pow;
+
   _normal_speed_boundary = _normal_speed_elem;
   _vel_boundary = _vel_elem[_qp];
 
@@ -56,7 +58,7 @@ CNSFVHLLCStagnationInletBC::preComputeWaveSpeed()
   // Compute inlet pressure using isentropic relation
   ADReal gamma = _cp[_qp] / _cv[_qp];
   _p_boundary =
-      _stagnation_pressure * std::pow(_stagnation_temperature / T_inlet, -gamma / (gamma - 1.));
+      _stagnation_pressure * pow(_stagnation_temperature / T_inlet, -gamma / (gamma - 1.));
 
   // Compute total energy from stagnation values.
   _specific_internal_energy_boundary = _cv[_qp] * T_inlet + 0.5 * speed_sq;

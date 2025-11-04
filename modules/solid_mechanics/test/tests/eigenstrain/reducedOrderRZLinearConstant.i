@@ -11,10 +11,6 @@
   volumetric_locking_correction = false
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -24,6 +20,7 @@
   xmin = 1
   ymax = 1
   ymin = 0
+  coord_type = RZ
 []
 
 [Functions]

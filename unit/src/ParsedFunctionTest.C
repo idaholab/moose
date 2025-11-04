@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,8 @@
 
 #include "libmesh/fe_map.h"
 #include "libmesh/quadrature_gauss.h"
+
+using namespace libMesh;
 
 ParsedFunction<Real> *
 ParsedFunctionTest::fptr(MooseParsedFunction & f)
@@ -100,7 +102,8 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   // Test face overloads
   _mesh->buildFiniteVolumeInfo();
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
-  auto face = Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
+  auto face = Moose::FaceArg(
+      {fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr});
   f_traditional = f.value(0, fi->faceCentroid());
   f_functor = f_wrapped(face, Moose::currentState());
   gradient_traditional = f.gradient(0, fi->faceCentroid());

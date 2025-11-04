@@ -1,5 +1,5 @@
 # PorousFlowPreDis, which is essentially checking the derivatives of the secondary concentrations in PorousFlowMassFractionAqueousPreDisChemistry
-# Dissolution with temperature, with three primary variables and four reactions, and some zero concnetrations
+# Dissolution with temperature, with three primary variables and four reactions, and some zero concentrations
 [Mesh]
   type = GeneratedMesh
   dim = 1

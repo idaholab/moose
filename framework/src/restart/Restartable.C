@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -46,6 +46,18 @@ Restartable::Restartable(MooseApp & moose_app,
     _restartable_name(name)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+Restartable::Restartable(const Restartable & object, const Moose::Kokkos::FunctorCopy &)
+  : _restartable_app(object._restartable_app),
+    _restartable_system_name(object._restartable_system_name),
+    _restartable_tid(object._restartable_tid),
+    _restartable_read_only(object._restartable_read_only),
+    _metaname(object._metaname),
+    _restartable_name(object._restartable_name)
+{
+}
+#endif
 
 RestartableDataValue &
 Restartable::registerRestartableDataOnApp(std::unique_ptr<RestartableDataValue> data,

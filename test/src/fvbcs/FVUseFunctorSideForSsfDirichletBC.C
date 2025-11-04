@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -33,10 +33,10 @@ FVUseFunctorSideForSsfDirichletBCTempl<is_ad>::FVUseFunctorSideForSsfDirichletBC
 
 template <bool is_ad>
 ADReal
-FVUseFunctorSideForSsfDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
+FVUseFunctorSideForSsfDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi,
+                                                             const Moose::StateArg & state) const
 {
-  return _functor(makeFace(fi, Moose::FV::LimiterType::CentralDifference, true, false),
-                  Moose::currentState());
+  return _functor(makeFace(fi, Moose::FV::LimiterType::CentralDifference, true, false), state);
 }
 
 template <bool is_ad>

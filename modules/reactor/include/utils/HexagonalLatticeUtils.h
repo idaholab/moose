@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,7 +44,8 @@ public:
                         const Real wire_diameter,
                         const Real wire_pitch,
                         const unsigned int n_rings,
-                        const unsigned int axis);
+                        const unsigned int axis,
+                        const Real rotation_around_axis = 0);
 
   /**
    * Distance from a point and a gap
@@ -632,6 +633,12 @@ protected:
 
   /// Vertical axis of the bundle along which the pins are aligned
   const unsigned int _axis;
+
+  /// Rotation around the axis to apply to the lattice
+  const Real _rotation_around_axis;
+
+  /// Rotation matrix to apply the rotation why
+  const RealTensorValue _rotation_matrix;
 
   /// Side length of duct
   const Real _bundle_side_length;

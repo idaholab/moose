@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,7 @@ InputParameters
 Component::validParams()
 {
   InputParameters params = THMObject::validParams();
+  params += ADFunctorInterface::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
@@ -35,6 +36,7 @@ Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
     LoggingInterface(getCheckedPointerParam<THMProblem *>("_thm_problem")->log()),
     NamingInterface(),
+    ADFunctorInterface(this),
 
     _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
@@ -107,7 +109,7 @@ Component::connectObject(const InputParameters & params,
                          const std::string & par_name) const
 {
   MooseObjectParameterName alias("component", this->name(), name, "::");
-  MooseObjectParameterName par_value(params.get<std::string>("_moose_base"), mooseName, par_name);
+  MooseObjectParameterName par_value(params.getBase(), mooseName, par_name);
   _app.getInputParameterWarehouse().addControllableParameterAlias(alias, par_value);
 }
 
@@ -178,8 +180,8 @@ Component::addRelationshipManager(
   // These need unique names
   static unsigned int unique_object_id = 0;
 
-  auto new_name = moose_object_pars.get<std::string>("_moose_base") + '_' + name() + '_' + rm_name +
-                  "_" + Moose::stringify(rm_type) + " " + std::to_string(unique_object_id);
+  auto new_name = moose_object_pars.getBase() + '_' + name() + '_' + rm_name + "_" +
+                  Moose::stringify(rm_type) + " " + std::to_string(unique_object_id);
 
   auto rm_params = _factory.getValidParams(rm_name);
   rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;
@@ -205,6 +207,39 @@ Component::addRelationshipManager(
     _factory.releaseSharedObjects(*rm_obj);
   else // we added it
     unique_object_id++;
+}
+
+Node *
+Component::addNode(const Point & pt)
+{
+  auto node = mesh().addNode(pt);
+  _node_ids.push_back(node->id());
+  return node;
+}
+
+Elem *
+Component::addNodeElement(dof_id_type node)
+{
+  auto elem = mesh().addNodeElement(node);
+  _elem_ids.push_back(elem->id());
+  return elem;
+}
+
+void
+Component::setSubdomainInfo(SubdomainID subdomain_id,
+                            const std::string & subdomain_name,
+                            const Moose::CoordinateSystemType & coord_system)
+{
+  _subdomain_ids.push_back(subdomain_id);
+  _subdomain_names.push_back(subdomain_name);
+  _coord_sys.push_back(coord_system);
+  if (_parent)
+  {
+    _parent->_subdomain_ids.push_back(subdomain_id);
+    _parent->_subdomain_names.push_back(subdomain_name);
+    _parent->_coord_sys.push_back(coord_system);
+  }
+  mesh().setSubdomainName(subdomain_id, subdomain_name);
 }
 
 void
@@ -250,4 +285,36 @@ Component::stringify(EComponentSetupStatus status) const
     default:
       mooseError("Should not reach here");
   }
+}
+
+const std::vector<dof_id_type> &
+Component::getNodeIDs() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _node_ids;
+}
+
+const std::vector<dof_id_type> &
+Component::getElementIDs() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _elem_ids;
+}
+
+const std::vector<SubdomainName> &
+Component::getSubdomainNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _subdomain_names;
+}
+
+const std::vector<Moose::CoordinateSystemType> &
+Component::getCoordSysTypes() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _coord_sys;
 }

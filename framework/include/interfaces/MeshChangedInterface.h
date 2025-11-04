@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,13 +9,11 @@
 
 #pragma once
 
-#include "MooseEnum.h"
+#include "MooseTypes.h"
 
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
-template <typename T>
-InputParameters validParams();
 
 /**
  * Interface for notifications that the mesh has changed.
@@ -26,6 +24,14 @@ public:
   static InputParameters validParams();
 
   MeshChangedInterface(const InputParameters & params);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MeshChangedInterface(const MeshChangedInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   virtual ~MeshChangedInterface() = default;
 
   /**

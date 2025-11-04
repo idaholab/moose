@@ -1,1 +1,1 @@
-../stitched_mesh_generator/right.e
+../stitch_mesh_generator/right.e

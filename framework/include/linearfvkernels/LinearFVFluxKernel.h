@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -68,6 +68,11 @@ public:
    * @param bc The boundary condition on the given face
    */
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) = 0;
+
+  /**
+   * Computes the flux from this kernel on a boundary
+   */
+  virtual Real computeBoundaryFlux(const LinearFVBoundaryCondition & bc);
 
 protected:
   /**

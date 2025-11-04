@@ -1,9 +1,0 @@
-[Tests]
-  [test]
-    type = RunApp
-    input = test.i
-    design = BatchPropertyDerivative.md
-    issues = '#26920'
-    requirement = 'The batch property derivative shall be able to gather, serialize material property values and receives material property derivatives for batch property computation.'
-  []
-[]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,7 @@ OrientedBoxInterface::validParams()
 OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
   : _center(parameters.get<Point>("center"))
 {
-  const std::string & name = parameters.get<std::string>("_object_name");
+  const std::string & name = parameters.getObjectName();
 
   // Define the bounding box
   Real xmax = 0.5 * parameters.get<Real>("width");
@@ -46,7 +46,7 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
   Point bottom_left(-xmax, -ymax, -zmax);
   Point top_right(xmax, ymax, zmax);
 
-  _bounding_box = std::make_unique<BoundingBox>(bottom_left, top_right);
+  _bounding_box = std::make_unique<libMesh::BoundingBox>(bottom_left, top_right);
 
   /*
    * now create the rotation matrix that rotates the oriented

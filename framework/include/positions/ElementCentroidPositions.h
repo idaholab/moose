@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,5 +25,5 @@ public:
 
   virtual void initialize() override;
 
-  MooseMesh & _mesh;
+  const MooseMesh & _mesh;
 };

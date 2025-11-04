@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -69,7 +69,7 @@ class InputParameters:
         # this InputParameters object
         for key in add_params.keys():
             if add_params.isRequired(key):
-                self.addRequiredParam(key, add_params[key], add_params.desc[key])
+                self.addRequiredParam(key, add_params.desc[key])
             elif add_params.isValid(key):
                 self.addParam(key, add_params[key], add_params.desc[key])
             else:

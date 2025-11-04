@@ -1,0 +1,29 @@
+[Tests]
+  issues = '#25438'
+  design = 'GaussianProcessTrainer.md LMC.md GaussianProcessSurrogate.md'
+
+  [lmc]
+    requirement = "The system shall be able to train a multi-output Gaussian process using Linear Model of Coregionalization "
+    [untuned]
+      type = 'JSONDiff'
+      input = mogp_lmc.i
+      jsondiff = "mogp_lmc_out.json"
+      detail = "without tuning the hyperparameters."
+    []
+    [tuned]
+      type = 'JSONDiff'
+      input = mogp_lmc_tuned.i
+      jsondiff = "mogp_lmc_tuned_out.json"
+      detail = "with tuning the hyperparameters."
+      abs_zero = 1e-6
+    []
+    [load]
+      type = 'JSONDiff'
+      input = mogp_lmc_load.i
+      jsondiff = "mogp_lmc_load_out.json"
+      detail = "and load the trained surrogate from a file."
+      prereq = lmc/tuned
+      skip_keys = "reporters train_params"
+    []
+  []
+[]

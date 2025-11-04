@@ -17,7 +17,7 @@
     exodiff = 'multismoothcircleIC_normal_test_out.e'
     scale_refine = 1
     valgrind = 'HEAVY'
-    method = '!DBG' # Uses nodal feature flood count - probably should be revamped
+    capabilities = 'method!=dbg' # Uses nodal feature flood count - probably should be revamped
     max_parallel = 1 # See #9886
     rel_err = 2e-5
     design = 'MultiSmoothCircleIC.md'

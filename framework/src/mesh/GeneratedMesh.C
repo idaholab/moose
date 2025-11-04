@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,8 +32,7 @@ GeneratedMesh::validParams()
   MooseEnum elem_types(LIST_GEOM_ELEM); // no default
 
   MooseEnum dims("1=1 2 3");
-  params.addRequiredParam<MooseEnum>(
-      "dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
+  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
 
   params.addParam<unsigned int>("nx", 1, "Number of elements in the X direction");
   params.addParam<unsigned int>("ny", 1, "Number of elements in the Y direction");

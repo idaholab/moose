@@ -9,6 +9,7 @@
     csvdiff = 'phy.conservation.csv'
     abs_zero = 1e-9
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall conserve energy when using HeatTransferFromHeatStructure3D1Phase.'
   []
@@ -20,6 +21,7 @@
     abs_zero = 1e-6
     max_time = 6000
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
 
     requirement = 'The system shall allow to connect multiple flow channels to a single boundary in HeatTransferFromHeatStructure3D1Phase.'
     issues = '#19831 #20298'

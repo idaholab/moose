@@ -55,8 +55,7 @@ n_elems_axial_extend = 12
     boundary_2d = hs2d:matrix:outer
     boundary_3d = hs3d:rmin
 
-    emissivity_2d = 0.4
-    emissivity_3d = 0.6
+    include_radiation = false
     gap_thickness = 0.00001
     gap_thermal_conductivity = 0.05
   []

@@ -6,10 +6,8 @@
     max_parallel = 1 # This is here because we're counting residual evaluations
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
-    petsc_version = '>=3.6.1'
     allow_warnings = true
-    petsc_version_release = true
-    compiler = '!INTEL'
+    restep = false # Test is already testing failed timesteps
 
     design = '/MultiApps/index.md'
     requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
@@ -23,13 +21,11 @@
     max_parallel = 1 # This is here because we're counting residual evaluations
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
-    petsc_version = '>=3.6.1'
     allow_warnings = true
-    petsc_version_release = true
-    compiler = '!INTEL'
+    restep = false # Test is already testing failed timesteps
 
     # Turn off Exodus and turn on CSV globally
-    cli_args = ':Outputs/csv=true :Outputs/exodus=false'
+    cli_args = 'Outputs/csv=true Outputs/exodus=false :Outputs/csv=true :Outputs/exodus=false'
 
     design = '/MultiApps/index.md'
     requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
@@ -43,10 +39,8 @@
     max_parallel = 1 # This is here because we're counting residual evaluations
     max_threads = 1 # NanAtCountKernel changes behavior with threads
     recover = false
-    petsc_version = '>=3.6.1'
     allow_warnings = true
-    petsc_version_release = true
-    compiler = '!INTEL'
+    restep = false # Test is already testing failed timesteps
 
     cli_args = 'MultiApps/active="sub sub_no_fail" Outputs/file_base=picard_parent_2subapps_out sub:Outputs/file_base=picard_parent_2subapps_out_sub sub_no_fail:Outputs/file_base=picard_parent_2subapps_out_sub_no_fail'
 

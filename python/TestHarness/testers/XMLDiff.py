@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,9 +28,6 @@ class XMLDiff(SchemaDiff):
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['xmldiff'])
-
-    def processResults(self, moose_dir, options, output):
-        return SchemaDiff.processResults(self, moose_dir, options, output)
 
     def load_file(self, path1):
         import xmltodict

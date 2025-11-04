@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,7 +43,7 @@ PorousFlowDiffusivityBaseTempl<is_ad>::PorousFlowDiffusivityBaseTempl(
 {
   // Also, the number of diffusion coefficients must be equal to the num_phases * num_components
   if (_input_diffusion_coeff.size() != _num_phases * _num_components)
-    this->template paramError(
+    this->paramError(
         "diffusion_coeff",
         "The number of diffusion coefficients entered is not equal to the number of phases "
         "multiplied by the number of fluid components");

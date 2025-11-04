@@ -28,7 +28,7 @@
       heavy = true
       detail = 'low conductivity in the gap and second order variables'
       cli_args = 'name=second_low_k Mesh/second_order=true order=SECOND'
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
     []
     [second_high_k]
       type = CSVDiff
@@ -38,7 +38,7 @@
       detail = 'high conductivity in the gap and second order variables'
       cli_args = 'name=second_high_k Mesh/second_order=true order=SECOND '
                  'Constraints/thermal_contact/k=100'
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
     []
   []
 
@@ -70,7 +70,7 @@
       heavy = true
       detail = 'low conductivity in the gap and second order variables.'
       cli_args = 'name=second_low_k_action Mesh/second_order=true order=SECOND'
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
     []
     [second_high_k_action]
       type = CSVDiff
@@ -80,7 +80,7 @@
       detail = 'high conductivity in the gap and second order variables.'
       cli_args = 'name=second_high_k_action Mesh/second_order=true order=SECOND '
                  'MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
     []
     [finite_action_al]
       type = CSVDiff

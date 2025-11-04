@@ -1,7 +1,7 @@
 # Code Verification with MOOSE\\ (a practical guide) id=title
 
 !style halign=center
-[www.mooseframework.org](index.md exact=True)
+[https://mooseframework.inl.gov](index.md exact=True)
 
 !--
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,17 +11,8 @@
 
 #include "InitialCondition.h"
 
-#include <string>
-
-class Function;
-class InputParameters;
-
-template <typename T>
-InputParameters validParams();
-
 /**
- * Defines a boundary condition that forces the value to be a user specified
- * function at the boundary.
+ * Defines an initial condition that forces the value to be a user specified function
  */
 class FunctionIC : public InitialCondition
 {

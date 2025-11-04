@@ -19,13 +19,6 @@
   []
 []
 
-[AuxVariables]
-  [velocity]
-    order = CONSTANT
-    family = MONOMIAL_VEC
-  []
-[]
-
 [Kernels]
   [darcy_pressure]
     type = DarcyPressure
@@ -46,39 +39,7 @@
   []
 []
 
-[AuxKernels]
-  [velocity]
-    type = DarcyVelocity
-    variable = velocity
-    execute_on = timestep_end
-    pressure = pressure
-  []
-[]
-
-[Functions]
-  [inlet_function]
-    type = ParsedFunction
-    expression = 2000*sin(0.466*pi*t) # Inlet signal from Fig. 3
-  []
-  [outlet_function]
-    type = ParsedFunction
-    expression = 2000*cos(0.466*pi*t) # Outlet signal from Fig. 3
-  []
-[]
-
 [BCs]
-  [inlet]
-    type = FunctionDirichletBC
-    variable = pressure
-    boundary = left
-    function = inlet_function
-  []
-  [outlet]
-    type = FunctionDirichletBC
-    variable = pressure
-    boundary = right
-    function = outlet_function
-  []
   [inlet_temperature]
     type = FunctionDirichletBC
     variable = temperature
@@ -90,19 +51,41 @@
     variable = temperature
     boundary = right
   []
+  [inlet]
+    type = FunctionDirichletBC
+    variable = pressure
+    boundary = left
+    function = 2000*sin(0.466*pi*t) # Inlet signal from Fig. 3
+  []
+  [outlet]
+    type = FunctionDirichletBC
+    variable = pressure
+    boundary = right
+    function = 2000*cos(0.466*pi*t) # Outlet signal from Fig. 3
+  []
 []
 
-[Materials]
-  [column]
-    type = PackedColumn
-    radius = 1
-    temperature = temperature
-    fluid_viscosity_file = data/water_viscosity.csv
-    fluid_density_file = data/water_density.csv
-    fluid_thermal_conductivity_file = data/water_thermal_conductivity.csv
-    fluid_specific_heat_file = data/water_specific_heat.csv
-    outputs = exodus
-  []
+[Materials/column]
+  type = PackedColumn
+  radius = 1
+  temperature = temperature
+  fluid_viscosity_file = data/water_viscosity.csv
+  fluid_density_file = data/water_density.csv
+  fluid_thermal_conductivity_file = data/water_thermal_conductivity.csv
+  fluid_specific_heat_file = data/water_specific_heat.csv
+  outputs = exodus
+[]
+
+[AuxVariables/velocity]
+  order = CONSTANT
+  family = MONOMIAL_VEC
+[]
+
+[AuxKernels/velocity]
+  type = DarcyVelocity
+  variable = velocity
+  execute_on = timestep_end
+  pressure = pressure
 []
 
 [Problem]
@@ -111,16 +94,15 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
-  automatic_scaling = true
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-
   end_time = 100
   dt = 0.25
   start_time = -1
 
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
+  automatic_scaling = true
   steady_state_tolerance = 1e-5
   steady_state_detection = true
 

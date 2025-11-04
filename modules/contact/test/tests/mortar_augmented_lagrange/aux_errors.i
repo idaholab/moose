@@ -26,7 +26,7 @@
 
 [AuxKernels]
   [gap]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = v
     user_object = dummy
     # contact_quantity =

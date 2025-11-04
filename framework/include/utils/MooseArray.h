@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -173,10 +173,13 @@ public:
    */
   std::vector<T> stdVector() const;
 
+  ///@{
   /**
    * Reference to first element of array
    */
   const T * data() const { return _data; }
+  T * data() { return _data; }
+  ///@}
 
 private:
   /// Smart pointer storage

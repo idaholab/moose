@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,8 @@
 
 #include "libmesh/libmesh_common.h"
 
+#include "Eigen/Core"
+
 #include <memory>
 
 class MooseApp;
@@ -26,6 +28,8 @@ template <typename T>
 class DenseVector;
 template <typename T>
 class DenseMatrix;
+template <typename T>
+class NumericVector;
 }
 
 // Overloads for to_json, which _must_ be overloaded in the namespace
@@ -38,6 +42,14 @@ namespace libMesh
 void to_json(nlohmann::json & json, const Point & p);
 void to_json(nlohmann::json & json, const DenseVector<Real> & vector);
 void to_json(nlohmann::json & json, const DenseMatrix<Real> & matrix);
+void to_json(nlohmann::json & json, const std::unique_ptr<NumericVector<Number>> & vector);
+}
+
+namespace Eigen
+{
+template <typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+void to_json(nlohmann::json & json,
+             const Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & matrix);
 }
 
 namespace nlohmann
@@ -62,4 +74,28 @@ struct adl_serializer<std::unique_ptr<T>>
       mooseAssert(false, "Should not get to this");
   }
 };
+}
+
+namespace Eigen
+{
+template <typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+void
+to_json(nlohmann::json & json, const Matrix<Scalar, Rows, Cols, Options, MaxRows, MaxCols> & matrix)
+{
+  if constexpr (Rows == 1 || Cols == 1)
+  {
+    std::vector<Scalar> values(matrix.data(), matrix.data() + matrix.rows() * matrix.cols());
+    nlohmann::to_json(json, values);
+  }
+  else
+  {
+    const auto nrows = matrix.rows();
+    const auto ncols = matrix.cols();
+    std::vector<std::vector<Scalar>> values(nrows, std::vector<Scalar>(ncols));
+    for (const auto i : make_range(nrows))
+      for (const auto j : make_range(ncols))
+        values[i][j] = matrix(i, j);
+    nlohmann::to_json(json, values);
+  }
+}
 }

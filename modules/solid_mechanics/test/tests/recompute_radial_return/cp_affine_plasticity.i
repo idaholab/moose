@@ -288,7 +288,7 @@
   [../]
 
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
   [../]
 
   [creep]

@@ -8,6 +8,15 @@ defined to support the definition of an equation.
 
 The interaction with Components is one of the main goals of the Physics system. Stay tuned for future developments.
 
+## Generating a traditional input from a Physics input
+
+By substituting the traditional [Problem](syntax/Problem/index.md) in your simulation for the [DumpObjectsProblem.md],
+you can generate the equivalent input using the traditional Kernel/BCs/etc syntax to an input using `Physics`.
+This is useful for debugging purposes.
+
+!alert note
+This is not currently possible for thermal hydraulics inputs which use a specific problem.
+
 ## Implementing your own Physics
 
 If you have *not* created the kernels, boundary conditions, and so on, the `Physics` system is not a good place
@@ -41,36 +50,66 @@ DiffusionPhysics::addFEKernels()
 
 Notice how we use the `PhysicsBase::getFactory()` routine to get access to the `Factory` that will get the parameters we
 need to fill, and the `PhysicsBase::getProblem()` to get access to the `Problem` which stores the objects created.
+We want the `Physics` to be able to be created with various types of `Problem` classes.
 
-If you already have an `Action` defined for your physics, converting it to a `Physics` should be fairly straightforward. The principal advantages of doing so are:
+If you already have an `Action` defined for your equations, converting it to a `Physics` should be fairly straightforward. The principal advantages of doing so are:
 
 - benefit from new APIs implemented in the `Physics` system
+- a standardized definition of the equation, which will help others maintain your `Action`
 - future ability to leverage the `Components` system to define a complex system
 
 ### Advice on implementation
 
 #### Add a lot of checks
 
-Do as much parameter checking as you can. The `PhysicsBase` class defines utilities such as the ones below
-that let you check that the user inputs to your physics are correct.
+Please add as much parameter checking as you can. The `PhysicsBase` class inherits the `InputParameterCheckUtils` that implements
+routines like the ones below that let you check that the user inputs to your physics are correct.
 
-```
-  void checkParamsBothSetOrNotSet(const std::string & param1, const std::string & param2) const;
-  template <typename T, typename S>
-  void checkVectorParamsSameLength(const std::string & param1, const std::string & param2) const;
-  template <typename T>
-  void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vec) const;
-```
+!listing InputParametersChecksUtils.h start=InputParametersChecksUtils<C>::checkVectorParamsSameLength end=} include-end=true
+
+Using this utility, consider checking that:
+
+- the size of vector, vector of vectors, `MultiMooseEnum` and map parameters are consistent
+- if a parameter is passed it must be used, for example if one parameter conditions the use of other parameters
+- the block restrictions are consistent between the `Physics` and objects it defines
 
 #### Separate the definition of the equation from its discretization
 
-The Physics base class you will create will hold the parameters that are shared between all the
-discretized versions of it.
+You may consider creating a `PhysicsBase` class to hold the parameters that are shared between all the
+implementations of the equations with each discretization. This will greatly facilitate switching between discretizations
+for users. It will also maximize code re-use in the definition and retrieval of parameters, and in the attributes of the
+various discretized `Physics` classes.
 
 Physics and spatial discretizations are as separated as we could make them, but they are still very much intertwined. So
 when you are adding a parameter you need to think about:
 
 - is this more tied to the strong form of the equation? If so then it likely belongs in a `XYZPhysicsBase` base class
 - is this more tied to the discretization of the equation? If so then it likely belong in the derived, user-instantiated,
-  `XYZPhysics` class.
+  `XYZPhysics(CG/DG/HDG/FV/LinearFV)` class.
 
+#### Rules for implementation of Physics with regards to restarting variables or using initial conditions
+
+It is often convenient to define initial conditions in the `Physics`, and also to be able to
+restart the variables defined by the `Physics` automatically with minimal user effort. User-defined initial conditions
+are convenient to keep the input syntax compact, and default initial conditions are useful to avoid
+non-physical initial states. However, all these objectives conflict when the user defines parameters for initialization in
+a restarted simulation. To make things simple, developers of `Physics` should follow these rules, which we developed based on user
+feedback.
+
+- if the `initialize_variables_from_mesh_file` parameter is set to true, then:
+  - skip adding initial conditions
+  - error if an initial condition parameter is passed by the user to the `Physics`
+- if the `Physics` is set to use (define kernels for) variables that are defined outside the `Physics`, then:
+  - skip adding initial conditions
+  - error if an initial condition parameter is passed by the user to the `Physics`
+- else, if the user specifies initial conditions for variables in the `Physics`
+  - always obey these parameters and add the initial conditions, even if the simulation is restarting
+  - as a sanity check, the [FEProblemBase.md] will error during restarts, unless [!param](/Problem/FEProblem/allow_initial_conditions_with_restart) is set to true
+- else, if the user does not specify initial conditions in the `Physics`, but the `Physics` does define default values for the initial conditions
+  - if the simulation is restarting (from [Checkpoint.md] notably), skip adding the default initial conditions
+  - (redundant due to the first rule) if the `initialize_variables_from_mesh_file` parameter is set to true, skip adding the default initial conditions
+  - (redundant due to the second rule) if the `Physics` is set to use (define kernels for) variables that are defined outside the `Physics`, skip adding the default initial conditions
+
+!alert note
+For `initialize_variables_from_mesh_file` to work correctly, you must use the `saveNonlinearVariable()` and `saveAuxiliaryVariable()` `Physics` routines
+in the constructor of your `Physics` on any variable that you desire to be restarted.

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
 #include "libmesh/quadrature.h"
+
+#include <set>
 
 namespace Moose
 {
@@ -76,101 +78,6 @@ struct ElemPointArg
 };
 
 /**
- * A structure defining a "face" evaluation calling argument for Moose functors
- */
-struct FaceArg
-{
-  /// a face information object which defines our location in space
-  const FaceInfo * fi;
-
-  /// a limiter which defines how the functor evaluated on either side of the face should be
-  /// interpolated to the face
-  Moose::FV::LimiterType limiter_type;
-
-  /// a boolean which states whether the face information element is upwind of the face
-  bool elem_is_upwind;
-
-  /// Whether to perform skew correction
-  bool correct_skewness;
-
-  /// A member that can be used to indicate whether there is a sidedness to this face. For example,
-  /// a block restricted diffusion kernel may use this to specify that a diffusion coefficient
-  /// should be evaluated on the elem side of the face, ignoring possible jumps in the diffusion
-  /// coefficient between the elem and neighbor sides of the face. If this is null, then a functor
-  /// that is itself block restricted may modify the value to indicate \emph its sidedness. If there
-  /// is ever a mismatch between the specified sidedness of a physics object and the sidedness of a
-  /// functor, then we will error
-  /// If unspecified (nullptr), the evaluation will be two-sided, unless the functor is not defined
-  /// on one side of the face.
-  const Elem * face_side;
-
-  /**
-   * @returns The conceptual physical location of this data structure
-   */
-  Point getPoint() const { return fi->faceCentroid(); }
-
-  /**
-   * Make a \p ElemArg from our data using the face information element
-   */
-  ElemArg makeElem() const { return {&fi->elem(), correct_skewness}; }
-
-  /**
-   * Make a \p ElemArg from our data using the face information neighbor
-   */
-  ElemArg makeNeighbor() const { return {fi->neighborPtr(), correct_skewness}; }
-
-  /**
-   * friend function that allows this structure to be used as keys in ordered containers like sets
-   * and maps
-   */
-  friend bool operator<(const FaceArg & l, const FaceArg & r)
-  {
-    return std::make_tuple(
-               l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.face_side) <
-           std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.face_side);
-  }
-};
-
-struct NodeArg
-{
-  /// The node which defines our location in space
-  const Node * node;
-  /// Indicates what subdomain this argument should be associated with. This removes ambiguity when
-  /// this argument is used to evaluate functors at the intersection of different blocks
-  SubdomainID subdomain_id;
-
-  Point getPoint() const { return *node; }
-};
-
-/**
- * Argument for requesting functor evaluation at a quadrature point location in an element. Data
- * in the argument:
- * - The element containing the quadrature point
- * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
- *   evaluation of the i-th point
- * - The quadrature rule that can be used to initialize the functor on the given element
- */
-struct ElemQpArg
-{
-  /// The element
-  const libMesh::Elem * elem;
-
-  /// The quadrature point index
-  unsigned int qp;
-
-  /// The quadrature rule
-  const QBase * qrule;
-
-  /// The physical location of the quadrature point
-  Point point;
-
-  /**
-   * @returns The conceptual physical location of this data structure
-   */
-  Point getPoint() const { return point; }
-};
-
-/**
  * Argument for requesting functor evaluation at quadrature point locations on an element side.
  * Data in the argument:
  * - The element
@@ -190,8 +97,8 @@ struct ElemSideQpArg
   /// The quadrature point index
   unsigned int qp;
 
-  /// The qudrature rule
-  const QBase * qrule;
+  /// The quadrature rule
+  const libMesh::QBase * qrule;
 
   /// The physical location of the quadrature point
   Point point;
@@ -226,6 +133,11 @@ struct StateArg
   {
   }
 
+  bool operator==(const StateArg & other) const
+  {
+    return state == other.state && iteration_type == other.iteration_type;
+  }
+
   /// The state. Zero represents the most recent state, so for any kind of iteration type, a zero
   /// state represents the current state, e.g. current solution
   /// One may represent the 'old' value (one before, in the iteration_type specified), and two an 'older' or two steps away state
@@ -257,4 +169,138 @@ previousNonlinearState()
 {
   return {(unsigned int)1, SolutionIterationType::Nonlinear};
 }
+
+inline StateArg
+previousFixedPointState()
+{
+  return {(unsigned int)1, SolutionIterationType::FixedPoint};
+}
+
+/**
+ * A structure defining a "face" evaluation calling argument for Moose functors
+ */
+struct FaceArg
+{
+  /// a face information object which defines our location in space
+  const FaceInfo * fi;
+
+  /// a limiter which defines how the functor evaluated on either side of the face should be
+  /// interpolated to the face
+  Moose::FV::LimiterType limiter_type;
+
+  /// a boolean which states whether the face information element is upwind of the face
+  bool elem_is_upwind;
+
+  /// Whether to perform skew correction
+  bool correct_skewness;
+
+  /// A member that can be used to indicate whether there is a sidedness to this face. For example,
+  /// a block restricted diffusion kernel may use this to specify that a diffusion coefficient
+  /// should be evaluated on the elem side of the face, ignoring possible jumps in the diffusion
+  /// coefficient between the elem and neighbor sides of the face. If this is null, then a functor
+  /// that is itself block restricted may modify the value to indicate \emph its sidedness. If there
+  /// is ever a mismatch between the specified sidedness of a physics object and the sidedness of a
+  /// functor, then we will error
+  /// If unspecified (nullptr), the evaluation will be two-sided, unless the functor is not defined
+  /// on one side of the face.
+  const libMesh::Elem * face_side;
+
+  /// A member that can be used to define the instance in which the limiters are executed
+  const Moose::StateArg * state_limiter;
+
+  /**
+   * @returns The conceptual physical location of this data structure
+   */
+  libMesh::Point getPoint() const { return fi->faceCentroid(); }
+
+  /**
+   * Make a \p ElemArg from our data using the face information element
+   */
+  ElemArg makeElem() const { return {&fi->elem(), correct_skewness}; }
+
+  /**
+   * Make a \p ElemArg from our data using the face information neighbor
+   */
+  ElemArg makeNeighbor() const { return {fi->neighborPtr(), correct_skewness}; }
+
+  /**
+   * friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
+  friend bool operator<(const FaceArg & l, const FaceArg & r)
+  {
+    return std::make_tuple(
+               l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.face_side) <
+           std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.face_side);
+  }
+};
+
+struct NodeArg
+{
+  /// The node which defines our location in space
+  const libMesh::Node * node;
+
+  /**
+   * Indicates what subdomains this argument should be associated with. If a single subdomain is
+   * given, then there is no ambiguity when this argument is used to evaluate functors at the
+   * intersection of different blocks. If multiple subdomains are given at such an intersection
+   * point, it is up to the functor whether it can be evaluated unambiguously, perform an average,
+   * or error
+   */
+  const std::set<SubdomainID> * subdomain_ids;
+
+  libMesh::Point getPoint() const { return *node; }
+
+  /// A static member that can be used when the connection of a node to subdomains is unknown.
+  /// Functors may still be able to evaluate a NodeArg with this as the provided \p subdomain_ids
+  /// if the functor has no "sidedness", e.g. like a H1 finite element family variable
+  static const std::set<SubdomainID> undefined_subdomain_connection;
+
+  /**
+   * Friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
+  friend bool operator<(const NodeArg & l, const NodeArg & r)
+  {
+    return std::make_tuple(l.node, l.subdomain_ids) < std::make_tuple(r.node, r.subdomain_ids);
+  }
+};
+
+/**
+ * Argument for requesting functor evaluation at a quadrature point location in an element. Data
+ * in the argument:
+ * - The element containing the quadrature point
+ * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
+ *   evaluation of the i-th point
+ * - The quadrature rule that can be used to initialize the functor on the given element
+ */
+struct ElemQpArg
+{
+  /// The element
+  const libMesh::Elem * elem;
+
+  /// The quadrature point index
+  unsigned int qp;
+
+  /// The quadrature rule
+  const libMesh::QBase * qrule;
+
+  /// The physical location of the quadrature point
+  libMesh::Point point;
+
+  /**
+   * @returns The conceptual physical location of this data structure
+   */
+  libMesh::Point getPoint() const { return point; }
+
+  /**
+   * Friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
+  friend bool operator<(const ElemQpArg & l, const ElemQpArg & r)
+  {
+    return std::make_tuple(l.elem, l.qp, l.qrule, l.point) <
+           std::make_tuple(r.elem, r.qp, r.qrule, r.point);
+  }
+};
 }

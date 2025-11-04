@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,8 +43,8 @@ class TestModalLink(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'a', size=1, href='#{}'.format(uid), string='test')
         self.assertHTMLTag(res(1), 'div', size=1, class_='moose-modal modal', id_=uid)
         self.assertHTMLTag(res(1,0), 'div', size=1, class_='modal-content')
-        self.assertHTMLTag(res(1,0,0), 'pre', size=1, class_='moose-pre')
-        self.assertHTMLTag(res(1,0,0,0), 'code', size=1, class_='language-text', string='1+2=3')
+        self.assertHTMLTag(res(1,0,0), 'pre', size=1, class_='', style='max-height:350px;')
+        self.assertHTMLTag(res(1,0,0,0), 'code', size=1, class_='language-text', string='1+2=3', style='')
 
         # Content as String
         ast = modal.ModalLink(None, string='test', content='1+2=3')
@@ -110,6 +110,12 @@ class TestModalSourceLink(MooseDocsTestCase):
         self.assertHTMLTag(res, 'body', size=1)
         self.assertHTMLTag(res(0), 'span', size=1, class_='moose-source-filename', string='string')
 
+        # link_prefix
+        ast = modal.ModalSourceLink(None, src='test', link_prefix='Foo:')
+        res = self.render(ast, renderer=base.HTMLRenderer())
+        self.assertHTMLTag(res, 'body', size=1)
+        self.assertHTMLTag(res(0), 'span', size=1, class_='moose-source-filename', string='(Foo: python/MooseDocs/test/extensions/test)')
+
     def testMaterialize(self):
 
         # 'src' with source enabled
@@ -124,8 +130,8 @@ class TestModalSourceLink(MooseDocsTestCase):
         self.assertHTMLTag(res(1), 'div', size=2, class_='moose-modal modal', id_=uid)
         self.assertHTMLTag(res(1,0), 'div', size=2, class_='modal-content')
         self.assertHTMLTag(res(1,0,0), 'h4', size=1, string='(python/MooseDocs/test/extensions/framework/Makefile)')
-        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='moose-pre')
-        self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-text')
+        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='', style='max-height:350px;')
+        self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-text', style='')
 
         self.assertIn('MOOSE Application Standard Makefile', res(1,0,1,0,0)['content'])
         self.assertHTMLTag(res(1,1), 'div', size=1, class_='modal-footer')
@@ -142,7 +148,7 @@ class TestModalSourceLink(MooseDocsTestCase):
         self.assertHTMLTag(res(1), 'div', size=2, class_='moose-modal modal', id_=uid)
         self.assertHTMLTag(res(1,0), 'div', size=2, class_='modal-content')
         self.assertHTMLTag(res(1,0,0), 'h4', size=1, string='Makefile')
-        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='moose-pre')
+        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='')
         self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-text')
 
         self.assertIn('MOOSE Application Standard Makefile', res(1,0,1,0,0)['content'])
@@ -160,7 +166,7 @@ class TestModalSourceLink(MooseDocsTestCase):
         self.assertHTMLTag(res(1), 'div', size=2, class_='moose-modal modal', id_=uid)
         self.assertHTMLTag(res(1,0), 'div', size=2, class_='modal-content')
         self.assertHTMLTag(res(1,0,0), 'h4', size=1, string='(python/MooseDocs/test/extensions/framework/Makefile)')
-        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='moose-pre')
+        self.assertHTMLTag(res(1,0,1), 'pre', size=1, class_='')
         self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-text')
 
         self.assertIn('MOOSE Application Standard Makefile', res(1,0,1,0,0)['content'])
@@ -171,6 +177,11 @@ class TestModalSourceLink(MooseDocsTestCase):
         ast = modal.ModalSourceLink(None, src='framework/Makefile', language='other')
         res = self.render(ast, renderer=base.MaterializeRenderer())
         self.assertHTMLTag(res(1,0,1,0), 'code', size=1, class_='language-other')
+
+        # link_prefix
+        ast = modal.ModalSourceLink(None, src='framework/Makefile', link_prefix='Foo:')
+        res = self.render(ast, renderer=base.MaterializeRenderer())
+        self.assertHTMLTag(res(0), 'a', string='(Foo: python/MooseDocs/test/extensions/framework/Makefile)')
 
     def testMaterializeErrors(self):
 

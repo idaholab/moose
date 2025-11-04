@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,22 +23,39 @@ public:
 protected:
   /// This will add another type of reporter to the params
   template <typename T>
-  static InputParameters addReporterTypeParams(const std::string & prefix, bool add_vector = true);
+  static InputParameters addReporterTypeParams(const std::string & prefix,
+                                               bool add_vector = true,
+                                               bool multiple_entries = true);
 
   ///@{
   /// Helper for declaring constant reporter values
   template <typename T>
+  T * declareConstantReporterValue(const std::string & prefix);
+  template <typename T>
   std::vector<T *> declareConstantReporterValues(const std::string & prefix);
   template <typename T>
   std::vector<std::vector<T> *> declareConstantVectorReporterValues(const std::string & prefix);
+  template <typename T>
+  std::vector<std::vector<std::vector<T>> *>
+  declareConstantVectorVectorReporterValues(const std::string & prefix);
   ///@}
 };
 
 template <typename T>
 InputParameters
-ConstantReporter::addReporterTypeParams(const std::string & prefix, bool add_vector)
+ConstantReporter::addReporterTypeParams(const std::string & prefix,
+                                        bool add_vector,
+                                        bool multiple_entries)
 {
   InputParameters params = emptyInputParameters();
+
+  if (!multiple_entries)
+  {
+    mooseAssert(!add_vector, "Should be creating vector of singular entry.");
+    params.addParam<ReporterValueName>(prefix + "_name", "Name of " + prefix + " value.");
+    params.addParam<T>(prefix + "_value", "Value of " + prefix + ".");
+    return params;
+  }
 
   params.addParam<std::vector<ReporterValueName>>(prefix + "_names",
                                                   "Names for each " + prefix + " value.");
@@ -49,9 +66,34 @@ ConstantReporter::addReporterTypeParams(const std::string & prefix, bool add_vec
         prefix + "_vector_names", "Names for each vector of " + prefix + "s value.");
     params.addParam<std::vector<std::vector<T>>>(prefix + "_vector_values",
                                                  "Values for vectors of " + prefix + "s.");
+
+    params.addParam<std::vector<ReporterValueName>>(prefix + "_vector_vector_names",
+                                                    "Names for each vector of vectors of " +
+                                                        prefix + "s value.");
+    params.addParam<std::vector<std::vector<std::vector<T>>>>(
+        prefix + "_vector_vector_values", "Values for vectors of vectors of " + prefix + "s.");
   }
 
   return params;
+}
+
+template <typename T>
+T *
+ConstantReporter::declareConstantReporterValue(const std::string & prefix)
+{
+  std::string names_param(prefix + "_name");
+  std::string values_param(prefix + "_value");
+  if (isParamValid(names_param) != isParamValid(values_param))
+    paramError((isParamValid(names_param) ? names_param : values_param),
+               "'",
+               names_param,
+               "' and '",
+               values_param,
+               "' must be set together.");
+  else if (isParamValid(names_param))
+    return &declareValue<T>(names_param, getParam<T>(values_param));
+
+  return nullptr;
 }
 
 template <typename T>
@@ -89,4 +131,12 @@ std::vector<std::vector<T> *>
 ConstantReporter::declareConstantVectorReporterValues(const std::string & prefix)
 {
   return this->declareConstantReporterValues<std::vector<T>>(prefix + "_vector");
+}
+
+template <typename T>
+std::vector<std::vector<std::vector<T>> *>
+ConstantReporter::declareConstantVectorVectorReporterValues(const std::string & prefix)
+{
+  return this->declareConstantReporterValues<std::vector<std::vector<T>>>(prefix +
+                                                                          "_vector_vector");
 }

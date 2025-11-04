@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,11 +19,15 @@
 #include "OutputWarehouse.h"
 #include "Function.h"
 #include "MooseVariableScalar.h"
+#include "UserObject.h"
 
 // libMesh includes
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
 #include "libmesh/enum_eigen_solver_type.h"
+
+// Needed for LIBMESH_CHECK_ERR
+using libMesh::PetscSolverException;
 
 registerMooseObject("MooseApp", EigenProblem);
 
@@ -43,6 +47,9 @@ EigenProblem::validParams()
       0,
       "Which eigenvector is used to compute residual and also associated to nonlinear variable");
   params.addParam<PostprocessorName>("bx_norm", "A postprocessor describing the norm of Bx");
+
+  params.addParamNamesToGroup("negative_sign_eigen_kernel active_eigen_index bx_norm",
+                              "Eigenvalue solve");
 
   return params;
 }
@@ -73,6 +80,8 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   if (_nl_sys_names.size() > 1)
     paramError("nl_sys_names",
                "eigen problems do not currently support multiple nonlinear eigen systems");
+  if (_linear_sys_names.size())
+    paramError("linear_sys_names", "EigenProblem only works with a single nonlinear eigen system");
 
   for (const auto i : index_range(_nl_sys_names))
   {
@@ -82,6 +91,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
     _current_nl_sys = nl.get();
     _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(nl);
+    nl->system().prefer_hash_table_matrix_assembly(_use_hash_table_matrix_assembly);
   }
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
@@ -100,7 +110,7 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
   mooseDeprecated(
       "Please use SLEPc-3.13.0 or higher. Old versions of SLEPc likely produce bad convergence");
 #endif
-  // Create extra vectors and matrices if any
+  // Create extra vectors if any
   createTagVectors();
 
   // Create extra solution vectors if any
@@ -194,10 +204,9 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-EigenProblem::computeMatricesTags(
-    const NumericVector<Number> & soln,
-    const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
-    const std::set<TagID> & tags)
+EigenProblem::computeMatricesTags(const NumericVector<Number> & soln,
+                                  const std::vector<SparseMatrix<Number> *> & jacobians,
+                                  const std::set<TagID> & tags)
 {
   TIME_SECTION("computeMatricesTags", 3);
 
@@ -293,8 +302,8 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
   // specific system tags that we need for this instance
   _nl_eigen->disassociateDefaultVectorTags();
 
-  // Clear FE tags and first add the specific tag associated with the residual
-  _fe_vector_tags.clear();
+  // add the specific tag associated with the residual
+  mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
   _fe_vector_tags.insert(tag);
 
   // Add any other user-added vector residual tags if they have associated vectors
@@ -309,6 +318,7 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
 
   setCurrentNonlinearSystem(_nl_eigen->number());
   computeResidualTags(_fe_vector_tags);
+  _fe_vector_tags.clear();
 
   _nl_eigen->disassociateVectorFromTag(residual, tag);
 }
@@ -326,8 +336,8 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   // specific system tags that we need for this instance
   _nl_eigen->disassociateDefaultVectorTags();
 
-  // Clear FE tags and first add the specific tags associated with the residual
-  _fe_vector_tags.clear();
+  // add the specific tags associated with the residual
+  mooseAssert(_fe_vector_tags.empty(), "This should be empty indicating a clean starting state");
   _fe_vector_tags.insert(tagA);
   _fe_vector_tags.insert(tagB);
 
@@ -343,6 +353,7 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   _nl_eigen->setSolution(soln);
 
   computeResidualTags(_fe_vector_tags);
+  _fe_vector_tags.clear();
 
   _nl_eigen->disassociateVectorFromTag(residualA, tagA);
   _nl_eigen->disassociateVectorFromTag(residualB, tagB);
@@ -491,6 +502,16 @@ EigenProblem::checkProblemIntegrity()
 {
   FEProblemBase::checkProblemIntegrity();
   _nl_eigen->checkIntegrity();
+  if (_bx_norm_name)
+  {
+    if (!isNonlinearEigenvalueSolver(0))
+      paramWarning("bx_norm", "This parameter is only used for nonlinear solve types");
+    else if (auto & pp = getUserObjectBase(_bx_norm_name.value());
+             !pp.getExecuteOnEnum().contains(EXEC_LINEAR))
+      pp.paramError("execute_on",
+                    "If providing the Bx norm, this postprocessor must execute on linear e.g. "
+                    "during residual evaluations");
+  }
 }
 
 void
@@ -522,7 +543,7 @@ EigenProblem::solve(const unsigned int nl_sys_num)
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
   if (!_app.isUltimateMaster())
-    PetscOptionsPush(_petsc_option_data_base);
+    LibmeshPetscCall(PetscOptionsPush(_petsc_option_data_base));
 #endif
 
   setCurrentNonlinearSystem(nl_sys_num);
@@ -543,37 +564,37 @@ EigenProblem::solve(const unsigned int nl_sys_num)
       preScaleEigenVector(eig);
     }
 
-    if (isNonlinearEigenvalueSolver() &&
-        solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+    if (isNonlinearEigenvalueSolver(nl_sys_num) &&
+        solverParams(nl_sys_num)._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
     {
       // Let do an initial solve if a nonlinear eigen solver but not power is used.
       // The initial solver is a Inverse Power, and it is used to compute a good initial
       // guess for Newton
-      if (solverParams()._free_power_iterations && _first_solve)
+      if (solverParams(nl_sys_num)._free_power_iterations && _first_solve)
       {
         _console << std::endl << " -------------------------------" << std::endl;
         _console << " Free power iteration starts ..." << std::endl;
         _console << " -------------------------------" << std::endl << std::endl;
-        doFreeNonlinearPowerIterations(solverParams()._free_power_iterations);
+        doFreeNonlinearPowerIterations(solverParams(nl_sys_num)._free_power_iterations);
         _first_solve = false;
       }
 
       // Let us do extra power iterations here if necessary
-      if (solverParams()._extra_power_iterations)
+      if (solverParams(nl_sys_num)._extra_power_iterations)
       {
         _console << std::endl << " --------------------------------------" << std::endl;
         _console << " Extra Free power iteration starts ..." << std::endl;
         _console << " --------------------------------------" << std::endl << std::endl;
-        doFreeNonlinearPowerIterations(solverParams()._extra_power_iterations);
+        doFreeNonlinearPowerIterations(solverParams(nl_sys_num)._extra_power_iterations);
       }
     }
 
     // We print this for only nonlinear solver
-    if (isNonlinearEigenvalueSolver())
+    if (isNonlinearEigenvalueSolver(nl_sys_num))
     {
       _console << std::endl << " -------------------------------------" << std::endl;
 
-      if (solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
+      if (solverParams(nl_sys_num)._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
         _console << " Nonlinear Newton iteration starts ..." << std::endl;
       else
         _console << " Nonlinear power iteration starts ..." << std::endl;
@@ -585,7 +606,7 @@ EigenProblem::solve(const unsigned int nl_sys_num)
     _current_nl_sys->update();
 
     // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
-    if (solverParams()._eigen_solve_type == Moose::EST_PJFNKMO)
+    if (solverParams(nl_sys_num)._eigen_solve_type == Moose::EST_PJFNKMO)
       execute(EXEC_LINEAR);
 
     // Scale eigen vector if users ask
@@ -594,7 +615,7 @@ EigenProblem::solve(const unsigned int nl_sys_num)
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   if (!_app.isUltimateMaster())
-    PetscOptionsPop();
+    LibmeshPetscCall(PetscOptionsPop());
 #endif
 
   // sync solutions in displaced problem
@@ -616,19 +637,34 @@ EigenProblem::setNormalization(const PostprocessorName & pp, const Real value)
 void
 EigenProblem::init()
 {
-#if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
+#if PETSC_RELEASE_LESS_THAN(3, 13, 0)
+  // Prior to Slepc 3.13 we did not have a nonlinear eigenvalue solver so we must always assemble
+  // before the solve
+  _nl_eigen->sys().attach_assemble_function(Moose::assemble_matrix);
+#else
+  mooseAssert(
+      numNonlinearSystems() == 1,
+      "We should have errored during construction if we had more than one nonlinear system");
+  mooseAssert(numLinearSystems() == 0,
+              "We should have errored during construction if we had any linear systems");
+  if (isNonlinearEigenvalueSolver(0))
+    // We don't need to assemble before the solve
+    _nl_eigen->sys().assemble_before_solve = false;
+  else
+    _nl_eigen->sys().attach_assemble_function(Moose::assemble_matrix);
+
   // If matrix_free=true, this tells Libmesh to use shell matrices
-  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free &&
-                                      !solverParams()._eigen_matrix_vector_mult);
+  _nl_eigen->sys().use_shell_matrices(solverParams(0)._eigen_matrix_free &&
+                                      !solverParams(0)._eigen_matrix_vector_mult);
   // We need to tell libMesh if we are using a shell preconditioning matrix
-  _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);
+  _nl_eigen->sys().use_shell_precond_matrix(solverParams(0)._precond_matrix_free);
 #endif
 
   FEProblemBase::init();
 }
 
 bool
-EigenProblem::nlConverged(unsigned int)
+EigenProblem::solverSystemConverged(unsigned int)
 {
   if (_solve)
     return _nl_eigen->converged();
@@ -637,13 +673,14 @@ EigenProblem::nlConverged(unsigned int)
 }
 
 bool
-EigenProblem::isNonlinearEigenvalueSolver() const
+EigenProblem::isNonlinearEigenvalueSolver(const unsigned int eigen_sys_num) const
 {
-  return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
-         solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
-         solverParams()._eigen_solve_type == Moose::EST_PJFNK ||
-         solverParams()._eigen_solve_type == Moose::EST_JFNK ||
-         solverParams()._eigen_solve_type == Moose::EST_PJFNKMO;
+  const auto & solver_params = solverParams(eigen_sys_num);
+  return solver_params._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
+         solver_params._eigen_solve_type == Moose::EST_NEWTON ||
+         solver_params._eigen_solve_type == Moose::EST_PJFNK ||
+         solver_params._eigen_solve_type == Moose::EST_JFNK ||
+         solver_params._eigen_solve_type == Moose::EST_PJFNKMO;
 }
 
 void
@@ -660,3 +697,9 @@ EigenProblem::formNorm()
   return getPostprocessorValueByName(*_bx_norm_name);
 }
 #endif
+
+std::string
+EigenProblem::solverTypeString(const unsigned int solver_sys_num)
+{
+  return Moose::stringify(solverParams(solver_sys_num)._eigen_solve_type);
+}

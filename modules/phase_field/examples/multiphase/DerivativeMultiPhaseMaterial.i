@@ -137,7 +137,7 @@
   #  1. The stock time derivative deta_i/dt kernel
   #  2. The Allen-Cahn kernel that takes a Dervative Material for the free energy
   #  3. A gradient interface kernel that includes cross terms
-  #     see http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/ACMultiInterface/
+  #     see https://mooseframework.inl.gov/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/ACMultiInterface/
   #  4. A penalty contribution that forces the interface contributions h(eta)
   #     to sum up to unity
   #
@@ -306,7 +306,7 @@
   [../]
 
   # The DerivativeMultiPhaseMaterial ties the phase free energies together into a global free energy.
-  # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
+  # https://mooseframework.inl.gov/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
     property_name = F

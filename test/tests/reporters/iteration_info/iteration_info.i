@@ -39,8 +39,8 @@
   num_steps = 3
   dt = 1
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu mumps'
 []
 
 [Reporters/iteration_info]

@@ -9,30 +9,34 @@ size based on the difficulty of the solution.
 
 `IterationAdaptiveDT` grows or shrinks the time step based on the number of iterations taken
 to obtain a converged solution in the last converged step. The required `optimal_iterations`
-parameter controls the number of nonlinear iterations per time step that provides optimal solution
+parameter controls the number of outer solver iterations per time step that provides optimal solution
 efficiency. If more iterations than that are required to obtain a converged solution, the time step
 may be too large, resulting in undue solution difficulty, while if fewer iterations are required, it
 may be possible to take larger time steps to obtain a solution more quickly.
 
+!alert note
+Outer solver iterations refer to nonlinear iterations with a nonlinear solver, and to linear iterations
+when using a linear solver to solve linear systems.
+
 A second parameter, `iteration_window`, is used to control the size of the region in which
-the time step is held constant. As shown in [fig:adaptive_dt_criteria], if the number of nonlinear iterations
+the time step is held constant. As shown in [fig:adaptive_dt_criteria], if the number of outer solver iterations
 for convergence is lower than (`optimal_iterations-iteration_window`), the time step is
 increased, while if more than (`optimal_iterations+iteration_window`), iterations are required,
 the time step is decreased. The `iteration_window` parameter is optional. If it is not
 specified, it defaults to 1/5 the value specified for `optimal_iterations`.
 
-The decision on whether to grow or shrink the time step is based both on the number of nonlinear
+The decision on whether to grow or shrink the time step is based both on the number of outer solver
 iterations and the number of linear iterations. The parameters mentioned above are used to
-control the optimal iterations and window for nonlinear iterations. The same criterion is applied
+control the optimal iterations and window for outer solver iterations. The same criterion is applied
 to the linear iterations. Another parameter, `linear_iteration` ratio, which defaults to 25, is
 used to control the optimal iterations and window for the linear iterations. These are calculated
 by multiplying `linear_iteration_ratio` by optimal iterations and iteration window,
 respectively.
 
-To grow the time step, the growth criterion must be met for both the linear iterations and nonlinear
-iterations. If the time step shrinkage criterion is reached for either the linear or nonlinear
+To grow the time step, the growth criterion must be met for both the linear iterations and outer solver
+iterations. If the time step shrinkage criterion is reached for either the linear or outer solver
 iterations, the time step is decreased. To control the time step size only based on the number of
-nonlinear iterations, set `linear_iteration_ratio` to a large number.
+outer solver iterations, set `linear_iteration_ratio` to a large number.
 
 If the time step is to be increased or decreased, that is done using the factors specified with the
 `growth_factor` and `cutback_factor`, respectively. If a solution fails to converge when adaptive

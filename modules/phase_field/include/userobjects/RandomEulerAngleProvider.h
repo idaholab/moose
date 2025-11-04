@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,7 +34,7 @@ public:
 
 protected:
   const GrainTrackerInterface & _grain_tracker;
-  std::vector<EulerAngles> _angles;
+  std::vector<EulerAngles> & _angles;
 
   MooseRandom _random;
 };

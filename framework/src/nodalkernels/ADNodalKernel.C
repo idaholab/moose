@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADNodalKernel.h"
-#include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
@@ -19,19 +18,23 @@
 InputParameters
 ADNodalKernel::validParams()
 {
-  return NodalKernelBase::validParams();
+  auto params = NodalKernelBase::validParams();
+  params += ADFunctorInterface::validParams();
+  return params;
 }
 
 ADNodalKernel::ADNodalKernel(const InputParameters & parameters)
-  : NodalKernelBase(parameters), _u(_var.adDofValues())
+  : NodalKernelBase(parameters),
+    ADFunctorInterface(this),
+    MooseVariableInterface<Real>(this,
+                                 true,
+                                 "variable",
+                                 Moose::VarKindType::VAR_SOLVER,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(*mooseVariable()),
+    _u(_var.adDofValues())
 {
-  if (getParam<std::vector<AuxVariableName>>("save_in").size())
-    paramError("save_in",
-               "ADNodalKernels do not support save_in. Please use the tagging system instead.");
-  if (getParam<std::vector<AuxVariableName>>("diag_save_in").size())
-    paramError(
-        "diag_save_in",
-        "ADNodalKernels do not support diag_save_in. Please use the tagging system instead.");
+  addMooseVariableDependency(mooseVariable());
 }
 
 void

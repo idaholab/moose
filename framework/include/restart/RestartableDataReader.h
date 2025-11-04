@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,8 +23,10 @@
 class RestartableDataReader : public RestartableDataIO
 {
 public:
-  RestartableDataReader(MooseApp & app, RestartableDataMap & data);
-  RestartableDataReader(MooseApp & app, std::vector<RestartableDataMap> & data);
+  RestartableDataReader(MooseApp & app, RestartableDataMap & data, const bool force = false);
+  RestartableDataReader(MooseApp & app,
+                        std::vector<RestartableDataMap> & data,
+                        const bool force = false);
 
   /**
    * Structure that contains the input streams for the reader.
@@ -208,6 +210,9 @@ private:
 
   /// Whether or not to error with a different number of processors
   bool _error_on_different_number_of_processors;
+
+  /// Whether or not to forcefully attempt to read despite incompatibilities
+  const bool _force;
 };
 
 template <typename T, typename... Args>

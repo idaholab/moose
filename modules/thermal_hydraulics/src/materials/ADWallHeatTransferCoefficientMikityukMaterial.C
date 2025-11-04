@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,7 +61,9 @@ ADWallHeatTransferCoefficientMikityukMaterial::ADWallHeatTransferCoefficientMiki
 void
 ADWallHeatTransferCoefficientMikityukMaterial::computeQpProperties()
 {
-  ADReal Pe = std::max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
+  using std::max, std::exp, std::pow;
+
+  ADReal Pe = max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
 
   if (_PoD > 1.5 || _PoD < 1.1 || Pe > 5000 || Pe < 30)
   {
@@ -71,6 +73,6 @@ ADWallHeatTransferCoefficientMikityukMaterial::computeQpProperties()
         "significant errors in your results!"));
   }
 
-  ADReal Nu = 0.047 * (1 - std::exp(-3.8 * (_PoD - 1))) * (std::pow(Pe, 0.77) + 250);
+  ADReal Nu = 0.047 * (1 - exp(-3.8 * (_PoD - 1))) * (pow(Pe, 0.77) + 250);
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
 #include "MooseVariableScalar.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "Function.h"
 #include "Numerics.h"
 #include "metaphysicl/parallel_numberarray.h"
@@ -155,6 +155,8 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
 {
   ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
+  using std::isinf, std::min, std::max, std::abs, std::isnan;
+
   // inlet c=0 established in component
   if (c == 0)
   {
@@ -190,7 +192,7 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       _Rp = _Rp_functions[0]->value(_flow_rel_corr, ADPoint());
       _eff = _eff_functions[0]->value(_flow_rel_corr, ADPoint());
     }
-    else if (std::isnan(_speed_rel_corr)) // NaN; unguarded, gives segmentation fault
+    else if (isnan(_speed_rel_corr)) // NaN; unguarded, gives segmentation fault
     {
       _Rp = std::nan("");
       _eff = std::nan("");
@@ -232,7 +234,7 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     }
 
     // Apply bounds
-    _Rp = std::max(_Rp_min, std::min(_Rp_max, _Rp));
+    _Rp = max(_Rp_min, min(_Rp_max, _Rp));
 
     // Invert if treating as turbine
     ADReal Rp_comp, eff_comp;
@@ -278,9 +280,9 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     }
     else
     {
-      _moment_of_inertia += _inertia_coeff[0] + _inertia_coeff[1] * std::abs(alpha) +
+      _moment_of_inertia += _inertia_coeff[0] + _inertia_coeff[1] * abs(alpha) +
                             _inertia_coeff[2] * alpha * alpha +
-                            _inertia_coeff[3] * std::abs(alpha * alpha * alpha);
+                            _inertia_coeff[3] * abs(alpha * alpha * alpha);
     }
 
     // friction torque
@@ -295,9 +297,9 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     }
     else
     {
-      _friction_torque = sign * (_tau_fr_coeff[0] + _tau_fr_coeff[1] * std::abs(alpha) +
-                                 _tau_fr_coeff[2] * alpha * alpha +
-                                 _tau_fr_coeff[3] * std::abs(alpha * alpha * alpha));
+      _friction_torque =
+          sign * (_tau_fr_coeff[0] + _tau_fr_coeff[1] * abs(alpha) +
+                  _tau_fr_coeff[2] * alpha * alpha + _tau_fr_coeff[3] * abs(alpha * alpha * alpha));
     }
 
     _torque += _isentropic_torque + _dissipation_torque + _friction_torque;

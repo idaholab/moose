@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,7 +26,8 @@ LevelSetOlssonTerminator::validParams()
 
 LevelSetOlssonTerminator::LevelSetOlssonTerminator(const InputParameters & params)
   : GeneralUserObject(params),
-    _solution_diff(_fe_problem.getNonlinearSystem(0).addVector("solution_diff", false, PARALLEL)),
+    _solution_diff(
+        _fe_problem.getNonlinearSystem(0).addVector("solution_diff", false, libMesh::PARALLEL)),
     _tol(getParam<Real>("tol")),
     _min_t_steps(getParam<int>("min_steps"))
 {

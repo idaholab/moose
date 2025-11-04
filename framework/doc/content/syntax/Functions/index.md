@@ -15,12 +15,19 @@ Note that there are exceptions to the rule that `Function`s only depend on
 space and time; for example, [MooseParsedFunction.md] may depend on post-processor
 values (which may depend on the solution) and scalar variable values.
 
-Moose `Function`s should override the following member functions
+Moose `Function`s should override the following member functions:
 
-- `Real value(Real, Point)` - returning the value of the function at a point in space and time
+- `Real value(Real, Point)` - the value of the function at a point in space and time
 - `Real value(ADReal, ADPoint)` - the AD enabled version of the above function
-- `Real timeDerivative(Real, Point)` - retuning the derivative of the function with respect to the first argument (time)
+- `Real timeDerivative(Real, Point)` - the derivative of the function with respect to the first argument (time)
 - `RealVectorValue gradient(Real, Point)` -  the spatial derivative with respect to the second argument
+
+and may optionally override the following member functions, which is only needed
+for some particular functionality:
+
+- `Real timeIntegral(Real t1, Real t1, const Point & p)`, which computes the
+  time integral of the function at the spatial point `p` between the time values
+  `t1` and `t2`.
 
 For vector valued functions
 

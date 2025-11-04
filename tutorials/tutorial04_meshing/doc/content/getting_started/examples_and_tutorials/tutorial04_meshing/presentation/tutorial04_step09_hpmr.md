@@ -5,7 +5,7 @@
 ## Heat Pipe-Cooled Micro Reactor (HP-MR)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 - This section covers the creation of a detailed 1/6 core Heat-Pipe Micro Reactor mesh using the following key steps:
 
@@ -19,14 +19,19 @@
   - Slice full core to 1/6 core
   - Extrude 2D mesh to 3D
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_workflow.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The steps to create a mesh for a heat pipe-cooled micro reactor.
+
+!col-end!
 
 !row-end!
 
-+Hands-on package MOOSE input file+: `combined/reactor_workshop/tests/reactor_examples/hpmr/hpmr.i`
++Hands-on package MOOSE input file+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/hpmr/hpmr.i`
 
 !---
 
@@ -43,16 +48,21 @@
 - Block IDs are assigned for each radial layer
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/moderator_pincell
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_pin_cell.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -68,16 +78,21 @@
 - Pattern references input mesh list in order (0-indexed)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/fuel_assembly
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_hex_assembly.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -91,16 +106,21 @@
 - Whole core rotated 60 degrees
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/fuel_core
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_fuel_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -127,30 +147,40 @@ Setup
 ### Control Drum Assembly
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/cd1_step1
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_control_drum_1.png
-       style=width:1000%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/cd1
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_control_drum_2.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -170,16 +200,21 @@ Setup
 - Assemblies that neighbor several different assembly types (control drums, reflectors) are generally created last so that the boundaries can be specified based on the meshes these need to match.
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/refl1
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_additional_assemblies.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -199,16 +234,21 @@ Setup
 - "Empty" spots should be defined with dummy assemblies and later deleted.
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/core
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hpmr_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -217,7 +257,7 @@ Setup
 ## Delete Dummy Assemblies
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [BlockDeletionGenerator.md]
 
@@ -226,10 +266,15 @@ Setup
 - The blocks IDs of the dummy assembly were defined by the user in the definition of the dummy assembly
 - Set the new outer boundaries that result from the deleted assemblies to have the same sideset ID as the existing outer boundary
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hpmr_del_dummy.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -248,16 +293,21 @@ Setup
 - Use existing core outer boundary ID as input boundary which describes which boundary the peripheral ring should start from
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/outer_shield
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_periphery.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -266,7 +316,7 @@ Setup
 ## Slice to 1/6 Core
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [PlaneDeletionGenerator.md]
 
@@ -283,25 +333,34 @@ Setup
 
 - Advanced trimming options are available (see [HexagonMeshTrimmer.md]). Trimming should only be performed along lines of symmetry.
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hpmr_slice.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/coreslice_1
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !listing reactor_examples/hpmr/hpmr.i
          block=Mesh/coreslice_2
          link=False
+
+!col-end!
 
 !row-end!
 
@@ -310,7 +369,7 @@ Setup
 ## Extrude to 3D
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [AdvancedExtruderGenerator.md]
 
@@ -323,10 +382,15 @@ Setup
 
 - Set top/bottom boundary IDs to be referenced later
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hpmr_extrude.png
-       style=width:75%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -347,16 +411,21 @@ We briefly describe some key steps which are required to use the resulting mesh 
 All blocks in the mesh must be assigned to a material in Griffin.
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=33%
 
 !listing reactor_examples/hpmr/hpmr_griffin_snippet.i
          block=Materials
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=66%
 
 !media tutorial04_meshing/hpmr_blocks.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
+
+!col-end!
 
 !row-end!
 
@@ -366,6 +435,7 @@ All blocks in the mesh must be assigned to a material in Griffin.
 
 !media tutorial04_meshing/hpmr_sidesets.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Sidesets of the mesh
 
 !---
 
@@ -378,14 +448,20 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference accele
 - Option 3: Define a regular square grid covering the entire mesh domain (and beyond)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_2.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A coarse mesh covering the same geometry but with coarser refinement.
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hpmr_coarse_mesh_cartesian_stencil_1.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A regular square grid covering the entire mesh domain.
+
+!col-end!
 
 !row-end!

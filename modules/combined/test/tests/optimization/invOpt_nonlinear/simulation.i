@@ -40,7 +40,7 @@
     type = ADParsedMaterial
     f_name = 'conductivity'
     function = '10+500*forwardT'
-    args = 'forwardT'
+    coupled_variables = 'forwardT'
   []
   [volumetric_heat]
     type = ADGenericFunctionMaterial

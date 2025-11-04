@@ -8,12 +8,12 @@
     type = RunApp
     input = 'Parsed_CH.i'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
   [../]
   [./Parsed_SplitCH]
     type = RunApp
     input = 'Parsed_SplitCH.i'
     check_input = True
-    fparser_jit = True
+    capabilities = 'fparser=jit'
   [../]
 []

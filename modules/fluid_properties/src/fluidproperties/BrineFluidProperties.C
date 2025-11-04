@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -122,6 +122,7 @@ BrineFluidProperties::rho_from_p_T_X(const FPADReal & pressure,
                                      const FPADReal & temperature,
                                      const FPADReal & xnacl) const
 {
+  using std::exp, std::sqrt;
   // The correlation requires the pressure in bar, not Pa.
   FPADReal pbar = pressure * 1.0e-5;
   FPADReal pbar2 = pbar * pbar;
@@ -130,21 +131,21 @@ BrineFluidProperties::rho_from_p_T_X(const FPADReal & pressure,
   // The correlation requires mole fraction
   const FPADReal Xnacl = massFractionToMoleFraction(xnacl);
 
-  const FPADReal n11 = -54.2958 - 45.7623 * std::exp(-9.44785e-4 * pbar);
+  const FPADReal n11 = -54.2958 - 45.7623 * exp(-9.44785e-4 * pbar);
   const FPADReal n21 = -2.6142 - 2.39092e-4 * pbar;
   const FPADReal n22 = 0.0356828 + 4.37235e-6 * pbar + 2.0566e-9 * pbar2;
-  const FPADReal n1x1 = 330.47 + 0.942876 * std::sqrt(pbar) + 0.0817193 * pbar -
-                        2.47556e-8 * pbar2 + 3.45052e-10 * pbar3;
-  const FPADReal n2x1 = -0.0370751 + 0.00237723 * std::sqrt(pbar) + 5.42049e-5 * pbar +
+  const FPADReal n1x1 =
+      330.47 + 0.942876 * sqrt(pbar) + 0.0817193 * pbar - 2.47556e-8 * pbar2 + 3.45052e-10 * pbar3;
+  const FPADReal n2x1 = -0.0370751 + 0.00237723 * sqrt(pbar) + 5.42049e-5 * pbar +
                         5.84709e-9 * pbar2 - 5.99373e-13 * pbar3;
   const FPADReal n12 = -n1x1 - n11;
-  const FPADReal n20 = 1.0 - n21 * std::sqrt(n22);
-  const FPADReal n23 = n2x1 - n20 - n21 * std::sqrt(1.0 + n22);
+  const FPADReal n20 = 1.0 - n21 * sqrt(n22);
+  const FPADReal n23 = n2x1 - n20 - n21 * sqrt(1.0 + n22);
 
   // The temperature Tv where the brine has the same molar volume as pure water
   // Note: correlation uses temperature in Celcius
   const FPADReal n1 = n1x1 + n11 * (1.0 - Xnacl) + n12 * (1.0 - Xnacl) * (1.0 - Xnacl);
-  const FPADReal n2 = n20 + n21 * std::sqrt(Xnacl + n22) + n23 * Xnacl;
+  const FPADReal n2 = n20 + n21 * sqrt(Xnacl + n22) + n23 * Xnacl;
   const FPADReal Tv = n1 + n2 * (temperature - _T_c2k);
 
   // The density of water at temperature Tv
@@ -264,6 +265,8 @@ BrineFluidProperties::h_from_p_T_X(const FPADReal & pressure,
                                    const FPADReal & temperature,
                                    const FPADReal & xnacl) const
 {
+  using std::sqrt;
+
   FPADReal q1, q2, q10, q11, q12, q20, q21, q22, q23, q1x1, q2x1, Th;
 
   // The correlation requires the pressure in bar, not Pa.
@@ -283,11 +286,11 @@ BrineFluidProperties::h_from_p_T_X(const FPADReal & pressure,
   q12 = -q11 - q1x1;
   q10 = q1x1;
 
-  q20 = 1.0 - q21 * std::sqrt(q22);
-  q23 = q2x1 - q20 - q21 * std::sqrt(1.0 + q22);
+  q20 = 1.0 - q21 * sqrt(q22);
+  q23 = q2x1 - q20 - q21 * sqrt(1.0 + q22);
 
   q1 = q10 + q11 * (1.0 - Xnacl) + q12 * (1.0 - Xnacl) * (1.0 - Xnacl);
-  q2 = q20 + q21 * std::sqrt(Xnacl + q22) + q23 * Xnacl;
+  q2 = q20 + q21 * sqrt(Xnacl + q22) + q23 * Xnacl;
   // The temperature Th where the brine has the same enthalpy as pure water
   // Note: correlation uses temperature in Celcius
   Th = q1 + q2 * (temperature - _T_c2k);

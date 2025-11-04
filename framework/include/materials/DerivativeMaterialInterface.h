@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -333,7 +333,7 @@ DerivativeMaterialInterface<T>::getMaterialPropertyDerivative(const std::string 
    * Check if base is a default property and shortcut to returning zero, as
    * derivatives of constants are zero.
    */
-  if (this->template defaultGenericMaterialProperty<U, is_ad>(prop_name))
+  if (this->template defaultGenericMaterialProperty<Real, is_ad>(prop_name))
     return this->template getGenericZeroMaterialProperty<U, is_ad>();
 
   if (c3 != "")
@@ -428,7 +428,7 @@ DerivativeMaterialInterface<T>::validateCouplingHelper(const MaterialPropertyNam
   // iterate over all variables in the current system (in groups)
   for (unsigned int i = 0; i < system.n_variable_groups(); ++i)
   {
-    const VariableGroup & vg = system.variable_group(i);
+    const libMesh::VariableGroup & vg = system.variable_group(i);
     for (unsigned int j = 0; j < vg.n_variables(); ++j)
     {
       std::vector<SymbolName> cj(c.begin(), c.end());

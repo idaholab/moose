@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,11 +28,11 @@ protected:
   const unsigned int _dim;
 
   /// x-velocity
-  const INSFVVelocityVariable * const _u_var;
+  MooseVariableField<Real> * const _u_var;
   /// y-velocity
-  const INSFVVelocityVariable * const _v_var;
+  MooseVariableField<Real> * const _v_var;
   /// z-velocity
-  const INSFVVelocityVariable * const _w_var;
+  MooseVariableField<Real> * const _w_var;
 
   /// Continuous phase density
   const Moose::Functor<ADReal> & _rho_mixture;

@@ -85,12 +85,12 @@
 
 [Postprocessors]
   [./num_elems_active]
-    type = NumElems
+    type = NumElements
     elem_filter = 'ACTIVE'
     execute_on = 'initial timestep_end'
   [../]
   [./num_elems_total]
-    type = NumElems
+    type = NumElements
     elem_filter = 'TOTAL'
     execute_on = 'initial timestep_end'
   [../]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,7 +25,7 @@
 #include <chrono>
 
 template <typename Object, typename Context>
-class ReceiveBuffer : public ParallelObject
+class ReceiveBuffer : public libMesh::ParallelObject
 {
 public:
   ReceiveBuffer(const libMesh::Parallel::Communicator & comm,

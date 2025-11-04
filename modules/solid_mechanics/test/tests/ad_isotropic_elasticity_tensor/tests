@@ -2,65 +2,69 @@
   issues = '#4783'
   design = 'ComputeIsotropicElasticityTensor.md'
 
-  [./lambda_shear]
+  [lambda_shear]
     type = Exodiff
     input = 'lambda_shear_modulus_test.i'
     exodiff = 'lambda_shear_modulus_test_out.e'
-    requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material using AD formulations.'
-  [../]
-  [./youngs_poissons]
+    requirement = 'The ADComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material using AD formulations.'
+  []
+  [youngs_poissons]
     type = Exodiff
     input = 'youngs_modulus_poissons_ratio_test.i'
     exodiff = 'youngs_modulus_poissons_ratio_test_out.e'
-    requirement = "The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic material using AD formulations."
-  [../]
-  [./bulk_shear]
+    requirement = "The ADComputeIsotropicElasticityTensor class shall correctly compute the "
+                  "elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic "
+                  "material using AD formulations."
+  []
+  [bulk_shear]
     type = Exodiff
     input = 'bulk_modulus_shear_modulus_test.i'
     exodiff = 'bulk_modulus_shear_modulus_test_out.e'
-    requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material using AD formulations.'
-  [../]
-  [./axisymmetric_rz]
+    requirement = 'The ADComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material using AD formulations.'
+  []
+  [axisymmetric_rz]
     type = Exodiff
     input = '2D-axisymmetric_rz_test.i'
     exodiff = '2D-axisymmetric_rz_test_out.e'
-    requirement = 'The ComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem.'
-  [../]
+    requirement = 'The ADComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem.'
+  []
 
-  [./lambda_shear-jac]
+  [lambda_shear-jac]
     type = PetscJacobianTester
     input = 'lambda_shear_modulus_test.i'
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-5
     issues = '#12650'
-    requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
-  [../]
-  [./youngs_poissons-jac]
+    requirement = 'The ADComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the lambda and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
+  []
+  [youngs_poissons-jac]
     type = PetscJacobianTester
     input = 'youngs_modulus_poissons_ratio_test.i'
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-5
     issues = '#12650'
-    requirement = "The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic material using AD formulations and produce a perfect Jacobian."
-  [../]
-  [./bulk_shear-jac]
+    requirement = "The ADComputeIsotropicElasticityTensor class shall correctly compute the "
+                  "elasticity tensor from the Young's modulus and Poisson's ratio for an isotropic "
+                  "material using AD formulations and produce a perfect Jacobian."
+  []
+  [bulk_shear-jac]
     type = PetscJacobianTester
     input = 'bulk_modulus_shear_modulus_test.i'
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-5
     issues = '#12650'
-    requirement = 'The ComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
-  [../]
-  [./axisymmetric_rz-jac]
+    requirement = 'The ADComputeIsotropicElasticityTensor class shall correctly compute the elasticity tensor from their bulk modulus and shear modulus for an isotropic material using AD formulations and produce a perfect Jacobian.'
+  []
+  [axisymmetric_rz-jac]
     type = PetscJacobianTester
     input = '2D-axisymmetric_rz_test.i'
     run_sim = 'True'
     ratio_tol = 1e-8
     difference_tol = 1e-1
     issues = '#12650'
-    requirement = 'The ComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem and produce a perfect Jacobian.'
-  [../]
+    requirement = 'The ADComputeElasticityTensor class shall correctly compute the elasticity tensor for an isotropic axisymmetric problem and produce a perfect Jacobian.'
+  []
 []

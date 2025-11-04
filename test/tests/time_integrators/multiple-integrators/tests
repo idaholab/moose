@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#19228'
+  design = 'ImplicitEuler.md CrankNicolson.md'
+  [test]
+    requirement = 'The system shall support having multiple time integrators in the same input file and yield the same results across thread counts, process counts, and mesh modes.'
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+  []
+  [test_accuracy]
+    requirement = 'The system shall support having multiple time integrators in the same input file and yield the expected temporal convergence rates for each variable.'
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestMultipleTimeIntegrators
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree # see #26480
+    prereq = test
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = test.i
+    cli_args = 'Outputs/csv=false'
+    run_sim = True
+    requirement = 'The system shall have an exact Jacobian when running with multiple time integrators.'
+  []
+  [test_multisys]
+    issues = '#29158'
+    requirement = 'The system shall be able to solve transient problems using multiple nonlinear systems and multiple time integrators.'
+    input = test_ti_split.i
+    csvdiff = 'test_ti_split_out.csv'
+  []
+[]

@@ -115,7 +115,7 @@
     exodiff = 'crack2d_vi_solver_out.e'
     abs_zero = 1e-09
     use_old_floor = True
-    design = 'ComputeLinearElasticPFFractureStress.md PFFractureBounds.md'
+    design = 'ComputeLinearElasticPFFractureStress.md VariableOldValueBounds.md'
     issues = '#14946'
     requirement = "The phase-field fracture model shall predict damage evolution using PETSc's SNES variational inequalities solver."
   [../]

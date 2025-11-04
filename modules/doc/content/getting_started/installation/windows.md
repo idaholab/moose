@@ -7,7 +7,7 @@ Caveats:
 
 - Peacock does not work correctly (artifacts during rendering: surface normals are flipped).
 
-<!-- double space on purpose to emphasize important bullet point -->
+!! double space on purpose to emphasize important bullet point below
 
 - Different flavors of Linux are available, but +we STRONGLY urge the use of Ubuntu version
   20.04.x LTS.+ Use other Linux flavors and versions at your peril if you are interested in using

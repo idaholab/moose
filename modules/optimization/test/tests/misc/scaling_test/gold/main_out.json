@@ -1,0 +1,33 @@
+{
+    "reporters": {
+        "OptimizationReporter": {
+            "type": "GeneralOptimization",
+            "values": {
+                "grad_parameter_results": {
+                    "type": "std::vector<double>"
+                },
+                "objective_value": {
+                    "type": "double"
+                },
+                "parameter_results": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "OptimizationReporter": {
+                "grad_parameter_results": [
+                    -0.00141982365629666
+                ],
+                "objective_value": 0.00025601754088785565,
+                "parameter_results": [
+                    1.05
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        }
+    ]
+}

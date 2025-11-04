@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#28819'
+  design = 'linear_fv_design.md'
+  [linearfv]
+    requirement = 'The system should br able to do fixed point iterations between systems with linear and nonlinear finite volume routines '
+    [linearfv_mainapp]
+      type = 'Exodiff'
+      input = 'linearfv.i'
+      exodiff = 'linearfv_out_nonlinear0.e linearfv_out.e'
+      detail = 'with the linear FV problem being the main application, '
+      cli_args = "Executioner/fixed_point_max_its=10 MultiApps/inactive='' Transfers/inactive=''"
+      allow_warnings = true
+      recover = false # we need to use no_restore for the fullsolvemultiapp
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [nonlinearfv_mainapp]
+      type = 'Exodiff'
+      input = 'nonlinearfv.i'
+      exodiff = 'nonlinearfv_out_linear0.e nonlinearfv_out.e'
+      detail = 'with the linear FV problem being the sub application'
+      cli_args = "Executioner/fixed_point_max_its=10 MultiApps/inactive='' Transfers/inactive=''"
+      allow_warnings = true
+      recover = false # we need to use no_restore for the fullsolvemultiapp
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+[]

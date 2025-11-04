@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,39 +10,57 @@
 #pragma once
 
 #include "TotalLagrangianStressDivergence.h"
+#include "HomogenizationInterface.h"
 
-#include "HomogenizationConstraint.h"
-#include "MooseVariableScalar.h"
-#include "Assembly.h"
-
-/// Total Lagrangian formulation with cross-jacobian homogenization terms
+/// Total Lagrangian formulation with all homogenization terms (one disp_xyz field and macro_gradient scalar)
 ///
-///  The total Lagrangian formulation can interact with the homogenization
-///  system defined by the HomogenizationConstraintScalarKernel and
-///  HomogenizationConstraint user object by providing the
-///  correct off-diagonal Jacobian entries.
-///
-class HomogenizedTotalLagrangianStressDivergence : public TotalLagrangianStressDivergence
+class HomogenizedTotalLagrangianStressDivergence
+  : public HomogenizationInterface<TotalLagrangianStressDivergence>
 {
 public:
   static InputParameters validParams();
   HomogenizedTotalLagrangianStressDivergence(const InputParameters & parameters);
 
+  /// Inform moose that this kernel covers the constraint scalar variable
+  virtual std::set<std::string> additionalROVariables() override;
+
 protected:
-  /// Homogenization constraint diagonal term
-  virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  /**
+   * Method for computing the scalar part of residual for _kappa
+   */
+  virtual void computeScalarResidual() override;
 
-  /// The scalar variable used to enforce the homogenization constraints
-  const unsigned int _macro_gradient_num;
+  /**
+   * Method for computing the scalar variable part of Jacobian for d-_kappa-residual / d-_kappa
+   */
+  virtual void computeScalarJacobian() override;
 
-  // Which indices are constrained and what types of constraints
-  const HomogenizationConstraint & _constraint;
+  /**
+   * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar.
+   * jvar is looped over all field variables, which herein is just disp_x and disp_y
+   */
+  virtual void computeScalarOffDiagJacobian(const unsigned int jvar_num) override;
 
-  /// The constraint map
-  const Homogenization::ConstraintMap & _cmap;
+  /**
+   * Method for computing an off-diagonal jacobian component at quadrature points.
+   */
+  virtual Real computeScalarQpOffDiagJacobian(const unsigned int jvar_num) override;
 
-  /// Derivatives of ivar with respect to jvar
-  DenseMatrix<Number> _ken;
-  /// Derivatives of jvar with respect to ivar
-  DenseMatrix<Number> _kne;
+  /**
+   * Method for computing an off-diagonal jacobian component d-_var-residual / d-svar.
+   * svar is looped over all scalar variables, which herein is just _kappa
+   */
+  virtual void computeOffDiagJacobianScalarLocal(const unsigned int svar_num) override;
+
+  /**
+   * Method for computing d-_var-residual / d-svar at quadrature points.
+   */
+  virtual Real computeQpOffDiagJacobianScalar(const unsigned int svar_num) override;
+
+private:
+  /// Indices for off-diagonal Jacobian components
+  unsigned int _m, _n;
+
+  /// Type of current homogenization constraint
+  Homogenization::ConstraintType _ctype = Homogenization::ConstraintType::None;
 };

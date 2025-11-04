@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
@@ -15,58 +14,33 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for duplicate output files in the same directory
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'duplicate_outputs')
+        def run_test(spec, test_names):
+            test_names = sorted(test_names)
+            result = self.runTests('-i', spec, exit_code=132)
+            out = result.output
+            jobs = result.harness.finished_jobs
 
-        e = cm.exception
+            for name in test_names:
+                job = [j for j in jobs if j.getTestNameShort() == name][0]
+                out = job.getOutput()
+                files = job.getOutputFiles(job.options)
+                self.assertIn(f'Tests: {", ".join(test_names)}', out)
+                self.assertIn(f'File(s): {", ".join(files)}', out)
 
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
-
-        # Use a different spec file, which makes use of the AnalyzeJacobian tester. The is because
-        # a race condition, when caught, will invalidate the rest of the tests with out testing them.
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'duplicate_outputs_analyzejacobian')
-
-        e = cm.exception
-
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+        run_test('duplicate_outputs', ['a', 'b', 'c', 'd'])
+        run_test('duplicate_outputs_analyzejacobian', ['a', 'b'])
 
     def testDuplicateOutputsOK(self):
         """
         Test for duplicate output files in the same directory that will _not_ overwrite eachother due to
         proper prereqs set.
         """
-        output = self.runTests('-i', 'duplicate_outputs_ok')
-        output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy')
+        out = self.runTests('-i', 'duplicate_outputs_ok').output
+        out += self.runTests('-i', 'duplicate_outputs_ok', '--heavy').output
 
         # skip case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'skipped_out.e')
+        self.assertNotRegex(out, 'skipped_out.e')
         # heavy case
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'heavy_out.e')
+        self.assertNotRegex(out, 'heavy_out.e')
         # all
-        self.assertNotRegexpMatches(output.decode('utf-8'), 'FATAL TEST HARNESS ERROR')
-
-    def testDelayedDuplicateOutputs(self):
-        """
-        Test a more complex, delayed, race condition by running three tests. Two which launch
-        immediately, and a third, waiting on one job to finish. When it does, this third test
-        will write to the same output file, that one of the other tests which is still running
-        is writing to. Thus, causing a delayed race condition.
-        """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'duplicate_outputs_prereqs')
-
-        e = cm.exception
-
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
-
-    def testMultipleDuplicateOutputs(self):
-        """
-        Test for multiple duplicate outputs created by one test
-        """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'multiple_duplicate_outputs')
-
-        e = cm.exception
-
-        self.assertRegex(e.output.decode('utf-8'), r'FAILED \(DUPLICATE OUTFILES\)')
+        self.assertNotRegex(out, 'FATAL TEST HARNESS ERROR')

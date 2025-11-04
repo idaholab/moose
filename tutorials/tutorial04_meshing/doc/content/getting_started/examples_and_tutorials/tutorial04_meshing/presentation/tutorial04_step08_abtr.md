@@ -5,7 +5,7 @@
 ## Homogenous Assembly Fast Reactor Core (ABTR)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - We now build a sodium-cooled fast reactor core mesh for the Advanced Burner Test Reactor (ABTR) ([!cite](shemon2015abtr)) using the following key steps:
 
@@ -17,21 +17,26 @@
   - Assign plane-level reporting IDs
   - Rename outer boundary sidesets for later use in Griffin (optional)
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_stepbystep.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The process of building up a 3D core from homogenized assemblies.
+
+!col-end!
 
 !row-end!
 
-+Hands-on package MOOSE input file+: `combined/reactor_workshop/tests/reactor_examples/abtr/abtr.i`
++Hands-on package MOOSE input file+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/abtr/abtr.i`
 
 !---
 
 ## Define Homogeneous Hexagonal Assemblies
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [SimpleHexagonGenerator.md]
 
@@ -43,10 +48,15 @@
 - Each assembly type requires its own definition so that different materials can later be assigned to different assemblies (using block id as a differentiating factor)
 - Alternatively, using [!param](/Mesh/SimpleHexagonGenerator/element_type) = `TRI` discretizes hexagonal assembly into 6 triangles
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_assembly_quads.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Homogeneous hexagonal assemblies represented using quads.
+
+!col-end!
 
 !row-end!
 
@@ -59,7 +69,7 @@
 ## Define Dummy Assemblies
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [SimpleHexagonGenerator.md]
 
@@ -69,10 +79,15 @@
 
 - Use a specific ID or name for the dummy in order to delete later in mesh generation process
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_assembly_quads.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Homogeneous hexagonal assemblies represented using quads.
+
+!col-end!
 
 !row-end!
 
@@ -91,17 +106,21 @@
 - The parameters [!param](/Mesh/PatternedHexMeshGenerator/id_name), [!param](/Mesh/PatternedHexMeshGenerator/assign_type), and [!param](/Mesh/PatternedHexMeshGenerator/exclude_id) define how the `assembly_id` reporting ID will be generated. We exclude the dummy assemblies from being assigned IDs.
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 !listing reactor_examples/abtr/abtr.i
          block=Mesh/core
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_2d_core_with_dummies.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A full core, including dummy assemblies at the edges.
 
+!col-end!
 !row-end!
 
 !---
@@ -109,7 +128,7 @@
 ## Delete Dummy Assemblies
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [BlockDeletionGenerator.md]
 
@@ -117,10 +136,15 @@
 
 - Set [!param](/Mesh/BlockDeletionGenerator/new_boundary) to same value as outer boundary in `Mesh/core/external_boundary_name` to update the outer boundary sideset along the location of deleted assemblies
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_2d_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The full core with dummy assemblies removed.
+
+!col-end!
 
 !row-end!
 
@@ -142,16 +166,21 @@
 - Assign new block IDs to each axial level using [!param](/Mesh/AdvancedExtruderGenerator/subdomain_swaps)
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 !listing reactor_examples/abtr/abtr.i
          block=Mesh/extrude
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_3d_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The core extruded into 3D.
+
+!col-end!
 
 !row-end!
 
@@ -160,16 +189,21 @@
 ## Assign Plane-level Reporting IDs
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [PlaneIDMeshGenerator.md]
 
 - Assign coordinates demarking axial levels in plane_coordinates. These levels should be consistent with how axial levels were defined in [AdvancedExtruderGenerator.md].
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_3d_core_with_plane_id.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The 3D core with plane-level reporting IDs.
+
+!col-end!
 
 !row-end!
 
@@ -182,16 +216,21 @@
 ## (Optional) Rename Outer Boundary Sidesets
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [RenameBoundaryGenerator.md]
 
 - Griffin requires the outer boundary sidesets to be defined to apply boundary conditions such as vacuum or reflective boundary conditions
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/hom_abtr_3d_sidesets.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Boundary names on the core.
+
+!col-end!
 
 !row-end!
 
@@ -241,6 +280,8 @@ We briefly touch on mesh generation for the Coarse Mesh Finite Difference (CMFD)
 
 This ABTR example uses option 1, where the CMFD acceleration uses the same mesh as the fine mesh, so no additional mesh generation is performed.
 
+So far, the example shown in this section has relied on explicit region ID mappings for the homogeneous core. Section ["RGMB Example: Heterogeneous to Homogeneous Conversion for Fast Reactor Core"](tutorial04_meshing/presentation/index.md#/11) will explore how the Reactor Geometry Mesh Builder can be used to generate the heterogeneous input mesh and automatically define the homogeneous core mesh from the heterogeneous mesh specifications.
+
 !---
 
 ### Output Postprocessing
@@ -262,14 +303,20 @@ This ABTR example uses option 1, where the CMFD acceleration uses the same mesh 
 - For each [ExtraIDIntegralVectorPostprocessor.md], a separate CSV file is generated to describe the integral variable quantity as a function of each combination of input reporting ID provided. Alternatively, [ExtraIDIntegralReporter.md] can output in JSON file format, which is more suitable for additional data parsing using script languages.
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !media tutorial04_meshing/hom_abtr_vpp_csv.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=CSV files describing integral variable quantities as a function of each combination of input reporting IDs.
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/hom_abtr_script_vis.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Integrated values in some parts of the mesh.
+
+!col-end!
 
 !row-end!

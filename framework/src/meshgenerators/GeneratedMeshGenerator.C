@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,7 +51,7 @@ GeneratedMeshGenerator::validParams()
   params.addParam<std::vector<SubdomainID>>(
       "subdomain_ids",
       "Subdomain IDs for each element, default to all zero. If a single number is specified, that "
-      "subdomain id is used for all element.");
+      "subdomain id is used for all elements.");
   params.addParam<SubdomainName>("subdomain_name",
                                  "If specified, single subdomain name for all elements");
 
@@ -113,13 +113,19 @@ GeneratedMeshGenerator::GeneratedMeshGenerator(const InputParameters & parameter
 {
   if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
     mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
+  if (_xmax < _xmin)
+    paramError("xmax", "xmax must be larger than xmin.");
+  if (_ymax < _ymin)
+    paramError("ymax", "ymax must be larger than ymin.");
+  if (_zmax < _zmin)
+    paramError("zmax", "zmax must be larger than zmin.");
 }
 
 std::unique_ptr<MeshBase>
 GeneratedMeshGenerator::generate()
 {
   // Have MOOSE construct the correct libMesh::Mesh object using Mesh block and CLI parameters.
-  auto mesh = buildMeshBaseObject();
+  auto mesh = buildMeshBaseObject(_dim);
 
   if (isParamValid("extra_element_integers"))
   {

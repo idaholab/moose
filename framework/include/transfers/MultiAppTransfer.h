@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,7 +38,7 @@ public:
   /**
    * Utility to verify that the variable in the destination system exists.
    */
-  void variableIntegrityCheck(const AuxVariableName & var_name) const;
+  void variableIntegrityCheck(const AuxVariableName & var_name, bool is_from_multiapp) const;
 
   void initialSetup() override;
 
@@ -103,11 +103,6 @@ public:
       return "Parent";
   }
 
-  /**
-   * Add the option to skip coordinate collapsing in coordinate transformation operations
-   */
-  static void addSkipCoordCollapsingParam(InputParameters & params);
-
   /// Whether the transfer owns a non-null from_multi_app
   bool hasFromMultiApp() const { return !(!_from_multi_app); }
 
@@ -120,7 +115,18 @@ public:
    */
   virtual void getAppInfo();
 
+  /**
+   * Add the option to skip coordinate collapsing in coordinate transformation operations
+   * Note: this is used by Actions creating transfers as well
+   */
+  static void addSkipCoordCollapsingParam(InputParameters & params);
+
 protected:
+  /**
+   * Add the execution order check parameter (to skip the warning if needed)
+   */
+  static void addUserObjectExecutionCheckParam(InputParameters & params);
+
   /**
    * Add the bounding box factor parameter to the supplied input parameters
    */
@@ -130,15 +136,16 @@ protected:
    * Transform a bounding box according to the transformations in the provided coordinate
    * transformation object
    */
-  static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
+  static void transformBoundingBox(libMesh::BoundingBox & box,
+                                   const MultiAppCoordTransform & transform);
 
   /// Deprecated class attribute for compatibility with the apps
   std::shared_ptr<MultiApp> _multi_app;
 
   std::vector<FEProblemBase *> _to_problems;
   std::vector<FEProblemBase *> _from_problems;
-  std::vector<EquationSystems *> _to_es;
-  std::vector<EquationSystems *> _from_es;
+  std::vector<libMesh::EquationSystems *> _to_es;
+  std::vector<libMesh::EquationSystems *> _from_es;
   std::vector<MooseMesh *> _to_meshes;
   std::vector<MooseMesh *> _from_meshes;
   std::vector<Point> _to_positions;
@@ -176,8 +183,8 @@ protected:
    * Note: global bounding boxes are not indexed by app number. But rather outer indexing is by
    * process, then the inner indexing is by local app number.
    */
-  std::vector<BoundingBox> getFromBoundingBoxes();
-  std::vector<BoundingBox> getFromBoundingBoxes(BoundaryID boundary_id);
+  std::vector<libMesh::BoundingBox> getFromBoundingBoxes();
+  std::vector<libMesh::BoundingBox> getFromBoundingBoxes(BoundaryID boundary_id);
   ///@}
 
   /**
@@ -190,7 +197,7 @@ protected:
    * If we are transferring to a multiapp, return the appropriate solution
    * vector
    */
-  NumericVector<Real> & getTransferVector(unsigned int i_local, std::string var_name);
+  libMesh::NumericVector<Real> & getTransferVector(unsigned int i_local, std::string var_name);
 
   /// Given local app index, returns global app index.
   std::vector<unsigned int> _to_local2global_map;
@@ -211,6 +218,20 @@ protected:
     mooseError("Siblings transfer not supported. You cannot transfer both from a multiapp to "
                "another multiapp");
   }
+
+  /// Checks the execute_on flags for user object transfers with user objects on the source app
+  /// which is also the parent app. This is to prevent a common mistake lagging the data from the
+  /// user object
+  void checkParentAppUserObjectExecuteOn(const std::string & object_name) const;
+
+  /**
+   * Error if executing this MooseObject on EXEC_TRANSFER in a source multiapp (from_multiapp,
+   * e.g. child/sibling app). Note that, conversely, when the parent app is the source
+   * application, it is usually \emph desired to use EXEC_TRANSFER for a MooseObject that
+   * provides the values to transfer.
+   * @param object_name name of the object to check the execute_on flags for
+   */
+  void errorIfObjectExecutesOnTransferInSourceApp(const std::string & object_name) const;
 
   /**
    * Get the target app point from a point in the reference frame
@@ -245,7 +266,7 @@ protected:
                      const std::string & param_name = "") const;
 
   /// Extends bounding boxes to avoid missing points
-  void extendBoundingBoxes(const Real factor, std::vector<BoundingBox> & bboxes) const;
+  void extendBoundingBoxes(const Real factor, std::vector<libMesh::BoundingBox> & bboxes) const;
 
 private:
   /**

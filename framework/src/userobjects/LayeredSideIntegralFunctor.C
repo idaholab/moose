@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,12 +14,12 @@ registerMooseObject("MooseApp", LayeredSideIntegralFunctor);
 InputParameters
 LayeredSideIntegralFunctor::validParams()
 {
-  InputParameters params = LayeredSideIntegralBase<SideIntegralFunctorUserObject>::validParams();
+  InputParameters params = LayeredIntegralBase<SideIntegralFunctorUserObject>::validParams();
   params.addClassDescription("Computes layered side integrals of a functor.");
   return params;
 }
 
 LayeredSideIntegralFunctor::LayeredSideIntegralFunctor(const InputParameters & parameters)
-  : LayeredSideIntegralBase<SideIntegralFunctorUserObject>(parameters)
+  : LayeredIntegralBase<SideIntegralFunctorUserObject>(parameters)
 {
 }

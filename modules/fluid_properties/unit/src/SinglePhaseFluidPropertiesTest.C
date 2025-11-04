@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,4 +51,10 @@ TEST_F(SinglePhaseFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->k_from_p_T(p, T), _fp->k_from_v_e(v, e), REL_TOL_CONSISTENCY);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  const Real rho_crit = 40.0;
+  REL_TEST(_fp->criticalDensity(), rho_crit, REL_TOL_CONSISTENCY);
+
+  const Real e_crit = 220.0;
+  REL_TEST(_fp->criticalInternalEnergy(), e_crit, REL_TOL_CONSISTENCY);
 }

@@ -3,9 +3,9 @@
   parallel_scheduling = True
 
   [steady_no_converge]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'steady_no_converge.i'
-    expect_out = 'Aborting as solve did not converge'
+    expect_err = 'Aborting as solve did not converge'
 
     requirement = 'The system shall report an error when the system solver is unable to find a converged solution.'
     design = 'Executioner/index.md'
@@ -16,7 +16,7 @@
   [range_check_param]
     type = 'RunException'
     input = 'range_check_param.i'
-    expect_err = 'Range check failed for parameter \S'
+    expect_err = "range_check_param.i:6.3: Range check failed for parameter Mesh/bias_x; expression = 'bias_x>=0.5 & bias_x<=2', value = 0.1"
 
     requirement = 'The system shall report an error message when a range-checked parameter is out of range.'
     issues = '#2777'
@@ -26,7 +26,7 @@
   [checked_pointer_param_test]
     type = 'RunException'
     input = 'checked_pointer_param_test.i'
-    expect_err = "checked_pointer_param_test.i:3.2: syntax error, unexpected invalid token, expecting ="
+    expect_err = "checked_pointer_param_test.i:3.2-3.3: syntax error, unexpected invalid token, expecting ="
     requirement = 'The system shall report an error when a null pointer-checked parameter is retrieved from the InputParameters object.'
     issues = '#10356'
   []
@@ -34,7 +34,7 @@
   [add_aux_variable_multiple_test]
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
-    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3' and 'MONOMIAL of order 0'"
 
     requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting types.'
     issues = '#1222'
@@ -44,10 +44,19 @@
     type = 'RunException'
     input = 'add_aux_variable_multiple_test.i'
     cli_args = 'Variables/q/family=SCALAR MoreAuxVariables/q/family=SCALAR'
-    expect_err = "AuxVariable with name 'q' already exists but is of a differing type!"
+    expect_err = "Mismatching types are specified for auxvariable with name 'q': 'MONOMIAL of order 3' and 'SCALAR of order 0'"
 
     requirement = 'The system shall report an error when multiple Scalar AuxVariables are added to the system with conflicting types.'
     issues = '#9313'
+  []
+
+  [add_aux_variable_multiple_subdomain_test]
+    type = 'RunException'
+    input = 'add_aux_variable_multiple_subdomain_test.i'
+    expect_err = "Mismatching block-restrictions are specified for auxvariable with name 'q': \{2\} and \{0, 2\}"
+
+    requirement = 'The system shall report an error when multiple AuxVariables are added to the system with conflicting block-restriction.'
+    issues = '#28568'
   []
 
   [bad_bc_test]
@@ -127,7 +136,7 @@
     type = 'RunException'
     input = 'bad_second_order_test.i'
     expect_err = 'ERROR: Finite element LAGRANGE on geometric element QUAD4\nonly supports FEInterface::max_order = 1, not fe_type.order = 2'
-    method = 'DBG'
+    capabilities = 'dbg'
 
     requirement = 'The system shall report an error when a first order element is used with a second order discretization.'
     issues = '#1405'
@@ -585,10 +594,10 @@
   []
 
   [nan_no_trap_fpe_test]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'nan_test.i'
     cli_args = '--no-trap-fpe'
-    expect_out = 'Solve Did NOT Converge'
+    expect_err = 'Solve Did NOT Converge'
 
     requirement = 'The system shall abort the solve and report a floating point error when a NaN is produced during user computation with the Steady executioner.'
     issues = '#374 #3614'
@@ -703,7 +712,7 @@
   [uo_pps_name_collision_test]
     type = 'RunException'
     input = 'uo_pps_name_collision_test.i'
-    expect_err = 'A UserObject with the name "\w+" already exists'
+    expect_err = 'A MTUserObject "\w+" already exists'
 
     requirement = 'The system shall report an error when a UserObject and a Postprocessor are added with the same names.'
     issues = '#1405'
@@ -712,17 +721,26 @@
   [uo_vector_pps_name_collision_test]
     type = 'RunException'
     input = 'uo_vector_pps_name_collision_test.i'
-    expect_err = 'A UserObject with the name "\w+" already exists'
+    expect_err = 'A MTUserObject "\w+" already exists'
 
     requirement = 'The system shall report and error when a UserObject and a VectorPostprocessor are added with the same names.'
     issues = '#1405'
+  []
+
+  [uo_reporter_name_collision_test]
+    type = 'RunException'
+    input = 'uo_reporter_name_collision_test.i'
+    expect_err = 'A MTUserObject "\w+" already exists'
+
+    requirement = 'The system shall report an error when a UserObject and a Reporter are added with the same names.'
+    issues = '#31231'
   []
 
   [wrong_object_test]
     type = 'RunException'
     input = 'wrong_moose_object_test.i'
     expect_err = "Task \w+ is not registered to build \w+ derived objects"
-    method = '!dbg'
+    capabilities = 'method!=dbg'
 
     requirement = 'The system shall report an error when an input file block associated with a pluggable system is asked to build an object from a different system.'
     issues = '#1405'
@@ -732,17 +750,17 @@
     type = 'RunException'
     input = 'wrong_moose_object_test.i'
     cli_args = "AAAKErnels/type=Diffusion BCs/active=''"
-    expect_err = "section '\[AAAKErnels\]' does not have an associated \"Action\""
+    expect_err = "CLI_ARGS: section '\[AAAKErnels]\' does not have an associated Action; you likely misspelled the Action/section name or the app you are running does not support this Action/syntax"
 
     requirement = 'The system shall report an error when an input file block associated with a pluggable system is misspelled.'
     issues = '#20062'
   []
 
   [wrong_input_switch]
-    type = 'RunApp'
-    input = 'Foo'
-    input_switch = '-m'
-    expect_out = '^Usage:'
+    type = 'RunException'
+    cli_args = '--foo'
+    no_additional_cli_args = True
+    expect_err = '^Usage:'
 
     requirement = 'The system shall report a standard Unix usage statement when an invalid command line switch is used.'
     issues = '#1405'
@@ -807,7 +825,7 @@
     type = 'RunException'
     input = 'nodal_value_off_block.i'
     expect_err = 'Node 0 does not contain any dofs for the v variable'
-    method = 'dbg'
+    capabilities = 'dbg'
 
     requirement = 'The system shall report an error when a coupled variable is not defined in the same region as the variable performing the coupling.'
     issues = '#2849'
@@ -840,8 +858,8 @@
 
   [check_syntax_no_input]
     type = 'RunException'
-    input = 'Foo'
-    input_switch = '--check-input'
+    input = ''
+    cli_args = '--check-input'
     expect_err = 'You specified --check-input, but did not provide an input file. Add -i <inputfile> to your command line.'
 
     requirement = 'The system shall report an error when requested to check the syntax in an input file but no input file is supplied.'
@@ -886,15 +904,6 @@
 
     requirement = 'The system shall report an error when the name of a function could be misinterpreted because it could also be evaluated (e.g. a function name of "x").'
     issues = '#8412'
-  []
-
-  [bad_number]
-    type = 'RunException'
-    input = 'bad_number.i'
-    expect_err = "invalid float syntax for parameter: BCs/right/value"
-
-    requirement = 'The system shall report an error when floating point input parameter types fail to parse as floating point numbers.'
-    issues = '#10310'
   []
 
   [coupling_field_into_scalar]
@@ -1168,5 +1177,16 @@
     requirement = 'The system shall report an error when a git-lfs file pointer is encountered for the mesh for a mesh generator.'
     design = 'MooseUtils.md'
     issues = '#17407'
+  []
+  [dump_error_with_unrecogized_param]
+    type = 'RunException'
+    input = ''
+    cli_args = '--dump-search bad_parameter'
+    expect_err = "Search parameter 'bad_parameter' was not found in the registered syntax."
+
+    requirement = 'The system shall report a helpful error when the dump parameter does not match any valid parameters'
+    issues = '#26714'
+    # See #29735
+    valgrind = none
   []
 []

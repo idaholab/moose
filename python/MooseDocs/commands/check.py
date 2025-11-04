@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,9 +42,6 @@ def command_line_options(subparser, parent):
     parser.add_argument('--show-warnings', action='store_true',
                         help='Display all report warnings.')
 
-    parser.add_argument('--generate', nargs='+', default=None, help='Deprecated')
-    parser.add_argument('--dump', nargs='+', default=None, help='Deprecated')
-
     parser.add_argument('--app-reports', nargs='+', default=None,
                         help='Limit to the following application reports (e.g. --app-reports navier_stokes')
     parser.add_argument('--req-reports', nargs='+', default=None,
@@ -55,7 +52,8 @@ def _print_reports(title, reports, status):
     if reports:
         print(mooseutils.colorText('\n{0}\n{1} REPORT(S):\n{0}\n'.format('-'*80, title.upper()), 'MAGENTA'), end='', flush=True)
         for report in reports:
-            print(report.getReport(), '\n')
+            if report.status != 1 or report.show_warning:
+                print(report.getReport(), '\n')
             status = report.status if status < report.status else status
     return status
 
@@ -86,14 +84,6 @@ def main(opt):
         app_reports = [report for report in app_reports if report.title in opt.app_reports]
     if opt.req_reports and req_reports:
         req_reports = [report for report in req_reports if report.title in opt.req_reports]
-
-    # Apply --generate option
-    if opt.generate:
-        print("The --generate option has been replaced by./moosedocs.py generate.")
-
-    # Apply --dump option
-    if opt.dump:
-        print("The --dump option has been replaced by./moosedocs.py syntax.")
 
     # Apply 'show_warnings' option
     if opt.show_warnings:

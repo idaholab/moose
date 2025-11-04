@@ -8,10 +8,10 @@
     expect_out = "label =.*?type =.*?name =.*?class =.*?file =.*?"
     input = ''
     input_switch = ''
-    method = '!DBG'
 
     requirement = "The system shall output all registered objects in HIT format."
     issues = '#10952'
+    capabilities = 'method!=dbg'
   [../]
   [./registry]
     # Make sure --registry CLI option is working
@@ -20,9 +20,9 @@
     expect_out = "MooseApp\s+object\s+FileMesh\s+FileMesh.*?FileMesh.C"
     input = ''
     input_switch = ''
-    method = '!DBG'
 
     requirement = "The system shall output all registered objects in single line format."
     issues = '#10952'
+    capabilities = 'method!=dbg'
   [../]
 []

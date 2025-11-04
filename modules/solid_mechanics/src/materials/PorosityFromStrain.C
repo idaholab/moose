@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -71,6 +71,7 @@ PorosityFromStrainTempl<is_ad>::computeQpProperties()
       mooseException("In ", _name, ": porosity is negative.");
   }
 
-  if (std::isnan(_porosity[_qp]))
+  using std::isnan;
+  if (isnan(_porosity[_qp]))
     mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
 }

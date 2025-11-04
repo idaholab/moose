@@ -72,7 +72,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [cube1_mechanics]
     strain = FINITE
     block = 'cube1 cube2'

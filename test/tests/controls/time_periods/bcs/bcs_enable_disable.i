@@ -56,13 +56,11 @@
   exodus = true
 []
 
-[Controls]
-  [./period0]
-    type = TimePeriod
-    enable_objects = 'BCs::right'
-    disable_objects = 'BCs::right2'
-    start_time = '0'
-    end_time = '0.5'
-    execute_on = 'initial timestep_begin'
-  [../]
+[Controls/period0]
+  type = TimePeriod
+  enable_objects = 'BCs::right'
+  disable_objects = 'BCs::right2'
+  start_time = '0'
+  end_time = '0.5'
+  execute_on = 'initial timestep_begin'
 []

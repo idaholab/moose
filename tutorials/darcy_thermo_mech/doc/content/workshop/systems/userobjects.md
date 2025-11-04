@@ -34,6 +34,7 @@ There are various types of UserObjects:
 - +SideUserObject+: executes on sides on boundaries
 - +InternalSideUserObject+: executes on internal sides
 - +InterfaceUserObject+: executes on sides on interfaces
+- +DomainUserObject+: executes on elements, internal and external sides
 - +GeneralUserObject+: executes once
 
 !---

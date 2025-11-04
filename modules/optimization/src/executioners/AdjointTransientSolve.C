@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,8 @@
 
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/numeric_vector.h"
+
+using namespace libMesh;
 
 InputParameters
 AdjointTransientSolve::validParams()

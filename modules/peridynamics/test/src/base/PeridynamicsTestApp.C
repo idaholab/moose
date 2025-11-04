@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,7 +23,7 @@ PeridynamicsTestApp::validParams()
 
 registerKnownLabel("PeridynamicsTestApp");
 
-PeridynamicsTestApp::PeridynamicsTestApp(InputParameters parameters) : MooseApp(parameters)
+PeridynamicsTestApp::PeridynamicsTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   PeridynamicsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -45,25 +45,8 @@ PeridynamicsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 PeridynamicsTestApp::registerApps()
 {
-  registerApp(PeridynamicsApp);
+  PeridynamicsApp::registerApps();
   registerApp(PeridynamicsTestApp);
-}
-
-void
-PeridynamicsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PeridynamicsTestApp"});
-}
-
-void
-PeridynamicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PeridynamicsTestApp"});
-}
-
-void
-PeridynamicsTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

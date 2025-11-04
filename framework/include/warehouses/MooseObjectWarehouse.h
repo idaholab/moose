@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,7 @@
 #include "MooseObjectWarehouseBase.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableFE.h"
+#include "ResidualObject.h"
 
 /**
  * A storage container for MooseObjects that inherit from SetupInterface.
@@ -60,6 +61,11 @@ public:
   virtual void residualSetup(THREAD_ID tid = 0) const;
   ///@}
 
+  /**
+   * Checks for whether this warehouse has objects for a given variable
+   */
+  bool hasVariableObjects(unsigned int variable_id, THREAD_ID tid = 0) const;
+
   ///@{
   /**
    * Methods for checking/getting variable kernels for a variable and SubdomainID
@@ -98,27 +104,28 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
 
   if (recurse)
   {
-    {
-      auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<Real>>(object);
-
-      if (mvi)
-        _variable_objects[mvi->mooseVariableBase()->number()].addObject(object, tid, false);
-    }
-
-    {
-      auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealVectorValue>>(object);
-
-      if (mvi)
-        _variable_objects[mvi->mooseVariableBase()->number()].addObject(object, tid, false);
-    }
-
-    {
-      auto mvi = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
-
-      if (mvi)
-        _variable_objects[mvi->mooseVariableBase()->number()].addObject(object, tid, false);
-    }
+    if (auto mvir = std::dynamic_pointer_cast<MooseVariableInterface<Real>>(object); mvir)
+      _variable_objects[mvir->mooseVariableBase()->number()].addObject(object, tid, false);
+    else if (auto mviv = std::dynamic_pointer_cast<MooseVariableInterface<RealVectorValue>>(object);
+             mviv)
+      _variable_objects[mviv->mooseVariableBase()->number()].addObject(object, tid, false);
+    else if (auto mvie = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
+             mvie)
+      _variable_objects[mvie->mooseVariableBase()->number()].addObject(object, tid, false);
+    // Some objects, such as ScalarKernels, do not inherit from the MooseVariableInterface (which is
+    // for field variables). These objects *do* inherit from ResidualObject which has this more
+    // generic variable() API
+    else if (auto ro = std::dynamic_pointer_cast<ResidualObject>(object); ro)
+      _variable_objects[ro->variable().number()].addObject(object, tid, false);
   }
+}
+
+template <typename T>
+bool
+MooseObjectWarehouse<T>::hasVariableObjects(const unsigned int variable_id, THREAD_ID tid) const
+{
+  auto iter = _variable_objects.find(variable_id);
+  return (iter != _variable_objects.end() && iter->second.hasObjects(tid));
 }
 
 template <typename T>

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,19 @@
 
 namespace THM
 {
+
+/**
+ * Computes two unit vectors orthogonal to the given vector
+ *
+ * The input vector need not be normalized; it will be normalized within this function.
+ *
+ * @param[in] n_unnormalized   Vector for which to find orthogonal directions
+ * @param[out] t1   First orthogonal unit vector
+ * @param[out] t2   Second orthogonal unit vector
+ */
+void computeOrthogonalDirections(const RealVectorValue & n_unnormalized,
+                                 RealVectorValue & t1,
+                                 RealVectorValue & t2);
 
 /**
  * Parallel gather of a map of DoF ID to AD vector

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,6 +29,7 @@ public:
                                 const dof_id_type & dof,
                                 ADReal & ad_u_dotdot) const override;
   virtual void postResidual(NumericVector<Number> & residual) override;
+  virtual bool overridesSolve() const override { return false; }
 
 protected:
   /**
@@ -37,6 +38,8 @@ protected:
   template <typename T, typename T2, typename T3, typename T4>
   void
   computeTimeDerivativeHelper(T & u_dot, const T2 & u, const T3 & u_old, const T4 & u_older) const;
+
+  virtual Real duDotDuCoeff() const override;
 
   std::vector<Real> & _weight;
 

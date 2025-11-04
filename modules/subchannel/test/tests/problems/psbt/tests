@@ -1,0 +1,83 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29196 #29199 #29237 #29505'
+  [psbt_regression_test_explicit]
+    type = CSVDiff
+    input = psbt_explicit.i
+    csvdiff = psbt_explicit_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm.'
+  []
+  [psbt_regression_test_explicit_friction2]
+    type = CSVDiff
+    input = psbt_explicit_v2.i
+    csvdiff = psbt_explicit_v2_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using the non-default friction/mixing model.'
+  []
+  [psbt_regression_test_explicit_staggered]
+    type = CSVDiff
+    input = psbt_explicit_staggered.i
+    csvdiff = psbt_explicit_staggered_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm and a staggered pressure formulation.'
+  []
+  [psbt_regression_test_implicit]
+    type = CSVDiff
+    input = psbt_implicit.i
+    csvdiff = psbt_implicit_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an implicit algorithm.'
+  []
+  [psbt_regression_test_monolithic]
+    type = CSVDiff
+    input = psbt_monolithic.i
+    csvdiff = psbt_monolithic_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a monolithic algorithm.'
+  []
+  [psbt_regression_test_full_monolithic]
+    type = CSVDiff
+    input = psbt_full_monolithic.i
+    csvdiff = psbt_full_monolithic_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    rel_err = 1e-4
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm.'
+  []
+  [psbt_regression_test_full_monolithic_staggered]
+    type = CSVDiff
+    input = psbt_full_monolithic_staggered.i
+    csvdiff = psbt_full_monolithic_staggered_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-6
+    rel_err = 6e-5
+    max_threads = 1
+    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm and a staggered pressure formulation.'
+  []
+[]

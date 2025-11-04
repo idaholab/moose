@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -66,8 +66,8 @@ Shaft::check() const
 void
 Shaft::addVariables()
 {
-    getTHMProblem().addSimVariable(
-        true, _omega_var_name, FEType(FIRST, SCALAR), _scaling_factor_omega);
+  getTHMProblem().addSimVariable(
+      true, _omega_var_name, libMesh::FEType(FIRST, SCALAR), _scaling_factor_omega);
 
   if (isParamValid("initial_speed"))
     getTHMProblem().addConstantScalarIC(_omega_var_name, getParam<Real>("initial_speed"));

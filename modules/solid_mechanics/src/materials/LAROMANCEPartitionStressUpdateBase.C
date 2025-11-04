@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -149,6 +149,8 @@ template <bool is_ad>
 GenericReal<is_ad>
 LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeSecondPartitionWeight()
 {
+  using std::sqrt, std::exp, std::min, std::max;
+
   // extract and scale only the relevant inputs on which the GPR was trained (ignore
   // _old_strain_input_index)
   std::vector<GenericReal<is_ad>> scaled_input_values(_num_inputs - 1);
@@ -177,14 +179,13 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeSecondPartitionWeight()
   {
     for (const auto j : index_range(_partition_difference[0]))
       _partition_distance[i] += _partition_difference[i][j];
-    _partition_distance[i] = std::sqrt(_partition_distance[i]);
+    _partition_distance[i] = sqrt(_partition_distance[i]);
   }
 
   // compute the covariance wrt ALL training points: the larger the distance, the smaller the
   // covariance
   for (const auto i : index_range(_partition_covariance))
-    _partition_covariance[i] =
-        Utility::pow<2>(_partition_Eta) * std::exp(-0.5 * _partition_distance[i]);
+    _partition_covariance[i] = Utility::pow<2>(_partition_Eta) * exp(-0.5 * _partition_distance[i]);
 
   // solve the system of equations: convert covariance to libMesh::DenseVector
   for (const auto i : index_range(_partition_covariance))
@@ -206,8 +207,8 @@ LAROMANCEPartitionStressUpdateBaseTempl<is_ad>::computeSecondPartitionWeight()
 
   // scale mu between 0 and 1: the weight of partition 2
   partition_weight = -partition_weight + 1.0;
-  partition_weight = std::min(partition_weight, 1.0);
-  partition_weight = std::max(partition_weight, 0.0);
+  partition_weight = min(partition_weight, 1.0);
+  partition_weight = max(partition_weight, 0.0);
   return partition_weight;
 }
 

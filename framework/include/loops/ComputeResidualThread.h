@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,9 @@ public:
 
 protected:
   using NonlinearThread::compute;
-  void compute(ResidualObject & ro) override;
+  virtual void compute(ResidualObject & ro) override;
+  using NonlinearThread::computeOnInternalFace;
+  virtual void computeOnInternalFace() override;
 
   void accumulateNeighbor() override;
   void accumulateNeighborLower() override;

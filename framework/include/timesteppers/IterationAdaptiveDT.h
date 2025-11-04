@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -100,7 +100,12 @@ protected:
   /// cut the timestep by by this factor
   const Real & _cutback_factor;
 
-  /// Number of nonlinear iterations in previous solve
+  /// Number of outer solver iterations in previous solve.
+  /// For a single nonlinear system: number of nonlinear iterations
+  /// For a linear system: number of linear iterations
+  /// For multiple systems: sum of the number of iterations of each system
+  unsigned int & _outer_its;
+  // Compatibility with SAM
   unsigned int & _nl_its;
   /// Number of linear iterations in previous solve
   unsigned int & _l_its;
@@ -112,4 +117,6 @@ protected:
   bool _reject_large_step;
   /// Threshold used to detect whether we need to reject a step
   double _large_step_rejection_threshold;
+  /// Timestep used to reject a timestep, used to constrain the next attempt
+  mutable std::optional<Real> _dt_from_reject;
 };

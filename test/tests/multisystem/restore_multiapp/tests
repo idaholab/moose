@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#31097'
+  design = 'syntax/MultiApps/index.md'
+  [nl_sol]
+    type = Exodiff
+    input = parent.i
+    #gold is created by running parent.i with fixed_point_max/min_its set to 1
+    exodiff = parent_out_sub0.e
+    #Shifts the time index to compare the last step of gold to the first step of the test.
+    custom_cmp = exodiff.cmp
+    exodiff_opts = '-show_all_diffs'
+    # Linear finite volume currently does not support threading, see libmesh issue #3808
+    max_threads = 1
+    requirement = 'The system shall be able to restore multiple solver systems when performing fixed point iterations with multiple applications.'
+  []
+[]

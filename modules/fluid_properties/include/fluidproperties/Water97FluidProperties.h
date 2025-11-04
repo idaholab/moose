@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -214,6 +214,11 @@ public:
   void
   h_from_p_T_template(const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const;
 
+  virtual Real s_from_h_p(Real enthalpy, Real pressure) const override;
+  virtual ADReal s_from_h_p(const ADReal & enthalpy, const ADReal & pressure) const override;
+  void virtual s_from_h_p(
+      Real enthalpy, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
+
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
@@ -329,6 +334,7 @@ public:
    */
   virtual Real T_from_p_h(Real pressure, Real enthalpy) const override;
   virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  virtual ADReal T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const override;
 
   /**
    * Boundary between subregions b and c in region 2.
@@ -722,7 +728,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal T_from_p_h_ad(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal T_from_p_h_ad(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 1
@@ -734,7 +740,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph1(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph1(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2a
@@ -746,7 +752,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph2a(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph2a(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2b
@@ -758,7 +764,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph2b(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph2b(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 2c
@@ -770,7 +776,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph2c(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph2c(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3a
@@ -783,7 +789,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph3a(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph3a(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * Backwards equation T(p, h) in Region 3b
@@ -796,7 +802,7 @@ protected:
    * @param enthalpy water enthalpy (J/kg)
    * @return temperature water temperature (K)
    */
-  FPADReal temperature_from_ph3b(const FPADReal & pressure, const FPADReal & enthalpy) const;
+  ADReal temperature_from_ph3b(const ADReal & pressure, const ADReal & enthalpy) const;
 
   /**
    * AD version of saturation temperature as a function of pressure (used internally)
@@ -810,7 +816,7 @@ protected:
    * @param pressure water pressure (Pa)
    * @return saturation temperature (K)
    */
-  FPADReal vaporTemperature_ad(const FPADReal & pressure) const;
+  ADReal vaporTemperature_ad(const ADReal & pressure) const;
 
   /// Water molar mass (kg/mol)
   const Real _Mh2o;
@@ -1536,6 +1542,8 @@ template <typename T>
 T
 Water97FluidProperties::densityRegion3(const T & pressure, const T & temperature) const
 {
+  using std::exp;
+
   // Region 3 is subdivided into 26 subregions, each with a given backwards equation
   // to directly calculate density from pressure and temperature without the need for
   // expensive iterations. Find the subregion id that the point is in:
@@ -1566,7 +1574,7 @@ Water97FluidProperties::densityRegion3(const T & pressure, const T & temperature
       sum += _n3s[sid][i] * MathUtils::pow(pi - a, _I3s[sid][i]) *
              MathUtils::pow(theta - b, _J3s[sid][i]);
 
-    volume = vstar * std::exp(sum);
+    volume = vstar * exp(sum);
   }
   else
     volume = vstar * subregionVolume(pi, theta, a, b, c, d, e, sid);
@@ -1638,12 +1646,14 @@ template <typename T>
 T
 Water97FluidProperties::gamma2(const T & pi, const T & tau) const
 {
+  using std::log;
+
   // Ideal gas part of the Gibbs free energy
   T sum0 = 0.0;
   for (std::size_t i = 0; i < _n02.size(); ++i)
     sum0 += _n02[i] * MathUtils::pow(tau, _J02[i]);
 
-  T g0 = std::log(pi) + sum0;
+  T g0 = log(pi) + sum0;
 
   // Residual part of the Gibbs free energy
   T gr = 0.0;
@@ -1724,11 +1734,13 @@ template <typename T>
 T
 Water97FluidProperties::phi3(const T & delta, const T & tau) const
 {
+  using std::log;
+
   T sum = 0.0;
   for (std::size_t i = 1; i < _n3.size(); ++i)
     sum += _n3[i] * MathUtils::pow(delta, _I3[i]) * MathUtils::pow(tau, _J3[i]);
 
-  return _n3[0] * std::log(delta) + sum;
+  return _n3[0] * log(delta) + sum;
 }
 
 template <typename T>
@@ -1793,12 +1805,14 @@ template <typename T>
 T
 Water97FluidProperties::gamma5(const T & pi, const T & tau) const
 {
+  using std::log;
+
   // Ideal gas part of the Gibbs free energy
   T sum0 = 0.0;
   for (std::size_t i = 0; i < _n05.size(); ++i)
     sum0 += _n05[i] * MathUtils::pow(tau, _J05[i]);
 
-  T g0 = std::log(pi) + sum0;
+  T g0 = log(pi) + sum0;
 
   // Residual part of the Gibbs free energy
   T gr = 0.0;
@@ -1940,9 +1954,11 @@ Water97FluidProperties::tempXY(const T & pressure, const subregionEnum xy) const
 
   T sum = 0.0;
 
+  using std::log;
+
   if (xy == AB || xy == OP || xy == WX)
     for (std::size_t i = 0; i < _tempXY_n[row].size(); ++i)
-      sum += _tempXY_n[row][i] * MathUtils::pow(std::log(pi), _tempXY_I[row][i]);
+      sum += _tempXY_n[row][i] * MathUtils::pow(log(pi), _tempXY_I[row][i]);
   else if (xy == EF)
     sum += 3.727888004 * (pi - _p_critical / 1.0e6) + _T_critical;
   else
@@ -1956,6 +1972,8 @@ template <typename T>
 void
 Water97FluidProperties::vaporPressureTemplate(const T & temperature, T & psat, T & dpsat_dT) const
 {
+  using std::sqrt, std::pow;
+
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
@@ -1975,7 +1993,7 @@ Water97FluidProperties::vaporPressureTemplate(const T & temperature, T & psat, T
   db_dtheta = 2.0 * _n4[2] * theta + _n4[3];
   dc_dtheta = 2.0 * _n4[5] * theta + _n4[6];
 
-  T denominator = -b + std::sqrt(b * b - 4.0 * a * c);
+  T denominator = -b + sqrt(b * b - 4.0 * a * c);
 
   psat = Utility::pow<4>(2.0 * c / denominator) * 1.0e6;
 
@@ -1983,7 +2001,7 @@ Water97FluidProperties::vaporPressureTemplate(const T & temperature, T & psat, T
   T dpsat = 4.0 * Utility::pow<3>(2.0 * c / denominator);
   dpsat *= (2.0 * dc_dtheta / denominator -
             2.0 * c / denominator / denominator *
-                (-db_dtheta + std::pow(b * b - 4.0 * a * c, -0.5) *
+                (-db_dtheta + pow(b * b - 4.0 * a * c, -0.5) *
                                   (b * db_dtheta - 2.0 * da_dtheta * c - 2.0 * a * dc_dtheta)));
   dpsat_dT = dpsat * dtheta_dT * 1.0e6;
 }
@@ -2155,13 +2173,15 @@ T
 Water97FluidProperties::subregionVolume(
     const T & pi, const T & theta, Real a, Real b, Real c, Real d, Real e, unsigned int sid) const
 {
+  using std::pow;
+
   T sum = 0.0;
 
   for (std::size_t i = 0; i < _n3s[sid].size(); ++i)
-    sum += _n3s[sid][i] * MathUtils::pow(std::pow(pi - a, c), _I3s[sid][i]) *
-           MathUtils::pow(std::pow(theta - b, d), _J3s[sid][i]);
+    sum += _n3s[sid][i] * MathUtils::pow(pow(pi - a, c), _I3s[sid][i]) *
+           MathUtils::pow(pow(theta - b, d), _J3s[sid][i]);
 
-  return std::pow(sum, e);
+  return pow(sum, e);
 }
 
 template <typename T>
@@ -2254,7 +2274,8 @@ Water97FluidProperties::c_from_p_T_template(const T & pressure, const T & temper
       mooseError("inRegion() has given an incorrect region");
   }
 
-  return std::sqrt(speed2);
+  using std::sqrt;
+  return sqrt(speed2);
 }
 
 template <typename T>
@@ -2366,6 +2387,7 @@ template <typename T>
 T
 Water97FluidProperties::k_from_rho_T_template(const T & density, const T & temperature) const
 {
+  using std::sqrt, std::exp, std::abs, std::pow;
   // Scale the density and temperature. Note that the scales are slightly
   // different to the critical values used in IAPWS-IF97
   T Tbar = temperature / 647.26;
@@ -2377,22 +2399,22 @@ Water97FluidProperties::k_from_rho_T_template(const T & density, const T & tempe
   for (std::size_t i = 0; i < _k_a.size(); ++i)
     sum0 += _k_a[i] * MathUtils::pow(Tbar, i);
 
-  T lambda0 = std::sqrt(Tbar) * sum0;
+  T lambda0 = sqrt(Tbar) * sum0;
 
   // The contribution due to finite density
-  T lambda1 = -0.39707 + 0.400302 * rhobar +
-              1.06 * std::exp(-0.171587 * Utility::pow<2>(rhobar + 2.392190));
+  T lambda1 =
+      -0.39707 + 0.400302 * rhobar + 1.06 * exp(-0.171587 * Utility::pow<2>(rhobar + 2.392190));
 
   // Critical enhancement
-  T DeltaT = std::abs(Tbar - 1.0) + 0.00308976;
-  T Q = 2.0 + 0.0822994 / std::pow(DeltaT, 0.6);
-  T S = (Tbar >= 1.0 ? 1.0 / DeltaT : 10.0932 / std::pow(DeltaT, 0.6));
+  T DeltaT = abs(Tbar - 1.0) + 0.00308976;
+  T Q = 2.0 + 0.0822994 / pow(DeltaT, 0.6);
+  T S = (Tbar >= 1.0 ? 1.0 / DeltaT : 10.0932 / pow(DeltaT, 0.6));
 
-  T lambda2 = (0.0701309 / Utility::pow<10>(Tbar) + 0.011852) * std::pow(rhobar, 1.8) *
-                  std::exp(0.642857 * (1.0 - std::pow(rhobar, 2.8))) +
-              0.00169937 * S * std::pow(rhobar, Q) *
-                  std::exp((Q / (1.0 + Q)) * (1.0 - std::pow(rhobar, 1.0 + Q))) -
-              1.02 * std::exp(-4.11717 * std::pow(Tbar, 1.5) - 6.17937 / Utility::pow<5>(rhobar));
+  T lambda2 =
+      (0.0701309 / Utility::pow<10>(Tbar) + 0.011852) * pow(rhobar, 1.8) *
+          exp(0.642857 * (1.0 - pow(rhobar, 2.8))) +
+      0.00169937 * S * pow(rhobar, Q) * exp((Q / (1.0 + Q)) * (1.0 - pow(rhobar, 1.0 + Q))) -
+      1.02 * exp(-4.11717 * pow(Tbar, 1.5) - 6.17937 / Utility::pow<5>(rhobar));
 
   return lambda0 + lambda1 + lambda2;
 }
@@ -2452,6 +2474,8 @@ template <typename T>
 T
 Water97FluidProperties::mu_from_rho_T_template(const T & density, const T & temperature) const
 {
+  using std::sqrt, std::exp;
+
   const T mu_star = 1.e-6;
   const T rhobar = density / _rho_critical;
   const T Tbar = temperature / _T_critical;
@@ -2461,7 +2485,7 @@ Water97FluidProperties::mu_from_rho_T_template(const T & density, const T & temp
   for (std::size_t i = 0; i < _mu_H0.size(); ++i)
     sum0 += _mu_H0[i] / MathUtils::pow(Tbar, i);
 
-  const T mu0 = 100.0 * std::sqrt(Tbar) / sum0;
+  const T mu0 = 100.0 * sqrt(Tbar) / sum0;
 
   // Residual component due to finite density
   T sum1 = 0.0;
@@ -2472,7 +2496,7 @@ Water97FluidProperties::mu_from_rho_T_template(const T & density, const T & temp
       sum1 += fact * _mu_Hij[i][j] * MathUtils::pow(rhobar - 1.0, j);
   }
 
-  const T mu1 = std::exp(rhobar * sum1);
+  const T mu1 = exp(rhobar * sum1);
 
   // The water viscosity (in Pa.s) is then given by
   return mu_star * mu0 * mu1;

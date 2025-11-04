@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearInterpolation.h"
+#include "MooseUtils.h"
 
 #include "ChainedReal.h"
 
@@ -69,11 +70,14 @@ LinearInterpolation::sample(const T & x) const
   }
 
   auto upper = std::upper_bound(_x.begin(), _x.end(), x);
-  int i = std::distance(_x.begin(), upper) - 1;
-  return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
-
-  // If this point is reached, x must be a NaN.
-  mooseException("Sample point in LinearInterpolation is a NaN.");
+  const auto i = cast_int<std::size_t>(std::distance(_x.begin(), upper) - 1);
+  if (i == cast_int<std::size_t>(_x.size() - 1))
+    // std::upper_bound returns the end() iterator if there are no elements that are
+    // an upper bound to the value. Since x >= _x.back() has already returned above,
+    // this means x is a NaN, so we return a NaN here.
+    return std::nan("");
+  else
+    return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
 }
 
 template Real LinearInterpolation::sample<Real>(const Real &) const;
@@ -101,11 +105,14 @@ LinearInterpolation::sampleDerivative(const T & x) const
   }
 
   auto upper = std::upper_bound(_x.begin(), _x.end(), x);
-  int i = std::distance(_x.begin(), upper) - 1;
-  return (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]);
-
-  // If this point is reached, x must be a NaN.
-  mooseException("Sample point in LinearInterpolation is a NaN.");
+  const auto i = cast_int<std::size_t>(std::distance(_x.begin(), upper) - 1);
+  if (i == cast_int<std::size_t>(_x.size() - 1))
+    // std::upper_bound returns the end() iterator if there are no elements that are
+    // an upper bound to the value. Since x >= _x.back() has already returned above,
+    // this means x is a NaN, so we return a NaN here.
+    return std::nan("");
+  else
+    return (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]);
 }
 
 template Real LinearInterpolation::sampleDerivative<Real>(const Real &) const;
@@ -120,6 +127,130 @@ LinearInterpolation::integrate()
     answer += 0.5 * (_y[i] + _y[i - 1]) * (_x[i] - _x[i - 1]);
 
   return answer;
+}
+
+Real
+LinearInterpolation::integratePartial(Real xA, Real xB) const
+{
+  // integral computation below will assume that x2 > x1; if this is not the
+  // case, compute as if it is and then use identity to convert
+  Real x1, x2;
+  bool switch_bounds;
+  if (MooseUtils::absoluteFuzzyEqual(xA, xB))
+    return 0.0;
+  else if (xB > xA)
+  {
+    x1 = xA;
+    x2 = xB;
+    switch_bounds = false;
+  }
+  else
+  {
+    x1 = xB;
+    x2 = xA;
+    switch_bounds = true;
+  }
+
+  // compute integral with knowledge that x2 > x1
+  Real integral = 0.0;
+  // find minimum i : x[i] > x; if x > x[n-1], i = n
+  auto n = _x.size();
+  const unsigned int i1 =
+      x1 <= _x[n - 1] ? std::distance(_x.begin(), std::upper_bound(_x.begin(), _x.end(), x1)) : n;
+  const unsigned int i2 =
+      x2 <= _x[n - 1] ? std::distance(_x.begin(), std::upper_bound(_x.begin(), _x.end(), x2)) : n;
+  unsigned int i = i1;
+  while (i <= i2)
+  {
+    if (i == 0)
+    {
+      // note i1 = i
+      Real integral1, integral2;
+      if (_extrap)
+      {
+        const Real dydx = (_y[1] - _y[0]) / (_x[1] - _x[0]);
+        const Real y1 = _y[0] + dydx * (x1 - _x[0]);
+        integral1 = 0.5 * (y1 + _y[0]) * (_x[0] - x1);
+        if (i2 == i)
+        {
+          const Real y2 = _y[0] + dydx * (x2 - _x[0]);
+          integral2 = 0.5 * (y2 + _y[0]) * (_x[0] - x2);
+        }
+        else
+          integral2 = 0.0;
+      }
+      else
+      {
+        integral1 = _y[0] * (_x[0] - x1);
+        if (i2 == i)
+          integral2 = _y[0] * (_x[0] - x2);
+        else
+          integral2 = 0.0;
+      }
+
+      integral += integral1 - integral2;
+    }
+    else if (i == n)
+    {
+      // note i2 = i
+      Real integral1, integral2;
+      if (_extrap)
+      {
+        const Real dydx = (_y[n - 1] - _y[n - 2]) / (_x[n - 1] - _x[n - 2]);
+        const Real y2 = _y[n - 1] + dydx * (x2 - _x[n - 1]);
+        integral2 = 0.5 * (y2 + _y[n - 1]) * (x2 - _x[n - 1]);
+        if (i1 == n)
+        {
+          const Real y1 = _y[n - 1] + dydx * (x1 - _x[n - 1]);
+          integral1 = 0.5 * (y1 + _y[n - 1]) * (x1 - _x[n - 1]);
+        }
+        else
+          integral1 = 0.0;
+      }
+      else
+      {
+        integral2 = _y[n - 1] * (x2 - _x[n - 1]);
+        if (i1 == n)
+          integral1 = _y[n - 1] * (x1 - _x[n - 1]);
+        else
+          integral1 = 0.0;
+      }
+
+      integral += integral2 - integral1;
+    }
+    else
+    {
+      Real integral1;
+      if (i == i1)
+      {
+        const Real dydx = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+        const Real y1 = _y[i - 1] + dydx * (x1 - _x[i - 1]);
+        integral1 = 0.5 * (y1 + _y[i - 1]) * (x1 - _x[i - 1]);
+      }
+      else
+        integral1 = 0.0;
+
+      Real integral2;
+      if (i == i2)
+      {
+        const Real dydx = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+        const Real y2 = _y[i - 1] + dydx * (x2 - _x[i - 1]);
+        integral2 = 0.5 * (y2 + _y[i - 1]) * (x2 - _x[i - 1]);
+      }
+      else
+        integral2 = 0.5 * (_y[i] + _y[i - 1]) * (_x[i] - _x[i - 1]);
+
+      integral += integral2 - integral1;
+    }
+
+    i++;
+  }
+
+  // apply identity if bounds were switched
+  if (switch_bounds)
+    return -1.0 * integral;
+  else
+    return integral;
 }
 
 Real

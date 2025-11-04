@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,7 +28,7 @@ SideIntegralPostprocessor::initialSetup()
 {
   SidePostprocessor::initialSetup();
 
-  if (!_qp_integration && _mesh.allFaceInfo().size() == 0)
+  if (!_qp_integration && _mesh.isFiniteVolumeInfoDirty())
     errorNoFaceInfo();
 }
 

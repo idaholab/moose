@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#28977'
+  design = 'FVInterfaceKernels/index.md'
+  [aux]
+    requirement = 'The system shall be able to solve problems with auxiliary variables coupled through interface kernels'
+    [fv]
+      type = CSVDiff
+      input = 'fv_reaction_1D.i'
+      csvdiff= 'fv_reaction_1D_out.csv'
+      detail = 'to finite volume variables,'
+    []
+    [fv_res_jac]
+      type = CSVDiff
+      input = 'fv_reaction_1D.i'
+      csvdiff= 'fv_reaction_1D_out.csv'
+      cli_args = 'Executioner/residual_and_jacobian_together=true'
+      detail = 'to finite volume variables when computing the residual and Jacobian together,'
+    []
+  []
+[]

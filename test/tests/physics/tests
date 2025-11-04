@@ -22,4 +22,14 @@
     requirement = 'The system shall be able to solve a source-less diffusion equation with a cell-centered finite volume discretization with a shorthand syntax.'
     design = 'DiffusionFV.md'
   []
+  [add_postprocesing]
+    type = CSVDiff
+    input = 'diffusion_cg.i'
+    cli_args = "Physics/Diffusion/ContinuousGalerkin/diff/compute_diffusive_fluxes_on='left'"
+    csvdiff = 'diffusion_cg_out.csv'
+    requirement = 'The system shall be able to output diffusive fluxes directly from the physics shorthand syntax.'
+    design = 'DiffusionCG.md'
+    # same CSV file name
+    prereq = 'cg'
+  []
 []

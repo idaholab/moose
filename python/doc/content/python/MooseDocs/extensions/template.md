@@ -8,7 +8,7 @@ markdown files, using two methods:
 - +Key/value pairs+: Simple substitution of key/value pairs via a syntax `{{keyname}}`.
 - +Fields+: Substitution of entire blocks of markdown text/input.
 
-The commands associated the template extension are the following:
+The commands associated with the template extension are the following:
 
 - `template load`: Loads a template file. This is required to use any templates.
 - `template field`: Declares a template "field" that must be defined with the `template item` command.

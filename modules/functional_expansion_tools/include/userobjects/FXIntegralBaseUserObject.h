@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -128,8 +128,8 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObje
     const InputParameters & parameters)
   : IntegralBaseVariableUserObject(parameters),
     MutableCoefficientsInterface(this, parameters),
-    _function_series(FunctionSeries::checkAndConvertFunction(
-        getFunction("function"), UserObject::getParam<std::string>("_moose_base"), name())),
+    _function_series(
+        FunctionSeries::checkAndConvertFunction(getFunction("function"), this->getBase(), name())),
     _keep_history(UserObject::getParam<bool>("keep_history")),
     _print_state(UserObject::getParam<bool>("print_state")),
     _standardized_function_volume(_function_series.getStandardizedFunctionVolume())

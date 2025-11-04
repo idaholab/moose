@@ -13,7 +13,7 @@ italics are two examples of inline items.
 
 !alert note title=MooseDown is a restricted version of [markdown].
 To unify content and to create a fast parser a strict, limited set of markdown is being used to
-define the MooseDocs syntax. The following sections detail the syntax that comprise the syntax.
+define the MooseDocs syntax. The following sections detail the syntax.
 
 ## Settings id=settings
 
@@ -24,22 +24,22 @@ However, the settings are applied in a uniform manner. Foremost, the key and val
 an equal (`=`) sign +without spaces+ surrounding. The value may contain spaces, with the space after
 the equal sign being the exception.
 
-If syntax has settings the key-value pairs, the default value (if any), and a short description
+If syntax has settings then the key-value pairs, the default value (if any), and a short description
 will be provided in a table. For example, [code-settings] lists the available settings
 for the fenced code blocks discussed in the [#fenced-code] section.
 
 !devel example id=settings-example
-               caption=Example use of settings within [#links], settings are key-value pairs that
+               caption=Example use of settings within [#links]. Settings are key-value pairs that
                        are specified with a separating equal sign (no spaces exist on either side).
 [google](https://www.google.com style=color:teal;)
 
 ## Block Syntax id=core-block
 
-Block level content, as the name suggest, are blocks of text. In all cases, blocks must
+Block level content, as the name suggests, are blocks of text. In all cases, blocks must
 begin and end with empty lines (with the exception of the start and end of the file). This
 restriction allows for special characters such as the hash (`#`) to be used at the start
 of a line without conflicting with heading creation (see [#headings]). Additionally, this
-allows content and settings to be spanned across multiple lines.
+allows content and settings to span multiple lines.
 
 ### Code id=fenced-code
 
@@ -71,7 +71,7 @@ as shown in [quote-nested-example].
 > This is a quotation.
 
 !devel example caption=Nested content in block quotes. id=quote-nested-example
-> Quotations begin with the `<` character and may
+> Quotations begin with the `>` character and may
 > contain any valid markdown content, include quotes and code as shown here.
 >
 > > This begins another quotation, which also contains a fenced code block.
@@ -94,8 +94,8 @@ to define a heading:
 1. the hash(es) must +not+ be preceded by a space.
 
 
-Settings, as listed in [heading-settings], are be applied after the heading title text and as shown in
-[heading-standard] headings may also span multiple lines as shown in [heading-multiline].
+Settings, as listed in [heading-settings], are applied after the heading title text as shown in
+[heading-standard]. Headings may also span multiple lines as shown in [heading-multiline].
 
 !devel! example caption=Basic use of all six heading levels. id=heading-basic-example
 # Level One
@@ -164,8 +164,8 @@ item by two spaces, as shown in [unordered-nested-example].
 !devel-end!
 
 As mentioned above, lists can contain lists, which can contain lists, etc. A sub-list, which is a
-list in a list, is created by creating by indenting with at the level of the list item which is
-should contained. Since lists are block items, it must be begin and end with empty lines. And, since
+list in a list, is created by indenting at the level of the list item within which it
+should be contained. Since lists are block items, it must be begin and end with empty lines. And, since
 this is a list it also follows the aforementioned rules for list continuation.
 [unordered-sublist-example] demonstrates the syntax for creating nested lists.
 
@@ -195,8 +195,8 @@ this is a list it also follows the aforementioned rules for list continuation.
 
 ### Ordered List
 
-A numbered list work nearly identical to unordered lists (see [#unordered]), but start with a
-numbered followed by a period and a single space. The number used for the first item in the list
+A numbered list works nearly identically to unordered lists (see [#unordered]), but starting with a
+number followed by a period and a single space. The number used for the first item in the list
 will be the number used for the start of the list, see [ordered-example].
 
 !devel! example id=ordered-example caption=Example of ordered lists with a starting number and a second with nested content.
@@ -230,7 +230,7 @@ You can create shortcuts to common items: [foo].
 
 ## Inline Content id=core-inline
 
-Inline content comprises of formatting, as the name suggest, that occurs within lines of text.
+Inline content comprises formatting, as the name suggests, that occurs within lines of text.
 Examples include inline code and text formatting such as +bold+.
 
 ### Monospace (Inline Code) id=monospace
@@ -288,7 +288,7 @@ syntax. The available settings for links is include in [link-settings].
 ### Shortcut links id=shortcut-link
 
 Links to shortcuts use the typical [markdown] syntax of a key enclosed in square brackets (`[key]`),
-where the key references a shortcut, which are defined as detailed in the [#shortcuts] section, refer
+where the key references a shortcut, which are defined in the [#shortcuts] section. Refer
 to [shortcut-example] for a demonstration of shortcut and shortcut link use.
 
 In addition to linking to [#shortcuts] created directly, the same syntax is used to reference
@@ -326,7 +326,7 @@ this.
 
 ### Escape Characters
 
-In some cases the use of characters such as a bracket of exclamation are needed in a context that
+In some cases the use of characters such as a bracket or exclamation are needed in a context that
 is recognized as special markdown syntax. In this case, the character should be escaped, using the
 `\` character, as in the following examples.
 

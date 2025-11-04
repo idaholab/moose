@@ -49,7 +49,7 @@ Do not do this, *it is bad*, umk.
 ## Block Alert
 
 The previous examples show the inline version (see [/core.md#core-inline]) of the
-alert command. Since, this command was built using the [command.md] there also exists a
+alert command. Since this command was built using the [command.md] there also exists a
 block version, which is demonstrated in [alert-example-block].
 
 !devel! example id=alert-example-block

@@ -9,7 +9,7 @@
     check_files = 'create_mapping_main_rom_polyreg_v.rd/data create_mapping_main_rom_polyreg_v_aux.rd/data create_mapping_main_mapping_pod_mapping.rd/data'
     min_parallel = 2
     max_parallel = 2
-    petsc_version = ">=3.14"
+    capabilities = 'petsc>=3.14'
   []
   [inverse_map]
     requirement = 'The system should be able to reconstruct a full solution field for a given variable based on '
@@ -22,7 +22,7 @@
       min_parallel = 2
       max_parallel = 2
       prereq = create_surrogate
-      petsc_version = ">=3.14"
+      capabilities = 'petsc>=3.14'
     []
     [with_manual_input]
       detail = 'manually specified coordinates.'
@@ -33,7 +33,7 @@
       min_parallel = 2
       max_parallel = 2
       prereq = create_surrogate
-      petsc_version = ">=3.14"
+      capabilities = 'petsc>=3.14'
     []
   []
   [inverse_map_verification]
@@ -49,7 +49,7 @@
       min_parallel = 2
       max_parallel = 2
       prereq = create_surrogate
-      petsc_version = ">=3.14"
+      capabilities = 'petsc>=3.14'
     []
   []
 []

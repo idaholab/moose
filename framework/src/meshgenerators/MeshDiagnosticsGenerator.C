@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshDiagnosticsGenerator.h"
+#include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 #include "MeshCoarseningUtils.h"
 #include "MeshBaseDiagnosticsUtils.h"
@@ -20,6 +21,8 @@
 #include "libmesh/cell_tet4.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/enum_point_locator_type.h"
 
 registerMooseObject("MooseApp", MeshDiagnosticsGenerator);
 
@@ -42,6 +45,19 @@ MeshDiagnosticsGenerator::validParams()
       "whether to check that sidesets are consistently oriented using neighbor subdomains. If a "
       "sideset is inconsistently oriented within a subdomain, this will not be detected");
   params.addParam<MooseEnum>(
+      "check_for_watertight_sidesets",
+      chk_option,
+      "whether to check for external sides that are not assigned to any sidesets");
+  params.addParam<MooseEnum>(
+      "check_for_watertight_nodesets",
+      chk_option,
+      "whether to check for external nodes that are not assigned to any nodeset");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundaries_to_check",
+      {},
+      "Names boundaries that should form a watertight envelope around the mesh. Defaults to all "
+      "the boundaries combined.");
+  params.addParam<MooseEnum>(
       "examine_element_volumes", chk_option, "whether to examine volume of the elements");
   params.addParam<Real>("minimum_element_volumes", 1e-16, "minimum size for element volume");
   params.addParam<Real>("maximum_element_volumes", 1e16, "Maximum size for element volume");
@@ -56,6 +72,10 @@ MeshDiagnosticsGenerator::validParams()
   params.addParam<MooseEnum>("examine_non_conformality",
                              chk_option,
                              "whether to examine the conformality of elements in the mesh");
+  params.addParam<MooseEnum>("examine_non_matching_edges",
+                             chk_option,
+                             "Whether to check if there are any intersecting edges");
+  params.addParam<Real>("intersection_tol", TOLERANCE, "tolerence for intersecting edges");
   params.addParam<Real>("nonconformal_tol", TOLERANCE, "tolerance for element non-conformality");
   params.addParam<MooseEnum>(
       "search_for_adaptivity_nonconformality",
@@ -75,6 +95,9 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _check_sidesets_orientation(getParam<MooseEnum>("examine_sidesets_orientation")),
+    _check_watertight_sidesets(getParam<MooseEnum>("check_for_watertight_sidesets")),
+    _check_watertight_nodesets(getParam<MooseEnum>("check_for_watertight_nodesets")),
+    _watertight_boundary_names(getParam<std::vector<BoundaryName>>("boundaries_to_check")),
     _check_element_volumes(getParam<MooseEnum>("examine_element_volumes")),
     _min_volume(getParam<Real>("minimum_element_volumes")),
     _max_volume(getParam<Real>("maximum_element_volumes")),
@@ -83,6 +106,8 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
     _check_non_planar_sides(getParam<MooseEnum>("examine_nonplanar_sides")),
     _check_non_conformal_mesh(getParam<MooseEnum>("examine_non_conformality")),
     _non_conformality_tol(getParam<Real>("nonconformal_tol")),
+    _check_non_matching_edges(getParam<MooseEnum>("examine_non_matching_edges")),
+    _non_matching_edge_tol(getParam<Real>("intersection_tol")),
     _check_adaptivity_non_conformality(
         getParam<MooseEnum>("search_for_adaptivity_nonconformality")),
     _check_local_jacobian(getParam<MooseEnum>("check_local_jacobian")),
@@ -97,10 +122,12 @@ MeshDiagnosticsGenerator::MeshDiagnosticsGenerator(const InputParameters & param
   if (isParamSetByUser("nonconformal_tol") && _check_non_conformal_mesh == "NO_CHECK")
     paramError("examine_non_conformality",
                "You must set this parameter to true to trigger mesh conformality check");
-  if (_check_sidesets_orientation == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
+  if (_check_sidesets_orientation == "NO_CHECK" && _check_watertight_sidesets == "NO_CHECK" &&
+      _check_watertight_nodesets == "NO_CHECK" && _check_element_volumes == "NO_CHECK" &&
       _check_element_types == "NO_CHECK" && _check_element_overlap == "NO_CHECK" &&
       _check_non_planar_sides == "NO_CHECK" && _check_non_conformal_mesh == "NO_CHECK" &&
-      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK")
+      _check_adaptivity_non_conformality == "NO_CHECK" && _check_local_jacobian == "NO_CHECK" &&
+      _check_non_matching_edges == "NO_CHECK")
     mooseError("You need to turn on at least one diagnostic. Did you misspell a parameter?");
 }
 
@@ -117,8 +144,23 @@ MeshDiagnosticsGenerator::generate()
   // This deliberately does not trust the mesh to know whether it's already prepared or not
   mesh->prepare_for_use();
 
+  // check that specified boundary is valid, convert BoundaryNames to BoundaryIDs, and sort
+  for (const auto & boundary_name : _watertight_boundary_names)
+  {
+    if (!MooseMeshUtils::hasBoundaryName(*mesh, boundary_name))
+      mooseError("User specified boundary_to_check \'", boundary_name, "\' does not exist");
+  }
+  _watertight_boundaries = MooseMeshUtils::getBoundaryIDs(*mesh, _watertight_boundary_names, false);
+  std::sort(_watertight_boundaries.begin(), _watertight_boundaries.end());
+
   if (_check_sidesets_orientation != "NO_CHECK")
     checkSidesetsOrientation(mesh);
+
+  if (_check_watertight_sidesets != "NO_CHECK")
+    checkWatertightSidesets(mesh);
+
+  if (_check_watertight_nodesets != "NO_CHECK")
+    checkWatertightNodesets(mesh);
 
   if (_check_element_volumes != "NO_CHECK")
     checkElementVolumes(mesh);
@@ -140,6 +182,9 @@ MeshDiagnosticsGenerator::generate()
 
   if (_check_local_jacobian != "NO_CHECK")
     checkLocalJacobians(mesh);
+
+  if (_check_non_matching_edges != "NO_CHECK")
+    checkNonMatchingEdges(mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -198,7 +243,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
     // side next to it, in the same sideset
     // We'll consider pi / 2 to be the most steep angle we'll pass
     unsigned int num_normals_flipping = 0;
-    Real steepest_side_angles = 1;
+    Real steepest_side_angles = 0;
     for (const auto & [elem_id, side_id, side_bid] : side_tuples)
     {
       if (side_bid != bid)
@@ -207,8 +252,9 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 
       // Get side normal
       const std::unique_ptr<const Elem> face = elem_ptr->build_side_ptr(side_id);
-      std::unique_ptr<FEBase> fe(FEBase::build(elem_ptr->dim(), FEType(elem_ptr->default_order())));
-      QGauss qface(elem_ptr->dim() - 1, CONSTANT);
+      std::unique_ptr<libMesh::FEBase> fe(
+          libMesh::FEBase::build(elem_ptr->dim(), libMesh::FEType(elem_ptr->default_order())));
+      libMesh::QGauss qface(elem_ptr->dim() - 1, CONSTANT);
       fe->attach_quadrature_rule(&qface);
       const auto & normals = fe->get_normals();
       fe->reinit(elem_ptr, side_id);
@@ -225,9 +271,9 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
               continue;
 
             // We re-init everything for the neighbor in case it's a different dimension
-            std::unique_ptr<FEBase> fe_neighbor(
-                FEBase::build(neighbor->dim(), FEType(neighbor->default_order())));
-            QGauss qface(neighbor->dim() - 1, CONSTANT);
+            std::unique_ptr<libMesh::FEBase> fe_neighbor(libMesh::FEBase::build(
+                neighbor->dim(), libMesh::FEType(neighbor->default_order())));
+            libMesh::QGauss qface(neighbor->dim() - 1, CONSTANT);
             fe_neighbor->attach_quadrature_rule(&qface);
             const auto & neigh_normals = fe_neighbor->get_normals();
             fe_neighbor->reinit(neighbor, neigh_side_index);
@@ -239,7 +285,7 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
             {
               num_normals_flipping++;
               steepest_side_angles =
-                  std::min(std::acos(neigh_side_normal * side_normal), steepest_side_angles);
+                  std::max(std::acos(neigh_side_normal * side_normal), steepest_side_angles);
               if (num_normals_flipping <= _num_outputs)
                 _console << "Side normals changed by more than pi/2 for sideset "
                          << sideset_full_name << " between side " << side_id << " of element "
@@ -256,7 +302,8 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
     if (num_normals_flipping)
       message = "Sideset " + sideset_full_name +
                 " has two neighboring sides with a very large angle. Largest angle detected: " +
-                std::to_string(steepest_side_angles) + " rad.";
+                std::to_string(steepest_side_angles) + " rad (" +
+                std::to_string(steepest_side_angles * 180 / libMesh::pi) + " degrees).";
     else
       message = "Sideset " + sideset_full_name +
                 " does not appear to have side-to-neighbor-side orientation flips. All neighbor "
@@ -264,6 +311,152 @@ MeshDiagnosticsGenerator::checkSidesetsOrientation(const std::unique_ptr<MeshBas
 
     diagnosticsLog(message, _check_sidesets_orientation, num_normals_flipping);
   }
+}
+
+void
+MeshDiagnosticsGenerator::checkWatertightSidesets(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*
+  Algorithm Overview:
+  1) Loop through all elements
+  2) For each element loop through all its sides
+  3) If it has no neighbors it's an external side
+  4) If external check if it's part of a sideset
+  */
+  if (mesh->mesh_dimension() < 2)
+    mooseError("The sideset check only works for 2D and 3D meshes");
+  auto & boundary_info = mesh->get_boundary_info();
+  boundary_info.build_side_list();
+  const auto sideset_map = boundary_info.get_sideset_map();
+  unsigned int num_faces_without_sideset = 0;
+
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    for (auto i : elem->side_index_range())
+    {
+      // Check if side is external
+      if (elem->neighbor_ptr(i) == nullptr)
+      {
+        // If external get the boundary ids associated with this side
+        std::vector<boundary_id_type> boundary_ids;
+        auto side_range = sideset_map.equal_range(elem);
+        for (const auto & itr : as_range(side_range))
+          if (itr.second.first == i)
+            boundary_ids.push_back(i);
+        // get intersection of boundary_ids and _watertight_boundaries
+        std::vector<boundary_id_type> intersections =
+            findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+
+        bool no_specified_ids = boundary_ids.empty();
+        bool specified_ids = !_watertight_boundaries.empty() && intersections.empty();
+        std::string message;
+        if (mesh->mesh_dimension() == 3)
+          message = "Element " + std::to_string(elem->id()) +
+                    " contains an external face which has not been assigned to ";
+        else
+          message = "Element " + std::to_string(elem->id()) +
+                    " contains an external edge which has not been assigned to ";
+        if (no_specified_ids)
+          message = message + "a sideset";
+        else if (specified_ids)
+          message = message + "one of the specified sidesets";
+        if ((no_specified_ids || specified_ids) && num_faces_without_sideset < _num_outputs)
+        {
+          _console << message << std::endl;
+          num_faces_without_sideset++;
+        }
+      }
+    }
+  }
+  std::string message;
+  if (mesh->mesh_dimension() == 3)
+    message = "Number of external element faces that have not been assigned to a sideset: " +
+              std::to_string(num_faces_without_sideset);
+  else
+    message = "Number of external element edges that have not been assigned to a sideset: " +
+              std::to_string(num_faces_without_sideset);
+  diagnosticsLog(message, _check_watertight_sidesets, num_faces_without_sideset);
+}
+
+void
+MeshDiagnosticsGenerator::checkWatertightNodesets(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*
+  Diagnostic Overview:
+  1) Mesh precheck
+  2) Loop through all elements
+  3) Loop through all sides of that element
+  4) If side is external loop through its nodes
+  5) If node is not associated with any nodeset add to list
+  6) Print out node id
+  */
+  if (mesh->mesh_dimension() < 2)
+    mooseError("The nodeset check only works for 2D and 3D meshes");
+  auto & boundary_info = mesh->get_boundary_info();
+  unsigned int num_nodes_without_nodeset = 0;
+  std::set<dof_id_type> checked_nodes_id;
+
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    for (const auto i : elem->side_index_range())
+    {
+      // Check if side is external
+      if (elem->neighbor_ptr(i) == nullptr)
+      {
+        // Side is external, now check nodes
+        auto side = elem->side_ptr(i);
+        const auto & node_list = side->get_nodes();
+        for (unsigned int j = 0; j < side->n_nodes(); j++)
+        {
+          const auto node = node_list[j];
+          if (checked_nodes_id.count(node->id()))
+            continue;
+          // get vector of node's boundaries (in most cases it will only have one)
+          std::vector<boundary_id_type> boundary_ids;
+          boundary_info.boundary_ids(node, boundary_ids);
+          std::vector<boundary_id_type> intersection =
+              findBoundaryOverlap(_watertight_boundaries, boundary_ids);
+
+          bool no_specified_ids = boundary_info.n_boundary_ids(node) == 0;
+          bool specified_ids = !_watertight_boundaries.empty() && intersection.empty();
+          std::string message =
+              "Node " + std::to_string(node->id()) +
+              " is on an external boundary of the mesh, but has not been assigned to ";
+          if (no_specified_ids)
+            message = message + "a nodeset";
+          else if (specified_ids)
+            message = message + "one of the specified nodesets";
+          if ((no_specified_ids || specified_ids) && num_nodes_without_nodeset < _num_outputs)
+          {
+            checked_nodes_id.insert(node->id());
+            num_nodes_without_nodeset++;
+            _console << message << std::endl;
+          }
+        }
+      }
+    }
+  }
+  std::string message;
+  message = "Number of external nodes that have not been assigned to a nodeset: " +
+            std::to_string(num_nodes_without_nodeset);
+  diagnosticsLog(message, _check_watertight_nodesets, num_nodes_without_nodeset);
+}
+
+std::vector<boundary_id_type>
+MeshDiagnosticsGenerator::findBoundaryOverlap(
+    const std::vector<boundary_id_type> & watertight_boundaries,
+    std::vector<boundary_id_type> & boundary_ids) const
+{
+  // Only the boundary_ids vector is sorted here. watertight_boundaries has to be sorted beforehand
+  // Returns their intersection (elements that they share)
+  std::sort(boundary_ids.begin(), boundary_ids.end());
+  std::vector<boundary_id_type> boundary_intersection;
+  std::set_intersection(watertight_boundaries.begin(),
+                        watertight_boundaries.end(),
+                        boundary_ids.begin(),
+                        boundary_ids.end(),
+                        std::back_inserter(boundary_intersection));
+  return boundary_intersection;
 }
 
 void
@@ -491,7 +684,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
   // will modify the mesh for the analysis of the next nodes
   // Make a copy of the mesh, add this element
   auto mesh_copy = mesh->clone();
-  MeshRefinement mesh_refiner(*mesh_copy);
+  libMesh::MeshRefinement mesh_refiner(*mesh_copy);
 
   // loop on nodes, assumes a replicated mesh
   for (auto & node : mesh->node_ptr_range())
@@ -511,12 +704,13 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
       // case of non-conformality
       bool node_on_elem = false;
 
-      // non-vertex nodes are not cause for the kind of non-conformality we are looking for
-      if (!elem->is_vertex(elem->get_node_index(node)))
-        continue;
-
       if (elem->get_node_index(node) != libMesh::invalid_uint)
+      {
         node_on_elem = true;
+        // non-vertex nodes are not cause for the kind of non-conformality we are looking for
+        if (!elem->is_vertex(elem->get_node_index(node)))
+          continue;
+      }
 
       // Keep track of all the elements this node is a part of. They are potentially the
       // 'fine' (refined) elements next to a coarser element
@@ -553,7 +747,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
              fine_elements.size() != 3)
       continue;
     else if ((elem_type == TET4 || elem_type == TET10 || elem_type == TET14) &&
-             (fine_elements.size() % 4 != 0))
+             (fine_elements.size() % 2 != 0))
       continue;
 
     // only one coarse element in front of refined elements except for tets. Whatever we're
@@ -703,7 +897,9 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
             }
             // A node for the coarse parent will appear in only one fine neighbor (not shared)
             // and will lay on the side of the coarse neighbor
-            if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol))
+            // We only care about the coarse neighbor vertex nodes
+            if (!node_shared && coarse_side->close_to_point(coarse_node, _non_conformality_tol) &&
+                elem_1->is_vertex(elem_1->get_node_index(&coarse_node)))
               tentative_coarse_nodes[i++] = &coarse_node;
             mooseAssert(i <= 5, "We went too far in this index");
           }
@@ -1065,7 +1261,7 @@ MeshDiagnosticsGenerator::checkNonConformalMeshFromAdaptivity(
 
     // Set the nodes to the coarse element
     for (auto i : index_range(tentative_coarse_nodes))
-      parent_ptr->set_node(i) = mesh_copy->node_ptr(tentative_coarse_nodes[i]->id());
+      parent_ptr->set_node(i, mesh_copy->node_ptr(tentative_coarse_nodes[i]->id()));
 
     // Refine this parent
     parent_ptr->set_refinement_flag(Elem::REFINE);
@@ -1130,19 +1326,19 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
   unsigned int num_negative_elem_qp_jacobians = 0;
   // Get a high-ish order quadrature
   auto qrule_dimension = mesh->mesh_dimension();
-  QGauss qrule(qrule_dimension, FIFTH);
+  libMesh::QGauss qrule(qrule_dimension, FIFTH);
 
   // Use a constant monomial
-  const FEType fe_type(CONSTANT, libMesh::MONOMIAL);
+  const libMesh::FEType fe_type(CONSTANT, libMesh::MONOMIAL);
 
   // Initialize a basic constant monomial shape function everywhere
-  std::unique_ptr<FEBase> fe_elem;
+  std::unique_ptr<libMesh::FEBase> fe_elem;
   if (mesh->mesh_dimension() == 1)
-    fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+    fe_elem = std::make_unique<libMesh::FEMonomial<1>>(fe_type);
   if (mesh->mesh_dimension() == 2)
-    fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+    fe_elem = std::make_unique<libMesh::FEMonomial<2>>(fe_type);
   else
-    fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+    fe_elem = std::make_unique<libMesh::FEMonomial<3>>(fe_type);
 
   fe_elem->get_JxW();
   fe_elem->attach_quadrature_rule(&qrule);
@@ -1155,15 +1351,15 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
     {
       // Re-initialize a quadrature
       qrule_dimension = elem->dim();
-      qrule = QGauss(qrule_dimension, FIFTH);
+      qrule = libMesh::QGauss(qrule_dimension, FIFTH);
 
       // Re-initialize a monomial FE
       if (elem->dim() == 1)
-        fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<1>>(fe_type);
       if (elem->dim() == 2)
-        fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<2>>(fe_type);
       else
-        fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<3>>(fe_type);
 
       fe_elem->get_JxW();
       fe_elem->attach_quadrature_rule(&qrule);
@@ -1197,7 +1393,7 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
   unsigned int num_negative_side_qp_jacobians = 0;
   // Get a high-ish order side quadrature
   auto qrule_side_dimension = mesh->mesh_dimension() - 1;
-  QGauss qrule_side(qrule_side_dimension, FIFTH);
+  libMesh::QGauss qrule_side(qrule_side_dimension, FIFTH);
 
   // Use the side quadrature now
   fe_elem->attach_quadrature_rule(&qrule_side);
@@ -1209,15 +1405,15 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
     if (int(qrule_side_dimension) != elem->dim() - 1)
     {
       qrule_side_dimension = elem->dim() - 1;
-      qrule_side = QGauss(qrule_side_dimension, FIFTH);
+      qrule_side = libMesh::QGauss(qrule_side_dimension, FIFTH);
 
       // Re-initialize a side FE
       if (elem->dim() == 1)
-        fe_elem = std::make_unique<FEMonomial<1>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<1>>(fe_type);
       if (elem->dim() == 2)
-        fe_elem = std::make_unique<FEMonomial<2>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<2>>(fe_type);
       else
-        fe_elem = std::make_unique<FEMonomial<3>>(fe_type);
+        fe_elem = std::make_unique<libMesh::FEMonomial<3>>(fe_type);
 
       fe_elem->get_JxW();
       fe_elem->attach_quadrature_rule(&qrule_side);
@@ -1250,6 +1446,133 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
                      Moose::stringify(num_negative_side_qp_jacobians),
                  _check_local_jacobian,
                  num_negative_side_qp_jacobians);
+}
+
+void
+MeshDiagnosticsGenerator::checkNonMatchingEdges(const std::unique_ptr<MeshBase> & mesh) const
+{
+  /*Algorithm Overview
+    1)Prechecks
+      a)This algorithm only works for 3D so check for that first
+    2)Loop
+      a)Loop through every element
+      b)For each element get the edges associated with it
+      c)For each edge check overlap with any edges of nearby elements
+      d)Have check to make sure the same pair of edges are not being tested twice for overlap
+    3)Overlap check
+      a)Shortest line that connects both lines is perpendicular to both lines
+      b)A good overview of the math for finding intersecting lines can be found
+    here->paulbourke.net/geometry/pointlineplane/
+  */
+  if (mesh->mesh_dimension() != 3)
+  {
+    mooseWarning("The edge intersection algorithm only works with 3D meshes. "
+                 "'examine_non_matching_edges' is skipped");
+    return;
+  }
+  if (!mesh->is_serial())
+    mooseError("Only serialized/replicated meshes are supported");
+  unsigned int num_intersecting_edges = 0;
+
+  // Create map of element to bounding box to avoing reinitializing the same bounding box multiple
+  // times
+  std::unordered_map<Elem *, BoundingBox> bounding_box_map;
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    const auto boundingBox = elem->loose_bounding_box();
+    bounding_box_map.insert({elem, boundingBox});
+  }
+
+  std::unique_ptr<PointLocatorBase> point_locator = mesh->sub_point_locator();
+  std::set<std::array<dof_id_type, 4>> overlapping_edges_nodes;
+  for (const auto elem : mesh->active_element_ptr_range())
+  {
+    // loop through elem's nodes and find nearby elements with it
+    std::set<const Elem *> candidate_elems;
+    std::set<const Elem *> nearby_elems;
+    for (unsigned int i = 0; i < elem->n_nodes(); i++)
+    {
+      (*point_locator)(elem->point(i), candidate_elems);
+      nearby_elems.insert(candidate_elems.begin(), candidate_elems.end());
+    }
+    std::vector<std::unique_ptr<const Elem>> elem_edges(elem->n_edges());
+    for (auto i : elem->edge_index_range())
+      elem_edges[i] = elem->build_edge_ptr(i);
+    for (const auto other_elem : nearby_elems)
+    {
+      // If they're the same element then there's no need to check for overlap
+      if (elem->id() >= other_elem->id())
+        continue;
+
+      std::vector<std::unique_ptr<const Elem>> other_edges(other_elem->n_edges());
+      for (auto j : other_elem->edge_index_range())
+        other_edges[j] = other_elem->build_edge_ptr(j);
+      for (auto & edge : elem_edges)
+      {
+        for (auto & other_edge : other_edges)
+        {
+          // Get nodes from edges
+          const Node * n1 = edge->get_nodes()[0];
+          const Node * n2 = edge->get_nodes()[1];
+          const Node * n3 = other_edge->get_nodes()[0];
+          const Node * n4 = other_edge->get_nodes()[1];
+
+          // Create array<dof_id_type, 4> to check against set
+          std::array<dof_id_type, 4> node_id_array = {n1->id(), n2->id(), n3->id(), n4->id()};
+          std::sort(node_id_array.begin(), node_id_array.end());
+
+          // Check if the edges have already been added to our check_edges list
+          if (overlapping_edges_nodes.count(node_id_array))
+          {
+            continue;
+          }
+
+          // Check element/edge type
+          if (edge->type() != EDGE2)
+          {
+            std::string element_message = "Edge of type " + Utility::enum_to_string(edge->type()) +
+                                          " was found in cell " + std::to_string(elem->id()) +
+                                          " which is of type " +
+                                          Utility::enum_to_string(elem->type()) + '\n' +
+                                          "The edge intersection check only works for EDGE2 "
+                                          "elements.\nThis message will not be output again";
+            mooseDoOnce(_console << element_message << std::endl);
+            continue;
+          }
+          if (other_edge->type() != EDGE2)
+            continue;
+
+          // Now compare edge with other_edge
+          Point intersection_coords;
+          bool overlap = MeshBaseDiagnosticsUtils::checkFirstOrderEdgeOverlap(
+              *edge, *other_edge, intersection_coords, _non_matching_edge_tol);
+          if (overlap)
+          {
+            // Add the nodes that make up the 2 edges to the vector overlapping_edges_nodes
+            overlapping_edges_nodes.insert(node_id_array);
+            num_intersecting_edges += 2;
+            if (num_intersecting_edges < _num_outputs)
+            {
+              // Print error message
+              std::string elem_id = std::to_string(elem->id());
+              std::string other_elem_id = std::to_string(other_elem->id());
+              std::string x_coord = std::to_string(intersection_coords(0));
+              std::string y_coord = std::to_string(intersection_coords(1));
+              std::string z_coord = std::to_string(intersection_coords(2));
+              std::string message = "Intersecting edges found between elements " + elem_id +
+                                    " and " + other_elem_id + " near point (" + x_coord + ", " +
+                                    y_coord + ", " + z_coord + ")";
+              _console << message << std::endl;
+            }
+          }
+        }
+      }
+    }
+  }
+  diagnosticsLog("Number of intersecting element edges: " +
+                     Moose::stringify(num_intersecting_edges),
+                 _check_non_matching_edges,
+                 num_intersecting_edges);
 }
 
 void

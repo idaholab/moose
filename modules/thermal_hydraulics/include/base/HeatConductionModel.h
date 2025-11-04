@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,7 +58,7 @@ public:
    * Get the FE type used for heat conduction
    * @return The finite element type
    */
-  static const FEType & feType() { return _fe_type; }
+  static const libMesh::FEType & feType() { return _fe_type; }
 
 protected:
   THMProblem & _sim;
@@ -82,7 +82,7 @@ public:
 
 protected:
   // FE type used for heat conduction
-  static FEType _fe_type;
+  static libMesh::FEType _fe_type;
 
   friend class Simulation;
 };

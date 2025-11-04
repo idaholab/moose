@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,7 @@
 #include "AddTimeStepperAction.h"
 #include "TimeStepper.h"
 #include "FEProblemBase.h"
-#include "Transient.h"
+#include "TransientBase.h"
 
 registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_stepper");
 registerMooseAction("MooseApp", AddTimeStepperAction, "add_time_steppers");
@@ -39,10 +39,10 @@ AddTimeStepperAction::act()
   else
     name = _name;
 
-  Transient * transient = dynamic_cast<Transient *>(_app.getExecutioner());
+  TransientBase * transient = dynamic_cast<TransientBase *>(_app.getExecutioner());
   if (!transient)
     mooseError("Cannot add TimeSteppers without a Transient executioner");
-  _moose_object_pars.set<Transient *>("_executioner") = transient;
+  _moose_object_pars.set<TransientBase *>("_executioner") = transient;
 
   auto ts =
       _problem->addObject<TimeStepper>(_type, name, _moose_object_pars, /* threaded = */ false)[0];

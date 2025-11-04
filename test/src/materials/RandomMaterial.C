@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,7 +23,7 @@ RandomMaterial::RandomMaterial(const InputParameters & parameters)
     _rand_real(declareProperty<Real>("rand_real")),
     _rand_long(declareProperty<unsigned long>("rand_long"))
 {
-  setRandomResetFrequency(EXEC_TIMESTEP_END);
+  setRandomResetFrequency(EXEC_TIMESTEP_BEGIN);
 }
 
 void

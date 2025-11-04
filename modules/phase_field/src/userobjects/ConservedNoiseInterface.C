@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,5 +16,5 @@ ConservedNoiseInterface::ConservedNoiseInterface(const InputParameters & paramet
    * This call turns on Random Number generation for this object, it can be called either in
    * the constructor or in initialSetup().
    */
-  setRandomResetFrequency(EXEC_TIMESTEP_END);
+  setRandomResetFrequency(EXEC_TIMESTEP_BEGIN);
 }

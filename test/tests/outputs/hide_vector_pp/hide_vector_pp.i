@@ -39,7 +39,7 @@
 
 [Postprocessors]
   [./pp]
-    type = NumElems
+    type = NumElements
     outputs = csv
   [../]
 []

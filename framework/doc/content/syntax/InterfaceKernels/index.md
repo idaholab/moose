@@ -23,6 +23,13 @@ Interface kernels can be used to provide any general flux condition at an interf
 
 For additional information about the interface kernel system, don't hesitate to contact the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions).
 
+## Multiple system support
+
+Using multiple nonlinear system with interface kernels is currently not supported.
+The only feature supported, which can at times suffice, notably when using
+[MultiApps](syntax/MultiApps/index.md) to couple equations, is to use an auxiliary
+variable as the `neighbor_var`.
+
 !syntax list /InterfaceKernels objects=True actions=False subsystems=False
 
 !syntax list /InterfaceKernels objects=False actions=False subsystems=True

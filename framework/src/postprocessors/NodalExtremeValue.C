@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,9 +29,20 @@ NodalExtremeValue::validParams()
 
 NodalExtremeValue::NodalExtremeValue(const InputParameters & parameters)
   : ExtremeValueBase<NodalVariablePostprocessor>(parameters),
-    _proxy_variable(isParamValid("proxy_variable") ? coupledValue("proxy_variable") : _u)
+    _proxy_variable(isParamValid("proxy_variable") ? coupledValue("proxy_variable") : _u),
+    _proxy_var(isParamValid("proxy_variable") ? getVar("proxy_variable", 0) : nullptr)
 {
-  _use_proxy = isParamValid("proxy_variable");
+}
+
+void
+NodalExtremeValue::execute()
+{
+  const bool have_dofs = _var->dofIndices().size();
+  if (_proxy_var)
+    mooseAssert(static_cast<bool>(_proxy_var->dofIndices().size()) == have_dofs,
+                "Should not use variables that don't have coincident dof maps");
+  if (have_dofs)
+    computeExtremeValue();
 }
 
 std::pair<Real, Real>

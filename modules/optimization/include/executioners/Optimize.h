@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,8 +29,13 @@ public:
 
   virtual void execute() override;
 
+  virtual bool lastSolveConverged() const override { return _last_solve_converged; }
+
   OptimizeSolve & getOptimizeSolve() { return _optim_solve; }
 
 protected:
   OptimizeSolve _optim_solve;
+
+private:
+  bool _last_solve_converged = true;
 };

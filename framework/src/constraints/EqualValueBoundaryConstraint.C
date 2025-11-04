@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -171,12 +171,12 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
                                                   nodes_to_ghost.begin(),
                                                   nodes_to_ghost.end(),
-                                                  null_output_iterator<Node>());
+                                                  libMesh::null_output_iterator<Node>());
 
     _mesh.getMesh().comm().allgather_packed_range(&_mesh.getMesh(),
                                                   primary_elems_to_ghost.begin(),
                                                   primary_elems_to_ghost.end(),
-                                                  null_output_iterator<Elem>());
+                                                  libMesh::null_output_iterator<Elem>());
 
     _mesh.update(); // Rebuild node_to_elem_map
 

@@ -56,7 +56,6 @@ velocity_interp_method = 'rc'
 []
 
 [FVKernels]
-
   [mass]
     type = INSFVMassAdvection
     variable = pressure
@@ -77,7 +76,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_x
     rho_d = ${rho_d}
-    fd = 'rho_mixture_var'
+    fd = 'phase_2'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
     momentum_component = 'x'
@@ -95,6 +94,15 @@ velocity_interp_method = 'rc'
     momentum_component = 'x'
     pressure = pressure
   []
+  [u_friction]
+    type = PINSFVMomentumFriction
+    Darcy_name = Darcy_coefficient_vec
+    is_porous_medium = false
+    momentum_component = x
+    mu = mu_mixture
+    rho = rho_mixture
+    variable = vel_x
+  []
 
   [v_advection]
     type = INSFVMomentumAdvection
@@ -108,7 +116,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_y
     rho_d = ${rho_d}
-    fd = 'rho_mixture_var'
+    fd = 'phase_2'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
     momentum_component = 'x'
@@ -125,6 +133,15 @@ velocity_interp_method = 'rc'
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
+  []
+  [v_friction]
+    type = PINSFVMomentumFriction
+    Darcy_name = Darcy_coefficient_vec
+    is_porous_medium = false
+    momentum_component = y
+    mu = mu_mixture
+    rho = rho_mixture
+    variable = vel_y
   []
 
   [phase_2_advection]
@@ -226,6 +243,7 @@ velocity_interp_method = 'rc'
     linear_coef_name = 'Darcy_coefficient'
     outputs = 'out'
     output_properties = 'vel_slip_x'
+    ghost_layers = 5
   []
   [populate_v_slip]
     type = WCNSFV2PSlipVelocityFunctorMaterial
@@ -240,6 +258,7 @@ velocity_interp_method = 'rc'
     linear_coef_name = 'Darcy_coefficient'
     outputs = 'out'
     output_properties = 'vel_slip_y'
+    ghost_layers = 5
   []
   [compute_phase_1]
     type = ADParsedFunctorMaterial

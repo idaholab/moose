@@ -18,7 +18,8 @@ rho = 1.0
     wall_boundaries = 'top left right bottom'
     momentum_wall_types = 'noslip noslip noslip noslip'
 
-    initial_velocity = '1 1 0'
+    initial_velocity = 'exact_u exact_v 0'
+    initial_pressure = 0
 
     pin_pressure = true
     pinned_pressure_type = average

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,7 +31,9 @@ relativePermeability(const T & seff, Real m)
     return 0.0;
   else if (MetaPhysicL::raw_value(seff) >= 1.0)
     return 1.0;
-  return (1.0 + m) * std::pow(seff, m) - m * std::pow(seff, m + 1.0);
+
+  using std::pow;
+  return (1.0 + m) * pow(seff, m) - m * pow(seff, m + 1.0);
 }
 
 /**

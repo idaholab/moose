@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "KernelBase.h"
 #include "IntegratedBCBase.h"
+#include "HDGKernel.h"
 #include "DGKernel.h"
 #include "InterfaceKernelBase.h"
 #include "MooseVariableFE.h"
@@ -300,7 +301,7 @@ ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
         if (dg->variable().number() == ivar && dg->isImplicit() &&
             dg->hasBlocks(neighbor->subdomain_id()) &&
             (jvariable.activeOnSubdomain(_subdomain) ||
-             jvariable.activeOnSubdomain(Moose::INTERNAL_SIDE_LOWERD_ID)))
+             jvariable.activeOnSubdomains(_fe_problem.mesh().interiorLowerDBlocks())))
         {
           dg->prepareShapes(jvar);
           dg->prepareNeighborShapes(jvar);
@@ -308,5 +309,23 @@ ComputeFullJacobianThread::computeOnInternalFace(const Elem * neighbor)
         }
       }
     }
+  }
+}
+
+void
+ComputeFullJacobianThread::computeOnInternalFace()
+{
+  mooseAssert(_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid),
+              "We should not be called if we have no active HDG kernels");
+  for (const auto & hdg_kernel : _hdg_warehouse->getActiveBlockObjects(_subdomain, _tid))
+  {
+    mooseAssert(
+        hdg_kernel->hasBlocks(_subdomain),
+        "We queried the warehouse for active blocks on this subdomain, so this better be active");
+    mooseAssert(
+        _neighbor_subdomain != Moose::INVALID_BLOCK_ID,
+        "We should have set a valid neighbor subdomain ID if we made it in side this method");
+    if (hdg_kernel->hasBlocks(_neighbor_subdomain))
+      hdg_kernel->computeJacobianOnSide();
   }
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,10 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AverageValueConstraint.h"
-
-// MOOSE includes
-#include "Assembly.h"
-#include "MooseVariableScalar.h"
+#include "libmesh/system.h"
 
 registerMooseObject("MooseApp", AverageValueConstraint);
 
@@ -25,14 +22,14 @@ AverageValueConstraint::validParams()
       "pp_name", "Name of the Postprocessor value we are trying to equate with 'value'.");
   params.addRequiredParam<Real>(
       "value", "Given (constant) which we want the integral of the solution variable to match.");
-
   return params;
 }
 
 AverageValueConstraint::AverageValueConstraint(const InputParameters & parameters)
   : ScalarKernel(parameters),
     _value(getParam<Real>("value")),
-    _pp_value(getPostprocessorValue("pp_name"))
+    _pp_value(getPostprocessorValue("pp_name")),
+    _add_jacobian(!_sys.system().has_static_condensation())
 {
 }
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,8 +37,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
 private:
-  ///@{
-  /// Phase concnetration variables
+  ///@{ Phase concentration variables
   unsigned int _ca_var;
   const VariableName _ca_name;
   unsigned int _cb_var;

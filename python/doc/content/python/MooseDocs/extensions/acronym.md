@@ -2,7 +2,7 @@
 
 The acronym extension provides a convenient way to defined acronyms that may be used throughout all
 documentation pages. On each page the full text and acronym definition will be displayed the first
-time is used, as shown in [acronym-example].
+time it is used, as shown in [acronym-example].
 
 !alert note
 When viewing on the website a tooltip is created for the acronyms, the

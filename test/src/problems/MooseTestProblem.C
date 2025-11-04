@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,9 +24,9 @@ MooseTestProblem::validParams()
 
 MooseTestProblem::MooseTestProblem(const InputParameters & params) : FEProblem(params)
 {
-  _console << "Hello, I am your FEProblemBase-derived class with coordinate type "
-           << getParam<MultiMooseEnum>("coord_type") << " and my name is '" << this->name() << "'"
-           << std::endl;
+  _console << "Hello, I am your FEProblemBase-derived class with solve = "
+           << (getParam<bool>("solve") ? "true" : "false") << " and my name is '" << this->name()
+           << "'" << std::endl;
 
   _test_aux = std::make_shared<AuxiliarySystem>(*this, "aux1");
   _test_aux->system().add_variable("dummy", FEType());

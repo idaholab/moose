@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,6 +20,7 @@ MortarUserObject::validParams()
 
 MortarUserObject::MortarUserObject(const InputParameters & parameters)
   : UserObject(parameters),
+    ScalarCoupleable(this),
     MortarConsumerInterface(this),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, _secondary_set),
     NeighborCoupleable(this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/false)

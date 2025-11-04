@@ -7,7 +7,7 @@ from math import pi, sqrt
 import matplotlib.pyplot as plt
 import numpy as np
 
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 f = 1e4
 mfr = 1.0

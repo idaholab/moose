@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,8 +13,9 @@
 #include "MooseObject.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
-#include "MortarData.h"
+#include "MortarInterfaceWarehouse.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
 #include "libmesh/quadrature.h"
 
 #include <algorithm>

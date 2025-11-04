@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -173,7 +173,7 @@ private:
   /// Number of parameters being optimized
   dof_id_type _ndof;
 
-  /// Parameters (solution)
+  /// Parameters (solution) given to TAO
   std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
 
   /// Hessian (matrix) - usually a matrix-free representation

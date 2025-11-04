@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,10 +11,16 @@
 #include "MortarContactUtils.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
 
+#include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
+#if METAPHYSICL_MAJOR_VERSION < 2
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
+#else
+#include "metaphysicl/parallel_dynamic_array_wrapper.h"
+#endif
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
@@ -182,7 +188,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
 
-ADReal ComputeDynamicWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
+ADReal
+ComputeDynamicWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
   mooseError(
       "We should never call computeQpResidual for ComputeDynamicWeightedGapLMMechanicalContact");
@@ -215,6 +222,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 void
 ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
 {
+  // These dof maps are not recoverable as they are maps of pointers, and recovering old pointers
+  // would be wrong. We would need to create a custom dataStore() and dataLoad()
+  if (_app.isRecovering())
+    mooseError("This object does not support recovering");
+
   _dof_to_old_weighted_gap.clear();
   _dof_to_old_velocity.clear();
   _dof_to_nodal_old_wear_depth.clear();

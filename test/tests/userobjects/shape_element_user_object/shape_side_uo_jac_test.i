@@ -48,6 +48,7 @@
 [Problem]
   type = FEProblem
   kernel_coverage_check = false
+  use_hash_table_matrix_assembly = true
 []
 
 [Preconditioning]

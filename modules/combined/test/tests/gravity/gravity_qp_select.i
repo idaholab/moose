@@ -99,7 +99,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = FINITE
   #incremental = true
   add_variables = true

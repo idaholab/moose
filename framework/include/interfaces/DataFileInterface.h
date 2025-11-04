@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,10 +13,11 @@
 
 #include <string>
 
+class ParallelParamObject;
+
 /**
  * Interface for objects that need to resolve data file paths (MooseObject and Action)
  */
-template <class T>
 class DataFileInterface
 {
 public:
@@ -29,26 +30,30 @@ public:
    * Constructing the object
    * @param parent Parent object (either MooseObject or Action) for params and  output
    */
-  DataFileInterface(const T & parent);
+  DataFileInterface(const ParallelParamObject & parent);
 
   /**
-   * Returns the path of a data file for a given FileName type parameter, searching
-   * (in the following order)
-   * - relative to the input file directory
-   * - relative to the running binary (assuming the application is installed)
-   * - relative to all registered data file directories
+   * Deprecated method.
+   *
+   * The data file paths are now automatically set within the InputParameters
+   * object, so using getParam<DataFileName>("param_name") is now sufficient.
    */
   std::string getDataFileName(const std::string & param) const;
 
   /**
+   * Deprecated method.
+   *
+   * Use getDataFilePath() instead.
+   */
+  std::string getDataFileNameByName(const std::string & relative_path) const;
+
+  /**
    * Returns the path of a data file for a given relative file path.
    * This can be used for hardcoded datafile names and will search the same locations
-   * as getDataFileName. The optional param pointer can be used to turn the mooseErrors this
-   * function emits into paramErrors
+   * as getDataFileName
    */
-  std::string getDataFileNameByName(const std::string & name,
-                                    const std::string * param = nullptr) const;
+  std::string getDataFilePath(const std::string & relative_path) const;
 
 private:
-  const T & _parent;
+  const ParallelParamObject & _parent;
 };

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,6 +43,16 @@ ReporterInterface::hasReporterValueByName(const ReporterName & reporter_name) co
         "Cannot call hasReporterValueByName() until all Reporters have been constructed.");
 
   return _ri_reporter_data.hasReporterValue(reporter_name);
+}
+
+const ReporterContextBase &
+ReporterInterface::getReporterContextBaseByName(const ReporterName & reporter_name) const
+{
+  if (!reportersAdded())
+    _ri_moose_object.mooseError(
+        "Cannot call getReporterContextBaseByName() until all Reporters have been constructed.");
+
+  return _ri_reporter_data.getReporterContextBase(reporter_name);
 }
 
 const ReporterName &

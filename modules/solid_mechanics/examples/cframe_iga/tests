@@ -2,15 +2,10 @@
   [cframe]
     type = XMLDiff
     input = 'cframe_iga.i'
-    exodus_version = '>=8.0'
-    # Set to >=9.0 once #21449 is resolved
-    vtk_version = '>=9.1'
     max_parallel = 1 # number of VTK output files changes with num processes, so we are sticking w/ one for now
     xmldiff = 'cframe_iga_out_001.pvtu cframe_iga_out_001_0.vtu'
-    # Too large for debug and valgrind
-    method = '!DBG'
-    # See #24187
-    petsc_version = '>=3.12.0'
+    # See #24187, set vtk to >=9.0 once #21449 is resolved
+    capabilities = 'petsc>=3.12.0 & method!=dbg & exodus>=8.0 & vtk>=9.1'
     valgrind = none
   []
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,5 +31,5 @@ FunctionSeriesToAux::validParams()
 FunctionSeriesToAux::FunctionSeriesToAux(const InputParameters & parameters)
   : FunctionAux(parameters)
 {
-  FunctionSeries::checkAndConvertFunction(_func, getParam<std::string>("_moose_base"), name());
+  FunctionSeries::checkAndConvertFunction(_func, getBase(), name());
 }

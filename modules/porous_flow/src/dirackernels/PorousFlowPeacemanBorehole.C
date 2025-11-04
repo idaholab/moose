@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -234,7 +234,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflow(unsigned current_dirac_ptid) co
     return 0.0;
 
   const Real bh_pressure =
-      _p_bot.value(_t, _q_point[_qp]) + _unit_weight * (_q_point[_qp] - _bottom_point);
+      _p_bot.value(_t, _bottom_point) + _unit_weight * (_q_point[_qp] - _bottom_point);
   const Real pp = ptqp();
 
   Real outflow = 0.0; // this is the flow rate from porespace out of the system
@@ -291,7 +291,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
   const unsigned pvar = _dictator.porousFlowVariableNum(jvar);
 
   const Real bh_pressure =
-      _p_bot.value(_t, _q_point[_qp]) + _unit_weight * (_q_point[_qp] - _bottom_point);
+      _p_bot.value(_t, _bottom_point) + _unit_weight * (_q_point[_qp] - _bottom_point);
   const Real pp = ptqp();
   const Real pp_prime = dptqp(pvar) * _phi[_j][_qp];
 

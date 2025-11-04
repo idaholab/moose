@@ -57,7 +57,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     planar_formulation = plane_strain

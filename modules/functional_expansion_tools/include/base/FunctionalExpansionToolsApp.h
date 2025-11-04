@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,11 +15,9 @@ class FunctionalExpansionToolsApp : public MooseApp
 {
 public:
   static InputParameters validParams();
-  FunctionalExpansionToolsApp(InputParameters parameters);
+  FunctionalExpansionToolsApp(const InputParameters & parameters);
   virtual ~FunctionalExpansionToolsApp();
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };

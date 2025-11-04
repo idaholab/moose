@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,7 +29,7 @@ public:
    * We pick one of the following:
    * - If the path just exists, use it
    * - If not, but a path with the new suffix exists instead (i.e.,
-   *   /path/to/xxxx_mesh.cpr was provided but /path/to/xxxx-mesh.cpr
+   *   /path/to/xxxx_mesh.cpa.gz was provided but /path/to/xxxx-mesh.cpa.gz
    *   exists), use that path and provide a param warning via \p object
    * - If not, but it is LATEST and we can find a latest checkpoint,
    *   use the latest checkpoint
@@ -43,6 +43,13 @@ public:
 protected:
   /// the path/name of the file containing the mesh
   const MeshFileName & _file_name;
+
+  /// the path/name of any file containing a matrix of mesh constraints
+  const MatrixFileName & _matrix_file_name;
+
+  /// Whether (and later, how much) libMesh should try constraint
+  /// matrix preconditioning
+  const Real _matrix_preconditioning;
 
   /// whether to skip partitioning after loading the mesh
   const bool _skip_partitioning;

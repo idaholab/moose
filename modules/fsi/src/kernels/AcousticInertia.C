@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,11 +31,11 @@ AcousticInertia::AcousticInertia(const InputParameters & parameters)
     _u_dot_old(_var.uDotOld()),
     _du_dot_du(_var.duDotDu()),
     _du_dotdot_du(_var.duDotDotDu()),
-    _u_dot_factor(_var.vectorTagValue(_sys.getTimeIntegrator()->uDotFactorTag())),
-    _u_dotdot_factor(_var.vectorTagValue(_sys.getTimeIntegrator()->uDotDotFactorTag()))
+    _u_dot_factor(_var.vectorTagValue(_sys.getTimeIntegrator(_var.number()).uDotFactorTag())),
+    _u_dotdot_factor(_var.vectorTagValue(_sys.getTimeIntegrator(_var.number()).uDotDotFactorTag()))
 {
-  addFEVariableCoupleableVectorTag(_sys.getTimeIntegrator()->uDotFactorTag());
-  addFEVariableCoupleableVectorTag(_sys.getTimeIntegrator()->uDotDotFactorTag());
+  addFEVariableCoupleableVectorTag(_sys.getTimeIntegrator(_var.number()).uDotFactorTag());
+  addFEVariableCoupleableVectorTag(_sys.getTimeIntegrator(_var.number()).uDotDotFactorTag());
 }
 
 Real

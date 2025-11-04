@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,14 +9,21 @@
 
 #include "Density.h"
 
-registerMooseObject("MiscApp", Density);
-registerMooseObject("MiscApp", ADDensity);
+registerMooseObjectDeprecated("MiscApp", Density, "12/31/2025 24:00");
+registerMooseObjectDeprecated("MiscApp", ADDensity, "12/31/2025 24:00");
 
 template <bool is_ad>
 InputParameters
 DensityTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
+
+  params.addClassDescription(
+      "Creates density material property. This class is deprecated, and its functionality"
+      "is replaced by StrainAdjustedDensity for cases when the density should be adjusted"
+      "to account for material deformation. If it is not desired to adjust the density for"
+      "deformation, a variety of general-purpose Materials, such as GenericConstantMaterial"
+      "or ParsedMaterial can be used to define the density.");
 
   params.addCoupledVar(
       "displacements",
@@ -27,7 +34,6 @@ DensityTempl<is_ad>::validParams()
                                "multiple material systems on the same block, "
                                "e.g. for multiple phases");
   params.addRequiredParam<Real>("density", "Density");
-  params.addClassDescription("Creates density material property");
 
   return params;
 }

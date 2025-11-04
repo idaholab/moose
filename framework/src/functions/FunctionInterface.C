@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,6 +25,16 @@ FunctionInterface::FunctionInterface(const MooseObject * moose_object)
     _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+FunctionInterface::FunctionInterface(const FunctionInterface & object,
+                                     const Moose::Kokkos::FunctorCopy &)
+  : _fni_params(object._fni_params),
+    _fni_feproblem(object._fni_feproblem),
+    _fni_tid(object._fni_tid)
+{
+}
+#endif
 
 const Function &
 FunctionInterface::getFunction(const std::string & name) const

@@ -23,7 +23,7 @@
   [icore]
     type = MixedNeutronicsMaterial
     material_id = 1
-    block = '  84   85   80   81   79   75   76   82  104  105  100  101   99   95   96  102  124  125  120  121  119  115  116  122  144   145  140  141  139  135  136  142  167  168  162  164  161  156  157  165'
+    block = '1'
     isotopes = 'pseudo_ICORE'
   []
 []

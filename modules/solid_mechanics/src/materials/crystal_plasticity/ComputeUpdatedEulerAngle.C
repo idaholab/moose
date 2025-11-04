@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -62,5 +62,5 @@ ComputeUpdatedEulerAngle::computeEulerAngleFromRotationMatrix(const RankTwoTenso
   euler_angle = (RealVectorValue)ea;
 
   if (!getParam<bool>("radian_to_degree"))
-    euler_angle *= pi / 180.0;
+    euler_angle *= libMesh::pi / 180.0;
 }

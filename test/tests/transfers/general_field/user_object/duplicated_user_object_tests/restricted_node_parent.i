@@ -63,6 +63,7 @@ num_layers = 2
     variable = s
     num_layers = ${num_layers}
     direction = x
+    execute_on = TRANSFER
   []
 
   [S_avg_back]
@@ -71,6 +72,7 @@ num_layers = 2
     variable = s
     num_layers = ${num_layers}
     direction = x
+    execute_on = TRANSFER
   []
 []
 

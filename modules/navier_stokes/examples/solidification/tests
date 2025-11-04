@@ -1,11 +1,18 @@
 [Tests]
   design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureFunctorMaterial.md'
   issues = '#23357'
-  [galium_melting]
+  [gallium_melting]
     type = RunApp
-    input = 'galium_melting.i'
+    input = 'gallium_melting.i'
     cli_args = "Nx=20 Ny=10"
-    requirement = 'The system shall be able to simulate the melting of galium.'
+    requirement = 'The system shall be able to simulate the melting of gallium.'
+    heavy = true
+  []
+  [gallium_melting_physics]
+    type = RunApp
+    input = 'gallium_melting-physics.i'
+    cli_args = "Nx=20 Ny=10"
+    requirement = 'The system shall be able to simulate the melting of gallium using the Navier Stokes physics syntax.'
     heavy = true
   []
 []

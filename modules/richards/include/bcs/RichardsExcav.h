@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,7 +34,7 @@ protected:
    * if excav_geom_function is != 0 at the point on
    * the boundary then apply the dirichlet BC
    */
-  virtual bool shouldApply();
+  virtual bool shouldApply() const;
 
   /**
    * The variable will be made equal to _p_excav

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -66,9 +66,17 @@ public:
   unsigned int getSampleSize() const;
 
   /**
-   * This function returns the integral of the function
+   * This function returns the integral of the function over the whole domain
    */
   Real integrate();
+
+  /**
+   * Returns the integral of the function over a specified domain
+   *
+   * @param[in] x1  First point in integral domain
+   * @param[in] x2  Second point in integral domain
+   */
+  Real integratePartial(Real x1, Real x2) const;
 
   Real domain(int i) const;
   Real range(int i) const;

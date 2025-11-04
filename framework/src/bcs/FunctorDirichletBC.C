@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,7 +37,7 @@ FunctorDirichletBC::FunctorDirichletBC(const InputParameters & parameters)
 ADReal
 FunctorDirichletBC::computeQpValue()
 {
-  const Moose::NodeArg space_arg = {_current_node, Moose::INVALID_BLOCK_ID};
+  const Moose::NodeArg space_arg = {_current_node, &Moose::NodeArg::undefined_subdomain_connection};
   const Moose::StateArg time_arg = Moose::currentState();
   return _coef(space_arg, time_arg) * _functor(space_arg, time_arg);
 }

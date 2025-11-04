@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,6 +24,13 @@ public:
 
   // MultiApp positions are not known at construction
   void initialize() override;
+
+  // Since we did not initialize on construction, initialize on setup by default
+  void initialSetup() override
+  {
+    initialize();
+    finalize();
+  }
 
   /// Whether to use the subapp mesh centroids to compute the positions, further translated by the positions
   const bool _use_apps_centroid;

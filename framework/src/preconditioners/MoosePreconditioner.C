@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -89,6 +89,9 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
     paramError("off_diag_column",
                "If off-diagonal columns are specified, matching off-diagonal "
                "rows must be specified as well");
+
+  // This must be set early because the solve type is queried by later actions
+  Moose::PetscSupport::setSolveTypeFromParams(_fe_problem, params);
 }
 
 void
@@ -136,12 +139,11 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
 void
 MoosePreconditioner::setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm)
 {
-  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
-  {
-    if (i == libMesh::cast_int<unsigned int>(_fe_problem.numNonlinearSystems() - 1))
-      // This is the last nonlinear system, so it's safe now to move the object
-      _fe_problem.setCouplingMatrix(std::move(cm), i);
-    else
-      _fe_problem.setCouplingMatrix(std::make_unique<CouplingMatrix>(*cm), i);
-  }
+  _fe_problem.setCouplingMatrix(std::move(cm), _nl_sys_num);
+}
+
+void
+MoosePreconditioner::initialSetup()
+{
+  Moose::PetscSupport::storePetscOptions(_fe_problem, _nl.prefix(), *this);
 }

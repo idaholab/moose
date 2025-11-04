@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,7 +54,7 @@ INSFEFluidEnergyDirichletBC::INSFEFluidEnergyDirichletBC(const InputParameters &
 }
 
 bool
-INSFEFluidEnergyDirichletBC::isInlet()
+INSFEFluidEnergyDirichletBC::isInlet() const
 {
   RealVectorValue vec_vel(_u_vel[0], _v_vel[0], _w_vel[0]);
 
@@ -71,7 +71,7 @@ INSFEFluidEnergyDirichletBC::isInlet()
 }
 
 bool
-INSFEFluidEnergyDirichletBC::shouldApply()
+INSFEFluidEnergyDirichletBC::shouldApply() const
 {
   return isInlet();
 }

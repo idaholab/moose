@@ -2,31 +2,10 @@
   issues = '#26474'
   design = 'syntax/Application/index.md CreateApplicationBlockAction.md'
 
-[Run_multiapp]
-  requirement = "The system shall support running a multiapp simulation"
-
   [no_application_block]
     type = 'RunApp'
     input = 'application_block_parent.i'
-    detail = "without using the Application system input block"
-  []
-
-  [application_block]
-    type = 'RunApp'
-    input = 'application_block_parent.i'
-    cli_args = 'Application/type=MooseTestApp'
-    detail = "with explicitly specifying application type in the Application system input block."
-  []
-
-[]
-[errors]
-requirement = "The system shall return an error"
-  [wrong_main_application_type]
-    type = 'RunException'
-    input = 'application_block_parent.i'
-    cli_args = 'Application/type=DummyApp'
-    expect_err = "'DummyApp' is not a registered application name."
-    detail = "when the input application type is not registered in main app"
+    requirement = 'The system shall support running a multiapp simmulation without using the Application system input block'
   []
 
   [wrong_sub_application_type]
@@ -34,15 +13,6 @@ requirement = "The system shall return an error"
     input = 'application_block_parent.i'
     cli_args = 'MultiApps/sub/input_files=application_block_unregistered_sub.i'
     expect_err = "In the sub\d+, '[^']+' is not a registered application\. The registered application is named: '[^']+'. Please double check the \[Application\] block to make sure the correct application is provided\."
-    detail = "when the input application type is not registered in sub app"
+    requirement = "The system shall report a reasonable error when the type of application in a MultiApp input is not a valid application type"
   []
-
-  [application_type_set_for_subapp]
-    type = 'RunException'
-    input = 'application_block_parent.i'
-    cli_args = 'sub0:Application/type=DummyApp'
-    expect_err = "Using the CommandLine option to overwite \[Application\] block is not supported for sub_apps"
-    detail = "when a command line option is used to set the application type for a child application."
-  []
-[]
 []

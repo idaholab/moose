@@ -11,6 +11,7 @@ CD: continuous deployment
 CI: continuous integration
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
 CMP: Configuration Management Plan
+CSG: Constructive Solid Geometry
 CSV: comma-separated values
 DOE: Department of Energy
 DOE-NE: Department of Energy, Nuclear Energy
@@ -32,6 +33,7 @@ JFNK: Jacobian-Free Newton-Krylov
 JSON: JavaScript Object Notation
 LGPL: GNU Lesser General Public License
 LWP: Laboratory Wide Procedure
+MC: Monte Carlo
 MMS: Method of Manufactured Solutions
 MWR: Method of Mean Weighted Residuals
 MPI: Message Passing Interface
@@ -63,3 +65,4 @@ FAR: Failure Analysis Report
 QLD: Quality Level Determination
 QP: quadrature point
 QPs: quadrature points
+URI: uniform resource identifier

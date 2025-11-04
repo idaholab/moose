@@ -1,36 +1,50 @@
 # Controls System
 
-The control system in MOOSE has one primary purpose: +to modify input parameters during runtime
+The Controls system in MOOSE has one primary purpose: +to modify input parameters during runtime
 of a MOOSE-based simulation+.
 
-## Creating a Controllable Parameter id=sec:control-param
+If a developer has marked a MOOSE object input parameter as *controllable*, that
+parameter may be controlled during a simulation using `Control` objects.
+`Control` objects are defined in the input file in the `Controls` block, similar to other systems
+in MOOSE. For example, the following input file snippet shows the use of the
+[RealFunctionControl](/RealFunctionControl.md) object.
 
-The input parameters of objects you which to be controlled must:
+!listing test/tests/controls/real_function_control/real_function_control.i
+         block=Kernels Controls
+         id=controls_example
+         caption=Example of a Control object used in a MOOSE input file.
 
-- Store parameter as a `const` reference; in your *.h files, declare storage for the parameters as
-  follows.
+Here, `func_control` controls the `coef` parameter of the `diff` object. See
+[#object-and-parameter-names] for the allowable syntax to specify controlled
+parameters.
+
+## Making a Parameter Controllable id=sec:control-param
+
+The input parameters of objects you wish to be controlled must:
+
+- Be marked as "controllable". In the `validParams()` method for the class,
+  the `InputParameters::declareControllable(param_names)` method is used as
+  shown in [declare_controllable_listing]. Note that `param_names` may be a
+  list of parameter names separated by spaces, e.g., `"param1 param2 param3"`.
+
+  !listing framework/src/bcs/DirichletBC.C
+          start=InputParameters
+          end=DirichletBC::DirichletBC
+          id=declare_controllable_listing
+          caption=Example `validParams` method that declares a parameter as controllable.
+- Be stored as `const` references; for example, in the `.h` file,
 
   !listing framework/include/bcs/DirichletBC.h line=_value
 
-- Initialize the reference in the *.C file as follows.
+  which is initialized in the `.C` file using `getParam<T>(param)`, as usual:
 
   !listing framework/src/bcs/DirichletBC.C line=_value(getParam
 
-In order to "control" a parameter it must be communicated that the parameter is allowed to be
-controlled, this is done in the `validParams` function as in [declare_controllable]. The input can
-be a single value or a space separated list of parameters.
+!alert tip title=Parameter controllability listed on documentation pages
+Each class documentation page lists whether each of its input parameters are controllable.
+For example, see the [DirichletBC](source/bcs/DirichletBC.md#input-parameters) page.
 
-!listing framework/src/bcs/DirichletBC.C
-         start=InputParameters
-         end=DirichletBC::DirichletBC
-         id=declare_controllable
-         caption=Example `validParams` method that declares a parameter as controllable.
-
-!alert tip
-The documentation for a given parameter will indicate whether it is controllable. For example, see
-the [DirichletBC](source/bcs/DirichletBC.md#input-parameters) page.
-
-## Create a Control object
+## Developing a New Control
 
 `Control` objects are similar to other systems in MOOSE. You create a control in your application
 by inheriting from the `Control` C++ class in MOOSE. It is required to override the `execute`
@@ -54,38 +68,20 @@ There are additional overloaded methods that allow for the setting and getting o
 with various inputs for prescribing the parameter name, but the two listed above are generally
 what is needed.  Please refer to the source code for a complete list.
 
-## Controls Block
-
-`Control` objects are defined in the input file in the Controls block, similar to other systems
-in MOOSE. For example, the following input file snippet shows the use of the
-[RealFunctionControl](/RealFunctionControl.md) object.
-
-!listing test/tests/controls/real_function_control/real_function_control.i
-         block=Controls
-         id=controls_example
-         caption=Example of a Control object used in a MOOSE input file.
-
 ## Object and Parameter Names id=object-and-parameter-names
 
-Notice that in [controls_example] the syntax for specifying a parameter is shown. In general,
-the syntax for a parameter name is specified as: `block/object/name`.
-
-- +`block`+: specifies the input file block name (e.g., "[Kernels]", "[BCs]").
-- +`object`+: specifies the input file sub-block name (e.g., "diff" in [controls_example2]).
-- +`name`+: specifies the parameter name (e.g., "coef" in [controls_example2]).
-
-!listing test/tests/controls/real_function_control/real_function_control.i
-         block=Kernels
-         id=controls_example2
-         caption=Example of a "Kernel" block that contains a parameter that is controlled via a
-                 MOOSE Control object.
-
-As shown in [controls_example] an asterisk ("*") can be substituted for any one of these three
-"names", doing so allows multiple parameters to match and be controlled simultaneously.
+The objective of a `Control` object is to control parameters of one or more other
+objects; these parameters to control are specified by input parameters of the `Control`.
+[controls_example] shows an example syntax for specifying input parameters in the
+`parameter` parameter. In this example, `*/*/coef` is specified, which would
+match any controllable parameter named `coef` at that nesting level. In the example, there
+is only one parameter that the pattern matches, so `Kernels/diff/coef` would
+be equivalent. The "/"-separated path preceding the parameter name corresponds
+to the syntax blocks under which the parameter is located, such as for the system name and object name.
 
 In similar fashion, object names can be requested by controls (e.g., as in the
-[`TimePeriod`](/TimePeriod.md)). In this case, the general name scheme is the same
-as above but the parameter name is not included.
+[`TimePeriod`](/TimePeriod.md)). In this case, the general naming scheme is the same
+as above but the parameter name is not included, e.g., `Kernels/diff`.
 
 In both cases there is an alternative form for defining an object and parameter names:
 `base::object/name`. In this case "base" is the MOOSE base system that the object is derived from.

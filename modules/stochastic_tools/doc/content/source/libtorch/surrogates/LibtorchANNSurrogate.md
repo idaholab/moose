@@ -1,6 +1,6 @@
 # LibtorchANNSurrogate
 
-!if function=hasLibtorch()
+!if function=hasCapability('libtorch')
 !syntax description /Surrogates/LibtorchANNSurrogate
 
 ## Overview
@@ -34,7 +34,7 @@ to compute the approximate values of the target function at the new sample point
 
 !listing libtorch_nn/evaluate.i block=Reporters
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax parameters /Surrogates/LibtorchANNSurrogate
 

@@ -1,4 +1,4 @@
-# GenericConstantMaterial
+# GenericConstantMaterial / ADGenericConstantMaterial
 
 !syntax description /Materials/GenericConstantMaterial
 

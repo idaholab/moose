@@ -40,7 +40,7 @@ volume = 0.567
     type = ParsedFunction
     expression = 'rhoV * g * head / volume'
     symbol_names = 'rhoV g head volume'
-    symbol_values = 'pump:rhoV ${g} ${head} ${volume}'
+    symbol_values = 'pump_rhoV ${g} ${head} ${volume}'
   []
 []
 
@@ -119,26 +119,28 @@ volume = 0.567
 
 [Postprocessors]
   [pump_rhoV]
-    type = ScalarVariable
-    variable = pump:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'pump'
     execute_on = 'initial timestep_end'
   []
   [expected_pressure_rise]
     type = FunctionValuePostprocessor
     function = expected_pressure_rise_fcn
-    execute_on = 'initial linear'
+    indirect_dependencies = 'pump_rhoV'
+    execute_on = 'initial timestep_end'
   []
   [p_inlet]
     type = SideAverageValue
     variable = p
     boundary = 'pipe1:out'
-    execute_on = 'initial linear'
+    execute_on = 'initial timestep_end'
   []
   [p_outlet]
     type = SideAverageValue
     variable = p
     boundary = 'pipe2:in'
-    execute_on = 'initial linear'
+    execute_on = 'initial timestep_end'
   []
   [actual_pressure_rise]
     type = DifferencePostprocessor

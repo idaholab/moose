@@ -3,6 +3,7 @@
     type = 'CSVDiff'
     input = 'Isp_1ph.i'
     csvdiff = 'Isp_1ph_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
 
     issues = '#189'
     design = 'SpecificImpulse1Phase.md'

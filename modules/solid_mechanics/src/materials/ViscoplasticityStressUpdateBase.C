@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -118,7 +118,8 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity(
       mooseException("In ", _name, ": porosity is negative.");
   }
 
-  if (std::isnan(_intermediate_porosity))
+  using std::isnan;
+  if (isnan(_intermediate_porosity))
     mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
 }
 

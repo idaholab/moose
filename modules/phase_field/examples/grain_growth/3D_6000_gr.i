@@ -137,7 +137,7 @@
     type = TimestepSize
   [../]
   [./n_elements]
-    type = NumElems
+    type = NumElements
     execute_on = timestep_end
   [../]
   [./n_nodes]

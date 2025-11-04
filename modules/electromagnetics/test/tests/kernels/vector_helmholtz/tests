@@ -15,4 +15,92 @@
     design = 'VectorCurrentSource.md'
     issues = '#21080'
   []
+  [ad_vector_kernels]
+    type = Exodiff
+    input = 'ad_vector_kernels.i'
+    exodiff = 'vector_kernels_out.e'
+    cli_args = 'Outputs/file_base=vector_kernels_out'
+    abs_zero = 1e-8
+    design = 'ADCurlCurlField.md'
+    issues = '#29868'
+    requirement = "The system shall be capable of modeling the vector Helmholtz equation for vector fields "
+                  "using Nedelec elements of the first kind with automatic differentiation."
+  []
+  [ad_vector_kernels_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'ad_vector_kernels.i'
+    cli_args = 'Outputs/exodus=false'
+    run_sim = True
+    difference_tol = 1e10
+    design = 'ADCurlCurlField.md'
+    issues = '#29868'
+    requirement = "The system shall be capable of modeling the vector Helmholtz equation for vector fields "
+                  "using Nedelec elements of the first kind with automatic differentiation and have a perfect Jacobian."
+  []
+
+  [vector_ADmaterial_wave_reaction]
+    type = 'Exodiff'
+    input = 'vector_ADmaterial_wave_reaction.i'
+    exodiff = 'vector_ADmaterial_wave_reaction_out.e'
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
+    design = 'ADMatWaveReaction.md'
+    issues = '#28758'
+  []
+  [vector_ADmaterial_wave_reaction_csv]
+    type = CSVDiff
+    command = 'vector_ADmaterial_wave_reaction_convergence.py'
+    csvdiff = 'vector_ADmaterial_wave_reaction_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the vector Helmholtz equation for vector fields with supplied AD material properties.'
+    design = 'ADMatWaveReaction.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    capabilities = 'method=opt'
+    required_python_packages = 'sympy os'
+  []
+
+  [vector_conduction_current]
+    type = 'Exodiff'
+    input = 'vector_conduction_current.i'
+    exodiff = 'vector_conduction_current_out.e'
+    requirement = 'The system shall be capable of modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
+    design = 'ADConductionCurrent.md'
+    issues = '#28758'
+  []
+  [vector_conduction_current_convergence_csv]
+    type = CSVDiff
+    command = vector_conduction_current_convergence.py
+    csvdiff = 'vector_conduction_current_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the vector Helmholtz equation for vector fields with a current density based on the material conductivity.'
+    design = 'ADConductionCurrent.md'
+    issues = '#28758'
+    heavy = True
+    recover = false
+    valgrind = none
+    capabilities = 'method=opt'
+    required_python_packages = 'sympy os'
+  []
+
+  [deprecated_microwave_heating]
+    type = 'Exodiff'
+    input = 'microwave_heating.i'
+    exodiff = 'microwave_heating_out.e'
+    requirement = 'The system shall be capable of modeling the power deposition due to the electric field interactions using the deprecated method.'
+    design = 'EMJouleHeatingSource.md'
+    issues = '#28758 #30000'
+  []
+  [deprecated_microwave_heating_convergence_csv]
+    type = CSVDiff
+    command = microwave_heating_convergence.py
+    csvdiff = 'microwave_heating_convergence.csv'
+    requirement = 'The system shall be able to perform a convergence analysis for modeling the power deposition due to the electric field interactions using the deprecated method.'
+    design = 'EMJouleHeatingSource.md'
+    issues = '#28758 #30000'
+    heavy = True
+    recover = false
+    valgrind = none
+    capabilities = 'method=opt'
+    required_python_packages = 'sympy os'
+  []
 []

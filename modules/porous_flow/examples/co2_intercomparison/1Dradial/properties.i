@@ -22,6 +22,9 @@
   dim = 2
   nx = 4
   xmax = 4
+
+  # To get consistent ordering of results with distributed meshes
+  allow_renumbering = false
 []
 
 [GlobalParams]

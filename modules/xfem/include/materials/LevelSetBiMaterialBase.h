@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,7 +54,7 @@ protected:
   const unsigned int _level_set_var_number;
 
   /// system reference
-  const System & _system;
+  const libMesh::System & _system;
 
   /// the subproblem solution vector
   const NumericVector<Number> & _solution;

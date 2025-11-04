@@ -126,16 +126,10 @@ PR=2
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
-        add_variables = true
-        strain = SMALL
-        eigenstrain_names = eigenstrain
-      [../]
-    [../]
-  [../]
+[Physics/SolidMechanics/QuasiStatic/all]
+  add_variables = true
+  strain = SMALL
+  eigenstrain_names = eigenstrain
 []
 
 [Kernels]
@@ -144,7 +138,7 @@ PR=2
     type = SplitCHParsed
     variable = c
     f_name = F
-    args = 'eta1 eta2 eta3'
+    coupled_variables = 'eta1 eta2 eta3'
     kappa_name = kappa_c
     w = w
   [../]
@@ -167,7 +161,7 @@ PR=2
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2 eta3 c'
+    coupled_variables = 'eta2 eta3 c'
     mob_name = L1
     f_name = F
   [../]
@@ -193,7 +187,7 @@ PR=2
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1 eta3 c'
+    coupled_variables = 'eta1 eta3 c'
     mob_name = L2
     f_name = F
   [../]
@@ -219,7 +213,7 @@ PR=2
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    args = 'eta1 eta2 c'
+    coupled_variables = 'eta1 eta2 c'
     mob_name = L3
     f_name = F
   [../]
@@ -302,7 +296,7 @@ PR=2
     type = CompositeEigenstrain
     weights = 'h2 h3'
     tensors = 's2 s3'
-    args = 'eta2 eta3'
+    coupled_variables = 'eta2 eta3'
     eigenstrain_name = eigenstrain
   [../]
 
@@ -369,7 +363,7 @@ PR=2
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
-    args = 'eta2 eta3'
+    coupled_variables = 'eta2 eta3'
     outputs = exodus
     output_properties = Fe
     derivative_order = 2

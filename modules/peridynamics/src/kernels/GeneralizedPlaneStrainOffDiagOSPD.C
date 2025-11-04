@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -106,8 +106,8 @@ GeneralizedPlaneStrainOffDiagOSPD::computeDispFullOffDiagJacobianScalar(unsigned
           vol_nb = _pdmesh.getNodeVolume(neighbors[nb]);
 
           // obtain bond nb's origin length and current orientation
-          origin_vec_nb =
-              *_pdmesh.nodePtr(neighbors[nb]) - *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbors[nb]) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
           for (unsigned int k = 0; k < _dim; k++)
             current_vec_nb(k) = origin_vec_nb(k) +

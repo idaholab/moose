@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,6 +40,9 @@ public:
       FEProblemBase & fe_problem,
       bool displaced,
       Assembly & assembly);
+
+  /// Setup step for materials that needs to be re-done if subdomains change
+  void setupMortarMaterials();
 
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian

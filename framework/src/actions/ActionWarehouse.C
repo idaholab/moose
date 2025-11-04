@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -145,9 +145,9 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
     {
       const InputParameters & mparams = moa->getObjectParams();
 
-      if (mparams.have_parameter<std::string>("_moose_base"))
+      if (mparams.hasBase())
       {
-        const std::string & base = mparams.get<std::string>("_moose_base");
+        const std::string & base = mparams.getBase();
         if (!_syntax.verifyMooseObjectTask(base, task))
           mooseError("Task ", task, " is not registered to build ", base, " derived objects");
       }
@@ -215,13 +215,18 @@ ActionWarehouse::buildBuildableActions(const std::string & task)
     auto it_pair = _action_factory.getActionsByTask(task);
     for (const auto & action_pair : as_range(it_pair))
     {
-      InputParameters params = _action_factory.getValidParams(action_pair.second);
+      const auto & type = action_pair.second;
+      InputParameters params = _action_factory.getValidParams(type);
       params.set<ActionWarehouse *>("awh") = this;
+
+      std::string name = "auto_" + type;
+      std::transform(
+          name.begin(), name.end(), name.begin(), [](const auto v) { return std::tolower(v); });
 
       if (params.areAllRequiredParamsValid())
       {
         params.set<std::string>("registered_identifier") = "(AutoBuilt)";
-        addActionBlock(_action_factory.create(action_pair.second, "", params));
+        addActionBlock(_action_factory.create(type, name, params));
         ret_value = true;
       }
     }
@@ -344,6 +349,7 @@ ActionWarehouse::executeAllActions()
   for (const auto & task : _ordered_names)
   {
     executeActionsWithAction(task);
+    std::scoped_lock lock(_completed_tasks_mutex);
     _completed_tasks.insert(task);
     if (_final_task != "" && task == _final_task)
       break;
@@ -468,5 +474,6 @@ ActionWarehouse::isTaskComplete(const std::string & task) const
 {
   if (!hasTask(task))
     mooseError("\"", task, "\" is not a registered task.");
+  std::scoped_lock lock(_completed_tasks_mutex);
   return _completed_tasks.count(task);
 }

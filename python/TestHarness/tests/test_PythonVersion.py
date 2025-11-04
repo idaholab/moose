@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,7 +12,7 @@ from TestHarnessTestCase import TestHarnessTestCase
 class TestHarnessTester(TestHarnessTestCase):
     def testVersion(self):
         """Test that python=... is working."""
-        output = self.runTests('-i', 'python_version').decode('utf-8')
+        output = self.runTests('-i', 'python_version').output
         self.assertIn('[PYTHON != 2]', output)
         self.assertIn('[PYTHON != 3.5]', output)
         self.assertIn('[PYTHON != 3.4.1]', output)

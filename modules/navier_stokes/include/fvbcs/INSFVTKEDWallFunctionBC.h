@@ -1,7 +1,7 @@
 
 
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,7 +24,7 @@ public:
 
   static InputParameters validParams();
 
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
 private:
   /// the dimension of the domain
@@ -49,4 +49,7 @@ private:
 
   /// C_mu turbulent coefficient
   const Moose::Functor<ADReal> & _C_mu;
+
+  /// Whether we are using a newton solve
+  const bool _newton_solve;
 };

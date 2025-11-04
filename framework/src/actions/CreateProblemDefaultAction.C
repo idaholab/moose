@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -67,6 +67,9 @@ CreateProblemDefaultAction::act()
       else
         type = "FEProblem";
       auto params = _factory.getValidParams(type);
+
+      // apply global parameters
+      _app.builder().extractParams("Problem", params);
 
       // apply common parameters of the object held by CreateProblemAction to honor user inputs in
       // [Problem]

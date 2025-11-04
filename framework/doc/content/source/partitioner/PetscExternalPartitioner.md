@@ -1,6 +1,8 @@
 # PetscExternalPartitioner
 
 Allow users to use several external partitioning packages (parmetis, chaco, ptscotch and party) via PETSc.
+Note that partitioning, just as meshing, requires a level of user insight to assure the domain is appropriately distributed. For example, edge cases where one seeks to have very few elements per process
+may misbehave with certain partitioners. To avert such situations, we switch ParMETIS to PTScotch in cases with less than 28 elements per process, and notify the user.
 
 ## [ParMETIS](http://glaros.dtc.umn.edu/gkhome/metis/parmetis/overview)
 
@@ -24,42 +26,38 @@ The party package aims at providing a recursive partitioning laboratory assembli
 
 These packages can be accessed via an unified interface in MOOSE, `PetscExternalPartitioner`. The use of the packages is accomplished by adding a subblock in `Mesh` block of input file.  For example
 
-```
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  [Partitioner]
-    # You need to use PetscExternalPartitioner to gain an access to these external packages
-    type = PetscExternalPartitioner
-    # specify which package you want to use
-    # you could choose one of {Chaco, Party, PTScotch, ParMETIS}
-    part_package = parmetis
-  []
-  parallel_type = distributed
-[]
-```
+!listing test/tests/partitioners/petsc_partitioner/petsc_partitioner.i block=Mesh
 
 ## Partitioning Examples
+
+!alert note
+For less than 28 elements per process we switch partitioner from ParMETIS to PTScotch. For these two partitioners we illustrate the refined grid case, where the switch does not occur.
 
 ### 4 subdomains
 
 !row!
 !col! small=12 medium=6 large=3
+10x10 grid
+
 !media party_4parts.png caption=`Party`
 !col-end!
 
 !col! small=12 medium=6 large=3
+10x10 grid
+
 !media chaco_4parts.png caption=`chaco`
 !col-end!
 
 !col! small=12 medium=6 large=3
-!media parmetis_4parts.png caption=`parmetis`
+20x20 grid
+
+!media parmetis20_4P.png caption=`parmetis`
 !col-end!
 
 !col! small=12 medium=6 large=3
-!media ptscotch_4parts.png caption=`ptscotch`
+20x20 grid
+
+!media ptscotch20_4P.png caption=`ptscotch`
 !col-end!
 !row-end!
 
@@ -76,13 +74,14 @@ These packages can be accessed via an unified interface in MOOSE, `PetscExternal
 !col-end!
 
 !col! small=12 medium=6 large=3
-!media parmetis_8parts.png caption=`parmetis`
+!media parmetis20_8P.png caption=`parmetis`
 !col-end!
 
 !col! small=12 medium=6 large=3
-!media ptscotch_8parts.png caption=`ptscotch`
+!media ptscotch20_8P.png caption=`ptscotch`
 !col-end!
 !row-end!
+
 
 !alert note
 By default, all element and face weights are uniform. This can be modified by implementing `computeElementWeight`

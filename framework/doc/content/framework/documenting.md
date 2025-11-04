@@ -75,7 +75,7 @@ cd doc
 ./moosedocs.py generate SolidMechanicsApp
 ```
 
-To generate pages for the framework, the moose test application can be used as follows.
+To generate pages for the framework, the MOOSE test application can be used as follows.
 
 ```bash
 cd ~/projects/moose/test

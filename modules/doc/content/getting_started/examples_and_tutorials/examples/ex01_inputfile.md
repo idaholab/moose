@@ -88,9 +88,9 @@ default solving method Preconditioned Jacobian Free Newton Krylov.
 
 ### Outputs
 
-Here two types of outputs are enabled: output to the screen (console) and output to an Exodus II
+Here two types of outputs are enabled: output to the screen (console) and output to an Exodus
 file (exodus).  Setting the "file_base" parameter is optional, in this example it forces the
-output file to be named "out.e" ("e" is the extension used for the Exodus II format).
+output file to be named "out.e" ("e" is the extension used for the Exodus format).
 
 !listing examples/ex01_inputfile/ex01.i block=Outputs
 
@@ -105,7 +105,7 @@ make -j8
 ```
 
 This will generate the results file, out.e, as shown in [example-1-results]. This file may be viewed using
-Peacock or an external application that supports the Exodus II format (e.g., Paraview).
+Peacock or an external application that supports the Exodus format (e.g., Paraview).
 
 
 !media large_media/examples/ex01_results.png
@@ -116,13 +116,12 @@ Peacock or an external application that supports the Exodus II format (e.g., Par
 ## Next Steps
 
 Although the Diffusion kernel is the only "physics" in the MOOSE framework, a large set of physics
-is included in the MOOSE [modules](http://mooseframework.org/wiki/PhysicsModules/).  In order to
-implement your own physics, you will need to understand the following:
+is included in the MOOSE [modules](modules/index.md). In order to implement your own physics, you 
+will need to understand the following:
 
-- [Finite Element Methods](http://mooseframework.org/wiki/MooseTraining/FEM/) and the generating
-  the "weak" form of for PDEs
+- [Finite Element Methods](help/faq/what_is_fem.md) and generating the "weak" form for PDEs
 - [C++](help/c++/index.md) and object-oriented design
-- [The Anatomy of a MOOSE Object](http://mooseframework.org/wiki/MooseTraining/MooseObject/)
+- The anatomy of a [MOOSE Object](base/MooseObject.md)
 - Check out more [examples](examples_and_tutorials/index.md#examples)
 
 ## Complete Source Files

@@ -32,10 +32,10 @@
 
 [NodalKernels]
   [source]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = u
     block = '0 1'
-    function = '1'
+    functor = '1'
   []
 []
 

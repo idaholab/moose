@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,8 @@
 
 // libMesh includes
 #include "libmesh/nonlinear_solver.h"
+
+using namespace libMesh;
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
 
@@ -49,8 +51,7 @@ ActuallyExplicitEuler::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
-
-  _du_dot_du = 1.0 / _dt;
+  computeDuDotDu();
 }
 
 void
@@ -75,12 +76,12 @@ ActuallyExplicitEuler::solve()
   _nonlinear_implicit_system->update();
 
   // Compute the residual
-  _explicit_residual.zero();
+  _explicit_residual->zero();
   _fe_problem.computeResidual(
-      *_nonlinear_implicit_system->current_local_solution, _explicit_residual, _nl.number());
+      *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
 
   // Move the residual to the RHS
-  _explicit_residual *= -1.0;
+  *_explicit_residual *= -1.0;
 
   // Compute the mass matrix
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
@@ -92,14 +93,14 @@ ActuallyExplicitEuler::solve()
   bool converged = performExplicitSolve(mass_matrix);
 
   // Update the solution
-  *_nonlinear_implicit_system->solution = _nl.solutionOld();
-  *_nonlinear_implicit_system->solution += _solution_update;
+  *_nonlinear_implicit_system->solution = _nl->solutionOld();
+  *_nonlinear_implicit_system->solution += *_solution_update;
 
   // Constraints may be solved in an uncoupled way. For example, momentum-balance equations may be
   // solved node-wise and then the solution (e.g. velocities or positions)can be applied to those
   // nodes without solving for such constraints on a system level. This strategy is being used for
   // node-face contact in explicit dynamics.
-  _nl.overwriteNodeFace(*_nonlinear_implicit_system->solution);
+  _nl->overwriteNodeFace(*_nonlinear_implicit_system->solution);
 
   // Enforce contraints on the solution
   DofMap & dof_map = _nonlinear_implicit_system->get_dof_map();
@@ -107,7 +108,7 @@ ActuallyExplicitEuler::solve()
                                       _nonlinear_implicit_system->solution.get());
   _nonlinear_implicit_system->update();
 
-  _nl.setSolution(*_nonlinear_implicit_system->current_local_solution);
+  _nl->setSolution(*_nonlinear_implicit_system->current_local_solution);
 
   _nonlinear_implicit_system->nonlinear_solver->converged = converged;
 }
@@ -115,8 +116,8 @@ ActuallyExplicitEuler::solve()
 void
 ActuallyExplicitEuler::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
+  residual += *_Re_time;
+  residual += *_Re_non_time;
   residual.close();
 
   // Reset time to the time at which to evaluate nodal BCs, which comes next

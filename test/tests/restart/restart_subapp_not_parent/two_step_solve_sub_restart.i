@@ -1,5 +1,5 @@
 [Mesh]
-  file = two_step_solve_parent_full_solve0_checkpoint_cp/0002-mesh.cpr
+  file = two_step_solve_parent_full_solve0_checkpoint_cp/0002-mesh.cpa.gz
 []
 
 [Problem]

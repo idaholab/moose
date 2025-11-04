@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,9 @@ public:
 
 protected:
   virtual Real computeValue() override;
+
+  // variable used to specify state being copied
+  unsigned short _state;
 
   /// The variable to project from
   const VariableValue & _v;

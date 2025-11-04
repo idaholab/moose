@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -206,7 +206,7 @@ class Lexer(object):
             parent[tree.tokens]: The parent token to which the new token(s) should be attached.
             grammar[Grammar]: Object containing the grammar (defined by regexs) to search.
             text[str]: The text to tokenize.
-            line[int]: The line number to startwith, this allows for nested calls to begin with
+            line[int]: The line number to start with, this allows for nested calls to begin with
                        the correct line.
 
         NOTE: If the functions attached to the Grammar object raise an Exception it will

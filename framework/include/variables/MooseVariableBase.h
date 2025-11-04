@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,7 @@
 #include "MooseTypes.h"
 #include "MooseArray.h"
 #include "MooseError.h"
+#include "MooseFunctorArguments.h"
 
 #include "libmesh/fe_type.h"
 #include "libmesh/enum_fe_family.h"
@@ -32,6 +33,13 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
+/**
+ * Base variable class. Sadly there are a lot of methods in here that should be pure virtual but
+ * can't be because AddVariableAction/MooseObjectAction will retrieve the validParams of
+ * MooseVariableBase which checks to ensure that MooseVariableBase is a registered object, and
+ * registration requires an instantiation. So we add runtime errors instead of compile-time
+ * errors for these would-be pure virtuals
+ */
 class MooseVariableBase : public MooseObject,
                           public BlockRestrictable,
                           public OutputInterface,
@@ -42,6 +50,9 @@ public:
 
   MooseVariableBase(const InputParameters & parameters);
 
+  /// Returns the variable name of a component of an array variable
+  const std::string & arrayVariableComponent(const unsigned int i) const;
+
   /**
    * Get variable number coming from libMesh
    * @return the libmesh variable number
@@ -51,7 +62,7 @@ public:
   /**
    * Get the type of finite element object
    */
-  const FEType & feType() const { return _fe_type; }
+  const libMesh::FEType & feType() const { return _fe_type; }
 
   /**
    * Get the system this variable is part of.
@@ -62,11 +73,6 @@ public:
    * Get the system this variable is part of.
    */
   const SystemBase & sys() const { return _sys; }
-
-  /**
-   * Get the variable name
-   */
-  const std::string & name() const override { return _var_name; }
 
   /**
    * Get dual mortar option
@@ -99,7 +105,7 @@ public:
    * Get the order of this variable
    * Note: Order enum can be implicitly converted to unsigned int.
    */
-  Order order() const;
+  libMesh::Order order() const;
 
   /**
    * Get the number of components
@@ -122,12 +128,15 @@ public:
   /**
    * Return the continuity of this variable
    */
-  virtual FEContinuity getContinuity() const { mooseError("Base class cannot determine this"); };
+  virtual libMesh::FEContinuity getContinuity() const
+  {
+    mooseError("Base class cannot determine this");
+  };
 
   /**
    * The DofMap associated with the system this variable is in.
    */
-  const DofMap & dofMap() const { return _dof_map; }
+  const libMesh::DofMap & dofMap() const { return _dof_map; }
 
   virtual void getDofIndices(const Elem * /*elem*/,
                              std::vector<dof_id_type> & /*dof_indices*/) const
@@ -175,14 +184,24 @@ public:
   /**
    * @return whether this is an array variable
    */
-  bool isArray() const { return _is_array; }
+  virtual bool isArray() const { return !_array_var_component_names.empty(); }
 
   /**
    * @return whether this variable lives on lower dimensional blocks
    */
   bool isLowerD() const { return _is_lower_d; }
 
+  /**
+   * Size data structures related to matrix tagging
+   */
+  virtual void sizeMatrixTagData() { mooseError("Derived class must implement this method"); }
+
 protected:
+  /**
+   * Get the solution corresponding to the provided state
+   */
+  const libMesh::NumericVector<libMesh::Number> & getSolution(const Moose::StateArg & state) const;
+
   /**
    * @returns whether we should insert derivatives
    */
@@ -192,7 +211,7 @@ protected:
   SystemBase & _sys;
 
   /// The FEType associated with this variable
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
   /// variable number (from libMesh)
   unsigned int _var_num;
@@ -210,13 +229,13 @@ protected:
   SubProblem & _subproblem;
 
   /// libMesh variable object for this variable
-  const Variable & _variable;
+  const libMesh::Variable & _variable;
 
   /// Assembly data
   Assembly & _assembly;
 
   /// DOF map
-  const DofMap & _dof_map;
+  const libMesh::DofMap & _dof_map;
 
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
@@ -233,17 +252,14 @@ protected:
   /// scaling factor for this variable
   std::vector<Real> _scaling_factor;
 
-  /// Variable name
-  std::string _var_name;
-
   /// If dual mortar approach is used
   bool _use_dual;
 
-  /// Whether this is an array variable
-  const bool _is_array;
-
   /// Whether this variable lives on lower dimensional blocks
   bool _is_lower_d;
+
+  /// Array variable names when the variable is an array variable
+  std::vector<std::string> _array_var_component_names;
 };
 
 inline void
@@ -266,5 +282,4 @@ MooseVariableBase::setActiveTags(const std::set<TagID> &)
   using MooseVariableBase::_mesh;                                                                  \
   using MooseVariableBase::_tid;                                                                   \
   using MooseVariableBase::_count;                                                                 \
-  using MooseVariableBase::_scaling_factor;                                                        \
-  using MooseVariableBase::_var_name
+  using MooseVariableBase::_scaling_factor

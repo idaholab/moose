@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -81,5 +81,5 @@ template <typename T>
 const T &
 FlowModelSetup::getParam(const std::string & name) const
 {
-  return InputParameters::getParamHelper(name, _this_params, static_cast<T *>(0));
+  return InputParameters::getParamHelper<T>(name, _this_params);
 }

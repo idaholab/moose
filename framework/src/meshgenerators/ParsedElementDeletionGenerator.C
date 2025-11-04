@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,19 +36,14 @@ ParsedElementDeletionGenerator::validParams()
 ParsedElementDeletionGenerator::ParsedElementDeletionGenerator(const InputParameters & parameters)
   : ElementDeletionGeneratorBase(parameters), FunctionParserUtils<false>(parameters)
 {
+  // Create parsed function
   _function = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_function);
-
-  // add the constant expressions
-  addFParserConstants(_function,
+  parsedFunctionSetup(_function,
+                      getParam<ParsedFunctionExpression>("expression"),
+                      "x,y,z,volume,id",
                       getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-
-  // parse function
-  if (_function->Parse(getParam<ParsedFunctionExpression>("expression"), "x,y,z,volume,id") >= 0)
-    paramError("expression", "Invalid function: ", _function->ErrorMsg());
+                      getParam<std::vector<std::string>>("constant_expressions"),
+                      comm());
 
   _func_params.resize(5);
 }

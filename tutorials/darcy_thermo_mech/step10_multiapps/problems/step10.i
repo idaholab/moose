@@ -21,16 +21,6 @@
   []
 []
 
-[AuxVariables]
-  [k_eff]
-    initial_condition = 15.0 # water at 20C
-  []
-  [velocity]
-    order = CONSTANT
-    family = MONOMIAL_VEC
-  []
-[]
-
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     # This block adds all of the proper Kernels, strain calculators, and Variables
@@ -63,16 +53,18 @@
   []
 []
 
-[AuxKernels]
-  [velocity]
-    type = DarcyVelocity
-    variable = velocity
-    execute_on = timestep_end
-    pressure = pressure
-  []
-[]
-
 [BCs]
+  [inlet_temperature]
+    type = FunctionDirichletBC
+    variable = temperature
+    boundary = bottom
+    function = 'if(t<0,350+50*t,350)'
+  []
+  [outlet_temperature]
+    type = HeatConductionOutflow
+    variable = temperature
+    boundary = top
+  []
   [inlet]
     type = DirichletBC
     variable = pressure
@@ -84,17 +76,6 @@
     variable = pressure
     boundary = top
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
-  []
-  [inlet_temperature]
-    type = FunctionDirichletBC
-    variable = temperature
-    boundary = bottom
-    function = 'if(t<0,350+50*t,350)'
-  []
-  [outlet_temperature]
-    type = HeatConductionOutflow
-    variable = temperature
-    boundary = top
   []
   [hold_inlet]
     type = DirichletBC
@@ -143,51 +124,69 @@
   [thermal_strain]
     type = ADComputeThermalExpansionEigenstrain
     stress_free_temperature = 300
-    thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain
     temperature = temperature
+    thermal_expansion_coeff = 1e-6
   []
 []
 
-[Postprocessors]
-  [average_temperature]
-    type = ElementAverageValue
-    variable = temperature
-  []
+[Postprocessors/average_temperature]
+  type = ElementAverageValue
+  variable = temperature
+[]
+
+[AuxVariables/velocity]
+  order = CONSTANT
+  family = MONOMIAL_VEC
+[]
+[AuxVariables/k_eff] # filled from the multiapp
+  initial_condition = 15.0 # water at 20C
+[]
+
+[AuxKernels/velocity]
+  type = DarcyVelocity
+  variable = velocity
+  execute_on = timestep_end
+  pressure = pressure
+[]
+
+[Problem]
+  type = FEProblem
 []
 
 [Executioner]
   type = Transient
-  start_time = -1
   end_time = 200
-  steady_state_tolerance = 1e-7
-  steady_state_detection = true
   dt = 0.25
+  start_time = -1
+
   solve_type = PJFNK
-  automatic_scaling = true
-  compute_scaling_once = false
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg 500'
   line_search = none
+
+  automatic_scaling = true
+  compute_scaling_once = false
+  steady_state_tolerance = 1e-7
+  steady_state_detection = true
+
   [TimeStepper]
     type = FunctionDT
     function = 'if(t<0,0.1,0.25)'
   []
 []
 
-[MultiApps]
-  [micro]
-    type = TransientMultiApp
-    app_type = DarcyThermoMechApp
-    positions = '0.01285 0.0    0
-                 0.01285 0.0608 0
-                 0.01285 0.1216 0
-                 0.01285 0.1824 0
-                 0.01285 0.2432 0
-                 0.01285 0.304  0'
-    input_files = step10_micro.i
-    execute_on = 'timestep_end'
-  []
+[MultiApps/micro]
+  type = TransientMultiApp
+  app_type = DarcyThermoMechApp
+  positions = '0.01285 0.0    0
+                0.01285 0.0608 0
+                0.01285 0.1216 0
+                0.01285 0.1824 0
+                0.01285 0.2432 0
+                0.01285 0.304  0'
+  input_files = step10_micro.i
+  execute_on = 'timestep_end'
 []
 
 [Transfers]
@@ -208,18 +207,14 @@
   []
 []
 
-[Controls]
-  [multiapp]
-    type = TimePeriod
-    disable_objects = 'MultiApps::micro Transfers::keff_from_sub Transfers::temperature_to_sub'
-    start_time = '0'
-    execute_on = 'initial'
-  []
+[Controls/multiapp]
+  type = TimePeriod
+  disable_objects = 'MultiApps::micro Transfers::keff_from_sub Transfers::temperature_to_sub'
+  start_time = '0'
+  execute_on = 'initial'
 []
 
-[Outputs]
-  [out]
-    type = Exodus
-    elemental_as_nodal = true
-  []
+[Outputs/out]
+  type = Exodus
+  elemental_as_nodal = true
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -206,6 +206,7 @@ public:
   propfunc(s, T, v)
   propfunc(cv, T, v)
   propfunc(h, p, T)
+  propfuncWithDefault(h, v, e)
   propfunc(g, v, e)
   propfuncWithDefault(p, h, s)
   propfunc(T, h, p)  // temporary, until uniformization
@@ -298,7 +299,7 @@ public:
    */
   virtual Real vaporPressure(Real T) const;
   virtual void vaporPressure(Real T, Real & psat, Real & dpsat_dT) const;
-  ADReal vaporPressure(const ADReal & T) const;
+  virtual ADReal vaporPressure(const ADReal & T) const;
 
   /**
    * Vapor temperature. Used to delineate liquid and gas phases.
@@ -311,7 +312,7 @@ public:
    */
   virtual Real vaporTemperature(Real p) const;
   virtual void vaporTemperature(Real p, Real & Tsat, Real & dTsat_dp) const;
-  ADReal vaporTemperature(const ADReal & p) const;
+  virtual ADReal vaporTemperature(const ADReal & p) const;
 
   /**
    * Henry's law coefficients for dissolution in water
@@ -437,12 +438,15 @@ protected:
 
   /**
    * Newton's method may be used to convert between variable sets
-   * _tolerance, _T_initial_guess, and _p_initial_guess are the parameters for these
-   * iterative solves
    */
+  /// Relative tolerance of the solves
   const Real _tolerance;
+  /// Initial guess for temperature (or temperature used to compute the initial guess)
   const Real _T_initial_guess;
+  /// Initial guess for pressure (or pressure used to compute the initial guess)
   const Real _p_initial_guess;
+  /// Maximum number of iterations for the variable conversion newton solves
+  const unsigned int _max_newton_its;
 
 private:
   void unimplementedDerivativeMethod(const std::string & property_function_name) const

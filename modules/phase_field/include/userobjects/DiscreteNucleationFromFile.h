@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,8 +44,8 @@ protected:
   /// Total nucleation history read from file
   NucleusList _nucleation_history;
 
-  /// pointer to the next nucleation event in the history
-  std::size_t _history_pointer;
+  /// index to the next nucleation event in the history
+  unsigned int & _history_pointer;
 
   /// tolerance for determining insertion time
   const Real _tol;

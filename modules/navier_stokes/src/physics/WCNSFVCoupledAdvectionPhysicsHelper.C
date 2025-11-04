@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,8 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "RelationshipManager.h"
-#include "WCNSFVFlowPhysics.h"
+#include "WCNSFVFlowPhysicsBase.h"
+#include "WCNSFVTurbulencePhysics.h"
 
 InputParameters
 WCNSFVCoupledAdvectionPhysicsHelper::validParams()
@@ -21,17 +22,17 @@ WCNSFVCoupledAdvectionPhysicsHelper::validParams()
 
   params.addParam<PhysicsName>("coupled_flow_physics",
                                "WCNSFVFlowPhysics generating the velocities");
-  params.addParamNamesToGroup("coupled_flow_physics", "Coupled Physics");
+  params.addParam<PhysicsName>("coupled_turbulence_physics",
+                               "Turbulence Physics coupled with this Physics");
+  params.addParamNamesToGroup("coupled_flow_physics coupled_turbulence_physics", "Coupled Physics");
 
   return params;
 }
 
 WCNSFVCoupledAdvectionPhysicsHelper::WCNSFVCoupledAdvectionPhysicsHelper(
-    const InputParameters & parameters, const NavierStokesPhysicsBase * derived_physics)
+    const NavierStokesPhysicsBase * derived_physics)
   : _advection_physics(derived_physics),
-    // note: we could move all this initialization to an initalSetup routine to avoid
-    // creation ordering difficulties
-    _flow_equations_physics(getCoupledFlowPhysics(parameters)),
+    _flow_equations_physics(getCoupledFlowPhysics()),
     _compressibility(_flow_equations_physics->compressibility()),
     _porous_medium_treatment(_flow_equations_physics->porousMediumTreatment()),
     _velocity_names(_flow_equations_physics->getVelocityNames()),
@@ -48,17 +49,18 @@ WCNSFVCoupledAdvectionPhysicsHelper::getPorosityFunctorName(bool smoothed) const
   return _flow_equations_physics->getPorosityFunctorName(smoothed);
 }
 
-const WCNSFVFlowPhysics *
-WCNSFVCoupledAdvectionPhysicsHelper::getCoupledFlowPhysics(const InputParameters & parameters) const
+const WCNSFVFlowPhysicsBase *
+WCNSFVCoupledAdvectionPhysicsHelper::getCoupledFlowPhysics() const
 {
   // User passed it, just use that
-  if (parameters.isParamValid("coupled_flow_physics"))
-    return _advection_physics->getCoupledPhysics<WCNSFVFlowPhysics>(
-        parameters.get<PhysicsName>("coupled_flow_physics"));
+  if (_advection_physics->isParamValid("coupled_flow_physics"))
+    return _advection_physics->getCoupledPhysics<WCNSFVFlowPhysicsBase>(
+        _advection_physics->getParam<PhysicsName>("coupled_flow_physics"));
   // Look for any physics of the right type, and check the block restriction
   else
   {
-    const auto all_flow_physics = _advection_physics->getCoupledPhysics<const WCNSFVFlowPhysics>();
+    const auto all_flow_physics =
+        _advection_physics->getCoupledPhysics<const WCNSFVFlowPhysicsBase>();
     for (const auto physics : all_flow_physics)
       if (_advection_physics->checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
@@ -66,7 +68,28 @@ WCNSFVCoupledAdvectionPhysicsHelper::getCoupledFlowPhysics(const InputParameters
         return physics;
       }
   }
-  mooseError(
-      "No coupled flow Physics found of type 'WCNSFVFlowPhysics'. Use the 'coupled_flow_physics' "
-      "parameter to give the name of the desired WCNSFVFlowPhysics to couple with");
+  mooseError("No coupled flow Physics found of type derived from 'WCNSFVFlowPhysicsBase'. Use the "
+             "'coupled_flow_physics' parameter to give the name of the desired "
+             "WCNSFVFlowPhysicsBase-derived Physics to couple with");
+}
+
+const WCNSFVTurbulencePhysics *
+WCNSFVCoupledAdvectionPhysicsHelper::getCoupledTurbulencePhysics() const
+{
+  // User passed it, just use that
+  if (_advection_physics->isParamValid("coupled_turbulence_physics"))
+    return _advection_physics->getCoupledPhysics<WCNSFVTurbulencePhysics>(
+        _advection_physics->getParam<PhysicsName>("coupled_turbulence_physics"));
+  // Look for any physics of the right type, and check the block restriction
+  else
+  {
+    const auto all_turbulence_physics =
+        _advection_physics->getCoupledPhysics<const WCNSFVTurbulencePhysics>(true);
+    for (const auto physics : all_turbulence_physics)
+      if (_advection_physics->checkBlockRestrictionIdentical(
+              physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
+        return physics;
+  }
+  // Did not find one
+  return nullptr;
 }

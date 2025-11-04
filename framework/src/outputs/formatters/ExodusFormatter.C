@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,7 @@
 #include "SystemInfo.h"
 #include "CommandLine.h"
 #include "ActionWarehouse.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/exodusII.h"
 
@@ -30,18 +31,10 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
       << "# Created by MOOSE #\n"
       << "####################\n";
 
-  // Grab the command line arguments first
-  _ss << "### Command Line Arguments ###\n";
-  if (wh.mooseApp().commandLine())
-  {
-    for (const auto & arg : wh.mooseApp().commandLine()->getArguments())
-      _ss << " " << arg;
-  }
-  if (wh.mooseApp().getSystemInfo() != NULL)
-  {
-    _ss << "### Version Info ###\n" << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
-  }
+  // write Console output header info
+  _ss << ConsoleUtils::outputFrameworkInformation(wh.mooseApp());
 
+  // write input file syntax
   _ss << "### Input File ###" << std::endl;
   wh.printInputFile(_ss);
 }

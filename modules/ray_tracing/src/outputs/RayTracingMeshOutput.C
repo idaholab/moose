@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,8 @@
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel_sync.h"
 #include "libmesh/remote_elem.h"
+
+using namespace libMesh;
 
 InputParameters
 RayTracingMeshOutput::validParams()
@@ -333,7 +335,7 @@ RayTracingMeshOutput::buildSegmentMesh()
       auto elem = _segment_mesh->add_elem(Elem::build_with_id(NODEELEM, elem_id));
       elem->processor_id(processor_id());
       elem->set_unique_id(_max_node_id + elem_id++);
-      elem->set_node(0) = last_node;
+      elem->set_node(0, last_node);
     }
     // Not stationary; add a point and element for each segment
     else
@@ -354,8 +356,8 @@ RayTracingMeshOutput::buildSegmentMesh()
         Elem * elem = _segment_mesh->add_elem(Elem::build_with_id(EDGE2, elem_id));
         elem->processor_id(processor_id());
         elem->set_unique_id(_max_node_id + elem_id++);
-        elem->set_node(0) = last_node;
-        elem->set_node(1) = node;
+        elem->set_node(0, last_node);
+        elem->set_node(1, node);
 
         // Set neighbor links
         if (last_elem)

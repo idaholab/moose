@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,6 +9,7 @@
 
 #include "AddComponentAction.h"
 #include "THMProblem.h"
+#include "THMMesh.h"
 
 registerMooseAction("ThermalHydraulicsApp", AddComponentAction, "THM:add_component");
 
@@ -29,6 +30,12 @@ AddComponentAction::AddComponentAction(const InputParameters & params)
 void
 AddComponentAction::act()
 {
+  // Error if using an unsupported mesh type, as most components cannot handle working with a
+  // regular MooseMesh instead of a THM mesh
+  if (!dynamic_cast<THMMesh *>(_mesh.get()))
+    mooseError("The Components block cannot be used to add a Component in conjunction with the "
+               "Mesh block at this time");
+
   if (!_group)
   {
     THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());

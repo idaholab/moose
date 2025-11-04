@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,10 +14,10 @@
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_aux_variable");
-
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_postprocessor");
-
 registerMooseAction("MooseApp", AddNodalNormalsAction, "add_user_object");
 
 InputParameters

@@ -1,3 +1,7 @@
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Mesh]
   [square]
     type = CartesianMeshGenerator
@@ -19,7 +23,7 @@
   [lambda]
     order = CONSTANT
     family = MONOMIAL
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
     components = 2
   []
 []
@@ -103,7 +107,7 @@
   [lambdanorm]
     type = ElementArrayL2Norm
     variable = lambda
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
     use_displaced_mesh = true
   []
 []

@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = channel.i
+    exodiff = channel_out.e
+    requirement = 'The system shall be able to model heat transfer between a fluid and the wall using a Dittus-Boelter correlation.'
+    design = 'DittusBoelterFunctorMaterial.md'
+    issues = '#19796'
+    abs_zero = 1e-8
+  []
+[]

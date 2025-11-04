@@ -1,7 +1,7 @@
 [Tests]
   [all]
     design = 'MooseDocs/index.md'
-    issues = '#6699 #9466 #9638 #9728 #12049 #13580 #13611 #15232 #15927 #16176 #16248 #16401 #16617 #16622 #16807 #17218 #17505 #20202 #25387'
+    issues = '#6699 #9466 #9638 #9728 #12049 #13580 #13611 #15232 #15927 #16176 #16248 #16401 #16617 #16622 #16807 #17218 #17505 #20202 #25387 #28573'
 
     requirement = "The system shall include documentation tools that provide support for"
     [core]
@@ -113,12 +113,17 @@
     [gitutils]
       type = PythonUnitTest
       input = test_gitutils.py
-      detail = "include git repository information, and"
+      detail = "include git repository information,"
     []
     [tagging]
       type = PythonUnitTest
       input = test_tagging.py
-      detail = "support documentation tags for filtering."
+      detail = "support documentation tags for filtering, and"
+    []
+    [versioner]
+      type = PythonUnitTest
+      input = test_versioner.py
+      detail = "reporting versions of systematically tracked packages."
     []
   []
 []

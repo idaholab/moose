@@ -15,6 +15,7 @@
       [diff]
         source_functor = 2
         transient = true
+        diffusivity_functor = '1'
       []
     []
   []

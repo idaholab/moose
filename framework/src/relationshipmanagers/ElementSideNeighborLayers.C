@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,8 @@
 #include "libmesh/default_coupling.h"
 #include "libmesh/point_neighbor_coupling.h"
 #include "libmesh/dof_map.h"
+
+using namespace libMesh;
 
 registerMooseObject("MooseApp", ElementSideNeighborLayers);
 

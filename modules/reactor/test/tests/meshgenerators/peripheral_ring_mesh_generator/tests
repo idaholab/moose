@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PeripheralRingMeshGenerator.md'
-  issues = '#19978 #20637 #22138'
+  issues = '#19978 #20637 #22138 #28169'
   [core_peripheral_ring_nonpreserved]
     type = 'Exodiff'
     input = 'core_ring.i'
@@ -77,6 +77,23 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
+  [peripheral_ring_boundary_layers_quadratic]
+    type = 'Exodiff'
+    input = 'ring_quadratic.i'
+    exodiff = 'ring_boundary_layers_quadratic_in.e'
+    cli_args = '--mesh-only ring_boundary_layers_quadratic_in.e'
+    requirement ='The system shall be able to add a peripheral ring consisting of quadratic elements with boundary layers to the input mesh and preserve volumes despite polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_mixed_edge_types]
+    type = 'RunException'
+    input = 'err_mix_type.i'
+    cli_args = '--mesh-only err.e'
+    expect_err = 'Input contains mixed element types on the external boundary.'
+    requirement ='The system shall throw an error if the external sideset of input mesh contains mixed types of side elements.'
+    mesh_mode = 'REPLICATED'
+  []
   [err_overlapped_boundary_layers]
     type = 'RunException'
     input = 'core_ring.i'
@@ -113,7 +130,7 @@
     type = 'RunException'
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/input_mesh_external_boundary=10001
-                Mesh/fmg/file=input_mesh_invalid_bdry_2.e
+                Mesh/fmg/file=input_sim.e
                 Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'This mesh generator does not work for the provided external boundary as it is not a closed loop.'
@@ -154,6 +171,17 @@
                 --mesh-only'
     expect_err = 'The boundary provided is not an external boundary.'
     requirement ='The system shall throw an error if the given external boundary is actually an internal boundary of the input mesh.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_non_existing_boundary]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/fmg/file=input_mesh_err.e
+                Mesh/pr/input_mesh_external_boundary=12345
+                Mesh/inactive=tg
+                --mesh-only'
+    expect_err = 'External boundary does not exist in the input mesh'
+    requirement ='The system shall throw an error if the given external boundary does not exist in the input mesh.'
     mesh_mode = 'REPLICATED'
   []
 []

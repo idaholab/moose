@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,6 +43,9 @@ HexagonalGridDivision::validParams()
       "assign_domain_outside_grid_to_border",
       false,
       "Whether to map the domain outside the grid back to the border of the grid");
+  params.addParam<Real>("rotation_around_axis",
+                        0.,
+                        "Rotation angle to apply to the underlying hexagonal lattice (in degrees)");
 
   return params;
 }
@@ -77,8 +80,14 @@ void
 HexagonalGridDivision::initialize()
 {
   // We make very large pins so they cover the entire position
-  _hex_latt = std::make_unique<HexagonalLatticeUtils>(
-      _lattice_flat_to_flat, _pin_pitch, _pin_pitch, 0., 1., _nr, _z_axis_index);
+  _hex_latt = std::make_unique<HexagonalLatticeUtils>(_lattice_flat_to_flat,
+                                                      _pin_pitch,
+                                                      _pin_pitch,
+                                                      0.,
+                                                      1.,
+                                                      _nr,
+                                                      _z_axis_index,
+                                                      getParam<Real>("rotation_around_axis"));
 
   if (!_center_positions)
     setNumDivisions(_hex_latt->totalPins(_nr) * _nz);

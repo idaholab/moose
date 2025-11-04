@@ -14,7 +14,7 @@
                   Trainers/pr_max/max_degree=1
                   pc_sub:Mesh/nx=5
                   pr_sub:Mesh/nx=5"
-      method = opt
+      capabilities = 'method=opt'
       detail = "with uniform parameter distributions "
     []
     [normal]
@@ -27,7 +27,7 @@
                   Trainers/pr_max/max_degree=1
                   pc_sub:Mesh/nx=5
                   pr_sub:Mesh/nx=5"
-      method = opt
+      capabilities = 'method=opt'
       detail = "and with normally distributed parameters."
     []
   []
@@ -39,7 +39,7 @@
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5"
       jsondiff = "uniform_surr_out.json"
-      method = opt
+      capabilities = 'method=opt'
       detail = "with uniform parameter distributions "
     []
     [normal]
@@ -48,7 +48,7 @@
       allow_test_objects = true
       cli_args = "Samplers/sample/num_rows=5"
       jsondiff = "normal_surr_out.json"
-      method = opt
+      capabilities = 'method=opt'
       detail = "and with normally distributed parameters."
     []
   []

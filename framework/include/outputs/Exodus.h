@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "OversampleOutput.h"
+#include "SampledOutput.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -21,7 +21,7 @@ class ExodusII_IO;
 /**
  * Class for output data to the ExodusII format
  */
-class Exodus : public OversampleOutput
+class Exodus : public SampledOutput
 {
 public:
   static InputParameters validParams();
@@ -91,12 +91,14 @@ public:
    * @param mesh The MooseMesh object that is queried to determine the appropriate output dimension.
    */
   static void
-  setOutputDimensionInExodusWriter(ExodusII_IO & exodus_io,
+  setOutputDimensionInExodusWriter(libMesh::ExodusII_IO & exodus_io,
                                    const MooseMesh & mesh,
                                    OutputDimension output_dim = OutputDimension::DEFAULT);
 
   /// Reset Exodus output
   void clear();
+
+  bool supportsMaterialPropertyOutput() const override { return true; }
 
 protected:
   /**
@@ -142,7 +144,7 @@ protected:
   virtual std::string filename() override;
 
   /// Pointer to the libMesh::ExodusII_IO object that performs the actual data output
-  std::unique_ptr<ExodusII_IO> _exodus_io_ptr;
+  std::unique_ptr<libMesh::ExodusII_IO> _exodus_io_ptr;
 
   /// Storage for scalar values (postprocessors and scalar AuxVariables)
   std::vector<Real> _global_values;
@@ -205,7 +207,4 @@ private:
 
   /// Flag to output HDF5 format (when available) in Exodus
   bool _write_hdf5;
-
-  /// whether the mesh is contiguously numbered (exodus output will force that)
-  bool _mesh_contiguous_numbering;
 };

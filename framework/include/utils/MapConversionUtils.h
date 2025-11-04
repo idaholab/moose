@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,7 +37,9 @@ createMapFromVectors(const std::vector<T> & keys, const std::vector<C> & values)
 {
   std::map<T, C> map;
   mooseAssert(keys.size() == values.size(),
-              "Map should be made from keys and values of the same size");
+              "Map should be made from keys (" + std::to_string(keys.size()) + ") and values (" +
+                  std::to_string(values.size()) + ") of the same size");
+
   // No values have been specified.
   if (!values.size())
   {

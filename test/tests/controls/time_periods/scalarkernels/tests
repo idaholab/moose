@@ -5,6 +5,7 @@
     type = CSVDiff
     input = scalarkernels.i
     csvdiff = scalarkernels_out.csv
+    restep = false # Explicitly needs to abort on solve failed
     requirement = "The Control system shall be capable of activating or deactivating ScalarKernel objects with time."
   [../]
 []

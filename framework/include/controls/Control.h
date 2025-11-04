@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,6 +19,7 @@
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
 #include "PerfGraphInterface.h"
+#include "ReporterInterface.h"
 
 class FEProblemBase;
 class InputParameterWarehouse;
@@ -38,7 +39,8 @@ class Control : public MooseObject,
                 public UserObjectInterface,
                 public Restartable,
                 protected PostprocessorInterface,
-                protected VectorPostprocessorInterface
+                protected VectorPostprocessorInterface,
+                protected ReporterInterface
 {
 public:
   /**

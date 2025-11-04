@@ -22,9 +22,6 @@
   ny = 1
   ymin = 0
   ymax = 11
-[]
-
-[Problem]
   coord_type = RZ
 []
 

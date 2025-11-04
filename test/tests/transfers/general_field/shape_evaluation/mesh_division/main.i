@@ -80,6 +80,8 @@
     to_multi_app = sub
     source_variable = to_sub
     variable = from_main
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [to_sub_elem]
@@ -87,6 +89,8 @@
     to_multi_app = sub
     source_variable = to_sub_elem
     variable = from_main_elem
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub]
@@ -94,6 +98,8 @@
     from_multi_app = sub
     source_variable = to_main
     variable = from_sub
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub_elem]
@@ -101,6 +107,8 @@
     from_multi_app = sub
     source_variable = to_main_elem
     variable = from_sub_elem
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 

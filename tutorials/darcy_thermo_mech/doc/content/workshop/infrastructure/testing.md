@@ -2,6 +2,14 @@
 
 !---
 
+## Continuous Integration
+
+Continuous integration is a software development practice where developers regularly merge their code changes into a central repository, after which automated builds and tests are run. The key goals of continuous integration are to find and address bugs quicker, improve software quality, and reduce the time it takes to validate and release new software updates.
+
+Testing enables continuous integration by ensuring your changes do not break previous capabilities of the code.
+
+!---
+
 ## Overview
 
 MOOSE includes an extendable test system (python) for executing code with different input files.
@@ -32,7 +40,7 @@ tests/
       my_kernel_test.i   [input file]
       tests              [test specification file]
       gold/              [gold standard folder for validated solution]
-      out.e              [solution]
+        out.e            [solution]
 ```
 
 !---
@@ -41,7 +49,7 @@ tests/
 
 Test specifications use the hit format, the same format as the standard MOOSE input file.
 
-```text
+```moose
 [Tests]
    [my_kernel_test]
      type    = Exodiff

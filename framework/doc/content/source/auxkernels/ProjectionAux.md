@@ -17,6 +17,14 @@ the modeler is invited to measure the projection error using a [ElementL2Differe
 Elemental variables that are discontinuous at nodes are projected to nodal variables by computing nodal values as element-volume-weighted
 averages of the centroid values of neighbor elements.
 
+!alert note
+The block restriction of the auxkernel, specified using the [!param](/AuxKernels/ProjectionAux/block) parameter, is used to select the
+source variable value as well using the [!param](/AuxKernels/ProjectionAux/use_block_restriction_for_source) parameter.
+
+!alert note
+Lower dimensional elements are currently not supported. If you require using lower dimensional elements for projections,
+please reach out on the [MOOSE Discussions forum](https://github.com/idaholab/moose/discussions).
+
 !syntax parameters /AuxKernels/ProjectionAux
 
 !syntax inputs /AuxKernels/ProjectionAux

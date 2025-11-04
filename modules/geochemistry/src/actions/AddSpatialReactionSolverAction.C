@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -52,7 +52,9 @@ AddSpatialReactionSolverAction::act()
     params.set<bool>("use_nonlinear") = true;
     params.set<bool>("solve") = getParam<bool>("include_moose_solve");
     _problem = _factory.create<FEProblemBase>(class_name, "Problem", params);
-    _problem->setKernelCoverageCheck(getParam<bool>("include_moose_solve"));
+    _problem->setKernelCoverageCheck(getParam<bool>("include_moose_solve")
+                                         ? FEProblemBase::CoverageCheckMode::TRUE
+                                         : FEProblemBase::CoverageCheckMode::FALSE);
   }
   else if (_current_task == "add_geochemistry_reactor")
   {

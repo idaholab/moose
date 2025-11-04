@@ -124,6 +124,7 @@
     pattern = '1 6;
               2 0 5;
                3 4'
+    assign_control_drum_id = true
   []
 []
 

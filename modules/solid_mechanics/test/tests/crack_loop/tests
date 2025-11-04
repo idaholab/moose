@@ -1,8 +1,11 @@
 [Tests]
-  [./screen_output_test]
+  issues = '#3275'
+  design = 'CrackFrontDefinition.md'
+  [screen_output_test]
     type = 'RunApp'
     input = 'crack_loop.i'
     expect_out = '^1       0 .*\n^2       116 .*\n^3       112 .*\n^4       108 .*\n^5       104 .*\n^6       100 .*\n^7       96 .*\n^8       92 .*\n^9       88 .*\n^10      84 .*\n^11      77 .*\n^12      76 .*\n^13      72 .*\n^14      68 .*\n^15      64 .*\n^16      57 .*\n^17      56 .*\n^18      52 .*\n^19      48 .*\n^20      44 .*\n^21      40 .*\n^22      36 .*\n^23      32 .*\n^24      28 .*\n^25      24 .*\n^26      20 .*\n^27      16 .*\n^28      12 .*\n^29      8 .*\n^30      1 '
     no_error_deprecated = true
-  [../]
+    requirement = 'The system shall report crack front data for a curved crack front to the console.'
+  []
 []

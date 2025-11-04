@@ -107,7 +107,7 @@
   []
   [strain_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
-    args = 'strain_yy strain_xy'
+    coupled_variables = 'strain_yy strain_xy'
     tensors = 'base'
     weights = 'prefactor_material'
   []

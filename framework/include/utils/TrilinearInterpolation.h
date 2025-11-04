@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,8 @@
 
 #include <vector>
 #include "Moose.h"
+
+using libMesh::Real;
 
 /**
  * This class interpolates a function of three values (f(x,y,z)).  It takes 4

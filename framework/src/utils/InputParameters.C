@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,7 @@
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
 #include "MooseObject.h"
+#include "MooseApp.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/simple_range.h"
@@ -70,8 +71,6 @@ InputParameters::clear()
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
   _allow_copy = true;
-  _block_fullpath = "";
-  _block_location = "";
   _old_to_new_name_and_dep.clear();
   _new_to_old_names.clear();
   _hit_node = nullptr;
@@ -106,33 +105,24 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
   }
 }
 
-bool
-InputParameters::attemptPrintDeprecated(const std::string & name_in)
+std::optional<std::string>
+InputParameters::queryDeprecatedParamMessage(const std::string & name_in) const
 {
   const auto name = checkForRename(name_in);
   if (_show_deprecated_message)
   {
-    auto emit_deprecation_message =
-        [this](const auto & deprecated_name, const auto & deprecation_message)
-    {
-      // This is user-facing, no need for a backtrace
-      const auto current_show_trace = Moose::show_trace;
-      Moose::show_trace = false;
-      moose::internal::mooseDeprecatedStream(
-          Moose::out, false, true, errorPrefix(deprecated_name), ":\n", deprecation_message, "\n");
-      Moose::show_trace = current_show_trace;
-      return true;
-    };
+    auto deprecation_message = [this](const auto & name, const auto & message) -> std::string
+    { return paramMessagePrefix(name) + message; };
 
     if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
-      return emit_deprecation_message(name,
-                                      "The parameter '" + name + "' is deprecated.\n" +
-                                          libmesh_map_find(_params, name)._deprecation_message);
+      return deprecation_message(name,
+                                 "The parameter '" + name + "' is deprecated.\n" +
+                                     libmesh_map_find(_params, name)._deprecation_message);
     else if (auto it = _old_to_new_name_and_dep.find(name_in);
              it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
-      return emit_deprecation_message(name_in, it->second.second);
+      return deprecation_message(name_in, it->second.second);
   }
-  return false;
+  return {};
 }
 
 std::string
@@ -148,15 +138,23 @@ InputParameters::operator=(const InputParameters & rhs)
   // correct constructor
   if (!rhs._allow_copy)
   {
-    const std::string & name =
-        rhs.get<std::string>("_object_name"); // If _allow_parameter_copy is set then so is name
-                                              // (see InputParameterWarehouse::addInputParameters)
-    mooseError("Copying of the InputParameters object for the ",
-               name,
-               " object is not allowed.\n\nThe likely cause for this error ",
-               "is having a constructor that does not use a const reference, all constructors\nfor "
-               "MooseObject based classes should be as follows:\n\n",
-               "    MyObject::MyObject(const InputParameters & parameters);");
+    // If _allow_parameter_copy is set, these should be too (see
+    // InputParameterWarehouse::addInputParameters)
+    const std::string & name = rhs.getObjectName();
+    const std::string & type = rhs.getObjectType(); // could be empty
+    const std::string name_example = type.size() ? type : "the " + name + " object";
+    const std::string type_example = type.size() ? type : "MyObject";
+    ::mooseError(
+        "Copying of the InputParameters object for ",
+        name_example,
+        " is not allowed.\n\nThe likely cause for this error ",
+        "is having a constructor that does not use a const reference, all constructors\nfor "
+        "MooseObject based classes should be as follows:\n\n",
+        "    ",
+        type_example,
+        "::",
+        type_example,
+        "(const InputParameters & parameters);");
   }
 
   Parameters::operator=(rhs);
@@ -170,12 +168,10 @@ InputParameters::operator=(const InputParameters & rhs)
   _coupled_vars = rhs._coupled_vars;
   _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _allow_copy = rhs._allow_copy;
-  _block_fullpath = rhs._block_fullpath;
-  _block_location = rhs._block_location;
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
-  _finalized = rhs._finalized;
+  _finalized = false;
 
   return *this;
 }
@@ -356,6 +352,20 @@ InputParameters::setDocString(const std::string & name_in, const std::string & d
   it->second._doc_string = doc;
 }
 
+std::string
+InputParameters::getDocUnit(const std::string & name_in) const
+{
+  const auto name = checkForRename(name_in);
+  return _params.at(name)._doc_unit;
+}
+
+void
+InputParameters::setDocUnit(const std::string & name_in, const std::string & doc_unit)
+{
+  const auto name = checkForRename(name_in);
+  _params[name]._doc_unit = doc_unit;
+}
+
 bool
 InputParameters::isParamRequired(const std::string & name_in) const
 {
@@ -389,6 +399,15 @@ InputParameters::isParamValid(const std::string & name_in) const
   }
   else if (have_parameter<MultiMooseEnum>(name))
     return get<MultiMooseEnum>(name).isValid();
+  else if (have_parameter<std::vector<MultiMooseEnum>>(name))
+  {
+    for (auto it = get<std::vector<MultiMooseEnum>>(name).begin();
+         it != get<std::vector<MultiMooseEnum>>(name).end();
+         ++it)
+      if (!it->isValid())
+        return false;
+    return true;
+  }
   else if (have_parameter<ExecFlagEnum>(name))
     return get<ExecFlagEnum>(name).isValid();
   else
@@ -464,16 +483,23 @@ InputParameters::getControllableExecuteOnTypes(const std::string & name_in) cons
 void
 InputParameters::registerBase(const std::string & value)
 {
-  InputParameters::set<std::string>("_moose_base") = value;
-  _params["_moose_base"]._is_private = true;
+  InputParameters::set<std::string>(MooseBase::moose_base_param) = value;
+  _params[MooseBase::moose_base_param]._is_private = true;
 }
 
-std::optional<std::string>
+bool
+InputParameters::hasBase() const
+{
+  return have_parameter<std::string>(MooseBase::moose_base_param);
+}
+
+const std::string &
 InputParameters::getBase() const
 {
-  if (have_parameter<std::string>("_moose_base"))
-    return get<std::string>("_moose_base");
-  return {};
+  if (!have_parameter<std::string>(MooseBase::moose_base_param))
+    mooseError("InputParameters::getBase(): Parameters do not have base; one needs to be set with "
+               "registerBase()");
+  return get<std::string>(MooseBase::moose_base_param);
 }
 
 void
@@ -546,31 +572,18 @@ InputParameters::mooseObjectSyntaxVisibility() const
   return _moose_object_syntax_visibility;
 }
 
-#define dynamicCastRangeCheck(type, up_type, long_name, short_name, param, oss)                    \
-  do                                                                                               \
-  {                                                                                                \
-    libMesh::Parameters::Value * val = MooseUtils::get(param);                                     \
-    InputParameters::Parameter<type> * scalar_p =                                                  \
-        dynamic_cast<InputParameters::Parameter<type> *>(val);                                     \
-    if (scalar_p)                                                                                  \
-      rangeCheck<type, up_type>(long_name, short_name, scalar_p, oss);                             \
-    InputParameters::Parameter<std::vector<type>> * vector_p =                                     \
-        dynamic_cast<InputParameters::Parameter<std::vector<type>> *>(val);                        \
-    if (vector_p)                                                                                  \
-      rangeCheck<type, up_type>(long_name, short_name, vector_p, oss);                             \
-  } while (0)
-
 #define checkMooseType(param_type, name)                                                           \
   if (have_parameter<param_type>(name) || have_parameter<std::vector<param_type>>(name))           \
-    oss << inputLocation(param_name) << ": non-controllable type '" << type(name)                  \
-        << "' for parameter '" << paramFullpath(param_name) << "' marked controllable";
+    error = "non-controllable type '" + type(name) + "' for parameter '" +                         \
+            paramFullpath(param_name) + "' marked controllable";
 
 void
 InputParameters::checkParams(const std::string & parsing_syntax)
 {
-  std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
-  std::ostringstream oss;
+  const std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
+
   // Required parameters
+  std::vector<std::string> required_param_errors;
   for (const auto & it : *this)
   {
     const auto param_name = checkForRename(it.first);
@@ -581,30 +594,35 @@ InputParameters::checkParams(const std::string & parsing_syntax)
       if (oit != _new_to_deprecated_coupled_vars.end() && isParamValid(oit->second))
         continue;
 
-      oss << blockLocation() << ": missing required parameter '" << parampath + "/" + param_name
-          << "'\n";
-      oss << "\tDoc String: \"" + getDocString(param_name) + "\"" << std::endl;
+      required_param_errors.push_back("missing required parameter '" + parampath + "/" +
+                                      param_name + "'\n\tDoc String: \"" +
+                                      getDocString(param_name) + "\"");
     }
   }
 
-  // Range checked parameters
-  for (const auto & it : *this)
-  {
-    std::string long_name(parampath + "/" + it.first);
+  if (required_param_errors.size())
+    mooseError(MooseUtils::stringJoin(required_param_errors, "\n"));
 
-    dynamicCastRangeCheck(Real, Real, long_name, it.first, it.second, oss);
-    dynamicCastRangeCheck(int, long, long_name, it.first, it.second, oss);
-    dynamicCastRangeCheck(long, long, long_name, it.first, it.second, oss);
-    dynamicCastRangeCheck(unsigned int, long, long_name, it.first, it.second, oss);
+  // Range checked parameters
+  for (const auto & [name, param_ptr] : *this)
+  {
+    if (const auto error = parameterRangeCheck(*param_ptr, parampath + "/" + name, name, false))
+    {
+      if (error->first)
+        paramError(name, error->second);
+      else
+        mooseError("For range checked parameter '" + name + "': " + error->second);
+    }
   }
 
   // Controllable parameters
   for (const auto & param_name : getControllableParameters())
   {
     if (isPrivate(param_name))
-      oss << inputLocation(param_name) << ": private parameter '" << paramFullpath(param_name)
-          << "' marked controllable";
+      paramError(param_name,
+                 "private parameter '" + paramFullpath(param_name) + "' marked controllable");
 
+    std::optional<std::string> error;
     checkMooseType(NonlinearVariableName, param_name);
     checkMooseType(AuxVariableName, param_name);
     checkMooseType(VariableName, param_name);
@@ -614,10 +632,34 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     checkMooseType(VectorPostprocessorName, param_name);
     checkMooseType(UserObjectName, param_name);
     checkMooseType(MaterialPropertyName, param_name);
+    if (error)
+      paramError(param_name, *error);
   }
+}
 
-  if (!oss.str().empty())
-    mooseError(oss.str());
+std::optional<std::pair<bool, std::string>>
+InputParameters::parameterRangeCheck(const Parameters::Value & value,
+                                     const std::string & long_name,
+                                     const std::string & short_name,
+                                     const bool include_param_path)
+{
+#define dynamicCastRangeCheck(type, up_type, long_name, short_name)                                \
+  do                                                                                               \
+  {                                                                                                \
+    if (const auto scalar_p = dynamic_cast<const InputParameters::Parameter<type> *>(&value))      \
+      return rangeCheck<type, up_type>(long_name, short_name, *scalar_p, include_param_path);      \
+    if (const auto vector_p =                                                                      \
+            dynamic_cast<const InputParameters::Parameter<std::vector<type>> *>(&value))           \
+      return rangeCheck<type, up_type>(long_name, short_name, *vector_p, include_param_path);      \
+  } while (0)
+
+  dynamicCastRangeCheck(Real, Real, long_name, short_name);
+  dynamicCastRangeCheck(int, long, long_name, short_name);
+  dynamicCastRangeCheck(long, long, long_name, short_name);
+  dynamicCastRangeCheck(unsigned int, long, long_name, short_name);
+#undef dynamicCastRangeCheck
+
+  return {};
 }
 
 void
@@ -640,7 +682,7 @@ InputParameters::finalize(const std::string & parsing_syntax)
       return;
 
     // The base by which to make things relative to
-    const auto file_base = getParamFileBase(param_name);
+    const auto file_base = getFileBase(param_name);
     value = std::filesystem::absolute(file_base / value_path).c_str();
   };
 
@@ -661,20 +703,53 @@ InputParameters::finalize(const std::string & parsing_syntax)
     set_if_filename(FileName);
     set_if_filename(FileNameNoExtension);
     set_if_filename(MeshFileName);
+    set_if_filename(MatrixFileName);
 #undef set_if_filename
+    // Set paths for data files
+    else if (auto data_file_name =
+                 dynamic_cast<Parameters::Parameter<DataFileName> *>(param_value.get()))
+    {
+      Moose::DataFileUtils::Path found_path;
+      std::optional<std::string> error;
+
+      // Catch this so that we can add additional error context if it fails (the param path)
+      {
+        Moose::ScopedThrowOnError scoped_throw_on_error;
+        try
+        {
+          found_path =
+              Moose::DataFileUtils::getPath(data_file_name->get(), getFileBase(param_name));
+        }
+        catch (std::exception & e)
+        {
+          error = e.what();
+        }
+      }
+
+      if (error)
+        paramError(param_name, *error);
+
+      // Set the value to the absolute searched path
+      data_file_name->set() = found_path.path;
+      // And store the path in metadata so that we can dump it later
+      at(param_name)._data_file_name_path = found_path;
+    }
   }
 
   _finalized = true;
 }
 
 std::filesystem::path
-InputParameters::getParamFileBase(const std::string & param_name) const
+InputParameters::getFileBase(const std::optional<std::string> & param_name) const
 {
   mooseAssert(!have_parameter<std::string>("_app_name"),
               "Not currently setup to work with app FileName parameters");
 
+  const hit::Node * hit_node = nullptr;
+
   // Context from the individual parameter
-  const hit::Node * hit_node = getHitNode(param_name);
+  if (param_name)
+    hit_node = getHitNode(*param_name);
   // Context from the parameters
   if (!hit_node)
     hit_node = getHitNode();
@@ -688,10 +763,14 @@ InputParameters::getParamFileBase(const std::string & param_name) const
 
   // Failed to find a node up the tree that isn't a command line argument
   if (!hit_node)
-    mooseError(
-        errorPrefix(param_name),
-        " Parameter was set via a command-line argument and does not have sufficient context for "
-        "determining a file path.");
+  {
+    const std::string error = "Input context was set via a command-line argument and does not have "
+                              "sufficient context for determining a file path.";
+    if (param_name)
+      paramError(*param_name, error);
+    else
+      mooseError(error);
+  }
 
   return std::filesystem::absolute(std::filesystem::path(hit_node->filename()).parent_path());
 }
@@ -720,7 +799,7 @@ InputParameters::hasDefault(const std::string & param_name) const
   else if (isParamSetByAddParam(name))
     return true;
   else if (isParamValid(name))
-    mooseError("No way to know if the parameter", param_name, "has a default");
+    mooseError("No way to know if the parameter '", param_name, "' has a default");
   else
     return false;
 }
@@ -741,9 +820,10 @@ InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 void
 InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value, unsigned int i)
 {
-  _params[coupling_name]._coupled_default.resize(i + 1);
-  _params[coupling_name]._coupled_default[i] = value;
-  _params[coupling_name]._have_coupled_default = true;
+  const auto actual_name = checkForRename(coupling_name);
+  _params[actual_name]._coupled_default.resize(i + 1);
+  _params[actual_name]._coupled_default[i] = value;
+  _params[actual_name]._have_coupled_default = true;
 }
 
 Real
@@ -865,6 +945,38 @@ InputParameters::getVecMooseType(const std::string & name_in) const
   return svars;
 }
 
+bool
+InputParameters::isMooseBaseObject() const
+{
+  return have_parameter<std::string>(MooseBase::type_param) &&
+         get<std::string>(MooseBase::type_param).size() &&
+         have_parameter<std::string>(MooseBase::name_param);
+}
+
+const std::string *
+InputParameters::queryObjectType() const
+{
+  return have_parameter<std::string>(MooseBase::type_param)
+             ? &get<std::string>(MooseBase::type_param)
+             : nullptr;
+}
+
+const std::string &
+InputParameters::getObjectType() const
+{
+  if (const auto type_ptr = queryObjectType())
+    return *type_ptr;
+  ::mooseError("InputParameters::getObjectType(): Missing '", MooseBase::type_param, "' param");
+}
+
+const std::string &
+InputParameters::getObjectName() const
+{
+  if (!have_parameter<std::string>(MooseBase::name_param))
+    ::mooseError("InputParameters::getObjectName(): Missing '", MooseBase::name_param, "' param");
+  return get<std::string>(MooseBase::name_param);
+}
+
 void
 InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
                                       const std::string group_name)
@@ -889,22 +1001,60 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
                  '.');
 }
 
+void
+InputParameters::renameParameterGroup(const std::string & old_name, const std::string & new_name)
+{
+  for (auto & param : _params)
+    if (param.second._group == old_name)
+      param.second._group = new_name;
+}
+
+void
+InputParameters::setGlobalCommandLineParam(const std::string & name)
+{
+  auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::setGlobalCommandLineParam: The parameter '",
+               name,
+               "' is not a command line parameter");
+  cl_data->global = true;
+}
+
 bool
 InputParameters::isCommandLineParameter(const std::string & name) const
 {
   return at(checkForRename(name))._cl_data.has_value();
 }
 
-const std::vector<std::string> &
-InputParameters::getCommandLineSyntax(const std::string & name) const
+std::optional<InputParameters::CommandLineMetadata>
+InputParameters::queryCommandLineMetadata(const std::string & name) const
 {
-  return getCommandLineMetadata(name).syntax;
+  const auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    return {};
+  return *cl_data;
 }
 
-InputParameters::CommandLineMetadata::ArgumentType
-InputParameters::getCommandLineArgumentType(const std::string & name) const
+const InputParameters::CommandLineMetadata &
+InputParameters::getCommandLineMetadata(const std::string & name) const
 {
-  return getCommandLineMetadata(name).argument_type;
+  const auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::getCommandLineMetadata: The parameter '",
+               name,
+               "' is not a command line parameter");
+  return *cl_data;
+}
+
+void
+InputParameters::commandLineParamSet(const std::string & name, const CommandLineParamSetKey)
+{
+  auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::commandLineParamSet: The parameter '",
+               name,
+               "' is not a command line parameter");
+  cl_data->set_by_command_line = true;
 }
 
 std::string
@@ -962,7 +1112,6 @@ InputParameters::applySpecificParameters(const InputParameters & common,
   // Loop through the common parameters
   for (const auto & it : common)
   {
-
     // Common parameter name
     const std::string & common_name = it.first;
 
@@ -1019,7 +1168,8 @@ InputParameters::applyCoupledVar(const InputParameters & common, const std::stri
 void
 InputParameters::applyParameter(const InputParameters & common,
                                 const std::string & common_name,
-                                bool allow_private)
+                                bool allow_private,
+                                bool override_default)
 {
   // Disable the display of deprecated message when applying common parameters, this avoids a dump
   // of messages
@@ -1036,7 +1186,7 @@ InputParameters::applyParameter(const InputParameters & common,
   // Extract the properties from the common parameter
   const bool common_exist = common._values.find(common_name) != common._values.end();
   const bool common_priv = allow_private ? false : common.isPrivate(common_name);
-  const bool common_valid = common.isParamValid(common_name);
+  const bool common_valid = common.isParamValid(common_name) || override_default;
 
   /* In order to apply a common parameter 4 statements must be satisfied
    * (1) A local parameter must exist with the same name as the common parameter
@@ -1057,6 +1207,10 @@ InputParameters::applyParameter(const InputParameters & common,
     // the parameter in the action
     at(local_name)._hit_node = common.getHitNode(common_name);
   }
+  else if (!local_exist && !common_exist)
+    mooseError("InputParameters::applyParameter(): Attempted to apply invalid parameter \"",
+               common_name,
+               "\"");
 
   // Enable deprecated message printing
   _show_deprecated_message = true;
@@ -1074,14 +1228,24 @@ bool
 InputParameters::isParamSetByUser(const std::string & name_in) const
 {
   const auto name = checkForRename(name_in);
+  // Invalid; for sure not set by the user
   if (!isParamValid(name))
-    // if the parameter is invalid, it is for sure not set by the user
     return false;
-  else
-    // If the parameters is not located in the list, then it was set by the user
-    // If the parameter is private, and present in global params, it is ignored, therefore not set
-    return _params.count(name) > 0 && !_params.at(name)._set_by_add_param &&
-           !_params.at(name)._is_private;
+  // Parameter is not located in the list (called Parameters::set)
+  if (!_params.count(name))
+    return false;
+  // Special case for a command line option, which is a private parameter
+  if (const auto cl_data = queryCommandLineMetadata(name))
+    return cl_data->set_by_command_line;
+  // Not a command line option, not set by addParam and not private
+  return !_params.at(name)._set_by_add_param && !_params.at(name)._is_private;
+}
+
+bool
+InputParameters::isParamDefined(const std::string & name_in) const
+{
+  const auto name = checkForRename(name_in);
+  return _params.count(name) > 0;
 }
 
 const std::string &
@@ -1135,6 +1299,27 @@ InputParameters::addRequiredParam<std::vector<MooseEnum>>(
 
 template <>
 void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(
+    const std::string & name,
+    const std::vector<MultiMooseEnum> & moose_enums,
+    const std::string & doc_string)
+{
+  mooseAssert(
+      moose_enums.size() == 1,
+      "Only 1 MultiMooseEnum is supported in addRequiredParam<std::vector<MultiMooseEnum>> for " +
+          name);
+  mooseAssert(!moose_enums[0].items().empty(),
+              "The MultiMooseEnum in addRequiredParam<std::vector<MultiMooseEnum>> is empty for " +
+                  name);
+  InputParameters::set<std::vector<MultiMooseEnum>>(name) =
+      moose_enums; // valid parameter is set by set_attributes
+  auto & metadata = _params[name];
+  metadata._required = true;
+  metadata._doc_string = doc_string;
+}
+
+template <>
+void
 InputParameters::addParam<MooseEnum>(const std::string & /*name*/,
                                      const std::string & /*doc_string*/)
 {
@@ -1158,6 +1343,24 @@ InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
 {
   mooseError("You must supply a vector of MooseEnum object(s) when using addParam, even if the "
              "parameter is not required!");
+}
+
+template <>
+void
+InputParameters::addParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                       const std::string & /*doc_string*/)
+{
+  mooseError(
+      "You must supply a vector of MultiMooseEnum object(s) when using addParam, even if the "
+      "parameter is not required!");
+}
+
+template <>
+void
+InputParameters::addRequiredParam<std::vector<MultiMooseEnum>>(const std::string & /*name*/,
+                                                               const std::string & /*doc_string*/)
+{
+  mooseError("You must supply a vector of MultiMooseEnum object(s) when using addRequiredParam!");
 }
 
 template <>
@@ -1205,14 +1408,6 @@ InputParameters::addDeprecatedParam<std::vector<MooseEnum>>(
 {
   mooseError("You must supply a vector of MooseEnum object(s) and the deprecation string when "
              "using addDeprecatedParam, even if the parameter is not required!");
-}
-
-std::string
-InputParameters::appendFunctorDescription(const std::string & doc_string) const
-{
-  return MooseUtils::trim(doc_string, ". ") +
-         ". A functor is any of the following: a variable, a functor material property, a "
-         "function, a post-processor, or a number.";
 }
 
 template <>
@@ -1314,9 +1509,7 @@ InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*nam
 template <>
 const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
-                                           const InputParameters & pars,
-                                           const MooseEnum *,
-                                           const MooseBase * /* = nullptr */)
+                                           const InputParameters & pars)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MooseEnum>(name);
@@ -1325,9 +1518,7 @@ InputParameters::getParamHelper<MooseEnum>(const std::string & name_in,
 template <>
 const MultiMooseEnum &
 InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name_in,
-                                                const InputParameters & pars,
-                                                const MultiMooseEnum *,
-                                                const MooseBase * /* = nullptr */)
+                                                const InputParameters & pars)
 {
   const auto name = pars.checkForRename(name_in);
   return pars.get<MultiMooseEnum>(name);
@@ -1406,15 +1597,6 @@ InputParameters::checkParamName(const std::string & name) const
     mooseError("Invalid parameter name: '", name, "'");
 }
 
-const InputParameters::CommandLineMetadata &
-InputParameters::getCommandLineMetadata(const std::string & name) const
-{
-  const auto & cl_data = at(checkForRename(name))._cl_data;
-  if (!cl_data)
-    mooseError("The parameter '", name, "' is not a command line parameter.");
-  return *cl_data;
-}
-
 bool
 InputParameters::shouldIgnore(const std::string & name_in)
 {
@@ -1455,7 +1637,7 @@ InputParameters::getControllableParameters() const
 }
 
 std::string
-InputParameters::errorPrefix(const std::string & param) const
+InputParameters::paramLocationPrefix(const std::string & param) const
 {
   auto prefix = param + ":";
   if (!inputLocation(param).empty())
@@ -1608,8 +1790,98 @@ InputParameters::paramAliases(const std::string & param_name) const
   return aliases;
 }
 
-void
-InputParameters::callMooseErrorHelper(const MooseBase & moose_base, const std::string & error)
+std::optional<Moose::DataFileUtils::Path>
+InputParameters::queryDataFileNamePath(const std::string & name) const
 {
-  moose_base.callMooseError(error, true);
+  return at(checkForRename(name))._data_file_name_path;
+}
+
+std::optional<std::string>
+InputParameters::setupVariableNames(std::vector<VariableName> & names,
+                                    const hit::Node & node,
+                                    const Moose::PassKey<Moose::Builder>)
+{
+  // Whether or not a name was found
+  bool has_name = false;
+  // Whether or not a default value (real) was found
+  bool has_default = false;
+
+  // Search through the names for values that convert to Real values,
+  // which are default values. If defaults are found, set appropriately
+  // in the InputParameters object. Keep track of if names or defaults
+  // were found because we don't allow having both
+  for (const auto i : index_range(names))
+  {
+    auto & name = names[i];
+    Real real_value;
+    if (MooseUtils::convert<Real>(name, real_value, false))
+    {
+      has_default = true;
+      defaultCoupledValue(node.path(), real_value, i);
+    }
+    else
+      has_name = true;
+  }
+
+  if (has_default)
+  {
+    if (has_name)
+      return {"invalid value for '" + node.fullpath() +
+              "': coupled vectors where some parameters are reals and others are variables are not "
+              "supported"};
+
+    // Don't actually use the names if these don't represent names
+    names.clear();
+  }
+
+  return {};
+}
+
+std::pair<std::string, const hit::Node *>
+InputParameters::paramMessageContext(const std::string & param) const
+{
+  const hit::Node * node = nullptr;
+
+  std::string fullpath;
+  // First try to find the parameter
+  if (const hit::Node * param_node = getHitNode(param))
+  {
+    fullpath = param_node->fullpath();
+    node = param_node;
+  }
+  // If no parameter node, hope for a block node
+  else if (const hit::Node * block_node = getHitNode())
+  {
+    node = block_node;
+    fullpath = block_node->fullpath() + "/" + param;
+  }
+  // Didn't find anything, at least use the parameter
+  else
+    fullpath = param;
+
+  return {fullpath + ": ", node};
+}
+
+std::string
+InputParameters::paramMessagePrefix(const std::string & param) const
+{
+  auto [prefix, node] = paramMessageContext(param);
+  if (node)
+    prefix = Moose::hitMessagePrefix(*node) + prefix;
+  return prefix;
+}
+
+[[noreturn]] void
+InputParameters::callMooseError(std::string msg,
+                                const bool with_prefix /* = true */,
+                                const hit::Node * node /* = nullptr */) const
+{
+  // Find the context of the app if we can. This will let our errors be
+  // prefixed by the multiapp name (if applicable) and will flush the
+  // console before outputting an error
+  MooseApp * app = nullptr;
+  if (isMooseBaseObject() && have_parameter<MooseApp *>(MooseBase::app_param))
+    app = get<MooseApp *>(MooseBase::app_param);
+
+  MooseBase::callMooseError(app, *this, msg, with_prefix, node);
 }

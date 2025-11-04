@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,7 @@ ExecuteMeshGenerators::act()
   // Don't do mesh generators when recovering as the master app or using master mesh! We do need
   // to run MeshGenerators for sub-apps because we don't currently have checkpoint/restart
   // information for the sub-app meshes; e.g. we just need to re-build them
-  if ((_app.isRecovering() && _app.isUltimateMaster()) || _app.masterMesh() ||
+  if ((_app.isRecovering() && _app.isUltimateMaster()) || _app.useMasterMesh() ||
       (_mesh && _mesh->isSplit()))
     return;
 

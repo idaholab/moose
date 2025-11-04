@@ -13,6 +13,10 @@
     input = convergence.i
     cli_args = "Executioner/reuse_preconditioner=true Outputs/csv/file_base=reuse_case"
     csvdiff = reuse_case.csv
+    # Linear iteration counter includes "failed" timesteps, changing when the
+    # preconditioner is reused. Thus changing the number of linear iterations for
+    # a given timestep, which this test is golded on.
+    restep = false
     requirement = 'Preconditioner is reused until the linear iterations exceed '
                   'the value of reuse_preconditioner_max_its upon which the '
                   'system recalculates the preconditioner'
@@ -22,6 +26,10 @@
     input = convergence.i
     cli_args = "Executioner/reuse_preconditioner=true Outputs/csv/file_base=mesh_case Executioner/Adaptivity/start_time=5.0"
     csvdiff = "mesh_case.csv"
+    # Linear iteration counter includes "failed" timesteps, changing when the
+    # preconditioner is reused. Thus changing the number of linear iterations for
+    # a given timestep, which this test is golded on.
+    restep = false
     requirement = 'A new preconditioner is formed if the system of equations changes '
                   'for example here through mesh refinement'
   []

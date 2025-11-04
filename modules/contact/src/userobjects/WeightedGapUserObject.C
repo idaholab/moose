@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,7 @@
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
+#include "AutomaticMortarGeneration.h"
 
 #include "libmesh/quadrature.h"
 
@@ -126,8 +127,10 @@ WeightedGapUserObject::computeQpIProperties()
   // Get the _dof_to_weighted_gap map
   const auto * const dof = static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i));
 
-  _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
-  _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
+  auto & [weighted_gap, normalization] = _dof_to_weighted_gap[dof];
+
+  weighted_gap += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  normalization += (*_test)[_i][_qp] * _qp_factor;
 
   _dof_to_weighted_displacements[dof] += (*_test)[_i][_qp] * _qp_displacement_nodal;
 }

@@ -8,38 +8,53 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [BCs]
-  [./u_injection_left]
+  [u_injection_left]
     type = InflowBC
     boundary = left
     variable = u
     velocity = '1 0 0'
     inlet_conc = 1
-  [../]
+  []
+[]
+
+[Materials]
+  [v]
+    type = GenericConstantVectorMaterial
+    prop_names = v
+    prop_values = '1 0 0'
+  []
 []
 
 [Kernels]
-  [./udot]
+  [udot]
     type = TimeDerivative
     variable = u
-  [../]
-  [./advection]
+  []
+  [advection]
     type = ConservativeAdvection
     variable = u
-    velocity = '1 0 0'
-  [../]
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = LINEAR
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   dt = 0.1
   end_time = 1
-  l_tol = 1E-14
 []
 
 [Outputs]

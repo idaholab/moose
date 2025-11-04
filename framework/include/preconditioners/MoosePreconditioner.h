@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -52,9 +52,14 @@ public:
                             const unsigned int to_var,
                             NumericVector<Number> & to_vector);
 
+  /**
+   * Perform some setup tasks such as storing the PETSc options
+   */
+  virtual void initialSetup();
+
 protected:
   /// Setup the coupling matrix on the finite element problem
-  void setCouplingMatrix(std::unique_ptr<CouplingMatrix> cm);
+  void setCouplingMatrix(std::unique_ptr<libMesh::CouplingMatrix> cm);
 
   /// Subproblem this preconditioner is part of
   FEProblemBase & _fe_problem;

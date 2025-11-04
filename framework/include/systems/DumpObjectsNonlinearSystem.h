@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,16 +26,18 @@ class DumpObjectsNonlinearSystem : public NonlinearSystemBase
 public:
   DumpObjectsNonlinearSystem(FEProblemBase & problem, const std::string & name);
 
-  virtual NonlinearSolver<Number> * nonlinearSolver() override { return NULL; }
+  virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() override { return NULL; }
   virtual void solve() override {}
-  virtual void stopSolve(const ExecFlagType &) override {}
+  virtual void stopSolve(const ExecFlagType &, const std::set<TagID> &) override {}
   virtual bool converged() override { return true; }
   virtual NumericVector<Number> & RHS() override { return *_dummy; }
   virtual SNES getSNES() override { return nullptr; }
 
   virtual unsigned int getCurrentNonlinearIterationNumber() override { return 0; }
   virtual void setupFiniteDifferencedPreconditioner() override {}
-  virtual void attachPreconditioner(Preconditioner<Number> * /* preconditioner */) override {}
+  virtual void attachPreconditioner(libMesh::Preconditioner<Number> * /* preconditioner */) override
+  {
+  }
   void residualAndJacobianTogether() override {}
 
 protected:

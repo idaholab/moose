@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "StitchedMeshGenerator.h"
+#include "StitchMeshGenerator.h"
 
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */
-class TestSubgenerators : public StitchedMeshGenerator
+class TestSubgenerators : public StitchMeshGenerator
 {
 public:
   static InputParameters validParams();

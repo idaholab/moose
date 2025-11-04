@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -37,7 +37,9 @@ public:
                               const unsigned int num_inputs,
                               const unsigned int num_outputs,
                               const std::vector<unsigned int> & num_neurons_per_layer,
-                              const std::vector<std::string> & activation_function = {"relu"});
+                              const std::vector<std::string> & activation_function = {"relu"},
+                              const torch::DeviceType device_type = torch::kCPU,
+                              const torch::ScalarType scalar_type = torch::kDouble);
 
   /**
    * Copy construct an artificial neural network
@@ -59,7 +61,7 @@ public:
    * this cannot be const since it creates a graph in the background
    * @param x Input tensor for the evaluation
    */
-  virtual torch::Tensor forward(torch::Tensor & x) override;
+  virtual torch::Tensor forward(const torch::Tensor & x) override;
 
   /// Return the name of the neural network
   const std::string & name() const { return _name; }
@@ -73,7 +75,10 @@ public:
   const std::vector<unsigned int> & numNeuronsPerLayer() const { return _num_neurons_per_layer; }
   /// Return the multi enum containing the activation functions
   const MultiMooseEnum & activationFunctions() const { return _activation_function; }
-
+  /// Return the device which is used by this neural network
+  torch::DeviceType deviceType() const { return _device_type; }
+  /// Return the data type which is used by this neural network
+  torch::ScalarType dataType() const { return _data_type; }
   /// Construct the neural network
   void constructNeuralNetwork();
 
@@ -95,6 +100,10 @@ protected:
   /// Activation functions (either one for all hidden layers or one for every layer
   /// separately)
   MultiMooseEnum _activation_function;
+  /// The device type used for this neural network
+  const torch::DeviceType _device_type;
+  /// The data type used in this neural network
+  const torch::ScalarType _data_type;
 };
 
 void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,6 +19,9 @@
 #include "ADReal.h"
 
 #include "metaphysicl/raw_type.h"
+
+using libMesh::Real;
+using libMesh::VectorValue;
 
 TEST(RankThreeTensor, constructors)
 {

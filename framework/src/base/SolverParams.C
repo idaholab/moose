@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,6 +19,8 @@ SolverParams::SolverParams()
     _eigen_matrix_free(false),
     _eigen_matrix_vector_mult(false),
     _customized_pc_for_eigen(false),
-    _precond_matrix_free(false)
+    _precond_matrix_free(false),
+    _prefix("-"),
+    _solver_sys_num(libMesh::invalid_uint)
 {
 }

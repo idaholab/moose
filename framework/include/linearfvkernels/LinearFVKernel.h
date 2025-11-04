@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,6 +36,9 @@ public:
   virtual const MooseLinearVariableFV<Real> & variable() const override { return _var; }
 
 protected:
+  /// Utility routine to request cell gradient computation on a variable
+  void requestVariableCellGradient(const std::string & variable_name);
+
   /// Reference to the linear finite volume variable
   MooseLinearVariableFV<Real> & _var;
 

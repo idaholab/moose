@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,6 +37,8 @@ MultiAppGeneralFieldUserObjectTransfer::validParams()
                                           "The UserObject you want to transfer values from. "
                                           "It must implement the SpatialValue() class routine");
 
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   // Blanket ban on origin boundary restriction. User objects tend to extend beyond boundaries,
   // and be able to be evaluated within a volume rather than only on a boundary
   // This could be re-enabled for spatial user objects that are only defined on boundaries
@@ -64,6 +66,27 @@ MultiAppGeneralFieldUserObjectTransfer::MultiAppGeneralFieldUserObjectTransfer(
   if (_nearest_positions_obj && isParamValid("to_multi_app") && !isParamValid("from_multi_app"))
     paramError("use_nearest_position",
                "Cannot use nearest-position algorithm when sending from the main application");
+}
+
+void
+MultiAppGeneralFieldUserObjectTransfer::execute()
+{
+  // Execute the user object if it was specified to execute on TRANSFER
+  switch (_current_direction)
+  {
+    case TO_MULTIAPP:
+    {
+      checkParentAppUserObjectExecuteOn(_user_object_name);
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _user_object_name);
+      _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _user_object_name);
+      break;
+    }
+    case FROM_MULTIAPP:
+      errorIfObjectExecutesOnTransferInSourceApp(_user_object_name);
+  }
+
+  // Perfom the actual transfer
+  MultiAppGeneralFieldTransfer::execute();
 }
 
 void
@@ -117,14 +140,20 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
             _from_problems[i_from]->getUserObjectBase(_user_object_name);
 
         // Use spatial value routine to compute the origin value to transfer
-        auto val = user_object.spatialValue(_from_transforms[from_global_num]->mapBack(pt));
+        const auto local_pt = _from_transforms[from_global_num]->mapBack(pt);
+        auto val = user_object.spatialValue(local_pt);
 
         // Look for overlaps. The check is not active outside of overlap search because in that
         // case we accept the first value from the lowest ranked process
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but we register an overlap as soon as two values are possible from this rank
         if (detectConflict(val, outgoing_vals[i_pt].first, distance, outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, _from_transforms[from_global_num]->mapBack(pt), 1, true);
+        {
+          if (_nearest_positions_obj)
+            registerConflict(i_from, 0, pt, distance, true);
+          else
+            registerConflict(i_from, 0, local_pt, distance, true);
+        }
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

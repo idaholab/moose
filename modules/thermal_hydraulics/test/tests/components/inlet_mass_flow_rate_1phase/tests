@@ -7,12 +7,14 @@
     exodiff = 'phy.massflowrate_3eqn.e'
     group = 'inlet_mass_flow_rate outlet pipe 1phase'
     max_time = 1000
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to model an inlet boundary condition for 1D single phase flow with a specified mass flow rate and temperature at the inlet."
   []
   [phy:reversed_flow]
     type = 'Exodiff'
     input = 'phy.reversed_flow.i'
     exodiff = 'phy.reversed_flow.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to model an inlet boundary condition for 1D single phase flow with a specified mass flow rate and temperature at the inlet, and handle flow reversal."
   []
 
@@ -20,12 +22,14 @@
     type = 'CSVDiff'
     input = 'clg.ctrl_m_dot_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_m_dot_3eqn_rdg_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to control the mass flow rate at a 1D single phase flow inlet defined by a temperature and a mass flow rate."
   []
   [clg:ctrl_T_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_T_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = "The system shall be able to control the fluid temperature at a 1D single phase flow inlet defined by a temperature and a mass flow rate."
   []
 

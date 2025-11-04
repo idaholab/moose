@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,4 +49,10 @@ RealVectorValue
 ConstantFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   return RealVectorValue(0);
+}
+
+Real
+ConstantFunction::timeIntegral(Real t1, Real t2, const Point & /*p*/) const
+{
+  return _value * (t2 - t1);
 }

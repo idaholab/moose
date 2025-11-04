@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-class SolutionUserObject;
+class SolutionUserObjectBase;
 
 /**
  * Function for reading a 2D axisymmetric solution from file and mapping it to a
@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Pointer to SolutionUserObject containing the solution of interest
-  const SolutionUserObject * _solution_object_ptr;
+  const SolutionUserObjectBase * _solution_object_ptr;
 
   /// Factor to scale the solution by (default = 1)
   const Real _scale_factor;

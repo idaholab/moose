@@ -18,14 +18,6 @@
 #   paraview --state=plot.pvsm
 # This will plot the numerical solution against the analytical solution
 
-[GlobalParams]
-  gravity_vector = '0 0 0'
-
-  rdg_slope_reconstruction = minmod
-
-  closures = simple_closures
-[]
-
 [Functions]
   [p_ic_fn]
     type = PiecewiseConstant
@@ -71,12 +63,17 @@
     n_elems = 100
     A = 1.0
 
+    gravity_vector = '0 0 0'
+
     # IC
     initial_T = T_ic_fn
     initial_p = p_ic_fn
     initial_vel = 0
 
     f = 0
+    closures = simple_closures
+
+    rdg_slope_reconstruction = minmod
   []
 
   [left_boundary]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,7 +24,7 @@ PhaseFieldTestApp::validParams()
 
 registerKnownLabel("PhaseFieldTestApp");
 
-PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : MooseApp(parameters)
+PhaseFieldTestApp::PhaseFieldTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   PhaseFieldTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -46,25 +46,8 @@ PhaseFieldTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool
 void
 PhaseFieldTestApp::registerApps()
 {
-  registerApp(PhaseFieldApp);
+  PhaseFieldApp::registerApps();
   registerApp(PhaseFieldTestApp);
-}
-
-void
-PhaseFieldTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PhaseFieldTestApp"});
-}
-
-void
-PhaseFieldTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PhaseFieldTestApp"});
-}
-
-void
-PhaseFieldTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

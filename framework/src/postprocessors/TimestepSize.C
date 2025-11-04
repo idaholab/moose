@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,9 @@ TimestepSize::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Reports the timestep size");
+
+  // Not supported
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 

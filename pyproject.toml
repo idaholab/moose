@@ -1,0 +1,28 @@
+[tool.black]
+target-version = ['py310', 'py311', 'py312', 'py313']
+required-version = '25.1.0'
+include = '''
+(
+  ^\/python\/moosecontrol\/.*.py$ |
+  ^\/python\/TestHarness\/resultsstore\/.*.py$ |
+  ^\/python\/TestHarness/tests/test_resultsstore.*.py$
+)
+'''
+
+[tool.ruff]
+include = [
+  "python/moosecontrol/**/*.py",
+  "python/TestHarness/resultsstore/**/*.py",
+  "python/TestHarness/tests/test_resultsstore*.py"
+]
+exclude = ["python/moosecontrol/requests_unixsocket/*.py"]
+
+[tool.ruff.lint]
+# Enable pycodestyle (E) and Pyflakes (F) codes by default.
+# D - NumPy docstring rules
+# I - Sorting imports
+# N801 - Class name should use CapWords convention
+# SIM - code simplification rules
+# TID - tidy imports
+select = ["D", "E", "F", "I", "N801", "SIM", "TID"]
+ignore = ["D203", "D212"]

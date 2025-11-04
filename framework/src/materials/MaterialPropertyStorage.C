@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,8 +20,10 @@
 
 #include <optional>
 
-MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
-  : _max_state(0),
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry,
+                                                 FEProblemBase & problem)
+  : _problem(problem),
+    _max_state(0),
     _spin_mtx(libMesh::Threads::spin_mtx),
     _registry(registry),
     _restart_in_place(false),
@@ -102,6 +104,19 @@ MaterialPropertyStorage::isRestoredProperty(const std::string & name) const
   return record.restored;
 }
 
+const std::set<const MooseObject *> &
+MaterialPropertyStorage::getConsumers(Moose::MaterialDataType type) const
+{
+  static const std::set<const MooseObject *> empty;
+
+  const auto it = _consumers.find(type);
+
+  if (it != _consumers.end())
+    return it->second;
+
+  return empty;
+}
+
 void
 MaterialPropertyStorage::updateStatefulPropsForPRefinement(
     const processor_id_type libmesh_dbg_var(pid),
@@ -122,7 +137,7 @@ MaterialPropertyStorage::updateStatefulPropsForPRefinement(
   else
     n_qpoints = qrule_face.n_points();
 
-  getMaterialData(tid).resize(n_qpoints);
+  _material_data[tid].resize(n_qpoints);
 
   mooseAssert(elem.active(), "We should be doing p-refinement on active elements only");
   mooseAssert(elem.processor_id() == pid, "Prolongation should be occurring locally");
@@ -173,7 +188,7 @@ MaterialPropertyStorage::prolongStatefulProps(
   else
     n_qpoints = qrule_face.n_points();
 
-  getMaterialData(tid).resize(n_qpoints);
+  _material_data[tid].resize(n_qpoints);
 
   unsigned int n_children = elem.n_children();
 
@@ -452,7 +467,7 @@ MaterialPropertyStorage::swap(const THREAD_ID tid, const Elem & elem, unsigned i
 
   for (const auto state : stateIndexRange())
     shallowSwapData(_stateful_prop_id_to_prop_id,
-                    getMaterialData(tid).props(state),
+                    _material_data[tid].props(state),
                     // Would be nice to make this setProps()
                     initAndSetProps(&elem, side, state));
 }
@@ -465,7 +480,7 @@ MaterialPropertyStorage::swapBack(const THREAD_ID tid, const Elem & elem, unsign
   for (const auto state : stateIndexRange())
     shallowSwapDataBack(_stateful_prop_id_to_prop_id,
                         setProps(&elem, side, state),
-                        getMaterialData(tid).props(state));
+                        _material_data[tid].props(state));
 
   // Workaround for MOOSE difficulties in keeping materialless
   // elements (e.g. Lower D elements in Mortar code) materials
@@ -537,7 +552,7 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
                                    unsigned int side,
                                    unsigned int n_qpoints)
 {
-  auto & material_data = getMaterialData(tid);
+  auto & material_data = _material_data[tid];
   material_data.resize(n_qpoints);
 
   auto & mat_props = initAndSetProps(elem, side, state);

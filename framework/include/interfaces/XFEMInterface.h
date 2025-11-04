@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -41,7 +41,7 @@ public:
    * Constructor
    */
   explicit XFEMInterface(const InputParameters & params)
-    : ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    : ConsoleStreamInterface(*params.getCheckedPointerParam<MooseApp *>(MooseBase::app_param)),
       _fe_problem(params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
       _moose_mesh(nullptr),
       _moose_displaced_mesh(nullptr),
@@ -109,7 +109,7 @@ public:
 
   virtual bool getXFEMWeights(MooseArray<Real> & weights,
                               const Elem * elem,
-                              QBase * qrule,
+                              libMesh::QBase * qrule,
                               const MooseArray<Point> & q_points) = 0;
 
   /**
@@ -122,7 +122,7 @@ public:
    */
   virtual bool getXFEMFaceWeights(MooseArray<Real> & weights,
                                   const Elem * elem,
-                                  QBase * qrule,
+                                  libMesh::QBase * qrule,
                                   const MooseArray<Point> & q_points,
                                   unsigned int side) = 0;
 

@@ -32,13 +32,19 @@ flux, an outgoing radiative heat flux is modeled using [FunctionRadiativeBC.md]
 
 Evaporation of material from the liquefied material surface helps
 drive momentum changes at the surface of the condensed phase; this effect is incorporated via the
-[INSADVaporRecoilPressureMomentumFluxBC.md] object
+[INSADVaporRecoilPressureMomentumFluxBC.md] object:
 
 !listing modules/navier_stokes/examples/laser-welding/3d.i block=BCs/vapor_recoil
 
+The surface tension of the liquid also contributes to the
+forces that determine the deformation of the surface. This effect is
+added using the [INSADSurfaceTensionBC.md] object:
+
+!listing modules/navier_stokes/examples/laser-welding/3d.i block=BCs/surface_tension
+
 These surface momentum and velocity
 changes are then translated into mesh displacement
-through [INSADDisplaceBoundaryBC.md] objects
+through [INSADDisplaceBoundaryBC.md] objects.
 
 !listing modules/navier_stokes/examples/laser-welding/3d.i block=BCs/displace_x_top BCs/displace_y_top BCs/displace_z_top
 

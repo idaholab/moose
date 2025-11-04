@@ -34,7 +34,7 @@
 []
 
 [VectorPostprocessors]
-  [T]
+  [T_vpp]
     type = LineValueSampler
     start_point = '0.1 0 0'
     end_point = '0.9 0 0'

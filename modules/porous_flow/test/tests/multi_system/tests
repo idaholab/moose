@@ -1,0 +1,24 @@
+[Tests]
+  issues = "#30944"
+  design = "PorousFlowFullySaturated.md"
+  [fully_coupled_flow_mecha]
+    type = CSVDiff
+    input = 'flow_and_mecha.i'
+    cli_args = "Problem/nl_sys_names=nl0
+                Variables/disp_x/solver_sys=nl0 Variables/disp_y/solver_sys=nl0 Variables/disp_z/solver_sys=nl0 Variables/porepressure/solver_sys=nl0
+                Preconditioning/active=SMP_porous Preconditioning/SMP_porous/nl_sys=nl0"
+    csvdiff = 'flow_and_mecha_out.csv'
+    threading = '!pthreads'
+    method = 'opt'
+    requirement = "The system shall be able to use a fully coupled nonlinear system approach to solving porous media - solid mechanics coupled problems."
+  []
+  [multi_system_flow_mecha]
+    type = CSVDiff
+    input = 'flow_and_mecha.i'
+    csvdiff = 'flow_and_mecha_out.csv'
+    # same input, same gold files
+    prereq = 'fully_coupled_flow_mecha'
+    threading = '!pthreads'
+    requirement = "The system shall be able to use a segregated multiple nonlinear system approach to solving porous media - solid mechanics coupled problems."
+  []
+[]

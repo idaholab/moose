@@ -187,8 +187,8 @@ rho=1.1
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_package -mat_mumps_icntl_14'
+  petsc_options_value = 'lu       NONZERO               mumps                         300'
   nl_rel_tol = 1e-12
 []
 

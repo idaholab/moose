@@ -1,15 +1,11 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
-// Standard includes
-#include <sstream>
-#include <stdexcept>
 
 // MOOSE includes
 #include "AddVariableAction.h"
@@ -19,14 +15,12 @@
 #include "MooseEigenSystem.h"
 #include "MooseObjectAction.h"
 #include "MooseMesh.h"
+#include "CopyNodalVarsAction.h"
 
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
+
+using namespace libMesh;
 
 registerMooseAction("MooseApp", AddVariableAction, "add_variable");
 
@@ -54,6 +48,7 @@ AddVariableAction::validParams()
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Specifies a constant initial condition for this variable");
+  params.transferParam<std::string>(CopyNodalVarsAction::validParams(), "initial_from_file_var");
   return params;
 }
 
@@ -105,30 +100,37 @@ AddVariableAction::init()
   // be populated. So we should apply the parameters directly from the action. There should be no
   // case in which both params objects get set by the user and they have different values
 
-  if (_pars.isParamSetByUser("family") && _moose_object_pars.isParamSetByUser("family") &&
-      !_pars.get<MooseEnum>("family").compareCurrent(_moose_object_pars.get<MooseEnum>("family")))
+  if (isParamSetByUser("family") && _moose_object_pars.isParamSetByUser("family") &&
+      !getParam<MooseEnum>("family").compareCurrent(_moose_object_pars.get<MooseEnum>("family")))
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`family` parameter set, and they are different values: ",
                _moose_object_pars.get<MooseEnum>("family"),
                " and ",
-               _pars.get<MooseEnum>("family"),
+               getParam<MooseEnum>("family"),
                " respectively. I don't know how you achieved this, but you need to rectify it.");
 
-  if (_pars.isParamSetByUser("order") && _moose_object_pars.isParamSetByUser("order") &&
-      !_pars.get<MooseEnum>("order").compareCurrent(_moose_object_pars.get<MooseEnum>("order")))
+  if (isParamSetByUser("order") && _moose_object_pars.isParamSetByUser("order") &&
+      !getParam<MooseEnum>("order").compareCurrent(_moose_object_pars.get<MooseEnum>("order")))
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`order` parameter set, and they are different values: ",
                _moose_object_pars.get<MooseEnum>("order"),
                " and ",
-               _pars.get<MooseEnum>("order"),
+               getParam<MooseEnum>("order"),
                " respectively. I don't know how you achieved this, but you need to rectify it.");
 
-  if (_pars.isParamSetByUser("scaling") && _moose_object_pars.isParamSetByUser("scaling") &&
-      _pars.get<std::vector<Real>>("scaling") !=
+  if (isParamSetByUser("scaling") && _moose_object_pars.isParamSetByUser("scaling") &&
+      getParam<std::vector<Real>>("scaling") !=
           _moose_object_pars.get<std::vector<Real>>("scaling"))
     mooseError("Both the MooseVariable* and Add*VariableAction parameters objects have had the "
                "`scaling` parameter set, and they are different values. I don't know how you "
                "achieved this, but you need to rectify it.");
+
+  if (isParamSetByUser("initial_condition") && isParamSetByUser("initial_from_file_var"))
+    paramError("initial_condition",
+               "Two initial conditions have been provided for the variable ",
+               name(),
+               " using the 'initial_condition' and 'initial_from_file_var' parameters. Please "
+               "remove one of them.");
 
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
@@ -152,21 +154,22 @@ AddVariableAction::act()
   init();
 
   // Get necessary data for creating a variable
-  std::string var_name = name();
+  const auto var_name = varName();
   addVariable(var_name);
 
   // Set the initial condition
-  if (_pars.isParamValid("initial_condition"))
-    createInitialConditionAction();
+  if (isParamValid("initial_condition"))
+  {
+    const auto & value = getParam<std::vector<Real>>("initial_condition");
+    createInitialConditionAction(value);
+  }
 }
 
 void
-AddVariableAction::createInitialConditionAction()
+AddVariableAction::createInitialConditionAction(const std::vector<Real> & value)
 {
   // Variable name
-  std::string var_name = name();
-
-  auto value = _pars.get<std::vector<Real>>("initial_condition");
+  const auto var_name = varName();
 
   // Create the object name
   std::string long_name("");

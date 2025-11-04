@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'mesh_displaced_interface_test.i'
+    csvdiff = 'mesh_displaced_interface_test_out.csv'
+    requirement = 'The system shall support the ability to update objects built with the displace mesh when displaced mesh gets updated.'
+    issues = '#30852'
+    design = 'MeshDisplacedInterface.md'
+  []
+[]

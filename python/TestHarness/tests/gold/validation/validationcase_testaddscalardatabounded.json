@@ -1,0 +1,28 @@
+{
+  "data": {
+    "data": {
+      "abs_zero": null,
+      "bounds": [
+        0.19999999999999996,
+        2.2
+      ],
+      "description": "unused",
+      "key": "data",
+      "nominal": null,
+      "rel_err": null,
+      "test": null,
+      "units": null,
+      "validation": true,
+      "value": 1.2
+    }
+  },
+  "results": [
+    {
+      "data_key": "data",
+      "message": "value 1.200E+00 within bounds; min = 2.000E-01, max = 2.200E+00",
+      "status": "OK",
+      "test": null,
+      "validation": true
+    }
+  ]
+}

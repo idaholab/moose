@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -59,6 +59,7 @@ WCNSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
   a += rho * var_dot.derivatives()[dof_number];
 
   const auto volume = _assembly.elementVolume(&elem);
-  _rc_uo.addToA(&elem, _index, a * volume);
+  if (_contribute_to_rc_coeffs)
+    _rc_uo.addToA(&elem, _index, a * volume);
   addResidualAndJacobian(strong_resid * volume, dof_number);
 }

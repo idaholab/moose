@@ -1,0 +1,20 @@
+[Tests]
+  design = 'SideFVFluxBCIntegral.md'
+  issues = '#28767'
+  [diffusive_flux]
+    type = 'CSVDiff'
+    requirement = 'The system shall be able to integrate the contributions from finite volume flux boundary conditions on sidesets.'
+    input = 'fvfluxbc_integral.i'
+    csvdiff = 'fvfluxbc_integral_out.csv'
+  []
+  [errors]
+    requirement = 'The system shall throw an error message '
+    [wrong-bc-type]
+      type = 'RunException'
+      input = 'fvfluxbc_integral.i'
+      detail = "when the user inputs a boundary condition with the wrong type to SideFVFluxBCIntegral postprocessor."
+      cli_args = 'FVBCs/inactive=left FVBCs/dummy/type=FVDirichletBC FVBCs/dummy/variable=u FVBCs/dummy/value=42 FVBCs/dummy/boundary=left Postprocessors/flux_left/fvbcs=dummy'
+      expect_err = " The given FVFluxBC with name 'dummy' was not found!"
+    []
+  []
+[]

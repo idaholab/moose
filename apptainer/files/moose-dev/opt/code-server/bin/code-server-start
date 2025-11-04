@@ -1,0 +1,86 @@
+#!/bin/bash
+# Helper script for setting up a code-server dameon for a user without needing
+# to know the slew of commands for running code-server itself.
+#
+# Arguments to this script are passed directly to code-server.
+#
+# The following environment variables are read and used if set:
+# - CODE_SERVER_PORT:            The port to listen on (defaults to 8080)
+# - CODE_SERVER_PASSWORD:        The password to use for connection; if not set, one is
+#                                generated and presented on screen
+# - CODE_SERVER_DATAROOT:        The data root to use for code server and the extensions.
+#                                If not set, the default by code-server will be used.
+# - CODE_SERVER_SKIP_EXTENSIONS: Set to anything to skip the install of extensions
+# - UNSET_APPTAINER_VARS:        Set to anything to unset APPTAINER/SINGULARITY vars
+
+set -e
+
+# The port to run on, auto set to 8080
+PORT=${CODE_SERVER_PORT:-8080}
+unset CODE_SERVER_PORT
+
+# The password to connect with, if one is not provided (randomly generated)
+PASSWORD=
+if [ -z "$CODE_SERVER_PASSWORD" ]; then
+  PASSWORD="$(tr -dc A-Za-z0-9 </dev/urandom | head -c 24)"
+# Password was provided, so don't show it
+else
+  PASSWORD="${CODE_SERVER_PASSWORD}"
+fi
+export PASSWORD
+
+# Create the dataroot if it doesn't exist + the extensions
+if [ -n "$CODE_SERVER_DATAROOT" ]; then
+  mkdir -p "${CODE_SERVER_DATAROOT}/extensions"
+fi
+
+# Additional arguments to pass to code-server, starting with the extensions
+# because we will install them first
+CODE_SERVER_ARGS=()
+if [ -n "$CODE_SERVER_DATAROOT" ]; then
+  CODE_SERVER_ARGS+=("--extensions-dir=${CODE_SERVER_DATAROOT}/extensions")
+fi
+
+# Install the extensions, unless requested not to
+if [ -z "$CODE_SERVER_SKIP_EXTENSIONS" ]; then
+  /opt/code-server/bin/code-server-setup-extensions "${CODE_SERVER_ARGS[@]}"
+else
+  unset CODE_SERVER_SKIP_EXTENSIONS
+fi
+
+# Pass the dataroot if its set
+if [ -n "$CODE_SERVER_DATAROOT" ]; then
+  CODE_SERVER_ARGS+=("--user-data-dir=${CODE_SERVER_DATAROOT}")
+fi
+unset CODE_SERVER_DATAROOT
+
+# Expose the password to the user if we set it
+if [ -z "$CODE_SERVER_PASSWORD" ]; then
+  GREEN='\033[0;32m'
+  NC='\033[0m'
+  printf "${GREEN}Connect to the instance at http://localhost:${PORT} with password ${PASSWORD}${NC}\n"
+else
+  unset CODE_SERVER_PASSWORD
+fi
+
+if [ -n "$UNSET_APPTAINER_VARS" ]; then
+  unset "${!APPTAINER@}" "${!SINGULARITY@}" UNSET_APPTAINER_VARS
+fi
+
+# If we're using openmpi, we need to allow running as root
+# if we're in a fakeroot environment
+if [ "$(whoami)" == root ] && which ompi_info &> /dev/null; then
+    export OMPI_ALLOW_RUN_AS_ROOT=1
+    export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+fi
+
+# Run the server
+code-server --auth=password \
+            --bind-addr=0.0.0.0:"${PORT}" \
+            --disable-telemetry \
+            --disable-getting-started-override \
+            --disable-update-check \
+            --disable-proxy \
+            --log debug \
+            "${CODE_SERVER_ARGS[@]}" \
+            "$@"

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -46,7 +46,9 @@ protected:
   /**
    * Called before forming the jacobian for an element
    */
-  virtual RealGradient precomputeQpJacobian();
+  virtual RealGradient precomputeQpJacobian() { return RealGradient(0.0); }
 
-  virtual Real computeQpResidual() override;
+  virtual Real computeQpResidual() override final { return 0.0; }
+
+  virtual Real computeQpJacobian() override final { return 0.0; }
 };

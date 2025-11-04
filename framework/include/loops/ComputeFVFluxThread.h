@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -396,11 +396,7 @@ protected:
 
 private:
   void reinitVariables(const FaceInfo & fi);
-  void checkPropDeps(const std::vector<std::shared_ptr<MaterialBase>> & mats) const;
   void finalizeContainers();
-  static void emptyDifferenceTest(const std::set<unsigned int> & requested,
-                                  const std::set<unsigned int> & supplied,
-                                  std::set<unsigned int> & difference);
 
   /// Print list of object types executed and in which order
   virtual void printGeneralExecutionInformation() const override;
@@ -570,77 +566,6 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::post()
 
 template <typename RangeType, typename AttributeTagType>
 void
-ComputeFVFluxThread<RangeType, AttributeTagType>::emptyDifferenceTest(
-    const std::set<unsigned int> & requested,
-    const std::set<unsigned int> & supplied,
-    std::set<unsigned int> & difference)
-{
-  std::set_difference(requested.begin(),
-                      requested.end(),
-                      supplied.begin(),
-                      supplied.end(),
-                      std::inserter(difference, difference.begin()));
-
-  mooseAssert(
-      difference.empty(),
-      "All of the material properties we depend on should already be supplied/computed. Do your FV "
-      "objects depend on a material property that is computed in a material with coupled FE "
-      "variables? If so, that property needs to be moved to a material without FE coupling.");
-}
-
-template <typename RangeType, typename AttributeTagType>
-void
-ComputeFVFluxThread<RangeType, AttributeTagType>::checkPropDeps(
-    const std::vector<std::shared_ptr<MaterialBase>> & libmesh_dbg_var(mats)) const
-{
-#ifndef NDEBUG
-  std::set<unsigned int> props_diff;
-  std::set<unsigned int> supplied_props;
-  std::unordered_set<unsigned int> fv_kernel_requested_props;
-
-  for (auto * kernel : _fv_flux_kernels)
-  {
-    const auto & mp_deps = kernel->getMatPropDependencies();
-    fv_kernel_requested_props.insert(mp_deps.begin(), mp_deps.end());
-  }
-
-  std::set<std::string> same_matprop_name;
-  for (std::shared_ptr<MaterialBase> mat : mats)
-  {
-    for (const auto prop_id : mat->getSuppliedPropIDs())
-    {
-      auto pr = supplied_props.insert(prop_id);
-      if (!pr.second)
-        same_matprop_name.insert(_fe_problem.getMaterialPropertyRegistry().getName(prop_id));
-    }
-
-    const auto & mp_deps = mat->getMatPropDependencies();
-    emptyDifferenceTest(
-        std::set<unsigned int>(mp_deps.begin(), mp_deps.end()), supplied_props, props_diff);
-  }
-
-  // Print a warning if block restricted materials are used
-  auto same_matprop_name_str = MooseUtils::join(same_matprop_name, " ");
-
-  if (same_matprop_name.size() > 0)
-    mooseDoOnce(
-        mooseWarning("Multiple objects supply properties of name ",
-                     same_matprop_name_str,
-                     ".\nDo you have different block-restricted physics *and* different "
-                     "block-restricted \nmaterials "
-                     "on either side of an interface that define the same "
-                     "property name? \nUnfortunately that is not supported in FV because we have "
-                     "to allow ghosting \nof material properties for block-restricted physics."));
-
-  emptyDifferenceTest(
-      std::set<unsigned int>(fv_kernel_requested_props.begin(), fv_kernel_requested_props.end()),
-      supplied_props,
-      props_diff);
-#endif
-}
-
-template <typename RangeType, typename AttributeTagType>
-void
 ComputeFVFluxThread<RangeType, AttributeTagType>::finalizeContainers()
 {
   //
@@ -693,12 +618,6 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::finalizeContainers()
                     _neigh_sub_neigh_face_mats.end(),
                     elem_sub_neigh_face_mat) == _neigh_sub_neigh_face_mats.end())
         _neigh_face_mats.push_back(elem_sub_neigh_face_mat);
-
-  //
-  // Check satisfaction of material property dependencies
-  //
-  checkPropDeps(_elem_face_mats);
-  checkPropDeps(_neigh_face_mats);
 }
 
 template <typename RangeType, typename AttributeTagType>

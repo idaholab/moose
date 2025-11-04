@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,6 +51,8 @@ INSFVWallFunctionBC::computeSegregatedContribution()
 ADReal
 INSFVWallFunctionBC::computeStrongResidual()
 {
+  using std::abs;
+
   // Get the velocity vector
   const FaceInfo & fi = *_face_info;
   const Elem & elem = fi.elem();
@@ -64,7 +66,7 @@ INSFVWallFunctionBC::computeStrongResidual()
 
   // Compute the velocity magnitude (parallel_speed) and
   // direction of the tangential velocity component (parallel_dir)
-  ADReal dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * _normal);
+  ADReal dist = abs((fi.elemCentroid() - fi.faceCentroid()) * _normal);
   ADReal perpendicular_speed = velocity * _normal;
   ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * _normal;
   ADReal parallel_speed = parallel_velocity.norm();
@@ -78,7 +80,8 @@ INSFVWallFunctionBC::computeStrongResidual()
 
   // Compute the friction velocity and the wall shear stress
   const auto rho = _rho(makeElemArg(&elem), state);
-  ADReal u_star = NS::findUStar(_mu(makeElemArg(&elem), state), rho, parallel_speed, dist.value());
+  ADReal u_star =
+      NS::findUStar<ADReal>(_mu(makeElemArg(&elem), state), rho, parallel_speed, dist.value());
   ADReal tau = u_star * u_star * rho;
   _a *= tau;
 

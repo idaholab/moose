@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,16 +12,20 @@
 #include "FVFluxKernel.h"
 #include "MathFVUtils.h"
 #include "SolutionInvalidInterface.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
  * isotropic diffusion coefficient, using functor material properties
  */
-class PINSFVEnergyDiffusion : public FVFluxKernel, protected SolutionInvalidInterface
+class PINSFVEnergyDiffusion : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
   PINSFVEnergyDiffusion(const InputParameters & params);
+
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
 
 protected:
   ADReal computeQpResidual() override;

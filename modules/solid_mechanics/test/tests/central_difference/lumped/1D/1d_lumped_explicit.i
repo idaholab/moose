@@ -48,10 +48,10 @@
 
 [NodalKernels]
   [./force_x]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_x
     boundary = right
-    function = force_x
+    functor = force_x
   [../]
 []
 
@@ -81,7 +81,7 @@
     block = 0
   [../]
   [./strain_block]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     block = 0
     displacements = 'disp_x'
     implicit = false

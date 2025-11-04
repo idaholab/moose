@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#22637 #29175'
+  design = 'WCNSLinearFVTwoPhaseMixturePhysics.md'
+  [lid-driven]
+    type = CSVDiff
+    input = 'lid-driven-two-phase-physics.i'
+    csvdiff = 'lid-driven-two-phase-physics_out.csv'
+    requirement = 'The system shall be able to model a lid-driven cavity with a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [rayleigh-benard]
+    type = CSVDiff
+    input = 'rayleigh-bernard-two-phase-physics.i'
+    csvdiff = 'rayleigh-bernard-two-phase-physics_out.csv'
+    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+    # Times out
+    heavy = True
+    method = 'opt'
+  []
+  [rayleigh-benard_heated]
+    type = CSVDiff
+    input = 'rayleigh-bernard-two-phase-physics_heated.i'
+    csvdiff = 'rayleigh-bernard-two-phase-physics_heated_out.csv'
+    requirement = 'The system shall be able to model a lid-driven cavity with Rayleigh Benard convection with a heated two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+    # Times out
+    heavy = True
+    method = 'opt'
+  []
+  [channel_regular]
+    type = CSVDiff
+    input = 'channel-drift-flux.i'
+    csvdiff = 'channel-drift-flux_out.csv'
+    requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [channel_physics]
+    type = CSVDiff
+    input = 'channel-drift-flux-physics.i'
+    csvdiff = 'channel-drift-flux-physics_out.csv'
+    requirement = 'The system shall be able to model channel flow using a two phase mixture using the linear finite volume discretization and a shorthand physics syntax.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+
+  [errors]
+    requirement = "The system shall return an error if"
+    [skewness]
+      type = RunException
+      input = 'lid-driven-two-phase-physics.i'
+      cli_args = "Mesh/gen/elem_type=TRI3 Mesh/inactive='' Physics/NavierStokes/FlowSegregated/flow/gravity='1 0 1'"
+      expect_err = 'We currently do not support mixture flow with buoyancy and mesh skewness.'
+      detail = 'a mixture model is used with buoyancy and a skewed mesh, as buoyancy forces reconstruction has not yet been implemented.'
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+[]

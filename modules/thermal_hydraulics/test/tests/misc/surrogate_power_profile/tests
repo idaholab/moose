@@ -7,6 +7,7 @@
     input = 'power_profile.i'
     exodiff = 'power_profile.e'
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to generate a power profile in an Exodus file to be read from a 1D flow simulation.'
   []
 

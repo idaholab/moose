@@ -4,7 +4,7 @@
     input = parallel_feature_count.i
     csvdiff = parallel_feature_count_out.csv
     # This test requires VTK because it uses the ImageFunction class
-    vtk = true
+    capabilities = 'vtk'
     min_parallel = 4
   [../]
 
@@ -14,7 +14,7 @@
     csvdiff = boxes_out.csv
     cli_args = 'Mesh/file=boxes_16x16.png Outputs/file_base=boxes_out'
     # This test requires VTK because it uses the ImageFunction class
-    vtk = true
+    capabilities = 'vtk'
     min_parallel = 4
   [../]
 
@@ -24,7 +24,7 @@
     csvdiff = l_shapes_out.csv
     cli_args = 'Mesh/file=l_shapes_16x16.png Outputs/file_base=l_shapes_out'
     # This test requires VTK because it uses the ImageFunction class
-    vtk = true
+    capabilities = 'vtk'
     min_parallel = 4
   [../]
 []

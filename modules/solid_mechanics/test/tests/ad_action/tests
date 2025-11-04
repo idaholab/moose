@@ -1,86 +1,86 @@
 [Tests]
   design = 'syntax/Physics/SolidMechanics/QuasiStatic/index.md'
   issues = '#7555'
-  [./two_block_new]
+  [two_block_new]
     type = Exodiff
     input = 'two_block_new.i'
     exodiff = 'two_block_new_out.e'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall create a consistent strain calculator material and stress divergence kernel and shall generate different sets of outputs for different mesh subblocks.'
-  [../]
+    requirement = 'The QuasiStatic SolidMechanics Physics shall create a consistent strain calculator material and stress divergence kernel and shall generate different sets of outputs for different mesh subblocks when automatic differentiation is requested.'
+  []
 
-  [./two_block]
+  [two_block]
     type = Exodiff
     input = 'two_block.i'
     exodiff = 'two_block_out.e'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/block1/block=1'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks requesting different strain formulations.'
-  [../]
+    requirement = 'The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks requesting different strain formulations when automatic differentiation is requested.'
+  []
 
-  [./error_unrestricted]
+  [error_unrestricted]
     type = RunException
     input = 'two_block.i'
     expect_err = 'No SolidMechanics/QuasiStatic action can be block unrestricted if more than one SolidMechanics/QuasiStatic action is specified.'
     prereq = 'two_block'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file does not specify block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
-  [../]
+    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file does not specify block restrictions for the MasterAction in input files with more than one instance of the MasterAction block when automatic differentiation is requested.'
+  []
 
-  [./error_overlapping]
+  [error_overlapping]
     type = RunException
     input = 'two_block.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/block1/block=2'
     expect_err = 'The block restrictions in the SolidMechanics/QuasiStatic actions must be non-overlapping.'
     prereq = 'error_unrestricted'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file specifies overlapping block restrictions for the MasterAction in input files with more than one instance of the MasterAction block.'
-  [../]
+    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file specifies overlapping block restrictions for the MasterAction in input files with more than one instance of the MasterAction block when automatic differentiation is requested.'
+  []
 
-  [./two_coord]
+  [two_coord]
     type = Exodiff
     input = 'two_coord.i'
     exodiff = 'two_coord_out.e'
     rel_err = 1e-5
-    requirement = 'The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks using different coordinate systems.'
-  [../]
+    requirement = 'The QuasiStatic SolidMechanics Physics shall create different sets of consistent strain calculator material and stress divergence kernel pairs for different mesh subblocks using different coordinate systems when automatic differentiation is requested.'
+  []
 
-  [./error_coord]
+  [error_coord]
     type = RunException
     input = 'two_coord.i'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/active=error'
     expect_err = 'The SolidMechanics action requires all subdomains to have the same coordinate system.'
     prereq = 'two_coord'
-    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file assigns the same QuasiStatic SolidMechanics Physics block to mesh blocks with different coordinate systems.'
-  [../]
+    requirement = 'The QuasiStatic SolidMechanics Physics shall error if an input file assigns the same QuasiStatic SolidMechanics Physics block to mesh blocks with different coordinate systems when automatic differentiation is requested.'
+  []
 
-  [./two_block-jac]
+  [two_block-jac]
     type = 'PetscJacobianTester'
     input = 'two_block.i'
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
     cli_args = 'Physics/SolidMechanics/QuasiStatic/block1/block=1'
-    requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect'
-  [../]
-  [./two_block_no_action-jac]
+    requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect when automatic differentiation is requested.'
+  []
+  [two_block_no_action-jac]
     type = 'PetscJacobianTester'
     input = 'two_block_no_action.i'
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
-    requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect (non action test case)'
-  [../]
-  [./two_block_new-jac]
+    requirement = 'The Jacobian for the automatic differentiation in the two_block testproblem shall be perfect (non action test case) when automatic differentiation is requested.'
+  []
+  [two_block_new-jac]
     type = 'PetscJacobianTester'
     input = 'two_block_new.i'
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
-    requirement = 'The Jacobian for the automatic differentiation in the two_block_new problem shall be perfect'
-  [../]
-  [./two_coord-jac]
+    requirement = 'The Jacobian for the automatic differentiation in the two_block_new problem shall be perfect when automatic differentiation is requested.'
+  []
+  [two_coord-jac]
     type = 'PetscJacobianTester'
     input = 'two_coord.i'
     run_sim = 'True'
     ratio_tol = 1e-7
     difference_tol = 1e4
-    requirement = 'The Jacobian for the automatic differentiation two_coord problem shall be perfect'
-  [../]
+    requirement = 'The Jacobian for the automatic differentiation two_coord problem shall be perfect when automatic differentiation is requested.'
+  []
 []

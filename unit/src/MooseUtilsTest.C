@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,6 +61,24 @@ TEST(MooseUtils, trim)
   EXPECT_EQ(MooseUtils::trim("      andrew edward"), "andrew edward");
   EXPECT_EQ(MooseUtils::trim("andrew edward    "), "andrew edward");
   EXPECT_EQ(MooseUtils::trim("  andrew edward    "), "andrew edward");
+}
+
+TEST(MooseUtils, removeExtraWhitespace)
+{
+  const auto test = [](const std::string & str, const std::string & expected_result)
+  {
+    const auto result = MooseUtils::removeExtraWhitespace(str);
+    ASSERT_EQ(expected_result, result);
+  };
+
+  test(" foo", "foo");
+  test("foo ", "foo");
+  test(" foo ", "foo");
+  test("  foo  ", "foo");
+  test("      a b  c d", "a b c d");
+  test("", "");
+  test(" ", "");
+  test("    ", "");
 }
 
 TEST(MooseUtils, tokenizeAndConvert)
@@ -313,6 +331,9 @@ TEST(MooseUtils, split)
 
   out = MooseUtils::split("a/b/c/d", "/", 2);
   EXPECT_EQ(out, std::vector<std::string>({"a", "b", "c/d"}));
+
+  out = MooseUtils::split("", ";");
+  EXPECT_EQ(out, std::vector<std::string>({""}));
 }
 
 TEST(MooseUtils, rsplit)

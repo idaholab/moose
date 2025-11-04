@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosBCs/index.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_coupled_dirichlet_bc.i'
+    exodiff = 'kokkos_coupled_dirichlet_bc_out.e'
+    requirement = 'The Kokkos system shall support the creation of BoundaryCondition objects that couple to nonlinear variables.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

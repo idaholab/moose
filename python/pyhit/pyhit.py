@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,6 @@
 
 """Wrapper for hit parser."""
 import os
-import subprocess
 import moosetree
 import hit
 from mooseutils import message
@@ -331,8 +330,9 @@ def parse(content, root=None, filename=''):
     for the tree to populate; if it is given this same node is returned. The *filename*, if provided,
     will be used for error reporting when manipulating the tree.
     """
+    if not content.strip():
+        raise ValueError("pyhit cannot parse null content.")
     hit_node = hit.parse(filename, content)
-    hit.explode(hit_node)
     root = Node(root, hit_node) if root is not None else Node(None, hit_node)
     _parse_hit(root, hit_node, filename)
     return root

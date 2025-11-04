@@ -1,0 +1,47 @@
+{
+    "reporters": {
+        "hex_grid_2rings_exclusions": {
+            "type": "HexagonalGridPositions",
+            "values": {
+                "positions_1d": {
+                    "type": "std::vector<libMesh::Point>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "hex_grid_2rings_exclusions": {
+                "positions_1d": [
+                    {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 5.179260919542346e-17,
+                        "y": 0.5,
+                        "z": 0.0
+                    },
+                    {
+                        "x": -0.4330127018922193,
+                        "y": 0.25,
+                        "z": 0.0
+                    },
+                    {
+                        "x": -5.179260919542346e-17,
+                        "y": -0.5,
+                        "z": 0.0
+                    },
+                    {
+                        "x": 0.4330127018922193,
+                        "y": -0.25,
+                        "z": 0.0
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

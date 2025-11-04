@@ -4,12 +4,12 @@
     input = checkpoint.i
     max_parallel = 1
     max_threads = 1
-    check_files ='checkpoint_out_cp/0001-mesh.cpr/1/header.cpr
-                  checkpoint_out_cp/0001-mesh.cpr/1/split-1-0.cpr
+    check_files ='checkpoint_out_cp/0001-mesh.cpa.gz/1/header.gz
+                  checkpoint_out_cp/0001-mesh.cpa.gz/1/split-1-0.gz
                   checkpoint_out_cp/0001-restart-0.rd/data
                   checkpoint_out_cp/0001-restart-0.rd/header
-                  checkpoint_out_cp/0002-mesh.cpr/1/header.cpr
-                  checkpoint_out_cp/0002-mesh.cpr/1/split-1-0.cpr
+                  checkpoint_out_cp/0002-mesh.cpa.gz/1/header.gz
+                  checkpoint_out_cp/0002-mesh.cpa.gz/1/split-1-0.gz
                   checkpoint_out_cp/0002-restart-0.rd/data
                   checkpoint_out_cp/0002-restart-0.rd/header'
    requirement = 'The XFEM module shall support outputting of checkpoint files.'

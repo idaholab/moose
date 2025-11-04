@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,6 +20,10 @@
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
 
+// This is not strictly needed here, but it used to be included by ADReal.h
+// so developers relied heavily on it being already available
+#include "MooseError.h"
+
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"
@@ -27,6 +31,7 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/parameters.h"
 #include "libmesh/dense_vector.h"
+#include "libmesh/dense_matrix.h"
 #include "libmesh/int_range.h"
 
 // BOOST include
@@ -44,8 +49,13 @@
 #include <memory>
 #include <type_traits>
 #include <functional>
+#include <iterator> // std::data
 
+#if !defined(INCLUDE_NLOHMANN_JSON_HPP_) && !defined(MOOSE_NLOHMANN_INCLUDED)
+#undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
 #include "nlohmann/json_fwd.h"
+#define MOOSE_NLOHMANN_INCLUDED
+#endif
 
 // DO NOT USE (Deprecated)
 #define MooseSharedPointer std::shared_ptr
@@ -132,28 +142,13 @@ class InputParameters;
 
 namespace libMesh
 {
-template <typename>
-class VectorValue;
 typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, Moose::dim, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim * Moose::dim> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
-template <typename>
-class TypeVector;
-template <typename>
-class TensorValue;
 typedef TensorValue<Real> RealTensorValue;
-template <typename>
-class TypeTensor;
-template <unsigned int, typename>
-class TypeNTensor;
-class Point;
-template <typename>
-class DenseMatrix;
-template <typename>
-class DenseVector;
 
 namespace TensorTools
 {
@@ -176,6 +171,22 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim>>
 };
 }
 }
+
+// Common types defined in libMesh
+using libMesh::Gradient;
+using libMesh::RealGradient;
+
+// Bring these common types added to the libMesh namespace in this header
+// to global namespace
+using libMesh::DenseMatrix;
+using libMesh::DenseVector;
+using libMesh::RealDIMValue;
+using libMesh::RealEigenMatrix;
+using libMesh::RealEigenVector;
+using libMesh::RealTensorArrayValue;
+using libMesh::RealTensorValue;
+using libMesh::RealVectorArrayValue;
+using libMesh::RealVectorValue;
 
 namespace MetaPhysicL
 {
@@ -203,8 +214,9 @@ typedef unsigned int PerfID;
 typedef unsigned int InvalidSolutionID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
-typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
-typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
+typedef libMesh::StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
+typedef libMesh::StoredRange<std::vector<const Elem *>::iterator, const Elem *>
+    ConstElemPointerRange;
 
 namespace Moose
 {
@@ -216,7 +228,7 @@ namespace Moose
 /// up with some overkill complex mechanism for dynamically resizing them.
 /// Eventually, we may need or implement that more sophisticated mechanism and
 /// will no longer need this.
-constexpr std::size_t constMaxQpsPerElem = 216;
+constexpr std::size_t constMaxQpsPerElem = 1000;
 
 // These are used by MooseVariableData and MooseVariableDataFV
 enum SolutionState : int
@@ -230,7 +242,8 @@ enum SolutionState : int
 enum class SolutionIterationType : unsigned short
 {
   Time = 0,
-  Nonlinear
+  Nonlinear = 1,
+  FixedPoint = 2
 };
 
 // These are used by MooseVariableData and MooseVariableDataFV
@@ -266,9 +279,9 @@ struct DOFType<RealVectorValue>
 template <typename OutputType>
 struct OutputTools
 {
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   typedef MooseArray<OutputType> VariableValue;
   typedef MooseArray<OutputGradient> VariableGradient;
@@ -277,9 +290,9 @@ struct OutputTools
   typedef MooseArray<OutputDivergence> VariableDivergence;
 
   typedef typename Moose::ShapeType<OutputType>::type OutputShape;
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
-  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
 
   typedef MooseArray<std::vector<OutputShape>> VariablePhiValue;
   typedef MooseArray<std::vector<OutputShapeGradient>> VariablePhiGradient;
@@ -366,6 +379,7 @@ typedef MooseArray<ADRealTensorValue> ADVariableSecond;
 typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
 typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
 typedef MooseArray<libMesh::TypeNTensor<3, ADReal>> ADVectorVariableSecond;
+typedef MooseArray<ADRealVectorValue> ADVectorVariableCurl;
 
 namespace Moose
 {
@@ -574,7 +588,7 @@ struct IsADType<MetaPhysicL::DualNumber<T, Args...>>
  * error with constexpr-based if conditions. The templating delays the triggering
  * of the static assertion until the template is instantiated.
  */
-template <class T>
+template <class... Ts>
 constexpr std::false_type always_false{};
 
 } // namespace Moose
@@ -595,6 +609,8 @@ using ADTemplateVariableGradient =
 template <typename T>
 using ADTemplateVariableSecond =
     typename OutputTools<typename Moose::ADType<T>::type>::VariableSecond;
+template <typename T>
+using ADTemplateVariableCurl = typename OutputTools<typename Moose::ADType<T>::type>::VariableCurl;
 
 typedef VariableTestValue ADVariableTestValue;
 typedef VariableTestGradient ADVariableTestGradient;
@@ -647,6 +663,8 @@ using GenericRankFourTensor = Moose::GenericType<RankFourTensor, is_ad>;
 template <bool is_ad>
 using GenericVariableValue = Moose::GenericType<VariableValue, is_ad>;
 template <bool is_ad>
+using GenericVectorVariableValue = Moose::GenericType<VectorVariableValue, is_ad>;
+template <bool is_ad>
 using GenericVariableGradient = Moose::GenericType<VariableGradient, is_ad>;
 template <bool is_ad>
 using GenericVariableSecond = Moose::GenericType<VariableSecond, is_ad>;
@@ -659,8 +677,6 @@ namespace Moose
 {
 extern const processor_id_type INVALID_PROCESSOR_ID;
 extern const SubdomainID ANY_BLOCK_ID;
-extern const SubdomainID INTERNAL_SIDE_LOWERD_ID;
-extern const SubdomainID BOUNDARY_SIDE_LOWERD_ID;
 extern const SubdomainID INVALID_BLOCK_ID;
 extern const BoundaryID ANY_BOUNDARY_ID;
 extern const BoundaryID INVALID_BOUNDARY_ID;
@@ -976,6 +992,31 @@ typedef std::function<void(const InputParameters &, InputParameters &)>
 
 std::string stringify(const Moose::RelationshipManagerType & t);
 std::string stringify(const Moose::TimeIntegratorType & t);
+
+/**
+ * Struct that all MOOSE derivative strings derive from
+ */
+struct DerivativeStringClass
+{
+};
+
+/**
+ * ContainerElement<R>:
+ *  - We use std::declval<R&>() (note the '&') to model an *lvalue* of R.
+ *    This forces std::data to pick the lvalue-qualified overload and yields
+ *    the element type with correct constness (e.g., const double* for a
+ *    const container). Using std::declval<R>() would model an rvalue and can
+ *    select different overloads or constness, which is not what typical code
+ *    sees when accessing a container's data().
+ *  - Assumes R exposes contiguous storage (std::data) and a size().
+ *  - Strips cv/ref qualifiers from the dereferenced pointer to get the element.
+ *
+ * Type trait created with assistance of ChatGPT 5
+ */
+template <class Container>
+using ContainerElement =
+    std::remove_cv_t<std::remove_reference_t<decltype(*std::data(std::declval<Container &>()))>>;
+
 } // namespace Moose
 
 namespace libMesh
@@ -987,9 +1028,7 @@ print_helper(std::ostream & os, const Moose::RelationshipManagerType * param)
   // Specialization so that we don't print out unprintable characters
   os << Moose::stringify(*param);
 }
-
-// End of Moose Namespace
-}
+} // namespace libMesh
 
 template <>
 struct enable_bitmask_operators<Moose::RelationshipManagerType>
@@ -1005,8 +1044,8 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * Be sure to use the DerivativeStringToJSON macro for new types in
  * MooseTypes.C to also define to_json for each
  */
-#define DerivativeStringClass(TheName)                                                             \
-  class TheName : public std::string                                                               \
+#define MooseDerivativeStringClass(TheName)                                                        \
+  class TheName : public std::string, public Moose::DerivativeStringClass                          \
   {                                                                                                \
   public:                                                                                          \
     TheName() : std::string() {}                                                                   \
@@ -1031,137 +1070,192 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
 /// This type is for expected (i.e. input) file names or paths that your simulation needs.
 /// If relative types are assigned to this type, they are replaced with an absolute path
 /// that is relative to the context of the parameter (usually the input file).
-DerivativeStringClass(FileName);
+MooseDerivativeStringClass(FileName);
 
 /// Similar to FileName but without an extension
-DerivativeStringClass(FileNameNoExtension);
+MooseDerivativeStringClass(FileNameNoExtension);
 
 /// This type is for expected filenames that should be relative and will not have their
 /// values set to absolute paths like FileName
-DerivativeStringClass(RelativeFileName);
+MooseDerivativeStringClass(RelativeFileName);
 
 /// This type is for files used in the DataFileInterface, which enables searching of files
 /// within the registered data directory
-DerivativeStringClass(DataFileName);
+MooseDerivativeStringClass(DataFileName);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
-DerivativeStringClass(MeshFileName);
+MooseDerivativeStringClass(MeshFileName);
+
+/// This type is similar to "FileName", but is used to further filter file dialogs on known matrix file types
+MooseDerivativeStringClass(MatrixFileName);
 
 /// This type is for output file base
-DerivativeStringClass(OutFileBase);
+MooseDerivativeStringClass(OutFileBase);
 
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
-DerivativeStringClass(NonlinearVariableName);
+MooseDerivativeStringClass(NonlinearVariableName);
 
 /// This type is used for objects that expect linear variable names (i.e. LinearFVKernels, LinearFVBCs)
-DerivativeStringClass(LinearVariableName);
+MooseDerivativeStringClass(LinearVariableName);
 
 /// This type is used for objects that expect linear or nonlinear solver variable names
-DerivativeStringClass(SolverVariableName);
+MooseDerivativeStringClass(SolverVariableName);
 
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
-DerivativeStringClass(AuxVariableName);
+MooseDerivativeStringClass(AuxVariableName);
 
 /// This type is used for objects that expect either Solver or Auxiliary Variables such as postprocessors
-DerivativeStringClass(VariableName);
+MooseDerivativeStringClass(VariableName);
 
 /// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
-DerivativeStringClass(BoundaryName);
+MooseDerivativeStringClass(BoundaryName);
 
 /// This type is similar to BoundaryName but is used for "blocks" or subdomains in the current mesh
-DerivativeStringClass(SubdomainName);
+MooseDerivativeStringClass(SubdomainName);
 
 /// This type is used for objects that expect Postprocessor objects
-DerivativeStringClass(PostprocessorName);
+MooseDerivativeStringClass(PostprocessorName);
 
 /// This type is used for objects that expect VectorPostprocessor objects
-DerivativeStringClass(VectorPostprocessorName);
+MooseDerivativeStringClass(VectorPostprocessorName);
 
 /// This type is used for objects that expect MeshDivision objects
-DerivativeStringClass(MeshDivisionName);
+MooseDerivativeStringClass(MeshDivisionName);
 
 /// This type is used for objects that expect Moose Function objects
-DerivativeStringClass(FunctionName);
+MooseDerivativeStringClass(FunctionName);
 
 /// This type is used for objects that expect Moose Distribution objects
-DerivativeStringClass(DistributionName);
+MooseDerivativeStringClass(DistributionName);
 
 /// This type is used for objects that expect Moose Sampler objects
-DerivativeStringClass(SamplerName);
+MooseDerivativeStringClass(SamplerName);
 
 /// This type is used for objects that expect "UserObject" names
-DerivativeStringClass(UserObjectName);
+MooseDerivativeStringClass(UserObjectName);
 
 /// This type is used for objects that expect an Indicator object name
-DerivativeStringClass(IndicatorName);
+MooseDerivativeStringClass(IndicatorName);
 
 /// This type is used for objects that expect an Marker object name
-DerivativeStringClass(MarkerName);
+MooseDerivativeStringClass(MarkerName);
 
 /// This type is used for objects that expect an MultiApp object name
-DerivativeStringClass(MultiAppName);
+MooseDerivativeStringClass(MultiAppName);
 
 /// Used for objects the require Output object names
-DerivativeStringClass(OutputName);
+MooseDerivativeStringClass(OutputName);
 
 /// Used for objects that expect MaterialProperty names
-DerivativeStringClass(MaterialPropertyName);
+MooseDerivativeStringClass(MaterialPropertyName);
 
 /// Used for objects that expect Moose::Functor names
-DerivativeStringClass(MooseFunctorName);
+MooseDerivativeStringClass(MooseFunctorName);
 
 /// User for accessing Material objects
-DerivativeStringClass(MaterialName);
+MooseDerivativeStringClass(MaterialName);
 
 /// Tag Name
-DerivativeStringClass(TagName);
+MooseDerivativeStringClass(TagName);
 
 /// Name of MeshGenerators
-DerivativeStringClass(MeshGeneratorName);
+MooseDerivativeStringClass(MeshGeneratorName);
 
 /// Name of extra element IDs
-DerivativeStringClass(ExtraElementIDName);
+MooseDerivativeStringClass(ExtraElementIDName);
 
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
-DerivativeStringClass(ReporterValueName);
+MooseDerivativeStringClass(ReporterValueName);
+
+/// Name of a Component object
+MooseDerivativeStringClass(ComponentName);
 
 /// Name of a Physics object
-DerivativeStringClass(PhysicsName);
+MooseDerivativeStringClass(PhysicsName);
 
 /// Name of a Positions object
-DerivativeStringClass(PositionsName);
+MooseDerivativeStringClass(PositionsName);
 
 /// Name of a Times object
-DerivativeStringClass(TimesName);
+MooseDerivativeStringClass(TimesName);
 
 /// Name of an Executor.  Used for inputs to Executors
-DerivativeStringClass(ExecutorName);
+MooseDerivativeStringClass(ExecutorName);
 
 /// ParsedFunction/ParsedMaterial etc. FParser expression
-DerivativeStringClass(ParsedFunctionExpression);
+MooseDerivativeStringClass(ParsedFunctionExpression);
 
 /// System name support of multiple nonlinear systems on the same mesh
-DerivativeStringClass(NonlinearSystemName);
+MooseDerivativeStringClass(NonlinearSystemName);
+
+/// Name of a Convergence object
+MooseDerivativeStringClass(ConvergenceName);
 
 /// System name support of multiple linear systems on the same mesh
-DerivativeStringClass(LinearSystemName);
+MooseDerivativeStringClass(LinearSystemName);
 
 /// Name of a system which either be linear or nonlinear
-DerivativeStringClass(SolverSystemName);
+MooseDerivativeStringClass(SolverSystemName);
 
 /// Command line argument, specialized to handle quotes in vector arguments
-DerivativeStringClass(CLIArgString);
+MooseDerivativeStringClass(CLIArgString);
 
+#ifdef MOOSE_MFEM_ENABLED
+/**
+ * Coefficients used in input for MFEM residual objects
+ */
+///@{
+MooseDerivativeStringClass(MFEMScalarCoefficientName);
+MooseDerivativeStringClass(MFEMVectorCoefficientName);
+MooseDerivativeStringClass(MFEMMatrixCoefficientName);
+///@}
+#endif
 /**
  * additional MOOSE typedefs
  */
 typedef std::vector<VariableName> CoupledName;
+
 namespace Moose
 {
 extern const TagName SOLUTION_TAG;
 extern const TagName OLD_SOLUTION_TAG;
 extern const TagName OLDER_SOLUTION_TAG;
 extern const TagName PREVIOUS_NL_SOLUTION_TAG;
+extern const TagName PREVIOUS_FP_SOLUTION_TAG;
+extern const TagName SOLUTION_DOT_TAG;
+extern const TagName SOLUTION_DOTDOT_TAG;
+
+enum class FEBackend
+{
+  LibMesh
+#ifdef MOOSE_MFEM_ENABLED
+  ,
+  MFEM
+#endif
+};
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Kokkos
+{
+// Passkey for calling special constructors for functor copy
+class FunctorCopy
+{
+  friend class ResidualObject;
+  friend class KernelBase;
+  friend class NodalKernelBase;
+  friend class BoundaryCondition;
+  friend class IntegratedBCBase;
+  friend class NodalBCBase;
+  friend class MaterialBase;
+  friend class Material;
+  friend class AuxKernel;
+
+  FunctorCopy() = default;
+  FunctorCopy(const FunctorCopy &) = delete;
+  FunctorCopy(FunctorCopy &&) = delete;
+};
+}
+#endif
 }
 
 /// macros for adding Tensor index enums locally

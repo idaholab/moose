@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -33,6 +33,8 @@ class RevealExtension(command.CommandExtension):
         config['translate'] = (['index.md'], "The files that should be translated, this allows " \
                                "files that are included to only be translated once.")
         config['background_image'] = (None, "Background image for all slides.")
+        config['background_position'] = (None, "Background image position for all slides.")
+        config['background_size'] = (None, "Background size for all slides.")
         return config
 
     def extend(self, reader, renderer):
@@ -114,6 +116,12 @@ class RevealExtension(command.CommandExtension):
         if img is not None:
             for sec in moosetree.iterate(result, lambda n: n.name == 'section'):
                 sec['data-background'] = img
+                position = self.get('background_position')
+                if position is not None:
+                    sec['data-background-position'] = position
+                size = self.get('background_size')
+                if size is not None:
+                    sec['data-background-size'] = size
 
     @staticmethod
     def _getNodeIDs(root):

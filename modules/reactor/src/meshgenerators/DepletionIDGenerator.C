@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,9 +27,13 @@ DepletionIDGenerator::validParams()
   params.addParam<std::vector<ExtraElementIDName>>(
       "exclude_id_name", "Extra ID names that need to be excluded in the depletion ID generation");
   params.addParam<std::vector<std::vector<dof_id_type>>>(
-      "exclude_id_value", "Extra ID values correponding to names defined in `exclude_id_name`");
-  params.addClassDescription("This DepletionIDGenerator source code is to assign depletion IDs for "
-                             "elements on a mesh based on material and other extra element IDs.");
+      "exclude_id_value", "Extra ID values corresponding to names defined in `exclude_id_name`");
+  params.addParam<ExtraElementIDName>(
+      "generated_id_name", "depletion_id", "The generated extra element integer name");
+  params.addClassDescription(
+      "This DepletionIDGenerator source code is to assign an extra element integer for "
+      "elements on a mesh based on material and other extra element IDs that is typically used for "
+      "depletion.");
   return params;
 }
 DepletionIDGenerator::DepletionIDGenerator(const InputParameters & params)
@@ -113,7 +117,8 @@ DepletionIDGenerator::generate()
     }
   }
   // assign depletion id to mesh
-  const auto depletion_id = mesh->add_elem_integer("depletion_id");
+  const auto depletion_id =
+      mesh->add_elem_integer(getParam<ExtraElementIDName>("generated_id_name"));
   for (Elem * const elem : mesh->active_element_ptr_range())
     elem->set_extra_integer(depletion_id, parsed_ids.at(elem->id()));
   return mesh;

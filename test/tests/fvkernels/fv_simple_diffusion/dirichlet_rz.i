@@ -8,6 +8,7 @@
   # causing there to basically be no BC on the left.
   xmin = .1
   xmax = 1
+  coord_type = RZ
 []
 
 [Variables]
@@ -75,7 +76,6 @@
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
 []
 
 [Executioner]

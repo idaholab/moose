@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -157,7 +157,10 @@ public:
 
   bool hasDoFsOnNodes() const override final { return false; }
 
-  FEContinuity getContinuity() const override final { return _element_data->getContinuity(); };
+  libMesh::FEContinuity getContinuity() const override final
+  {
+    return _element_data->getContinuity();
+  };
 
   virtual bool isNodalDefined() const override final { return false; }
 
@@ -334,6 +337,10 @@ public:
   {
     return _element_data->adGradSlnDot();
   }
+  const ADTemplateVariableCurl<OutputType> & adCurlSln() const override
+  {
+    mooseError("We don't currently implement curl for FV");
+  }
 
   /// neighbor AD
   const ADTemplateVariableValue<OutputType> & adSlnNeighbor() const override
@@ -359,6 +366,10 @@ public:
   const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const override
   {
     return _neighbor_data->adGradSlnDot();
+  }
+  const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const override
+  {
+    mooseError("We don't currently implement curl for FV");
   }
 
   /// Initializes/computes variable values from the solution vectors for the
@@ -398,9 +409,9 @@ public:
   /// @return Variable value
   OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
 
-  virtual void insert(NumericVector<Number> & vector) override;
-  virtual void insertLower(NumericVector<Number> & vector) override;
-  virtual void add(NumericVector<Number> & vector) override;
+  virtual void insert(libMesh::NumericVector<libMesh::Number> & vector) override;
+  virtual void insertLower(libMesh::NumericVector<libMesh::Number> & vector) override;
+  virtual void add(libMesh::NumericVector<libMesh::Number> & vector) override;
 
   const DoFValue & dofValues() const override;
   const DoFValue & dofValuesOld() const override;
@@ -418,16 +429,14 @@ public:
   const DoFValue & dofValuesDotDotNeighbor() const override;
   const DoFValue & dofValuesDotDotOld() const override;
   const DoFValue & dofValuesDotDotOldNeighbor() const override;
-  const MooseArray<Number> & dofValuesDuDotDu() const override;
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor() const override;
-  const MooseArray<Number> & dofValuesDuDotDotDu() const override;
-  const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDu() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDuNeighbor() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const override;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDotDuNeighbor() const override;
 
-  /// Returns the AD dof values.
   const MooseArray<ADReal> & adDofValues() const override;
-
-  /// Returns the AD neighbor dof values
   const MooseArray<ADReal> & adDofValuesNeighbor() const override;
+  const MooseArray<ADReal> & adDofValuesDot() const override;
 
   /// Note: const monomial is always the case - higher order solns are
   /// reconstructed - so this is simpler func than FE equivalent.
@@ -453,6 +462,7 @@ public:
   std::pair<bool, std::vector<const FVFluxBC *>> getFluxBCs(const FaceInfo & fi) const;
 
   virtual void residualSetup() override;
+  virtual void initialSetup() override;
   virtual void jacobianSetup() override;
   virtual void timestepSetup() override;
   virtual void meshChanged() override;
@@ -493,6 +503,8 @@ public:
 
   bool supportsFaceArg() const override final { return true; }
   bool supportsElemSideQpArg() const override final { return true; }
+
+  virtual void sizeMatrixTagData() override;
 
 protected:
   /**
@@ -557,6 +569,14 @@ private:
 
   /// Whether the boundary to Dirichlet cache map has been setup yet
   bool _dirichlet_map_setup = false;
+
+  /**
+   * Setup the boundary to Flux BC map
+   */
+  void determineBoundaryToFluxBCMap();
+
+  /// Whether the boundary to fluxBC cache map has been setup yet
+  bool _flux_map_setup = false;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -653,6 +673,9 @@ public:
                                                   const Elem * elem_side_to_extrapolate_from,
                                                   const StateArg & state) const;
 
+  /// Function to get wether two term boundary expansion is used for the variable
+  const bool & getTwoTermBoundaryExpansion() const { return _two_term_boundary_expansion; }
+
 protected:
   /**
    * clear finite volume caches
@@ -671,7 +694,7 @@ private:
   /// The current (ghosted) solution. Note that this needs to be stored as a reference to a pointer
   /// because the solution might not exist at the time that this variable is constructed, so we
   /// cannot safely dereference at that time
-  const NumericVector<Number> * const & _solution;
+  const libMesh::NumericVector<libMesh::Number> * const & _solution;
 
   /// Shape functions
   const FieldVariablePhiValue & _phi;
@@ -690,6 +713,10 @@ private:
   /// Map from boundary ID to Dirichlet boundary conditions. Added to speed up Dirichlet BC lookups
   /// in \p getDirichletBC
   std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
+
+  /// Map from boundary ID to flux boundary conditions. Added to enable internal separator
+  /// boundaries.
+  std::unordered_map<BoundaryID, std::vector<const FVFluxBC *>> _boundary_id_to_flux_bc;
 
   /**
    * Emit an error message for unsupported lower-d ops
@@ -730,6 +757,13 @@ inline const MooseArray<ADReal> &
 MooseVariableFV<OutputType>::adDofValuesNeighbor() const
 {
   return _neighbor_data->adDofValues();
+}
+
+template <typename OutputType>
+inline const MooseArray<ADReal> &
+MooseVariableFV<OutputType>::adDofValuesDot() const
+{
+  return _element_data->adDofValuesDot();
 }
 
 template <typename OutputType>
@@ -812,10 +846,20 @@ MooseVariableFV<OutputType>::dofIndicesLower() const
 
 template <typename OutputType>
 void
+MooseVariableFV<OutputType>::initialSetup()
+{
+  determineBoundaryToDirichletBCMap();
+  determineBoundaryToFluxBCMap();
+  MooseVariableField<OutputType>::initialSetup();
+}
+
+template <typename OutputType>
+void
 MooseVariableFV<OutputType>::meshChanged()
 {
   _prev_elem = nullptr;
   _dirichlet_map_setup = false;
+  _flux_map_setup = false;
   MooseVariableField<OutputType>::meshChanged();
 }
 
@@ -824,6 +868,7 @@ void
 MooseVariableFV<OutputType>::timestepSetup()
 {
   _dirichlet_map_setup = false;
+  _flux_map_setup = false;
   MooseVariableField<OutputType>::timestepSetup();
 }
 
@@ -841,5 +886,13 @@ MooseVariableFV<OutputType>::lowerDError() const
   mooseError("Lower dimensional element support not implemented for finite volume variables");
 }
 
+// Declare all the specializations, as the template specialization declaration below must know
 template <>
 ADReal MooseVariableFV<Real>::evaluateDot(const ElemArg & elem, const StateArg & state) const;
+template <>
+ADReal MooseVariableFV<Real>::evaluateDot(const FaceArg & elem_arg, const StateArg & state) const;
+template <>
+ADReal MooseVariableFV<Real>::evaluateDot(const ElemQpArg & elem_arg, const StateArg & state) const;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MooseVariableFV<Real>;

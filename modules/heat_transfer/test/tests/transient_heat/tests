@@ -18,9 +18,9 @@
     design = 'HeatConductionTimeDerivative.md'
   []
   [transient_heat_t_limit]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'transient_heat_derivatives.i'
-    expect_err = 'is below min_T'
+    expect_out = '(is below min_T|specified minimum)'
     cli_args = 'Materials/constant/min_T=10'
     requirement = 'The system shall use a lower temperature limit to compute the specific heat'
     issues = '#26647'

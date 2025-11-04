@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,7 @@ MooseVariableField<OutputType>::MooseVariableField(const InputParameters & param
   : MooseVariableFieldBase(parameters),
     Moose::FunctorBase<typename Moose::ADType<OutputType>::type>(name()),
     MeshChangedInterface(parameters),
-    _time_integrator(_sys.getTimeIntegrator())
+    _time_integrator(_sys.queryTimeIntegrator(_var_num))
 {
 }
 
@@ -56,18 +56,6 @@ MooseVariableField<OutputType>::timestepSetup()
 }
 
 template <typename OutputType>
-const NumericVector<Number> &
-MooseVariableField<OutputType>::getSolution(const Moose::StateArg & state) const
-{
-  // It's not safe to use solutionState(0) because it returns the libMesh System solution member
-  // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
-  // perturbs the solution vector we feed these perturbations into the current_local_solution
-  // while the libMesh solution is frozen in the non-perturbed state
-  return (state.state == 0) ? *this->_sys.currentSolution()
-                            : this->_sys.solutionState(state.state, state.iteration_type);
-}
-
-template <typename OutputType>
 Moose::VarFieldType
 MooseVariableField<OutputType>::fieldType() const
 {
@@ -85,7 +73,11 @@ template <typename OutputType>
 bool
 MooseVariableField<OutputType>::isArray() const
 {
-  return std::is_same<OutputType, RealEigenVector>::value;
+  const auto is_array = MooseVariableBase::isArray();
+  if (std::is_same<OutputType, RealEigenVector>::value != is_array)
+    mooseError("A variable is marked as an array variable in a base class, but in a derived class "
+               "the output type is not consistent.");
+  return is_array;
 }
 
 template <typename OutputType>
@@ -93,6 +85,30 @@ bool
 MooseVariableField<OutputType>::isVector() const
 {
   return std::is_same<OutputType, RealVectorValue>::value;
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableField<Real>::genericDofValues<false>() const
+{
+  return dofValues();
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableField<RealVectorValue>::genericDofValues<false>() const
+{
+  return dofValues();
+}
+
+template <>
+template <>
+const MooseArray<Real> &
+MooseVariableField<RealEigenVector>::genericDofValues<false>() const
+{
+  mooseError("genericDofValues not implemented for array variables");
 }
 
 template class MooseVariableField<Real>;

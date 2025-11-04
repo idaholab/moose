@@ -1,7 +1,7 @@
 # Gallery Extension
 
-The gallery extension provides a mechanism for creating "cards" using the 'card' command and
-allow for these items to be organized in to a gallery with the 'gallery' command. The
+The gallery extension provides a mechanism for creating "cards" using the `!card` command and
+allows for these items to be organized into a gallery with the `!gallery` command. The
 available configuration items for the extension are listed below, in [gallery-config].
 
 !devel settings module=MooseDocs.extensions.gallery
@@ -12,8 +12,8 @@ available configuration items for the extension are listed below, in [gallery-co
 ## Cards
 
 In general, a gallery is composed of cards; however, the 'card' command works as a stand
-alone command. The name card is derived from the [materialize](https://materializecss.com/cards.html)
-framework, which MOOSEDocs relies for creating website content. The settings for the
+alone command. The name "card" is derived from the [materialize](https://materializecss.com/cards.html)
+framework, which MOOSEDocs relies on for creating website content. The settings for the
 card command are listed in [card-settings].
 
 !devel! example id=gallery-example-card

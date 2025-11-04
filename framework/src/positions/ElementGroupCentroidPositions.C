@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ElementGroupCentroidPositions.h"
+
+#include "libmesh/parallel_algebra.h"
 
 registerMooseObject("MooseApp", ElementGroupCentroidPositions);
 
@@ -23,7 +25,7 @@ ElementGroupCentroidPositions::validParams()
   params.addParam<MooseEnum>("grouping_type", groupTypeEnum(), "Type of group of elements");
   params.addParam<std::vector<ExtraElementIDName>>("extra_id_name",
                                                    "Name(s) of the extra element ID(s) to use");
-  params.addParam<std::vector<std::vector<unsigned int>>>(
+  params.addParam<std::vector<std::vector<dof_id_type>>>(
       "extra_id",
       "Specific ID(s), for each extra id name, for grouping elements. "
       "If empty, all *valid* ids will be used to bin");
@@ -39,24 +41,25 @@ ElementGroupCentroidPositions::validParams()
 ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParameters & parameters)
   : Positions(parameters),
     BlockRestrictable(this),
-    _mesh(_fe_problem.mesh()),
+    _mesh(_subproblem.mesh()),
     _group_type(getParam<MooseEnum>("grouping_type"))
 {
-  // We would need reductions on volumes, not just positions to make this work for
-  // distributed.
-  _mesh.errorIfDistributedMesh(type());
-
   // We are not excluding using both block restriction and extra element ids
   if (_group_type == "extra_id" || _group_type == "block_and_extra_id")
   {
     _extra_id_names = getParam<std::vector<ExtraElementIDName>>("extra_id_name");
     for (const auto & name : _extra_id_names)
       _extra_id_indices.push_back(_mesh.getMesh().get_elem_integer_index(name));
-    _extra_id_group_indices = getParam<std::vector<std::vector<unsigned int>>>("extra_id");
+
+    if (isParamValid("extra_id"))
+      _extra_id_group_indices = getParam<std::vector<std::vector<dof_id_type>>>("extra_id");
+    else
+      _extra_id_group_indices.resize(_extra_id_names.size());
 
     if (_extra_id_group_indices.size() != _extra_id_names.size())
-      mooseError("Number of extra id names and the indices to select must match. "
-                 "If you want all indices for an extra id, use this pattern '; ;'");
+      paramError("extra_id",
+                 "Number of extra id names and the indices to select must match. "
+                 "If you want all indices for an extra id, use an empty vector entry");
 
     // Can only have so many groups though, considering 4D max capability
     if (_extra_id_indices.size() > unsigned(3 + blockRestricted()))
@@ -78,7 +81,7 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
     _blocks_in_use = true;
     _extra_id_names.insert(_extra_id_names.begin(), "block");
     _extra_id_indices.insert(_extra_id_indices.begin(), std::numeric_limits<unsigned short>::max());
-    _extra_id_group_indices.insert(_extra_id_group_indices.begin(), std::vector<unsigned int>());
+    _extra_id_group_indices.insert(_extra_id_group_indices.begin(), std::vector<dof_id_type>());
     // Add real block restriction
     if (blockRestricted())
       for (const auto & block : blockIDs())
@@ -109,12 +112,18 @@ ElementGroupCentroidPositions::initialize()
   {
     auto & indices = _extra_id_group_indices[i];
     if (indices.empty())
-      for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+    {
+      std::set<dof_id_type> ids;
+      for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
       {
-        auto local_id = id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0);
-        if (std::find(indices.begin(), indices.end(), local_id) == indices.end())
-          indices.push_back(local_id);
+        auto eeid = id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0);
+        if (eeid != DofObject::invalid_id)
+          ids.insert(eeid);
       }
+      _mesh.comm().set_union(ids);
+      for (const auto & id : ids)
+        indices.push_back(id);
+    }
   }
 
   // Allocate some vectors holding the volumes
@@ -224,7 +233,7 @@ ElementGroupCentroidPositions::initialize()
       positions_indexing[i][extra_id] = j++;
   }
 
-  for (const auto & elem : _mesh.getMesh().active_element_ptr_range())
+  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
   {
     // Pre-compute the centroid, this is expensive but may be used for multiple element ids
     const auto centroid = elem->true_centroid();
@@ -253,27 +262,55 @@ ElementGroupCentroidPositions::initialize()
   // Report the zero volumes
   unsigned int num_zeros = 0;
   if (_extra_id_names.size() == 1)
+  {
+    _mesh.comm().sum(volumes);
+    _mesh.comm().sum(_positions);
     for (const auto & vol : volumes)
       if (MooseUtils::absoluteFuzzyEqual(vol, 0))
         num_zeros++;
+  }
   if (_extra_id_names.size() == 2)
+  {
+    for (const auto i : index_range(volumes_2d))
+    {
+      _mesh.comm().sum(volumes_2d[i]);
+      _mesh.comm().sum(_positions_2d[i]);
+    }
     for (const auto & vol_vec : volumes_2d)
       for (const auto & vol : vol_vec)
         if (MooseUtils::absoluteFuzzyEqual(vol, 0))
           num_zeros++;
+  }
   if (_extra_id_names.size() == 3)
+  {
+    for (const auto i : index_range(volumes_3d))
+      for (const auto j : index_range(volumes_3d[i]))
+      {
+        _mesh.comm().sum(volumes_3d[i][j]);
+        _mesh.comm().sum(_positions_3d[i][j]);
+      }
     for (const auto & vol_vec_vec : volumes_3d)
       for (const auto & vol_vec : vol_vec_vec)
         for (const auto & vol : vol_vec)
           if (MooseUtils::absoluteFuzzyEqual(vol, 0))
             num_zeros++;
+  }
   if (_extra_id_names.size() == 4)
+  {
+    for (const auto i : index_range(volumes_4d))
+      for (const auto j : index_range(volumes_4d[i]))
+        for (const auto k : index_range(volumes_4d[i][j]))
+        {
+          _mesh.comm().sum(volumes_4d[i][j][k]);
+          _mesh.comm().sum(_positions_4d[i][j][k]);
+        }
     for (const auto & vol_vec_vec_vec : volumes_4d)
       for (const auto & vol_vec_vec : vol_vec_vec_vec)
         for (const auto & vol_vec : vol_vec_vec)
           for (const auto & vol : vol_vec)
             if (MooseUtils::absoluteFuzzyEqual(vol, 0))
               num_zeros++;
+  }
   if (num_zeros)
     mooseWarning(std::to_string(num_zeros) +
                  " zero volume bins detected during group centroid position calculation. "
@@ -300,8 +337,8 @@ ElementGroupCentroidPositions::initialize()
           _positions_2d[i][j] /= volumes_2d[i][j];
         else
         {
-          _positions_2d[i].erase(_positions.begin() + j);
-          volumes_2d[i].erase(volumes.begin() + j);
+          _positions_2d[i].erase(_positions_2d[i].begin() + j);
+          volumes_2d[i].erase(volumes_2d[i].begin() + j);
           j--;
         }
       }
@@ -340,7 +377,7 @@ ElementGroupCentroidPositions::initialize()
   _initialized = true;
 }
 
-unsigned int
+dof_id_type
 ElementGroupCentroidPositions::id(const Elem & elem, unsigned int id_index, bool use_subdomains)
 {
   mooseAssert(!use_subdomains || (id_index == std::numeric_limits<unsigned short>::max()),

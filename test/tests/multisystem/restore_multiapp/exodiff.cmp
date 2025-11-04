@@ -1,0 +1,9 @@
+STEP OFFSET 1
+
+EXCLUDE TIMES 2
+
+TIME STEPS relative 1.0 floor 0.0
+
+ELEMENT VARIABLES relative 1.e-10 floor 0.0
+	u
+	v

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -72,7 +72,7 @@ LinearFrictionFactorFunctorMaterial::LinearFrictionFactorFunctorMaterial(
         // see PINSFVSpeedFunctorMaterial.C for explanation
         const ADRealVectorValue superficial_vel(
             _superficial_vel_x(r, t), _superficial_vel_y(r, t), _superficial_vel_z(r, t));
-        const auto speed = NS::computeSpeed(superficial_vel) / _eps(r, t);
+        const auto speed = NS::computeSpeed<ADReal>(superficial_vel) / _eps(r, t);
 
         return _A * _f(r, t) + _B * _g(r, t) * speed;
       });

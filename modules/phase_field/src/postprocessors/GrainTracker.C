@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -93,7 +93,6 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _bound_value(getParam<Real>("bound_value")),
     _remap(getParam<bool>("remap_grains")),
     _tolerate_failure(getParam<bool>("tolerate_failure")),
-    _nl(_fe_problem.getNonlinearSystemBase(_sys.number())),
     _poly_ic_uo(parameters.isParamValid("polycrystal_ic_uo")
                     ? &getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo")
                     : nullptr),
@@ -1163,11 +1162,11 @@ GrainTracker::remapGrains()
         swapSolutionValues(grain, new_var_it->second, cache, RemapCacheMode::USE);
     }
 
-    _nl.solution().close();
-    _nl.solutionOld().close();
-    _nl.solutionOlder().close();
+    _sys.solution().close();
+    _sys.solutionOld().close();
+    _sys.solutionOlder().close();
 
-    _nl.system().update();
+    _sys.system().update();
 
     if (_verbosity_level > 1)
       _console << "Swaps complete" << std::endl;
@@ -1507,11 +1506,11 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node,
       const auto & dof_index = _vars[new_var_index]->nodalDofIndex();
 
       // Transfer this solution from the old to the current
-      _nl.solution().set(dof_index, current);
+      _sys.solution().set(dof_index, current);
       if (_is_transient)
       {
-        _nl.solutionOld().set(dof_index, old);
-        _nl.solutionOlder().set(dof_index, older);
+        _sys.solutionOld().set(dof_index, old);
+        _sys.solutionOlder().set(dof_index, older);
       }
     }
 
@@ -1532,11 +1531,11 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node,
       const auto & dof_index = _vars[curr_var_index]->nodalDofIndex();
 
       // Set the DOF for the current variable to zero
-      _nl.solution().set(dof_index, -_bound_value);
+      _sys.solution().set(dof_index, -_bound_value);
       if (_is_transient)
       {
-        _nl.solutionOld().set(dof_index, -_bound_value);
-        _nl.solutionOlder().set(dof_index, -_bound_value);
+        _sys.solutionOld().set(dof_index, -_bound_value);
+        _sys.solutionOlder().set(dof_index, -_bound_value);
       }
     }
   }

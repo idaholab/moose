@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "Capabilities.h"
 
 InputParameters
 ChemicalReactionsApp::validParams()
@@ -34,9 +35,12 @@ ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
 
 ChemicalReactionsApp::~ChemicalReactionsApp() {}
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  Registry::registerObjectsTo(f, {"ChemicalReactionsApp"});
+  Registry::registerActionsTo(af, {"ChemicalReactionsApp"});
+
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
@@ -48,38 +52,16 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 }
 
 void
-ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  Registry::registerObjectsTo(f, {"ChemicalReactionsApp"});
-  Registry::registerActionsTo(af, {"ChemicalReactionsApp"});
-  associateSyntaxInner(s, af);
-}
-
-void
 ChemicalReactionsApp::registerApps()
 {
+  const std::string doc = "Thermochimica Gibbs energy minimization library support ";
+#ifdef THERMOCHIMICA_ENABLED
+  addCapability("thermochimica", true, doc + "is available.");
+#else
+  addCapability("thermochimica", false, doc + "is not available.");
+#endif
+
   registerApp(ChemicalReactionsApp);
-}
-
-void
-ChemicalReactionsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"ChemicalReactionsApp"});
-}
-
-void
-ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"ChemicalReactionsApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-ChemicalReactionsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

@@ -56,7 +56,7 @@
 
 [Problem]
   # We have to close the matrix before enforcing boundary conditions, which destroys our sparsity pattern
-  error_on_jacobian_nonzero_reallocation = false
+  use_hash_table_matrix_assembly = true
 []
 
 [Outputs]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 
 #include "Function.h"
 
-registerMooseObject("MooseApp", UserForcingFunctionNodalKernel);
+registerMooseObjectDeprecated("MooseApp", UserForcingFunctionNodalKernel, "01/01/2026 00:00");
 
 InputParameters
 UserForcingFunctionNodalKernel::validParams()

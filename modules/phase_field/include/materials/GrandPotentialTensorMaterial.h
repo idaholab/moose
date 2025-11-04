@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 
 #include "PolycrystalDiffusivityTensorBase.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
+#include "RankThreeTensor.h"
 
 /**
  * Calculates mobilities for grand potential model. The potential mobility (\chi*D)
@@ -31,6 +32,7 @@ protected:
   std::string _chiD_name;
   MaterialProperty<RealTensorValue> & _chiD;
   MaterialProperty<RealTensorValue> * _dchiDdc;
+  MaterialProperty<RankThreeTensor> * _dchiDdgradc;
 
   /// grain boundary mobility
   std::string _Ls_name;
@@ -55,11 +57,9 @@ protected:
   const MaterialProperty<Real> & _dchidc;
   std::vector<const MaterialProperty<Real> *> _dchideta;
   std::vector<MaterialProperty<RealTensorValue> *> _dchiDdeta;
+  std::vector<MaterialProperty<RankThreeTensor> *> _dchiDdgradeta;
 
   Real _GBMobility;
   Real _GBmob0;
   const Real _Q;
-
-  /// solid phase order parameters
-  std::vector<NonlinearVariableName> _vals_name;
 };

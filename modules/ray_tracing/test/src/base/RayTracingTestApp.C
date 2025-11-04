@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ RayTracingTestApp::validParams()
 
 registerKnownLabel("RayTracingTestApp");
 
-RayTracingTestApp::RayTracingTestApp(InputParameters parameters) : MooseApp(parameters)
+RayTracingTestApp::RayTracingTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RayTracingTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +44,8 @@ RayTracingTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool
 void
 RayTracingTestApp::registerApps()
 {
-  registerApp(RayTracingApp);
+  RayTracingApp::registerApps();
   registerApp(RayTracingTestApp);
-}
-
-void
-RayTracingTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RayTracingTestApp"});
-}
-
-void
-RayTracingTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RayTracingTestApp"});
-}
-
-void
-RayTracingTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -207,7 +207,7 @@ public:
    * Whether or not this MultiApp should be restored at the beginning of
    * each Picard iteration.
    */
-  virtual bool needsRestoration() { return true; }
+  bool needsRestoration() { return !_no_restore; }
 
   /**
    * @param app The global app number to get the Executioner for
@@ -226,9 +226,10 @@ public:
    * @param displaced_mesh True if the bounding box is retrieved for the displaced mesh, other false
    * @param coord_transform An optional coordinate transformation object
    */
-  virtual BoundingBox getBoundingBox(unsigned int app,
-                                     bool displaced_mesh,
-                                     const MultiAppCoordTransform * coord_transform = nullptr);
+  virtual libMesh::BoundingBox
+  getBoundingBox(unsigned int app,
+                 bool displaced_mesh,
+                 const MultiAppCoordTransform * coord_transform = nullptr);
 
   /**
    * Get the FEProblemBase this MultiApp is part of.
@@ -268,7 +269,8 @@ public:
    * @param var_name The name of the variable you are going to be transferring to.
    * @return The vector to fill.
    */
-  virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
+  virtual libMesh::NumericVector<libMesh::Number> & appTransferVector(unsigned int app,
+                                                                      std::string var_name);
 
   /**
    * @return Number of Global Apps in this MultiApp
@@ -375,7 +377,8 @@ public:
    * Transform a bounding box according to the transformations in the provided coordinate
    * transformation object
    */
-  static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
+  static void transformBoundingBox(libMesh::BoundingBox & box,
+                                   const MultiAppCoordTransform & transform);
 
   /**
    * Sets all the app's output file bases. @see MooseApp::setOutputFileBase for usage
@@ -384,10 +387,7 @@ public:
 
 protected:
   /// function that provides cli_args to subapps
-  virtual std::vector<std::string> cliArgs() const
-  {
-    return std::vector<std::string>(_cli_args.begin(), _cli_args.end());
-  }
+  virtual std::vector<std::string> cliArgs() const;
 
   /**
    * _must_ fill in _positions with the positions of the sub-aps
@@ -426,12 +426,15 @@ protected:
   /// call back executed right before app->runInputFile()
   virtual void preRunInputFile();
 
-  /** Method to aid in getting the "cli_args" parameters.
+  /**
+   * @return The command line arguments to be applied to the subapp
+   * with index \p local_app
    *
-   * The method is virtual because it is needed to allow for batch runs within the stochastic tools
-   * module, see SamplerFullSolveMultiApp for an example.
+   * The method is virtual because it is needed to allow for batch runs
+   * within the stochastic tools module; see SamplerFullSolveMultiApp for
+   * an example.
    */
-  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app);
+  virtual std::vector<std::string> getCommandLineArgs(const unsigned int local_app);
 
   /**
    * Build communicators and reserve backups.
@@ -451,8 +454,8 @@ protected:
   void createApps();
 
   /**
-   * Reserve the solution from the previous simulation,
-   *  and it is used as an initial guess for the next run
+   * Preserve the solution from the previous simulation,
+   * and it is used as an initial guess for the next run
    */
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
 
@@ -541,7 +544,7 @@ protected:
   std::vector<bool> _has_bounding_box;
 
   /// This multi-app's bounding box
-  std::vector<BoundingBox> _bounding_box;
+  std::vector<libMesh::BoundingBox> _bounding_box;
 
   /// Relative bounding box inflation
   Real _inflation;
@@ -585,7 +588,7 @@ protected:
   /// Whether or not this processor as an App _at all_
   bool _has_an_app;
 
-  /// CommandLine arguments
+  /// CommandLine arguments (controllable!)
   const std::vector<CLIArgString> & _cli_args;
 
   /// CommandLine arguments from files
@@ -594,8 +597,18 @@ protected:
   /// Flag indicates if or not restart from the latest solution
   bool _keep_solution_during_restore;
 
+  /// Flag indicates if or not restart the auxiliary system from the latest auxiliary solution
+  bool _keep_aux_solution_during_restore;
+
+  /// Whether or not to skip restoring completely
+  const bool _no_restore;
+
   /// The solution from the end of the previous solve, this is cloned from the Nonlinear solution during restore
-  std::vector<std::unique_ptr<NumericVector<Real>>> _end_solutions;
+  /// Outer indexing by child application, inner indexing by solver system
+  std::vector<std::vector<std::unique_ptr<libMesh::NumericVector<Real>>>> _end_solutions;
+
+  /// The auxiliary solution from the end of the previous solve, this is cloned from the auxiliary solution during restore
+  std::vector<std::unique_ptr<NumericVector<Real>>> _end_aux_solutions;
 
   /// The app configuration resulting from calling init
   LocalRankConfig _rank_config;
@@ -615,6 +628,10 @@ protected:
   const PerfID _backup_timer;
   const PerfID _restore_timer;
   const PerfID _reset_timer;
+
+private:
+  /// The parameter that was used to set the command line args, if any
+  mutable std::optional<std::string> _cli_args_param;
 };
 
 void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);

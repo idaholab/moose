@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,7 +25,7 @@ StochasticToolsApp::validParams()
 
 registerKnownLabel("StochasticToolsApp");
 
-StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
+StochasticToolsApp::StochasticToolsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   StochasticToolsApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -105,37 +105,17 @@ StochasticToolsApp::registerApps()
 }
 
 void
-StochasticToolsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"StochasticToolsApp"});
-}
-
-void
-StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"StochasticToolsApp"});
-}
-
-void
 StochasticToolsApp::requiresTorch(const MooseObject &
-#ifndef LIBTORCH_ENABLED
+#ifndef MOOSE_LIBTORCH_ENABLED
                                       obj
 #endif
 )
 {
-#ifndef LIBTORCH_ENABLED
+#ifndef MOOSE_LIBTORCH_ENABLED
   obj.mooseError("PyTorch C++ API (libtorch) must be installed to use this object, see "
                  "https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html for "
                  "instruction.");
 #endif
-}
-
-void
-StochasticToolsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

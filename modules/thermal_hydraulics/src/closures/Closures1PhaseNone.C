@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,6 +27,15 @@ Closures1PhaseNone::validParams()
 
 Closures1PhaseNone::Closures1PhaseNone(const InputParameters & params) : Closures1PhaseBase(params)
 {
+  if (getParam<bool>("add_wall_temperature_property"))
+    mooseDeprecated("'Closures1PhaseNone' is deprecated. Since 'add_wall_temperature_property' was "
+                    "set to 'true', change the type of the 'Closures1PhaseNone' object to "
+                    "'WallTemperature1PhaseClosures'.");
+  else
+    mooseDeprecated(
+        "'Closures1PhaseNone' is deprecated. The 'closures' parameter now takes an arbitrary-sized "
+        "list of closures objects, defaulting to an empty list, so to transition, delete the "
+        "'Closures1PhaseNone' block and the 'closures' parameter from your input file.");
 }
 
 void

@@ -59,7 +59,7 @@ power = 2
     order = CONSTANT
     initial_condition = -1.0
     [AuxKernel]
-      type = SelfAux
+      type = ProjectionAux
       variable = Dc_elem
       v = Dc
       execute_on = 'TIMESTEP_END'
@@ -67,7 +67,7 @@ power = 2
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true

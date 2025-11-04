@@ -1,0 +1,84 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#30478'
+  [MFEMDomainSubMesh]
+    type = XMLDiff
+    input = domain_submesh.i
+    xmldiff = 'OutputData/DomainPotential/Run0/Run0.pvd
+                OutputData/DomainPotential/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to solve a diffusion problem defined on an MFEM domain restricted submesh.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMBoundarySubMeshTransfer]
+    type = XMLDiff
+    input = boundary_submesh.i
+    xmldiff = 'OutputData/BoundaryPotential/Run0/Run0.pvd
+                OutputData/BoundaryPotential/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to solve an FE problem defined on an MFEM boundary restricted submesh.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMDomainSubMeshTransfer]
+    type = XMLDiff
+    input = domain_submesh_transfer.i
+    xmldiff = 'OutputData/DomainPotentialTransfer/Run0/Run0.pvd
+                OutputData/DomainPotentialTransfer/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to transfer a domain restricted submesh variable data to a corresponding variable defined on the parent mesh.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+  []
+  [MFEMCoupledVariableSource]
+    type = XMLDiff
+    input = magnetostatic.i
+    xmldiff = 'OutputData/Magnetostatic/Run0/Run0.pvd
+                OutputData/Magnetostatic/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'MOOSE shall have the ability to support source terms arising from the elimination of coupled MFEM variables external to the equation system.'
+    capabilities = 'mfem'
+    max_parallel = 1
+    recover = false
+    max_threads = 1
+  []  
+  [MFEMGeometryCutTransitionSubMesh]
+    design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
+    issues = '#31404'
+    type = CSVDiff
+    input = av_magnetostatic.i
+    csvdiff = 'OutputData/AVMagnetostaticClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to strongly enforce global topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane defined in a solid geometry.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    valgrind = heavy
+  []
+  [MFEMVacuumCutTransitionSubMesh]
+    design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
+    issues = '#31404'
+    type = CSVDiff
+    input = hphi_magnetostatic.i
+    csvdiff = 'OutputData/HPhiMagnetostaticClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to strongly enforce global topological constraints in MFEM by defining a transition region for variable discontinuities on one side of a cut plane defined in an exterior vacuum region.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+  [MFEMDomainSubMeshBoundary]
+    design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
+    issues = '#31404'
+    type = CSVDiff
+    input = hphi_magnetodynamic.i
+    csvdiff = 'OutputData/HPhiMagnetodynamicClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to apply boundary conditions on boundaries of embedded volumetric subdomains.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+    restep = false
+    valgrind = heavy
+  []  
+[]

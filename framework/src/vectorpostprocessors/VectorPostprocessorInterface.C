@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,6 +31,17 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * m
                  : 0)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+VectorPostprocessorInterface::VectorPostprocessorInterface(
+    const VectorPostprocessorInterface & object, const Moose::Kokkos::FunctorCopy &)
+  : _broadcast_by_default(object._broadcast_by_default),
+    _vpi_moose_object(object._vpi_moose_object),
+    _vpi_feproblem(object._vpi_feproblem),
+    _vpi_tid(object._vpi_tid)
+{
+}
+#endif
 
 const VectorPostprocessorValue &
 VectorPostprocessorInterface::getVectorPostprocessorValue(const std::string & param_name,

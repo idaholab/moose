@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -63,7 +63,7 @@ LineSegment::contains_point(const Point & p) const
 }
 
 bool
-LineSegment::intersect(const Plane & pl, Point & intersect_p) const
+LineSegment::intersect(const libMesh::Plane & pl, Point & intersect_p) const
 {
   /**
    * There are three cases in 3D for intersection of a line and a plane
@@ -152,6 +152,9 @@ LineSegment::intersect(const LineSegment & l, Point & intersect_p) const
   // Check that the lines are coplanar
   Real concur = c * (a.cross(b));
   if (std::abs(concur) > 1.e-10)
+    return false;
+
+  if (v.is_zero())
     return false;
 
   Real s = (c.cross(b) * v) / (v * v);

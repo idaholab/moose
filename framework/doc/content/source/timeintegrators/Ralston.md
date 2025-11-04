@@ -35,7 +35,7 @@ All kernels except time-(derivative)-kernels should have the parameter `implicit
 time integrator.
 
 !alert warning
-ExplicitRK2-derived TimeIntegrators [ExplicitMidpoint.md], [Heun.md], [Ralston.md]) and other multistage
+ExplicitRK2-derived TimeIntegrators ([ExplicitMidpoint.md], [Heun.md], [Ralston.md]) and other multistage
 TimeIntegrators are known not to work with Materials/AuxKernels that accumulate 'state' and
 should be used with caution.
 

@@ -63,17 +63,19 @@ Userobjects available in the Solid Properties module that provide thermal proper
 An example will be provided later on this page for creating a new solid userobject.
 
 On their own, these userobjects do not execute; their functions must be called from other
-objects. The most common use case is to compute material properties with these
-userobjects, which can be accomplished with
-[ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md);
-its `computeQpProperties` method evaluates the thermal conductivity, isobaric specific heat, and density at
-the quadrature points using the values of a coupled variable representing temperature
-plus the functions provided by the selected userobject:
+objects. Some potentially useful classes that call them are:
 
-!listing modules/solid_properties/src/materials/ThermalSolidPropertiesMaterial.C start=computeQpProperties
-
-Another use case is to get a single property into a post-processor,
-which is accomplished with [ThermalSolidPropertiesPostprocessor.md].
+- [ThermalSolidPropertiesFunctorMaterial.md]: A functor material that declares
+  functor material properties for density, thermal conductivity, isobaric specific heat,
+  and specific internal energy. An option is provided for using a constant density.
+  This functor material can have its functor material properties converted to
+  regular AD or non-AD material properties by using it in conjunction with
+  [(AD)MaterialFunctorConverter](MaterialFunctorConverter.md).
+- [ThermalSolidPropertiesMaterial.md] and [ConstantDensityThermalSolidPropertiesMaterial.md],
+  which declare AD or non-AD material properties for density, thermal conductivity, and isobaric specific heat,
+  using variable density and constant density, respectively.
+- [ThermalSolidPropertiesPostprocessor.md] evaluates density, thermal conductivity,
+  or isobaric specific heat at a single temperature value.
 
 ## Usage
 

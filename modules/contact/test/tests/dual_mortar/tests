@@ -35,6 +35,8 @@
                   'variable condenstation with AMG.'
     allow_warnings = true
     mesh_mode = REPLICATED
+    # uses same output name
+    prereq = 'dm_contact'
   []
   [dm_contact_precon_no_adaptivity]
     type = 'CSVDiff'
@@ -47,6 +49,7 @@
                   'variable condenstation with AMG, by always condensing out the LMs.'
     allow_warnings = true
     mesh_mode = REPLICATED
+    prereq = 'dm_contact_precon'
   []
   [dm_contact_precon_full_dinv]
     type = 'CSVDiff'
@@ -60,5 +63,6 @@
                   'assuming diagonal coupling with the primal variable).'
     allow_warnings = true
     mesh_mode = REPLICATED
+    prereq = 'dm_contact_precon_no_adaptivity'
   []
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "SurfaceDelaunayGeneratorBase.h"
 
 /**
  * Generates a triangulation in the XY plane, based on an input mesh
@@ -17,7 +17,7 @@
  * interior Steiner points) and an optional set of input meshes
  * defining inner hole boundaries.
  */
-class XYDelaunayGenerator : public MeshGenerator
+class XYDelaunayGenerator : public SurfaceDelaunayGeneratorBase
 {
 public:
   static InputParameters validParams();
@@ -60,21 +60,6 @@ protected:
   /// Desired triangle area as a (fparser-compatible) function of x,y
   const std::string _desired_area_func;
 
-  /// Whether to use automatic desired area function
-  const bool _use_auto_area_func;
-
-  /// Background size for automatic desired area function
-  const Real _auto_area_func_default_size;
-
-  /// Background size's effective distance for automatic desired area function
-  const Real _auto_area_func_default_size_dist;
-
-  /// Maximum number of points to use for the inverse distance interpolation for automatic area function
-  const unsigned int _auto_area_function_num_points;
-
-  /// Power of the polynomial used in the inverse distance interpolation for automatic area function
-  const Real _auto_area_function_power;
-
   /// Type of algorithm used to find matching nodes (binary or exhaustive)
   const MooseEnum _algorithm;
 
@@ -83,4 +68,7 @@ protected:
 
   /// Whether mesh stitching should have verbose output
   const bool _verbose_stitching;
+
+  /// Desired interior node locations
+  std::vector<Point> _interior_points;
 };

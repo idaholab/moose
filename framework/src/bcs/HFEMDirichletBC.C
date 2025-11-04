@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,10 +29,14 @@ HFEMDirichletBC::HFEMDirichletBC(const InputParameters & parameters)
 {
   if (_uhat_var)
   {
-    if (!_uhat_var->activeSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
-      paramError("uhat",
-                 "Must be defined on BOUNDARY_SIDE_LOWERD_SUBDOMAIN subdomain that is added by "
-                 "Mesh/build_all_side_lowerd_mesh=true");
+    for (const auto & id : _uhat_var->activeSubdomains())
+      if (_mesh.boundaryLowerDBlocks().count(id) == 0)
+        mooseDocumentedError("moose",
+                             29151,
+                             "'uhat' must be defined on lower-dimensional boundary subdomain '" +
+                                 _mesh.getSubdomainName(id) +
+                                 "' that is added by Mesh/build_all_side_lowerd_mesh=true.\nThe "
+                                 "check could be overly restrictive.");
 
     if (isParamValid("value"))
       paramError("uhat", "'uhat' and 'value' can not be both provided");

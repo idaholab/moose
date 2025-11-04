@@ -12,7 +12,7 @@
     abs_zero = 1e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -27,7 +27,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -47,7 +47,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -67,7 +67,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -89,7 +89,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictionless, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]
@@ -106,7 +106,7 @@
     abs_zero = 2e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8
     elements and with a friction coefficient of 0."
@@ -124,7 +124,7 @@
     abs_zero = 1e-6
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, penalty
     contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8
     elements and with a friction coefficient of 1.0."
@@ -144,7 +144,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The Contact system shall enforce frictional, Augmented
     Lagrange contact for 2D Hertz half-symmetry cylindrical contact problem using higher order QUAD8 elements."
   [../]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 // MOOSE includes
 #include "TestDiscontinuousValuePP.h"
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 
 registerMooseObject("MooseTestApp", TestDiscontinuousValuePP);
 
@@ -46,7 +46,7 @@ TestDiscontinuousValuePP::TestDiscontinuousValuePP(const InputParameters & param
 void
 TestDiscontinuousValuePP::initialSetup()
 {
-  _solution_object_ptr = &getUserObject<SolutionUserObject>("solution");
+  _solution_object_ptr = &getUserObject<SolutionUserObjectBase>("solution");
 }
 
 Real

@@ -126,7 +126,7 @@
     input = 'supg_pspg_adv_dominated_mms.i'
     exodiff = 'supg_pspg_adv_dominated_mms_exodus.e'
     # This problem uses SuperLU.
-    superlu = true
+    capabilities = 'superlu'
     requirement = 'The system shall be able to solve high Reynolds number incompressible flow problems through use of streamline upwind and pressure stabilized Petrov-Galerkin and with a Q1Q1 discretization'
     recover = false # We only execute output on final
   [../]

@@ -1,0 +1,7 @@
+[Tests]
+  [test]
+    type = RunCommand
+    command = 'echo foo'
+    validation_test = validation_init_exception.py
+  []
+[]

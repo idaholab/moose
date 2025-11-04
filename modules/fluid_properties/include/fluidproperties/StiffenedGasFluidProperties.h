@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -47,6 +47,7 @@ public:
   propfuncWithDefinitionOverride(s, p, T);
   propfuncWithDefinitionOverride(T, v, e);
   propfuncWithDefinitionOverride(p, v, e);
+  propfuncWithDefinitionOverride(T, p, h);
   virtual Real e_from_T_v(Real T, Real v) const override;
   virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
   virtual Real p_from_T_v(Real T, Real v) const override;
@@ -176,6 +177,23 @@ StiffenedGasFluidProperties::T_from_v_e_template(
 
 template <typename CppType>
 CppType
+StiffenedGasFluidProperties::T_from_p_h_template(const CppType & /*p*/, const CppType & h) const
+{
+  return (1.0 / _cv) * (h - _q) / _gamma;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::T_from_p_h_template(
+    const CppType & p, const CppType & h, CppType & T, CppType & dT_dp, CppType & dT_dh) const
+{
+  T = T_from_p_h_template(p, h);
+  dT_dp = 0;
+  dT_dh = 1.0 / _cv / _gamma;
+}
+
+template <typename CppType>
+CppType
 StiffenedGasFluidProperties::p_from_v_e_template(const CppType & v, const CppType & e) const
 {
   return (_gamma - 1.0) * (e - _q) / v - _gamma * _p_inf;
@@ -195,13 +213,15 @@ template <typename CppType>
 CppType
 StiffenedGasFluidProperties::s_from_v_e_template(const CppType & v, const CppType & e) const
 {
+  using std::pow, std::log;
+
   CppType T = T_from_v_e_template(v, e);
   CppType p = p_from_v_e_template(v, e);
-  CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  CppType n = pow(T, _gamma) / pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
     return getNaN();
   else
-    return _cv * std::log(n) + _q_prime;
+    return _cv * log(n) + _q_prime;
 }
 
 template <typename CppType>
@@ -209,13 +229,15 @@ void
 StiffenedGasFluidProperties::s_from_v_e_template(
     const CppType & v, const CppType & e, CppType & s, CppType & ds_dv, CppType & ds_de) const
 {
+  using std::pow, std::log;
+
   CppType T, dT_dv, dT_de;
   T_from_v_e_template(v, e, T, dT_dv, dT_de);
 
   CppType p, dp_dv, dp_de;
   p_from_v_e_template(v, e, p, dp_dv, dp_de);
 
-  const CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  const CppType n = pow(T, _gamma) / pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
   {
     s = getNaN();
@@ -224,10 +246,10 @@ StiffenedGasFluidProperties::s_from_v_e_template(
   }
   else
   {
-    s = _cv * std::log(n) + _q_prime;
+    s = _cv * log(n) + _q_prime;
 
-    const CppType dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
-    const CppType dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+    const CppType dn_dT = _gamma * pow(T, _gamma - 1.0) / pow(p + _p_inf, _gamma - 1.0);
+    const CppType dn_dp = pow(T, _gamma) * (1.0 - _gamma) * pow(p + _p_inf, -_gamma);
 
     const CppType dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
     const CppType dn_de = dn_dT * dT_de + dn_dp * dp_de;
@@ -241,11 +263,13 @@ template <typename CppType>
 CppType
 StiffenedGasFluidProperties::s_from_p_T_template(const CppType & p, const CppType & T) const
 {
-  CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  using std::pow, std::log;
+
+  CppType n = pow(T, _gamma) / pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
     return getNaN();
   else
-    return _cv * std::log(n) + _q_prime;
+    return _cv * log(n) + _q_prime;
 }
 
 template <typename CppType>
@@ -253,7 +277,9 @@ void
 StiffenedGasFluidProperties::s_from_p_T_template(
     const CppType & p, const CppType & T, CppType & s, CppType & ds_dp, CppType & ds_dT) const
 {
-  const CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  using std::pow, std::log;
+
+  const CppType n = pow(T, _gamma) / pow(p + _p_inf, _gamma - 1.0);
   if (n <= 0.0)
   {
     s = getNaN();
@@ -262,10 +288,10 @@ StiffenedGasFluidProperties::s_from_p_T_template(
   }
   else
   {
-    s = _cv * std::log(n) + _q_prime;
+    s = _cv * log(n) + _q_prime;
 
-    const CppType dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
-    const CppType dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+    const CppType dn_dT = _gamma * pow(T, _gamma - 1.0) / pow(p + _p_inf, _gamma - 1.0);
+    const CppType dn_dp = pow(T, _gamma) * (1.0 - _gamma) * pow(p + _p_inf, -_gamma);
 
     ds_dp = _cv / n * dn_dp;
     ds_dT = _cv / n * dn_dT;

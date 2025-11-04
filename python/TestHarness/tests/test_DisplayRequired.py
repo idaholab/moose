@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@ import os
 from TestHarnessTestCase import TestHarnessTestCase
 
 class TestHarnessTester(TestHarnessTestCase):
-    def testDislpayRequired(self):
+    def testDisplayRequired(self):
         """
         Test that the display required is working.
         """
@@ -20,8 +20,8 @@ class TestHarnessTester(TestHarnessTestCase):
         if display:
             os.unsetenv('DISPLAY')
 
-        output = self.runTests('--no-color', '-i', 'display_required')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.display_required.*? \[NO DISPLAY\] SKIP')
+        output = self.runTests('--no-color', '-i', 'display_required').output
+        self.assertRegex(output, r'test_harness\.display_required.*? \[NO DISPLAY\] SKIP')
 
         if display:
             os.putenv('DISPLAY', display)

@@ -32,7 +32,7 @@ through the [!param](/Mesh/FileMesh/file) parameter inside `[Mesh]`, e.g.
 ```
 
 MOOSE supports a [variety of mesh file formats](FileMeshGenerator.md); most
-commonly used is the Exodus II format.
+commonly used is the Exodus format.
 
 ### SolidMechanics QuasiStatic Physics
 
@@ -72,7 +72,7 @@ timestep of `1`.
 ### `Outputs`
 
 We use the `exodus = true` shorthand to setup an output object of type `Exodus` to write
-an Exodus II mesh and solution file to the disk. You can visualize these outputs using
+an Exodus mesh and solution file to the disk. You can visualize these outputs using
 [Paraview](https://www.paraview.org).
 
 ## Questions

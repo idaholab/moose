@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Action.h"
-class GaussianProcess;
+class GaussianProcessSurrogate;
 
 class LoadCovarianceDataAction : public Action
 {
@@ -20,5 +20,5 @@ public:
   virtual void act() override;
 
 private:
-  void load(GaussianProcess & model);
+  void load(GaussianProcessSurrogate & model);
 };

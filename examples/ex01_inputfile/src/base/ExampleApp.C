@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ ExampleApp::validParams()
   return params;
 }
 
-ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
+ExampleApp::ExampleApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());
   ExampleApp::registerAll(_factory, _action_factory, _syntax);

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -105,10 +105,12 @@ relativePermeability(const T & seff, Real m)
   else if (MetaPhysicL::raw_value(seff) >= 1.0)
     return 1.0;
 
-  const T a = 1.0 - std::pow(seff, 1.0 / m);
-  const T b = 1.0 - std::pow(a, m);
+  using std::pow, std::sqrt;
 
-  return std::sqrt(seff) * Utility::pow<2>(b);
+  const T a = 1.0 - pow(seff, 1.0 / m);
+  const T b = 1.0 - pow(a, m);
+
+  return sqrt(seff) * Utility::pow<2>(b);
 }
 
 /**
@@ -142,10 +144,12 @@ relativePermeabilityNW(const T & seff, Real m)
   else if (MetaPhysicL::raw_value(seff) >= 1.0)
     return 1.0;
 
-  const T a = std::pow(1.0 - seff, 1.0 / m);
-  const T b = std::pow(1.0 - a, 2.0 * m);
+  using std::pow, std::sqrt;
 
-  return std::sqrt(seff) * b;
+  const T a = pow(1.0 - seff, 1.0 / m);
+  const T b = pow(1.0 - a, 2.0 * m);
+
+  return sqrt(seff) * b;
 }
 
 /**

@@ -1,9 +1,17 @@
 [Tests]
   design = 'splitting.md'
   issues = '#8472 #7752 #11004'
+  [./test_2_generate_split]
+    type = 'RunApp'
+    input = 'checkpoint_split.i'
+    cli_args = '--split-mesh 2 --split-file checkpoint_split_in'
+
+    requirement = 'The system shall generate pre-split mesh files using a standard input file combined with command line arguments.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  [../]
   [./test_2]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in
+    prereq = 'test_2_generate_split'
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_2.e'
@@ -11,66 +19,26 @@
     max_parallel = 2
     min_parallel = 2
 
-    requirement = 'The system shall generate pre-split mesh files using a standard input file combined with command line arguments.'
+    requirement = 'The system shall use pre-split mesh files using a standard input file combined with command line arguments.'
+  [../]
+  [./test_2a_generate_split]
+    type = 'RunApp'
+    input = 'checkpoint_split.i'
+    cli_args = '--split-mesh 2 --split-file checkpoint_split_in.cpr'
+
+    requirement = 'The system shall generate pre-split binary mesh files using a standard input file combined with command line arguments.'
+    recover = false
+    mesh_mode = 'REPLICATED'
   [../]
   [./test_2a]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in.cpa
+    prereq = 'test_2a_generate_split'
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_2a.e'
-    cli_args = 'Outputs/file_base=test_2a --use-split --split-file checkpoint_split_in.cpa'
+    cli_args = 'Outputs/file_base=test_2a --use-split --split-file checkpoint_split_in.cpr'
     max_parallel = 2
     min_parallel = 2
 
     requirement = 'The system shall use pre-split binary mesh files using a standard input file combined with command line arguments.'
-  [../]
-  [./test_4]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_4.e'
-    cli_args = 'Outputs/file_base=test_4 --use-split --split-file checkpoint_split_in'
-    max_parallel = 4
-    min_parallel = 4
-
-    requirement = 'The system shall auto-detect and use pre-split meshes using a standard input file combined with command line arguments.'
-  [../]
-  [./test_4a]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in.cpa
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_4a.e'
-    cli_args = 'Outputs/file_base=test_4a --use-split --split-file checkpoint_split_in.cpa'
-    max_parallel = 4
-    min_parallel = 4
-
-    requirement = 'The system shall use pre-split ascii meshes when the command line parameter also includes the pre-split suffix.'
-  [../]
-  [./test_8]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_8.e'
-    cli_args = 'Outputs/file_base=test_8 --use-split --split-file checkpoint_split_in'
-    max_parallel = 8
-    min_parallel = 8
-
-    requirement = 'The system shall use pre-splits for several different numbers of processors auto-detected from the number of MPI processors used.'
-  [../]
-  [./test_8a]
-    # To generate the splits for this test, run
-    # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in.cpa
-    type = 'Exodiff'
-    input = 'checkpoint_split.i'
-    exodiff = 'test_8a.e'
-    cli_args = 'Outputs/file_base=test_8a --use-split --split-file checkpoint_split_in.cpa'
-    max_parallel = 8
-    min_parallel = 8
-
-    requirement = 'The system shall use pre-splits for several different numbers of processors when the command line parameter also includes the pre-split suffix.'
   [../]
 []

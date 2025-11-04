@@ -12,6 +12,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with a minmod flux limiter.'
   []
 
@@ -25,6 +26,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with no flux limiter.'
   []
 
@@ -38,6 +40,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with a MC flux limiter.'
   []
 
@@ -51,6 +54,7 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to solve a square wave problem with a 1D single phase compressible flow discretization with a Superbee flux limiter.'
   []
 []

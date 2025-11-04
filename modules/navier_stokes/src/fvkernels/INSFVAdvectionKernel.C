@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,8 @@
 #include "RelationshipManager.h"
 #include "NSFVUtils.h"
 #include "FVBoundaryScalarLagrangeMultiplierConstraint.h"
+#include "Limiter.h"
+#include "Steady.h"
 
 InputParameters
 INSFVAdvectionKernel::validParams()
@@ -27,6 +29,15 @@ INSFVAdvectionKernel::validParams()
   // advection kernels
   params.suppressParameter<bool>("force_boundary_execution");
 
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsAdvection(obj_params, rm_params, 3); });
+
   return params;
 }
 
@@ -38,8 +49,6 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   if (need_more_ghosting && _tid == 0)
   {
-    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
-
     // If we need more ghosting, then we are a second-order nonlinear limiting scheme whose stencil
     // is liable to change upon wind-direction change. Consequently we need to tell our problem that
     // it's ok to have new nonzeros which may crop-up after PETSc has shrunk the matrix memory
@@ -55,6 +64,28 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   };
 
   param_check("force_boundary_execution");
+
+  if (_var.getTwoTermBoundaryExpansion() &&
+      !(_advected_interp_method == Moose::FV::InterpMethod::Upwind ||
+        _advected_interp_method == Moose::FV::InterpMethod::Average ||
+        _advected_interp_method == Moose::FV::InterpMethod::HarmonicAverage ||
+        _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage))
+    mooseWarning(
+        "Second order upwind limiting is not supported when `two_term_boundary_expansion "
+        "= true` for the limited variable. Use at your own risk or please consider "
+        "setting `two_term_boundary_expansion = false` in the advected variable parameters or "
+        "changing your "
+        "'advected_interp_method' of the kernel to first order methods (`upwind`, `average`)");
+
+  if (dynamic_cast<Steady *>(_app.getExecutioner()))
+  {
+    const MooseEnum not_available_with_steady("sou min_mod vanLeer quick venkatakrishnan");
+    const std::string chosen_scheme =
+        static_cast<std::string>(getParam<MooseEnum>("advected_interp_method"));
+    if (not_available_with_steady.find(chosen_scheme) != not_available_with_steady.items().end())
+      paramError("advected_interp_method",
+                 "The given advected interpolation cannot be used with steady-state runs!");
+  }
 }
 
 void
@@ -70,32 +101,37 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
   if (avoidBoundary(fi))
     return true;
 
-  // We're not on a boundary, so technically we're not skipping a boundary
-  if (!onBoundary(fi))
-    return false;
+  // We get this to check if we are on a kernel boundary or not
+  const bool on_boundary = onBoundary(fi);
 
-  // Selected boundaries to force
-  for (const auto bnd_to_force : _boundaries_to_force)
-    if (fi.boundaryIDs().count(bnd_to_force))
-      return false;
+  // We are either on a kernel boundary or on an internal sideset
+  // which is handled as a boundary
+  if (on_boundary || !fi.boundaryIDs().empty())
+  {
+    // Selected boundaries to force
+    for (const auto bnd_to_force : _boundaries_to_force)
+      if (fi.boundaryIDs().count(bnd_to_force))
+        return false;
 
-  // If we have flux bcs then we do skip
-  const auto & [have_flux_bcs, flux_bcs] = _var.getFluxBCs(fi);
-  libmesh_ignore(have_flux_bcs);
-  for (const auto * const flux_bc : flux_bcs)
-    // If we have something like an average-value pressure constraint on a flow boundary, then we
-    // still want to execute this advection kernel on the boundary to ensure we're enforcing local
-    // conservation (mass in this example)
-    if (!dynamic_cast<const FVBoundaryScalarLagrangeMultiplierConstraint *>(flux_bc))
-      return true;
+    // If we have flux bcs then we do skip
+    const auto & [have_flux_bcs, flux_bcs] = _var.getFluxBCs(fi);
+    libmesh_ignore(have_flux_bcs);
+    for (const auto * const flux_bc : flux_bcs)
+      // If we have something like an average-value pressure constraint on a flow boundary, then we
+      // still want to execute this advection kernel on the boundary to ensure we're enforcing local
+      // conservation (mass in this example)
+      if (!dynamic_cast<const FVBoundaryScalarLagrangeMultiplierConstraint *>(flux_bc))
+        return true;
 
-  // If we have a flow boundary without a replacement flux BC, then we must not skip. Mass and
-  // momentum are transported via advection across boundaries
-  for (const auto bc_id : fi.boundaryIDs())
-    if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
-      return false;
+    // If we have a flow boundary without a replacement flux BC, then we must not skip. Mass and
+    // momentum are transported via advection across boundaries
+    for (const auto bc_id : fi.boundaryIDs())
+      if (_flow_boundaries.find(bc_id) != _flow_boundaries.end())
+        return false;
+  }
 
   // If not a flow boundary, then there should be no advection/flow in the normal direction, e.g. we
-  // should not contribute any advective flux
-  return true;
+  // should not contribute any advective flux. If we are on an internal face though, we still
+  // execute.
+  return on_boundary;
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,12 +61,12 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-  ValueType evaluate(const ElemArg & elem_arg, const StateArg & state) const override final;
-  ValueType evaluate(const FaceArg & face, const StateArg & state) const override final;
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final;
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final;
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
-  ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
+  ValueType evaluate(const NodeArg &, const StateArg &) const override final;
 };
 
 template <typename T, typename Map>
@@ -119,4 +119,20 @@ typename FaceCenteredMapFunctor<T, Map>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const NodeArg &, const StateArg &) const
 {
   mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+inline void
+dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+{
+  Map & m_map = m;
+  dataStore(stream, m_map, context);
+}
+
+template <typename T, typename Map>
+inline void
+dataLoad(std::istream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+{
+  Map & m_map = m;
+  dataLoad(stream, m_map, context);
 }

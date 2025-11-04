@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,94 +14,103 @@
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
 #include "Parser.h"
+#include "MooseUnitUtils.h"
+#include "MooseBase.h"
 
 TEST(InputParametersTest, checkControlParamPrivateError)
 {
-  try
-  {
-    InputParameters params = emptyInputParameters();
-    params.addPrivateParam<Real>("private", 1);
-    params.declareControllable("private");
-    params.checkParams("");
-    FAIL() << "checkParams failed to catch private control param";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("private parameter '' marked controllable") != std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  InputParameters params = emptyInputParameters();
+  params.addPrivateParam<Real>("private", 1);
+  params.declareControllable("private");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>([&params]() { params.checkParams(""); },
+                                                    "private parameter '' marked controllable");
 }
 
-// This tests for the bug https://github.com/idaholab/moose/issues/8586.
-// It makes sure that range-checked input file parameters comparison functions
-// do absolute floating point comparisons instead of using a default epsilon.
 TEST(InputParametersTest, checkRangeCheckedParam)
 {
-  try
+  // This tests for the bug https://github.com/idaholab/moose/issues/8586.
+  // It makes sure that range-checked input file parameters comparison functions
+  // do absolute floating point comparisons instead of using a default epsilon.
+  InputParameters params = emptyInputParameters();
+  params.addRangeCheckedParam<Real>("p", 1.000000000000001, "p = 1", "Some doc");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.checkParams(""); },
+      "p: Range check failed; expression = 'p = 1', value = 1");
+
+  const auto test_vector_error = [](const std::vector<Real> & value,
+                                    const std::string & range_function,
+                                    const bool is_user_error,
+                                    const std::string expect_error)
   {
     InputParameters params = emptyInputParameters();
-    params.addRangeCheckedParam<Real>("p", 1.000000000000001, "p = 1", "Some doc");
-    params.checkParams("");
-    FAIL() << "range checked input param failed to catch 1.000000000000001 != 1";
-  }
-  catch (const std::exception & e)
+    const std::string name = "p";
+    params.addRangeCheckedParam<std::vector<Real>>(name, value, range_function, "Some doc");
+    const auto param = dynamic_cast<libMesh::Parameters::Parameter<std::vector<Real>> *>(
+        params.begin()->second.get());
+    const auto result = params.rangeCheck<Real, Real>(name, name, *param);
+    EXPECT_TRUE(result.has_value());
+    ASSERT_EQ(is_user_error, result->first);
+    ASSERT_EQ(expect_error, result->second);
+  };
+
+  // Invalid range function
+  test_vector_error({}, "!", false, "Error parsing expression '!' for parameter p");
+  // Check all values, vector has no values
+  test_vector_error(
+      {}, "p = 1", true, "Range checking empty vector parameter p; expression = 'p = 1'");
+  // Check all values, invalid variable
+  test_vector_error({1}, "a = 1", false, "Error parsing expression 'a = 1'");
+  // Index check out of range
+  test_vector_error(
+      {1},
+      "p_1 = 1",
+      true,
+      "Error parsing expression 'p_1 = 1' for parameter p; out of range variable 'p_1'");
+  // Index check invalid variable
+  test_vector_error(
+      {1}, "p_a = 1", false, "Error parsing expression 'p_a = 1'; invalid variable 'p_a'");
+
+  const auto test_scalar_error = [](const std::string & range_function,
+                                    const bool is_user_error,
+                                    const std::string expect_error)
   {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Range check failed for param") != std::string::npos)
-        << "range check failed with unexpected error: " << msg;
-  }
+    InputParameters params = emptyInputParameters();
+    const std::string name = "p";
+    params.addRangeCheckedParam<Real>(name, 1, range_function, "Some doc");
+    const auto param =
+        dynamic_cast<libMesh::Parameters::Parameter<Real> *>(params.begin()->second.get());
+    const auto result = params.rangeCheck<Real, Real>(name, name, *param);
+    EXPECT_TRUE(result.has_value());
+    ASSERT_EQ(is_user_error, result->first);
+    ASSERT_EQ(expect_error, result->second);
+  };
+
+  // Invalid range function
+  test_scalar_error("!", false, "Error parsing expression '!' for parameter p");
 }
 
 TEST(InputParametersTest, checkControlParamTypeError)
 {
-  try
-  {
-    InputParameters params = emptyInputParameters();
-    params.addParam<PostprocessorName>("pp_name", "make_it_valid", "Some doc");
-    params.declareControllable("pp_name");
-    params.checkParams("");
-    FAIL() << "checkParams failed to catch invalid control param type";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("non-controllable type") != std::string::npos)
-        << "failed with unexpected error:" << msg;
-  }
+  InputParameters params = emptyInputParameters();
+  params.addParam<PostprocessorName>("pp_name", "make_it_valid", "Some doc");
+  params.declareControllable("pp_name");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>([&params]() { params.checkParams(""); },
+                                                    "non-controllable type");
 }
 
 TEST(InputParametersTest, checkControlParamValidError)
 {
-  try
-  {
-    InputParameters params = emptyInputParameters();
-    params.declareControllable("not_valid");
-    params.checkParams("");
-    FAIL() << "checkParams failed to catch non existing control param";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("cannot be marked as controllable") != std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.declareControllable("not_valid"); }, "cannot be marked as controllable");
 }
 
 TEST(InputParametersTest, checkSuppressedError)
 {
-  try
-  {
-    InputParameters params = emptyInputParameters();
-    params.suppressParameter<int>("nonexistent");
-    FAIL() << "failed to error on supression of nonexisting parameter";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Unable to suppress nonexistent parameter") != std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.suppressParameter<int>("nonexistent"); },
+      "Unable to suppress nonexistent parameter");
 }
 
 TEST(InputParametersTest, checkSuppressingControllableParam)
@@ -129,36 +138,21 @@ TEST(InputParametersTest, checkSetDocString)
 
 TEST(InputParametersTest, checkSetDocStringError)
 {
-  try
-  {
-    InputParameters params = emptyInputParameters();
-    params.setDocString("little_guy", "That little guy, I wouldn't worry about that little_guy.");
-    FAIL() << "failed to error on attempt to set non-existing parameter";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("Unable to set the documentation string (using setDocString)") !=
-                std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() {
+        params.setDocString("little_guy",
+                            "That little guy, I wouldn't worry about that little_guy.");
+      },
+      "Unable to set the documentation string (using setDocString)");
 }
 
 void
 testBadParamName(const std::string & name)
 {
-  try
-  {
-    InputParameters params = emptyInputParameters();
-    params.addParam<bool>(name, "Doc");
-    FAIL() << "failed to error on attempt to set invalid parameter name";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    EXPECT_TRUE(msg.find("Invalid parameter name") != std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params, &name]() { params.addParam<bool>(name, "Doc"); }, "Invalid parameter name");
 }
 
 /// Just make sure we don't allow invalid parameter names
@@ -182,6 +176,9 @@ TEST(InputParametersTest, applyParameter)
   p2.set<MultiMooseEnum>("enum") = "bar";
   p1.applyParameter(p2, "enum");
   EXPECT_TRUE(p1.get<MultiMooseEnum>("enum").contains("bar"));
+
+  // applyParameter should throw error if input parameter doesn't match any valid parameters
+  EXPECT_THROW(p1.applyParameter(p2, "invalid_param"), std::exception);
 }
 
 TEST(InputParametersTest, applyParametersVector)
@@ -268,32 +265,14 @@ TEST(InputParametersTest, makeParamRequired)
   EXPECT_TRUE(params.isParamRequired("good_param"));
 
   // Require existing parameter with the wrong type
-  try
-  {
-    params.makeParamRequired<PostprocessorName>("wrong_param_type");
-    FAIL() << "failed to error on attempt to change a parameter type when making it required";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    EXPECT_TRUE(msg.find("Unable to require nonexistent parameter: wrong_param_type") !=
-                std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.makeParamRequired<PostprocessorName>("wrong_param_type"); },
+      "Unable to require nonexistent parameter: wrong_param_type");
 
   // Require non-existing parameter
-  try
-  {
-    params.makeParamRequired<PostprocessorName>("wrong_param_name");
-    FAIL() << "failed to error on attempt to require a non-existent parameter";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    EXPECT_TRUE(msg.find("Unable to require nonexistent parameter: wrong_param_name") !=
-                std::string::npos)
-        << "failed with unexpected error: " << msg;
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.makeParamRequired<PostprocessorName>("wrong_param_name"); },
+      "Unable to require nonexistent parameter: wrong_param_name");
 }
 
 TEST(InputParametersTest, setPPandVofPP)
@@ -371,20 +350,9 @@ TEST(InputParametersTest, getPairLength)
   p.addParam<std::vector<std::string>>("first", num_words, "");
   p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
 
-  try
-  {
-    auto pairs = p.get<std::string, int>("first", "second");
-    FAIL() << "Missing expected exception.";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find(
-            "Vector parameters first:(size: 3) and second:(size: 4) are of different lengths") !=
-        std::string::npos)
-        << "Failed with unexpected error message: " << msg;
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&p]() { p.get<std::string, int>("first", "second"); },
+      "first: Vector parameters first(size: 3) and second(size: 4) are of different lengths");
 }
 
 TEST(InputParametersTest, getControllablePairs)
@@ -396,21 +364,10 @@ TEST(InputParametersTest, getControllablePairs)
   p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
   p.declareControllable("first");
 
-  try
-  {
-    auto pairs = p.get<std::string, int>("first", "second");
-    FAIL() << "Missing expected exception.";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(
-        msg.find(
-            "first: and/or second: are controllable parameters and cannot be "
-            "retireved using the MooseObject::getParam/InputParameters::get methods for pairs") !=
-        std::string::npos)
-        << "Failed with unexpected error message: " << msg;
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&p]() { p.get<std::string, int>("first", "second"); },
+      "Parameters first and/or second are controllable parameters and cannot be retireved using "
+      "the MooseObject::getParam/InputParameters::get methods for pairs");
 }
 
 TEST(InputParametersTest, getParamList)
@@ -539,32 +496,13 @@ TEST(InputParametersTest, noDefaultValueError)
   params.addParam<std::vector<Real>>("dummy_vector", "a dummy vector");
 
   // Throw an error message when no default value is provided
-  try
-  {
-    params.getParamHelper<Real>("dummy_real", params, static_cast<Real *>(0));
-    FAIL() << "failed to get the parameter because the default value is missing";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The parameter \"dummy_real\" is being retrieved before being set.") !=
-                std::string::npos)
-        << "Failed with unexpected error message: " << msg;
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.getParamHelper<Real>("dummy_real", params); },
+      "The parameter \"dummy_real\" is being retrieved before being set.");
 
-  try
-  {
-    params.getParamHelper<std::vector<Real>>(
-        "dummy_vector", params, static_cast<std::vector<Real> *>(0));
-    FAIL() << "failed to get the parameter because the default value is missing";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The parameter \"dummy_vector\" is being retrieved before being set.") !=
-                std::string::npos)
-        << "Failed with unexpected error message: " << msg;
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.getParamHelper<std::vector<Real>>("dummy_vector", params); },
+      "The parameter \"dummy_vector\" is being retrieved before being set.");
 }
 
 TEST(InputParametersTest, fileNames)
@@ -618,19 +556,8 @@ TEST(InputParametersTest, fileNames)
 
     // Parse the inputs
     Parser parser(filenames, input_text);
+    parser.setCommandLineParams(cli_args);
     parser.parse();
-
-    // Merge in the command line arguments, if any
-    std::string cli_hit;
-    for (const auto & value : cli_args)
-      cli_hit += value + "\n";
-    if (cli_hit.size())
-    {
-      auto cli_root = hit::parse("CLI_ARGS", cli_hit);
-      hit::explode(cli_root);
-      hit::merge(cli_root, parser.root());
-      delete cli_root;
-    }
 
     // Define the parameters that we care about
     InputParameters base_params = emptyInputParameters();
@@ -647,7 +574,7 @@ TEST(InputParametersTest, fileNames)
 
     // Fill the object parameters from the input
     ExtractWalker ew(object_params);
-    parser.root()->walk(&ew, hit::NodeType::Section);
+    parser.getRoot().walk(&ew, hit::NodeType::Section);
 
     // Finalize the parameters, which sets the filep aths
     for (auto & name_params_pair : object_params)
@@ -744,4 +671,107 @@ TEST(InputParametersTest, fileNames)
   // Input with an include in a different directory
   run_test({{"../main.i", "!include " + include_file("simple_input.i")}},
            {{"object", relative_include_file("../foo")}});
+}
+
+TEST(InputParametersTest, alphaCommandLineParamSwitch)
+{
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addCommandLineParam<bool>("1value", "--1value", "Doc"); },
+      "The switch '--1value' for the command line parameter '1value' is invalid. It must begin "
+      "with an alphabetical character.");
+}
+
+TEST(InputParametersTest, setGlobalCommandLineParamNotCLParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("param", "Doc");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.setGlobalCommandLineParam("param"); },
+      "InputParameters::setGlobalCommandLineParam: The parameter 'param' is not a command line "
+      "parameter");
+}
+
+TEST(InputParametersTest, getCommandLineMetadataNotCLParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("param", "Doc");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.getCommandLineMetadata("param"); },
+      "InputParameters::getCommandLineMetadata: The parameter 'param' is not a command line "
+      "parameter");
+}
+
+TEST(InputParametersTest, commandLineParamSetNotCLParam)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<std::string>("param", "Doc");
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.commandLineParamSet("param", {}); },
+      "InputParameters::commandLineParamSet: The parameter 'param' is not a command line "
+      "parameter");
+}
+
+TEST(InputParametersTest, isCommandLineParameter)
+{
+  InputParameters params = emptyInputParameters();
+  params.addCommandLineParam<std::string>("cliparam", "--cliparam", "Doc");
+  params.addParam<std::string>("noncliparam", "Doc");
+
+  EXPECT_TRUE(params.isCommandLineParameter("cliparam"));
+  EXPECT_FALSE(params.isCommandLineParameter("noncliparam"));
+}
+
+TEST(InputParametersTest, commandLineParamKnownArg)
+{
+  // Helper for checking if a command line name is registered
+  const auto have_cl_name = [](const std::string & var) -> bool
+  {
+    const auto names = libMesh::command_line_names();
+    return std::find(names.begin(), names.end(), var) != names.end();
+  };
+
+  const std::vector<std::string> switches{"-iptest_knownarg", "--iptest_anotherarg"};
+
+  // These arguments should not be recognized yet; these need to be unique
+  // names because the libMesh command line is shared across unit tests
+  for (const auto & v : switches)
+    ASSERT_FALSE(have_cl_name(v));
+
+  // Adding these arguments should call back to libMesh::add_command_line_name
+  InputParameters params = emptyInputParameters();
+  const auto combined_switches = MooseUtils::stringJoin(switches, " ");
+  params.addCommandLineParam<std::string>("foo", combined_switches, "Doc");
+
+  // Should now be recognized
+  for (const auto & v : switches)
+    ASSERT_TRUE(have_cl_name(v));
+}
+
+TEST(InputParametersTest, checkIsParamDefined)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<Real>("test_param", "This parameter should be indicated as being defined");
+  ASSERT_TRUE(params.isParamDefined("test_param"));
+  ASSERT_FALSE(params.isParamDefined("some_other_param"));
+}
+
+TEST(InputParametersTest, queryAndGetObjectType)
+{
+  InputParameters params = emptyInputParameters();
+
+  // Not set
+  ASSERT_EQ(params.queryObjectType(), nullptr);
+  Moose::UnitUtils::assertThrows([&params]() { params.getObjectType(); },
+                                 "InputParameters::getObjectType(): Missing '" +
+                                     MooseBase::type_param + "' param",
+                                 true);
+
+  // Is set
+  const auto object_type = "foo";
+  params.set<std::string>(MooseBase::type_param) = object_type;
+  const auto type_ptr = params.queryObjectType();
+  ASSERT_NE(type_ptr, nullptr);
+  ASSERT_EQ(*type_ptr, object_type);
+  ASSERT_EQ(params.getObjectType(), *type_ptr);
 }

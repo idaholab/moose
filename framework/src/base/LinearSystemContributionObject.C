@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -45,7 +45,7 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
                     false),
-    Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
+    Restartable(this, getBase() + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
@@ -54,4 +54,32 @@ LinearSystemContributionObject::LinearSystemContributionObject(const InputParame
     _tid(parameters.get<THREAD_ID>("_tid")),
     _mesh(_subproblem.mesh())
 {
+}
+
+void
+LinearSystemContributionObject::linkTaggedVectorsAndMatrices(const std::set<TagID> & vector_tags,
+                                                             const std::set<TagID> & matrix_tags)
+{
+  _vectors.clear();
+  _matrices.clear();
+  // The requested tags can be a subset of the stored vector/matrix tags
+  std::set<TagID> vector_intersection;
+  std::set_intersection(vector_tags.begin(),
+                        vector_tags.end(),
+                        this->getVectorTags({}).begin(),
+                        this->getVectorTags({}).end(),
+                        std::inserter(vector_intersection, vector_intersection.begin()));
+
+  std::set<TagID> matrix_intersection;
+  std::set_intersection(matrix_tags.begin(),
+                        matrix_tags.end(),
+                        this->getMatrixTags({}).begin(),
+                        this->getMatrixTags({}).end(),
+                        std::inserter(matrix_intersection, matrix_intersection.begin()));
+
+  for (const auto tag : vector_intersection)
+    _vectors.push_back(&_sys.getVector(tag));
+
+  for (const auto tag : matrix_intersection)
+    _matrices.push_back(&_sys.getMatrix(tag));
 }

@@ -37,7 +37,7 @@ MOOSE produces the expected result:
 
 ## Theis tests
 
-In the fully-saturated, isothermal case with no mechanical coupling and constant, large fluid bulk modulus, the [fluid flow equations](governing_equations.md) reduce to the form conventionally used in groundwater flow:
+In the fully-saturated, isothermal case with no mechanical coupling and constant, large fluid bulk modulus, the [fluid flow equations](porous_flow/governing_equations.md) reduce to the form conventionally used in groundwater flow:
 \begin{equation}
 S_{s}\frac{\partial H}{\partial t} = \nabla_{i}\left(K_{ij}\nabla_{j} H \right) \ ,
 \end{equation}
@@ -72,7 +72,7 @@ Flow from a source in a radial 1D problem admits a similarity solution, where th
 
 [fig:theis_similarity_fig] shows the comparison of
 similarity solutions calculated with either fixed radial distance or fixed time. In this case, good agreement
-is observed between the two results for both liquid pressure and gas saturation. 
+is observed between the two results for both liquid pressure and gas saturation.
 
 !media dirackernels/theis3_similarity_fig.png style=width:90%;margin-left:10px caption=Results of the 2-phase radial injection simulation. id=fig:theis_similarity_fig
 

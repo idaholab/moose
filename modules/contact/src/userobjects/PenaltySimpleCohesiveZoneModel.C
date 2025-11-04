@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -176,7 +176,7 @@ PenaltySimpleCohesiveZoneModel::reinit()
     // Keep active set fixed from second Uzawa loop
     if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
     {
-      using namespace std;
+      using std::abs;
 
       const auto & real_tangential_velocity =
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
@@ -192,15 +192,15 @@ PenaltySimpleCohesiveZoneModel::reinit()
       // capacity)
       ADTwoVector inner_iteration_penalty_friction = penalty_friction * slip_distance;
 
-      const auto slip_metric = std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(0)) +
-                               std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
+      const auto slip_metric = abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(0)) +
+                               abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
 
       if (slip_metric > _epsilon_tolerance &&
           penalty_friction * slip_distance.norm() >
-              0.4 * _friction_coefficient * std::abs(normal_pressure))
+              0.4 * _friction_coefficient * abs(normal_pressure))
       {
         inner_iteration_penalty_friction =
-            MetaPhysicL::raw_value(0.4 * _friction_coefficient * std::abs(normal_pressure) /
+            MetaPhysicL::raw_value(0.4 * _friction_coefficient * abs(normal_pressure) /
                                    (penalty_friction * slip_distance.norm())) *
             penalty_friction * slip_distance;
       }
@@ -210,7 +210,7 @@ PenaltySimpleCohesiveZoneModel::reinit()
 
       // Nonlinearity below
       ADReal tangential_trial_traction_norm = 0;
-      if (std::abs(tangential_trial_traction(0)) + std::abs(tangential_trial_traction(1)) >
+      if (abs(tangential_trial_traction(0)) + abs(tangential_trial_traction(1)) >
           _epsilon_tolerance)
         tangential_trial_traction_norm = tangential_trial_traction.norm();
 

@@ -19,3 +19,5 @@ Extensions:
         home: /modules/richards/index.md
     MooseDocs.extensions.appsyntax:
         active: False
+    MooseDocs.extensions.ifelse:
+        active: False

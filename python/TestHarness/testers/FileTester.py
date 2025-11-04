@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,4 +27,4 @@ class FileTester(RunApp):
 
     def prepare(self, options):
         if self.specs['delete_output_before_running']:
-            util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles())
+            util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))

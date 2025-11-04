@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,7 @@ SodiumProperties::validParams()
 {
   InputParameters params = FluidProperties::validParams();
   params.addClassDescription("Fluid properties for sodium");
+  params.set<std::string>("fp_type") = "sodium-specific-fp";
   params.addParam<Real>(
       "thermal_conductivity",
       "Optional value for thermal conductivity that overrides interal calculations");

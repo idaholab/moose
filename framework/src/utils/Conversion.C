@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,8 @@
 
 // system includes
 #include <iomanip>
+
+using namespace libMesh;
 
 namespace Moose
 {
@@ -427,6 +429,8 @@ stringify(SolutionIterationType t)
       return "time";
     case SolutionIterationType::Nonlinear:
       return "nonlinear";
+    case SolutionIterationType::FixedPoint:
+      return "fixed_point";
     default:
       mooseError("Unhandled SolutionIterationType");
   }

@@ -1,0 +1,26 @@
+[Tests]
+  [diffusion_multi_cg]
+    design = 'MultiSpeciesDiffusionCG.md'
+    issues = '#25642'
+    requirement = 'The system shall be able to solve a diffusion equation for multiple species with a continuous Galerkin discretization with a shorthand syntax and '
+    [non-ad]
+      type = CSVDiff
+      input = 'diffusion_multi_cg.i'
+      cli_args = 'Physics/MultiSpeciesDiffusion/ContinuousGalerkin/diff/use_automatic_differentiation=false Materials/diff_coeffs/type=GenericConstantMaterial'
+      csvdiff = 'diffusion_multi_cg_out_sample_0010.csv'
+      detail = 'without automatic differentiation for several terms,'
+    []
+    [ad]
+      type = CSVDiff
+      input = 'diffusion_multi_cg.i'
+      csvdiff = 'diffusion_multi_cg_out_sample_0010.csv'
+      detail = 'with automatic differentiation,'
+    []
+    [multi_options]
+      type = CSVDiff
+      input = 'diffusion_multi_options.i'
+      csvdiff = 'diffusion_multi_options_out_sample_0010.csv'
+      detail = 'with diffusivities and heat sources provided in a flexible manner.'
+    []
+  []
+[]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,7 +15,7 @@
 
 // Forward declarations
 class AuxiliarySystem;
-class InternalSideIndicators;
+class InternalSideIndicatorBase;
 
 class ComputeIndicatorThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -59,7 +59,7 @@ protected:
   const MooseObjectWarehouse<Indicator> & _indicator_whs;
 
   /// InternalSideIndicator Storage
-  const MooseObjectWarehouse<InternalSideIndicator> & _internal_side_indicators;
+  const MooseObjectWarehouse<InternalSideIndicatorBase> & _internal_side_indicators;
 
   bool _finalize;
 };

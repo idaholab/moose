@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -60,6 +60,12 @@ FVInitialConditionTempl<T>::computeElement(const ElemInfo & elem_info)
     static_assert(Moose::always_false<T>,
                   "Initial condition is not implemented for the used type!");
   }
+}
+template <typename T>
+MooseVariableFEBase &
+FVInitialConditionTempl<T>::variable()
+{
+  return _base_var;
 }
 
 template class FVInitialConditionTempl<Real>;

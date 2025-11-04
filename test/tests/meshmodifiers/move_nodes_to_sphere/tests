@@ -1,0 +1,21 @@
+[Tests]
+  design = 'MoveNodesToSphere.md'
+  [geometrysphere]
+    type = 'Exodiff'
+    input = 'geometrysphere.i'
+    exodiff = 'geometrysphere_out.e-s004'
+    issues = '#9578'
+    requirement = "The system shall support 'snapping' or moving new nodes in sidesets created by "
+                  "mesh adaptivity to the surface of a geometric sphere to capture high fidelity "
+                  "features on curved geometries."
+  []
+  [block]
+    type = 'Exodiff'
+    input = 'block.i'
+    exodiff = 'block_out.e-s004'
+    issues = '#24645'
+    requirement = "The system shall support 'snapping' or moving new nodes in lower dimensional "
+                  "subdomains created by mesh adaptivity to the surface of a geometric sphere to "
+                  "capture high fidelity features on curved geometries."
+  []
+[]

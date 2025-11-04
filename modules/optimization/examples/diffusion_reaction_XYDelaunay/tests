@@ -1,0 +1,29 @@
+[Tests]
+    design = 'materialInv_diffusion_reaction.md'
+    issues = '#22215 #27722'
+
+    [diffusion_reaction_xy_del]
+      requirement = 'The system shall be able to perform material inversion on a nonlinear diffusion-reaction problem by'
+      [parameter_mesh]
+        type = Exodiff
+        input = parameter_mesh.i
+        exodiff = parameter_mesh_out.e
+        recover = false
+        detail = 'creating a mesh defining parameter space using the XYDelaunayGenerator, '
+      []
+
+      [optimize]
+        type = Exodiff
+        input = optimize.i
+        exodiff = optimize_out_forward0.e
+        rel_err = 1e-4
+        prereq = diffusion_reaction_xy_del/parameter_mesh
+        max_threads = 1 # Optimize executioner does not support multiple threads
+        # steady solve
+        recover = false
+        detail = 'using TAO to perform optimization.'
+        valgrind = HEAVY
+        heavy = true
+      []
+    []
+  []

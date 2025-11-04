@@ -203,13 +203,13 @@ h_conv = 50
     type = INSFVInletVelocityBC
     boundary = 'top'
     variable = vel_x
-    function = 0
+    functor = 0
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'top'
     variable = vel_y
-    function = ${u_inlet}
+    functor = ${u_inlet}
   []
   [inlet_T]
     type = FVDirichletBC

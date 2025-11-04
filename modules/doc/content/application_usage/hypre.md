@@ -2,7 +2,7 @@
 
 ## Overview
 
-Hypre is a set of solvers/preconditioners from Lawrence Livermore National Laboratory.  The [main Hypre website can be found here](https://computation.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods).  For MOOSE we mainly use Hypre's algebraic multigrid (AMG) package: BoomerAMG.
+Hypre is a set of solvers/preconditioners from Lawrence Livermore National Laboratory.  The [main Hypre website can be found here](https://computing.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods).  For MOOSE we mainly use Hypre's algebraic multigrid (AMG) package: BoomerAMG.
 
 AMG is a scalable, efficient algorithm for solution of PDEs that are fairly elliptic.  Many different sets of PDEs fall into that category including heat conduction, solid mechanics, porous flow, species diffusion, etc.
 

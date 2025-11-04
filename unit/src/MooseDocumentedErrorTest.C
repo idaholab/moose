@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,7 +20,7 @@ TEST_F(MooseDocumentedErrorTest, mooseObjectError)
         catch (const std::exception & e)
         {
           EXPECT_EQ(std::string(e.what()),
-                    "The following error occurred in the Problem 'problem' of type "
+                    "The following occurred in the Problem 'problem' of type "
                     "FEProblem.\n\nfoo\n\nThis error is documented at "
                     "github.com/idaholab/moose/issues/1234.");
           throw;

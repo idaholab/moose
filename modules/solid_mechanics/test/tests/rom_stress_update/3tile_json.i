@@ -107,7 +107,7 @@ endtime = 1.9
   []
   [rom_stress_prediction]
     type = LAROMANCEPartitionStressUpdate
-    model = laromance/test/3tile.json
+    model = solid_mechanics:laromance/test/3tile.json
     temperature = temperature
     effective_inelastic_strain_name = effective_creep_strain
     internal_solve_full_iteration_history = true

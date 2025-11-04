@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,6 +20,7 @@
 #include "wasphit/HITNodeView.h"
 #include "waspsiren/SIRENInterpreter.h"
 #include "waspsiren/SIRENResultSet.h"
+#include "waspplot/CustomPlotFile.h"
 #include <string>
 #include <memory>
 #include <set>
@@ -54,21 +55,16 @@ private:
   bool parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList);
 
   /**
-   * Update document text changes - specific to this server implemention.
-   * @param replacement_text - text to be replaced over the provided range
-   * @param start_line - starting replace line number ( zero-based )
-   * @param start_character - starting replace column number ( zero-based )
-   * @param end_line - ending replace line number ( zero-based )
-   * @param end_character - ending replace column number ( zero-based )
-   * @param range_length - length of replace range - server specific
-   * @return - true if the document text was updated successfully
+   * Add paths from includes and FileName parameters for client to watch.
    */
-  bool updateDocumentTextChanges(const std::string & replacement_text,
-                                 int start_line,
-                                 int start_character,
-                                 int end_line,
-                                 int end_character,
-                                 int range_length);
+  void addResourcesForDocument();
+
+  /**
+   * Recursively walk input to gather all FileName type parameter values.
+   * @param filename_vals - set to fill up with FileName parameter values
+   * @param parent - nodeview for recursive tree traversal starting point
+   */
+  void getFileNameTypeValues(std::set<std::string> & filename_vals, wasp::HITNodeView parent);
 
   /**
    * Gather document completion items - specific to this server implemention.
@@ -170,9 +166,11 @@ private:
    * Add parameter values to completion list for request line and column.
    * @param completionItems - list of completion objects to be filled out
    * @param valid_params - all valid parameters used for value completion
+   * @param existing_params - set of parameters already existing in input
    * @param existing_subblocks - active and inactive subblock name values
    * @param param_name - name of input parameter for value autocompletion
    * @param obj_act_tasks - tasks to verify object type with valid syntax
+   * @param object_path - full node path where autocomplete was requested
    * @param replace_line_beg - start line of autocompletion replace range
    * @param replace_char_beg - start column of autocomplete replace range
    * @param replace_line_end - end line of autocomplete replacement range
@@ -181,9 +179,11 @@ private:
    */
   bool addValuesToList(wasp::DataArray & completionItems,
                        const InputParameters & valid_params,
+                       const std::set<std::string> & existing_params,
                        const std::set<std::string> & existing_subblocks,
                        const std::string & param_name,
                        const std::set<std::string> & obj_act_tasks,
+                       const std::string & object_path,
                        int replace_line_beg,
                        int replace_char_beg,
                        int replace_line_end,
@@ -219,12 +219,12 @@ private:
                                      const std::string & val_string);
 
   /**
-   * Add locations of lookups or parameter declarator to definition list.
-   * @param definitionLocations - data array of locations objects to fill
+   * Add set of nodes sorted by location to definition or reference list.
+   * @param defsOrRefsLocations - data array of locations objects to fill
    * @param location_nodes - set of nodes that have locations to be added
    * @return - true if filling of location objects completed successfully
    */
-  bool addLocationNodesToList(wasp::DataArray & definitionLocations,
+  bool addLocationNodesToList(wasp::DataArray & defsOrRefsLocations,
                               const SortedLocationNodes & location_nodes);
 
   /**
@@ -248,6 +248,18 @@ private:
                                          int line,
                                          int character,
                                          bool include_declaration);
+
+  /**
+   * Recursively walk input to gather all nodes matching value and types.
+   * @param match_nodes - set to fill with nodes matching value and types
+   * @param view_parent - nodeview used to start recursive tree traversal
+   * @param target_value -
+   * @param target_types -
+   */
+  void getNodesByValueAndTypes(SortedLocationNodes & match_nodes,
+                               wasp::HITNodeView view_parent,
+                               const std::string & target_value,
+                               const std::set<std::string> & target_types);
 
   /**
    * Gather formatting text edits - specific to this server implemention.
@@ -306,6 +318,53 @@ private:
   int getDocumentSymbolKind(wasp::HITNodeView symbol_node);
 
   /**
+   * Get required parameter completion text list for given subblock path.
+   * @param subblock_path - subblock path for finding required parameters
+   * @param subblock_type - subblock type for finding required parameters
+   * @param existing_params - set of parameters already existing in input
+   * @param indent_spaces - indentation to be added before each parameter
+   * @return - list of required parameters to use in subblock insert text
+   */
+  std::string getRequiredParamsText(const std::string & subblock_path,
+                                    const std::string & subblock_type,
+                                    const std::set<std::string> & existing_params,
+                                    const std::string & indent_spaces);
+
+  /**
+   * Gather extension responses - specific to this server implemention.
+   * @param extensionResponses - data array of custom responses to fill
+   * @param extensionMethod - name for current extension request method
+   * @param line - zero-based line to use for logic of custom extension
+   * @param character - zero-based column for logic of custom extension
+   * @return - true if request successfully handled with response built
+   */
+  bool gatherExtensionResponses(wasp::DataArray & extensionResponses,
+                                const std::string & extensionMethod,
+                                int line,
+                                int character);
+
+  /**
+   * Build CustomPlot extension responses when method name is plotting.
+   * @param plottingResponses - array to fill with CustomPlot responses
+   * @param line - zero-based line to use for logic of custom extension
+   * @param character - zero-based column for logic of custom extension
+   * @return - true if request successfully handled with response built
+   */
+  bool gatherPlottingResponses(wasp::DataArray & plottingResponses, int line, int character);
+
+  /**
+   * Build CustomPlot graph with provided keys, values, and plot title.
+   * @param plot_object - CustomPlot object to be built into line graph
+   * @param plot_title - title for plot composed of block name and type
+   * @param graph_keys - abscissa values from function for graph x-axis
+   * @param graph_vals - ordinate values from function for graph y-axis
+   */
+  void buildLineGraphPlot(wasp::CustomPlot & plot_object,
+                          const std::string & plot_title,
+                          const std::vector<double> & graph_keys,
+                          const std::vector<double> & graph_vals);
+
+  /**
    * Read from connection into object - specific to this server's connection.
    * @param object - reference to object to be read into
    * @return - true if the read from the connection completed successfully
@@ -327,14 +386,50 @@ private:
   bool rootIsValid() const;
 
   /**
-   * @return The current root node
+   * Helper for storing the state for a single document
    */
-  hit::Node & getRoot();
+  struct CheckState
+  {
+    CheckState(std::shared_ptr<Parser> & parser) : parser(parser) {}
+    std::shared_ptr<Parser> parser;
+    std::unique_ptr<MooseApp> app;
+  };
 
   /**
-   * @return Input check application for document path from current operation
+   * @return The check state for the current document path, if any
    */
-  std::shared_ptr<MooseApp> getCheckApp() const;
+  ///@{
+  const CheckState * queryCheckState() const;
+  CheckState * queryCheckState();
+  ///@}
+  /**
+   * @return The check app for the current document path, if any
+   */
+  ///@{
+  const MooseApp * queryCheckApp() const;
+  MooseApp * queryCheckApp();
+  ///@}
+  /**
+   * @return The check parser for the current document path, if any
+   */
+  ///@{
+  const Parser * queryCheckParser() const;
+  Parser * queryCheckParser();
+  ///@}
+  /**
+   * @return The root node from the check parser for the current document path, if any
+   */
+  const hit::Node * queryRoot() const;
+
+  /**
+   * @return The check app for the current document path, with error checking on if it exists
+   */
+  MooseApp & getCheckApp();
+  /**
+   * @return The root node from the check parser for the current document path, with error checking
+   * on if it exists
+   */
+  const hit::Node & getRoot() const;
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
@@ -342,9 +437,9 @@ private:
   MooseApp & _moose_app;
 
   /**
-   * @brief _check_apps - map from document paths to input check applications
+   * @brief _check_state - map from document paths to state (parser, app, text)
    */
-  std::map<std::string, std::shared_ptr<MooseApp>> _check_apps;
+  std::map<std::string, CheckState> _check_state;
 
   /**
    * @brief _connection - shared pointer to this server's read / write iostream
@@ -360,6 +455,11 @@ private:
    * @brief _type_to_input_paths - map of parameter types to lookup paths
    */
   std::map<std::string, std::set<std::string>> _type_to_input_paths;
+
+  /**
+   * @brief _type_to_input_paths - map of lookup paths to parameter types
+   */
+  std::map<std::string, std::set<std::string>> _input_path_to_types;
 
   /**
    * @brief _formatting_tab_size - number of indent spaces for formatting

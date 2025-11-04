@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
+using namespace libMesh;
 
 registerMooseObject("MooseApp", LStableDirk3);
 
@@ -37,7 +38,7 @@ LStableDirk3::LStableDirk3(const InputParameters & parameters)
   {
     std::ostringstream oss;
     oss << "residual_stage" << stage + 1;
-    _stage_residuals[stage] = &(_nl.addVector(oss.str(), false, GHOSTED));
+    _stage_residuals[stage] = addVector(oss.str(), false, GHOSTED);
   }
 
   // Initialize parameters
@@ -67,7 +68,7 @@ LStableDirk3::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
-  _du_dot_du = 1. / _dt;
+  computeDuDotDu();
 }
 
 void
@@ -107,20 +108,20 @@ LStableDirk3::solve()
 
     // If we previously used coloring, destroy the old object so it doesn't leak when we allocate a
     // new object in the following lines
-    _nl.destroyColoring();
+    _nl->destroyColoring();
 
     // Potentially setup finite differencing contexts for the solve
-    _nl.potentiallySetupFiniteDifferencing();
+    _nl->potentiallySetupFiniteDifferencing();
 
     // Do the solve
-    _nl.system().solve();
+    _nl->system().solve();
 
     // Update the iteration counts
     _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
     _n_linear_iterations += getNumLinearIterationsLastSolve();
 
     // Abort time step immediately on stage failure - see TimeIntegrator doc page
-    if (!_fe_problem.converged(_nl.number()))
+    if (!_fe_problem.converged(_nl->number()))
       return;
   }
 }
@@ -146,10 +147,10 @@ LStableDirk3::postResidual(NumericVector<Number> & residual)
 
   // Store this stage's non-time residual.  We are calling operator=
   // here, and that calls close().
-  *_stage_residuals[_stage - 1] = _Re_non_time;
+  *_stage_residuals[_stage - 1] = *_Re_non_time;
 
   // Build up the residual for this stage.
-  residual.add(1., _Re_time);
+  residual.add(1., *_Re_time);
   for (unsigned int j = 0; j < _stage; ++j)
     residual.add(_a[_stage - 1][j], *_stage_residuals[j]);
   residual.close();

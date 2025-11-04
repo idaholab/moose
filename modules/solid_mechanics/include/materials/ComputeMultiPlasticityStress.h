@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -132,13 +132,13 @@ protected:
   /// old value of transverse direction
   const MaterialProperty<RealVectorValue> & _n_old;
 
-  /// strain increment (coming from ComputeIncrementalSmallStrain, for example)
+  /// strain increment (coming from ComputeIncrementalStrain, for example)
   const MaterialProperty<RankTwoTensor> & _strain_increment;
 
-  /// Old value of total strain (coming from ComputeIncrementalSmallStrain, for example)
+  /// Old value of total strain (coming from ComputeIncrementalStrain, for example)
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
 
-  /// Rotation increment (coming from ComputeIncrementalSmallStrain, for example)
+  /// Rotation increment (coming from ComputeIncrementalStrain, for example)
   const MaterialProperty<RankTwoTensor> & _rotation_increment;
 
   /// Old value of stress

@@ -1,7 +1,5 @@
-
-
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +11,7 @@
 
 #include "FVDirichletBCBase.h"
 #include "FVFluxBC.h"
+#include "NS.h"
 
 /**
  * Applies a wall function to the turbulent viscosity field
@@ -24,7 +23,7 @@ public:
 
   static InputParameters validParams();
 
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
 private:
   /// the dimension of the domain
@@ -51,5 +50,12 @@ private:
   const Real _C_mu;
 
   /// Method used for wall treatment
-  const MooseEnum _wall_treatment;
+  NS::WallTreatmentEnum _wall_treatment;
+
+  /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
+  const bool _preserve_sparsity_pattern;
+
+  // Mu_t evaluated at y+=30 for blending purposes
+  const Real _mut_30 =
+      (NS::von_karman_constant * 30.0 / std::log(NS::E_turb_constant * 30.0) - 1.0);
 };

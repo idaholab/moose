@@ -1,6 +1,26 @@
 Content:
-    - framework/doc/content
-    - modules/fluid_properties/doc/content
+    framework:
+        root_dir: framework/doc/content
+    fluid_properties:
+        root_dir: modules/fluid_properties/doc/content
+    air:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content/source
+        external: True
+    carbon_dioxide:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/doc/content/source
+        external: True
+    helium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/doc/content/source
+        external: True
+    nitrogen:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/doc/content/source
+        external: True
+    potassium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/doc/content/source
+        external: True
+    sodium:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/doc/content/source
+        external: True
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -20,6 +40,12 @@ Extensions:
         includes:
             - framework/include
             - modules/fluid_properties/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/air/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/nitrogen/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/potassium/include
+            - ${MOOSE_DIR}/modules/fluid_properties/contrib/sodium/include
     MooseDocs.extensions.common:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,36 @@
 // loves to warn about it...
 #include "libmesh/ignore_warnings.h"
 
+// If VTK is built without an external nlohmann, then it assumes it
+// will never be compiled against another nlohmann, and it includes
+// its own copy but modified with macro tricks.  We have probably
+// already included nlohmann headers, which we didn't tamper with
+// because OF COURSE NOT, but now we need to take care not to let the
+// include guards prevent them from including their copy with their
+// different namespace.
+#ifndef MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 0
+// Detect if VTK built with external nlohmann
+#ifdef __has_include
+#if __has_include("vtk_nlohmannjson.h")
+#include "vtk_nlohmannjson.h"
+#if !VTK_MODULE_USE_EXTERNAL_vtknlohmannjson
+#undef MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+#define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS 1
+#endif // !VTK_MODULE_USE_EXTERNAL_vtknlohmannjson
+#endif // __has_include("vtk_nlohmannjson.h")
+#else  // __has_include
+#error "Could not auto-detect whether VTK built with external nlohmann json. \
+Define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=1 if built with vendored nlohmann \
+, otherwise define MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS=0"
+#endif // __has_include
+#endif // MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS
+
+#if MOOSE_VTK_UNDEF_NLOHMANNJSON_HEADER_GUARDS && !defined(MOOSE_VTK_NLOHMANN_INCLUDED)
+#undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#define MOOSE_VTK_NLOHMANN_INCLUDED
+#endif
+
 #include "vtkSmartPointer.h"
 #include "vtkPNGReader.h"
 #include "vtkTIFFReader.h"
@@ -34,6 +64,12 @@
 #include "vtkImageShiftScale.h"
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
+
+// If VTK is built without an external nlohmann, then it assumes it
+// will never be compiled against another nlohmann, and it defines an
+// nlohmann macro to point to its vtknlohmann copy.  In MOOSE their
+// assumption is wrong.
+#undef nlohmann
 
 #include "libmesh/restore_warnings.h"
 
@@ -63,7 +99,7 @@ public:
    * Return the pixel value for the given point
    * @param p The point at which to extract pixel data
    */
-  virtual Real sample(const Point & p) const;
+  virtual libMesh::Real sample(const libMesh::Point & p) const;
 
   /**
    * Perform initialization of image data
@@ -114,13 +150,13 @@ private:
 #endif
 
   /// Origin of image
-  Point _origin;
+  libMesh::Point _origin;
 
   /// Pixel dimension of image
   std::vector<int> _dims;
 
   /// Physical dimensions of image
-  Point _physical_dims;
+  libMesh::Point _physical_dims;
 
   /// Physical pixel size
   std::vector<double> _voxel;
@@ -131,7 +167,7 @@ private:
 #endif
 
   /// Bounding box for testing points
-  BoundingBox _bounding_box;
+  libMesh::BoundingBox _bounding_box;
 
   /// Parameters for interface
   const InputParameters & _is_pars;

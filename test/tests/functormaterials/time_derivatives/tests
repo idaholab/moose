@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#28755'
+  design = 'GenericFunctorTimeDerivativeMaterial.md'
+  [test]
+    type = CSVDiff
+    input = functor_time_derivatives.i
+    csvdiff = functor_time_derivatives_out.csv
+    requirement = 'The system shall be able to compute the time derivatives of functors, and make them available as functor material properties.'
+  []
+[]

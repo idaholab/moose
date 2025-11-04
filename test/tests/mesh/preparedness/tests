@@ -7,5 +7,7 @@
     input = 'test.i'
     exodiff = 'test_out.e'
     mesh_mode = 'replicated' # for stitched meshes
+    allow_warnings = true
+    restep = false # Explicitly needs to abort on solve failed
   []
 []

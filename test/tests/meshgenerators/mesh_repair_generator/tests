@@ -22,4 +22,11 @@
     requirement = "The system shall be able to split blocks across their element's type."
     mesh_mode = 'replicated'
   []
+  [boundary_merge]
+    type = JSONDiff
+    input = merge_boundaries.i
+    jsondiff = merge_boundaries_json.json
+    requirement = "The system shall be able to merge boundaries with the same names but different boundary IDs."
+    mesh_mode = 'replicated'
+  []
 []

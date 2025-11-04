@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ ReactorApp::validParams()
   return params;
 }
 
-ReactorApp::ReactorApp(InputParameters parameters) : MooseApp(parameters)
+ReactorApp::ReactorApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ReactorApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -42,26 +42,6 @@ void
 ReactorApp::registerApps()
 {
   registerApp(ReactorApp);
-}
-
-void
-ReactorApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"ReactorApp"});
-}
-
-void
-ReactorApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"ReactorApp"});
-}
-
-void
-ReactorApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 /***************************************************************************************************

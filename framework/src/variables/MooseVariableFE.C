@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@
 #include "ArbitraryQuadrature.h"
 
 #include "libmesh/quadrature_monomial.h"
+
+using namespace libMesh;
 
 template <>
 InputParameters
@@ -861,8 +863,6 @@ typename MooseVariableFE<OutputType>::ValueType
 MooseVariableFE<OutputType>::evaluate(const NodeArg & node_arg, const StateArg & state) const
 {
   mooseAssert(node_arg.node, "Must have a node");
-  mooseAssert(this->hasBlocks(node_arg.subdomain_id),
-              "Our variable should be defined on the requested subdomain ID");
   const Node & node = *node_arg.node;
   mooseAssert(node.n_dofs(this->_sys.number(), this->number()),
               "Our variable must have dofs on the requested node");
@@ -1070,13 +1070,19 @@ MooseVariableFE<OutputType>::faceEvaluate(const FaceArg & face_arg,
   };
 
   const auto continuity = this->getContinuity();
-  const bool on_elem = !face_arg.face_side || (face_arg.face_side == face_arg.fi->elemPtr());
-  const bool on_neighbor =
-      !face_arg.face_side || (face_arg.face_side == face_arg.fi->neighborPtr());
-  if (on_neighbor)
-    mooseAssert(
-        face_arg.fi->neighborPtr(),
-        "If we are signaling we should evaluate on the neighbor, we better have a neighbor");
+  bool on_elem;
+  bool on_neighbor;
+  if (!face_arg.face_side)
+  {
+    on_elem = this->hasBlocks(face_arg.fi->elemPtr()->subdomain_id());
+    on_neighbor =
+        face_arg.fi->neighborPtr() && this->hasBlocks(face_arg.fi->neighborPtr()->subdomain_id());
+  }
+  else
+  {
+    on_elem = face_arg.face_side == face_arg.fi->elemPtr();
+    on_neighbor = face_arg.face_side == face_arg.fi->neighborPtr();
+  }
 
   // Only do multiple evaluations if we are not continuous and we are on an internal face
   if ((continuity != C_ZERO && continuity != C_ONE) && on_elem && on_neighbor)
@@ -1144,9 +1150,12 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::DotType
 MooseVariableFE<OutputType>::evaluateDot(const ElemQpArg & elem_qp, const StateArg & state) const
 {
-  mooseAssert(_time_integrator && _time_integrator->dt(),
+  mooseAssert(_time_integrator,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
+  mooseAssert(_time_integrator->dt(),
+              "A time derivative is being requested but the time integrator wants to perform a 0s "
+              "time step");
   evaluateOnElement(elem_qp, state, /*query_cache=*/true);
   const auto qp = elem_qp.qp;
   mooseAssert(qp < _current_elem_qp_functor_dot.size(),
@@ -1158,9 +1167,12 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::DotType
 MooseVariableFE<OutputType>::evaluateDot(const ElemArg & elem_arg, const StateArg & state) const
 {
-  mooseAssert(_time_integrator && _time_integrator->dt(),
+  mooseAssert(_time_integrator,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
+  mooseAssert(_time_integrator->dt(),
+              "A time derivative is being requested but the time integrator wants to perform a 0s "
+              "time step");
   const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
@@ -1172,9 +1184,12 @@ template <typename OutputType>
 typename MooseVariableFE<OutputType>::GradientType
 MooseVariableFE<OutputType>::evaluateGradDot(const ElemArg & elem_arg, const StateArg & state) const
 {
-  mooseAssert(_time_integrator && _time_integrator->dt(),
+  mooseAssert(_time_integrator,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
+  mooseAssert(_time_integrator->dt(),
+              "A time derivative is being requested but the time integrator wants to perform a 0s "
+              "time step");
   const QMonomial qrule(elem_arg.elem->dim(), CONSTANT);
   // We can use whatever we want for the point argument since it won't be used
   const ElemQpArg elem_qp_arg{elem_arg.elem, /*qp=*/0, &qrule, Point(0, 0, 0)};
@@ -1359,6 +1374,15 @@ MooseVariableFE<OutputType>::jacobianSetup()
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   MooseVariableField<OutputType>::jacobianSetup();
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::sizeMatrixTagData()
+{
+  _element_data->sizeMatrixTagData();
+  _neighbor_data->sizeMatrixTagData();
+  _lower_data->sizeMatrixTagData();
 }
 
 template class MooseVariableFE<Real>;

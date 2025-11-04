@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,7 +42,7 @@ private:
   const Point _point;
 
   /// We use a point locator in case the constraint is a point value
-  std::unique_ptr<PointLocatorBase> _point_locator;
+  std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
 
   /// Pointer to the element in case we have a point constraint
   const Elem * _my_elem;

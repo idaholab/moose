@@ -5,7 +5,6 @@
     input = 'parsed_subdomain_mg.i'
     cli_args = '--mesh-only'
     exodiff = 'parsed_subdomain_mg_in.e'
-    mesh_mode = 'REPLICATED'
     recover = false
     requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions.'
     issues = '#11640'
@@ -15,7 +14,6 @@
     input = 'parsed_subdomain_eeid.i'
     cli_args = '--mesh-only'
     exodiff = 'parsed_subdomain_eeid_in.e'
-    mesh_mode = 'REPLICATED'
     recover = false
     requirement = 'The system shall have the ability to assign mesh subdomains based on parsed functions of extra element integers.'
     issues = '#26402'

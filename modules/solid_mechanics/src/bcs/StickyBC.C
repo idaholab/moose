@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,7 +40,7 @@ StickyBC::StickyBC(const InputParameters & parameters)
 }
 
 bool
-StickyBC::shouldApply()
+StickyBC::shouldApply() const
 {
   const unsigned qp = 0; // this is a NodalBC: all qp = 0
   return (_u_old[qp] <= _min_value || _u_old[qp] >= _max_value);

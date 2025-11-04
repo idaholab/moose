@@ -17,16 +17,13 @@
     xmin = 0.2
     nx = 4
   [../]
+  coord_type = RZ
 []
 
 [Variables]
   [./u]
     order = FIRST
   [../]
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Functions]

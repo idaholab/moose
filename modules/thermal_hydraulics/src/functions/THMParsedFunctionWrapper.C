@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,8 +29,8 @@ THMParsedFunctionWrapper::THMParsedFunctionWrapper(Simulation & sim,
 {
   initialize();
 
-  _function_ptr =
-      std::make_unique<ParsedFunction<Real, RealGradient>>(_function_str, &_vars, &_initial_vals);
+  _function_ptr = std::make_unique<libMesh::ParsedFunction<Real, RealGradient>>(
+      _function_str, &_vars, &_initial_vals);
 
   for (auto & v : _vars)
     _addr.push_back(&_function_ptr->getVarAddress(v));

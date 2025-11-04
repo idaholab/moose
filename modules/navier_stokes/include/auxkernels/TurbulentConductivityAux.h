@@ -1,7 +1,7 @@
 
 
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,11 +29,11 @@ protected:
   virtual Real computeValue() override;
 
   /// Specific heat at Constant Pressure
-  const Moose::Functor<ADReal> & _cp;
+  const Moose::Functor<Real> & _cp;
 
   /// Turbulent Prandtl number
-  const Moose::Functor<ADReal> & _Pr_t;
+  const Moose::Functor<Real> & _Pr_t;
 
   /// Turbulent viscosity
-  const Moose::Functor<ADReal> & _mu_t;
+  const Moose::Functor<Real> & _mu_t;
 };

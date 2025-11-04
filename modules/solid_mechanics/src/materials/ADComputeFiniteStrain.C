@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -86,7 +86,10 @@ ADComputeFiniteStrainTempl<R2, R4>::computeProperties()
   {
     // Finalize volumetric locking correction
     if (_volumetric_locking_correction)
-      _Fhat[_qp] *= std::cbrt(ave_Fhat_det / _Fhat[_qp].det());
+    {
+      using std::cbrt;
+      _Fhat[_qp] *= cbrt(ave_Fhat_det / _Fhat[_qp].det());
+    }
 
     computeQpStrain();
   }
@@ -128,6 +131,8 @@ void
 ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_increment,
                                                         ADRankTwoTensor & rotation_increment)
 {
+  using std::sqrt;
+
   switch (_decomposition_method)
   {
     case DecompMethod::TaylorExpansion:
@@ -163,7 +168,7 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
             "C1 for the Rashid approximation for the rotation tensor. This zero or negative number "
             "may occur when elements become heavily distorted.");
 
-      const ADReal C1 = std::sqrt(C1_squared);
+      const ADReal C1 = sqrt(C1_squared);
 
       ADReal C2;
       if (q > 0.01)
@@ -186,7 +191,7 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
             "Cannot take square root of a number less than or equal to zero in the calculation of "
             "C3_test for the Rashid approximation for the rotation tensor. This zero or negative "
             "number may occur when elements become heavily distorted.");
-      const ADReal C3 = 0.5 * std::sqrt(C3_test); // sin theta_a/(2 sqrt(q))
+      const ADReal C3 = 0.5 * sqrt(C3_test); // sin theta_a/(2 sqrt(q))
 
       // Calculate incremental rotation. Note that this value is the transpose of that from Rashid,
       // 93, so we transpose it before storing
@@ -209,6 +214,14 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
 
     case DecompMethod::EigenSolution:
     {
+      // Add a small perturbation to F for the case when F=I, which occurs with no deformation,
+      // which commonly occurs in initialization. The perturbation to F does not affect the computed
+      // stress, but prevents a singularity in the AD-computed material Jacobian.
+      if (this->_fe_problem.currentlyComputingJacobian() &&
+          _Fhat[_qp] == ADRankTwoTensor::Identity())
+        _Fhat[_qp] +=
+            ADRankTwoTensor(0.0, 5.0e-13, 5.0e-13, 5.0e-13, 0.0, 5.0e-13, 5.0e-13, 5.0e-13, 0.0);
+
       FADR2 Chat = ADR2::transposeTimes(_Fhat[_qp]);
       FADR2 Uhat = MathUtils::sqrt(Chat);
       rotation_increment = _Fhat[_qp] * Uhat.inverse().template get<ADRankTwoTensor>();

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,16 +58,16 @@ protected:
   std::vector<std::unordered_map<boundary_id_type, boundary_id_type>> _boundary_swap_pairs;
 
   /// Easier to work with version of _elem_integers_swaps
-  std::vector<std::unordered_map<unsigned int, unsigned int>> _elem_integers_swap_pairs;
+  std::vector<std::unordered_map<dof_id_type, dof_id_type>> _elem_integers_swap_pairs;
 
   /// The direction of the extrusion
   Point _direction;
 
-  bool _has_top_boundary;
-  boundary_id_type _top_boundary;
+  const bool _has_top_boundary;
+  const BoundaryName _top_boundary;
 
-  bool _has_bottom_boundary;
-  boundary_id_type _bottom_boundary;
+  const bool _has_bottom_boundary;
+  const BoundaryName _bottom_boundary;
 
   /// The list of input mesh's blocks that need to be assigned upward boundary interfaces for each layer of elevation
   const std::vector<std::vector<subdomain_id_type>> _upward_boundary_source_blocks;
@@ -83,12 +83,4 @@ protected:
 
   /// Axial pitch for a full rotation
   const Real _twist_pitch;
-
-  /**
-   * Swap two nodes within an element
-   * @param elem element whose nodes need to be swapped
-   * @param nd1 index of the first node to be swapped
-   * @param nd2 index of the second node to be swapped
-   */
-  void swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2);
 };

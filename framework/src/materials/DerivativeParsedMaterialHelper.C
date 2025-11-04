@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,8 +31,10 @@ DerivativeParsedMaterialHelperTempl<is_ad>::validParams()
 
 template <bool is_ad>
 DerivativeParsedMaterialHelperTempl<is_ad>::DerivativeParsedMaterialHelperTempl(
-    const InputParameters & parameters, VariableNameMappingMode map_mode)
-  : ParsedMaterialHelper<is_ad>(parameters, map_mode),
+    const InputParameters & parameters,
+    const VariableNameMappingMode map_mode,
+    const std::optional<std::string> & function_param_name /* = {} */)
+  : ParsedMaterialHelper<is_ad>(parameters, map_mode, function_param_name),
     _derivative_order(this->template getParam<unsigned int>("derivative_order")),
     _dmatvar_base("matpropautoderiv"),
     _dmatvar_index(0)
@@ -266,7 +268,8 @@ DerivativeParsedMaterialHelperTempl<is_ad>::assembleDerivatives()
     recurseDerivative(i, 1, root);
 
   // increase the parameter buffer to provide storage for the material property derivatives
-  _func_params.resize(_nargs + _mat_prop_descriptors.size() + _postprocessor_values.size());
+  _func_params.resize(_nargs + _mat_prop_descriptors.size() + _postprocessor_values.size() +
+                      _extra_symbols.size() + _functors.size());
 }
 
 template <bool is_ad>

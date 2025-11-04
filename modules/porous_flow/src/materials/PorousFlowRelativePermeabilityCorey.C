@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -35,7 +35,8 @@ template <bool is_ad>
 GenericReal<is_ad>
 PorousFlowRelativePermeabilityCoreyTempl<is_ad>::relativePermeability(GenericReal<is_ad> seff) const
 {
-  return std::pow(seff, _n);
+  using std::pow;
+  return pow(seff, _n);
 }
 
 template <bool is_ad>

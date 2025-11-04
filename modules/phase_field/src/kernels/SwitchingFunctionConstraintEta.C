@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,8 +21,8 @@ SwitchingFunctionConstraintEta::validParams()
   params.addParam<MaterialPropertyName>("h_name",
                                         "Switching Function Materials that provides h(eta_i)");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier");
-  params.addCoupledVar("args", "Vector of further variable arguments to the switching function");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of further variable arguments to the switching function");
   return params;
 }
 
@@ -31,20 +31,14 @@ SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const InputParame
     _eta_name(_var.name()),
     _dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name)),
     _d2h(getMaterialPropertyDerivative<Real>("h_name", _eta_name, _eta_name)),
-    _d2ha(isCoupled("args") ? coupledComponents("args") : coupledComponents("coupled_variables")),
-    _d2ha_map(isCoupled("args") ? getParameterJvarMap("args")
-                                : getParameterJvarMap("coupled_variables")),
+    _d2ha(coupledComponents("coupled_variables")),
+    _d2ha_map(getParameterJvarMap("coupled_variables")),
     _lambda(coupledValue("lambda")),
     _lambda_var(coupled("lambda"))
 {
   for (std::size_t i = 0; i < _d2ha.size(); ++i)
-  {
-    if (isCoupled("args"))
-      _d2ha[i] = &getMaterialPropertyDerivative<Real>("h_name", _eta_name, coupledName("args", i));
-    else
-      _d2ha[i] = &getMaterialPropertyDerivative<Real>(
-          "h_name", _eta_name, coupledName("coupled_variables", i));
-  }
+    _d2ha[i] = &getMaterialPropertyDerivative<Real>(
+        "h_name", _eta_name, coupledName("coupled_variables", i));
 }
 
 Real

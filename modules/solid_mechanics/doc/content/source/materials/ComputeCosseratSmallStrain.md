@@ -21,7 +21,7 @@ The curvature tensor $C$ is also computed by this `Material` from the gradients 
 C = \nabla_{j}\theta_{c}^{i}
 
 !alert note
-This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/cosserat.pdf))
+This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/tree/next/modules/solid_mechanics/doc/theory/cosserat.pdf))
 for more explanation.
 
 !syntax parameters /Materials/ComputeCosseratSmallStrain

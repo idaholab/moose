@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,10 +29,15 @@
 #include "Moose.h"
 #include "ConsoleStream.h"
 #include "MooseError.h"
-#include "LinearFVKernel.h"
+#include "LinearFVElementalKernel.h"
+#include "LinearFVFluxKernel.h"
 #include "UserObject.h"
 #include "SolutionInvalidity.h"
 #include "MooseLinearVariableFV.h"
+#include "LinearFVTimeDerivative.h"
+#include "LinearFVFluxKernel.h"
+#include "LinearFVElementalKernel.h"
+#include "LinearFVBoundaryCondition.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -51,8 +56,11 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/default_coupling.h"
 #include "libmesh/diagonal_matrix.h"
+#include "libmesh/petsc_solver_exception.h"
 
 #include <ios>
+
+using namespace libMesh;
 
 namespace Moose
 {
@@ -77,27 +85,23 @@ LinearSystem::LinearSystem(FEProblemBase & fe_problem, const std::string & name)
     _rhs_non_time_tag(-1),
     _rhs_non_time(NULL),
     _n_linear_iters(0),
+    _converged(false),
     _linear_implicit_system(fe_problem.es().get_system<LinearImplicitSystem>(name))
 {
   getRightHandSideNonTimeVector();
-  // Don't need to add the matrix - it already exists (for now)
+  // Don't need to add the matrix - it already exists. Well, technically it will exist
+  // after the initialization. Right now it is just a nullpointer. We will just make sure
+  // we associate the tag with the system matrix for now.
   _system_matrix_tag = _fe_problem.addMatrixTag("SYSTEM");
 
   // We create a tag for the right hand side, the vector is already in the libmesh system
   _rhs_tag = _fe_problem.addVectorTag("RHS");
+  associateVectorToTag(*_linear_implicit_system.rhs, _rhs_tag);
 
   _linear_implicit_system.attach_assemble_function(Moose::compute_linear_system);
 }
 
 LinearSystem::~LinearSystem() = default;
-
-void
-LinearSystem::addTimeIntegrator(const std::string & /*type*/,
-                                const std::string & /*name*/,
-                                InputParameters & /*parameters*/)
-{
-  mooseError("LinearSystem does not support time integrators yet!");
-}
 
 void
 LinearSystem::initialSetup()
@@ -110,6 +114,40 @@ LinearSystem::initialSetup()
       mooseError("You are trying to add a nonlinear variable to a linear system! The variable "
                  "which is assigned to the wrong system: ",
                  name);
+
+  // Calling initial setup for the linear kernels
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVElementalKernel")
+        .template condition<AttribThread>(tid)
+        .queryInto(fv_elemental_kernels);
+
+    for (auto * fv_kernel : fv_elemental_kernels)
+      fv_kernel->initialSetup();
+
+    std::vector<LinearFVFluxKernel *> fv_flux_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVFluxKernel")
+        .template condition<AttribThread>(tid)
+        .queryInto(fv_flux_kernels);
+
+    for (auto * fv_kernel : fv_flux_kernels)
+      fv_kernel->initialSetup();
+
+    std::vector<LinearFVBoundaryCondition *> fv_bcs;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("LinearFVBoundaryCondition")
+        .template condition<AttribThread>(tid)
+        .queryInto(fv_bcs);
+
+    for (auto * fv_bc : fv_bcs)
+      fv_bc->initialSetup();
+  }
 }
 
 void
@@ -131,6 +169,7 @@ LinearSystem::computeLinearSystemTags(const std::set<TagID> & vector_tags,
   }
   catch (MooseException & e)
   {
+    _console << "Exception detected " << e.what() << std::endl;
     // The buck stops here, we have already handled the exception by
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
@@ -175,8 +214,8 @@ LinearSystem::computeGradients()
 
   for (const auto i : index_range(_raw_grad_container))
   {
+    _new_gradient[i]->close();
     _raw_grad_container[i] = std::move(_new_gradient[i]);
-    _raw_grad_container[i]->close();
   }
 }
 
@@ -187,8 +226,12 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 {
   TIME_SECTION("computeLinearSystemInternal", 3);
 
+  // Before we assemble we clear up the matrix and the vector
+  _linear_implicit_system.matrix->zero();
+  _linear_implicit_system.rhs->zero();
+
   // Make matrix ready to use
-  activeAllMatrixTags();
+  activateAllMatrixTags();
 
   for (auto tag : matrix_tags)
   {
@@ -196,11 +239,12 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     // Necessary for speed
     if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&matrix))
     {
-      MatSetOption(petsc_matrix->mat(),
-                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-                   PETSC_TRUE);
+      LibmeshPetscCall(MatSetOption(petsc_matrix->mat(),
+                                    MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                                    PETSC_TRUE));
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+        LibmeshPetscCall(
+            MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE));
     }
   }
 
@@ -220,16 +264,15 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
     FaceInfoRange face_info_range(_fe_problem.mesh().ownedFaceInfoBegin(),
                                   _fe_problem.mesh().ownedFaceInfoEnd());
 
-    ComputeLinearFVElementalThread elem_thread(_fe_problem,
-                                               _fe_problem.linearSysNum(name()),
-                                               Moose::FV::LinearFVComputationMode::FullSystem,
-                                               vector_tags);
+    ComputeLinearFVElementalThread elem_thread(
+        _fe_problem, this->number(), vector_tags, matrix_tags);
     Threads::parallel_reduce(elem_info_range, elem_thread);
 
     ComputeLinearFVFaceThread face_thread(_fe_problem,
-                                          _fe_problem.linearSysNum(name()),
+                                          this->number(),
                                           Moose::FV::LinearFVComputationMode::FullSystem,
-                                          vector_tags);
+                                          vector_tags,
+                                          matrix_tags);
     Threads::parallel_reduce(face_info_range, face_thread);
   }
   PARALLEL_CATCH;
@@ -241,6 +284,7 @@ LinearSystem::computeLinearSystemInternal(const std::set<TagID> & vector_tags,
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
+  _app.solutionInvalidity().syncIteration();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -274,23 +318,56 @@ LinearSystem::solve()
 
   system().solve();
 
+  // store info about the solve
   _n_linear_iters = _linear_implicit_system.n_linear_iterations();
 
-  // store info about the solve
+  auto & linear_solver =
+      libMesh::cast_ref<PetscLinearSolver<Real> &>(*_linear_implicit_system.get_linear_solver());
+  _initial_linear_residual = linear_solver.get_initial_residual();
   _final_linear_residual = _linear_implicit_system.final_linear_residual();
+  _converged = linear_solver.get_converged_reason() > 0;
+
+  _console << "System: " << this->name() << " Initial residual: " << _initial_linear_residual
+           << " Final residual: " << _final_linear_residual << " Num. of Iter. " << _n_linear_iters
+           << std::endl;
 
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();
 }
 
 void
-LinearSystem::stopSolve(const ExecFlagType & /*exec_flag*/)
+LinearSystem::stopSolve(const ExecFlagType & /*exec_flag*/,
+                        const std::set<TagID> & vector_tags_to_close)
 {
   // We close the containers in case the solve restarts from a failed iteration
+  closeTaggedVectors(vector_tags_to_close);
   _linear_implicit_system.matrix->close();
-  _linear_implicit_system.rhs->close();
-  if (_rhs_time)
-    _rhs_time->close();
-  if (_rhs_non_time)
-    _rhs_non_time->close();
+}
+
+bool
+LinearSystem::containsTimeKernel()
+{
+  // Right now, FV kernels are in TheWarehouse so we have to use that.
+  std::vector<LinearFVKernel *> kernels;
+  auto base_query = _fe_problem.theWarehouse()
+                        .query()
+                        .template condition<AttribSysNum>(this->number())
+                        .template condition<AttribSystem>("LinearFVKernel")
+                        .queryInto(kernels);
+
+  bool contains_time_kernel = false;
+  for (const auto kernel : kernels)
+  {
+    contains_time_kernel = dynamic_cast<LinearFVTimeDerivative *>(kernel);
+    if (contains_time_kernel)
+      break;
+  }
+
+  return contains_time_kernel;
+}
+
+void
+LinearSystem::compute(ExecFlagType)
+{
+  // Linear systems have their own time derivative computation machinery
 }

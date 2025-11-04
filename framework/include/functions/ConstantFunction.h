@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,6 +27,8 @@ public:
 
   virtual Real timeDerivative(Real t, const Point & p) const override;
   virtual RealVectorValue gradient(Real t, const Point & p) const override;
+
+  virtual Real timeIntegral(Real t1, Real t2, const Point & p) const override;
 
 protected:
   const Real & _value;

@@ -7,6 +7,7 @@
     input = 'parent.i'
     exodiff = 'parent_out.e parent_out_sub_app0.e parent_out_sub_app1.e'
     allow_warnings = true
+    restep = false # Test will be repeating its own time steps
 
     requirement = "The system shall support running a transient simulation with sub-applications that can fail and re-execute with smaller timesteps until the execution times for the parent and sub-applications are equivalent."
   [../]

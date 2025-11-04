@@ -55,7 +55,7 @@ offset = 0.01
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     incremental = true
@@ -133,13 +133,6 @@ offset = 0.01
 
     model = frictionless
     formulation = mortar
-
-    friction_coefficient = 0.0
-
-    normal_smoothing_distance = 0.1
-
-    penalty = 1e+8
-    normalize_penalty = true
   [../]
 []
 

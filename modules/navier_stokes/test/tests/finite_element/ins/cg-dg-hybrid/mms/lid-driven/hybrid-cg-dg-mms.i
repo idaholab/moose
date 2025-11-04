@@ -39,7 +39,7 @@ k=1.1
   [momentum_x_convection]
     type = ADConservativeAdvection
     variable = u
-    velocity = 'velocity'
+    velocity_material = 'velocity'
     advected_quantity = 'rhou'
   []
   [momentum_x_diffusion]
@@ -62,7 +62,7 @@ k=1.1
   [momentum_y_convection]
     type = ADConservativeAdvection
     variable = v
-    velocity = 'velocity'
+    velocity_material = 'velocity'
     advected_quantity = 'rhov'
   []
   [momentum_y_diffusion]
@@ -85,7 +85,7 @@ k=1.1
   [mass]
     type = ADConservativeAdvection
     variable = pressure
-    velocity = velocity
+    velocity_material = velocity
     advected_quantity = -1
   []
   [p_forcing]
@@ -96,7 +96,7 @@ k=1.1
   [T_convection]
     type = ADConservativeAdvection
     variable = T
-    velocity = 'velocity'
+    velocity_material = 'velocity'
     advected_quantity = 'rho_cp_temp'
   []
   [T_diffusion]
@@ -279,8 +279,8 @@ k=1.1
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
-  petsc_options_value = 'lu       NONZERO               mumps'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type -mat_mumps_icntl_14'
+  petsc_options_value = 'lu       NONZERO               mumps                      300'
   nl_rel_tol = 1e-12
 []
 

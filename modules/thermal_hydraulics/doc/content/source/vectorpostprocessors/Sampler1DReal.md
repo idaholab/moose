@@ -2,7 +2,7 @@
 
 !syntax description /VectorPostprocessors/Sampler1DReal
 
-This object has similar capabilities to the [MaterialVectorPostprocessor.md], but is
+This object has similar capabilities to the [ElementMaterialSampler.md], but is
 implemented differently. It creates its own standalone loop on elements in the mesh
 to gather the material properties.
 

@@ -5,7 +5,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test2DRC
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 2
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 2D cylindrical coordinates, using a Rhie-Chow scheme, dirichlet boundary conditions for both variables, and demonstrate second order convergence for the velocity and pressure.'
     required_python_packages = 'pandas matplotlib'

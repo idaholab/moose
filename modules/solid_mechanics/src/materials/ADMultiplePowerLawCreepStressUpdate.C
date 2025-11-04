@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -80,24 +80,27 @@ void
 ADMultiplePowerLawCreepStressUpdate::computeStressInitialize(
     const ADReal & effective_trial_stress, const ADRankFourTensor & elasticity_tensor)
 {
+  using std::exp;
+
   ADRadialReturnStressUpdate::computeStressInitialize(effective_trial_stress, elasticity_tensor);
 
   _stress_index = stressIndex(effective_trial_stress);
 
   if (_temperature)
-    _exponential =
-        std::exp(-_activation_energy[_stress_index] / (_gas_constant * (*_temperature)[_qp]));
+    _exponential = exp(-_activation_energy[_stress_index] / (_gas_constant * (*_temperature)[_qp]));
 
-  _exp_time = std::pow(_t - _start_time, _m_exponent[_stress_index]);
+  _exp_time = pow(_t - _start_time, _m_exponent[_stress_index]);
 }
 
 ADReal
 ADMultiplePowerLawCreepStressUpdate::computeResidual(const ADReal & effective_trial_stress,
                                                      const ADReal & scalar)
 {
+  using std::pow;
+
   const ADReal stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const ADReal creep_rate = _coefficient[_stress_index] *
-                            std::pow(stress_delta, _n_exponent[_stress_index]) * _exponential *
+                            pow(stress_delta, _n_exponent[_stress_index]) * _exponential *
                             _exp_time;
   return creep_rate * _dt - scalar;
 }
@@ -106,10 +109,12 @@ ADReal
 ADMultiplePowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_stress,
                                                        const ADReal & scalar)
 {
+  using std::pow;
+
   const ADReal stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const ADReal creep_rate_derivative =
       -_coefficient[_stress_index] * _three_shear_modulus * _n_exponent[_stress_index] *
-      std::pow(stress_delta, _n_exponent[_stress_index] - 1.0) * _exponential * _exp_time;
+      pow(stress_delta, _n_exponent[_stress_index] - 1.0) * _exponential * _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
 

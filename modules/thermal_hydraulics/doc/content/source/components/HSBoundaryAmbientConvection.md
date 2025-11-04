@@ -12,7 +12,9 @@ The parameter [!param](/Components/HSBoundaryAmbientConvection/T_ambient) gives 
 [!param](/Components/HSBoundaryAmbientConvection/htc_ambient) gives the heat transfer coefficient $\mathcal{H}$.
 
 The parameter [!param](/Components/HSBoundaryAmbientConvection/scale) specifies
-the name of a [functor](Functors/index.md) $f$ that can scale the boundary conditions.
+the name of a [functor](Functors/index.md) $f$ that can scale the boundary conditions, for
+example, a functor material property created with [FinEnhancementFactorFunctorMaterial.md]
+for heat transfer enhancement due to fins.
 
 !syntax parameters /Components/HSBoundaryAmbientConvection
 

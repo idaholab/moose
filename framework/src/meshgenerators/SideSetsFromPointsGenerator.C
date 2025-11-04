@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -64,7 +64,7 @@ SideSetsFromPointsGenerator::generate()
 
   // Our flood fill doesn't do any communication, so it requires a
   // serialized mesh
-  MeshSerializer serial(*mesh);
+  libMesh::MeshSerializer serial(*mesh);
 
   // Get the BoundaryIDs from the mesh
   std::vector<BoundaryID> boundary_ids =
@@ -74,7 +74,8 @@ SideSetsFromPointsGenerator::generate()
 
   _visited.clear();
 
-  std::unique_ptr<PointLocatorBase> pl = PointLocatorBase::build(TREE, *mesh);
+  std::unique_ptr<libMesh::PointLocatorBase> pl =
+      libMesh::PointLocatorBase::build(libMesh::TREE, *mesh);
 
   for (const auto i : index_range(boundary_ids))
   {

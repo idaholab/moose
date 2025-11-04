@@ -12,7 +12,7 @@ offset = 1e-2
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     strain = FINITE
@@ -139,15 +139,5 @@ offset = 1e-2
   [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  []
-[]
-
-[VectorPostprocessors]
-  [cont_press]
-    type = NodalValueSampler
-    variable = contact_pressure
-    boundary = '10 101'
-    sort_by = x
-    execute_on = NONLINEAR
   []
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,7 +23,7 @@ XFEMTestApp::validParams()
 
 registerKnownLabel("XFEMTestApp");
 
-XFEMTestApp::XFEMTestApp(InputParameters parameters) : MooseApp(parameters)
+XFEMTestApp::XFEMTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   XFEMTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -45,25 +45,8 @@ XFEMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_t
 void
 XFEMTestApp::registerApps()
 {
-  registerApp(XFEMApp);
+  XFEMApp::registerApps();
   registerApp(XFEMTestApp);
-}
-
-void
-XFEMTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"XFEMTestApp"});
-}
-
-void
-XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"XFEMTestApp"});
-}
-
-void
-XFEMTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

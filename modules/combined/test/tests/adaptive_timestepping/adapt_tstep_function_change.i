@@ -9,7 +9,6 @@
   displacements = 'disp_x disp_y disp_z'
   order = FIRST
   family = LAGRANGE
-  block = 1
 []
 
 [Mesh]
@@ -39,7 +38,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     volumetric_locking_correction = true

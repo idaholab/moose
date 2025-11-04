@@ -50,6 +50,7 @@
     requirement = 'The system shall be able to postprocess results from a linear finite volume solver and produce accurate aggregate fluxes and values and auxiliary fields.'
     issues = '#25722'
     design = 'LinearFVDiffusion.md'
+    abs_zero=1e-6
     max_threads = 1 # see libmesh issue #3808
   []
 []

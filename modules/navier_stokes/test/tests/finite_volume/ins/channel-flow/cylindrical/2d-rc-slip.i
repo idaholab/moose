@@ -14,9 +14,6 @@ velocity_interp_method = 'rc'
     nx = 10
     ny = 50
   []
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 
@@ -104,13 +101,13 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = u
-    function = 0
+    functor = 0
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
-    function = 1
+    functor = 1
   []
   [free-slip-wall-u]
     type = INSFVNaturalFreeSlipBC

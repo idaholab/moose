@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -189,7 +189,7 @@ FormattedTable::addRow(Real time)
 }
 
 Real
-FormattedTable::getLastTime()
+FormattedTable::getLastTime() const
 {
   mooseAssert(!empty(), "No Data stored in the FormattedTable");
   return _data.rbegin()->first;
@@ -303,15 +303,14 @@ FormattedTable::printTablePiece(std::ostream & out,
                                 std::vector<std::string>::iterator & col_begin,
                                 std::vector<std::string>::iterator & col_end)
 {
-  fillEmptyValues();
+  fillEmptyValues(last_n_entries);
   /**
    * Print out the header row
    */
   printRowDivider(out, col_widths, col_begin, col_end);
   out << "|";
   if (_output_time)
-    out << std::setw(_column_width) << std::left << " time"
-        << " |";
+    out << std::setw(_column_width) << std::left << " time" << " |";
   for (auto header_it = col_begin; header_it != col_end; ++header_it)
     out << " " << std::setw(col_widths[*header_it]) << *header_it << "|";
   out << "\n";
@@ -424,7 +423,7 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
       printRow(_data[_output_row_index], align);
   }
 
-  _output_file.flush();
+  close();
 }
 
 void
@@ -573,13 +572,30 @@ FormattedTable::clear()
 }
 
 void
-FormattedTable::fillEmptyValues()
+FormattedTable::fillEmptyValues(unsigned int last_n_entries)
 {
-  for (auto & it : _data)
-    for (const auto & col_name : _column_names)
-      if (!it.second[col_name])
-        it.second[col_name] =
-            std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
+  auto begin = _data.begin();
+  auto end = _data.end();
+  if (last_n_entries && (last_n_entries < _data.size()))
+    begin = end - last_n_entries;
+
+  for (auto it = begin; it != end; ++it)
+  {
+    auto & datamap = it->second;
+    if (datamap.size() != _column_names.size())
+    {
+      for (const auto & col_name : _column_names)
+        if (!datamap[col_name])
+          datamap[col_name] =
+              std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
+    }
+    else
+    {
+      for (auto & [key, val] : datamap)
+        if (!val)
+          val = std::dynamic_pointer_cast<TableValueBase>(std::make_shared<TableValue<char>>('0'));
+    }
+  }
 }
 
 MooseEnum

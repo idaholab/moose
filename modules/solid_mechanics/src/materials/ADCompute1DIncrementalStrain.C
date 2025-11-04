@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,13 +14,13 @@
 InputParameters
 ADCompute1DIncrementalStrain::validParams()
 {
-  InputParameters params = ADComputeIncrementalSmallStrain::validParams();
+  InputParameters params = ADComputeIncrementalStrain::validParams();
   params.addClassDescription("Compute strain increment for small strains in 1D problems.");
   return params;
 }
 
 ADCompute1DIncrementalStrain::ADCompute1DIncrementalStrain(const InputParameters & parameters)
-  : ADComputeIncrementalSmallStrain(parameters)
+  : ADComputeIncrementalStrain(parameters)
 {
 }
 

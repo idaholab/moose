@@ -11,12 +11,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = meshes/rz_cone.e
+  coord_type = RZ
 []
 
 [Functions]
@@ -40,7 +37,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     volumetric_locking_correction = true
     incremental = true

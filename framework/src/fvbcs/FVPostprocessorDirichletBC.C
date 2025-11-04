@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,8 @@ FVPostprocessorDirichletBC::FVPostprocessorDirichletBC(const InputParameters & p
 }
 
 ADReal
-FVPostprocessorDirichletBC::boundaryValue(const FaceInfo & /*fi*/) const
+FVPostprocessorDirichletBC::boundaryValue(const FaceInfo & /*fi*/,
+                                          const Moose::StateArg & /*state*/) const
 {
   return _postprocessor_value;
 }

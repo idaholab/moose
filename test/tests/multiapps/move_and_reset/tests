@@ -19,6 +19,15 @@
       input = 'multilevel_parent.i'
       exodiff = 'multilevel_parent_out.e multilevel_parent_out_sub0.e multilevel_parent_out_sub0.e-s002 multilevel_parent_out_sub0_sub0.e multilevel_parent_out_sub0_sub0.e-s002'
       recover = false
+      # Re-doing the time step at the same time as reset and move causes the
+      # sub-sub app to increment the file number once more than intended. This is
+      # due to the reset incrementing the file at the sub-sub app output on
+      # initial call (which doesn't happen in the sub app), then moving the app
+      # causes the exodus object to think it needs to increment again. This
+      # doesn't cause issues without restepping because it doesn't take into
+      # account the mesh change on the subsequent output call, but it does if we
+      # are re-doing that timestep.
+      restep = false
 
       detail = "multi-level sub-applications."
     []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,7 +18,7 @@
  * can access non-linear and aux variables (unlike MooseParsedFunction).
  */
 template <bool is_ad>
-class ParsedMaterialTempl : public ParsedMaterialHelper<is_ad>, public ParsedMaterialBase
+class ParsedMaterialTempl : public ParsedMaterialBase, public ParsedMaterialHelper<is_ad>
 {
 public:
   static InputParameters validParams();

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,7 +17,7 @@ class SilentRecordHandler(logging.NullHandler):
         super().__init__(*args, **kwargs)
         self._records = collections.defaultdict(set)
 
-    def getCount(self, level):
+    def get_count(self, level):
         return SilentRecordHandler.COUNTS[level]
 
     def getRecords(self):

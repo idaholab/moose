@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,7 +29,7 @@ protected:
   virtual void computeQpProperties() override;
 
   /// The radius of the spheres in the column
-  const Function & _radius;
+  const Function & _input_radius;
 
   /// Value of viscosity from the input file
   const Real & _input_viscosity;

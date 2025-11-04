@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -35,7 +35,8 @@ public:
 
   DerivativeParsedMaterialHelperTempl(
       const InputParameters & parameters,
-      VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES);
+      const VariableNameMappingMode map_mode = VariableNameMappingMode::USE_PARAM_NAMES,
+      const std::optional<std::string> & function_param_name = {});
 
   static InputParameters validParams();
 

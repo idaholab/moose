@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -39,6 +39,6 @@ protected:
 
   const SystemEnum _system_enum;
 
-  const System * _system_pointer;
+  const libMesh::System * _system_pointer;
   const EquationSystems * _es_pointer;
 };

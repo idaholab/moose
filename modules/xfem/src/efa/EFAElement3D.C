@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -1008,8 +1008,9 @@ EFAElement3D::createChild(const std::set<EFAElement *> & CrackTipElements,
 
       std::vector<EFAPoint> cut_plane_points;
 
-      EFAPoint normal(0.0, 0.0, 0.0);
       EFAPoint orig(0.0, 0.0, 0.0);
+
+      std::vector<EFAPoint> normal_v;
 
       if (cut_plane_nodes.size())
       {
@@ -1028,24 +1029,22 @@ EFAElement3D::createChild(const std::set<EFAElement *> & CrackTipElements,
           }
           cut_plane_points.push_back(coor);
         }
+
         for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
           orig += cut_plane_points[i];
         orig /= cut_plane_points.size();
 
-        EFAPoint center(0.0, 0.0, 0.0);
-        for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
-          center += cut_plane_points[i];
-        center /= cut_plane_points.size();
-
         for (unsigned int i = 0; i < cut_plane_points.size(); ++i)
         {
           unsigned int iplus1 = i < cut_plane_points.size() - 1 ? i + 1 : 0;
-          EFAPoint ray1 = cut_plane_points[i] - center;
-          EFAPoint ray2 = cut_plane_points[iplus1] - center;
-          normal += ray1.cross(ray2);
+          unsigned int iminus1 = i == 0 ? cut_plane_points.size() - 1 : i - 1;
+          EFAPoint ray1 = cut_plane_points[iminus1] - cut_plane_points[i];
+          EFAPoint ray2 = cut_plane_points[i] - cut_plane_points[iplus1];
+          normal_v.push_back(ray1.cross(ray2));
         }
-        normal /= cut_plane_points.size();
-        Xfem::normalizePoint(normal);
+
+        for (unsigned int i = 0; i < normal_v.size(); ++i)
+          Xfem::normalizePoint(normal_v[i]);
       }
 
       // get child element's nodes
@@ -1054,9 +1053,18 @@ EFAElement3D::createChild(const std::set<EFAElement *> & CrackTipElements,
         EFAPoint p(0.0, 0.0, 0.0);
         p = _local_node_coor[j];
         EFAPoint origin_to_point = p - orig;
+
+        bool node_outside_fragment = false;
+        for (unsigned int k = 0; k < normal_v.size(); ++k)
+          if (origin_to_point * normal_v[k] > Xfem::tol)
+          {
+            node_outside_fragment = true;
+            break;
+          }
+
         if (_fragments.size() == 1 && !shouldDuplicateForCrackTip(CrackTipElements))
           childElem->setNode(j, _nodes[j]); // inherit parent's node
-        else if (origin_to_point * normal < Xfem::tol)
+        else if (!node_outside_fragment)
           childElem->setNode(j, _nodes[j]); // inherit parent's node
         else                                // parent element's node is not in fragment
         {
@@ -1107,7 +1115,7 @@ EFAElement3D::removePhantomEmbeddedNode()
           if (!_fragments[0]->containsNode(edge->getEmbeddedNode(k)))
             nodes_to_delete.push_back(edge->getEmbeddedNode(k));
         } // k
-      }   // j
+      } // j
 
       // get emb nodes to be removed in the face interior
       for (unsigned int j = 0; j < _faces[i]->numInteriorNodes(); ++j)
@@ -1230,10 +1238,10 @@ EFAElement3D::connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNode
               } // i
             }
           } // loop over NeighborElem's children
-        }   // if (merge_phantom_edges)
-      }     // IF edge-j has_intersection()
-    }       // k, loop over neighbors on edge j
-  }         // j, loop over all faces
+        } // if (merge_phantom_edges)
+      } // IF edge-j has_intersection()
+    } // k, loop over neighbors on edge j
+  } // j, loop over all faces
 
   // Now do a second loop through faces and convert remaining nodes to permanent nodes.
   // If there is no neighbor on that face, also duplicate the embedded node if it exists
@@ -1895,7 +1903,7 @@ EFAElement3D::getTipFaceIDs() const
         {
           if (_faces[i]->containsFace(_fragments[0]->getFace(j)))
             num_frag_faces += 1;
-        }                        // j
+        } // j
         if (num_frag_faces == 2) // element face contains two fragment edges
           tip_face_id.push_back(i);
       }
@@ -1920,7 +1928,7 @@ EFAElement3D::getTipEmbeddedNodes() const
         {
           if (_faces[i]->containsFace(_fragments[0]->getFace(j)))
             frag_faces.push_back(_fragments[0]->getFace(j));
-        }                           // j
+        } // j
         if (frag_faces.size() == 2) // element edge contains two fragment edges
         {
           unsigned int edge_id = frag_faces[0]->adjacentCommonEdge(frag_faces[1]);

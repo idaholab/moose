@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,7 +23,7 @@
 #include <list>
 
 template <typename Object, typename Context>
-class SendBuffer : public ParallelObject
+class SendBuffer : public libMesh::ParallelObject
 {
 public:
   SendBuffer(const libMesh::Parallel::Communicator & comm,

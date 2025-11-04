@@ -133,7 +133,7 @@
     shear_modulus = 2.0
   []
   [strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y disp_z'
     eigenstrain_names = ini_stress
   []

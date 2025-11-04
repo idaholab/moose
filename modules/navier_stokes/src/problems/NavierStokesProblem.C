@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,11 @@
 
 #include "NavierStokesProblem.h"
 #include "NonlinearSystemBase.h"
+#include "FieldSplitPreconditioner.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/static_condensation.h"
+
+using namespace libMesh;
 
 registerMooseObject("NavierStokesApp", NavierStokesProblem);
 
@@ -81,13 +85,33 @@ NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters) : F
 
 NavierStokesProblem::~NavierStokesProblem()
 {
+  auto ierr = (PetscErrorCode)0;
   if (_Q_scale)
-    // We're destructing so don't check for errors which can throw
-    MatDestroy(&_Q_scale);
+  {
+    ierr = MatDestroy(&_Q_scale);
+    CHKERRABORT(this->comm().get(), ierr);
+  }
   if (_L)
-    MatDestroy(&_L);
+  {
+    ierr = MatDestroy(&_L);
+    CHKERRABORT(this->comm().get(), ierr);
+  }
 }
 
+void
+NavierStokesProblem::initialSetup()
+{
+  FEProblem::initialSetup();
+  for (const auto & solver_sys : _solver_systems)
+    if (solver_sys->system().has_static_condensation())
+    {
+      if (_have_L_matrix)
+        mooseError("Static condensation and LSC preconditioning not supported together");
+      if (_have_mass_matrix)
+        cast_ref<StaticCondensation &>(solver_sys->getMatrix(massMatrixTagID()))
+            .uncondensed_dofs_only();
+    }
+}
 KSP
 NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
 {
@@ -95,7 +119,6 @@ NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
   if (it == _schur_fs_index.end())
     return node;
 
-  PetscErrorCode ierr = 0;
   PC fs_pc;
   PetscInt num_splits;
   KSP * subksp;
@@ -106,37 +129,31 @@ NavierStokesProblem::findSchurKSP(KSP node, const unsigned int tree_position)
   auto sub_ksp_index = *it;
 
   // Get the preconditioner associated with the linear solver
-  ierr = KSPGetPC(node, &fs_pc);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(KSPGetPC(node, &fs_pc));
 
   // Verify the preconditioner is a field split preconditioner
-  PetscObjectTypeCompare((PetscObject)fs_pc, PCFIELDSPLIT, &is_fs);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)fs_pc, PCFIELDSPLIT, &is_fs));
   if (!is_fs)
     mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
 
   // Setup the preconditioner. We need to call this first in order to be able to retrieve the sub
   // ksps and sub index sets associated with the splits
-  ierr = PCSetUp(fs_pc);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PCSetUp(fs_pc));
 
   // Get the linear solvers associated with each split
-  ierr = PCFieldSplitGetSubKSP(fs_pc, &num_splits, &subksp);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PCFieldSplitGetSubKSP(fs_pc, &num_splits, &subksp));
   next_ksp = subksp[sub_ksp_index];
 
   // Get the index set for the split at this level of the tree we are traversing to the Schur
   // complement preconditioner
-  ierr = PCFieldSplitGetISByIndex(fs_pc, sub_ksp_index, &is);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PCFieldSplitGetISByIndex(fs_pc, sub_ksp_index, &is));
 
   // Store this tree level's index set, which we will eventually use to get the sub-matrices
-  // required for our preconditioning process from the system matrix
+  // required for our preconditioning process from the system matrices
   _index_sets.push_back(is);
 
   // Free the array of sub linear solvers that got allocated in the PCFieldSplitGetSubKSP call
-  ierr = PetscFree(subksp);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PetscFree(subksp));
 
   // Continue traversing down the tree towards the Schur complement linear solver/preconditioner
   return findSchurKSP(next_ksp, tree_position + 1);
@@ -156,13 +173,10 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   PetscBool is_lsc, is_fs;
   std::vector<Mat> intermediate_Qs;
   std::vector<Mat> intermediate_Ls;
-  PetscErrorCode ierr = 0;
 
   // Get the preconditioner for the linear solver. It must be a field split preconditioner
-  ierr = KSPGetPC(schur_ksp, &schur_pc);
-  LIBMESH_CHKERR2(this->comm(), ierr);
-  PetscObjectTypeCompare((PetscObject)schur_pc, PCFIELDSPLIT, &is_fs);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(KSPGetPC(schur_ksp, &schur_pc));
+  LibmeshPetscCall(PetscObjectTypeCompare((PetscObject)schur_pc, PCFIELDSPLIT, &is_fs));
   if (!is_fs)
     mooseError("Not a field split. Please check the 'schur_fs_index' parameter");
 
@@ -171,23 +185,29 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   // preconditioner for the Schur complement
   Mat global_Q = nullptr;
   if (_have_mass_matrix)
-    global_Q =
-        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(massMatrixTagID()))
-            .mat();
+  {
+    auto & sparse_mass_mat = _current_nl_sys->getMatrix(massMatrixTagID());
+    if (_current_nl_sys->system().has_static_condensation())
+      global_Q = cast_ref<const PetscMatrixBase<Number> &>(
+                     cast_ref<StaticCondensation &>(sparse_mass_mat).get_condensed_mat())
+                     .mat();
+    else
+      global_Q = cast_ref<PetscMatrixBase<Number> &>(sparse_mass_mat).mat();
+  }
+
   // The Poisson operator matrix corresponding to the velocity degrees of freedom. This is only used
   // and is required for Olshanskii LSC preconditioning
   Mat global_L = nullptr;
   if (_have_L_matrix)
     global_L =
-        static_cast<PetscMatrix<Number> &>(getNonlinearSystemBase(0).getMatrix(LMatrixTagID()))
-            .mat();
+        cast_ref<PetscMatrixBase<Number> &>(_current_nl_sys->getMatrix(LMatrixTagID())).mat();
 
   //
-  // Process down from our system matrix to the sub-matrix containing the velocity-pressure dofs for
-  // which we are going to be doing the Schur complement preconditioning
+  // Process down from our system matrices to the sub-matrix containing the velocity-pressure dofs
+  // for which we are going to be doing the Schur complement preconditioning
   //
 
-  auto process_intermediate_mats = [this, &ierr](auto & intermediate_mats, auto parent_mat)
+  auto process_intermediate_mats = [this](auto & intermediate_mats, auto parent_mat)
   {
     mooseAssert(parent_mat, "This should be non-null");
     intermediate_mats.resize(_index_sets.size());
@@ -195,12 +215,11 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     {
       auto intermediate_is = _index_sets[i];
       Mat intermediate_mat;
-      ierr = MatCreateSubMatrix(i == 0 ? parent_mat : intermediate_mats[i - 1],
-                                intermediate_is,
-                                intermediate_is,
-                                MAT_INITIAL_MATRIX,
-                                &intermediate_mat);
-      LIBMESH_CHKERR2(this->comm(), ierr);
+      LibmeshPetscCall(MatCreateSubMatrix(i == 0 ? parent_mat : intermediate_mats[i - 1],
+                                          intermediate_is,
+                                          intermediate_is,
+                                          MAT_INITIAL_MATRIX,
+                                          &intermediate_mat));
       intermediate_mats[i] = intermediate_mat;
     }
     return _index_sets.empty() ? parent_mat : intermediate_mats.back();
@@ -215,43 +234,36 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
 
   // Setup the preconditioner. We need to call this first in order to be able to retrieve the sub
   // ksps and sub index sets associated with the splits
-  ierr = PCSetUp(schur_pc);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PCSetUp(schur_pc));
 
   // There are always two splits in a Schur complement split. The zeroth split is the split with the
   // on-diagonals, e.g. the velocity dofs. Here we retrive the velocity dofs/index set
-  ierr = PCFieldSplitGetISByIndex(schur_pc, 0, &velocity_is);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PCFieldSplitGetISByIndex(schur_pc, 0, &velocity_is));
 
   // Get the rows of the parent velocity-pressure matrix that our process owns
-  ierr = MatGetOwnershipRange(our_parent_Q, &rstart, &rend);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(MatGetOwnershipRange(our_parent_Q, &rstart, &rend));
 
   if (_commute_lsc)
   {
     // If we're commuting LSC, e.g. doing Olshanskii, the user must have provided a Poisson operator
     // matrix
     mooseAssert(our_parent_L, "This should be non-null");
+
     if (!_L)
-    {
       // If this is our first time in this routine, then we create the matrix
-      ierr = MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_INITIAL_MATRIX, &_L);
-      LIBMESH_CHKERR2(this->comm(), ierr);
-    }
+      LibmeshPetscCall(
+          MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_INITIAL_MATRIX, &_L));
     else
-    {
       // Else we reuse the matrix
-      ierr = MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_REUSE_MATRIX, &_L);
-      LIBMESH_CHKERR2(this->comm(), ierr);
-    }
+      LibmeshPetscCall(
+          MatCreateSubMatrix(our_parent_L, velocity_is, velocity_is, MAT_REUSE_MATRIX, &_L));
   }
 
   // Get the local index set complement corresponding to the pressure dofs from the velocity dofs
-  ierr = ISComplement(velocity_is, rstart, rend, &pressure_is);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(ISComplement(velocity_is, rstart, rend, &pressure_is));
 
   auto create_q_scale_submat =
-      [our_parent_Q, this, velocity_is, pressure_is, &ierr](const auto & mat_initialization)
+      [our_parent_Q, this, velocity_is, pressure_is](const auto & mat_initialization)
   {
     if (_commute_lsc || _pressure_mass_matrix_as_pre)
     {
@@ -259,9 +271,8 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
       // preconditioner (no LSC), then we must have access to a pressure mass matrix
       mooseAssert(our_parent_Q, "This should be non-null");
       // Create a sub-matrix corresponding to the pressure index set
-      ierr =
-          MatCreateSubMatrix(our_parent_Q, pressure_is, pressure_is, mat_initialization, &_Q_scale);
-      LIBMESH_CHKERR2(this->comm(), ierr);
+      LibmeshPetscCall(MatCreateSubMatrix(
+          our_parent_Q, pressure_is, pressure_is, mat_initialization, &_Q_scale));
     }
     else if (_have_mass_matrix) // If we don't have a mass matrix and the user has requested scaling
                                 // then the diagonal of A will be used
@@ -271,9 +282,8 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
       mooseAssert(our_parent_Q, "This should be non-null");
       // We are not commuting LSC, so we are doing Elman, and the user has passed us a mass matrix
       // tag. In this case we are creating a velocity mass matrix, so we use the velocity index set
-      ierr =
-          MatCreateSubMatrix(our_parent_Q, velocity_is, velocity_is, mat_initialization, &_Q_scale);
-      LIBMESH_CHKERR2(this->comm(), ierr);
+      LibmeshPetscCall(MatCreateSubMatrix(
+          our_parent_Q, velocity_is, velocity_is, mat_initialization, &_Q_scale));
     }
   };
 
@@ -285,25 +295,17 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     create_q_scale_submat(MAT_REUSE_MATRIX);
 
   // We don't need the pressure index set anymore
-  ierr = ISDestroy(&pressure_is);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(ISDestroy(&pressure_is));
 
   // Nor the intermediate matrices
   for (auto & mat : intermediate_Qs)
-  {
-    ierr = MatDestroy(&mat);
-    LIBMESH_CHKERR2(this->comm(), ierr);
-  }
+    LibmeshPetscCall(MatDestroy(&mat));
   for (auto & mat : intermediate_Ls)
-  {
-    ierr = MatDestroy(&mat);
-    LIBMESH_CHKERR2(this->comm(), ierr);
-  }
+    LibmeshPetscCall(MatDestroy(&mat));
 
   // Get the sub KSP for the Schur split that corresponds to the linear solver for the Schur
   // complement (e.g. rank equivalent to the pressure rank)
-  ierr = PCFieldSplitGetSubKSP(schur_pc, &num_splits, &subksp);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PCFieldSplitGetSubKSP(schur_pc, &num_splits, &subksp));
   if (num_splits != 2)
     mooseError("The number of splits should be two");
   // The Schur complement linear solver is always at the first index (for the pressure dofs;
@@ -315,30 +317,24 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     mooseAssert(_Q_scale, "This should be non-null");
     Mat S;
     // Set the Schur complement preconditioner to be the pressure mass matrix
-    ierr = PCFieldSplitSetSchurPre(schur_pc, PC_FIELDSPLIT_SCHUR_PRE_USER, _Q_scale);
-    LIBMESH_CHKERR2(this->comm(), ierr);
+    LibmeshPetscCall(PCFieldSplitSetSchurPre(schur_pc, PC_FIELDSPLIT_SCHUR_PRE_USER, _Q_scale));
     // Get the Schur complement operator S, which in generic KSP speak is used for the operator A
-    ierr = KSPGetOperators(schur_complement_ksp, &S, NULL);
-    LIBMESH_CHKERR2(this->comm(), ierr);
+    LibmeshPetscCall(KSPGetOperators(schur_complement_ksp, &S, NULL));
     // Set, in generic KSP speak, the operators A and P respectively. So our pressure mass matrix is
     // P
-    ierr = KSPSetOperators(schur_complement_ksp, S, _Q_scale);
-    LIBMESH_CHKERR2(this->comm(), ierr);
+    LibmeshPetscCall(KSPSetOperators(schur_complement_ksp, S, _Q_scale));
   }
   else // We are doing LSC preconditioning
   {
     // Get the least squares commutator preconditioner for the Schur complement
-    ierr = KSPGetPC(schur_complement_ksp, &lsc_pc);
-    LIBMESH_CHKERR2(this->comm(), ierr);
+    LibmeshPetscCall(KSPGetPC(schur_complement_ksp, &lsc_pc));
     // Verify that it's indeed an LSC preconditioner
-    ierr = PetscObjectTypeCompare(PetscObject(lsc_pc), PCLSC, &is_lsc);
-    LIBMESH_CHKERR2(this->comm(), ierr);
+    LibmeshPetscCall(PetscObjectTypeCompare(PetscObject(lsc_pc), PCLSC, &is_lsc));
     if (!is_lsc)
       mooseError("Not an LSC PC. Please check the 'schur_fs_index' parameter");
 
     // Get the LSC preconditioner
-    ierr = PCGetOperators(lsc_pc, NULL, &lsc_pc_pmat);
-    LIBMESH_CHKERR2(this->comm(), ierr);
+    LibmeshPetscCall(PCGetOperators(lsc_pc, NULL, &lsc_pc_pmat));
 
     if (_commute_lsc)
     {
@@ -346,8 +342,7 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
       mooseAssert(_L, "This should be non-null");
       // Attach our L matrix to the PETSc object. PETSc will use this during the preconditioner
       // application
-      ierr = PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_L", (PetscObject)_L);
-      LIBMESH_CHKERR2(this->comm(), ierr);
+      LibmeshPetscCall(PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_L", (PetscObject)_L));
       // Olshanskii preconditioning requires a pressure mass matrix
       mooseAssert(_have_mass_matrix, "This is to verify we will enter the next conditional");
     }
@@ -356,14 +351,13 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
       mooseAssert(_Q_scale, "This should be non-null");
       // Attach our scaling/mass matrix to the PETSc object. PETSc will use this during the
       // preconditioner application
-      ierr = PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_Qscale", (PetscObject)_Q_scale);
-      LIBMESH_CHKERR2(this->comm(), ierr);
+      LibmeshPetscCall(
+          PetscObjectCompose((PetscObject)lsc_pc_pmat, "LSC_Qscale", (PetscObject)_Q_scale));
     }
   }
 
   // Free the sub-KSP array that was allocated during PCFieldSplitGetSubKSP
-  ierr = PetscFree(subksp);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  LibmeshPetscCall(PetscFree(subksp));
 }
 
 PetscErrorCode
@@ -395,13 +389,8 @@ NavierStokesProblem::initPetscOutputAndSomeSolverSettings()
   }
 
   // Set the pre-KSP solve callback. At that time we will setup our Schur complement preconditioning
-  PetscErrorCode ierr = 0;
-  KSP ksp;
-  auto snes = currentNonlinearSystem().getSNES();
-  ierr = SNESGetKSP(snes, &ksp);
-  LIBMESH_CHKERR2(this->comm(), ierr);
-  ierr = KSPSetPreSolve(ksp, &navierStokesKSPPreSolve, this);
-  LIBMESH_CHKERR2(this->comm(), ierr);
+  auto ksp = currentNonlinearSystem().getFieldSplitPreconditioner().getKSP();
+  LibmeshPetscCall(KSPSetPreSolve(ksp, &navierStokesKSPPreSolve, this));
 }
 
 #endif

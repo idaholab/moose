@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,7 +20,7 @@ registerMooseObject("MooseApp", MeshDivisionFunctorReductionVectorPostprocessor)
 InputParameters
 MeshDivisionFunctorReductionVectorPostprocessor::validParams()
 {
-  InputParameters params = ElementVectorPostprocessor::validParams();
+  InputParameters params = SpatialUserObjectFunctor<ElementVectorPostprocessor>::validParams();
   MooseEnum reduction("integral average min max");
   params.addRequiredParam<MooseEnum>("reduction", reduction, "Reduction operation to apply");
   params.addRequiredParam<std::vector<MooseFunctorName>>("functors",
@@ -34,8 +34,7 @@ MeshDivisionFunctorReductionVectorPostprocessor::validParams()
 
 MeshDivisionFunctorReductionVectorPostprocessor::MeshDivisionFunctorReductionVectorPostprocessor(
     const InputParameters & parameters)
-  : ElementVectorPostprocessor(parameters),
-    NonADFunctorInterface(this),
+  : SpatialUserObjectFunctor<ElementVectorPostprocessor>(parameters),
     _reduction(getParam<MooseEnum>("reduction")),
     _nfunctors(getParam<std::vector<MooseFunctorName>>("functors").size()),
     _mesh_division(_fe_problem.getMeshDivision(getParam<MeshDivisionName>("mesh_division"), _tid))
@@ -168,4 +167,10 @@ MeshDivisionFunctorReductionVectorPostprocessor::spatialValue(const Point & p) c
   if (index == MooseMeshDivision::INVALID_DIVISION_INDEX)
     mooseError("Spatial value sampled outside of the mesh_division specified at", p);
   return (*_functor_reductions[0])[index];
+}
+
+bool
+MeshDivisionFunctorReductionVectorPostprocessor::hasBlocks(const SubdomainID sub) const
+{
+  return BlockRestrictable::hasBlocks(sub);
 }

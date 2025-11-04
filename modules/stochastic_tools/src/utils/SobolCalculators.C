@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 namespace StochasticTools
 {
 template <typename InType, typename OutType>
-SobolCalculator<InType, OutType>::SobolCalculator(const ParallelObject & other,
+SobolCalculator<InType, OutType>::SobolCalculator(const libMesh::ParallelObject & other,
                                                   const std::string & name,
                                                   bool resample)
   : Calculator<std::vector<InType>, std::vector<OutType>>(other, name), _resample(resample)
@@ -120,7 +120,7 @@ SobolCalculator<InType, OutType>::finalize(bool is_distributed)
   // Output the data
   _sobol.clear();
   if (_resample)
-    _sobol.reserve(n * (1 + n));
+    _sobol.reserve(n * (n + 3) / 2);
   else
     _sobol.reserve(2 * n);
 

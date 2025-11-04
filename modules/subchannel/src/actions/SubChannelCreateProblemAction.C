@@ -1,0 +1,49 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "SubChannelCreateProblemAction.h"
+#include "ActionFactory.h"
+#include "SubChannelApp.h"
+#include "FEProblemBase.h"
+
+registerMooseAction("SubChannelApp", SubChannelCreateProblemAction, "create_problem");
+
+InputParameters
+SubChannelCreateProblemAction::validParams()
+{
+  InputParameters params = MooseObjectAction::validParams();
+  params.addClassDescription("Creates the input block that encopasses all the problem parameters");
+  params.addRequiredParam<std::string>("type", "Problem type");
+  params.addParam<std::string>("name", "SubChannel Problem", "The name of the problem");
+  return params;
+}
+
+SubChannelCreateProblemAction::SubChannelCreateProblemAction(const InputParameters & parameters)
+  : MooseObjectAction(parameters)
+{
+}
+
+void
+SubChannelCreateProblemAction::act()
+{
+  // build the problem only if we have mesh
+  if (_mesh.get() != NULL)
+  {
+    // when this action is built by parser with Problem input block, this action
+    // must act i.e. create a problem. Thus if a problem has been created, it will error out.
+    if (_problem)
+      mooseError("Trying to build a problem but problem has already existed");
+
+    _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
+    _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
+
+    _problem =
+        _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
+  }
+}

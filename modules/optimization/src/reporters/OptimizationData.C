@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -167,6 +167,11 @@ OptimizationDataTempl<T>::computeMisfit()
     {
       if (MooseUtils::absoluteFuzzyEqual(this->_t, _measurement_time[i]))
       {
+        // If we are on the first var, make sure reset the simulation values so they aren't
+        // accumulated on repeated timesteps
+        if (var_index == 0)
+          _simulation_values[i] = 0.0;
+
         const Point point(_measurement_xcoord[i], _measurement_ycoord[i], _measurement_zcoord[i]);
         const Real val = sys.point_value(vnum, point, false);
 

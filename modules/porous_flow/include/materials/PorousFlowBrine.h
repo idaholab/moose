@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -50,4 +50,7 @@ protected:
 
   /// NaCl mass fraction at the qps or nodes
   const VariableValue & _xnacl;
+
+  /// Flag to denote whether NaCl mass fraction is a nonlinear variable
+  const bool _is_xnacl_pfvar;
 };

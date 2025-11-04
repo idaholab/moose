@@ -4,6 +4,6 @@ specs:
     - tests
 dependencies:
     - framework
-    - tensor_mechanics
+    - solid_mechanics
 repo: moose
 reports: !include ${MOOSE_DIR}/modules/contact/doc/sqa_reports.yml

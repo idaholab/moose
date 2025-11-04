@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "libmesh/system.h"
+#include "libmesh/variable.h"
 
 InputParameters
 MooseVariableFieldBase::validParams()
@@ -23,16 +24,15 @@ MooseVariableFieldBase::MooseVariableFieldBase(const InputParameters & parameter
 {
 }
 
-std::string
+const std::string &
 MooseVariableFieldBase::componentName(const unsigned int comp) const
 {
   if (comp >= _count)
-    mooseError("Component index must be less than the number of components of variable ",
-               _var_name);
+    mooseError("componentName(): Component index is not less than the number of components");
   if (isArray())
-    return this->_subproblem.arrayVariableComponent(_var_name, comp);
+    return this->arrayVariableComponent(comp);
   else
-    return _var_name;
+    return name();
 }
 
 const std::set<SubdomainID> &

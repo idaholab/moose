@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,6 +28,7 @@ protected:
   virtual void addDiracKernels();
   virtual void addMaterials();
   virtual void addSecondaryFluxVector();
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm) override;
 
   const bool _quadrature;
   const MooseEnum _order;
@@ -37,4 +38,5 @@ protected:
 
   /// Primary/Secondary boundary name pairs for thermal contact
   const std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
+  using Action::addRelationshipManagers;
 };

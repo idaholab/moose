@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -30,7 +30,4 @@ protected:
    * which to evaluate the variable. If not provided, defaults to the variable.
    */
   const VariableValue & _proxy_variable;
-
-  /// Extreme value of the value and proxy variable at the same point
-  std::pair<Real, Real> _proxy_value;
 };

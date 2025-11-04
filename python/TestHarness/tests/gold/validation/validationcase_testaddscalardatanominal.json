@@ -1,0 +1,17 @@
+{
+  "data": {
+    "test": {
+      "abs_zero": null,
+      "bounds": null,
+      "description": "unused",
+      "key": "test",
+      "nominal": 1.1,
+      "rel_err": null,
+      "test": null,
+      "units": null,
+      "validation": true,
+      "value": 1.0
+    }
+  },
+  "results": []
+}

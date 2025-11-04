@@ -1,0 +1,92 @@
+[Tests]
+  [physics]
+    type = CSVDiff
+    input = 'component_with_physics.i'
+    csvdiff = 'component_with_physics_out.csv'
+    design = 'ComponentPhysicsInterface.md'
+    issues = '#24103'
+    requirement = 'The system shall be able to add equations onto the mesh of (action)components using physics syntax.'
+  []
+  [materials]
+    type = CSVDiff
+    input = 'component_with_materials.i'
+    csvdiff = 'component_with_materials_out.csv'
+    design = 'ComponentMaterialPropertyInterface.md'
+    issues = '#29856'
+    requirement = 'The system shall be able to add generic materials on the subdomains of (action)components for a compact, local syntax.'
+  []
+  [ics]
+    type = CSVDiff
+    input = 'component_with_ics.i'
+    csvdiff = 'component_with_ics_out.csv'
+    design = 'ComponentInitialConditionInterface.md'
+    issues = '#29856'
+    requirement = 'The system shall be able to add initial conditions directly on the subdomains (action)components for a compact, local syntax.'
+  []
+  [bcs]
+    type = CSVDiff
+    input = 'component_with_bcs.i'
+    csvdiff = 'component_with_bcs_out.csv'
+    design = 'ComponentBoundaryConditionInterface.md'
+    issues = '#29856'
+    requirement = 'The system shall be able to add boundary conditions directly on the subdomains (action)components for a compact, local syntax.'
+  []
+
+  [errors]
+    issues = '#29856'
+    design = 'ComponentPhysicsInterface.md ComponentMaterialPropertyInterface.md ComponentInitialConditionInterface.md ComponentBoundaryConditionInterface.md'
+    requirement = 'The system shall report an error'
+    [materials_input_size]
+      type = RunException
+      input = 'component_with_materials.i'
+      cli_args = "ActionComponents/cylinder_1/property_values='1 2'"
+      expect_err = 'Should be the same size as property functors'
+      detail = 'if the input of properties directly on the functor is not consistent between values and names,'
+    []
+    [ics_input_size]
+      type = RunException
+      input = 'component_with_ics.i'
+      cli_args = "ActionComponents/cylinder_1/initial_condition_variables='u v'"
+      expect_err = 'Should be the same size as '''
+      detail = 'if the input of initial conditions directly on the functor is not consistent between variables and values,'
+    []
+    [ics_unrequested]
+      type = RunException
+      input = 'component_with_ics.i'
+      cli_args = "ActionComponents/cylinder_1/initial_condition_variables='w'"
+      expect_err = "Initial conditions for variables \'w\' have been defined on this ActionComponent, but have not been requested by any Physics."
+      detail = 'if the input of an initial condition on an (action)component is not used by any Physics to define an initial condition,'
+    []
+    [bcs_unrequested]
+      type = RunException
+      input = 'component_with_bcs.i'
+      cli_args = "ActionComponents/cylinder_1/flux_bc_variables='w' "
+                 "ActionComponents/cylinder_1/flux_bc_boundaries='cylinder_1_right' "
+                 "ActionComponents/cylinder_1/flux_bc_values='4' "
+                 "ActionComponents/cylinder_1/fixed_value_bc_variables='u v w' "
+                 "ActionComponents/cylinder_1/fixed_value_bc_boundaries='cylinder_1_right; cylinder_1_right; cylinder_1_right' "
+                 "ActionComponents/cylinder_1/fixed_value_bc_values='4; 4; 2'"
+      expect_err = "have been defined on this ActionComponent, but have not been requested by any Physics."
+      detail = 'if the input of a boundary condition on an (action)component is not used by any Physics to define a boundary condition,'
+    []
+    [ics_unimplemented]
+      type = RunException
+      input = 'physics_component_interface_errors.i'
+      cli_args = "ActionComponents/cylinder_2/initial_condition_variables='test_variable'
+                  ActionComponents/cylinder_2/initial_condition_values='1'"
+      expect_err = "This Physics however does not implement the 'addInitialConditionsFromComponents'"
+      detail = 'if an initial condition is specified for a variable of a physics on a component, but that physics does not implement creating initial conditions on a component,'
+      allow_test_objects = true
+    []
+    [bcs_unimplemented]
+      type = RunException
+      input = 'physics_component_interface_errors.i'
+      cli_args = "ActionComponents/cylinder_2/fixed_value_bc_variables='test_variable'
+                  ActionComponents/cylinder_2/fixed_value_bc_boundaries='left'
+                  ActionComponents/cylinder_2/fixed_value_bc_values='3'"
+      expect_err = "This Physics however does not implement the 'addBoundaryConditionsFromComponents'"
+      detail = 'if a boundary condition is specified for a variable of a physics on a component, but that physics does not implement creating boundary conditions on a component'
+      allow_test_objects = true
+    []
+  []
+[]

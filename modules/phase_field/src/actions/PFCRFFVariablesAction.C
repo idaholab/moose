@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,8 @@ PFCRFFVariablesAction::validParams()
 {
   InputParameters params = Action::validParams();
   MooseEnum familyEnum = AddVariableAction::getNonlinearVariableFamilies();
+  params.addClassDescription("Creates the L nonlinear variables for the Cahn-Hilliard equation for "
+                             "the RFF form of the phase field crystal model");
   params.addParam<MooseEnum>(
       "family",
       familyEnum,

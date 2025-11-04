@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,7 +13,7 @@
 
 #include "libmesh/numeric_vector.h"
 
-class Transient;
+class TransientBase;
 
 /**
  * MultiApp Implementation for Transient Apps.
@@ -38,8 +38,6 @@ public:
 
   virtual void finishStep(bool recurse_through_multiapp_levels = false) override;
 
-  virtual bool needsRestoration() override;
-
   virtual void resetApp(unsigned int global_app, Real time) override;
 
   /**
@@ -56,12 +54,11 @@ private:
    */
   void setupApp(unsigned int i, Real time = 0.0);
 
-  std::vector<Transient *> _transient_executioners;
+  std::vector<TransientBase *> _transient_executioners;
 
   bool _sub_cycling;
   bool _interpolate_transfers;
   bool _detect_steady_state;
-  Real _steady_state_tol;
   bool _output_sub_cycles;
 
   unsigned int _max_failures;

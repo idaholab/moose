@@ -14,7 +14,9 @@
   [errors]
     type = RunException
     input = 'test.i'
-    expect_err = "componentB: warning 2.*componentA: error 1.*componentA: error 2.*componentB: error 1.*componentB: error 2"
+    # We can't reliably check for the warnings first here because the ordering of the warning
+    # and the error is MPI implementation dependent
+    expect_err = "componentA: error 1.*componentA: error 2.*componentB: error 1.*componentB: error 2"
     allow_test_objects = true
     allow_warnings = true # Testing that warnings are emitted
     requirement = 'The system shall be able to output errors in a batch.'

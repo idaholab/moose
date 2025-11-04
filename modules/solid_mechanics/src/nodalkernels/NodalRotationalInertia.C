@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 #include "TimeIntegrator.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("SolidMechanicsApp", NodalRotationalInertia);
 
@@ -85,7 +86,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _rot_dot_residual(_nrot),
     _rot_vel_old_value(_nrot),
     _rot_dotdot_residual(_nrot),
-    _time_integrator(*_sys.getTimeIntegrator())
+    _time_integrator(_sys.getTimeIntegrator(_var.number()))
 {
   if (_has_beta && _has_gamma && _has_rot_velocities && _has_rot_accelerations)
   {

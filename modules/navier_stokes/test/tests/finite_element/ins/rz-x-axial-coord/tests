@@ -28,18 +28,24 @@
       input = 'hand-coded-jac-pipe-flow.i'
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization,'
       exodiff = 'hand-coded-jac-pipe-flow_out.e'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [natural]
       type = 'Exodiff'
       input = 'pipe-flow-natural-bc.i'
       detail = 'in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
       exodiff = 'pipe-flow-natural-bc_out.e'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [natural_hand]
       type = 'Exodiff'
       input = 'hand-coded-jac-pipe-flow-natural-bc.i'
       detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization.'
       exodiff = 'hand-coded-jac-pipe-flow-natural-bc_out.e'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
   []
   [rz_traction]
@@ -50,6 +56,8 @@
       cli_args = "Kernels/inactive='mass_pspg momentum_supg' Variables/velocity/order=SECOND Mesh/second_order=true Outputs/file_base=dirichlet-unstabilized-traction GlobalParams/viscous_form=traction -pc_factor_shift_type NONZERO"
       exodiff = 'dirichlet-unstabilized-traction.e'
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, without PSPG and SUPG stabilization,'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [dirichlet_unstablized_hand]
       type = 'Exodiff'
@@ -57,6 +65,8 @@
       cli_args = "GlobalParams/supg=false GlobalParams/pspg=false Variables/velocity_x/order=SECOND Variables/velocity_y/order=SECOND Mesh/second_order=true Outputs/file_base=hand-coded-jac-dirichlet-unstabilized-traction GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ -pc_factor_shift_type NONZERO"
       exodiff = 'hand-coded-jac-dirichlet-unstabilized-traction.e'
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, without PSPG and SUPG stabilization,'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [dirichlet]
       type = 'Exodiff'
@@ -78,6 +88,8 @@
       detail = 'in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
       exodiff = 'natural-traction.e'
       cli_args = 'GlobalParams/viscous_form=traction Outputs/file_base=natural-traction'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [natural_hand]
       type = 'Exodiff'
@@ -85,6 +97,8 @@
       detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization.'
       exodiff = 'natural-hand-traction.e'
       cli_args = 'GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ Outputs/file_base=natural-hand-traction'
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
   []
 []

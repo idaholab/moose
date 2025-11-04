@@ -26,7 +26,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   strain = SMALL
   incremental = true
   planar_formulation = PLANE_STRAIN

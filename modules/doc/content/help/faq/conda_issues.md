@@ -9,7 +9,7 @@ section for what may look familiar, and follow those instructions:
   you (Sorry!). Remove the offending channel(s):
 
   ```bash
-  conda config --remove channels https://mooseframework.org/conda/moose
+  conda config --remove channels https://mooseframework.inl.gov/conda/moose
   conda config --remove channels https://mooseframework.com/conda/moose
   conda config --remove channels https://mooseframework.inl.gov/conda/moose
   ```
@@ -115,12 +115,12 @@ section for what may look familiar, and follow those instructions:
 
   The quick fix-attempt, is to delete the faulty environment and re-install it:
 
-  !package! code
+  !versioner! code
   conda activate base
   conda env remove -n moose
-  conda create -n moose moose-dev=__MOOSE_DEV__
+  conda create -n moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
   conda activate moose
-  !package-end!
+  !versioner-end!
 
   If the above re-install method ultimately failed, it is time to submit your errors to the
   [discussion forum](faq/discussion_forum.md).

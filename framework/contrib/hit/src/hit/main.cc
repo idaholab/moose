@@ -90,16 +90,30 @@ main(int argc, char ** argv)
     return profile(argc - 2, argv + 2);
   else if (subcmd == "braceexpr")
   {
-    std::stringstream ss;
-    for (std::string line; std::getline(std::cin, line);)
-      ss << line << std::endl;
+    // verify number of arguments
+    if (argc != 3)
+    {
+      std::cerr << "Usage: hit braceexpr filename.i" << std::endl;
+      return 1;
+    }
 
-    hit::BraceExpander expander;
-    hit::EnvEvaler env;
+    // load file and parse string
+    std::string fname(argv[2]);
+    std::string input = readInput(fname);
+    std::unique_ptr<hit::Node> root(hit::parse(fname, input));
+
+    // evaluate brace expressions
     hit::RawEvaler raw;
-    expander.registerEvaler("env", env);
-    expander.registerEvaler("raw", raw);
-    std::cout << expander.expand(nullptr, ss.str()) << "\n";
+    hit::EnvEvaler env;
+    hit::ReplaceEvaler repl;
+    hit::BraceExpander exw;
+    exw.registerEvaler("raw", raw);
+    exw.registerEvaler("env", env);
+    exw.registerEvaler("replace", repl);
+    root->walk(&exw);
+
+    // output expanded input file
+    std::cout << root->render() << std::endl;
 
     return 0;
   }
@@ -215,23 +229,22 @@ public:
   DupParamWalker() {}
   void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
   {
-    std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
-
-    if (_have.count(fullpath) > 0)
+    const std::string prefix = n->type() == hit::NodeType::Field ? "parameter" : "section";
+    const auto it = _have.find(fullpath);
+    if (it != _have.end())
     {
-      auto existing = _have[fullpath];
+      auto existing = it->second;
       if (_duplicates.count(fullpath) == 0)
       {
-        errors.push_back(
-            hit::errormsg(existing, prefix, " '", fullpath, "' supplied multiple times"));
+        errors.emplace_back(prefix + " '" + fullpath + "' supplied multiple times", existing);
         _duplicates.insert(fullpath);
       }
-      errors.push_back(hit::errormsg(n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.emplace_back(prefix + " '" + fullpath + "' supplied multiple times", n);
     }
     _have[n->fullpath()] = n;
   }
 
-  std::vector<std::string> errors;
+  std::vector<hit::ErrorMessage> errors;
 
 private:
   std::set<std::string> _duplicates;
@@ -494,7 +507,6 @@ readMerged(const std::vector<std::string> & input_filenames)
   {
     std::string input = readInput(input_filename);
     std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
-    hit::explode(root.get());
 
     if (!combined_root)
       combined_root = std::move(root);
@@ -831,8 +843,8 @@ validate(int argc, char ** argv)
 
     DupParamWalker w;
     root->walk(&w, hit::NodeType::Field);
-    for (auto & msg : w.errors)
-      std::cout << msg << "\n";
+    for (const auto & error : w.errors)
+      std::cout << error.prefixed_message << "\n";
   }
   return ret;
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,9 +26,14 @@
 #include "libmesh/elem_range.h"
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/remote_elem.h"
+#include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
+#if METAPHYSICL_MAJOR_VERSION < 2
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
+#else
+#include "metaphysicl/parallel_dynamic_array_wrapper.h"
+#endif
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
@@ -47,11 +52,7 @@ INSFVRhieChowInterpolator::uniqueParams()
       "means elements that we have access to (this may not be all the elements in the mesh if the "
       "mesh is distributed) but that we do not own.");
   params.addParamNamesToGroup("pull_all_nonlocal_a", "Parallel Execution Tuning");
-  params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "nl0",
-                                       "The nonlinear system in which the monolithic momentum and "
-                                       "continuity equations are located.");
-  params.addParamNamesToGroup("mass_momentum_system", "Nonlinear Solver");
+
   params.addParam<bool>(
       "correct_volumetric_force", false, "Flag to activate volume force corrections.");
   MooseEnum volume_force_correction_method("force-consistent pressure-consistent",
@@ -69,7 +70,6 @@ std::vector<std::string>
 INSFVRhieChowInterpolator::listOfCommonParams()
 {
   return {"pull_all_nonlocal_a",
-          "mass_momentum_system",
           "correct_volumetric_force",
           "volume_force_correction_method",
           "volumetric_force_functors"};
@@ -117,7 +117,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
-    _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
+    _momentum_sys_number(_fe_problem.systemNumForVariable(getParam<VariableName>("u"))),
     _example(0),
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a")),
@@ -310,16 +310,18 @@ INSFVRhieChowInterpolator::initialSetup()
   if (_bool_correct_vf && _volume_force_correction_method == "force-consistent")
   {
     _baseline_volume_force = 1e10;
-    for (const auto & loc_elem : _mesh.element_ptr_range())
+    for (const auto & loc_elem : *_elem_range)
     {
       Real elem_value = 0.0;
       for (const auto i : make_range(_volumetric_force.size()))
         elem_value += (*_volumetric_force[i])(makeElemArg(loc_elem), determineState());
+
       if (std::abs(elem_value) < _baseline_volume_force)
         _baseline_volume_force = std::abs(elem_value);
       if (_baseline_volume_force == 0)
         break;
     }
+    _communicator.min(_baseline_volume_force);
   }
 }
 
@@ -353,7 +355,7 @@ INSFVRhieChowInterpolator::initialize()
   // The keys should not have changed unless the mesh has changed
   // Dont reset if not in current system
   // IDEA: clear them derivatives
-  if (_u->sys().number() == _fe_problem.currentNlSysNum())
+  if (_momentum_sys_number == _fe_problem.currentNlSysNum())
     for (auto & pair : _a)
       pair.second = 0;
   else
@@ -367,14 +369,10 @@ INSFVRhieChowInterpolator::initialize()
 void
 INSFVRhieChowInterpolator::execute()
 {
-  if (_sys.number() != _u->sys().number())
-  {
-    mooseAssert(!needAComputation(),
-                "The velocity variables are in the auxiliary system. In this case we will not run "
-                "kernels to compute a-coefficients. Consequently the a-coefficient data must be "
-                "provided, approximated, or we should be using an average velocity interpolation");
+  // Either we provided the RC coefficients using aux-variable, or we are solving for another
+  // system than the momentum equations are in, in a multi-system setup for example
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     return;
-  }
 
   mooseAssert(!_a_data_provided,
               "a-coefficient data should not be provided if the velocity variables are in the "
@@ -396,7 +394,7 @@ INSFVRhieChowInterpolator::execute()
 
   PARALLEL_TRY
   {
-    GatherRCDataElementThread et(_fe_problem, _nl_sys_number, _var_numbers);
+    GatherRCDataElementThread et(_fe_problem, _momentum_sys_number, _var_numbers);
     Threads::parallel_reduce(*_elem_range, et);
   }
   PARALLEL_CATCH;
@@ -404,7 +402,8 @@ INSFVRhieChowInterpolator::execute()
   PARALLEL_TRY
   {
     using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _nl_sys_number, _var_numbers, _displaced);
+    GatherRCDataFaceThread<FVRange> fvr(
+        _fe_problem, _momentum_sys_number, _var_numbers, _displaced);
     FVRange faces(_moose_mesh.ownedFaceInfoBegin(), _moose_mesh.ownedFaceInfoEnd());
     Threads::parallel_reduce(faces, fvr);
   }
@@ -419,8 +418,9 @@ INSFVRhieChowInterpolator::finalize()
   if (!needAComputation() || this->n_processors() == 1)
     return;
 
-  // If advecting with auxiliary variables, no need to try to run those kernels
-  if (_fe_problem.currentNlSysNum() != _u->sys().number())
+  // If advecting with auxiliary variables, no need to synchronize data
+  // Same if not solving for the velocity variables at the moment
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     return;
 
   using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
@@ -549,13 +549,17 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (Moose::FV::onBoundary(*this, fi))
   {
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
-    const Moose::FaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
+    const Moose::FaceArg boundary_face{&fi,
+                                       Moose::FV::LimiterType::CentralDifference,
+                                       true,
+                                       correct_skewness,
+                                       boundary_elem,
+                                       nullptr};
     auto velocity = vel(boundary_face, time);
     incorporate_mesh_velocity(boundary_face, velocity);
 
     // If not solving for velocity, clear derivatives
-    if (_fe_problem.currentNlSysNum() != _u->sys().number())
+    if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
       return MetaPhysicL::raw_value(velocity);
     else
       return velocity;
@@ -564,7 +568,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   VectorValue<ADReal> velocity;
 
   Moose::FaceArg face{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr, nullptr};
   // Create the average face velocity (not corrected using RhieChow yet)
   velocity(0) = (*u)(face, time);
   if (v)
@@ -575,7 +579,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   incorporate_mesh_velocity(face, velocity);
 
   // If not solving for velocity, clear derivatives
-  if (_fe_problem.currentNlSysNum() != _u->sys().number())
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     velocity = MetaPhysicL::raw_value(velocity);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
@@ -608,11 +612,12 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // Get pressure gradient. This is the uncorrected gradient plus a correction from cell
   // centroid values on either side of the face
-  const auto & grad_p = p.adGradSln(fi, time);
+  const auto correct_skewness_p = pressureSkewCorrection(tid);
+  const auto & grad_p = p.adGradSln(fi, time, correct_skewness_p);
 
   // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
   // along a boundary face
-  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time);
+  const auto & unc_grad_p = p.uncorrectedAdGradSln(fi, time, correct_skewness_p);
 
   // Volumetric Correction Method #1: pressure-based correction
   // Function that allows us to mark the face for which the Rhie-Chow interpolation is
@@ -629,7 +634,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
     // Compute the corrected interpolated face value
     Moose::FaceArg face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr, nullptr};
 
     interp_vf = 0.0;
     for (const auto i : make_range(_volumetric_force.size()))
@@ -658,7 +663,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                elem_has_fi ? side : loc_neighbor->which_neighbor_am_i(elem));
 
       Moose::FaceArg loc_face{
-          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem};
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem, nullptr};
 
       MooseMeshUtils::coordTransformFactor(
           elem->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
@@ -693,7 +698,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                elem_has_fi ? side : loc_elem->which_neighbor_am_i(neighbor));
 
       Moose::FaceArg loc_face{
-          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem};
+          fi_loc, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem, nullptr};
 
       MooseMeshUtils::coordTransformFactor(
           neighbor->vertex_average(), coord_multiplier, coord_type, rz_radial_coord);
@@ -734,7 +739,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   {
     Real value = 0.0;
     Moose::FaceArg loc_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr, nullptr};
 
     for (const auto i : make_range(_volumetric_force.size()))
       value += (*_volumetric_force[i])(loc_face, time) * (face_normal * fi.normal());
@@ -821,7 +826,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   }
 
   // If not solving for velocity, clear derivatives
-  if (_fe_problem.currentNlSysNum() != _u->sys().number())
+  if (_fe_problem.currentNlSysNum() != _momentum_sys_number)
     return MetaPhysicL::raw_value(velocity);
   else
     return velocity;

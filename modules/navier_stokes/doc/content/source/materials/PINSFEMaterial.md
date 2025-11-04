@@ -1,20 +1,19 @@
 # PINSFEMaterial
 
-!alert construction title=Undocumented Class
-The PINSFEMaterial has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Materials/PINSFEMaterial
 
-## Overview
+This material is the porous media version of [INSFEMaterial.md]. It declares and computes
+the same material properties. It additionally can set constant user-input values for the following
+properties:
 
-!! Replace these lines with information regarding the PINSFEMaterial object.
+- the inertia resistance coefficient
+- the viscous resistance coefficient
+- the porous media heat transfer coefficient between the solid and fluid phase
+- the porous media wetted area
 
-## Example Input File Syntax
 
-!! Describe and include an example of how to use the PINSFEMaterial object.
+Non-constant properties can be defined for these quantities by creating a derived class of the
+[PINSFEMaterial.md] and implementing correlations for the properties there.
 
 !syntax parameters /Materials/PINSFEMaterial
 

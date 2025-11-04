@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "XFEMCutMeshOutput.h"
-#include "MeshCut2DUserObjectBase.h"
+#include "MeshCutUserObjectBase.h"
 
 registerMooseObject("XFEMApp", XFEMCutMeshOutput);
 
@@ -16,16 +16,16 @@ InputParameters
 XFEMCutMeshOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription("Outputs XFEM MeshCut2DUserObjectBase cutter mesh in Exodus format.");
+  params.addClassDescription("Outputs XFEM MeshCutUserObjectBase cutter mesh in Exodus format.");
   params.addRequiredParam<UserObjectName>("xfem_cutter_uo",
-                                          "The MeshCut2DUserObject to get cutter mesh from");
+                                          "The MeshCutUserObject to get cutter mesh from");
   return params;
 }
 
 XFEMCutMeshOutput::XFEMCutMeshOutput(const InputParameters & params)
   : FileOutput(params),
     UserObjectInterface(this),
-    _cutter_uo(getUserObject<MeshCut2DUserObjectBase>("xfem_cutter_uo"))
+    _cutter_uo(getUserObject<MeshCutUserObjectBase>("xfem_cutter_uo"))
 {
 }
 
@@ -34,7 +34,7 @@ XFEMCutMeshOutput::filename()
 {
   // Append the .e extension to the base file name
   std::ostringstream output;
-  output << _file_base << ".e";
+  output << _file_base << "_XFEMCutMeshOutput.e";
 
   // Add the _000x extension to the file
   if (_file_num > 1)
@@ -52,7 +52,7 @@ XFEMCutMeshOutput::output()
   int exodus_num = 1;
   ++_file_num;
   _es = std::make_unique<EquationSystems>(_cutter_uo.getCutterMesh());
-  _exodus_io = std::make_unique<ExodusII_IO>(_es->get_mesh());
+  _exodus_io = std::make_unique<libMesh::ExodusII_IO>(_es->get_mesh());
   // Default to non-HDF5 output for wider compatibility
   _exodus_io->set_hdf5_writing(false);
   _exodus_io->write_timestep(

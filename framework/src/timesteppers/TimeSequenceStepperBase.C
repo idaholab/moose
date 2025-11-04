@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,8 @@ TimeSequenceStepperBase::validParams()
       false,
       "If true, uses the final time step size for times after the last time in the sequence, "
       "instead of taking a single step directly to the simulation end time");
+  params.addParam<bool>(
+      "use_last_t_for_end_time", false, "Use last time in sequence as 'end_time' in Executioner.");
   return params;
 }
 
@@ -30,7 +32,8 @@ TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & paramet
   : TimeStepper(parameters),
     _use_last_dt_after_last_t(getParam<bool>("use_last_dt_after_last_t")),
     _current_step(declareRestartableData<unsigned int>("current_step", 0)),
-    _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence"))
+    _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence")),
+    _set_end_time(getParam<bool>("use_last_t_for_end_time"))
 {
 }
 
@@ -46,24 +49,8 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
   if (!_app.isRecovering())
   {
     // also we need to do something different when restarting
-    if (!_app.isRestarting())
-    {
-      // sync _executioner.startTime and endTime with _time_sequence
-      Real start_time = _executioner.getStartTime();
-      Real end_time = _executioner.endTime();
-
-      // make sure time sequence is in strictly ascending order
-      if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
-        paramError("time_sequence", "Time points must be in strictly ascending order.");
-
-      _time_sequence.push_back(start_time);
-      for (unsigned int j = 0; j < times.size(); ++j)
-      {
-        if (times[j] > start_time && times[j] < end_time)
-          _time_sequence.push_back(times[j]);
-      }
-      _time_sequence.push_back(end_time);
-    }
+    if (!_app.isRestarting() || _time_sequence.empty())
+      updateSequence(times);
     else
     {
       // in case of restart it should be allowed to modify _time_sequence if it follows the
@@ -84,8 +71,17 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
         if (times[j + 1] <= times[j])
           mooseError("time_sequence must be in ascending order.");
 
+      if (times.size() < _current_step + 1)
+        mooseError("The timesequence provided in the restart file must be identical to "
+                   "the one in the old file up to entry number ",
+                   _current_step + 1,
+                   " but there are only ",
+                   times.size(),
+                   " value(s) provided for the timesequence in the restart input.");
+
       // save the restarted time_sequence
       std::vector<Real> saved_time_sequence = _time_sequence;
+
       _time_sequence.clear();
 
       // step 1: fill in the entries up to _current_step
@@ -95,8 +91,13 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
           mooseError("The timesequence provided in the restart file must be identical to "
                      "the one in the old file up to entry number ",
                      _current_step + 1,
-                     " = ",
-                     saved_time_sequence[_current_step]);
+                     " but entry ",
+                     j + 1,
+                     " is ",
+                     times[j],
+                     " in the restart input but ",
+                     saved_time_sequence[j],
+                     " in the restarted input.");
 
         _time_sequence.push_back(saved_time_sequence[j]);
       }
@@ -107,8 +108,17 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
         if (times[j] < end_time)
           _time_sequence.push_back(times[j]);
       }
-      _time_sequence.push_back(end_time);
+
+      if (!_set_end_time)
+        _time_sequence.push_back(end_time);
     }
+  }
+
+  // Set end time to last time in sequence if requested
+  if (_set_end_time)
+  {
+    auto & end_time = _executioner.endTime();
+    end_time = _time_sequence.back();
   }
 
   if (_app.testCheckpointHalfTransient())
@@ -119,11 +129,38 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
 }
 
 void
-TimeSequenceStepperBase::step()
+TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
 {
-  TimeStepper::step();
-  if (converged() && !_executioner.fixedPointSolve().XFEMRepeatStep())
-    _current_step++;
+  Real start_time = _executioner.getStartTime();
+  Real end_time = _executioner.endTime();
+
+  // make sure time sequence is in strictly ascending order
+  if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
+    paramError("time_sequence", "Time points must be in strictly ascending order.");
+
+  _time_sequence.push_back(start_time);
+  for (unsigned int j = 0; j < times.size(); ++j)
+  {
+    if (times[j] > start_time && times[j] <= end_time)
+      _time_sequence.push_back(times[j]);
+  }
+
+  if (!_set_end_time)
+    _time_sequence.push_back(end_time);
+}
+
+void
+TimeSequenceStepperBase::resetSequence()
+{
+  _time_sequence.clear();
+}
+
+void
+TimeSequenceStepperBase::acceptStep()
+{
+  TimeStepper::acceptStep();
+  if (MooseUtils::absoluteFuzzyGreaterEqual(_time, getNextTimeInSequence()))
+    increaseCurrentStep();
 }
 
 Real
@@ -135,8 +172,6 @@ TimeSequenceStepperBase::computeInitialDT()
 Real
 TimeSequenceStepperBase::computeDT()
 {
-  const auto standard_dt = _time_sequence[_current_step + 1] - _time_sequence[_current_step];
-
   if (_use_last_dt_after_last_t)
   {
     // last *provided* time value index; actual last index corresponds to end time
@@ -144,10 +179,10 @@ TimeSequenceStepperBase::computeDT()
     if (_current_step + 1 > last_t_index)
       return _time_sequence[last_t_index] - _time_sequence[last_t_index - 1];
     else
-      return standard_dt;
+      return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
   }
   else
-    return standard_dt;
+    return _time_sequence[_current_step + 1] - _time_sequence[_current_step];
 }
 
 Real

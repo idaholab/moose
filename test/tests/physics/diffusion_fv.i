@@ -21,6 +21,7 @@
     [FiniteVolume]
       [diff]
         source_functor = 2
+        diffusivity_functor = 1
 
         # Test all the ways of setting the boundary conditions
         neumann_boundaries = 'left_to_0 right_to_0 top_to_0 bottom_to_0'
@@ -84,6 +85,7 @@
     type = ElementValueSampler
     variable = 'u'
     sort_by = 'id'
+    execute_on = 'initial timestep_end'
   []
 []
 

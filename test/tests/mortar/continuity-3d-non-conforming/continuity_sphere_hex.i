@@ -20,10 +20,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [T]
     block = '1 2'
@@ -103,8 +99,7 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
 []
 

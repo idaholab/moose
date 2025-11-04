@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -60,13 +60,15 @@ PowerLawCreepStressUpdateTempl<is_ad>::computeStressInitialize(
     const GenericReal<is_ad> & effective_trial_stress,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  using std::exp, std::pow;
+
   RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effective_trial_stress,
                                                                 elasticity_tensor);
 
   if (_temperature)
-    _exponential = std::exp(-_activation_energy / (_gas_constant * (*_temperature)[_qp]));
+    _exponential = exp(-_activation_energy / (_gas_constant * (*_temperature)[_qp]));
 
-  _exp_time = std::pow(_t - _start_time, _m_exponent);
+  _exp_time = pow(_t - _start_time, _m_exponent);
 }
 
 template <bool is_ad>
@@ -75,9 +77,11 @@ ScalarType
 PowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(
     const GenericReal<is_ad> & effective_trial_stress, const ScalarType & scalar)
 {
+  using std::pow;
+
   const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const ScalarType creep_rate =
-      _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _exp_time;
+      _coefficient * pow(stress_delta, _n_exponent) * _exponential * _exp_time;
   return creep_rate * _dt - scalar;
 }
 
@@ -86,10 +90,12 @@ GenericReal<is_ad>
 PowerLawCreepStressUpdateTempl<is_ad>::computeDerivative(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
+  using std::pow;
+
   const GenericReal<is_ad> stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const GenericReal<is_ad> creep_rate_derivative =
-      -_coefficient * _three_shear_modulus * _n_exponent *
-      std::pow(stress_delta, _n_exponent - 1.0) * _exponential * _exp_time;
+      -_coefficient * _three_shear_modulus * _n_exponent * pow(stress_delta, _n_exponent - 1.0) *
+      _exponential * _exp_time;
   return creep_rate_derivative * _dt - 1.0;
 }
 

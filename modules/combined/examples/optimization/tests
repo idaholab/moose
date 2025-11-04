@@ -5,7 +5,7 @@
     type = RunApp
     input = '2d_mbb.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check single material topology optimization "
                   "problem of a bridge structure."
   []
@@ -13,7 +13,7 @@
     type = RunApp
     input = '2d_mbb_pde.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check single material topology optimization "
                   "problem of a bridge structure using a partial differential equation to filter "
                   "displacement compliance sensitivities."
@@ -22,7 +22,7 @@
     type = RunApp
     input = '2d_mbb_pde_amr.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check single material topology optimization "
                   "problem of a bridge structure using a partial differential equation to filter "
                   "displacement compliance sensitivities and using adaptive mesh refinement to "
@@ -32,7 +32,7 @@
     type = RunApp
     input = 'helmholtz_multimat_nostrip.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check a multimaterial topology optimization "
                   "problem of a bridge structure using a partial differential equation to filter "
                   "displacement compliance sensitivities with multiple mesh blocks."
@@ -41,7 +41,7 @@
     type = RunApp
     input = 'helmholtz_multimat_strip.i'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check a multimaterial topology optimization "
                   "problem of a bridge structure using a partial differential equation to filter "
                   "displacement compliance sensitivities with multiple mesh blocks in which one of "
@@ -52,7 +52,7 @@
     input = 'three_materials.i'
     design = 'DensityUpdateTwoConstraints.md'
     check_input = True
-    method = opt
+    capabilities = 'method=opt'
     requirement = "The system shall be able to syntax check a multimaterial topology optimization "
                   "problem of a structure with cost and volume fraction constraints using an ordered "
                   "SIMP approach."

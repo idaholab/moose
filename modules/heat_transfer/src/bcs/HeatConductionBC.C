@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,7 @@ InputParameters
 HeatConductionBC::validParams()
 {
   InputParameters params = FluxBC::validParams();
+  params.addClassDescription("Boundary condition for a diffusive heat flux.");
 
   return params;
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,6 +21,11 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class Assembly;
+
+namespace libMesh
+{
+class QBase;
+}
 
 /**
  * Base class for deriving element dampers
@@ -68,7 +73,7 @@ protected:
   /// Quadrature points
   const MooseArray<Point> & _q_point;
   /// Quadrature rule
-  const QBase * const & _qrule;
+  const libMesh::QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
 

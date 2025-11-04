@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -125,6 +125,12 @@ MultiApp::validParams()
 
   // Set the default execution time
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
+  // Add the POST_ADAPTIVITY execution flag.
+#ifdef LIBMESH_ENABLE_AMR
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on");
+  exec_enum.addAvailableFlags(EXEC_POST_ADAPTIVITY);
+  params.setDocString("execute_on", exec_enum.getDocString());
+#endif
 
   params.addParam<processor_id_type>("max_procs_per_app",
                                      std::numeric_limits<processor_id_type>::max(),
@@ -214,8 +220,23 @@ MultiApp::validParams()
                         false,
                         "This is useful when doing MultiApp coupling iterations. It takes the "
                         "final solution from the previous coupling iteration"
-                        "and re-uses it as the initial guess "
-                        "for the next coupling iteration");
+                        "and re-uses it as the initial guess for the next coupling iteration");
+  params.addParam<bool>("keep_aux_solution_during_restore",
+                        false,
+                        "This is useful when doing MultiApp coupling iterations. It takes the "
+                        "final auxiliary solution from the previous coupling iteration"
+                        "and re-uses it as the initial guess for the next coupling iteration");
+  params.addParam<bool>(
+      "no_restore",
+      false,
+      "True to turn off restore for this multiapp. This is useful when doing steady-state "
+      "Picard iterations where we want to use the solution of previous Picard iteration as the "
+      "initial guess of the current Picard iteration.");
+  params.addParam<unsigned int>(
+      "max_multiapp_level",
+      10,
+      "Integer set by user that will stop the simulation if the multiapp level "
+      "exceeds it. Useful for preventing infinite loops with multiapp simulations");
 
   params.addDeprecatedParam<bool>("clone_master_mesh",
                                   false,
@@ -224,13 +245,13 @@ MultiApp::validParams()
   params.addParam<bool>(
       "clone_parent_mesh", false, "True to clone parent app mesh and use it for this MultiApp.");
 
-  params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<bool>("use_positions", true);
   params.declareControllable("enable");
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
-  params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init", "Advanced");
+  params.addParamNamesToGroup("use_displaced_mesh wait_for_first_app_init max_multiapp_level",
+                              "Advanced");
   params.addParamNamesToGroup("positions positions_file positions_objects run_in_position "
                               "output_in_position",
                               "Positions / transformations of the MultiApp frame of reference");
@@ -238,8 +259,9 @@ MultiApp::validParams()
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
   params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
-                              "keep_solution_during_restore",
-                              "Fixed point acceleration of MultiApp quantities");
+                              "keep_solution_during_restore keep_aux_solution_during_restore "
+                              "no_restore",
+                              "Fixed point iteration");
   params.addParamNamesToGroup("library_name library_path library_load_dependencies",
                               "Dynamic loading");
   params.addParamNamesToGroup("cli_args cli_args_files", "Passing command line argument");
@@ -280,6 +302,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _cli_args(getParam<std::vector<CLIArgString>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _keep_aux_solution_during_restore(getParam<bool>("keep_aux_solution_during_restore")),
+    _no_restore(getParam<bool>("no_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
     _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", this)),
     _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),
@@ -406,7 +430,6 @@ void
 MultiApp::createLocalApp(const unsigned int i)
 {
   createApp(i, _global_time_offset);
-  _app.builder().hitCLIFilter(_apps[i]->name(), _app.commandLine()->getArguments());
 }
 
 void
@@ -456,9 +479,10 @@ MultiApp::readCommandLineArguments()
         MooseUtils::checkFileReadable(cli_args_file);
 
         std::ifstream is(cli_args_file.c_str());
-        std::copy(std::istream_iterator<std::string>(is),
-                  std::istream_iterator<std::string>(),
-                  std::back_inserter(cli_args));
+        // Read by line rather than space separated like the cli_args parameter
+        std::string line;
+        while (std::getline(is, line))
+          cli_args.push_back(line);
 
         // We do not allow empty files
         if (!cli_args.size())
@@ -633,9 +657,12 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
   // Get a transient executioner to get a user-set tolerance
   Real timestep_tol = 1e-13;
-  if (dynamic_cast<Transient *>(_fe_problem.getMooseApp().getExecutioner()))
+  if (dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner()))
     timestep_tol =
-        dynamic_cast<Transient *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
+        dynamic_cast<TransientBase *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
+
+  // Determination on whether we need to backup the app due to changes below
+  bool backup_apps = false;
 
   // First, see if any Apps need to be reset
   for (unsigned int i = 0; i < _reset_times.size(); i++)
@@ -671,6 +698,9 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         if (target_time + timestep_tol >= _reset_times[j])
           _reset_happened[j] = true;
 
+      // Backup in case the next solve fails
+      backup_apps = true;
+
       break;
     }
   }
@@ -681,7 +711,13 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)
       moveApp(_move_apps[i], _move_positions[i]);
+
+    // Backup in case the next solve fails
+    backup_apps = true;
   }
+
+  if (backup_apps)
+    backup();
 }
 
 Executioner *
@@ -753,12 +789,17 @@ MultiApp::restore(bool force)
 
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        _end_solutions[i] = _apps[i]
-                                ->getExecutioner()
-                                ->feProblem()
-                                .getNonlinearSystemBase(/*nl_sys=*/0)
-                                .solution()
-                                .clone();
+        _end_solutions[i].resize(_apps[i]->getExecutioner()->feProblem().numSolverSystems());
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
+             j++)
+        {
+          _end_solutions[i][j] = _apps[i]
+                                     ->getExecutioner()
+                                     ->feProblem()
+                                     .getSolverSystem(/*solver_sys=*/j)
+                                     .solution()
+                                     .clone();
+        }
         auto & sub_multiapps =
             _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects();
 
@@ -767,6 +808,16 @@ MultiApp::restore(bool force)
         for (auto & multi_app : sub_multiapps)
           multi_app->keepSolutionDuringRestore(_keep_solution_during_restore);
       }
+    }
+
+    // We temporarily copy and store solutions for all subapps
+    if (_keep_aux_solution_during_restore)
+    {
+      _end_aux_solutions.resize(_my_num_apps);
+
+      for (unsigned int i = 0; i < _my_num_apps; i++)
+        _end_aux_solutions[i] =
+            _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().solution().clone();
     }
 
     if (_fe_problem.verboseMultiApps())
@@ -787,15 +838,43 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
-        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/0).solution() =
-            *_end_solutions[i];
+        for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
+             j++)
+        {
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).solution() =
+              *_end_solutions[i][j];
 
-        // We need to synchronize solution so that local_solution has the right values
-        _apps[i]->getExecutioner()->feProblem().getNonlinearSystemBase(/*nl_sys=*/0).update();
+          // We need to synchronize solution so that local_solution has the right values
+          _apps[i]->getExecutioner()->feProblem().getSolverSystem(/*solver_sys=*/j).update();
+        }
       }
 
       _end_solutions.clear();
     }
+    // Now copy the latest auxiliary solutions back for each subapp
+    if (_keep_aux_solution_during_restore)
+    {
+      for (unsigned int i = 0; i < _my_num_apps; i++)
+      {
+        _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().solution() =
+            *_end_aux_solutions[i];
+
+        // We need to synchronize solution so that local_solution has the right values
+        _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().update();
+      }
+
+      _end_aux_solutions.clear();
+    }
+
+    // Make sure the displaced mesh on the multiapp is up-to-date with displacement variables
+    for (const auto & app_ptr : _apps)
+      if (app_ptr->feProblem().getDisplacedProblem())
+        app_ptr->feProblem().getDisplacedProblem()->updateMesh();
+
+    // If we are restoring due to a failed solve, make sure reset the solved state in the sub-apps
+    if (!getMooseApp().getExecutioner()->lastSolveConverged())
+      for (auto & app_ptr : _apps)
+        app_ptr->getExecutioner()->fixedPointSolve().clearFixedPointStatus();
   }
   else
   {
@@ -1054,6 +1133,10 @@ MultiApp::parentOutputPositionChanged()
 void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
+  // Delete the old app if we're resetting
+  if (_apps[i])
+    _apps[i].reset();
+
   // Define the app name
   const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
   std::string full_name;
@@ -1068,22 +1151,15 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
   app_params.set<std::unique_ptr<Backup> *>("_initial_backup") = &_sub_app_backups[i];
 
-  // Set the command line parameters with a copy of the main application command line parameters,
-  // the copy is required so that the addArgument command below doesn't accumulate more and more
-  // of the same cli_args, which is important when running in batch mode.
-  std::shared_ptr<CommandLine> app_cli = std::make_shared<CommandLine>(*_app.commandLine());
-
+  // Build the CommandLine with the relevant options for this subapp and add the
+  // cli args from the input file
+  std::vector<std::string> input_cli_args;
   if (cliArgs().size() > 0 || _cli_args_from_file.size() > 0)
-  {
-    for (const std::string & str : MooseUtils::split(getCommandLineArgsParamHelper(i), ";"))
-    {
-      std::ostringstream oss;
-      oss << full_name << ":" << str;
-      app_cli->addArgument(oss.str());
-    }
-  }
-  app_cli->initForMultiApp(full_name);
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
+    input_cli_args = getCommandLineArgs(i);
+  // This will mark all hit CLI command line parameters that are passed to subapps
+  // as used within the parent app (_app)
+  auto app_cli = _app.commandLine()->initSubAppCommandLine(name(), multiapp_name, input_cli_args);
+  app_cli->parse();
 
   if (_fe_problem.verboseMultiApps())
     _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
@@ -1092,12 +1168,19 @@ MultiApp::createApp(unsigned int i, Real start_time)
              << COLOR_DEFAULT << std::endl;
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
+  app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+#ifdef MOOSE_MFEM_ENABLED
+  app_params.set<std::shared_ptr<mfem::Device>>("_mfem_device") =
+      _app.getMFEMDevice(Moose::PassKey<MultiApp>());
+  const auto & mfem_device_set = _app.getMFEMDevices(Moose::PassKey<MultiApp>());
+  app_params.set<std::set<std::string>>("_mfem_devices") = mfem_device_set;
+#endif
   if (getParam<bool>("clone_master_mesh") || getParam<bool>("clone_parent_mesh"))
   {
     if (_fe_problem.verboseMultiApps())
       _console << COLOR_CYAN << "Cloned parent app mesh will be used for MultiApp " << name()
                << COLOR_DEFAULT << std::endl;
-    app_params.set<const MooseMesh *>("_master_mesh") = &_fe_problem.mesh();
+    app_params.set<bool>("_use_master_mesh") = true;
     auto displaced_problem = _fe_problem.getDisplacedProblem();
     if (displaced_problem)
       app_params.set<const MooseMesh *>("_master_displaced_mesh") = &displaced_problem->mesh();
@@ -1109,32 +1192,31 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   // create new parser tree for the application and parse
   auto parser = std::make_unique<Parser>(input_file);
+  parser->setCommandLineParams(app_cli->buildHitParams());
+  parser->parse();
 
-  if (input_file.size())
-  {
-    parser->parse();
-    const auto & app_type = parser->getAppType();
-    if (app_type.empty() && _app_type.empty())
-      mooseWarning("The application type is not specified for ",
-                   full_name,
-                   ". Please use [Application] block to specify the application type.");
-    if (!app_type.empty() && app_type != _app_type &&
-        !AppFactory::instance().isRegistered(app_type))
-      mooseError("In the ",
+  // Checks on app type
+  const auto & app_type = parser->getAppType();
+  if (app_type.empty() && _app_type.empty())
+    mooseWarning("The application type is not specified for ",
                  full_name,
-                 ", '",
-                 app_type,
-                 "' is not a registered application. The registered application is named: '",
-                 _app_type,
-                 "'. Please double check the [Application] block to make sure the correct "
-                 "application is provided. \n");
-  }
+                 ". Please use [Application] block to specify the application type.");
+  if (!app_type.empty() && app_type != _app_type && !AppFactory::instance().isRegistered(app_type))
+    mooseError("In the ",
+               full_name,
+               ", '",
+               app_type,
+               "' is not a registered application. The registered application is named: '",
+               _app_type,
+               "'. Please double check the [Application] block to make sure the correct "
+               "application is provided. \n");
 
   if (parser->getAppType().empty())
     parser->setAppType(_app_type);
 
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
-  _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(app_cli);
+  _apps[i] = AppFactory::instance().create(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
   app->setGlobalTimeOffset(start_time);
@@ -1158,6 +1240,10 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (app->getOutputFileBase().empty())
     setAppOutputFileBase(i);
   preRunInputFile();
+  if (_app.multiAppLevel() > getParam<unsigned int>("max_multiapp_level"))
+    mooseError("Maximum multiapp level has been reached. This is likely caused by an infinite loop "
+               "in your multiapp system. If additional multiapp levels are needed, "
+               "max_multiapp_level can be specified in the MuliApps block.");
 
   // Transfer coupling relaxation information to the subapps
   _apps[i]->fixedPointConfig().sub_relaxation_factor = getParam<Real>("relaxation_factor");
@@ -1187,23 +1273,57 @@ MultiApp::createApp(unsigned int i, Real start_time)
   }
 }
 
-std::string
-MultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
+std::vector<std::string>
+MultiApp::getCommandLineArgs(const unsigned int local_app)
 {
-  auto cla = cliArgs();
+  const auto cla = cliArgs();
+  auto cli_args_param = _cli_args_param;
+  std::string combined_args;
 
-  mooseAssert(cla.size() || _cli_args_from_file.size(), "There is no commandLine argument \n");
-
-  // Single set of "cli_args" to be applied to all sub apps
+  // Single set of args from cliArgs() to be provided to all apps
   if (cla.size() == 1)
-    return cla[0];
+    combined_args = cla[0];
+  // Single "cli_args_files" file to be provided to all apps
   else if (_cli_args_from_file.size() == 1)
-    return _cli_args_from_file[0];
+  {
+    cli_args_param = "cli_args_files";
+    combined_args = _cli_args_from_file[0];
+  }
+  // Unique set of args from cliArgs() to be provided to each app
   else if (cla.size())
-    // Unique set of "cli_args" to be applied to each sub apps
-    return cla[local_app + _first_local_app];
+    combined_args = cla[local_app + _first_local_app];
+  // Unique set of args from "cli_args_files" to be provided to all apps
   else
-    return _cli_args_from_file[local_app + _first_local_app];
+  {
+    cli_args_param = "cli_args_files";
+    combined_args = _cli_args_from_file[local_app + _first_local_app];
+  }
+
+  // Remove all of the beginning and end whitespace so we can recognize truly empty
+  combined_args = MooseUtils::trim(combined_args);
+
+  // MooseUtils::split will return a single empty entry if there is nothing,
+  // so exit early if we have nothing
+  if (combined_args.empty())
+    return {};
+
+  // Split the argument into a vector of arguments, and make sure
+  // that we don't have any empty arguments
+  const auto args = MooseUtils::split(combined_args, ";");
+  for (const auto & arg : args)
+  {
+    if (arg.empty())
+    {
+      const auto error = "An empty MultiApp command line argument was provided. Your "
+                         "combined command line string has a ';' with no argument after it.";
+      if (cli_args_param)
+        paramError(*cli_args_param, error);
+      else
+        mooseError(error);
+    }
+  }
+
+  return args;
 }
 
 LocalRankConfig
@@ -1361,6 +1481,14 @@ MultiApp::setAppOutputFileBase()
 {
   for (unsigned int i = 0; i < _my_num_apps; ++i)
     setAppOutputFileBase(i);
+}
+
+std::vector<std::string>
+MultiApp::cliArgs() const
+{
+  // So that we can error out with paramError("cli_args", ...);
+  _cli_args_param = "cli_args";
+  return std::vector<std::string>(_cli_args.begin(), _cli_args.end());
 }
 
 void

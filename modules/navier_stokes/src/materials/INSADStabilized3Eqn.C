@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,14 +42,15 @@ INSADStabilized3Eqn::INSADStabilized3Eqn(const InputParameters & parameters)
 void
 INSADStabilized3Eqn::computeQpProperties()
 {
+  using std::sqrt;
+
   INSADTauMaterialTempl<INSAD3Eqn>::computeQpProperties();
 
   const auto dissipation_coefficient = _k[_qp] / (_rho[_qp] * _cp[_qp]);
   const auto transient_part = _has_energy_transient ? 4. / (_dt * _dt) : 0.;
-  _tau_energy[_qp] =
-      _alpha / std::sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
-                         9. * (4. * dissipation_coefficient / (_hmax * _hmax)) *
-                             (4. * dissipation_coefficient / (_hmax * _hmax)));
+  _tau_energy[_qp] = _alpha / sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
+                                   9. * (4. * dissipation_coefficient / (_hmax * _hmax)) *
+                                       (4. * dissipation_coefficient / (_hmax * _hmax)));
 
   // Start with the conductive term
   _temperature_strong_residual[_qp] = -_k[_qp] * _second_temperature[_qp].tr();

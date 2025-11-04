@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -41,7 +41,7 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return TaggingExtension(**kwargs)
 
-Tag = tokens.newToken('Tag', attr_name='', path='', key_vals=[])
+Tag = tokens.newToken('Tag', attr_name='', path='', description='', image='', key_vals=[])
 
 class TaggingExtension(command.CommandExtension):
 
@@ -98,9 +98,10 @@ class TaggingExtension(command.CommandExtension):
         # Data dictionary saved as a string
         replace_str = ""
         for iter in self.getAttributeItems():
+            print(iter)
             if bool(re.search('tag_', iter[0])):
                 tag_dict_str=str(iter[1])
-                key_list_regex = ['name', 'path', 'key_vals'] + self._allowed_keys
+                key_list_regex = ['name', 'path', 'image', 'description', 'key_vals'] + self._allowed_keys
                 for entry in key_list_regex:
 
                     # Remove single quotes around entry
@@ -166,11 +167,11 @@ class TaggingExtension(command.CommandExtension):
 
         # Find and replace 'data:' dict structure within supplied javascript template file content,
         # save to javascript file in destination.
-        with open(js_path,'r') as f:
+        with open(js_path,'r', encoding='utf-8') as f:
             content=f.readlines()
             f.close()
-        content[-1]=re.sub('\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
-        with open(js_dest_path, 'w') as f:
+        content[-1]=re.sub(r'\{data:\[\{.+\}\}\]\}',str(replace_str), content[-1])
+        with open(js_dest_path, 'w', encoding='utf-8') as f:
             f.writelines(content)
             f.close()
 
@@ -190,7 +191,7 @@ class TaggingExtension(command.CommandExtension):
                 for key in all_keys:
                     name_key_val_dict[entry].setdefault(key, ' - ')
 
-            with open(csv_path,'w') as f:
+            with open(csv_path,'w', encoding='utf-8') as f:
                 # Write out 'names' (the word) then keys as a header
                 f.write('names,' + ",".join(all_keys) + "\n")
                 for entry in entry_names:
@@ -209,6 +210,8 @@ class TaggingCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         settings['name'] = (None, 'ID name for page and associated key:value category:label pairs.')
         settings['pairs'] = (None, 'Key:value pairs representing categories and page-specific labels for each category.')
+        settings['image'] = (None, 'Link to an image to display for this entry')
+        settings['description'] = (None, 'Description of the entry')
         return settings
 
     def createToken(self, parent, info, page, settings):
@@ -216,6 +219,7 @@ class TaggingCommand(command.CommandComponent):
         Process name and key:value pairs provided in the documentation file, check against
         previously-processed names and keys, and add new data to global attributes.
         """
+        # Process input data
         if settings['name'] is None:
             msg = "%s: No 'name' provided for page and associated tags; check markdown file. " \
                   "This page will not be added to the tag database!"
@@ -229,12 +233,22 @@ class TaggingCommand(command.CommandComponent):
             keylist=''
         else:
             keylist=settings['pairs'].split()
+        # Downstream javascript does not support empty fields
+        if settings['description'] is None:
+            description = settings['name']
+        else:
+            description = settings['description']
+        if settings['image'] is None:
+            image = 'No Image'
+        else:
+            image=settings['image']
         mpath=re.sub(r'^.*?moose/', 'moose/', page.source)
         entry_key_values=[]
         for keys in keylist:
             key_vals=keys.split(':')
             entry_key_values.append([key_vals[0],key_vals[1]])
 
+        # Check keys
         good_keys=[]
         for pair in entry_key_values:
             if pair[0] not in self.extension.allowed_keys and len(self.extension.allowed_keys) > 0:
@@ -247,8 +261,9 @@ class TaggingCommand(command.CommandComponent):
             else:
                 good_keys.append([pair[0], pair[1]])
 
+        # Form tag token
         if len(name) != 0: # Only add to tag database if 'name' is provided
-            page_data = {'name':name, "path":mpath, "key_vals":dict(good_keys)}
+            page_data = {'name':name, "path":mpath, "description":description, "image":image, "key_vals":dict(good_keys)}
 
             tag_id_name = ''
             if self.extension.get_tag_data("tag_" + name):
@@ -259,6 +274,6 @@ class TaggingCommand(command.CommandComponent):
                 tag_id_name = "tag_" + name
                 self.extension.set_tag_data(tag_id_name, page_data)
 
-            Tag(parent, attr_name=tag_id_name, path=mpath, key_vals=dict(good_keys))
+            Tag(parent, attr_name=tag_id_name, path=mpath, description=description, image=image, key_vals=dict(good_keys))
 
         return parent

@@ -1,0 +1,11 @@
+[Tests]
+  [lag_time]
+    type = CSVDiff
+    input = 'lag_time.i'
+    csvdiff = 'lag_time_out.csv'
+
+    design = 'Postprocessors/index.md'
+    issues = '#30394'
+    requirement = 'The system shall restore postprocessor values to their old state when a timestep is repeated.'
+  []
+[]

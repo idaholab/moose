@@ -7,7 +7,7 @@
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
     cli_args = 'Executioner/solve_type=Newton Executioner/matrix_free=true -eps_view'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     expect_out = 'type: moosepc'
     requirement = "Eigen solver should work with a physics-based preconditioner "
   [../]
@@ -17,7 +17,7 @@
     input = 'ne_pbp.i'
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
     cli_args = 'Executioner/solve_type=JFNK -eps_view'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     expect_out = 'type: moosepc'
     prereq = 'newton_pbp'
     requirement = "The system shall support a physics-based preconditioner with using JFNK "
@@ -29,7 +29,7 @@
     csvdiff = 'ne_pbp_out_eigenvalues_0001.csv'
     cli_args = 'Executioner/precond_matrix_free=true -eps_view'
     prereq = 'JFNK_pbp'
-    slepc_version = '>=3.8.0'
+    capabilities = 'slepc>=3.8.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with a shell preconditioning matrix"
   [../]
 
@@ -39,7 +39,7 @@
     cli_args = 'Executioner/precond_matrix_free=true -eps_view'
     prereq = 'newton_pbp_shell_precond'
     expect_out = 'type: shell'
-    petsc_version = '>=3.13.0'
+    capabilities = 'petsc>=3.13.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with a PETSc shell matrix"
   [../]
 
@@ -55,7 +55,7 @@
     # For SLEPc 3.13.0 or newer, we can set initial guess from moose side with right
     # boundary conditions etc. So it still converge to the fundamental mode.
     # SLEPc older than 3.13 can not take initial guess from moose
-    slepc_version = '>=3.13.0'
+    capabilities = 'slepc>=3.13.0'
     requirement = "Eigen solver should work with a physics-based preconditioner with including eigen kernels in the preconditioning matrix"
   [../]
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,23 +29,35 @@ class ADNumericalFlux3EqnHLLC : public ADNumericalFlux3EqnBase, public NaNInterf
 public:
   ADNumericalFlux3EqnHLLC(const InputParameters & parameters);
 
-  virtual void calcFlux(const std::vector<ADReal> & U1,
-                        const std::vector<ADReal> & U2,
-                        const ADReal & nLR_dot_d,
+  virtual void calcFlux(const std::vector<ADReal> & UL,
+                        const std::vector<ADReal> & UR,
+                        const RealVectorValue & nLR,
+                        const RealVectorValue & t1,
+                        const RealVectorValue & t2,
                         std::vector<ADReal> & FL,
                         std::vector<ADReal> & FR) const override;
 
   virtual unsigned int getNumberOfRegions() const override { return 4; }
 
 protected:
+  /// Type for how to compute left and right wave speeds
+  enum class WaveSpeedFormulation
+  {
+    EINFELDT,
+    DAVIS
+  };
+
   /**
    * Computes the flow area that is used in the numerical flux
    */
-  virtual ADReal computeFlowArea(const std::vector<ADReal> & U1,
-                                 const std::vector<ADReal> & U2) const;
+  virtual ADReal computeFlowArea(const std::vector<ADReal> & UL,
+                                 const std::vector<ADReal> & UR) const;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
+
+  /// How to compute left and right wave speeds
+  const WaveSpeedFormulation _wave_speed_formulation;
 
 public:
   static InputParameters validParams();

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,7 +13,6 @@ import re
 from mooseutils.yaml_load import yaml_load
 
 import MooseDocs
-from ..common import exceptions
 from ..tree import tokens
 from . import core, command
 
@@ -76,7 +75,7 @@ class PackageCodeReplace(command.CommandComponent):
         content = info['inline'] if 'inline' in info else info['block']
         content = re.sub(r'__(?P<package>[A-Z][A-Z_]+)__', self._subFunction, content,
                          flags=re.UNICODE)
-        core.Code(parent, style="max-height:{};".format(settings['max-height']),
+        core.Code(parent, style=f'max-height:{settings["max-height"]}',
                   language=settings['language'], content=content)
         return parent
 

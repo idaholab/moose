@@ -87,8 +87,8 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
+[Physics]
+  [./SolidMechanics]
     [./GeneralizedPlaneStrain]
       [./gps]
         displacements = 'disp_x disp_y'

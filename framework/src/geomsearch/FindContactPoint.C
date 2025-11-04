@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,8 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/vector_value.h"
 
+using namespace libMesh;
+
 namespace Moose
 {
 
@@ -33,31 +35,38 @@ namespace Moose
  * @param p_info The penetration info object, contains primary_elem, side, various other information
  * @param fe_elem FE object for the element
  * @param fe_side FE object for the side
- * @param fe_side_type The type of fe_side, needed for inverse_map routines
+ * @param fe_side_type Unused; was used for a now-deprecated
+ * inverse_map overload.
  * @param start_with_centroid if true, start inverse mapping procedure from element centroid
  * @param tangential_tolerance 'tangential' tolerance for determining whether a contact point on a
  * side
  * @param secondary_point The physical space coordinates of the secondary node
  * @param contact_point_on_side whether or not the contact_point actually lies on _that_ side of the
  * element.
+ * @param search_succeeded whether or not the search for the contact point succeeded. If not it
+ * should likely be discarded
  */
 void
 findContactPoint(PenetrationInfo & p_info,
                  FEBase * fe_elem,
                  FEBase * fe_side,
-                 FEType & fe_side_type,
-                 const Point & secondary_point,
+                 FEType & /* fe_side_type */,
+                 const libMesh::Point & secondary_point,
                  bool start_with_centroid,
                  const Real tangential_tolerance,
-                 bool & contact_point_on_side)
+                 bool & contact_point_on_side,
+                 bool & search_succeeded)
 {
+  // Default to true and we'll switch on failures
+  search_succeeded = true;
+
   const Elem * primary_elem = p_info._elem;
 
   unsigned int dim = primary_elem->dim();
 
   const Elem * side = p_info._side;
 
-  const std::vector<Point> & phys_point = fe_side->get_xyz();
+  const std::vector<libMesh::Point> & phys_point = fe_side->get_xyz();
 
   const std::vector<RealGradient> & dxyz_dxi = fe_side->get_dxyzdxi();
   const std::vector<RealGradient> & d2xyz_dxi2 = fe_side->get_d2xyzdxi2();
@@ -73,7 +82,7 @@ findContactPoint(PenetrationInfo & p_info,
     p_info._closest_point = *nearest_node;
     p_info._closest_point_ref =
         primary_elem->master_point(primary_elem->get_node_index(nearest_node));
-    std::vector<Point> elem_points = {p_info._closest_point_ref};
+    std::vector<libMesh::Point> elem_points = {p_info._closest_point_ref};
 
     const std::vector<RealGradient> & elem_dxyz_dxi = fe_elem->get_dxyzdxi();
 
@@ -85,9 +94,9 @@ findContactPoint(PenetrationInfo & p_info,
       p_info._normal *= -1.0;
     p_info._normal /= p_info._normal.norm();
 
-    Point from_secondary_to_closest = p_info._closest_point - secondary_point;
+    libMesh::Point from_secondary_to_closest = p_info._closest_point - secondary_point;
     p_info._distance = from_secondary_to_closest * p_info._normal;
-    Point tangential = from_secondary_to_closest - p_info._distance * p_info._normal;
+    libMesh::Point tangential = from_secondary_to_closest - p_info._distance * p_info._normal;
     p_info._tangential_distance = tangential.norm();
     p_info._dxyzdxi = dxyz_dxi;
     p_info._dxyzdeta = dxyz_deta;
@@ -98,15 +107,14 @@ findContactPoint(PenetrationInfo & p_info,
     return;
   }
 
-  Point ref_point;
+  libMesh::Point ref_point;
 
   if (start_with_centroid)
-    ref_point = FEInterface::inverse_map(
-        dim - 1, fe_side_type, side, side->vertex_average(), TOLERANCE, false);
+    ref_point = FEMap::inverse_map(dim - 1, side, side->vertex_average(), TOLERANCE, false);
   else
     ref_point = p_info._closest_point_ref;
 
-  std::vector<Point> points = {ref_point};
+  std::vector<libMesh::Point> points = {ref_point};
   fe_side->reinit(side, &points);
   RealGradient d = secondary_point - phys_point[0];
 
@@ -116,7 +124,6 @@ findContactPoint(PenetrationInfo & p_info,
   for (unsigned int it = 0; it < 3 && update_size > TOLERANCE * 1e3; ++it)
   {
     DenseMatrix<Real> jac(dim - 1, dim - 1);
-
     jac(0, 0) = -(dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -127,14 +134,12 @@ findContactPoint(PenetrationInfo & p_info,
     }
 
     DenseVector<Real> rhs(dim - 1);
-
     rhs(0) = dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = dxyz_deta[0] * d;
 
     DenseVector<Real> update(dim - 1);
-
     jac.lu_solve(rhs, update);
 
     ref_point(0) -= update(0);
@@ -154,12 +159,13 @@ findContactPoint(PenetrationInfo & p_info,
   unsigned nit = 0;
 
   // Newton Loop
-  for (; nit < 12 && update_size > TOLERANCE * TOLERANCE; nit++)
+  const auto max_newton_its = 25;
+  const auto tolerance_newton = 1e3 * TOLERANCE * TOLERANCE;
+  for (; nit < max_newton_its && update_size > tolerance_newton; nit++)
   {
     d = secondary_point - phys_point[0];
 
     DenseMatrix<Real> jac(dim - 1, dim - 1);
-
     jac(0, 0) = (d2xyz_dxi2[0] * d) - (dxyz_dxi[0] * dxyz_dxi[0]);
 
     if (dim - 1 == 2)
@@ -171,32 +177,75 @@ findContactPoint(PenetrationInfo & p_info,
     }
 
     DenseVector<Real> rhs(dim - 1);
-
     rhs(0) = -dxyz_dxi[0] * d;
 
     if (dim - 1 == 2)
       rhs(1) = -dxyz_deta[0] * d;
 
     DenseVector<Real> update(dim - 1);
-
     jac.lu_solve(rhs, update);
 
-    ref_point(0) += update(0);
+    // Improvised line search in case the update is too large and gets out of the element so bad
+    // that we cannot reinit at the new point
+    Real mult = 1;
+    while (true)
+    {
+      try
+      {
+        ref_point(0) += mult * update(0);
 
-    if (dim - 1 == 2)
-      ref_point(1) += update(1);
+        if (dim - 1 == 2)
+          ref_point(1) += mult * update(1);
 
-    points[0] = ref_point;
-    fe_side->reinit(side, &points);
-    d = secondary_point - phys_point[0];
+        points[0] = ref_point;
+        fe_side->reinit(side, &points);
+        d = secondary_point - phys_point[0];
 
-    update_size = update.l2_norm();
+        // we don't multiply by 'mult' because it is used for convergence
+        update_size = update.l2_norm();
+        break;
+      }
+      catch (libMesh::LogicError & e)
+      {
+        ref_point(0) -= mult * update(0);
+        if (dim - 1 == 2)
+          ref_point(1) -= mult * update(1);
+
+        mult *= 0.5;
+        if (mult < 1e-6)
+        {
+#ifndef NDEBUG
+          mooseWarning("We could not solve for the contact point.", e.what());
+#endif
+          update_size = update.l2_norm();
+          d = (secondary_point - phys_point[0]) * mult;
+          break;
+        }
+      }
+    }
+    // We failed the line search, make sure to trigger the error
+    if (mult < 1e-6)
+    {
+      nit = max_newton_its;
+      update_size = 1;
+      break;
+    }
   }
 
-  /*
-    if (nit == 12 && update_size > TOLERANCE*TOLERANCE)
-      Moose::err<<"Warning!  Newton solve for contact point failed to converge!"<<std::endl;
-  */
+  if (nit == max_newton_its && update_size > tolerance_newton)
+  {
+    search_succeeded = false;
+#ifndef NDEBUG
+    const auto initial_point =
+        start_with_centroid ? side->vertex_average() : ref_point = p_info._closest_point_ref;
+    Moose::err << "Warning!  Newton solve for contact point failed to converge!\nLast update "
+                  "distance was: "
+               << update_size << "\nInitial point guess:   " << initial_point
+               << "\nLast considered point: " << phys_point[0]
+               << "\nThis potential contact pair (face, point) will be discarded." << std::endl;
+#endif
+    return;
+  }
 
   p_info._closest_point_ref = ref_point;
   p_info._closest_point = phys_point[0];
@@ -205,15 +254,16 @@ findContactPoint(PenetrationInfo & p_info,
   if (dim - 1 == 2)
   {
     p_info._normal = dxyz_dxi[0].cross(dxyz_deta[0]);
-    p_info._normal /= p_info._normal.norm();
+    if (!MooseUtils::absoluteFuzzyEqual(p_info._normal.norm(), 0))
+      p_info._normal /= p_info._normal.norm();
   }
   else
   {
     const Node * const * elem_nodes = primary_elem->get_nodes();
-    const Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
-    const Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
+    const libMesh::Point in_plane_vector1 = *elem_nodes[1] - *elem_nodes[0];
+    const libMesh::Point in_plane_vector2 = *elem_nodes[2] - *elem_nodes[0];
 
-    Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
+    libMesh::Point out_of_plane_normal = in_plane_vector1.cross(in_plane_vector2);
     out_of_plane_normal /= out_of_plane_normal.norm();
 
     p_info._normal = dxyz_dxi[0].cross(out_of_plane_normal);
@@ -226,7 +276,7 @@ findContactPoint(PenetrationInfo & p_info,
   if (dot > 0.0)
     p_info._distance = -p_info._distance;
 
-  contact_point_on_side = FEInterface::on_reference_element(ref_point, side->type());
+  contact_point_on_side = side->on_reference_element(ref_point);
 
   p_info._tangential_distance = 0.0;
 
@@ -237,7 +287,7 @@ findContactPoint(PenetrationInfo & p_info,
 
     points[0] = p_info._closest_point_on_face_ref;
     fe_side->reinit(side, &points);
-    Point closest_point_on_face(phys_point[0]);
+    libMesh::Point closest_point_on_face(phys_point[0]);
 
     RealGradient off_face = closest_point_on_face - p_info._closest_point;
     Real tangential_distance = off_face.norm();
@@ -262,7 +312,9 @@ findContactPoint(PenetrationInfo & p_info,
 }
 
 void
-restrictPointToFace(Point & p, const Elem * side, std::vector<const Node *> & off_edge_nodes)
+restrictPointToFace(libMesh::Point & p,
+                    const Elem * side,
+                    std::vector<const Node *> & off_edge_nodes)
 {
   const ElemType t(side->type());
   off_edge_nodes.clear();

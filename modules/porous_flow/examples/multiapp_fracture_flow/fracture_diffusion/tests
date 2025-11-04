@@ -6,6 +6,8 @@
   requirement = "PorousFlow shall provide examples of heat flow in matrix-fracture systems, including an example where the matrix is 2D and the fracture is 1D and the fracture mesh conforms with the matrix mesh, without using a MultiApp approach"
   issues = '#17928'
   design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
+  # Uses a ParsedGenerateSideset
+  mesh_mode = 'replicated'
 []
 [conforming_dirac]
   type = CSVDiff
@@ -14,6 +16,8 @@
   requirement = "PorousFlow shall provide examples of heat flow in matrix-fracture systems, including an example where the matrix is 2D and the fracture is 1D and the fracture mesh conforms with the matrix mesh, using a MultiApp approach"
   issues = '#17928'
   design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
+  # Uses a MultiAppGeometricInterpolationTransfer
+  mesh_mode = 'replicated'
 []
 [non_conforming_dirac]
   type = CSVDiff
@@ -22,5 +26,7 @@
   requirement = "PorousFlow shall provide examples of heat flow in matrix-fracture systems, including an example where the matrix is 2D and the fracture is 1D and the fracture mesh does not conform with the matrix mesh, using a MultiApp approach"
   issues = '#17928'
   design = 'porous_flow/multiapp_fracture_flow_diffusion.md'
+  # Uses a MultiAppGeometricInterpolationTransfer
+  mesh_mode = 'replicated'
 []
 []

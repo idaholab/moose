@@ -7,9 +7,9 @@
     cli_args = '--mesh-only 3d_chimney.e'
     exodiff = '3d_chimney.e'
     recover = false
-    method = '!dbg'
     issues = '#1568'
     requirement = 'The system shall allow writing out the mesh without running a simulation.'
+    capabilities = 'method!=dbg'
   []
 
   [mesh_info]
@@ -17,22 +17,11 @@
     input = 'mesh_only.i'
     cli_args = '--mesh-only info_test.e'
     recover = false
-    method = '!dbg'
     expect_out = 'Mesh Information'
     absent_out = 'Option left: name:--mesh-only'
     issues = '#11917 #11921 #26002'
     requirement = 'The system shall print out information about the mesh when writing out the mesh and avoid emitting petsc warnings in mesh-only mode.'
-  []
-
-  [mesh_only_warning]
-    type = RunApp
-    input = 'mesh_only.i'
-    # Intentional error (not a mesh filename)
-    cli_args = '--mesh-only Outputs/exodus=false'
-    allow_warnings = true
-    expect_out = 'The --mesh-only option should be followed by a file name.'
-    issues = '#1568'
-    requirement = 'The system shall warn when using --mesh-only and there is no clear filename to use'
+    capabilities = 'method!=dbg'
   []
 
   [output_dimension_override]
@@ -41,22 +30,22 @@
     cli_args = '--mesh-only output_dimension.e'
     exodiff = 'output_dimension.e'
     recover = false
-    method = '!dbg'
     issues = '#12757'
     requirement = 'The system shall support overriding output dimension when necessary to store coordinates in higher planes'
+    capabilities = 'method!=dbg'
   []
 
   [mesh_only_checkpoint]
     type = 'CheckFiles'
     input = 'mesh_only.i'
-    cli_args = 'Mesh/parallel_type=distributed --mesh-only 3d_chimney.cpr'
-    check_files = '3d_chimney.cpr/3/split-3-0.cpr 3d_chimney.cpr/3/split-3-1.cpr 3d_chimney.cpr/3/split-3-2.cpr'
+    cli_args = 'Mesh/parallel_type=distributed --mesh-only 3d_chimney.cpa.gz'
+    check_files = '3d_chimney.cpa.gz/3/split-3-0.gz 3d_chimney.cpa.gz/3/split-3-1.gz 3d_chimney.cpa.gz/3/split-3-2.gz 3d_chimney.cpa.gz/meta_data_mesh.rd/data 3d_chimney.cpa.gz/meta_data_mesh.rd/header'
     min_parallel = 3
     max_parallel = 3
     recover = false
-    method = '!dbg'
     issues = '#14312'
     requirement = 'The system shall support writing parallel checkpoint files with --mesh-only'
+    capabilities = 'method!=dbg'
   []
 
   [mesh_only_with_extra_elem_ids]
@@ -65,9 +54,9 @@
     cli_args = '--mesh-only'
     exodiff = 'mesh_only_with_elem_ids_in.e'
     recover = false
-    method = '!dbg'
     issues = '#23386'
     requirement = 'The system shall allow writing out the mesh with extra element ids without running a simulation.'
+    capabilities = 'method!=dbg'
   []
   [mesh_only_with_restricted_elem_ids]
     type = 'Exodiff'
@@ -75,9 +64,9 @@
     cli_args = '--mesh-only mesh_only_with_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="pin_id"'
     exodiff = 'mesh_only_with_elem_ids_in.e'
     recover = false
-    method = '!dbg'
     issues = '#23386'
     requirement = 'The system shall allow writing out the mesh with extra element ids without running a simulation and user-provided id names.'
+    capabilities = 'method!=dbg'
   []
   [mesh_only_with_unrecognized_elem_ids]
     type = 'RunException'
@@ -85,8 +74,57 @@
     cli_args = '--mesh-only mesh_only_without_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="assembly_id"'
     expect_err = "assembly_id defined in Outputs/extra_element_ids_to_output is not defined on the mesh and will be ignored."
     recover = false
-    method = '!dbg'
     issues = '#23386'
     requirement = 'The system shall throw a warning if user-provided extra element id names do not exist on mesh.'
+    capabilities = 'method!=dbg'
+  []
+  [mesh_only_with_check_input]
+    type = 'RunApp'
+    input = 'mesh_only.i'
+    cli_args = '--check-input --mesh-only'
+    expect_out = 'Syntax OK'
+    max_parallel = 1
+    issues = '#29788'
+    requirement = 'The system shall report the successful parsing and interpretation of input file sytax when using the "--check-input" and "--mesh-only" command line flags'
+  []
+  [mesh_only_with_check_input_unused_param]
+    type = 'RunException'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --check-input --mesh-only'
+    expect_err = "unused parameter 'Mesh/extrude/x"
+    issues = '#29788'
+    requirement = 'The system shall throw an error about unused parameters if --mesh-only is used with --check-input'
+    should_crash = true
+    capabilities = 'method!=dbg'
+  []
+  [mesh_only_warning_unused]
+    type = 'RunException'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --mesh-only'
+    expect_err = "unused parameter 'Mesh/extrude/x"
+    recover = false
+    issues = '#14550'
+    requirement = 'The system shall throw a warning if an unused parameter exists in Mesh block in --mesh-only mode'
+    should_crash = true
+    capabilities = 'method!=dbg'
+  []
+  [mesh_only_allow_unused]
+    type = 'Exodiff'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --allow-unused --mesh-only 3d_chimney.e'
+    exodiff = '3d_chimney.e'
+    recover = false
+    issues = '#30370'
+    requirement = 'The system shall allow writing out the mesh without running a simulation when unused parameters exist but the flag to allow unused parameters is turned on.'
+    capabilities = 'method!=dbg'
+  []
+  [mesh_only_with_check_input_allow_unused]
+    type = 'RunApp'
+    input = 'mesh_only.i'
+    cli_args = 'Mesh/extrude/x=5 --allow-unused --check-input --mesh-only'
+    expect_out = 'Syntax OK'
+    max_parallel = 1
+    issues = '#30370'
+    requirement = 'The system shall report the successful parsing and interpretation of input file sytax with unused parameters when using the "--check-input", "--mesh-only", and "--allow-unused" command line flags'
   []
 []

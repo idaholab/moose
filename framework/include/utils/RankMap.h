@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,13 +20,13 @@
  *
  * https://github.com/idaholab/moose/pull/12351
  */
-class RankMap : ParallelObject, PerfGraphInterface
+class RankMap : libMesh::ParallelObject, PerfGraphInterface
 {
 public:
   /**
    * Constructs and fills the map
    */
-  RankMap(const Parallel::Communicator & comm, PerfGraph & perf_graph);
+  RankMap(const libMesh::Parallel::Communicator & comm, PerfGraph & perf_graph);
 
   /**
    * Returns the "hardware ID" (a unique ID given to each physical compute node in the job)

@@ -6,7 +6,7 @@
     input = 'sliding_elastic_blocks_2d.i'
     exodiff = 'sliding_elastic_blocks_2d_out.e'
     custom_cmp = 'sliding_elastic_blocks_2d.cmp'
-    superlu = true
+    capabilities = 'superlu'
     requirement = 'The contact system shall enforce 2D line contact between quads with significant accumulated slip.'
   [../]
   [./sliding_elastic_blocks_2d_tp]
@@ -14,7 +14,7 @@
     input = 'sliding_elastic_blocks_2d_tp.i'
     exodiff = 'sliding_elastic_blocks_2d_tp_out.e'
     custom_cmp = 'sliding_elastic_blocks_2d.cmp'
-    superlu = true
+    capabilities = 'superlu'
     requirement = 'The contact system shall enforce 2D line contact between quads with significant accumulated slip, when formulation selected is tangential_penalty.'
   [../]
 []

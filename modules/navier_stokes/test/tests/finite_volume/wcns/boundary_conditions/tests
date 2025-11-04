@@ -7,7 +7,7 @@
       type = 'Exodiff'
       input = dirichlet_bcs_velocity.i
       exodiff = dirichlet_bcs_velocity_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       recover = false # see #19126
       detail = 'using a velocity postprocessor'
@@ -16,7 +16,7 @@
       type = 'Exodiff'
       input = dirichlet_bcs_mdot.i
       exodiff = dirichlet_bcs_mdot_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       recover = false # see #19126
       detail = 'using a mass flow rate postprocessor'
@@ -30,7 +30,7 @@
       type = 'Exodiff'
       input = flux_bcs_direct.i
       exodiff = flux_bcs_direct_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 3e-9
       recover = false # see #19126
       detail = 'specifying the flux values directly though the flow rates'
@@ -39,7 +39,7 @@
       type = 'Exodiff'
       input = flux_bcs_velocity.i
       exodiff = flux_bcs_velocity_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       recover = false # see #19126
       detail = 'using the inlet velocity to compute the fluxes'
@@ -48,7 +48,7 @@
       type = 'Exodiff'
       input = flux_bcs_velocity-action.i
       exodiff = flux_bcs_velocity-action_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       recover = false # see #19126
       detail = 'using the inlet velocity to compute the fluxes with the NSFV action syntax'
@@ -57,7 +57,7 @@
       type = 'Exodiff'
       input = flux_bcs_mdot.i
       exodiff = flux_bcs_mdot_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       recover = false # see #19126
       detail = 'using the inlet mass flow rate to compute the fluxes'
@@ -66,7 +66,7 @@
       type = 'Exodiff'
       input = flux_bcs_mdot-action.i
       exodiff = flux_bcs_mdot-action_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-9
       recover = false # see #19126
       detail = 'using the inlet mass flow rate to compute the fluxes with NSFVAction syntax'
@@ -75,7 +75,7 @@
       type = 'Exodiff'
       input = flux_bcs_reversal.i
       exodiff = flux_bcs_reversal_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       abs_zero = 1e-6
       recover = false
       detail = 'and correctly handle inflow and outflow boundaries'

@@ -24,6 +24,14 @@ Flags provided to `PorousFlowPorosity` control its evolution.
 - If `chemical = true` then porosity will depend on $M$.  Otherwise that term in
   [eq:poro_evolve] is ignored.
 
+!alert note
+On the parameter `solid_bulk`: Selecting a functor with dependency on a model
+variable $u$ (such as pore pressure) for the parameter `solid_bulk` $K$ in a way
+that $\text{d}K / \text{d}u \neq 0$ without taking further precautions may result in an
+inexact Jacobian matrix, which can lead to convergence problems. These problems
+should not be triggered by a constant solid bulk or a pure dependency on the
+model's time and/or spatial coordinates.
+
 !syntax parameters /Materials/PorousFlowPorosity
 
 !syntax inputs /Materials/PorousFlowPorosity

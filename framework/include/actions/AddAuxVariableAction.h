@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,9 +18,6 @@
 class AddAuxVariableAction : public AddVariableAction
 {
 public:
-  /**
-   * Class constructor
-   */
   static InputParameters validParams();
 
   AddAuxVariableAction(const InputParameters & params);

@@ -24,7 +24,7 @@
     type = 'CheckFiles'
     input = 'tecplot_binary.i'
     check_files = 'tecplot_binary_out_0000.plt tecplot_binary_out_0001.plt'
-    tecplot = true
+    capabilities = 'tecplot'
 
     requirement = "The system shall optionally support writing binary Tecplot files."
   [../]

@@ -100,31 +100,31 @@
 
 [AuxKernels]
   [penalty_normal_pressure_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
   [penalty_frictional_pressure_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
   [penalty_accumulated_slip_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
   [penalty_tangential_vel_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
   [penalty_weighted_gap_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = weighted_gap
     user_object = friction_uo
     contact_quantity = normal_gap
@@ -157,13 +157,13 @@
     block = '1 2 3 4 5 6 7'
   []
   [react_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'
   []
   [react_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_y'
     variable = 'react_y'
@@ -256,10 +256,8 @@
   solve_type = 'PJFNK'
 
   petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15          '
-                        '         1e-5'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15                   1e-5'
 
   line_search = 'none'
 

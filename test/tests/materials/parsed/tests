@@ -1,0 +1,13 @@
+[Tests]
+
+  [parsed_material_with_functors]
+    design = 'ParsedMaterial.md'
+    issues = '#28220'
+    type = 'Exodiff'
+    input = 'parsed_material_with_functors.i'
+    exodiff = 'parsed_material_with_functors_out.e'
+
+    requirement = "The system shall support parsed material property calculations using functors as input."
+  []
+
+[]

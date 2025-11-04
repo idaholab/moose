@@ -65,8 +65,8 @@
   []
 []
 
-[Modules]
-  [TensorMechanics/Master]
+[Physics]
+  [SolidMechanics/QuasiStatic]
     [steel]
       strain = FINITE
       add_variables = false
@@ -135,7 +135,6 @@
   [pressure_left_block]
     type = ADPressure
     variable = disp_x
-    component = 0
     boundary = 'moving_block_left'
     function = '1e4*t*y'
   []

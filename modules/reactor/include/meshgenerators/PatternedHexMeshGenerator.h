@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -63,7 +63,7 @@ protected:
   /// Boundary ID of mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
-  const std::string _external_boundary_name;
+  const BoundaryName _external_boundary_name;
   /// Whether inward interface boundaries are created
   const bool _create_inward_interface_boundaries;
   /// Whether outward interface boundaries are created
@@ -94,6 +94,11 @@ protected:
   const bool _use_interface_boundary_id_shift;
   /// hold user-defined shift values for each pattern cell
   std::vector<std::vector<boundary_id_type>> _interface_boundary_id_shift_pattern;
+  /// Type of quadrilateral elements to be generated in the periphery region
+  QUAD_ELEM_TYPE _boundary_quad_elem_type;
+  /// Whether to allow additional assembly types to be passed to "inputs" parameter without being used in lattice
+  const bool _allow_unused_inputs;
+
   /**
    * Adds background and duct region mesh to stitched hexagon meshes. Note that the function works
    * for single unit hexagon mesh (corner or edge) separately before stitching.

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,7 +29,7 @@ protected:
   /// Name of the function specifying initial condition for wall temperature
   const FunctionName _T_wall_fn_name;
   /// The type of the wall temperature variable
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
 public:
   static InputParameters validParams();

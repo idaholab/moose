@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,10 +14,11 @@
 #include "MooseObjectAction.h"
 #include "QuasiStaticSolidMechanicsPhysics.h"
 #include "Material.h"
+#include "CommonSolidMechanicsAction.h"
 
 #include "BlockRestrictable.h"
 
-#include "HomogenizationConstraint.h"
+#include "HomogenizationInterface.h"
 #include "AddVariableAction.h"
 
 #include "libmesh/string_to_enum.h"
@@ -55,8 +56,8 @@ QuasiStaticSolidMechanicsPhysics::validParams()
   InputParameters params = QuasiStaticSolidMechanicsPhysicsBase::validParams();
   params.addClassDescription("Set up stress divergence kernels with coordinate system aware logic");
 
-  // parameters specified here only appear in the input file sub-blocks of the
-  // Master action, not in the common parameters area
+  // parameters specified here only appear in the input file sub-blocks of the solid mechanics
+  // action, not in the common parameters area
   params.addParam<std::vector<SubdomainName>>("block",
                                               {},
                                               "The list of ids of the blocks (subdomain) "
@@ -106,15 +107,13 @@ QuasiStaticSolidMechanicsPhysics::validParams()
                         "calculator within TMA internally.");
 
   // Homogenization system input
-  MultiMooseEnum constraintType("strain stress");
-  params.addParam<MultiMooseEnum>("constraint_types",
-                                  Homogenization::constraintType,
-                                  "Type of each constraint: "
-                                  "stress or strain.");
-  params.addParam<std::vector<FunctionName>>("targets",
-                                             {},
-                                             "Functions giving the target "
-                                             "values of each constraint.");
+  params.addParam<MultiMooseEnum>(
+      "constraint_types",
+      Homogenization::constraintType,
+      "Type of each constraint: strain, stress, or none. The types are specified in the "
+      "column-major order, and there must be 9 entries in total.");
+  params.addParam<std::vector<FunctionName>>(
+      "targets", {}, "Functions giving the targets to hit for constraint types that are not none.");
 
   params.addParamNamesToGroup("scaling", "Variables");
   params.addParamNamesToGroup("strain_base_name automatic_eigenstrain_names", "Strain");
@@ -382,7 +381,10 @@ QuasiStaticSolidMechanicsPhysics::act()
   // Add variables
   else if (_current_task == "add_variable")
   {
-    if (getParam<bool>("add_variables"))
+    // Add variables here only if the CommonSolidMechanicsAction does not exist.
+    // This happens notably if the QuasiStaticSolidMechanics was created by a meta_action
+    const auto common_actions = _awh.getActions<CommonSolidMechanicsAction>();
+    if (common_actions.empty() && getParam<bool>("add_variables"))
     {
       auto params = _factory.getValidParams("MooseVariable");
       // determine necessary order
@@ -392,6 +394,9 @@ QuasiStaticSolidMechanicsPhysics::act()
       params.set<MooseEnum>("family") = "LAGRANGE";
       if (isParamValid("scaling"))
         params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+
+      // Note how we do not add the block restriction because BISON's meta-actions
+      // currently rely on them not being added.
 
       // Loop through the displacement variables
       for (const auto & disp : _displacements)
@@ -405,10 +410,24 @@ QuasiStaticSolidMechanicsPhysics::act()
     if (_lk_homogenization)
     {
       InputParameters params = _factory.getValidParams("MooseVariable");
-      const std::map<bool, std::vector<unsigned int>> mg_order{{true, {1, 4, 9}},
-                                                               {false, {1, 3, 6}}};
+      const std::map<bool, std::vector<unsigned int>> mg_order_max{{true, {1, 4, 9}},
+                                                                   {false, {1, 3, 6}}};
+      std::size_t mg_order = 0;
+      for (auto i : index_range(_constraint_types))
+      {
+        const auto ctype = static_cast<Homogenization::ConstraintType>(_constraint_types.get(i));
+        if (ctype != Homogenization::ConstraintType::None)
+          mg_order++;
+      }
+      if (mg_order > mg_order_max.at(_lk_large_kinematics)[_ndisp - 1])
+        paramError("constraint_types",
+                   "Number of non-none constraint types must not be greater than ",
+                   mg_order_max.at(_lk_large_kinematics)[_ndisp - 1],
+                   ", but ",
+                   mg_order,
+                   " are provided.");
       params.set<MooseEnum>("family") = "SCALAR";
-      params.set<MooseEnum>("order") = mg_order.at(_lk_large_kinematics)[_ndisp - 1];
+      params.set<MooseEnum>("order") = mg_order;
       auto fe_type = AddVariableAction::feType(params);
       auto var_type = AddVariableAction::variableType(fe_type);
       _problem->addVariable(var_type, _hname, params);
@@ -460,8 +479,9 @@ QuasiStaticSolidMechanicsPhysics::act()
 
       if (_lk_homogenization)
       {
-        params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
-        params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
+        params.set<std::vector<VariableName>>("scalar_variable") = {_hname};
+        params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+        params.set<std::vector<FunctionName>>("targets") = _targets;
       }
 
       _problem->addKernel(ad_prepend + tensor_kernel_type, kernel_name, params);
@@ -476,32 +496,6 @@ QuasiStaticSolidMechanicsPhysics::act()
       _problem->addKernel(ad_prepend + "WeakPlaneStress", wps_kernel_name, params);
     }
   }
-  else if (_current_task == "add_scalar_kernel")
-  {
-    if (_lk_homogenization)
-    {
-      InputParameters params = _factory.getValidParams("HomogenizationConstraintScalarKernel");
-      params.set<NonlinearVariableName>("variable") = _hname;
-      params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
-
-      _problem->addScalarKernel(
-          "HomogenizationConstraintScalarKernel", "HomogenizationConstraints", params);
-    }
-  }
-  else if (_current_task == "add_user_object")
-  {
-    if (_lk_homogenization)
-    {
-      InputParameters params = _factory.getValidParams("HomogenizationConstraint");
-      params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
-      params.set<std::vector<FunctionName>>("targets") = _targets;
-      params.set<bool>("large_kinematics") = _lk_large_kinematics;
-      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-      _problem->addUserObject("HomogenizationConstraint", _integrator_name, params);
-    }
-  }
 }
 
 void
@@ -512,7 +506,13 @@ QuasiStaticSolidMechanicsPhysics::actSubdomainChecks()
   {
     // get subdomain IDs
     for (auto & name : _subdomain_names)
-      _subdomain_ids.insert(_mesh->getSubdomainID(name));
+    {
+      auto id = _mesh->getSubdomainID(name);
+      if (id == Moose::INVALID_BLOCK_ID)
+        paramError("block", "Subdomain \"" + name + "\" not found in mesh.");
+      else
+        _subdomain_ids.insert(id);
+    }
   }
 
   if (_current_task == "validate_coordinate_systems")
@@ -766,7 +766,7 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
 
   // if no value was provided, chose the default CONSTANT
   if (_material_output_order.size() == 0)
-    _material_output_order.push_back("CONSTANT");
+    _material_output_order.setAdditionalValue("CONSTANT");
 
   // For only one order, make all orders the same magnitude
   if (_material_output_order.size() == 1)
@@ -781,7 +781,7 @@ QuasiStaticSolidMechanicsPhysics::verifyOrderAndFamilyOutputs()
 
   // if no value was provided, chose the default MONOMIAL
   if (_material_output_family.size() == 0)
-    _material_output_family.push_back("MONOMIAL");
+    _material_output_family.setAdditionalValue("MONOMIAL");
 
   // For only one family, make all families that value
   if (_material_output_family.size() == 1)
@@ -975,7 +975,8 @@ QuasiStaticSolidMechanicsPhysics::actLagrangianKernelStrain()
 
     params.set<MaterialPropertyName>("homogenization_gradient_name") = _homogenization_strain_name;
     params.set<std::vector<VariableName>>("macro_gradient") = {_hname};
-    params.set<UserObjectName>("homogenization_constraint") = _integrator_name;
+    params.set<MultiMooseEnum>("constraint_types") = _constraint_types;
+    params.set<std::vector<FunctionName>>("targets") = _targets;
 
     _problem->addMaterial(type, name() + "_compute_" + _homogenization_strain_name, params);
   }
@@ -993,7 +994,7 @@ QuasiStaticSolidMechanicsPhysics::actStressDivergenceTensorsStrain()
   {
     std::map<std::pair<Moose::CoordinateSystemType, StrainAndIncrement>, std::string> type_map = {
         {{Moose::COORD_XYZ, StrainAndIncrement::SmallTotal}, "ComputeSmallStrain"},
-        {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalSmallStrain"},
+        {{Moose::COORD_XYZ, StrainAndIncrement::SmallIncremental}, "ComputeIncrementalStrain"},
         {{Moose::COORD_XYZ, StrainAndIncrement::FiniteIncremental}, "ComputeFiniteStrain"},
         {{Moose::COORD_RZ, StrainAndIncrement::SmallTotal}, "ComputeAxisymmetricRZSmallStrain"},
         {{Moose::COORD_RZ, StrainAndIncrement::SmallIncremental},

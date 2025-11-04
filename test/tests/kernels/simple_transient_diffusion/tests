@@ -38,7 +38,6 @@
     requirement = "We shall be able to solve an initially poorly scaled problem by using MOOSE's automatic scaling feature"
     cli_args = 'Executioner/automatic_scaling=true'
     max_parallel = 1 # no parallel svd preconditioner
-    petsc_version = '>=3.9.0'
   []
   [automatic-scaling-done-once-parallel-preconditioner]
     type = Exodiff
@@ -50,7 +49,6 @@
     cli_args = 'Executioner/automatic_scaling=true -pc_type hypre -pc_hypre_type boomeramg'
     prereq = 'automatic-scaling-done-once'
     max_parallel = 2 # Can't reset preallocation in PETSc when there are no dofs on a process
-    petsc_version = '>=3.9.0'
   []
   [cant-solve-large-transient-changes]
     type = RunException
@@ -62,7 +60,6 @@
     requirement = 'We shall not be able to solve a problem where the physics has large changes over time if we only scale once'
     cli_args = "Executioner/automatic_scaling=true Materials/active='function' Executioner/num_steps=10 BCs/right/function='ramp' Outputs/exodus=false"
     max_parallel = 1 # no parallel svd preconditioner
-    petsc_version = '>=3.9.0'
   []
   [automatic-scaling-done-per-time-step]
     type = Exodiff
@@ -74,7 +71,6 @@
     requirement = 'We shall be able to solve a problem where the physics has large changes over time if we scale on every time step'
     cli_args = "Executioner/automatic_scaling=true Executioner/compute_scaling_once=false Materials/active='function' Executioner/num_steps=10 BCs/right/function='ramp' Outputs/file_base=transient"
     max_parallel = 1 # no parallel svd preconditioner
-    petsc_version = '>=3.9.0'
   []
   [automatic-scaling-done-per-time-step-parallel-preconditioner]
     type = Exodiff

@@ -1,16 +1,18 @@
 [Tests]
   issues = '#17472'
   design = 'source/materials/lagrangian/ComputeLagrangianStrain.md'
-  [./cook_small_total]
+  [cook_small_total]
     type = CSVDiff
     input = 'cook_small.i'
     csvdiff = 'cook_small_out.csv'
-    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements for small deformations."
-  [../]
-  [./cook_large_total]
+    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements for small "
+                  "deformations with the updated Lagrangian formulation."
+  []
+  [cook_large_total]
     type = CSVDiff
     input = 'cook_large.i'
     csvdiff = 'cook_large_out.csv'
-    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements for large deformations."
-  [../]
+    requirement = "Stabilized solution matches Cook's solution for stabilized Q4 elements for large "
+                  "deformations with the updated Lagrangian formulation."
+  []
 []

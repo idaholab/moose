@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,18 +44,21 @@ SetupResidualDebugAction::act()
   if (_problem.get() == NULL)
     return;
 
-  if (!_show_var_residual.empty())
-    _problem->getNonlinearSystemBase(/*nl_sys=*/0).debuggingResiduals(true);
-
   // debug variable residuals
   for (const auto & var_name : _show_var_residual)
   {
+    // Get the variable
+    MooseVariableFEBase & var = _problem->getVariable(
+        0, var_name, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD);
+
+    // Turn on variable residual debugging in the system of the variable
+    // TODO: Add linear system support
+    _problem->getNonlinearSystemBase(var.sys().number()).debuggingResiduals(true);
+
     // add aux-variable
     auto order = AddVariableAction::getNonlinearVariableOrders();
     auto family = AddVariableAction::getNonlinearVariableFamilies();
 
-    MooseVariableFEBase & var = _problem->getVariable(
-        0, var_name, Moose::VarKindType::VAR_SOLVER, Moose::VarFieldType::VAR_FIELD_STANDARD);
     auto fe_type = var.feType();
     order = Utility::enum_to_string<Order>(fe_type.order);
     family = Utility::enum_to_string(fe_type.family);

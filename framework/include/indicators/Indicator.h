@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,7 @@
 class MooseMesh;
 class SubProblem;
 class Assembly;
+class SystemBase;
 
 class Indicator : public MooseObject,
                   public BlockRestrictable,
@@ -54,7 +55,7 @@ public:
    * This will allow you to sum up error from multiple places and then do something like take the
    * square root of it in this function.
    */
-  virtual void finalize(){};
+  virtual void finalize() {}
 
   SubProblem & subProblem() { return _subproblem; }
 
@@ -62,6 +63,8 @@ public:
   bool isActive() const { return true; }
 
 protected:
+  /// Whether to use the displaced mesh
+  const bool _use_displaced_mesh;
   SubProblem & _subproblem;
   FEProblemBase & _fe_problem;
   SystemBase & _sys;

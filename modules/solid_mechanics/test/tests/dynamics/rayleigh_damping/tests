@@ -4,7 +4,6 @@
     input = 'rayleigh_hht.i'
     exodiff = 'rayleigh_hht_out.e'
     abs_zero = 1e-09
-    compiler = 'GCC CLANG'
 
     requirement = "The mechanics system shall accurately predict the dynamic response"
                   " of a linear elastic system with both Rayleigh damping and numerical"
@@ -17,7 +16,6 @@
     input = 'rayleigh_hht_ti.i'
     exodiff = 'rayleigh_hht_out.e'
     abs_zero = 1e-09
-    compiler = 'GCC CLANG'
 
     requirement = "The mechanics system shall accurately predict the dynamic response"
                   " of a linear elastic system with both Rayleigh damping and numerical"
@@ -33,7 +31,6 @@
     input = 'rayleigh_newmark.i'
     exodiff = 'rayleigh_newmark_out.e'
     abs_zero = 1e-09
-    compiler = 'GCC CLANG'
 
     requirement = "The mechanics system shall accurately predict the dynamic response"
                   " of a linear elastic system with a constant Rayleigh damping."
@@ -45,7 +42,6 @@
     input = 'rayleigh_newmark_material_dependent.i'
     exodiff = 'rayleigh_newmark_out.e'
     abs_zero = 1e-09
-    compiler = 'GCC CLANG'
     prereq = 'newmark'
 
     requirement = "The mechanics system shall accurately predict the dynamic response"

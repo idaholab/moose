@@ -169,6 +169,7 @@ p_ambient = 1e5
     type = Shaft
     connected_components = 'motor compressor turbine generator'
     initial_speed = ${speed_initial}
+    scaling_factor_omega = 1e-3
   []
   [motor]
     type = ShaftConnectedMotor
@@ -440,11 +441,10 @@ p_ambient = 1e5
 
   end_time = ${t3}
   dt = 0.1
-  abort_on_solve_fail = true
 
   solve_type = NEWTON
   nl_rel_tol = 1e-50
-  nl_abs_tol = 1e-11
+  nl_abs_tol = 1e-10
   nl_max_its = 15
 
   l_tol = 1e-4

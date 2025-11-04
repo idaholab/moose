@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,8 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_sync.h"
 #include "libmesh/remote_elem.h"
+
+using namespace libMesh;
 
 InputParameters
 RayTracingStudy::validParams()
@@ -91,6 +93,12 @@ RayTracingStudy::validParams()
                         "Whether or not to verify the trace intersections in devel and dbg modes. "
                         "Trace intersections are not verified regardless of this parameter in "
                         "optimized modes (opt, oprof).");
+
+  params.addParam<bool>("allow_other_flags_with_prekernels",
+                        false,
+                        "Whether or not to allow the list of execution flags to have PRE_KERNELS "
+                        "mixed with other flags. If this parameter is not set then if PRE_KERNELS "
+                        "is provided it must be the only execution flag.");
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
@@ -193,9 +201,9 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
   }
 
   // Evaluating on residual and Jacobian evaluation
-  if (_execute_enum.contains(EXEC_PRE_KERNELS))
+  if (_execute_enum.isValueSet(EXEC_PRE_KERNELS))
   {
-    if (_execute_enum.size() > 1)
+    if (!getParam<bool>("allow_other_flags_with_prekernels") && _execute_enum.size() > 1)
       paramError("execute_on",
                  "PRE_KERNELS cannot be mixed with any other execution flag.\nThat is, you cannot "
                  "currently "
@@ -248,13 +256,13 @@ RayTracingStudy::initialSetup()
   std::vector<RayKernelBase *> ray_kernels;
   getRayKernels(ray_kernels, 0);
   for (const auto & rkb : ray_kernels)
-    if (dynamic_cast<RayKernel *>(rkb) && !_execute_enum.contains(EXEC_PRE_KERNELS))
+    if (dynamic_cast<RayKernel *>(rkb) && !_execute_enum.isValueSet(EXEC_PRE_KERNELS))
       mooseError("This study has RayKernel objects that contribute to residuals and Jacobians.",
                  "\nIn this case, the study must use the execute_on = PRE_KERNELS");
 
   // Build 1D quadrature rule for along a segment
-  _segment_qrule = QBase::build(
-      QGAUSS, 1, _fe_problem.getNonlinearSystemBase(_sys.number()).getMinQuadratureOrder());
+  _segment_qrule =
+      QBase::build(QGAUSS, 1, _fe_problem.getSystemBase(_sys.number()).getMinQuadratureOrder());
 }
 
 void
@@ -363,12 +371,7 @@ RayTracingStudy::verifyDependenciesExist(const std::vector<RayTracingObject *> &
         }
 
       if (!found)
-        rto->paramError("depends_on",
-                        "The ",
-                        rto->parameters().get<std::string>("_moose_base"),
-                        " '",
-                        dep_name,
-                        "' does not exist");
+        rto->paramError("depends_on", "The ", rto->getBase(), " '", dep_name, "' does not exist");
     }
 }
 

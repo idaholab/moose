@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -41,6 +41,9 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _dchiDdc(isCoupledConstant(_c_name)
                  ? nullptr
                  : &declarePropertyDerivative<RealTensorValue>(_chiD_name, _c_name)),
+    _dchiDdgradc(isCoupledConstant(_c_name)
+                     ? nullptr
+                     : &declarePropertyDerivative<RankThreeTensor>(_chiD_name, "gradc")),
     _Ls_name(getParam<std::string>("solid_mobility")),
     _Ls(declareProperty<Real>(_Ls_name)),
     _Lv_name(getParam<std::string>("void_mobility")),
@@ -53,17 +56,19 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
     _dchidc(getMaterialPropertyDerivative<Real>(_chi_name, _c_name)),
     _dchideta(_op_num),
     _dchiDdeta(_op_num),
+    _dchiDdgradeta(_op_num),
     _GBMobility(getParam<Real>("GBMobility")),
     _GBmob0(getParam<Real>("GBmob0")),
-    _Q(getParam<Real>("Q")),
-    _vals_name(_op_num)
+    _Q(getParam<Real>("Q"))
 {
   for (unsigned int i = 0; i < _op_num; ++i)
   {
-    _vals_name[i] = coupledName("v", i);
     _dchideta[i] = &getMaterialPropertyDerivative<Real>(_chi_name, _vals_name[i]);
     if (!isCoupledConstant(_vals_name[i]))
       _dchiDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_chiD_name, _vals_name[i]);
+    if (!isCoupledConstant(_vals_name[i]))
+      _dchiDdgradeta[i] =
+          &declarePropertyDerivative<RankThreeTensor>(_chiD_name, ("grad" + _vals_name[i]));
   }
 }
 
@@ -77,9 +82,15 @@ GrandPotentialTensorMaterial::computeProperties()
     _chiD[_qp] = _D[_qp] * _chi[_qp];
     if (_dchiDdc)
       (*_dchiDdc)[_qp] = (*_dDdc)[_qp] * _chi[_qp] + _D[_qp] * _dchidc[_qp];
+    if (_dchiDdgradc)
+      (*_dchiDdgradc)[_qp] = (*_dDdgradc)[_qp] * _chi[_qp];
     for (unsigned int i = 0; i < _op_num; ++i)
+    {
       if (_dchiDdeta[i])
-        (*_dchiDdeta[i])[_qp] = _D[_qp] * (*_dchideta[i])[_qp];
+        (*_dchiDdeta[i])[_qp] = _D[_qp] * (*_dchideta[i])[_qp] + (*_dDdeta[i])[_qp] * _chi[_qp];
+      if (_dchiDdgradeta[i])
+        (*_dchiDdgradeta[i])[_qp] = (*_dDdgradeta[i])[_qp] * _chi[_qp];
+    }
 
     _chiDmag[_qp] = _chiD[_qp].norm();
 

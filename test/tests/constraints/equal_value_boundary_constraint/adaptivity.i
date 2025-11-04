@@ -5,6 +5,10 @@
   ny = 6
 []
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Adaptivity]
   marker = 'box'
   [Markers]

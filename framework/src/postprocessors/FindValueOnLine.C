@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -79,6 +79,14 @@ FindValueOnLine::execute()
   Real s_right = 1.0;
   Real right = getValueAtPoint(_end_point);
 
+  // Helper for erroring; won't error if error_if_not_found=false
+  const auto error = [this](auto &&... message)
+  {
+    if (_error_if_not_found)
+      mooseError(std::scientific, std::setprecision(4), message...);
+    _position = _default_value;
+  };
+
   /**
    * Here we determine the direction of the solution. i.e. the left might be the high value
    * while the right might be the low value.
@@ -87,35 +95,19 @@ FindValueOnLine::execute()
   // Initial bounds check
   if ((left_to_right && _target < left) || (!left_to_right && _target < right))
   {
-    if (_error_if_not_found)
-    {
-      mooseError("Target value \"",
-                 _target,
-                 "\" is less than the minimum sampled value \"",
-                 std::min(left, right),
-                 "\"");
-    }
-    else
-    {
-      _position = _default_value;
-      return;
-    }
+    error("Target value ",
+          _target,
+          " is less than the minimum sampled value ",
+          std::min(left, right));
+    return;
   }
   if ((left_to_right && _target > right) || (!left_to_right && _target > left))
   {
-    if (_error_if_not_found)
-    {
-      mooseError("Target value \"",
-                 _target,
-                 "\" is greater than the maximum sampled value \"",
-                 std::max(left, right),
-                 "\"");
-    }
-    else
-    {
-      _position = _default_value;
-      return;
-    }
+    error("Target value ",
+          _target,
+          " is greater than the maximum sampled value ",
+          std::max(left, right));
+    return;
   }
 
   bool found_it = false;
@@ -147,12 +139,15 @@ FindValueOnLine::execute()
 
   // Return error if target value (within tol) was not found within depth bisections
   if (!found_it)
-    mooseError("Target value \"",
-               std::setprecision(10),
-               _target,
-               "\" not found on line within tolerance, last sample: ",
-               value,
-               ".");
+  {
+    error("Target value ",
+          _target,
+          " not found on line within tolerance.\nLast sample: ",
+          value,
+          ", difference from target: ",
+          std::abs(_target - value));
+    return;
+  }
 
   _position = s * _length;
 }
@@ -162,10 +157,11 @@ FindValueOnLine::getValueAtPoint(const Point & p)
 {
   const Elem * elem = (*_pl)(p);
 
-  processor_id_type elem_proc_id = elem ? elem->processor_id() : DofObject::invalid_processor_id;
+  processor_id_type elem_proc_id =
+      elem ? elem->processor_id() : libMesh::DofObject::invalid_processor_id;
   _communicator.min(elem_proc_id);
 
-  if (elem_proc_id == DofObject::invalid_processor_id)
+  if (elem_proc_id == libMesh::DofObject::invalid_processor_id)
   {
     // there is no element
     mooseError("No element found at the current search point. Please make sure the sampling line "

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -53,8 +53,9 @@ HeatStructure2DRadiationCouplerRZBC::HeatStructure2DRadiationCouplerRZBC(
 ADReal
 HeatStructure2DRadiationCouplerRZBC::computeQpResidual()
 {
+  using std::pow;
   const auto T_coupled = computeCoupledTemperature();
   const Real circumference = computeCircumference(_q_point[_qp]);
-  return _sigma * (std::pow(_u[_qp], 4) - std::pow(T_coupled, 4)) / _radiation_resistance *
-         circumference * _test[_i][_qp];
+  return _sigma * (pow(_u[_qp], 4) - pow(T_coupled, 4)) / _radiation_resistance * circumference *
+         _test[_i][_qp];
 }

@@ -42,6 +42,8 @@
 *.blg
 *.spl
 *.idx
+*.mat
+*.info
 traceout*.txt
 temp_print_trace.*
 *.xda
@@ -108,15 +110,17 @@ framework/contrib/libtorch
 test.cache
 
 # Allow certain files in gold directories
-!**/gold/*.e
-!**/gold/*.e-s*
-!**/gold/*.csv
-!**/gold/*.csv.*
-!**/gold/*.vtk
-!**/gold/*.vtu
-!**/gold/*.pvtu
-!**/gold/*.xml*
-!**/gold/*.json*
+!**/gold/**/*.e
+!**/gold/**/*.e-s*
+!**/gold/**/*.csv
+!**/gold/**/*.csv.*
+!**/gold/**/*.vtk
+!**/gold/**/*.vtu
+!**/gold/**/*.pvtu
+!**/gold/**/*.mat
+!**/gold/**/*.info
+!**/gold/**/*.xml*
+!**/gold/**/*.json*
 
 peacock_run_tmp.i
 yaml_dump*
@@ -184,9 +188,9 @@ framework/contrib/asio/
 *.rd-*
 
 # Checkpoint Files
-*.cpa
+*.cpa.gz
 *.cpr
-*.cpa-*
+*.cpa.gz-*
 *.cpr-*
 
 # Ignore petsc arch
@@ -245,6 +249,9 @@ python/peacock/tests/postprocessor_tab/TestPostprocessorPluginManager_test_scrip
 peacock_tmp_diff.exo
 *.e.diff
 
+# Python
+.coverage
+
 # configure
 _configs.sed
 autom4te.cache
@@ -264,8 +271,10 @@ modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/positions
 # Ignore share directory
 share/
 
-# Ignore vscode local parameters
+# Ignore vscode stuff
 .vscode/*
+*.code-workspace
+.cache
 
 # App Resource file (including modules/)
 /test/moose_test.yaml
@@ -296,6 +305,7 @@ share/
 /modules/reactor/reactor.yaml
 /modules/rdg/rdg.yaml
 /modules/fsi/fsi.yaml
+/modules/subchannel/subchannel.yaml
 /unit/moose-unit.yaml
 /modules/functional_expansion_tools/unit/functional_expansion_tools-unit.yaml
 /modules/solid_properties/unit/solid_properties-unit.yaml
@@ -312,6 +322,7 @@ share/
 /modules/ray_tracing/unit/ray_tracing-unit.yaml
 /modules/phase_field/unit/phase_field-unit.yaml
 /modules/heat_transfer/unit/heat_transfer-unit.yaml
+/modules/solid_mechanics/unit/solid_mechanics-unit.yaml
 /modules/tensor_mechanics/unit/tensor_mechanics-unit.yaml
 /modules/richards/unit/richards-unit.yaml
 /modules/level_set/unit/level_set-unit.yaml
@@ -323,6 +334,37 @@ share/
 /modules/reactor/unit/reactor-unit.yaml
 /modules/rdg/unit/rdg-unit.yaml
 /modules/fsi/unit/fsi-unit.yaml
+/modules/subchannel/unit/subchannel-unit.yaml
 /modules/misc/misc.yaml
 /tutorials/tutorial01_app_development/*/babbler.yaml
 /tutorials/darcy_thermo_mech/*/darcy_thermo_mech.yaml
+
+# test harness --sep-files output
+*.runner_run_out.txt
+*.runner_out.txt
+*.tester_out.txt
+*.job_out.txt
+
+# test harness hpc output
+*.hpc_out.txt
+*.hpc_result
+*.hpc_submit
+
+# clangd cache data
+.cache
+
+# MFEM output
+OutputData
+!**/gold/**/OutputData
+!**/gold/**/OutputData/**/*.e
+!**/gold/**/OutputData/**/*.e-s*
+!**/gold/**/OutputData/**/*.csv
+!**/gold/**/OutputData/**/*.csv.*
+!**/gold/**/OutputData/**/*.vtk
+!**/gold/**/OutputData/**/*.vtu
+!**/gold/**/OutputData/**/*.pvtu
+!**/gold/**/OutputData/**/*.xml*
+!**/gold/**/OutputData/**/*.json*
+
+# PETSc binary output
+binaryoutput

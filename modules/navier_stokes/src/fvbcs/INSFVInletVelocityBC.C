@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,8 +17,6 @@ INSFVInletVelocityBC::validParams()
 {
   InputParameters params = FVADFunctorDirichletBC::validParams();
   params += INSFVFlowBC::validParams();
-  params.addParam<FunctionName>("function", "Function (functor) describing the inlet velocity");
-  params.deprecateParam("function", "functor", "01/01/2024");
   return params;
 }
 

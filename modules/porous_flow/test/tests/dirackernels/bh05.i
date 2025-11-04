@@ -6,8 +6,8 @@
   nx = 1
   ny = 1
   nz = 1
-  xmin = 1
-  xmax = 3
+  xmin = -1
+  xmax = 1
   ymin = -1
   ymax = 1
   zmin = -1
@@ -113,7 +113,6 @@
   []
 []
 
-
 [Postprocessors]
   [bh_report]
     type = PorousFlowPlotQuantity
@@ -140,11 +139,10 @@
   [p0]
     type = PointValue
     variable = pp
-    point = '2 0 0'
+    point = '0 0 0'
     execute_on = timestep_end
   []
 []
-
 
 [Functions]
   [mass_bal_fcn]
@@ -164,7 +162,6 @@
     petsc_options_value = 'bcgs bjacobi 1E-10 1E-10 10000 30'
   []
 []
-
 
 [Executioner]
   type = Transient

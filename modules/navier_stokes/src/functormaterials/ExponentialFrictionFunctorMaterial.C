@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -53,7 +53,8 @@ ExponentialFrictionFunctorMaterial::ExponentialFrictionFunctorMaterial(
   addFunctorProperty<ADReal>(_friction_factor_name,
                              [this](const auto & r, const auto & t) -> ADReal
                              {
-                               return _c1 * std::pow(_Re(r, t), _c2) *
+                               using std::pow;
+                               return _c1 * pow(_Re(r, t), _c2) *
                                       (_include_velocity_factor ? (*_speed)(r, t) : ADReal(1.0));
                              });
 }

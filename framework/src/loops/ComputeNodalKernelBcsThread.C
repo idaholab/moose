@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -79,7 +79,10 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
       _fe_problem.reinitNodeFace(node, boundary_id, _tid);
       const auto & objects = _nkernel_warehouse->getActiveBoundaryObjects(boundary_id, _tid);
       for (const auto & nodal_kernel : objects)
+      {
+        nodal_kernel->setSubdomains(Moose::NodeArg::undefined_subdomain_connection);
         nodal_kernel->computeResidual();
+      }
 
       _num_cached++;
     }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -80,6 +80,14 @@ protected:
   bool hasReporterValueByName(const ReporterName & reporter_name) const;
 
   ///@}
+
+  /**
+   * Get the reporter context to allow non-typed operations with the data
+   * @param reporter_name A ReporterName object that for the desired Reporter context.
+   * @returns ReporterContextBase of the reporter value
+   */
+  const ReporterContextBase &
+  getReporterContextBaseByName(const ReporterName & reporter_name) const;
 
   /**
    * @returns The ReporterName associated with the parametre \p param_name.

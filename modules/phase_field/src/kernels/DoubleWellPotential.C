@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,14 +9,14 @@
 
 #include "DoubleWellPotential.h"
 
+registerMooseObject("PhaseFieldApp", DoubleWellPotential);
+
 InputParameters
 DoubleWellPotential::validParams()
 {
-  InputParameters params = KernelValue::validParams();
+  InputParameters params = ACBulk<Real>::validParams();
   params.addClassDescription(
       "Simple demonstration Allen-Cahn Kernel using an algebraic double-well potential");
-  params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
-
   return params;
 }
 

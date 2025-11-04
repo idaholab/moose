@@ -35,7 +35,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
     planar_formulation = PLANE_STRAIN

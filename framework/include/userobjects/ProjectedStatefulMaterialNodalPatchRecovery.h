@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -121,3 +121,13 @@ typedef ProjectedStatefulMaterialNodalPatchRecoveryTempl<RankFourTensor, false>
     ProjectedStatefulMaterialNodalPatchRecoveryRankFourTensor;
 typedef ProjectedStatefulMaterialNodalPatchRecoveryTempl<RankFourTensor, true>
     ADProjectedStatefulMaterialNodalPatchRecoveryRankFourTensor;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<Real, false>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<Real, true>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<RealVectorValue, false>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<RealVectorValue, true>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<RankTwoTensor, false>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<RankTwoTensor, true>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<RankFourTensor, false>;
+extern template class ProjectedStatefulMaterialNodalPatchRecoveryTempl<RankFourTensor, true>;

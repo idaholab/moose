@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -57,7 +57,7 @@ WCNSFVInletVelocityBC::WCNSFVInletVelocityBC(const InputParameters & params)
 }
 
 ADReal
-WCNSFVInletVelocityBC::boundaryValue(const FaceInfo & fi) const
+WCNSFVInletVelocityBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const
 {
   if (_area_pp)
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
@@ -67,7 +67,7 @@ WCNSFVInletVelocityBC::boundaryValue(const FaceInfo & fi) const
     return _scaling_factor * (*_velocity_pp);
   else
   {
-    ADReal rho = (*_rho)(singleSidedFaceArg(&fi), determineState());
+    ADReal rho = (*_rho)(singleSidedFaceArg(&fi), state);
 
     return _scaling_factor * (*_mdot_pp) / (*_area_pp * rho);
   }

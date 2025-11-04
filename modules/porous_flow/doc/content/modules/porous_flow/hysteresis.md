@@ -26,7 +26,7 @@ The order is computed by the [PorousFlowHysteresisOrder](PorousFlowHysteresisOrd
 
 ## Capillary curves
 
-All capillary curves are based on the [van Genuchten](capillary_pressure.md) curve
+All capillary curves are based on the [van Genuchten](porous_flow/capillary_pressure.md) curve
 \begin{equation}
 \label{vg.cap.eqn}
 P_{c}(S_{l}) = \frac{1}{\alpha} \left( S_{\mathrm{eff}}^{n/(1-n)} - 1\right)^{1/n} \ ,
@@ -217,7 +217,7 @@ Assuming the relative permeability values are constant outside the well-defined 
 
 [!citet](doughty2008) recommends extending and modifying the curves in the following ways.
 
-1. There is no hysteresis in the region $S_{l} < S_{l, r}$: the drying curves equal the wetting curves in this region, and if $\mathrm{TP}_{0} < S_{l, r}$ then $\mathrm{TP}_{0} = S_{l, r}$ is used in the wetting curves. 
+1. There is no hysteresis in the region $S_{l} < S_{l, r}$: the drying curves equal the wetting curves in this region, and if $\mathrm{TP}_{0} < S_{l, r}$ then $\mathrm{TP}_{0} = S_{l, r}$ is used in the wetting curves.
 
 2. The gas relative permeability is extended to the region $S_{l} < S_{l, r}$ so that $k_{r, g}(0) = 1$.   Two types of extension are possible in MOOSE.  Both are cubic functions satisfying $k_{r, g}(0) = 1$, $k_{r, g}(S_{l, r}) = k_{r, g}^{max}$ and $k'_{r, g}(0) = 0$:
 

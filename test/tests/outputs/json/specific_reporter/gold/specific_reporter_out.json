@@ -1,0 +1,38 @@
+{
+    "reporters": {
+        "reporter": {
+            "type": "ConstantReporter",
+            "values": {
+                "value1": {
+                    "type": "double"
+                },
+                "value2": {
+                    "type": "double"
+                },
+                "value3": {
+                    "type": "double"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "reporter": {
+                "value1": 1.0,
+                "value2": 2.0,
+                "value3": 3.0
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "reporter": {
+                "value1": 1.0,
+                "value2": 2.0,
+                "value3": 3.0
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,8 @@ GapFluxModelConduction::validParams()
       "by gap_conductivity.");
   params.addCoupledVar("gap_conductivity_function_variable",
                        "Variable to be used in the gap_conductivity_function in place of time");
+  params.addParamNamesToGroup("gap_conductivity_function gap_conductivity_function_variable",
+                              "Gap conductive flux");
   return params;
 }
 

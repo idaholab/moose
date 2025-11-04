@@ -69,7 +69,7 @@ ReplaceEvaler::eval(Field * n, const std::list<std::string> & args, BraceExpande
     }
   }
 
-  exp.errors.push_back(errormsg(n, "no variable '", var, "' found for substitution expression"));
+  exp.errors.emplace_back("no variable '" + var + "' found for substitution expression", n);
   return n->val();
 }
 
@@ -87,7 +87,7 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
 {
   auto f = dynamic_cast<Field *>(n);
   if (!f)
-    throw Error("BraceExpander cannot walk non-Field-type nodes");
+    throw Error("BraceExpander cannot walk non-Field-type nodes", n);
 
   try
   {
@@ -106,7 +106,7 @@ BraceExpander::walk(const std::string & /*fullpath*/, const std::string & /*node
   }
   catch (Error & err)
   {
-    errors.push_back(errormsg(f, err.what()));
+    errors.insert(errors.end(), err.error_messages.begin(), err.error_messages.end());
     return;
   }
 }
@@ -154,7 +154,7 @@ BraceExpander::expand(Field * n, BraceNode & expr)
 
   auto cmd = expanded_args.front();
   if (_evalers.count(cmd) == 0)
-    throw hit::Error("invalid brace-expression command '" + cmd + "'");
+    throw Error("invalid brace-expression command '" + cmd + "'");
   expanded_args.pop_front();
   return _evalers[cmd]->eval(n, expanded_args, *this);
 }

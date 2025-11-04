@@ -142,18 +142,21 @@
 
 [Postprocessors]
   [junction_rho]
-    type = ScalarVariable
-    variable = junction:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
   [junction_rhou]
-    type = ScalarVariable
-    variable = junction:rhouV
+    type = ElementAverageValue
+    variable = rhouV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
   [junction_rhoE]
-    type = ScalarVariable
-    variable = junction:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'junction'
     execute_on = 'initial timestep_end'
   []
 []

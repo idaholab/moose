@@ -5,6 +5,6 @@
     requirement = 'The system shall be able to compute the liquid fraction based on solidus and liquidus temperatures.'
     type = CSVDiff
     input = liquid-fraction-fv-aux.i
-    csvdiff = "liquid-fraction-fv-aux_out_T_0001.csv liquid-fraction-fv-aux_out_fl_0001.csv"
+    csvdiff = "liquid-fraction-fv-aux_out_T_vpp_0001.csv liquid-fraction-fv-aux_out_fl_0001.csv"
   []
 []

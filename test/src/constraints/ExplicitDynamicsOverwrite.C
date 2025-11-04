@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,7 +23,7 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
-registerMooseObject("MooseApp", ExplicitDynamicsOverwrite);
+registerMooseObject("MooseTestApp", ExplicitDynamicsOverwrite);
 
 InputParameters
 ExplicitDynamicsOverwrite::validParams()

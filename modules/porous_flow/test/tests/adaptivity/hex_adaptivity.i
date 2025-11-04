@@ -132,7 +132,6 @@
 []
 
 [Outputs]
-  execute_on = 'final'
   exodus = true
   perf_graph = true
   show = pp

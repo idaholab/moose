@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -184,7 +184,8 @@ TEST_F(PorousFlowDictatorTest, coupleAux)
         std::string(err.what())
             .find(
                 "PorousFlowDictator: AuxVariables variables must not be coupled into the Dictator "
-                "for this is against specification #1984.  Variable number 1 is an AuxVariable.");
+                "for this is against specification #1984.  Variable 'aux_var' is either an "
+                "AuxVariable or from a different nonlinear system.");
     ASSERT_TRUE(pos != std::string::npos);
   }
 }

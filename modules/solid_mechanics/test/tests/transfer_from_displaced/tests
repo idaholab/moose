@@ -3,7 +3,7 @@
   issues = '#22534'
   [test]
     type = Exodiff
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     valgrind = 'none'
     input = parent.i
     exodiff = 'parent_out.e'

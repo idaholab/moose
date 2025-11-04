@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@
 #include "libmesh/mesh.h"
 #include "libmesh/elem.h"
 #include "libmesh/fe.h"
+
+using namespace libMesh;
 
 registerMooseObject("MooseApp", QuadraturePointMultiApp);
 // TODO: Deprecate and use Positions system

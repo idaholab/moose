@@ -1,4 +1,4 @@
-# EqualValueEmbeddedConstraint
+# EqualValueEmbeddedConstraint / ADEqualValueEmbeddedConstraint
 
 !syntax description /Constraints/EqualValueEmbeddedConstraint
 
@@ -16,6 +16,7 @@ Options are available to control how this constraint is applied:
 
 This option strictly enforces value of the solution at the secondary nodes to be equal to the value in the primary element at that point. The constraint is enforced by updating the secondary residual $r_s$ and primary residual $r_m$ as:
 \begin{equation}
+\label{eqn:kinematic}
 \begin{aligned}
 r_s &= r_s + f_c + k_p(u_{secondary} - u_{primary})\\
 r_m &= r_m + \phi_i r_{s,copy}
@@ -34,6 +35,9 @@ r_m &= r_m - \phi_i k_p(u_{secondary} - u_{primary})
 \end{aligned}
 \end{equation}
 where $r_{s,copy}$ is the ghosted residual. The penalty parameter must be selected carefully, as small values lead to large differences between the secondary node's solution and the solution in the primary element, while large values may lead to poor convergence.
+
+!alert warning title=`ADEqualValueEmbeddedConstraint` only works for PENALTY formulation
+Automatic differentation cannot be used to compute Jacobian terms for [!param](/Constraints/ADEqualValueEmbeddedConstraint/formulation) = KINEMATIC because the KINEMATIC implementation enforces the constraint by enforcing the residual value on the secondary node prior to application of the constraint, $r_{s,copy}$ in [!eqref](eqn:kinematic).  This secondary node residual value is a nonAD copy of the residual and cannot be used to compute derivatives for the Jacobian.
 
 !syntax parameters /Constraints/EqualValueEmbeddedConstraint
 

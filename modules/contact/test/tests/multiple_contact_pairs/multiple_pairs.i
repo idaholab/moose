@@ -9,7 +9,7 @@ offset = 1e-2
   file = multiple_pairs.e
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     add_variables = true
     strain = FINITE

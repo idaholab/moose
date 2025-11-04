@@ -5,7 +5,7 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = Test2DRCWalls
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -16,7 +16,7 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = Test2DRCSymmetry
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -27,7 +27,7 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = Test2DRZRCSymmetry
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279

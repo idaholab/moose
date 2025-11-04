@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,8 @@
 #include "libmesh/enum_fe_family.h"
 #include "libmesh/enum_elem_type.h"
 
+#include <variant>
+
 // Forward declarations
 class MultiMooseEnum;
 namespace libMesh
@@ -32,10 +34,10 @@ template <typename T>
 T stringToEnum(const std::string & s);
 
 template <>
-QuadratureType stringToEnum<QuadratureType>(const std::string & s);
+libMesh::QuadratureType stringToEnum<libMesh::QuadratureType>(const std::string & s);
 
 template <>
-Order stringToEnum<Order>(const std::string & s);
+libMesh::Order stringToEnum<libMesh::Order>(const std::string & s);
 
 template <>
 CoordinateSystemType stringToEnum<CoordinateSystemType>(const std::string & s);
@@ -105,6 +107,23 @@ stringify(unsigned long long v)
   return std::to_string(v);
 }
 
+namespace internal
+{
+template <typename T, typename V>
+inline std::string
+stringify_variant(const V & value)
+{
+  return std::holds_alternative<T>(value) ? stringify(std::get<T>(value)) : "";
+}
+}
+
+template <typename... T>
+inline std::string
+stringify(std::variant<T...> v)
+{
+  return (internal::stringify_variant<T>(v) + ...);
+}
+
 /// Convert solve type into human readable string
 std::string stringify(const SolveType & t);
 
@@ -118,7 +137,7 @@ std::string stringify(const VarFieldType & t);
 std::string stringify(const std::string & s);
 
 /// Convert FEType from libMesh into string
-std::string stringify(FEFamily f);
+std::string stringify(libMesh::FEFamily f);
 
 /// Convert SolutionIterationType into string
 std::string stringify(SolutionIterationType t);

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,9 +34,12 @@ PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) : MooseApp(para
 
 PhaseFieldApp::~PhaseFieldApp() {}
 
-static void
-associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
+void
+PhaseFieldApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  Registry::registerObjectsTo(f, {"PhaseFieldApp"});
+  Registry::registerActionsTo(af, {"PhaseFieldApp"});
+
   registerSyntax("BicrystalBoundingBoxICAction", "ICs/PolycrystalICs/BicrystalBoundingBoxIC");
   registerSyntax("BicrystalCircleGrainICAction", "ICs/PolycrystalICs/BicrystalCircleGrainIC");
   registerSyntax("CHPFCRFFSplitKernelAction", "Kernels/CHPFCRFFSplitKernel");
@@ -71,38 +74,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 }
 
 void
-PhaseFieldApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
-{
-  Registry::registerObjectsTo(f, {"PhaseFieldApp"});
-  Registry::registerActionsTo(af, {"PhaseFieldApp"});
-  associateSyntaxInner(s, af);
-}
-
-void
 PhaseFieldApp::registerApps()
 {
   registerApp(PhaseFieldApp);
-}
-
-void
-PhaseFieldApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"PhaseFieldApp"});
-}
-
-void
-PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"PhaseFieldApp"});
-  associateSyntaxInner(syntax, action_factory);
-}
-
-void
-PhaseFieldApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,7 +28,11 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/face_tri3.h"
+#include "libmesh/face_tri6.h"
+#include "libmesh/face_tri7.h"
 #include "libmesh/face_quad4.h"
+#include "libmesh/face_quad8.h"
+#include "libmesh/face_quad9.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/quadrature_nodal.h"
@@ -65,8 +69,8 @@ public:
   {
     auto params = Output::validParams();
     params.addPrivateParam<AutomaticMortarGeneration *>("_amg", nullptr);
-    params.addPrivateParam<MooseApp *>("_moose_app", nullptr);
-    params.set<std::string>("_type") = "MortarNodalGeometryOutput";
+    params.addPrivateParam<MooseApp *>(MooseBase::app_param, nullptr);
+    params.set<std::string>(MooseBase::type_param) = "MortarNodalGeometryOutput";
     return params;
   };
 
@@ -172,7 +176,7 @@ public:
         }
 
       } // end loop over nodes
-    }   // end loop over elems
+    } // end loop over elems
 
     // Finish assembly.
     _nodal_normals_system->solution->close();
@@ -226,7 +230,8 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     _debug(debug),
     _on_displaced(on_displaced),
     _periodic(periodic),
-    _distributed(!_mesh.is_replicated()),
+    // We always ghost the entire mortar interface when it is allowed to displace
+    _distributed(_on_displaced ? false : !_mesh.is_replicated()),
     _correct_edge_dropping(correct_edge_dropping),
     _minimum_projection_angle(minimum_projection_angle)
 {
@@ -252,8 +257,8 @@ AutomaticMortarGeneration::initOutput()
   _output_params = std::make_unique<InputParameters>(MortarNodalGeometryOutput::validParams());
   _output_params->set<AutomaticMortarGeneration *>("_amg") = this;
   _output_params->set<FEProblemBase *>("_fe_problem_base") = &_app.feProblem();
-  _output_params->set<MooseApp *>("_moose_app") = &_app;
-  _output_params->set<std::string>("_object_name") =
+  _output_params->set<MooseApp *>(MooseBase::app_param) = &_app;
+  _output_params->set<std::string>(MooseBase::name_param) =
       "mortar_nodal_geometry_" +
       std::to_string(_primary_secondary_boundary_id_pairs.front().first) +
       std::to_string(_primary_secondary_boundary_id_pairs.front().second) + "_" +
@@ -279,6 +284,8 @@ AutomaticMortarGeneration::clear()
   _secondary_elems_to_mortar_segments.clear();
   _secondary_ip_sub_ids.clear();
   _primary_ip_sub_ids.clear();
+  _projected_secondary_nodes.clear();
+  _failed_secondary_node_projections.clear();
 }
 
 void
@@ -433,6 +440,8 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh()
 {
+  using std::abs;
+
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
 
@@ -491,7 +500,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem->set_unique_id(new_elem->id());
 
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
-      new_elem->set_node(n) = new_nodes[n];
+      new_elem->set_node(n, new_nodes[n]);
 
     Elem * new_elem_ptr = _mortar_segment_mesh->add_elem(new_elem.release());
 
@@ -554,7 +563,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const Elem * secondary_elem = val.second;
 
     // If this is an aligned node, we don't need to do anything.
-    if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
+    if (abs(abs(xi1) - 1.) < _xi_tolerance)
       continue;
 
     auto && order = secondary_elem->default_order();
@@ -707,8 +716,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_left->subdomain_id() = current_mortar_segment->subdomain_id();
     new_elem_left->set_id(local_id_index++);
     new_elem_left->set_unique_id(new_elem_left->id());
-    new_elem_left->set_node(0) = current_mortar_segment->node_ptr(0);
-    new_elem_left->set_node(1) = new_node;
+    new_elem_left->set_node(0, current_mortar_segment->node_ptr(0));
+    new_elem_left->set_node(1, new_node);
 
     // Make an Elem on the right
     std::unique_ptr<Elem> new_elem_right;
@@ -721,8 +730,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_right->subdomain_id() = current_mortar_segment->subdomain_id();
     new_elem_right->set_id(local_id_index++);
     new_elem_right->set_unique_id(new_elem_right->id());
-    new_elem_right->set_node(0) = new_node;
-    new_elem_right->set_node(1) = current_mortar_segment->node_ptr(1);
+    new_elem_right->set_node(0, new_node);
+    new_elem_right->set_node(1, current_mortar_segment->node_ptr(1));
 
     if (order == SECOND)
     {
@@ -745,7 +754,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                   "new_id must be the same on all processes");
       Node * const new_interior_node_left = _mortar_segment_mesh->add_point(
           left_interior_point, new_interior_left_id, new_elem_left->processor_id());
-      new_elem_left->set_node(2) = new_interior_node_left;
+      new_elem_left->set_node(2, new_interior_node_left);
       new_interior_node_left->set_unique_id(new_interior_left_id + node_unique_id_offset);
 
       // right
@@ -766,7 +775,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                   "new_id must be the same on all processes");
       Node * const new_interior_node_right = _mortar_segment_mesh->add_point(
           right_interior_point, new_interior_id_right, new_elem_right->processor_id());
-      new_elem_right->set_node(2) = new_interior_node_right;
+      new_elem_right->set_node(2, new_interior_node_right);
       new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
     }
 
@@ -857,8 +866,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   {
     MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
-    if (primary_elem == nullptr || std::abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
-        std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
+    if (primary_elem == nullptr || abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
+        abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
       // Erase from secondary to msms map
       auto it = _secondary_elems_to_mortar_segments.find(msinfo.secondary_elem->id());
@@ -1133,8 +1142,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       for (auto r : make_range(result_set.size()))
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - center_point).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
+        mooseAssert(abs((_mesh.point(ret_index[r]) - center_point).norm_sq() - out_dist_sqr[r]) <=
+                        TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
         // Get list of elems connected to node
@@ -1262,7 +1271,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // Attach newly created nodes
             for (auto i : index_range(elem_to_node_map[el]))
-              new_elem->set_node(i) = new_nodes[elem_to_node_map[el][i]];
+              new_elem->set_node(i, new_nodes[elem_to_node_map[el][i]]);
 
             // If element is smaller than tolerance, don't add to msm
             if (new_elem->volume() / secondary_volume < TOLERANCE)
@@ -1308,7 +1317,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       if (secondary_to_msm_element_set.empty())
         _secondary_elems_to_mortar_segments.erase(secondary_elem_to_msm_map_it);
     } // End loop through secondary elements
-  }   // End loop through mortar constraint pairs
+  } // End loop through mortar constraint pairs
 
   _mortar_segment_mesh->cache_elem_data();
 
@@ -1485,6 +1494,8 @@ AutomaticMortarGeneration::msmStatistics()
 void
 AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
 {
+  using std::abs;
+
   // Note that in 3D our trick to check whether an element has edge dropping needs loose tolerances
   // since the mortar segments are on the linearized element and comparing the volume of the
   // linearized element does not have the same volume as the warped element
@@ -1516,7 +1527,7 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
     // Loop through all elements on my processor
     for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(pr.second))
       // If elem fully or partially dropped
-      if (std::abs(active_volume[el] / el->volume() - 1.0) > tol)
+      if (abs(active_volume[el] / el->volume() - 1.0) > tol)
       {
         // Add all nodes to list of inactive
         for (auto n : make_range(el->n_nodes()))
@@ -1690,7 +1701,7 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 
     //****
     if (!_correct_edge_dropping)
-      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > tol)
+      if (abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > tol)
         continue;
     //****
 
@@ -1804,6 +1815,8 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
                                                       Point & nodal_tangent_one,
                                                       Point & nodal_tangent_two) const
 {
+  using std::abs;
+
   mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
               "The input nodal normal should have unity norm");
 
@@ -1819,7 +1832,7 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
   // Avoid singularity of the equations at the end of routine by providing the solution to
   // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
   // on a spherical problem.
-  if (std::abs(h_vector(0)) < TOLERANCE)
+  if (abs(h_vector(0)) < TOLERANCE)
   {
     nodal_tangent_one(0) = 0;
     nodal_tangent_one(1) = 1;
@@ -1854,11 +1867,129 @@ AutomaticMortarGeneration::projectSecondaryNodes()
     projectSecondaryNodesSinglePair(pr.first, pr.second);
 }
 
+bool
+AutomaticMortarGeneration::processAlignedNodes(
+    const Node & secondary_node,
+    const Node & primary_node,
+    const std::vector<const Elem *> * secondary_node_neighbors,
+    const std::vector<const Elem *> * primary_node_neighbors,
+    const VectorValue<Real> & nodal_normal,
+    const Elem & candidate_element,
+    std::set<const Elem *> & rejected_elem_candidates)
+{
+  if (!secondary_node_neighbors)
+    secondary_node_neighbors = &libmesh_map_find(_nodes_to_secondary_elem_map, secondary_node.id());
+  if (!primary_node_neighbors)
+    primary_node_neighbors = &libmesh_map_find(_nodes_to_primary_elem_map, primary_node.id());
+
+  std::vector<bool> primary_elems_mapped(primary_node_neighbors->size(), false);
+
+  // Add entries to secondary_node_and_elem_to_xi2_primary_elem container.
+  //
+  // First, determine "on left" vs. "on right" orientation of the nodal neighbors.
+  // There can be a max of 2 nodal neighbors, and we want to make sure that the
+  // secondary nodal neighbor on the "left" is associated with the primary nodal
+  // neighbor on the "left" and similarly for the "right". We use cross products to determine
+  // alignment. In the below diagram, 'x' denotes a node, and connected '|' are lower dimensional
+  // elements.
+  //                   x
+  //           x       |
+  //           |       |
+  // secondary x ----> x primary
+  //           |       |
+  //           |       x
+  //           x
+  //
+  //  Looking at the aligned nodes, the secondary node first, if we pick the top secondary lower
+  //  dimensional element, then the cross product as written a few lines below points out of the
+  //  screen towards you. (Point in the direction of the secondary nodal normal, and then curl your
+  //  hand towards the secondary element's opposite node, then the thumb points in the direction of
+  //  the cross product). Doing the same with the aligned primary node, if we pick the top primary
+  //  element, then the cross product also points out of the screen. Because the cross products
+  //  point in the same direction (positive dot product), then we know to associate the
+  //  secondary-primary element pair. If we had picked the bottom primary element whose cross
+  //  product points into the screen, then clearly the cross products point in the opposite
+  //  direction and we don't have a match
+  std::array<Real, 2> secondary_node_neighbor_cps, primary_node_neighbor_cps;
+
+  for (const auto nn : index_range(*secondary_node_neighbors))
+  {
+    const Elem * const secondary_neigh = (*secondary_node_neighbors)[nn];
+    const Point opposite = (secondary_neigh->node_ptr(0) == &secondary_node)
+                               ? secondary_neigh->point(1)
+                               : secondary_neigh->point(0);
+    const Point cp = nodal_normal.cross(opposite - secondary_node);
+    secondary_node_neighbor_cps[nn] = cp(2);
+  }
+
+  for (const auto nn : index_range(*primary_node_neighbors))
+  {
+    const Elem * const primary_neigh = (*primary_node_neighbors)[nn];
+    const Point opposite = (primary_neigh->node_ptr(0) == &primary_node) ? primary_neigh->point(1)
+                                                                         : primary_neigh->point(0);
+    const Point cp = nodal_normal.cross(opposite - primary_node);
+    primary_node_neighbor_cps[nn] = cp(2);
+  }
+
+  // Associate secondary/primary elems on matching sides.
+  bool found_match = false;
+  for (const auto snn : index_range(*secondary_node_neighbors))
+    for (const auto mnn : index_range(*primary_node_neighbors))
+      if (secondary_node_neighbor_cps[snn] * primary_node_neighbor_cps[mnn] > 0)
+      {
+        found_match = true;
+        if (primary_elems_mapped[mnn])
+          continue;
+        primary_elems_mapped[mnn] = true;
+
+        // Figure out xi^(2) value by looking at which node primary_node is
+        // of the current primary node neighbor.
+        const Real xi2 = (&primary_node == (*primary_node_neighbors)[mnn]->node_ptr(0)) ? -1 : +1;
+        const auto secondary_key =
+            std::make_pair(&secondary_node, (*secondary_node_neighbors)[snn]);
+        const auto primary_val = std::make_pair(xi2, (*primary_node_neighbors)[mnn]);
+        _secondary_node_and_elem_to_xi2_primary_elem.emplace(secondary_key, primary_val);
+
+        // Also map in the other direction.
+        const Real xi1 =
+            (&secondary_node == (*secondary_node_neighbors)[snn]->node_ptr(0)) ? -1 : +1;
+
+        const auto primary_key =
+            std::make_tuple(primary_node.id(), &primary_node, (*primary_node_neighbors)[mnn]);
+        const auto secondary_val = std::make_pair(xi1, (*secondary_node_neighbors)[snn]);
+        _primary_node_and_elem_to_xi1_secondary_elem.emplace(primary_key, secondary_val);
+      }
+
+  if (!found_match)
+  {
+    // There could be coincident nodes and this might be a bad primary candidate (see
+    // issue #21680). Instead of giving up, let's try continuing
+    rejected_elem_candidates.insert(&candidate_element);
+    return false;
+  }
+
+  // We need to handle the case where we've exactly projected a secondary node onto a
+  // primary node, but our secondary node is at one of the secondary boundary face endpoints and
+  // our primary node is not.
+  if (secondary_node_neighbors->size() == 1 && primary_node_neighbors->size() == 2)
+    for (const auto i : index_range(primary_elems_mapped))
+      if (!primary_elems_mapped[i])
+      {
+        _primary_node_and_elem_to_xi1_secondary_elem.emplace(
+            std::make_tuple(primary_node.id(), &primary_node, (*primary_node_neighbors)[i]),
+            std::make_pair(1, nullptr));
+      }
+
+  return found_match;
+}
+
 void
 AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
     SubdomainID lower_dimensional_primary_subdomain_id,
     SubdomainID lower_dimensional_secondary_subdomain_id)
 {
+  using std::abs;
+
   // Build the "subdomain" adaptor based KD Tree.
   NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_primary_subdomain_id);
   subdomain_kd_tree_t kd_tree(
@@ -1944,8 +2075,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann'sFss
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *secondary_node).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
+        mooseAssert(abs((_mesh.point(ret_index[r]) - *secondary_node).norm_sq() -
+                        out_dist_sqr[r]) <= TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
@@ -1963,7 +2094,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             continue;
 
           // Now generically solve for xi2
-          auto && order = primary_elem_candidate->default_order();
+          const auto order = primary_elem_candidate->default_order();
           DualNumber<Real> xi2_dn{0, 1};
           unsigned int current_iterate = 0, max_iterates = 10;
 
@@ -1979,7 +2110,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             const auto u = x2 - (*secondary_node);
             const auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
-            if (std::abs(F) < _newton_tolerance)
+            if (abs(F) < _newton_tolerance)
               break;
 
             if (F.derivatives())
@@ -1999,9 +2130,17 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 
           // Check whether the projection worked. The last condition checks for obliqueness of the
           // projection
-          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + _xi_tolerance) &&
-              (std::abs(
-                   (primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
+          //
+          // We are projecting on one side first and the other side second. If we make the
+          // tolerance bigger and remove the (5) factor we are going to continue to miss the
+          // second projection and fall into the exception message in
+          // projectPrimaryNodesSinglePair. What makes this modification to not fall in the
+          // exception is that we are projecting on one side more xi than in the other. There
+          // should be a better way of doing this by using actual distances and not parametric
+          // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
+          // the trick here.
+          if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + 5 * _xi_tolerance) &&
+              (abs((primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
                    nodal_normal) < std::cos(_minimum_projection_angle * libMesh::pi / 180)))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
@@ -2009,114 +2148,21 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-
-            // We are projecting on one side first and the other side second. If we make the
-            // tolerance bigger and remove the (5) factor we are going to continue to miss the
-            // second projection and fall into the exception message in
-            // projectPrimaryNodesSinglePair. What makes this modification to not fall in the
-            // exception is that we are projecting on one side more xi than in the other. There
-            // should be a better way of doing this by using actual distances and not parametric
-            // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
-            // the trick here.
-            if (std::abs(std::abs(xi2) - 1.) < _xi_tolerance * 5.0)
+            if (abs(abs(xi2) - 1.) <= _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
+              const bool created_mortar_segment =
+                  processAlignedNodes(*secondary_node,
+                                      *primary_node,
+                                      &secondary_node_neighbors,
+                                      nullptr,
+                                      nodal_normal,
+                                      *primary_elem_candidate,
+                                      rejected_primary_elem_candidates);
 
-              const std::vector<const Elem *> & primary_node_neighbors =
-                  _nodes_to_primary_elem_map.at(primary_node->id());
-
-              std::vector<bool> primary_elems_mapped(primary_node_neighbors.size(), false);
-
-              // Add entries to secondary_node_and_elem_to_xi2_primary_elem container.
-              //
-              // First, determine "on left" vs. "on right" orientation of the nodal neighbors.
-              // There can be a max of 2 nodal neighbors, and we want to make sure that the
-              // secondary nodal neighbor on the "left" is associated with the primary nodal
-              // neighbor on the "left" and similarly for the "right".
-              std::vector<Real> secondary_node_neighbor_cps(2), primary_node_neighbor_cps(2);
-
-              // Figure out which secondary side neighbor is on the "left" and which is on the
-              // "right".
-              for (MooseIndex(secondary_node_neighbors) nn = 0;
-                   nn < secondary_node_neighbors.size();
-                   ++nn)
-              {
-                const Elem * secondary_neigh = secondary_node_neighbors[nn];
-                Point opposite = (secondary_neigh->node_ptr(0) == secondary_node)
-                                     ? secondary_neigh->point(1)
-                                     : secondary_neigh->point(0);
-                Point cp = nodal_normal.cross(opposite - *secondary_node);
-                secondary_node_neighbor_cps[nn] = cp(2);
-              }
-
-              // Figure out which primary side neighbor is on the "left" and which is on the
-              // "right".
-              for (MooseIndex(primary_node_neighbors) nn = 0; nn < primary_node_neighbors.size();
-                   ++nn)
-              {
-                const Elem * primary_neigh = primary_node_neighbors[nn];
-                Point opposite = (primary_neigh->node_ptr(0) == primary_node)
-                                     ? primary_neigh->point(1)
-                                     : primary_neigh->point(0);
-                Point cp = nodal_normal.cross(opposite - *secondary_node);
-                primary_node_neighbor_cps[nn] = cp(2);
-              }
-
-              // Associate secondary/primary elems on matching sides.
-              bool found_match = false;
-              for (MooseIndex(secondary_node_neighbors) snn = 0;
-                   snn < secondary_node_neighbors.size();
-                   ++snn)
-                for (MooseIndex(primary_node_neighbors) mnn = 0;
-                     mnn < primary_node_neighbors.size();
-                     ++mnn)
-                  if (secondary_node_neighbor_cps[snn] * primary_node_neighbor_cps[mnn] > 0)
-                  {
-                    found_match = true;
-                    primary_elems_mapped[mnn] = true;
-
-                    // Figure out xi^(2) value by looking at which node primary_node is
-                    // of the current primary node neighbor.
-                    Real xi2 = (primary_node == primary_node_neighbors[mnn]->node_ptr(0)) ? -1 : +1;
-                    auto secondary_key =
-                        std::make_pair(secondary_node, secondary_node_neighbors[snn]);
-                    auto primary_val = std::make_pair(xi2, primary_node_neighbors[mnn]);
-                    _secondary_node_and_elem_to_xi2_primary_elem.emplace(secondary_key,
-                                                                         primary_val);
-
-                    // Also map in the other direction.
-                    Real xi1 =
-                        (secondary_node == secondary_node_neighbors[snn]->node_ptr(0)) ? -1 : +1;
-
-                    auto primary_key = std::make_tuple(
-                        primary_node->id(), primary_node, primary_node_neighbors[mnn]);
-                    auto secondary_val = std::make_pair(xi1, secondary_node_neighbors[snn]);
-                    _primary_node_and_elem_to_xi1_secondary_elem.emplace(primary_key,
-                                                                         secondary_val);
-                  }
-
-              if (!found_match)
-              {
-                // There could be coincident nodes and this might be a bad primary candidate (see
-                // issue #21680). Instead of giving up, let's try continuing
-                rejected_primary_elem_candidates.insert(primary_elem_candidate);
+              if (!created_mortar_segment)
                 continue;
-              }
-
-              // We need to handle the case where we've exactly projected a secondary node onto a
-              // primary node, but our secondary node is at one of the secondary face endpoints and
-              // our primary node is not.
-              if (secondary_node_neighbors.size() == 1 && primary_node_neighbors.size() == 2)
-                for (auto it = primary_elems_mapped.begin(); it != primary_elems_mapped.end(); ++it)
-                  if (*it == false)
-                  {
-                    auto index = std::distance(primary_elems_mapped.begin(), it);
-                    _primary_node_and_elem_to_xi1_secondary_elem.emplace(
-                        std::make_tuple(
-                            primary_node->id(), primary_node, primary_node_neighbors[index]),
-                        std::make_pair(1, nullptr));
-                  }
             }
             else // Point falls somewhere in the middle of the Elem.
             {
@@ -2149,14 +2195,35 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
 
         if (projection_succeeded)
           break; // out of r-loop
-      }          // r-loop
+      } // r-loop
 
-      if (!projection_succeeded && _debug)
-        _console << "Failed to find primary Elem into which secondary node "
-                 << static_cast<const Point &>(*secondary_node) << " was projected." << std::endl
-                 << std::endl;
+      if (!projection_succeeded)
+      {
+        _failed_secondary_node_projections.insert(secondary_node->id());
+        if (_debug)
+          _console << "Failed to find primary Elem into which secondary node "
+                   << static_cast<const Point &>(*secondary_node) << ", id '"
+                   << secondary_node->id() << "', projects onto\n"
+                   << std::endl;
+      }
+      else if (_debug)
+        _projected_secondary_nodes.insert(secondary_node->id());
     } // loop over side nodes
-  }   // end loop over lower-dimensional elements
+  } // end loop over lower-dimensional elements
+
+  if (_distributed)
+  {
+    if (_debug)
+      _mesh.comm().set_union(_projected_secondary_nodes);
+    _mesh.comm().set_union(_failed_secondary_node_projections);
+  }
+
+  if (_debug)
+    _console << "\n"
+             << _projected_secondary_nodes.size() << " out of "
+             << _projected_secondary_nodes.size() + _failed_secondary_node_projections.size()
+             << " secondary nodes were successfully projected\n"
+             << std::endl;
 }
 
 // Inverse map primary nodes onto their corresponding secondary elements for each primary/secondary
@@ -2175,6 +2242,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
     SubdomainID lower_dimensional_primary_subdomain_id,
     SubdomainID lower_dimensional_secondary_subdomain_id)
 {
+  using std::abs;
+
   // Build a Nanoflann object on the lower-dimensional secondary elements of the Mesh.
   NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_secondary_subdomain_id);
   subdomain_kd_tree_t kd_tree(
@@ -2242,8 +2311,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *primary_node).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
+        mooseAssert(abs((_mesh.point(ret_index[r]) - *primary_node).norm_sq() - out_dist_sqr[r]) <=
+                        TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
@@ -2294,7 +2363,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
             const auto F = u(0) * normals(1) - u(1) * normals(0);
 
-            if (std::abs(F) < _newton_tolerance)
+            if (abs(F) < _newton_tolerance)
               break;
 
             // Unlike for projection of nodal normals onto primary surfaces, we should never have a
@@ -2311,22 +2380,43 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
           // Check for convergence to a valid solution... The last condition checks for obliqueness
           // of the projection
-          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance) &&
-              (std::abs((primary_side_elem->point(0) - primary_side_elem->point(1)).unit() *
-                        MetaPhysicL::raw_value(normals).unit()) <
+          if ((current_iterate < max_iterates) && (abs(xi1) <= 1. + _xi_tolerance) &&
+              (abs((primary_side_elem->point(0) - primary_side_elem->point(1)).unit() *
+                   MetaPhysicL::raw_value(normals).unit()) <
                std::cos(_minimum_projection_angle * libMesh::pi / 180.0)))
           {
-            if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
+            if (abs(abs(xi1) - 1.) < _xi_tolerance)
             {
               // Special case: xi1=+/-1.
               // It is unlikely that we get here, because this primary node should already
               // have been mapped during the project_secondary_nodes() routine, but
               // there is still a chance since the tolerances are applied to
               // the xi coordinate and that value may be different on a primary element and a
-              // secondary element since they may have different sizes.
-              throw MooseException("Nodes on primary and secondary surfaces are aligned. This is "
-                                   "causing trouble when identifying projections from secondary "
-                                   "nodes when performing primary node projections.");
+              // secondary element since they may have different sizes. It's also possible that we
+              // may reach this point if the solve has yielded a non-physical configuration such as
+              // one block being pushed way out into space
+              const Node & secondary_node = (xi1 < 0) ? secondary_elem_candidate->node_ref(0)
+                                                      : secondary_elem_candidate->node_ref(1);
+              bool created_mortar_segment = false;
+
+              // If we have failed to project this secondary node, let's try again now
+              if (_failed_secondary_node_projections.count(secondary_node.id()))
+                created_mortar_segment = processAlignedNodes(secondary_node,
+                                                             *primary_node,
+                                                             nullptr,
+                                                             &primary_node_neighbors,
+                                                             MetaPhysicL::raw_value(normals),
+                                                             *secondary_elem_candidate,
+                                                             rejected_secondary_elem_candidates);
+              else
+                rejected_secondary_elem_candidates.insert(secondary_elem_candidate);
+
+              if (!created_mortar_segment)
+                // We used to throw an exception in this scope but now that we support processing
+                // aligned nodes within this primary node projection method, I don't see any harm in
+                // simply rejecting the secondary element candidate in the case of failure and
+                // continuing just as we do when projecting secondary nodes
+                continue;
             }
             else // somewhere in the middle of the Elem
             {
@@ -2362,16 +2452,16 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
         if (projection_succeeded)
           break; // out of r-loop
-      }          // r-loop
+      } // r-loop
 
       if (!projection_succeeded && _debug)
       {
-        _console << "Failed to find point from which primary node "
+        _console << "\nFailed to find point from which primary node "
                  << static_cast<const Point &>(*primary_node) << " was projected." << std::endl
                  << std::endl;
       }
     } // loop over side nodes
-  }   // end loop over elements for finding where primary points would have projected from.
+  } // end loop over elements for finding where primary points would have projected from.
 }
 
 std::vector<AutomaticMortarGeneration::MortarFilterIter>

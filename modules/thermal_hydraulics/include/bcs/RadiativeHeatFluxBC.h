@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,8 @@ public:
 protected:
   virtual Real coefficient() const override;
 
+  /// Emissivity of the boundary
+  const Real _eps_boundary;
   /// View factor function
   const Function & _view_factor_fn;
 

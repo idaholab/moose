@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,7 @@
 #include "FEProblemBase.h"
 #include "DiscreteElementUserObject.h"
 #include "ThreadedGeneralUserObject.h"
+#include "MooseObject.h"
 
 InputParameters
 UserObjectInterface::validParams()
@@ -29,6 +30,16 @@ UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
                  : 0)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+UserObjectInterface::UserObjectInterface(const UserObjectInterface & object,
+                                         const Moose::Kokkos::FunctorCopy &)
+  : _uoi_moose_object(object._uoi_moose_object),
+    _uoi_feproblem(object._uoi_feproblem),
+    _uoi_tid(object._uoi_tid)
+{
+}
+#endif
 
 UserObjectName
 UserObjectInterface::getUserObjectName(const std::string & param_name) const
@@ -76,6 +87,12 @@ UserObjectInterface::hasUserObjectByName(const UserObjectName & object_name) con
 }
 
 const UserObject &
+UserObjectInterface::getUserObjectFromFEProblem(const UserObjectName & object_name) const
+{
+  return _uoi_feproblem.getUserObjectBase(object_name);
+}
+
+const UserObject &
 UserObjectInterface::getUserObjectBase(const std::string & param_name,
                                        const bool is_dependency) const
 {
@@ -113,4 +130,13 @@ const std::string &
 UserObjectInterface::userObjectName(const UserObject & uo) const
 {
   return uo.name();
+}
+
+void
+UserObjectInterface::mooseObjectError(const std::string & param_name, std::stringstream & oss) const
+{
+  if (_uoi_moose_object.parameters().isParamValid(param_name))
+    _uoi_moose_object.paramError(param_name, oss.str());
+  else
+    _uoi_moose_object.mooseError(oss.str());
 }

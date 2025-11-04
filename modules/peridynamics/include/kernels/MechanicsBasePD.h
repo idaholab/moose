@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -64,6 +64,9 @@ protected:
 
   /// Current variable dof numbers for nodes i and j
   std::vector<dof_id_type> _ivardofs;
+
+  /// weights used for the current element to obtain the nodal stress
+  std::vector<Real> _weights;
 
   /// Vector of bond in current configuration
   RealGradient _current_vec;

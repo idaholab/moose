@@ -9,21 +9,47 @@
   []
 
   [allow_solution_invalid]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'solution_invalid.i'
     cli_args = 'Problem/allow_invalid_solution=true'
-    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall allow overriding the solution validity checks.'
   []
 
+  [solution_invalid_warning]
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall be able to count warnings through the solution invalidity interface and report them,'
+    [no_console_output]
+      type = 'RunException'
+      input = 'solution_invalid.i'
+      cli_args = 'Materials/filter/flag_solution_warning=true Problem/show_invalid_solution_console=false'
+      expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/show_invalid_solution_console=true to show solution counts'
+      detail = 'unless the user specifies to silence them,'
+    []
+    [console_output]
+      type = 'RunApp'
+      input = 'solution_invalid.i'
+      cli_args = "Materials/filter/flag_solution_warning=true Outputs/file_base='solution_invalid_warning'"
+      expect_out = "Solution Invalid Warnings:
+------------------------------------------------------------------------------
+|     Object      | Converged | Timestep | Total |          Message          |
+------------------------------------------------------------------------------
+| NonsafeMaterial |        16 |       48 |    48 | Solution invalid warning! |
+------------------------------------------------------------------------------
+"
+      detail = 'and otherwise both in the console window and a json file.'
+    []
+  []
+
   [immediately_print_invalid_solution]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'solution_invalid.i'
     allow_warnings = true
     cli_args = 'Problem/immediately_print_invalid_solution=true'
     expect_out = 'NonsafeMaterial: The diffusivity is greater than the threshold value!'
+    expect_err = 'Aborting as solve did not converge'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output to screen immediately a detailed reason as to why a solution is invalid'
@@ -34,7 +60,9 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
+    should_crash = true
     jsondiff = 'solution_invalid.json'
+    hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file'
@@ -45,8 +73,11 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
+    should_crash = true
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
+    hpc = false # iteration counts can be MPI dependent
+    restep = false # Test will be repeating its own time steps
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
@@ -57,8 +88,10 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
+    should_crash = true
     cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
     jsondiff = 'solution_invalid_parallel.json'
+    hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     min_parallel = 3
     max_parallel = 3
@@ -88,6 +121,10 @@
       type = JSONDiff
       input = solution_invalid_recover.i
       jsondiff = 'solution_invalid_checkpoint.json'
+      hpc = false # iteration counts can be MPI dependent
+      # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
+      # The object is meant to keep its state across failed timesteps, though.
+      restep = false
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
       detail = 'outputting of checkpoint files'
     []
@@ -101,7 +138,48 @@
       cli_args = "--recover solution_invalid_checkpoint_cp/0003 Outputs/file_base='solution_invalid_recover' Executioner/num_steps=4 Outputs/json=true"
       jsondiff = 'solution_invalid_recover.json'
       prereq = 'test/solution_valid_checkpoint'
+      # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
+      # The object is meant to keep its state across failed timesteps, though.
+      restep = false
       detail = 'restarting from the output data'
     []
+  []
+
+  [solution_warning_history]
+    design = 'SolutionInvalidity.md SolutionInvalidityOutput.md'
+    issues = '#29731'
+    requirement = 'The system shall output a time history summary table of all solution warnings in the end of the simulation.'
+    [show_default_solution_warning]
+      type = 'RunApp'
+      input = 'solution_invalid_timehistory.i'
+      detail = "when solution invalid warning is detected and output with default time step interval"
+      expect_out = "Solution Invalid Warnings History:
+      -----------------------------------------------------------------------------------------
+      |                   Object                    | Time | Stepinterval Count | Total Count |
+      -----------------------------------------------------------------------------------------
+      | NonsafeMaterial : Solution invalid warning! | 0-1  |                  0 |           0 |
+      | NonsafeMaterial : Solution invalid warning! | 1-2  |                 48 |          48 |
+      | NonsafeMaterial : Solution invalid warning! | 2-3  |                 48 |          96 |
+      | NonsafeMaterial : Solution invalid warning! | 3-4  |                 48 |         144 |
+      | NonsafeMaterial : Solution invalid warning! | 4-5  |                 48 |         192 |
+      | NonsafeMaterial : Solution invalid warning! | 5-6  |                 48 |         240 |
+      -----------------------------------------------------------------------------------------
+  "
+    []
+    [use_solution_warning_subblock]
+      type = 'RunApp'
+      input = 'solution_invalid_timehistory.i'
+      cli_args = "Outputs/solution_invalidity_history=false Outputs/solution_invalid/type=SolutionInvalidityOutput Outputs/solution_invalid/solution_invalidity_timestep_interval=2"
+      detail = "when user provides a SolutionInvalidityOutput subblock under [Outputs]"
+      expect_out = "Solution Invalid Warnings History:
+-----------------------------------------------------------------------------------------
+|                   Object                    | Time | Stepinterval Count | Total Count |
+-----------------------------------------------------------------------------------------
+| NonsafeMaterial : Solution invalid warning! | 0-2  |                 48 |          48 |
+| NonsafeMaterial : Solution invalid warning! | 1-3  |                 96 |         144 |
+| NonsafeMaterial : Solution invalid warning! | 2-4  |                 96 |         240 |
+-----------------------------------------------------------------------------------------
+  "
+      []
   []
 []

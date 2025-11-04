@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,8 @@
 #include "libmesh/dense_vector.h"
 
 #include "ADReal.h"
+#include "NavierStokesMethods.h"
+#include "HeatTransferUtils.h"
 
 using namespace libMesh;
 
@@ -115,7 +117,7 @@ template <typename T1, typename T2, typename T3, typename T4, typename T5>
 auto
 Reynolds(const T1 & volume_fraction, const T2 & rho, const T3 & vel, const T4 & D_h, const T5 & mu)
 {
-  return volume_fraction * rho * std::fabs(vel) * D_h / mu;
+  return volume_fraction * HeatTransferUtils::reynolds(rho, vel, D_h, mu);
 }
 
 /**
@@ -130,7 +132,7 @@ template <typename T1, typename T2, typename T3>
 auto
 Prandtl(const T1 & cp, const T2 & mu, const T3 & k)
 {
-  return cp * mu / k;
+  return HeatTransferUtils::prandtl(cp, mu, k);
 }
 
 /**
@@ -155,7 +157,8 @@ Peclet(const T1 & volume_fraction,
        const T5 & D_h,
        const T6 & k)
 {
-  return volume_fraction * cp * D_h * rho * std::fabs(vel) / k;
+  const auto diffusivity = HeatTransferUtils::thermalDiffusivity(k, rho, cp);
+  return volume_fraction * HeatTransferUtils::peclet(vel, D_h, diffusivity);
 }
 
 /**
@@ -222,20 +225,7 @@ viscosityNumber(const T1 & viscosity,
          std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_magnitude / delta_rho));
 }
 
-/**
- * Compute wall heat transfer coefficient
- * @param Nu Nusselt number
- * @param k Thermal conductivity
- * @param D_h Hydraulic diameter
- *
- * @return the wall heat transfer coefficient
- */
-template <typename T1, typename T2, typename T3>
-auto
-wallHeatTransferCoefficient(const T1 & Nu, const T2 & k, const T3 & D_h)
-{
-  return Nu * k / D_h;
-}
+using NS::wallHeatTransferCoefficient;
 
 /**
  * Compute Dean number

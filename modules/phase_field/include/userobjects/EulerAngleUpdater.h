@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,8 +51,16 @@ protected:
   const VectorPostprocessorValue & _grain_volumes;
 
   const Real _mr;
-  bool _first_time;
+  /// Whether this is the first time updating angles, in which case the initial euler angle provider should be used
+  bool & _first_time;
+  /// Whether the simulation has recovered once. This only serves to prevent using the old angles in initialize()
+  /// as problem.converged() returns false on the very first initialize() call after recovering
+  bool _first_time_recovered;
+  /// Used to determine whether a timestep is being repeated
+  int & _t_step_old;
 
-  std::vector<EulerAngles> _angles;
-  std::vector<EulerAngles> _angles_old;
+  /// Current set of Euler angles (one per grain), updated on initialize()
+  std::vector<EulerAngles> & _angles;
+  /// Previous set of Euler angles, used when the time step failed to reset the angles (pre-update)
+  std::vector<EulerAngles> & _angles_old;
 };

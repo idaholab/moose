@@ -14,7 +14,12 @@
 #
 # (a) Fluxes are matched from both domains (InterfaceDiffusion kernel)
 #
-# (b) First-order reaction is R = kf*u - kb*v
+# (b) First-order reaction is R = kf*u - kb*v = 0
+#
+# This results in the interfacial conditions
+#
+# -D1 du = -D2 dv
+#   kf*u = kb*v
 #
 # Analytical solution is
 # u = -0.2*u+1,    0<=u<=1

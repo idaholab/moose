@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -39,7 +39,8 @@ protected:
    */
   bool autoTranslationBoundaries();
 
-  void setPeriodicVars(PeriodicBoundaryBase & p, const std::vector<VariableName> & var_names);
+  void setPeriodicVars(libMesh::PeriodicBoundaryBase & p,
+                       const std::vector<VariableName> & var_names);
 
   MooseMesh * _mesh;
 };

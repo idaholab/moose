@@ -14,9 +14,6 @@
   xmin = 0
   xmax = 100
   second_order = true
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 
@@ -104,7 +101,7 @@
     type = SplitCHParsed
     variable = c
     f_name = F
-    args = 'eta'
+    coupled_variables = 'eta'
     kappa_name = kappa_c
     w = w
   [../]
@@ -127,7 +124,7 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta
-    args = 'c'
+    coupled_variables = 'c'
     mob_name = L
     f_name = F
   [../]
@@ -247,14 +244,14 @@
   [./elastic_free_energy_1]
     type = ElasticEnergyMaterial
     f_name = Fe1
-    args = ''
+    coupled_variables = ''
     base_name = phase1
     derivative_order = 2
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
     f_name = Fe2
-    args = ''
+    coupled_variables = ''
     base_name = phase2
     derivative_order = 2
   [../]
@@ -282,7 +279,7 @@
     fa_name = F1
     fb_name = F2
     eta = eta
-    args = 'c'
+    coupled_variables = 'c'
     W = 4
   [../]
 
@@ -299,7 +296,7 @@
     fa_name = Fe1
     fb_name = Fe2
     eta = eta
-    args = 'c'
+    coupled_variables = 'c'
     W = 0
   [../]
 []

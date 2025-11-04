@@ -80,9 +80,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Modules]
-  [TensorMechanics]
-    [Master]
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
       generate_output = 'stress_yy vonmises_stress stress_xy'
       [all]
         strain = FINITE

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,9 +24,8 @@ MemoryUsage::validParams()
   MooseEnum value_type("total average max_process min_process", "total");
   params.addParam<MooseEnum>(
       "value_type", value_type, "Aggregation method to apply to the requested memory metric.");
-  params.addParam<MooseEnum>("mem_units",
-                             MemoryUtils::getMemUnitsEnum(),
-                             "The unit prefix used to report memory usage, default: Mebibytes");
+  params.addParam<MooseEnum>(
+      "mem_units", MemoryUtils::getMemUnitsEnum(), "The unit prefix used to report memory usage.");
   params.addParam<bool>("report_peak_value",
                         true,
                         "If the postprocessor is executed more than once "

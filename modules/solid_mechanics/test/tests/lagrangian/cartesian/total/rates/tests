@@ -8,6 +8,7 @@
     csvdiff = 'truesdell_shear_out.csv'
     requirement = "Classical Truesdell response to pure shear matches known solution"
     abs_zero = 1e-6
+    capabilities = 'method!=dbg'
   []
   [jaumann_shear]
     type = CSVDiff
@@ -16,6 +17,7 @@
     csvdiff = 'jaumann_shear_out.csv'
     requirement = "Classical Jaumann response to pure shear matches known solution"
     abs_zero = 1e-6
+    capabilities = 'method!=dbg'
   []
   [green_naghdi_shear]
     type = CSVDiff
@@ -24,6 +26,7 @@
     csvdiff = 'green_naghdi_shear_out.csv'
     requirement = "Classical Green-Naghdi response to pure shear matches known solution"
     abs_zero = 1e-6
+    capabilities = 'method!=dbg'
   []
   [truesdell_rotation]
     type = CSVDiff

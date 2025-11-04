@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,18 +20,19 @@ registerMooseObject("MooseTestApp", TestSubgenerators);
 InputParameters
 TestSubgenerators::validParams()
 {
-  InputParameters params = StitchedMeshGenerator::validParams();
+  InputParameters params = StitchMeshGenerator::validParams();
 
   params.makeParamNotRequired<std::vector<MeshGeneratorName>>("inputs");
   params.set<std::vector<MeshGeneratorName>>("inputs") = {};
 
   params.addRequiredParam<std::vector<std::string>>("input_files", "The input mesh filenames");
+  params.addPrivateParam<bool>("_check_inputs", false);
 
   return params;
 }
 
 TestSubgenerators::TestSubgenerators(const InputParameters & parameters)
-  : StitchedMeshGenerator(parameters),
+  : StitchMeshGenerator(parameters),
     _input_filenames(getParam<std::vector<std::string>>("input_files"))
 {
   const std::string sg_name_base = name() + "_sub_";

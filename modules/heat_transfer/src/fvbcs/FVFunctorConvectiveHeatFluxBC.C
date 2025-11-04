@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,7 +43,7 @@ FVFunctorConvectiveHeatFluxBC::computeQpResidual()
   // Allow the functors to pick their side evaluation since either T_bulk or T_solid is likely not
   // defined on this boundary condition's side
   const Moose::FaceArg face{
-      _face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
   const auto flux = _htc(face, determineState()) *
                     (_T_bulk(face, determineState()) - _T_solid(face, determineState()));
   if (_is_solid)

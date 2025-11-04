@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,8 +19,8 @@ ElasticEnergyMaterial::validParams()
   InputParameters params = DerivativeFunctionMaterialBase::validParams();
   params.addClassDescription("Free energy material for the elastic energy contributions.");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addCoupledVar("args", "Vector of variable arguments of the free energy function");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of variable arguments of the free energy function");
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "
                        "Modules/PhaseField/DisplacementGradients "

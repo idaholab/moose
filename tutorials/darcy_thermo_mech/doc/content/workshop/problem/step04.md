@@ -42,7 +42,7 @@ occurs in the element interiors.
 
 ## Step 4: Input File
 
-!listing step04_velocity_aux/problems/step4.i
+!listing step04_velocity_aux/problems/step4.i diff=step03_darcy_material/problems/step3.i
 
 !---
 
@@ -60,6 +60,7 @@ cd problems
 ## Step 4: Result
 
 !media darcy_thermo_mech/step04_result.png
+       alt=The pressure and velocity fields obtained by running the simulation above.
 
 !---
 
@@ -73,3 +74,4 @@ cd problems
 ```
 
 !media darcy_thermo_mech/step04_result_tight.png
+       alt=The pressure and velocity fields obtained by running the simulation with smaller tolerances.

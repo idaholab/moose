@@ -1,0 +1,40 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "CrackGrowthReporterBase.h"
+
+/**
+ *  StressCorrosionCrackingExponential is a reporter that computs stress corrosion cracking growth
+ * size and number of cycles
+ */
+class CrackMeshCut3DUserObject;
+class StressCorrosionCrackingExponential : public CrackGrowthReporterBase
+{
+public:
+  static InputParameters validParams();
+  StressCorrosionCrackingExponential(const InputParameters & parameters);
+
+protected:
+  virtual void computeGrowth(std::vector<int> & index) override;
+
+  ///@{ Material specific scc parameters
+  const Real & _k_low;
+  const Real & _k_high;
+  const Real & _growth_rate_mid_multiplier;
+  const Real & _growth_rate_mid_exp_factor;
+  ///@}
+
+  /// timestep size to reach max_growth_increment postprocessor
+  Real & _time_increment;
+
+  /// growth increment reporters
+  std::vector<Real> & _growth_increment;
+};

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ HeatTransferTestApp::validParams()
 
 registerKnownLabel("HeatTransferTestApp");
 
-HeatTransferTestApp::HeatTransferTestApp(InputParameters parameters) : MooseApp(parameters)
+HeatTransferTestApp::HeatTransferTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   HeatTransferTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +44,8 @@ HeatTransferTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 HeatTransferTestApp::registerApps()
 {
-  registerApp(HeatTransferApp);
+  HeatTransferApp::registerApps();
   registerApp(HeatTransferTestApp);
-}
-
-void
-HeatTransferTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"HeatTransferTestApp"});
-}
-
-void
-HeatTransferTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"HeatTransferTestApp"});
-}
-
-void
-HeatTransferTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

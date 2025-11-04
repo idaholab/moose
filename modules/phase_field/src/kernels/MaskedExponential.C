@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,8 +23,8 @@ MaskedExponential::validParams()
       "mask", "hm", "Mask function that specifies where this kernel is active");
   params.addRequiredParam<MaterialPropertyName>("n_eq", "Equilibrium defect concentration");
   params.addRequiredParam<int>("species_charge", "Charge of species this kernel is being used for");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments this object depends on");
   return params;
 }
 

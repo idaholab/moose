@@ -3,7 +3,7 @@
 This is the auxiliary kernel used to compute the dynamic turbulent viscosity
 
 \begin{equation}
-\mu_t = \rho C_{\mu} \frac{k^2}{\epsilon} \,,
+\mu_t = \rho C_{\mu} k T_e \,,
 \end{equation}
 
 where:
@@ -12,6 +12,7 @@ where:
 - $C_{\mu} = 0.09$ is a closure parameter,
 - $k$ is the turbulent kinetic energy,
 - $\epsilon$ is the turbulent kinetic energy dissipation rate.
+- $T_e = max( \frac{k}{\epsilon} , \sqrt(\frac{\nu}{\epsilon}) )$.
 
 By setting parameter [!param](/AuxKernels/kEpsilonViscosityAux/bulk_wall_treatment) to `true`, the
 kernel allows us to set the value of the cells on the boundaries specified in

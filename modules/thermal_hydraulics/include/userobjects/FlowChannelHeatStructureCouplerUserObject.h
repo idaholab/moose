@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,11 +11,13 @@
 
 #include "ElementUserObject.h"
 #include "MeshAlignment.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for caching quantities computed between flow channels and heat structures.
  */
-class FlowChannelHeatStructureCouplerUserObject : public ElementUserObject
+class FlowChannelHeatStructureCouplerUserObject : public ElementUserObject,
+                                                  public ADFunctorInterface
 {
 public:
   FlowChannelHeatStructureCouplerUserObject(const InputParameters & parameters);

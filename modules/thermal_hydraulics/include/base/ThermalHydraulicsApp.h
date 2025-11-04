@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -39,6 +39,7 @@ extern FlowModelID FM_INVALID;
 extern FlowModelID FM_SINGLE_PHASE;
 extern FlowModelID FM_TWO_PHASE;
 extern FlowModelID FM_TWO_PHASE_NCG;
+extern FlowModelID FM_GAS_MIX;
 
 // This is the upper limit on variable length given by exodusII
 static const size_t MAX_VARIABLE_LENGTH = 31;
@@ -48,28 +49,8 @@ static const size_t MAX_VARIABLE_LENGTH = 31;
 class ThermalHydraulicsApp : public MooseApp
 {
 public:
-  ThermalHydraulicsApp(InputParameters parameters);
+  ThermalHydraulicsApp(const InputParameters & parameters);
   virtual ~ThermalHydraulicsApp();
-
-  /**
-   * Registers a closures option
-   *
-   * @param[in] closures_option   Closures option string to register
-   * @param[in] closures_name     Closures class name
-   * @param[in] flow_model_id     Flow model ID
-   */
-  static void registerClosuresOption(const std::string & closures_option,
-                                     const std::string & class_name,
-                                     const THM::FlowModelID & flow_model_id);
-
-  /**
-   * Gets the class name of the closures corresponding to the flow model and user option
-   *
-   * @param[in] closures_option   Closures option
-   * @param[in] flow_model_id     Flow model ID
-   */
-  static const std::string & getClosuresClassName(const std::string & closures_option,
-                                                  const THM::FlowModelID & flow_model_id);
 
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
@@ -77,9 +58,6 @@ public:
   /**
    * Deprecated Methods
    */
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
-  static void registerExecFlags(Factory & factory);
 
   /**
    * Get the class name of a flow model corresponding to the flow model ID
@@ -94,8 +72,4 @@ public:
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
 
   static InputParameters validParams();
-
-protected:
-  /// Map from flow model ID to map of closures option to its class
-  static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
 };

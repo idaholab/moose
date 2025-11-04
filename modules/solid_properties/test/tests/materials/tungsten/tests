@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#31072'
+  design = 'TungstenThermalPropertiesMaterial.md'
+  [tungsten_props]
+    type = CSVDiff
+    input = 'tungsten_thermal_properties.i'
+    csvdiff = 'tungsten_thermal_properties_csv_props_and_diffs_0002.csv'
+    requirement = 'The system shall be able to compute tungsten thermal properties and compare exactly to analytical expressions.'
+  []
+[]

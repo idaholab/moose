@@ -48,7 +48,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   volumetric_locking_correction = true
   strain = FINITE
   generate_output = 'strain_yy stress_yy'
@@ -129,7 +129,7 @@
   [temp_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
     block = '1 2'
-    args = temp
+    coupled_variables = temp
     tensors = 'base'
     weights = 'prefactor_material'
   []

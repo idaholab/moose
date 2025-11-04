@@ -27,8 +27,7 @@
     type = Exodiff
     input = 'multiple_pairs_mortar.i'
     exodiff = 'multiple_pairs_mortar_out.e'
-    abs_zero = 1.0e-8
-    rel_err = 1.0e-5
+    custom_cmp = multiple_pairs_mortar.cmp
     cli_args = "Postprocessors/active=''"
     map = False
     partial = True
@@ -39,8 +38,7 @@
     type = Exodiff
     input = 'multiple_pairs_mortar_friction.i'
     exodiff = 'multiple_pairs_mortar_friction_out.e'
-    abs_zero = 1.0e-8
-    rel_err = 1.0e-5
+    custom_cmp = multiple_pairs_mortar_friction.cmp
     cli_args = "Postprocessors/active=''"
     map = False
     partial = True
@@ -85,6 +83,8 @@
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    mesh_mode = 'replicated'
   []
   [three_hexagons_coarse_automatic_pair_node_proximity]
     type = 'Exodiff'
@@ -102,6 +102,8 @@
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    mesh_mode = 'replicated'
   []
   [three_hexagons_coarse_automatic_pair_node_proximity_small_distance]
     type = 'Exodiff'
@@ -118,6 +120,8 @@
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    mesh_mode = 'replicated'
   []
   [three_hexagons_coarse_automatic_pair_node_proximity_large_distance]
     type = 'Exodiff'
@@ -135,6 +139,91 @@
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    mesh_mode = 'replicated'
+  []
+
+  # These tests are duplicated to have both recover and distributed testing
+  # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+  [three_hexagons_coarse_automatic_pair_with_distributed]
+    type = 'Exodiff'
+    issues = '#24122'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_out.e'
+    cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Contact/contact_pressure/automatic_pairing_method='CENTROID' Outputs/hide=penetration "
+               "Postprocessors/active=''"
+    requirement = 'The system shall be able to, if the user provides a reference distance, assign '
+                  'primary-secondary contact pairs automatically when using a distributed mesh.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    recover = 'false'
+    mesh_mode = 'distributed'
+    prereq = 'three_hexagons_coarse_automatic_pair'
+  []
+  [three_hexagons_coarse_automatic_pair_node_proximity_with_distributed]
+    type = 'Exodiff'
+    issues = '#24609'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_out.e'
+    cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Contact/contact_pressure/automatic_pairing_method=NODE "
+               "Contact/contact_pressure/automatic_pairing_distance=0.002001 "
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_out "
+               "Outputs/hide=penetration"
+    requirement = 'The system shall be able to, if the user provides a reference distance, assign '
+                  'primary-secondary contact pairs automatically using proximity between nodes that '
+                  'belong to arbitrary boundaries when using a distributed mesh.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    recover = 'false'
+    mesh_mode = 'distributed'
+    prereq = 'three_hexagons_coarse_automatic_pair_node_proximity'
+  []
+  [three_hexagons_coarse_automatic_pair_node_proximity_small_distance_with_distributed]
+    type = 'Exodiff'
+    issues = '#24609'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_small_distance_out.e'
+    cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Contact/contact_pressure/automatic_pairing_method=NODE "
+               "Contact/contact_pressure/automatic_pairing_distance=0.0013 "
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_small_distance_"
+               "out Outputs/hide=penetration"
+    requirement = 'The system shall be able to, if the user provides a too-small reference distance, '
+                  'avoid assigning primary-secondary contact pairs using proximity between nodes when using a distributed mesh.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    recover = 'false'
+    mesh_mode = 'distributed'
+    prereq = 'three_hexagons_coarse_automatic_pair_node_proximity_small_distance'
+  []
+  [three_hexagons_coarse_automatic_pair_node_proximity_large_distance_with_distributed]
+    type = 'Exodiff'
+    issues = '#24609'
+    input = 'three_hexagons_coarse_automatic_pair.i'
+    exodiff = 'three_hexagons_coarse_automatic_pair_node_proximity_large_distance_out.e'
+    cli_args = "Contact/contact_pressure/automatic_pairing_boundaries='102 201 301' "
+               "Contact/contact_pressure/automatic_pairing_method=NODE "
+               "Contact/contact_pressure/automatic_pairing_distance=4.0 "
+               "Outputs/file_base=three_hexagons_coarse_automatic_pair_node_proximity_large_distance_"
+               "out Outputs/hide=penetration"
+    requirement = 'The system shall be able to, if the user provides a very large reference '
+                  'distance, assign primary-secondary contact pairs automatically using proximity '
+                  'between nodes that belong to arbitrary boundaries when using a distributed mesh.'
+    abs_zero = 1.0e-4
+    rel_err = 1.0e-4
+    allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    recover = 'false'
+    mesh_mode = 'distributed'
+    prereq = 'three_hexagons_coarse_automatic_pair_node_proximity_large_distance'
   []
   [three_hexagons_coarse_automatic_pair_error]
     type = 'RunException'
@@ -144,6 +233,8 @@
     requirement = 'The system shall generate an error if insufficient information to automatically '
                   'define contact surface pairs is provided.'
     allow_warnings = true
+    # Automatic pairing method requires a serial mesh and the checkpoint is distributed
+    mesh_mode = 'replicated'
   []
   [three_hexagons_coarse_various_actions]
     type = 'Exodiff'

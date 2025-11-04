@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -35,10 +35,11 @@ public:
   /**
    * Called before this RM is attached
    */
-  void init(MooseMesh & moose_mesh, const MeshBase & mesh, const DofMap * dof_map = nullptr);
+  void
+  init(MooseMesh & moose_mesh, const MeshBase & mesh, const libMesh::DofMap * dof_map = nullptr);
 
   /**
-   * Whether or not this RM has been inited. NOTE that this just indicates that the \p init method
+   * Whether or not this RM has been init-ed. NOTE that this just indicates that the \p init method
    * has been called at least once. Conceivably this could have been during the early geometric
    * setup phase and if this relationship manager is also algebraic/coupling, we are not assured
    * that this RelationshipManager is fully initialized until the \p init call during the
@@ -117,7 +118,7 @@ public:
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
-  const DofMap * dofMap() { return _dof_map; }
+  const libMesh::DofMap * dofMap() { return _dof_map; }
 
 protected:
   /**
@@ -135,7 +136,7 @@ protected:
 
   /// Pointer to DofMap (may be null if this is geometric only). This is useful for setting coupling
   /// matrices in call-backs from DofMap::reinit
-  const DofMap * _dof_map = nullptr;
+  const libMesh::DofMap * _dof_map = nullptr;
 
   /// Boolean indicating whether this RM can be attached early (e.g. all parameters are known
   /// without the need for inspecting things like variables or other parts of the system that
@@ -182,7 +183,7 @@ public:
    * This returns an \p InputParameters object containing an \p ElementSideNeighborLayers
    * relationship manager with zero layers of ghosting. While zero layers may seem foolish, this is
    * actually very useful for building the correct sparsity pattern between intra-element degrees of
-   * freedom. Since this object only has meaning for building the sparsity pattern, the relationsip
+   * freedom. Since this object only has meaning for building the sparsity pattern, the relationship
    * manager type contained within the returned \p InputParameters object will be COUPLING
    */
   static InputParameters zeroLayerGhosting();

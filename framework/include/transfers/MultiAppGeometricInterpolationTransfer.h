@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -35,18 +35,18 @@ public:
   virtual void execute() override;
 
 protected:
-  void
-  fillSourceInterpolationPoints(FEProblemBase & from_problem,
-                                const MooseVariableFieldBase & from_var,
-                                const MultiAppCoordTransform & from_app_transform,
-                                std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
+  void fillSourceInterpolationPoints(
+      FEProblemBase & from_problem,
+      const MooseVariableFieldBase & from_var,
+      const MultiAppCoordTransform & from_app_transform,
+      std::unique_ptr<libMesh::InverseDistanceInterpolation<Moose::dim>> & idi);
 
-  void
-  interpolateTargetPoints(FEProblemBase & to_problem,
-                          MooseVariableFieldBase & to_var,
-                          NumericVector<Real> & to_solution,
-                          const MultiAppCoordTransform & to_app_transform,
-                          const std::unique_ptr<InverseDistanceInterpolation<Moose::dim>> & idi);
+  void interpolateTargetPoints(
+      FEProblemBase & to_problem,
+      MooseVariableFieldBase & to_var,
+      NumericVector<Real> & to_solution,
+      const MultiAppCoordTransform & to_app_transform,
+      const std::unique_ptr<libMesh::InverseDistanceInterpolation<Moose::dim>> & idi);
 
   void
   subdomainIDsNode(MooseMesh & mesh, const Node & node, std::set<subdomain_id_type> & subdomainids);

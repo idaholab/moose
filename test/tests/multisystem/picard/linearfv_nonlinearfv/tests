@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#28819'
+  design = 'LinearSystem.md'
+  [tightly_coupled]
+    requirement = 'The system shall be able to solve a coupled diffusion problem using fixed point iteration between linear and nonlinear systems in the same input file.'
+    type = Exodiff
+    input = same_input.i
+    exodiff = 'same_input_out.e'
+    recover = false # we need to use no_restore for the fullsolvemultiapp
+    max_threads = 1 # see libmesh issue #3808
+  []
+[]

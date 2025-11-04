@@ -1,6 +1,6 @@
 [Tests]
   design = 'DataIO.md Restartable.md'
-  issues = '#2304'
+  issues = '#2304 #27240'
 
   [./test_part1]
     type = 'RunApp'

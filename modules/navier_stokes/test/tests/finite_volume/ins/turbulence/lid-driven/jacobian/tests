@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#9007'
+  design = 'WCNSFVTurbulencePhysics.md'
+  [keps-jac-physics]
+    type = 'PetscJacobianTester'
+    input = turb-energy-wall-physics.i
+    requirement = 'The system shall be able to show a perfect Jacobian when solving the flow equations, the energy conservation equation and the k-epsilon turbulence equations.'
+
+    # Test tolerances
+    ratio_tol = 3e-8
+    difference_tol = 1e-6
+    cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2"
+  []
+[]

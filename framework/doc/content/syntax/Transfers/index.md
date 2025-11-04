@@ -27,8 +27,8 @@ from the parent application.
                  that solves along with the parent as time progresses.
 
 For this example, the sub-applications require that the average from the parent in the form of a
-scalar AuxVariable, see the [AuxVariables] documentation for further information. Therefore the
-parent will transfer the average value (computed via the
+scalar AuxVariable, see the [AuxVariables](/AuxVariables/index.md) documentation for further information.
+Therefore the parent will transfer the average value (computed via the
 [ElementAverageValue](/ElementAverageValue.md) Postprocessor) to a scalar AuxVariable on each
 sub-application. As shown in [transfers-parent-transfers], the
 [MultiAppPostprocessorToAuxScalarTransfer](/MultiAppPostprocessorToAuxScalarTransfer.md) is provided

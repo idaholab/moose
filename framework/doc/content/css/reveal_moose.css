@@ -365,3 +365,46 @@
 .reveal .moose-alert-construction .moose-alert-content{
   background-color: var(--alert-construction-content);
 }
+
+.token.moose-parsed-syntax,
+.token.moose-syntax {
+  color: #C586C0;
+}
+
+.toke.moose-object {
+  color: #DCDCAA;
+}
+
+.token.moose-parsed-class,
+.token.moose-class {
+  color: #DCDCAA;
+}
+
+.token.moose-type {
+  color: #C586C0;
+}
+
+.language-moose .token.constant,
+.language-moose .token.boolean {
+  color: #358ed7;
+}
+
+.language-moose .token.number {
+  color: #B5CEA8;
+}
+
+.language-moose .token.operator {
+  color: #D4D4D4;
+}
+
+.language-moose .token.punctuation {
+  color: #6A9955;
+}
+
+.language-moose .token.property {
+  color: #90d3f6;
+}
+
+.diff-highlight .token.coord {
+  display: none;
+}

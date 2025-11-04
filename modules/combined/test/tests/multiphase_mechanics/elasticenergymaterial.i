@@ -88,7 +88,7 @@
 
   [./elasticenergy]
     type = ElasticEnergyMaterial
-    args = 'c'
+    coupled_variables = 'c'
     outputs = exodus
   [../]
 []

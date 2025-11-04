@@ -26,7 +26,7 @@
     inputs = 'pin1'
     pattern = '0 0;
               0 0 0;
-               0 0;'
+               0 0'
     background_intervals = 1
     background_region_id = 4
     duct_halfpitch = 1.7703

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,7 @@ InputParameters
 WCNSFVMixingLengthEnergyDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
+  params += FVDiffusionInterpolationInterface::validParams();
   params.addClassDescription("Computes the turbulent diffusive flux that appears in "
                              "Reynolds-averaged fluid energy conservation equations.");
   params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
@@ -30,12 +31,22 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
 
+  // We add the relationship manager here, this will select the right number of
+  // ghosting layers depending on the chosen interpolation method
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { FVRelationshipManagerInterface::setRMParamsDiffusion(obj_params, rm_params, 3); });
+
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
+    FVDiffusionInterpolationInterface(params),
     _dim(_subproblem.mesh().dimension()),
     _u(getFunctor<ADReal>("u")),
     _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
@@ -55,6 +66,8 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
 ADReal
 WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
 {
+  using std::sqrt;
+
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
@@ -76,7 +89,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
     }
   }
 
-  symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+  symmetric_strain_tensor_norm = sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
   ADReal mixing_len = _mixing_len(face, state);
@@ -88,7 +101,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   // the scalar variable
   eddy_diff /= _schmidt_number;
 
-  const auto dTdn = gradUDotNormal(state);
+  const auto dTdn = gradUDotNormal(state, _correct_skewness);
 
   ADReal rho_cp_face;
   if (onBoundary(*_face_info))

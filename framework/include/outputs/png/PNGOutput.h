@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 
-#include "MooseConfig.h"
 #ifdef MOOSE_HAVE_LIBPNG
 
 // pnglib includes
@@ -63,7 +62,7 @@ protected:
   const Real _transparency;
 
   /// Pointer to the libMesh::MeshFunction object in which the read data is stored.
-  std::unique_ptr<MeshFunction> _mesh_function;
+  std::unique_ptr<libMesh::MeshFunction> _mesh_function;
 
   /// The boundaries of the image.
   BoundingBox _box;

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,7 +61,8 @@ interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
         false,
         input_functor.hasFaceSide(*face, true)
             ? (input_functor.hasFaceSide(*face, false) ? nullptr : face->elemPtr())
-            : face->neighborPtr()};
+            : face->neighborPtr(),
+        nullptr};
     auto face_value = input_functor(face_arg, time);
     std::pair<T, Real> * neighbor_pair = nullptr;
     if (face->neighborPtr() && face->neighborPtr() != libMesh::remote_elem)

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,7 @@ class SinglePhaseFluidProperties;
 class VaporMixtureFluidProperties;
 class TwoPhaseFluidProperties;
 class TwoPhaseNCGFluidProperties;
+class TwoPhaseNCGPartialPressureFluidProperties;
 
 /**
  * User object for querying a single-phase or two-phase fluid properties object
@@ -161,6 +162,8 @@ protected:
   const TwoPhaseFluidProperties * const _fp_2phase;
   /// pointer to 2-phase NCG fluid properties object (if provided 2-phase NCG object)
   const TwoPhaseNCGFluidProperties * const _fp_2phase_ncg;
+  /// pointer to 2-phase NCG partial pressure fluid properties object (if provided)
+  const TwoPhaseNCGPartialPressureFluidProperties * const _fp_2phase_ncg_partial_pressure;
 
   /// flag that user provided 1-phase fluid properties
   const bool _has_1phase;
@@ -170,6 +173,8 @@ protected:
   const bool _has_2phase;
   /// flag that user provided 2-phase NCG fluid properties
   const bool _has_2phase_ncg;
+  /// flag that user provided 2-phase NCG partial pressure fluid properties
+  const bool _has_2phase_ncg_partial_pressure;
 
   /// pointer to liquid fluid properties object (if provided 2-phase object)
   const SinglePhaseFluidProperties * const _fp_liquid;

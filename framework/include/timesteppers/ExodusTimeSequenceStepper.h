@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,4 +25,6 @@ public:
 protected:
   /// The ExodusII file that is being read
   std::string _mesh_file;
+
+  virtual void init() override;
 };

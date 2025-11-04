@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #include "ParsedMaterialHelper.h"
 
 #include "libmesh/quadrature.h"
+#include "Conversion.h"
 
 template <bool is_ad>
 InputParameters
@@ -27,22 +28,59 @@ ParsedMaterialHelper<is_ad>::validParams()
       "extra_symbols",
       extra_symbols,
       "Special symbols, like point coordinates, time, and timestep size.");
+  params.addParam<std::vector<MaterialName>>(
+      "upstream_materials",
+      std::vector<MaterialName>(),
+      "List of upstream material properties that must be evaluated when compute=false");
   return params;
 }
 
 template <bool is_ad>
-ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parameters,
-                                                  VariableNameMappingMode map_mode)
+ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(
+    const InputParameters & parameters,
+    const VariableNameMappingMode map_mode,
+    const std::optional<std::string> & function_param_name /* = {} */)
   : FunctionMaterialBase<is_ad>(parameters),
     FunctionParserUtils<is_ad>(parameters),
     _symbol_names(_nargs),
-    _extra_symbols(
-        this->template getParam<MultiMooseEnum>("extra_symbols").template getEnum<ExtraSymbols>()),
+    _extra_symbols(this->template getParam<MultiMooseEnum>("extra_symbols")
+                       .template getSetValueIDs<ExtraSymbols>()),
     _tol(0),
     _map_mode(map_mode),
+    _function_param_name(function_param_name),
+    _upstream_mat_names(this->template getParam<std::vector<MaterialName>>("upstream_materials")),
     _error_on_missing_material_properties(
-        this->template getParam<bool>("error_on_missing_material_properties"))
+        this->template getParam<bool>("error_on_missing_material_properties")),
+    _params(parameters)
 {
+  if (_function_param_name)
+    mooseAssert(_params.have_parameter<std::string>(*_function_param_name),
+                "Does not have parameter");
+}
+
+template <bool is_ad>
+void
+ParsedMaterialHelper<is_ad>::insertReservedNames(std::set<std::string> & reserved_names)
+{
+  for (const auto symbol : _extra_symbols)
+    switch (symbol)
+    {
+      case ExtraSymbols::x:
+        reserved_names.insert("x");
+        break;
+      case ExtraSymbols::y:
+        reserved_names.insert("y");
+        break;
+      case ExtraSymbols::z:
+        reserved_names.insert("z");
+        break;
+      case ExtraSymbols::t:
+        reserved_names.insert("t");
+        break;
+      case ExtraSymbols::dt:
+        reserved_names.insert("dt");
+        break;
+    };
 }
 
 template <bool is_ad>
@@ -99,6 +137,32 @@ ParsedMaterialHelper<is_ad>::functionParse(
     const std::vector<std::string> & tol_names,
     const std::vector<Real> & tol_values)
 {
+  const std::vector<MooseFunctorName> empty_functor_vector;
+  const std::vector<std::string> empty_string_vector;
+  functionParse(function_expression,
+                constant_names,
+                constant_expressions,
+                mat_prop_expressions,
+                postprocessor_names,
+                tol_names,
+                tol_values,
+                empty_functor_vector,
+                empty_string_vector);
+}
+
+template <bool is_ad>
+void
+ParsedMaterialHelper<is_ad>::functionParse(
+    const std::string & function_expression,
+    const std::vector<std::string> & constant_names,
+    const std::vector<std::string> & constant_expressions,
+    const std::vector<std::string> & mat_prop_expressions,
+    const std::vector<PostprocessorName> & postprocessor_names,
+    const std::vector<std::string> & tol_names,
+    const std::vector<Real> & tol_values,
+    const std::vector<MooseFunctorName> & functor_names,
+    const std::vector<std::string> & functor_symbols)
+{
   // build base function object
   _func_F = std::make_shared<SymFunction>();
 
@@ -112,7 +176,7 @@ ParsedMaterialHelper<is_ad>::functionParse(
   if (_map_mode == VariableNameMappingMode::USE_PARAM_NAMES)
     for (const auto & acd : _arg_constant_defaults)
       if (!_func_F->AddConstant(acd, this->_pars.defaultCoupledValue(acd)))
-        mooseError("Invalid constant name in parsed function object");
+        _params.mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
@@ -133,12 +197,12 @@ ParsedMaterialHelper<is_ad>::functionParse(
       break;
 
     default:
-      mooseError("Unknown variable mapping mode.");
+      _params.mooseError("Unknown variable mapping mode.");
   }
 
   // tolerance vectors
   if (tol_names.size() != tol_values.size())
-    mooseError("The parameter vectors tol_names and tol_values must have equal length.");
+    _params.mooseError("The parameter vectors tol_names and tol_values must have equal length.");
 
   // set tolerances
   _tol.resize(_nargs);
@@ -195,20 +259,40 @@ ParsedMaterialHelper<is_ad>::functionParse(
         break;
     }
 
+  // get all functors
+  if (!functor_symbols.empty() && functor_symbols.size() != functor_names.size())
+    _params.mooseError(
+        "The parameter vector functor_symbols must be of same length as functor_names, if "
+        "not empty.");
+  _functors.resize(functor_names.size());
+  for (const auto i : index_range(functor_names))
+  {
+    if (functor_symbols.empty())
+    {
+      auto functor_name = functor_names[i];
+      _symbol_names.push_back(functor_name);
+      _functors[i] = &FunctorInterface::getFunctor<Real>(functor_name);
+    }
+    else
+    {
+      auto functor_name = functor_names[i];
+      auto symbol_name = functor_symbols[i];
+      _symbol_names.push_back(symbol_name);
+      _functors[i] = &FunctorInterface::getFunctor<Real>(functor_name);
+    }
+  }
+
   // build 'variables' argument for fparser
   std::string variables = Moose::stringify(_symbol_names);
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)
-    mooseError("Invalid function\n",
-               function_expression,
-               '\n',
-               variables,
-               "\nin ParsedMaterialHelper.\n",
-               _func_F->ErrorMsg());
+    parseError("Invalid parsed material function \"" + function_expression +
+               "\" with variables \"" + variables + "\"; " + _func_F->ErrorMsg());
 
   // create parameter passing buffer
-  _func_params.resize(_nargs + nmat_props + _postprocessor_values.size() + _extra_symbols.size());
+  _func_params.resize(_nargs + nmat_props + _postprocessor_values.size() + _extra_symbols.size() +
+                      functor_names.size());
 
   // perform next steps (either optimize or take derivatives and then optimize)
 
@@ -236,6 +320,15 @@ ParsedMaterialHelper<is_ad>::functionsPostParse()
 
 template <bool is_ad>
 void
+ParsedMaterialHelper<is_ad>::initialSetup()
+{
+  _upstream_mat.resize(_upstream_mat_names.size());
+  for (const auto i : make_range(_upstream_mat_names.size()))
+    _upstream_mat[i] = &this->getMaterialByName(_upstream_mat_names[i]);
+}
+
+template <bool is_ad>
+void
 ParsedMaterialHelper<is_ad>::initQpStatefulProperties()
 {
   computeQpProperties();
@@ -245,8 +338,14 @@ template <bool is_ad>
 void
 ParsedMaterialHelper<is_ad>::computeQpProperties()
 {
+  if (!(this->_compute))
+  {
+    for (const auto i : make_range(_upstream_mat_names.size()))
+      _upstream_mat[i]->computePropertiesAtQp(_qp);
+  }
+
   // fill the parameter vector, apply tolerances
-  for (unsigned int i = 0; i < _nargs; ++i)
+  for (const auto i : make_range(_nargs))
   {
     if (_tol[i] < 0.0)
       _func_params[i] = (*_args[i])[_qp];
@@ -256,20 +355,23 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
       _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
     }
   }
+  auto offset = _nargs;
 
   // insert material property values
   for (const auto i : index_range(_mat_prop_descriptors))
-    _func_params[i + _nargs] = _mat_prop_descriptors[i].value(_qp);
+    _func_params[i + offset] = _mat_prop_descriptors[i].value(_qp);
+  offset += _mat_prop_descriptors.size();
 
   // insert postprocessor values
   auto npps = _postprocessor_values.size();
   for (MooseIndex(_postprocessor_values) i = 0; i < npps; ++i)
-    _func_params[i + _nargs + _mat_prop_descriptors.size()] = *_postprocessor_values[i];
+    _func_params[i + offset] = *_postprocessor_values[i];
+  offset += _postprocessor_values.size();
 
   // insert extra symbol values
   for (const auto i : index_range(_extra_symbols))
   {
-    const auto j = _nargs + _mat_prop_descriptors.size() + _postprocessor_values.size() + i;
+    const auto j = offset + i;
     switch (_extra_symbols[i])
     {
       case ExtraSymbols::x:
@@ -289,9 +391,27 @@ ParsedMaterialHelper<is_ad>::computeQpProperties()
         break;
     }
   }
+  offset += _extra_symbols.size();
+
+  // insert functor values
+  const auto & state = TransientInterface::determineState();
+  const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
+  for (const auto i : index_range(_functors))
+    _func_params[offset + i] = (*_functors[i])(qp_arg, state);
+
   // set function value
   if (_prop_F)
     (*_prop_F)[_qp] = evaluate(_func_F, _name);
+}
+
+template <bool is_ad>
+void
+ParsedMaterialHelper<is_ad>::parseError(const std::string & message) const
+{
+  if (_function_param_name)
+    _params.paramError(*_function_param_name, message);
+  else
+    _params.mooseError(message);
 }
 
 // explicit instantiation

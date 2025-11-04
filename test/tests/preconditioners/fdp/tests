@@ -6,7 +6,6 @@
     input = fdp_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
     cli_args = 'Preconditioning/FDP/full=true'
     requirement = "The system shall produce a perfect coloring for the Jacobian when using the finite difference preconditioner."

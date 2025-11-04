@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,7 @@ ElementCentroidPositions::validParams()
 }
 
 ElementCentroidPositions::ElementCentroidPositions(const InputParameters & parameters)
-  : Positions(parameters), BlockRestrictable(this), _mesh(_fe_problem.mesh())
+  : Positions(parameters), BlockRestrictable(this), _mesh(_subproblem.mesh())
 {
   // Mesh is ready at construction
   initialize();

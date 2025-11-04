@@ -149,6 +149,7 @@
 [Problem]
   extra_tag_vectors = 'tag_diff tag_rhs'
   extra_tag_matrices = 'tag_diff tag_rhs'
+  use_hash_table_matrix_assembly = true
 []
 
 [Postprocessors]

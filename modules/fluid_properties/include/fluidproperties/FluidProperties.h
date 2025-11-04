@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@
 // rather than hand-coding them in derived classes.
 typedef DualNumber<Real, DNDerivativeSize<5>> FPADReal;
 
-class FluidProperties : public ThreadedGeneralUserObject, public SolutionInvalidInterface
+class FluidProperties : public ThreadedGeneralUserObject
 {
 public:
   static InputParameters validParams();

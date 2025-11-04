@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,4 +25,7 @@ protected:
 
   /// The type of reduction operation performed on the array variable
   const MooseEnum _value_type;
+
+  /// values specified by the weights parameter or 1 otherwise
+  const RealEigenVector _weights;
 };

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,7 +14,7 @@ registerMooseObject("ThermalHydraulicsApp", LayeredFlowAreaChange);
 InputParameters
 LayeredFlowAreaChange::validParams()
 {
-  InputParameters params = SideIntegralUserObject::validParams();
+  InputParameters params = SpatialUserObjectFunctor<SideIntegralUserObject>::validParams();
   params += LayeredBase::validParams();
   params.addRequiredCoupledVar("displacements",
                                "Displacements, size must match problem dimension.");
@@ -34,7 +34,9 @@ LayeredFlowAreaChange::validParams()
 }
 
 LayeredFlowAreaChange::LayeredFlowAreaChange(const InputParameters & parameters)
-  : SideIntegralUserObject(parameters), LayeredBase(parameters), _dim(_mesh.dimension())
+  : SpatialUserObjectFunctor<SideIntegralUserObject>(parameters),
+    LayeredBase(parameters),
+    _dim(_mesh.dimension())
 {
   if (coupledComponents("displacements") != _dim)
     paramError("displacements",
@@ -48,7 +50,7 @@ LayeredFlowAreaChange::LayeredFlowAreaChange(const InputParameters & parameters)
 void
 LayeredFlowAreaChange::initialize()
 {
-  SideIntegralUserObject::initialize();
+  SpatialUserObjectFunctor<SideIntegralUserObject>::initialize();
   LayeredBase::initialize();
 }
 
@@ -91,6 +93,6 @@ LayeredFlowAreaChange::finalize()
 void
 LayeredFlowAreaChange::threadJoin(const UserObject & y)
 {
-  SideIntegralUserObject::threadJoin(y);
+  SpatialUserObjectFunctor<SideIntegralUserObject>::threadJoin(y);
   LayeredBase::threadJoin(y);
 }

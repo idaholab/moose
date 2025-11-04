@@ -4,17 +4,23 @@
     input = 'fixed_outer.i'
     csvdiff = 'fixed_outer_P_0001.csv fixed_outer_T_0001.csv fixed_outer_U_0001.csv'
     threading = '!pthreads'
+    # Loosening tolerance for parallel testing
+    abs_zero = 1e-8
   [../]
   [./fixed_outer_rz]
     type = 'CSVDiff'
     input = 'fixed_outer_rz.i'
     csvdiff = 'fixed_outer_rz_P_0001.csv fixed_outer_rz_T_0001.csv fixed_outer_rz_U_0001.csv'
     threading = '!pthreads'
+    # Loosening tolerance for parallel testing
+    abs_zero = 1e-8
   [../]
   [./free_outer]
     type = 'CSVDiff'
     input = 'free_outer.i'
     csvdiff = 'free_outer_P_0001.csv free_outer_T_0001.csv free_outer_U_0001.csv'
     threading = '!pthreads'
+    # Loosening tolerance for parallel testing
+    rel_err = 1e-5
   [../]
 []

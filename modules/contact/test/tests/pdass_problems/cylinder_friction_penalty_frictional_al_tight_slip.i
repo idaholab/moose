@@ -69,7 +69,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master/all]
+[Physics/SolidMechanics/QuasiStatic/all]
   strain = FINITE
   add_variables = true
   save_in = 'saved_x saved_y'
@@ -80,42 +80,42 @@
 
 [AuxKernels]
   [penalty_normal_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
     boundary = 3
   []
   [penalty_frictional_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
     boundary = 3
   []
   [penalty_tangential_vel_one]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
     boundary = 3
   []
   [penalty_accumulated_slip_one]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
     boundary = 3
   []
   [normal_lm]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = normal_lm
     user_object = friction_uo
     contact_quantity = normal_lm
     boundary = 3
   []
   [normal_gap]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = normal_gap
     user_object = friction_uo
     contact_quantity = normal_gap

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,23 +43,6 @@ void
 MiscApp::registerApps()
 {
   registerApp(MiscApp);
-}
-
-void
-MiscApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"MiscApp"});
-}
-
-void
-MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"MiscApp"});
-}
-
-void
-MiscApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

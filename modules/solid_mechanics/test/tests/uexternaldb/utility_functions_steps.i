@@ -12,7 +12,7 @@
 
 [UserObjects]
   [step_uo]
-   type = StepUserObject
+   type = AnalysisStepUserObject
    step_start_times = '0 1'
   []
   [uexternaldb]

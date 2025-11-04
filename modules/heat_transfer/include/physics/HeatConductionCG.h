@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,20 +9,24 @@
 
 #pragma once
 
-#include "HeatConductionPhysics.h"
+#include "HeatConductionPhysicsBase.h"
 
 /**
  * Creates all the objects needed to solve the heat conduction equations with CG
  */
-class HeatConductionCG : public HeatConductionPhysics
+class HeatConductionCG : public HeatConductionPhysicsBase
 {
 public:
   static InputParameters validParams();
 
   HeatConductionCG(const InputParameters & parameters);
 
+protected:
+  /// Whether to use automatic differentiation
+  const bool _use_ad;
+
 private:
-  void addNonlinearVariables() override;
+  void addSolverVariables() override;
   void addFEKernels() override;
   void addFEBCs() override;
 };

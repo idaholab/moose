@@ -1,0 +1,37 @@
+[Tests]
+  issues = '#23557'
+  design = MooseMesh.md
+  [add_sideset_ids]
+    type = CSVDiff
+    input = add_sideset_ids.i
+    csvdiff = add_sideset_ids_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall allow specifying valid sideset IDs that do not exist on the initial mesh.'
+  []
+  [add_sideset_ids_and_names]
+    type = CSVDiff
+    input = add_sideset_ids.i
+    prereq = 'add_sideset_ids'
+    csvdiff = add_sideset_ids_out.csv
+    cli_args = "Mesh/add_sideset_names='future' Postprocessors/flux/boundary='future' "
+               "UserObjects/side_updater/update_boundary_name=future"
+    requirement = 'The system shall allow specifying valid sideset IDs and names that do not exist on the initial mesh.'
+  []
+  [add_sideset_names]
+    type = CSVDiff
+    input = add_sideset_names.i
+    csvdiff = add_sideset_names_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall allow specifying valid sideset names that do not exist on the initial mesh, and assign IDs automatically.'
+  []
+  [remove_sidesets]
+    type = CSVDiff
+    input = remove_sideset_ids.i
+    csvdiff = remove_sideset_ids_out.csv
+    design = MooseMesh.md
+    requirement = 'The system shall be able to remove sides from sidesets when these sides elements are moved to new blocks.'
+    # Revision of this test would make it possible for restep, the current
+    # interplay between timestep_begin and timestep_end make it very fragile
+    restep = false
+  []
+[]

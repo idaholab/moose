@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), and [`CoreMeshGenerator`](CoreMeshGenerator.md).
+This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), [`ControlDrumMeshGenerator`](ControlDrumMeshGenerator.md), and [`CoreMeshGenerator`](CoreMeshGenerator.md).
 
 The `AssemblyMeshGenerator` object generates assembly reactor geometry structures in either square or hexagonal geometries using component pin cell meshes from the [`PinMeshGenerator`](PinMeshGenerator.md) in [!param](/Mesh/AssemblyMeshGenerator/inputs). The component pin cell meshes are tagged with pin cell `reporting ID` values according to their location in the assembly grid. Any newly created regions such as ducts are given block ID assignments.
 
@@ -43,7 +43,7 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 ## Metadata Information
 
-Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/AssemblyMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output. The following metadata is defined on the assembly mesh:
+Users may be interested in defining additional metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. The following metadata is defined on the assembly mesh:
 
 - `assembly_type`: Value of type_id associated with assembly, equivalent to the input parameter [!param](/Mesh/AssemblyMeshGenerator/assembly_type)
 - `pitch`: Assembly pitch, equivalent to the input parameter [!param](/Mesh/ReactorMeshParams/assembly_pitch)
@@ -75,11 +75,15 @@ For applications where an output mesh does not need to be created and meshing ro
 
 This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 
-!media reactor/meshgenerators/assembly_mesh_generator.png style=width:40%;
+!media reactor/meshgenerators/assembly_mesh_generator.png
+       style=width:40%;
+       alt=The mesh blocks created by the configuration above.
 
 This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins:
 
-!media reactor/meshgenerators/assembly_mesh_generator_rid.png style=width:40%;
+!media reactor/meshgenerators/assembly_mesh_generator_rid.png
+       style=width:40%;
+       alt=The region_id for the mesh created from the configuration above.
 
 !syntax parameters /Mesh/AssemblyMeshGenerator
 

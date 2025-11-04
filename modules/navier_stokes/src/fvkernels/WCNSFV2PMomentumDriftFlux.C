@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,12 +27,13 @@ WCNSFV2PMomentumDriftFlux::validParams()
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
 
+  params.renameParam("fd", "fraction_dispersed", "");
+
   MooseEnum coeff_interp_method("average harmonic", "harmonic");
   params.addParam<MooseEnum>("density_interp_method",
                              coeff_interp_method,
                              "Switch that can select face interpolation method for the density.");
 
-  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
@@ -53,6 +54,11 @@ WCNSFV2PMomentumDriftFlux::WCNSFV2PMomentumDriftFlux(const InputParameters & par
   if (_dim >= 3 && !_w_slip)
     mooseError(
         "In three dimensions, the w_slip velocity must be supplied using the 'w_slip' parameter");
+
+  // Phase fraction could be a nonlinear variable
+  const auto & fraction_name = getParam<MooseFunctorName>("fraction_dispersed");
+  if (isParamValid("fraction_dispersed") && _fe_problem.hasVariable(fraction_name))
+    addMooseVariableDependency(&_fe_problem.getVariable(_tid, fraction_name));
 }
 
 ADReal
@@ -60,19 +66,19 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
 {
   _normal = _face_info->normal();
   const auto state = determineState();
+
   Moose::FaceArg face_arg;
   if (onBoundary(*_face_info))
     face_arg = singleSidedFaceArg();
   else
-    face_arg =
-        Moose::FaceArg{_face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+    face_arg = makeCDFace(*_face_info);
 
   ADRealVectorValue u_slip_vel_vec;
   if (_dim == 1)
     u_slip_vel_vec = ADRealVectorValue(_u_slip(face_arg, state), 0.0, 0.0);
-  if (_dim == 2)
+  else if (_dim == 2)
     u_slip_vel_vec = ADRealVectorValue(_u_slip(face_arg, state), (*_v_slip)(face_arg, state), 0.0);
-  if (_dim == 3)
+  else
     u_slip_vel_vec = ADRealVectorValue(
         _u_slip(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
 
@@ -94,23 +100,25 @@ WCNSFV2PMomentumDriftFlux::computeStrongResidual(const bool populate_a_coeffs)
     if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     {
-      if (_index == 1)
-        _ae = uslipdotn * _u_slip(elemArg(), state);
-      if (_index == 2)
-        _ae = uslipdotn * (*_v_slip)(elemArg(), state);
-      if (_index == 3)
-        _ae = uslipdotn * (*_w_slip)(elemArg(), state);
+      const auto dof_number = _face_info->elem().dof_number(_sys.number(), _var.number(), 0);
+      if (_index == 0)
+        _ae = (uslipdotn * _u_slip(elemArg(), state)).derivatives()[dof_number];
+      else if (_index == 1)
+        _ae = (uslipdotn * (*_v_slip)(elemArg(), state)).derivatives()[dof_number];
+      else
+        _ae = (uslipdotn * (*_w_slip)(elemArg(), state)).derivatives()[dof_number];
       _ae *= -face_rho_fd;
     }
     if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
         _face_type == FaceInfo::VarFaceNeighbors::BOTH)
     {
-      if (_index == 1)
-        _ae = uslipdotn * _u_slip(neighborArg(), state);
-      if (_index == 2)
-        _ae = uslipdotn * (*_v_slip)(neighborArg(), state);
-      if (_index == 3)
-        _ae = uslipdotn * (*_w_slip)(neighborArg(), state);
+      const auto dof_number = _face_info->neighbor().dof_number(_sys.number(), _var.number(), 0);
+      if (_index == 0)
+        _an = (uslipdotn * _u_slip(neighborArg(), state)).derivatives()[dof_number];
+      else if (_index == 1)
+        _an = (uslipdotn * (*_v_slip)(neighborArg(), state)).derivatives()[dof_number];
+      else
+        _an = (uslipdotn * (*_w_slip)(neighborArg(), state)).derivatives()[dof_number];
       _an *= face_rho_fd;
     }
   }

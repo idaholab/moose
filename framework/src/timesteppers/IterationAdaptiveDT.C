@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,8 @@
 #include "PiecewiseLinear.h"
 #include "Transient.h"
 #include "NonlinearSystem.h"
+#include "FEProblemBase.h"
+#include "LinearSystem.h"
 
 #include <limits>
 #include <set>
@@ -24,8 +26,11 @@ IterationAdaptiveDT::validParams()
 {
   InputParameters params = TimeStepper::validParams();
   params.addClassDescription("Adjust the timestep based on the number of iterations");
-  params.addParam<int>("optimal_iterations",
-                       "The target number of nonlinear iterations for adaptive timestepping");
+  params.addParam<int>(
+      "optimal_iterations",
+      "The target number of solver outer iterations for adaptive timestepping. "
+      "For a problem using nonlinear systems, the total number of nonlinear iterations is used. "
+      "For a problem using linear systems, the total number of linear iterations is used.");
   params.addParam<int>("iteration_window",
                        "Attempt to grow/shrink timestep if the iteration count "
                        "is below/above 'optimal_iterations plus/minus "
@@ -116,7 +121,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _use_time_ipol(_time_ipol.getSampleSize() > 0),
     _growth_factor(getParam<Real>("growth_factor")),
     _cutback_factor(getParam<Real>("cutback_factor")),
-    _nl_its(declareRestartableData<unsigned int>("nl_its", 0)),
+    _outer_its(declareRestartableData<unsigned int>("outer_its", 0)),
+    _nl_its(_outer_its),
     _l_its(declareRestartableData<unsigned int>("l_its", 0)),
     _cutback_occurred(declareRestartableData<bool>("cutback_occurred", false)),
     _at_function_point(false),
@@ -299,8 +305,15 @@ IterationAdaptiveDT::constrainStep(Real & dt)
 {
   bool at_sync_point = TimeStepper::constrainStep(dt);
 
-  // Limit the timestep to postprocessor value
-  limitDTToPostprocessorValue(dt);
+  // Use value from computed dt while rejecting the timestep
+  if (_dt_from_reject)
+  {
+    dt = *_dt_from_reject;
+    _dt_from_reject.reset();
+  }
+  // Otherwise, limit the timestep to the current postprocessor value
+  else
+    limitDTToPostprocessorValue(dt);
 
   // Limit the timestep to limit change in the function
   limitDTByFunction(dt);
@@ -354,6 +367,10 @@ IterationAdaptiveDT::converged() const
   if (_dt == _dt_min || _t_step < 2)
     return true;
 
+  // This means we haven't tried constraining the latest step yet
+  if (_dt_from_reject)
+    return false;
+
   // we get what the next time step should be
   Real dt_test = _dt;
   limitDTToPostprocessorValue(dt_test);
@@ -365,7 +382,10 @@ IterationAdaptiveDT::converged() const
   // if the time step is much smaller than the current time step
   // we need to repeat the current iteration with a smaller time step
   if (dt_test < _dt * _large_step_rejection_threshold)
+  {
+    _dt_from_reject = dt_test;
     return false;
+  }
 
   // otherwise we move one
   return true;
@@ -488,33 +508,34 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
 void
 IterationAdaptiveDT::computeAdaptiveDT(Real & dt, bool allowToGrow, bool allowToShrink)
 {
-  const unsigned int growth_nl_its(
+  const unsigned int growth_outer_its(
       _optimal_iterations > _iteration_window ? _optimal_iterations - _iteration_window : 0);
-  const unsigned int shrink_nl_its(_optimal_iterations + _iteration_window);
+  const unsigned int shrink_outer_its(_optimal_iterations + _iteration_window);
   const unsigned int growth_l_its(_optimal_iterations > _iteration_window
                                       ? _linear_iteration_ratio *
                                             (_optimal_iterations - _iteration_window)
                                       : 0);
   const unsigned int shrink_l_its(_linear_iteration_ratio *
                                   (_optimal_iterations + _iteration_window));
+  const std::string ite_type = (_fe_problem.numLinearSystems() == 0) ? "nl" : "solver";
 
-  if (allowToGrow && (_nl_its < growth_nl_its && _l_its < growth_l_its))
+  if (allowToGrow && (_outer_its < growth_outer_its && _l_its < growth_l_its))
   {
     // Grow the timestep
     dt *= _growth_factor;
 
     if (_verbose)
-      _console << "Growing dt: nl its = " << _nl_its << " < " << growth_nl_its
+      _console << "Growing dt: " + ite_type + " its = " << _outer_its << " < " << growth_outer_its
                << " && lin its = " << _l_its << " < " << growth_l_its << " old dt: " << std::setw(9)
                << _dt_old << " new dt: " << std::setw(9) << dt << '\n';
   }
-  else if (allowToShrink && (_nl_its > shrink_nl_its || _l_its > shrink_l_its))
+  else if (allowToShrink && (_outer_its > shrink_outer_its || _l_its > shrink_l_its))
   {
     // Shrink the timestep
     dt *= _cutback_factor;
 
     if (_verbose)
-      _console << "Shrinking dt: nl its = " << _nl_its << " > " << shrink_nl_its
+      _console << "Shrinking dt: " + ite_type + " its = " << _outer_its << " > " << shrink_outer_its
                << " || lin its = " << _l_its << " > " << shrink_l_its << " old dt: " << std::setw(9)
                << _dt_old << " new dt: " << std::setw(9) << dt << '\n';
   }
@@ -560,8 +581,21 @@ IterationAdaptiveDT::acceptStep()
     _tfunc_times.erase(_tfunc_times.begin());
   }
 
-  _nl_its = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).nNonlinearIterations();
-  _l_its = _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).nLinearIterations();
+  // Reset counts
+  _outer_its = 0;
+  _l_its = 0;
+
+  // Use the total number of iterations for multi-system
+  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
+    _outer_its += _fe_problem.getNonlinearSystemBase(/*nl_sys=*/i).nNonlinearIterations();
+  // Add linear iterations for both nonlinear and linear systems for multi-system
+  for (const auto i : make_range(_fe_problem.numNonlinearSystems()))
+    _l_its += _fe_problem.getNonlinearSystemBase(/*nl_sys=*/i).nLinearIterations();
+  for (const auto i : make_range(_fe_problem.numLinearSystems()))
+  {
+    _l_its += _fe_problem.getLinearSystem(/*nl_sys=*/i).nLinearIterations();
+    _outer_its += _fe_problem.getLinearSystem(/*nl_sys=*/i).nLinearIterations();
+  }
 
   if ((_at_function_point || _executioner.atSyncPoint()) &&
       _dt + _timestep_tolerance < _executioner.unconstrainedDT())

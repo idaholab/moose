@@ -186,14 +186,14 @@
     type = MatReaction
     variable = vel_x_solid
     block = 1
-    mob_name = 1
+    reaction_rate = 1
     use_displaced_mesh = false
   [../]
   [./source_vys]
     type = MatReaction
     variable = vel_y_solid
     block = 1
-    mob_name = 1
+    reaction_rate = 1
     use_displaced_mesh = false
   [../]
 []
@@ -217,7 +217,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./solid_domain]
     strain = SMALL
     incremental = false
@@ -294,7 +294,7 @@
 
 [Preconditioning]
   [./SMP]
-    type = SMP
+    type = FDP
     full = true
   [../]
 []
@@ -305,7 +305,7 @@
   # num_steps = 60
   dt = 0.1
   dtmin = 0.1
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
   line_search = none

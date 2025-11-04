@@ -96,6 +96,8 @@
     variable = 'from_sub from_sub'
     target_variable_components = '0 1'
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   [from_sub_elem]
@@ -106,5 +108,7 @@
     variable = 'from_sub_elem from_sub_elem'
     target_variable_components = '0 1'
     extrapolation_constant = -1
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []

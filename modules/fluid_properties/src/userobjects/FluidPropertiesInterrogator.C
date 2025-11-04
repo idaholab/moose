@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,7 @@
 #include "VaporMixtureFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"
 #include "TwoPhaseNCGFluidProperties.h"
+#include "TwoPhaseNCGPartialPressureFluidProperties.h"
 
 registerMooseObject("FluidPropertiesApp", FluidPropertiesInterrogator);
 
@@ -46,10 +47,13 @@ FluidPropertiesInterrogator::FluidPropertiesInterrogator(const InputParameters &
     _fp_1phase(dynamic_cast<const SinglePhaseFluidProperties * const>(_fp)),
     _fp_2phase(dynamic_cast<const TwoPhaseFluidProperties * const>(_fp)),
     _fp_2phase_ncg(dynamic_cast<const TwoPhaseNCGFluidProperties * const>(_fp)),
+    _fp_2phase_ncg_partial_pressure(
+        dynamic_cast<const TwoPhaseNCGPartialPressureFluidProperties * const>(_fp)),
     _has_1phase(_fp_1phase),
     _has_vapor_mixture(dynamic_cast<const VaporMixtureFluidProperties * const>(_fp)),
     _has_2phase(_fp_2phase),
     _has_2phase_ncg(_fp_2phase_ncg),
+    _has_2phase_ncg_partial_pressure(_fp_2phase_ncg_partial_pressure),
     _fp_liquid(_has_2phase
                    ? &getUserObjectByName<SinglePhaseFluidProperties>(_fp_2phase->getLiquidName())
                    : nullptr),
@@ -385,18 +389,20 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
   // determine how state is specified
   std::vector<std::vector<std::string>> parameter_sets = {
       {"p", "T", "x_ncg"}, {"rho", "e", "x_ncg"}, {"rho", "rhou", "rhoE", "x_ncg"}};
+  if (_has_2phase_ncg_partial_pressure)
+    parameter_sets.push_back({"p", "T"});
   auto specified = getSpecifiedSetMap(parameter_sets, "vapor mixture", throw_error_if_no_match);
-
-  const auto x_ncg = getParam<std::vector<Real>>("x_ncg");
 
   // compute/determine rho, e, p, T, vel
 
   Real rho, e, p, T, vel = 0;
+  std::vector<Real> x_ncg;
   bool specified_a_set = false;
   if (specified["rho,e,x_ncg"])
   {
     rho = getParam<Real>("rho");
     e = getParam<Real>("e");
+    x_ncg = getParam<std::vector<Real>>("x_ncg");
     const Real v = 1.0 / rho;
     p = _fp_vapor_mixture->p_from_v_e(v, e, x_ncg);
     T = _fp_vapor_mixture->T_from_v_e(v, e, x_ncg);
@@ -409,7 +415,22 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
   {
     p = getParam<Real>("p");
     T = getParam<Real>("T");
-    rho = _fp_vapor_mixture->rho_from_p_T(p, T, x_ncg);
+    x_ncg = getParam<std::vector<Real>>("x_ncg");
+    const Real v = _fp_vapor_mixture->v_from_p_T(p, T, x_ncg);
+    rho = 1.0 / v;
+    e = _fp_vapor_mixture->e_from_p_T(p, T, x_ncg);
+    if (isParamValid("vel"))
+      vel = getParam<Real>("vel");
+
+    specified_a_set = true;
+  }
+  else if (_has_2phase_ncg_partial_pressure && specified["p,T"])
+  {
+    p = getParam<Real>("p");
+    T = getParam<Real>("T");
+    x_ncg = {_fp_2phase_ncg_partial_pressure->x_sat_ncg_from_p_T(p, T)};
+    const Real v = _fp_vapor_mixture->v_from_p_T(p, T, x_ncg);
+    rho = 1.0 / v;
     e = _fp_vapor_mixture->e_from_p_T(p, T, x_ncg);
     if (isParamValid("vel"))
       vel = getParam<Real>("vel");
@@ -421,6 +442,7 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
     rho = getParam<Real>("rho");
     const Real rhou = getParam<Real>("rhou");
     const Real rhoE = getParam<Real>("rhoE");
+    x_ncg = getParam<std::vector<Real>>("x_ncg");
 
     vel = rhou / rho;
     const Real E = rhoE / rho;
@@ -439,18 +461,21 @@ FluidPropertiesInterrogator::computeVaporMixture(bool throw_error_if_no_match)
 
     const Real v = 1.0 / rho;
     const Real h = e + p / rho;
+    const Real s = _fp_vapor_mixture->s_from_p_T(p, T, x_ncg);
     const Real c = _fp_vapor_mixture->c_from_p_T(p, T, x_ncg);
     const Real mu = _fp_vapor_mixture->mu_from_p_T(p, T, x_ncg);
     const Real cp = _fp_vapor_mixture->cp_from_p_T(p, T, x_ncg);
     const Real cv = _fp_vapor_mixture->cv_from_p_T(p, T, x_ncg);
     const Real k = _fp_vapor_mixture->k_from_p_T(p, T, x_ncg);
 
+    params.set<std::vector<Real>>("x_ncg") = x_ncg;
     params.set<Real>("p") = p;
     params.set<Real>("T") = T;
     params.set<Real>("rho") = rho;
     params.set<Real>("e") = e;
     params.set<Real>("v") = v;
     params.set<Real>("h") = h;
+    params.set<Real>("s") = s;
     params.set<Real>("c") = c;
     params.set<Real>("mu") = mu;
     params.set<Real>("cp") = cp;
@@ -516,7 +541,7 @@ void
 FluidPropertiesInterrogator::buildJSONVaporMixture(nlohmann::json & json,
                                                    const InputParameters & params)
 {
-  for (auto p : {"p", "T", "rho", "e", "v", "h", "c", "mu", "cp", "cv", "k"})
+  for (auto p : {"p", "T", "rho", "e", "v", "h", "s", "c", "mu", "cp", "cv", "k"})
     if (params.have_parameter<Real>(p))
       json["static"][p] = params.get<Real>(p);
 
@@ -734,12 +759,16 @@ FluidPropertiesInterrogator::outputStagnationProperties(const InputParameters & 
 void
 FluidPropertiesInterrogator::outputVaporMixtureStaticProperties(const InputParameters & params)
 {
+  const auto x_ncg = params.get<std::vector<Real>>("x_ncg");
+  for (unsigned int i = 0; i < x_ncg.size(); i++)
+    outputProperty("Mass fraction " + std::to_string(i), x_ncg[i], "-");
   outputProperty("Pressure", params.get<Real>("p"), "Pa");
   outputProperty("Temperature", params.get<Real>("T"), "K");
   outputProperty("Density", params.get<Real>("rho"), "kg/m^3");
   outputProperty("Specific volume", params.get<Real>("v"), "m^3/kg");
   outputProperty("Specific internal energy", params.get<Real>("e"), "J/kg");
   outputProperty("Specific enthalpy", params.get<Real>("h"), "J/kg");
+  outputProperty("Specific entropy", params.get<Real>("s"), "J/kg");
   _console << std::endl;
   outputProperty("Sound speed", params.get<Real>("c"), "m/s");
   outputProperty("Dynamic viscosity", params.get<Real>("mu"), "Pa-s");

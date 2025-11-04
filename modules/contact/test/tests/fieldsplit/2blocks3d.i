@@ -12,7 +12,7 @@
   error_on_jacobian_nonzero_reallocation = true
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     incremental = true

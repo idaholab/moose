@@ -6,7 +6,7 @@
 
 ## Step 7a: Coarse Solution
 
-!listing step7a_coarse.i
+!listing step07_adaptivity/problems/step7a_coarse.i diff=step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
 
 !---
 
@@ -23,7 +23,7 @@ cd problems
 
 ## Step 7b: Fine Solution
 
-!listing step7b_fine.i
+!listing step07_adaptivity/problems/step7b_fine.i diff=step07_adaptivity/problems/step7a_coarse.i
 
 !---
 
@@ -40,7 +40,7 @@ cd problems
 
 ## Step 7c: Adaptive Mesh Solution
 
-!listing step7c_adapt.i
+!listing step07_adaptivity/problems/step7c_adapt.i diff=step07_adaptivity/problems/step7b_fine.i
 
 !---
 
@@ -56,13 +56,15 @@ cd problems
 !---
 
 !media darcy_thermo_mech/step07abc_result.mp4
+       alt=Temperature field evolution found using different levels of refinement, including adaptive mesh refinement.
 
 !---
 
 ## Step 7d: Multiple Subdomains
 
-!listing step7d_adapt_blocks.i
+!listing step7d_adapt_blocks.i diff=step07_adaptivity/problems/step7c_adapt.i
 
 !---
 
 !media darcy_thermo_mech/step07d_result.mp4
+       alt=Temperature field evolution found using adaptive mesh refinement on a mesh with multiple subdomains.

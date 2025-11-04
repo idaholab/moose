@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,6 +51,7 @@ ComputeIncrementalStrainBase::initQpStatefulProperties()
   _mechanical_strain[_qp].zero();
   _total_strain[_qp].zero();
   _deformation_gradient[_qp].setToIdentity();
+  _rotation_increment[_qp].setToIdentity();
 }
 
 void

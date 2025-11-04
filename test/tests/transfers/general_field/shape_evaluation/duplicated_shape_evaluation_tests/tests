@@ -60,7 +60,7 @@
     [missed_point]
       type = 'RunException'
       input = 'missing_parent.i'
-      expect_err = 'could not be located'
+      expect_err = 'No source value for node '
 
       detail = "the evaluation point does not exist"
     []

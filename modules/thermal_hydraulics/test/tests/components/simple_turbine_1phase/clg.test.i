@@ -124,15 +124,16 @@
 []
 
 [Postprocessors]
-  [W_dot]
-    type = ScalarVariable
-    variable = turbine:W_dot
+  [turbine_power]
+    type = ElementAverageValue
+    variable = W_dot
+    block = 'turbine'
   []
 []
 
 [Outputs]
   [csv]
     type = CSV
-    show = 'W_dot'
+    show = 'turbine_power'
   []
 []

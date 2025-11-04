@@ -1,0 +1,8 @@
+# For testing mooseutils.sqa tools in the case that multiple specs are provided.
+# This file is used in tandem with the spec_missing_req file in python/moosesqa/test/specs.
+[Tests]
+   [no_issue]
+     design = 'design.md'
+     requirement = 'all'
+   []
+[]

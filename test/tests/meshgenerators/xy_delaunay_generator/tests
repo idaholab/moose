@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYDelaunayGenerator.md'
-  issues = '#20192 #26776 #27545'
+  issues = '#20192 #26776 #27545 #27828 #27722'
   [xydelaunay]
     requirement = "The system shall have the capability of triangulating a polyline boundary"
     [basic]
@@ -10,6 +10,15 @@
       exodiff = 'xydelaunay_mesh_generator_in.e'
       recover = false
       detail = "within an input polyline"
+    []
+    [id_name_assignment]
+      type = 'Exodiff'
+      input = 'xydelaunay_mesh_generator.i'
+      cli_args = 'Mesh/triang/output_subdomain_id=99 Mesh/triang/output_subdomain_name=ablock --mesh-only xydelaunay_mesh_generator_with_name.e'
+      exodiff = 'xydelaunay_mesh_generator_with_name.e'
+      recover = false
+      exodiff_opts = '-pedantic'
+      detail = "allowing users to assign subdomain id and names for the triangulated area"
     []
     [open_line]
       type = 'RunException'
@@ -73,6 +82,7 @@
       cli_args = 'Mesh/final_generator=triang
                   --mesh-only'
       exodiff = 'xydelaunay_stitching_in.e'
+      exodiff_opts = '-pedantic'
       recover = false
       detail = "selectively stitching 'hole' meshes into the final mesh"
     []
@@ -83,6 +93,8 @@
       exodiff = 'xydelaunay_nested_in.e'
       recover = false
       detail = "allowing deep nesting of triangulations within triangulations"
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [smoothed]
       type = 'Exodiff'
@@ -91,6 +103,8 @@
       exodiff = 'xydelaunay_smoothed_in.e'
       recover = false
       detail = "with optional Laplacian mesh smoothing."
+      # PR #26848. Clang 16 Apple Si is not compatible.
+      machine = X86_64
     []
     [area_func]
       type = 'Exodiff'
@@ -156,7 +170,15 @@
                   --mesh-only xydelaunay_stitching_tri7.e'
       exodiff = 'xydelaunay_stitching_tri7.e'
       recover = false
-      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order" 
+      detail = "selectively stitching linear 'hole' meshes into the final quadratic TRI7 mesh after increasing the hole mesh element order"
+    []
+    [interior_points]
+      type = 'Exodiff'
+      input = 'xydelaunay_interior_pts.i'
+      cli_args = '--mesh-only xydelaunay_interior_pts.e'
+      exodiff = 'xydelaunay_interior_pts.e'
+      recover = false
+      detail = "with the ability to specify interior nodes."
     []
   []
   [errors]
@@ -193,6 +215,13 @@
                   Mesh/xyd/tri_element_type=TRI3'
       expect_err = "Cannot use first order elements with stitched quadratic element holes."
       detail = "if the input hole meshes"
+    []
+    [err_interior_points]
+      type = RunException
+      input = 'xydelaunay_interior_pts.i'
+      cli_args = "Mesh/triangulate/interior_points='0.25 0.25 0.0' --mesh-only"
+      expect_err = "Duplicate points were found in the provided interior points."
+      detail = "with duplicate interior points"
     []
   []
 []

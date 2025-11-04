@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -88,8 +88,9 @@ ADInterfaceKernelTempl<T>::computeElemNeighResidual(Moose::DGResidualType type)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initQpResidual(type);
+    const auto jxw_p = _JxW[_qp] * _coord[_qp];
     for (_i = 0; _i < test_space.size(); _i++)
-      _local_re(_i) += raw_value(_ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(type));
+      _local_re(_i) += jxw_p * raw_value(computeQpResidual(type));
   }
 
   accumulateTaggedLocalResidual();
@@ -154,8 +155,9 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initQpResidual(resid_type);
+    const auto jxw_c = _ad_JxW[_qp] * _ad_coord[_qp];
     for (_i = 0; _i < test_space.size(); _i++)
-      residuals[_i] += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
+      residuals[_i] += jxw_c * computeQpResidual(resid_type);
   }
 
   const bool element_var_is_var = (type == Moose::ElementElement || type == Moose::ElementNeighbor);
@@ -208,8 +210,9 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initQpResidual(resid_type);
+    const auto jxw_c = _ad_JxW[_qp] * _ad_coord[_qp];
     for (_i = 0; _i < test_space.size(); _i++)
-      residuals[_i] += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
+      residuals[_i] += jxw_c * computeQpResidual(resid_type);
   }
 
   // We assert earlier that the type cannot be Moose::ElementNeighbor (nor Moose::NeighborElement)

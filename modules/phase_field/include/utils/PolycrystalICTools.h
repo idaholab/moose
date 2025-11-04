@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,20 +61,20 @@ unsigned int assignPointToGrain(const Point & p,
 AdjacencyMatrix<Real>
 buildGrainAdjacencyMatrix(const std::map<dof_id_type, unsigned int> & entity_to_grain,
                           MooseMesh & mesh,
-                          const PeriodicBoundaries * pb,
+                          const libMesh::PeriodicBoundaries * pb,
                           unsigned int n_grains,
                           bool is_elemental);
 
 AdjacencyMatrix<Real>
 buildElementalGrainAdjacencyMatrix(const std::map<dof_id_type, unsigned int> & element_to_grain,
                                    MooseMesh & mesh,
-                                   const PeriodicBoundaries * pb,
+                                   const libMesh::PeriodicBoundaries * pb,
                                    unsigned int n_grains);
 
 AdjacencyMatrix<Real>
 buildNodalGrainAdjacencyMatrix(const std::map<dof_id_type, unsigned int> & node_to_grain,
                                MooseMesh & mesh,
-                               const PeriodicBoundaries * pb,
+                               const libMesh::PeriodicBoundaries * pb,
                                unsigned int n_grains);
 
 std::vector<unsigned int> assignOpsToGrains(AdjacencyMatrix<Real> & adjacency_matrix,

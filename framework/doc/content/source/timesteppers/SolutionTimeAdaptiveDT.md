@@ -22,8 +22,6 @@ The sign of the update is chosen as explained above.
 
 ## Example input syntax
 
-!listing test/tests/executioners/executioner/sln-time-adapt.i block=Executioner
-
 !syntax parameters /Executioner/TimeSteppers/SolutionTimeAdaptiveDT
 
 !syntax inputs /Executioner/TimeSteppers/SolutionTimeAdaptiveDT

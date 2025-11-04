@@ -11,137 +11,111 @@
 # modulus, t is the thickness and P is the point load.
 
 # For this problem, E = 1e6 Pa, L = 2 m, R = 1 m, t = 0.01 m, P = 10 N and
-# Poisson's ratio = 0.3. FEM results from different mesh discretizations are
-# presented below. Only the 10x10 mesh is included as a test.
+# Poisson's ratio = 0.3. This gives an analytic displacement of 0.16424 m.
+# FEM results from different mesh discretizations are presented below. Only
+# the 10x10 mesh is included as a test.
 
-# Mesh of 1/8 cylinder |  FEM/analytical (Moose) | FEM/analytical (Dvorkin)
-#                      |ratio of normalized disp.| ratio of normalized disp.
+# As shown in the table below, the results from the MOOSE FEM analysis converge
+# to the analytic solution and the convergence matches well with the results
+# of Dvorkin and Bathe (1984).
+
+# Mesh of 1/8 cylinder |  FEM/analytical disp    | FEM/analytical disp
+#                      |  (MOOSE implementation) | (Reported by Dvorkin)
 #----------------------|-------------------------|-------------------------
-#     10 x 10          |          0.806          |        0.83
-#     20 x 20          |          1.06           |        0.96
-#     40 x 40          |          0.95           |         -
-#     80 x 160         |          0.96           |         -
-
-# The results from FEM analysis matches well with the series solution and with
-# the solution presented by Dvorkin and Bathe (1984).
+#     10 x 10          |          0.82           |        0.83
+#     20 x 20          |          0.95           |        0.96
+#     40 x 40          |          0.99           |         -
+#     80 x 80          |          1.01           |         -
 
 [Mesh]
-  [./mesh]
+  [mesh]
     type = FileMeshGenerator
-    file = pinched_cyl_10_10.msh
-  [../]
-  [./block_100]
-    type = ParsedSubdomainMeshGenerator
-    input = mesh
-    combinatorial_geometry = 'x > -1.1 & x < 1.1 & y > -1.1 & y < 1.1 & z > -0.1 & z < 2.1'
-    block_id = 100
-  [../]
-  [./nodeset_1]
-    type = BoundingBoxNodeSetGenerator
-    input = block_100
-    top_right = '1.1 1.1 0'
-    bottom_left = '-1.1 -1.1 0'
-    new_boundary = 'CD' #CD
-  [../]
-  [./nodeset_2]
-    type = BoundingBoxNodeSetGenerator
-    input = nodeset_1
-    top_right = '1.1 1.1 1.0'
-    bottom_left = '-1.1 -1.1 1.0'
-    new_boundary = 'AB' #AB
-  [../]
-  [./nodeset_3]
-    type = BoundingBoxNodeSetGenerator
-    input = nodeset_2
-    top_right = '0.02 1.1 1.0'
-    bottom_left = '-0.1 0.98 0.0'
-    new_boundary = 'AD' #AD
-  [../]
-  [./nodeset_4]
-    type = BoundingBoxNodeSetGenerator
-    input = nodeset_3
-    top_right = '1.1 0.02 1.0'
-    bottom_left = '0.98 -0.1 0.0'
-    new_boundary = 'BC' #BC
-  [../]
+    file = cyl_sym_10x10.e
+  []
 []
 
-
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./rot_x]
+  []
+  [rot_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./rot_y]
+  []
+  [rot_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [BCs]
-  [./simply_support_x]
+  [simply_support_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'CD AD'
     value = 0.0
-  [../]
-  [./simply_support_y]
+  []
+  [simply_support_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'CD BC'
     value = 0.0
-  [../]
-  [./simply_support_z]
+  []
+  [simply_support_z]
     type = DirichletBC
     variable = disp_z
-    boundary = 'CD AB'
+    boundary = 'AB'
     value = 0.0
-  [../]
-  [./simply_support_rot_x]
+  []
+  # Note that the rotational DOFs are in the local coordinate system
+  # Also it isn't clear from the Dvorkin paper which DOFs should be fixed on the far
+  # end (boundary CD). If it were fully constrained we would need to fix disp_z and
+  # the rotations, but that makes it stiffer than the analytical solution.
+  [simply_support_rot_x]
     type = DirichletBC
     variable = rot_x
-    boundary = 'CD BC'
+    boundary = 'AB'
     value = 0.0
-  [../]
-  [./simply_support_rot_y]
+  []
+  [simply_support_rot_y]
     type = DirichletBC
     variable = rot_y
-    boundary = 'CD AD'
+    boundary = 'AD BC'
     value = 0.0
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./point1]
+  [point]
     type = ConstantPointSource
     variable = disp_x
     point = '1 0 1'
     value = -2.5 # P = 10
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
+  petsc_options = '-snes_ksp_ew'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
   line_search = 'none'
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-8
@@ -151,74 +125,90 @@
 []
 
 [Kernels]
-  [./solid_disp_x]
+  [solid_disp_x]
     type = ADStressDivergenceShell
     block = '100'
     component = 0
     variable = disp_x
     through_thickness_order = SECOND
-  [../]
-  [./solid_disp_y]
+  []
+  [solid_disp_y]
     type = ADStressDivergenceShell
     block = '100'
     component = 1
     variable = disp_y
     through_thickness_order = SECOND
-  [../]
-  [./solid_disp_z]
+  []
+  [solid_disp_z]
     type = ADStressDivergenceShell
     block = '100'
     component = 2
     variable = disp_z
     through_thickness_order = SECOND
-  [../]
-  [./solid_rot_x]
+  []
+  [solid_rot_x]
     type = ADStressDivergenceShell
     block = '100'
     component = 3
     variable = rot_x
     through_thickness_order = SECOND
-  [../]
-  [./solid_rot_y]
+  []
+  [solid_rot_y]
     type = ADStressDivergenceShell
     block = '100'
     component = 4
     variable = rot_y
     through_thickness_order = SECOND
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ADComputeIsotropicElasticityTensorShell
     youngs_modulus = 1e6
     poissons_ratio = 0.3
     block = '100'
     through_thickness_order = SECOND
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ADComputeIncrementalShellStrain
     block = '100'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y'
     thickness = 0.01
     through_thickness_order = SECOND
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ADComputeShellStress
     block = '100'
     through_thickness_order = SECOND
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./disp_z2]
+  [disp_x1]
     type = PointValue
     point = '1 0 1'
     variable = disp_x
-  [../]
+  []
+  [disp_y1]
+    type = PointValue
+    point = '1 0 1'
+    variable = disp_y
+  []
+  [disp_x2]
+    type = PointValue
+    point = '0 1 1'
+    variable = disp_x
+  []
+  [disp_y2]
+    type = PointValue
+    point = '0 1 1'
+    variable = disp_y
+  []
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []

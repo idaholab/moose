@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,7 +54,7 @@ protected:
   /// Boundary ID of the mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the mesh's external boundary
-  const std::string _external_boundary_name;
+  const BoundaryName _external_boundary_name;
   /// Boundary Names of the mesh's inward interface boundaries
   const std::vector<std::string> _inward_interface_boundary_names;
   /// Boundary Names of the mesh's outward interface boundaries

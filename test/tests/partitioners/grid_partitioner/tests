@@ -1,12 +1,55 @@
 [Tests]
-  [./test]
-    requirement = 'The system shall provide a simple regular grid-based partitioner'
-    design = '/GridPartitioner.md'
-    issues = '#11437'
+  design = '/GridPartitioner.md'
+  [test]
     type = 'Exodiff'
     input = 'grid_partitioner.i'
     exodiff = 'grid_partitioner_out.e'
     min_parallel = 4
     max_parallel = 4
-  [../]
+    issues = '#11437'
+    requirement = 'The system shall provide a simple regular grid-based partitioner'
+  []
+  [automatic_with_constraint]
+    type = 'Exodiff'
+    input = 'grid_partitioner.i'
+    exodiff = 'grid_partitioner_out.e'
+    # Same output name as 'test'
+    prereq = 'test'
+    recover = false
+    cli_args = 'Mesh/Partitioner/grid_computation=automatic Mesh/Partitioner/nx=2 Mesh/Partitioner/ny=0 Mesh/Partitioner/nz=0'
+    allow_warnings = true
+    min_parallel = 4
+    max_parallel = 4
+    issues = '#28787'
+    requirement = 'The system shall be able to create a simple rectangular grid partitioning automatically.'
+  []
+
+  [exceptions]
+    requirement = "The system shall throw an error if"
+    issues = '#11437 #28787'
+    [wrong_size]
+      type = RunException
+      input = 'grid_partitioner.i'
+      expect_err = 'Number of grid cells \(10\) does not match the number of MPI processes'
+      cli_args = 'Mesh/Partitioner/nx=5'
+      min_parallel = 2
+      max_parallel = 9
+      detail = 'the user-specified grid does not match the number of processes.'
+    []
+  []
+
+  [warnings]
+    requirement = "The system shall emit a warning if"
+    issues = '#28787'
+    [override_in_automatic]
+      type = 'RunApp'
+      input = 'grid_partitioner.i'
+      cli_args = 'Mesh/Partitioner/grid_computation=automatic Mesh/Partitioner/nx=5'
+      expect_out = "User specified \(nx,ny,nz\) grid exceeded number of partition"
+      allow_warnings = true
+      min_parallel = 4
+      max_parallel = 4
+      detail = 'the user provides a grid with more partitions than processors in the automatic model of the grid-based partitioner.'
+    []
+  []
 []

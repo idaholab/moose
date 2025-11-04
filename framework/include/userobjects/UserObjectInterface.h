@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,10 +11,12 @@
 
 // MOOSE includes
 #include "MooseTypes.h"
-#include "FEProblemBase.h"
+#include "MooseUtils.h"
 
 // Forward declarations
 class UserObject;
+class FEProblemBase;
+class MooseObject;
 
 /**
  * Interface for objects that need to use UserObjects.
@@ -24,13 +26,14 @@ class UserObjectInterface
 public:
   static InputParameters validParams();
 
-  /**
-   * @param params The parameters used by the object being instantiated. This
-   *        class needs them so it can get the user object named in the input file,
-   *        but the object calling getUserObject only needs to use the name on the
-   *        left hand side of the statement "user_object = user_object_name"
-   */
   UserObjectInterface(const MooseObject * moose_object);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  UserObjectInterface(const UserObjectInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   /**
    * @return The name of the user object associated with the parameter \p param_name
@@ -109,12 +112,22 @@ protected:
 
 private:
   /**
+   * Go directly to the FEProblem for the requested \p UserObject
+   */
+  const UserObject & getUserObjectFromFEProblem(const UserObjectName & object_name) const;
+
+  /**
    * Internal helper that casts the UserObject \p uo_base to the requested type. Exits with
    * a useful error if the casting failed. If the parameter \p param_name is provided and
    * is valid, a paramError() will be used instead.
    */
   template <class T>
   const T & castUserObject(const UserObject & uo_base, const std::string & param_name = "") const;
+
+  /**
+   * emit an error for the given parameter
+   */
+  void mooseObjectError(const std::string & param_name, std::stringstream & oss) const;
 
   /// Gets a UserObject's type; avoids including UserObject.h in the UserObjectInterface
   const std::string & userObjectType(const UserObject & uo) const;
@@ -146,10 +159,7 @@ UserObjectInterface::castUserObject(const UserObject & uo_base,
         << " is not derived from the required type.\n\nThe UserObject must derive from "
         << MooseUtils::prettyCppType<T>() << ".";
 
-    if (_uoi_moose_object.parameters().isParamValid(param_name))
-      _uoi_moose_object.paramError(param_name, oss.str());
-    else
-      _uoi_moose_object.mooseError(oss.str());
+    mooseObjectError(param_name, oss);
   }
 
   return *uo;
@@ -183,5 +193,5 @@ UserObjectInterface::hasUserObjectByName(const UserObjectName & object_name) con
 {
   if (!hasUserObjectByName(object_name))
     return false;
-  return dynamic_cast<const T *>(&_uoi_feproblem.getUserObjectBase(object_name));
+  return dynamic_cast<const T *>(&getUserObjectFromFEProblem(object_name));
 }

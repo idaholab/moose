@@ -72,7 +72,7 @@ Clicking on the links in the above table will provide you with more examples.  F
 !alert note
 For multi-phase situations you will need an advective flux calculator for each phase and each component, unless the phases are immiscible (each component exists in one phase only).
 
-For example, in the case of 2 phases with 2 components, each potentially existing in both phases, there are 2 PorousFlow [governing equations](governing_equations.md): one for each component.  The equation for fluid component zero contains contributions from both phase 0 and phase 1.  The equation for fluid component one contains contributions from both phase 0 and phase 1.  So the Kernels will look like
+For example, in the case of 2 phases with 2 components, each potentially existing in both phases, there are 2 PorousFlow [governing equations](porous_flow/governing_equations.md): one for each component.  The equation for fluid component zero contains contributions from both phase 0 and phase 1.  The equation for fluid component one contains contributions from both phase 0 and phase 1.  So the Kernels will look like
 
 !listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_2phasePS_KT.i start=Kernels
 

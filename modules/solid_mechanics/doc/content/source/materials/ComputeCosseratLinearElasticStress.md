@@ -24,7 +24,7 @@ The Jacobian, derivative of the stress with regards to strain, is simply set to 
 and the derivative of the coupled stress with regards to strain, is simply set to the elasticity flexural rigidity tensor.
 
 !alert note
-This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/cosserat.pdf))
+This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/tree/next/modules/solid_mechanics/doc/theory/cosserat.pdf))
 for more explanation.
 
 !syntax parameters /Materials/ComputeCosseratLinearElasticStress

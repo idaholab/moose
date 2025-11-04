@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ VolumeAux::validParams()
 
 VolumeAux::VolumeAux(const InputParameters & parameters) : AuxKernel(parameters)
 {
-  if (mooseVariableBase()->feType() != FEType(CONSTANT, MONOMIAL))
+  if (mooseVariableBase()->feType() != libMesh::FEType(CONSTANT, MONOMIAL))
     paramError("variable", "Must be of type CONSTANT MONOMIAL");
 }
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,10 +34,10 @@ PackedColumn::PackedColumn(const InputParameters & parameters)
   : Material(parameters),
 
     // Get the parameters from the input file
-    _radius(getFunction("radius")),
+    _input_radius(getFunction("radius")),
     _input_viscosity(getParam<Real>("viscosity")),
 
-    // Declare two material properties by getting a reference from the MOOSE Material system
+    // Material Properties being produced by this object
     _permeability(declareADProperty<Real>("permeability")),
     _viscosity(declareADProperty<Real>("viscosity"))
 {
@@ -50,7 +50,7 @@ PackedColumn::computeQpProperties()
   std::vector<Real> sphere_sizes = {1, 3};
   std::vector<Real> permeability = {0.8451e-9, 8.968e-9};
 
-  Real value = _radius.value(_t, _q_point[_qp]);
+  Real value = _input_radius.value(_t, _q_point[_qp]);
   mooseAssert(value >= 1 && value <= 3,
               "The radius range must be in the range [1, 3], but " << value << " provided.");
 

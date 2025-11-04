@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -30,7 +30,7 @@ public:
   // Evaluation function of the libtorch modules. Since there are considerable
   // differences between self-built modules and modules read using a torch-script
   // format, this serves as a common denominator between the two.
-  virtual torch::Tensor forward(torch::Tensor & x) = 0;
+  virtual torch::Tensor forward(const torch::Tensor & x) = 0;
 };
 
 }

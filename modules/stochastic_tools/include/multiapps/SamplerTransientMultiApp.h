@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -46,7 +46,7 @@ protected:
   dof_id_type _local_batch_app_index;
 
   /// Override to allow to get correct cli_args
-  virtual std::string getCommandLineArgsParamHelper(unsigned int local_app) override;
+  virtual std::vector<std::string> getCommandLineArgs(const unsigned int local_app) override;
 
 private:
   /**

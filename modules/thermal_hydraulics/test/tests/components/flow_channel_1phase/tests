@@ -10,6 +10,7 @@
       input = 'phy.f_fn.3eqn.i'
       csvdiff = 'phy.f_fn.3eqn_out.csv'
       rel_err = 1e-10
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'with a friction factor provided by a function.'
     []
     [phy:par_fn]
@@ -17,6 +18,7 @@
       input = 'phy.par_fn.i'
       csvdiff = 'phy.par_fn_out.csv'
       rel_err = 1e-10
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'with a hydraulic diameter provided by a function.'
     []
     [phy:sub_discretization]

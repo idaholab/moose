@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,16 +17,38 @@
 InputParameters
 NodalKernel::validParams()
 {
-  return NodalKernelBase::validParams();
+  auto params = NodalKernelBase::validParams();
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in",
+      {},
+      "The name of auxiliary variables to save this BC's residual contributions to.  "
+      "Everything about that variable must match everything about this variable (the "
+      "type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>(
+      "diag_save_in",
+      {},
+      "The name of auxiliary variables to save this BC's diagonal jacobian "
+      "contributions to.  Everything about that variable must match everything "
+      "about this variable (the type, what blocks it's on, etc.)");
+  params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
+  return params;
 }
 
 NodalKernel::NodalKernel(const InputParameters & parameters)
   : NodalKernelBase(parameters),
+    MooseVariableInterface<Real>(this,
+                                 true,
+                                 "variable",
+                                 Moose::VarKindType::VAR_SOLVER,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(*mooseVariable()),
     _u(_var.dofValues()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 
 {
+  addMooseVariableDependency(mooseVariable());
+
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
@@ -107,20 +129,18 @@ NodalKernel::computeJacobian()
 void
 NodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  const auto & jvar = getVariable(jvar_num);
-
   if (_var.isNodalDefined())
   {
-    if (jvar.number() == _var.number())
+    if (jvar_num == _var.number())
       computeJacobian();
     else
     {
       _qp = 0;
-      const Real cached_val = computeQpOffDiagJacobian(jvar.number());
+      const Real cached_val = computeQpOffDiagJacobian(jvar_num);
       const dof_id_type cached_row = _var.nodalDofIndex();
 
       // Note: this only works for equal order Lagrange variables...
-      const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar.number(), 0);
+      const dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar_num, 0);
 
       addJacobianElement(_assembly, cached_val, cached_row, cached_col, _var.scalingFactor());
     }

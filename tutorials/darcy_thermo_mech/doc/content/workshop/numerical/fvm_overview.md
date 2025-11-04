@@ -25,7 +25,9 @@
 !style fontsize=80%
 First, domain $\Omega$ is split into $N_c$ cells ($\Omega_{i},~i=1,...,N_c$).
 
-!media darcy_thermo_mech/fvm_cell.png style=width:100%;background:white;
+!media darcy_thermo_mech/fvm_cell.png
+       style=width:100%;background:white;
+       alt=Diagram illustrating cells used in the finite volume method.
 
 !col-end!
 
@@ -95,12 +97,15 @@ is very similar to the one used in the FEM routines (We always use a test functi
 !style fontsize=80%
 Othogonal scenario: ($S_f$ and $\delta_{NP}$ are parallel)
 
-!media darcy_thermo_mech/fvm_orthogonal.png style=width:100%;background:white;
+!media darcy_thermo_mech/fvm_orthogonal.png
+       style=width:100%;background:white;
+       alt=Diagram illustrating approximation of diffusion between two cell centroids when the line connecting them is orthogonal to the cells' shared face.
 
 !style fontsize=80%
 Non-othogonal scenario:
 
 !media darcy_thermo_mech/fvm_nonorthogonal.png style=width:100%;background:white;
+       alt=Diagram illustrating approximation of diffusion between two cell centroids when the line connecting them is not orthogonal to the cells' shared face.
 
 !col-end!
 
@@ -143,7 +148,10 @@ On an internal cell (let's say on cell C):
 !style fontsize=80%
 Basic interpolation scheme:
 
-!media darcy_thermo_mech/fvm_interpolation.png style=width:100%;background:white;
+!media darcy_thermo_mech/fvm_interpolation.png
+       style=width:100%;background:white;
+       alt=Illustration of how interpolation is done between centroids.
+
 
 !equation
 u_f = \left(\frac{\delta_{fN}}{\delta_{CN}}\right) u_C + \left(1- \frac{\delta_{fN}}{\delta_{CN}}\right) u_N
@@ -201,7 +209,7 @@ Split to integral to cell-wise integrals and use the divergence theorem:
 On an internal cell (let's say on cell C), assuming that $\beta$ is constant:
 
 !equation
-\int_{\partial\Omega_i} (\vec{\beta}~u) \cdot \hat{n}~ dS = \sum_f^{N_{f,C}} \int_{\partial\Omega_{C,f}} (\vec{\beta}~u) \cdot \hat{n}~ dS \approx \sum_f^{N_{f,C}} \vec{\beta}_f~ u_f \hat{n}_f |S_f|
+\int_{\partial\Omega_i} (\vec{\beta}~u) \cdot \hat{n}~ dS = \sum_f^{N_{f,C}} \int_{\partial\Omega_{C,f}} (\vec{\beta}~u) \cdot \hat{n}~ dS \approx \sum_f^{N_{f,C}} (\vec{\beta}_f~ u_f) \cdot \hat{n}_f |S_f|
 
 !col-end!
 
@@ -271,7 +279,10 @@ Common interpolation method for $u_f$:
 
 !col! width=40%
 
-!media darcy_thermo_mech/fvm_cask.gif style=width:100%;background:white;
+!media darcy_thermo_mech/fvm_cask.gif
+       style=width:100%;background:white;
+       alt=Velocity and vorticity plots from a finite volume simulation of coolant flow in a spent fuel cask.
+
 
 !col-end!
 

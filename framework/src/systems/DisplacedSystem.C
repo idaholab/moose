@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ DisplacedSystem::DisplacedSystem(DisplacedProblem & problem,
                                  Moose::VarKindType var_kind)
   : SystemBase(problem, fe_problem, name, var_kind),
     _undisplaced_system(undisplaced_system),
-    _sys(problem.es().add_system<TransientExplicitSystem>(name))
+    _sys(problem.es().add_system<libMesh::System>(name))
 {
   if (!problem.defaultGhosting())
   {
@@ -50,12 +50,6 @@ DisplacedSystem::getVector(const std::string & name) const
     return _sys.get_vector(name);
   else
     return _undisplaced_system.getVector(name);
-}
-
-void
-DisplacedSystem::addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti)
-{
-  _time_integrator = ti;
 }
 
 System &

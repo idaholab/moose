@@ -5,7 +5,7 @@
 The heat transfer coefficient $h$ is simply derived from the definition of the Nusselt number $Nu$:
 
 !equation
-Nu = \dfrac{Nu k}{D_h}
+h = \dfrac{Nu k}{D_h}
 
 with $k$ the thermal conductivity and $D_h$ the hydraulic diameter.
 

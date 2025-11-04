@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -30,4 +30,6 @@ protected:
   const Moose::Functor<ADReal> & _epsilon;
   /// The C_mu
   const Moose::Functor<ADReal> & _C_mu;
+  /// Whether to preserve the sparsity pattern between iterations (needed for Newton solvers)
+  const bool _preserve_sparsity_pattern;
 };

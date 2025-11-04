@@ -23,6 +23,14 @@ scale = 0.8
 power = ${fparse scale * heat_flux_integral}
 E_change = ${fparse power * t}
 
+[FunctorMaterials]
+  [test_fm]
+    type = ADGenericFunctorMaterial
+    prop_names = 'T_ambient_prop htc_ambient_prop'
+    prop_values = 'T_ambient_fn htc_ambient_fn'
+  []
+[]
+
 [Functions]
   [T_ambient_fn]
     type = PiecewiseConstant
@@ -69,8 +77,8 @@ E_change = ${fparse power * t}
     type = HSBoundaryAmbientConvection
     boundary = 'hs:outer'
     hs = hs
-    T_ambient = T_ambient_fn
-    htc_ambient = htc_ambient_fn
+    T_ambient = T_ambient_prop
+    htc_ambient = htc_ambient_prop
     scale = ${scale}
   []
 []

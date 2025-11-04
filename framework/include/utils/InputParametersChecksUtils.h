@@ -1,11 +1,13 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
 
 #include "InputParameters.h"
 #include "Moose.h"
@@ -46,6 +48,11 @@ protected:
   /// @param param2 second parameter to check, that should be set if first one is set
   void checkSecondParamSetOnlyIfFirstOneSet(const std::string & param1,
                                             const std::string & param2) const;
+  /// Check that a parameter is not set if the first one is set
+  /// @param param1 first parameter to check, check that the second is not if this one is set
+  /// @param param2 second parameter to check, that should not be set if first one is set
+  void checkSecondParamNotSetIfFirstOneSet(const std::string & param1,
+                                           const std::string & param2) const;
   /// Check that the two vector parameters are of the same length
   /// @param param1 first vector parameter to compare the size of
   /// @param param2 second vector parameter to compare the size of
@@ -68,6 +75,11 @@ protected:
   /// @param param_vecs vector of parameters that should not overlap with each other
   template <typename T>
   void checkVectorParamsNoOverlap(const std::vector<std::string> & param_vecs) const;
+  /// Check that there is no overlap between the respective items in each vector of the two-D parameters
+  /// Each vector of the two-D vector parameter should also have unique items
+  /// @param param_vecs vector of parameters that should not overlap with each other
+  template <typename T>
+  void checkTwoDVectorParamsNoRespectiveOverlap(const std::vector<std::string> & param_vecs) const;
   /// Check that each inner vector of a two-D vector parameter are the same size as another one-D vector parameter
   /// @param param1 two-D vector parameter to check the dimensions of
   /// @param param2 one-D vector parameter to set the desired size
@@ -125,6 +137,13 @@ protected:
   void errorDependentParameter(const std::string & param1,
                                const std::string & value_not_set,
                                const std::vector<std::string> & dependent_params) const;
+  /// Error messages for parameters that should depend on another parameter but with a different error message
+  /// @param param1 the parameter has not been set to the desired value (for logging purposes)
+  /// @param value_set the value it has been set to and which is not appropriate (for logging purposes)
+  /// @param dependent_params all the parameters that should not have been set since 'param1' was set to 'value_set'
+  void errorInconsistentDependentParameter(const std::string & param1,
+                                           const std::string & value_set,
+                                           const std::vector<std::string> & dependent_params) const;
 
 private:
   // Convenience routines so that defining new checks feels very similar to coding checks in
@@ -214,7 +233,7 @@ InputParametersChecksUtils<C>::checkVectorParamsSameLength(const std::string & p
   // handle empty vector defaults
   else if (forwardIsParamValid(param1) || forwardIsParamValid(param2))
     if (forwardGetParam<std::vector<T>>(param1).size() ||
-        forwardGetParam<std::vector<T>>(param2).size())
+        forwardGetParam<std::vector<S>>(param2).size())
       checkParamsBothSetOrNotSet(param1, param2);
 }
 
@@ -261,12 +280,13 @@ InputParametersChecksUtils<C>::checkTwoDVectorParamsSameLength(const std::string
             param1,
             "Vector at index " + std::to_string(index) + " of 2D vector parameter '" + param1 +
                 "' is not the same size as its counterpart from 2D vector parameter '" + param2 +
-                "'");
+                "'.\nSize first vector: " + std::to_string(value1[index].size()) +
+                "\nSize second vector: " + std::to_string(value2[index].size()));
   }
   // handle empty vector defaults
   else if (forwardIsParamValid(param1) || forwardIsParamValid(param2))
     if (forwardGetParam<std::vector<T>>(param1).size() ||
-        forwardGetParam<std::vector<T>>(param2).size())
+        forwardGetParam<std::vector<S>>(param2).size())
       checkParamsBothSetOrNotSet(param1, param2);
 }
 
@@ -353,9 +373,49 @@ InputParametersChecksUtils<C>::checkVectorParamsNoOverlap(
 
     for (const auto & value : forwardGetParam<std::vector<T>>(param))
       if (!unique_params.insert(value).second)
-        forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
-                          "' is also present in one or more of the parameters '" +
-                          Moose::stringify(param_vec) + "'. This is disallowed.");
+      {
+        auto copy_params = param_vec;
+        copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
+        // Overlap between multiple vectors of parameters
+        if (copy_params.size())
+          forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
+                            "' is also present in one or more of the parameters '" +
+                            Moose::stringify(copy_params) + "', which is not allowed.");
+        // Overlap within a single vector parameter caused by a repeated item
+        else
+          forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
+                            "' is repeated, which is not allowed.");
+      }
+  }
+}
+
+template <typename C>
+template <typename T>
+void
+InputParametersChecksUtils<C>::checkTwoDVectorParamsNoRespectiveOverlap(
+    const std::vector<std::string> & param_vec) const
+{
+  // Outer loop, each param is the name of a parameter for a vector of vectors
+  for (const auto & param : param_vec)
+  {
+    assertParamDefined<std::vector<std::vector<T>>>(param);
+    const auto & twoD_vec = forwardGetParam<std::vector<std::vector<T>>>(param);
+    std::vector<std::set<T>> unique_params(twoD_vec.size());
+
+    // Loop over each outer vector and compare the inner vectors respectively to other parameters
+    for (const auto i : index_range(twoD_vec))
+    {
+      for (const auto & value : twoD_vec[i])
+        if (!unique_params[i].insert(value).second)
+        {
+          auto copy_params = param_vec;
+          copy_params.erase(std::find(copy_params.begin(), copy_params.end(), param));
+          forwardMooseError("Item '" + value + "' specified in vector parameter '" + param +
+                            "' is also present in one or more of the two-D vector parameters '" +
+                            Moose::stringify(copy_params) +
+                            "' in the inner vector of the same index, which is not allowed.");
+        }
+    }
   }
 }
 
@@ -439,7 +499,8 @@ InputParametersChecksUtils<C>::checkBlockwiseConsistency(
           if (std::find(object_blocks.begin(), object_blocks.end(), block) == object_blocks.end())
             forwardParamError(block_param_name,
                               "Block '" + block + "' is not present in the block restriction of " +
-                                  forwardName() + "!");
+                                  forwardName() +
+                                  "!\nBlock restriction: " + Moose::stringify(object_blocks));
 
     for (const auto & param_name : parameter_names)
     {
@@ -492,9 +553,8 @@ InputParametersChecksUtils<C>::warnInconsistent(const InputParameters & other_pa
   if (!consistent)
     forwardMooseWarning("Parameter " + param_name + " is inconsistent between Physics \"" +
                         forwardName() + "\" of type \"" + forwardType() +
-                        "\" and the parameter set for \"" +
-                        other_param.get<std::string>("_action_name") + "\" of type \"" +
-                        other_param.get<std::string>("action_type") + "\"");
+                        "\" and the parameter set for \"" + other_param.getObjectName() +
+                        "\" of type \"" + other_param.getObjectType() + "\"");
 }
 
 template <typename C>
@@ -510,6 +570,21 @@ InputParametersChecksUtils<C>::errorDependentParameter(
                         "Parameter '" + dependent_param +
                             "' should not be set by the user if parameter '" + param1 +
                             "' has not been set to '" + value_not_set + "'");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::errorInconsistentDependentParameter(
+    const std::string & param1,
+    const std::string & value_set,
+    const std::vector<std::string> & dependent_params) const
+{
+  for (const auto & dependent_param : dependent_params)
+    if (forwardIsParamSetByUser(dependent_param))
+      forwardParamError(dependent_param,
+                        "Parameter '" + dependent_param +
+                            "' should not be set by the user if parameter '" + param1 +
+                            "' has been set to '" + value_set + "'");
 }
 
 template <typename C>
@@ -546,4 +621,15 @@ InputParametersChecksUtils<C>::checkSecondParamSetOnlyIfFirstOneSet(
     forwardParamError(param2,
                       "Parameter '" + param2 + "' should not be set if parameter '" + param1 +
                           "' is not specified.");
+}
+
+template <typename C>
+void
+InputParametersChecksUtils<C>::checkSecondParamNotSetIfFirstOneSet(const std::string & param1,
+                                                                   const std::string & param2) const
+{
+  if (forwardIsParamSetByUser(param1) && forwardIsParamSetByUser(param2))
+    forwardParamError(param2,
+                      "Parameter '" + param2 + "' should not be specified if parameter '" + param1 +
+                          "' is specified.");
 }

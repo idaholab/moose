@@ -40,6 +40,20 @@
     extra_element_id_names = elem_id
     expression = 'elem_id+1'
   []
+  [assign_elem_id3]
+    type = ParsedExtraElementIDGenerator
+    input = assign_elem_id2
+    restricted_subdomains = '0'
+    extra_elem_integer_name = elem_id3
+    expression = invalid_elem_id
+  []
+  [assign_elem_id4]
+    type = ParsedExtraElementIDGenerator
+    input = assign_elem_id3
+    restricted_subdomains = '1 2 3 4 5 6 7 8 9 10'
+    extra_elem_integer_name = elem_id3
+    expression = int(sqrt(x*x+y*y)/pi*e)
+  []
 []
 
 [Problem]

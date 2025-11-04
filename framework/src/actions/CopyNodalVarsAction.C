@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -59,7 +59,14 @@ CopyNodalVarsAction::act()
       SystemBase * system;
       // Is this a NonlinearSystem variable or an AuxiliarySystem variable?
       if (_current_task == "copy_nodal_vars")
-        system = &_problem->getNonlinearSystemBase(/*nl_sys=*/0);
+      {
+        // This iterates through each nonlinear system and finds which one the current variable
+        // needs to be copied to
+        system = &_problem->getSolverSystem(/*sys_num=*/0);
+        for (unsigned int i = 0; i < _problem->numSolverSystems(); i++)
+          if (_problem->getSolverSystem(i).hasVariable(name()))
+            system = &_problem->getSolverSystem(i);
+      }
       else
         system = &_problem->getAuxiliarySystem();
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,13 +44,19 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _dDdc(isCoupledConstant("_c_name")
               ? nullptr
               : &declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _c_name)),
+    _dDdgradc(isCoupledConstant("_c_name")
+                  ? nullptr
+                  : &declarePropertyDerivative<RankThreeTensor>(_diffusivity_name, "gradc")),
     _D0(getParam<Real>("D0")),
     _Em(getParam<Real>("Em")),
     _s_index(getParam<Real>("surfindex")),
     _gb_index(getParam<Real>("gbindex")),
     _b_index(getParam<Real>("bulkindex")),
     _kb(8.617343e-5), // Boltzmann constant in eV/K
-    _op_num(coupledComponents("v"))
+    _op_num(coupledComponents("v")),
+    _vals_name(_op_num),
+    _dDdeta(_op_num),
+    _dDdgradeta(_op_num)
 {
   if (_op_num == 0)
     mooseError("Model requires op_num > 0");
@@ -61,6 +67,12 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
   {
     _vals[i] = &coupledValue("v", i);
     _grad_vals[i] = &coupledGradient("v", i);
+    _vals_name[i] = coupledName("v", i);
+    if (!isCoupledConstant(_vals_name[i]))
+      _dDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _vals_name[i]);
+    if (!isCoupledConstant(_vals_name[i]))
+      _dDdgradeta[i] =
+          &declarePropertyDerivative<RankThreeTensor>(_diffusivity_name, ("grad" + _vals_name[i]));
   }
 }
 
@@ -74,8 +86,10 @@ PolycrystalDiffusivityTensorBase::computeProperties()
     Real c = _c[_qp];
     Real mc = 1.0 - c;
 
-    // Compute grain boundary diffusivity
+    // Compute grain boundary diffusivity and derivatives wrt order parameters
     RealTensorValue Dgb(0.0);
+    std::vector<RealTensorValue> dDgbdeta(_op_num);
+    std::vector<RankThreeTensor> dDgbdgradeta(_op_num);
 
     for (unsigned int i = 0; i < _op_num; ++i)
       for (unsigned int j = i + 1; j < _op_num; ++j)
@@ -94,26 +108,100 @@ PolycrystalDiffusivityTensorBase::computeProperties()
             Tgb(b, a) = I(b, a) - ngb(b) * ngb(a);
           }
 
+        RankThreeTensor dTgbi, dTgbj;
+        if (((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]).norm() > 1.0e-10)
+        {
+          Real detax = (*_grad_vals[i])[_qp](0) - (*_grad_vals[j])[_qp](0);
+          Real detay = (*_grad_vals[i])[_qp](1) - (*_grad_vals[j])[_qp](1);
+          Real detaz = (*_grad_vals[i])[_qp](2) - (*_grad_vals[j])[_qp](2);
+          Real norm4 = pow(((*_grad_vals[i])[_qp] - (*_grad_vals[j])[_qp]).norm(), 4.0);
+          // Derivatives wrt detai/dx
+          dTgbi(0, 0, 0) = -2.0 * detax * (detay * detay + detaz * detaz) / norm4;
+          dTgbi(1, 0, 0) = dTgbi(0, 1, 0) =
+              (detax * detax * detay - detay * detay * detay - detay * detaz * detaz) / norm4;
+          dTgbi(1, 1, 0) = 2.0 * detax * detay * detay / norm4;
+          dTgbi(2, 0, 0) = dTgbi(0, 2, 0) =
+              (detax * detax * detaz - detay * detay * detaz - detaz * detaz * detaz) / norm4;
+          dTgbi(2, 1, 0) = dTgbi(1, 2, 0) = 2.0 * detax * detay * detaz / norm4;
+          dTgbi(2, 2, 0) = 2.0 * detax * detaz * detaz / norm4;
+          // Derivatives wrt detai/dy
+          dTgbi(0, 0, 1) = 2.0 * detax * detax * detay / norm4;
+          dTgbi(1, 0, 1) = dTgbi(0, 1, 1) =
+              (-detax * detax * detax + detax * detay * detay - detax * detaz * detaz) / norm4;
+          dTgbi(1, 1, 1) = -2.0 * detay * (detax * detax + detaz * detaz) / norm4;
+          dTgbi(2, 0, 1) = dTgbi(0, 2, 1) = 2.0 * detax * detay * detaz / norm4;
+          dTgbi(2, 1, 1) = dTgbi(1, 2, 1) =
+              (detay * detay * detaz - detax * detax * detaz - detaz * detaz * detaz) / norm4;
+          dTgbi(2, 2, 1) = 2.0 * detay * detaz * detaz / norm4;
+
+          // Derivatives wrt detai/dz
+          dTgbi(0, 0, 2) = 2.0 * detax * detax * detaz / norm4;
+          dTgbi(1, 0, 2) = dTgbi(0, 1, 2) = 2.0 * detax * detay * detaz / norm4;
+          dTgbi(1, 1, 2) = 2.0 * detay * detay * detaz / norm4;
+          dTgbi(2, 0, 2) = dTgbi(0, 2, 2) =
+              (detax * detaz * detaz - detax * detax * detax - detay * detay * detax) / norm4;
+          dTgbi(2, 1, 2) = dTgbi(1, 2, 2) =
+              (detay * detaz * detaz - detax * detax * detay - detay * detay * detay) / norm4;
+          dTgbi(2, 2, 2) = -2.0 * detaz * (detax * detax + detay * detay) / norm4;
+
+          dTgbj = -dTgbi;
+        }
+
         Dgb += (*_vals[i])[_qp] * (*_vals[j])[_qp] * Tgb;
         Dgb += (*_vals[j])[_qp] * (*_vals[i])[_qp] * Tgb;
+        dDgbdeta[i] += 2.0 * (*_vals[j])[_qp] * Tgb;
+        dDgbdeta[j] += 2.0 * (*_vals[i])[_qp] * Tgb;
+        dDgbdgradeta[i] += 2.0 * (*_vals[i])[_qp] * (*_vals[j])[_qp] * dTgbi;
+        dDgbdgradeta[j] += 2.0 * (*_vals[i])[_qp] * (*_vals[j])[_qp] * dTgbj;
       }
 
     // Compute surface diffusivity matrix
-    RealGradient ns(0), dns(0);
+    RealGradient ns(0);
     if (_grad_c[_qp].norm() > 1.0e-10)
       ns = _grad_c[_qp] / _grad_c[_qp].norm();
 
     RealTensorValue Ts;
-    RealTensorValue dTs;
     for (unsigned int a = 0; a < 3; ++a)
       for (unsigned int b = 0; b < 3; ++b)
       {
         Ts(a, b) = I(a, b) - ns(a) * ns(b);
-        dTs(a, b) = -2.0 * dns(a) * ns(b);
       }
 
+    RankThreeTensor dTs;
+    if (_grad_c[_qp].norm() > 1.0e-10)
+    {
+      Real dcx = _grad_c[_qp](0);
+      Real dcy = _grad_c[_qp](1);
+      Real dcz = _grad_c[_qp](2);
+      Real norm4 = pow(_grad_c[_qp].norm(), 4.0);
+      // Derivatives wrt dc/dx
+      dTs(0, 0, 0) = -2.0 * dcx * (dcy * dcy + dcz * dcz) / norm4;
+      dTs(1, 0, 0) = dTs(0, 1, 0) = (dcx * dcx * dcy - dcy * dcy * dcy - dcy * dcz * dcz) / norm4;
+      dTs(1, 1, 0) = 2.0 * dcx * dcy * dcy / norm4;
+      dTs(2, 0, 0) = dTs(0, 2, 0) = (dcx * dcx * dcz - dcy * dcy * dcz - dcz * dcz * dcz) / norm4;
+      dTs(2, 1, 0) = dTs(1, 2, 0) = 2.0 * dcx * dcy * dcz / norm4;
+      dTs(2, 2, 0) = 2.0 * dcx * dcz * dcz / norm4;
+
+      // Derivatives wrt dc/dy
+      dTs(0, 0, 1) = 2.0 * dcx * dcx * dcy / norm4;
+      dTs(1, 0, 1) = dTs(0, 1, 1) = (-dcx * dcx * dcx + dcx * dcy * dcy - dcx * dcz * dcz) / norm4;
+      dTs(1, 1, 1) = -2.0 * dcy * (dcx * dcx + dcz * dcz) / norm4;
+      dTs(2, 0, 1) = dTs(0, 2, 1) = 2.0 * dcx * dcy * dcz / norm4;
+      dTs(2, 1, 1) = dTs(1, 2, 1) = (dcy * dcy * dcz - dcx * dcx * dcz - dcz * dcz * dcz) / norm4;
+      dTs(2, 2, 1) = 2.0 * dcy * dcz * dcz / norm4;
+
+      // Derivatives wrt dc/dz
+      dTs(0, 0, 2) = 2.0 * dcx * dcx * dcz / norm4;
+      dTs(1, 0, 2) = dTs(0, 1, 2) = 2.0 * dcx * dcy * dcz / norm4;
+      dTs(1, 1, 2) = 2.0 * dcy * dcy * dcz / norm4;
+      dTs(2, 0, 2) = dTs(0, 2, 2) = (dcx * dcz * dcz - dcx * dcx * dcx - dcy * dcy * dcx) / norm4;
+      dTs(2, 1, 2) = dTs(1, 2, 2) = (dcy * dcz * dcz - dcx * dcx * dcy - dcy * dcy * dcy) / norm4;
+      dTs(2, 2, 2) = -2.0 * dcz * (dcx * dcx + dcy * dcy) / norm4;
+    }
+
     RealTensorValue Dsurf = c * c * mc * mc * Ts;
-    RealTensorValue dDsurfdc = (2.0 * c * mc * mc - 2.0 * c * c * mc) * Ts + c * c * mc * mc * dTs;
+    RealTensorValue dDsurfdc = (2.0 * c * mc * mc - 2.0 * c * c * mc) * Ts;
+    RankThreeTensor dDsurfdgradc = c * c * mc * mc * dTs;
 
     // Compute bulk properties
     _Dbulk = _D0 * std::exp(-_Em / _kb / _T[_qp]);
@@ -124,5 +212,14 @@ PolycrystalDiffusivityTensorBase::computeProperties()
     _D[_qp] = _Dbulk * (_b_index * mult_bulk * I + _gb_index * Dgb + _s_index * Dsurf);
     if (_dDdc)
       (*_dDdc)[_qp] = _Dbulk * (_b_index * dmult_bulk * I + _s_index * dDsurfdc);
+    if (_dDdgradc)
+      (*_dDdgradc)[_qp] = _Dbulk * _s_index * dDsurfdgradc;
+    for (unsigned int i = 0; i < _op_num; ++i)
+    {
+      if (_dDdeta[i])
+        (*_dDdeta[i])[_qp] = _Dbulk * _gb_index * dDgbdeta[i];
+      if (_dDdgradeta[i])
+        (*_dDdgradeta[i])[_qp] = _Dbulk * _gb_index * dDgbdgradeta[i];
+    }
   }
 }

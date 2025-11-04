@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -70,7 +70,7 @@ public:
   void updatePatch(std::vector<dof_id_type> & secondary_nodes);
 
   /**
-   * Updates the ghosted elements at the start of the time step for iterion
+   * Updates the ghosted elements at the start of the time step for iteration
    * patch update strategy.
    */
   void updateGhostedElems();

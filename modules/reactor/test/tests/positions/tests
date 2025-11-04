@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23587'
+  issues = '#23587 #31215'
   design = 'HexagonalGridPositions.md'
 
   [test]
@@ -24,6 +24,21 @@
       cli_args = 'Positions/active=hex_grid_3rings_exclusions Outputs/file_base=hexagonal_grid_positions_3r_out'
       detail = 'a three-ring hexagonal grid with some positions excluded,'
     []
+    [rotated_hex_pattern_2rings]
+      type = 'JSONDiff'
+      input = 'hexagonal_grid_positions.i'
+      jsondiff = 'rotated_hexagonal_grid_positions_2r_out.json'
+      cli_args = "Positions/active=hex_grid_2rings_exclusions
+                  Positions/hex_grid_2rings_exclusions/rotation_around_axis=30
+                  Outputs/file_base=rotated_hexagonal_grid_positions_2r_out"
+      detail = 'a two-ring hexagonal grid with some positions excluded and rotated by a user-specified angle around its axis,'
+    []
+    [nested_hex_pattern]
+      type = 'JSONDiff'
+      input = 'nested_hexagonal_grid_positions.i'
+      jsondiff = 'nested_hexagonal_grid_positions_out.json'
+      detail = 'a two-level nested hexagonal grid, with some positions excluded from the parent grid,'
+    []
     [cartesian_centroids]
       type = 'JSONDiff'
       input = 'cartesian_grid_positions.i'
@@ -43,6 +58,24 @@
       jsondiff = 'cartesian_grid_positions_3d_out.json'
       cli_args = 'Positions/active=cart_grid_exclusions_2D Outputs/file_base=cartesian_grid_positions_3d_out'
       detail = 'a three-dimensional cartesian grid with some positions excluded.'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error"
+    [1ring_too_big]
+      type = RunException
+      input = 'hexagonal_grid_positions.i'
+      cli_args = "Positions/hex_grid/nr=1 Positions/hex_grid/lattice_flat_to_flat=0.49"
+      expect_err = "For one ring, the lattice flat to flat must be at least the pin pitch"
+      detail = 'if the hexagonal lattice flat-to-flat specified is too small for a single pin to fit,'
+    []
+    [more_rings_too_big]
+      type = RunException
+      input = 'hexagonal_grid_positions.i'
+      cli_args = "Positions/hex_grid/lattice_flat_to_flat=1.43"
+      expect_err = "Lattice flat to flat distance is less than the minimum"
+      detail = 'and if the hexagonal lattice flat-to-flat specified is too small for the rings of pins to fit.'
     []
   []
 []

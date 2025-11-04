@@ -69,6 +69,21 @@
   []
 []
 
+[BCs]
+  [pressure]
+    type = DirichletBC
+    variable = 'pressure'
+    value = 1e6
+    boundary = 'left right'
+  []
+  [temperature]
+    type = DirichletBC
+    variable = 'temperature'
+    value = 323.15
+    boundary = 'left right'
+  []
+[]
+
 [Kernels]
   [pressure]
     type = Diffusion

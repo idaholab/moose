@@ -34,14 +34,11 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]#Comment
   file = hertz_contact_rz.e
   displacements = 'disp_x disp_y'
   allow_renumbering = false
+  coord_type = RZ
 [] # Mesh
 
 [Functions]
@@ -109,7 +106,7 @@
 
 [] # AuxVariables
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     add_variables = true
     strain = SMALL

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -52,8 +52,8 @@ if [[ -n "$help" ]]; then
   echo "*************************************************************************************"
   echo ""
 
-  if [ -e "${LIBMESH_SRC_DIR}/configure" ]; then
-    ${LIBMESH_SRC_DIR} -h
+  if [ -x "${LIBMESH_SRC_DIR}/configure" ]; then
+    "${LIBMESH_SRC_DIR}/configure" -h
   fi
   exit 0
 fi
@@ -216,7 +216,7 @@ function run_build_cmd()
 
 if [ -z "${MOOSE_MAKE}" ]; then
   run_build_cmd make -j ${JOBS:-$LIBMESH_JOBS}
-  run_build_cmd make install
+  run_build_cmd make -j ${JOBS:-$LIBMESH_JOBS} install
 else
   run_build_cmd ${MOOSE_MAKE}
   run_build_cmd ${MOOSE_MAKE} install

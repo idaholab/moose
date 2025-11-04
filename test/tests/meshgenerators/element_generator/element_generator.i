@@ -7,6 +7,7 @@
 
     element_connectivity = '0 1 2'
     elem_type = "TRI3"
+    subdomain_name = 'base'
   []
 []
 

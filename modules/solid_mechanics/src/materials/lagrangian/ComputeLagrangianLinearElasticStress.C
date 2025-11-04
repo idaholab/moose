@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,8 +25,8 @@ ComputeLagrangianLinearElasticStress::validParams()
 ComputeLagrangianLinearElasticStress::ComputeLagrangianLinearElasticStress(
     const InputParameters & parameters)
   : ComputeLagrangianObjectiveStress(parameters),
-    _elasticity_tensor(
-        getMaterialProperty<RankFourTensor>(getParam<MaterialPropertyName>("elasticity_tensor")))
+    _elasticity_tensor(getMaterialProperty<RankFourTensor>(
+        _base_name + getParam<MaterialPropertyName>("elasticity_tensor")))
 {
 }
 

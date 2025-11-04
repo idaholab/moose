@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -139,7 +139,7 @@ def find_moose_executable(loc, **kwargs):
             exe_name = os.path.join(loc, name + '-' + method)
             if os.path.isfile(exe_name):
                 exe = exe_name
-            break
+                break
 
     # Returns the executable or error code
     if (exe is None) and show_error:
@@ -165,7 +165,7 @@ def run_executable(app_path, *args, mpi=None, suppress_output=False):
     A function for running an application.
     """
     import subprocess
-    if mpi and isinstance(mpi, int):
+    if mpi and isinstance(mpi, int) and mpi > 1:
         cmd = ['mpiexec', '-n', str(mpi), app_path]
     else:
         cmd = [app_path]
@@ -234,7 +234,7 @@ def check_configuration(packages, message=True):
         if re_operators.findall(_package):
             try:
                 _op = re_operators.findall(_package)[0]
-                (_package, _operator, _version) = re.findall(f'([.\w_-]+)([{_op}]+)(.*)',
+                (_package, _operator, _version) = re.findall(fr'([.\w_-]+)([{_op}]+)(.*)',
                                                              _package)[0]
             # Try and capture possible regex issues
             except IndexError:

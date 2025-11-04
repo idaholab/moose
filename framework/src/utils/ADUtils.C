@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADUtils.h"
+
+// We must include this first for the unity build to see some dataStore template specializations
+// before including DataIO.h through NonlinearSystemBase.h
+#include "PerfGraphRegistry.h"
 
 #include "NonlinearSystemBase.h"
 #include "SubProblem.h"

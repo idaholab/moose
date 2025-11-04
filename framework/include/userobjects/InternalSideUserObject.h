@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,9 +11,8 @@
 
 #include "UserObject.h"
 #include "BlockRestrictable.h"
-#include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "MooseVariableDependencyInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
 
@@ -21,13 +20,13 @@
  * Base class for user objects executed on all element sides internal to one or more
  * blocks, by default to the whole mesh.
  */
-class InternalSideUserObject : public UserObject,
-                               public BlockRestrictable,
-                               public TwoMaterialPropertyInterface,
-                               public NeighborCoupleable,
-                               public MooseVariableDependencyInterface,
-                               public TransientInterface,
-                               public ElementIDInterface
+class InternalSideUserObject
+  : public UserObject,
+    public BlockRestrictable,
+    public TwoMaterialPropertyInterface,
+    public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+    public TransientInterface,
+    public ElementIDInterface
 {
 public:
   static InputParameters validParams();

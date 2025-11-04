@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,8 @@ FluidPropertiesTestApp::validParams()
 
 registerKnownLabel("FluidPropertiesTestApp");
 
-FluidPropertiesTestApp::FluidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
+FluidPropertiesTestApp::FluidPropertiesTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   FluidPropertiesTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +45,8 @@ FluidPropertiesTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 FluidPropertiesTestApp::registerApps()
 {
-  registerApp(FluidPropertiesApp);
+  FluidPropertiesApp::registerApps();
   registerApp(FluidPropertiesTestApp);
-}
-
-void
-FluidPropertiesTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"FluidPropertiesTestApp"});
-}
-
-void
-FluidPropertiesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"FluidPropertiesTestApp"});
-}
-
-void
-FluidPropertiesTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

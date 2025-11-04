@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -30,6 +30,8 @@
 
 #include <regex>
 
+using namespace libMesh;
+
 InputParameters
 SubProblem::validParams()
 {
@@ -45,11 +47,19 @@ SubProblem::validParams()
   return params;
 }
 
+const std::unordered_set<FEFamily> SubProblem::_default_families_without_p_refinement = {
+    libMesh::LAGRANGE,
+    libMesh::NEDELEC_ONE,
+    libMesh::RAVIART_THOMAS,
+    libMesh::LAGRANGE_VEC,
+    libMesh::CLOUGH,
+    libMesh::BERNSTEIN,
+    libMesh::RATIONAL_BERNSTEIN};
+
 // SubProblem /////
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
     _factory(_app.getFactory()),
-    _requires_nonlocal_coupling(false),
     _default_ghosting(getParam<bool>("default_ghosting")),
     _currently_computing_jacobian(false),
     _currently_computing_residual_and_jacobian(false),
@@ -58,7 +68,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
-    _output_functors(false),
+    _show_functors(false),
+    _show_chain_control_data(false),
     _typed_vector_tags(2),
     _have_p_refinement(false)
 {
@@ -133,6 +144,18 @@ SubProblem::vectorTagExists(const TagName & tag_name) const
       return true;
 
   return false;
+}
+
+void
+SubProblem::addNotZeroedVectorTag(const TagID tag)
+{
+  _not_zeroed_tagged_vectors.insert(tag);
+}
+
+bool
+SubProblem::vectorTagNotZeroed(const TagID tag) const
+{
+  return _not_zeroed_tagged_vectors.count(tag);
 }
 
 const VectorTag &
@@ -347,8 +370,8 @@ void
 SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, const THREAD_ID tid)
 {
   _active_fe_var_coupleable_vector_tags[tid] = vtags;
-  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-    systemBaseNonlinear(nl_sys_num).setActiveVariableCoupleableVectorTags(vtags, tid);
+  for (const auto sys_num : make_range(numSolverSystems()))
+    systemBaseSolver(sys_num).setActiveVariableCoupleableVectorTags(vtags, tid);
   systemBaseAuxiliary().setActiveVariableCoupleableVectorTags(vtags, tid);
 }
 
@@ -690,6 +713,14 @@ SubProblem::checkBoundaryMatProps()
     mooseError(errors.str());
 }
 
+bool
+SubProblem::nlConverged(const unsigned int nl_sys_num)
+{
+  mooseAssert(nl_sys_num < numNonlinearSystems(),
+              "The nonlinear system number is higher than the number of systems we have!");
+  return solverSystemConverged(nl_sys_num);
+}
+
 void
 SubProblem::markMatPropRequested(const std::string & prop_name)
 {
@@ -738,12 +769,6 @@ SubProblem::nLinearIterations(unsigned int) const
   return 0;
 }
 
-void
-SubProblem::meshChanged()
-{
-  mooseError("This system does not support changing the mesh");
-}
-
 std::string
 SubProblem::restrictionSubdomainCheckName(SubdomainID check_id)
 {
@@ -772,6 +797,21 @@ unsigned int
 SubProblem::getAxisymmetricRadialCoord() const
 {
   return mesh().getAxisymmetricRadialCoord();
+}
+
+bool
+SubProblem::hasLinearVariable(const std::string & var_name) const
+{
+  for (const auto i : make_range(numLinearSystems()))
+    if (systemBaseLinear(i).hasVariable(var_name))
+      return true;
+  return false;
+}
+
+bool
+SubProblem::hasAuxiliaryVariable(const std::string & var_name) const
+{
+  return systemBaseAuxiliary().hasVariable(var_name);
 }
 
 template <typename T>
@@ -1029,13 +1069,14 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
 {
   EquationSystems & eq = es();
   const auto n_sys = eq.n_systems();
+  DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
 
-#ifndef NDEBUG
-  const DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
   const bool found_in_root_sys =
       std::find(nl_dof_map.algebraic_ghosting_functors_begin(),
                 nl_dof_map.algebraic_ghosting_functors_end(),
                 &algebraic_gf) != nl_dof_map.algebraic_ghosting_functors_end();
+
+#ifndef NDEBUG
   const bool found_in_our_map =
       _root_alg_gf_to_sys_clones.find(&algebraic_gf) != _root_alg_gf_to_sys_clones.end();
   mooseAssert(found_in_root_sys == found_in_our_map,
@@ -1043,7 +1084,9 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
               "it in our gf to clones map");
 #endif
 
-  eq.get_system(0).get_dof_map().remove_algebraic_ghosting_functor(algebraic_gf);
+  if (found_in_root_sys) // libMesh yells if we try to remove
+                         // something that's not there
+    nl_dof_map.remove_algebraic_ghosting_functor(algebraic_gf);
 
   auto it = _root_alg_gf_to_sys_clones.find(&algebraic_gf);
   if (it == _root_alg_gf_to_sys_clones.end())
@@ -1072,11 +1115,12 @@ SubProblem::removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf)
   if (!num_nl_sys)
     return;
 
-#ifndef NDEBUG
-  const DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
+  DofMap & nl_dof_map = eq.get_system(0).get_dof_map();
   const bool found_in_root_sys = std::find(nl_dof_map.coupling_functors_begin(),
                                            nl_dof_map.coupling_functors_end(),
                                            &coupling_gf) != nl_dof_map.coupling_functors_end();
+
+#ifndef NDEBUG
   const bool found_in_our_map =
       _root_coupling_gf_to_sys_clones.find(&coupling_gf) != _root_coupling_gf_to_sys_clones.end();
   mooseAssert(found_in_root_sys == found_in_our_map,
@@ -1084,7 +1128,9 @@ SubProblem::removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf)
               "it in our gf to clones map");
 #endif
 
-  eq.get_system(0).get_dof_map().remove_coupling_functor(coupling_gf);
+  if (found_in_root_sys) // libMesh yells if we try to remove
+                         // something that's not there
+    nl_dof_map.remove_coupling_functor(coupling_gf);
 
   auto it = _root_coupling_gf_to_sys_clones.find(&coupling_gf);
   if (it == _root_coupling_gf_to_sys_clones.end())
@@ -1142,6 +1188,8 @@ SubProblem::timestepSetup()
   for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->timestepSetup();
+  if (_show_chain_control_data)
+    _console << _app.getChainControlDataSystem().outputChainControlMap() << std::flush;
 }
 
 void
@@ -1171,11 +1219,13 @@ SubProblem::jacobianSetup()
 void
 SubProblem::initialSetup()
 {
-  if (_output_functors)
+  if (_show_functors)
   {
     showFunctors();
     showFunctorRequestors();
   }
+  if (_show_chain_control_data)
+    _console << _app.getChainControlDataSystem().outputChainControlMap() << std::flush;
 
   for (const auto & functors : _functors)
     for (const auto & [functor_wrapper_name, functor_wrapper] : functors)
@@ -1284,44 +1334,51 @@ SubProblem::addCachedJacobian(const THREAD_ID tid)
 }
 
 void
-SubProblem::doingPRefinement(const bool doing_p_refinement,
-                             const MultiMooseEnum & disable_p_refinement_for_families_enum)
+SubProblem::preparePRefinement()
 {
-  mesh().doingPRefinement(doing_p_refinement);
+  std::unordered_set<FEFamily> disable_families;
+  for (const auto & [family, flag] : _family_for_p_refinement)
+    if (flag)
+      disable_families.insert(family);
 
-  if (doing_p_refinement)
-  {
-    std::vector<FEFamily> disable_families(disable_p_refinement_for_families_enum.size());
-    for (const auto i : index_range(disable_families))
-      disable_families[i] =
-          Utility::string_to_enum<FEFamily>(disable_p_refinement_for_families_enum[i]);
+  for (const auto tid : make_range(libMesh::n_threads()))
+    for (const auto s : make_range(numNonlinearSystems()))
+      assembly(tid, s).havePRefinement(disable_families);
 
-    for (const auto tid : make_range(libMesh::n_threads()))
-      for (const auto s : make_range(numNonlinearSystems()))
-        assembly(tid, s).havePRefinement(disable_families);
-
-    auto & eq = es();
-    for (const auto family : disable_families)
-      for (const auto i : make_range(eq.n_systems()))
+  auto & eq = es();
+  for (const auto family : disable_families)
+    for (const auto i : make_range(eq.n_systems()))
+    {
+      auto & system = eq.get_system(i);
+      auto & dof_map = system.get_dof_map();
+      for (const auto vg : make_range(system.n_variable_groups()))
       {
-        auto & system = eq.get_system(i);
-        auto & dof_map = system.get_dof_map();
-        for (const auto vg : make_range(system.n_variable_groups()))
-        {
-          const auto & var_group = system.variable_group(vg);
-          if (var_group.type().family == family)
-            dof_map.should_p_refine(vg, false);
-        }
+        const auto & var_group = system.variable_group(vg);
+        if (var_group.type().family == family)
+          dof_map.should_p_refine(vg, false);
       }
+    }
 
-    _have_p_refinement = true;
-  }
+  _have_p_refinement = true;
 }
 
 bool
 SubProblem::doingPRefinement() const
 {
   return mesh().doingPRefinement();
+}
+
+void
+SubProblem::markFamilyPRefinement(const InputParameters & params)
+{
+  auto family = Utility::string_to_enum<FEFamily>(params.get<MooseEnum>("family"));
+  bool flag = _default_families_without_p_refinement.count(family);
+  if (params.isParamValid("disable_p_refinement"))
+    flag = params.get<bool>("disable_p_refinement");
+
+  auto [it, inserted] = _family_for_p_refinement.emplace(family, flag);
+  if (!inserted && flag != it->second)
+    mooseError("'disable_p_refinement' not set consistently for variables in ", family);
 }
 
 void

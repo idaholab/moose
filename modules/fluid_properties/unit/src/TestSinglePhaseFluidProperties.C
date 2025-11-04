@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,9 @@ TestSinglePhaseFluidProperties::TestSinglePhaseFluidProperties(const InputParame
     _dcp_dv(14.0),
     _dcp_de(15.0),
     _dk_dv(16.0),
-    _dk_de(17.0)
+    _dk_de(17.0),
+    _p_crit(5.0),
+    _T_crit(10.0)
 {
 }
 

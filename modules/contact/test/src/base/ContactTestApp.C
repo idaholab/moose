@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ ContactTestApp::validParams()
 
 registerKnownLabel("ContactTestApp");
 
-ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters)
+ContactTestApp::ContactTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   ContactTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +44,8 @@ ContactTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool us
 void
 ContactTestApp::registerApps()
 {
-  registerApp(ContactApp);
+  ContactApp::registerApps();
   registerApp(ContactTestApp);
-}
-
-void
-ContactTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"ContactTestApp"});
-}
-
-void
-ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"ContactTestApp"});
-}
-
-void
-ContactTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

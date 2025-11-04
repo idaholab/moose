@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -68,7 +68,7 @@ MomentumFreeSlipBC::MomentumFreeSlipBC(const InputParameters & parameters)
 MomentumFreeSlipBC::~MomentumFreeSlipBC() {}
 
 bool
-MomentumFreeSlipBC::shouldApply()
+MomentumFreeSlipBC::shouldApply() const
 {
   // this prevents zeroing out the row
   return !_fe_problem.currentlyComputingJacobian();

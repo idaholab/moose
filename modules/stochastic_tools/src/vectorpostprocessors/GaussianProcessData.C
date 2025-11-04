@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,7 @@ GaussianProcessData::validParams()
 GaussianProcessData::GaussianProcessData(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     SurrogateModelInterface(this),
-    _gp_uo(getSurrogateModel<GaussianProcess>("gp_name"))
+    _gp_surrogate(getSurrogateModel<GaussianProcessSurrogate>("gp_name"))
 {
 }
 
@@ -35,9 +35,9 @@ void
 GaussianProcessData::initialize()
 {
   const std::unordered_map<std::string, Real> & _hyperparam_map =
-      _gp_uo.getGPHandler().getHyperParamMap();
+      _gp_surrogate.getGP().getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map =
-      _gp_uo.getGPHandler().getHyperParamVectorMap();
+      _gp_surrogate.getGP().getHyperParamVectorMap();
 
   for (auto iter = _hyperparam_map.begin(); iter != _hyperparam_map.end(); ++iter)
   {

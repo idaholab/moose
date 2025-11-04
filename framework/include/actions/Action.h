@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,17 +9,13 @@
 
 #pragma once
 
-#include "MooseBase.h"
-#include "MooseBaseParameterInterface.h"
-#include "MooseBaseErrorInterface.h"
+#include "ParallelParamObject.h"
 #include "InputParameters.h"
 #include "MeshMetaDataInterface.h"
 #include "Registry.h"
 #include "PerfGraphInterface.h"
-#include "DataFileInterface.h"
 #include "MooseObjectParameterName.h"
-
-#include "libmesh/parallel_object.h"
+#include "SolutionInvalidInterface.h"
 
 #include <string>
 #include <ostream>
@@ -35,15 +31,15 @@ class Factory;
 /**
  * Base class for actions.
  */
-class Action : public MooseBase,
-               public MooseBaseParameterInterface,
-               public MooseBaseErrorInterface,
+class Action : public ParallelParamObject,
                public MeshMetaDataInterface,
                public PerfGraphInterface,
-               public libMesh::ParallelObject,
-               public DataFileInterface<Action>
+               public SolutionInvalidInterface
 {
 public:
+  /// The name of the parameter that contains the unique action name
+  static const std::string unique_action_name_param;
+
   static InputParameters validParams();
 
   Action(const InputParameters & parameters);
@@ -54,6 +50,9 @@ public:
    * The method called externally that causes the action to act()
    */
   void timedAct();
+
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
 
 private:
   /**
@@ -142,7 +141,7 @@ protected:
    * parameters from this action.
    *
    * An example here is when you want to associate the creation of an action with
-   * an arugment from the aplication.
+   * an argument from the application.
    */
   void associateWithParameter(const InputParameters & from_params,
                               const std::string & param_name,

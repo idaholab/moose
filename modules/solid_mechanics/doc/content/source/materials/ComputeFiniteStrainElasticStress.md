@@ -4,7 +4,7 @@
 
 ## Description
 
-This material, `ComputeFiniteStrainElasticStress` computes the elastic stress for an incremental formulation, both incremental small ([ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) type) and incremental finite ([ComputeFiniteStrain](/ComputeFiniteStrain.md) type) strain formulations.
+This material, `ComputeFiniteStrainElasticStress` computes the elastic stress for an incremental formulation, both incremental small ([ComputeIncrementalStrain](/ComputeIncrementalStrain.md) type) and incremental finite ([ComputeFiniteStrain](/ComputeFiniteStrain.md) type) strain formulations.
 This stress class is compatible with both Cartesian and non-Cartesian strain calculators, including [Axisymmetric](/ComputeAxisymmetricRZFiniteStrain.md) and [RSpherical](/ComputeRSphericalFiniteStrain.md).
 
 Elastic materials do not experience permanent deformation, and all elastic strain and elastic stress is recoverable. Elastic stress is related to elastic strain through the elasticity tensor

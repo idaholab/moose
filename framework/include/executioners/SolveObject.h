@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,6 +27,11 @@ public:
   SolveObject(Executioner & ex);
 
   /**
+   * Method that should be executed once, before any solve calls
+   */
+  virtual void initialSetup() {};
+
+  /**
    * Solve routine provided by this object.
    * @return True if solver is converged.
    */
@@ -41,7 +46,7 @@ protected:
   /// Reference to FEProblem
   FEProblemBase & _problem;
   /// Displaced problem
-  std::shared_ptr<DisplacedProblem> _displaced_problem;
+  DisplacedProblem * _displaced_problem;
   /// Mesh
   MooseMesh & _mesh;
   /// Displaced mesh

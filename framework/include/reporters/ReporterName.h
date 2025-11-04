@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,6 +34,15 @@ public:
   ReporterName(const std::string & object_and_value_name);
   ReporterName(const char * combined_name);
   ReporterName(){}; // empty constructor for InputParameters
+
+  /**
+   * Determines if the inputted string is convertible to a ReporterName.
+   *
+   * @param object_and_value_name The string to determine convertibility
+   * @return true Inputted string has a "/"
+   * @return false Inputted string does not have a "/"
+   */
+  static bool isValidName(const std::string & object_and_value_name);
 
   /**
    * Return the object name that produces the Reporter value

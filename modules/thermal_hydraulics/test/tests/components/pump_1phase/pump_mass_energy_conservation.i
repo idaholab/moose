@@ -117,8 +117,9 @@ g = 9.81
     execute_on = 'initial timestep_end'
   []
   [mass_pump]
-    type = ScalarVariable
-    variable = pump:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'pump'
     execute_on = 'initial timestep_end'
   []
   [mass_tot]
@@ -142,8 +143,9 @@ g = 9.81
     execute_on = 'initial timestep_end'
   []
   [E_pump]
-    type = ScalarVariable
-    variable = pump:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'pump'
     execute_on = 'initial timestep_end'
   []
   [E_tot]
@@ -155,6 +157,7 @@ g = 9.81
   [S_energy]
     type = FunctionValuePostprocessor
     function = S_energy_fcn
+    indirect_dependencies = 'pump_rhouV'
     execute_on = 'initial timestep_end'
   []
   [E_change]
@@ -170,6 +173,13 @@ g = 9.81
     function = E_conservation_fcn
     execute_on = 'timestep_end'
   []
+
+  [pump_rhouV]
+    type = ElementAverageValue
+    variable = rhouV
+    block = 'pump'
+    execute_on = 'initial timestep_end'
+  []
 []
 
 [Functions]
@@ -177,7 +187,7 @@ g = 9.81
     type = ParsedFunction
     expression = 'rhouV * g * head * A / volume'
     symbol_names = 'rhouV g head A volume'
-    symbol_values = 'pump:rhouV ${g} ${head} ${A} ${volume}'
+    symbol_values = 'pump_rhouV ${g} ${head} ${A} ${volume}'
   []
   [E_conservation_fcn]
     type = ParsedFunction

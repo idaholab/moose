@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,9 +20,14 @@
  * This object must be created in the main() of any MOOSE-based application so
  * everything is properly initialized and finalized.
  */
-class MooseInit : public LibMeshInit
+class MooseInit : public libMesh::LibMeshInit
 {
 public:
   MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN = MPI_COMM_WORLD);
   virtual ~MooseInit() = default;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+private:
+  void initKokkos();
+#endif
 };

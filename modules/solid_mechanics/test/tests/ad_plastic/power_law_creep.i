@@ -66,7 +66,7 @@
     poissons_ratio = 0.3
   [../]
   [./strain]
-    type = ADComputeIncrementalSmallStrain
+    type = ADComputeIncrementalStrain
   [../]
   [./elastic_strain]
     type = ADComputeMultipleInelasticStress

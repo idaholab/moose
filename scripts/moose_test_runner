@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 import sys, os
 
+# Environment variable set by MooseApp so that we can capture the
+# name of the executing application (the binary that --run is called from).
+# This will override `app_name` within the `testroot`.
+app_name = os.environ.get('MOOSE_TEST_RUNNER_APP_NAME')
+if not app_name:
+    print('The variable MOOSE_TEST_RUNNER_APP_NAME is not set.')
+    print('This must be run via the "--run" command line option from a MOOSE app')
+    sys.exit(1)
+
 mydir = os.path.dirname(os.path.realpath(__file__))
 moose_config_path = os.path.join(mydir, '..', 'share', 'moose', 'moose_config.py')
 if not os.path.exists(moose_config_path):
@@ -28,4 +37,4 @@ if not os.path.isdir(MOOSE_PYTHON_DIR):
 sys.path.append(MOOSE_PYTHON_DIR)
 
 from TestHarness import TestHarness
-TestHarness.buildAndRun(sys.argv, None, MOOSE_DIR, moose_python=MOOSE_PYTHON_DIR)
+TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR, MOOSE_PYTHON_DIR)

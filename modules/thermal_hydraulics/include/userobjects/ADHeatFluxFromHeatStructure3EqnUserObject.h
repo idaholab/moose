@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,6 +25,9 @@ protected:
   const ADMaterialProperty<Real> & _T_wall;
   const ADMaterialProperty<Real> & _Hw;
   const ADMaterialProperty<Real> & _T;
+
+  /// Functor by which to scale the heat flux
+  const Moose::Functor<ADReal> & _scale;
 
 public:
   static InputParameters validParams();

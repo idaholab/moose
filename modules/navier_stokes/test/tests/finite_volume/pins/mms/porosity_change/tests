@@ -6,7 +6,7 @@
     input = test.py
     test_case = TestRC
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 1D channel with a continuously varying porosity and produce second order convergence for all variables.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -17,7 +17,7 @@
     input = test.py
     test_case = TestRC_2D
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 2D channel with a continuously varying porosity and produce second order convergence for all variables.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 16
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -28,7 +28,7 @@
     input = test.py
     test_case = TestPressureCorrected
     requirement = 'The system shall show second order convergence for all variables when the porosity is interpolated and reconstructed multiple times and when a correction is applied to the pressure interpolation.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -39,7 +39,7 @@
     input = test.py
     test_case = TestPressureCorrectedAction
     requirement = 'The system shall show second order convergence for all variables when using porosity reconstructions and friction corrections together with NSFV action syntax.'
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279

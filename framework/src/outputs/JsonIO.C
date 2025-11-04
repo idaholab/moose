@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,13 +21,10 @@
 void
 to_json(nlohmann::json & json, const MooseApp & app)
 {
-  if (!app.getSystemInfo())
-    return;
-
   json["app_name"] = app.name();
-  json["current_time"] = app.getSystemInfo()->getTimeStamp();
-  json["executable"] = app.getSystemInfo()->getExecutable();
-  json["executable_time"] = app.getSystemInfo()->getExecutableTimeStamp(json["executable"]);
+  json["current_time"] = app.getSystemInfo().getTimeStamp();
+  json["executable"] = app.getSystemInfo().getExecutable();
+  json["executable_time"] = app.getSystemInfo().getExecutableTimeStamp(json["executable"]);
 
   json["moose_version"] = MOOSE_REVISION;
   json["libmesh_version"] = LIBMESH_BUILD_VERSION;
@@ -68,5 +65,16 @@ to_json(nlohmann::json & json, const DenseMatrix<Real> & matrix)
     for (const auto j : make_range(matrix.n()))
       values[i][j] = matrix(i, j);
   nlohmann::to_json(json, values);
+}
+
+void
+to_json(nlohmann::json & json, const std::unique_ptr<NumericVector<Number>> & vector)
+{
+  mooseAssert(vector, "vector must be non-null");
+  std::vector<Number> local_values;
+  local_values.reserve(vector->local_size());
+  for (const auto i : make_range(vector->first_local_index(), vector->last_local_index()))
+    local_values.push_back((*vector)(i));
+  nlohmann::to_json(json, local_values);
 }
 }

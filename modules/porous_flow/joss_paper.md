@@ -77,11 +77,11 @@ mass-density of the material (including solid and fluid contributions); and $b_{
 components of the external force density (for example, the
 gravitational acceleration).  The effective stress $\sigma^{\mathrm{eff}}$ obeys a constitutive equation, $\alpha_{B}$ is the Biot coefficient, and $P_{f}$ an effective fluid porepressure.
 
-A comprehensive listing of equations, including fluid equations of state, the evolution of porosity and permeability, relative-permeability functions, capillary relationships, chemical reactions, etc, may be found at https://mooseframework.org/modules/porous_flow/index.html.
+A comprehensive listing of equations, including fluid equations of state, the evolution of porosity and permeability, relative-permeability functions, capillary relationships, chemical reactions, etc, may be found at https://mooseframework.inl.gov/modules/porous_flow/index.html.
 
 # Software details and comparisons
 
-``PorousFlow`` is built upon the open-source, massively parallel, fully implicit multiphysics simulation framework MOOSE (Multiphysics Object-Oriented Simulation Environment) [@permann2020moose].  MOOSE is an open-source library from Idaho National Laboratory that provides a high-level interface to the libMesh finite element library [@libmesh] and PETSc nonlinear solvers [@petsc].  MOOSE and ``PorousFlow`` follow [strict quality controls](https://mooseframework.org/sqa/index.html).
+``PorousFlow`` is built upon the open-source, massively parallel, fully implicit multiphysics simulation framework MOOSE (Multiphysics Object-Oriented Simulation Environment) [@permann2020moose].  MOOSE is an open-source library from Idaho National Laboratory that provides a high-level interface to the libMesh finite element library [@libmesh] and PETSc nonlinear solvers [@petsc].  MOOSE and ``PorousFlow`` follow [strict quality controls](https://mooseframework.inl.gov/sqa/index.html).
 
 Other open-source codes that can also perform tightly-coupled thermal-hydraulic-mechanical-chemical simulations to some degree include OpenGeoSys [@opengeosys], PFLOTRAN [@pflotran] and work under the Open Porous Media initiative [@opm].
 
@@ -89,7 +89,7 @@ One aspect that makes ``PorousFlow`` different to these codes is the ease of cou
 
 ![As CO$_{2}$ dissolves into brine, the brine's density increases, resulting in beautiful density-driven convective flows that resemble a "lava lamp".  The top figure shows the initial condition with CO$_{2}$ injected at the top of a brine-filled reservoir.  The lower figures show the CO$_{2}$ concentration as time evolves.\label{fig:example}](paper.png)
 
-For convenience, the source code for ``PorousFlow`` is bundled within the MOOSE framework, and detailed documentation found at https://mooseframework.org/modules/porous_flow/index.html.
+For convenience, the source code for ``PorousFlow`` is bundled within the MOOSE framework, and detailed documentation found at https://mooseframework.inl.gov/modules/porous_flow/index.html.
 
 # Acknowledgements
 

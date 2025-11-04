@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseVariableBase.h"
+#include "MooseFunctor.h"
 #include "SystemBase.h"
 
 // libMesh forward declarations
@@ -25,7 +26,7 @@ class TimeIntegrator;
 /**
  * Class for scalar variables (they are different).
  */
-class MooseVariableScalar : public MooseVariableBase
+class MooseVariableScalar : public MooseVariableBase, public Moose::FunctorBase<ADReal>
 {
 public:
   static InputParameters validParams();
@@ -84,6 +85,11 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override { _required_vector_tags = vtags; }
 
+  virtual void sizeMatrixTagData() override;
+
+  bool supportsFaceArg() const override final { return true; }
+  bool supportsElemSideQpArg() const override final { return true; }
+
 protected:
   /// The value of scalar variable
   VariableValue _u;
@@ -131,6 +137,40 @@ protected:
   ADVariableValue _ad_u_dot;
 
 private:
+  using typename Moose::FunctorBase<ADReal>::ValueType;
+  using typename Moose::FunctorBase<ADReal>::GradientType;
+  using typename Moose::FunctorBase<ADReal>::DotType;
+
+  using ElemArg = Moose::ElemArg;
+  using ElemQpArg = Moose::ElemQpArg;
+  using ElemSideQpArg = Moose::ElemSideQpArg;
+  using FaceArg = Moose::FaceArg;
+  using ElemPointArg = Moose::ElemPointArg;
+  using NodeArg = Moose::NodeArg;
+
+  ValueType evaluate(const ElemArg & elem, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const FaceArg & face, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const ElemQpArg & qp, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp,
+                     const Moose::StateArg & state) const override final;
+  ValueType evaluate(const ElemPointArg & elem_point,
+                     const Moose::StateArg & state) const override final;
+  ValueType evaluate(const NodeArg & node, const Moose::StateArg & state) const override final;
+  ValueType evaluate(const Moose::StateArg & state) const;
+
+  GradientType evaluateGradient(const ElemArg & elem,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const FaceArg & face,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemQpArg & qp,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const ElemPointArg & elem_point,
+                                const Moose::StateArg & state) const override final;
+  GradientType evaluateGradient(const NodeArg & node,
+                                const Moose::StateArg & state) const override final;
+
   /**
    * Adds derivative information to the scalar variable value arrays
    * @param nodal_ordering Whether we are doing a nodal ordering of the derivative vector, e.g.

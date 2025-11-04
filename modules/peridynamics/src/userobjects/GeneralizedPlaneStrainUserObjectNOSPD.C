@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -39,8 +39,8 @@ GeneralizedPlaneStrainUserObjectNOSPD::execute()
   dof_id_type node_j = _current_elem->node_id(1);
 
   // coordinates for node i and j
-  Point coord_i = *_pdmesh.nodePtr(node_i);
-  Point coord_j = *_pdmesh.nodePtr(node_j);
+  Point coord_i = _pdmesh.getNodeCoord(node_i);
+  Point coord_j = _pdmesh.getNodeCoord(node_j);
 
   // nodal area for node i and j
   Real nv_i = _pdmesh.getNodeVolume(node_i);

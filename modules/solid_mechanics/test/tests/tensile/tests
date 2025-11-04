@@ -173,6 +173,8 @@
     abs_zero = 1.0E-8
     rel_err = 1.0E-5
     cli_args = '--no-trap-fpe'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
   [./planar5]
     type = 'CSVDiff'
@@ -181,6 +183,8 @@
     abs_zero = 1.0E-8
     rel_err = 1.0E-5
     cli_args = '--no-trap-fpe'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
   [./planar6]
     type = 'CSVDiff'
@@ -254,6 +258,8 @@
     override_columns = 's_xx s_xy s_zz s_yy'
     override_rel_err = '2e-3 1e-3 1e-3 1e-3'
     override_abs_zero = '1e-6 6e-4 1e-6 1e-6'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
   [../]
   [./small_deform3_update]
     type = 'CSVDiff'

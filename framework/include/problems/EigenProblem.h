@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,17 +25,14 @@ public:
 
   EigenProblem(const InputParameters & parameters);
 
-  virtual std::string solverTypeString() override
-  {
-    return Moose::stringify(solverParams()._eigen_solve_type);
-  }
+  virtual std::string solverTypeString(unsigned int solver_sys_num = 0) override;
 
 #ifdef LIBMESH_HAVE_SLEPC
   virtual void solve(const unsigned int nl_sys_num) override;
 
   virtual void init() override;
 
-  virtual bool nlConverged(const unsigned int nl_sys_num) override;
+  virtual bool solverSystemConverged(const unsigned int solver_sys_num) override;
 
   unsigned int getNEigenPairsRequired() const { return _n_eigen_pairs_required; }
   void setNEigenPairsRequired(unsigned int n_eigen_pairs)
@@ -43,7 +40,7 @@ public:
     _n_eigen_pairs_required = n_eigen_pairs;
   }
   bool isGeneralizedEigenvalueProblem() const { return _generalized_eigenvalue_problem; }
-  bool isNonlinearEigenvalueSolver() const;
+  bool isNonlinearEigenvalueSolver(unsigned int eigen_sys_num) const;
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
@@ -128,7 +125,7 @@ public:
    * Form several matrices simultaneously
    */
   void computeMatricesTags(const NumericVector<Number> & soln,
-                           const std::vector<std::unique_ptr<SparseMatrix<Number>>> & jacobians,
+                           const std::vector<SparseMatrix<Number> *> & jacobians,
                            const std::set<TagID> & tags);
 
   /**

@@ -36,8 +36,8 @@ offset = -0.19
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    zeta = 0.05
-    alpha = 0.0
+    stiffness_damping_coefficient = 0.05
+    hht_alpha = 0.0
   []
   [inertia_x]
     type = InertialForce

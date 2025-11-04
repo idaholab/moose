@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -178,6 +178,11 @@ JsonInputFileFormatter::addParameters(const nlohmann::json & params)
     auto & l = lines[name];
     auto desc = nlohmann::to_string(param["description"]);
     addLine(l, max_len, desc);
+
+    const auto doc_unit = nlohmann::to_string(param["doc_unit"]);
+    if (!doc_unit.empty())
+      addLine("", max_len + 1,
+              "Unit: " + doc_unit); // a +1 to account for an empty line
 
     const auto group = nlohmann::to_string(param["group_name"]);
     if (!group.empty())

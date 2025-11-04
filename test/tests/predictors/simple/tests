@@ -43,6 +43,7 @@
     input = 'predictor_test_skip_after_failed_tstep.i'
     type = 'CSVDiff'
     csvdiff = 'predictor_test_skip_after_failed_tstep_out.csv'
+    restep = false # Testing feature where behavior changes on failed timestep
   []
 
   [pre_smo]

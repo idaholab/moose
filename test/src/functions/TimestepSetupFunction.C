@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,14 +19,14 @@ TimestepSetupFunction::validParams()
 }
 
 TimestepSetupFunction::TimestepSetupFunction(const InputParameters & parameters)
-  : Function(parameters), _local_timestep(declareRestartableData<unsigned int>("local_timestep", 0))
+  : Function(parameters), _local_timestep(-1)
 {
 }
 
 void
 TimestepSetupFunction::timestepSetup()
 {
-  _local_timestep++;
+  _local_timestep = _t_step;
 }
 
 Real

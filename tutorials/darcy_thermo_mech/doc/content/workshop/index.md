@@ -4,7 +4,7 @@
 !datetime today format=%B %Y
 
 !style halign=center
-[www.mooseframework.org](index.md exact=True)
+[https://mooseframework.inl.gov](index.md exact=True)
 
 !---
 
@@ -96,7 +96,7 @@
 
 !---
 
-!include workshop/systems/mesh.md
+!include workshop/systems/mesh.md end=mesh-advanced
 
 !---
 
@@ -235,6 +235,10 @@ All MOOSE Postprocessors are based on the UserObject System, so we will begin wi
 !---
 
 !include workshop/modules/modules.md
+
+!---
+
+!include workshop/systems/mesh.md start=mesh-advanced
 
 !---
 

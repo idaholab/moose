@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,7 +29,14 @@ FVFunctionDirichletBC::FVFunctionDirichletBC(const InputParameters & parameters)
 }
 
 ADReal
-FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi) const
+FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const
 {
-  return _function.value(_t, fi.faceCentroid());
+
+  if (state.state != 0 && state.iteration_type == Moose::SolutionIterationType::Time)
+  {
+    mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");
+    return _function.value(_t_old, fi.faceCentroid());
+  }
+  else
+    return _function.value(_t, fi.faceCentroid());
 }

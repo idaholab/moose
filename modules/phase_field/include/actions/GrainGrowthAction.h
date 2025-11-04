@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,7 @@ protected:
   const std::string _var_name_base;
 
   /// FEType for the variable being created
-  const FEType _fe_type;
+  const libMesh::FEType _fe_type;
 
   /// Take initial values from file?
   const bool _initial_from_file;

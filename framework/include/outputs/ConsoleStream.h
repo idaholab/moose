@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -96,9 +96,10 @@ private:
   /// of something in AutomaticMortarGeneration that requires
   /// this to be trivially copyable.
   mutable std::shared_ptr<std::ostringstream> _oss;
-};
 
-extern std::mutex _stream_mutex;
+  /// Mutex to prevent concurrent read/writes, write/writes
+  static std::mutex _stream_mutex;
+};
 
 template <typename StreamType>
 const ConsoleStream &

@@ -8,10 +8,12 @@
     input = 'block-dynamics.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'The system shall solve mortar frictionless contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-reference]
     type = 'CSVDiff'
@@ -19,22 +21,25 @@
     csvdiff = 'block-dynamics-reference_out.csv'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     requirement = 'The system shall solve dynamics mortar contact between two blocks with weighted '
                   'gap time stabilization and match reference kinetic and elastic energy results.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-action]
     type = 'Exodiff'
     exodiff = 'block-dynamics-action_out.e'
     input = 'block-dynamics-action.i'
-    rel_err = 5.0e-4
-    abs_zero = 1.0e-5
-    min_ad_size = '50'
+    custom_cmp = block-dynamics-action.cmp
+    capabilities = 'ad_size>=50'
     cli_args = 'Contact/mechanical/mortar_dynamics=true Contact/mechanical/newmark_beta=0.25  '
                'Contact/mechanical/newmark_gamma=0.5 Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'The system shall solve mortar frictionless contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry via the contact '
                   'mechanics action.'
+    # ComputeDynamicWeightedGapLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-action-beta-error]
     type = RunException
@@ -42,7 +47,7 @@
     expect_err = 'newmark_beta can only be used with the mortar_dynamics option'
     cli_args = 'Contact/mechanical/mortar_dynamics=false Contact/mechanical/newmark_beta=0.25 '
                'Executioner/end_time=0.3'
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     requirement = 'The system shall generate an error if dynamics is not specifically requested and '
                   'Newmark-beta integration parameter beta is provided.'
   []
@@ -52,7 +57,7 @@
     expect_err = 'newmark_gamma can only be used with the mortar_dynamics option'
     cli_args = 'Contact/mechanical/mortar_dynamics=false Contact/mechanical/newmark_gamma=0.5 '
                'Executioner/end_time=0.3'
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     requirement = 'The system shall generate an error if dynamics is not specifically requested and '
                   'Newmark-beta integration parameter gamma is provided.'
 
@@ -63,21 +68,24 @@
     input = 'block-dynamics-friction.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'The system shall solve mortar frictional contact between two blocks with weighted '
                   'gap time stabilization using mortar nodal geometry.'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-friction-action]
     type = 'Exodiff'
     exodiff = 'block-dynamics-friction-action_out.e'
     input = 'block-dynamics-friction-action.i'
-    rel_err = 5.0e-4
-    abs_zero = 1.0e-5
-    min_ad_size = '50'
+    custom_cmp = block-dynamics-friction-action.cmp
+    capabilities = 'ad_size>=50'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'The system shall solve mortar frictional contact between two blocks with weighted '
                   'gap time stabilization using mortar nodal geometry via the contact action.'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [block-dynamics-friction-creep]
     type = 'Exodiff'
@@ -86,10 +94,12 @@
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
     min_parallel = 1
-    min_ad_size = '50'
+    capabilities = 'ad_size>=50'
     requirement = 'The system shall simulate mortar frictional contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry with a creep material '
                   'model.'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [frictional-mortar-3d-dynamics]
     type = 'CSVDiff'
@@ -100,10 +110,10 @@
               'frictional-mortar-3d-dynamics_out_tangent_y_0001.csv'
     requirement = 'The system shall solve a dynamic 3D frictional bouncing block problem with mortar '
                   'constraint using nodal-attached geometry'
+    restep = false # Issue #31054
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    min_ad_size = 150
-    method = 'opt'
+    capabilities = 'ad_size>=150 & method=opt'
   []
   [frictional-mortar-3d-dynamics-light]
     type = 'Exodiff'
@@ -111,10 +121,12 @@
     input = 'frictional-mortar-3d-dynamics-light.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_ad_size = 100
+    capabilities = 'ad_size>=64'
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
                   'with mortar constraint using nodal-attached geometry and the correct edge '
                   'dropping setting'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [frictional-mortar-3d-dynamics-light-miss-dropping]
     type = 'Exodiff'
@@ -122,7 +134,7 @@
     input = 'frictional-mortar-3d-dynamics-light.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_ad_size = 100
+    capabilities = 'ad_size>=64'
     cli_args = 'Constraints/friction/correct_edge_dropping=false '
                'Constraints/normal_x/correct_edge_dropping=false '
                'Constraints/normal_y/correct_edge_dropping=false '
@@ -136,6 +148,8 @@
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
                   'with mortar constraint using nodal-attached geometry and the incorrect edge '
                   'dropping setting'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
   [frictional-mortar-3d-dynamics-light-function]
     type = 'Exodiff'
@@ -143,9 +157,12 @@
     input = 'frictional-mortar-3d-dynamics-light-function.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_ad_size = 100
+    capabilities = 'ad_size>=64'
+    restep = false # Issue #31054
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
                   'with mortar constraints using nodal geometry and a friction coefficient '
                   'that depends on the normal contact pressure and the relative tangential velocity'
+    # ComputeDynamicFrictionalForceLMMechanicalContact does not support recover
+    recover = false
   []
 []

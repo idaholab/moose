@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -311,6 +311,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
 
     def _createFilenameOption(self, param):
         cpp_type_map = {"MeshFileName": "Find Mesh File",
+                        "MatrixFileName": "Find Matrix File",
                 "FileNameNoExtension": "Find Base File",
                 }
         text = cpp_type_map.get(param.cpp_type, "Find File")
@@ -468,7 +469,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self.setItem(row, 3, comments_item)
 
         watch_blocks = self._getChildrenOfNodeOptions(param.cpp_type)
-        if param.cpp_type == "FileName" or param.cpp_type == "MeshFileName" or param.cpp_type == "FileNameNoExtension":
+        if param.cpp_type == "FileName" or param.cpp_type == "MeshFileName" or param.cpp_type == "MatrixFileName" or param.cpp_type == "FileNameNoExtension":
             self._createFilenameOption(param)
         elif watch_blocks:
             self._createBlockWatcher(param, watch_blocks)

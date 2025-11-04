@@ -2,6 +2,15 @@
   issues = '#9669'
   design = 'interfaces/TaggingInterface.md'
 
+  [not_zeroed_vector_tag]
+    type = Exodiff
+    requirement = 'The system shall support the ability for a the user to create a tagged vector which is not automatically zeroed.'
+    input = 'not_zeroed_tag_vector.i'
+    exodiff = 'not_zeroed_tag_vector_out.e'
+    # There is no way to reset a not zeroed vector if a timestep fails and is repeated
+    restep = false
+  []
+
   [general]
     requirement = 'The system shall support the ability for a specific calculation to fill a labeled '
                   'or "tagged"'
@@ -64,6 +73,13 @@
     cli_args = 'Mesh/square/second=true Variables/u/order=SECOND'
     requirement = 'The system shall throw an error when the variable orders and families for the '
                   'tagged and the auxiliary output variables do not match.'
+  []
+  [wrong_tag_type]
+    type = 'RunException'
+    input = 'wrong_tag_type.i'
+    expect_err = 'The provided vector tag does not correspond to a tagged residual vector'
+    requirement = 'The system shall throw an error when the user attempts to remove variable scaling '
+                  'from a tagged vector that is not affected by variable scaling.'
   []
 
   [call_residual]
@@ -146,7 +162,7 @@
       type = 'Exodiff'
       input = 'eigen_tag.i'
       exodiff = 'eigen_tag_out.e'
-      slepc_version = '>=3.8.0'
+      capabilities = 'slepc>=3.8.0'
       detail = 'the eigen system, and '
     []
 
@@ -229,6 +245,13 @@
     input = tag-fv.i
     exodiff = tag-fv_out.e
     requirement = 'The system shall be able to index solution vectors and residual vectors using the degree of freedom indices of a finite volume variable.'
+  []
+  [linear-fv]
+    type = 'Exodiff'
+    input = tag-linearfv.i
+    exodiff = tag-linearfv_out.e
+    requirement = 'The system shall be able to tag matrix diagonals and right hand sides built using linear systems and finite volume discretization.'
+    max_threads = 1 # see libmesh issue #3808
   []
   [mass]
     requirement = 'The system shall be able to use matrix tagging to compute a mass matrix'

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # * This file is part of the MOOSE framework
-# * https://www.mooseframework.org
+# * https://mooseframework.inl.gov
 # *
 # * All rights reserved, see COPYRIGHT for full restrictions
 # * https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -79,7 +79,7 @@ class CSVTools:
 
     def getParamValues(self, param, param_line):
         """ return a list of discovered values for param """
-        return re.findall(param + "\s+([0-9e.\-\+]+)", param_line)
+        return re.findall(param + r"\s+([0-9e.\-\+]+)", param_line)
 
     def parseComparisonFile(self, config_file):
         """ Walk through comparison file and populate/return a dictionary as best we can """

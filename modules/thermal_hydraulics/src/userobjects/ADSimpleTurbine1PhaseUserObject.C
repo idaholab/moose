@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,7 @@
 #include "ADSimpleTurbine1PhaseUserObject.h"
 #include "SinglePhaseFluidProperties.h"
 #include "VolumeJunction1Phase.h"
-#include "THMIndices3Eqn.h"
+#include "THMIndicesVACE.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
 
@@ -42,10 +42,16 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 {
   ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(c);
 
+  using std::pow;
+
   if ((c == 0) && _on)
   {
+    const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
+    const auto & rhovV = _cached_junction_var_values[VolumeJunction1Phase::RHOVV_INDEX];
+    const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
+
     const Point di = _dir[0];
-    const ADRealVectorValue rhouV_vec(_rhouV[0], _rhovV[0], _rhowV[0]);
+    const ADRealVectorValue rhouV_vec(rhouV, rhovV, rhowV);
 
     // energy source
     const ADReal S_E = _W_dot;
@@ -62,8 +68,7 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
     const ADReal p_in = _fp.p_from_v_e(v_in, e_in);
     const ADReal T_in = _fp.T_from_v_e(v_in, e_in);
     const ADReal h_in = _fp.h_from_p_T(p_in, T_in);
-    const ADReal delta_p =
-        p_in * (1 - std::pow((1 - _W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
+    const ADReal delta_p = p_in * (1 - pow((1 - _W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
 
     const ADRealVectorValue S_M = delta_p * _A[0] * di;
 

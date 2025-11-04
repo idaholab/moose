@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,6 +31,16 @@ PostprocessorInterface::PostprocessorInterface(const FEProblemBase * problem)
     _ppi_feproblem(*problem)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+PostprocessorInterface::PostprocessorInterface(const PostprocessorInterface & object,
+                                               const Moose::Kokkos::FunctorCopy &)
+  : _ppi_moose_object(object._ppi_moose_object),
+    _ppi_params(object._ppi_params),
+    _ppi_feproblem(object._ppi_feproblem)
+{
+}
+#endif
 
 const PostprocessorValue &
 PostprocessorInterface::getPostprocessorValue(const std::string & param_name,

@@ -88,7 +88,7 @@
   [section_output]
     type = AverageSectionValueSampler
     axis_direction = '0 0 1'
-    lengths = '10.0 18.0'
+    positions = '10.0 18.0'
     block = '1'
     variables = 'disp_x disp_y disp_z'
     reference_point = '0 0 0'
@@ -97,7 +97,7 @@
   [section_output_two]
     type = AverageSectionValueSampler
     axis_direction = '0 0 1'
-    lengths = '10.0 18.0'
+    positions = '10.0 18.0'
     block = '1'
     variables = 'disp_x disp_y disp_z'
     reference_point = '2.1 2.1 0'

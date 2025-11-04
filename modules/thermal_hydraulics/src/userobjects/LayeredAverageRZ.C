@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -33,7 +33,7 @@ LayeredAverageRZ::LayeredAverageRZ(const InputParameters & parameters)
 void
 LayeredAverageRZ::execute()
 {
-  LayeredIntegral::execute();
+  LayeredIntegralBase<ElementIntegralVariableUserObject>::execute();
 
   Real current_elem_volume = 0.;
   for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)

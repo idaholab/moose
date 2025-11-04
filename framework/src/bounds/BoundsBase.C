@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,12 +36,8 @@ BoundsBase::BoundsBase(const InputParameters & parameters)
     _fe_var(_bounded_var.isFV() ? nullptr
                                 : &_subproblem.getStandardVariable(_tid, _bounded_var_name))
 {
-  if (!Moose::PetscSupport::isSNESVI(*dynamic_cast<FEProblemBase *>(&_subproblem)))
-    mooseDoOnce(
-        mooseWarning("A variational inequalities solver must be used in conjunction with Bounds"));
-
   // Check that the bounded variable is of a supported type
-  if (!_bounded_var.isNodal() && (_bounded_var.feType().order != CONSTANT))
+  if (!_bounded_var.isNodal() && (_bounded_var.feType().order != libMesh::CONSTANT))
     paramError("bounded_variable", "Bounded variable must be nodal or of a CONSTANT order!");
 
   const auto & dummy =
@@ -52,6 +48,14 @@ BoundsBase::BoundsBase(const InputParameters & parameters)
     paramError("variable",
                "Dummy bounds aux variable and bounded variable must use the same finite element "
                "order and family");
+}
+
+void
+BoundsBase::initialSetup()
+{
+  if (!Moose::PetscSupport::isSNESVI(*dynamic_cast<FEProblemBase *>(&_c_fe_problem)))
+    mooseDoOnce(
+        mooseWarning("A variational inequalities solver must be used in conjunction with Bounds"));
 }
 
 Real

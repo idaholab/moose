@@ -1,20 +1,19 @@
 # PINSFEFluidVelocityTimeDerivative
 
-!alert construction title=Undocumented Class
-The PINSFEFluidVelocityTimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/PINSFEFluidVelocityTimeDerivative
 
-## Overview
+If using the conservative form, the time derivative of the density is taken into account in the contribution to
+the residual $R_{time}$. If not, only the time derivative of velocity is considered.
 
-!! Replace these lines with information regarding the PINSFEFluidVelocityTimeDerivative object.
+!equation
+R_{time} = (\rho \dfrac{\partial v_i}{\partial t} + v_i \dfrac{\partial \rho}{\partial t})\psi
 
-## Example Input File Syntax
+with $\rho$ the fluid density, $v_i$ the component of the (superficial) velocity specified
+with the [!param](/Kernels/PINSFEFluidVelocityTimeDerivative/variable) parameter, and $\psi$
+the test function.
 
-!! Describe and include an example of how to use the PINSFEFluidVelocityTimeDerivative object.
+!alert note
+The porosity is assumed to be constant in time.
 
 !syntax parameters /Kernels/PINSFEFluidVelocityTimeDerivative
 

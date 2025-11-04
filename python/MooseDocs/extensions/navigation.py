@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -225,12 +225,12 @@ class NavigationExtension(Extension):
             img0 = self.translator.findPage('github-logo.png')
             img1 = self.translator.findPage('github-mark.png')
 
-            html.Tag(a, 'img', src=img0.relativeDestination(page), class_='github-mark')
-            html.Tag(a, 'img', src=img1.relativeDestination(page), class_='github-logo')
+            html.Tag(a, 'img', src=img0.relativeDestination(page), alt="GitHub wordmark", class_='github-mark')
+            html.Tag(a, 'img', src=img1.relativeDestination(page), alt="GitHub logo", class_='github-logo')
 
         elif 'gitlab' in repo:
             img = self.translator.findPage('gitlab-logo.png')
-            html.Tag(a, 'img', src=img.relativeDestination(page), class_='gitlab-logo')
+            html.Tag(a, 'img', src=img.relativeDestination(page), alt="GitLab logo", class_='gitlab-logo')
 
         nav.insert(0, a)
 

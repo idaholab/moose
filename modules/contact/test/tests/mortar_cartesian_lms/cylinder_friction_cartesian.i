@@ -84,7 +84,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     incremental = false
     save_in = 'saved_x saved_y'

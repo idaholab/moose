@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,19 +22,27 @@
 #include "MooseSyntax.h"
 #include "ExecFlagRegistry.h"
 
+#include "hit/parse.h"
+
 #include <unistd.h>
 
 const ExecFlagType EXEC_NONE = registerDefaultExecFlag("NONE");
 const ExecFlagType EXEC_INITIAL = registerDefaultExecFlag("INITIAL");
 const ExecFlagType EXEC_LINEAR = registerDefaultExecFlag("LINEAR");
+const ExecFlagType EXEC_LINEAR_CONVERGENCE = registerDefaultExecFlag("LINEAR_CONVERGENCE");
 const ExecFlagType EXEC_NONLINEAR = registerDefaultExecFlag("NONLINEAR");
+const ExecFlagType EXEC_NONLINEAR_CONVERGENCE = registerDefaultExecFlag("NONLINEAR_CONVERGENCE");
 const ExecFlagType EXEC_POSTCHECK = registerDefaultExecFlag("POSTCHECK");
 const ExecFlagType EXEC_TIMESTEP_END = registerDefaultExecFlag("TIMESTEP_END");
 const ExecFlagType EXEC_TIMESTEP_BEGIN = registerDefaultExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_ITERATION_END =
+    registerExecFlag("MULTIAPP_FIXED_POINT_ITERATION_END");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_END");
 const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
     registerDefaultExecFlag("MULTIAPP_FIXED_POINT_BEGIN");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE =
+    registerDefaultExecFlag("MULTIAPP_FIXED_POINT_CONVERGENCE");
 const ExecFlagType EXEC_FINAL = registerDefaultExecFlag("FINAL");
 const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
 const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");
@@ -46,6 +54,9 @@ const ExecFlagType EXEC_SAME_AS_MULTIAPP = registerExecFlag("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP = registerExecFlag("PRE_MULTIAPP_SETUP");
 const ExecFlagType EXEC_TRANSFER = registerExecFlag("TRANSFER");
 const ExecFlagType EXEC_PRE_KERNELS = registerExecFlag("PRE_KERNELS");
+#ifdef LIBMESH_ENABLE_AMR
+const ExecFlagType EXEC_POST_ADAPTIVITY = registerExecFlag("POST_ADAPTIVITY");
+#endif
 
 namespace Moose
 {
@@ -58,15 +69,8 @@ registerAll(Factory & f, ActionFactory & af, Syntax & s)
   registerObjects(f, {"MooseApp"});
   associateSyntaxInner(s, af);
   registerActions(s, af, {"MooseApp"});
-  registerDataFilePath();
+  registerAppDataFilePath("moose");
   registerRepository("moose", "github.com/idaholab/moose");
-}
-
-void
-registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  registerObjects(factory, {"MooseApp"});
 }
 
 void
@@ -98,7 +102,14 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_executioner",            Executioner,               false);
   registerMooseObjectTask("read_executor",                Executor,                  false);
   registerTask("add_executor", true);
+
+  // TODO Organize these somewhere
   registerTask("init_physics", false);
+  registerTask("init_component_physics", false);
+  registerTask("meta_action_component", false);
+  registerTask("setup_component", false);
+  // 'list_component' is used to retrieve ActionComponents for the syntax JSON
+  registerTask("list_component", false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -115,17 +126,30 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
   appendMooseObjectTask  ("add_kernel",                   ArrayKernel);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_kernel",                   KokkosKernel);
+#endif
 
   registerMooseObjectTask("add_variable",                 MooseVariableBase,         false);
   registerMooseObjectTask("add_aux_variable",             MooseVariableBase,         false);
   registerMooseObjectTask("add_elemental_field_variable", MooseVariableBase,         false);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,               false);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_nodal_kernel",             KokkosNodalKernel);
+#endif
 
   registerMooseObjectTask("add_functor_material",         FunctorMaterial,           false);
   registerMooseObjectTask("add_material",                 MaterialBase,              false);
   appendDeprecatedMooseObjectTask("add_material",         FunctorMaterial);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_material",                 KokkosMaterial);
+#endif
+
   registerMooseObjectTask("add_bc",                       BoundaryCondition,         false);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_bc",                       KokkosBoundaryCondition);
+#endif
 
   registerMooseObjectTask("add_function",                 Function,                  false);
   registerMooseObjectTask("add_distribution",             Distribution,              false);
@@ -134,6 +158,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,                 false);
   appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
   appendMooseObjectTask  ("add_aux_kernel",               ArrayAuxKernel);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_aux_kernel",               KokkosAuxKernel); 
+#endif
   registerMooseObjectTask("add_bound",                    Bounds,                    false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,              false);
@@ -162,7 +189,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_time_steppers",            TimeStepper,               false);
   registerMooseObjectTask("add_time_stepper",             TimeStepper,               false);
   registerTask           ("compose_time_stepper",                                    true);
+  registerMooseObjectTask("setup_time_integrators",       TimeIntegrator,            false);
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,            false);
+  registerMooseObjectTask("add_convergence",              Convergence,            false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,       false);
   registerMooseObjectTask("add_field_split",              Split,                     false);
@@ -170,6 +199,10 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mesh_division",            MeshDivision,              false);
   registerMooseObjectTask("add_user_object",              UserObject,                false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
+  appendDeprecatedMooseObjectTask("add_user_object",      Corrector);
+  registerMooseObjectTask("add_corrector",                Corrector,                 false);
+  appendDeprecatedMooseObjectTask("add_user_object",      MeshModifier);
+  registerMooseObjectTask("add_mesh_modifier",            MeshModifier,              false);
 
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);
@@ -186,6 +219,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_output",                   Output,                    false);
 
   registerMooseObjectTask("add_control",                  Control,                   false);
+  registerMooseObjectTask("add_chain_control",            ChainControl,              false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,          false);
 
   // clang-format on
@@ -232,6 +266,9 @@ addActionTypes(Syntax & syntax)
   registerTask("check_integrity_early", true);
   registerTask("check_integrity_early_physics", false);
   registerTask("setup_quadrature", true);
+  registerTask("create_tagged_matrices", true);
+
+  registerTask("mesh_modifiers", false);
 
   /// Additional Actions
   registerTask("no_action", false); // Used for Empty Action placeholders
@@ -263,6 +300,13 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
+  registerTask("add_default_nonlinear_convergence", true);
+  registerTask("add_default_multiapp_fixed_point_convergence", true);
+  registerTask("add_default_steady_state_convergence", true);
+
+  registerTask("chain_control_setup", true);
+  registerTask("start_webservercontrol", true);
+
   // Action for setting up the signal-based checkpoint
   registerTask("auto_checkpoint_action", true);
   /**************************/
@@ -280,6 +324,7 @@ addActionTypes(Syntax & syntax)
 
   // clang-format off
   syntax.addDependencySets("(meta_action)"
+                           "(meta_action_component)"
                            "(dynamic_object_registration)"
                            "(common_output)"
                            "(set_global_params)"
@@ -306,33 +351,43 @@ addActionTypes(Syntax & syntax)
                            "(create_problem_custom)"
                            "(create_problem_default)"
                            "(create_problem_complete)"
+                           "(init_displaced_problem)" // Problem must be init-ed before we start adding functors
+                           "(add_function)"  // Functions can depend on scalar variables & PPs, but this dependence can be
+                                             // added on initialSetup() rather than construction
+                           "(init_component_physics)" // components must add their blocks to physics before init_physics
                            "(init_physics)"
                            "(setup_postprocessor_data)"
-                           "(setup_time_integrator)"
+                           "(setup_time_integrator, setup_time_integrators)"
                            "(setup_executioner)"
                            "(setup_executioner_complete)"
+                           "(setup_component)"  // no particular reason for that placement
                            "(read_executor)"
                            "(add_executor)"
                            "(check_integrity_early)"
-                           "(check_integrity_early_physics)"
                            "(setup_predictor)"
-                           "(init_displaced_problem)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable,"
                            " add_external_aux_variables)"
                            "(add_mortar_variable)"
                            "(setup_variable_complete)"
+                           "(check_integrity_early_physics)"  // checks that systems and variables are consistent
                            "(setup_quadrature)"
-                           "(add_function)"
+                           "(add_convergence)"
+                           "(add_default_nonlinear_convergence,"
+                           " add_default_multiapp_fixed_point_convergence,"
+                           " add_default_steady_state_convergence)"
+                           "(add_positions)"
                            "(add_periodic_bc)"
-                           "(add_user_object)"
+                           "(add_user_object, add_corrector, add_mesh_modifier)"
+                           "(add_field_split)" // split objects required before field split preconditioner itself
+                           "(add_preconditioning)" // preconditioner may introduce objects such as static condensation which influence the underlying types of tagged matrices
+                           "(create_tagged_matrices)"
                            "(add_distribution)"
                            "(add_sampler)"
                            "(setup_function_complete)"
                            "(setup_adaptivity)"
                            "(set_adaptivity_options)"
                            "(add_ic, add_fv_ic)"
-                           "(add_constraint, add_field_split)"
-                           "(add_preconditioning)"
+                           "(add_constraint)"
                            "(add_times)"
                            "(add_time_stepper, add_time_steppers)"
                            "(compose_time_stepper)"
@@ -341,7 +396,6 @@ addActionTypes(Syntax & syntax)
                            "(setup_dampers)"
                            "(setup_residual_debug)"
                            "(add_bounds_vectors)"
-                           "(add_positions)"
                            "(add_mesh_division)"  // NearestPositionsDivision uses a Positions
                            "(add_multi_app)"
                            "(add_transfer)"
@@ -372,11 +426,58 @@ addActionTypes(Syntax & syntax)
                            "(coupling_functor_check)"
                            "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
-                           "(add_control)"
+                           "(add_control, add_chain_control)"
+                           "(chain_control_setup)"
+                           "(start_webservercontrol)"
                            "(check_output)"
                            "(check_integrity)"
                            "(create_application_block)");
   // clang-format on
+
+#ifdef MOOSE_MFEM_ENABLED
+  registerTask("add_mfem_problem_operator", true);
+  addTaskDependency("add_mfem_problem_operator", "init_mesh");
+  addTaskDependency("add_variable", "add_mfem_problem_operator");
+  addTaskDependency("add_aux_variable", "add_mfem_problem_operator");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
+  addTaskDependency("add_bc", "add_mfem_problem_operator");
+  addTaskDependency("add_kernel", "add_mfem_problem_operator");
+
+  // add SubMeshes
+  registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
+  addTaskDependency("add_mfem_submeshes", "create_problem_complete");
+
+  // add SubMesh transfers
+  appendMooseObjectTask("add_transfer", MFEMSubMeshTransfer);
+
+  // add FESpaces
+  registerMooseObjectTask("add_mfem_fespaces", MFEMFESpace, false);
+  appendMooseObjectTask("add_mfem_fespaces", MFEMFECollection);
+  addTaskDependency("add_mfem_fespaces", "add_mfem_submeshes");
+  addTaskDependency("add_variable", "add_mfem_fespaces");
+  addTaskDependency("add_aux_variable", "add_mfem_fespaces");
+  addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
+  addTaskDependency("add_kernel", "add_mfem_fespaces");
+
+  // set mesh FE space
+  registerTask("set_mesh_fe_space", true);
+  addTaskDependency("set_mesh_fe_space", "add_variable");
+  addTaskDependency("set_mesh_fe_space", "init_mesh");
+
+  // add preconditioning.
+  registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
+  addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_operator");
+  addTaskDependency("add_mfem_preconditioner", "add_variable");
+
+  // add solver.
+  registerMooseObjectTask("add_mfem_solver", MFEMSolverBase, true);
+  addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
+  addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
+#endif
+
+  registerTask("parse_neml2", /*required=*/false);
+  addTaskDependency("add_material", "parse_neml2");
+  addTaskDependency("add_user_object", "parse_neml2");
 }
 
 /**
@@ -421,7 +522,8 @@ registerActions(Syntax & syntax,
 {
   Registry::registerActionsTo(action_factory, obj_labels);
 
-  // TODO: Why is this here?
+  // Add these actions here so they are always executed last, without setting any dependency
+  registerTask("dump_objects", false);
   registerTask("finish_input_file_output", false);
 }
 
@@ -436,6 +538,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("DiffusionCG", "Physics/Diffusion/ContinuousGalerkin/*");
   registerSyntax("DiffusionFV", "Physics/Diffusion/FiniteVolume/*");
 
+  registerSyntax("AddActionComponentAction", "ActionComponents/*");
+  registerSyntax("CombineComponentsMeshes", "ActionComponents");
+
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "check_copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "Variables/*", "copy_nodal_vars");
   registerSyntaxTask("CopyNodalVarsAction", "AuxVariables/*", "check_copy_nodal_vars");
@@ -446,7 +551,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddKernelAction", "AuxKernels/*", "add_aux_kernel");
 
   registerSyntaxTask("AddHDGKernelAction", "HDGKernels/*", "add_hybridized_kernel");
-  registerSyntaxTask("AddHDGBCAction", "HDGBCs/*", "add_hybridized_integrated_bc");
 
   registerSyntax("AddAuxKernelAction", "AuxVariables/*/AuxKernel");
 
@@ -455,14 +559,26 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  registerSyntaxTask("AddKokkosKernelAction", "KokkosKernels/*", "add_kernel");
+  registerSyntaxTask("AddKokkosNodalKernelAction", "KokkosNodalKernels/*", "add_nodal_kernel");
+  registerSyntaxTask("AddKokkosKernelAction", "KokkosAuxKernels/*", "add_aux_kernel");
+
+  registerSyntaxTask("AddKokkosBCAction", "KokkosBCs/*", "add_bc");
+#endif
+
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");
 
   registerSyntax("SetupMeshAction", "Mesh");
   registerSyntax("SetupMeshCompleteAction", "Mesh");
+  // Components should be able create a Mesh without a Mesh block
+  registerSyntax("CreateMeshSetupActionsForComponents", "ActionComponents");
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");
+  registerSyntaxTask("EmptyAction", "Mesh/BatchMeshGeneratorAction", "no_action");
+  registerSyntax("BatchMeshGeneratorAction", "Mesh/BatchMeshGeneratorAction/*");
   registerSyntax("ElementIDOutputAction", "Mesh");
   syntax.registerSyntaxType("Mesh/*", "MeshGeneratorName");
 
@@ -471,6 +587,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMeshDivisionAction", "MeshDivisions/*");
   syntax.registerSyntaxType("MeshDivisions/*", "MeshDivisionName");
+  registerSyntax("AddConvergenceAction", "Convergence/*");
+  syntax.registerSyntaxType("Convergence/*", "ConvergenceName");
 
   registerSyntax("GlobalParamsAction", "GlobalParams");
 
@@ -507,6 +625,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  registerSyntax("AddKokkosMaterialAction", "KokkosMaterials/*");
+  syntax.registerSyntaxType("KokkosMaterials/*", "MaterialName");
+#endif
+
   registerSyntax("AddFunctorMaterialAction", "FunctorMaterials/*");
   syntax.registerSyntaxType("FunctorMaterials/*", "MaterialName");
 
@@ -530,6 +653,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddOutputAction", "Outputs/*");
   registerSyntax("CommonOutputAction", "Outputs");
+  registerSyntax("MaterialOutputAction", "Outputs");
+  registerSyntax("AutoCheckpointAction", "Outputs");
   syntax.registerSyntaxType("Outputs/*", "OutputName");
 
   // Note: Preconditioner Actions will be built by this setup action
@@ -543,7 +668,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddTimeStepperAction", "Executioner/TimeStepper", "add_time_stepper");
   registerSyntaxTask(
       "ComposeTimeStepperAction", "Executioner/TimeSteppers", "compose_time_stepper");
-  registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
+  registerSyntaxTask(
+      "SetupTimeIntegratorAction", "Executioner/TimeIntegrators/*", "setup_time_integrators");
+  registerSyntaxTask(
+      "SetupTimeIntegratorAction", "Executioner/TimeIntegrator", "setup_time_integrator");
   syntax.registerSyntaxType("Executors/*", "ExecutorName");
 
   registerSyntax("SetupQuadratureAction", "Executioner/Quadrature");
@@ -569,11 +697,18 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddConstraintAction", "Constraints/*");
 
-  registerSyntax("AddUserObjectAction", "UserObjects/*");
-  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddControlAction", "Controls/*");
+  registerSyntax("AddChainControlAction", "ChainControls/*");
   registerSyntax("AddBoundAction", "Bounds/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
+
+  // UserObject and some derived classes
+  registerSyntax("AddUserObjectAction", "UserObjects/*");
+  syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
+  registerSyntax("AddCorrectorAction", "Correctors/*");
+  syntax.registerSyntaxType("Correctors/*", "UserObjectName");
+  registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
+  syntax.registerSyntaxType("MeshModifiers/*", "UserObjectName");
 
   registerSyntax("AddNodalNormalsAction", "NodalNormals");
 
@@ -608,6 +743,16 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   // Application Block System
   registerSyntax("CreateApplicationBlockAction", "Application");
+
+#ifdef MOOSE_MFEM_ENABLED
+  registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
+  registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
+  registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
+  registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
+#endif
+
+  registerSyntax("NEML2ActionCommon", "NEML2");
+  registerSyntax("NEML2Action", "NEML2/*");
 
   addActionTypes(syntax);
 }
@@ -647,6 +792,29 @@ setColorConsole(bool use_color, bool force)
 {
   _color_console = (isatty(fileno(stdout)) || force) && use_color;
   return _color_console;
+}
+
+ScopedThrowOnError::ScopedThrowOnError(const bool throw_on_error)
+  : _throw_on_error_before(Moose::_throw_on_error)
+{
+  mooseAssert(!libMesh::Threads::in_threads, "Cannot be used in threads");
+  Moose::_throw_on_error = throw_on_error;
+}
+
+ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
+
+ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_error_before; }
+
+std::string
+hitMessagePrefix(const hit::Node & node)
+{
+  // Strip meaningless line and column number for CLI args
+  if (node.filename() == "CLI_ARGS")
+    return "CLI_ARGS:\n";
+  // If using the root node, don't add line info
+  if (node.isRoot())
+    return node.filename() + ":\n";
+  return node.fileLocation() + ":\n";
 }
 
 bool _warnings_are_errors = false;

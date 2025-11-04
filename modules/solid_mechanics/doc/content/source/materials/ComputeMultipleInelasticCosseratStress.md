@@ -17,7 +17,7 @@ If finite strain rotations are considered, then the these two terms are further 
 The derivative tensor of the coupled Cosserat elastic stress with regards to strain is rotated by the rotation increment.
 
 !alert note
-This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/cosserat.pdf))
+This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/tree/next/modules/solid_mechanics/doc/theory/cosserat.pdf))
 for more explanation.
 
 !syntax parameters /Materials/ComputeMultipleInelasticCosseratStress

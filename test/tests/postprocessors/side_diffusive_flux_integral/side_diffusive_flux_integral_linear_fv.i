@@ -88,8 +88,9 @@
 []
 
 [Executioner]
-  type = LinearPicardSteady
-  linear_systems_to_solve = u_sys
+  type = Steady
+  system_names = u_sys
+  l_tol = 1e-10
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

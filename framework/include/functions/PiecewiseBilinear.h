@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -76,12 +76,13 @@ public:
                     ColumnMajorMatrix & z,
                     const std::string & object_name);
 
+  const int _xaxis;
+  const int _yaxis;
+
 private:
   std::unique_ptr<BilinearInterpolation> _bilinear_interp;
   const std::string _data_file_name;
   const int _axis;
-  const int _yaxis;
-  const int _xaxis;
   const bool _axisValid;
   const bool _yaxisValid;
   const bool _xaxisValid;

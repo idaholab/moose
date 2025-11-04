@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `CombinerGenerator` allows the user to combine the outputs of multiple `MeshGenerator`s into a single mesh.  This is somewhat similar to the [StitchedMeshGenerator.md] with the difference being that `CombinerGenerator` makes no attempt to "heal" / "join" the mesh like [StitchedMeshGenerator.md] does.  There `CombinerGenerator` is more suited to creation of disjoint meshes (where the individual pieces are not directly tied together).
+The `CombinerGenerator` allows the user to combine the outputs of multiple `MeshGenerator`s into a single mesh.  This is somewhat similar to the [StitchMeshGenerator.md] with the difference being that `CombinerGenerator` makes no attempt to "heal" / "join" the mesh like [StitchMeshGenerator.md] does.  There `CombinerGenerator` is more suited to creation of disjoint meshes (where the individual pieces are not directly tied together).
 
 !alert note title=Mesh naming precedence
 `CombinerGenerator` preserves subdomain names and boundary names (node sets, side sets, and edge sets).
@@ -26,6 +26,7 @@ The most straightforward thing to do is simply to combine the output of multiple
 Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner_multi.png style=width:50%;
+         alt=Three meshes simply combined together.
 
 
 ### 2. Combine Multiple `MeshGenerator`s AND Translate Them
@@ -40,7 +41,8 @@ If you specify `positions` then the number of `positions` must match the number 
 
 Will generate a mesh that looks like:
 
-!media media/meshgenerators/combiner_multi_translate.png style=width:75%;
+!media framework/meshgenerators/combiner_multi_translate.png style=width:75%;
+         alt=Three meshes combined, with each mesh translated in space.
 
 Alternatively, the same displacement vectors can be supplied in a file with the `positions_file` option. The above mesh can equivalently be generated with the following.
 
@@ -63,6 +65,7 @@ The final option is to provide exactly one `inputs` but specify multiple `positi
 Will generate a mesh that looks like:
 
 !media media/meshgenerators/combiner.png style=width:75%;
+         alt=Three copies of the same mesh, each translated in space.
 
 Again, the same capability can be achieved with the `positions_file` option.
 

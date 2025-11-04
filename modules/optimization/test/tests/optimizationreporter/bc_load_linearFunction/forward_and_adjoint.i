@@ -82,6 +82,21 @@
   []
 []
 
+[Preconditioning]
+  [nl0]
+    type = SMP
+    nl_sys = 'nl0'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
+  []
+  [adjoint]
+    type = SMP
+    nl_sys = 'adjoint'
+    petsc_options_iname = '-pc_type'
+    petsc_options_value = 'lu'
+  []
+[]
+
 [Executioner]
   type = SteadyAndAdjoint
   forward_system = nl0
@@ -89,8 +104,6 @@
   line_search = none
   nl_rel_tol = 1e-12
   l_tol = 1e-12
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
 []
 
 [DiracKernels]
@@ -128,7 +141,7 @@
     variable = temperature
     measurement_file = 'measurementData.csv'
     file_xcoord = 'coordx'
-    file_ycoord ='y'
+    file_ycoord = 'y'
     file_zcoord = 'z'
     file_value = 'weightedMeasurement'
     file_variable_weights = 'weight'
@@ -142,16 +155,16 @@
   [vector_sqsum]
     type = ParsedVectorRealReductionReporter
     name = sqsum
-    reporter_name= 'measure_data/misfit_values'
-    initial_value = 0
+    vector_reporter_name = 'measure_data/misfit_values'
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value*indexed_value'
-    outputs=none
+    outputs = none
   []
   [obj_sum]
     type = ParsedScalarReporter
     name = value
-    reporter_names = 'vector_sqsum/sqsum'
-    reporter_symbols = 'a'
+    scalar_reporter_names = 'vector_sqsum/sqsum'
+    scalar_reporter_symbols = 'a'
     expression = '0.5*a'
   []
 []

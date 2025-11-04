@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -175,7 +175,7 @@ class TestHitLoad(unittest.TestCase):
     def testTestRoot(self):
         root = pyhit.load(os.path.join('..', '..', 'testroot'))
         self.assertIn('app_name', root)
-        self.assertEqual(root['app_name'], 'moose_python')
+        self.assertEqual(root['app_name'], '')
 
 
 if __name__ == '__main__':

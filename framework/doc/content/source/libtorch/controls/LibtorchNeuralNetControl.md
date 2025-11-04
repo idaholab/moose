@@ -1,6 +1,6 @@
 # LibtorchNeuralNetControl
 
-!if! function=hasLibtorch()
+!if! function=hasCapability('libtorch')
 
 !syntax description /Controls/LibtorchNeuralNetControl
 

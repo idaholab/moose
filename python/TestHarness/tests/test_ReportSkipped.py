@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,9 +16,9 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Verify the skipped test _does_ appear
-        output = self.runExceptionTests('--no-color', '-i', 'ignore_skipped').decode('utf-8')
+        output = self.runTests('--no-color', '-i', 'ignore_skipped').output
         self.assertIn('[ALWAYS SKIPPED] SKIP', output)
 
         # Verify the skipped test does _not_ appear
-        output = self.runTests('--no-color', '--no-report', '-i', 'ignore_skipped').decode('utf-8')
+        output = self.runTests('--no-color', '--no-report', '-i', 'ignore_skipped').output
         self.assertNotIn('[ALWAYS SKIPPED] SKIP', output)

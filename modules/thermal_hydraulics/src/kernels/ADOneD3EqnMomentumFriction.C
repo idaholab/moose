@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,6 +38,7 @@ ADOneD3EqnMomentumFriction::ADOneD3EqnMomentumFriction(const InputParameters & p
 ADReal
 ADOneD3EqnMomentumFriction::computeQpResidual()
 {
-  return 0.5 * _f_D[_qp] * _rho[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] / _D_h[_qp] *
+  using std::abs;
+  return 0.5 * _f_D[_qp] * _rho[_qp] * _vel[_qp] * abs(_vel[_qp]) * _A[_qp] / _D_h[_qp] *
          _test[_i][_qp];
 }

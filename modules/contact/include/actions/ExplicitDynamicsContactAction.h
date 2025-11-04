@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,6 +54,9 @@ protected:
 
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
+
+  /// Verbose output, may increase runtime
+  const bool _verbose;
 
 private:
   /**

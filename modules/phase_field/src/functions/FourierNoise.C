@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -113,8 +113,10 @@ FourierNoise::value(Real, const Point & p) const
 ADReal
 FourierNoise::value(const ADReal &, const ADPoint & p) const
 {
+  using std::sin, std::cos;
+
   ADReal v = 0.0;
   for (const auto & f : _series)
-    v += f.s * std::sin(p * f.k) + f.c * std::cos(p * f.k);
+    v += f.s * sin(p * f.k) + f.c * cos(p * f.k);
   return v * _scale;
 }

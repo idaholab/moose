@@ -26,9 +26,9 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [./SolidMechanics]
+    [./QuasiStatic]
       [./All]
         add_variables = true
         strain = SMALL

@@ -8,6 +8,10 @@ used independently or in combination to meet the needs of the application develo
 
 !include modules/stochastic_tools/examples/index.md start=example-lists-begin end=example-lists-end
 
+## Workshops
+
+- Introduction to STM: [intro_slides/index.md optional=True]
+
 ## Performance
 
 The stochastic tools module is optimized in two ways for memory use. First, sub-applications can be
@@ -24,6 +28,10 @@ as well. However, to enable it one needs to compile MOOSE with the C++ APIs of
 [pytorch](https://pytorch.org/). For this, follow the appropriate installation guide below:
 
 - [enable_pytorch.md]
+
+## Python Utilities
+
+- [StochasticControl.md]
 
 ## Objects, Actions, and Syntax
 

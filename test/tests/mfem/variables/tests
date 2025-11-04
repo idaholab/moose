@@ -1,0 +1,16 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  issues = '#29632'
+  [MFEMVariableSetupFromMOOSEVariables]
+    type = XMLDiff
+    input = mfem_variables_from_moose.i
+    xmldiff = 'OutputData/VariableSetupTest/Run0/Cycle000000/data.pvtu
+                OutputData/VariableSetupTest/Run0/Cycle000001/data.pvtu'
+    requirement = 'The system shall have the ability to add an MFEM variable from a user specification of a MOOSE variable, inferring the finite element space.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    restep = false
+  []
+[]

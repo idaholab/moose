@@ -20,7 +20,8 @@
   [esm]
     type = CutElementSubdomainModifier
     geometric_cut_userobject = level_set_cut_uo
-    apply_initial_conditions = false
+    reinitialize_subdomains = '' #no reinitialization of variables or material properties
+    skip_restore_subdomain_changes = true
   []
 []
 

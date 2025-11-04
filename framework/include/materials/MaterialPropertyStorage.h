@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,6 +19,7 @@
 #include <variant>
 
 // Forward declarations
+class FEProblemBase;
 class MaterialBase;
 class QpMap;
 
@@ -42,7 +43,7 @@ void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * c
 class MaterialPropertyStorage
 {
 public:
-  MaterialPropertyStorage(MaterialPropertyRegistry & registry);
+  MaterialPropertyStorage(MaterialPropertyRegistry & registry, FEProblemBase & problem);
 
   /**
    * Basic structure for storing information about a property
@@ -102,8 +103,8 @@ public:
    */
   void prolongStatefulProps(processor_id_type pid,
                             const std::vector<std::vector<QpMap>> & refinement_map,
-                            const QBase & qrule,
-                            const QBase & qrule_face,
+                            const libMesh::QBase & qrule,
+                            const libMesh::QBase & qrule_face,
                             MaterialPropertyStorage & parent_material_props,
                             const THREAD_ID tid,
                             const Elem & elem,
@@ -128,8 +129,8 @@ public:
    */
   void updateStatefulPropsForPRefinement(const processor_id_type pid,
                                          const std::vector<QpMap> & p_refinement_map,
-                                         const QBase & qrule,
-                                         const QBase & qrule_face,
+                                         const libMesh::QBase & qrule,
+                                         const libMesh::QBase & qrule_face,
                                          const THREAD_ID tid,
                                          const Elem & elem,
                                          const int input_side);
@@ -148,8 +149,8 @@ public:
    */
   void restrictStatefulProps(const std::vector<std::pair<unsigned int, QpMap>> & coarsening_map,
                              const std::vector<const Elem *> & coarsened_element_children,
-                             const QBase & qrule,
-                             const QBase & qrule_face,
+                             const libMesh::QBase & qrule,
+                             const libMesh::QBase & qrule_face,
                              const THREAD_ID tid,
                              const Elem & elem,
                              int input_side = -1);
@@ -310,21 +311,38 @@ public:
   /**
    * @returns A range over states to be used in range-based for loops
    */
-  IntRange<unsigned int> stateIndexRange() const { return IntRange<unsigned int>(0, numStates()); }
+  libMesh::IntRange<unsigned int> stateIndexRange() const
+  {
+    return libMesh::IntRange<unsigned int>(0, numStates());
+  }
   /**
    * @returns A range over stateful states to be used in range-based for loops
    *
    * Will be an empty range if there are no stateful states
    */
-  IntRange<unsigned int> statefulIndexRange() const
+  libMesh::IntRange<unsigned int> statefulIndexRange() const
   {
-    return IntRange<unsigned int>(1, numStates());
+    return libMesh::IntRange<unsigned int>(1, numStates());
   }
 
   /**
    * @return The MaterialData for thread \p tid
    */
+  const MaterialData & getMaterialData(const THREAD_ID tid) const { return _material_data[tid]; }
   MaterialData & getMaterialData(const THREAD_ID tid) { return _material_data[tid]; }
+
+  /**
+   * @return The consumers of storage of type \p type
+   */
+  const std::set<const MooseObject *> & getConsumers(Moose::MaterialDataType type) const;
+
+  /**
+   * Add \p object as the consumer of storage of type \p type
+   */
+  void addConsumer(Moose::MaterialDataType type, const MooseObject * object)
+  {
+    _consumers[type].insert(object);
+  }
 
   /**
    * Sets the loading of stateful material properties to recover
@@ -357,6 +375,9 @@ public:
   bool isRestoredProperty(const std::string & name) const;
 
 protected:
+  /// Reference to the problem
+  FEProblemBase & _problem;
+
   /// The actual storage
   std::array<PropsType, MaterialData::max_state + 1> _storage;
 
@@ -365,6 +386,9 @@ protected:
 
   /// the vector of stateful property ids (the vector index is the map to stateful prop_id)
   std::vector<unsigned int> _stateful_prop_id_to_prop_id;
+
+  /// The consumers of this storage
+  std::map<Moose::MaterialDataType, std::set<const MooseObject *>> _consumers;
 
   void sizeProps(MaterialProperties & mp, unsigned int size);
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,6 +27,9 @@ WCNSFV2PMomentumAdvectionSlip::validParams()
   params.addParam<MooseFunctorName>("w_slip", "The slip velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho_d", "Dispersed phase density.");
   params.addParam<MooseFunctorName>("fd", 0.0, "Fraction dispersed phase.");
+  params.renameParam("fd", "fraction_dispersed", "");
+  params.setDocString(NS::density, "Main phase (not dispersed) density functor");
+
   return params;
 }
 
@@ -70,7 +73,8 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
   if (on_boundary)
     face_arg = singleSidedFaceArg();
   else
-    face_arg = Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+    face_arg = Moose::FaceArg{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr};
 
   ADRealVectorValue u_slip_vel_vec;
   if (_dim == 1)
@@ -81,8 +85,8 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
     u_slip_vel_vec = ADRealVectorValue(
         _u_slip(face_arg, state), (*_v_slip)(face_arg, state), (*_w_slip)(face_arg, state));
 
-  const auto rho = _rho(face_arg, state) +
-                   (_rho_d(face_arg, state) - _rho(face_arg, state)) * _fd(face_arg, state);
+  const auto rho_mix = _rho(face_arg, state) +
+                       (_rho_d(face_arg, state) - _rho(face_arg, state)) * _fd(face_arg, state);
 
   const auto vdotn = _normal * u_slip_vel_vec;
 
@@ -91,7 +95,7 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
     const auto ssf = singleSidedFaceArg();
     const Elem * const sided_elem = ssf.face_side;
     const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
-    const auto rho_face = rho;
+    const auto rho_face = rho_mix;
     const auto eps_face = epsilon()(ssf, state);
     const auto u_face = _var(ssf, state);
     const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
@@ -115,8 +119,12 @@ WCNSFV2PMomentumAdvectionSlip::computeResidualsAndAData(const FaceInfo & fi)
   else // we are an internal fluid flow face
   {
     const bool elem_is_upwind = MetaPhysicL::raw_value(u_slip_vel_vec) * _normal > 0;
-    const Moose::FaceArg advected_face_arg{
-        &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
+    const Moose::FaceArg advected_face_arg{&fi,
+                                           limiterType(_advected_interp_method),
+                                           elem_is_upwind,
+                                           correct_skewness,
+                                           nullptr,
+                                           nullptr};
     if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
             NS::isPorosityJumpFace(epsilon(), fi, state);
         is_jump)

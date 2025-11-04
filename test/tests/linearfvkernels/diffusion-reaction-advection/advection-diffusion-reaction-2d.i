@@ -46,7 +46,7 @@
 []
 
 [LinearFVBCs]
-  inactive = "outflow"
+  inactive = "outflow neumann"
   [dir]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
@@ -58,6 +58,13 @@
     variable = u
     boundary = "right"
     use_two_term_expansion = true
+  []
+  [neumann]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    variable = u
+    boundary = "top"
+    functor = analytic_solution_neumann_top
+    diffusion_coeff = diff_coeff_func
   []
 []
 
@@ -78,6 +85,10 @@
     type = ParsedFunction
     expression = 'sin((1/2)*x*pi)*sin(2*y*pi) + 1.5'
   []
+  [analytic_solution_neumann_top]
+    type = ParsedFunction
+    expression = '(1.0+0.5*x*y)*sin((1/2)*x*pi)*cos(2*y*pi)*2*pi'
+  []
 []
 
 [Postprocessors]
@@ -93,9 +104,20 @@
   []
 []
 
+[Convergence]
+  [linear]
+    type = IterationCountConvergence
+    max_iterations = 1
+    converge_at_max_iterations = true
+  []
+[]
+
 [Executioner]
-  type = LinearPicardSteady
-  linear_systems_to_solve = u_sys
+  type = Steady
+  system_names = u_sys
+  l_tol = 1e-10
+  multi_system_fixed_point=true
+  multi_system_fixed_point_convergence=linear
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

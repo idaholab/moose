@@ -4,10 +4,6 @@ elem = QUAD4
 order = FIRST
 name = 'finite_rr'
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   patch_size = 80
   patch_update_strategy = auto
@@ -58,6 +54,7 @@ name = 'finite_rr'
     old_block = '1 2'
     new_block = 'plank block'
   []
+  coord_type = RZ
 []
 
 [GlobalParams]
@@ -83,7 +80,7 @@ name = 'finite_rr'
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [block]
     use_automatic_differentiation = true
     strain = FINITE

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
+#include <tuple>
+#include <sstream>
+#include <string>
 
 /***
  * Streams all of the given arguments into the given stream
@@ -43,4 +47,17 @@ streamArguments(StreamType & ss, std::tuple<Args...> args)
   ss << std::get<I>(args);
   streamArguments<I + 1, StreamType, Args...>(ss, args);
 }
+
+/***
+ * Streams all of the given arguments into a string
+ */
+template <typename... Args>
+std::string
+argumentsToString(Args &&... args)
+{
+  std::ostringstream ss;
+  streamArguments(ss, std::forward<Args>(args)...);
+  return ss.str();
+}
+
 // clang-format on

@@ -1,0 +1,51 @@
+reset
+
+#{hex_dimension = 1.0}
+#{B = 20*hex_dimension}
+#{hex_dimension_sm = 0.9} # small
+#{offset = 2.1} # small
+
+# First HEXAGON
+create vertex {hex_dimension} 0 0
+create vertex {0.5*hex_dimension} {0.866025*hex_dimension} 0
+create vertex {-0.5*hex_dimension} {0.866025*hex_dimension} 0
+create vertex {-1.0*hex_dimension} 0 0
+create vertex {-0.5*hex_dimension} {-0.866025*hex_dimension} 0
+create vertex {0.5*hex_dimension} {-0.866025*hex_dimension} 0
+
+# Create hexagon surface
+create surface vertex 1,2,3,4,5,6
+
+# Additional surface to subtract the geometry
+create vertex {hex_dimension_sm} 0 0
+create vertex {0.5*hex_dimension_sm} {0.866025*hex_dimension_sm} 0
+create vertex {-0.5*hex_dimension_sm} {0.866025*hex_dimension_sm} 0
+create vertex {-1.0*hex_dimension_sm} 0 0
+create vertex {-0.5*hex_dimension_sm} {-0.866025*hex_dimension_sm} 0
+create vertex {0.5*hex_dimension_sm} {-0.866025*hex_dimension_sm} 0
+create surface vertex 7,8,9,10,11,12
+
+subtract 2 from 1
+
+#
+sweep surface 3 vector 0 0 1  distance {B}
+#
+
+webcut volume all with plane xplane rotate 60 about z
+delete volume 3
+
+surface 20 interval 3
+curve 51 53 54 55 interval 2
+curve 28 31 30 42 interval 4
+curve 47 32 33 41 43 45 21 29 27 49 interval 10
+mesh volume 1
+
+sideset 16 surface 24
+sideset 4 surface 21
+sideset 5 surface 17 18
+
+block 1 volume 1
+
+block 1 elem HEX8
+
+export mesh "one_duct_symm.e" overwrite

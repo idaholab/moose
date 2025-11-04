@@ -39,12 +39,9 @@
   volumetric_locking_correction = true
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = elastic_thermal_patch_rz_test.e
+  coord_type = RZ
 []
 
 [Functions]
@@ -77,7 +74,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   add_variables = true
   strain = SMALL
   incremental = true

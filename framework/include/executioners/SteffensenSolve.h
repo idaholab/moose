@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,6 +19,8 @@ public:
 
   static InputParameters validParams();
 
+  virtual void initialSetup() override;
+
   /**
    * Allocate storage for the fixed point algorithm.
    * This creates the system vector of old (older, pre/post solve) variable values and the
@@ -28,6 +30,11 @@ public:
    *                quantities (as main app) or the secondary ones (as a subapp)
    */
   virtual void allocateStorage(const bool primary) override final;
+
+  virtual void printFixedPointConvergenceHistory(
+      Real initial_norm,
+      const std::vector<Real> & timestep_begin_norms,
+      const std::vector<Real> & timestep_end_norms) const override final;
 
 private:
   /**
@@ -76,18 +83,15 @@ private:
   virtual void transformVariables(const std::set<dof_id_type> & transformed_dofs,
                                   const bool primary) override final;
 
-  /// Print the convergence history of the coupling, at every coupling iteration
-  virtual void printFixedPointConvergenceHistory() override final;
-
   /// Vector tag id for the most recent solution variable, pre-Steffensen transform, as a main app
-  TagID _fxn_m1_tagid;
+  TagID _fxn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the solution variable before the latest solve, as a main app
-  TagID _xn_m1_tagid;
+  TagID _xn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the most recent solution variable, pre-Steffensen transform, as a sub app
-  TagID _secondary_fxn_m1_tagid;
+  TagID _secondary_fxn_m1_tagid = Moose::INVALID_TAG_ID;
 
   /// Vector tag id for the solution variable before the latest solve, as a sub app
-  TagID _secondary_xn_m1_tagid;
+  TagID _secondary_xn_m1_tagid = Moose::INVALID_TAG_ID;
 };

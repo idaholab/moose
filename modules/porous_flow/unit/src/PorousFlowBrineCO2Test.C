@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -547,7 +547,8 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 
   ABS_TEST(liquid_density.value(), density, 1.0e-12);
   ABS_TEST(liquid_viscosity.value(), viscosity, 1.0e-12);
-  ABS_TEST(liquid_enthalpy.value(), enthalpy, 1.0e-12);
+  // Tolerance loosened to pass on Apple M4
+  ABS_TEST(liquid_enthalpy.value(), enthalpy, 3.e-10);
 
   // Verify derivatives
   // Derivatives wrt pressure

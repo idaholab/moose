@@ -60,7 +60,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     volumetric_locking_correction = true
     add_variables  = true

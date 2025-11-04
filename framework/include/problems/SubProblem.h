@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -68,6 +68,9 @@ class NumericVector;
 class System;
 } // namespace libMesh
 
+using libMesh::CouplingMatrix;
+using libMesh::EquationSystems;
+
 /**
  * Generic class for solving transient nonlinear problems
  *
@@ -80,25 +83,34 @@ public:
   SubProblem(const InputParameters & parameters);
   virtual ~SubProblem();
 
-  virtual EquationSystems & es() = 0;
+  virtual libMesh::EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
   virtual const MooseMesh & mesh() const = 0;
   virtual const MooseMesh & mesh(bool use_displaced) const = 0;
 
-  virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
+  /**
+   * @returns whether there will be nonlocal coupling at any point in the simulation, e.g. whether
+   * there are any active \emph or inactive nonlocal kernels or boundary conditions
+   */
+  virtual bool checkNonlocalCouplingRequirement() const = 0;
 
   /**
-   * @return whether the given \p nl_sys_num is converged
+   * @return whether the given solver system \p sys_num is converged
    */
-  virtual bool nlConverged(const unsigned int nl_sys_num) { return converged(nl_sys_num); }
+  virtual bool solverSystemConverged(const unsigned int sys_num) { return converged(sys_num); }
 
   /**
-   * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
-   * We will have to first convert apps to use nlConverged, and then once that is done, we can
-   * change this signature. Then we can go through the apps again and convert back to this changed
-   * API
+   * @return whether the given nonlinear system \p nl_sys_num is converged.
    */
-  virtual bool converged(const unsigned int nl_sys_num) { return nlConverged(nl_sys_num); }
+  virtual bool nlConverged(const unsigned int nl_sys_num);
+
+  /**
+   * Eventually we want to convert this virtual over to taking a solver system number argument.
+   * We will have to first convert apps to use solverSystemConverged, and then once that is done, we
+   * can change this signature. Then we can go through the apps again and convert back to this
+   * changed API
+   */
+  virtual bool converged(const unsigned int sys_num) { return solverSystemConverged(sys_num); }
 
   /**
    * @return the nonlinear system number corresponding to the provided \p nl_sys_name
@@ -143,6 +155,22 @@ public:
    */
   virtual TagID addVectorTag(const TagName & tag_name,
                              const Moose::VectorTagType type = Moose::VECTOR_TAG_RESIDUAL);
+
+  /**
+   * Adds a vector tag to the list of vectors that will not be zeroed
+   * when other tagged vectors are
+   * @param tag the TagID of the vector that will be manually managed
+   */
+  void addNotZeroedVectorTag(const TagID tag);
+
+  /**
+   * Checks if a vector tag is in the list of vectors that will not be zeroed
+   * when other tagged vectors are
+   * @param tag the TagID of the vector that is currently being checked
+   * @returns false if the tag is not within the set of vectors that are
+   *          intended to not be zero or if the set is empty. returns true otherwise
+   */
+  bool vectorTagNotZeroed(const TagID tag) const;
 
   /**
    * Get a VectorTag from a TagID.
@@ -227,6 +255,12 @@ public:
   /// Whether or not this problem has the variable
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
+  /// Whether or not this problem has this linear variable
+  virtual bool hasLinearVariable(const std::string & var_name) const;
+
+  /// Whether or not this problem has this auxiliary variable
+  virtual bool hasAuxiliaryVariable(const std::string & var_name) const;
+
   /**
    * Returns the variable reference for requested variable which must
    * be of the expected_var_type (Nonlinear vs. Auxiliary) and
@@ -267,12 +301,6 @@ public:
   virtual ArrayMooseVariable & getArrayVariable(const THREAD_ID tid,
                                                 const std::string & var_name) = 0;
 
-  /// Returns the variable name of a component of an array variable
-  static std::string arrayVariableComponent(const std::string & var_name, unsigned int i)
-  {
-    return var_name + "_" + std::to_string(i);
-  }
-
   /// Returns a Boolean indicating whether any system contains a variable with the name provided
   virtual bool hasScalarVariable(const std::string & var_name) const = 0;
 
@@ -281,7 +309,7 @@ public:
                                                   const std::string & var_name) = 0;
 
   /// Returns the equation system containing the variable provided
-  virtual System & getSystem(const std::string & var_name) = 0;
+  virtual libMesh::System & getSystem(const std::string & var_name) = 0;
 
   /**
    * Set the MOOSE variables to be reinited on each element.
@@ -331,6 +359,11 @@ public:
   virtual const SystemBase & systemBaseLinear(const unsigned int sys_num) const = 0;
   virtual SystemBase & systemBaseLinear(const unsigned int sys_num) = 0;
   /**
+   * Return the solver system object as a base class reference given the system number
+   */
+  virtual const SystemBase & systemBaseSolver(const unsigned int sys_num) const = 0;
+  virtual SystemBase & systemBaseSolver(const unsigned int sys_num) = 0;
+  /**
    * Return the auxiliary system object as a base class reference
    */
   virtual const SystemBase & systemBaseAuxiliary() const = 0;
@@ -360,17 +393,19 @@ public:
   virtual void cacheResidualNeighbor(const THREAD_ID tid);
   virtual void addCachedResidual(const THREAD_ID tid);
 
-  virtual void setResidual(NumericVector<Number> & residual, const THREAD_ID tid) = 0;
-  virtual void setResidualNeighbor(NumericVector<Number> & residual, const THREAD_ID tid) = 0;
+  virtual void setResidual(libMesh::NumericVector<libMesh::Number> & residual,
+                           const THREAD_ID tid) = 0;
+  virtual void setResidualNeighbor(libMesh::NumericVector<libMesh::Number> & residual,
+                                   const THREAD_ID tid) = 0;
 
   virtual void addJacobian(const THREAD_ID tid) = 0;
   virtual void addJacobianNeighbor(const THREAD_ID tid) = 0;
   virtual void addJacobianNeighborLowerD(const THREAD_ID tid) = 0;
   virtual void addJacobianLowerD(const THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian,
+  virtual void addJacobianNeighbor(libMesh::SparseMatrix<libMesh::Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,
-                                   const DofMap & dof_map,
+                                   const libMesh::DofMap & dof_map,
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    const std::set<TagID> & tags,
@@ -483,8 +518,6 @@ public:
   updateGeomSearch(GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) = 0;
 
   virtual GeometricSearchData & geomSearchData() = 0;
-
-  virtual void meshChanged();
 
   /**
    * Adds the given material property to a storage map based on block ids
@@ -643,7 +676,7 @@ public:
   /**
    * @return the nonlocal coupling matrix for the i'th nonlinear system
    */
-  const CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const { return _nonlocal_cm[i]; }
+  virtual const libMesh::CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const = 0;
 
   /**
    * Returns true if the problem is in the process of computing the Jacobian
@@ -742,7 +775,7 @@ public:
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
-  virtual const CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const = 0;
+  virtual const libMesh::CouplingMatrix * couplingMatrix(const unsigned int nl_sys_num) const = 0;
 
 private:
   /**
@@ -754,7 +787,7 @@ private:
    * MeshBase (the underlying MeshBase will be the same for every system held by this object's
    * EquationSystems object)
    */
-  void cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
+  void cloneAlgebraicGhostingFunctor(libMesh::GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
   /**
    * Creates (n_sys - 1) clones of the provided coupling ghosting functor (corresponding to the
@@ -765,28 +798,28 @@ private:
    * MeshBase (the underlying MeshBase will be the same for every system held by this object's
    * EquationSystems object)
    */
-  void cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh = true);
+  void cloneCouplingGhostingFunctor(libMesh::GhostingFunctor & coupling_gf, bool to_mesh = true);
 
 public:
   /**
    * Add an algebraic ghosting functor to this problem's DofMaps
    */
-  void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
+  void addAlgebraicGhostingFunctor(libMesh::GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
   /**
    * Add a coupling functor to this problem's DofMaps
    */
-  void addCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh = true);
+  void addCouplingGhostingFunctor(libMesh::GhostingFunctor & coupling_gf, bool to_mesh = true);
 
   /**
    * Remove an algebraic ghosting functor from this problem's DofMaps
    */
-  void removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf);
+  void removeAlgebraicGhostingFunctor(libMesh::GhostingFunctor & algebraic_gf);
 
   /**
    * Remove a coupling ghosting functor from this problem's DofMaps
    */
-  void removeCouplingGhostingFunctor(GhostingFunctor & coupling_gf);
+  void removeCouplingGhostingFunctor(libMesh::GhostingFunctor & coupling_gf);
 
   /**
    * Automatic scaling setter
@@ -888,7 +921,9 @@ public:
   virtual void jacobianSetup();
 
   /// Setter for debug functor output
-  void setFunctorOutput(bool set_output) { _output_functors = set_output; }
+  void setFunctorOutput(bool set_output) { _show_functors = set_output; }
+  /// Setter for debug chain control data output
+  void setChainControlDataOutput(bool set_output) { _show_chain_control_data = set_output; }
 
   /**
    * @return the number of nonlinear systems in the problem
@@ -954,20 +989,19 @@ public:
   void reinitFVFace(const THREAD_ID tid, const FaceInfo & fi);
 
   /**
-   * Whether the simulation has nonlocal coupling which should be accounted for in the Jacobian
+   * Whether the simulation has active nonlocal coupling which should be accounted for in the
+   * Jacobian. For this to return true, there must be at least one active nonlocal kernel or
+   * boundary condition
    */
   virtual bool hasNonlocalCoupling() const = 0;
 
   /**
-   * Indicate whether the kind of adaptivity we're doing is p-refinement
-   * @param doing_p_refinement Whether we're doing p-refinement
-   * @param disable_p_refinement_for_families Families to disable p-refinement for
+   * Prepare \p DofMap and \p Assembly classes with our p-refinement information
    */
-  virtual void doingPRefinement(bool doing_p_refinement,
-                                const MultiMooseEnum & disable_p_refinement_for_families);
+  void preparePRefinement();
 
   /**
-   * @returns whether the kind of adaptivity we're doing is p-refinement
+   * @returns whether we're doing p-refinement
    */
   [[nodiscard]] bool doingPRefinement() const;
 
@@ -999,6 +1033,12 @@ protected:
    */
   bool verifyVectorTags() const;
 
+  /**
+   * Mark a variable family for either disabling or enabling p-refinement with valid parameters of a
+   * variable
+   */
+  void markFamilyPRefinement(const InputParameters & params);
+
   /// The currently declared tags
   std::map<TagName, TagID> _matrix_tag_name_to_tag_id;
 
@@ -1007,8 +1047,6 @@ protected:
 
   /// The Factory for building objects
   Factory & _factory;
-
-  std::vector<CouplingMatrix> _nonlocal_cm; /// nonlocal coupling matrix;
 
   DiracKernelInfo _dirac_kernel_info;
 
@@ -1050,9 +1088,6 @@ protected:
 
   std::vector<std::set<TagID>> _active_sc_var_coupleable_vector_tags;
 
-  /// nonlocal coupling requirement flag
-  bool _requires_nonlocal_coupling;
-
   /// Whether or not to use default libMesh coupling
   bool _default_ghosting;
 
@@ -1079,6 +1114,9 @@ protected:
 
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
+
+  /// the list of vector tags that will not be zeroed when all other tags are
+  std::unordered_set<TagID> _not_zeroed_tagged_vectors;
 
 private:
   /**
@@ -1125,7 +1163,10 @@ private:
   std::vector<std::multimap<std::string, std::pair<bool, bool>>> _functor_to_request_info;
 
   /// Whether to output a list of the functors used and requested (currently only at initialSetup)
-  bool _output_functors;
+  bool _show_functors;
+
+  /// Whether to output a list of all the chain control data
+  bool _show_chain_control_data;
 
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
@@ -1151,17 +1192,24 @@ private:
   /// A map from a root algebraic ghosting functor, e.g. the ghosting functor passed into \p
   /// removeAlgebraicGhostingFunctor, to its clones in other systems, e.g. systems other than system
   /// 0
-  std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
+  std::unordered_map<libMesh::GhostingFunctor *,
+                     std::vector<std::shared_ptr<libMesh::GhostingFunctor>>>
       _root_alg_gf_to_sys_clones;
 
   /// A map from a root coupling ghosting functor, e.g. the ghosting functor passed into \p
   /// removeCouplingGhostingFunctor, to its clones in other systems, e.g. systems other than system
   /// 0
-  std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
+  std::unordered_map<libMesh::GhostingFunctor *,
+                     std::vector<std::shared_ptr<libMesh::GhostingFunctor>>>
       _root_coupling_gf_to_sys_clones;
 
   /// Whether p-refinement has been requested at any point during the simulation
   bool _have_p_refinement;
+
+  /// Indicate whether a family is disabled for p-refinement
+  std::unordered_map<FEFamily, bool> _family_for_p_refinement;
+  /// The set of variable families by default disable p-refinement
+  static const std::unordered_set<FEFamily> _default_families_without_p_refinement;
 
   friend class Restartable;
 };
@@ -1190,8 +1238,9 @@ SubProblem::getFunctor(const std::string & name,
     if (functors.count("wraps_" + name) > 1)
       mooseError("Attempted to get a functor with the name '",
                  name,
-                 "' but multiple functors match. Make sure that you do not have functor material "
-                 "properties, functions, postprocessors or variables with the same names");
+                 "' but multiple (" + std::to_string(functors.count("wraps_" + name)) +
+                     ") functors match. Make sure that you do not have functor material "
+                     "properties, functions, postprocessors or variables with the same names.");
 
     auto & [true_functor_is, non_ad_functor, ad_functor] = find_ret->second;
     auto & functor_wrapper = requested_functor_is_ad ? *ad_functor : *non_ad_functor;
@@ -1217,8 +1266,10 @@ SubProblem::getFunctor(const std::string & name,
         mooseError("We already have the functor; it should not be unset");
 
       // Check for whether this is a valid request
+      // We allow auxiliary variables and linear variables to be retrieved as non AD
       if (!requested_functor_is_ad && requestor_is_ad &&
-          true_functor_is == SubProblem::TrueFunctorIs::AD)
+          true_functor_is == SubProblem::TrueFunctorIs::AD &&
+          !(hasAuxiliaryVariable(name) || hasLinearVariable(name)))
         mooseError("The AD object '",
                    requestor_name,
                    "' is requesting the functor '",
@@ -1360,9 +1411,9 @@ SubProblem::addFunctor(const std::string & name,
       {
         auto & [requested_functor_is_ad, requestor_is_ad] = request_info_it->second;
         if (!requested_functor_is_ad && requestor_is_ad && added_functor_is_ad)
-          mooseError("We are requesting a non-AD functor from an AD object, but the true functor "
-                     "is AD. This means we could be dropping important derivatives. We will not "
-                     "allow this");
+          mooseError("We are requesting a non-AD functor '" + name +
+                     "' from an AD object, but the true functor is AD. This means we could be "
+                     "dropping important derivatives. We will not allow this");
         // We're going to eventually check whether we've fulfilled all functor requests and our
         // check will be that the multimap is empty. This request is fulfilled, so erase it from the
         // map now
@@ -1396,6 +1447,19 @@ SubProblem::addFunctor(const std::string & name,
         existing_ad_wrapper->assign(std::make_unique<Moose::ADWrapperFunctor<ADType>>(functor));
       }
       return;
+    }
+    else if (!existing_wrapper)
+    {
+      // Functor was emplaced but the cast failed. This could be a double definition with
+      // different types, or it could be a request with one type then a definition with another
+      // type. Either way it is going to error later, but it is cleaner to catch it now
+      mooseError("Functor '",
+                 name,
+                 "' is being added with return type '",
+                 MooseUtils::prettyCppType<T>(),
+                 "' but it has already been defined or requested with return type '",
+                 existing_wrapper_base->returnType(),
+                 "'.");
     }
   }
 
@@ -1439,5 +1503,5 @@ SubProblem::setCurrentlyComputingResidualAndJacobian(
 
 namespace Moose
 {
-void initial_condition(EquationSystems & es, const std::string & system_name);
+void initial_condition(libMesh::EquationSystems & es, const std::string & system_name);
 } // namespace Moose

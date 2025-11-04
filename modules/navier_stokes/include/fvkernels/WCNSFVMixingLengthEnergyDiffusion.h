@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,12 +11,14 @@
 
 #include "FVFluxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "FVDiffusionInterpolationInterface.h"
 
 /**
  * Computes the turbulent diffusion of energy term in the weakly compressible formulation
  * of the energy equation, using functor material properties
  */
-class WCNSFVMixingLengthEnergyDiffusion : public FVFluxKernel
+class WCNSFVMixingLengthEnergyDiffusion : public FVFluxKernel,
+                                          public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();

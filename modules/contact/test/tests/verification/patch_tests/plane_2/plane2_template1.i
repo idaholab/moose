@@ -231,7 +231,7 @@
     poissons_ratio = 0.3
   [../]
   [./bot_strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     block = '1'
   [../]
   [./bot_stress]
@@ -245,7 +245,7 @@
     poissons_ratio = 0.3
   [../]
   [./top_strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     block = '2'
   [../]
   [./top_stress]

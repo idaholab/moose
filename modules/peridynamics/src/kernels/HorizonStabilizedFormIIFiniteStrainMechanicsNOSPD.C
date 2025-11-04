@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -78,8 +78,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalResidual()
       {
         ivardofs[1] = _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])
                           ->dof_number(_sys.number(), _var.number(), 0);
-        origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                        *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                        _pdmesh.getNodeCoord(_current_elem->node_id(nd));
         node_vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
         for (unsigned int i = 0; i < _nnodes; ++i)
@@ -141,8 +141,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalJacobian()
       {
         ivardofs[1] = _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])
                           ->dof_number(_sys.number(), _var.number(), 0);
-        origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                        *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                        _pdmesh.getNodeCoord(_current_elem->node_id(nd));
         node_vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
         for (unsigned int i = 0; i < _nnodes; ++i)
@@ -188,8 +188,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
       {
         ivardofs[1] = _pdmesh.nodePtr(neighbors[dg_neighbors[nb1]])
                           ->dof_number(_sys.number(), _var.number(), 0);
-        origin_vec_nb1 = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb1]]) -
-                         *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb1 = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb1]]) -
+                         _pdmesh.getNodeCoord(_current_elem->node_id(nd));
         node_vol_nb1 = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb1]]);
 
         Real vol_nb2, dJdU;
@@ -203,8 +203,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeNonlocalJacobian()
                               ->dof_number(_sys.number(), _var.number(), 0);
             vol_nb2 = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb2]]);
 
-            origin_vec_nb2 = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb2]]) -
-                             *_pdmesh.nodePtr(_current_elem->node_id(nd));
+            origin_vec_nb2 = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb2]]) -
+                             _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
             dFdUk.zero();
             for (unsigned int i = 0; i < _dim; ++i)
@@ -305,8 +305,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
                             ->dof_number(_sys.number(), _var.number(), 0);
           jvardofs[1] =
               _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])->dof_number(_sys.number(), jvar_num, 0);
-          origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                          *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
           node_vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
           for (unsigned int i = 0; i < _nnodes; ++i)
@@ -359,8 +359,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
                             ->dof_number(_sys.number(), _var.number(), 0);
           jvardofs[1] =
               _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])->dof_number(_sys.number(), jvar_num, 0);
-          origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                          *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
           node_vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
           for (unsigned int i = 0; i < _nnodes; ++i)
@@ -406,8 +406,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computeLocalOffDiagJacobian(
                             ->dof_number(_sys.number(), _var.number(), 0);
           jvardofs[1] =
               _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])->dof_number(_sys.number(), jvar_num, 0);
-          origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                          *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
           node_vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
           for (unsigned int i = 0; i < _nnodes; ++i)
@@ -465,8 +465,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacob
         {
           ivardofs[1] = _pdmesh.nodePtr(neighbors[dg_neighbors[nb1]])
                             ->dof_number(_sys.number(), _var.number(), 0);
-          origin_vec_nb1 = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb1]]) -
-                           *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb1 = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb1]]) -
+                           _pdmesh.getNodeCoord(_current_elem->node_id(nd));
           node_vol_nb1 = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb1]]);
 
           Real vol_nb2, dJdU;
@@ -481,8 +481,8 @@ HorizonStabilizedFormIIFiniteStrainMechanicsNOSPD::computePDNonlocalOffDiagJacob
                                 ->dof_number(_sys.number(), jvar_num, 0);
               vol_nb2 = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb2]]);
 
-              origin_vec_nb2 = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb2]]) -
-                               *_pdmesh.nodePtr(_current_elem->node_id(nd));
+              origin_vec_nb2 = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb2]]) -
+                               _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
               dFdUk.zero();
               for (unsigned int i = 0; i < _dim; ++i)

@@ -31,6 +31,24 @@
   reference_vector = 'ref'
 []
 
+[Variables]
+  [disp_x]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [disp_y]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[Physics/SolidMechanics/QuasiStatic/all]
+  strain = FINITE
+  extra_vector_tags = 'ref'
+  block = '1 2 3 4 5 6 7'
+  generate_output = 'stress_xx stress_yy stress_xy'
+[]
+
 [AuxVariables]
   [penalty_normal_pressure]
   []
@@ -61,53 +79,45 @@
   []
 []
 
-[Modules/TensorMechanics/Master/all]
-  strain = FINITE
-  add_variables = true
-  extra_vector_tags = 'ref'
-  block = '1 2 3 4 5 6 7'
-  generate_output = 'stress_xx stress_yy stress_xy'
-[]
-
 [AuxKernels]
   [penalty_normal_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
   [penalty_frictional_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
   [penalty_accumulated_slip]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
   [penalty_tangential_vel]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
   [penalty_gap]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = normal_gap
     user_object = friction_uo
     contact_quantity = normal_gap
   []
   [react_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'
   []
   [react_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_y'
     variable = 'react_y'

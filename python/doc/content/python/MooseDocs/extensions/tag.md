@@ -23,9 +23,8 @@ development team.
 An example of the usage of extension settings from [tagging-config] in a configuration file is shown
 below.
 
-```
+```yaml
 Extensions:
-    ...
     MooseDocs.extensions.tagging:
         active: True
         js_file: tagging.js

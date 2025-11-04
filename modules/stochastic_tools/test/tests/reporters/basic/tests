@@ -43,8 +43,7 @@
     [error]
       type = RunException
       input = statistics_reporter_error.i
-      expect_err = "The following reporter value\(s\) do not have a type supported by the StatisticsReporter:\n"
-                   "\s+const/const"
+      expect_err = "Reporters/stats/reporters: The following reporter value\(s\) do not have a type supported by the StatisticsReporter:\nconst/const"
 
       detail = "and error if the supplied type is not supported."
     []

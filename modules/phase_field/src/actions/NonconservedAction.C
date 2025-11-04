@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@
 #include "MooseMesh.h"
 
 #include "libmesh/string_to_enum.h"
+
+using namespace libMesh;
 
 registerMooseAction("PhaseFieldApp", NonconservedAction, "add_variable");
 
@@ -45,8 +47,8 @@ NonconservedAction::validParams()
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addParam<MaterialPropertyName>("mobility", "L", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this kernel depends on");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments this kernel depends on");
   params.addRequiredParam<MaterialPropertyName>(
       "free_energy", "Base name of the free energy function F defined in a free energy material");
   params.addParam<MaterialPropertyName>("kappa", "kappa_op", "The kappa used with the kernel");
@@ -64,7 +66,7 @@ NonconservedAction::NonconservedAction(const InputParameters & params)
   : Action(params),
     _var_name(name()),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")))
+             Utility::string_to_enum<libMesh::FEFamily>(getParam<MooseEnum>("family")))
 {
 }
 

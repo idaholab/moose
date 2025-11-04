@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,12 +25,12 @@ HeatTransferFromTemperature1Phase::validParams()
 HeatTransferFromTemperature1Phase::HeatTransferFromTemperature1Phase(
     const InputParameters & parameters)
   : HeatTransfer1PhaseBase(parameters),
-    _fe_type(getParam<MooseEnum>("var_type") == 0 ? FEType(FIRST, LAGRANGE)
-                                                  : FEType(CONSTANT, MONOMIAL))
+    _fe_type(getParam<MooseEnum>("var_type") == 0 ? libMesh::FEType(FIRST, LAGRANGE)
+                                                  : libMesh::FEType(CONSTANT, MONOMIAL))
 {
 }
 
-const FEType &
+const libMesh::FEType &
 HeatTransferFromTemperature1Phase::getFEType()
 {
   return _fe_type;

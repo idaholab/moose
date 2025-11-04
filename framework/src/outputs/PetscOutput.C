@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 #include "PetscOutput.h"
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
+#include "CommonOutputAction.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -68,7 +69,7 @@ PetscOutputInterface::petscNonlinearOutput(SNES, PetscInt its, PetscReal norm, v
   }
 
   // Done
-  return 0;
+  return (PetscErrorCode)0;
 }
 
 PetscErrorCode
@@ -117,7 +118,7 @@ PetscOutputInterface::petscLinearOutput(KSP, PetscInt its, PetscReal norm, void 
   }
 
   // Done
-  return 0;
+  return (PetscErrorCode)0;
 }
 
 InputParameters
@@ -186,15 +187,15 @@ PetscOutput::PetscOutput(const InputParameters & parameters)
 {
   // Output toggle support
   if (getParam<bool>("output_linear"))
-    _execute_on.push_back("linear");
+    _execute_on.setAdditionalValue("linear");
   if (getParam<bool>("output_nonlinear"))
-    _execute_on.push_back("nonlinear");
+    _execute_on.setAdditionalValue("nonlinear");
 
   // Nonlinear residual start-time supplied by user
   if (isParamValid("nonlinear_residual_start_time"))
   {
     _nonlinear_start_time = getParam<Real>("nonlinear_residual_start_time");
-    _execute_on.push_back("nonlinear");
+    _execute_on.setAdditionalValue("nonlinear");
   }
 
   // Nonlinear residual end-time supplied by user
@@ -205,7 +206,7 @@ PetscOutput::PetscOutput(const InputParameters & parameters)
   if (isParamValid("linear_residual_start_time"))
   {
     _linear_start_time = getParam<Real>("linear_residual_start_time");
-    _execute_on.push_back("linear");
+    _execute_on.setAdditionalValue("linear");
   }
 
   // Linear residual end-time supplied by user
@@ -234,20 +235,27 @@ PetscOutput::solveSetup()
   if (_app.getInterfaceObjects<PetscOutputInterface>()[0] != this)
     return;
 
+  ActionWarehouse & awh = _app.actionWarehouse();
+  const auto actions = awh.getActions<CommonOutputAction>();
+  mooseAssert(actions.size() <= 1, "Should not be more than one CommonOutputAction");
+  const Action * common = actions.empty() ? nullptr : *actions.begin();
+
   // Extract the non-linear and linear solvers from PETSc
   NonlinearSystemBase & nl = _problem_ptr->currentNonlinearSystem();
   SNES snes = nl.getSNES();
   KSP ksp;
-  SNESGetKSP(snes, &ksp);
+  LibmeshPetscCallA(_communicator.get(), SNESGetKSP(snes, &ksp));
 
   // Set the PETSc monitor functions (register the nonlinear callback so that linear outputs
   // get an updated nonlinear iteration number)
   // Not every Output should register its own DM monitor! Just register one each of nonlinear
   // and linear and dispatch all Outputs from there!
-  auto ierr1 = SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR);
-  CHKERRABORT(_communicator.get(), ierr1);
-  auto ierr2 = KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR);
-  CHKERRABORT(_communicator.get(), ierr2);
+  if (common && common->getParam<bool>("print_nonlinear_residuals"))
+    LibmeshPetscCallA(_communicator.get(),
+                      SNESMonitorSet(snes, petscNonlinearOutput, this, LIBMESH_PETSC_NULLPTR));
+  if (common && common->getParam<bool>("print_linear_residuals"))
+    LibmeshPetscCallA(_communicator.get(),
+                      KSPMonitorSet(ksp, petscLinearOutput, this, LIBMESH_PETSC_NULLPTR));
 }
 
 Real

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -63,7 +63,7 @@ public:
    * @param es The EquationSystems object to be searched.
    * @param var_name The name of the variable you are looking for.
    */
-  static System * find_sys(EquationSystems & es, const std::string & var_name);
+  static libMesh::System * find_sys(libMesh::EquationSystems & es, const std::string & var_name);
 
   enum DIRECTION
   {
@@ -110,5 +110,5 @@ protected:
   MultiMooseEnum _directions;
 
 public:
-  const static Number OutOfMeshValue;
+  const static libMesh::Number OutOfMeshValue;
 };

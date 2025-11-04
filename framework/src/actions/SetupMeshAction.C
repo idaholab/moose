@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -123,9 +123,8 @@ SetupMeshAction::validParams()
 SetupMeshAction::SetupMeshAction(const InputParameters & params)
   : MooseObjectAction(params),
     _use_split(getParam<bool>("use_split") || _app.getParam<bool>("use_split")),
-    _split_file(_app.getParam<std::string>("split_file").size()
-                    ? _app.getParam<std::string>("split_file")
-                    : getParam<std::string>("split_file"))
+    _split_file(_app.isParamSetByUser("split_file") ? _app.getParam<std::string>("split_file")
+                                                    : getParam<std::string>("split_file"))
 {
 }
 
@@ -152,7 +151,8 @@ SetupMeshAction::setupMesh(MooseMesh * mesh)
   unsigned int level = getParam<unsigned int>("uniform_refine");
 
   // Did they specify extra refinement levels on the command-line?
-  level += _app.getParam<unsigned int>("refinements");
+  if (_app.isParamSetByUser("refinements"))
+    level += _app.getParam<unsigned int>("refinements");
 
   mesh->setUniformRefineLevel(level, getParam<bool>("skip_deletion_repartition_after_refine"));
 #endif // LIBMESH_ENABLE_AMR
@@ -205,17 +205,14 @@ std::string
 SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) const
 {
   // Get the split_file extension, if there is one, and use that to decide
-  // between .cpr and .cpa
+  // between .cpr and .cpa.gz
   auto split_file = _split_file;
-  std::string split_file_ext;
-  auto pos = split_file.rfind(".");
-  if (pos != std::string::npos)
-    split_file_ext = split_file.substr(pos + 1, std::string::npos);
+  std::string split_file_ext = MooseUtils::getExtension(split_file);
 
-  // If split_file already has the .cpr or .cpa extension, we go with
-  // that, otherwise we strip off the extension and append ".cpr".
-  if (split_file != "" && split_file_ext != "cpr" && split_file_ext != "cpa")
-    split_file = MooseUtils::stripExtension(split_file) + ".cpr";
+  // If split_file already has the .cpr or .cpa.gz extension, we go with
+  // that, otherwise we strip off the extension and append ".cpa.gz".
+  if (split_file != "" && split_file_ext != "cpr" && split_file_ext != "cpa.gz")
+    split_file = MooseUtils::stripExtension(split_file) + ".cpa.gz";
 
   if (_type != "FileMesh")
   {
@@ -229,7 +226,8 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
     new_pars.applyParameters(_moose_object_pars);
 
     new_pars.set<MeshFileName>("file") = split_file;
-    new_pars.set<MooseApp *>("_moose_app") = moose_object_params.get<MooseApp *>("_moose_app");
+    new_pars.set<MooseApp *>(MooseBase::app_param) =
+        moose_object_params.get<MooseApp *>(MooseBase::app_param);
     moose_object_params = new_pars;
   }
   else
@@ -238,7 +236,7 @@ SetupMeshAction::modifyParamsForUseSplit(InputParameters & moose_object_params) 
       moose_object_params.set<MeshFileName>("file") = split_file;
     else
       moose_object_params.set<MeshFileName>("file") =
-          MooseUtils::stripExtension(moose_object_params.get<MeshFileName>("file")) + ".cpr";
+          MooseUtils::stripExtension(moose_object_params.get<MeshFileName>("file")) + ".cpa.gz";
   }
 
   moose_object_params.set<bool>("_is_split") = true;
@@ -254,7 +252,7 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
-    if (_app.masterMesh())
+    if (_app.useMasterMesh())
       _mesh = _app.masterMesh()->safeClone();
     else
     {
@@ -287,10 +285,9 @@ SetupMeshAction::act()
           for (auto generator_action_ptr : generator_actions)
             if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
             {
-              mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                           _type,
-                           "\" mesh, which does not use Mesh Generators in constructing the mesh.");
-              break;
+              mooseError("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                         _type,
+                         "\" mesh, which does not use Mesh Generators in constructing the mesh. ");
             }
         }
       }
@@ -305,10 +302,9 @@ SetupMeshAction::act()
 
   else if (_current_task == "set_mesh_base")
   {
-
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
 
-    if (!_app.masterMesh() && !_mesh->hasMeshBase())
+    if (!_app.useMasterMesh() && !_mesh->hasMeshBase())
     {
       // We want to set the MeshBase object to that coming from mesh generators when the following
       // conditions are met:
@@ -356,7 +352,7 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true);
 
-    if (_app.masterMesh())
+    if (_app.useMasterMesh())
     {
       if (_app.masterDisplacedMesh())
         _displaced_mesh = _app.masterDisplacedMesh()->safeClone();

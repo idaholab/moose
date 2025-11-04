@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosPostprocessorNeumannBC.md'
+
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_pp_neumann.i'
+    exodiff = 'kokkos_pp_neumann_out.e'
+    requirement = 'The Kokkos system shall support the application of a Neumann boundary condition computed via Postprocessor object.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

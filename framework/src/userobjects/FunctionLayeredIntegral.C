@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,21 +14,22 @@ registerMooseObject("MooseApp", FunctionLayeredIntegral);
 InputParameters
 FunctionLayeredIntegral::validParams()
 {
-  InputParameters params = FunctionElementIntegralUserObject::validParams();
+  InputParameters params =
+      SpatialUserObjectFunctor<FunctionElementIntegralUserObject>::validParams();
   params += LayeredBase::validParams();
   params.addClassDescription("Integrates a function in layers");
   return params;
 }
 
 FunctionLayeredIntegral::FunctionLayeredIntegral(const InputParameters & parameters)
-  : FunctionElementIntegralUserObject(parameters), LayeredBase(parameters)
+  : SpatialUserObjectFunctor<FunctionElementIntegralUserObject>(parameters), LayeredBase(parameters)
 {
 }
 
 void
 FunctionLayeredIntegral::initialize()
 {
-  FunctionElementIntegralUserObject::initialize();
+  SpatialUserObjectFunctor<FunctionElementIntegralUserObject>::initialize();
   LayeredBase::initialize();
 }
 
@@ -51,7 +52,7 @@ FunctionLayeredIntegral::finalize()
 void
 FunctionLayeredIntegral::threadJoin(const UserObject & y)
 {
-  FunctionElementIntegralUserObject::threadJoin(y);
+  SpatialUserObjectFunctor<FunctionElementIntegralUserObject>::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
 

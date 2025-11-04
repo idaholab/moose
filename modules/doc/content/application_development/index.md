@@ -10,7 +10,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Source Code](source/index.md exact=True) - MOOSE source documentation
 
-[MOOSE Doxygen](https://mooseframework.org/docs/doxygen/moose/classes.html) - MOOSE Doxygen
+[MOOSE Doxygen](https://mooseframework.inl.gov/docs/doxygen/moose/classes.html) - MOOSE Doxygen
 
 [Modules Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classes.html)
 
@@ -19,8 +19,6 @@ These documentation pages are meant to be used by developers who are developing 
 [Build System](/build_system.md) - How the hierarchical `make` system functions in MOOSE
 
 [Test System](/test_system.md) - How to create/maintain tests for your application
-
-[Performance Benchmarking](/performance_benchmarking.md) - How to perform benchmarking
 
 [Profiling](/profiling.md) - How to profile your application in order to determine what functions are hogging compute time.
 

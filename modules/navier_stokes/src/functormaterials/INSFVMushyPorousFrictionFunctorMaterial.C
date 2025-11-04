@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,6 +28,12 @@ INSFVMushyPorousFrictionFunctorMaterial::validParams()
   params.addRequiredParam<MooseFunctorName>("rho_l", "The liquid density (not the mixture one).");
   params.addParam<MooseFunctorName>(
       "dendrite_spacing_scaling", "1e-4", "The dendrite spacing scaling.");
+  params.addParam<MooseFunctorName>(
+      "Darcy_coef_name", "Darcy_coefficient", "Name of the Darcy friction coefficient");
+  params.addParam<MooseFunctorName>("Forchheimer_coef_name",
+                                    "Forchheimer_coefficient",
+                                    "Name of the Forchheimer friction coefficient");
+
   return params;
 }
 
@@ -41,32 +47,36 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
 {
 
   addFunctorProperty<ADReal>(
-      "Darcy_coefficient",
+      getParam<MooseFunctorName>("Darcy_coef_name"),
       [this](const auto & r, const auto & t) -> ADReal
       {
+        using std::atan;
+
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
         const auto fs = 1.0 - _fl(r, t);
         mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
                     "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
+        const auto Fk = 0.5 + atan(_s * (fs - _fs_crit)) / libMesh::pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
         return _mu(r, t) / K;
       });
 
   addFunctorProperty<ADReal>(
-      "Forchheimer_coefficient",
+      getParam<MooseFunctorName>("Forchheimer_coef_name"),
       [this](const auto & r, const auto & t) -> ADReal
       {
+        using std::atan, std::sqrt;
+
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
         const auto fs = 1.0 - _fl(r, t);
         mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
                     "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
+        const auto Fk = 0.5 + atan(_s * (fs - _fs_crit)) / libMesh::pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
-        return _forchheimer_coef * _rho_l(r, t) / std::sqrt(K);
+        return _forchheimer_coef * _rho_l(r, t) / sqrt(K);
       });
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -39,7 +39,7 @@ RBMPresetOldValuePD::computeQpValue()
 }
 
 bool
-RBMPresetOldValuePD::shouldApply()
+RBMPresetOldValuePD::shouldApply() const
 {
   // check whether the number of active bonds is less than number of problem dimension
   unsigned int active_bonds = 0;

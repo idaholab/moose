@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeIncrementalStrain.h"
 
 /**
  * Compute2DIncrementalStrain defines a strain increment only for
@@ -18,7 +18,7 @@
  * as a general nonzero value in the inherited classes ComputePlaneIncrementalStrain
  * and ComputeAxisymmetricRZIncrementalStrain.
  */
-class Compute2DIncrementalStrain : public ComputeIncrementalSmallStrain
+class Compute2DIncrementalStrain : public ComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();

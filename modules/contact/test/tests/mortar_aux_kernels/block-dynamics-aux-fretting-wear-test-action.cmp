@@ -1,0 +1,25 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:            0.15 @ t4
+
+GLOBAL VARIABLES relative 1.0e-3 floor 5.0e-4
+	contact     # min:               0 @ t1	max:               0 @ t1
+	cumulative  # min:               0 @ t1	max:              15 @ t4
+	num_nl      # min:               0 @ t1	max:               8 @ t4
+
+NODAL VARIABLES relative 1.0e-3 floor 5.0e-4
+	accel_x               # min:               0 @ t1,n1	max:        15.27864 @ t3,n571
+	accel_y               # min:               0 @ t1,n1	max:       9.1138354 @ t4,n671
+	disp_x                # min:               0 @ t1,n1	max:     0.020097003 @ t4,n662
+	disp_y                # min:               0 @ t1,n1	max:    0.0054244297 @ t2,n671
+	gap_vel               # min:               0 @ t1,n1	max:      0.10603937 @ t3,n671
+	normal_normal_lm      # min:               0 @ t1,n1	max:       47210.552 @ t4,n662
+	normal_tangential_lm  # min:               0 @ t1,n1	max:       23605.276 @ t4,n662
+	vel_x                 # min:               0 @ t1,n1	max:      0.28099877 @ t3,n596
+	vel_y                 # min:               0 @ t1,n1	max:      0.10702004 @ t3,n671
+	worn_depth            # min:               0 @ t1,n1	max:   0.00022063521 @ t4,n662
+
+ELEMENT VARIABLES relative 1.0e-3 floor 5.0e-4
+	stress_xx  # min:               0 @ t1,b1,e1	max:       5546.1015 @ t4,b2,e590
+	stress_yy  # min:               0 @ t1,b1,e1	max:       2229.5341 @ t4,b2,e500
+

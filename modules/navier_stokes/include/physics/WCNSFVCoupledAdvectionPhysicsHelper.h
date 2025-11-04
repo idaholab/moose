@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,30 +12,37 @@
 #include "PhysicsBase.h"
 
 class NavierStokesPhysicsBase;
-class WCNSFVFlowPhysics;
+class WCNSFVFlowPhysicsBase;
+class WCNSFVTurbulencePhysics;
 
 /**
- * Helper class to interact with a WCNSFVFlowPhysics
+ * Helper class to interact with a flow and turbulence physics for a Physics that solves
+ * an advection problem using incompressible or weakly-compressible finite volume
  */
 class WCNSFVCoupledAdvectionPhysicsHelper
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVCoupledAdvectionPhysicsHelper(const InputParameters & parameters,
-                                      const NavierStokesPhysicsBase * derived_physics);
+  WCNSFVCoupledAdvectionPhysicsHelper(const NavierStokesPhysicsBase * derived_physics);
 
-  const WCNSFVFlowPhysics * getCoupledFlowPhysics(const InputParameters & parameters) const;
+  const WCNSFVFlowPhysicsBase * getCoupledFlowPhysics() const;
+  const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
 
   /// Return the porosity functor name.
   /// It is important to forward to the Physics so we do not get the smoothing status wrong
   MooseFunctorName getPorosityFunctorName(bool smoothed) const;
 
+  const MooseFunctorName & densityName() const { return _density_name; }
+  const MooseFunctorName & dynamicViscosityName() const { return _dynamic_viscosity_name; }
+
 protected:
   /// The Physics class using this helper
   const NavierStokesPhysicsBase * _advection_physics;
   /// Flow physics
-  const WCNSFVFlowPhysics * _flow_equations_physics;
+  const WCNSFVFlowPhysicsBase * _flow_equations_physics;
+  /// Turbulence
+  const WCNSFVTurbulencePhysics * _turbulence_physics;
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;

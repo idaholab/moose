@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -163,6 +163,7 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   mooseAssert(fi, "The face information must be non-null");
 
   const auto face_type = fi->faceType(std::make_pair(this->_var_num, this->_sys_num));
+
   if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
     return Moose::FV::interpolate(*this, face, state);
   else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))
@@ -173,9 +174,14 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
   }
   // If no boundary condition is defined but we are evaluating on a boundary, just return the
   // element value
-  else if (face.face_side)
+  else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
   {
-    const auto & elem_info = this->_mesh.elemInfo(face.face_side->id());
+    const auto & elem_info = this->_mesh.elemInfo(fi->elemPtr()->id());
+    return getElemValue(elem_info, state);
+  }
+  else if (face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+  {
+    const auto & elem_info = this->_mesh.elemInfo(fi->neighborPtr()->id());
     return getElemValue(elem_info, state);
   }
   else
@@ -838,6 +844,20 @@ MooseLinearVariableFV<OutputType>::adGradSln() const
 }
 
 template <typename OutputType>
+const ADTemplateVariableCurl<OutputType> &
+MooseLinearVariableFV<OutputType>::adCurlSln() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const ADTemplateVariableCurl<OutputType> &
+MooseLinearVariableFV<OutputType>::adCurlSlnNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
 const MooseArray<ADReal> &
 MooseLinearVariableFV<OutputType>::adDofValues() const
 {
@@ -847,6 +867,13 @@ MooseLinearVariableFV<OutputType>::adDofValues() const
 template <typename OutputType>
 const MooseArray<ADReal> &
 MooseLinearVariableFV<OutputType>::adDofValuesNeighbor() const
+{
+  adError();
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseLinearVariableFV<OutputType>::adDofValuesDot() const
 {
   adError();
 }
@@ -863,6 +890,13 @@ const dof_id_type &
 MooseLinearVariableFV<OutputType>::nodalDofIndexNeighbor() const
 {
   nodalError();
+}
+
+template <typename OutputType>
+void
+MooseLinearVariableFV<OutputType>::sizeMatrixTagData()
+{
+  _element_data->sizeMatrixTagData();
 }
 
 template class MooseLinearVariableFV<Real>;

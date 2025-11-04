@@ -4,7 +4,6 @@
     type = Exodiff
     input = 'isotropic_plasticity_incremental_strain.i'
     exodiff = 'isotropic_plasticity_incremental_strain_out.e'
-    compiler = 'CLANG GCC'
     design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
     requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain '
                   'response under tensile loading within the small incremental strain formulation.'
@@ -17,7 +16,6 @@
                "Physics/SolidMechanics/QuasiStatic/all/generate_output=''"
     exodiff = 'isotropic_plasticity_incremental_strain_out.e'
     exodiff_opts = '-allow_name_mismatch'
-    compiler = 'CLANG GCC'
     prereq = isotropic_plasticity_incremental
     design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
     requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain '
@@ -28,7 +26,6 @@
     type = Exodiff
     input = 'isotropic_plasticity_incremental_strain.i'
     exodiff = 'isotropic_plasticity_incremental_strain_out.e'
-    compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'isotropic_plasticity_incremental_base_name'
     design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
@@ -40,7 +37,6 @@
     type = Exodiff
     input = 'isotropic_plasticity_finite_strain.i'
     exodiff = 'isotropic_plasticity_finite_strain_out.e'
-    compiler = 'CLANG GCC'
     design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
     requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain '
                   'response under tensile loading within the finite incremental strain formulation.'
@@ -49,7 +45,6 @@
     type = Exodiff
     input = 'isotropic_plasticity_finite_strain.i'
     exodiff = 'isotropic_plasticity_finite_strain_out.e'
-    compiler = 'CLANG GCC'
     cli_args = 'GlobalParams/volumetric_locking_correction=true'
     prereq = 'isotropic_plasticity_finite'
     design = 'IsotropicPlasticityStressUpdate.md ComputeMultipleInelasticStress.md'
@@ -61,7 +56,6 @@
     type = Exodiff
     input = 'uniaxial_viscoplasticity_incrementalstrain.i'
     exodiff = 'uniaxial_viscoplasticity_incrementalstrain_out.e'
-    compiler = 'CLANG GCC'
     design = 'HyperbolicViscoplasticityStressUpdate.md'
     requirement = 'The system shall compute the hyperbolic visoplastic stress response for a '
                   'time-dependent linear strain hardening plasticity model in a small incremental '

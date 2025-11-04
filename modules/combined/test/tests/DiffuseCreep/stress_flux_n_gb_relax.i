@@ -170,7 +170,7 @@
     M_name = mobility_prop
     tensors = diffusivity
     weights = var_dep
-    args = c
+    coupled_variables = c
   [../]
   [./phase_normal]
     type = PhaseNormalTensor
@@ -220,7 +220,7 @@
     coupled_tensor_increment_names = 'diffuse gb_relax'
   [../]
   [./strain]
-   type = ComputeIncrementalSmallStrain
+   type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y'
   [../]
   [./stress]

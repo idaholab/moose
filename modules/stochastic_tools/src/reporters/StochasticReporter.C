@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,12 +27,20 @@ StochasticReporter::validParams()
       "outputting purposes that this parameter be set to ROOT, otherwise, many files will be "
       "produced showing the values on each processor. However, if there are lot of samples, "
       "gathering on root may be memory restrictive.");
+  params.set<ExecFlagEnum>("execute_on", true).addAvailableFlags(EXEC_TRANSFER);
   return params;
 }
 
 StochasticReporter::StochasticReporter(const InputParameters & parameters)
   : GeneralReporter(parameters), _parallel_type(getParam<MooseEnum>("parallel_type"))
 {
+}
+
+void
+StochasticReporter::initialize()
+{
+  for (auto & vector : _vectors)
+    vector->initialize();
 }
 
 ReporterName

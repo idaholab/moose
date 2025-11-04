@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -61,7 +61,9 @@ ADWallHeatTransferCoefficientKazimiMaterial::ADWallHeatTransferCoefficientKazimi
 void
 ADWallHeatTransferCoefficientKazimiMaterial::computeQpProperties()
 {
-  ADReal Pe = std::max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
+  using std::max, std::pow;
+
+  ADReal Pe = max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
 
   if (_PoD > 1.4 || _PoD < 1.1 || Pe > 5000 || Pe < 10)
   {
@@ -71,7 +73,6 @@ ADWallHeatTransferCoefficientKazimiMaterial::computeQpProperties()
                              "significant errors in your results!"));
   }
 
-  ADReal Nu =
-      4.0 + 0.33 * std::pow(_PoD, 3.8) * std::pow(Pe / 100, 0.86) + 0.16 * std::pow(_PoD, 5.0);
+  ADReal Nu = 4.0 + 0.33 * pow(_PoD, 3.8) * pow(Pe / 100, 0.86) + 0.16 * pow(_PoD, 5.0);
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }

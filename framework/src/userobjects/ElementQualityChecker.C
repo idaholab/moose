@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,8 +40,12 @@ ElementQualityChecker::validParams()
   params.addRequiredParam<MooseEnum>("metric_type",
                                      ElementQualityChecker::QualityMetricType(),
                                      "Type of quality metric to be checked");
-  params.addParam<Real>("upper_bound", "the upper bound for provided metric type");
+  params.addParam<Real>("upper_bound", "The upper bound for provided metric type");
   params.addParam<Real>("lower_bound", "The lower bound for provided metric type");
+  params.addParam<bool>("suppress_invalid_metric_warning",
+                        false,
+                        "Whether to print the warning related to the quality metric type not being "
+                        "applicable to a given element type.");
   params.addParam<MooseEnum>("failure_type",
                              ElementQualityChecker::FailureMessageType(),
                              "The way how the failure of quality metric check should respond");
@@ -52,7 +56,7 @@ ElementQualityChecker::validParams()
 
 ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _m_type(getParam<MooseEnum>("metric_type").getEnum<ElemQuality>()),
+    _m_type(getParam<MooseEnum>("metric_type").getEnum<libMesh::ElemQuality>()),
     _has_upper_bound(isParamValid("upper_bound")),
     _has_lower_bound(isParamValid("lower_bound")),
     _upper_bound(_has_upper_bound ? getParam<Real>("upper_bound") : 0.0),
@@ -60,6 +64,7 @@ ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
     _m_min(0),
     _m_max(0),
     _m_sum(0),
+    _suppress_invalid_metric_warning(getParam<bool>("suppress_invalid_metric_warning")),
     _failure_type(getParam<MooseEnum>("failure_type").getEnum<FailureType>())
 {
 }
@@ -80,7 +85,7 @@ void
 ElementQualityChecker::execute()
 {
   // obtain the available quality metric for current ElemType
-  std::vector<ElemQuality> metrics_avail = libMesh::Quality::valid(_current_elem->type());
+  std::vector<libMesh::ElemQuality> metrics_avail = libMesh::Quality::valid(_current_elem->type());
 
   // check whether the provided quality metric is applicable to current ElemType
   if (!checkMetricApplicability(_m_type, metrics_avail))
@@ -163,8 +168,9 @@ ElementQualityChecker::finalize()
   _communicator.set_union(_bypassed_elem_type);
 
   if (_bypassed)
-    mooseWarning("Provided quality metric doesn't apply to following element type: " +
-                 Moose::stringify(_bypassed_elem_type));
+    if (!_suppress_invalid_metric_warning)
+      mooseWarning("Provided quality metric doesn't apply to following element type: " +
+                   Moose::stringify(_bypassed_elem_type));
 
   _console << libMesh::Quality::name(_m_type) << " Metric values:"
            << "\n";
@@ -197,8 +203,9 @@ ElementQualityChecker::finalize()
 }
 
 bool
-ElementQualityChecker::checkMetricApplicability(const ElemQuality & elem_metric,
-                                                const std::vector<ElemQuality> & elem_metrics)
+ElementQualityChecker::checkMetricApplicability(
+    const libMesh::ElemQuality & elem_metric,
+    const std::vector<libMesh::ElemQuality> & elem_metrics)
 {
   bool has_metric = false;
 

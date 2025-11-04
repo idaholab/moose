@@ -3,12 +3,12 @@
     type = RunApp
     input = 'xfem_mechanics_prescribed_growth.i'
     check_input = True
-    unique_id = true
+    capabilities = 'unique_id'
   [../]
   [./xfem_thermomechanics_stress_growth]
     type = RunApp
     input = 'xfem_thermomechanics_stress_growth.i'
     check_input = True
-    unique_id = true
+    capabilities = 'unique_id'
   [../]
 []

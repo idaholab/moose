@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,7 @@ LinearFVBoundaryCondition::validParams()
   InputParameters params = MooseObject::validParams();
   params += TransientInterface::validParams();
   params += BoundaryRestrictableRequired::validParams();
+  params += GeometricSearchInterface::validParams();
   params += TaggingInterface::validParams();
   params += NonADFunctorInterface::validParams();
 
@@ -49,7 +50,7 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     MooseVariableInterface(this,
                            false,
                            "variable",
-                           Moose::VarKindType::VAR_SOLVER,
+                           Moose::VarKindType::VAR_ANY,
                            Moose::VarFieldType::VAR_FIELD_STANDARD),
     MooseVariableDependencyInterface(this),
     NonADFunctorInterface(this),
@@ -57,10 +58,9 @@ LinearFVBoundaryCondition::LinearFVBoundaryCondition(const InputParameters & par
     _tid(parameters.get<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mesh(_subproblem.mesh()),
-    _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
+    _fv_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _var(*mooseLinearVariableFV()),
     _sys(_var.sys()),
-    _linear_system(libMesh::cast_ref<libMesh::LinearImplicitSystem &>(_sys.system())),
     _var_num(_var.number()),
     _sys_num(_sys.number())
 {
@@ -96,13 +96,8 @@ LinearFVBoundaryCondition::computeCellToFaceDistance() const
 RealVectorValue
 LinearFVBoundaryCondition::computeCellToFaceVector() const
 {
-  const auto is_on_mesh_boundary = !_current_face_info->neighborPtr();
-  const auto defined_on_elem =
-      is_on_mesh_boundary ? true : (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM);
-  if (is_on_mesh_boundary)
-    return _current_face_info->dCN();
-  else
-    return (_current_face_info->faceCentroid() - (defined_on_elem
-                                                      ? _current_face_info->elemCentroid()
-                                                      : _current_face_info->neighborCentroid()));
+  const auto defined_on_elem = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM;
+  return (_current_face_info->faceCentroid() - (defined_on_elem
+                                                    ? _current_face_info->elemCentroid()
+                                                    : _current_face_info->neighborCentroid()));
 }

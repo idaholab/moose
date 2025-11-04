@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -132,6 +132,8 @@ PenaltyWeightedGapUserObject::initialize()
 void
 PenaltyWeightedGapUserObject::selfFinalize()
 {
+  using std::min;
+
   // compute new normal pressure for each node
   for (const auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
@@ -144,7 +146,7 @@ PenaltyWeightedGapUserObject::selfFinalize()
         _augmented_lagrange_problem ? _dof_to_lagrange_multiplier[dof_object] : 0.0;
 
     // keep the negative normal pressure (compressive per convention here)
-    auto normal_pressure = std::min(0.0, penalty * gap + lagrange_multiplier);
+    auto normal_pressure = min(0.0, penalty * gap + lagrange_multiplier);
 
     // we switch conventins here and consider positive normal pressure as compressive
     _dof_to_normal_pressure[dof_object] = -normal_pressure;
@@ -223,6 +225,8 @@ PenaltyWeightedGapUserObject::timestepSetup()
 bool
 PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
 {
+  using std::max, std::min, std::abs;
+
   Real max_positive_gap = 0.0;
   Real min_negative_gap = 0.0;
 
@@ -234,8 +238,8 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
       // Check condition for nodes that are active
       if (gap < 0 || _dof_to_lagrange_multiplier[dof_object] < 0.0)
       {
-        max_positive_gap = std::max(max_positive_gap, gap);
-        min_negative_gap = std::min(min_negative_gap, gap);
+        max_positive_gap = max(max_positive_gap, gap);
+        min_negative_gap = min(min_negative_gap, gap);
       }
     }
   }
@@ -255,7 +259,7 @@ PenaltyWeightedGapUserObject::isAugmentedLagrangianConverged()
     // report the gap value with the largest magnitude
     const Real reported_gap =
         -min_negative_gap > max_positive_gap ? min_negative_gap : max_positive_gap;
-    if (std::abs(reported_gap) > _penetration_tolerance)
+    if (abs(reported_gap) > _penetration_tolerance)
     {
       mooseInfoRepeated("Penetration tolerance fail max_gap = ",
                         reported_gap,
@@ -294,6 +298,8 @@ PenaltyWeightedGapUserObject::augmentedLagrangianSetup()
 void
 PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 {
+  using std::abs;
+
   for (const auto & [dof_object, wgap] : _dof_to_weighted_gap)
   {
     auto & penalty = _dof_to_local_penalty[dof_object];
@@ -319,7 +325,7 @@ PenaltyWeightedGapUserObject::updateAugmentedLagrangianMultipliers()
 
     if (_adaptivity_normal == AdaptivityNormalPenalty::SIMPLE)
     {
-      if (std::abs(gap) > 0.25 * std::abs(previous_gap) && std::abs(gap) > _penetration_tolerance)
+      if (abs(gap) > 0.25 * abs(previous_gap) && abs(gap) > _penetration_tolerance)
         penalty *= _penalty_multiplier;
     }
     else if (_adaptivity_normal == AdaptivityNormalPenalty::BUSSETTA)
@@ -361,27 +367,29 @@ PenaltyWeightedGapUserObject::adaptiveNormalPenalty(const Real previous_gap,
                                                     const Real gap,
                                                     Real & penalty)
 {
-  const bool condition_one = std::abs(std::abs(previous_gap / gap) - 1.0) < 0.01;
-  const bool condition_two = std::abs(gap) > 1.01 * std::abs(previous_gap);
+  using std::abs, std::max, std::sqrt;
+
+  const bool condition_one = abs(abs(previous_gap / gap) - 1.0) < 0.01;
+  const bool condition_two = abs(gap) > 1.01 * abs(previous_gap);
 
   if (previous_gap * gap < 0)
   {
     if (previous_gap > _penetration_tolerance)
-      penalty = std::abs(penalty * previous_gap / gap * (std::abs(gap) + _penetration_tolerance) /
-                         (gap - previous_gap));
+      penalty = abs(penalty * previous_gap / gap * (abs(gap) + _penetration_tolerance) /
+                    (gap - previous_gap));
     else
-      penalty = std::abs(penalty * previous_gap / 10.0 / gap);
+      penalty = abs(penalty * previous_gap / 10.0 / gap);
   }
-  else if (std::abs(gap) > _penetration_tolerance)
+  else if (abs(gap) > _penetration_tolerance)
   {
-    if (std::abs(gap - previous_gap) >
-        std::max(gap / 10.0, std::max(previous_gap / 10.0, 5.0 * _penetration_tolerance)))
+    if (abs(gap - previous_gap) >
+        max(gap / 10.0, max(previous_gap / 10.0, 5.0 * _penetration_tolerance)))
       penalty *= 10.0;
     else if (condition_one && gap < 10.0 * _penetration_tolerance)
-      penalty *= MathUtils::pow(std::sqrt(std::abs(gap) / _penetration_tolerance - 1.0) + 1.0, 2);
+      penalty *= MathUtils::pow(sqrt(abs(gap) / _penetration_tolerance - 1.0) + 1.0, 2);
     else if (condition_two)
       penalty *= 10.0 * previous_gap / gap;
     else
-      penalty *= std::sqrt(std::abs(gap) / _penetration_tolerance - 1.0) + 1.0;
+      penalty *= sqrt(abs(gap) / _penetration_tolerance - 1.0) + 1.0;
   }
 }

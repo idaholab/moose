@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,7 +20,8 @@ MeshingTutorialTestApp::validParams()
   return params;
 }
 
-MeshingTutorialTestApp::MeshingTutorialTestApp(InputParameters parameters) : MooseApp(parameters)
+MeshingTutorialTestApp::MeshingTutorialTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   MeshingTutorialTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,7 @@ Space = tokens.newToken('Space', count=1)
 Break = tokens.newToken('Break', count=1)
 Punctuation = tokens.newToken('Punctuation', content='')
 Number = tokens.newToken('Number', content='')
-Code = tokens.newToken('Code', content='', language='text', escape=True)
+Code = tokens.newToken('Code', content='', language='text', escape=True, max_height='350px')
 Heading = tokens.newToken('Heading', level=1)
 Paragraph = tokens.newToken('Paragraph')
 OrderedList = tokens.newToken('OrderedList', browser_default=True, start=1)
@@ -150,7 +150,8 @@ class CodeBlock(components.ReaderComponent):
         args = info['settings'].split()
         if args and ('=' not in args[0]):
             settings['language'] = args[0]
-
+        if settings['language'].lower() == 'c++':
+            settings['language'] = 'cpp'
         return Code(parent, content=info['code'], language=settings['language'],
                     **self.attributes(settings))
 
@@ -412,12 +413,17 @@ class RenderHeading(components.RenderComponent):
         return sec
 
 class RenderCode(components.RenderComponent):
-    def createHTML(self, parent, token, page):
-        language = 'language-{}'.format(token['language'])
+    def createReveal(self, parent, token, page):
+        # Reveal will oddly end up with double code blocks if we put
+        # the style within the pre entry; style_in_pre=False puts
+        # the style within the code entry
+        return self.createHTML(parent, token, page, style='font-size:65%', style_in_pre=False)
 
-        pre = html.Tag(parent, 'pre', token)
-        pre.addClass('moose-pre')
-        code = html.Tag(pre, 'code', class_=language)
+    def createHTML(self, parent, token, page, style='', style_in_pre=True):
+        language = 'language-{}'.format(token['language'])
+        style = f'max-height:{token["max_height"]};{style}'
+        pre = html.Tag(parent, 'pre', token, style=(style if style_in_pre else ''))
+        code = html.Tag(pre, 'code', class_=language, style=('' if style_in_pre else style))
         html.String(code, content=token['content'], escape=token['escape'])
         return pre
 

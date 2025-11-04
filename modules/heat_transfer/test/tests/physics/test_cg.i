@@ -13,6 +13,7 @@
       [h1]
         temperature_name = 'T'
         heat_source_var = 'Q'
+        heat_source_blocks = '0'
         initial_temperature = 0
 
         # Thermal properties

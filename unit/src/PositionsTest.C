@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -69,7 +69,6 @@ TEST_F(PositionsTest, getters)
 {
   InputParameters params = _factory.getValidParams("InputPositions");
   params.set<std::vector<Point>>("positions") = {Point(1, 0, 0), Point(0, 0, 1)};
-  params.set<bool>("auto_sort") = true;
   auto & positions = addObject<Positions>("InputPositions", "test", params);
 
   // Test getters

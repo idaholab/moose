@@ -50,7 +50,7 @@ make -j8
 ./ex20-opt -i ex20.i
 ```
 
-This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This file may be viewed using Peacock or an external application that supports the Exodus II format (e.g., Paraview).
+This will generate the results file, ex2_out.e, as shown in Figure 1 and 2. This file may be viewed using Peacock or an external application that supports the Exodus format (e.g., Paraview).
 
 !media large_media/examples/ex20_out_4.png
        caption=Figure 1 : Example 20 results after four time steps

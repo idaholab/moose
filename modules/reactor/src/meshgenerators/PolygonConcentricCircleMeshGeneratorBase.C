@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,11 @@
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
 #include "libmesh/mesh_smoother_laplace.h"
 #include "MooseUtils.h"
+#include "PolygonalMeshGenerationUtils.h"
+#include "MooseMeshUtils.h"
+
+#include "libmesh/parsed_function.h"
+#include "libmesh/poly2tri_triangulator.h"
 
 #include <cmath>
 
@@ -113,13 +118,6 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParam<bool>("uniform_mesh_on_sides",
                         false,
                         "Whether the side elements are reorganized to have a uniform size.");
-  params.addParam<bool>(
-      "quad_center_elements", false, "Whether the center elements are quad or triangular.");
-  params.addRangeCheckedParam<Real>(
-      "center_quad_factor",
-      "center_quad_factor>0&center_quad_factor<1",
-      "A fractional radius factor used to determine the radial positions of transition nodes in "
-      "the center region meshed by quad elements.");
   params.addParam<unsigned int>("smoothing_max_it",
                                 0,
                                 "Number of Laplacian smoothing iterations. This number is "
@@ -128,6 +126,22 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "flat_side_up",
       false,
       "Whether to rotate the generated polygon mesh to ensure that one flat side faces up.");
+
+  params.addParam<bool>(
+      "quad_center_elements", false, "Whether the center elements are quad or triangular.");
+  params.addRangeCheckedParam<Real>(
+      "center_quad_factor",
+      "center_quad_factor>0&center_quad_factor<1",
+      "A fractional radius factor used to determine the radial positions of transition nodes in "
+      "the center region meshed by quad elements.");
+  params.addParam<bool>("replace_inner_ring_with_delaunay_mesh",
+                        false,
+                        "True to replace the inner ring mesh with a Delaunay unstructured mesh");
+  params.addParam<std::string>(
+      "inner_ring_desired_area",
+      std::string(),
+      "Desired area as a function of x,y; omit to use the default constant area (square of the "
+      "smallest side length on the ring circle)");
 
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names",
@@ -140,6 +154,9 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "ring_inner_boundary_layer_intervals ring_outer_boundary_layer_biases "
       "ring_outer_boundary_layer_widths ring_outer_boundary_layer_intervals",
       "Mesh Boundary Layers and Biasing Options");
+  params.addParamNamesToGroup("quad_center_elements center_quad_factor "
+                              "replace_inner_ring_with_delaunay_mesh inner_ring_desired_area ",
+                              "Inner ring");
 
   addRingAndSectorIDParams(params);
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
@@ -331,36 +348,105 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       paramError("num_sectors_per_side", "This parameter must be even.");
   declareMeshProperty("num_sectors_per_side_meta", _num_sectors_per_side);
 
+  if (!getParam<bool>("replace_inner_ring_with_delaunay_mesh") &&
+      isParamSetByUser("inner_ring_desired_area"))
+    paramError(
+        "inner_ring_desired_area",
+        "This parameter should be set only when 'replace_inner_ring_with_delaunay_mesh=true'");
+
   if (_has_rings)
   {
     const unsigned int num_innermost_ring_layers =
         _ring_inner_boundary_layer_params.intervals.front() + _ring_intervals.front() +
         _ring_outer_boundary_layer_params.intervals.front();
+    // If conditions are met, duplicate the first element of _ring_block_ids at the start.
     if (!_ring_block_ids.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
         _ring_block_ids.size() == _ring_intervals.size())
       _ring_block_ids.insert(_ring_block_ids.begin(), _ring_block_ids.front());
+    // check if the number of ring block ids is appropiate
     if (!_ring_block_ids.empty() &&
         _ring_block_ids.size() !=
             (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
-      paramError("ring_block_ids",
-                 "This parameter must have the appropriate size if it is provided. The size should "
-                 "be the same as the size of 'ring_intervals' if the innermost ring interval "
-                 "(including boundary layers) is unity; otherwise the size should be greater than "
-                 "the size of 'ring_intervals' by one. If 'quad_center_elements' is true, it is "
-                 "optional to only provide this parameter with the same size as 'ring_intervals'");
+    {
+      // Create an ostringstream for the debug information
+      std::ostringstream debug_info;
+      debug_info << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
+                 << std::endl;
+      debug_info << "ring_block_ids size is : " << _ring_block_ids.size() << std::endl;
+      debug_info << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
+      debug_info << "number of innermost ring layers is : " << num_innermost_ring_layers
+                 << std::endl;
+
+      // error message
+      if (!_quad_center_elements)
+      {
+        paramError(
+            "ring_block_ids",
+            "This parameter must have the appropriate size if it is provided: "
+            "Since the number of the innermost ring layers (" +
+                std::to_string(num_innermost_ring_layers) +
+                " :first ring interval and inner/outer boundaries of the first ring) is more than "
+                "one, and we have non-quad central elements, the size of 'ring_block_ids' must be "
+                "equal to the size of 'ring_intervals' + 1.\n",
+            debug_info.str());
+      }
+      else
+      {
+        paramError(
+            "ring_block_ids",
+            "This parameter must have the appropriate size if it is provided: "
+            "Since the number of the innermost ring layers (" +
+                std::to_string(num_innermost_ring_layers) +
+                " :first ring interval and inner/outer boundaries of the first ring) is more than "
+                "one, and we have quad central elements, the size of 'ring_block_ids' can be either"
+                "equal to the size of 'ring_intervals' or 'ring_intervals' + 1.\n",
+            debug_info.str());
+      }
+    }
+    // If conditions are met, duplicate the first element of _ring_block_names at the start.
     if (!_ring_block_names.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
         _ring_block_names.size() == _ring_intervals.size())
       _ring_block_names.insert(_ring_block_names.begin(), _ring_block_names.front());
+    // check if the number of ring block names is appropiate
     if (!_ring_block_names.empty() &&
         _ring_block_names.size() !=
             (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
-      paramError(
-          "ring_block_names",
-          "This parameter must have the appropriate size if it is set. The size should be the "
-          "same as the size of 'ring_intervals' if the innermost ring interval (including "
-          "boundary layers) is unity; otherwise the size should be greater than the size of "
-          "'ring_intervals' by one. If 'quad_center_elements' is true, it is optional to only "
-          "provide this parameter with the same size as 'ring_intervals'");
+    {
+      // Create an ostringstream for the debug information
+      std::ostringstream debug_info;
+      debug_info << "quad_center_elements is : " << (_quad_center_elements ? "true" : "false")
+                 << std::endl;
+      debug_info << "ring_block_names size is : " << _ring_block_names.size() << std::endl;
+      debug_info << "ring_intervals size is : " << _ring_intervals.size() << std::endl;
+      debug_info << "number of innermost ring layers is : " << num_innermost_ring_layers
+                 << std::endl;
+
+      // error message
+      if (!_quad_center_elements)
+      {
+        paramError(
+            "ring_block_names",
+            "This parameter must have the appropriate size if it is provided: "
+            "Since the number of the innermost ring layers (" +
+                std::to_string(num_innermost_ring_layers) +
+                " :first ring interval and inner/outer boundaries of the first ring) is more than "
+                "one, and we have non-quad central elements, the size of 'ring_block_names' must "
+                "be equal to the size of 'ring_intervals' + 1.\n",
+            debug_info.str());
+      }
+      else
+      {
+        paramError(
+            "ring_block_names",
+            "This parameter must have the appropriate size if it is provided: "
+            "Since the number of the innermost ring layers (" +
+                std::to_string(num_innermost_ring_layers) +
+                " :first ring interval and inner/outer boundaries of the first ring) is more than "
+                "one, and we have quad central elements, the size of 'ring_block_names' can be "
+                "either equal to the size of 'ring_intervals' or 'ring_intervals' + 1.\n",
+            debug_info.str());
+      }
+    }
     for (unsigned int i = 0; i < _ring_radii.size(); i++)
     {
       const Real layer_width = _ring_radii[i] - (i == 0 ? 0.0 : _ring_radii[i - 1]);
@@ -594,7 +680,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   {
     if (_preserve_volumes)
     {
-      Real corr_factor = radiusCorrectionFactor(azimuthal_list);
+      Real corr_factor =
+          PolygonalMeshGenerationUtils::radiusCorrectionFactor(azimuthal_list, true, _order);
       for (unsigned int i = 0; i < _ring_radii.size(); i++)
         ring_radii_corr.push_back(_ring_radii[i] * corr_factor);
     }
@@ -673,12 +760,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);
     mesh0->prepare_for_use();
     other_mesh.prepare_for_use();
-    mesh0->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+    mesh0->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true, false);
     other_mesh.clear();
   }
 
   // An extra step to stich the first and last slices together
-  mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+  mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true, false);
 
   if (!_has_rings && !_has_ducts && _background_intervals == 1)
     MooseMesh::changeBoundaryId(*mesh0, 1 + _interface_boundary_id_shift, OUTER_SIDESET_ID, false);
@@ -742,7 +829,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
 
   if (!_has_ducts && _sides_to_adapt.empty())
   {
-    LaplaceMeshSmoother lms(*mesh0);
+    libMesh::LaplaceMeshSmoother lms(*mesh0);
     lms.smooth(_smoothing_max_it);
   }
 
@@ -863,5 +950,108 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   if (flat_side_up)
     MeshTools::Modification::rotate(*mesh0, 180.0 / (Real)_num_sides, 0.0, 0.0);
   mesh0->set_isnt_prepared();
+
+  if (_has_rings && getParam<bool>("replace_inner_ring_with_delaunay_mesh"))
+  {
+    if (isParamSetByUser("quad_center_elements"))
+      paramError("quad_center_elements",
+                 "Should not be set because the center elements of the inner ring will be replaced "
+                 "by a Delaunay mesh with 'replace_inner_ring_with_delaunay_mesh=true'");
+
+    // remove elements of the inner ring and create an inner-ring external boundary side set
+    std::set<Elem *> deleteable_elems;
+    for (auto & elem : mesh0->element_ptr_range())
+      if (elem->vertex_average().norm() < ring_radii_corr[0])
+        deleteable_elems.insert(elem);
+
+    const boundary_id_type boundary_id = MooseMeshUtils::getBoundaryIDs(*mesh0, {"_foo"}, true)[0];
+    BoundaryInfo & boundary_info = mesh0->get_boundary_info();
+    for (auto & elem : deleteable_elems)
+    {
+      unsigned int n_sides = elem->n_sides();
+      for (unsigned int n = 0; n != n_sides; ++n)
+      {
+        Elem * neighbor = elem->neighbor_ptr(n);
+        if (!neighbor)
+          continue;
+
+        const unsigned int return_side = neighbor->which_neighbor_am_i(elem);
+
+        if (neighbor->neighbor_ptr(return_side) == elem)
+        {
+          neighbor->set_neighbor(return_side, nullptr);
+          boundary_info.add_side(neighbor, return_side, boundary_id);
+        }
+      }
+
+      mesh0->delete_elem(elem);
+    }
+
+    // build the 1d mesh from the new boundary
+    auto poly_mesh = MooseMeshUtils::buildBoundaryMesh(*mesh0, boundary_id);
+    Real min_side = std::numeric_limits<Real>::max();
+    for (auto & elem : poly_mesh->element_ptr_range())
+    {
+      Real l = elem->volume();
+      if (l < min_side)
+        min_side = l;
+    }
+
+    // triangulate with the 1d mesh
+    libMesh::Poly2TriTriangulator poly2tri(*poly_mesh);
+    poly2tri.triangulation_type() = libMesh::TriangulatorInterface::PSLG;
+    poly2tri.set_interpolate_boundary_points(0);
+    poly2tri.set_refine_boundary_allowed(false);
+    poly2tri.set_verify_hole_boundaries(false);
+    const auto desired_area = getParam<std::string>("inner_ring_desired_area");
+    if (desired_area != "")
+    {
+      poly2tri.desired_area() = 0;
+      libMesh::ParsedFunction<Real> area_func{desired_area};
+      poly2tri.set_desired_area_function(&area_func);
+    }
+    else
+      poly2tri.desired_area() = min_side * min_side;
+    poly2tri.minimum_angle() = 0;
+    poly2tri.smooth_after_generating() = true;
+    // poly2tri.elem_type() is TRI3 by default
+    if (_tri_elem_type == TRI_ELEM_TYPE::TRI6)
+      poly2tri.elem_type() = libMesh::ElemType::TRI6;
+    else if (_tri_elem_type == TRI_ELEM_TYPE::TRI7)
+      poly2tri.elem_type() = libMesh::ElemType::TRI7;
+    // let us keep the center point
+    poly_mesh->add_point(libMesh::Point());
+    poly2tri.triangulate();
+    // keep the old subdomain id
+    for (auto elem : poly_mesh->element_ptr_range())
+      elem->subdomain_id() = block_ids_new[0];
+
+    if (isParamValid("ring_id_name"))
+    {
+      if (_ring_intervals[0] != 1 && getParam<MooseEnum>("ring_id_assign_type") == "ring_wise")
+        paramError("replace_inner_ring_with_delaunay_mesh",
+                   "Inner ring has multple intervals with each being assigned with a different "
+                   "ring id, replacing inner ring with Delaunay mesh will remove this ring id "
+                   "assign type. Either change 'ring_id_assign_type' to block_wise or set the "
+                   "first element of 'ring_intervals' to 1 or set "
+                   "'replace_inner_ring_with_delaunay_mesh' to false to avoid this error.");
+      auto id_name = getParam<std::string>("ring_id_name");
+      const auto extra_id_index = poly_mesh->add_elem_integer(id_name);
+      for (auto elem : poly_mesh->element_ptr_range())
+        elem->set_extra_integer(extra_id_index, 1);
+    }
+    if (isParamValid("sector_id_name"))
+    {
+      // we will assign all elements in the inner ring with zero sector id
+      auto id_name = getParam<std::string>("sector_id_name");
+      const auto extra_id_index = poly_mesh->add_elem_integer(id_name);
+      for (auto elem : poly_mesh->element_ptr_range())
+        elem->set_extra_integer(extra_id_index, 0);
+    }
+
+    // stitch the triangulated mesh and the original mesh without the inner ring
+    mesh0->stitch_meshes(*poly_mesh, boundary_id, 0, TOLERANCE, true, false);
+  }
+
   return dynamic_pointer_cast<MeshBase>(mesh0);
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ PorousFlowTestApp::validParams()
 
 registerKnownLabel("PorousFlowTestApp");
 
-PorousFlowTestApp::PorousFlowTestApp(InputParameters parameters) : MooseApp(parameters)
+PorousFlowTestApp::PorousFlowTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   PorousFlowTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +44,8 @@ PorousFlowTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool
 void
 PorousFlowTestApp::registerApps()
 {
-  registerApp(PorousFlowApp);
+  PorousFlowApp::registerApps();
   registerApp(PorousFlowTestApp);
-}
-
-void
-PorousFlowTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"PorousFlowTestApp"});
-}
-
-void
-PorousFlowTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"PorousFlowTestApp"});
-}
-
-void
-PorousFlowTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

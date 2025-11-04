@@ -23,6 +23,7 @@
       detail = 'without bounds projection and be'
       cli_args = 'Outputs/file_base=ranfs-dont-project-svd Executioner/line_search=none -pc_type svd '
                  '-pc_svd_monitor'
+      restep = false # Restep will output more timesteps with output on nonlinear
     []
     [ranfs-project-amg]
       type = 'Exodiff'
@@ -112,7 +113,8 @@
                'lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      min_ad_size = '73'
+      capabilities = 'ad_size>=73'
+      restep = false # Issue #31054
     []
     [equal_order_edge_dropping]
       type = 'Exodiff'
@@ -129,6 +131,7 @@
       type = 'Exodiff'
       input = frictionless-penalty-weighted-gap.i
       exodiff = 'frictionless-penalty-weighted-gap_out.e'
+      restep = false # Test is prescribed to abort on failed timestep
       detail = 'using a first order basis for displacements and penalty multiplication times the '
                'negative gap distance to form the contact force.'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
@@ -141,9 +144,10 @@
       detail = 'using a first order basis for displacements and penalty multiplication times the '
                'negative gap distance to form the contact force via the contact action.'
       map = true
+      restep = false # Test is prescribed to abort on failed timestep
       cli_args = "Mesh/mesh_file/file=long-bottom-block-1elem-blocks-coarse.e "
-                 "Executioner/end_time=50 Postprocessors/active='' Outputs/hide='nodal_area "
-                 "contact_pressure penetration'"
+                 "Executioner/end_time=50 Postprocessors/active=''"
+      custom_cmp = 'frictionless-penalty-weighted-gap-action.cmp'
     []
   []
   [very_parallel_penalty]
@@ -157,6 +161,7 @@
                "Postprocessors/active='' "
                "Outputs/file_base=parallel-frictionless-penalty-weighted-gap_out"
     min_parallel = 13
+    restep = false # Test is prescribed to abort on failed timestep
   []
   [very_parallel_frictional_penalty]
     requirement = 'The system shall be able to communicate semilocal weighted gaps and velocities '
@@ -165,11 +170,14 @@
     issues = '#21329'
     type = 'Exodiff'
     input = frictional-penalty-weighted-vel.i
+    # this test does not converge, see #30642
+    should_crash = true
     exodiff = 'parallel-frictional-penalty-weighted-vel_out.e'
     cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                "Postprocessors/active='' "
                "Outputs/file_base=parallel-frictional-penalty-weighted-vel_out"
     min_parallel = 13
+    restep = false # Test is prescribed to abort on failed timestep
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '
@@ -190,7 +198,7 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action_out.e'
       detail = 'using the contact action'
       cli_args = "Postprocessors/active=''"
-      abs_zero = 5e-9
+      custom_cmp = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action.cmp'
     []
   []
   [split_secondary]
@@ -201,7 +209,7 @@
     requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
                   'mechanical contact problem in which the secondary side of the contact interface '
                   'is split between processes when run in parallel.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     valgrind = 'heavy'
   []
   [split_secondary_action]
@@ -214,7 +222,8 @@
                   'is split between processes when run in parallel while using the contact action to '
                   'build the set of constraints, user objects, and application of generalized '
                   'forces.'
-    method = "!dbg"
+    capabilities = 'method!=dbg'
+    custom_cmp = 'variational-frictional.cmp'
     valgrind = 'heavy'
   []
   [mixed_inactive_nodes]
@@ -223,8 +232,7 @@
     exodiff = 'mixed-weighted-gap-swapped_out.e'
     requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on '
                   'inactive nodes.'
-    method = "!dbg"
     valgrind = 'heavy'
-    min_ad_size = '100'
+    capabilities = 'ad_size>=100 & method!=dbg'
   []
 []

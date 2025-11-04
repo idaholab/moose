@@ -1,0 +1,50 @@
+[Tests]
+  issues = '#29980'
+  design = 'FunctorIC.md'
+  [functor]
+    requirement = 'The system shall be able to initialize a variable using functors, notably'
+    [from_pp]
+      type = CSVDiff
+      input = 'test.i'
+      csvdiff = 'from_pp.csv'
+      cli_args = 'Outputs/file_base=from_pp'
+      detail = 'postprocessors,'
+    []
+    [from_fmat]
+      type = CSVDiff
+      input = 'test.i'
+      csvdiff = 'from_functor_mat.csv'
+      cli_args = 'Outputs/file_base=from_functor_mat ICs/u_init/functor=mat_functor'
+      detail = 'functor material properties,'
+      expect_out = 'Functor materials or postprocessors should not depend on variables if used in a FunctorIC'
+    []
+    [from_function]
+      type = CSVDiff
+      input = 'test.i'
+      csvdiff = 'from_function.csv'
+      cli_args = 'Outputs/file_base=from_function ICs/u_init/functor=function_functor'
+      detail = 'functions,'
+    []
+    [from_var]
+      type = RunException
+      input = 'test.i'
+      cli_args = 'ICs/u_init/functor=variable_functor'
+      expect_err = 'Initializing a variable with another variable is not supported at this time'
+      detail = 'but not other variables,'
+    []
+    [from_pp_not_initialized]
+      type = RunException
+      input = 'test.i'
+      cli_args = 'Postprocessors/pp_functor/force_preic=false'
+      expect_err = "Functor is a postprocessor and does not have 'force_preic' set to true"
+      detail = 'or postprocessors that are not executed before initial conditions are set.'
+    []
+  []
+  [gradient]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'gradient_ic.csv'
+    cli_args = 'Variables/u/family=HERMITE Variables/u/order=THIRD Outputs/file_base=gradient_ic'
+    requirement = 'The system shall be able to use the gradient of a functor to set an initial condition to a third order variable.'
+  []
+[]

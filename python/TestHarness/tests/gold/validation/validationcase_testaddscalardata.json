@@ -1,0 +1,17 @@
+{
+  "data": {
+    "peak_temperature": {
+      "abs_zero": null,
+      "bounds": null,
+      "description": "Peak temperature",
+      "key": "peak_temperature",
+      "nominal": null,
+      "rel_err": null,
+      "test": null,
+      "units": "K",
+      "validation": true,
+      "value": 1.234
+    }
+  },
+  "results": []
+}

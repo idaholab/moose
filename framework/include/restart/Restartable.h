@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,14 +42,14 @@ public:
   class ManagedValue
   {
   public:
-    ManagedValue<T>(RestartableData<T> & value) : _value(value) {}
+    ManagedValue(RestartableData<T> & value) : _value(value) {}
 
     /**
      * Destructor.
      *
      * Destructs the managed restartable data.
      */
-    ~ManagedValue<T>() { _value.reset(); }
+    ~ManagedValue() { _value.reset(); }
 
     /**
      * Get the restartable value.
@@ -104,6 +104,13 @@ public:
               THREAD_ID tid,
               const bool read_only = false,
               const RestartableDataMapName & metaname = "");
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  Restartable(const Restartable & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
 protected:
   /**

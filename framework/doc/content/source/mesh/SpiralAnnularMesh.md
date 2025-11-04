@@ -32,6 +32,7 @@ The resulting mesh looks like this :
 
 !media large_media/spiral_annular_mesh/SpiralAnnularMesh_example.png
        style=width:50%;
+       alt=The mesh produced by the configurations above.
 
 ## Further SpiralAnnularMesh Documentation
 

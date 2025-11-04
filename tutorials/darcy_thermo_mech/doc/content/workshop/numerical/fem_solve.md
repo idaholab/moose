@@ -23,7 +23,9 @@ where $\mathcal{J}_e$ is the Jacobian of the map from the physical element to th
 
 ## Reference Element (Quad9)
 
-!media darcy_thermo_mech/fem_quad9_ref.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/fem_quad9_ref.png
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=The mapping between reference-space and real-space for a second-order quadrilateral element.
 
 !---
 
@@ -80,6 +82,15 @@ necessary), respectively.
 
 !---
 
+## Intermediate summary
+
+- There is a mesh, with cells and functions, polynomials, defined by their coefficients
+- We plug in these functions in the PDEs, then obtain a weak form
+- We evaluate the integrals in the weak form using a quadrature, thus forming a set of equations
+- Now let's solve these equations to obtain the coefficients
+
+!---
+
 ## Newton's Method
 
 Newton's method is a "root finding" method with good convergence properties, in "update form",
@@ -92,7 +103,9 @@ f'(x_n) \delta x_{n+1} &= -f(x_n) \\
 x_{n+1} &= x_n + \delta x_{n+1}
 \end{aligned}
 
-!media darcy_thermo_mech/newtons_method.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/newtons_method.png
+       style=width:50%;margin-left:auto;margin-right:auto;display:block;
+       alt=Plot demonstrating Newton's method for iteratively finding a solution by projecting along the tangents of a curve.
 
 !---
 
@@ -124,7 +137,7 @@ J_{ij}(\vec{u}_n) = \frac{\partial \vec{R}_i(\vec{u}_n)}{\partial u_j}
 
 The solve type is specified in the `[Executioner]` block within the input file:
 
-```
+```moose
 [Executioner]
   solve_type = PJFNK
 ```
@@ -151,7 +164,7 @@ The action of the Jacobian is approximated by:
 
 !equation id=jfnk
 \begin{aligned}
-\mathbf{J}\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}+\epsilon \mathbf{v})-\mathbf{R}(\mathbf{u})}{\epsilon}
+\mathbf{J}(\mathbf{u})\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}+\epsilon \mathbf{v})-\mathbf{R}(\mathbf{u})}{\epsilon}
 \end{aligned}
 
 The `Kernel` method `computeQpResidual` is called to compute
@@ -197,7 +210,7 @@ during linear iterations.
 
 Select a preconditioner using PETSC options, either in the executioner or in the `[Preconditioning]` block:
 
-```language=cpp
+```language=moose
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_hypre_type'

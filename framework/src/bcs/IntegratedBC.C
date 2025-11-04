@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,7 @@
 #include "SystemBase.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/quadrature.h"
 
@@ -98,7 +99,7 @@ IntegratedBC::computeResidual()
 
   if (_has_save_in)
   {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    libMesh::Threads::spin_mutex::scoped_lock lock(libMesh::Threads::spin_mtx);
     for (unsigned int i = 0; i < _save_in.size(); i++)
       _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
   }
@@ -128,7 +129,7 @@ IntegratedBC::computeJacobian()
     for (unsigned int i = 0; i < rows; i++)
       diag(i) = _local_ke(i, i);
 
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    libMesh::Threads::spin_mutex::scoped_lock lock(libMesh::Threads::spin_mtx);
     for (unsigned int i = 0; i < _diag_save_in.size(); i++)
       _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
   }

@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#28819'
+  design = 'SIMPLE.md LinearFVScalarAdvection.md'
+  [channel]
+    requirement = "The system shall be able to solve a "
+    [steady-physics]
+      type = 'CSVDiff'
+      input = channel-conservation-physics.i
+      csvdiff = 'channel-conservation-physics_csv.csv'
+      recover = false # no recover testing for steady solves
+      max_threads = 1 # see libmesh issue #3808
+      detail = "1D steady scalar advection problem using the shorthand Physics syntax and show scalar conservation,"
+    []
+    [transient-physics]
+      type = 'CSVDiff'
+      input = channel-transient-physics.i
+      csvdiff = 'channel-transient-physics_csv.csv'
+      max_threads = 1 # see libmesh issue #3808
+      detail = "1D transient scalar advection problem using the shorthand Physics syntax."
+    []
+  []
+[]

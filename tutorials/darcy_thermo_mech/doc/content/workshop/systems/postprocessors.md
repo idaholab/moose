@@ -65,7 +65,7 @@ MOOSE includes a large number built-in `Postprocessors`: `ElementAverageValue`, 
 By default, `Postprocessors` will output to a formatted table on the screen and optionally using
 the `[Outputs]` block be stored in CSV file.
 
-```text
+```moose
 [Output]
   csv = true
 []

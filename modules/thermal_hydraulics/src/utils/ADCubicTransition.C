@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -33,25 +33,26 @@ ADCubicTransition::initialize(const ADReal & f1_end_value,
                               const ADReal & df2dx_end_value)
 {
   // compute cubic polynomial coefficients
+  using std::pow;
 
   DenseMatrix<ADReal> mat(4, 4);
 
-  mat(0, 0) = std::pow(_x1, 3);
-  mat(0, 1) = std::pow(_x1, 2);
+  mat(0, 0) = pow(_x1, 3);
+  mat(0, 1) = pow(_x1, 2);
   mat(0, 2) = _x1;
   mat(0, 3) = 1.0;
 
-  mat(1, 0) = std::pow(_x2, 3);
-  mat(1, 1) = std::pow(_x2, 2);
+  mat(1, 0) = pow(_x2, 3);
+  mat(1, 1) = pow(_x2, 2);
   mat(1, 2) = _x2;
   mat(1, 3) = 1.0;
 
-  mat(2, 0) = 3.0 * std::pow(_x1, 2);
+  mat(2, 0) = 3.0 * pow(_x1, 2);
   mat(2, 1) = 2.0 * _x1;
   mat(2, 2) = 1.0;
   mat(2, 3) = 0.0;
 
-  mat(3, 0) = 3.0 * std::pow(_x2, 2);
+  mat(3, 0) = 3.0 * pow(_x2, 2);
   mat(3, 1) = 2.0 * _x2;
   mat(3, 2) = 1.0;
   mat(3, 3) = 0.0;
@@ -77,11 +78,12 @@ ADReal
 ADCubicTransition::value(const ADReal & x, const ADReal & f1, const ADReal & f2) const
 {
   mooseAssert(_initialized, "initialize() must be called.");
+  using std::pow;
 
   if (x <= _x1)
     return f1;
   else if (x >= _x2)
     return f2;
   else
-    return _A * std::pow(x, 3) + _B * std::pow(x, 2) + _C * x + _D;
+    return _A * pow(x, 3) + _B * pow(x, 2) + _C * x + _D;
 }

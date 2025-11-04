@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
 
@@ -78,7 +78,7 @@ protected:
   std::vector<Real> _current_response;
   /// This variable is populated if the controller needs acess to older values of the
   /// observed postprocessor values
-  std::vector<std::vector<Real>> _old_responses;
+  std::vector<std::vector<Real>> & _old_responses;
 
   /// The names of the controllable parameters
   const std::vector<std::string> & _control_names;
@@ -95,9 +95,6 @@ protected:
   /// Number of timesteps to use as input data from the reporters (this influences how many past
   /// results are used, e.g. the size of _old_responses)
   const unsigned int _input_timesteps;
-
-  /// Flag to show if the vector containing the time-series of responses has been initialized or not
-  bool _initialized;
 
   /// Shifting constants for the responses
   const std::vector<Real> _response_shift_factors;

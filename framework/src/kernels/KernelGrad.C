@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -88,16 +88,4 @@ KernelGrad::computeOffDiagJacobian(const unsigned int jvar_num)
 
     accumulateTaggedLocalMatrix();
   }
-}
-
-Real
-KernelGrad::computeQpResidual()
-{
-  return 0.0;
-}
-
-RealGradient
-KernelGrad::precomputeQpJacobian()
-{
-  return RealGradient(0.0);
 }

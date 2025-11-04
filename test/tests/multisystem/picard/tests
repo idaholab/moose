@@ -1,0 +1,92 @@
+[Tests]
+  issues = '#8780'
+  design = 'FEProblemSolve.md'
+  [one_way]
+    requirement = 'The system shall be able to solve a one-way coupled diffusion problem'
+    [fully_coupled_1]
+      type = Exodiff
+      input = one_way.i
+      exodiff = 'one_way_out.e'
+      detail = 'using the classic fully-coupled single-matrix approach,'
+    []
+    [no_picard]
+      type = Exodiff
+      input = one_way.i
+      cli_args = "Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys"
+      exodiff = 'one_way_out.e'
+      detail = 'using the a multi-system sequential approach with no fixed point iterations,'
+    []
+    [unnecessary_picard]
+      type = Exodiff
+      input = one_way.i
+      cli_args = "Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      exodiff = 'one_way_out.e'
+      detail = 'using the a multi-system approach with fixed point iterations using a Picard algorithm.'
+    []
+  []
+  [two_way]
+    requirement = 'The system shall be able to solve a two-way coupled diffusion problem'
+    [fully_coupled]
+      type = Exodiff
+      input = two_way.i
+      exodiff = 'two_way_out.e'
+      detail = 'using the classic fully-coupled single-matrix approach,'
+    []
+    [necessary_picard]
+      type = Exodiff
+      input = two_way.i
+      cli_args = "Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      exodiff = 'two_way_out.e'
+      detail = 'using the a multi-system approach with fixed point iterations using a Picard algorithm,'
+    []
+    [necessary_picard_solved_in_other_order]
+      type = Exodiff
+      input = two_way.i
+      cli_args = "Executioner/system_names='v_sys u_sys' Problem/nl_sys_names='u_sys v_sys' Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      exodiff = 'two_way_out.e'
+      detail = 'using the a multi-system approach with fixed point iterations using a Picard algorithm, solving them in a different order.'
+    []
+  []
+  [exceptions]
+    requirement = 'The system shall throw an error if'
+    [vector_param_too_long_for_systems]
+      type = RunException
+      input = 'two_way.i'
+      cli_args = "Executioner/residual_and_jacobian_together='true false false'
+                  Problem/nl_sys_names='u_sys v_sys'
+                  Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys
+                  Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      detail = 'too many solver system parameters are being passed for how many systems have been specified,'
+      expect_err = 'Vector parameter size \(3\) is different than the number of nonlinear systems \(2\)'
+    []
+    [vector_param_empty]
+      type = RunException
+      input = 'two_way.i'
+      cli_args = "Executioner/residual_and_jacobian_together=''
+                  Problem/nl_sys_names='u_sys v_sys'
+                  Problem/kernel_coverage_check=false
+                  Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys
+                  Executioner/multi_system_fixed_point=true Executioner/multi_system_fixed_point_convergence=multisys"
+      detail = 'an empty vector parameter has been specified with multiple systems at hand,'
+      expect_err = 'This parameter was passed to a routine which cannot handle empty vector parameters'
+    []
+    [missing_fp_cv]
+      type = RunException
+      input = 'two_way.i'
+      cli_args = "Problem/nl_sys_names='u_sys v_sys'
+                  Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys
+                  Executioner/multi_system_fixed_point=true"
+      detail = 'no convergence objects has been specified to assess convergence of fixed point iterations,'
+      expect_err = 'Must set a convergence object for multi-system fixed point iterations if using multi-system fixed point iterations'
+    []
+    [missing_fp_bool]
+      type = RunException
+      input = 'two_way.i'
+      cli_args = "Problem/nl_sys_names='u_sys v_sys'
+                  Variables/u/solver_sys=u_sys Variables/v/solver_sys=v_sys
+                  Executioner/multi_system_fixed_point_convergence=multisys"
+      detail = 'a multi-system convergence object has been specified when multi-system fixed point iterations is not in use.'
+      expect_err = "Cannot set a convergence object for multi-system fixed point iterations if 'multi_system_fixed_point' is set to false"
+    []
+  []
+[]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,8 @@
 // libMesh includes
 #include "libmesh/enum_quadrature_type.h"
 
+using namespace libMesh;
+
 ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) : QBase(d, o) {}
 
 std::unique_ptr<QBase>
@@ -23,7 +25,7 @@ ArbitraryQuadrature::clone() const
 QuadratureType
 ArbitraryQuadrature::type() const
 {
-  return INVALID_Q_RULE;
+  return libMesh::INVALID_Q_RULE;
 }
 
 void
@@ -39,23 +41,35 @@ ArbitraryQuadrature::setWeights(const std::vector<Real> & weights)
   _weights = weights;
 }
 
+#ifdef LIBMESH_QBASE_INIT_ARGUMENTS_REMOVED
 void
-ArbitraryQuadrature::init_1D(const ElemType _type, unsigned int p_level)
+ArbitraryQuadrature::init_1D()
 {
-  this->_type = _type;
-  this->_p_level = p_level;
 }
 
 void
-ArbitraryQuadrature::init_2D(const ElemType _type, unsigned int p_level)
+ArbitraryQuadrature::init_2D()
 {
-  this->_type = _type;
-  this->_p_level = p_level;
 }
 
 void
-ArbitraryQuadrature::init_3D(const ElemType _type, unsigned int p_level)
+ArbitraryQuadrature::init_3D()
 {
-  this->_type = _type;
-  this->_p_level = p_level;
 }
+
+#else
+void
+ArbitraryQuadrature::init_1D(const ElemType, unsigned int)
+{
+}
+
+void
+ArbitraryQuadrature::init_2D(const ElemType, unsigned int)
+{
+}
+
+void
+ArbitraryQuadrature::init_3D(const ElemType, unsigned int)
+{
+}
+#endif // LIBMESH_QBASE_INIT_ARGUMENTS_REMOVED

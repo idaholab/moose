@@ -42,4 +42,23 @@
       detail = 'or the number of values and names are not equal.'
     []
   []
+
+  [constant_eigen]
+    type = JSONDiff
+    input = constant_eigen_reporter.i
+    jsondiff = constant_eigen_reporter_out.json
+    requirement = 'The system shall be able to produce real number vector and matrix values for use in other calculations.'
+  []
+  [eigen_error]
+    type = RunException
+    input = constant_eigen_reporter.i
+    cli_args = "Reporters/active=error
+                Reporters/error/eigen_matrix_value='1; 2'"
+    expect_err = "'eigen_matrix_name' and 'eigen_matrix_value' must be set together."
+    match_literal = true
+
+    requirement = 'The system shall throw an error when producing a real number
+                   vector or matrix reporter value if the name and value are
+                   not supplied together.'
+  []
 []

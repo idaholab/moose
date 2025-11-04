@@ -42,7 +42,7 @@ permeability and viscosity.
 
 ## Step 2: Input File
 
-!listing step02_darcy_pressure/problems/step2.i
+!listing step02_darcy_pressure/problems/step2.i diff=step01_diffusion/problems/step1.i
 
 !---
 
@@ -60,3 +60,4 @@ cd problems
 ## Step 2: Result
 
 !media darcy_thermo_mech/step02_result.png
+       alt=Pressure gradient calculated using the simulation above.

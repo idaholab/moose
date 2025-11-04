@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,8 +26,4 @@ protected:
 
   std::vector<AuxVariableName> _velocities;
   std::vector<AuxVariableName> _accelerations;
-
-  const Real _newmark_beta;
-  const Real _newmark_gamma;
-  const Real _hht_alpha;
 };

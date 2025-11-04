@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,7 +28,7 @@ IntegralRayKernelBase::validParams()
 
 IntegralRayKernelBase::IntegralRayKernelBase(const InputParameters & params)
   : RayKernelBase(params),
-    _assembly(_fe_problem.assembly(_tid, _nl.number())),
+    _assembly(_fe_problem.assembly(_tid, _nl->number())),
     _q_point(_assembly.qPoints()),
     _JxW(_assembly.JxW())
 {

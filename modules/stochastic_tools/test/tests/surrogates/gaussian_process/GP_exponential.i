@@ -91,9 +91,9 @@
   [GP_avg_trainer]
     type = GaussianProcessTrainer
     execute_on = timestep_end
-    covariance_function = 'covar'           #Choose an exponential for the kernel
-    standardize_params = 'true'               #Center and scale the training params
-    standardize_data = 'true'                 #Center and scale the training data
+    covariance_function = 'covar' #Choose an exponential for the kernel
+    standardize_params = 'true' #Center and scale the training params
+    standardize_data = 'true' #Center and scale the training data
     sampler = train_sample
     response = results/data:avg:value
   []
@@ -101,18 +101,18 @@
 
 [Surrogates]
   [GP_avg]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = GP_avg_trainer
   []
 []
 
 [Covariance]
   [covar]
-    type=ExponentialCovariance
-    gamma = 1                                 #Define the exponential factor
-    signal_variance = 1                       #Use a signal variance of 1 in the kernel
-    noise_variance = 1e-6                     #A small amount of noise can help with numerical stability
-    length_factor = '0.551133 0.551133'       #Select a length factor for each parameter (k and q)
+    type = ExponentialCovariance
+    gamma = 1 #Define the exponential factor
+    signal_variance = 1 #Use a signal variance of 1 in the kernel
+    noise_variance = 1e-6 #A small amount of noise can help with numerical stability
+    length_factor = '0.551133 0.551133' #Select a length factor for each parameter (k and q)
   []
 []
 

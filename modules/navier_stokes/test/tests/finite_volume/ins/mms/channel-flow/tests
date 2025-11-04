@@ -5,7 +5,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test1DAverage
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in one dimension with prescribed inlet velocity and outlet pressure and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -15,7 +15,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test2DAverage
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -25,7 +25,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test2DRC
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 16
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
@@ -37,7 +37,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test2DApproximateRC
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 16
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an approximate Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
@@ -50,7 +50,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestPlanePoiseuilleRC
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
     required_python_packages = 'pandas matplotlib'
     min_parallel = 16
@@ -60,7 +60,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestPlanePoiseuilleRCFirst
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
     required_python_packages = 'pandas matplotlib'
     min_parallel = 16
@@ -70,7 +70,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test2DAverageTemp
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = 'true'
     valgrind = 'none'
@@ -80,7 +80,7 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test2DRCTemp
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     min_parallel = 16
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using a Rhie-Chow interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = 'true'

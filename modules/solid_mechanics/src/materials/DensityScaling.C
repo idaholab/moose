@@ -1,6 +1,6 @@
 //* This file is part of the MOOSE framework
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@ InputParameters
 DensityScaling::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Automatically scale the material density to achieve the desired time "
+                             "step size to satisfy CFL conditions.");
   params.addRequiredParam<MaterialPropertyName>(
       "density",
       "Name of Material Property or a constant real number defining the density of the material.");

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,8 +29,8 @@ class CSVDiff(FileTester):
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
 
-    def getOutputFiles(self):
-        return self.specs['csvdiff']
+    def getOutputFiles(self, options):
+        return super().getOutputFiles(options) + self.specs['csvdiff']
 
     # Check that override parameter lists are the same length
     def checkRunnable(self, options):
@@ -89,8 +89,8 @@ class CSVDiff(FileTester):
 
         return commands
 
-    def processResults(self, moose_dir, options, output):
-        FileTester.processResults(self, moose_dir, options, output)
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        output = super().processResults(moose_dir, options, exit_code, runner_output)
 
         if self.isFail() or self.specs['skip_checks']:
             return output

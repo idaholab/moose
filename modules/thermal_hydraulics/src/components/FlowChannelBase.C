@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -88,8 +88,11 @@ FlowChannelBase::validParams()
       "pipe_pars_transferred",
       false,
       "Set to true if Dh, P_hf and A are going to be transferred in from an external source");
-  params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
-  params.addRequiredParam<std::string>("closures", "Closures type");
+  params.addParam<std::vector<std::string>>(
+      "closures",
+      {},
+      "Closures object(s). This is optional since closure relations can be supplied directly by "
+      "Materials as well.");
   params.addParam<bool>("name_multiple_ht_by_index",
                         true,
                         "If true, when there are multiple heat transfer components connected to "
@@ -103,7 +106,6 @@ FlowChannelBase::validParams()
 
   params.addPrivateParam<std::string>("component_type", "pipe");
   params.declareControllable("A f");
-  params.addParamNamesToGroup("lump_mass_matrix", "Numerical scheme");
 
   return params;
 }
@@ -118,7 +120,6 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
                        ? 0.0
                        : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
                              180 / M_PI),
-    _closures_name(getParam<std::string>("closures")),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
     _roughness(getParam<Real>("roughness")),
     _HT_geometry(getEnumParam<EConvHeatTransGeom>("heat_transfer_geom")),
@@ -165,23 +166,10 @@ FlowChannelBase::init()
   {
     _flow_model->init();
 
-    if (getTHMProblem().hasClosures(_closures_name))
-      _closures = getTHMProblem().getClosures(_closures_name);
-    else
-      _closures = buildClosures();
+    const auto & closures_names = getParam<std::vector<std::string>>("closures");
+    for (const auto & closures_name : closures_names)
+      _closures_objects.push_back(getTHMProblem().getClosures(closures_name));
   }
-}
-
-std::shared_ptr<ClosuresBase>
-FlowChannelBase::buildClosures()
-{
-  const std::string class_name =
-      ThermalHydraulicsApp::getClosuresClassName(_closures_name, getFlowModelID());
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<THMProblem *>("_thm_problem") = &getTHMProblem();
-  params.set<Logger *>("_logger") = &getTHMProblem().log();
-  return _factory.create<ClosuresBase>(
-      class_name, genName(name(), "closure", _closures_name), params);
 }
 
 void
@@ -208,8 +196,8 @@ FlowChannelBase::check() const
 {
   Component1D::check();
 
-  if (_closures)
-    _closures->checkFlowChannel(*this);
+  for (const auto & closures : _closures_objects)
+    closures->checkFlowChannel(*this);
 
   // check types of heat transfer for all sources; must be all of same type
   if (_temperature_mode)
@@ -334,7 +322,9 @@ FlowChannelBase::addMooseObjects()
   }
 
   _flow_model->addMooseObjects();
-  _closures->addMooseObjectsFlowChannel(*this);
+
+  for (const auto & closures : _closures_objects)
+    closures->addMooseObjectsFlowChannel(*this);
 }
 
 void

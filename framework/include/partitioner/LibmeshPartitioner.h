@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,8 +29,9 @@ public:
   virtual std::unique_ptr<Partitioner> clone() const;
   virtual void partition(MeshBase & mesh, const unsigned int n);
   virtual void partition(MeshBase & mesh);
-  virtual void prepareBlocksForSubdomainPartitioner(const MeshBase & mesh,
-                                                    SubdomainPartitioner & subdomain_partitioner);
+  virtual void
+  prepareBlocksForSubdomainPartitioner(const MeshBase & mesh,
+                                       libMesh::SubdomainPartitioner & subdomain_partitioner);
 
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n);

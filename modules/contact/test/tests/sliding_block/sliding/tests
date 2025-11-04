@@ -7,13 +7,13 @@
     input = 'frictional_02_penalty.i'
     exodiff = 'frictional_02_penalty_out.e'
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
     allow_warnings = true
     rel_err = 1e-4
-    requirement = 'The system shall support mechanics frictional contact problems'
+    requirement = 'The system shall support mechanics frictional contact problems with a 0.2 friction coefficient.'
   []
 
   [frictional_mu04_penalty]
@@ -26,7 +26,7 @@
     rel_err = 1e-4
     max_time = 800
     allow_warnings = true
-    requirement = 'The system shall support mechanics frictional contact problems'
+    requirement = 'The system shall support mechanics frictional contact problems with a 0.4 friction coefficient.'
   []
 
   [frictionless_kinematic]
@@ -38,7 +38,7 @@
     abs_zero = 1e-7
     rel_err = 1e-4
     max_time = 800
-    requirement = 'The system shall support mechanics frictionless contact problems'
+    requirement = 'The system shall support mechanics frictionless contact problems with a kinematic formulation.'
   []
 
   [frictionless_penalty]
@@ -46,12 +46,12 @@
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     min_parallel = 4
     abs_zero = 1e-7
     rel_err = 1e-4
     max_time = 800
-    requirement = 'The system shall support mechanics frictionless contact problems'
+    requirement = 'The system shall support mechanics frictionless contact problems with a penalty formulation.'
   []
 
   [frictionless_aug]
@@ -59,12 +59,12 @@
     input = 'frictionless_aug.i'
     exodiff = 'frictionless_aug_out.e'
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     min_parallel = 4
     abs_zero = 1e-4
     rel_err = 1e-4
     max_time = 800
-    requirement = 'The system shall support mechanics frictionless contact problems'
+    requirement = 'The system shall support mechanics frictionless contact problems using the augmented Lagrangian method.'
   []
 
   [frictional_mu02_aug]
@@ -72,12 +72,12 @@
     input = 'frictional_02_aug.i'
     exodiff = 'frictional_02_aug_out.e'
     heavy = true
-    superlu = true
+    capabilities = 'superlu'
     min_parallel = 4
     rel_err = 1e-4
     abs_zero = 1e-4
     max_time = 800
-    requirement = 'The system shall support mechanics frictional contact problems'
+    requirement = 'The system shall support mechanics frictional contact problems using the augmented Lagrangian method.'
   []
 
 []

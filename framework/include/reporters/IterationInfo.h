@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -50,7 +50,7 @@ template <typename T>
 T &
 IterationInfo::declareHelper(const std::string & item_name, T & dummy, bool extra_check)
 {
-  return (extra_check && (!_items.isValid() || _items.contains(item_name)))
+  return (extra_check && (!_items.isValid() || _items.isValueSet(item_name)))
              ? declareValueByName<T>(item_name, REPORTER_MODE_REPLICATED)
              : dummy;
 }

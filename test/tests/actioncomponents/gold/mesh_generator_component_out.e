@@ -1,0 +1,1 @@
+two_same_components_out.e

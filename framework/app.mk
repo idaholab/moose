@@ -80,27 +80,36 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # that won't benefit from unity building
 # Also, exclude the base directory by default because it's another big jumble
 # of unrelated stuff.
-non_unity_dirs := %.libs %/src $(app_non_unity_dirs)
+non_unity_dirs := %.libs %/src %/kokkos $(app_non_unity_dirs)
 
-# Find all of the top-level subdirectories in our src folder(s)
+# Find all of the subdirectories in our src folder(s) up to $(app_unity_depth)
+app_unity_depth ?= 1
+ifeq ($(shell expr $(app_unity_depth) \< 1), 1)
+	$(error "app_unity_depth cannot be less than 1, got $(app_unity_depth)")
+endif
 # We will create a Unity file for each individual subdirectory
 # The idea is that files grouped withing a subdirectory are closely related
 # and will benefit from a Unity build
-srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -type d -not -path '*/.libs*')
+srcsubdirs := $(shell find $(APPLICATION_DIR)/src -maxdepth $(app_unity_depth) -type d -not -path '*/.libs*')
+srcsubdirs_nonmaxdepth := $(shell find $(APPLICATION_DIR)/src -maxdepth $(shell expr $(app_unity_depth) - 1) -type d -not -path '*/.libs*')
+srcsubdirs_maxdepth := $(filter-out $(srcsubdirs_nonmaxdepth), $(srcsubdirs))
 allsrcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
 
 # Filter out the paths we don't want to Unity build
 unity_srcsubdirs := $(filter-out $(non_unity_dirs), $(srcsubdirs))
+unity_srcsubdirs_nonmaxdepth := $(filter-out $(non_unity_dirs), $(srcsubdirs_nonmaxdepth))
+unity_srcsubdirs_maxdepth := $(filter-out $(non_unity_dirs), $(srcsubdirs_maxdepth))
 non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(allsrcsubdirs))
 
 # This is a biggie
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs_nonmaxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs_maxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
-app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
+app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C))
 
 # Add to the global list of unity source files
 unity_srcfiles += $(app_unity_srcfiles)
@@ -225,7 +234,7 @@ app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
 ifeq ($(GEN_REVISION),yes)
   CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
   app_BASE_DIR    ?= base/
-  app_HEADER      ?= $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
+  app_HEADER      := $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
 endif
 
 # depend modules
@@ -286,10 +295,10 @@ LIBRARY_SUFFIX :=
 ifeq ($(MOOSE_HEADER_SYMLINKS),true)
 
 # If we are compiling with header symlinks, we don't want to start compiling any
-# object files until all symlinking is completed. The first dependency in the
+# object files until all symlinking is completed. The second dependency in the
 # list below ensures this.
 
-$(all_app_objects) : | $(app_LINKS) $(moose_config_symlink)
+$(all_app_objects) : $(moose_config_symlink) | $(app_LINKS)
 
 else
 
@@ -356,6 +365,61 @@ $(app_HEADER): $(app_HEADER_deps) | $(all_header_dir)
 #
 app_resource = $(APPLICATION_DIR)/$(APPLICATION_NAME).yaml
 
+# Kokkos for app
+
+ifeq ($(ENABLE_KOKKOS),true)
+
+app_KOKKOS_UNITY_SRC_FILES :=
+
+app_KOKKOS_SRC_FILES := $(shell find $(SRC_DIRS) -name "*.K")
+app_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(app_KOKKOS_SRC_FILES))
+app_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(app_KOKKOS_OBJECTS))
+app_KOKKOS_LIB       :=
+
+ifneq ($(app_KOKKOS_OBJECTS),)
+  app_KOKKOS_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)$(KOKKOS_LIB_SUFFIX)
+  app_KOKKOS_LIBS    += $(app_KOKKOS_LIB)
+endif
+
+KOKKOS_OBJECTS += $(app_KOKKOS_OBJECTS)
+KOKKOS_DEPS    += $(app_KOKKOS_DEPS)
+
+-include $(app_KOKKOS_DEPS)
+
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+  $(app_KOKKOS_OBJECTS): $(moose_config_symlink) | $(app_LINKS)
+else
+  $(app_KOKKOS_OBJECTS): $(moose_config)
+endif
+
+ifneq ($(app_KOKKOS_LIB),)
+
+ifeq ($(KOKKOS_COMPILER),CPU)
+
+$(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
+$(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
+$(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
+	@echo "Linking Kokkos Library "$@"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+		$(KOKKOS_CXX) -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(curr_dir)/lib
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
+
+else
+
+# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
+$(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
+$(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
+$(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
+	@mkdir -p $(curr_dir)/lib
+	@echo "Linking Kokkos Library "$@"..."
+	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+
+endif
+
+endif
+
+endif
+
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
@@ -366,7 +430,7 @@ $(app_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
 $(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(LDFLAGS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 
 ifeq ($(BUILD_TEST_OBJECTS_LIB),no)
@@ -382,10 +446,10 @@ $(app_test_LIB): curr_deps := $(depend_libs)
 $(app_test_LIB): curr_libs := $(depend_libs_flags)
 $(app_test_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_test_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
-$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
+$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(gtest_LIB) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Test Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(LDFLAGS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 endif
 
@@ -452,36 +516,62 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS)
 	@echo "Linking Executable "$@"..."
-	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(CXXFLAGS) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
+	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS) ${SILENCE_SOME_WARNINGS}'
 	@$(codesign)
 
 ###### install stuff #############
 docs_dir := $(APPLICATION_DIR)/doc
-bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
+installed_app_binary = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(share_install_dir)/$(notdir $(app_EXEC))
 # Strip the trailing slashes (if provided) and transform into a suitable Makefile targets
 copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(patsubst %/,%,$(dir)))
 
 ifeq ($(want_exec),yes)
-  install_bin: $(bindst)
-  lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
+  install_bin: $(installed_app_binary)
+# Install targets for library archives, which will also install the associated .so/.dylib library
+  lib_archive_install_targets = $(foreach lib,$(filter %.la, $(applibs)),$(dir $(lib))install_lib_from_archive_$(notdir $(lib)))
+# Install targets for libraries that do not have archives (.so/.dylib)
+	lib_install_targets = $(foreach lib,$(filter %.$(lib_suffix), $(applibs)),$(dir $(lib))install_lib_$(notdir $(lib)))
 else
   install_bin:
 endif
 
-install_libs:: $(lib_install_targets)
+# Top level install target for all libraries (.so/.dylib, .la)
+install_all_libs: $(lib_archive_install_targets) $(lib_install_targets)
 
+# Install application data directory if it exists
 ifneq ($(wildcard $(APPLICATION_DIR)/data/.),)
 install_data_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/data
 install_data_$(APPLICATION_NAME)_dst := $(share_install_dir)
 install_data:: install_data_$(APPLICATION_NAME)
 endif
-
 install_data_%:
 	@echo "Installing data "$($@_dst)"..."
+	@mkdir -p $($@_dst)
+	@cp -r $($@_src) $($@_dst)
+
+# Install application python directory if it exists
+ifneq ($(wildcard $(APPLICATION_DIR)/python/.),)
+install_python_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/python
+install_python_$(APPLICATION_NAME)_dst := $(share_install_dir)
+install_python:: install_python_$(APPLICATION_NAME)
+endif
+install_python_%:
+	@echo "Installing python "$($@_dst)"..."
+	@mkdir -p $($@_dst)
+	@cp -r $($@_src) $($@_dst)
+
+ifneq ($(wildcard $(APPLICATION_DIR)/scripts/TestHarness/testers),)
+install_tester_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/scripts/TestHarness/testers
+install_tester_$(APPLICATION_NAME)_dst := $(share_install_dir)/scripts/TestHarness
+install_testers:: install_tester_$(APPLICATION_NAME)
+endif
+
+install_tester_%:
+	@echo "Installing TestHarness testers "$($@_dst)"..."
 	@mkdir -p $($@_dst)
 	@cp -r $($@_src) $($@_dst)
 
@@ -489,47 +579,51 @@ $(copy_input_targets):
 	@$(eval kv := $(subst ->, ,$(subst target_$(APPLICATION_NAME)_,,$@)))
 	@$(eval source_dir := $(word 1, $(kv)))
 	@$(eval dest_dir := $(if $(word 2, $(kv)),$(word 2, $(kv)),$(source_dir)))
-	@echo "Installing inputs from directory \"$(source_dir)\" into $(dest_dir)"
-	@rm -rf $(share_install_dir)/$(dest_dir)
-	@mkdir -p $(share_install_dir)/$(dest_dir)
+	@$(eval dest_dir_full := $(share_install_dir)/$(dest_dir))
 	@$(eval abs_source_dir := $(realpath $(APPLICATION_DIR)/$(source_dir)))
-	@if [ "$(abs_source_dir)" != "" ]; \
-	then \
-		cp -R $(abs_source_dir)/ $(share_install_dir)/$(dest_dir); \
-	else \
-		(echo "ERROR: Source directory $(APPLICATION_DIR)/$(source_dir) does not exist!"; exit 1) \
-	fi;
-	@if [ -e $(APPLICATION_DIR)/testroot ]; \
-	then \
-		cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$(dest_dir)/; \
-	elif [ -e $(source_dir)/testroot ]; \
-	then \
-		cp -f $(source_dir)/testroot $(share_install_dir)/$(dest_dir)/; \
-	else \
-		echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$(dest_dir)/testroot; \
-	fi; \
+	@echo "Installing tests $(dest_dir_full)"
+	@APPLICATION_DIR="$(APPLICATION_DIR)" \
+	 APPLICATION_NAME="$(APPLICATION_NAME)" \
+	 SOURCE_DIR="$(abs_source_dir)" \
+	 DEST_DIR="$(dest_dir_full)" \
+	 $(FRAMEWORK_DIR)/scripts/install_copy_inputs.sh
 
-
-install_lib_%: %
+# Install target for a single .la library archive and the associated .so/.dylib library
+install_lib_from_archive_%: %
 	@mkdir -p $(lib_install_dir)
-	@$(eval libname := $(shell grep "dlname='.*'" $< | sed -E "s/dlname='(.*)'/\1/g"))
-	@$(eval libdst := $(lib_install_dir)/$(libname))  # full installed path (includes library name)
-	@$(eval source_dir := $(dir $<))
-	@$(eval la_installed = $(lib_install_dir)/$(notdir $<))
-	@echo "Installing library $(libdst)"
-	@cp $< $(la_installed)                   # Copy the library archive file
-	@cp $(source_dir)/$(libname) $(libdst)   # Copy the library file
-	@$(call patch_la,$(la_installed),$(lib_install_dir))
-ifneq (,$(findstring darwin,$(libmesh_HOST)))
-	@$(call patch_rpath,$(libdst),../$(lib_install_suffix/.))
-endif
-	@$(call patch_relink,$(libdst),$(libpath_pcre),$(libname_pcre))
-	@$(call patch_relink,$(libdst),$(libpath_framework),$(libname_framework))
+	@$(eval lib_archive_installed = $(lib_install_dir)/$(notdir $<))
+	@$(eval lib_file = $(call lib_from_archive,$<))
+	@$(eval lib_installed := $(lib_install_dir)/$(lib_file))
+	@$(eval lib_build := $(dir $<)/$(lib_file))
+
+# Install the .so/.dylib library
+	@echo "Installing library $(lib_installed)"
+	@cp $(lib_build) $(lib_installed)
+# Patch to add additional installed rpaths to the application libs
+# for dependencies-of-dependencies installed in a different folder
+	@if [ "$(notdir $<)" = "$(notdir $(app_LIB))" ] || [ "$(notdir $<)" = "$(notdir $(app_test_LIB))" ]; then \
+	for lib_dir in $(ADDITIONAL_APP_INSTALL_RPATHS); do $(call patch_rpath,$(lib_installed),$(abspath $(lib_install_dir)/../$$lib_dir)); done \
+	fi
+# Patch to add libraries in the installed folder
+	@$(call patch_rpath,$(lib_installed),$(lib_install_dir))
+
+# Install the .la library, which on mac requires the library above to be installed first
+	@echo "Installing library archive $(lib_archive_installed)"
+	@cp $< $(lib_archive_installed)
+	@$(call patch_la,$(lib_archive_installed),$(lib_install_dir))
 # These lines are critical in that they are a catch-all for nested applications. (e.g. These will properly remap MOOSE and the modules
 # in an application library to the installed locations) - DO NOT REMOVE! Yes, this can probably be done better
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
+	@$(eval libnames := $(foreach lib,$(filter %.la, $(applibs)),$(call lib_from_archive,$(lib))))
+	@$(eval libpaths := $(foreach lib,$(filter %.la, $(applibs)),$(dir $(lib))$(call lib_from_archive,$(lib))))
+	@for lib in $(libpaths); do $(call patch_relink,$(lib_installed),$$lib,$$(basename $$lib)); done
+
+# Install target for a single .so/.dylib library that is not associated with a .la library archive
+install_lib_%: %
+	@mkdir -p $(lib_install_dir)
+	@$(eval lib_installed = $(lib_install_dir)/$(notdir $<))
+	@echo "Installing library $(lib_installed)"
+	@cp $< $(lib_installed)
+	@$(call patch_rpath,$(lib_installed),$(lib_install_dir))
 
 $(binlink): $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
@@ -543,17 +637,17 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(bindst): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs install_$(APPLICATION_NAME)_resource $(binlink)
+$(installed_app_binary): $(app_EXEC) $(copy_input_targets) install_$(APPLICATION_NAME)_docs install_$(APPLICATION_NAME)_resource $(binlink)
 	@echo "Installing binary $@"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@
-	@$(call patch_rpath,$@,../$(lib_install_suffix)/.)
-	@$(eval libnames := $(foreach lib,$(applibs),$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
-	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
+	@$(call patch_rpath,$@,$(lib_install_dir))
+	@$(eval libnames := $(foreach lib,$(applibs),$(call lib_from_archive,$(lib))))
+	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(call lib_from_archive,$(lib))))
 	@for lib in $(libpaths); do $(call patch_relink,$@,$$lib,$$(basename $$lib)); done
 
 ifeq ($(want_exec),yes)
-install_bin: $(bindst)
+install_bin: $(installed_app_binary)
 else
 install_bin:
 endif
@@ -563,3 +657,4 @@ endif
 sa: $(app_analyzer)
 
 compile_commands_all_srcfiles += $(srcfiles)
+compile_commands_all_kokkos_srcfiles += $(app_KOKKOS_SRC_FILES)

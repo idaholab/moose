@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,24 +15,24 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for error in input to CSVDiff
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'csvdiffs')
+        result = self.runTests('-i', 'csvdiffs', exit_code=128)
 
-        e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)')
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)')
-        self.checkStatus(e.output.decode('utf-8'), failed=2)
+        out = result.output
+        self.assertRegex(out, r'test_harness\.test_csvdiff.*?FAILED \(Override inputs not the same length\)')
+        self.assertRegex(out, r'test_harness\.test_badfile.*?FAILED \(MISSING GOLD FILE\)')
+
+        self.checkStatus(result.harness, failed=2)
 
     def testMissingComparison(self):
         """
         Verify the TestHarness will detect and report a missing comparison file error
         """
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'csvdiff_missing_comparison_file')
+        result = self.runTests('-i', 'csvdiff_missing_comparison_file', exit_code=128)
 
-        e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'test_harness\.test_csvdiff_comparison_file_missing.*?FAILED \(MISSING COMPARISON FILE\)')
-        self.checkStatus(e.output.decode('utf-8'), failed=1)
+        out = result.output
+        self.assertRegex(out, r'test_harness\.test_csvdiff_comparison_file_missing.*?FAILED \(MISSING COMPARISON FILE\)')
+
+        self.checkStatus(result.harness, failed=1)
 
     def testCSVDiffScript(self):
         """

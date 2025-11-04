@@ -75,17 +75,15 @@
     use_displaced_mesh = false
   []
   [saved_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = 'saved_x'
     vector_tag = 'ref'
     v = 'disp_x'
-    execute_on = timestep_end
   []
   [saved_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     variable = 'saved_y'
     vector_tag = 'ref'
-    execute_on = timestep_end
     v = 'disp_y'
   []
 []
@@ -95,7 +93,6 @@
     type = ScalarTagVectorAux
     variable = 'saved_strain_zz'
     vector_tag = 'ref'
-    execute_on = timestep_end
     v = 'scalar_strain_zz'
   []
 []

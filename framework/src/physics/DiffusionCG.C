@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,10 @@ DiffusionCG::validParams()
 }
 
 DiffusionCG::DiffusionCG(const InputParameters & parameters)
-  : DiffusionPhysicsBase(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
+  : PhysicsBase(parameters),
+    PhysicsComponentInterface(parameters),
+    DiffusionPhysicsBase(parameters),
+    _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 }
 
@@ -48,24 +51,26 @@ DiffusionCG::addFEKernels()
     else if (isParamValid("diffusivity_functor"))
     {
       const auto & d = getParam<MooseFunctorName>("diffusivity_functor");
-      if (getProblem().hasFunction(d))
+      if (getProblem().hasFunction(d) || MooseUtils::parsesToReal(d))
         kernel_type = "FunctionDiffusion";
       else
-        paramError(
-            "diffusivity_functor", "No diffusion kernel implemented for the source type of", d);
+        paramError("diffusivity_functor",
+                   "No diffusion kernel implemented for the diffusivity type of ",
+                   d);
     }
     else
       kernel_type = _use_ad ? "ADDiffusion" : "Diffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the diffusivity parameter from the Physics to the kernel
+    // From parameters
     if (isParamValid("diffusivity_matprop"))
       params.set<MaterialPropertyName>("diffusivity") =
           getParam<MaterialPropertyName>("diffusivity_matprop");
     else if (isParamValid("diffusivity_functor"))
-      params.set<MaterialPropertyName>("diffusivity") =
-          getParam<MaterialPropertyName>("diffusivity_matprop");
+      params.set<FunctionName>("function") = getParam<MooseFunctorName>("diffusivity_functor");
 
     getProblem().addKernel(kernel_type, prefix() + _var_name + "_diffusion", params);
   }
@@ -89,6 +94,7 @@ DiffusionCG::addFEKernels()
 
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
 
     // Transfer the source and coefficient parameter from the Physics to the kernel
     const auto coef = getParam<Real>("source_coef");
@@ -114,11 +120,12 @@ DiffusionCG::addFEKernels()
   }
 
   // Time derivative term
-  if (isTransient())
+  if (shouldCreateTimeDerivative(_var_name, _blocks, false))
   {
     const std::string kernel_type = _use_ad ? "ADTimeDerivative" : "TimeDerivative";
     InputParameters params = getFactory().getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = _var_name;
+    assignBlocks(params, _blocks);
     getProblem().addKernel(kernel_type, prefix() + _var_name + "_time", params);
   }
 }
@@ -126,7 +133,7 @@ DiffusionCG::addFEKernels()
 void
 DiffusionCG::addFEBCs()
 {
-  if (isParamValid("neumann_boundaries"))
+  if (isParamSetByUser("neumann_boundaries"))
   {
     const auto & boundary_fluxes = getParam<std::vector<MooseFunctorName>>("boundary_fluxes");
     for (const auto i : index_range(_neumann_boundaries))
@@ -168,7 +175,7 @@ DiffusionCG::addFEBCs()
           bc_type, prefix() + _var_name + "_neumann_bc_" + _neumann_boundaries[i], params);
     }
   }
-  if (isParamValid("dirichlet_boundaries"))
+  if (isParamSetByUser("dirichlet_boundaries"))
   {
     const auto & boundary_values = getParam<std::vector<MooseFunctorName>>("boundary_values");
     for (const auto i : index_range(_dirichlet_boundaries))
@@ -210,22 +217,60 @@ DiffusionCG::addFEBCs()
 }
 
 void
-DiffusionCG::addNonlinearVariables()
+DiffusionCG::addSolverVariables()
 {
   // If the variable was added outside the Physics
-  if (nonlinearVariableExists(_var_name, /*error_if_aux*/ true))
+  if (!shouldCreateVariable(_var_name, _blocks, true))
   {
-    if (isParamValid("variable_order"))
-      paramError("variable_order",
-                 "Cannot specify the variable order if variable " + _var_name +
-                     " is defined outside the Physics block");
-    else
-      return;
+    reportPotentiallyMissedParameters({"variable_order", "system_names"}, "MooseVariable");
+    return;
   }
 
   const std::string variable_type = "MooseVariable";
   InputParameters params = getFactory().getValidParams(variable_type);
   params.set<MooseEnum>("order") = getParam<MooseEnum>("variable_order");
+  assignBlocks(params, _blocks);
+  params.set<SolverSystemName>("solver_sys") = getSolverSystem(_var_name);
 
   getProblem().addVariable(variable_type, _var_name, params);
+}
+
+void
+DiffusionCG::addBoundaryConditionsFromComponents()
+{
+  const auto bc_type_fixed = "FunctorDirichletBC";
+  InputParameters params_fixed = getFactory().getValidParams(bc_type_fixed);
+  const auto bc_type_flux = "FunctorNeumannBC";
+  InputParameters params_flux = getFactory().getValidParams(bc_type_flux);
+
+  for (const auto & comp_pair : _components_boundary_conditions)
+  {
+    for (const auto & bc_pair : comp_pair.second)
+    {
+      params_fixed.set<NonlinearVariableName>("variable") = _var_name;
+      params_flux.set<NonlinearVariableName>("variable") = _var_name;
+
+      const auto bc_type = bc_pair.second.second;
+      const auto functor_name = bc_pair.second.first;
+      params_fixed.set<MooseFunctorName>("functor") = functor_name;
+      params_flux.set<MooseFunctorName>("functor") = functor_name;
+
+      const auto surface_name = bc_pair.first.second;
+      params_fixed.set<std::vector<BoundaryName>>("boundary") = {surface_name};
+      params_flux.set<std::vector<BoundaryName>>("boundary") = {surface_name};
+
+      if (bc_type == ComponentBoundaryConditionInterface::BoundaryConditionType::FIXED_VALUE)
+        getProblem().addBoundaryCondition(bc_type_fixed,
+                                          prefix() + _var_name + "_comp_" + comp_pair.first +
+                                              "_fixed_value_" + surface_name,
+                                          params_fixed);
+      else if (bc_type == ComponentBoundaryConditionInterface::BoundaryConditionType::FLUX)
+        getProblem().addBoundaryCondition(bc_type_flux,
+                                          prefix() + _var_name + "_comp_" + comp_pair.first +
+                                              "_flux_" + surface_name,
+                                          params_flux);
+      else
+        mooseError("Boundary condition type not implemented");
+    }
+  }
 }

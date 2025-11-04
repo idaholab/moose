@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,7 @@
 // Forward Declarations
 class InputParameters;
 class VectorPostprocessor;
+class TransientBase;
 
 namespace libMesh
 {
@@ -59,6 +60,15 @@ protected:
   void setupVariables(const std::vector<std::string> & variable_names);
 
   /**
+   *  Checks whether the passed variable pointer corresponds to a regular single-valued field
+   * variable
+   * @param var_param_name name of the variable parameter in which the variables were passed
+   * @param var_ptr pointer to the field variable
+   */
+  void checkForStandardFieldVariableType(const MooseVariableFieldBase * const var_ptr,
+                                         const std::string & var_param_name = "variable") const;
+
+  /**
    * Call this with the value of every variable at each point you want to sample at.
    * @param p The point where you took the sample
    * @param id This can either be an actual ID or a distance or anything else you want
@@ -99,6 +109,9 @@ protected:
   /// The communicator of the child
   const libMesh::Parallel::Communicator & _comm;
 
+  /// Transient executioner used to determine if the last solve converged
+  const TransientBase * const _sampler_transient;
+
   /// The variable names
   std::vector<std::string> _variable_names;
 
@@ -116,4 +129,12 @@ protected:
   VectorPostprocessorValue & _id;
 
   std::vector<VectorPostprocessorValue *> _values;
+
+private:
+  /// The number of samples added in the last execution
+  std::size_t _curr_num_samples = 0;
+  /// The indices of the samples in the last execution
+  std::set<std::size_t, std::greater<std::size_t>> _curr_indices;
+  /// The full size of the vector since the last execution
+  std::size_t _curr_total_samples = 0;
 };

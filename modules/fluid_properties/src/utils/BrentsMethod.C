@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,8 +34,13 @@ bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2)
   if (f1 * f2 > 0.0)
   {
     unsigned int iter = 0;
+    std::stringstream debug_ss;
     while (f1 * f2 > 0.0)
     {
+#ifdef DEBUG
+      debug_ss << "  iteration " << iter << ": (x1,x2) = (" << x1 << "," << x2 << "), (f1,f2) = ("
+               << f1 << "," << f2 << ")\n";
+#endif
       if (std::abs(f1) < std::abs(f2))
       {
         x1 += factor * (x1 - x2);
@@ -52,7 +57,7 @@ bracket(std::function<Real(Real)> const & f, Real & x1, Real & x2)
       iter++;
       if (iter >= n)
         throw MooseException("No bracketing interval found by BrentsMethod::bracket after " +
-                             Moose::stringify(n) + " iterations");
+                             Moose::stringify(n) + " iterations.\n" + debug_ss.str());
     }
   }
 }
@@ -63,7 +68,7 @@ root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol)
   Real a = x1, b = x2, c = x2, d = 0.0, e = 0.0, min1, min2;
   Real fa = f(a);
   Real fb = f(b);
-  Real fc, p, q, r, s, tol1, xm;
+  Real fc, p, q, r, s, tol1, xm = 0;
   unsigned int iter_max = 100;
   Real eps = 1.0e-12;
 
@@ -71,8 +76,13 @@ root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol)
     throw MooseException("Root must be bracketed in BrentsMethod::root");
 
   fc = fb;
+  std::stringstream debug_ss;
   for (unsigned int i = 1; i <= iter_max; ++i)
   {
+#ifdef DEBUG
+    debug_ss << "  iteration " << i << ": dx = " << xm << ", x = " << b << ", f(x) = " << fb
+             << "\n";
+#endif
     if (fb * fc > 0.0)
     {
       // Rename a,b and c and adjust bounding interval d
@@ -154,7 +164,8 @@ root(std::function<Real(Real)> const & f, Real x1, Real x2, Real tol)
     fb = f(b);
   }
 
-  throw MooseException("Maximum number of iterations exceeded in BrentsMethod::root");
+  throw MooseException("Maximum number of iterations exceeded in BrentsMethod::root.\n" +
+                       debug_ss.str());
   return 0.0; // Should never get here
 }
 } // namespace BrentsMethod

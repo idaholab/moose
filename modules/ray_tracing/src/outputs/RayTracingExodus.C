@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,7 @@ RayTracingExodus::outputMesh()
 {
   TIME_SECTION("outputMesh", 3, "Writing Ray Mesh");
 
-  ExodusII_IO eio(*_segment_mesh);
+  libMesh::ExodusII_IO eio(*_segment_mesh);
   eio.set_hdf5_writing(false);
 
   // With nodal data, we need to output these variables in write_timestep

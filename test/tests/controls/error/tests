@@ -33,7 +33,7 @@
     type = RunException
     input = 'tid_warehouse_error.i'
     expect_err = "Attempting to access a thread id \(12345\) greater than the number allowed by the storage item \(1\)"
-    method = 'dbg'
+    capabilities = 'dbg'
     requirement = "The Control system shall error if a thread id greater than the number of threads available is supplied when retrieving a Control object."
   [../]
 

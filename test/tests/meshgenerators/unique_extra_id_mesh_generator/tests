@@ -27,5 +27,13 @@
       detail = 'with domain cutting using PlaneDeletionGenerator'
       recover = false
     []
+
+    [block_restriction]
+      type = 'Exodiff'
+      input = 'unique_id_block_restricted.i'
+      exodiff = 'unique_id_block_restricted_out.e'
+      detail = 'with the new extra element id assigned to restricted mesh subdomains'
+      recover = false
+    []
   []
 []

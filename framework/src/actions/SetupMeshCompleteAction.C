@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,7 +54,7 @@ SetupMeshCompleteAction::act()
       return;
 
     // uniform refinement has been done on master, so skip
-    if (_app.masterMesh())
+    if (_app.useMasterMesh())
       return;
 
     /**
@@ -71,21 +71,20 @@ SetupMeshCompleteAction::act()
 
         if (_mesh->uniformRefineLevel())
         {
-          if (_mesh->meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
-              _mesh->meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+          if (!_mesh->interiorLowerDBlocks().empty() || !_mesh->boundaryLowerDBlocks().empty())
             mooseError("HFEM does not support mesh uniform refinement currently.");
 
           Adaptivity::uniformRefine(_mesh.get());
           // After refinement we need to make sure that all of our MOOSE-specific containers are
           // up-to-date
-          _mesh->update();
+          _mesh->meshChanged();
 
           if (_displaced_mesh)
           {
             Adaptivity::uniformRefine(_displaced_mesh.get());
             // After refinement we need to make sure that all of our MOOSE-specific containers are
             // up-to-date
-            _displaced_mesh->update();
+            _displaced_mesh->meshChanged();
           }
         }
       }

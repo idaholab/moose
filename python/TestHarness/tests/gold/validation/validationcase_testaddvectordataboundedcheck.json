@@ -1,0 +1,182 @@
+{
+  "data": {
+    "fail_both": {
+      "abs_zero": null,
+      "bounds": [
+        [
+          1.05,
+          1.9
+        ],
+        [
+          1.1,
+          1.95
+        ]
+      ],
+      "description": "y",
+      "key": "fail_both",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestValidationCase.test_fail_both",
+      "units": "y_units",
+      "validation": true,
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "x",
+      "x_units": "x_units"
+    },
+    "fail_lower": {
+      "abs_zero": null,
+      "bounds": [
+        [
+          1.05,
+          2.05
+        ],
+        [
+          1.1,
+          2.1
+        ]
+      ],
+      "description": "y",
+      "key": "fail_lower",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestValidationCase.test_fail_lower",
+      "units": "y_units",
+      "validation": true,
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "x",
+      "x_units": "x_units"
+    },
+    "fail_upper": {
+      "abs_zero": null,
+      "bounds": [
+        [
+          0.9,
+          1.9
+        ],
+        [
+          0.95,
+          1.95
+        ]
+      ],
+      "description": "y",
+      "key": "fail_upper",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestValidationCase.test_fail_upper",
+      "units": "y_units",
+      "validation": true,
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "x",
+      "x_units": "x_units"
+    },
+    "pass": {
+      "abs_zero": null,
+      "bounds": [
+        [
+          0.9,
+          1.9
+        ],
+        [
+          1.1,
+          2.1
+        ]
+      ],
+      "description": "y",
+      "key": "pass",
+      "nominal": null,
+      "rel_err": null,
+      "test": "TestValidationCase.test_pass",
+      "units": "y_units",
+      "validation": true,
+      "value": [
+        1.0,
+        2.0
+      ],
+      "x": [
+        0.0,
+        1.0
+      ],
+      "x_description": "x",
+      "x_units": "x_units"
+    }
+  },
+  "results": [
+    {
+      "data_key": "fail_both",
+      "message": "x = 0.000E+00 x_units (index 0) value 1.000E+00 y_units out of bounds; min = 1.050E+00 y_units, max = 1.100E+00 y_units",
+      "status": "FAIL",
+      "test": "TestValidationCase.test_fail_both",
+      "validation": true
+    },
+    {
+      "data_key": "fail_both",
+      "message": "x = 1.000E+00 x_units (index 1) value 2.000E+00 y_units out of bounds; min = 1.900E+00 y_units, max = 1.950E+00 y_units",
+      "status": "FAIL",
+      "test": "TestValidationCase.test_fail_both",
+      "validation": true
+    },
+    {
+      "data_key": "fail_lower",
+      "message": "x = 0.000E+00 x_units (index 0) value 1.000E+00 y_units out of bounds; min = 1.050E+00 y_units, max = 1.100E+00 y_units",
+      "status": "FAIL",
+      "test": "TestValidationCase.test_fail_lower",
+      "validation": true
+    },
+    {
+      "data_key": "fail_lower",
+      "message": "x = 1.000E+00 x_units (index 1) value 2.000E+00 y_units out of bounds; min = 2.050E+00 y_units, max = 2.100E+00 y_units",
+      "status": "FAIL",
+      "test": "TestValidationCase.test_fail_lower",
+      "validation": true
+    },
+    {
+      "data_key": "fail_upper",
+      "message": "x = 0.000E+00 x_units (index 0) value 1.000E+00 y_units out of bounds; min = 9.000E-01 y_units, max = 9.500E-01 y_units",
+      "status": "FAIL",
+      "test": "TestValidationCase.test_fail_upper",
+      "validation": true
+    },
+    {
+      "data_key": "fail_upper",
+      "message": "x = 1.000E+00 x_units (index 1) value 2.000E+00 y_units out of bounds; min = 1.900E+00 y_units, max = 1.950E+00 y_units",
+      "status": "FAIL",
+      "test": "TestValidationCase.test_fail_upper",
+      "validation": true
+    },
+    {
+      "data_key": "pass",
+      "message": "x = 0.000E+00 x_units (index 0) value 1.000E+00 y_units within bounds; min = 9.000E-01 y_units, max = 1.100E+00 y_units",
+      "status": "OK",
+      "test": "TestValidationCase.test_pass",
+      "validation": true
+    },
+    {
+      "data_key": "pass",
+      "message": "x = 1.000E+00 x_units (index 1) value 2.000E+00 y_units within bounds; min = 1.900E+00 y_units, max = 2.100E+00 y_units",
+      "status": "OK",
+      "test": "TestValidationCase.test_pass",
+      "validation": true
+    }
+  ]
+}

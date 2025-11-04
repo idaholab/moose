@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,9 +43,9 @@ class MooseVariableField : public MooseVariableFieldBase,
 {
 public:
   // type for gradient, second and divergence of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   // shortcut for types storing values on quadrature points
   typedef MooseArray<OutputType> FieldVariableValue;
@@ -58,9 +58,9 @@ public:
   typedef typename Moose::ShapeType<OutputType>::type OutputShape;
 
   // type for gradient, second and divergence of shape functions of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
-  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
 
   // shortcut for types storing shape function values on quadrature points
   typedef MooseArray<std::vector<OutputShape>> FieldVariablePhiValue;
@@ -119,6 +119,11 @@ public:
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const = 0;
 
   /**
+   * AD curl solution getter
+   */
+  virtual const ADTemplateVariableCurl<OutputType> & adCurlSln() const = 0;
+
+  /**
    * AD grad neighbor solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighbor() const = 0;
@@ -127,6 +132,11 @@ public:
    * AD grad of time derivative neighbor solution getter
    */
   virtual const ADTemplateVariableGradient<OutputType> & adGradSlnNeighborDot() const = 0;
+
+  /**
+   * AD curl neighbor solution getter
+   */
+  virtual const ADTemplateVariableCurl<OutputType> & adCurlSlnNeighbor() const = 0;
 
   /**
    * AD second solution getter
@@ -167,6 +177,11 @@ public:
    * Return the AD neighbor dof values
    */
   virtual const MooseArray<ADReal> & adDofValuesNeighbor() const = 0;
+
+  /**
+   * Return the AD time derivatives at dofs
+   */
+  virtual const MooseArray<ADReal> & adDofValuesDot() const = 0;
 
   ///@{
   /**
@@ -353,10 +368,13 @@ public:
   virtual const DoFValue & dofValuesDotDotNeighbor() const = 0;
   virtual const DoFValue & dofValuesDotDotOld() const = 0;
   virtual const DoFValue & dofValuesDotDotOldNeighbor() const = 0;
-  virtual const MooseArray<Number> & dofValuesDuDotDu() const = 0;
-  virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() const = 0;
-  virtual const MooseArray<Number> & dofValuesDuDotDotDu() const = 0;
-  virtual const MooseArray<Number> & dofValuesDuDotDotDuNeighbor() const = 0;
+  virtual const MooseArray<libMesh::Number> & dofValuesDuDotDu() const = 0;
+  virtual const MooseArray<libMesh::Number> & dofValuesDuDotDuNeighbor() const = 0;
+  virtual const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const = 0;
+  virtual const MooseArray<libMesh::Number> & dofValuesDuDotDotDuNeighbor() const = 0;
+
+  template <bool is_ad>
+  const MooseArray<GenericReal<is_ad>> & genericDofValues() const;
 
   /**
    * tag values getters
@@ -382,11 +400,6 @@ public:
   bool hasBlocks(const SubdomainID id) const override { return BlockRestrictable::hasBlocks(id); }
 
 protected:
-  /**
-   * Get the solution corresponding to the provided state
-   */
-  const NumericVector<Number> & getSolution(const Moose::StateArg & state) const;
-
   /// the time integrator used for computing time derivatives
   const TimeIntegrator * const _time_integrator;
 
@@ -394,8 +407,31 @@ protected:
   mutable ADReal _ad_real_dummy = 0;
 };
 
+template <>
+template <>
+const MooseArray<Real> & MooseVariableField<Real>::genericDofValues<false>() const;
+template <>
+template <>
+const MooseArray<Real> & MooseVariableField<RealVectorValue>::genericDofValues<false>() const;
+template <>
+template <>
+const MooseArray<Real> & MooseVariableField<RealEigenVector>::genericDofValues<false>() const;
+
+template <typename OutputType>
+template <bool is_ad>
+const MooseArray<GenericReal<is_ad>> &
+MooseVariableField<OutputType>::genericDofValues() const
+{
+  return adDofValues();
+}
+
 #define usingMooseVariableFieldMembers                                                             \
   usingMooseVariableFieldBaseMembers;                                                              \
   using MooseVariableField<OutputType>::_time_integrator;                                          \
   using MooseVariableField<OutputType>::_ad_real_dummy;                                            \
   using MooseVariableField<OutputType>::getSolution
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MooseVariableField<Real>;
+extern template class MooseVariableField<RealVectorValue>;
+extern template class MooseVariableField<RealEigenVector>;

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -63,15 +63,21 @@ LinearFVFluxKernel::addMatrixContribution()
       _matrix_contribution(1, 0) = -elem_matrix_contribution;
       _matrix_contribution(1, 1) = -neighbor_matrix_contribution;
     }
-    (*_linear_system.matrix).add_matrix(_matrix_contribution, _dof_indices.get_values());
+
+    // We add the contributions to every tagged matrix
+    for (auto & matrix : _matrices)
+      (*matrix).add_matrix(_matrix_contribution, _dof_indices.get_values());
   }
   // We are at a block boundary where the variable is not defined on one of the adjacent cells.
   // We check if we have a boundary condition here
   else if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
            _current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
   {
-    mooseAssert(_current_face_info->boundaryIDs().size() == 1,
-                "We should only have one boundary on every face.");
+    mooseAssert(
+        _current_face_info->boundaryIDs().size() == 1,
+        "We should only have one boundary on every face. Current face center: " +
+            Moose::stringify(_current_face_info->faceCentroid()) +
+            " boundaries specified: " + Moose::stringify(_current_face_info->boundaryIDs()));
 
     LinearFVBoundaryCondition * bc_pointer =
         _var.getBoundaryCondition(*_current_face_info->boundaryIDs().begin());
@@ -87,13 +93,19 @@ LinearFVFluxKernel::addMatrixContribution()
       if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
-        (*_linear_system.matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
+
+        // We add the contributions to every tagged matrix
+        for (auto & matrix : _matrices)
+          (*matrix).add(dof_id_elem, dof_id_elem, matrix_contribution);
       }
       else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
       {
         const auto dof_id_neighbor =
             _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
-        (*_linear_system.matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
+
+        // We add the contributions to every tagged matrix
+        for (auto & matrix : _matrices)
+          (*matrix).add(dof_id_neighbor, dof_id_neighbor, matrix_contribution);
       }
     }
   }
@@ -120,8 +132,9 @@ LinearFVFluxKernel::addRightHandSideContribution()
     if (hasBlocks(_current_face_info->neighborInfo()->subdomain_id()))
       _rhs_contribution(1) = neighbor_rhs_contribution;
 
-    (*_linear_system.rhs)
-        .add_vector(_rhs_contribution.get_values().data(), _dof_indices.get_values());
+    // We add the contributions to every tagged vector
+    for (auto & vector : _vectors)
+      (*vector).add_vector(_rhs_contribution.get_values().data(), _dof_indices.get_values());
   }
   // We are at a block boundary where the variable is not defined on one of the adjacent cells.
   // We check if we have a boundary condition here
@@ -145,13 +158,17 @@ LinearFVFluxKernel::addRightHandSideContribution()
       if (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
       {
         const auto dof_id_elem = _current_face_info->elemInfo()->dofIndices()[_sys_num][_var_num];
-        (*_linear_system.rhs).add(dof_id_elem, rhs_contribution);
+        // We add the contributions to every tagged vector
+        for (auto & vector : _vectors)
+          (*vector).add(dof_id_elem, rhs_contribution);
       }
       else if (_current_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
       {
         const auto dof_id_neighbor =
             _current_face_info->neighborInfo()->dofIndices()[_sys_num][_var_num];
-        (*_linear_system.rhs).add(dof_id_neighbor, rhs_contribution);
+        // We add the contributions to every tagged matrix
+        for (auto & vector : _vectors)
+          (*vector).add(dof_id_neighbor, rhs_contribution);
       }
     }
   }
@@ -174,6 +191,16 @@ LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
 {
   mooseAssert(fi, "FaceInfo should not be null!");
   return makeFace(*fi, limiter_type, true, correct_skewness);
+}
+
+Real
+LinearFVFluxKernel::computeBoundaryFlux(const LinearFVBoundaryCondition & bc)
+{
+  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+  return computeBoundaryMatrixContribution(bc) * _var.getElemValue(*elem_info, determineState()) -
+         computeBoundaryRHSContribution(bc);
 }
 
 void

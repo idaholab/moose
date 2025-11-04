@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -211,7 +211,8 @@ INSADTauMaterialTempl<T>::computeHMax()
       _hmax = std::max(_hmax, diff.norm_sq());
     }
 
-  _hmax = std::sqrt(_hmax);
+  using std::sqrt;
+  _hmax = sqrt(_hmax);
 }
 
 template <typename T>
@@ -344,11 +345,13 @@ INSADTauMaterialTempl<T>::computeQpProperties()
 {
   T::computeQpProperties();
 
+  using std::sqrt;
+
   const auto nu = _mu[_qp] / _rho[_qp];
   const auto transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
-  _speed = NS::computeSpeed(_relative_velocity[_qp]);
-  _tau[_qp] = _alpha / std::sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
-                                 9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
+  _speed = NS::computeSpeed<ADReal>(_relative_velocity[_qp]);
+  _tau[_qp] = _alpha / sqrt(transient_part + (2. * _speed / _hmax) * (2. * _speed / _hmax) +
+                            9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
 
   _momentum_strong_residual[_qp] =
       _advective_strong_residual[_qp] + _viscous_strong_residual[_qp] + _grad_p[_qp];

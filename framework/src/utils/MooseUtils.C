@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <ctime>
 #include <cstdlib>
+#include <regex>
 
 // System includes
 #include <sys/stat.h>
@@ -85,12 +86,16 @@ findTestRoot()
 }
 
 bool
-parsesToReal(const std::string & input)
+parsesToReal(const std::string & input, Real * parsed_real)
 {
   std::istringstream ss(input);
   Real real_value;
   if (ss >> real_value && ss.eof())
+  {
+    if (parsed_real)
+      (*parsed_real) = real_value;
     return true;
+  }
   return false;
 }
 
@@ -128,6 +133,12 @@ docsDir(const std::string & app_name)
   if (pathExists(docfile) && checkFileReadable(docfile))
     return installed_path;
   return "";
+}
+
+std::string
+mooseDocsURL(const std::string & path)
+{
+  return "https://mooseframework.inl.gov/" + path;
 }
 
 std::string
@@ -211,13 +222,9 @@ escape(std::string & str)
 }
 
 std::string
-trim(const std::string & str, const std::string & white_space)
+removeExtraWhitespace(const std::string & input)
 {
-  const auto begin = str.find_first_not_of(white_space);
-  if (begin == std::string::npos)
-    return ""; // no content
-  const auto end = str.find_last_not_of(white_space);
-  return str.substr(begin, end - begin + 1);
+  return std::regex_replace(input, std::regex("^\\s+|\\s+$|\\s+(?=\\s)"), "");
 }
 
 bool
@@ -241,15 +248,6 @@ pathExists(const std::string & path)
 {
   struct stat buffer;
   return (stat(path.c_str(), &buffer) == 0);
-}
-
-bool
-pathIsDirectory(const std::string & path)
-{
-  // We use the non-throwing overload of this so that we suppress any issues with
-  // reading and just report it as an unavailable directory
-  std::error_code ec;
-  return std::filesystem::is_directory(path, ec);
 }
 
 bool
@@ -410,12 +408,28 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
 }
 
 std::string
-stripExtension(const std::string & s)
+getExtension(const std::string & filename, const bool rfind)
 {
-  auto pos = s.rfind(".");
-  if (pos != std::string::npos)
-    return s.substr(0, pos);
-  return s;
+  std::string file_ext = "";
+  if (filename != "")
+  {
+    // The next line splits filename at the last "/" and gives the file name after "/"
+    const std::string stripped_filename = splitFileName<std::string>(filename).second;
+    auto pos = rfind ? stripped_filename.rfind(".") : stripped_filename.find(".");
+    if (pos != std::string::npos)
+      file_ext += stripped_filename.substr(pos + 1, std::string::npos);
+  }
+
+  return file_ext;
+}
+
+std::string
+stripExtension(const std::string & s, const bool rfind)
+{
+  const std::string ext = getExtension(s, rfind);
+  const bool offset = (ext.size() != 0);
+  // -1 offset accounts for the extension's leading dot ("."), if there is an extension
+  return s.substr(0, s.size() - ext.size() - offset);
 }
 
 std::string
@@ -937,119 +951,21 @@ globCompare(const std::string & candidate,
   return globCompare(candidate, pattern, c + 1, p + 1);
 }
 
-template <typename T>
-T
-convertStringToInt(const std::string & str, bool throw_on_failure)
-{
-  T val;
-
-  // Let's try to read a double and see if we can cast it to an int
-  // This would be the case for scientific notation
-  long double double_val;
-  std::stringstream double_ss(str);
-  double_ss >> double_val;
-
-  // on arm64 the long double does not have sufficient precission
-  bool use_int = false;
-  std::stringstream int_ss(str);
-  if (!(int_ss >> val).fail() && int_ss.eof())
-    use_int = true;
-
-  if (double_ss.fail() || !double_ss.eof())
-  {
-    std::string msg =
-        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
-
-    if (throw_on_failure)
-      throw std::invalid_argument(msg);
-    else
-      mooseError(msg);
-  }
-
-  // Check to see if it's an integer (and within range of an integer)
-  if (double_val == static_cast<T>(double_val))
-    return use_int ? val : static_cast<T>(double_val);
-
-  // Still failure
-  std::string msg =
-      std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
-
-  if (throw_on_failure)
-    throw std::invalid_argument(msg);
-  else
-    mooseError(msg);
-}
-
-template <>
-short int
-convert<short int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<short int>(str, throw_on_failure);
-}
-
-template <>
-unsigned short int
-convert<unsigned short int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<unsigned short int>(str, throw_on_failure);
-}
-
-template <>
-int
-convert<int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<int>(str, throw_on_failure);
-}
-
-template <>
-unsigned int
-convert<unsigned int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<unsigned int>(str, throw_on_failure);
-}
-
-template <>
-long int
-convert<long int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<long int>(str, throw_on_failure);
-}
-
-template <>
-unsigned long int
-convert<unsigned long int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<unsigned long int>(str, throw_on_failure);
-}
-
-template <>
-long long int
-convert<long long int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<long long int>(str, throw_on_failure);
-}
-
-template <>
-unsigned long long int
-convert<unsigned long long int>(const std::string & str, bool throw_on_failure)
-{
-  return convertStringToInt<unsigned long long int>(str, throw_on_failure);
-}
-
 std::string
-toUpper(const std::string & name)
+stringJoin(const std::vector<std::string> & values, const std::string & separator)
 {
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-  return upper;
+  std::string combined;
+  for (const auto & value : values)
+    combined += value + separator;
+  if (values.size())
+    combined = combined.substr(0, combined.size() - separator.size());
+  return combined;
 }
 
-std::string
-toLower(const std::string & name)
+bool
+beginsWith(const std::string & value, const std::string & begin_value)
 {
-  std::string lower(name);
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  return lower;
+  return value.rfind(begin_value, 0) == 0;
 }
 
 ExecFlagEnum
@@ -1249,6 +1165,35 @@ prettyCppType(const std::string & cpp_type)
   // Do it again for nested vectors
   r.GlobalReplace("std::vector<\\1>", &s);
   return s;
+}
+
+std::string
+canonicalPath(const std::string & path)
+{
+  return std::filesystem::weakly_canonical(path).c_str();
+}
+
+bool
+startsWith(const std::string & string1, const std::string & string2)
+{
+  if (string2.size() > string1.size())
+    return false;
+  return string1.compare(0, string2.size(), string2) == 0;
+}
+
+void
+replaceStart(std::string & string1, const std::string & string2, const std::string & string3)
+{
+  mooseAssert(startsWith(string1, string2),
+              "Cannot replace the start because it doesn't match the start string");
+  string1.replace(0, string2.size(), string3);
+}
+
+bool
+isAllLowercase(const std::string & str)
+{
+  return std::all_of(
+      str.begin(), str.end(), [](unsigned char c) { return !std::isalpha(c) || std::islower(c); });
 }
 } // MooseUtils namespace
 

@@ -10,7 +10,7 @@
       input = 'element_integral_test.i'
       csvdiff = 'out.csv'
 
-      detail = 'over the whole domain and'
+      detail = 'over the whole domain, and'
     []
 
     [block_test]
@@ -18,7 +18,15 @@
       input = 'element_block_integral_test.i'
       csvdiff = 'out_block.csv'
 
-      detail = 'over a subset of the domain.'
+      detail = 'over a subset of the domain,'
+    []
+
+    [test_abs]
+      type = 'CSVDiff'
+      input = 'element_integral_absolute_test.i'
+      csvdiff = 'out.csv'
+
+      detail = 'and also optionally, using the absolute variable value.'
     []
   []
 []

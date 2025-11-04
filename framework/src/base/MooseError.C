@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +13,8 @@
 #include "Registry.h"
 
 #include "libmesh/string_to_enum.h"
+
+using namespace libMesh;
 
 namespace moose
 {
@@ -48,44 +50,73 @@ mooseMsgFmt(const std::string & msg, const std::string & color)
 }
 
 [[noreturn]] void
-mooseErrorRaw(std::string msg, const std::string prefix)
+mooseErrorRaw(std::string msg,
+              const std::string & prefix /* = "" */,
+              const hit::Node * node /* = nullptr */)
 {
   if (Moose::_throw_on_error)
-    throw std::runtime_error(msg);
+    throw MooseRuntimeError(msg, node);
 
-  msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
+  // Atomic that will be set as soon as any thread hits this method
+  static std::atomic_flag aborting = ATOMIC_FLAG_INIT;
 
-  std::ostringstream oss;
-  oss << msg << "\n";
-
-  // this independent flush of the partial error message (i.e. without the
-  // trace) is here because trace retrieval can be slow in some
-  // circumstances, and we want to get the error message out ASAP.
-  msg = oss.str();
-  if (!prefix.empty())
-    MooseUtils::indentMessage(prefix, msg);
+  // This branch will be hit after another thread has already set the atomic.
+  // MPI_Abort, despite its name, does not behave like std::abort but instead
+  // calls exit handlers and destroys statics. So we don't want to touch
+  // anything static at this point. We'll just wait until the winning thread
+  // has incurred program exit
+  if (aborting.test_and_set(std::memory_order_acq_rel))
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-    Moose::err << msg << std::flush;
+    // Waiting for the other thread(s), not burning CPU
+    for (;;)
+      pause();
   }
-
-  oss.str("");
-  if (Moose::show_trace && libMesh::global_n_processors() == 1)
-    print_trace(oss);
-
-  msg = oss.str();
-  if (!prefix.empty())
-    MooseUtils::indentMessage(prefix, msg);
-
+  // We're the first thread to hit this method (we set the atomic), so we're
+  // responsible for dumping the error and trace(s) while the remaining
+  // threads wait for us to exit (via MOOSE_ABORT)
+  else
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-    Moose::err << msg << std::flush;
+    // Output the message if there is one, but flush it without the trace
+    // as trace retrieval can be slow in some circumstances and we want to
+    // get the error message out ASAP
+    if (!msg.empty())
+    {
+      // If we have a node available, add in the hit context (file location)
+      if (node)
+        msg = Moose::hitMessagePrefix(*node) + msg;
 
+      msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED) + "\n";
+      if (!prefix.empty()) // multiapp prefix
+        MooseUtils::indentMessage(prefix, msg);
+
+      {
+        Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+        Moose::err << msg << std::flush;
+      }
+    }
+
+    // Print the trace if enabled and on a single rank
+    if (Moose::show_trace && libMesh::global_n_processors() == 1)
+    {
+      std::ostringstream oss;
+      print_trace(oss);
+      auto trace = oss.str();
+      if (!prefix.empty()) // multiapp prefix
+        MooseUtils::indentMessage(prefix, trace);
+
+      {
+        Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+        Moose::err << trace << std::flush;
+      }
+    }
+
+    // In parallel with libMesh configured with --enable-tracefiles, this will
+    // dump a trace for each rank to file
     if (libMesh::global_n_processors() > 1)
       libMesh::write_traceout();
-  }
 
-  MOOSE_ABORT;
+    MOOSE_ABORT;
+  }
 }
 
 void

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -81,10 +81,18 @@ class Clobber(object):
                 ".gcov",
                 ".gch",
                 ".so",
+                ".so.0",
+                ".so.0.0.0",
                 )
 
         for root, subdirs, files in os.walk(self.top_dir, topdown=True):
             self.ignore_dir(root, subdirs, "moose")
+            for subdir in subdirs:
+                subdir_path = os.path.join(root, subdir)
+                dir_list = os.listdir(subdir_path)
+                if '.git' in dir_list or '.svn' in dir_list:
+                    self.ignore_dir(root, subdirs, subdir)
+            # Need these for when our Makefile is in the root directory
             self.ignore_dir(root, subdirs, ".git")
             self.ignore_dir(root, subdirs, ".svn")
 

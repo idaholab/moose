@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,10 +40,12 @@ public:
 
   virtual void solve() override;
 
-  virtual void addTimeIntegrator(const std::string & type,
-                                 const std::string & name,
-                                 InputParameters & parameters) override;
-  using SystemBase::addTimeIntegrator;
+  /**
+   * At the moment, this is only used for the multi-system fixed point
+   * iteration. We return true here since ther is no way to specify
+   * separate linear residuals in FEProblemSolve yet.
+   */
+  virtual bool converged() override { return _converged; }
 
   virtual void initialSetup() override;
 
@@ -55,7 +57,16 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve(const ExecFlagType & exec_flag) override;
+  virtual void stopSolve(const ExecFlagType & exec_flag,
+                         const std::set<TagID> & vector_tags_to_close) override;
+
+  /**
+   * If the system has a kernel that corresponds to a time derivative.
+   * Considering that we don't have transient capabilities for linear
+   * systems at the moment, this is false.
+   */
+  virtual bool containsTimeKernel() override;
+  virtual std::vector<std::string> timeKernelVariableNames() override { return {}; }
 
   /**
    * Compute the right hand side and the system matrix of the system for given tags.
@@ -72,7 +83,7 @@ public:
   /**
    * Return a reference to the stored linear implicit system
    */
-  LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
+  libMesh::LinearImplicitSystem & linearImplicitSystem() { return _linear_implicit_system; }
 
   /**
    *  Return a numeric vector that is associated with the time tag.
@@ -104,6 +115,17 @@ public:
   virtual TagID systemMatrixTag() const override { return _system_matrix_tag; }
   ///@}
 
+  /// Fetching the right hand side vector from the libmesh system.
+  NumericVector<Number> & getRightHandSideVector() { return *_linear_implicit_system.rhs; }
+  const NumericVector<Number> & getRightHandSideVector() const
+  {
+    return *_linear_implicit_system.rhs;
+  }
+
+  /// Fetching the system matrix from the libmesh system.
+  SparseMatrix<Number> & getSystemMatrix() { return *_linear_implicit_system.matrix; }
+  const SparseMatrix<Number> & getSystemMatrix() const { return *_linear_implicit_system.matrix; }
+
   /**
    * Compute the Green-Gauss gradients
    */
@@ -116,6 +138,8 @@ public:
   {
     return _new_gradient;
   }
+
+  virtual void compute(ExecFlagType type) override;
 
 protected:
   /**
@@ -165,11 +189,17 @@ protected:
   /// Number of linear iterations
   unsigned int _n_linear_iters;
 
+  /// The initial linear residual
+  Real _initial_linear_residual;
+
   /// The final linear residual
   Real _final_linear_residual;
 
+  /// If the solve on the linear system converged
+  bool _converged;
+
   /// Base class reference to the linear implicit system in libmesh
-  LinearImplicitSystem & _linear_implicit_system;
+  libMesh::LinearImplicitSystem & _linear_implicit_system;
 
   /// Vectors to store the new gradients during the computation. This is needed
   /// because the old gradients might still be needed to determine boundary values

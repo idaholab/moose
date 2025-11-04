@@ -4,12 +4,8 @@
 #
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
-{% set build = 0 %}
-{% set version = "2024.05.05" %}
-{% set vtk_friendly_version = "9.2" %}
-
-# permanent
-{% set strbuild = "build_" + build|string %}
+{% set build = 1 %}
+{% set version = "2025.10.15" %}
 
 package:
   name: moose-libmesh
@@ -18,16 +14,18 @@ package:
 source:
   - path: ../../libmesh
   - path: ../../scripts/configure_libmesh.sh
+  - path: ../functions/retry_build.sh
 
 build:
   number: {{ build }}
-  string: {{ strbuild }}
+  string: {{ mpi }}_{{ build }}
   skip: true                                            # [win]
   script_env:
     - MOOSE_JOBS
-    - vtk_friendly_version={{ vtk_friendly_version }}
     - REQUESTS_CA_BUNDLE
     - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
 
 requirements:
   build:
@@ -35,12 +33,13 @@ requirements:
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - libpng
+    - zlib
   run:
+    - {{ mpi }}
     - {{ moose_petsc }}
     - {{ moose_libmesh_vtk }}
     - pkg-config
     - packaging
-    - setuptools <60
 
 test:
   commands:

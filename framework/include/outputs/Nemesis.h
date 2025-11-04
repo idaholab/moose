@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,11 +32,6 @@ public:
   Nemesis(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Nemesis();
-
-  /**
    * Sets up the libMesh::NemesisII_IO object used for outputting to the Nemesis format
    */
   virtual void initialSetup() override;
@@ -45,6 +40,18 @@ public:
    * Creates a new NemesisII_IO output object for outputting a new mesh
    */
   virtual void meshChanged() override;
+
+  /**
+   * Performs the necessary deletion and re-creating of NemesisII_IO object
+   *
+   * This function is stand-alone and called directly from the output() method because
+   * the NemesisII_IO object is extremely fragile with respect to closing a file that has
+   * not had data written. Thus, it is important to only create a new NemesisII_IO object
+   * if it is certain that it will be used.
+   */
+  virtual void outputSetup();
+
+  bool supportsMaterialPropertyOutput() const override { return true; }
 
 protected:
   /**
@@ -71,7 +78,7 @@ protected:
   virtual std::string filename() override;
 
   /// Pointer to the libMesh::NemesisII_IO object that performs the actual data output
-  std::unique_ptr<Nemesis_IO> _nemesis_io_ptr;
+  std::unique_ptr<libMesh::Nemesis_IO> _nemesis_io_ptr;
 
   /// Storage for scalar values (postprocessors and scalar AuxVariables)
   std::vector<Real> _global_values;
@@ -80,12 +87,24 @@ protected:
   std::vector<std::string> _global_names;
 
   /// Current output filename; utilized by filename() to create the proper suffix
-  unsigned int _file_num;
+  unsigned int & _file_num;
 
 private:
   /// Count of outputs per exodus file
-  unsigned int _nemesis_num;
+  unsigned int & _nemesis_num;
 
   /// Flag if the output has been initialized
   bool _nemesis_initialized;
+
+  /// Flag indicating MOOSE is recovering via --recover command-line option
+  bool _recovering;
+
+  /// A flag indicating to the Nemesis object that the mesh has changed
+  bool & _nemesis_mesh_changed;
+
+  /// Flag to output HDF5 format (when available) in Nemesis. libMesh wants to do
+  ///  so by default (for backwards compatibility with libMesh HDF5 users), but we
+  /// want to avoid this by default (for backwards compatibility with most Moose users
+  /// and to avoid generating regression test gold files that non-HDF5 Moose builds can't read)
+  bool _write_hdf5;
 };

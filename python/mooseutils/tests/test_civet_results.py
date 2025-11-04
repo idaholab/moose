@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,7 +14,7 @@ import platform
 import mooseutils
 import mooseutils.civet_results as cr
 
-SITE = 'https://mooseframework.inl.gov/docs/civettest'
+SITE = 'https://civet.inl.gov'
 REPO = 'idaholab/moose'
 SHAS = ['681ba2f4274dc8465bb2a54e1353cfa24765a5c1', 'febe3476040fe6af1df1d67e8cc8c04c4760afb6']
 

@@ -1,0 +1,19 @@
+[Tests]
+  design = 'kernels/FunctorKernel.md'
+  issues = '#30810 #31358'
+
+  [test_add]
+    type = Exodiff
+    input = 'functor_kernel.i'
+    exodiff = 'functor_kernel_out.e'
+    requirement = 'The system shall allow an equation term to be supplied by a functor value.'
+  []
+
+  [test_target]
+    type = Exodiff
+    input = 'functor_kernel_target.i'
+    exodiff = 'functor_kernel_target_out.e'
+    requirement = 'The system shall allow the residual to be defined in such a way that the variable matches a predefined value, computed by a Functor.'
+  []
+
+[]

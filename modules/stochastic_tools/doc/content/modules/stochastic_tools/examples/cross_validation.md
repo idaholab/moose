@@ -73,7 +73,7 @@ The following model types were used:
 
 - Third degree [PolynomialRegression](source/trainers/PolynomialRegressionTrainer.md).
 - Third degree [PolynomialChaos](source/surrogates/PolynomialChaos.md).
-- [GaussianProcess](source/trainers/GaussianProcessTrainer.md), with a [SquaredExponentialCovariance](source/surrogates/SquaredExponentialCovariance.md) function. Length scales for each input parameter were chosen by first performing hyperparameter tuning with a reduced training data set.
+- [GaussianProcess](source/trainers/GaussianProcessTrainer.md), with a [SquaredExponentialCovariance](source/covariances/SquaredExponentialCovariance.md) function. Length scales for each input parameter were chosen by first performing hyperparameter tuning with a reduced training data set.
 - [LibtorchANN](source/libtorch/trainers/LibtorchANNTrainer.md), with a single hidden layer and 64 neurons.
 - [NearestPoint](source/trainers/NearestPointTrainer.md).
 

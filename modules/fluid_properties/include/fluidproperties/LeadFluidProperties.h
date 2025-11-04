@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -79,8 +79,8 @@ public:
   Real h_from_p_T(Real p, Real T) const override;
   void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  Real h_from_v_e(Real v, Real e) const;
-  void h_from_v_e(Real v, Real e, Real & h, Real & dh_dv, Real & dh_de) const;
+  Real h_from_v_e(Real v, Real e) const override;
+  void h_from_v_e(Real v, Real e, Real & h, Real & dh_dv, Real & dh_de) const override;
 
   Real e_from_p_T(Real p, Real T) const override;
 
@@ -111,6 +111,6 @@ public:
 
 private:
   /// Melting temperature of Lead
-  const Real _T_mo;
+  static constexpr Real _T_mo = 600.6;
 };
 #pragma GCC diagnostic pop

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,14 +14,15 @@ registerMooseObject("MooseApp", PostprocessorSpatialUserObject);
 InputParameters
 PostprocessorSpatialUserObject::validParams()
 {
-  InputParameters params = GeneralUserObject::validParams();
+  InputParameters params = SpatialUserObjectFunctor<GeneralUserObject>::validParams();
   params.addRequiredParam<PostprocessorName>("postprocessor", "The name of the postprocessor");
   params.addClassDescription("User object (spatial) that holds a postprocessor value.");
   return params;
 }
 
 PostprocessorSpatialUserObject::PostprocessorSpatialUserObject(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _value(getPostprocessorValue("postprocessor"))
+  : SpatialUserObjectFunctor<GeneralUserObject>(parameters),
+    _value(getPostprocessorValue("postprocessor"))
 {
 }
 

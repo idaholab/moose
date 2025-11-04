@@ -44,7 +44,7 @@
   block = '1 2'
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     # strain = FINITE
     add_variables = true

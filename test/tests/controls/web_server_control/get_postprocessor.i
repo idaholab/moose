@@ -8,8 +8,9 @@
 
 [Controls/web_server]
   type = WebServerControl
-  port = 8000 # will get overridden by the script to find an available port
   execute_on = 'INITIAL TIMESTEP_BEGIN'
+  initial_client_timeout = 5
+  client_timeout = 5
 []
 
 [Problem]

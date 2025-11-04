@@ -27,6 +27,8 @@
       input = 'BimodalInverseSuperellipsoidsIC.i'
       exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
       scale_refine = 1
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'bimodal inverse superellipsoidal structures,'
     []
@@ -36,6 +38,8 @@
       input = 'BimodalSuperellipsoidsIC.i'
       exodiff = 'BimodalSuperellipsoidsIC_out.e'
       scale_refine = 1
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'bimodal superellipsoidal structures,'
     []
@@ -46,6 +50,8 @@
       exodiff = 'SmoothSuperellipsoidIC_out.e'
       scale_refine = 1
       valgrind = 'HEAVY'
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'smooth superellipsoidal structures,'
     []
@@ -56,6 +62,8 @@
       exodiff = 'SpecifiedSmoothSuperellipsoidIC_out.e'
       scale_refine = 1
       valgrind = 'HEAVY'
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'smooth superellipsoidal structures specified from a file,'
     []
@@ -97,6 +105,8 @@
       cli_args = 'UserObjects/voronoi/use_kdtree=false'
 
       detail = 'polycrystal structure with diffused interface and periodic BC,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalVoronoiIC_periodic_kdtree]
@@ -105,6 +115,8 @@
       exodiff = 'PolycrystalVoronoiIC_periodic_out.e'
 
       detail = 'polycrystal structure with diffused interface and periodic BC using KDTree,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalVoronoiVoidIC_moregrains]
@@ -113,6 +125,8 @@
       exodiff = 'PolycrystalVoronoiVoidIC_moregrains_out.e'
 
       detail = 'large polycrystal structure with voids,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalVoronoiVoidIC_notperiodic]
@@ -121,6 +135,8 @@
       exodiff = 'PolycrystalVoronoiVoidIC_notperiodic_out.e'
 
       detail = 'polycrystal structure with voids,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalVoronoiVoidIC_periodic]
@@ -129,15 +145,19 @@
       exodiff = 'PolycrystalVoronoiVoidIC_periodic_out.e'
 
       detail = 'polycrystal structure with voids on a periodic domain,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalVoronoiVoidIC_periodic_fromfile]
       type = 'Exodiff'
       input = 'PolycrystalVoronoiVoidIC_periodic_fromfile.i'
       exodiff = 'PolycrystalVoronoiVoidIC_periodic_fromfile_out.e'
-      method = '!DBG'
+      capabilities = 'method!=dbg'
 
       detail = 'polycrystal structure with voids with centroids specified from a file,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalVoronoi_FromFile]
@@ -146,30 +166,41 @@
       exodiff = 'PolycrystalVoronoi_fromfile_out.e'
 
       detail = 'polycrystal structure with centroids specified from a file,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalCircles_FromFile]
       type = Exodiff
       input = 'polycrystalcircles_fromfile.i'
       exodiff = 'polycrystalcircles_fromfile_out.e'
+      restep = false # Not actually doing any timesteps
 
       detail = 'polycrystal circles specified from a file,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalCircles_FromFileClipped]
       type = Exodiff
       input = 'polycrystalcircles_clipped.i'
       exodiff = 'polycrystalcircles_clipped_out.e'
+      restep = false # Not actually doing any timesteps
 
       detail = 'polycrystal circles specified from a file that may not appear in the final domain,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [PolycrystalCircles_FromVector]
       type = Exodiff
       input = 'polycrystalcircles_fromvector.i'
       exodiff = 'polycrystalcircles_fromvector_out.e'
+      restep = false # Not actually doing any timesteps
 
       detail = 'polycrystal circles specified from an input vector,'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [HexPolycrystalIC]
@@ -177,7 +208,7 @@
       input = HexPolycrystalIC.i
       exodiff = HexPolycrystalIC_out.e
       # Testing optimal hex coloring with a backtracking algorithm
-      method = '!DBG'
+      capabilities = 'method!=dbg'
 
       detail = 'hexagonal structure in 2D,'
     []
@@ -187,9 +218,11 @@
       input = HexPolycrystalIC_3D_columnar.i
       exodiff = HexPolycrystalIC_3D_columnar_out.e
       # Testing optimal hex coloring with a backtracking algorithm
-      method = '!DBG'
+      capabilities = 'method!=dbg'
 
       detail = 'hexagonal structure in 3D, and'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [TricrystalTripleJunctionIC]
@@ -227,6 +260,8 @@
       exodiff = 'SmoothCircleIC_out.e'
       scale_refine = 1
       valgrind = 'HEAVY'
+      # Uses exodus oversampling
+      recover = false
 
       detail = 'smooth interface circles,'
     []
@@ -245,8 +280,11 @@
       type = Exodiff
       input = 'circles_from_file_ic.i'
       exodiff = 'circles_from_file_ic_out.e'
+      restep = false # Not actually doing any timesteps
 
       detail = 'smooth interface circles specified from a file, and'
+      # 0-step transient does not recover
+      recover = false
     []
 
     [RndSmoothCircleIC]
@@ -272,6 +310,8 @@
       input = ClosePackIC.i
       exodiff = ClosePackIC_out.e
       installation_type = in_tree
+      # steady solve
+      recover = false
 
       detail = 'in 2D, and'
     []
@@ -281,7 +321,7 @@
       type = Exodiff
       input = ClosePackIC_3D.i
       exodiff = ClosePackIC_3D_out.e
-      method = '!dbg' # This test is too slow in debug
+      capabilities = 'method!=dbg' # This test is too slow in debug
       valgrind = HEAVY
 
       detail = 'in 3D.'

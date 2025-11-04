@@ -26,7 +26,7 @@ An action designed to build specific objects, such as the case in [#step09] for 
 
 The MOOSE action system operates on tasks, each task is connected to one or many actions.
 
-For each task the `act()` method is called for each task, thus the act method can be used to
+For each task the `act()` method is called. Thus the act method can be used to
 create any number of objects.
 
 !---

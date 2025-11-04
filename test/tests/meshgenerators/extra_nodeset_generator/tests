@@ -43,4 +43,15 @@
     design = 'meshgenerators/ExtraNodesetGenerator.md'
     issues = '#13814'
   []
+  [close_node]
+    type = 'Exodiff'
+    input = 'closest_point_nodeset.i'
+    cli_args = '--mesh-only'
+    exodiff = 'closest_point_nodeset_in.e'
+    recover = false
+
+    requirement = 'The system shall have the ability to add the node closest to a point to a nodeset.'
+    design = 'meshgenerators/ExtraNodesetGenerator.md'
+    issues = '#28482'
+  []
 []

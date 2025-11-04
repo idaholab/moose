@@ -13,6 +13,7 @@
                   'displacements, and temperature) as the built-in MOOSE capabilities for a '
                   'thermomechanical problem where temperature is a variable and affects material '
                   'stiffness significantly '
+    recover = false
   []
   [gap_heat_transfer_umat_reference]
     type = 'Exodiff'

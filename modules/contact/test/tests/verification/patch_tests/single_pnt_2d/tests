@@ -11,9 +11,7 @@
     abs_zero = 3e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
-    petsc_version = '>=3.7.6'
-    compiler = '!INTEL'
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, kinematic contact
     for 2D plane strain "
@@ -31,7 +29,7 @@
     abs_zero = 3e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce glued, penalty contact
     for 2D plane strain "
@@ -48,7 +46,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, kinematic contact
     for 2D plane "
@@ -66,7 +64,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane "
@@ -85,7 +83,6 @@
                   "strain single point contact model using the contact line
     search solver "
                   "options."
-    compiler = 'GCC CLANG'
   []
   [mu_0_0_kin]
     type = 'CSVDiff'
@@ -99,7 +96,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane "
@@ -117,7 +114,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane "
@@ -134,7 +131,7 @@
     abs_zero = 4e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, kinematic contact
     for 2D plane "
@@ -154,7 +151,7 @@
     abs_zero = 3e-5
     max_parallel = 1
     mesh_mode = REPLICATED
-    superlu = true
+    capabilities = 'superlu'
     allow_warnings = true
     requirement = "The Contact system shall enforce frictional, penalty contact
     for 2D plane "

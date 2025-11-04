@@ -20,7 +20,7 @@
     real_vector_names = 'x y z'
     real_vector_values = '.31 .41 .51  .31 .41 .51 .31 .41 .51 .8;
                           .31 .31 .31 .41  .41 .41 .51 .51 .51 .8;
-                           0   0   0  0   0   0  0  0   0  1;'
+                           0   0   0  0   0   0  0  0   0  1'
     outputs=none
   []
   [bad_coords]
@@ -28,7 +28,7 @@
     real_vector_names = 'x y z'
     real_vector_values = '.31 .41 .51;
                           .31 .31 .31 .41  .41 .41 .51 .51;
-                           0   0   0  0   0   0  0  0   0  1;'
+                           0   0   0  0   0   0  0  0   0  1'
     outputs=none
   []
 []

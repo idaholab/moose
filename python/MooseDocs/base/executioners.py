@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -338,7 +338,8 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Complete copying of non-source (e.g., images) files."""
         start = time.time()
         for node in other_nodes:
-            self.translator.renderer.write(node)
+            if node.attributes.get('active', True) and node.attributes.get('write', True):
+                self.translator.renderer.write(node)
         return time.time() - start
 
     def _clear_progress(self):

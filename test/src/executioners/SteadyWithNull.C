@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #include "SteadyWithNull.h"
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("MooseTestApp", SteadyWithNull);
 

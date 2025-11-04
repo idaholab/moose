@@ -1,0 +1,22 @@
+[Tests]
+  [level]
+    issues = '#31023'
+    design = 'ElementMaxLevelPostProcessor.md'
+    requirement = 'The system shall allow for the computation of the'
+
+    [h_max]
+      type = CSVDiff
+      input = 'max_level.i'
+      cli_args = 'Outputs/file_base="max_h_level_out"'
+      csvdiff = 'max_h_level_out.csv'
+      detail = 'maximum element h-adaptivity level'
+    []
+    [p_max]
+      type = CSVDiff
+      input = 'max_level.i'
+      cli_args = 'Postprocessors/max_level/level=p Adaptivity/switch_h_to_p_refinement=true Outputs/file_base="max_p_level_out"'
+      csvdiff = 'max_p_level_out.csv'
+      detail = 'maximum element p-adaptivity level'
+    []
+  []
+[]

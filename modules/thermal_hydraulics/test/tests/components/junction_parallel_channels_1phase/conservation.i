@@ -16,6 +16,7 @@
   fp = eos
 
   scaling_factor_1phase = '1 1e-2 1e-5'
+  scaling_factor_rhoEV = 1e-5
 
   closures = simple_closures
 []
@@ -128,13 +129,15 @@
     execute_on = 'initial timestep_end'
   []
   [mass_junction1]
-    type = ScalarVariable
-    variable = junction1:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'junction1'
     execute_on = 'initial timestep_end'
   []
   [mass_junction2]
-    type = ScalarVariable
-    variable = junction2:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'junction2'
     execute_on = 'initial timestep_end'
   []
   [mass_tot]
@@ -158,13 +161,15 @@
     execute_on = 'initial timestep_end'
   []
   [E_junction1]
-    type = ScalarVariable
-    variable = junction1:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'junction1'
     execute_on = 'initial timestep_end'
   []
   [E_junction2]
-    type = ScalarVariable
-    variable = junction2:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'junction2'
     execute_on = 'initial timestep_end'
   []
   [E_tot]

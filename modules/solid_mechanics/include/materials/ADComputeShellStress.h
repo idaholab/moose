@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -47,11 +47,17 @@ protected:
   /// Quadrature points along thickness
   std::vector<Point> _t_points;
 
+  /// Transformation matrix to map the global stress to the element's local coordinate
+  std::vector<const MaterialProperty<RankTwoTensor> *> _local_transformation_matrix;
+
   /// Covariant base vector matrix material property to transform stress
   std::vector<const MaterialProperty<RankTwoTensor> *> _covariant_transformation_matrix;
 
   /// Global stress tensor material property
   std::vector<MaterialProperty<RankTwoTensor> *> _global_stress;
+
+  /// local stress tensor material property
+  std::vector<MaterialProperty<RankTwoTensor> *> _local_stress;
 
   /// Real value of stress in the local coordinate system
   RankTwoTensor _unrotated_stress;

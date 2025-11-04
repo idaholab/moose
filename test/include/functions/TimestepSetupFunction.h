@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,5 +24,5 @@ public:
   virtual void timestepSetup();
 
 private:
-  unsigned int & _local_timestep;
+  int _local_timestep;
 };

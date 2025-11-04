@@ -20,6 +20,9 @@ forch = 1.1
   [eps_out]
     type = MooseVariableFVReal
   []
+  [eps_smoothed_out]
+    type = MooseVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -28,6 +31,11 @@ forch = 1.1
     variable = eps_out
     functor = porosity
     execute_on = 'timestep_end'
+  []
+  [eps_smoothed_out]
+    type = FunctorAux
+    variable = eps_smoothed_out
+    functor = smoothed_porosity
   []
 []
 

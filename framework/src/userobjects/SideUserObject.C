@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,8 +28,7 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BoundaryRestrictableRequired(this, false), // false for applying to sidesets
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    Coupleable(this, false),
-    MooseVariableDependencyInterface(this),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, false),
     TransientInterface(this),
     ElementIDInterface(this),
     _mesh(_subproblem.mesh()),
@@ -44,10 +43,6 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
     _current_side_volume(_assembly.sideElemVolume()),
     _current_boundary_id(_assembly.currentBoundaryID())
 {
-  // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
 }
 
 void

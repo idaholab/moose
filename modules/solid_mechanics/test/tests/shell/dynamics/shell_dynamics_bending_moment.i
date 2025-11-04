@@ -255,10 +255,10 @@
 []
 [NodalKernels]
   [./force_y2]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = disp_z
     boundary = 'top'
-    function = force_function
+    functor = force_function
   [../]
 []
 [Kernels]

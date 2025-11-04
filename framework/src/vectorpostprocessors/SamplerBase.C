@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,13 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SamplerBase.h"
-
-// MOOSE includes
 #include "IndirectSort.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
 #include "MooseError.h"
 #include "VectorPostprocessor.h"
+#include "MooseVariableFieldBase.h"
+#include "FEProblemBase.h"
+#include "MooseApp.h"
+#include "TransientBase.h"
 
 #include "libmesh/point.h"
 
@@ -39,6 +41,10 @@ SamplerBase::SamplerBase(const InputParameters & parameters,
   : _sampler_params(parameters),
     _vpp(vpp),
     _comm(comm),
+    _sampler_transient(dynamic_cast<TransientBase *>(
+        parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
+            ->getMooseApp()
+            .getExecutioner())),
     _sort_by(parameters.get<MooseEnum>("sort_by")),
     _x(vpp->declareVector("x")),
     _y(vpp->declareVector("y")),
@@ -69,6 +75,8 @@ SamplerBase::addSample(const Point & p, const Real & id, const std::vector<Real>
   mooseAssert(values.size() == _variable_names.size(), "Mismatch of variable names to vector size");
   for (MooseIndex(values) i = 0; i < values.size(); ++i)
     _values[i]->emplace_back(values[i]);
+
+  _curr_num_samples++;
 }
 
 void
@@ -76,15 +84,72 @@ SamplerBase::initialize()
 {
   // Don't reset the vectors if we want to retain history
   if (_vpp->containsCompleteHistory() && _comm.rank() == 0)
-    return;
+  {
+    // If we are repeating the timestep due to an aborted solve, we want to throw away the last
+    // values
+    if (_sampler_transient && !_sampler_transient->lastSolveConverged())
+    {
+      // Convenient to allocate a single variable for all the vpp values
+      std::vector<VectorPostprocessorValue *> vec_ptrs = {{&_x, &_y, &_z, &_id}};
+      vec_ptrs.insert(vec_ptrs.end(), _values.begin(), _values.end());
+      // Erase the elements from the last execution
+      for (auto vec_ptr : vec_ptrs)
+      {
+        // Vector may have already been restored, if so, skip the erasure
+        if (_curr_total_samples > vec_ptr->size())
+        {
+          mooseAssert(vec_ptr->size() == (_curr_total_samples - _curr_num_samples),
+                      "Number of samples is not what is expected.");
+          continue;
+        }
+        for (auto ind : _curr_indices)
+        {
+          mooseAssert(ind < vec_ptr->size(), "Trying to remove a sample that doesn't exist.");
+          vec_ptr->erase(vec_ptr->begin() + ind);
+        }
+      }
+    }
+    _curr_indices.clear();
+  }
+  else
+  {
+    _x.clear();
+    _y.clear();
+    _z.clear();
+    _id.clear();
 
-  _x.clear();
-  _y.clear();
-  _z.clear();
-  _id.clear();
+    std::for_each(
+        _values.begin(), _values.end(), [](VectorPostprocessorValue * vec) { vec->clear(); });
+  }
 
-  std::for_each(
-      _values.begin(), _values.end(), [](VectorPostprocessorValue * vec) { vec->clear(); });
+  _curr_num_samples = 0;
+}
+
+void
+SamplerBase::checkForStandardFieldVariableType(const MooseVariableFieldBase * const var_ptr,
+                                               const std::string & var_param_name) const
+{
+  // A pointer to a MooseVariableFieldBase should never be SCALAR
+  mooseAssert(var_ptr->feType().family != SCALAR,
+              "Scalar variable '" + var_ptr->name() + "' cannot be sampled.");
+  mooseAssert(dynamic_cast<const MooseObject *>(_vpp), "Should have succeeded");
+  if (var_ptr->isVector())
+    dynamic_cast<const MooseObject *>(_vpp)->paramError(
+        var_param_name,
+        "The variable '",
+        var_ptr->name(),
+        "' is a vector variable. Sampling those is not currently supported in the "
+        "framework. It may be supported using a dedicated object in your application. Use "
+        "'VectorVariableComponentAux' auxkernel to copy those values into a regular field "
+        "variable");
+  if (var_ptr->isArray())
+    dynamic_cast<const MooseObject *>(_vpp)->paramError(
+        var_param_name,
+        "The variable '",
+        var_ptr->name(),
+        "' is an array variable. Sampling those is not currently supported in the "
+        "framework. It may be supported using a dedicated object in your application. Use "
+        "'ArrayVariableComponent' auxkernel to copy those values into a regular field variable");
 }
 
 void
@@ -139,6 +204,18 @@ SamplerBase::finalize()
     // Swap vector storage with sorted vector
     vec_ptr->swap(tmp_vector);
   }
+
+  // Gather the indices of samples from the last execution
+  // Used to determine which parts of the vector need to be erased if a solve fails
+  if (_vpp->containsCompleteHistory())
+  {
+    _comm.sum(_curr_num_samples);
+    if (_comm.rank() == 0)
+    {
+      _curr_indices.insert(sorted_indices.end() - _curr_num_samples, sorted_indices.end());
+      _curr_total_samples = vec_ptrs[0]->size();
+    }
+  }
 }
 
 void
@@ -152,4 +229,6 @@ SamplerBase::threadJoin(const SamplerBase & y)
 
   for (MooseIndex(_variable_names) i = 0; i < _variable_names.size(); i++)
     _values[i]->insert(_values[i]->end(), y._values[i]->begin(), y._values[i]->end());
+
+  _curr_num_samples += y._curr_num_samples;
 }

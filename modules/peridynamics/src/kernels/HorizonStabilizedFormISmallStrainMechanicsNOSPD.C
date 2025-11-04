@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -90,8 +90,8 @@ HorizonStabilizedFormISmallStrainMechanicsNOSPD::computeNonlocalJacobian()
                           ->dof_number(_sys.number(), _var.number(), 0);
         vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
-        origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                        *_pdmesh.nodePtr(_current_elem->node_id(nd));
+        origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                        _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
         dFdUk.zero();
         for (unsigned int i = 0; i < _dim; ++i)
@@ -221,8 +221,8 @@ HorizonStabilizedFormISmallStrainMechanicsNOSPD::computePDNonlocalOffDiagJacobia
               _pdmesh.nodePtr(neighbors[dg_neighbors[nb]])->dof_number(_sys.number(), jvar_num, 0);
           vol_nb = _pdmesh.getNodeVolume(neighbors[dg_neighbors[nb]]);
 
-          origin_vec_nb = *_pdmesh.nodePtr(neighbors[dg_neighbors[nb]]) -
-                          *_pdmesh.nodePtr(_current_elem->node_id(nd));
+          origin_vec_nb = _pdmesh.getNodeCoord(neighbors[dg_neighbors[nb]]) -
+                          _pdmesh.getNodeCoord(_current_elem->node_id(nd));
 
           dFdUk.zero();
           for (unsigned int i = 0; i < _dim; ++i)

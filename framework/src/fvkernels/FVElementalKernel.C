@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,7 +54,7 @@ void
 FVElementalKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
-  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual() * _assembly.elemVolume());
+  _local_re(0) += MetaPhysicL::raw_value(computeQpResidual()) * _assembly.elemVolume();
   accumulateTaggedLocalResidual();
 }
 

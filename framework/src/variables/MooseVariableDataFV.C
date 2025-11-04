@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -50,9 +50,9 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_curl_old(false),
     _need_curl_older(false),
     // for FV variables, they use each other's ad_u values to compute ghost cell
-    // values - we don't have any way to propogate these inter-variable-data
+    // values - we don't have any way to propagate these inter-variable-data
     // dependencies. So if something needs an ad_u value, that need isn't
-    // propogated through to both the element and the neighbor
+    // propagated through to both the element and the neighbor
     // data structures. So instead just set _need_ad+_need_ad_u values to true always.
     _need_ad(true),
     _need_ad_u(true),
@@ -61,7 +61,7 @@ MooseVariableDataFV<OutputType>::MooseVariableDataFV(const MooseVariableFV<Outpu
     _need_ad_grad_u(false),
     _need_ad_grad_u_dot(false),
     _need_ad_second_u(false),
-    _time_integrator(_sys.getTimeIntegrator()),
+    _time_integrator(_sys.queryTimeIntegrator(_var_num)),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
     _qrule(nullptr)
@@ -468,28 +468,28 @@ MooseVariableDataFV<OutputType>::computeValues()
     if (second_required)
     {
       if (_need_second)
-        _second_u[qp] = 0;
+        _second_u[qp] = 0.;
 
       if (_need_second_previous_nl)
-        _second_u_previous_nl[qp] = 0;
+        _second_u_previous_nl[qp] = 0.;
 
       if (is_transient)
       {
         if (_need_second_old)
-          _second_u_old[qp] = 0;
+          _second_u_old[qp] = 0.;
 
         if (_need_second_older)
-          _second_u_older[qp] = 0;
+          _second_u_older[qp] = 0.;
       }
     }
 
     if (curl_required)
     {
       if (_need_curl)
-        _curl_u[qp] = 0;
+        _curl_u[qp] = 0.;
 
       if (is_transient && _need_curl_old)
-        _curl_u_old[qp] = 0;
+        _curl_u_old[qp] = 0.;
     }
 
     for (auto tag : _required_vector_tags)

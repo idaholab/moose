@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#23587'
+  design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer a spatial field using a nearest-node "
+                  "(source) algorithm combined with a nearest-application heuristic to limit the "
+                  "source of the origin values "
+    [nearest_apps]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e'
+      detail = "for a 2D case with multiple subapps."
+    []
+  []
+
+  [between_subapps]
+    type = 'Exodiff'
+    input = 'main_between_multiapp.i'
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
+               main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
+    requirement = 'The system shall be able to send data in a subapp to another subapp using a nearest-application heuristic for finding the source values.'
+  []
+  # Ideally we would have used the between_subapps test under nearest_node/nearest_position but it uses
+  # the group_subapps option, which does not make sense for the 'nearest-app' mode
+  [between_subapps_match_nearest_positions]
+    type = 'Exodiff'
+    input = 'main_between_multiapp.i'
+    exodiff = 'main_between_multiapp_out_ma10.e main_between_multiapp_out_ma11.e
+               main_between_multiapp_out_ma20.e main_between_multiapp_out_ma21.e'
+    cli_args = "Transfers/app1_to_2_nodal_nodal/assume_nearest_app_holds_nearest_location=false
+                Transfers/app2_to_1_nodal_nodal/assume_nearest_app_holds_nearest_location=false
+                Transfers/app1_to_2_elem_elem/assume_nearest_app_holds_nearest_location=false
+                Transfers/app2_to_1_elem_elem/assume_nearest_app_holds_nearest_location=false
+                Transfers/app1_to_2_nodal_nodal/use_nearest_position=input_app1
+                Transfers/app2_to_1_nodal_nodal/use_nearest_position=input_app2
+                Transfers/app1_to_2_elem_elem/use_nearest_position=input_app1
+                Transfers/app2_to_1_elem_elem/use_nearest_position=input_app2"
+    requirement = 'The system shall be able to match the nearest-app heuristic using a nearest-position heuristic for field transfers.'
+  []
+[]

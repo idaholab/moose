@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -43,8 +43,7 @@ ExplicitEuler::computeTimeDerivatives()
   u_dot = *_solution;
   computeTimeDerivativeHelper(u_dot, _solution_old);
   u_dot.close();
-
-  _du_dot_du = 1.0 / _dt;
+  computeDuDotDu();
 }
 
 void
@@ -58,7 +57,7 @@ ExplicitEuler::computeADTimeDerivatives(ADReal & ad_u_dot,
 void
 ExplicitEuler::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
+  residual += *_Re_time;
+  residual += *_Re_non_time;
   residual.close();
 }

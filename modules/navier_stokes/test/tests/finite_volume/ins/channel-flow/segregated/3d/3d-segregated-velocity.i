@@ -148,19 +148,19 @@ pressure_tag = "pressure_grad"
     type = INSFVInletVelocityBC
     boundary = 'back'
     variable = vel_x
-    function = '0'
+    functor = '0'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'back'
     variable = vel_y
-    function = '0'
+    functor = '0'
   []
   [inlet-w]
     type = INSFVInletVelocityBC
     boundary = 'back'
     variable = vel_z
-    function = '1.1'
+    functor = '1.1'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
@@ -211,6 +211,7 @@ pressure_tag = "pressure_grad"
   momentum_l_tol = 0
   pressure_l_tol = 0
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Outputs]

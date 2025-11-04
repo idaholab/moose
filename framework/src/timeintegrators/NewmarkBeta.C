@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -92,7 +92,7 @@ NewmarkBeta::computeTimeDerivatives()
 
   // used for Jacobian calculations
   _du_dotdot_du = 1.0 / _beta / _dt / _dt;
-  _du_dot_du = _gamma / _beta / _dt;
+  computeDuDotDu();
 }
 
 void
@@ -114,7 +114,13 @@ NewmarkBeta::computeADTimeDerivatives(ADReal & ad_u_dot,
 void
 NewmarkBeta::postResidual(NumericVector<Number> & residual)
 {
-  residual += _Re_time;
-  residual += _Re_non_time;
+  residual += *_Re_time;
+  residual += *_Re_non_time;
   residual.close();
+}
+
+Real
+NewmarkBeta::duDotDuCoeff() const
+{
+  return _gamma / _beta;
 }

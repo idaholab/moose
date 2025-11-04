@@ -74,6 +74,7 @@ rho = 1.0
     variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
+    variable_interp_method = skewness-corrected
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -101,6 +102,7 @@ rho = 1.0
     variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
+    variable_interp_method = skewness-corrected
   []
   [v_pressure]
     type = INSFVMomentumPressure

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,8 @@
 // TIMPI includes
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
+
+using namespace libMesh;
 
 registerMooseObjectDeprecated("MooseApp", MultiAppShapeEvaluationTransfer, "12/31/2024 24:00");
 registerMooseObjectRenamed("MooseApp",

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -277,13 +277,15 @@ protected:
                     const Real coef,
                     const bool derivative = false)
   {
+    using std::exp, std::log;
+
     if (transform == ROMInputTransform::EXP)
     {
       mooseAssert(coef != 0, "Coefficient must not be zero.");
       if (derivative)
-        x = std::exp(x / coef) / coef;
+        x = exp(x / coef) / coef;
       else
-        x = std::exp(x / coef);
+        x = exp(x / coef);
     }
     else if (transform == ROMInputTransform::LOG)
     {
@@ -291,7 +293,7 @@ protected:
       if (derivative)
         x = 1.0 / (x + coef);
       else
-        x = std::log(x + coef);
+        x = log(x + coef);
     }
     else if (transform == ROMInputTransform::LINEAR)
     {

@@ -7,11 +7,13 @@
 []
 
 [Variables]
-  [u][]
+  [u]
+  []
 []
 
 [AuxVariables]
-  [nodal][]
+  [nodal]
+  []
   [elemental]
     type = MooseVariableFVReal
   []
@@ -94,9 +96,9 @@
     variable = u
   []
   [ffn]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = u
-    function = analytic
+    functor = analytic
   []
 []
 

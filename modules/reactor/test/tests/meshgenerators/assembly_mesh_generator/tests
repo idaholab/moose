@@ -65,6 +65,14 @@
     exodiff = 'assembly_ductIDs_in.e'
     recover = false
   []
+  [hex_flexible_stitching]
+    requirement = 'The system shall generate a 2D hexagonal assembly mesh with the outermost duct layer removed and re-meshed with FlexiblePatternGenerator'
+    type = 'CSVDiff'
+    input = 'assembly_hex_flexible.i'
+    csvdiff = 'assembly_hex_flexible_out.csv'
+    recover = false
+    mesh_mode = REPLICATED
+  []
   [hex_metadata_transfer]
     requirement = 'The system shall generate a 2D hexagonal assembly mesh that transfers metadata correctly across RGMB mesh generators'
     type = 'Exodiff'

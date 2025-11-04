@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 #include "LinearSystem.h"
 #include "LinearFVBoundaryCondition.h"
 #include "PetscVectorReader.h"
+#include "FEProblemBase.h"
 
 ComputeLinearFVGreenGaussGradientVolumeThread::ComputeLinearFVGreenGaussGradientVolumeThread(
     FEProblemBase & fe_problem, const unsigned int linear_system_num)
@@ -68,7 +69,7 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
       {
         std::vector<PetscVectorReader> grad_reader;
         for (const auto dim_index : index_range(grad_container))
-          grad_reader.emplace_back(*linear_system.newGradientContainer()[dim_index]);
+          grad_reader.emplace_back(*grad_container[dim_index]);
 
         // Iterate over all the elements in the range
         auto elem_iterator = range.begin();
@@ -101,7 +102,10 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
         }
       }
       for (const auto dim_index : index_range(grad_container))
-        grad_container[dim_index]->insert(new_values[dim_index].data(), dof_indices);
+      {
+        grad_container[dim_index]->zero();
+        grad_container[dim_index]->add_vector(new_values[dim_index].data(), dof_indices);
+      }
     }
   }
 }

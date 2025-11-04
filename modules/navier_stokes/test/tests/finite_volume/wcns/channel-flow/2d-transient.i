@@ -215,13 +215,13 @@ inlet_v = 0.001
     type = INSFVInletVelocityBC
     variable = vel_x
     boundary = 'left'
-    function = ${inlet_v}
+    functor = ${inlet_v}
   []
   [inlet_v]
     type = INSFVInletVelocityBC
     variable = vel_y
     boundary = 'left'
-    function = 0
+    functor = 0
   []
   [inlet_T]
     type = FVDirichletBC

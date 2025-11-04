@@ -250,3 +250,24 @@
    fun:*torch*autograd*
    ...
 }
+{
+   netgen_singleton_taskmanager_leak
+   Memcheck:Leak
+   ...
+   fun:*TaskManager*
+   ...
+}
+{
+   cuda_driver
+   Memcheck:Leak
+   ...
+   obj:*libcuda*
+   ...
+}
+{
+   cuda_runtime
+   Memcheck:Leak
+   ...
+   obj:*libnvidia*
+   ...
+}

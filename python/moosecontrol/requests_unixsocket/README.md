@@ -1,0 +1,1 @@
+Imported from gitlab.com/thelabnyc/requests-unixsocket2, which is a drop-in-replacement for the now unsupported github.com/msabramo/requests-unixsocket. The latter exists on conda, but the former does not. Which means until we have an easy way to install it (from conda), we will import it on our own.

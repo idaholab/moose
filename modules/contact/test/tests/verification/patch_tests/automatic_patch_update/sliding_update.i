@@ -27,7 +27,7 @@
     poissons_ratio = 0.3
   []
   [strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
   []
   [stress]
     type = ComputeFiniteStrainElasticStress

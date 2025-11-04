@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,7 +24,13 @@ public:
   TimeSequenceFromTimes(const InputParameters & parameters);
 
 protected:
-  void step() override;
+  virtual void init() override;
+
+  virtual Real computeDT() override;
+
+  virtual Real getNextTimeInSequence() override;
+
+  void updateTimeSequence();
 
   /// A Times object that will provide the sequence of times to hit
   const Times & _times;

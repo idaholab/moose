@@ -6,6 +6,10 @@
     type = RunApp
     input = advanced_stateful_material.i
     requirement = 'The system shall be able to generate a checkpoint of stateful material properties that supports the advanced restart of the properties'
+    # RunException with some cases will only run in serial, which means if
+    # "checkpoint" runs in parallel we'll actually get an error with a
+    # processor mismatch instead of the one that we want
+    hpc = false
   []
 
   [errors]

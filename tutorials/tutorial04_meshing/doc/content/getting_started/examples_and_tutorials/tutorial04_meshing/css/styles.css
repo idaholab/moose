@@ -1,0 +1,12 @@
+.reveal pre {
+    margin: 15px auto;
+    font-size: 0.55em;
+}
+
+code[class*=language-], pre[class*=language-] {
+        line-height: 1.2;
+}
+
+.moose-column {
+    min-width: 0;
+}

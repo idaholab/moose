@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -111,7 +111,7 @@ if [ -z "$go_fast" ]; then
   rm -rf ${PETSC_SRC_DIR}/$PETSC_ARCH
 
   source $SCRIPT_DIR/configure_petsc.sh
-  configure_petsc "$PFX_STR" $*
+  configure_petsc "$PFX_STR" "$@"
 
   exitIfExitCode $?
 fi

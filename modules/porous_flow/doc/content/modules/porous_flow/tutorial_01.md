@@ -50,7 +50,7 @@ In these equations
 - $\alpha_{f}$ is the volumetric thermal expansion coefficient of the fluid (units K$^{-1}$)
 
 The [derivation](PorousFlowFullySaturatedMassTimeDerivative.md) of [eq:basicthm] from
-the [full PorousFlow equations](governing_equations.md) assumes that $M$ and $A$ are constant.
+the [full PorousFlow equations](porous_flow/governing_equations.md) assumes that $M$ and $A$ are constant.
 
 In this tutorial page we will be solving fluid flow only, so the
 $\dot{\epsilon}_{v}$ and $\dot{T}$ in Eq. [eq:basicthm] are ignored (set to zero).

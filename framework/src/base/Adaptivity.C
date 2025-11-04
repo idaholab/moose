@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,6 +25,8 @@
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
+
+using namespace libMesh;
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -54,7 +56,9 @@ Adaptivity::Adaptivity(FEProblemBase & fe_problem)
 Adaptivity::~Adaptivity() {}
 
 void
-Adaptivity::init(unsigned int steps, unsigned int initial_steps)
+Adaptivity::init(const unsigned int steps,
+                 const unsigned int initial_steps,
+                 const bool p_refinement)
 {
   // Get the pointer to the DisplacedProblem, this cannot be done at construction because
   // DisplacedProblem
@@ -69,7 +73,11 @@ Adaptivity::init(unsigned int steps, unsigned int initial_steps)
 
   _initial_steps = initial_steps;
   _steps = steps;
+  _p_refinement_flag = p_refinement;
   _mesh_refinement_on = true;
+
+  if (_p_refinement_flag)
+    _mesh.doingPRefinement(true);
 
   _mesh_refinement->set_periodic_boundaries_ptr(
       _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
@@ -311,7 +319,8 @@ Adaptivity::uniformRefineWithProjection()
 
     if (_displaced_problem)
       displaced_mesh_refinement.uniformly_refine(1);
-    _fe_problem.meshChanged();
+    _fe_problem.meshChanged(
+        /*intermediate_step=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/true);
   }
 }
 
@@ -384,14 +393,6 @@ bool
 Adaptivity::isAdaptivityDue()
 {
   return _mesh_refinement_on && (_start_time <= _t && _t < _stop_time) && _step % _interval == 0;
-}
-
-void
-Adaptivity::doingPRefinement(const bool doing_p_refinement,
-                             const MultiMooseEnum & disable_p_refinement_for_families)
-{
-  _p_refinement_flag = doing_p_refinement;
-  _fe_problem.doingPRefinement(doing_p_refinement, disable_p_refinement_for_families);
 }
 
 #endif // LIBMESH_ENABLE_AMR

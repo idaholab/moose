@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -117,7 +117,7 @@ PCNSFVStrongBC::PCNSFVStrongBC(const InputParameters & params)
 ADReal
 PCNSFVStrongBC::computeQpResidual()
 {
-  const auto ft = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number()));
+  const auto ft = _face_type;
   const bool out_of_elem = (ft == FaceInfo::VarFaceNeighbors::ELEM);
   const auto normal = out_of_elem ? _face_info->normal() : Point(-_face_info->normal());
 

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -100,7 +100,6 @@ class AppSyntaxExtension(command.CommandExtension):
         config['inputs'] = ([],
                             "List of directories to interrogate for input files using an object.")
         config['allow-test-objects'] = (False, "Enable documentation for test objects.");
-        config['hide'] = (None, "DEPRECATED")
         config['remove'] = (None, "List or Dictionary of lists of syntax to remove.")
         config['visible'] = (['required', 'optional'],
                              "Parameter groups to show as un-collapsed.")
@@ -118,15 +117,11 @@ class AppSyntaxExtension(command.CommandExtension):
 
         self._app_type = None
         self._app_syntax = None
-        self._app_exe = None
         self._database = None
         self._cache = dict()
         self._object_cache = dict()
         self._syntax_cache = dict()
         self._external_missing_syntax = set() # page.uid
-
-        if self['hide'] is not None:
-            LOG.warning("The 'hide' option is no longer being used.")
 
     def preExecute(self):
         """Populate the application syntax tree."""
@@ -149,10 +144,8 @@ class AppSyntaxExtension(command.CommandExtension):
 
         start = time.time()
         LOG.info("Reading MOOSE application syntax...")
-        exe = mooseutils.eval_path(self['executable'])
-        exe = mooseutils.find_moose_executable(exe, name=self['app_name'], show_error=False)
-        self._app_exe = exe
 
+        exe = self.executable
         if exe is None:
             LOG.error("Failed to locate a valid executable in %s.", self['executable'])
         else:
@@ -163,13 +156,13 @@ class AppSyntaxExtension(command.CommandExtension):
                                                                      unregister=self['unregister'],
                                                                      markdown=self['markdown'])
 
-                out = mooseutils.runExe(exe, ['--type'])
+                out = mooseutils.runExe(exe, ['--show-type'])
                 match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
                 if match:
                     self._app_type = match.group("type")
                 else:
                     msg = "Failed to determine application type by running the following:\n"
-                    msg += "    {} --type".format(exe)
+                    msg += "    {} --show-type".format(exe)
                     LOG.error(msg)
 
             except Exception as e:
@@ -235,9 +228,13 @@ class AppSyntaxExtension(command.CommandExtension):
 
     @property
     def executable(self):
-        return self._app_exe
+        exe = mooseutils.eval_path(self['executable'])
+        exe = mooseutils.find_moose_executable(exe,
+                                               name=self['app_name'],
+                                               show_error=False)
+        return exe
 
-    def find(self, name, page, node_type=None):
+    def find(self, name, page=None, node_type=None, throw_on_missing=True):
 
         if name.endswith('<RESIDUAL>'):
             msg = "The use of <RESIDUAL> is no longer needed in the syntax name '%s', it " \
@@ -254,9 +251,9 @@ class AppSyntaxExtension(command.CommandExtension):
             node = self._cache.get(name, None)
 
         if node is None:
-            if page.external:
+            if getattr(page, 'external', False):
                 self._external_missing_syntax.add(page.uid)
-            else:
+            elif throw_on_missing:
                 msg = "'{}' syntax was not recognized."
                 raise exceptions.MooseDocsException(msg, name)
 
@@ -558,8 +555,10 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
     def _addItems(self, parent, info, page, group, objects, base=None):
 
         count = 0
+        obj_name_set = set()
         for obj in objects:
-            if (group in obj.groups()) and not (obj.removed or obj.test):
+            if (group in obj.groups()) and not (obj.removed or obj.test) and not (obj.name, obj.markdown) in obj_name_set:
+                obj_name_set.add((obj.name, obj.markdown))
                 count += 1
                 item = SyntaxListItem(parent, group=group, syntax=obj.name)
                 if base:
@@ -771,6 +770,17 @@ class RenderParameterToken(components.RenderComponent):
         p = html.Tag(body, 'p', class_='moose-parameter-description-cpptype')
         html.Tag(p, 'span', string='C++ Type:')
         html.String(p, content=cpp_type, escape=True)
+
+        doc_unit = param['doc_unit']
+        # Only display a unit if specified or if the type is likely to have a unit
+        if doc_unit or "double" in cpp_type or "Variable" in cpp_type or "Postprocessor" in cpp_type or "Funct" in cpp_type or "MaterialProperty" in cpp_type:
+            p = html.Tag(body, 'p', class_='moose-parameter-description-doc-unit')
+            html.Tag(p, 'span', string='Unit:')
+            # If a unit was specified, always display it
+            if doc_unit:
+                html.String(p, content=doc_unit)
+            else:
+                html.String(p, content='(no unit assumed)')
 
         if param['options']:
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')

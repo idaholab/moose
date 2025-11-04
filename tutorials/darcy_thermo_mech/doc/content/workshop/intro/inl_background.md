@@ -11,15 +11,17 @@ www.inl.gov
 
 !---
 
-- INL is the one of the largest employers in Idaho with 5,597 employees and 478 interns
-- In 2023 the INL budget was over $1.6 billion
+- INL is the one of the largest employers in Idaho with 6,200 employees and 478 interns
+- In 2024 the INL budget was over $2 billion
 
 !---
 
 INL is the site where 52 nuclear reactors were designed and constructed, including the
 first reactor to generate usable amounts of electricity: Experimental Breeder Reactor I (EBR-1)
 
-!media darcy_thermo_mech/inl_erb1.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_erb1.jpg
+       style=width:30%;margin-left:auto;margin-right:auto;display:block;
+       alt=Experimental Breeder Reactor I
 
 !---
 
@@ -29,7 +31,9 @@ first reactor to generate usable amounts of electricity: Experimental Breeder Re
 - Constructed in 1967
 - Volume of 1.4 cubic meters, with 43 kg of uranium, and operates at 60C
 
-!media darcy_thermo_mech/inl_atr.jpg style=width:25%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_atr.jpg
+       style=width:25%;margin-left:auto;margin-right:auto;display:block;
+       alt=Advanced Test Reactor, demonstrating Cherenkov radiation.
 
 !---
 
@@ -40,7 +44,9 @@ of fuels and materials to accident conditions
 
 High-intensity (+20 GW+), short-duration (+80 ms+) neutron pulses for severe accident testing
 
-!media darcy_thermo_mech/inl_treat.png style=width:40%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_treat.png
+       style=width:40%;margin-left:auto;margin-right:auto;display:block;
+       alt=The Transient Reactor Test Facility
 
 !---
 

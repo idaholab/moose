@@ -59,14 +59,14 @@ top_side_temperature = 150
 
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '${u_inlet} 0'
+        momentum_inlet_functors = '${u_inlet} 0'
 
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'noslip symmetry'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '${p_outlet}'
+        pressure_functors = '${p_outlet}'
 
         mass_advection_interpolation = 'average'
         momentum_advection_interpolation = 'average'
@@ -75,15 +75,18 @@ top_side_temperature = 150
     [FluidHeatTransfer]
       [fluid]
         thermal_conductivity = 'k'
+        effective_conductivity = true
         specific_heat = 'cp'
 
         initial_temperature = '${T_inlet}'
 
+        # See 'flow' for inlet boundaries
         energy_inlet_types = 'fixed-temperature'
-        energy_inlet_function = '${T_inlet}'
+        energy_inlet_functors = '${T_inlet}'
 
+        # See 'flow' for wall boundaries
         energy_wall_types = 'heatflux heatflux'
-        energy_wall_function = '0 0'
+        energy_wall_functors = '0 0'
 
         ambient_convection_alpha = 'h_cv'
         ambient_temperature = 'T_solid'

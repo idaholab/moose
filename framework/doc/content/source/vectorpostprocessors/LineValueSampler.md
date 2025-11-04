@@ -18,6 +18,10 @@ If the line value sampler is used with a discontinuous variable on the edge/face
 the distance along the sampled line in a vector called `id`,
 and a vector named after each value sampled, containing the variable values at each point.
 
+!alert note title=General sampling
+The `LineValueSampler` samples variables on the specified line. For more flexible sampling,
+use the [PositionsFunctorValueSampler.md].
+
 !syntax parameters /VectorPostprocessors/LineValueSampler
 
 !syntax inputs /VectorPostprocessors/LineValueSampler

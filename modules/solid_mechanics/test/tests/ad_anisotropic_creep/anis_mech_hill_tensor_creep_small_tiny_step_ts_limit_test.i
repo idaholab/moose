@@ -89,10 +89,23 @@
 []
 
 [Materials]
+  # Supplying elasticity tensor three times with different base_name
+  [elasticity_tensor_three]
+    type = ADComputeElasticityTensor
+    fill_method = orthotropic
+    C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
+  []
   [elasticity_tensor]
     type = ADComputeElasticityTensor
     fill_method = orthotropic
     C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
+    base_name = trial_creep
+  []
+  [elasticity_tensor_two]
+    type = ADComputeElasticityTensor
+    fill_method = orthotropic
+    C_ijkl = '2.0e3 2.0e5 2.0e3 0.71428571e3 0.71428571e3 0.71428571e3 0.4 0.2 0.004 0.004 0.2 0.4'
+    base_name = trial_creep_two
   []
 
   [elastic_strain]

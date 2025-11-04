@@ -68,6 +68,7 @@ for most objects, list the objects created by an action. The `Debug` system also
 - [!param](/Debug/show_material_props) for material properties, created on elements, neighbors and sides
 - [!param](/Debug/show_reporters) for reporters, created directly or from systems that derive from Reporters, such as [VectorPostprocessors](syntax/Postprocessors/index.md) and [Positions](syntax/Positions/index.md)
 - [!param](/Debug/show_functors) for [Functors](syntax/Functors/index.md), an abstraction for objects which includes [Functions](syntax/Functions/index.md) and [Variables](syntax/Variables/index.md)
+- [!param](/Debug/show_block_restriction) for information regarding block-restriction of objects
 
 
 Additionally, [!param](/Debug/show_execution_order) will provide the list of objects executed as they are executed.

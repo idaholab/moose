@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -85,7 +85,8 @@ VectorMagnitudeFunctorMaterialTempl<is_ad>::VectorMagnitudeFunctorMaterialTempl(
           const auto x = (*_x)(r, t);
           const auto y = _y(r, t);
           const auto z = _z(r, t);
-          return std::sqrt((x * x) + (y * y) + (z * z));
+          using std::sqrt;
+          return sqrt((x * x) + (y * y) + (z * z));
         },
         clearance_schedule);
   else

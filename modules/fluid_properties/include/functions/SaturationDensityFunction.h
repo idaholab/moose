@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,6 +25,9 @@ public:
 
   SaturationDensityFunction(const InputParameters & parameters);
 
+  // To retrieve the fluid properties
+  virtual void initialSetup() override;
+
   using Function::value;
   virtual Real value(Real t, const Point & p) const override;
 
@@ -32,11 +35,11 @@ protected:
   /// Temperature function
   const Function & _T_fn;
   /// 2-phase fluid properties object
-  const TwoPhaseFluidProperties & _fp_2phase;
+  const TwoPhaseFluidProperties * _fp_2phase;
   /// Single-phase liquid properties
-  const SinglePhaseFluidProperties & _fp_liquid;
+  const SinglePhaseFluidProperties * _fp_liquid;
   /// Single-phase vapor properties
-  const SinglePhaseFluidProperties & _fp_vapor;
+  const SinglePhaseFluidProperties * _fp_vapor;
   /// Set true to use liquid phase; else vapor phase
   const bool _use_liquid;
 };

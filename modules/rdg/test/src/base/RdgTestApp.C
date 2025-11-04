@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ RdgTestApp::validParams()
 
 registerKnownLabel("RdgTestApp");
 
-RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
+RdgTestApp::RdgTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   RdgTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
@@ -43,27 +43,9 @@ RdgTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
 void
 RdgTestApp::registerApps()
 {
-  registerApp(RdgApp);
+  RdgApp::registerApps();
   registerApp(RdgTestApp);
 }
-
-void
-RdgTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"RdgTestApp"});
-}
-
-void
-RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"RdgTestApp"});
-}
-
-void
-RdgTestApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
 extern "C" void
 RdgTestApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {

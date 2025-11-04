@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,9 +9,10 @@
 
 #pragma once
 
-#include "MooseConfig.h"
 #include "libmesh/libmesh_common.h"
 #include "metaphysicl/metaphysicl_version.h"
+
+#include <array>
 
 #if METAPHYSICL_MAJOR_VERSION < 1
 namespace MetaPhysicL
@@ -23,13 +24,7 @@ class DualNumber;
 #include "metaphysicl/dualnumber_forward.h"
 #endif
 
-namespace MetaPhysicL
-{
-template <typename, typename, typename>
-class SemiDynamicSparseNumberArray;
-template <std::size_t N>
-struct NWrapper;
-}
+#include "metaphysicl/semidynamicsparsenumberarray_decl.h"
 
 using libMesh::Real;
 using MetaPhysicL::DualNumber;

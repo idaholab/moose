@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,9 +23,11 @@ public:
   DiffusionCG(const InputParameters & parameters);
 
 private:
-  virtual void addNonlinearVariables() override;
+  virtual void addSolverVariables() override;
   virtual void addFEKernels() override;
   virtual void addFEBCs() override;
+
+  virtual void addBoundaryConditionsFromComponents() override;
 
   /// Whether to use automatic differentiation or not
   const bool _use_ad;

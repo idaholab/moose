@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,9 +10,10 @@
 #pragma once
 
 // MOOSE includes
+#include "SpatialUserObjectFunctor.h"
 #include "PointVariableSamplerBase.h"
 
-class LineValueSampler : public PointVariableSamplerBase
+class LineValueSampler : public SpatialUserObjectFunctor<PointVariableSamplerBase>
 {
 public:
   static InputParameters validParams();

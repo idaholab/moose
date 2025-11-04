@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -50,10 +50,16 @@ class SQARequirementReport(SQAReport):
                 raise NotADirectoryError("Supplied directory does not exist: {}".format(d))
 
         # Build Requirement objects and remove directory based dict
-        req_dict = get_requirements_from_tests(directories, specs.split(), self.include_non_testable)
         requirements = []
-        for values in req_dict.values():
-            requirements += values
+        if not isinstance(specs, str):
+            for s in specs:
+                req_dict = get_requirements_from_tests(directories, s.split(), self.include_non_testable)
+                for values in req_dict.values():
+                    requirements += values
+        else:
+            req_dict = get_requirements_from_tests(directories, specs, self.include_non_testable)
+            for values in req_dict.values():
+                requirements += values
 
         # Populate the lists of tests for SQARequirementDiffReport
         self.test_names = set()

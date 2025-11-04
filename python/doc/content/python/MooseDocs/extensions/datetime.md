@@ -13,7 +13,7 @@ for date and time operations. This extension is based on the
 
 The "today" sub-command inserts the date when the execution of the documentation build occurs, by
 calling the python `datetime.date.today()` function, as demonstrated in [datetime-today-example].
-The available settings for the this command are provided in [datetime-today-settings].
+The available settings for this command are provided in [datetime-today-settings].
 
 !devel settings module=MooseDocs.extensions.datetime
                 object=TodayCommand

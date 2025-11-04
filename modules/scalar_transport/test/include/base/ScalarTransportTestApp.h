@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,7 +16,7 @@ class ScalarTransportTestApp : public ScalarTransportApp
 public:
   static InputParameters validParams();
 
-  ScalarTransportTestApp(InputParameters parameters);
+  ScalarTransportTestApp(const InputParameters & parameters);
   virtual ~ScalarTransportTestApp();
 
   static void registerApps();

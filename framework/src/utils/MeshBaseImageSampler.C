@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -60,8 +60,8 @@ MeshBaseImageSampler::MeshBaseImageSampler(const InputParameters & parameters)
     _algorithm(NULL),
 #endif
     _is_pars(parameters),
-    _is_console((parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))->getOutputWarehouse())
-
+    _is_console(
+        (parameters.getCheckedPointerParam<MooseApp *>(MooseBase::app_param))->getOutputWarehouse())
 {
 #ifndef LIBMESH_HAVE_VTK
   // This should be impossible to reach, the registration of MeshBaseImageSampler is also guarded

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,37 +9,21 @@
 
 #pragma once
 
-#include "NavierStokesPhysicsBase.h"
-#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
+#include "WCNSFVScalarTransportPhysicsBase.h"
 
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar transport equations
+ * using the nonlinear finite volume weakly-compressible discretization (WCNSFV)
  */
-class WCNSFVScalarTransportPhysics final : public NavierStokesPhysicsBase,
-                                           public WCNSFVCoupledAdvectionPhysicsHelper
+class WCNSFVScalarTransportPhysics : public WCNSFVScalarTransportPhysicsBase
 {
 public:
   static InputParameters validParams();
 
   WCNSFVScalarTransportPhysics(const InputParameters & parameters);
 
-  /// Get the names of the advected scalar quantity variables
-  const std::vector<NonlinearVariableName> & getAdvectedScalarNames() const
-  {
-    return _passive_scalar_names;
-  }
-
-  /// Whether the physics is actually creating the scalar advection equations
-  bool hasScalarEquations() const { return _has_scalar_equation; }
-
-protected:
 private:
-  void addNonlinearVariables() override;
-  void addInitialConditions() override;
-  void addFVKernels() override;
-  void addFVBCs() override;
-
-  unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
+  virtual void addSolverVariables() override;
 
   /**
    * Functions adding kernels for the incompressible / weakly-compressible scalar transport
@@ -47,31 +31,15 @@ private:
    * If the material properties are not constant, some of these can be used for
    * weakly-compressible simulations as well.
    */
-  void addScalarTimeKernels();
-  void addScalarDiffusionKernels();
-  void addScalarAdvectionKernels();
+  virtual void addScalarTimeKernels() override;
+  virtual void addScalarDiffusionKernels() override;
+  virtual void addScalarAdvectionKernels() override;
   /// Equivalent of NSFVAction addScalarCoupledSourceKernels
-  void addScalarSourceKernels();
+  virtual void addScalarSourceKernels() override;
 
   /// Functions adding boundary conditions for the incompressible simulation.
   /// These are used for weakly-compressible simulations as well.
-  void addScalarInletBC();
-  void addScalarWallBC();
-
-  /// Names of the passive scalar variables
-  std::vector<NonlinearVariableName> _passive_scalar_names;
-  /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
-  const bool _has_scalar_equation;
-
-  /// Functors for the passive scalar sources. Indexing is scalar variable index
-  std::vector<MooseFunctorName> _passive_scalar_sources;
-  /// Functors for the passive scalar (coupled) sources. Inner indexing is scalar variable index
-  std::vector<std::vector<MooseFunctorName>> _passive_scalar_coupled_sources;
-  /// Coefficients multiplying for the passive scalar sources. Inner indexing is scalar variable index
-  std::vector<std::vector<Real>> _passive_scalar_sources_coef;
-
-  /// Passive scalar inlet boundary types
-  MultiMooseEnum _passive_scalar_inlet_types;
-  /// Functors describing the inlet boundary values. See passive_scalar_inlet_types for what the functors actually represent
-  std::vector<std::vector<MooseFunctorName>> _passive_scalar_inlet_functors;
+  virtual void addScalarInletBC() override;
+  virtual void addScalarWallBC() override {}
+  virtual void addScalarOutletBC() override;
 };

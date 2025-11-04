@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedCartesianMeshGenerator.md'
-  issues = '#22828 #23367 #26921'
+  issues = '#22828 #23367 #26921 #28164 #30930'
   [square_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -18,6 +18,50 @@
     requirement = 'The system shall stitch square meshes to form a large mesh with square boundary.'
     recover = false
   []
+  [square_boundary_quad8]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_sq_quad8.e'
+    cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=44
+                  Mesh/pattern/duct_sizes=21
+                  Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/duct_block_ids=2000
+                  Mesh/pattern/duct_block_names="duct_block"
+                  Mesh/pattern/uniform_mesh_on_sides=true
+                  Mesh/pattern/boundary_region_element_type=QUAD8
+                  Mesh/square_1/tri_element_type=TRI6
+                  Mesh/square_1/quad_element_type=QUAD8
+                  Mesh/square_2/tri_element_type=TRI6
+                  Mesh/square_2/quad_element_type=QUAD8
+                  --mesh-only "patterned_sq_quad8.e"'
+    requirement = 'The system shall be able to stitch square meshes to form a larger patterned mesh with a square boundary using QUAD8 elements.'
+    recover = false
+  []
+  [square_boundary_quad9]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_sq_quad9.e'
+    cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=44
+                  Mesh/pattern/duct_sizes=21
+                  Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/duct_block_ids=2000
+                  Mesh/pattern/duct_block_names="duct_block"
+                  Mesh/pattern/uniform_mesh_on_sides=true
+                  Mesh/pattern/boundary_region_element_type=QUAD9
+                  Mesh/square_1/tri_element_type=TRI6
+                  Mesh/square_1/quad_element_type=QUAD9
+                  Mesh/square_2/tri_element_type=TRI6
+                  Mesh/square_2/quad_element_type=QUAD9
+                  --mesh-only "patterned_sq_quad9.e"'
+    requirement = 'The system shall be able to stitch square meshes to form a larger patterned mesh with a square boundary using QUAD9 elements.'
+    recover = false
+  []
   [square_boundary_no_interface]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -31,7 +75,6 @@
                   Mesh/pattern/duct_block_ids=2000
                   Mesh/pattern/duct_block_names="duct_block"
                   Mesh/pattern/uniform_mesh_on_sides=true
-                  Mesh/pattern/create_interface_boundaries=false
                   --mesh-only "patterned_sq_no_interface.e"'
     requirement = 'The system shall stitch square meshes to form a large mesh with square boundary and without interface boundaries defined.'
     recover = false
@@ -48,6 +91,27 @@
     requirement = 'The system shall stitch square meshes to form a large mesh with square boundary without deforming the input meshes.'
     recover = false
   []
+  [square_boundary_different_stitching]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_sq.e'
+    prereq = 'square_boundary'
+    cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=44
+                  Mesh/pattern/duct_sizes=21
+                  Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/duct_block_ids=2000
+                  Mesh/pattern/duct_block_names="duct_block"
+                  Mesh/pattern/uniform_mesh_on_sides=true
+                  Mesh/pattern/stitching_boundary_name="abcd"
+                  Mesh/square_1/external_boundary_name="abcd"
+                  Mesh/square_2/external_boundary_name="abcd"
+                  --mesh-only "patterned_sq.e"'
+    requirement = 'The system shall stitch square meshes to form a large mesh with square boundary, with a custom boundary used for stitching.'
+    recover = false
+  []
   [none_boundary]
     type = 'Exodiff'
     input = 'patterned_2d.i'
@@ -62,6 +126,14 @@
     exodiff = 'patterned_pattern.e'
     cli_args = '--mesh-only "patterned_pattern.e"'
     requirement = 'The system shall stitch square patterned meshes to form a large mesh.'
+    recover = false
+  []
+  [patterned_pattern_allow_unused]
+    type = 'Exodiff'
+    input = 'patterned_pattern_unused.i'
+    exodiff = 'patterned_pattern.e'
+    cli_args = 'Mesh/pattern_2/allow_unused_inputs=true --mesh-only "patterned_pattern.e"'
+    requirement ='The system shall allow input structures to be defined in "inputs" without being part of the Cartesian lattice.'
     recover = false
   []
   [patterned_pattern_cd]
@@ -87,6 +159,15 @@
                   --mesh-only "patterned_err.e"'
     expect_err = 'The input meshes contain subdomain name maps with conflicts.'
     requirement = 'The system shall throw an error if the input cartesian meshes contain different block ids that share the same block name.'
+  []
+  [err_empty_pattern_row]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/pattern/pattern="0 0 0 0;0 1 0 0;0 0 1 0;0 0 0 0; "
+                  --mesh-only "patterned_err.e"'
+    expect_err = 'The element of the two-dimensional array parameter pattern must not be empty.'
+    requirement = 'The system shall throw an error if cartesian pattern input contains an empty row.'
   []
   [err_pattern_unity]
     type = 'RunException'
@@ -201,7 +282,7 @@
     input = 'patterned_2d.i'
     cli_args = 'Mesh/pattern/pattern="0 0;0 0"
                   --mesh-only "patterned_err.e"'
-    expect_err = 'All the meshes provided in inputs must be used here.'
+    expect_err = 'All the meshes provided in inputs must be used in the lattice pattern.'
     requirement = 'The system shall throw an error if not all the cartesian meshes provided in inputs are used in pattern.'
   []
   [err_no_appropriate_pitch_meta]

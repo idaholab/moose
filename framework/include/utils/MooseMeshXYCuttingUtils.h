@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,7 @@ namespace MooseMeshXYCuttingUtils
  * @param side_to_remove which side of the mesh needs to be removed: true means ax+by+c>0 and
  * false means ax+by+c<0
  */
-void lineRemoverMoveNode(ReplicatedMesh & mesh,
+void lineRemoverMoveNode(libMesh::ReplicatedMesh & mesh,
                          const std::vector<Real> & bdry_pars,
                          const subdomain_id_type block_id_to_remove,
                          const std::set<subdomain_id_type> & subdomain_ids_set,
@@ -109,7 +109,7 @@ Point twoPointandLineIntersection(const Point & pt1,
  * @return whether any elements have been fixed
  */
 bool
-quasiTriElementsFixer(ReplicatedMesh & mesh,
+quasiTriElementsFixer(libMesh::ReplicatedMesh & mesh,
                       const std::set<subdomain_id_type> & subdomain_ids_set,
                       const subdomain_id_type tri_elem_subdomain_shift = Moose::INVALID_BLOCK_ID,
                       const SubdomainName tri_elem_subdomain_name_suffix = "tri");
@@ -138,17 +138,14 @@ std::vector<std::pair<Real, unsigned int>> vertex_distances(const Elem & elem);
  * @param nid_4 id of the node on the second cut side of the triangle
  * @param single_elem_side_id subdomain id of the single element side
  * @param double_elem_side_id subdomain id of the double element side
- * @param new_boundary_id boundary id of the new boundary that divides the single element side and
- * the double element side
  */
-void triElemSplitter(ReplicatedMesh & mesh,
+void triElemSplitter(libMesh::ReplicatedMesh & mesh,
                      const dof_id_type elem_id,
                      const unsigned short node_shift,
                      const dof_id_type nid_3,
                      const dof_id_type nid_4,
                      const subdomain_id_type single_elem_side_id,
-                     const subdomain_id_type double_elem_side_id,
-                     const boundary_id_type new_boundary_id);
+                     const subdomain_id_type double_elem_side_id);
 
 /**
  * Split a TRI3 element into two TRI3 elements based on one node on one side of the triangle
@@ -159,15 +156,13 @@ void triElemSplitter(ReplicatedMesh & mesh,
  * @param nid_m id of the node on the cut side of the triangle
  * @param first_elem_side_id subdomain id of the first element side
  * @param second_elem_side_id subdomain id of the second element side
- * @param new_boundary_id boundary id of the new boundary that divides the two elements
  */
-void triElemSplitter(ReplicatedMesh & mesh,
+void triElemSplitter(libMesh::ReplicatedMesh & mesh,
                      const dof_id_type elem_id,
                      const unsigned short node_shift,
                      const dof_id_type nid_m,
                      const subdomain_id_type first_elem_side_id,
-                     const subdomain_id_type second_elem_side_id,
-                     const boundary_id_type new_boundary_id);
+                     const subdomain_id_type second_elem_side_id);
 
 /**
  * Split a QUAD4 element into two TRI3 elements
@@ -175,7 +170,7 @@ void triElemSplitter(ReplicatedMesh & mesh,
  * @param elem_id id of the QUAD4 element that needs to be split
  * @param tri_elem_subdomain_shift subdomain id shift used to define the TRI element subdomains
  */
-void quadElemSplitter(ReplicatedMesh & mesh,
+void quadElemSplitter(libMesh::ReplicatedMesh & mesh,
                       const dof_id_type elem_id,
                       const subdomain_id_type tri_elem_subdomain_shift);
 
@@ -188,7 +183,7 @@ void quadElemSplitter(ReplicatedMesh & mesh,
  * @param tri_elem_subdomain_name_suffix suffix used to name the TRI element subdomains generated
  * due to the conversion
  */
-void quadToTriOnLine(ReplicatedMesh & mesh,
+void quadToTriOnLine(libMesh::ReplicatedMesh & mesh,
                      const std::vector<Real> & cut_line_params,
                      const dof_id_type tri_subdomain_id_shift,
                      const SubdomainName tri_elem_subdomain_name_suffix);
@@ -202,7 +197,7 @@ void quadToTriOnLine(ReplicatedMesh & mesh,
  * removed
  * @param new_boundary_id boundary id of the new boundary that forms due to the trimming
  */
-void lineRemoverCutElemTri(ReplicatedMesh & mesh,
+void lineRemoverCutElemTri(libMesh::ReplicatedMesh & mesh,
                            const std::vector<Real> & cut_line_params,
                            const subdomain_id_type block_id_to_remove,
                            const boundary_id_type new_boundary_id);
@@ -222,7 +217,7 @@ void lineRemoverCutElemTri(ReplicatedMesh & mesh,
  * @param improve_boundary_tri_elems flag to indicate whether the boundary TRI3 elements need to be
  * improved
  */
-void lineRemoverCutElem(ReplicatedMesh & mesh,
+void lineRemoverCutElem(libMesh::ReplicatedMesh & mesh,
                         const std::vector<Real> & cut_line_params,
                         const dof_id_type tri_subdomain_id_shift,
                         const SubdomainName tri_elem_subdomain_name_suffix,
@@ -235,7 +230,8 @@ void lineRemoverCutElem(ReplicatedMesh & mesh,
  * @param mesh input mesh with the boundary TRI3 elements that need to be improved
  * @param boundary_to_improve boundary id of the boundary that needs to be improved
  */
-void boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_to_improve);
+void boundaryTriElemImprover(libMesh::ReplicatedMesh & mesh,
+                             const boundary_id_type boundary_to_improve);
 
 /**
  * Make a TRI3 element with the given node ids and subdomain id with boundary information
@@ -250,7 +246,7 @@ void boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type bound
  * @param boundary_ids_for_side_2 boundary ids of the third side of the TRI3 element
  */
 void makeImprovedTriElement(
-    ReplicatedMesh & mesh,
+    libMesh::ReplicatedMesh & mesh,
     const dof_id_type node_id_0,
     const dof_id_type node_id_1,
     const dof_id_type node_id_2,
@@ -272,7 +268,7 @@ void makeImprovedTriElement(
  * @param is_inverse flag to indicate if the two nodes are in the same direction as the side
  * @return true if the element contains the side with the given pair of nodes
  */
-bool elemSideLocator(ReplicatedMesh & mesh,
+bool elemSideLocator(libMesh::ReplicatedMesh & mesh,
                      const dof_id_type elem_id,
                      const dof_id_type node_id_0,
                      const dof_id_type node_id_1,

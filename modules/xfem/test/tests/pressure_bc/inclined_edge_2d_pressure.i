@@ -8,6 +8,7 @@
 [XFEM]
   qrule = volfrac
   output_cut_plane = true
+  min_weight_multiplier = 0.0
 []
 
 [Mesh]
@@ -36,7 +37,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
     generate_output = 'stress_xx stress_yy'

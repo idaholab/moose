@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -41,7 +41,7 @@ protected:
   virtual void initialSetup();
 
 private:
-  ///@{ Phase concnetration variable
+  ///@{ Phase concentration variable
   unsigned int _ca_var;
   VariableName _ca_name;
   ///@}

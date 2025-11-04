@@ -90,7 +90,7 @@
   dt = 0.01
   end_time = 1.25
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_sub_type'
+  petsc_options_iname = '-pc_type -sub_pc_type'
   petsc_options_value = 'asm      ilu'
   scheme = bdf2
   nl_rel_tol = 1e-12

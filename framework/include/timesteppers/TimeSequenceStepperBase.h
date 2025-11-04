@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,15 +23,20 @@ public:
   TimeSequenceStepperBase(const InputParameters & parameters);
 
   void setupSequence(const std::vector<Real> & times);
+  void updateSequence(const std::vector<Real> & times);
+
+  // Clear the time sequence array, usually use when time sequence need to be updated during the
+  // simulation
+  void resetSequence();
 
   // Increase the current step count by one
   void increaseCurrentStep() { _current_step++; };
 
   // Get the time of the current step from input time sequence
-  Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
+  virtual Real getNextTimeInSequence() { return _time_sequence[_current_step]; };
 
   virtual void init() override {}
-  virtual void step() override;
+  virtual void acceptStep() override;
 
 protected:
   virtual Real computeInitialDT() override;
@@ -46,4 +51,7 @@ protected:
 
   /// stores the sequence of time points
   std::vector<Real> & _time_sequence;
+
+  /// Whether to use the last t in sequence as Executioner end_time
+  const bool _set_end_time;
 };

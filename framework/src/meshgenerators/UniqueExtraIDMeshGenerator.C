@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,12 +22,14 @@ UniqueExtraIDMeshGenerator::validParams()
   params.addRequiredParam<std::vector<ExtraElementIDName>>(
       "id_name",
       "Existing extra integer ID names that is used to generate a new extra integer ID by finding "
-      "unique combintaions of their values");
+      "unique combinations of their values");
   params.addRequiredParam<ExtraElementIDName>("new_id_name", "New extra integer ID name");
   params.addParam<std::vector<unsigned int>>(
       "new_id_rule",
-      "Vector of unsigned integers to determine new integer ID values by mutiplying the provided "
-      "integers to the correpsonding existing ID values and then summing the resulting values");
+      "Vector of unsigned integers to determine new integer ID values by multiplying the provided "
+      "integers to the corresponding existing ID values and then summing the resulting values");
+  params.addParam<std::vector<SubdomainName>>(
+      "restricted_subdomains", "Only set new extra element id for elements in given subdomains");
   params.addClassDescription("Add a new extra element integer ID by finding unique combinations of "
                              "the existing extra element integer ID values");
   return params;
@@ -37,7 +39,8 @@ UniqueExtraIDMeshGenerator::UniqueExtraIDMeshGenerator(const InputParameters & p
   : MeshGenerator(params),
     _input(getMesh("input")),
     _extra_ids(getParam<std::vector<ExtraElementIDName>>("id_name")),
-    _use_new_id_rule(isParamValid("new_id_rule"))
+    _use_new_id_rule(isParamValid("new_id_rule")),
+    _has_restriction(isParamValid("restricted_subdomains"))
 {
   if (_use_new_id_rule &&
       getParam<std::vector<unsigned int>>("new_id_rule").size() != _extra_ids.size())
@@ -49,7 +52,23 @@ std::unique_ptr<MeshBase>
 UniqueExtraIDMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  auto parsed_ids = MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, {}, _extra_ids);
+
+  std::set<SubdomainID> restricted_ids;
+  if (_has_restriction)
+  {
+    auto names = getParam<std::vector<SubdomainName>>("restricted_subdomains");
+    for (auto & name : names)
+    {
+      // check that the subdomain exists in the mesh
+      if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+        paramError("restricted_subdomains", "The block '", name, "' was not found in the mesh");
+
+      restricted_ids.insert(MooseMeshUtils::getSubdomainID(name, *mesh));
+    }
+  }
+
+  auto parsed_ids =
+      MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, restricted_ids, _extra_ids);
 
   // override the extra ID values from MooseMeshUtils::getExtraIDUniqueCombinationMap by using
   // new_id_rule
@@ -77,7 +96,12 @@ UniqueExtraIDMeshGenerator::generate()
     paramWarning(
         "new_id_name", "An element integer with the name '", new_id_name, "' already exists");
   }
+
   for (auto & elem : mesh->active_element_ptr_range())
+  {
+    if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
+      continue;
     elem->set_extra_integer(extra_id_index, parsed_ids.at(elem->id()));
+  }
   return mesh;
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -66,4 +66,6 @@ MatBodyForce::computeQpOffDiagJacobian(unsigned int jvar)
   return (*_dpropertydarg[cvar])[_qp] * BodyForce::computeQpResidual() * _phi[_j][_qp];
 }
 
+template class MatBodyForceTempl<false,
+                                 DerivativeMaterialInterface<JvarMapKernelInterface<BodyForce>>>;
 template class MatBodyForceTempl<true, ADBodyForce>;

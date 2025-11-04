@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,8 @@ ExodusFileTimes::validParams()
   params.addRequiredParam<std::vector<FileName>>("files", "Exodus file(s) with the times");
   // File is loaded only on zeroth process
   params.set<bool>("auto_broadcast") = true;
+  // Exodus file set the time sequence during initialization stage
+  params.set<bool>("dynamic_time_sequence") = false;
 
   return params;
 }
@@ -41,7 +43,7 @@ ExodusFileTimes::ExodusFileTimes(const InputParameters & parameters) : Times(par
       // dummy mesh
       ReplicatedMesh mesh(_communicator);
 
-      ExodusII_IO exodusII_io(mesh);
+      libMesh::ExodusII_IO exodusII_io(mesh);
       exodusII_io.read(times_files[p_file_it]);
       auto & times = exodusII_io.get_time_steps();
 

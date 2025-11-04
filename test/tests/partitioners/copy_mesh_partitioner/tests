@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#30470'
+  design = 'CopyMeshPartitioner.md'
+  [base_copy]
+    type = Exodiff
+    input = 'parent.i'
+    exodiff = 'parent_out_full_solve0.e'
+    requirement = 'The system shall be able to match the partitioning of the parent application in the child application mesh.'
+    # parent app is steady
+    recover = false
+  []
+  [base_smaller]
+    type = Exodiff
+    input = 'parent.i'
+    cli_args = "MultiApps/full_solve/cli_args='Mesh/xmax=0.4;Mesh/ymax=0.4;Mesh/nx=8;Mesh/ny=8'
+                Outputs/file_base=small"
+    exodiff = 'small_full_solve0.e'
+    requirement = 'The system shall be able to match the partitioning of the parent application in the child application mesh when the child application mesh is different but fully contained within the parent application mesh.'
+    allow_warnings = true
+    # parent app is steady
+    recover = false
+  []
+  # TODO: we would want a test with re-partitioning
+  # We would need both applications to trigger re-partitioning at the same time to
+  # make this work, so right now I dont expect re-partitioning would work as expected
+  [errors]
+    requirement = 'The system shall throw an error'
+    [fewer_procs_subapp]
+      type = RunException
+      input = 'parent.i'
+      cli_args = 'MultiApps/full_solve/max_procs_per_app=2'
+      min_parallel = 3
+      expect_err = 'his partitioner does not support using fewer ranks to partition the mesh than are used to partition the source mesh'
+      detail = 'if the copy-partitioned mesh cannot be fit on the child application processors,'
+    []
+    [no_source_mesh]
+      type = RunException
+      input = 'sub.i'
+      min_parallel = 2
+      expect_err = "Expecting either a parent app with a mesh to copy the partitioning from, a 'source_mesh' \(private\) parameter to be set programmatically"
+      detail = 'if the copy-partitioner does not know what mesh to copy the partitioning from.'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall emit a warning'
+    [insufficient_procs_used_in_subapp]
+      type = RunException
+      input = 'parent.i'
+      cli_args = 'MultiApps/full_solve/cli_args="Mesh/xmax=0.01;Mesh/ymax=0.01"'
+      min_parallel = 2
+      expect_err = 'Some parallel \(MPI\) processes were not assigned any element during partitioning. These processes will not perform any work'
+      detail = 'if the copied partitioning does not use all the available processes.'
+    []
+  []
+[]

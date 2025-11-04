@@ -27,14 +27,11 @@
     input = '2d_diffusion_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0 & vtk'
     # Set to >=9.0 once #21449 is resolved
-    vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile
     max_parallel = 1
-    vtk = true
     xmldiff = '2d_diffusion_iga_out_002.pvtu 2d_diffusion_iga_out_002_0.vtu'
 
     requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases and output spline results in VTK format.'
@@ -48,9 +45,7 @@
     cli_args = 'Outputs/vtk=false Outputs/exodus=true'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
-    # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0 & exodus>=8.0'
     exodiff = '2d_diffusion_iga_out.e'
     requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases and output spline results in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
@@ -62,14 +57,11 @@
     input = '2d_diffusion_iga_nosplines.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0 & vtk'
     # Set to >=9.0 once #21449 is resolved
-    vtk_version = '>=9.1'
     # VTK diffs via XMLDiff are really fragile
     max_parallel = 1
-    vtk = true
     xmldiff = '2d_diffusion_iga_nosplines_out_002.pvtu 2d_diffusion_iga_nosplines_out_002_0.vtu'
 
     requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes and output Bernstein-Bezier results in VTK format.'
@@ -83,9 +75,7 @@
     cli_args = 'Outputs/vtk=false Outputs/exodus=true'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
-    # See #24187
-    petsc_version = '>=3.12.0'
+    capabilities = 'petsc>=3.12.0 & exodus>=8.0'
     exodiff = '2d_diffusion_iga_nosplines_out.e'
 
     requirement = 'The system shall have the ability to remove spline nodes from IsoGeometric Analysis meshes and output Bernstein-Bezier results in ExodusII format.'
@@ -98,18 +88,13 @@
     input = '3d_steady_diffusion_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
     # See #24187
-    petsc_version = '>=3.12.0'
-    # Set to >=9.0 once #21449 is resolved
-    vtk_version = '>=9.1'
+    capabilities = 'petsc>=3.12.0 & vtk>=9.1 & exodus>=8.0'
     # VTK diffs via XMLDiff are really fragile ... and we can't add an
     # exodiff version of this test, because exodiff gets confused
     # when a spline control node is at a finite element's centroid.
     max_parallel = 1
-    vtk = true
     xmldiff = '3d_steady_diffusion_iga_out_001.pvtu 3d_steady_diffusion_iga_out_001_0.vtu'
-
     requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with 3D elements and sidesets in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
@@ -121,7 +106,7 @@
     input = '2d_discontinuous_iga_l2.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = '2d_discontinuous_iga_l2_out.e'
 
     requirement = 'The system shall have the ability to extract discontinuous Bezier-Bernstein elements from IsoGeometric Analysis meshes.'
@@ -135,7 +120,7 @@
     input = 'exact_discontinuous_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = 'exact_discontinuous_iga_out.e'
 
     requirement = 'The system shall have the ability to reproduce exact discrete solutions on discontinuous Bezier-Bernstein edges from IsoGeometric Analysis meshes.'
@@ -149,7 +134,7 @@
     input = '1d_discontinuous_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = '1d_discontinuous_iga_out.e'
 
     requirement = 'The system shall have the ability to find continuous PDE solutions on discontinuous Bezier-Bernstein edges from IsoGeometric Analysis meshes.'
@@ -157,13 +142,104 @@
     issues = '#18768'
   []
 
+  [iga_constraint_matrix]
+    type = Exodiff
+    input = 'iga_constraint_matrix.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    capabilities = 'exodus>=8.0'
+    exodiff = 'iga_constraint_matrix_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to apply externally defined constraint matrices to 3D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_preconditioned]
+    type = Exodiff
+    input = 'iga_constraint_matrix.i'
+    cli_args = 'Mesh/iga_file/constraint_preconditioning=1 Outputs/file_base=iga_constraint_matrix_preconditioned_out'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+    exodiff = 'iga_constraint_matrix_preconditioned_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to precondition externally defined constraint matrices on 3D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_1d]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    expect_out = 'Solve Converged'
+    recover = false
+    capabilities = 'exodus>=8.0'
+    exodiff = 'iga_constraint_matrix_1d_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to apply externally defined constraint matrices to 1D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_1d_preconditioned]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    cli_args = 'Mesh/iga_file/constraint_preconditioning=1 Outputs/file_base=iga_constraint_matrix_1d_preconditioned_out'
+    expect_out = 'Solve Converged'
+    recover = false
+    exodus_version = '>=8.0'
+
+    # Just a symlink - the extraction operator in this particular case
+    # is constructed such that the preconditioning operation here is
+    # an identity
+    exodiff = 'iga_constraint_matrix_1d_preconditioned_out.e'
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to precondition externally defined constraint matrices on 1D isoparametric meshes.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+  [iga_constraint_matrix_hdf5]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    cli_args = 'Mesh/iga_file/constraint_matrix=linear_iga.h5 Outputs/file_base=iga_constraint_hdf5_out'
+    expect_out = 'Solve Converged'
+    recover = false
+    capabilities = 'exodus>=8.0' # This also ensures HDF5 support
+    exodiff = 'iga_constraint_hdf5_out.e' # Symlink; this should match the .m based test
+
+    # Workaround for bug at libMesh level
+    max_parallel = 2
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to load externally defined constraint matrices in CSR format from HDF5 files.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+
   [./exodus_discontinuous_iga_2d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
     input = '2d_discontinuous_iga.i'
     expect_out = 'Solve Converged'
     recover = false
-    exodus_version = '>=8.0'
+    capabilities = 'exodus>=8.0'
     exodiff = '2d_discontinuous_iga_out.e'
 
     requirement = 'The system shall have the ability to find continuous PDE solutions on discontinuous Bezier-Bernstein quads from IsoGeometric Analysis meshes.'
@@ -186,35 +262,11 @@
     type = 'Exodiff'
     input = '2d_diffusion_test.i'
     exodiff = '2d_diffusion_test_out.e'
-    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpr'
+    cli_args = 'Mesh/inactive=square Mesh/fmg/type=FileMeshGenerator Mesh/fmg/file=2d_diffusion_test_out_cp/0001-mesh.cpa.gz'
     recover = false
     prereq = pre_checkpoint_load_test
     requirement = 'The system shall have the ability to load the mesh from checkpoint files.'
     design = 'meshgenerators/FileMeshGenerator.md'
-    issues = '#16192'
-  []
-
-  [checkpoint_new_prefix]
-    type = 'CheckFiles'
-    input = 'checkpoint_old_prefix.i'
-    check_files = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr/meta_data_mesh.rd/header'
-    cli_args = 'Outputs/checkpoint=true Mesh/final_generator=gmg'
-    requirement = 'The system shall support outputting checkpoints using a consistent directory naming scheme.'
-    design = 'Checkpoint.md'
-    issues = '#21011'
-    recover = false
-  []
-
-  [checkpoint_old_prefix]
-    type = 'RunApp'
-    input = 'checkpoint_old_prefix.i'
-    expect_out = 'checkpoint_old_prefix_out_cp/0001-mesh.cpr'
-    cli_args = 'Mesh/final_generator=checkpoint'
-    requirement = 'The system shall support loading checkpointed meshes using the deprecated suffix when a checkpoint exists with the standard suffix.'
-    design = 'FileMeshGenerator.md'
-    issues = '#21011'
-    prereq = 'checkpoint_new_prefix'
-    allow_warnings = True
-    recover = false
+    issues = '#16192 #27240'
   []
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,10 +24,10 @@ protected:
 
   /// Temperature
   const VariableValue & _T;
-  /// Ambient temperature function
-  const Function & _T_ambient_fn;
-  /// Ambient heat transfer coefficient function
-  const Function & _htc_ambient_fn;
+  /// Ambient temperature functor
+  const Moose::Functor<Real> & _T_ambient;
+  /// Ambient heat transfer coefficient functor
+  const Moose::Functor<Real> & _htc_ambient;
   /// Functor by which to scale the heat flux
   const Moose::Functor<Real> & _scale;
 

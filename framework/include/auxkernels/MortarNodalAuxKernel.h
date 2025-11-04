@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -84,3 +84,7 @@ private:
 
 typedef MortarNodalAuxKernelTempl<Real> MortarNodalAuxKernel;
 typedef MortarNodalAuxKernelTempl<RealVectorValue> VectorMortarNodalAuxKernel;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class MortarNodalAuxKernelTempl<Real>;
+extern template class MortarNodalAuxKernelTempl<RealVectorValue>;

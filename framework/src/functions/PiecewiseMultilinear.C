@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -47,6 +47,7 @@ template <bool is_ad>
 Moose::GenericType<Real, is_ad>
 PiecewiseMultilinear::sampleInternal(const Moose::GenericType<GridPoint, is_ad> pt) const
 {
+  using std::abs;
   /*
    * left contains the indices of the point to the 'left', 'down', etc, of pt
    * right contains the indices of the point to the 'right', 'up', etc, of pt
@@ -76,7 +77,7 @@ PiecewiseMultilinear::sampleInternal(const Moose::GenericType<GridPoint, is_ad> 
       {
         arg[j] = left[j];
         if (left[j] != right[j])
-          weight *= std::abs(pt[j] - _grid[j][right[j]]);
+          weight *= abs(pt[j] - _grid[j][right[j]]);
         else
           // unusual "end condition" case. weight by 0.5 because we will encounter this twice
           weight *= 0.5;
@@ -85,7 +86,7 @@ PiecewiseMultilinear::sampleInternal(const Moose::GenericType<GridPoint, is_ad> 
       {
         arg[j] = right[j];
         if (left[j] != right[j])
-          weight *= std::abs(pt[j] - _grid[j][left[j]]);
+          weight *= abs(pt[j] - _grid[j][left[j]]);
         else
           // unusual "end condition" case. weight by 0.5 because we will encounter this twice
           weight *= 0.5;

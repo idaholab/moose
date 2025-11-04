@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,5 +34,6 @@ TestADScalarKernel::TestADScalarKernel(const InputParameters & parameters)
 ADReal
 TestADScalarKernel::computeQpResidual()
 {
-  return 1.2 * std::pow(_u[0], 2) - 0.5 * std::pow(_v[0], 2) + _test_uo.getValue();
+  using std::pow;
+  return 1.2 * pow(_u[0], 2) - 0.5 * pow(_v[0], 2) + _test_uo.getValue();
 }

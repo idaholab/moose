@@ -1,0 +1,23 @@
+[Tests]
+  design = 'VolumeJunction1Phase.md'
+  issues = '#25958'
+
+  [3pipes_open]
+    type = CSVDiff
+    input = '3pipes_open.i'
+    cli_args = 'end_time=0.01'
+    csvdiff = '3pipes_open.csv'
+    heavy = True
+    max_time = 600
+    requirement = 'The system shall be able to model an open, 3-pipe shock tube.'
+  []
+  [4pipes_closed]
+    type = CSVDiff
+    input = '4pipes_closed.i'
+    cli_args = 'end_time=0.01'
+    csvdiff = '4pipes_closed.csv'
+    heavy = True
+    max_time = 600
+    requirement = 'The system shall be able to model a closed, 4-pipe shock tube.'
+  []
+[]

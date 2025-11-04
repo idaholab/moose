@@ -10,12 +10,9 @@
     family = L2_LAGRANGE
     order = FIRST
     AQtype = Gauss-Chebyshev
-    NPolar = 3
-    NAzmthl = 4
-    NA = 2
-    sweep_type = asynchronous_parallel_sweeper
-    using_array_variable = true
-    collapse_scattering  = true
+    NPolar = 2
+    NAzmthl = 3
+    NA = 1
   []
 []
 

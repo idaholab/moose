@@ -1,13 +1,22 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 50
-  ny = 50
-  nz = 0
-  xmax = 40
-  ymax = 40
-  zmax = 0
-  elem_type = QUAD4
+  inactive = 'rotation'
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 50
+    ny = 50
+    nz = 0
+    xmax = 40
+    ymax = 40
+    zmax = 0
+    elem_type = QUAD4
+  []
+  [rotation]
+    type = TransformGenerator
+    input = gmg
+    transform = "ROTATE"
+    vector_value = '45 0 0'
+  []
 []
 
 [Variables]

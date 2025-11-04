@@ -182,7 +182,7 @@
   solve_type = Newton
   dt = 1E3
   dtmin = 1E3
-  nl_rel_tol=1.e-10
+  nl_rel_tol=8.e-8
   nl_max_its=20
   end_time = 1E4
 []

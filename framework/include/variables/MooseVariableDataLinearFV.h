@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -52,9 +52,9 @@ class MooseVariableDataLinearFV : public MooseVariableDataBase<OutputType>
 {
 public:
   // type for gradient, second and divergence of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   // shortcut for types storing values on quadrature points
   typedef MooseArray<OutputType> FieldVariableValue;
@@ -67,9 +67,9 @@ public:
   typedef typename Moose::ShapeType<OutputType>::type OutputShape;
 
   // type for gradient, second and divergence of shape functions of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
-  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
 
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
@@ -83,7 +83,7 @@ public:
 
   bool isNodal() const override { return false; }
   bool hasDoFsOnNodes() const override { return false; }
-  FEContinuity getContinuity() const override { return DISCONTINUOUS; }
+  libMesh::FEContinuity getContinuity() const override { return libMesh::DISCONTINUOUS; }
 
   /**
    * Set the geometry type before calculating variables values.
@@ -136,7 +136,7 @@ protected:
   /**
    * Get the corresponding variable.
    */
-  virtual const MooseLinearVariableFV<OutputType> & var() const override { return _var; }
+  virtual const MooseLinearVariableFV<OutputType> & var() const override;
 
 private:
   void initializeSolnVars();
@@ -145,7 +145,7 @@ private:
   const MooseLinearVariableFV<OutputType> & _var;
 
   /// Reference to the variable's finite element type
-  const FEType & _fe_type;
+  const libMesh::FEType & _fe_type;
 
   /// The index of the variable in the system
   const unsigned int _var_num;
@@ -176,7 +176,7 @@ private:
   const bool _displaced;
 
   /// Pointer to the quadrature rule
-  const QBase * _qrule;
+  const libMesh::QBase * _qrule;
 
   using MooseVariableDataBase<OutputType>::_sys;
   using MooseVariableDataBase<OutputType>::_subproblem;

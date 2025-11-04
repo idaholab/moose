@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,7 +26,7 @@
 #include "libmesh/parallel_object.h"
 
 template <typename WorkType, typename ParallelDataType>
-class ParallelStudy : public ParallelObject
+class ParallelStudy : public libMesh::ParallelObject
 {
 public:
   typedef typename MooseUtils::Buffer<WorkType>::iterator work_iterator;

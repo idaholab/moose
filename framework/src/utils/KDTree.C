@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,7 +24,7 @@ using ResultItem = std::pair<T, U>;
 }
 #endif
 
-KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
+KDTree::KDTree(const std::vector<Point> & master_points, unsigned int max_leaf_size)
   : _point_list_adaptor(master_points.begin(), master_points.end()),
     _kd_tree(std::make_unique<KdTreeT>(
         LIBMESH_DIM, _point_list_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size)))

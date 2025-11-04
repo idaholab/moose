@@ -8,4 +8,10 @@
     requirement = "The system shall be able to copy from a variable to another of the same finite "
                   "element family and order.  "
   []
+  [copy_old]
+    type = CSVDiff
+    input = copy_old_aux.i
+    csvdiff = copy_old_aux_out.csv
+    requirement = "The system shall be able to copy from a variable OLD and OLDER state to an AuxVariable."
+  []
 []

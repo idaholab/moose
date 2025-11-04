@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,6 @@
 
 #include "MooseObject.h"
 #include "SetupInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
@@ -21,7 +20,6 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
-#include "SystemBase.h"
 
 class FEProblemBase;
 class MooseMesh;
@@ -30,6 +28,7 @@ class Assembly;
 class MooseVariableBase;
 class MooseVariableFieldBase;
 class InputParameters;
+class SystemBase;
 
 /**
  * This is the common base class for objects that give residual contributions.
@@ -55,6 +54,13 @@ public:
    * @param nodal Whether this object is applied to nodes or not
    */
   ResidualObject(const InputParameters & parameters, bool nodal = false);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ResidualObject(const ResidualObject & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   /// Compute this object's contribution to the residual
   virtual void computeResidual() = 0;
@@ -107,6 +113,12 @@ public:
    * @param var_num The variable number whose shape functions should be prepared
    */
   virtual void prepareShapes(unsigned int var_num);
+
+  /**
+   * @returns Additional variables covered by this residual object in addition to \p variable(). A
+   * covered variable here means a variable for whom this object computes residuals/Jacobians
+   */
+  virtual std::set<std::string> additionalROVariables() { return {}; }
 
 protected:
   virtual void precalculateResidual() {}

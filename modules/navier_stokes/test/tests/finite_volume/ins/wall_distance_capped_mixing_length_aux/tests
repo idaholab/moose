@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = capped_mixing_length.i
     exodiff = capped_mixing_length_out.e
-    method = "!dbg"
+    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to compute the turbulent viscosity based on the capped mixing length model.'
     issues = '#18666'
     design = 'rans_theory.md WallDistanceMixingLengthAux.md'

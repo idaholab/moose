@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
+#ifdef MOOSE_KOKKOS_ENABLED
+#include "KokkosTypes.h"
+#endif
 
 // MOOSE includes
 #include "InputParameters.h"
@@ -19,6 +23,13 @@
 
 class FEProblemBase;
 class MooseMesh;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose::Kokkos
+{
+class Mesh;
+}
+#endif
 
 class MooseVariableFieldBase;
 
@@ -79,6 +90,13 @@ public:
    */
   BlockRestrictable(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  BlockRestrictable(const BlockRestrictable & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * Destructor: does nothing but needs to be marked as virtual since
    * this class defines virtual functions.
@@ -126,6 +144,13 @@ public:
    * @return True if the given ids are valid for this object
    */
   bool hasBlocks(const std::vector<SubdomainName> & names) const;
+
+  /**
+   * Test if the supplied set of block names are valid for this object
+   * @param names A set of SubdomainNames to check
+   * @return True if the given ids are valid for this object
+   */
+  bool hasBlocks(const std::set<SubdomainName> & names) const;
 
   /**
    * Test if the supplied block ids are valid for this object
@@ -218,11 +243,63 @@ protected:
    */
   void initializeBlockRestrictable(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh * mesh);
+#endif
+
   /**
    * Check if the blocks this object operates on all have the same coordinate system,
    * and if so return it.
    */
   Moose::CoordinateSystemType getBlockCoordSystem();
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get the number of elements this Kokkos object is operating on
+   * @returns The number of elements local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBlockElements() const { return _kokkos_element_ids.size(); }
+  /**
+   * Get the number of nodes this Kokkos object is operating on
+   * @returns The number of nodes local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBlockNodes() const { return _kokkos_node_ids.size(); }
+  /**
+   * Get the number of sides this Kokkos object is operating on
+   * @returns The number of sides local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBlockSides() const
+  {
+    return _kokkos_element_side_ids.size();
+  }
+  /**
+   * Get the contiguous element ID this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The contiguous element ID
+   */
+  KOKKOS_FUNCTION ContiguousElementID kokkosBlockElementID(ThreadID tid) const
+  {
+    return _kokkos_element_ids[tid];
+  }
+  /**
+   * Get the contiguous node index this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns the contiguous node ID
+   */
+  KOKKOS_FUNCTION ContiguousElementID kokkosBlockNodeID(ThreadID tid) const
+  {
+    return _kokkos_node_ids[tid];
+  }
+  /**
+   * Get the contiguous element ID - side index pair this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The contiguous element ID - side index pair
+   */
+  KOKKOS_FUNCTION auto kokkosBlockElementSideID(ThreadID tid) const
+  {
+    return _kokkos_element_side_ids[tid];
+  }
+#endif
 
 private:
   /// Set of block ids supplied by the user via the input file (for error checking)
@@ -241,7 +318,7 @@ private:
   FEProblemBase * _blk_feproblem;
 
   /// Pointer to Mesh
-  MooseMesh * _blk_mesh;
+  const MooseMesh * _blk_mesh;
 
   /// An empty set for referencing when boundary_ids is not included
   const std::set<BoundaryID> _empty_boundary_ids;
@@ -257,6 +334,25 @@ private:
 
   /// Largest mesh dimension of the elements in the blocks for this object
   unsigned int _blk_dim;
+
+  /// Pointer to the MOOSE object
+  const MooseObject * _moose_object;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * List of contiguous element IDs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<ContiguousElementID> _kokkos_element_ids;
+  /**
+   * List of contiguous node IDs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<ContiguousNodeID> _kokkos_node_ids;
+  /**
+   * List of contiguous local element ID - side index pairs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<ContiguousElementID, unsigned int>>
+      _kokkos_element_side_ids;
+#endif
 };
 
 template <typename T, bool is_ad>

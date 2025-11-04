@@ -169,15 +169,6 @@
 
 []
 
-[UserObjects]
-  [terminator_creep]
-    type = Terminator
-    expression = 'time_step_size > matl_ts_min'
-    fail_mode = SOFT
-    execute_on = TIMESTEP_END
-  []
-[]
-
 [Executioner]
   type = Transient
 
@@ -203,6 +194,8 @@
   growth_factor = 1.5
   cutback_factor = 0.5
   timestep_limiting_postprocessor = matl_ts_min
+  reject_large_step = true
+  reject_large_step_threshold = 0.999
 [../]
 []
 

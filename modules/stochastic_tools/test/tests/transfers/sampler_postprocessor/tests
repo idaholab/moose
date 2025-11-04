@@ -41,6 +41,7 @@
       csvdiff = 'cartesian_diverge_out_storage_0001.csv cartesian_diverge_out_storage_0002.csv'
 
       detail = "transfer last computed postprocessor value, "
+      valgrind = 'none' # too slow
     []
     [nan]
       type = CheckFiles
@@ -50,6 +51,7 @@
       check_files = 'cartesian_diverge_nan_storage_0001.csv'
       file_expect_out = 'data:avg\nnan\n0\.269307.*\n0\.269307.*\n0\.269307.*\n0\.269307.*\n'
       detail = "or transfer NaN."
+      valgrind = 'none' # too slow
     []
   []
 []

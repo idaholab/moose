@@ -1,3 +1,7 @@
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
@@ -17,7 +21,7 @@
   [lambda]
     order = CONSTANT
     family = MONOMIAL
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
   []
 []
 
@@ -61,7 +65,7 @@
   [lambdanorm]
     type = ElementL2Norm
     variable = lambda
-    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN
+    block = INTERNAL_SIDE_LOWERD_SUBDOMAIN_EDGE2
   []
 []
 

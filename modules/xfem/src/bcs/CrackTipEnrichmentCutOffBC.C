@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,7 @@ CrackTipEnrichmentCutOffBC::CrackTipEnrichmentCutOffBC(const InputParameters & p
 }
 
 bool
-CrackTipEnrichmentCutOffBC::shouldApply()
+CrackTipEnrichmentCutOffBC::shouldApply() const
 {
   Real r, theta;
   _crack_front_definition.calculateRThetaToCrackFront((*_current_node), r, theta);

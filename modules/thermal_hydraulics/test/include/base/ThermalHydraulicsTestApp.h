@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,7 +14,7 @@
 class ThermalHydraulicsTestApp : public ThermalHydraulicsApp
 {
 public:
-  ThermalHydraulicsTestApp(InputParameters parameters);
+  ThermalHydraulicsTestApp(const InputParameters & parameters);
   virtual ~ThermalHydraulicsTestApp();
 
 public:

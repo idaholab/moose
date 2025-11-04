@@ -37,19 +37,16 @@ do not have wall heat transfer linked to them makes no sense.
 
 In our tutorial we will define the custom closures on the primary side of the heat exchanger.
 
-To use the custom closure set, we create a closures object of the class [Closures1PhaseNone.md],
-which does not create any of its own Materials:
-
-!listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
-         block=Closures
-         link=False
-
-Then the name we gave this closures object (`none_closures`) is passed to the `closures` parameter in the `hx/pri` component. This will overwrite the `closures` parameter set in the `GlobalParams` block.
+To use the custom closure set, we set the `closures` parameter in the `hx/pri` component
+to an empty list, which will overwrite the `closures` parameter set in the `GlobalParams` block:
 
 
 !listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          block=hx/pri
          link=False
+
+Then we are responsible for creating any closure material properties using `Materials`
+objects directly.
 
 ## Materials
 

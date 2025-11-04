@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ public:
   ParsedFunctionTest() : MooseObjectUnitTest("MooseUnitApp") {}
 
 protected:
-  ParsedFunction<Real> * fptr(MooseParsedFunction & f);
+  libMesh::ParsedFunction<Real> * fptr(MooseParsedFunction & f);
   InputParameters getParams();
   MooseParsedFunction & buildFunction(InputParameters & params);
 

@@ -417,6 +417,7 @@ pressure_tag = "pressure_grad"
   pressure_pin_point = '0.2 1.5 0.0'
   pressure_pin_value = 0
   print_fields = false
+  continue_on_max_its = true
 []
 
 [Outputs]

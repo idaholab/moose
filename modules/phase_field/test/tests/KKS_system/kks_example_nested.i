@@ -1,5 +1,5 @@
 #
-# KKS toy problem in the split form
+# Two-phase nested KKS toy problem
 #
 
 [Mesh]
@@ -18,34 +18,34 @@
 []
 
 [AuxVariables]
-  [./Fglobal]
+  [Fglobal]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Variables]
   # order parameter
-  [./eta]
+  [eta]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # hydrogen concentration
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
   # chemical potential
-  [./w]
+  [w]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [ICs]
-  [./eta]
+  [eta]
     variable = eta
     type = SmoothCircleIC
     x1 = 0.0
@@ -54,8 +54,8 @@
     invalue = 0.2
     outvalue = 0.1
     int_width = 0.75
-  [../]
-  [./c]
+  []
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 0.0
@@ -64,42 +64,41 @@
     invalue = 0.6
     outvalue = 0.4
     int_width = 0.75
-  [../]
+  []
 []
 
-
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = 'eta w c'
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   # Free energy of the matrix
-  [./fm]
+  [fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    function = '(0.1-cm)^2'
+    property_name = fm
+    expression = '(0.1-cm)^2'
     material_property_names = 'cm'
     additional_derivative_symbols = 'cm'
     compute = false
-  [../]
+  []
 
   # Free energy of the delta phase
-  [./fd]
+  [fd]
     type = DerivativeParsedMaterial
-    f_name = fd
-    function = '(0.9-cd)^2'
+    property_name = fd
+    expression = '(0.9-cd)^2'
     material_property_names = 'cd'
     additional_derivative_symbols = 'cd'
     compute = false
-  [../]
+  []
 
   # Compute phase concentrations
-  [./PhaseConcentrationMaterial]
+  [PhaseConcentrationMaterial]
     type = KKSPhaseConcentrationMaterial
     global_cs = 'c'
     ci_names = 'cm cd'
@@ -113,10 +112,10 @@
     relative_tolerance = 1e-9
     nested_iterations = iter
     outputs = exodus
-  [../]
+  []
 
   # Compute chain rule terms
-  [./PhaseConcentrationDerivatives]
+  [PhaseConcentrationDerivatives]
     type = KKSPhaseConcentrationDerivatives
     global_cs = 'c'
     eta = eta
@@ -124,28 +123,28 @@
     fa_name = fm
     fb_name = fd
     h_name = h
-  [../]
+  []
 
   # h(eta)
-  [./h_eta]
+  [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
-  [../]
+  []
 
   # g(eta)
-  [./g_eta]
+  [g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
-  [../]
+  []
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
-    prop_names  = 'M   L   kappa'
+    prop_names = 'M   L   kappa'
     prop_values = '0.7 0.7 0.4  '
-  [../]
+  []
 []
 
 [Kernels]
@@ -155,31 +154,31 @@
   #
   # Cahn-Hilliard Equation
   #
-  [./CHBulk]
+  [CHBulk]
     type = NestedKKSSplitCHCRes
     variable = c
     global_cs = 'c'
-    w        = w
+    w = w
     all_etas = eta
     ca_names = 'cm cd'
     fa_name = fm
-    args = 'eta w'
-  [../]
-  [./dcdt]
+    coupled_variables = 'eta w'
+  []
+  [dcdt]
     type = CoupledTimeDerivative
     variable = w
     v = c
-  [../]
-  [./ckernel]
+  []
+  [ckernel]
     type = SplitCHWRes
     mob_name = M
     variable = w
-  [../]
+  []
 
   #
   # Allen-Cahn Equation
   #
-  [./ACBulkF]
+  [ACBulkF]
     type = NestedKKSACBulkF
     variable = eta
     global_cs = 'c'
@@ -190,9 +189,9 @@
     h_name = h
     mob_name = L
     w = 0.4
-    args = 'c'
-  [../]
-  [./ACBulkC]
+    coupled_variables = 'c'
+  []
+  [ACBulkC]
     type = NestedKKSACBulkC
     variable = eta
     global_cs = 'c'
@@ -200,27 +199,27 @@
     fa_name = fm
     h_name = h
     mob_name = L
-    args = 'c'
-  [../]
-  [./ACInterface]
+    coupled_variables = 'c'
+  []
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa
-  [../]
-  [./detadt]
+  []
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./GlobalFreeEnergy]
+  [GlobalFreeEnergy]
     variable = Fglobal
     type = KKSGlobalFreeEnergy
     fa_name = fm
     fb_name = fd
     w = 0.4
-  [../]
+  []
 []
 
 [Executioner]
@@ -241,12 +240,11 @@
 # Precondition using handcoded off-diagonal terms
 #
 [Preconditioning]
-  [./full]
+  [full]
     type = SMP
     full = true
-  [../]
+  []
 []
-
 
 [Outputs]
   file_base = kks_example_nested

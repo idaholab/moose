@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -169,6 +169,12 @@ Syntax::replaceActionSyntax(const std::string & action,
 {
   _syntax_to_actions.erase(syntax);
   registerActionSyntax(action, syntax, task, file, line);
+}
+
+void
+Syntax::removeAllActionsForSyntax(const std::string & syntax)
+{
+  _syntax_to_actions.erase(syntax);
 }
 
 void

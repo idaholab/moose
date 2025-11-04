@@ -21,8 +21,6 @@
       input = nonlinear_diffusivity.i
       csvdiff = 'nonlinear_diffusivity_forward.csv nonlinear_diffusivity_adjoint.csv'
       detail = 'have non-linear steady-state material properties, and'
-      # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
     []
     [nonuniform_tstep]
       type = CSVDiff

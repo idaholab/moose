@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,10 +26,11 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/default_coupling.h"
 
 // TIMPI includes
 #include "timpi/parallel_sync.h"
+
+using namespace libMesh;
 
 void
 assemble_l2(EquationSystems & es, const std::string & system_name)
@@ -100,10 +101,6 @@ MultiAppProjectionTransfer::initialSetup()
                          .feType();
 
     LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + name());
-
-    proj_sys.get_dof_map().add_coupling_functor(
-        proj_sys.get_dof_map().default_coupling(),
-        false); // The false keeps it from getting added to the mesh
 
     _proj_var_num = proj_sys.add_variable("var", fe_type);
     proj_sys.attach_assemble_function(assemble_l2);
@@ -423,7 +420,7 @@ MultiAppProjectionTransfer::execute()
 
     for (const auto & elem : to_mesh.active_local_element_ptr_range())
     {
-      qrule.init(elem->type(), elem->p_level());
+      qrule.init(*elem);
 
       bool element_is_evaled = false;
       std::vector<Real> evals(qrule.n_points(), 0.);

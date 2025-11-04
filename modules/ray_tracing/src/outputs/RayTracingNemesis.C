@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,7 +40,7 @@ RayTracingNemesis::outputMesh()
   TIME_SECTION("outputMesh", 3, "Outputting Nemesis RayTracing Mesh");
 
   // Build the nemesis IO object
-  Nemesis_IO nemesis_io(*_segment_mesh);
+  libMesh::Nemesis_IO nemesis_io(*_segment_mesh);
   nemesis_io.set_hdf5_writing(false);
 
   // With nodal data, we need to output these variables in write_timestep

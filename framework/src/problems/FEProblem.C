@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,9 @@
 #include "LinearSystem.h"
 #include "LineSearch.h"
 #include "MooseEnum.h"
+
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/linear_implicit_system.h"
 
 registerMooseObject("MooseApp", FEProblem);
 
@@ -53,23 +56,40 @@ FEProblem::FEProblem(const InputParameters & parameters)
     for (const auto i : index_range(_linear_sys_names))
     {
       _linear_systems[i] = std::make_shared<LinearSystem>(*this, _linear_sys_names[i]);
-      _solver_systems[i] = std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
+      _solver_systems[_num_nl_sys + i] =
+          std::dynamic_pointer_cast<SolverSystem>(_linear_systems[i]);
     }
+
+  if (_solver_systems.size() > 1)
+    for (auto & solver_system : _solver_systems)
+      solver_system->system().prefix_with_name(true);
 
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(_solver_systems);
+  for (auto & solver_system : _solver_systems)
+    solver_system->system().prefer_hash_table_matrix_assembly(_use_hash_table_matrix_assembly);
 
   if (_num_nl_sys)
     initNullSpaceVectors(parameters, _nl);
 
   es().parameters.set<FEProblem *>("_fe_problem") = this;
 
-  // Create extra vectors and matrices if any
+  // Create extra vectors if any
   createTagVectors();
 
   // Create extra solution vectors if any
   createTagSolutions();
+}
+
+void
+FEProblem::init()
+{
+  for (const auto & sys : _solver_systems)
+    if (sys->system().has_static_condensation() && libMesh::n_threads() != 1)
+      mooseError("Static condensation may not be used with multiple threads");
+
+  FEProblemBase::init();
 }
 
 void

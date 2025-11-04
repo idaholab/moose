@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,6 +37,13 @@ public:
    * @param parameters Parameters that come from constructing the object
    */
   ScalarCoupleable(const MooseObject * moose_object);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ScalarCoupleable(const ScalarCoupleable & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   /**
    * Get the list of coupled scalar variables
@@ -85,7 +92,7 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Order of coupled variable
    */
-  Order coupledScalarOrder(const std::string & var_name, unsigned int comp = 0) const;
+  libMesh::Order coupledScalarOrder(const std::string & var_name, unsigned int comp = 0) const;
 
   /**
    * Returns value of a scalar coupled variable
@@ -248,7 +255,7 @@ private:
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default value
-   * @return VariableValue * a pointer to the associated VarirableValue.
+   * @return VariableValue * a pointer to the associated VariableValue.
    */
   const VariableValue * getDefaultValue(const std::string & var_name) const;
 

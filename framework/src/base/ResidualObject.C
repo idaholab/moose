@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ResidualObject.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
 #include "InputParameters.h"
 
 InputParameters
@@ -38,13 +38,12 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     // VPPs used by ScalarKernels must be broadcast because we don't know where the
     // ScalarKernel will end up being evaluated
     // Note: residual objects should have a valid _moose_base.
-    VectorPostprocessorInterface(this,
-                                 parameters.get<std::string>("_moose_base") == "ScalarKernel"),
+    VectorPostprocessorInterface(this, getBase() == "ScalarKernel"),
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
                     is_nodal),
-    Restartable(this, parameters.get<std::string>("_moose_base") + "s"),
+    Restartable(this, getBase() + "s"),
     MeshChangedInterface(parameters),
     TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
@@ -55,6 +54,30 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _mesh(_subproblem.mesh())
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+ResidualObject::ResidualObject(const ResidualObject & object,
+                               const Moose::Kokkos::FunctorCopy & key)
+  : MooseObject(object, key),
+    SetupInterface(object, key),
+    FunctionInterface(object, key),
+    UserObjectInterface(object, key),
+    TransientInterface(object, key),
+    PostprocessorInterface(object, key),
+    VectorPostprocessorInterface(object, key),
+    RandomInterface(object, key),
+    Restartable(object, key),
+    MeshChangedInterface(object, key),
+    TaggingInterface(object, key),
+    _subproblem(object._subproblem),
+    _fe_problem(object._fe_problem),
+    _sys(object._sys),
+    _tid(object._tid),
+    _assembly(object._assembly),
+    _mesh(object._mesh)
+{
+}
+#endif
 
 void
 ResidualObject::prepareShapes(const unsigned int var_num)

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -499,7 +499,7 @@ ParameterStudyAction::act()
     const auto & output = getParam<MultiMooseEnum>("output_type");
 
     // Add csv output
-    if (output.contains("csv"))
+    if (output.isValueSet("csv"))
     {
       auto params = _factory.getValidParams("CSV");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
@@ -509,7 +509,7 @@ ParameterStudyAction::act()
     }
 
     // Add json output
-    if (output.contains("json") || _compute_stats)
+    if (output.isValueSet("json") || _compute_stats)
     {
       auto params = _factory.getValidParams("JSON");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
@@ -556,11 +556,11 @@ ParameterStudyAction::act()
     // Specify output objects
     const auto & output_type = getParam<MultiMooseEnum>("output_type");
     auto & outputs = params.set<std::vector<OutputName>>("outputs");
-    if (output_type.contains("csv"))
+    if (output_type.isValueSet("csv"))
       outputs.push_back(outputName("csv"));
-    if (output_type.contains("json"))
+    if (output_type.isValueSet("json"))
       outputs.push_back(outputName("json"));
-    if (output_type.contains("none"))
+    if (output_type.isValueSet("none"))
       outputs = {"none"};
 
     params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
@@ -631,9 +631,7 @@ ParameterStudyAction::showObject(std::string type,
                                  const InputParameters & params) const
 {
   // Output basic information
-  std::string base_type = params.have_parameter<std::string>("_moose_base")
-                              ? params.get<std::string>("_moose_base")
-                              : "Unknown";
+  std::string base_type = params.hasBase() ? params.getBase() : "Unknown";
   _console << "[ParameterStudy] "
            << "Base Type:  " << COLOR_YELLOW << base_type << COLOR_DEFAULT << "\n"
            << "                 Type:       " << COLOR_YELLOW << type << COLOR_DEFAULT << "\n"
@@ -722,7 +720,6 @@ ParameterStudyAction::inferMultiAppMode()
   std::ifstream f(input_filename);
   std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
   std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
-  hit::explode(root.get());
 
   // Walk through the input and see if every param is controllable
   AreParametersControllableWalker control_walker(_parameters, _app);

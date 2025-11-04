@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6297'
+  issues = '#6297 #27240'
   design = 'DataIO.md Restartable.md'
 
   # only parent, 0 <= t <= 4

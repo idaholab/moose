@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,11 +42,11 @@ PorousFlowThermalConductivityFromPorosityTempl<
                                    "dPorousFlow_porosity_qp_dvar"))
 {
   if (_num_phases != 1)
-    this->template paramError("fluid_phase",
-                              "The Dictator proclaims that the number of phases is ",
-                              _dictator.numPhases(),
-                              " whereas this material can only be used for single phase "
-                              "simulations.  Be aware that the Dictator has noted your mistake.");
+    this->paramError("fluid_phase",
+                     "The Dictator proclaims that the number of phases is ",
+                     _dictator.numPhases(),
+                     " whereas this material can only be used for single phase "
+                     "simulations.  Be aware that the Dictator has noted your mistake.");
 }
 
 template <bool is_ad>

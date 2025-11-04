@@ -14,6 +14,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labeled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -23,7 +24,8 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
   - This mesh has 48 unique elements (12 triangular in the center, and 36 quadrilateral).
 
 !media tutorial04_meshing/general_FEM_labels.png
-       style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labeled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -38,7 +40,8 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
   - Nodes are highlighted as small circles in this mesh. Nodes specify the vertices of linear triangular and quadrilateral elements.
 
 !media tutorial04_meshing/general_FEM_labels.png
-       style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labeled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -49,6 +52,7 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labeled diagram illustrating the use of common terms for parts of a mesh.
 
 !---
 
@@ -59,3 +63,4 @@ Before proceeding in this tutorial, we briefly define some terminology, limiting
 
 !media tutorial04_meshing/general_FEM_labels.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=Labeled diagram illustrating the use of common terms for parts of a mesh.

@@ -2,7 +2,7 @@
 
 !style! halign=left
 To access the HPC, familiarize yourself with [inl/hpc_ondemand.md]. There are three options for
-gaining access to the HPC machines Sawtooth and Lemhi. The first two are accessed via the
+gaining access to the HPC machines Sawtooth, Bitterroot, and WindRiver. The first two are accessed via the
 [HPC OnDemand Dashboard](https://hpcondemand.inl.gov/pun/sys/dashboard).
 !style-end!
 
@@ -19,7 +19,8 @@ Desktop. This takes you to another webpage where you will input the following in
   performing your work. Contact the HPC staff for help determining which project your work pertains
   to.
 
-1. Under the Cluster label, select your choice of machine. (Sawtooth or Lemhi)
+1. Under the Cluster label, select your choice of machine.
+  Presently, only Sawtooth supports the Login job type.
 
 1. Under the Job Type label, select Login.
 
@@ -38,13 +39,13 @@ Option 3, use Secure Shell rather than OnDemand. To do so use the following step
 
 1. Once you have accessed hpclogin, from there you must SSH login to your machine of choice.
 
-NCRC Application binaries, like RELAP5-3D, are only available on Sawtooth and Lemhi.
+NCRC Application binaries, like RELAP5-3D, are only available on Sawtooth, Bitterroot, and WindRiver.
 
 
 ## Load Environment
 
 !style! halign=left
-Once logged into either Sawtooth or Lemhi using any of the methods above, load the RELAP5
+Once logged into either Sawtooth, Bitterroot, or WindRiver using any of the methods above, load the RELAP5
 environment:
 !style-end!
 

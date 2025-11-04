@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,7 +37,8 @@ private:
    * @param[in] var_name the variable to build the mesh functions for
    * @param[out] the mesh functions
    */
-  void buildMeshFunctions(const unsigned int var_index, std::vector<MeshFunction> & local_meshfuns);
+  void buildMeshFunctions(const unsigned int var_index,
+                          std::vector<libMesh::MeshFunction> & local_meshfuns);
 
   /*
    * Evaluate interpolation values for incoming points
@@ -48,16 +49,16 @@ private:
    */
   void evaluateInterpValuesWithMeshFunctions(
       const std::vector<BoundingBox> & local_bboxes,
-      std::vector<MeshFunction> & local_meshfuns,
+      std::vector<libMesh::MeshFunction> & local_meshfuns,
       const std::vector<std::pair<Point, unsigned int>> & incoming_points,
       std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /*
    * Bounding boxes
    */
-  std::vector<BoundingBox> _local_bboxes;
+  std::vector<libMesh::BoundingBox> _local_bboxes;
   /*
    * Local mesh functions
    */
-  std::vector<MeshFunction> _local_meshfuns;
+  std::vector<libMesh::MeshFunction> _local_meshfuns;
 };

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -70,7 +70,7 @@ ConservedVarValuesMaterial::computeQpProperties()
   _total_energy_density[_qp] = _var_total_energy_density[_qp];
 
   _velocity[_qp] = _mass_flux[_qp] / _rho[_qp];
-  _speed[_qp] = NS::computeSpeed(_velocity[_qp]);
+  _speed[_qp] = NS::computeSpeed<ADReal>(_velocity[_qp]);
   _vel_x[_qp] = _velocity[_qp](0);
   _vel_y[_qp] = _velocity[_qp](1);
   _vel_z[_qp] = _velocity[_qp](2);

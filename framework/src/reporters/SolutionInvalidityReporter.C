@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -45,8 +45,8 @@ to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_inval
       nlohmann::json entry;
       entry["object_type"] = solution_registry.item(id).object_type;
       entry["message"] = solution_registry.item(id).message;
-      entry["converged_counts"] = counts[id].counts;
-      entry["timestep_counts"] = counts[id].timestep_counts;
+      entry["converged_counts"] = counts[id].current_counts;
+      entry["timestep_counts"] = counts[id].current_timestep_counts;
       entry["total_counts"] = counts[id].total_counts;
       json.push_back(entry);
     }

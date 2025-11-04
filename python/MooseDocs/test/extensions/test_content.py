@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -456,6 +456,21 @@ class testContentPagination(MooseDocsTestCase):
         self.assertHTMLString(res(1)(1)(0), content='Config Extension')
         self.assertHTMLTag(res(1)(1)(1), 'i', size=1, class_='material-icons right')
         self.assertHTMLString(res(1)(1)(1)(0), content='arrow_forward')
+
+class TestMissingExternalContentList(MooseDocsTestCase):
+    EXTENSIONS = [extensions.core, extensions.command, extensions.heading, extensions.content]
+
+    def setupContent(self):
+        config = [dict(root_dir='python/MooseDocs/test/invalid_content',
+                       content=['file.md'],
+                       external=True)]
+        with self.assertLogs(level=logging.WARNING) as cm:
+             common.get_content(config, '.md')
+        self.assertIn("Part of the content specified in \'config.yml\' is not included in documentation", cm.output[0])
+
+    def testAST(self):
+        self.setupContent()
+        return
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

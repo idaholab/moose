@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "libMeshReducedNamespace.h"
 #include "libmesh/perf_log.h"
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
@@ -16,6 +17,9 @@
 #include <memory>
 #include <set>
 #include <string>
+
+#define QUOTE(macro) stringifyName(macro)
+#define stringifyName(name) #name
 
 namespace libMesh
 {
@@ -32,18 +36,21 @@ using UniquePtr = std::unique_ptr<T>;
 #endif
 }
 
-using namespace libMesh;
-
 class ActionFactory;
 class Factory;
 class MooseEnumItem;
 class ExecFlagEnum;
 class MooseVariableFieldBase;
 
-void MooseVecView(NumericVector<Number> & vector);
-void MooseVecView(const NumericVector<Number> & vector);
-void MooseMatView(SparseMatrix<Number> & mat);
-void MooseMatView(const SparseMatrix<Number> & mat);
+namespace hit
+{
+class Node;
+}
+
+void MooseVecView(libMesh::NumericVector<libMesh::Number> & vector);
+void MooseVecView(const libMesh::NumericVector<libMesh::Number> & vector);
+void MooseMatView(libMesh::SparseMatrix<libMesh::Number> & mat);
+void MooseMatView(const libMesh::SparseMatrix<libMesh::Number> & mat);
 
 /**
  * MOOSE now contains C++17 code, so give a reasonable error message
@@ -114,13 +121,17 @@ class FEProblemBase;
 using ExecFlagType = MooseEnumItem;
 extern const ExecFlagType EXEC_NONE;
 extern const ExecFlagType EXEC_INITIAL;
+extern const ExecFlagType EXEC_LINEAR_CONVERGENCE;
 extern const ExecFlagType EXEC_LINEAR;
+extern const ExecFlagType EXEC_NONLINEAR_CONVERGENCE;
 extern const ExecFlagType EXEC_NONLINEAR;
 extern const ExecFlagType EXEC_POSTCHECK;
 extern const ExecFlagType EXEC_TIMESTEP_END;
 extern const ExecFlagType EXEC_TIMESTEP_BEGIN;
+extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_ITERATION_END;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN;
 extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END;
+extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE;
 extern const ExecFlagType EXEC_FINAL;
 extern const ExecFlagType EXEC_FORCED;
 extern const ExecFlagType EXEC_FAILED;
@@ -132,6 +143,9 @@ extern const ExecFlagType EXEC_PRE_MULTIAPP_SETUP;
 extern const ExecFlagType EXEC_TRANSFER;
 extern const ExecFlagType EXEC_PRE_KERNELS;
 extern const ExecFlagType EXEC_ALWAYS;
+#ifdef LIBMESH_ENABLE_AMR
+extern const ExecFlagType EXEC_POST_ADAPTIVITY;
+#endif
 
 namespace Moose
 {
@@ -171,7 +185,7 @@ extern bool show_multiple;
  *
  * This is no longer instantiated in the framework and will be removed in the future.
  */
-extern PerfLog perf_log;
+extern libMesh::PerfLog perf_log;
 
 /**
  * Variable indicating whether we will enable FPE trapping for this run.
@@ -241,7 +255,6 @@ using libMesh::out;
 
 void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
-void registerObjects(Factory & factory);
 void registerObjects(Factory & factory, const std::set<std::string> & obj_labels);
 void addActionTypes(Syntax & syntax);
 void registerActions(Syntax & syntax, ActionFactory & action_factory);
@@ -276,9 +289,61 @@ private:
   MPI_Comm _orig;
 };
 
+/**
+ * Scoped helper for setting Moose::_throw_on_error during this scope.
+ *
+ * Cannot be used within threads.
+ */
+class ScopedThrowOnError
+{
+public:
+  /**
+   * Default constructor, which sets Moose::_throw_on_error = true
+   */
+  ScopedThrowOnError();
+
+  /**
+   * Specialized constructor, which sets Moose::_throw_on_error
+   * based on the argument \p throw_on_error
+   */
+  ScopedThrowOnError(const bool throw_on_error);
+
+  /**
+   * Destructor, which sets Moose::_throw_on_error to what it
+   * was upon construction
+   */
+  ~ScopedThrowOnError();
+
+private:
+  /// The value of Moose::_throw_on_error at construction
+  const bool _throw_on_error_before;
+};
+
+/**
+ * Get the prefix to be associated with a hit node for a message
+ */
+std::string hitMessagePrefix(const hit::Node & node);
+
 // MOOSE Requires PETSc to run, this CPP check will cause a compile error if PETSc is not found
 #ifndef LIBMESH_HAVE_PETSC
 #error PETSc has not been detected, please ensure your environment is set up properly then rerun the libmesh build script and try to compile MOOSE again.
 #endif
 
 } // namespace Moose
+
+// If we are using MFEM, in addition to the checks we do as part of the build system in moose.mk,
+// we check at compile time if both MOOSE and MFEM were built in dbg mode or not
+#ifdef MOOSE_MFEM_ENABLED
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
+#ifdef MFEM_DEBUG
+static_assert(std::string_view(QUOTE(METHOD)) == "dbg",
+              "MFEM was built in dbg mode, but not MOOSE. Try reinstalling "
+              "MFEM using the scripts/update_and_rebuild_mfem.sh script.");
+#else
+static_assert(std::string_view(QUOTE(METHOD)) != "dbg",
+              "MOOSE was built in dbg mode, but not MFEM. Try reinstalling "
+              "MFEM using the scripts/update_and_rebuild_mfem.sh script.");
+#endif
+#endif

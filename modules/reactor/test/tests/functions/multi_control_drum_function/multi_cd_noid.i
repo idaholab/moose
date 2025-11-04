@@ -133,10 +133,6 @@
     order = CONSTANT
     block = 5002
   []
-  [cd_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
 []
 
 [AuxKernels]
@@ -145,12 +141,6 @@
     variable = cd_param
     function = cd_param_func
     execute_on = 'initial linear timestep_end'
-  []
-  [set_cd_id]
-    type = ExtraElementIDAux
-    variable = cd_id
-    extra_id_name = control_drum_id
-    execute_on = 'initial timestep_end'
   []
 []
 

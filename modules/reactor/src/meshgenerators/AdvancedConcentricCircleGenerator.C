@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AdvancedConcentricCircleGenerator.h"
+#include "PolygonalMeshGenerationUtils.h"
 
 // C++ includes
 #include <cmath>
@@ -198,7 +199,10 @@ AdvancedConcentricCircleGenerator::generate()
     mod_azimuthal_angles.push_back((_azimuthal_angles.back() + _azimuthal_angles.front() + 360.0) /
                                    2.0);
 
-  const Real corr_factor = _preserve_volumes ? radiusCorrectionFactor(mod_azimuthal_angles) : 1.0;
+  const Real corr_factor =
+      _preserve_volumes
+          ? PolygonalMeshGenerationUtils::radiusCorrectionFactor(mod_azimuthal_angles, true, _order)
+          : 1.0;
 
   for (const auto & ring_radius : _ring_radii)
     ring_radii_corr.push_back(ring_radius * corr_factor);
@@ -285,7 +289,10 @@ AdvancedConcentricCircleGenerator::generate()
     MeshTools::Modification::rotate(other_mesh, -_azimuthal_angles[i], 0, 0);
     mesh->prepare_for_use();
     other_mesh.prepare_for_use();
-    mesh->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+    // As we rotate the mesh in the negative direction (see "-" before _azimuthal_angles[i]),
+    // the order of SLICE_END and SLICE_BEGIN should be reversed compared to the similar call in
+    // PolygonConcentricCircleMeshGeneratorBase.C
+    mesh->stitch_meshes(other_mesh, SLICE_END, SLICE_BEGIN, TOLERANCE, true, false);
     other_mesh.clear();
   }
 
@@ -294,7 +301,7 @@ AdvancedConcentricCircleGenerator::generate()
       mesh->get_boundary_info().remove_id(i + 1 + OUTER_SIDESET_ID_ALT);
 
   // An extra step to stich the first and last slices together
-  mesh->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+  mesh->stitch_surfaces(SLICE_END, SLICE_BEGIN, TOLERANCE, true, false);
 
   mesh->prepare_for_use();
 

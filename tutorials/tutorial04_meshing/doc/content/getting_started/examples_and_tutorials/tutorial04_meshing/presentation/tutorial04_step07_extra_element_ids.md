@@ -5,7 +5,7 @@
 ## Why do we need Reporting IDs?
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - In reactor simulations, we want to bookkeep the individual elements belonging to each geometric component
 
@@ -17,10 +17,15 @@
   - Multiple hierarchical levels in geometries (e.g., pin, assembly) cannot be represented with blocks
 - Reporting IDs were introduced as a practical solution to this bookkeeping issue
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/block_vs_reporting_id.png
-       style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh labeled by block ID and by reporting ID.
+
+!col-end!
 
 !row-end!
 
@@ -45,6 +50,7 @@
 - Reporting IDs can be used to assign material properties
 - Reporting IDs can be used to create additional unique zones (e.g. depletion zones)
 - Reporting IDs can be leveraged to post-process solution data into tables by using the [ExtraIDIntegralVectorPostprocessor.md]. This postprocessor integrates the solution based on reporting IDs. Component-wise values such as pin-by-pin power distribution can be easily yielded by specifying integration over pin and assembly reporting IDs to this postprocessor.
+- Reporting IDs can be generated from the block ID (subdomain ID) mapping using [SubdomainExtraElementIDGenerator.md] or copied over from an existing reporting ID name using [ExtraElementIDCopyGenerator.md]. Otherwise the mesh generators describes in the next slides explain how they can be defined from scratch for typical mesh generation workflows.
 
 !---
 
@@ -63,21 +69,28 @@
 
 - Pin and Assembly IDs are applied during creations of assemblies and core, respectively.
 
+- [FlexiblePatternGenerator.md] also supports creation of reporting IDs for each unique pin structure (See ["Advanced Meshing Tools"](tutorial04_meshing/presentation/index.md#/15) section)
+
 !---
 
 ### Cell Pattern Example
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 !media tutorial04_meshing/eeid_cart_hex_examples.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Meshes labeled by pin ID and assembly ID.
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !listing modules/reactor/test/tests/meshgenerators/reporting_id/cartesian_id/patterned_cartesian_core_reporting_id.i
          block=Mesh
          link=False
+
+!col-end!
 
 !row-end!
 
@@ -91,16 +104,21 @@
   - [!param](/Mesh/PatternedHexMeshGenerator/assign_type) = `manual`: Assign IDs based on a user-defined mapping in the optional [!param](/Mesh/PatternedHexMeshGenerator/id_pattern) array, which may differ from the required [!param](/Mesh/PatternedHexMeshGenerator/pattern) array
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=33%
 
 !listing base_mesh_generators/alternative_pattern_reporting_id.i
          block=Mesh
          link=False
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=66%
 
 !media tutorial04_meshing/eeid_assign_type_example.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Different patterns for pin IDs on meshes that are otherwise identical.
+
+!col-end!
 
 !row-end!
 
@@ -109,7 +127,7 @@
 ## Applying Reporting IDs for Axial Plane
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [PlaneIDMeshGenerator.md]
 
@@ -119,10 +137,15 @@
 - The input mesh to this mesh generator should be 3D (this mesh generator does not perform the extrusion itself)
 - Unique IDs can be assigned between axial planes (coarse approach) or also to each unique sublayer defined by axial subintervals between the planes (fine approach)
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/eeid_plane_id_examples.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Different distributions of plane IDs.
+
+!col-end!
 
 !row-end!
 
@@ -135,7 +158,7 @@
 ## Applying Depletion IDs
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=66%
 
 - [DepletionIDGenerator.md]
 
@@ -145,10 +168,15 @@
 - For a pin-level depletion case, the depletion IDs for the entire domain can be specified by finding unique combinations of assembly, pin, and material IDs
 - By additionally including ring and sector IDs accessible through [PolygonConcentricCircleMeshGenerator.md], depletion zones can be defined within the pin itself
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=33%
 
 !media tutorial04_meshing/eeid_depletion_id_example.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Depletion IDs found using different combinations of assembly, pin, and material IDs.
+
+!col-end!
 
 !row-end!
 
@@ -161,7 +189,7 @@
 ## Querying Output Data using Reporting IDs
 
 !row!
-!col small=12 medium=6 large=8
+!col! width=50%
 
 - [ExtraIDIntegralVectorPostprocessor.md]
 - [ExtraIDIntegralReporter.md]
@@ -171,10 +199,15 @@
 - [ExtraIDIntegralVectorPostprocessor.md] exports the post-processed results in CSV file format
 - [ExtraIDIntegralReporter.md], based on the MOOSE reporting system, can output in JSON file format
 
-!col small=12 medium=6 large=4
+!col-end!
+
+!col! width=50%
 
 !media tutorial04_meshing/eeid_reporting_id_vpp_example.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Solution variables integrated over zones identified by combinations of reporting IDs.
+
+!col-end!
 
 !row-end!
 

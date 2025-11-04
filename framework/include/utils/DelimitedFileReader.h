@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,8 @@ namespace MooseUtils
  * Communicator is provide then it will only read on processor 0 and broadcast the data to all
  * processors. If not provided it will read on all processors.
  */
-class DelimitedFileReader
+template <typename T>
+class DelimitedFileReaderTempl
 {
 public:
   enum class HeaderFlag
@@ -50,8 +51,8 @@ public:
 
   const std::size_t INVALID_SIZE = std::numeric_limits<std::size_t>::max();
 
-  DelimitedFileReader(const std::string & filename,
-                      const libMesh::Parallel::Communicator * comm = nullptr);
+  DelimitedFileReaderTempl(const std::string & filename,
+                           const libMesh::Parallel::Communicator * comm = nullptr);
 
   /**
    * Perform the actual data reading.
@@ -93,7 +94,12 @@ public:
   ///@}
 
   /// Set the file name, used to change the file to read from
-  void setFileName(const std::string & new_file) { _filename = new_file; }
+  /// We also reset the column/row names as a second read might have different names
+  void setFileName(const std::string & new_file)
+  {
+    _filename = new_file;
+    _names.clear();
+  }
 
   /**
    * Return the column/row names.
@@ -105,7 +111,7 @@ public:
    *
    * The outer vector is column and the inner the rows.
    */
-  const std::vector<std::vector<double>> & getData() const;
+  const std::vector<std::vector<T>> & getData() const;
 
   /**
    * Get the data in Point format. This performs checks that the data
@@ -117,22 +123,8 @@ public:
   /**
    * Return the row/column of data for a specified header entry
    */
-  const std::vector<double> & getData(const std::string & name) const;
-  const std::vector<double> & getData(std::size_t index) const;
-  ///@}
-
-  ///@{
-  /**
-   * Deprecated
-   */
-  void setHeaderFlag(bool value);
-  const std::vector<std::string> & getColumnNames() const;
-  const std::vector<std::vector<double>> & getColumnData() const;
-  const std::vector<double> & getColumnData(const std::string & name) const;
-  DelimitedFileReader(const std::string & filename,
-                      const bool header,
-                      const std::string delimiter,
-                      const libMesh::Parallel::Communicator * comm = nullptr);
+  const std::vector<T> & getData(const std::string & name) const;
+  const std::vector<T> & getData(std::size_t index) const;
   ///@}
 
 protected:
@@ -152,7 +144,7 @@ protected:
   std::vector<std::string> _names;
 
   /// Storage for the read data columns.
-  std::vector<std::vector<double>> _data;
+  std::vector<std::vector<T>> _data;
 
   /// Communicator
   const libMesh::Parallel::Communicator * const _communicator;
@@ -171,8 +163,8 @@ private:
   /**
    * Read the numeric data as rows or columns into a single vector.
    */
-  void readColumnData(std::ifstream & stream_data, std::vector<double> & output);
-  void readRowData(std::ifstream & stream_data, std::vector<double> & output);
+  void readColumnData(std::ifstream & stream_data, std::vector<T> & output);
+  void readRowData(std::ifstream & stream_data, std::vector<T> & output);
   ///@}
 
   /**
@@ -181,7 +173,7 @@ private:
    * @param row The vector to populate.
    * @param num The current line number.
    */
-  void processLine(const std::string & line, std::vector<double> & row, const unsigned int & num);
+  void processLine(const std::string & line, std::vector<T> & row, const unsigned int & num);
 
   /**
    * Check the content of the line and if it should be skipped.
@@ -204,4 +196,7 @@ private:
    */
   bool header(const std::string & line);
 };
+
+typedef DelimitedFileReaderTempl<double> DelimitedFileReader;
+typedef DelimitedFileReaderTempl<std::string> DelimitedFileOfStringReader;
 }

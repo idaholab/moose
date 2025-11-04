@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -80,7 +80,7 @@ protected:
   std::vector<Point> _nodes;
 
   /// Pointer to PointLocatorBase object
-  std::unique_ptr<PointLocatorBase> _pl;
+  std::unique_ptr<libMesh::PointLocatorBase> _pl;
 
   /// Pointer to the XFEM controller object
   std::shared_ptr<XFEM> _xfem;
@@ -98,7 +98,7 @@ protected:
   const unsigned int _level_set_var_number;
 
   /// System reference
-  const System & _system;
+  const libMesh::System & _system;
 
   /// The subproblem solution vector
   const NumericVector<Number> & _solution;

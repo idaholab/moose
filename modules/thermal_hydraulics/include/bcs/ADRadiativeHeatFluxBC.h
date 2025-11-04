@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,26 +9,33 @@
 
 #pragma once
 
-#include "RadiativeHeatFluxBCBase.h"
+#include "ADIntegratedBC.h"
 
 /**
  * Radiative heat transfer boundary condition for a plate heat structure
  */
-class ADRadiativeHeatFluxBC : public ADRadiativeHeatFluxBCBase
+class ADRadiativeHeatFluxBC : public ADIntegratedBC
 {
 public:
   ADRadiativeHeatFluxBC(const InputParameters & parameters);
 
 protected:
-  virtual ADReal coefficient() const override;
+  virtual ADReal computeQpResidual() override;
 
-  /// View factor function
-  const Function & _view_factor_fn;
+  /// Ambient temperature
+  const Moose::Functor<ADReal> & _T_ambient;
+  /// Emissivity
+  const Moose::Functor<ADReal> & _emissivity;
+  /// View factor
+  const Moose::Functor<ADReal> & _view_factor;
 
   /// Post-processor by which to scale boundary condition
   const PostprocessorValue & _scale_pp;
-  /// Function by which to scale the boundary condition
-  const Function & _scale_fn;
+  /// Functor by which to scale the boundary condition
+  const Moose::Functor<ADReal> & _scale;
+
+  /// Stefan-Boltzmann constant
+  const Real _sigma;
 
 public:
   static InputParameters validParams();

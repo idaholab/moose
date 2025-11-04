@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,6 +42,12 @@ ThermalFunctionSolidProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_
 {
   cp = cp_from_T(T);
   dcp_dT = _cp_function.timeDerivative(T);
+}
+
+Real
+ThermalFunctionSolidProperties::cp_integral(const Real & T) const
+{
+  return _cp_function.timeIntegral(_T_zero_e, T, Point(0, 0, 0));
 }
 
 Real

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,8 +10,6 @@
 #pragma once
 
 #include "MeshCut2DUserObjectBase.h"
-
-class CrackFrontDefinition;
 
 /**
  * MeshCut2DFractureUserObject:
@@ -27,27 +25,31 @@ public:
 
   MeshCut2DFractureUserObject(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
   virtual void initialize() override;
 
 protected:
   virtual void findActiveBoundaryGrowth() override;
 
 private:
-  /// critical k value for crack growth
-  const Real & _k_critical;
   /// amount to grow crack by for each xfem update step
   const Real & _growth_increment;
 
-  const std::string _ring_number_string;
+  /// are fracture integrals used for growing crack
+  const bool _use_k;
+  /// is stress used to grow crack
+  const bool _use_stress;
 
-  CrackFrontDefinition * _crack_front_definition;
-  /**
-   * Compute all of the maximum hoop stress fracture integrals for all crack trips from the fracture
-   * integral vector post processors
-   * @param k1 fracture integrals from KI vector postprocessors
-   * @param k2 fracture integrals from KII vector postprocessors
-   * @return computed fracture integral squared
-   */
-  std::vector<Real> getKSquared(const std::vector<Real> & k1, const std::vector<Real> & k2) const;
+  /// critical k value for crack growth
+  const Real _k_critical;
+  /// Maximum stress criterion threshold for crack growth.
+  const Real _stress_threshold;
+
+  /// Pointer fracture integral ki if available
+  const std::vector<Real> * const _ki_vpp;
+  /// Pointer fracture integral kii if available
+  const std::vector<Real> * const _kii_vpp;
+  /// Pointer to crack front stress if available
+  const std::vector<Real> * const _stress_vpp;
+  /// Pointer to crack front critical k if available
+  const std::vector<Real> * const _k_critical_vpp;
 };

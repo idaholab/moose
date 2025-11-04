@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,8 @@
 
 // MOOSE includes
 #include "ElementUserObject.h"
+
+class ElementSubdomainModifierBase;
 
 class NodalPatchRecoveryBase : public ElementUserObject
 {
@@ -29,10 +31,36 @@ public:
    */
   virtual Real nodalPatchRecovery(const Point & p, const std::vector<dof_id_type> & elem_ids) const;
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void threadJoin(const UserObject &) override;
-  virtual void finalize() override;
+  /**
+   * Compute coefficients without reading or writing cached values
+   * The coefficients returned by this function are intended to be multiplied with the multi-index
+   * table to build the corresponding polynomial. For details on the multi-index table, refer to the
+   * comments in the multiIndex() function.
+   *
+   * @param elem_ids Ids of the elements in the patch
+   * @return The coefficients of the polynomial
+   */
+  const RealEigenVector getCoefficients(const std::vector<dof_id_type> & elem_ids) const;
+
+  /**
+   * Compute coefficients, using cached values if available, and store any newly computed
+   * coefficients in cache
+   * The coefficients returned by this function are intended to be multiplied with the multi-index
+   * table to build the corresponding polynomial. For details on the multi-index table, refer to the
+   * comments in the multiIndex() function.
+   *
+   * @param elem_ids Ids of the elements in the patch
+   * @return The coefficients of the polynomial
+   */
+  const RealEigenVector getCachedCoefficients(const std::vector<dof_id_type> & elem_ids);
+
+  void initialize() override;
+  void execute() override;
+  void threadJoin(const UserObject &) override;
+  void finalize() override;
+
+  /// Returns the multi-index table
+  const std::vector<std::vector<unsigned int>> & multiIndex() const { return _multi_index; }
 
 protected:
   /// Compute the quantity to recover using nodal patch recovery
@@ -41,6 +69,22 @@ protected:
   unsigned int _qp;
 
 private:
+  /// Builds a query map of element IDs that require data from other processors.
+  /// This version of this method only checks data communication needs for a provided vector of elements.
+  /// @param specific_elems Set of elements that we need the information about Ae and be (which may be own by current processor
+  /// or need to be requested from another processor).
+  /// @return Map of processor id to vector of non-local elements on the current processor that belong to
+  ///                that processor. Used to ensure that all non-local evaluable elements are properly synchronized
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>>
+  gatherRequestList(const std::vector<dof_id_type> & specific_elems);
+
+  /// Builds a query map of element IDs that require data from other processors.
+  /// This version of this method iterates over all semi-local evaluable elements (including ghost elements)
+  /// and records those belonging to a different processor and request from them.
+  /// @return Map of processor id to vector of semilocal elements on the current processor that belong to
+  ///                that processor. Used to ensure that all semi-local evaluable elements are properly synchronized
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> gatherRequestList();
+
   /**
    * Compute the P vector at a given point
    * i.e. given dim = 2, order = 2, polynomial P has the following terms:
@@ -55,10 +99,56 @@ private:
    */
   RealEigenVector evaluateBasisFunctions(const Point & q_point) const;
 
+  /**
+   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
+   *
+   * @param specific_elems: the elements that will be synchronized.
+   * This is typically used when the monomial basis needs to be built from a
+   * specific patch, or a subset of that patch.
+   */
+  void sync(const std::vector<dof_id_type> & specific_elems);
+
+  /**
+   * @brief Synchronizes local matrices and vectors (_Ae, _be) across processors.
+   * all ghosted evaluable elements are synchronized.
+   */
+  void sync();
+
+  /**
+   * @brief Helper function to perform the actual communication of _Ae and _be.
+   */
+  void
+  syncHelper(const std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids);
+
+  /**
+   * @brief Adds an element to the map provided in query_ids if it belongs to a different processor.
+   * @param elem Pointer to element to be considered for addition to the map
+   * @param query_ids Map of processor id to vector of semilocal elements on the current processor
+   *                                   that belong to that processor.
+   */
+  void
+  addToQuery(const libMesh::Elem * elem,
+             std::unordered_map<processor_id_type, std::vector<dof_id_type>> & query_ids) const;
+
   /// The polynomial order, default is variable order
   const unsigned int _patch_polynomial_order;
 
-  /// The multi-index table
+  /**
+   * Multi-index table for a polynomial basis.
+   *
+   * Each multi-index is a vector of exponents [i, j, k], representing monomials like x^i y^j z^k.
+   * The table contains all unique multi-indices where the sum of exponents is <= order.
+   *
+   * Ordering:
+   * - Grouped by total degree (sum of exponents), from 0 to order.
+   * - Within each group, ordered colexicographically (last index varies fastest).
+   *
+   * Examples:
+   * dim = 1, order = 3: [0], [1], [2], [3]
+   * dim = 2, order = 2: [0,0], [0,1], [1,0], [0,2], [1,1], [2,0]
+   * dim = 3, order = 2: [0,0,0], [0,0,1], [0,1,0], [1,0,0], [0,0,2], [0,1,1], [1,0,1], [0,2,0],
+   * [1,1,0], [2,0,0]
+   */
   const std::vector<std::vector<unsigned int>> _multi_index;
 
   /// Number of basis functions
@@ -69,4 +159,18 @@ private:
 
   /// The element-level b vector
   std::map<dof_id_type, RealEigenVector> _be;
+
+  /// @brief Cache for least-squares coefficients used in nodal patch recovery.
+  /// Typically, there is a one-to-one mapping from element to coefficients,
+  /// so only a single set of coefficients is cached rather than a full map.
+  mutable std::vector<dof_id_type> _cached_elem_ids;
+  mutable RealEigenVector _cached_coef;
+
+  /// @brief Whether the mesh is distributed
+  bool _distributed_mesh;
+
+  /// @brief The processor IDs vector in the running
+  std::vector<int> _proc_ids;
+
+  friend class ElementSubdomainModifierBase;
 };

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,7 +37,7 @@ AddElementalFieldAction::init()
   _moose_object_pars.set<MooseEnum>("order") = "CONSTANT";
   _moose_object_pars.set<MooseEnum>("family") = "MONOMIAL";
 
-  _fe_type = FEType(CONSTANT, MONOMIAL);
+  _fe_type = libMesh::FEType(CONSTANT, MONOMIAL);
 
   _type = "MooseVariableConstMonomial";
 

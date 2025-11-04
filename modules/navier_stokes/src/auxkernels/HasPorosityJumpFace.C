@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,7 +24,7 @@ HasPorosityJumpFace::validParams()
 }
 
 HasPorosityJumpFace::HasPorosityJumpFace(const InputParameters & parameters)
-  : AuxKernel(parameters), _eps(getFunctor<ADReal>(NS::porosity))
+  : AuxKernel(parameters), _eps(getFunctor<Real>(NS::porosity))
 {
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");

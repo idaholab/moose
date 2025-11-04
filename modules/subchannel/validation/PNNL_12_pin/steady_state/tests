@@ -1,0 +1,16 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29238'
+  [PNNL-12_ss]
+      type = CSVDiff
+      input = 2X6_ss.i
+      csvdiff = 2X6_ss_out.csv
+      # custom_cmp = 'test.exodiff'
+      capabilities = 'method!=dbg'
+      valgrind = NONE
+      recover = false
+      abs_zero = 1e-5
+      max_threads = 1
+      requirement = 'The system will examine the subchannel solver for the PNNL 12-pin steady state case'
+  []
+[]

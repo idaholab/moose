@@ -8,12 +8,14 @@
     custom_cmp = 'rdg_1phase.exodiff'
     group = 'outlet pipe 1phase rdg'
     max_time = 600
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to specify an inlet boundary condition for 1D single phase flow in steady state from the inlet flow velocity and temperature.'
   []
   [phy:reversed_flow]
     type = 'Exodiff'
     input = 'phy.reversed_flow.i'
     exodiff = 'phy.reversed_flow.e'
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to specify an inlet boundary condition for 1D single phase flow in steady state from the inlet flow velocity and temperature, and handle flow reversal.'
   []
   [clg:velocity_t_3eqn]
@@ -21,6 +23,7 @@
     input = 'clg.velocity_t_3eqn.i'
     csvdiff = 'clg.velocity_t_3eqn_out.csv'
     max_parallel = 13 # https://github.com/idaholab/moose/issues/24537
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to control the inlet flow velocity and temperature in a 1D single phase flow inlet specified using the flow velocity and temperature.'
   []
 []

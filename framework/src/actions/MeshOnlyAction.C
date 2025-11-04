@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,6 +21,8 @@
 #include "libmesh/exodusII_io_helper.h"
 #include "libmesh/checkpoint_io.h"
 
+using namespace libMesh;
+
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
 InputParameters
@@ -34,28 +36,18 @@ MeshOnlyAction::MeshOnlyAction(const InputParameters & params) : Action(params) 
 void
 MeshOnlyAction::act()
 {
+  // Run error checking on input file first before trying to generate a mesh
+  bool warn = _app.unusedFlagIsWarning();
+  bool err = _app.unusedFlagIsError();
+  _app.builder().errorCheck(comm(), warn, err);
+
   std::string mesh_file = _app.parameters().get<std::string>("mesh_only");
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
   // Print information about the mesh
   _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2) << std::endl;
 
-  bool should_generate = false;
-
-  // If no argument specified or if the argument following --mesh-only starts
-  // with a dash, try to build an output filename based on the input mesh filename.
-  if (mesh_file.empty() || (mesh_file[0] == '-'))
-    should_generate = true;
-  // There's something following the --mesh-only flag, let's make an attempt to validate it.
-  // If we don't find a '.' or we DO find an equals sign, chances are this is not a file!
-  else if ((mesh_file.find('.') == std::string::npos || mesh_file.find('=') != std::string::npos))
-  {
-    mooseWarning("The --mesh-only option should be followed by a file name. Move it to the end of "
-                 "your CLI args or follow it by another \"-\" argument.");
-    should_generate = true;
-  }
-
-  if (should_generate)
+  if (mesh_file.empty())
   {
     mesh_file = _app.builder().getPrimaryFileName();
     size_t pos = mesh_file.find_last_of('.');
@@ -192,11 +184,11 @@ MeshOnlyAction::act()
     }
   }
 
-  else if (mesh_file.find(".cpr") + 4 == mesh_file.size())
+  else if (mesh_file.find(".cpa.gz") + 7 == mesh_file.size())
   {
     TIME_SECTION("act", 1, "Writing Checkpoint");
 
-    CheckpointIO io(mesh_ptr->getMesh(), true);
+    CheckpointIO io(mesh_ptr->getMesh(), false);
     io.write(mesh_file);
 
     // Write mesh metadata

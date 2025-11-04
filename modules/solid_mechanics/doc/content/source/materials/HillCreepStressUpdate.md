@@ -4,25 +4,111 @@
 
 ## Description
 
-This class computes a creep strain rate based on an equivalent deviatoric stress function that
+This class computes a creep strain rate based on an equivalent deviatoric stress function (${\sigma_e}$) that
 is calculated as a function of Hill's function anisotropy parameters $F$, $G$, $H$, $L$, $M$, and $N$:
 \begin{equation}
-\tilde{q}(\sigma) = {[F(\sigma_{22} - \sigma_{33})^2 + G(\sigma_{33} - \sigma_{11})^2 + H(\sigma_{11} - \sigma_{22})^2
+\sigma_e = \tilde{q}(\boldsymbol{\sigma}) = {[F(\sigma_{22} - \sigma_{33})^2 + G(\sigma_{33} - \sigma_{11})^2 + H(\sigma_{11} - \sigma_{22})^2
 + 2L\sigma_{23}^2 + 2M\sigma_{13}^2 + 2N\sigma_{12}^2]}^{1/2}
+\label{hill_stress_function}
 \end{equation}
 
-The equivalent creep strain rate function may then be obtained as
+where $\boldsymbol{\sigma}$ and $\sigma_{ij}$ are the stress tensor and its component, respectively. The [!eqref](hill_stress_function) is also called Hill stress function and accounts for anisotropy through the anisotropy parameters. The equivalent creep strain rate function may then be obtained as
 \begin{equation}
-\dot{\epsilon} = A_{aniso} (\tilde{q})^{n}
+\dot{\epsilon} = A {\sigma_e}^{n}
+\label{creep_law}
 \end{equation}
 
-where $A_{aniso}$ is a creep coefficient and $n$ the creep exponent.
+where $A$ is a creep coefficient and $n$ the creep exponent.
 
 The effective creep strain increment is obtained within the framework of a generalized (Hill plasticity) radial return mapping, see
 [GeneralizedRadialReturnStressUpdate](/GeneralizedRadialReturnStressUpdate.md). This class computes the
-generalized radial return inelastic increment.
+generalized radial return inelastic increment. More details on the Hill-type creep material model may be found in [!cite](stewart2011anisotropic).
 
-More details on the Hill-type creep material model may be found in [!cite](stewart2011anisotropic).
+
+### Creep strain integration scheme
+
+Newton iteration is performed for computing the effective creep strain increment $\Delta \gamma$ with increment in the $\Delta \gamma$ (d$\Delta \gamma$) for each Newton iteration computed as:
+
+\begin{equation}
+d{\Delta \gamma}_{n+1} = - \frac{R({\Delta \gamma}_n)}{R'({\Delta \gamma}_n)} \\
+{\Delta \gamma}_{n+1} = {\Delta \gamma}_{n} + d{\Delta \gamma}_{n+1}
+\label{newtons_iteration}
+\end{equation}
+
+where $R$ is the residual and $R'$ is the derivative of residual with respect to the ${\Delta \gamma}$. The residual and its derivative are computed as:
+
+\begin{equation}
+R = {\dot{\epsilon_c}} \times \Delta t - \Delta \gamma
+\label{residual}
+\end{equation}
+
+\begin{equation}
+\frac{\partial R}{\partial \Delta \gamma} = \frac{\partial {\dot{\epsilon_c}}} {\Delta \gamma} \times \Delta t - 1.0
+\label{residual_derivative}
+\end{equation}
+
+Substituting [!eqref](creep_law) in [!eqref](residual) and [!eqref](residual_derivative), we obtain:
+
+\begin{equation}
+R = A {\mathbf{\sigma_e}}^n \times \Delta t - \Delta \gamma
+\label{residual2}
+\end{equation}
+
+\begin{equation}
+\frac{\partial R}{\partial \Delta \gamma} = A n {\sigma_e}^{n-1} \frac{\partial \sigma_e}{\partial \Delta{\gamma}} \times \Delta t - 1.0
+\label{residual_derivative2}
+\end{equation}
+
+We need expressions for $\sigma_e$ and $\frac {\partial \sigma_e} {\partial \Delta{\gamma}}$ in terms of trial stress $\mathbf{\sigma^{tr}}$ and $\Delta \gamma$, which are then substituted in [!eqref](residual2) and [!eqref](residual_derivative2).
+
+#### Isotropic Elasticity
+
+\begin{equation}
+\sigma_e = {\sigma^{tr}_e} - 3G\Delta \gamma
+\label{isotropic_sigma_e}
+\end{equation}
+
+\begin{equation}
+\frac{\partial \sigma_e}{\partial \Delta \gamma} = - 3G
+\label{isotropic_sigma_e_derivative}
+\end{equation}
+
+where $G$ is the shear modulus. For details of [!eqref](isotropic_sigma_e) and [!eqref](isotropic_sigma_e_derivative) see [!cite](dunne2005introduction).
+
+#### Anisotropic Elasticity
+
+For cases with anisotropic elasticity [!eqref](isotropic_sigma_e) is not valid. The stress tensor after radial return for the case with anisotropic elasticity is expressed as:
+
+\begin{equation}
+\boldsymbol{\sigma} = \boldsymbol{\sigma^{tr}} - \boldsymbol{C} \Delta \boldsymbol{\epsilon_c}
+\label{anisotropic_sigma}
+\end{equation}
+
+where $\boldsymbol{\epsilon_c}$ is the creep strain tensor and $\boldsymbol{C}$ is the elasticity tensor. Rewriting [!eqref](hill_stress_function):
+
+\begin{equation}
+\sigma_e = \tilde{q}(\boldsymbol{\sigma})
+\label{anisotropic_sigma_e}
+\end{equation}
+
+\begin{equation}
+\frac{\partial \sigma_e}{\partial \Delta{\gamma}} = \frac{\partial \tilde{q}(\boldsymbol{\sigma^{tr}} - \boldsymbol{C} \Delta \boldsymbol{\epsilon_c})}{\partial \Delta \gamma} = \frac{\partial \tilde{q}(\boldsymbol{\sigma^{tr}} - \boldsymbol{C} \Delta \boldsymbol{\epsilon_c})}{\partial \Delta \boldsymbol{\epsilon_c}} \frac{\partial \Delta \boldsymbol{\epsilon_c}}{\partial \Delta{\gamma}}
+\label{anisotropic_sigma_e_derivative}
+\end{equation}
+
+Note that [!eqref](anisotropic_sigma_e_derivative) uses chain rule. Normality hypothesis is expressed as:
+
+\begin{equation}
+\Delta \boldsymbol{\epsilon_c} = \Delta \gamma \frac{\partial \tilde{q}}{\partial \boldsymbol{\sigma}}
+\label{normality_hypothesis}
+\end{equation}
+
+and the last term of [!eqref](anisotropic_sigma_e_derivative) is obtained by taking derivative of [!eqref](normality_hypothesis) as:
+
+\begin{equation}
+\frac{\partial \Delta \boldsymbol{\epsilon_c}}{\partial \Delta{\gamma}} = \frac{\partial \tilde{q}}{\partial \boldsymbol{\sigma}}
+\label{normality_hypothesis_derivative}
+\end{equation}
 
 ### Numerical time integration error
 

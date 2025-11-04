@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -64,13 +64,13 @@ RestartableDataReporter::getDataParams() const
   const auto & entries = getParam<MultiMooseEnum>("entries");
 
   RestartableDataValue::StoreJSONParams params;
-  params.value = entries.contains("value");
-  params.type = entries.contains("type");
+  params.value = entries.isValueSet("value");
+  params.type = entries.isValueSet("type");
   params.name = false;
-  params.declared = entries.contains("declared");
-  params.loaded = entries.contains("loaded");
-  params.stored = entries.contains("stored");
-  params.has_context = entries.contains("has_context");
+  params.declared = entries.isValueSet("declared");
+  params.loaded = entries.isValueSet("loaded");
+  params.stored = entries.isValueSet("stored");
+  params.has_context = entries.isValueSet("has_context");
 
   return params;
 }

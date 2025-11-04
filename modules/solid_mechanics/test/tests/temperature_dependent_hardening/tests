@@ -6,6 +6,7 @@
     input = 'temp_dep_hardening.i'
     exodiff = 'temp_dep_hardening_out.e'
     requirement = 'The system shall compute the stress as a function of temperature and plastic strain from user-supplied hardening functions not using automatic differentiation.'
+    capabilities = 'method!=dbg'
   [../]
   [./ADtest]
     issues = '#18454'
@@ -14,5 +15,6 @@
     input = 'ADtemp_dep_hardening.i'
     exodiff = 'temp_dep_hardening_out.e'
     requirement = 'The system shall compute the stress as a function of temperature and plastic strain from user-supplied hardening functions using automatic differentiation.'
+    capabilities = 'method!=dbg'
   [../]
 []

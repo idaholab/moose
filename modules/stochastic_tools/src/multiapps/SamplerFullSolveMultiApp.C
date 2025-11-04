@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -82,8 +82,22 @@ SamplerFullSolveMultiApp::SamplerFullSolveMultiApp(const InputParameters & param
                "Conditionally run sampler multiapp only works in batch modes.");
 }
 
-void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
+void
+SamplerFullSolveMultiApp::backup()
 {
+  if (_mode != StochasticTools::MultiAppMode::BATCH_RESTORE)
+    FullSolveMultiApp::backup();
+}
+
+void
+SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
+{
+  // Logic for calling initial setup again:
+  //    1) If and only if not doing batch-reset (solveStepBatch does this at each local row)
+  //    2) If the number of rows have changed since the communicator is re-split.
+  //    3) If we have already solved and doing "normal" execution, effectively resetting the apps
+  bool initial_setup_required = false;
+
   // Reinitialize MultiApp size
   const auto num_rows = _sampler.getNumberOfRows();
   if (num_rows != _number_of_sampler_rows)
@@ -93,13 +107,20 @@ void SamplerFullSolveMultiApp::preTransfer(Real /*dt*/, Real /*target_time*/)
                                 _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
     _number_of_sampler_rows = num_rows;
     _row_data.clear();
+    initial_setup_required = _mode != StochasticTools::MultiAppMode::BATCH_RESET;
   }
+  else if (_solved_once)
+    initial_setup_required = _mode == StochasticTools::MultiAppMode::NORMAL;
 
-  // Reinitialize app to original state prior to solve, if a solve has occured.
-  // Since the app is reinitialized in the solve step either way, we skip this
-  // for batch-reset mode.
-  if (_solved_once && _mode != StochasticTools::MultiAppMode::BATCH_RESET)
+  // Call initial setup based on the logic above
+  if (initial_setup_required)
+  {
     initialSetup();
+    _solved_once = false;
+  }
+  // Otherwise we need to restore for batch-restore
+  else if (_solved_once && _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+    restore();
 
   if (isParamValid("should_run_reporter"))
     _should_run = &getReporterValue<std::vector<bool>>("should_run_reporter");
@@ -160,8 +181,8 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     transfer->initializeFromMultiapp();
   }
 
-  if (_mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
-    backup();
+  if (!_solved_once && _mode == StochasticTools::MultiAppMode::BATCH_RESTORE)
+    FullSolveMultiApp::backup();
 
   // Perform batch MultiApp solves
   _local_batch_app_index = 0;
@@ -335,10 +356,10 @@ SamplerFullSolveMultiApp::getActiveStochasticToolsTransfers(Transfer::DIRECTION 
   return output;
 }
 
-std::string
-SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
+std::vector<std::string>
+SamplerFullSolveMultiApp::getCommandLineArgs(const unsigned int local_app)
 {
-  std::string args;
+  std::vector<std::string> args;
 
   // With multiple processors per app, there are no local rows for non-root processors
   if (isRootProcessor())
@@ -348,9 +369,7 @@ SamplerFullSolveMultiApp::getCommandLineArgsParamHelper(unsigned int local_app)
     updateRowData(_mode == StochasticTools::MultiAppMode::NORMAL ? local_app
                                                                  : _local_batch_app_index);
 
-    const std::vector<std::string> & full_args_name =
-        MooseUtils::split(FullSolveMultiApp::getCommandLineArgsParamHelper(local_app), ";");
-    args = sampledCommandLineArgs(_row_data, full_args_name);
+    args = sampledCommandLineArgs(_row_data, FullSolveMultiApp::getCommandLineArgs(local_app));
   }
 
   _my_communicator.broadcast(args);
@@ -384,11 +403,11 @@ SamplerFullSolveMultiApp::updateRowData(dof_id_type local_index)
               "Local index must be equal or one greater than the index previously called.");
 }
 
-std::string
+std::vector<std::string>
 SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                                                  const std::vector<std::string> & full_args_name)
 {
-  std::ostringstream oss;
+  std::vector<std::string> args;
 
   // Find parameters that are meant to be assigned by sampler values
   std::vector<std::string> cli_args_name;
@@ -398,7 +417,7 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
     if (fan.find("=") == std::string::npos)
       cli_args_name.push_back(fan);
     else
-      oss << fan << ";";
+      args.push_back(fan);
   }
 
   // Make sure the parameters either all have brackets, or none of them do
@@ -425,15 +444,14 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
           MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
 
       // Loop through indices and assign parameter: param='row[0] 3.14 row[1]'
-      oss << vector_param[0] << "='";
-      std::string sep = "";
+      std::vector<std::string> values;
       for (const auto & istr : index_string)
       {
-        oss << sep;
-        sep = " ";
+        Real value;
+
         // If the value is enclosed in parentheses, then it isn't an index, it's a value
         if (istr.find("(") != std::string::npos)
-          oss << std::stod(istr.substr(istr.find("(") + 1));
+          value = std::stod(istr.substr(istr.find("(") + 1));
         // Assign the value from row if it is an index
         else
         {
@@ -444,17 +462,18 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                          ") for ",
                          vector_param[0],
                          " is out of bound.");
-          oss << Moose::stringifyExact(row[index]);
+          value = row[index];
         }
+
+        values.push_back(Moose::stringifyExact(value));
       }
-      oss << "';";
+
+      args.push_back(vector_param[0] + "='" + MooseUtils::stringJoin(values) + "'");
     }
     // Assign scalar parameters
     else
-    {
-      oss << cli_args_name[i] << "=" << Moose::stringifyExact(row[i]) << ";";
-    }
+      args.push_back(cli_args_name[i] + "=" + Moose::stringifyExact(row[i]));
   }
 
-  return oss.str();
+  return args;
 }

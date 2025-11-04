@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -64,6 +64,9 @@ SamplerReporterTransfer::initialSetup()
 void
 SamplerReporterTransfer::initializeFromMultiapp()
 {
+  // Initialize vectors so they are the proper size before transfer
+  if (_results->getExecuteOnEnum().contains(EXEC_TRANSFER))
+    _results->initialize();
 }
 
 void
@@ -80,13 +83,20 @@ SamplerReporterTransfer::executeFromMultiapp()
 void
 SamplerReporterTransfer::finalizeFromMultiapp()
 {
+  // Execute reporter so that things are gathered after transfer properly
+  _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _results->name());
+  _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _results->name());
 }
 
 void
 SamplerReporterTransfer::execute()
 {
+  initializeFromMultiapp();
+
   for (dof_id_type i = _sampler_ptr->getLocalRowBegin(); i < _sampler_ptr->getLocalRowEnd(); ++i)
     transferStochasticReporters(i, i);
+
+  finalizeFromMultiapp();
 }
 
 void

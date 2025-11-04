@@ -1,6 +1,6 @@
 //* This file is part of the MOOSE framework
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,6 +21,8 @@ InputParameters
 WaveSpeed::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addClassDescription("Calculate the wave speed as $E / \\sqrt{\\rho}$ where $E$ is the "
+                             "effective stiffness, and $\\rho$ is the material density.");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "

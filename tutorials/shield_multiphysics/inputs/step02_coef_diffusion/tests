@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#4522'
+  design = 'examples_and_tutorials/index.md'
+  [step]
+    type = RunApp
+    input = '../step01_diffusion/mesh.i step2.i'
+    cli_args = "Mesh/inactive='fmg'"
+    requirement = "The shield multiphysics tutorial shall include a step demonstrating the "
+                  "implementation of a diffusion term with a diffusivity coefficient."
+  []
+[]

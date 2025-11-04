@@ -1,0 +1,10 @@
+[Tests]
+  design = 'FlowModelGasMixAux.md'
+  issues = '#28335'
+  [test]
+    type = CSVDiff
+    input = 'flow_model_gas_mix_aux.i'
+    csvdiff = 'flow_model_gas_mix_aux_out.csv'
+    requirement = 'The system shall be able to compute auxiliary quantities for the gas mixture flow model.'
+  []
+[]

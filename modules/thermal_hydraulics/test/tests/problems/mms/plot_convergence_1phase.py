@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,7 +16,7 @@
 #   p_err
 
 import matplotlib.pyplot as plt
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 input_file = "convergence.csv"
 output_file = "convergence.png"

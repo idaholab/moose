@@ -1,0 +1,20 @@
+[Tests]
+  [conditional_restore]
+    type = RunApp
+    input = 'restore_test.i'
+    expect_out = 'Reporter Restoration Summary:
+--------------------------------------------------------
+|        Name        |        Type         | Restored? |
+--------------------------------------------------------
+| const/not_restored | VectorPostprocessor | NO        |
+| const/restored     | VectorPostprocessor | YES       |
+| old_vpp/value      | Postprocessor       | YES       |
+--------------------------------------------------------'
+    match_literal = true
+    capture_perf_graph = false
+
+    design = 'VectorPostprocessors/index.md'
+    issues = '#30394'
+    requirement = 'The system shall restore vector-postprocessor values to their old state when a timestep is repeated if and only if an old value is requested.'
+  []
+[]

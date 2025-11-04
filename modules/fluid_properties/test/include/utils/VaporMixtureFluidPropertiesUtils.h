@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,8 +12,9 @@
 #include "SinglePhaseFluidPropertiesTestUtils.h"
 
 // Macro for performing a derivative test
-#define VAPOR_MIX_DERIV_TEST(f, a, b, x, tol)                                                      \
+#define VAPOR_MIX_DERIV_TEST(f, a, b, x, rel_tol)                                                  \
   {                                                                                                \
+    const Real abs_tol = 1e-10;                                                                    \
     const Real da = REL_PERTURBATION * a;                                                          \
     const Real db = REL_PERTURBATION * b;                                                          \
     std::vector<Real> dx(x.size());                                                                \
@@ -33,9 +34,9 @@
     Real f_value, df_da, df_db;                                                                    \
     std::vector<Real> df_dx(x.size());                                                             \
     f(a, b, x, f_value, df_da, df_db, df_dx);                                                      \
-    REL_TEST(f(a, b, x), f_value, REL_TOL_CONSISTENCY);                                            \
-    REL_TEST(df_da, df_da_fd, tol);                                                                \
-    REL_TEST(df_db, df_db_fd, tol);                                                                \
+    REL_ABS_TEST(f(a, b, x), f_value, REL_TOL_CONSISTENCY, abs_tol);                               \
+    REL_ABS_TEST(df_da, df_da_fd, rel_tol, abs_tol);                                               \
+    REL_ABS_TEST(df_db, df_db_fd, rel_tol, abs_tol);                                               \
     for (unsigned int i = 0; i < x.size(); ++i)                                                    \
-      REL_TEST(df_dx[i], df_dx_fd[i], tol);                                                        \
+      REL_ABS_TEST(df_dx[i], df_dx_fd[i], rel_tol, abs_tol);                                       \
   }

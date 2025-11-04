@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -69,8 +69,8 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   _fe_problem.reinitNode(node, _tid);
 
-  const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
-  for (const auto & block : block_ids)
+  const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
+  for (const auto block : block_ids)
     if (_nkernel_warehouse->hasActiveBlockObjects(block, _tid))
     {
       std::set<TagID> needed_fe_var_vector_tags;
@@ -81,7 +81,10 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
       const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
       for (const auto & nodal_kernel : objects)
         if (nks_executed.emplace(nodal_kernel.get()).second)
+        {
+          nodal_kernel->setSubdomains(block_ids);
           nodal_kernel->computeResidual();
+        }
     }
 
   _num_cached++;

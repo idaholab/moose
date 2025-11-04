@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,16 +10,23 @@
 #include "MatDiffusion.h"
 
 registerMooseObject("MooseApp", MatDiffusion);
+registerMooseObject("MooseApp", ADMatDiffusion);
 
+template <bool is_ad>
 InputParameters
-MatDiffusion::validParams()
+MatDiffusionTempl<is_ad>::validParams()
 {
-  InputParameters params = MatDiffusionBase<Real>::validParams();
+  InputParameters params = MatDiffusionBaseParent<is_ad>::validParams();
   params.addClassDescription(
       "Diffusion equation Kernel that takes an isotropic Diffusivity from a material property");
   return params;
 }
 
-MatDiffusion::MatDiffusion(const InputParameters & parameters) : MatDiffusionBase<Real>(parameters)
+template <bool is_ad>
+MatDiffusionTempl<is_ad>::MatDiffusionTempl(const InputParameters & parameters)
+  : MatDiffusionBaseParent<is_ad>(parameters)
 {
 }
+
+template class MatDiffusionTempl<false>;
+template class MatDiffusionTempl<true>;

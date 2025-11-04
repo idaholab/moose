@@ -51,17 +51,17 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = t/100
+    expression = t/100
   []
   # Forced evolution of temperature
   [temperature_load]
     type = ParsedFunction
-    value = '273'
+    expression = '273'
   []
   # Factor to multiply the elasticity tensor in MOOSE
   [elasticity_prefactor]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   []
 []
 

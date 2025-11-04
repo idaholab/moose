@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,7 +17,7 @@ registerMooseObjectAliased("MooseApp", VTKOutput, "VTK");
 InputParameters
 VTKOutput::validParams()
 {
-  InputParameters params = OversampleOutput::validParams();
+  InputParameters params = SampledOutput::validParams();
   params.addClassDescription("Output data using the Visualization Toolkit (VTK).");
 
   // Set default padding to 3
@@ -31,7 +31,7 @@ VTKOutput::validParams()
 }
 
 VTKOutput::VTKOutput(const InputParameters & parameters)
-  : OversampleOutput(parameters), _binary(getParam<bool>("binary"))
+  : SampledOutput(parameters), _binary(getParam<bool>("binary"))
 {
 #ifndef LIBMESH_HAVE_VTK
   mooseError("VTK output was requested, but libMesh was not configured with VTK. To fix this, you "
@@ -44,7 +44,7 @@ VTKOutput::output()
 {
 #ifdef LIBMESH_HAVE_VTK
   /// Create VTKIO object
-  VTKIO vtk(_es_ptr->get_mesh());
+  libMesh::VTKIO vtk(_es_ptr->get_mesh());
 
   // Set the comppression
   vtk.set_compression(_binary);

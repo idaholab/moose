@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -56,10 +56,6 @@ ExplicitDynamicsContactAction::validParams()
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
   params.addParam<Real>("penalty", 1e8, "Penalty factor for normal contact.");
-  params.addParam<bool>("overwrite_current_solution",
-                        false,
-                        "Whether to overwrite the position of contact boundaries with the velocity "
-                        "computed with the contact algorithm.");
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement in "
                              "explicit dynamics simulations.");
   params.addParam<std::vector<TagName>>(
@@ -74,6 +70,7 @@ ExplicitDynamicsContactAction::validParams()
                                 "Offset to gap distance from secondary side");
   params.addParam<VariableName>("mapped_primary_gap_offset",
                                 "Offset to gap distance mapped from primary side");
+  params.addParam<bool>("verbose", false, "Verbose output. May increase runtime.");
 
   return params;
 }
@@ -81,7 +78,8 @@ ExplicitDynamicsContactAction::validParams()
 ExplicitDynamicsContactAction::ExplicitDynamicsContactAction(const InputParameters & params)
   : Action(params),
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
-    _model(getParam<MooseEnum>("model").getEnum<ExplicitDynamicsContactModel>())
+    _model(getParam<MooseEnum>("model").getEnum<ExplicitDynamicsContactModel>()),
+    _verbose(getParam<bool>("verbose"))
 {
   // The resulting velocity of the contact algorithm is applied, as the code stands, by modifying
   // the old position. This causes artifacts in the internal forces as old position, new position,
@@ -113,7 +111,7 @@ ExplicitDynamicsContactAction::act()
 
   addNodeFaceContact();
 
-  if (_current_task == "add_aux_kernel")
+  if (_current_task == "add_aux_kernel" && _verbose)
   { // Add ContactPenetrationAuxAction.
     if (!_problem->getDisplacedProblem())
       mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
@@ -162,22 +160,7 @@ ExplicitDynamicsContactAction::act()
                            .system()
                            .variable_type(displacements[0])
                            .order.get_order();
-    // Add ContactPenetrationVarAction
-    {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "penetration", var_params);
-    }
-    // Add ContactPressureVarAction
-    {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
-
-      _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
-    }
     // Add gap rate for output
     {
       auto var_params = _factory.getValidParams("MooseVariable");
@@ -185,33 +168,51 @@ ExplicitDynamicsContactAction::act()
       var_params.set<MooseEnum>("family") = "LAGRANGE";
       _problem->addAuxVariable("MooseVariable", "gap_rate", var_params);
     }
-    // Add nodal area contact variable
+    if (_verbose)
     {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
+      // Add ContactPenetrationVarAction
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
-    }
-    // Add nodal density variable
-    {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
+        _problem->addAuxVariable("MooseVariable", "penetration", var_params);
+      }
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "nodal_density", var_params);
-    }
-    // Add nodal wave speed
-    {
-      auto var_params = _factory.getValidParams("MooseVariable");
-      var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-      var_params.set<MooseEnum>("family") = "LAGRANGE";
+        _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
+      }
+      // Add nodal area contact variable
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addAuxVariable("MooseVariable", "nodal_wave_speed", var_params);
+        _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
+      }
+      // Add nodal density variable
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+        _problem->addAuxVariable("MooseVariable", "nodal_density", var_params);
+      }
+      // Add nodal wave speed
+      {
+        auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+        var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+        _problem->addAuxVariable("MooseVariable", "nodal_wave_speed", var_params);
+      }
     }
   }
 
-  if (_current_task == "add_user_object")
+  if (_current_task == "add_user_object" && _verbose)
   {
     {
       auto var_params = _factory.getValidParams("NodalArea");
@@ -295,7 +296,7 @@ ExplicitDynamicsContactAction::addContactPressureAuxKernel()
   ed_contact_action_counter++;
 
   // Add auxiliary kernel if we are the last contact action object.
-  if (ed_contact_action_counter == actions.size())
+  if (ed_contact_action_counter == actions.size() && _verbose)
   {
     std::vector<BoundaryName> boundary_vector;
     std::vector<BoundaryName> pair_boundary_vector;
@@ -325,8 +326,7 @@ ExplicitDynamicsContactAction::addContactPressureAuxKernel()
     params.set<bool>("use_displaced_mesh") = true;
 
     std::string name = _name + "_contact_pressure";
-    params.set<ExecFlagEnum>("execute_on",
-                             true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
+    params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
     _problem->addAuxKernel("ContactPressureAux", name, params);
   }
 }
@@ -361,16 +361,12 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
 
   params.set<std::vector<VariableName>>("displacements") = displacements;
   params.set<bool>("use_displaced_mesh") = true;
-  params.set<bool>("overwrite_current_solution") = getParam<bool>("overwrite_current_solution");
   params.set<Real>("penalty") = getParam<Real>("penalty");
 
   params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
 
   for (const auto & contact_pair : _boundary_pairs)
   {
-    params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area"};
-    params.set<std::vector<VariableName>>("nodal_density") = {"nodal_density"};
-    params.set<std::vector<VariableName>>("nodal_wave_speed") = {"nodal_wave_speed"};
 
     if (isParamValid("vel_x"))
       params.set<std::vector<VariableName>>("vel_x") = getParam<std::vector<VariableName>>("vel_x");

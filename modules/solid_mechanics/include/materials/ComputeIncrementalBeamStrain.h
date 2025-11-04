@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -74,7 +74,7 @@ protected:
   const VariableValue & _Ix;
 
   /// Rotational transformation from global coordinate system to initial beam local configuration
-  RankTwoTensor _original_local_config;
+  RankTwoTensor & _original_local_config;
 
   /// Initial length of the beam
   MaterialProperty<Real> & _original_length;

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,7 +40,11 @@ EulerAngleUpdater::EulerAngleUpdater(const InputParameters & params)
     _grain_torque(getUserObject<GrainForceAndTorqueInterface>("grain_torques_object")),
     _grain_volumes(getVectorPostprocessorValue("grain_volumes", "feature_volumes")),
     _mr(getParam<Real>("rotation_constant")),
-    _first_time(true)
+    _first_time(declareRestartableData<bool>("first_time_euler_update", true)),
+    _first_time_recovered(_app.isRecovering()),
+    _t_step_old(declareRestartableData<int>("euler_update_tstep_old", -1)),
+    _angles(declareRestartableData<std::vector<EulerAngles>>("euler_angles")),
+    _angles_old(declareRestartableData<std::vector<EulerAngles>>("euler_angles_old"))
 {
 }
 
@@ -63,14 +67,16 @@ EulerAngleUpdater::initialize()
 
   for (unsigned int i = 0; i < grain_num; ++i)
   {
-    if (!_first_time && !_fe_problem.converged(_sys.number()))
+    // We dont want to use old angles on recovery
+    if (!_first_time && !_first_time_recovered && !_fe_problem.converged(_sys.number()))
       _angles[i] = _angles_old[i];
+    _first_time_recovered = false;
 
     RealGradient torque = _grain_torque.getTorqueValues()[i];
 
-    if (i <= angle_size) // if new grains are created
+    if (i <= angle_size && _t_step > _t_step_old) // if new grains are created
       _angles_old[i] = _angles[i];
-    else
+    else if (i > angle_size)
       _angles_old.push_back(_angles[i]);
 
     RotationTensor R0(_angles_old[i]); // RotationTensor as per old euler angles
@@ -156,6 +162,7 @@ EulerAngleUpdater::initialize()
   }
 
   _first_time = false;
+  _t_step_old = _t_step;
 }
 
 unsigned int

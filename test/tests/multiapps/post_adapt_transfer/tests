@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#30547'
+  design = 'syntax/MultiApps/index.md SetupInterface.md'
+  [./test]
+    type = 'CSVDiff'
+    input = 'parent.i'
+    csvdiff = 'parent_out_sub0.csv'
+    requirement = 'The system shall allow for the execution of multi-apps and transfers after '
+                  'adaptivity in the parent application and before the parent application progresses to the next timestep.'
+  [../]
+[]

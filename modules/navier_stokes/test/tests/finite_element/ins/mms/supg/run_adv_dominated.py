@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,8 +24,8 @@ def mms_cases(h_list, methods, mu):
                     "Outputs/file_base=%s_mu%s_%sx%s" % (method, mu, n, n),
                     "Executioner/TimeStepper/dt=%s" % dt,
                     "Executioner/num_steps=1000000",
-                    "Executioner/trans_ss_check=true",
-                    "Executioner/ss_check_tol=1e-10",
+                    "Executioner/steady_state_detection=true",
+                    "Executioner/steady_state_tolerance=1e-10",
                     "mu=%s" % mu]
 
             if method.split('_')[0] == "unstabilized":

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,7 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
+#include "libmesh/petsc_solver_exception.h"
 #include "ExternalPetscSolverApp.h"
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -49,7 +50,7 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters) : MooseMesh(par
 
   if (petsc_app && petsc_app->getPetscTS())
     // Retrieve mesh from TS
-    TSGetDM(petsc_app->getPetscTS(), &_dmda);
+    LibmeshPetscCall(TSGetDM(petsc_app->getPetscTS(), &_dmda));
   else
     mooseError(" PETSc external solver TS does not exist or this is not a petsc external solver");
 }
@@ -90,34 +91,36 @@ add_element_Quad4(DM da,
   // xp: number of processors in x direction
   // yp: number of processors in y direction
   PetscInt Mx, My, xp, yp;
-  DMDAGetInfo(da,
-              PETSC_IGNORE,
-              &Mx,
-              &My,
-              PETSC_IGNORE,
-              &xp,
-              &yp,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE);
+  LibmeshPetscCallA(mesh.comm().get(),
+                    DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                &xp,
+                                &yp,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
 
   const PetscInt *lx, *ly;
   PetscInt *lxo, *lyo;
   // PETSc-3.8.x or older use PetscDataType
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
-  DMGetWorkArray(da, xp + yp + 2, PETSC_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMGetWorkArray(da, xp + yp + 2, PETSC_INT, &lxo));
 #else
   // PETSc-3.9.x or newer use MPI_DataType
-  DMGetWorkArray(da, xp + yp + 2, MPIU_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMGetWorkArray(da, xp + yp + 2, MPIU_INT, &lxo));
 #endif
+
   // Gets the ranges of indices in the x, y and z direction that are owned by each process
   // Ranges here are different from what we have in Mat and Vec.
   // It means how many points each processor holds
-  DMDAGetOwnershipRanges(da, &lx, &ly, NULL);
+  LibmeshPetscCallA(mesh.comm().get(), DMDAGetOwnershipRanges(da, &lx, &ly, NULL));
   lxo[0] = 0;
   for (PetscInt i = 0; i < xp; i++)
     lxo[i + 1] = lxo[i] + lx[i];
@@ -132,25 +135,25 @@ add_element_Quad4(DM da,
   // Finds integer in a sorted array of integers
   // Loc:  the location if found, otherwise -(slot+1)
   // where slot is the place the value would go
-  PetscFindInt(i, xp + 1, lxo, &xpid);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(i, xp + 1, lxo, &xpid));
 
   xpid = xpid < 0 ? -xpid - 1 - 1 : xpid;
 
-  PetscFindInt(i + 1, xp + 1, lxo, &xpidplus);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(i + 1, xp + 1, lxo, &xpidplus));
 
   xpidplus = xpidplus < 0 ? -xpidplus - 1 - 1 : xpidplus;
 
-  PetscFindInt(j, yp + 1, lyo, &ypid);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(j, yp + 1, lyo, &ypid));
 
   ypid = ypid < 0 ? -ypid - 1 - 1 : ypid;
 
-  PetscFindInt(j + 1, yp + 1, lyo, &ypidplus);
+  LibmeshPetscCallA(mesh.comm().get(), PetscFindInt(j + 1, yp + 1, lyo, &ypidplus));
 
   ypidplus = ypidplus < 0 ? -ypidplus - 1 - 1 : ypidplus;
 #if PETSC_VERSION_LESS_THAN(3, 9, 0)
-  DMRestoreWorkArray(da, xp + yp + 2, PETSC_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMRestoreWorkArray(da, xp + yp + 2, PETSC_INT, &lxo));
 #else
-  DMRestoreWorkArray(da, xp + yp + 2, MPIU_INT, &lxo);
+  LibmeshPetscCallA(mesh.comm().get(), DMRestoreWorkArray(da, xp + yp + 2, MPIU_INT, &lxo));
 #endif
 
   // Bottom Left
@@ -192,10 +195,10 @@ add_element_Quad4(DM da,
   // Make sure our unique_id doesn't overlap any nodes'
   elem->set_unique_id(elem_id + (nx + 1) * (ny + 1));
   elem = mesh.add_elem(elem);
-  elem->set_node(0) = node0_ptr;
-  elem->set_node(1) = node1_ptr;
-  elem->set_node(2) = node2_ptr;
-  elem->set_node(3) = node3_ptr;
+  elem->set_node(0, node0_ptr);
+  elem->set_node(1, node1_ptr);
+  elem->set_node(2, node2_ptr);
+  elem->set_node(3, node3_ptr);
 
   // Bottom
   if (j == 0)
@@ -337,21 +340,23 @@ build_cube_Quad4(UnstructuredMesh & mesh, DM da)
   PetscInt xs, ys, xm, ym, Mx, My, xp, yp;
 
   /* Get local grid boundaries */
-  DMDAGetCorners(da, &xs, &ys, PETSC_IGNORE, &xm, &ym, PETSC_IGNORE);
-  DMDAGetInfo(da,
-              PETSC_IGNORE,
-              &Mx,
-              &My,
-              PETSC_IGNORE,
-              &xp,
-              &yp,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE,
-              PETSC_IGNORE);
+  LibmeshPetscCallA(mesh.comm().get(),
+                    DMDAGetCorners(da, &xs, &ys, PETSC_IGNORE, &xm, &ym, PETSC_IGNORE));
+  LibmeshPetscCallA(mesh.comm().get(),
+                    DMDAGetInfo(da,
+                                PETSC_IGNORE,
+                                &Mx,
+                                &My,
+                                PETSC_IGNORE,
+                                &xp,
+                                &yp,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE,
+                                PETSC_IGNORE));
 
   for (PetscInt j = ys; j < ys + ym; j++)
     for (PetscInt i = xs; i < xs + xm; i++)

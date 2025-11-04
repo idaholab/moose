@@ -10,6 +10,10 @@ in the domain, selection of blocks, or selection of boundaries.
 the IDs of the nodes in a vector named `id`,
 and a vector named after each variable sampled, containing the variable values at each point.
 
+!alert note title=General sampling
+The `NodalValueSampler` samples nodal variables at the mesh nodes. For more flexible sampling,
+use the [PositionsFunctorValueSampler.md].
+
 !syntax parameters /VectorPostprocessors/NodalValueSampler
 
 !syntax inputs /VectorPostprocessors/NodalValueSampler

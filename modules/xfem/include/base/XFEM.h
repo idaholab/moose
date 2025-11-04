@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -226,6 +226,13 @@ public:
    */
   void setDebugOutputLevel(unsigned int debug_output_level);
 
+  /**
+   * Controls the minimum average weight multiplier for each element
+   * @param min_weight_multiplier The minimum average weight multiplier applied
+   * by XFEM to the standard quadrature weights
+   */
+  void setMinWeightMultiplier(Real min_weight_multiplier);
+
   virtual bool getXFEMWeights(MooseArray<Real> & weights,
                               const Elem * elem,
                               QBase * qrule,
@@ -360,6 +367,10 @@ private:
   /// 2: Details on modifications to mesh
   /// 3: Full dump of element fragment algorithm mesh
   unsigned int _debug_output_level;
+
+  /// The minimum average multiplier applied by XFEM to the standard quadrature weights
+  /// to integrate partial elements
+  Real _min_weight_multiplier;
 
   /**
    * Data structure to store the nonlinear solution for nodes/elements affected by XFEM

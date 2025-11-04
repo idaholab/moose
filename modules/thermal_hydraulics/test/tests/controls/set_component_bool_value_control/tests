@@ -7,6 +7,7 @@
     csvdiff = 'test_out.csv'
     allow_test_objects = true
     recover = false
+    restep = false # Test is prescribed to abort on failed timestep
     requirement = 'The system shall be able to set a component boolean parameter to the value of a boolean control data.'
   []
 []

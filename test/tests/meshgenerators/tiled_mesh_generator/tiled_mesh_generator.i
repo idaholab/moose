@@ -18,10 +18,6 @@
     x_tiles = 2
     y_tiles = 2
     z_tiles = 2
-
-    # You can only run this test with ReplicatedMesh because the underlying
-    # algorithm, stitch_meshes(), only works with ReplicatedMesh.
-    parallel_type = replicated
   []
 []
 

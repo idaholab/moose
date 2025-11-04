@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,7 @@ InputParameters
 PolycrystalRandomICAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription("Sets random polycrystal initial conditions for each order parameter");
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   MooseEnum typ_options("continuous discrete");

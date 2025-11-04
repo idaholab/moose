@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,18 +11,16 @@ Main program for running MooseDocs. The moosedocs.py script that exists within t
 documentation directory for applications call this in similar fashion to
 MOOSE run_tests.
 """
-import os
 import argparse
 import logging
-import mooseutils
 
 from .commands import build, verify, check, generate, syntax, init
 from .common import log
 
-def command_line_options():
+def command_line_options()->object:
     """
     The main command line parser, this creates the main parser and calls the
-    calls the command_line_options method for each command.
+    command_line_options method for each command.
     """
     desc = "MooseDocs: A utility to build MOOSE documentation from a single source."
     parser = argparse.ArgumentParser(description=desc)
@@ -70,11 +68,11 @@ def run():
 
 
     handler = logging.getLogger('MooseDocs').handlers[0]
-    critical = handler.getCount(logging.CRITICAL)
-    errors =   handler.getCount(logging.ERROR)
-    warnings = handler.getCount(logging.WARNING)
+    critical = handler.get_count(logging.CRITICAL)
+    errors =   handler.get_count(logging.ERROR)
+    warnings = handler.get_count(logging.WARNING)
 
-    print('CRITICAL:{} ERROR:{} WARNING:{}'.format(critical, errors, warnings))
+    print(f'CRITICAL:{critical} ERROR:{errors} WARNING:{warnings}')
     if critical or errors or (errno != 0):
         return 1
     return 0

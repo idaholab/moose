@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -59,7 +59,7 @@ protected:
   /// Calculates and returns "grad_u dot normal" on the face to be used for
   /// diffusive terms.  If using any cross-diffusion corrections, etc. all
   /// those calculations will be handled for appropriately by this function.
-  virtual ADReal gradUDotNormal(const Moose::StateArg & time) const;
+  virtual ADReal gradUDotNormal(const Moose::StateArg & time, const bool correct_skewness) const;
 
   /// Kernels are called even on boundaries in case one is for a variable with
   /// a dirichlet BC - in which case we need to run the kernel with a
@@ -118,19 +118,14 @@ protected:
   Moose::FaceArg singleSidedFaceArg(
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
-      bool correct_skewness = false) const;
+      bool correct_skewness = false,
+      const Moose::StateArg * state_limiter = nullptr) const;
 
   /**
    * Returns whether to avoid execution on a boundary
    * @param fi the FaceInformation currently considered
    */
   bool avoidBoundary(const FaceInfo & fi) const;
-
-  /**
-   * Adjust the number of ghost layers in the relationship manager
-   * @param ghost_layers The new number of requested ghost layers
-   */
-  void adjustRMGhostLayers(const unsigned short ghost_layers) const;
 
   /// Which boundaries/sidesets to force the execution of flux kernels on
   std::unordered_set<BoundaryID> _boundaries_to_force;

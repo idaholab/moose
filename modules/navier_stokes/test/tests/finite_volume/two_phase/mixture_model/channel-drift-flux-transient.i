@@ -83,7 +83,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_x
     rho_d = ${rho_d}
-    fd = 'rho_mixture_var'
+    fd = 'phase_2'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
     momentum_component = 'x'
@@ -100,6 +100,15 @@ velocity_interp_method = 'rc'
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
+  []
+  [u_friction]
+    type = PINSFVMomentumFriction
+    Darcy_name = Darcy_coefficient_vec
+    is_porous_medium = false
+    momentum_component = x
+    mu = mu_mixture
+    rho = rho_mixture
+    variable = vel_x
   []
 
   [v_time]
@@ -120,7 +129,7 @@ velocity_interp_method = 'rc'
     type = WCNSFV2PMomentumDriftFlux
     variable = vel_y
     rho_d = ${rho_d}
-    fd = 'rho_mixture_var'
+    fd = 'phase_2'
     u_slip = 'vel_slip_x'
     v_slip = 'vel_slip_y'
     momentum_component = 'y'
@@ -138,6 +147,15 @@ velocity_interp_method = 'rc'
     momentum_component = 'y'
     pressure = pressure
   []
+  [v_friction]
+    type = PINSFVMomentumFriction
+    Darcy_name = Darcy_coefficient_vec
+    is_porous_medium = false
+    momentum_component = y
+    mu = mu_mixture
+    rho = rho_mixture
+    variable = vel_y
+  []
 
   [phase_2_time]
     type = FVFunctorTimeKernel
@@ -147,8 +165,8 @@ velocity_interp_method = 'rc'
   [phase_2_advection]
     type = INSFVScalarFieldAdvection
     variable = phase_2
-    u_slip = 'vel_x'
-    v_slip = 'vel_y'
+    u_slip = 'vel_slip_x'
+    v_slip = 'vel_slip_y'
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = 'upwind'
   []
@@ -209,6 +227,12 @@ velocity_interp_method = 'rc'
   [mu_mixture_var]
     type = MooseVariableFVReal
   []
+  [vel_slip_x_var]
+    type = MooseVariableFVReal
+  []
+  [vel_slip_y_var]
+    type = MooseVariableFVReal
+  []
 []
 
 [AuxKernels]
@@ -226,6 +250,16 @@ velocity_interp_method = 'rc'
     type = FunctorAux
     variable = mu_mixture_var
     functor = 'mu_mixture'
+  []
+  [populate_vx_slip_var]
+    type = FunctorAux
+    variable = vel_slip_x_var
+    functor = 'vel_slip_x'
+  []
+  [populate_vy_slip_var]
+    type = FunctorAux
+    variable = vel_slip_y_var
+    functor = 'vel_slip_y'
   []
 []
 
@@ -311,5 +345,20 @@ velocity_interp_method = 'rc'
     type = SideAverageValue
     boundary = 'right'
     variable = 'rho_mixture_var'
+  []
+  [vslip_x]
+    type = SideExtremeValue
+    boundary = 'left'
+    variable = 'vel_slip_x_var'
+  []
+  [vslip_y]
+    type = SideExtremeValue
+    boundary = 'left'
+    variable = 'vel_slip_y_var'
+  []
+  [vslip_value]
+    type = ParsedPostprocessor
+    expression = 'sqrt(vslip_x*vslip_x + vslip_y*vslip_y)*vslip_x/abs(vslip_x)'
+    pp_names = 'vslip_x vslip_y'
   []
 []

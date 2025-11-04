@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,8 +27,6 @@ public:
   TimeNodalKernel(const InputParameters & parameters);
 
 protected:
-  virtual void computeResidual() override;
-
   /// Time derivative of u
   const VariableValue & _u_dot;
 

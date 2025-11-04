@@ -17,6 +17,7 @@
 
 [AuxVariables]
   [p0]
+    block = 'inlet_pipe outlet_pipe deadend_pipe'
     family = MONOMIAL
     order = CONSTANT
   []

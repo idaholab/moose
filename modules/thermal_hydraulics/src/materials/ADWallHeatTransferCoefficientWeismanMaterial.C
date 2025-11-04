@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -64,6 +64,8 @@ ADWallHeatTransferCoefficientWeismanMaterial::ADWallHeatTransferCoefficientWeism
 void
 ADWallHeatTransferCoefficientWeismanMaterial::computeQpProperties()
 {
+  using std::max, std::pow;
+
   switch (_bundle_array)
   {
     case Bundle_array::SQUARE:
@@ -74,9 +76,9 @@ ADWallHeatTransferCoefficientWeismanMaterial::computeQpProperties()
             "and 1.3. Be aware that using values out of this range may lead to "
             "significant errors in your results!"));
       ADReal Pr = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
-      ADReal Re = std::max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
+      ADReal Re = max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
       ADReal n = (_T[_qp] < _T_wall[_qp]) ? 0.4 : 0.3;
-      ADReal Nu = 0.023 * std::pow(Re, 4. / 5.) * std::pow(Pr, n) * (1.826 * _PoD - 1.0430);
+      ADReal Nu = 0.023 * pow(Re, 4. / 5.) * pow(Pr, n) * (1.826 * _PoD - 1.0430);
       _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
       break;
     }
@@ -88,9 +90,9 @@ ADWallHeatTransferCoefficientWeismanMaterial::computeQpProperties()
             "and 1.5. Be aware that using values out of this range may lead to "
             "significant errors in your results!"));
       ADReal Pr = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
-      ADReal Re = std::max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
+      ADReal Re = max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
       ADReal n = (_T[_qp] < _T_wall[_qp]) ? 0.4 : 0.3;
-      ADReal Nu = 0.023 * std::pow(Re, 4. / 5.) * std::pow(Pr, n) * (1.130 * _PoD - 0.2609);
+      ADReal Nu = 0.023 * pow(Re, 4. / 5.) * pow(Pr, n) * (1.130 * _PoD - 0.2609);
       _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
       break;
     }

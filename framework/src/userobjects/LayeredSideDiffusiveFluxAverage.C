@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,7 +18,7 @@ registerMooseObjectRenamed("MooseApp",
 InputParameters
 LayeredSideDiffusiveFluxAverage::validParams()
 {
-  InputParameters params = LayeredSideIntegral::validParams();
+  InputParameters params = LayeredSideAverage::validParams();
   params.addClassDescription("Computes the diffusive flux of a variable on layers alongside "
                              "a boundary.");
   params.addRequiredParam<std::string>(

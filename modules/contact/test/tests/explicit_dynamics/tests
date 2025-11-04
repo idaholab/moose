@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#25666'
+  issues = '#25666 #28008 #29732'
   design = 'ExplicitDynamicsContactConstraint.md'
   [block_penalty]
     type = 'CSVDiff'
@@ -17,21 +17,10 @@
     exodiff = 'test_balance_out.e'
     abs_zero = 1.0e-4
     allow_warnings = true
-    method = '!dbg'                  
+    capabilities = 'method!=dbg'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve a simple few-element normal contact problem '
                   'using explicit dynamics solving uncoupled, local equations of momentum balance.'
-  []
-  [test_balance_overwrite]
-    type = 'CSVDiff'
-    input = 'test_balance.i'
-    csvdiff = 'test_balance_overwrite_out.csv'
-    cli_args = 'ExplicitDynamicsContact/my_contact/overwrite_current_solution=true Outputs/file_base=test_balance_overwrite_out'
-    abs_zero = 1.0e-4
-    allow_warnings = true
-    method = '!dbg'                  
-    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
-                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
-                  ' and overwrite boundary variables after applying the time stepper scheme.'
   []
   [test_balance_short]
     type = 'Exodiff'
@@ -39,20 +28,10 @@
     exodiff = 'test_balance_short_out.e'
     abs_zero = 1.0e-4
     allow_warnings = true
-    cli_args = 'Outputs/file_base=test_balance_short_out Executioner/end_time=-0.009'            
+    cli_args = 'Outputs/file_base=test_balance_short_out Executioner/end_time=0.001'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve a simple few-element normal contact problem '
                   'using explicit dynamics solving uncoupled, local equations of momentum balance in debug mode.'
-  []
-  [test_balance_overwrite_short]
-    type = 'CSVDiff'
-    input = 'test_balance.i'
-    csvdiff = 'test_balance_overwrite_short_out.csv'
-    cli_args = 'ExplicitDynamicsContact/my_contact/overwrite_current_solution=true Outputs/file_base=test_balance_overwrite_short_out Executioner/end_time=-0.009'
-    abs_zero = 1.0e-4
-    allow_warnings = true               
-    requirement = 'The system shall be able to solve a simple few-element normal contact problem '
-                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
-                  ' and overwrite boundary variables after applying the time stepper scheme in debug mode.'
   []
   [settlement]
     type = 'CSVDiff'
@@ -64,5 +43,51 @@
                   'using explicit dynamics solving uncoupled, local equations of momentum balance '
                   'during an impact-settling under gravity acceleration.'
     heavy = true
+  []
+  [highvel]
+    type = 'CSVDiff'
+    input = 'highvel.i'
+    csvdiff = 'highvel_out.csv'
+    abs_zero = 1.0e-5
+    allow_warnings = true
+    requirement = 'The system shall be able to solve a simple few-element normal contact problem with contact at an elevated velocity '
+                  'using explicit dynamics solving uncoupled, local equations of momentum balance '
+                  'during an impact-settling under increased gravity acceleration.'
+    heavy = true
+  []
+  [exp_constant_mass]
+    type = 'Exodiff'
+    input = 'test_balance.i'
+    exodiff = 'test_balance_out.e'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    capabilities = 'method!=dbg'
+    prereq = 'test_balance'
+    cli_args ='Executioner/TimeIntegrator/use_constant_mass=true Mesh/patch_update_strategy=always'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    requirement = 'The system shall be able to solve an explicit contact problem with the constant mass option and with updating the contact patch often.'
+  []
+  [optimized_contact]
+    type = 'Exodiff'
+    custom_cmp = 'optimize.cmp'
+    input = 'test_balance_optimized.i'
+    exodiff = 'test_balance_out.e'
+    # uses same output name
+    prereq = 'exp_constant_mass'
+    abs_zero = 1.0e-4
+    allow_warnings = true
+    capabilities = 'method!=dbg'
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    requirement = 'The system shall be able to solve an explicit contact problem quickly, omitting verbose output.'
+  []
+  [deep_impact]
+    type = 'Exodiff'
+    input = 'deep_impact.i'
+    exodiff = 'deep_impact_out.e'
+    abs_zero = 1.0e-5
+    allow_warnings = true
+    capabilities = 'method!=dbg'
+    heavy = true
+    requirement = 'The system shall be able to solve for a large displacemnt explicit contact problem.'
   []
 []

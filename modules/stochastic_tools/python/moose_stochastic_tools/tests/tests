@@ -1,0 +1,37 @@
+[Tests]
+  [make_histogram]
+    type = PythonUnitTest
+    input = test_make_histogram.py
+    required_python_packages = 'numpy plotly'
+
+    issues = '#17391'
+    design = 'parameter_study.md sobol.md'
+    requirement = "The system shall include python utilities that produce histogram figures from stochastic data."
+  []
+  [visualize_statistics]
+    type = PythonUnitTest
+    input = test_visualize_statistics.py
+    required_python_packages = 'numpy plotly'
+
+    issues = '#17391'
+    design = 'parameter_study.md sobol.md'
+    requirement = "The system shall include python utilities that process StatisticsReporter output."
+  []
+  [visualize_sobol]
+    type = PythonUnitTest
+    input = test_visualize_sobol.py
+    required_python_packages = 'numpy plotly'
+
+    issues = '#17391'
+    design = 'parameter_study.md sobol.md'
+    requirement = "The system shall include python utilities that process SobolReporter output."
+  []
+  [stochastic_control]
+    type = PythonUnitTest
+    input = test_stochastic_control.py
+
+    issues = '#31171'
+    design = 'StochasticControl.md'
+    requirement = "The system shall include python utilities for driving stochastic simulations of MOOSE-based models."
+  []
+[]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,8 +40,6 @@
 void
 testReconstruction(const Moose::CoordinateSystemType coord_type)
 {
-  const char * argv[2] = {"foo", "\0"};
-
   MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
   coord_type_enum = (coord_type == Moose::COORD_XYZ) ? "XYZ" : "RZ";
 
@@ -57,7 +55,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
   for (const auto i : index_range(num_elem))
   {
     const auto nx = num_elem[i];
-    auto app = AppFactory::createAppShared("NavierStokesUnitApp", 1, (char **)argv);
+    auto app = AppFactory::create("NavierStokesUnitApp");
     auto * factory = &app->getFactory();
     std::string mesh_type = "MeshGeneratorMesh";
 
@@ -115,8 +113,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     {
       auto moukalled_reconstruct = [&fi](auto & functor, auto & container)
       {
-        auto face =
-            Moose::FaceArg({&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
+        auto face = Moose::FaceArg(
+            {&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr, nullptr});
         const RealVectorValue uf(functor(face, Moose::currentState()));
         const Point surface_vector = fi.normal() * fi.faceArea();
         auto product = (uf * fi.dCN()) * surface_vector;

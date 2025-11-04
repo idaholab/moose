@@ -8,6 +8,7 @@
 [XFEM]
   qrule = volfrac
   output_cut_plane = true
+  min_weight_multiplier = 0.0
 []
 
 [UserObjects]
@@ -30,7 +31,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
   [../]

@@ -5,7 +5,7 @@
 The Rayleigh number is computed as:
 
 !equation
-Ra = \dfrac{\Delta \rho l^3 g}{\mu k} = \dfrac{\rho \beta \Delta T l^3 g}{\mu k}
+Ra = \dfrac{\Delta \rho l^3 g}{\mu \alpha} = \dfrac{\rho \beta \Delta T l^3 g}{\mu \alpha}
 
 where:
 
@@ -15,7 +15,7 @@ where:
 - $l$ is the size of the system in the direction of the temperature difference
 - $g$ is the magnitude of the gravity
 - $\mu$ is the dynamic viscosity of the fluid
-- $k$ is the thermal diffusivity of the fluid
+- $\alpha$ is the thermal diffusivity of the fluid
 
 
 The density difference may be provided either directly or using the fluid expansion coefficient

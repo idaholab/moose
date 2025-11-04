@@ -23,6 +23,7 @@ See [this paper](https://joss.theoj.org/papers/10.21105/joss.06146) for an overv
 
 ### Documentation class=center style=font-weight:400
 
+- [Theory manual](modules/thermal_hydraulics/theory_manual/index.md)
 - [Getting started](modules/thermal_hydraulics/getting_started.md)
 - Tutorials:
 
@@ -32,6 +33,8 @@ See [this paper](https://joss.theoj.org/papers/10.21105/joss.06146) for an overv
 - [Examples](modules/thermal_hydraulics/examples/index.md)
 - [Test problems](modules/thermal_hydraulics/test_problems/index.md)
 - [Syntax index](modules/thermal_hydraulics/syntax.md)
+- [Utilities](modules/thermal_hydraulics/utilities.md)
+- [Deprecations](modules/thermal_hydraulics/deprecations/index.md)
 
 !col-end!
 

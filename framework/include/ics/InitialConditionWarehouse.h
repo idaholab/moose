@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,8 +40,13 @@ public:
 
 protected:
   ///@{
-  /// Variable name to block/boundary IDs for error checking
-  std::vector<std::map<std::string, std::set<BoundaryID>>> _boundary_ics;
-  std::vector<std::map<std::string, std::set<SubdomainID>>> _block_ics;
+  /// Maps used to check if multiple ICs define the same variable on the same block/boundary for the same state (e.g CURRENT, OLD, OLDER).
+  /// They are vectors of maps because each map is repeated for each thread.
+  /// Each map relates string-int tuples to a set of block/boundary IDs.
+  /// The string-int tuple is a unique identifier for a specific variable and state. The string-int tuple is renamed to ic_key_type for clarity.
+  /// The algorithm then makes sure that a new IC object does not overlap with a previous IC object (i.e. same block/boundary).
+  using ic_key_type = std::tuple<VariableName, unsigned short>;
+  std::vector<std::map<ic_key_type, std::set<BoundaryID>>> _boundary_ics;
+  std::vector<std::map<ic_key_type, std::set<SubdomainID>>> _block_ics;
   ///@}
 };

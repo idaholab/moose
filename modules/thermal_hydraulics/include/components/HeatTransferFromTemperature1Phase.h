@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,7 +26,7 @@ public:
 
 protected:
   /// Get the FE type for wall temperature variable
-  virtual const FEType & getFEType();
+  virtual const libMesh::FEType & getFEType();
 
   /**
    * Adds 1-phase heat transfer kernels
@@ -34,7 +34,7 @@ protected:
   void addHeatTransferKernels();
 
   /// The type of the wall temperature variable
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
 public:
   static InputParameters validParams();

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,53 +14,14 @@ registerMooseObject("MooseApp", LayeredAverage);
 InputParameters
 LayeredAverage::validParams()
 {
-  InputParameters params = LayeredIntegral::validParams();
+  InputParameters params =
+      LayeredVolumeAverageBase<ElementIntegralVariableUserObject>::validParams();
   params.addClassDescription("Computes averages of variables over layers");
 
   return params;
 }
 
-LayeredAverage::LayeredAverage(const InputParameters & parameters) : LayeredIntegral(parameters)
+LayeredAverage::LayeredAverage(const InputParameters & parameters)
+  : LayeredVolumeAverageBase<ElementIntegralVariableUserObject>(parameters)
 {
-  _layer_volumes.resize(_num_layers);
-}
-
-void
-LayeredAverage::initialize()
-{
-  LayeredIntegral::initialize();
-
-  for (auto & vol : _layer_volumes)
-    vol = 0.0;
-}
-
-void
-LayeredAverage::execute()
-{
-  LayeredIntegral::execute();
-
-  unsigned int layer = getLayer(_current_elem->vertex_average());
-  _layer_volumes[layer] += _current_elem_volume;
-}
-
-void
-LayeredAverage::finalize()
-{
-  LayeredIntegral::finalize();
-
-  gatherSum(_layer_volumes);
-
-  // Compute the average for each layer
-  for (unsigned int i = 0; i < _layer_volumes.size(); i++)
-    if (layerHasValue(i))
-      setLayerValue(i, getLayerValue(i) / _layer_volumes[i]);
-}
-
-void
-LayeredAverage::threadJoin(const UserObject & y)
-{
-  LayeredIntegral::threadJoin(y);
-  const auto & la = static_cast<const LayeredAverage &>(y);
-  for (unsigned int i = 0; i < _layer_volumes.size(); i++)
-    _layer_volumes[i] += la._layer_volumes[i];
 }

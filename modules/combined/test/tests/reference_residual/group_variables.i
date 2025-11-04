@@ -101,8 +101,8 @@
   [../]
 []
 
-[Modules]
-  [./TensorMechanics]
+[Physics]
+  [./SolidMechanics]
     [./GeneralizedPlaneStrain]
       [./gps1]
         use_displaced_mesh = true

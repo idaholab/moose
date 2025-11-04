@@ -21,6 +21,8 @@ In order to generate the hexagonal patterned mesh, three fundamental parameters 
 
 When [!param](/Mesh/PatternedHexMeshGenerator/pattern_boundary) is set as `hexagon`, the user can also provide [!param](/Mesh/PatternedHexMeshGenerator/duct_sizes) in either `apothem` or `radius` style to add external duct regions to the generated hexagon mesh. Also, [!param](/Mesh/PatternedHexMeshGenerator/hexagon_size) must also be provided to define the external hexagon boundary size, which can be either `apothem` or `radius` of the hexagon, as determined by [!param](/Mesh/PatternedHexMeshGenerator/hexagon_size_style). In some cases, if [!param](/Mesh/PatternedHexMeshGenerator/hexagon_size) is small enough, the hexagon external boundary may cut off some of the stitched hexagonal meshes. As long as the concentric circular (`rings`) regions are not cut off, the rest of the mesh is deformed to accommodate the limited external boundaries. Users can also set [!param](/Mesh/PatternedHexMeshGenerator/deform_non_circular_region) as `false` to prevent the non-circular regions from being deformed.
 
+ By default, the generated boundary mesh consists of linear elements. If quadratic elements are preferred, users can set [!param](/Mesh/PatternedHexMeshGenerator/boundary_region_element_type) as `QUAD8` or `QUAD9`.
+
 ## MeshMetaData of Input and Output Meshes
 
 As mentioned before, the `PatternedHexMeshGenerator` is capable of two modes of mesh patterning jobs, which require different mesh metadata from the input meshes to be patterned. These mesh metadata can be automatically assigned by the typical mesh generators that produce the input meshes. Alternatively, users can manually assign the required metadata using [`AddMetaDataGenerator`](/AddMetaDataGenerator.md).

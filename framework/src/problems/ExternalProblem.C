@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,7 +20,7 @@ ExternalProblem::validParams()
 
   // there is no nonlinear system (we set it as empty in the constructor)
   params.suppressParameter<bool>("ignore_zeros_in_jacobian");
-  params.suppressParameter<bool>("kernel_coverage_check");
+  params.suppressParameter<MooseEnum>("kernel_coverage_check");
   params.suppressParameter<std::vector<NonlinearSystemName>>("nl_sys_names");
   params.suppressParameter<bool>("previous_nl_solution_required");
   params.suppressParameter<bool>("skip_nl_system_check");
@@ -63,6 +63,7 @@ ExternalProblem::solve(const unsigned int)
   TIME_SECTION("solve", 1, "Solving", false)
 
   syncSolutions(Direction::TO_EXTERNAL_APP);
-  externalSolve();
+  if (shouldSolve())
+    externalSolve();
   syncSolutions(Direction::FROM_EXTERNAL_APP);
 }

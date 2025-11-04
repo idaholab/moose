@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,14 +51,25 @@ private:
   const Real _maximum_output_value;
   /// Limiting minimum value for the output of the PID controller
   const Real _minimum_output_value;
+  /// Limiting maximum value for the rate of change of output of the PID controller
+  const Real _maximum_change_rate;
   /// Integral of the error
-  Real _integral;
+  Real & _integral;
   /// Saved value of the integral at the beginning of a timestep, to recover from a failed solve
-  Real _integral_old;
+  Real & _integral_old;
+  /// Saved value of the controlled parameter at the end of a timestep. This is recomputed every time, but need to be restarted
+  /// for recover simulations
+  Real & _value;
   /// Saved value of the controlled parameter at the beginning of a timestep, to recover from a failed solve
-  Real _value_old;
+  Real & _value_old;
   /// the previous time step
-  int _t_step_old;
-  /// the previous value of the difference with the target, to detect changes of sign
-  Real _old_delta;
+  int & _t_step_old;
+  /// the previous value of the difference with the target, to detect changes of sign, and to compute the derivative term
+  Real & _old_delta;
+  /// whether the app has recovered once, because the logic for setting the value is different after having just recovered
+  bool _has_recovered;
+  /// the difference with the target from the previous time step, used if a time step fails
+  Real _delta_prev_tstep = 0.0;
+  /// the difference with the target from the second-to-last iteration of previous time step, used if a time step fails
+  Real _old_delta_prev_tstep = 0.0;
 };

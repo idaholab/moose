@@ -1,0 +1,50 @@
+[Tests]
+  design = DirectPerturbationReporter.md
+  issues = '#28671 #28799'
+
+  [central_difference]
+    requirement = 'The system shall support the ability to compute direct perturbation-based sensitivity values with central differencing '
+    [distributed]
+      type = JSONDiff
+      input = dp_main.i
+      jsondiff = dp_main_out.json
+      allow_test_objects = true
+      detail = 'on distributed data sets;'
+    []
+    [root]
+      type = JSONDiff
+      input = dp_main.i
+      cli_args = 'Reporters/storage/parallel_type=ROOT'
+      jsondiff = dp_main_out.json
+      allow_test_objects = true
+      detail = 'on root processor;'
+    []
+  []
+  [forward_difference]
+    requirement = 'The system shall support the ability to compute direct perturbation-based sensitivity values with forward differencing '
+    [distributed]
+      type = JSONDiff
+      input = dp_main.i
+      jsondiff = dp_main_out.json
+      allow_test_objects = true
+      detail = 'on distributed data sets;'
+      cli_args = 'Samplers/directperturbation/perturbation_method=forward_difference'
+    []
+    [root]
+      type = JSONDiff
+      input = dp_main.i
+      jsondiff = dp_main_out.json
+      allow_test_objects = true
+      detail = 'on root processor;'
+      cli_args = 'Reporters/storage/parallel_type=ROOT Samplers/directperturbation/perturbation_method=forward_difference'
+    []
+  []
+  [relative_sensitivity]
+    type = JSONDiff
+    input = dp_main.i
+    cli_args = 'Reporters/sensitivities/relative_sensitivity=true Outputs/file_base=relative_sens'
+    jsondiff = relative_sens.json
+    allow_test_objects = true
+    requirement = 'The system shall support the ability to compute direct perturbation-based relative sensitivity values.'
+  []
+[]

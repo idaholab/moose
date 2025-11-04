@@ -40,7 +40,9 @@ c = 0
 [Executioner]
   type = Transient
 
-  solve_type = 'PJFNK'
+  solve_type = 'Newton'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   start_time = 0.0
   end_time = 20
   dt = 1
@@ -60,17 +62,15 @@ c = 0
   []
 []
 
-[Controls]
-  [integral_value]
-    type = PIDTransientControl
-    postprocessor = integral
-    target = 1.5
-    parameter = 'BCs/left/value'
-    K_integral = -1
-    K_proportional = -1
-    K_derivative = -0.1
-    execute_on = 'initial timestep_begin'
-  []
+[Controls/integral_value]
+  type = PIDTransientControl
+  postprocessor = integral
+  target = 1.5
+  parameter = 'BCs/left/value'
+  K_integral = -1
+  K_proportional = -1
+  K_derivative = -0.1
+  execute_on = 'initial timestep_begin'
 []
 
 [Outputs]

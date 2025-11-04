@@ -19,33 +19,33 @@
 
 [Variables]
   # order parameter
-  [./eta]
+  [eta]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 
   # hydrogen concentration
-  [./c]
+  [c]
     order = THIRD
     family = HERMITE
-  [../]
+  []
 
   # hydrogen phase concentration (matrix)
-  [./cm]
+  [cm]
     order = THIRD
     family = HERMITE
     initial_condition = 0.0
-  [../]
+  []
   # hydrogen phase concentration (delta phase)
-  [./cd]
+  [cd]
     order = THIRD
     family = HERMITE
     initial_condition = 0.0
-  [../]
+  []
 []
 
 [ICs]
-  [./eta]
+  [eta]
     variable = eta
     type = SmoothCircleIC
     x1 = 0.0
@@ -54,8 +54,8 @@
     invalue = 0.2
     outvalue = 0.1
     int_width = 0.05
-  [../]
-  [./c]
+  []
+  [c]
     variable = c
     type = SmoothCircleIC
     x1 = 0.0
@@ -64,124 +64,124 @@
     invalue = 0.6
     outvalue = 0.4
     int_width = 0.05
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = 'eta c cm cd'
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
   # Free energy of the matrix
-  [./fm]
+  [fm]
     type = DerivativeParsedMaterial
     property_name = fm
     coupled_variables = 'cm'
     expression = '(0.1-cm)^2'
     outputs = oversampling
-  [../]
+  []
 
   # Free energy of the delta phase
-  [./fd]
+  [fd]
     type = DerivativeParsedMaterial
     property_name = fd
     coupled_variables = 'cd'
     expression = '(0.9-cd)^2'
     outputs = oversampling
-  [../]
+  []
 
   # h(eta)
-  [./h_eta]
+  [h_eta]
     type = SwitchingFunctionMaterial
     h_order = HIGH
     eta = eta
     outputs = oversampling
-  [../]
+  []
 
   # g(eta)
-  [./g_eta]
+  [g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
     outputs = oversampling
-  [../]
+  []
 
   # constant properties
-  [./constants]
+  [constants]
     type = GenericConstantMaterial
-    prop_names  = 'L   '
+    prop_names = 'L   '
     prop_values = '0.7 '
-  [../]
+  []
 []
 
 [Kernels]
   # enforce c = (1-h(eta))*cm + h(eta)*cd
-  [./PhaseConc]
+  [PhaseConc]
     type = KKSPhaseConcentration
-    ca       = cm
+    ca = cm
     variable = cd
-    c        = c
-    eta      = eta
-  [../]
+    c = c
+    eta = eta
+  []
 
   # enforce pointwise equality of chemical potentials
-  [./ChemPotVacancies]
+  [ChemPotVacancies]
     type = KKSPhaseChemicalPotential
     variable = cm
-    cb       = cd
-    fa_name  = fm
-    fb_name  = fd
-  [../]
+    cb = cd
+    fa_name = fm
+    fb_name = fd
+  []
 
   #
   # Cahn-Hilliard Equation
   #
-  [./CHBulk]
+  [CHBulk]
     type = KKSCHBulk
     variable = c
-    ca       = cm
-    cb       = cd
-    fa_name  = fm
-    fb_name  = fd
+    ca = cm
+    cb = cd
+    fa_name = fm
+    fb_name = fd
     mob_name = 0.7
-  [../]
-  [./dcdt]
+  []
+  [dcdt]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 
   #
   # Allen-Cahn Equation
   #
-  [./ACBulkF]
+  [ACBulkF]
     type = KKSACBulkF
     variable = eta
-    fa_name  = fm
-    fb_name  = fd
-    coupled_variables     = 'cm cd'
-    w        = 0.4
-  [../]
-  [./ACBulkC]
+    fa_name = fm
+    fb_name = fd
+    coupled_variables = 'cm cd'
+    w = 0.4
+  []
+  [ACBulkC]
     type = KKSACBulkC
     variable = eta
-    ca       = cm
-    cb       = cd
-    fa_name  = fm
-  [../]
-  [./ACInterface]
+    ca = cm
+    cb = cd
+    fa_name = fm
+  []
+  [ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = 0.4
-  [../]
-  [./detadt]
+  []
+  [detadt]
     type = TimeDerivative
     variable = eta
-  [../]
+  []
 []
 
 [Executioner]
@@ -202,16 +202,18 @@
 []
 
 [Preconditioning]
-  [./mydebug]
+  [mydebug]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Outputs]
   file_base = kks_example
-  [./oversampling]
+  [oversampling]
     type = Exodus
     refinements = 3
-  [../]
+    # To keep the same test results as before #30318 sampled output rework
+    hide = 'd^2fd/dcd^2 d^2fm/dcm^2 d^2g/deta^2 d^2h/deta^2 dfd/dcd dfm/dcm dg/deta dh/deta fd fm g h'
+  []
 []

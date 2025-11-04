@@ -5,7 +5,7 @@ expression has to be provided for each individual phase. Two different systems e
 *phase free energies* into a *global free energy*.
 
 Material objects that internally derive from ```DerivativeFunctionMaterialBase```
-([Doxygen](http://mooseframework.org/docs/doxygen/modules/classDerivativeFunctionMaterialBase.html)),
+([Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classDerivativeFunctionMaterialBase.html)),
 like the materials for the [Parsed Function Kernels](ParsedFunctionKernels) are used to provide the
 free energy expressions for each phase.
 
@@ -13,7 +13,7 @@ The simplified +two-phase model+ uses a single order parameter to switch between
 global free energy is constructed using a meta material class that combines the phase free energies.
 
 For two phase models the ```DerivativeTwoPhaseMaterial```
-([Doxygen](http://mooseframework.org/docs/doxygen/modules/classDerivativeTwoPhaseMaterial.html)) can
+([Doxygen](https://mooseframework.inl.gov/docs/doxygen/modules/classDerivativeTwoPhaseMaterial.html)) can
 be used to combine two phase free energies into a global free energy (which the Allen-Cahn and
 Cahn-Hilliard kernels use to evolve the system) as
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@
 #include "Assembly.h"
 #include "SystemBase.h"
 #include "ADUtils.h"
+#include "FEProblemBase.h"
+#include "AutomaticMortarGeneration.h"
 
 #include <algorithm>
 #include <vector>
@@ -49,7 +51,7 @@ ADMortarLagrangeConstraint::initialSetup()
   // Detect if preconditioner is VCP. If so, disable automatic derivative trimming.
   auto const * mpc = feProblem().getNonlinearSystemBase(_sys.number()).getPreconditioner();
 
-  if (auto * const is_vcp = dynamic_cast<const VariableCondensationPreconditioner *>(mpc))
+  if (dynamic_cast<const VariableCondensationPreconditioner *>(mpc))
     _apply_derivative_threshold = false;
 }
 

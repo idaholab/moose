@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,8 +12,7 @@
 #include "UserObject.h"
 #include "BoundaryRestrictableRequired.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "NeighborCoupleable.h"
-#include "MooseVariableDependencyInterface.h"
+#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
 #include "FaceInfo.h"
@@ -21,13 +20,13 @@
 /**
  *  Base class for implementing interface user objects
  */
-class InterfaceUserObjectBase : public UserObject,
-                                public BoundaryRestrictableRequired,
-                                public TwoMaterialPropertyInterface,
-                                public NeighborCoupleable,
-                                public MooseVariableDependencyInterface,
-                                public TransientInterface,
-                                public ElementIDInterface
+class InterfaceUserObjectBase
+  : public UserObject,
+    public BoundaryRestrictableRequired,
+    public TwoMaterialPropertyInterface,
+    public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+    public TransientInterface,
+    public ElementIDInterface
 {
 public:
   static InputParameters validParams();

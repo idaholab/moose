@@ -58,7 +58,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   displacements = 'disp_x disp_y disp_z'
   [all]
     strain = SMALL
@@ -146,6 +146,13 @@
     variable = disp_x
     function = '0.01*t'
     boundary = right
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
   []
 []
 

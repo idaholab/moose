@@ -1,0 +1,530 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
+#include "MFEMProblem.h"
+#include "MFEMInitialCondition.h"
+#include "MFEMVariable.h"
+#include "MFEMSubMesh.h"
+#include "MFEMFunctorMaterial.h"
+#include "libmesh/string_to_enum.h"
+
+#include <vector>
+#include <algorithm>
+
+registerMooseObject("MooseApp", MFEMProblem);
+
+InputParameters
+MFEMProblem::validParams()
+{
+  InputParameters params = ExternalProblem::validParams();
+  params.addClassDescription("Problem type for building and solving finite element problem using"
+                             " the MFEM finite element library.");
+  return params;
+}
+
+MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(params)
+{
+  // Initialise Hypre for all MFEM problems.
+  mfem::Hypre::Init();
+  // Disable multithreading for all MFEM problems (including any libMesh or MFEM subapps).
+  libMesh::libMeshPrivateData::_n_threads = 1;
+  setMesh();
+}
+
+void
+MFEMProblem::initialSetup()
+{
+  FEProblemBase::initialSetup();
+  addMFEMNonlinearSolver();
+}
+
+void
+MFEMProblem::setMesh()
+{
+  auto pmesh = mesh().getMFEMParMeshPtr();
+  getProblemData().pmesh = pmesh;
+  getProblemData().comm = pmesh->GetComm();
+  getProblemData().num_procs = pmesh->GetNRanks();
+  getProblemData().myid = pmesh->GetMyRank();
+}
+
+void
+MFEMProblem::addMFEMPreconditioner(const std::string & user_object_name,
+                                   const std::string & name,
+                                   InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+}
+
+void
+MFEMProblem::addMFEMSolver(const std::string & user_object_name,
+                           const std::string & name,
+                           InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+  auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
+
+  getProblemData().jacobian_solver = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
+}
+
+void
+MFEMProblem::addMFEMNonlinearSolver()
+{
+  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
+
+  // Defaults to one iteration, without further nonlinear iterations
+  nl_solver->SetRelTol(0.0);
+  nl_solver->SetAbsTol(0.0);
+  nl_solver->SetMaxIter(1);
+
+  getProblemData().nonlinear_solver = nl_solver;
+}
+
+void
+MFEMProblem::addBoundaryCondition(const std::string & bc_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(bc_name, name, parameters);
+  const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
+  if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
+    auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
+    if (getProblemData().eqn_system)
+    {
+      getProblemData().eqn_system->AddIntegratedBC(std::move(bc));
+    }
+    else
+    {
+      mooseError("Cannot add integrated BC with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+  else if (dynamic_cast<const MFEMEssentialBC *>(mfem_bc_uo) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMEssentialBC>(name).getSharedPtr();
+    auto mfem_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
+    if (getProblemData().eqn_system)
+    {
+      getProblemData().eqn_system->AddEssentialBC(std::move(mfem_bc));
+    }
+    else
+    {
+      mooseError("Cannot add boundary condition with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+  else
+  {
+    mooseError("Unsupported bc of type '", bc_name, "' and name '", name, "' detected.");
+  }
+}
+
+void
+MFEMProblem::addMaterial(const std::string &, const std::string &, InputParameters &)
+{
+  mooseError(
+      "MFEM materials must be added through the 'FunctorMaterials' block and not 'Materials'");
+}
+
+void
+MFEMProblem::addFunctorMaterial(const std::string & material_name,
+                                const std::string & name,
+                                InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(material_name, name, parameters);
+  getUserObject<MFEMFunctorMaterial>(name);
+}
+
+void
+MFEMProblem::addFESpace(const std::string & user_object_name,
+                        const std::string & name,
+                        InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(user_object_name, name, parameters);
+  MFEMFESpace & mfem_fespace(getUserObject<MFEMFESpace>(name));
+
+  // Register fespace and associated fe collection.
+  getProblemData().fecs.Register(name, mfem_fespace.getFEC());
+  getProblemData().fespaces.Register(name, mfem_fespace.getFESpace());
+}
+
+void
+MFEMProblem::addVariable(const std::string & var_type,
+                         const std::string & var_name,
+                         InputParameters & parameters)
+{
+  addGridFunction(var_type, var_name, parameters);
+  // MOOSE variables store DoFs for the trial variable and its time derivatives up to second order;
+  // MFEM GridFunctions store data for only one set of DoFs each, so we must add additional
+  // GridFunctions for time derivatives.
+  if (isTransient())
+  {
+    const auto time_derivative_var_name =
+        getUserObject<MFEMVariable>(var_name).getTimeDerivativeName();
+    getProblemData().time_derivative_map.addTimeDerivativeAssociation(var_name,
+                                                                      time_derivative_var_name);
+    addGridFunction(var_type, time_derivative_var_name, parameters);
+  }
+}
+
+void
+MFEMProblem::addGridFunction(const std::string & var_type,
+                             const std::string & var_name,
+                             InputParameters & parameters)
+{
+  if (var_type == "MFEMVariable")
+  {
+    // Add MFEM variable directly.
+    FEProblemBase::addUserObject(var_type, var_name, parameters);
+  }
+  else
+  {
+    // Add MOOSE variable.
+    FEProblemBase::addVariable(var_type, var_name, parameters);
+
+    // Add MFEM variable indirectly ("gridfunction").
+    InputParameters mfem_variable_params = addMFEMFESpaceFromMOOSEVariable(parameters);
+    FEProblemBase::addUserObject("MFEMVariable", var_name, mfem_variable_params);
+  }
+
+  // Register gridfunction.
+  MFEMVariable & mfem_variable = getUserObject<MFEMVariable>(var_name);
+  getProblemData().gridfunctions.Register(var_name, mfem_variable.getGridFunction());
+  if (mfem_variable.getFESpace().isScalar())
+    getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
+        var_name, mfem_variable.getGridFunction().get());
+  else
+    getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+        var_name, mfem_variable.getGridFunction().get());
+}
+
+void
+MFEMProblem::addAuxVariable(const std::string & var_type,
+                            const std::string & var_name,
+                            InputParameters & parameters)
+{
+  // We handle MFEM AuxVariables just like MFEM Variables, except
+  // we do not add additional GridFunctions for time derivatives.
+  addGridFunction(var_type, var_name, parameters);
+}
+
+void
+MFEMProblem::addAuxKernel(const std::string & kernel_name,
+                          const std::string & name,
+                          InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(kernel_name, name, parameters);
+}
+
+void
+MFEMProblem::addKernel(const std::string & kernel_name,
+                       const std::string & name,
+                       InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(kernel_name, name, parameters);
+  const UserObject * kernel_uo = &(getUserObjectBase(name));
+
+  if (dynamic_cast<const MFEMKernel *>(kernel_uo) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMKernel>(name).getSharedPtr();
+    auto kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
+    if (getProblemData().eqn_system)
+    {
+      getProblemData().eqn_system->AddKernel(std::move(kernel));
+    }
+    else
+    {
+      mooseError("Cannot add kernel with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+  else
+  {
+    mooseError("Unsupported kernel of type '", kernel_name, "' and name '", name, "' detected.");
+  }
+}
+
+libMesh::Point
+pointFromMFEMVector(const mfem::Vector & vec)
+{
+  return libMesh::Point(
+      vec.Elem(0), vec.Size() > 1 ? vec.Elem(1) : 0., vec.Size() > 2 ? vec.Elem(2) : 0.);
+}
+
+int
+vectorFunctionDim(const std::string & type, const InputParameters & parameters)
+{
+  if (type == "LevelSetOlssonVortex")
+  {
+    return 2;
+  }
+  else if (type == "ParsedVectorFunction")
+  {
+    if (parameters.isParamSetByUser("expression_z") || parameters.isParamSetByUser("value_z"))
+    {
+      return 3;
+    }
+    else if (parameters.isParamSetByUser("expression_y") || parameters.isParamSetByUser("value_y"))
+    {
+      return 2;
+    }
+    else
+    {
+      return 1;
+    }
+  }
+  else
+  {
+    return 3;
+  }
+}
+
+const std::vector<std::string> SCALAR_FUNCS = {"Axisymmetric2D3DSolutionFunction",
+                                               "BicubicSplineFunction",
+                                               "CoarsenedPiecewiseLinear",
+                                               "CompositeFunction",
+                                               "ConstantFunction",
+                                               "ImageFunction",
+                                               "ParsedFunction",
+                                               "ParsedGradFunction",
+                                               "PeriodicFunction",
+                                               "PiecewiseBilinear",
+                                               "PiecewiseConstant",
+                                               "PiecewiseConstantFromCSV",
+                                               "PiecewiseLinear",
+                                               "PiecewiseLinearFromVectorPostprocessor",
+                                               "PiecewiseMultiInterpolation",
+                                               "PiecewiseMulticonstant",
+                                               "SolutionFunction",
+                                               "SplineFunction",
+                                               "FunctionSeries",
+                                               "LevelSetOlssonBubble",
+                                               "LevelSetOlssonPlane",
+                                               "NearestReporterCoordinatesFunction",
+                                               "ParameterMeshFunction",
+                                               "ParsedOptimizationFunction",
+                                               "FourierNoise",
+                                               "MovingPlanarFront",
+                                               "MultiControlDrumFunction",
+                                               "Grad2ParsedFunction",
+                                               "GradParsedFunction",
+                                               "RichardsExcavGeom",
+                                               "ScaledAbsDifferenceDRLRewardFunction",
+                                               "CircularAreaHydraulicDiameterFunction",
+                                               "CosineHumpFunction",
+                                               "CosineTransitionFunction",
+                                               "CubicTransitionFunction",
+                                               "GeneralizedCircumference",
+                                               "PiecewiseFunction",
+                                               "TimeRampFunction"},
+                               VECTOR_FUNCS = {"ParsedVectorFunction", "LevelSetOlssonVortex"};
+
+void
+MFEMProblem::addFunction(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  ExternalProblem::addFunction(type, name, parameters);
+  auto & func = getFunction(name);
+  // FIXME: Do we want to have optimised versions for when functions
+  // are only of space or only of time.
+  if (std::find(SCALAR_FUNCS.begin(), SCALAR_FUNCS.end(), type) != SCALAR_FUNCS.end())
+  {
+    getCoefficients().declareScalar<mfem::FunctionCoefficient>(
+        name,
+        [&func](const mfem::Vector & p, mfem::real_t t) -> mfem::real_t
+        { return func.value(t, pointFromMFEMVector(p)); });
+  }
+  else if (std::find(VECTOR_FUNCS.begin(), VECTOR_FUNCS.end(), type) != VECTOR_FUNCS.end())
+  {
+    int dim = vectorFunctionDim(type, parameters);
+    getCoefficients().declareVector<mfem::VectorFunctionCoefficient>(
+        name,
+        dim,
+        [&func, dim](const mfem::Vector & p, mfem::real_t t, mfem::Vector & u)
+        {
+          libMesh::RealVectorValue vector_value = func.vectorValue(t, pointFromMFEMVector(p));
+          for (int i = 0; i < dim; i++)
+          {
+            u[i] = vector_value(i);
+          }
+        });
+  }
+  else
+  {
+    mooseWarning("Could not identify whether function ",
+                 type,
+                 " is scalar or vector; no MFEM coefficient object created.");
+  }
+}
+
+void
+MFEMProblem::addPostprocessor(const std::string & type,
+                              const std::string & name,
+                              InputParameters & parameters)
+{
+  ExternalProblem::addPostprocessor(type, name, parameters);
+  const PostprocessorValue & val = getPostprocessorValueByName(name);
+  getCoefficients().declareScalar<mfem::FunctionCoefficient>(
+      name, [&val](const mfem::Vector &) -> mfem::real_t { return val; });
+}
+
+InputParameters
+MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
+{
+
+  InputParameters fespace_params = _factory.getValidParams("MFEMGenericFESpace");
+  InputParameters mfem_variable_params = _factory.getValidParams("MFEMVariable");
+
+  auto moose_fe_type =
+      FEType(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
+             Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+
+  std::string mfem_family;
+  int mfem_vdim = 1;
+
+  switch (moose_fe_type.family)
+  {
+    case FEFamily::LAGRANGE:
+      mfem_family = "H1";
+      mfem_vdim = 1;
+      break;
+    case FEFamily::LAGRANGE_VEC:
+      mfem_family = "H1";
+      mfem_vdim = 3;
+      break;
+    case FEFamily::MONOMIAL:
+      mfem_family = "L2";
+      mfem_vdim = 1;
+      break;
+    case FEFamily::MONOMIAL_VEC:
+      mfem_family = "L2";
+      mfem_vdim = 3;
+      break;
+    default:
+      mooseError("Unable to set MFEM FESpace for MOOSE variable");
+      break;
+  }
+
+  // Create fespace name. If this already exists, we will reuse this for
+  // the mfem variable ("gridfunction").
+  const std::string fespace_name = mfem_family + "_" +
+                                   std::to_string(mesh().getMFEMParMesh().Dimension()) + "D_P" +
+                                   std::to_string(moose_fe_type.order.get_order());
+
+  // Set all fespace parameters.
+  fespace_params.set<std::string>("fec_name") = fespace_name;
+  fespace_params.set<int>("vdim") = mfem_vdim;
+
+  if (!hasUserObject(fespace_name)) // Create the fespace (implicit).
+  {
+    addFESpace("MFEMGenericFESpace", fespace_name, fespace_params);
+  }
+
+  mfem_variable_params.set<UserObjectName>("fespace") = fespace_name;
+
+  return mfem_variable_params;
+}
+
+void
+MFEMProblem::displaceMesh()
+{
+  // Displace mesh
+  if (mesh().shouldDisplace())
+  {
+    mesh().displace(static_cast<mfem::GridFunction const &>(*getMeshDisplacementGridFunction()));
+    // TODO: update FESpaces GridFunctions etc for transient solves
+  }
+}
+
+std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
+MFEMProblem::getMeshDisplacementGridFunction()
+{
+  // If C++23 transform were available this would be easier
+  auto const displacement_variable = mesh().getMeshDisplacementVariable();
+  if (displacement_variable)
+  {
+    return *_problem_data.gridfunctions.Get(displacement_variable.value());
+  }
+  else
+  {
+    return std::nullopt;
+  }
+}
+
+std::vector<VariableName>
+MFEMProblem::getAuxVariableNames()
+{
+  return systemBaseAuxiliary().getVariableNames();
+}
+
+MFEMMesh &
+MFEMProblem::mesh()
+{
+  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
+              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
+  return static_cast<MFEMMesh &>(_mesh);
+}
+
+const MFEMMesh &
+MFEMProblem::mesh() const
+{
+  return const_cast<MFEMProblem *>(this)->mesh();
+}
+
+void
+MFEMProblem::addSubMesh(const std::string & var_type,
+                        const std::string & var_name,
+                        InputParameters & parameters)
+{
+  // Add MFEM SubMesh.
+  FEProblemBase::addUserObject(var_type, var_name, parameters);
+  // Register submesh.
+  MFEMSubMesh & mfem_submesh = getUserObject<MFEMSubMesh>(var_name);
+  getProblemData().submeshes.Register(var_name, mfem_submesh.getSubMesh());
+}
+
+void
+MFEMProblem::addTransfer(const std::string & transfer_name,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  if (parameters.getBase() == "MFEMSubMeshTransfer")
+    FEProblemBase::addUserObject(transfer_name, name, parameters);
+  else
+    FEProblemBase::addTransfer(transfer_name, name, parameters);
+}
+
+std::shared_ptr<mfem::ParGridFunction>
+MFEMProblem::getGridFunction(const std::string & name)
+{
+  return getUserObject<MFEMVariable>(name).getGridFunction();
+}
+
+void
+MFEMProblem::addInitialCondition(const std::string & ic_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(ic_name, name, parameters);
+  getUserObject<MFEMInitialCondition>(name); // error check
+}
+
+std::string
+MFEMProblem::solverTypeString(const unsigned int libmesh_dbg_var(solver_sys_num))
+{
+  mooseAssert(solver_sys_num == 0, "No support for multi-system with MFEM right now");
+  return MooseUtils::prettyCppType(getProblemData().jacobian_solver.get());
+}
+
+#endif

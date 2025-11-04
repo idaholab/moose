@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -69,8 +69,13 @@ NaKFluidProperties::T_from_p_rho(Real pressure, Real density) const
   // NOTE we could also invert analytically the third degree polynomial, see Cardan's method
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
   { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(
-               pressure, density, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
+  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                             density,
+                                             _T_initial_guess,
+                                             _tolerance,
+                                             lambda,
+                                             name() + "::T_from_p_rho",
+                                             _max_newton_its)
                .first;
   // check for nans
   if (std::isnan(T))

@@ -19,9 +19,6 @@ rho = 1
     nx = 10
     ny = 10
   []
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 

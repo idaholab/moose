@@ -57,7 +57,7 @@
 [Kernels]
   # See wiki page "Developing Phase Field Models" for more information on Split
   # Cahn-Hilliard equation kernels.
-  # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/
+  # https://mooseframework.inl.gov/wiki/PhysicsModules/PhaseField/DevelopingModels/
   [./w_dot]
     variable = w
     v = c
@@ -109,7 +109,7 @@
 [Preconditioning]
   # Preconditioning is required for Newton's method. See wiki page "Solving
   # Phase Field Models" for more information.
-  # http://mooseframework.org/wiki/PhysicsModules/PhaseField/SolvingModels/
+  # https://mooseframework.inl.gov/wiki/PhysicsModules/PhaseField/SolvingModels/
   [./coupled]
     type = SMP
     full = true

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,7 @@ InputParameters
 InitialConditionBase::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += InitialConditionInterface::validParams();
   params += BlockRestrictable::validParams();
   params += BoundaryRestrictable::validParams();
   params += MaterialPropertyInterface::validParams();
@@ -38,6 +39,7 @@ InitialConditionBase::validParams()
 
 InitialConditionBase::InitialConditionBase(const InputParameters & parameters)
   : MooseObject(parameters),
+    InitialConditionInterface(parameters),
     BlockRestrictable(this),
     Coupleable(this,
                getParam<SystemBase *>("_sys")

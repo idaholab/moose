@@ -36,8 +36,7 @@
     initial_condition = 0
   []
   [ppgas]
-    family = MONOMIAL
-    order = CONSTANT
+    type = MooseVariableFVReal
   []
 []
 

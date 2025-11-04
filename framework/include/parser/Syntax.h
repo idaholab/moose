@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -114,6 +114,11 @@ public:
                             const std::string & task = "",
                             const std::string & file = "",
                             int line = -1);
+
+  /**
+   * De-registers all actions associated with a given syntax
+   */
+  void removeAllActionsForSyntax(const std::string & syntax);
 
   /**
    *  Registration function that replaces existing Moose Actions with a completely new action

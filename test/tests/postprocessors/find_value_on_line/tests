@@ -67,7 +67,7 @@
   [./line_out_of_bounds]
     type = 'RunException'
     input = 'findvalueonline.i'
-    cli_args = "\"Postprocessors/pos/end_point='11 0 0' Outputs/csv=false\""
+    cli_args = "Postprocessors/pos/end_point='11 0 0' Outputs/csv=false"
     expect_err = "No element found at the current search point"
 
     requirement = 'The system shall report and error when the sampling line extends beyond the mesh bounding box.'

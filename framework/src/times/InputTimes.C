@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,11 +20,14 @@ InputTimes::validParams()
 
   // Times are known for all processes already
   params.set<bool>("auto_broadcast") = false;
+  params.set<bool>("dynamic_time_sequence") = false;
 
   return params;
 }
 
-InputTimes::InputTimes(const InputParameters & parameters) : Times(parameters)
+InputTimes::InputTimes(const InputParameters & parameters)
+  : Times(parameters),
+    _input_times(isParamValid("times") ? getParam<std::vector<Real>>("times") : std::vector<Real>())
 {
-  _times = getParam<std::vector<Real>>("times");
+  _times = _input_times;
 }

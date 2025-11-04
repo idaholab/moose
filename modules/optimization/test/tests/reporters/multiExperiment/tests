@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#21885 #26530'
+  design = 'ParsedVectorRealReductionReporter.md ParsedVectorVectorRealReductionReporter.md'
+  [sampler_opt]
+    requirement = "The system shall be able to find an optimal value to a linear combination of parallel forward problems run using the sampler system."
+    type = CSVDiff
+    input = optimize.i
+    csvdiff = optimize_out.csv
+    min_parallel = 6
+    max_parallel = 6
+    max_threads = 1
+    # skip recover for steady solve
+    recover = false
+  []
+[]

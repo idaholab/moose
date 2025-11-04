@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,5 +34,5 @@ protected:
   /// Returns the Problem's equation system, displaced or not
   /// Be careful! If you transfer TO a displaced system you will likely need a synchronization
   /// So most transfers reach the non-displaced system directly
-  EquationSystems & getEquationSystem(FEProblemBase & problem, bool use_displaced) const;
+  libMesh::EquationSystems & getEquationSystem(FEProblemBase & problem, bool use_displaced) const;
 };

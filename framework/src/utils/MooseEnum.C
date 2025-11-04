@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -57,7 +57,7 @@ MooseEnum::operator=(const MooseEnumItem & item)
 }
 
 void
-MooseEnum::assign(const std::string & name)
+MooseEnum::assign(const std::string & name, const std::optional<std::string> & context)
 {
   if (name == "")
   {
@@ -69,7 +69,8 @@ MooseEnum::assign(const std::string & name)
   if (iter == _items.end())
   {
     if (!_allow_out_of_range) // Are out of range values allowed?
-      mooseError("Invalid option \"",
+      mooseError(context ? (*context + ":\n\n") : std::string(""),
+                 "Invalid option \"",
                  name,
                  "\" in MooseEnum.  Valid options (not case-sensitive) are \"",
                  getRawNames(),

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "ExecutablePath.h"
 #include "ConsoleUtils.h"
+#include "MooseStringUtils.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
@@ -36,6 +37,7 @@
 #include <list>
 #include <filesystem>
 #include <deque>
+#include <regex>
 
 // Forward Declarations
 class InputParameters;
@@ -66,7 +68,9 @@ pathjoin(const std::filesystem::path & p, Args... args)
 }
 
 /// Check if the input string can be parsed into a Real
-bool parsesToReal(const std::string & input);
+/// @param input input to check / parse
+/// @param parsed_real pointer to a Real that gets set to the parsed real if it does parse to Real
+bool parsesToReal(const std::string & input, Real * parsed_real = nullptr);
 
 /// Returns the location of either a local repo run_tests script - or an
 /// installed test executor script if run_tests isn't found.
@@ -84,6 +88,15 @@ std::string installedInputsDir(const std::string & app_name,
 
 /// Returns the directory of any installed docs/site.
 std::string docsDir(const std::string & app_name);
+
+/**
+ * Returns the URL of a page located on the MOOSE documentation site.
+ *
+ * @param[in] path   URL path following the domain name. For example, in the
+ *                   URL "www.example.com/folder1/folder2/file.html", this
+ *                   would be "folder1/folder2/file.html".
+ */
+std::string mooseDocsURL(const std::string & path);
 
 /// Replaces all occurrences of from in str with to and returns the result.
 std::string replaceAll(std::string str, const std::string & from, const std::string & to);
@@ -104,9 +117,11 @@ int levenshteinDist(const std::string & s1, const std::string & s2);
 void escape(std::string & str);
 
 /**
- * Standard scripting language trim function
+ * Removes additional whitespace from a string
+ *
+ * Removes beginning whitespace, end whitespace, and repeated whitespace into a single space
  */
-std::string trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r");
+std::string removeExtraWhitespace(const std::string & str);
 
 /**
  * Python like split functions for strings.
@@ -122,16 +137,25 @@ std::vector<std::string> rsplit(const std::string & str,
                                 std::size_t max_count = std::numeric_limits<std::size_t>::max());
 
 /**
- * Python like join function for strings.
+ * Python-like join function for strings over an iterator range.
+ */
+template <typename Iterator>
+std::string
+join(Iterator begin, Iterator end, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(begin, end, infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
+}
+
+/**
+ * Python-like join function for strings over a container.
  */
 template <typename T>
 std::string
 join(const T & strings, const std::string & delimiter)
 {
-  std::ostringstream oss;
-  std::copy(
-      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
-  return oss.str();
+  return join(strings.begin(), strings.end(), delimiter);
 }
 
 /**
@@ -213,10 +237,19 @@ void serialEnd(const libMesh::Parallel::Communicator & comm, bool warn = true);
 bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
 
 /**
+ * Gets the extension of the passed file name.
+ * @param filename The filename of which to get the extension
+ * @param rfind When true, searches for last "." in filename. Otherwise, searches for first "."
+ * @return file_ext The extension of filename (does not include the leading "."). If filename has no
+ * extension, returns "".
+ */
+std::string getExtension(const std::string & filename, const bool rfind = false);
+
+/**
  * Removes any file extension from the given string s (i.e. any ".[extension]" suffix of s) and
  * returns the result.
  */
-std::string stripExtension(const std::string & s);
+std::string stripExtension(const std::string & s, const bool rfind = false);
 
 /**
  * Function for splitting path and filename
@@ -309,9 +342,12 @@ std::string prettyCppType(const std::string & cpp_type);
  */
 template <typename T>
 std::string
-prettyCppType(const T * = nullptr)
+prettyCppType(const T * obj = nullptr)
 {
-  return prettyCppType(demangle(typeid(T).name()));
+  if (obj)
+    return prettyCppType(libMesh::demangle(typeid(*obj).name()));
+  else
+    return prettyCppType(libMesh::demangle(typeid(T).name()));
 }
 
 /**
@@ -335,12 +371,13 @@ doesMapContainValue(const std::map<T1, T2> & the_map, const T2 & value)
  * @param tol The tolerance to be used
  * @return true if var1 and var2 are equal within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyEqual(const T & var1,
                    const T2 & var2,
@@ -358,12 +395,13 @@ absoluteFuzzyEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 or var1 == var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyGreaterEqual(const T & var1,
                           const T2 & var2,
@@ -381,12 +419,13 @@ absoluteFuzzyGreaterEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 and var1 != var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyGreaterThan(const T & var1,
                          const T2 & var2,
@@ -404,12 +443,13 @@ absoluteFuzzyGreaterThan(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 or var1 == var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyLessEqual(const T & var1,
                        const T2 & var2,
@@ -426,12 +466,13 @@ absoluteFuzzyLessEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 and var1 != var2 within tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 absoluteFuzzyLessThan(const T & var1,
                       const T2 & var2,
@@ -503,12 +544,13 @@ relativeFuzzyEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 or var1 == var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyGreaterEqual(const T & var1,
                           const T2 & var2,
@@ -527,12 +569,13 @@ relativeFuzzyGreaterEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 > var2 and var1 != var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyGreaterThan(const T & var1,
                          const T2 & var2,
@@ -552,12 +595,13 @@ relativeFuzzyGreaterThan(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 or var1 == var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyLessEqual(const T & var1,
                        const T2 & var2,
@@ -576,12 +620,13 @@ relativeFuzzyLessEqual(const T & var1,
  * @param tol The tolerance to be used
  * @return true if var1 < var2 and var1 != var2 within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3 = T,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 bool
 relativeFuzzyLessThan(const T & var1,
                       const T2 & var2,
@@ -591,6 +636,27 @@ relativeFuzzyLessThan(const T & var1,
       var1,
       var2,
       tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
+}
+
+/**
+ * Function which takes the union of \p vector1 and \p vector2 and copies them
+ * to \p common . Depending on the vector size and data type this can be very expensive!
+ */
+template <typename T>
+void
+getUnion(const std::vector<T> & vector1, const std::vector<T> & vector2, std::vector<T> & common)
+{
+  std::unordered_set<T> unique_elements;
+  unique_elements.reserve(vector1.size() + vector2.size());
+
+  for (const T & entry : vector1)
+    unique_elements.insert(entry);
+  for (const T & entry : vector2)
+    unique_elements.insert(entry);
+
+  // Now populate the common vector with the union
+  common.clear();
+  common.assign(unique_elements.begin(), unique_elements.end());
 }
 
 /**
@@ -710,7 +776,6 @@ std::string & removeColor(std::string & msg);
 std::list<std::string> listDir(const std::string path, bool files_only = false);
 
 bool pathExists(const std::string & path);
-bool pathIsDirectory(const std::string & path);
 
 /**
  * Retrieves the names of all of the files contained within the list of directories passed into
@@ -768,107 +833,32 @@ expandAllMatches(const std::vector<T> & candidates, std::vector<T> & patterns)
 }
 
 /**
- * This function will split the passed in string on a set of delimiters appending the substrings
- * to the passed in vector.  The delimiters default to "/" but may be supplied as well.  In
- * addition if min_len is supplied, the minimum token length will be greater than the supplied
- * value. T should be std::string or a MOOSE derived string class.
- */
-template <typename T>
-void
-tokenize(const std::string & str,
-         std::vector<T> & elements,
-         unsigned int min_len = 1,
-         const std::string & delims = "/")
-{
-  elements.clear();
-
-  std::string::size_type last_pos = str.find_first_not_of(delims, 0);
-  std::string::size_type pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
-
-  while (last_pos != std::string::npos)
-  {
-    elements.push_back(str.substr(last_pos, pos - last_pos));
-    // skip delims between tokens
-    last_pos = str.find_first_not_of(delims, pos);
-    if (last_pos == std::string::npos)
-      break;
-    pos = str.find_first_of(delims, std::min(last_pos + min_len, str.size()));
-  }
-}
-
-/**
- *  tokenizeAndConvert splits a string using delimiter and then converts to type T.
- *  If the conversion fails tokenizeAndConvert returns false, otherwise true.
- */
-template <typename T>
-bool
-tokenizeAndConvert(const std::string & str,
-                   std::vector<T> & tokenized_vector,
-                   const std::string & delimiter = " \t\n\v\f\r")
-{
-  std::vector<std::string> tokens;
-  MooseUtils::tokenize(str, tokens, 1, delimiter);
-  tokenized_vector.resize(tokens.size());
-  for (unsigned int j = 0; j < tokens.size(); ++j)
-  {
-    std::stringstream ss(trim(tokens[j]));
-    // we have to make sure that the conversion succeeded _and_ that the string
-    // was fully read to avoid situations like [conversion to Real] 3.0abc to work
-    if ((ss >> tokenized_vector[j]).fail() || !ss.eof())
-      return false;
-  }
-  return true;
-}
-
-/**
- * convert takes a string representation of a number type and converts it to the number.
- * This method is here to get around deficiencies in the STL stoi and stod methods where they
- * might successfully convert part of a string to a number when we'd like to throw an error.
+ * Takes the string representation of a value and converts it to the value.
+ *
+ * See the convert method in MooseStringUtils.h for more information on
+ * handling of each case.
+ *
+ * @param str The string to convert from
+ * @param throw_on_failure If true, throw on a failure to convert, otherwise use mooseError
+ * @return The converted value on success
  */
 template <typename T>
 T
 convert(const std::string & str, bool throw_on_failure = false)
 {
-  std::stringstream ss(str);
   T val;
-  if ((ss >> val).fail() || !ss.eof())
+  try
   {
-    std::string msg =
-        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
-
-    if (throw_on_failure)
-      throw std::invalid_argument(msg);
-    else
-      mooseError(msg);
+    convert(str, val, true);
   }
-
+  catch (std::exception const & e)
+  {
+    if (throw_on_failure)
+      throw;
+    mooseError(e.what());
+  }
   return val;
 }
-
-template <>
-short int convert<short int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned short int convert<unsigned short int>(const std::string & str, bool throw_on_failure);
-
-template <>
-int convert<int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned int convert<unsigned int>(const std::string & str, bool throw_on_failure);
-
-template <>
-long int convert<long int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned long int convert<unsigned long int>(const std::string & str, bool throw_on_failure);
-
-template <>
-long long int convert<long long int>(const std::string & str, bool throw_on_failure);
-
-template <>
-unsigned long long int convert<unsigned long long int>(const std::string & str,
-                                                       bool throw_on_failure);
 
 /**
  * Create a symbolic link, if the link already exists it is replaced.
@@ -879,18 +869,6 @@ void createSymlink(const std::string & target, const std::string & link);
  * Remove a symbolic link, if the given filename is a link.
  */
 void clearSymlink(const std::string & link);
-
-/**
- * Convert supplied string to upper case.
- * @params name The string to convert upper case.
- */
-std::string toUpper(const std::string & name);
-
-/**
- * Convert supplied string to lower case.
- * @params name The string to convert upper case.
- */
-std::string toLower(const std::string & name);
 
 /**
  * Returns a container that contains the content of second passed in container
@@ -925,6 +903,17 @@ concatenate(std::vector<T> c1, const T & item)
   c1.push_back(item);
   return c1;
 }
+
+/**
+ * Concatenates \p value into a single string separated by \p separator
+ */
+std::string stringJoin(const std::vector<std::string> & values,
+                       const std::string & separator = " ");
+
+/**
+ * @return Whether or not \p value begins with \p begin_value
+ */
+bool beginsWith(const std::string & value, const std::string & begin_value);
 
 /**
  * Return the number of digits for a number.
@@ -1047,11 +1036,11 @@ wildcardEqual(AnyType, const T &)
 /**
  * Find a specific pair in a container matching on first, second or both pair components
  */
-template <typename C, typename M1, typename M2>
-typename C::iterator
-findPair(C & container, const M1 & first, const M2 & second)
+template <typename C, typename It, typename M1, typename M2>
+auto
+findPair(C & container, It start_iterator, const M1 & first, const M2 & second)
 {
-  return std::find_if(container.begin(),
+  return std::find_if(start_iterator,
                       container.end(),
                       [&](auto & item) {
                         return wildcardEqual(first, item.first) &&
@@ -1074,7 +1063,7 @@ findPair(C & container, const M1 & first, const M2 & second)
  * @param p2 Second corner of the constructed bounding box
  * @return Valid bounding box
  */
-BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
+libMesh::BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
 
 /**
  * Utility class template for a semidynamic vector with a maximum size N
@@ -1084,9 +1073,15 @@ BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
  * using the third template parameter if uninitialized storage is acceptable,
  */
 template <typename T, std::size_t N, bool value_init = true>
+#if METAPHYSICL_MAJOR_VERSION < 2
 class SemidynamicVector : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>>
 {
   typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>> Parent;
+#else
+class SemidynamicVector : public MetaPhysicL::DynamicStdArrayWrapper<T, N>
+{
+  typedef MetaPhysicL::DynamicStdArrayWrapper<T, N> Parent;
+#endif
 
 public:
   SemidynamicVector(std::size_t size) : Parent()
@@ -1200,6 +1195,42 @@ isDigits(const std::string & str)
 {
   return std::all_of(str.begin(), str.end(), [](unsigned char c) { return std::isdigit(c); });
 }
+
+/**
+ * Courtesy https://stackoverflow.com/a/57163016 and
+ * https://stackoverflow.com/questions/447206/c-isfloat-function
+ * @return Whether the string is convertible to a float
+ */
+inline bool
+isFloat(const std::string & str)
+{
+  if (str.empty())
+    return false;
+  char * ptr;
+  strtof(str.c_str(), &ptr);
+  return (*ptr) == '\0';
+}
+
+/**
+ * Gets the canonical path of the given path
+ */
+std::string canonicalPath(const std::string & path);
+
+/**
+ * @returns Whether the \p string1 starts with \p string2
+ */
+bool startsWith(const std::string & string1, const std::string & string2);
+
+/**
+ * Replace the starting string \p string2 of \p string1 with \p string3. A user should have checked
+ * that \p string1 \p startsWith \p string2
+ */
+void replaceStart(std::string & string1, const std::string & string2, const std::string & string3);
+
+/**
+ * @returns whether every alphabetic character in a string is lower-case
+ */
+bool isAllLowercase(const std::string & str);
 } // MooseUtils namespace
 
 namespace Moose

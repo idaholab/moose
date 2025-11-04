@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,17 +26,11 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual const FEType & getFEType() override;
+  virtual const libMesh::FEType & getFEType() override;
 
   virtual void setupMesh() override;
   virtual void check() const override;
 
-  /**
-   * Gets the heat structure boundary name for this connection
-   *
-   * @return The boundary name of the heat structure side
-   */
-  const BoundaryName & getHeatStructureSideName() const;
   /**
    * Gets the flow channel nodeset name for this connection
    *

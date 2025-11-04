@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -53,3 +53,9 @@ typedef InterpolatedStatefulMaterialTempl<RealVectorValue>
 typedef InterpolatedStatefulMaterialTempl<RankTwoTensor> InterpolatedStatefulMaterialRankTwoTensor;
 typedef InterpolatedStatefulMaterialTempl<RankFourTensor>
     InterpolatedStatefulMaterialRankFourTensor;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class InterpolatedStatefulMaterialTempl<Real>;
+extern template class InterpolatedStatefulMaterialTempl<RealVectorValue>;
+extern template class InterpolatedStatefulMaterialTempl<RankTwoTensor>;
+extern template class InterpolatedStatefulMaterialTempl<RankFourTensor>;

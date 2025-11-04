@@ -1,23 +1,21 @@
 # PINSFEFluidPressureTimeDerivative
 
-!alert construction title=Undocumented Class
-The PINSFEFluidPressureTimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Kernels/PINSFEFluidPressureTimeDerivative
 
-## Overview
+Assuming porosity not changing with time, the time derivative for the porous media mass equation is computed as:
 
-!! Replace these lines with information regarding the PINSFEFluidPressureTimeDerivative object.
+!equation
+\epsilon (\dfrac{\partial \rho}{\partial T} \dot{T} + \dfrac{\partial \rho}{\partial p} \dot{p}) \psi
 
-## Example Input File Syntax
+with $\rho$ the density, $T$ the temperature, $p$ the pressure, and $\psi$ the test functions.
 
-!! Describe and include an example of how to use the PINSFEFluidPressureTimeDerivative object.
+!alert note
+This kernel refers to the pressure as the mass equation is assigned to the pressure
+degrees of freedom in the nonlinear systems.
 
 !syntax parameters /Kernels/PINSFEFluidPressureTimeDerivative
 
 !syntax inputs /Kernels/PINSFEFluidPressureTimeDerivative
 
 !syntax children /Kernels/PINSFEFluidPressureTimeDerivative
+

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -87,6 +87,13 @@ protected:
    */
   void dependsOn(const std::string name) { _depend_names.insert(name); }
 
+  /**
+   * Get the right nonlinear system. Some simulations might not have one,
+   * if some user objects only operate on aux variables we need a special
+   * treatment
+   */
+  NonlinearSystemBase * getNonlinearSystem();
+
   /// The thread id
   const THREAD_ID _tid;
 
@@ -98,8 +105,8 @@ protected:
   /// The TraceRay object associated with this thread
   const TraceRay & _trace_ray;
 
-  /// The nonlinear system
-  NonlinearSystemBase & _nl;
+  /// The nonlinear system, we might not have one
+  NonlinearSystemBase * _nl;
   /// The aux system
   AuxiliarySystem & _aux;
 

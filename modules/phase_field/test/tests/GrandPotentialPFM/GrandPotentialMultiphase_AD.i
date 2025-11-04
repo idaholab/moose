@@ -71,23 +71,22 @@
   []
 []
 
-
 [BCs]
 []
 
 [Kernels]
-# Order parameter eta_alpha0
+  # Order parameter eta_alpha0
   [ACa0_bulk]
     type = ADACGrGrMulti
     variable = etaa0
-    v =           'etab0 etab1'
+    v = 'etab0 etab1'
     gamma_names = 'gab   gab'
   []
   [ACa0_sw]
     type = ADACSwitching
     variable = etaa0
-    Fj_names  = 'omegaa omegab'
-    hj_names  = 'ha     hb'
+    Fj_names = 'omegaa omegab'
+    hj_names = 'ha     hb'
   []
   [ACa0_int]
     type = ADACInterface
@@ -99,18 +98,18 @@
     type = ADTimeDerivative
     variable = etaa0
   []
-# Order parameter eta_beta0
+  # Order parameter eta_beta0
   [ACb0_bulk]
     type = ADACGrGrMulti
     variable = etab0
-    v =           'etaa0 etab1'
+    v = 'etaa0 etab1'
     gamma_names = 'gab   gbb'
   []
   [ACb0_sw]
     type = ADACSwitching
     variable = etab0
-    Fj_names  = 'omegaa omegab'
-    hj_names  = 'ha     hb'
+    Fj_names = 'omegaa omegab'
+    hj_names = 'ha     hb'
   []
   [ACb0_int]
     type = ADACInterface
@@ -122,18 +121,18 @@
     type = ADTimeDerivative
     variable = etab0
   []
-# Order parameter eta_beta1
+  # Order parameter eta_beta1
   [ACb1_bulk]
     type = ADACGrGrMulti
     variable = etab1
-    v =           'etaa0 etab0'
+    v = 'etaa0 etab0'
     gamma_names = 'gab   gbb'
   []
   [ACb1_sw]
     type = ADACSwitching
     variable = etab1
-    Fj_names  = 'omegaa omegab'
-    hj_names  = 'ha     hb'
+    Fj_names = 'omegaa omegab'
+    hj_names = 'ha     hb'
   []
   [ACb1_int]
     type = ADACInterface
@@ -145,7 +144,7 @@
     type = ADTimeDerivative
     variable = etab1
   []
-#Chemical potential
+  #Chemical potential
   [w_dot]
     type = ADSusceptibilityTimeDerivative
     variable = w
@@ -162,7 +161,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   []
   [coupled_etab0dot]
     type = ADCoupledSwitchingTimeDerivative
@@ -170,7 +169,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   []
   [coupled_etab1dot]
     type = ADCoupledSwitchingTimeDerivative
@@ -178,7 +177,7 @@
     v = etab1
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   []
 []
 
@@ -208,7 +207,7 @@
   []
   [omegaa]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegaa
     material_property_names = 'Vm ka caeq'
     expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
@@ -216,7 +215,7 @@
   []
   [omegab]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegab
     material_property_names = 'Vm kb cbeq'
     expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
@@ -224,7 +223,7 @@
   []
   [rhoa]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhoa
     material_property_names = 'Vm ka caeq'
     expression = 'w/Vm^2/ka + caeq/Vm'
@@ -232,7 +231,7 @@
   []
   [rhob]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhob
     material_property_names = 'Vm kb cbeq'
     expression = 'w/Vm^2/kb + cbeq/Vm'
@@ -240,7 +239,7 @@
   []
   [const]
     type = ADGenericConstantMaterial
-    prop_names =  'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu'
+    prop_names = 'kappa_c  kappa   L   D    chi  Vm   ka    caeq kb    cbeq  gab gbb mu'
     prop_values = '0        1       1.0 1.0  1.0  1.0  10.0  0.1  10.0  0.9   4.5 1.5 1.0'
   []
   [Mobility]
@@ -270,10 +269,9 @@
   nl_abs_tol = 1e-8
   num_steps = 2
   [TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.1
+    type = TimeSequenceStepper
+    time_sequence = '0.1 0.21'
   []
-
 []
 
 [Outputs]

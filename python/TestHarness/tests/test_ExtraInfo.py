@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,8 +27,8 @@ class TestHarnessTester(TestHarnessTestCase):
 
         # All the caveats we will verify that should exist in the
         # output
-        caveats = ['ASIO', 'DTK', 'UNIQUE_IDS', 'CXX11', 'SUPERLU',
-                   'DOF_ID_BYTES', 'TECPLOT', 'PETSC_VERSION_RELEASE',
+        caveats = ['UNIQUE_IDS', 'SUPERLU',
+                   'DOF_ID_BYTES', 'TECPLOT',
                    'SLEPC_VERSION', 'MESH_MODE', 'METHOD', 'BOOST',
                    'PETSC_DEBUG', 'LIBRARY_MODE', 'PETSC_VERSION',
                    'CURL', 'THREADING', 'SLEPC', 'VTK', 'UNIQUE_ID',
@@ -39,7 +39,8 @@ class TestHarnessTester(TestHarnessTestCase):
         # will use the --ignore feature to force the test to run
         # regardless if that check(s) would otherwise cause this
         # test to be skipped.
-        output = self.runTests('-c', '-i', 'extra_info', '--ignore', '-e').decode('utf-8')
+        output = self.runTests('-c', '-i', 'extra_info', '--ignore', '-e',
+                               no_capabilities=False).output
 
         # Parse the output, and find the caveat string
         raw_caveat_string = re.findall(r'\[(.*)\]', output)

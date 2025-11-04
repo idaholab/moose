@@ -19,11 +19,21 @@ as shown in [katex-numbered].
 
 !devel! example id=katex-numbered
                 caption=Example of syntax for creating numbered equations with [KaTeX].
+\begin{equation}
+\label{line-eq2}
+y = a\cdot x + b
+\end{equation}
+!devel-end!
+
+Equation blocks can also be created with `!equation`, as shown in [katex-numbered-2].
+
+!devel! example id=katex-numbered-2
+                caption=Example of syntax for creating numbered equations with [KaTeX].
 !equation id=line-eq
 y = a\cdot x + b
 !devel-end!
 
-To include a non-numbered equation, simply exclude the "id" in the command, as shown in
+To include a non-numbered equation, simply exclude the `\label` or "id" in the command, as shown in
 [katex-no-number].
 
 !devel! example id=katex-no-number
@@ -63,13 +73,13 @@ Inline equations can use traditional LaTeX syntax, i.e., the content is wrapped 
 the inline `!eq` command, as shown in [katex-inline].
 
 !devel example id=katex-inline caption=Example of an inline LaTeX equation.
-This $y=2\phi$ is inline and so it this: [!eq](\phi=\beta^2).
+This $y=2\phi$ is inline and so is this: [!eq](\phi=\beta^2).
 
 ## Macros
 
-It is possible to define macros within extension configuration. This is done using the
+It is possible to define macros within the extension configuration. This is done using the
 'macros' configuration parameter (see [katex-extension-config]). For example, the main configuration
-file for contains the following allowing for equation in [katex-macro] to be defined.
+file contains the following, allowing for equation in [katex-macro] to be defined.
 
 !listing modules/doc/config.yml start=MooseDocs.extensions.katex end=MooseDocs.extensions.appsyntax
 

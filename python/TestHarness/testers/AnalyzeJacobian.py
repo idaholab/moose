@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,17 +23,19 @@ class AnalyzeJacobian(FileTester):
         params.addParam('off_diagonal', True, "Also test the off-diagonal Jacobian entries")
         params.addParam('mesh_size',   1, "Resize the input mesh")
 
+        params['capture_perf_graph'] = False
+
         return params
 
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
 
-    def getOutputFiles(self):
-        # analizejacobian.py outputs files prefixed with the input file name
-        return [self.specs['input']]
+    def getOutputFiles(self, options):
+        # analyzejacobian.py outputs files prefixed with the input file name
+        return super().getOutputFiles(options) + [self.specs['input']]
 
     def prepare(self, options):
-        # We do not know what file(s) analizejacobian.py produces
+        # We do not know what file(s) analyzejacobian.py produces
         return
 
     # Check if numpy is available
@@ -71,20 +73,35 @@ class AnalyzeJacobian(FileTester):
         return command
 
 
-    def processResults(self, moose_dir, options, output):
+    def processResults(self, moose_dir, options, exit_code, runner_output):
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
-            out_ok = util.checkOutputForPattern(output, specs['expect_out'])
-            if (out_ok and self.exit_code != 0):
+            out_ok = util.checkOutputForPattern(runner_output, specs['expect_out'])
+            if (out_ok and exit_code != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
                 reason = 'NO EXPECTED OUT'
         if reason == '':
-            if self.exit_code != 0 :
+            if exit_code != 0:
                 reason = 'CRASH'
 
         if reason != '':
             self.setStatus(self.fail, reason)
 
-        return output
+        return ''
+
+    def checkRunnable(self, options):
+        # We cannot rely on an external script running things within HPC
+        if options.hpc:
+            self.addCaveats('hpc unsupported')
+            self.setStatus(self.skip)
+            return False
+
+        # This doesn't pass valgrind arguments
+        if options.valgrind_mode:
+            self.addCaveats('valgrind=false')
+            self.setStatus(self.skip)
+            return False
+
+        return FileTester.checkRunnable(self, options)

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -266,7 +266,7 @@ FeatureFloodCount::initialSetup()
   _entities_visited.resize(_vars.size());
 
   // Get a pointer to the PeriodicBoundaries buried in libMesh
-  _pbs = _fe_problem.getNonlinearSystemBase(_sys.number()).dofMap().get_periodic_boundaries();
+  _pbs = _sys.dofMap().get_periodic_boundaries();
 
   meshChanged();
 

@@ -26,9 +26,9 @@ l=10
     variable = u
   []
   [ffn]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = u
-    function = '-1'
+    functor = '-1'
   []
   [lm_coupled_force]
     type = CoupledForceNodalKernel

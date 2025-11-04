@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,8 @@
 // compiler includes (for type demangling)
 #include <cxxabi.h>
 #include <fstream>
+
+using namespace libMesh;
 
 registerMooseObjectAliased("MooseApp", DOFMapOutput, "DOFMap");
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,8 +22,8 @@ ChemicalReactionsTestApp::validParams()
 
 registerKnownLabel("ChemicalReactionsTestApp");
 
-ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters)
-  : MooseApp(parameters)
+ChemicalReactionsTestApp::ChemicalReactionsTestApp(const InputParameters & parameters)
+  : ChemicalReactionsApp(parameters)
 {
   ChemicalReactionsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -34,10 +34,9 @@ ChemicalReactionsTestApp::~ChemicalReactionsTestApp() {}
 void
 ChemicalReactionsTestApp::registerAll(Factory & f,
                                       ActionFactory & af,
-                                      Syntax & s,
+                                      Syntax & /*s*/,
                                       bool use_test_objects)
 {
-  ChemicalReactionsApp::registerAll(f, af, s);
   if (use_test_objects)
   {
     Registry::registerObjectsTo(f, {"ChemicalReactionsTestApp"});
@@ -48,26 +47,8 @@ ChemicalReactionsTestApp::registerAll(Factory & f,
 void
 ChemicalReactionsTestApp::registerApps()
 {
-  registerApp(ChemicalReactionsApp);
+  ChemicalReactionsApp::registerApps();
   registerApp(ChemicalReactionsTestApp);
-}
-
-void
-ChemicalReactionsTestApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"ChemicalReactionsTestApp"});
-}
-void
-ChemicalReactionsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"ChemicalReactionsTestApp"});
-}
-void
-ChemicalReactionsTestApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

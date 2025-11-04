@@ -39,7 +39,6 @@
     input = 'steady.i'
     cli_args = "Executioner/automatic_scaling=true Executioner/verbose=true Outputs/exodus=false"
     expect_out = "Automatic scaling factors:\s+u: 0\.175781"
-    petsc_version = '>=3.9.0'
     max_parallel = 4
     requirement = "The system shall print automatic scaling factors if specified."
     issues = '#13795'
@@ -50,9 +49,24 @@
     input = 'steady.i'
     cli_args = "Executioner/automatic_scaling=true Outputs/exodus=false"
     absent_out = "Automatic scaling factors:"
-    petsc_version = '>=3.9.0'
     max_parallel = 4
     requirement = "The system shall not print automatic scaling factors if not specified."
     issues = '#13795'
   [../]
+
+  [unused_nl_convergence_params]
+    type = RunException
+    input = 'unused_nl_convergence_params.i'
+    expect_err = "The following nonlinear convergence parameters were set in the executioner, but are not used"
+    requirement = "The system shall report an error if the user specifies nonlinear convergence parameters that are not used."
+    issues = '#24128'
+  []
+
+  [diverged_steady_state]
+    type = RunException
+    input = 'diverged_steady_state.i'
+    expect_err = "The steady-state Convergence object \(iteration_conv\) reported divergence"
+    requirement = "The system shall report an error if the steady-state convergence check reports divergence."
+    issues = '#30858'
+  []
 []

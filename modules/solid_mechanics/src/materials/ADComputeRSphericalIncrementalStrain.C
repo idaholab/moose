@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,7 +19,7 @@ registerMooseObject("SolidMechanicsApp", ADComputeRSphericalIncrementalStrain);
 InputParameters
 ADComputeRSphericalIncrementalStrain::validParams()
 {
-  InputParameters params = ADComputeIncrementalSmallStrain::validParams();
+  InputParameters params = ADComputeIncrementalStrain::validParams();
   params.addClassDescription(
       "Compute a strain increment for incremental strains in 1D spherical symmetry problems.");
   return params;
@@ -27,7 +27,7 @@ ADComputeRSphericalIncrementalStrain::validParams()
 
 ADComputeRSphericalIncrementalStrain::ADComputeRSphericalIncrementalStrain(
     const InputParameters & parameters)
-  : ADComputeIncrementalSmallStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
+  : ADComputeIncrementalStrain(parameters), _disp_old_0(coupledValueOld("displacements", 0))
 {
 }
 

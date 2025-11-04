@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 
 #include "libmesh/libmesh.h"
 
-#include "libmesh/petsc_macro.h"
+#include "libmesh/petsc_solver_exception.h"
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscts.h>

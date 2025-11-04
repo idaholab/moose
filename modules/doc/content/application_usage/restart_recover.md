@@ -72,7 +72,7 @@ You should always set [!param](/Outputs/Checkpoint/num_files) to at least 2 to m
 
 ## Automatic Checkpoints
 
-In the event that the user forgets to enable checkpoints, MOOSE automatically creates a checkpoint object in the background for convenience. This object writes a checkpoint every 10 minutes of wall time or at the end of the next time step, whichever is later.
+In the event that the user forgets to enable checkpoints, MOOSE automatically creates a checkpoint object in the background for convenience. This object writes a checkpoint every 1 hour of wall time or at the end of the next time step, whichever is later.
 This wall time interval length may be modified by defining a checkpoint block and setting the [!param](/Outputs/Checkpoint/wall_time_interval) parameter:
 
 ```puppet
@@ -97,7 +97,7 @@ Note that while this command is called `kill`, it does not actually terminate th
 ```puppet
 [Mesh]
   #Serial number should match corresponding Executioner parameter
-  file = out_cp/0010-mesh.cpr
+  file = out_cp/0010-mesh.cpa.gz
   #This method of restart is only supported on serial meshes
   distribution = serial
 []

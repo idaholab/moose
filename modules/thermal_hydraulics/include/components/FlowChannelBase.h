@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -178,19 +178,20 @@ public:
   std::string getHeatTransferNamesSuffix(const std::string & ht_name) const;
 
   /**
-   * Get the used closures object
+   * Get the used closures object(s)
    *
-   * @return The closures object
+   * @return The closures object(s)
    */
-  std::shared_ptr<ClosuresBase> getClosures() const { return _closures; }
+  std::vector<std::shared_ptr<ClosuresBase>> getClosuresObjects() const
+  {
+    return _closures_objects;
+  }
 
 protected:
   virtual std::shared_ptr<FlowModel> buildFlowModel() = 0;
   virtual void init() override;
   virtual void initSecondary() override;
   virtual void check() const override;
-
-  virtual std::shared_ptr<ClosuresBase> buildClosures();
 
   /**
    * Adds objects which are common for single- and two-phase flow
@@ -214,11 +215,8 @@ protected:
   /// Function describing the flow channel area
   FunctionName _area_function;
 
-  /// The name of used closures
-  const std::string & _closures_name;
-
-  /// Closures object
-  std::shared_ptr<ClosuresBase> _closures;
+  /// Closures object(s)
+  std::vector<std::shared_ptr<ClosuresBase>> _closures_objects;
 
   const bool & _pipe_pars_transferred;
 

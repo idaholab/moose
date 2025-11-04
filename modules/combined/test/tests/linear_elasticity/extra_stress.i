@@ -12,7 +12,7 @@
   elem_type = QUAD4
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   add_variables = true
   generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy'
 []

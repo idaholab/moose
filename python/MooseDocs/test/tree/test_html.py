@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,7 @@ class TestHTML(unittest.TestCase):
         html.String(content='foo', parent=tag)
         self.assertEqual(tag.write(), '<h1>foo</h1>')
 
-    def testBool(self):
+    def testTagBoolAttribute(self):
         tag = html.Tag(None, 'video', autoplay=True)
         self.assertEqual(tag.write(), '<video autoplay></video>')
 
@@ -42,6 +42,9 @@ class TestHTML(unittest.TestCase):
         tag['controls'] = True
         self.assertEqual(tag.write(), '<video autoplay controls></video>')
 
+        # Bool attributes come first
+        tag = html.Tag(None, 'script', valueattr='foo', trueattr=True)
+        self.assertEqual(tag.write(), '<script trueattr valueattr="foo"></script>')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

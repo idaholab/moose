@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -140,7 +140,7 @@ PINSFVMomentumFriction::computeFrictionWCoefficient(const Moose::ElemArg & elem_
           superficial_velocity(2) = (*_w_var)(elem_arg, state);
       }
     }
-    speed = NS::computeSpeed(superficial_velocity);
+    speed = NS::computeSpeed<ADReal>(superficial_velocity);
     if (_is_porous_medium)
     {
       speed *= (1 / _epsilon(elem_arg, state));

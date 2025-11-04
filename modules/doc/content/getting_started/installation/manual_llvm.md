@@ -10,7 +10,7 @@ cd llvm-project
 git checkout llvmorg-__CLANG__
 !package-end!
 
-Configure LLVM using the recommended arguments:
+Configure LLVM using our recommended arguments, in addition to any optimizations you require:
 
 !package! code
 mkdir llvm-build

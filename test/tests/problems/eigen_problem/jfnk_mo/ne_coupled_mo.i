@@ -79,6 +79,20 @@
   type = Eigenvalue
   solve_type = PJFNKMO
   nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-14
+[]
+
+[Problem]
+  type = EigenProblem
+[]
+
+[Postprocessors]
+  [uint]
+    type = ElementIntegralVariablePostprocessor
+    variable = u
+    execute_on = 'initial linear nonlinear'
+    outputs = 'console'
+  []
 []
 
 [VectorPostprocessors]

@@ -117,13 +117,13 @@ pressure_tag = "pressure_grad"
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_x
-    function = '1.1'
+    functor = '1.1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_y
-    function = '0.0'
+    functor = '0.0'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
@@ -171,5 +171,5 @@ pressure_tag = "pressure_grad"
 
 [Outputs]
   exodus = true
-  execute_on = FINAL
+  execute_on = TIMESTEP_END
 []

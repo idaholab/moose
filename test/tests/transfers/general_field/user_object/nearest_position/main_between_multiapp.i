@@ -28,20 +28,24 @@
 []
 
 # This application uses at most 3 processes
-[MultiApps/ma1]
-  type = TransientMultiApp
-  input_files = sub_between_diffusion.i
-  max_procs_per_app = 3
-  positions_objects = 'input_app1'
-  output_in_position = true
+[MultiApps]
+  [ma1]
+    type = TransientMultiApp
+    input_files = sub_between_diffusion.i
+    max_procs_per_app = 3
+    positions_objects = 'input_app1'
+    output_in_position = true
+  []
 []
 
 # This application will use as many processes as the main app
-[MultiApps/ma2]
-  type = TransientMultiApp
-  input_files = sub_between_diffusion.i
-  positions_objects = 'input_app2'
-  output_in_position = true
+[MultiApps]
+  [ma2]
+    type = TransientMultiApp
+    input_files = sub_between_diffusion.i
+    positions_objects = 'input_app2'
+    output_in_position = true
+  []
 []
 
 [Transfers]
@@ -56,6 +60,8 @@
     use_nearest_position = input_app1
     # slight inflation to avoid floating point issues on borders
     bbox_factor = 1.001
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [app2_to_1_nodal_nodal]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -66,6 +72,8 @@
     extrapolation_constant = -1
     use_nearest_position = input_app2
     bbox_factor = 1.001
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 
   # Elemental to elemental variables
@@ -78,6 +86,8 @@
     extrapolation_constant = -1
     use_nearest_position = input_app1
     bbox_factor = 1.001
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [app2_to_1_elem_elem]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -88,6 +98,8 @@
     extrapolation_constant = -1
     use_nearest_position = input_app2
     bbox_factor = 1.001
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,8 @@
 
 // libMesh includes
 #include "libmesh/nonlinear_solver.h"
+
+using namespace libMesh;
 
 registerMooseObject("MooseApp", CentralDifference);
 
@@ -46,6 +48,10 @@ CentralDifference::computeADTimeDerivatives(ADReal & ad_u_dot,
                                             const dof_id_type & dof,
                                             ADReal & ad_u_dotdot) const
 {
+  // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
+  // MooseVariableData
+  ad_u_dotdot = ad_u_dot;
+
   computeTimeDerivativeHelper(ad_u_dot, ad_u_dotdot, _solution_old(dof), _solution_older(dof));
 }
 
@@ -55,10 +61,10 @@ CentralDifference::initialSetup()
   ActuallyExplicitEuler::initialSetup();
 
   // _nl here so that we don't create this vector in the aux system time integrator
-  _nl.disassociateVectorFromTag(*_nl.solutionUDot(), _u_dot_factor_tag);
-  _nl.addVector(_u_dot_factor_tag, true, GHOSTED);
-  _nl.disassociateVectorFromTag(*_nl.solutionUDotDot(), _u_dotdot_factor_tag);
-  _nl.addVector(_u_dotdot_factor_tag, true, GHOSTED);
+  _nl->disassociateVectorFromTag(*_nl->solutionUDot(), _u_dot_factor_tag);
+  _nl->addVector(_u_dot_factor_tag, true, GHOSTED);
+  _nl->disassociateVectorFromTag(*_nl->solutionUDotDot(), _u_dotdot_factor_tag);
+  _nl->addVector(_u_dotdot_factor_tag, true, GHOSTED);
 }
 
 void
@@ -87,7 +93,7 @@ CentralDifference::computeTimeDerivatives()
   u_dot.close();
 
   // used for Jacobian calculations
-  _du_dot_du = 1.0 / (2 * _dt);
+  computeDuDotDu();
   _du_dotdot_du = 1.0 / (_dt * _dt);
 
   // Computing udotdot "factor"
@@ -113,4 +119,10 @@ CentralDifference::computeTimeDerivatives()
     u_dot_factor *= 1.0 / (2.0 * _dt);
     u_dot_factor.close();
   }
+}
+
+Real
+CentralDifference::duDotDuCoeff() const
+{
+  return Real(1) / Real(2);
 }

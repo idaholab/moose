@@ -1,0 +1,61 @@
+{
+    "reporters": {
+        "matrix": {
+            "type": "StochasticMatrix",
+            "values": {
+                "results:converged": {
+                    "row_begin": 0,
+                    "row_end": 4,
+                    "type": "std::vector<bool>"
+                },
+                "results:l2error:value": {
+                    "row_begin": 0,
+                    "row_end": 4,
+                    "type": "std::vector<double>"
+                },
+                "test_0": {
+                    "row_begin": 0,
+                    "row_end": 4,
+                    "type": "std::vector<double>"
+                },
+                "test_1": {
+                    "row_begin": 0,
+                    "row_end": 4,
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "matrix": {
+                "results:converged": [
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "results:l2error:value": [
+                    0.006140899524593516,
+                    0.010505678416121461,
+                    0.0015668821790721986,
+                    0.005425419862385741
+                ],
+                "test_0": [
+                    0.00013864103172310882,
+                    0.00012707154029110033,
+                    0.0001395556158341649,
+                    0.00013137278815868362
+                ],
+                "test_1": [
+                    68.32632033768421,
+                    63.19447251327895,
+                    62.98261633261899,
+                    61.66746839355559
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

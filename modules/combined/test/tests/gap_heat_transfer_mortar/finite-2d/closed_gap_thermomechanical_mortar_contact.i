@@ -65,8 +65,8 @@
   []
 []
 
-[Modules]
-  [TensorMechanics/Master]
+[Physics]
+  [SolidMechanics/QuasiStatic]
     [steel]
       strain = FINITE
       add_variables = false

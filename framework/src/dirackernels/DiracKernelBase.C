@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,7 @@ DiracKernelBase::validParams()
   InputParameters params = ResidualObject::validParams();
   params += MaterialPropertyInterface::validParams();
   params += BlockRestrictable::validParams();
+  params += GeometricSearchInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -51,6 +52,8 @@ DiracKernelBase::validParams()
 
   params.addParamNamesToGroup("use_displaced_mesh drop_duplicate_points", "Advanced");
   params.declareControllable("enable");
+  params.registerSystemAttributeName("DiracKernel");
+
   return params;
 }
 
@@ -74,12 +77,6 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
 {
   // Stateful material properties are not allowed on DiracKernels
   statefulPropertiesAllowed(false);
-}
-
-Real
-DiracKernelBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  return 0;
 }
 
 void

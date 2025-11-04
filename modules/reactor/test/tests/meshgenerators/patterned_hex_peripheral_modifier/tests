@@ -1,12 +1,24 @@
 [Tests]
   design = 'meshgenerators/PatternedHexPeripheralModifier.md'
-  issues = '#20641'
+  issues = '#20641 #28296'
   [single_hex]
     type = 'Exodiff'
     input = 'single_hex.i'
     exodiff = 'single_hex_in.e'
     cli_args = '--mesh-only'
-    requirement ='The system shall generate a hexagonal assembly mesh then modify the peripheral region to facilitate further stitching.'
+    requirement ='The system shall generate a hexagonal assembly mesh of linear elements then modify the peripheral region to facilitate further stitching.'
+    recover = false
+  []
+  [single_hex_quatratic]
+    type = 'Exodiff'
+    input = 'single_hex.i'
+    exodiff = 'single_hex_quadratic_in.e'
+    cli_args = 'Mesh/hex/quad_element_type=QUAD8
+                Mesh/hex/tri_element_type=TRI6
+                Mesh/pattern/boundary_region_element_type=QUAD8
+                Mesh/pattern/hexagon_size=15
+                --mesh-only single_hex_quadratic_in.e'
+    requirement ='The system shall generate a hexagonal assembly mesh of quadratic QUAD8 elements then modify the peripheral region with TRI6 elements to facilitate further stitching.'
     recover = false
   []
   [single_hex_pin_id]

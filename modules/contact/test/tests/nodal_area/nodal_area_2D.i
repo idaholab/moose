@@ -1,8 +1,5 @@
 [Mesh]
   file = nodal_area_2D.e
-[]
-
-[Problem]
   coord_type = RZ
 []
 

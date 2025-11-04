@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,9 +8,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from SchemaDiff import SchemaDiff
-from TestHarness import util
-class JSONDiff(SchemaDiff):
 
+class JSONDiff(SchemaDiff):
     @staticmethod
     def validParams():
         params = SchemaDiff.validParams()
@@ -42,12 +41,8 @@ class JSONDiff(SchemaDiff):
         for entry in self.specs['ignored_regex_items']:
             re_entry = 'root'
             for key in entry.split('/'):
-                re_entry += f"\['{key}'\]"
+                re_entry += fr"\['{key}'\]"
             self.exclude_regex_paths.append(re_entry)
-
-    def prepare(self, options):
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.getTestDir(), self.specs['jsondiff'])
 
     def load_file(self, path1):
         import json

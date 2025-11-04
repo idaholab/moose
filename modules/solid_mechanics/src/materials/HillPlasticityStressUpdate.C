@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -104,7 +104,8 @@ HillPlasticityStressUpdateTempl<is_ad>::computeOmega(const GenericReal<is_ad> & 
   if (omega == 0.0)
     omega = 1.0e-36;
 
-  return std::sqrt(omega);
+  using std::sqrt;
+  return sqrt(omega);
 }
 
 template <bool is_ad>
@@ -158,6 +159,7 @@ HillPlasticityStressUpdateTempl<is_ad>::computeResidual(
     const GenericDenseVector<is_ad> & /*stress_sigma*/,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::pow;
 
   // If in elastic regime, just return
   if (_yield_condition <= 0.0)
@@ -173,7 +175,7 @@ HillPlasticityStressUpdateTempl<is_ad>::computeResidual(
   // Hardening variable is \alpha isotropic hardening for now.
   _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
   GenericReal<is_ad> s_y =
-      _hardening_constant * std::pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent) +
+      _hardening_constant * pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent) +
       _yield_stress;
 
   GenericReal<is_ad> residual = 0.0;
@@ -275,9 +277,10 @@ template <bool is_ad>
 Real
 HillPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative()
 {
+  using std::pow;
+
   return _hardening_constant * _hardening_exponent *
-         MetaPhysicL::raw_value(
-             std::pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent - 1));
+         MetaPhysicL::raw_value(pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent - 1));
 }
 
 template <bool is_ad>
@@ -288,6 +291,8 @@ HillPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
     const GenericDenseVector<is_ad> & stress_dev,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::sqrt;
+
   // e^P = delta_gamma * hill_tensor * stress
   GenericDenseVector<is_ad> inelasticStrainIncrement_vector(6);
   GenericDenseVector<is_ad> hill_stress(6);
@@ -311,7 +316,7 @@ HillPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
   GenericReal<is_ad> eq_plastic_strain_inc = Mepsilon.dot(inelasticStrainIncrement_vector);
 
   if (eq_plastic_strain_inc > 0.0)
-    eq_plastic_strain_inc = std::sqrt(eq_plastic_strain_inc);
+    eq_plastic_strain_inc = sqrt(eq_plastic_strain_inc);
 
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + eq_plastic_strain_inc;
 

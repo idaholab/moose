@@ -61,11 +61,11 @@
 [Functions]
   [forcing_function]
     type = ParsedFunction
-    expression= '-4 + x^2 + y^2'
+    expression = '-4 + x^2 + y^2'
   []
   [exact_soln]
     type = ParsedFunction
-    expression= 'x^2 + y^2'
+    expression = 'x^2 + y^2'
   []
 []
 
@@ -99,8 +99,6 @@
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = ' -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = '  NONZERO               1e-15'
 []
 
 [Outputs]

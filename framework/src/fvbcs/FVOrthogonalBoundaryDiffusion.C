@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,9 +44,7 @@ FVOrthogonalBoundaryDiffusion::FVOrthogonalBoundaryDiffusion(const InputParamete
 ADReal
 FVOrthogonalBoundaryDiffusion::computeQpResidual()
 {
-  const bool elem_is_interior =
-      _face_info->faceType(std::make_pair(_var.number(), _var.sys().number())) ==
-      FaceInfo::VarFaceNeighbors::ELEM;
+  const bool elem_is_interior = (_face_type == FaceInfo::VarFaceNeighbors::ELEM);
 
   const auto & diff_quant = elem_is_interior ? _diff_quant_elem[_qp] : _diff_quant_neighbor[_qp];
   const auto & coeff = elem_is_interior ? _coeff_elem[_qp] : _coeff_neighbor[_qp];

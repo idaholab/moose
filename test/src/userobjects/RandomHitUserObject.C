@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RandomHitUserObject.h"
+
+#include "Executioner.h"
 
 registerMooseObject("MooseTestApp", RandomHitUserObject);
 
@@ -45,6 +47,10 @@ RandomHitUserObject::elementWasHit(const Elem * elem) const
 void
 RandomHitUserObject::execute()
 {
+  // If the last solve didn't converge, we don't want to advance the random number generator
+  if (!getMooseApp().getExecutioner()->lastSolveConverged())
+    return;
+
   for (unsigned int i = 0; i < _num_hits; i++)
   {
     Real rand_x = _random.rand();

@@ -7,8 +7,9 @@
     exodiff = 'small_unstabilized.e'
     abs_zero = 1e-6
     requirement = "Action produces identical results for small deformations/without stabilization in "
-                  "axisymmetric RZ coordinates"
-    cli_args = "Outputs/file_base=small_unstabilized Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
+                  "centrosymmetric R-spherical coordinates"
+    cli_args = "Outputs/file_base=small_unstabilized "
+               "Physics/SolidMechanics/QuasiStatic/all/strain=SMALL "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "
                "Materials/compute_stress/large_kinematics=false"
   []
@@ -18,7 +19,7 @@
     exodiff = 'large_unstabilized.e'
     abs_zero = 1e-6
     requirement = "Action produces identical results for large deformations/without stabilization in "
-                  "axisymmetric RZ coordinates"
+                  "centrosymmetric R-spherical coordinates"
     cli_args = "Outputs/file_base=large_unstabilized "
                "Physics/SolidMechanics/QuasiStatic/all/strain=FINITE "
                "Physics/SolidMechanics/QuasiStatic/all/volumetric_locking_correction=false "

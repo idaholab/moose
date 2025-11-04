@@ -29,7 +29,6 @@
 # At t = 1, p = 200.
 
 [Problem]
-  coord_type = RZ
   type = ReferenceResidualProblem
   reference_vector = ref
   extra_tag_vectors = ref
@@ -42,6 +41,7 @@
 
 [Mesh]
   file = rz.e
+  coord_type = RZ
 []
 
 [Functions]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -192,7 +192,7 @@ EBSDMeshGenerator::generate()
 {
   if (_pre_refine)
   {
-    MeshRefinement mesh_refinement(*_base);
+    libMesh::MeshRefinement mesh_refinement(*_base);
     mesh_refinement.uniformly_refine(_pre_refine);
   }
   return std::move(_base);

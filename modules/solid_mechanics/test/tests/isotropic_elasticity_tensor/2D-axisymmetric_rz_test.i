@@ -2,14 +2,11 @@
   type = GeneratedMesh
   dim = 2
   elem_type = QUAD8
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Physics/SolidMechanics/QuasiStatic]

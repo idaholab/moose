@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,10 @@
 class MooseApp;
 class MeshGeneratorMesh;
 class MeshGenerator;
+namespace CSG
+{
+class CSGBase;
+}
 
 /**
  * System that manages MeshGenerators.
@@ -78,7 +82,8 @@ public:
    * Get a reference to a pointer that will be the output of the
    * MeshGenerator named name
    */
-  [[nodiscard]] std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const MeshGeneratorName & name);
+  [[nodiscard]] std::unique_ptr<libMesh::MeshBase> &
+  getMeshGeneratorOutput(const MeshGeneratorName & name);
 
   /**
    * Creates (constructs) all of the MeshGenerators that have been
@@ -112,12 +117,28 @@ public:
   /**
    * Get the saved mesh by name
    */
-  [[nodiscard]] std::unique_ptr<MeshBase> getSavedMesh(const std::string & name);
+  [[nodiscard]] std::unique_ptr<libMesh::MeshBase> getSavedMesh(const std::string & name);
 
   /**
    * Get all user-defined saved meshes except main and main_displaced
    */
   std::vector<std::string> getSavedMeshNames() const;
+
+  /**
+   * Set whether mesh generator system is running in CSG-only mode to true
+   */
+  void setCSGOnly();
+
+  /**
+   * Get whether mesh generator system is running in CSG-only mode
+   */
+  bool getCSGOnly() const { return _csg_only; }
+
+  const std::vector<std::vector<MeshGenerator *>> & getOrderedMeshGenerators() const
+  {
+    mooseAssert(_ordered_mesh_generators.size(), "Mesh generator order has not been set");
+    return _ordered_mesh_generators;
+  }
 
   /**
    * @returns Whether or not a mesh generator exists with the name \p name.
@@ -167,6 +188,31 @@ public:
    * Should be used to throw errors from within a MeshGenerator with more context.
    */
   void dataDrivenError(const MeshGenerator & generator, const std::string & message) const;
+
+  /// Get the name of the final mesh generator
+  MeshGeneratorName getFinalMeshGeneratorName() const { return _final_generator_name; }
+
+  /// Set the verbose flag
+  void setVerbose(const bool verbose) { _verbose = verbose; }
+
+  /**
+   * Saves the CSGBase object to the global map storage, _csg_base_output, for a particular mesh
+   * generator.
+   * Note that this moves the memory ownership of the CSGBase to the MeshGeneratorSystem.
+   *
+   * @param generator_name Name of mesh generator
+   * @param csg_base Pointer to CSGBase object created by mesh generator
+   */
+  void saveOutputCSGBase(const MeshGeneratorName generator_name,
+                         std::unique_ptr<CSG::CSGBase> & csg_base);
+
+  /**
+   * Returns the output CSGBase object associated with a particular mesh generator name
+   *
+   * @param name Name of mesh generator
+   * @return Pointer to CSGBase object associated with mesh generator name
+   */
+  std::unique_ptr<CSG::CSGBase> & getCSGBaseGeneratorOutput(const MeshGeneratorName & name);
 
 private:
   /**
@@ -224,17 +270,26 @@ private:
   std::vector<std::vector<MeshGenerator *>> _ordered_mesh_generators;
 
   /// Holds the output for each mesh generator - including duplicates needed downstream
-  std::map<std::string, std::list<std::unique_ptr<MeshBase>>> _mesh_generator_outputs;
+  std::map<std::string, std::list<std::unique_ptr<libMesh::MeshBase>>> _mesh_generator_outputs;
 
   /// The final mesh generator name to use
   std::string _final_generator_name;
 
   /// Holds the map of save in mesh -> name
-  std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
+  std::map<std::string, std::unique_ptr<libMesh::MeshBase>> _save_in_meshes;
 
   /// The name of the data driven generator, if any
   std::optional<std::string> _data_driven_generator_name;
 
   /// Whether any of the mesh generators are a \p BreakMeshByBlockGenerator
   bool _has_bmbb;
+
+  /// Whether to print the names of the mesh generators being executed or not
+  bool _verbose;
+
+  /// Whether mesh generator system is running in CSG-only mode
+  bool _csg_only;
+
+  /// Holds the output CSGBase object for each mesh generator
+  std::map<std::string, std::unique_ptr<CSG::CSGBase>> _csg_base_output;
 };

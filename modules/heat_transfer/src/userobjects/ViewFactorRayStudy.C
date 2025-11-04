@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,8 @@
 // Ray tracing includes
 #include "ReflectRayBC.h"
 #include "RayTracingPackingUtils.h"
+
+using namespace libMesh;
 
 registerMooseObject("HeatTransferApp", ViewFactorRayStudy);
 
@@ -441,7 +443,7 @@ ViewFactorRayStudy::generateStartElems()
       continue;
 
     // Sanity check on QGRID not working on some types
-    if (_q_face->type() == QGRID && elem->type() == TET4)
+    if (_q_face->type() == libMesh::QGRID && elem->type() == TET4)
       mooseError(
           "Cannot use GRID quadrature type with tetrahedral elements in ViewFactorRayStudy '",
           _name,

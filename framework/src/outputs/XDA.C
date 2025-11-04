@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,8 @@
 // libMesh includes
 #include "libmesh/enum_xdr_mode.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", XDA);
 registerMooseObjectAliased("MooseApp", XDA, "XDR");
 
@@ -23,7 +25,7 @@ InputParameters
 XDA::validParams()
 {
   // Get the base class parameters
-  InputParameters params = OversampleOutput::validParams();
+  InputParameters params = SampledOutput::validParams();
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format.");
@@ -37,7 +39,7 @@ XDA::validParams()
 }
 
 XDA::XDA(const InputParameters & parameters)
-  : OversampleOutput(parameters), _binary(getParam<bool>("_binary"))
+  : SampledOutput(parameters), _binary(getParam<bool>("_binary"))
 {
 }
 

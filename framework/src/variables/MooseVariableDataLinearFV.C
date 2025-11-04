@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,7 @@
 #include "SubProblem.h"
 #include "FVKernel.h"
 #include "ADUtils.h"
+#include "MooseLinearVariableFV.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/fe_base.h"
@@ -41,7 +42,7 @@ MooseVariableDataLinearFV<OutputType>::MooseVariableDataLinearFV(
     _var_num(_var.number()),
     _assembly(_subproblem.assembly(_tid, var.kind() == Moose::VAR_SOLVER ? sys.number() : 0)),
     _element_type(element_type),
-    _time_integrator(_sys.getTimeIntegrator()),
+    _time_integrator(_sys.queryTimeIntegrator(_var_num)),
     _elem(elem),
     _displaced(dynamic_cast<const DisplacedSystem *>(&_sys) ? true : false),
     _qrule(nullptr)
@@ -165,6 +166,13 @@ MooseVariableDataLinearFV<OutputType>::getDofIndices(const Elem * elem,
                                                      std::vector<dof_id_type> & dof_indices) const
 {
   _dof_map.dof_indices(elem, dof_indices, _var_num);
+}
+
+template <typename OutputType>
+const MooseLinearVariableFV<OutputType> &
+MooseVariableDataLinearFV<OutputType>::var() const
+{
+  return _var;
 }
 
 template class MooseVariableDataLinearFV<Real>;

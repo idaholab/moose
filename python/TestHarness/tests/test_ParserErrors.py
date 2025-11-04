@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,5 +17,5 @@ class TestHarnessTester(TestHarnessTestCase):
 
         # check that parser errors print correctly
         # TODO: Are there more we can test?
-        output = self.runExceptionTests('-i', 'parse_errors').decode('utf-8')
+        output = self.runTests('-i', 'parse_errors', exit_code=128).output
         self.assertIn('duplicate parameter', output)

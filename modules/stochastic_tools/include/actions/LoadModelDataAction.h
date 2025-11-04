@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -66,7 +66,8 @@ void
 LoadModelDataAction<T>::load(const T & object)
 {
   // Create the object that will load in data
-  RestartableDataReader reader(_app, _app.getRestartableDataMap(object.modelMetaDataName()));
+  RestartableDataReader reader(
+      _app, _app.getRestartableDataMap(object.modelMetaDataName()), _app.forceRestart());
   reader.setErrorOnLoadWithDifferentNumberOfProcessors(false);
 
   // Read the supplied file

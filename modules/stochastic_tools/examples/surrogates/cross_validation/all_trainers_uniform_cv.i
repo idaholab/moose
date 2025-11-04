@@ -146,7 +146,7 @@
     trainer = np_max
   []
   [gp_surr]
-    type = GaussianProcess
+    type = GaussianProcessSurrogate
     trainer = gp_max
   []
   [ann_surr]

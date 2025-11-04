@@ -4,6 +4,10 @@
 # two blocks to have the same value
 ###########################################################
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Mesh]
 []
 
@@ -61,7 +65,7 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   line_search = none

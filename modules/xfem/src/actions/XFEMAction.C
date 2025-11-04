@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -57,6 +57,11 @@ XFEMAction::validParams()
       "debug_output_level <= 3",
       "Controls the amount of debug output from XFEM.  0: None, 1: Summary, 2: Details on "
       "modifications to mesh, 3: Full dump of element fragment algorithm mesh");
+  params.addRangeCheckedParam<Real>("min_weight_multiplier",
+                                    1.e-3,
+                                    "min_weight_multiplier >= 0 & min_weight_multiplier<=1",
+                                    "Minimum average multiplier applied by XFEM to integration "
+                                    "point weights for partial elements");
   params.addParam<bool>("output_cut_plane", false, "Output the XFEM cut plane and volume fraction");
   params.addParam<bool>("use_crack_growth_increment", false, "Use fixed crack growth increment");
   params.addParam<Real>("crack_growth_increment", 0.1, "Crack growth increment");
@@ -156,6 +161,7 @@ XFEMAction::act()
 
     xfem->setCrackGrowthMethod(_xfem_use_crack_growth_increment, _xfem_crack_growth_increment);
     xfem->setDebugOutputLevel(getParam<unsigned int>("debug_output_level"));
+    xfem->setMinWeightMultiplier(getParam<Real>("min_weight_multiplier"));
   }
   else if (_current_task == "add_variable" && _use_crack_tip_enrichment)
   {

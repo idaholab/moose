@@ -45,24 +45,28 @@ T_inlet = 200
     gravity = '0 -9.81 0'
     ref_temperature = 150
 
+    # Reference file sets effective_conductivity by default that way
+    # so the conductivity is multiplied by the porosity in the kernel
+    effective_conductivity = false
+
     initial_velocity = '1e-6 ${v_inlet} 0'
     initial_pressure = 0.0
     initial_temperature = 0.0
 
     inlet_boundaries = 'bottom'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '0 ${v_inlet}'
+    momentum_inlet_functors = '0 ${v_inlet}'
     energy_inlet_types = 'heatflux'
-    energy_inlet_function = '${fparse v_inlet * rho * cp * T_inlet}'
+    energy_inlet_functors = '${fparse v_inlet * rho * cp * T_inlet}'
 
     wall_boundaries = 'right left'
     momentum_wall_types = 'noslip symmetry'
     energy_wall_types = 'heatflux heatflux'
-    energy_wall_function = '0 0'
+    energy_wall_functors = '0 0'
 
     outlet_boundaries = 'top'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
+    pressure_functors = '0'
 
     ambient_convection_alpha = 1e-3
     ambient_temperature = 'T_solid'

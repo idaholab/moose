@@ -70,7 +70,7 @@ make -j8
 ```
 
 This will generate the results file, out.e, as shown in Figure 2. This file may be viewed using
-Peacock or an external application that supports the Exodus II format (e.g., Paraview).
+Peacock or an external application that supports the Exodus format (e.g., Paraview).
 
 <br>
 

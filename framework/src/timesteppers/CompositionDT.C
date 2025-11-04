@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,7 @@
 #include "Transient.h"
 #include "TimeSequenceStepperBase.h"
 #include "IterationAdaptiveDT.h"
+#include "FEProblemBase.h"
 
 #include <limits>
 
@@ -181,6 +182,7 @@ CompositionDT::getSequenceSteppersNextTime()
   for (auto & tss : time_sequence_steppers)
   {
     Real ts_time_to_hit = tss->getNextTimeInSequence();
+
     if (ts_time_to_hit - _time <= _dt_min)
     {
       tss->increaseCurrentStep();

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,9 @@
 #pragma once
 
 #include "Action.h"
+#include "ActionWarehouse.h"
 #include "InputParametersChecksUtils.h"
+#include "ActionComponent.h"
 
 // We include these headers for all the derived classes that will be building objects
 #include "FEProblemBase.h"
@@ -32,6 +34,10 @@ public:
 
   PhysicsBase(const InputParameters & parameters);
 
+  /// Provide additional parameters for the relationship managers
+  virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
+
+  // Responding to tasks //
   /// Forwards from the action tasks to the implemented addXYZ() in the derived classes
   /// If you need more than these:
   /// - register your action to the new task using
@@ -42,11 +48,13 @@ public:
   /// Routine to add additional setup work on additional registered tasks to a Physics
   virtual void actOnAdditionalTasks() {}
 
+  // Block restriction //
   /**
    * @brief Add new blocks to the Physics
    * @param blocks list of blocks to add to the physics
    */
   void addBlocks(const std::vector<SubdomainName> & blocks);
+  void addBlocksById(const std::vector<SubdomainID> & block_ids);
 
   /// Return the blocks this physics is defined on
   const std::vector<SubdomainName> & blocks() const { return _blocks; }
@@ -61,9 +69,7 @@ public:
                                       const std::vector<SubdomainName> & blocks,
                                       const bool error_if_not_identical = true) const;
 
-  /// Provide additional parameters for the relationship managers
-  virtual InputParameters getAdditionalRMParams() const { return emptyInputParameters(); };
-
+  // Coupling with Physics //
   /**
    * @brief Get a Physics from the ActionWarehouse with the requested type and name
    * @param phys_name name of the Physics to retrieve
@@ -75,16 +81,32 @@ public:
   template <typename T>
   const std::vector<T *> getCoupledPhysics(const bool allow_fail = false) const;
 
-protected:
-  /// Return whether the Physics is solved using a transient
-  bool isTransient() const;
   /// Return the maximum dimension of the blocks the Physics is active on
   unsigned int dimension() const;
 
+  // Coupling with Components //
+  /// Get a component with the requested name
+  const ActionComponent & getActionComponent(const ComponentName & comp_name) const;
+  /// Check that the component is of the desired type
+  template <typename T>
+  void checkComponentType(const ActionComponent & component) const;
+  /// Most basic way of adding a component: simply adding the blocks to the block
+  /// restriction of the Physics. More complex behavior should be implemented by overriding
+  virtual void addComponent(const ActionComponent & component);
+
+  /// Return the list of solver (nonlinear + linear) variables in this physics
+  const std::vector<VariableName> & solverVariableNames() const { return _solver_var_names; };
+  /// Return the list of aux variables in this physics
+  const std::vector<VariableName> & auxVariableNames() const { return _aux_var_names; };
+
+protected:
+  /// Return whether the Physics is solved using a transient
+  bool isTransient() const;
+
   /// Get the factory for this physics
   /// The factory lets you get the parameters for objects
-  virtual Factory & getFactory() { return _factory; }
-  virtual Factory & getFactory() const { return _factory; }
+  Factory & getFactory() { return _factory; }
+  Factory & getFactory() const { return _factory; }
   /// Get the problem for this physics
   /// Useful to add objects to the simulation
   virtual FEProblemBase & getProblem()
@@ -100,22 +122,36 @@ protected:
 
   /// Tell the app if we want to use Exodus restart
   void prepareCopyVariablesFromMesh() const;
-  /// Copy variables from the mesh file
-  void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy);
+  /**
+   * Copy nonlinear or aux variables from the mesh file
+   *
+   * @param variables_to_copy  Nonlinear or aux (not a mix) variables
+   * @param are_nonlinear  True if \c variables_to_copy are nonlinear; else, aux
+   */
+  void copyVariablesFromMesh(const std::vector<VariableName> & variables_to_copy,
+                             bool are_nonlinear = true);
 
   /// Use prefix() to disambiguate names
   std::string prefix() const { return name() + "_"; }
 
-  /// Return the list of nonlinear variables in this physics
-  const std::vector<VariableName> & nonlinearVariableNames() const { return _nl_var_names; };
-  /// Keep track of the name of a nonlinear variable defined in the Physics
-  void saveNonlinearVariableName(const VariableName & var_name)
+  /// Keep track of the name of the solver variable defined in the Physics
+  void saveSolverVariableName(const VariableName & var_name)
   {
-    _nl_var_names.push_back(var_name);
+    _solver_var_names.push_back(var_name);
   }
+  /// Keep track of the name of an aux variable defined in the Physics
+  void saveAuxVariableName(const VariableName & var_name) { _aux_var_names.push_back(var_name); }
 
-  /// Check whether a nonlinear variable already exists
-  bool nonlinearVariableExists(const VariableName & var_name, bool error_if_aux) const;
+  /// Check whether a variable already exists
+  bool variableExists(const VariableName & var_name, bool error_if_aux) const;
+  /// Check whether a variable already exists and is a solver variable
+  bool solverVariableExists(const VariableName & var_name) const;
+
+  /// Get the solver system for this variable index. The index should be the index of the variable in solver
+  /// var_names (currently _solver_var_names) vector
+  const SolverSystemName & getSolverSystem(unsigned int variable_index) const;
+  /// Get the solver system for this variable name
+  const SolverSystemName & getSolverSystem(const VariableName & variable_name) const;
 
   /// Add a new required task for all physics deriving from this class
   /// NOTE: This does not register the task, you still need to call registerMooseAction
@@ -132,9 +168,87 @@ protected:
    * @param blocks the vector blocks to check for whether it contains every block in the mesh
    */
   bool allMeshBlocks(const std::vector<SubdomainName> & blocks) const;
+  bool allMeshBlocks(const std::set<SubdomainName> & blocks) const;
+  // These APIs can deal with ANY_BLOCK_ID or ids with no names. They will be slower than the
+  // MooseMeshUtils' APIs, but are more convenient for setup purposes
+  /// Get the set of subdomain ids for the incoming vector of subdomain names
+  std::set<SubdomainID> getSubdomainIDs(const std::set<SubdomainName> & blocks) const;
+  /// Get the vector of subdomain names and ids for the incoming set of subdomain IDs
+  std::vector<std::string> getSubdomainNamesAndIDs(const std::set<SubdomainID> & blocks) const;
 
-  /// System number for the system owning the variables
-  const unsigned int _sys_number;
+  /**
+   * Process the given petsc option pairs into the system solver settings
+   */
+  void addPetscPairsToPetscOptions(
+      const std::vector<std::pair<MooseEnumItem, std::string>> & petsc_pair_options);
+
+  // Helpers to check on variable types
+  /// Whether the variable is a finite volume variable
+  bool isVariableFV(const VariableName & var_name) const;
+  /// Whether the variable is a scalar variable (global single scalar, not a field)
+  bool isVariableScalar(const VariableName & var_name) const;
+
+  // Routines to help with deciding when to create objects
+  /**
+   * Returns whether this Physics should create the variable. Will return false if the variable
+   * already exists and has the necessary block restriction.
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param error_if_aux error if the variable is auxiliary
+   */
+  bool shouldCreateVariable(const VariableName & var_name,
+                            const std::vector<SubdomainName> & blocks,
+                            const bool error_if_aux);
+
+  /**
+   * Returns whether this Physics should create the variable. Will return false if the initial
+   * condition already exists and has the necessary block restriction.
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param ic_is_default_ic whether this IC is from a default parameter, and therefore should be
+   * skipped when recovering/restarting
+   * @param error_if_already_defined two ICs cannot be defined on the same subdomain, so if this is
+   * set to true, any overlap between the subdomains of two ICs for the same variable will cause an
+   * error. If set to false, the existing ICs will take priority, and this routine will return
+   * false. Setting 'error_if_already_defined' to '!ic_is_default_ic' is a good idea if it is ok to
+   * overwrite the default IC value of the Physics.
+   */
+  bool shouldCreateIC(const VariableName & var_name,
+                      const std::vector<SubdomainName> & blocks,
+                      const bool ic_is_default_ic,
+                      const bool error_if_already_defined) const;
+
+  /**
+   * Returns whether this Physics should create the variable. Will return false if the time
+   * derivative kernel already exists and has the necessary block restriction.
+   * @param var_name name of the variable
+   * @param blocks block restriction to use. If empty, no block restriction
+   * @param error_if_already_defined two time derivatives can be defined on the same subdomain, but
+   * it is usually not correct. So if this is set to true, any overlap between the subdomains of two
+   * time derivatives for the same variable will cause an error. If set to false, the existing time
+   * derivative will be deemed as sufficient, and this routine will return false.
+   */
+  bool shouldCreateTimeDerivative(const VariableName & var_name,
+                                  const std::vector<SubdomainName> & blocks,
+                                  const bool error_if_already_defined) const;
+
+  // Other conceivable "shouldCreate" routines for things that are unique to a variable
+  // - shouldCreateTimeIntegrator
+  // - shouldCreatePredictor/Corrector
+
+  /**
+   * When this is called, we are knowingly not using the value of these parameters. This routine
+   * checks whether these parameters simply have defaults or were passed by the user
+   * @param param_names the parameters we are ignoring
+   */
+  void reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
+                                         const std::string & object_type) const;
+
+  /// System names for the system(s) owning the solver variables
+  std::vector<SolverSystemName> _system_names;
+
+  /// System numbers for the system(s) owning the solver variables
+  std::vector<unsigned int> _system_numbers;
 
   /// Whether to output additional information
   const bool _verbose;
@@ -158,10 +272,12 @@ private:
   virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
+  /// Additional checks performed near the end of the setup phase
+  virtual void checkIntegrity() const {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
-  virtual void addNonlinearVariables() {}
+  virtual void addSolverVariables() {}
   virtual void addAuxiliaryVariables() {}
   virtual void addInitialConditions() {}
   virtual void addFEKernels() {}
@@ -181,6 +297,7 @@ private:
   virtual void addMaterials() {}
   virtual void addFunctorMaterials() {}
   virtual void addUserObjects() {}
+  virtual void addCorrectors() {}
   virtual void addMultiApps() {}
   virtual void addTransfers() {}
   virtual void addPostprocessors() {}
@@ -198,8 +315,10 @@ private:
   /// some physics directly to steady state
   MooseEnum _is_transient;
 
-  /// Vector of the nonlinear variables in the Physics
-  std::vector<VariableName> _nl_var_names;
+  /// Vector of the solver variables (nonlinear and linear) in the Physics
+  std::vector<VariableName> _solver_var_names;
+  /// Vector of the aux variables in the Physics
+  std::vector<VariableName> _aux_var_names;
 
   /// Dimension of the physics, which we expect for now to be the dimension of the mesh
   /// NOTE: this is not known at construction time, only after initializePhysics which is a huge bummer
@@ -244,4 +363,14 @@ PhysicsBase::getCoupledPhysics(const bool allow_fail) const
     mooseError("No Physics of requested type '", MooseUtils::prettyCppType<T>(), "'");
   else
     return all_T_physics;
+}
+
+template <typename T>
+void
+PhysicsBase::checkComponentType(const ActionComponent & component) const
+{
+  if (!dynamic_cast<const T *>(&component))
+    mooseError("Component '" + component.name() + "' must be of type '" +
+               MooseUtils::prettyCppType<T>() + "'.\nIt is currently of type '" + component.type() +
+               "'");
 }

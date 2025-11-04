@@ -108,7 +108,7 @@ A similar equation holds for temperature (but in PorousFlow
 simulations the heat is sometimes supplied by the fluid, in which case
 the appropriate equation to use for the heat may be the above equation
 multiplied by the enthalpy).  Here $k_{nn}$ is the permeability of the
-region between the model and the imaginary environment 
+region between the model and the imaginary environment
 (which can also be thought of as the permeability of the adjacent element),
 $k_{\mathrm{r}}$ is the relative permeability in this region, $\rho$
 and $\mu$ are the fluid density and viscosity.  The environment
@@ -123,23 +123,23 @@ almost zero and does nothing.
 
 ### Numerical Implementation
 
-The [`PorousFlowSink`](PorousFlowSink.md) is implemented in a fairly general way 
-that allows for flexibility in setting combinations of pressure and temperature boundary conditions. Due to its implementation, 
+The [`PorousFlowSink`](PorousFlowSink.md) is implemented in a fairly general way
+that allows for flexibility in setting combinations of pressure and temperature boundary conditions. Due to its implementation,
 it is difficult to draw a perfect analogy to the physical flux. Nevertheless,
 [eq:fix_pp_bc] may be implemented in a number of ways, and one of the most
 common involves a [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
 that follows the format of [eq:s_f_g] using $f(x,t)=C$ and $g(P-P_{\mathrm{e}})$ as a
-piecewise linear function between ordered pairs of `pt_vals` (on the x-axis) and 
-`multiplier` (on the y-axis). An example of the function $g$ is shown in the figure below. It accepts $P-P_{\mathrm{e}}$ as an input and returns 
+piecewise linear function between ordered pairs of `pt_vals` (on the x-axis) and
+`multiplier` (on the y-axis). An example of the function $g$ is shown in the figure below. It accepts $P-P_{\mathrm{e}}$ as an input and returns
 a value that ends up multiplying $C$ to give a flux (as in [eq:s_f_g]). $C$ can be thought of as the conductance and is specified with `flux_function = C`. Its numerical value is discussed below. $P_{\mathrm{e}}$ can be specified using an AuxVariable or set to a constant value using `PT_shift = Pe`.
 
 
 !media piecewiselinear_g_function.png style=width:50%;margin-left:10px caption=Depiction of $g(P-P_{\mathrm{e}})$ for PorousFlowPiecewiseLinearSink. The function accepts $P-P_{\mathrm{e}}$ as an input (i.e. the difference between a specified environment pressure and the pressure on the boundary element) and returns a value that multiplies $C$ to give the flux out of the domain. id=PiecewiseLinear_g_Function
 
-To set a Dirichlet boundary condition $P = P_{\mathrm{e}}$, either $C$ or the slope of $g$ should be very large. 
+To set a Dirichlet boundary condition $P = P_{\mathrm{e}}$, either $C$ or the slope of $g$ should be very large.
 It is usually convenient to make the slope of $g$ equal to 1 by setting `pt_vals = '-1E9 1E9'` and `multipliers = '-1E9 1E9'`, and then $C$ can be selected appropriately.
 The range for `pt_vals` should be sufficiently large that the simulation always occupies the region between the values specified (`-1E9 1E9` is a typical choice because porepressures encountered in many simulations are $O(10^6)$).
-This ensures good convergence, and if in doubt set the `pt_vals` at a higher value than you expect. 
+This ensures good convergence, and if in doubt set the `pt_vals` at a higher value than you expect.
 If $P - P_{\mathrm{e}}$ falls outside of the range defined in `pt_vals`, then the slope of $g = 0$. This can be useful to set a boundary condition that will only allow for outflow (e.g. by using  `pt_vals = '0 1E9'`, `multipliers = '0 1E9'`).`
 
 The numerical value of the conductance, $C$, is
@@ -152,11 +152,11 @@ true`, and then $C = 1/L$.  This has three advantages: (1) the MOOSE
 input file is simpler; (2) MOOSE automatically chooses the correct
 mobility and relative permeability to use; (3) these parameters are
 appropriate to the model so it reduces the potential for difficult
-numerical situations occurring. 
+numerical situations occurring.
 
-Also note, if $C \times g$ is too large, the boundary residual will be much larger than residuals within the domain. This results in poor convergence. 
+Also note, if $C \times g$ is too large, the boundary residual will be much larger than residuals within the domain. This results in poor convergence.
 
-So what value should be assigned to $C$? In the example below, $C = 10^{-5}$, $\rho \sim 10^3$ kg/m$^3$, $k = 10^{-15}$ m$^2$, $k_r = 1$, and $\mu \sim 10^{-3}$ Pa-s. Therefore $L \sim 10^{-4}$ m. This value of $L$ is small enough to ensure that the Dirichlet boundary condition is satisfied. If $C$ is increased to $10^{-2}$, $L \sim 10^{-7}$ m, and the simulation has difficulty converging. If $C = 10^{-11}$, $L\sim10^2$ m, and the boundary acts like a source of fluid from a distant reservoir (i.e. it no longer acts like a Dirichlet boundary condition). 
+So what value should be assigned to $C$? In the example below, $C = 10^{-5}$, $\rho \sim 10^3$ kg/m$^3$, $k = 10^{-15}$ m$^2$, $k_r = 1$, and $\mu \sim 10^{-3}$ Pa-s. Therefore $L \sim 10^{-4}$ m. This value of $L$ is small enough to ensure that the Dirichlet boundary condition is satisfied. If $C$ is increased to $10^{-2}$, $L \sim 10^{-7}$ m, and the simulation has difficulty converging. If $C = 10^{-11}$, $L\sim10^2$ m, and the boundary acts like a source of fluid from a distant reservoir (i.e. it no longer acts like a Dirichlet boundary condition).
 The value of $C$ is simply $1/L$ if `use_mobility = true` and `use_relperm = true`.
 
 !listing modules/porous_flow/test/tests/sinks/PorousFlowPiecewiseLinearSink_BC_eg1.i start=[BCs] end=[Postprocessors]
@@ -331,7 +331,7 @@ Inclusion of a BC for $u$ in a MOOSE input file will specify something about the
 
 ### The PorousFlow mass flux
 
-The [governing equation](governing_equations.md) for mass conservation of fluid species $\kappa$ is
+The [governing equation](porous_flow/governing_equations.md) for mass conservation of fluid species $\kappa$ is
 \begin{equation}
 0 = \frac{\partial M^{\kappa}}{\partial t} + M^{\kappa}\nabla\cdot{\mathbf
   v}_{s} + \nabla\cdot \mathbf{F}^{\kappa} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \ .
@@ -339,7 +339,7 @@ The [governing equation](governing_equations.md) for mass conservation of fluid 
 The standard [PorousFlow nomenclature](/porous_flow/nomenclature.md) as been used here.  The weak form is
 \begin{equation}
 \label{eqn.pf.mass.flux.weak}
-0 = \int_{\Omega}\psi \dot{M}^{\kappa} + \int_{\Omega}\psi \left( M^{\kappa}\nabla\cdot{\mathbf v}_{s} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \right) - \int_{\Omega}\nabla\psi\cdot \mathbf{F}^{\kappa} + \int_{\partial\Omega}\psi {\mathbf n}\cdot \mathbf{F}^{\kappa} 
+0 = \int_{\Omega}\psi \dot{M}^{\kappa} + \int_{\Omega}\psi \left( M^{\kappa}\nabla\cdot{\mathbf v}_{s} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \right) - \int_{\Omega}\nabla\psi\cdot \mathbf{F}^{\kappa} + \int_{\partial\Omega}\psi {\mathbf n}\cdot \mathbf{F}^{\kappa}
 \end{equation}
 The flux of species $\kappa$ out through an arbitrary area $A$ is
 \begin{equation}
@@ -362,7 +362,7 @@ Inclusion of a BC for porepressure or mass fraction in a MOOSE input file will s
 
 ### The PorousFlow heat flux
 
-The [governing equation](governing_equations.md) for heat-energy conservation is
+The [governing equation](porous_flow/governing_equations.md) for heat-energy conservation is
 \begin{equation}
 0 = \frac{\partial\mathcal{E}}{\partial t} + \mathcal{E}\nabla\cdot{\mathbf
   v}_{s} + \nabla\cdot \mathbf{F}^{T} -

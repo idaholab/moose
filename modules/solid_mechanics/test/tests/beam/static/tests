@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'euler_small_strain_y.i'
     exodiff = 'euler_small_strain_y_out.e'
-    verification = 'beam_vandv.md' 
+    verification = 'beam_vandv.md'
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under small deformations in the y direction."
@@ -45,6 +45,7 @@
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under finite deformations in the y direction."
+    capabilities = 'method!=dbg'
   [../]
   [./euler_finite_rot_z]
     type = 'Exodiff'
@@ -54,6 +55,7 @@
     requirement = "The mechanics system shall accurately predict the"
                   " static bending response of a Euler-Bernoulli beam modeled using"
                   " beam elements under finite deformations in the z direction."
+    capabilities = 'method!=dbg'
   [../]
   [./euler_small_y_with_action]
     type = 'Exodiff'

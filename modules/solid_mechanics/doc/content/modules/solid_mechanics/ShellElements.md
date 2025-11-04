@@ -39,7 +39,7 @@ If $^t \mathbf{g_i} = \partial ^t \mathbf{x}/\partial r_i$ are the covariant bas
 \end{equation}
 
 The expressions for the small and large strains in the 11, 22, 12, 13 and 23 directions are provided in equations 21 to 24 of [!cite](dvorkin1984continuum). The expressions for the shear strains in the 13 and 23 directions also include a correction for shear locking. In MOOSE the small strain increments are computed in
-[ADComputeIncrementalShellStrain](/ADComputeIncrementalShellStrain.md) and the small + large strain increments are computed in [ADComputeFiniteShellStrain](/ADComputeFiniteShellStrain.md)). Note that strain in the 33 direction is not computed.
+[ADComputeIncrementalShellStrain](/ADComputeIncrementalShellStrain.md) and the small + large strain increments are computed in [ADComputeFiniteShellStrain](/ADComputeFiniteShellStrain.md). Note that strain in the 33 direction is not computed.
 
 Apart from the strain increment, two other matrices (B and BNL) are computed by the strain class. These two matrices connect the nodal displacements/rotations to the small and large strains, respectively, i.e., $e=B u$ and $\eta = B_{NL} u$. These two matrices are then used to compute the residuals in [ADStressDivergenceShell](/ADStressDivergenceShell.md).
 
@@ -51,13 +51,25 @@ The shell element assumes a plane stress condition, i.e., the normal stress in t
 \tilde{C}_{ijkl} = (g^i \cdot \hat{e}_m)(g^j \cdot \hat{e}_n)(g^k \cdot \hat{e}_o)(g^l \cdot \hat{e}_p) \hat{C}_{mnop}
 \end{equation}
 
-where $g^i$ are the contravariant base vectors and $\hat{e}_i$ are the local cartesian coordinate system computed using the covariant base vectors, i.e.,
-
+where $g^i$ are the contravariant base vectors. The contravariant base vectors $g^1$, $g^2$ and $g^3$ are determined from the covariant base vectors $g_1$, $g_2$ and $g_3$ using the following equations:
 \begin{equation}
-\hat{e}_3 = \frac{g_3}{|g_3|}; \hat{e}_1 = \frac{g_2 \times \hat{e}^3}{|g_2 \times \hat{e}^3|}; \hat{e}_2 = \hat{e}_3 \times \hat{e}_1
+g^1=\dfrac{g_2 \times g_3}{g_1 \cdot (g_2 \times g_3)}
 \end{equation}
 
-The elasticity tensor at each quadrature point (qp) is computed in [ADComputeIsotropicElasticityTensorShell](/ADComputeIsotropicElasticityTensorShell.md).
+\begin{equation}
+g^2=\dfrac{g_3 \times g_1}{g_1 \cdot (g_2 \times g_3)}
+\end{equation}
+
+\begin{equation}
+g^3=\dfrac{g_1 \times g_2}{g_1 \cdot (g_2 \times g_3)}
+\end{equation}
+These contravariant base vectors satisfy the orthogonality condition: $g^i \cdot g_j =\delta_{ij}$, where $\delta_{ij}$ is Kronecker delta. The $\hat{e}_i$ vectors are the local cartesian coordinate system defined based on a user-defined reference first local direction vector $\hat{e}_{1r}$, which is defined by the `reference_first_local_direction` parameter, which defaults to the $X$ direction (i.e. $\hat{e}_{1r}=(1, 0, 0)$). The projection of $\hat{e}_{1r}$ onto the local element's plane provides the first local direction, so that the $\hat{e}$ vectors are computed as:
+
+\begin{equation}
+\hat{e}_3 = V_n; \hat{e}_2 = \frac{\hat{e}_3 \times \hat{e}_{1r}}{|\hat{e}_3 \times \hat{e}_{1r}|}; \hat{e}_1 = \hat{e}_2 \times \hat{e}_3
+\end{equation}
+
+In this equation, $V_n$ represents the element's normal vector. The second local vector $e_2$ is obtained via the cross product of $e_3$ and $\hat{e}_{1r}$. The projection of $\hat{e}_{1r}$ onto each element ensures that $\hat{e}_1$ lies in-plane and is perpendicular to the element's normal. The projection of $\hat{e}_{1r}$ on the shell element is then determined via the cross product of $e_2$ and $e_3$. The elasticity tensor at each quadrature point (qp) is computed in [ADComputeIsotropicElasticityTensorShell](/ADComputeIsotropicElasticityTensorShell.md).
 
 ## Stress calculation
 

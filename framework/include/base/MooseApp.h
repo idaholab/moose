@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,9 +9,22 @@
 
 #pragma once
 
+#ifdef MOOSE_LIBTORCH_ENABLED
+// Libtorch includes
+#include <torch/types.h>
+#include <torch/mps.h>
+#include <torch/cuda.h>
+#include <c10/core/DeviceType.h>
+#endif
+
+#ifdef MOOSE_MFEM_ENABLED
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
+#endif
+
 // MOOSE includes
 #include "Moose.h"
-#include "Parser.h"
 #include "Builder.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
@@ -25,9 +38,15 @@
 #include "TheWarehouse.h"
 #include "RankMap.h"
 #include "MeshGeneratorSystem.h"
+#include "ChainControlDataSystem.h"
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
+#include "Capabilities.h"
+#include "MoosePassKey.h"
+#include "SystemInfo.h"
+#include "Syntax.h"
+
 #include "libmesh/parallel_object.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/point.h"
@@ -39,6 +58,7 @@
 #include <unordered_set>
 #include <typeindex>
 #include <filesystem>
+#include <variant>
 
 // Forward declarations
 class Executioner;
@@ -46,10 +66,13 @@ class Executor;
 class NullExecutor;
 class FEProblemBase;
 class InputParameterWarehouse;
-class SystemInfo;
 class CommandLine;
 class RelationshipManager;
 class SolutionInvalidity;
+class MultiApp;
+#ifdef MOOSE_MFEM_ENABLED
+class MFEMProblemSolve;
+#endif
 
 namespace libMesh
 {
@@ -59,6 +82,13 @@ namespace hit
 {
 class Node;
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose::Kokkos
+{
+class MemoryPool;
+}
+#endif
 
 /**
  * Base class for MOOSE-based applications
@@ -70,12 +100,17 @@ class Node;
  *
  * Each application should register its own objects and register its own special syntax
  */
-class MooseApp : public ConsoleStreamInterface,
-                 public PerfGraphInterface,
-                 public libMesh::ParallelObject,
-                 public MooseBase
+class MooseApp : public PerfGraphInterface, public libMesh::ParallelObject, public MooseBase
 {
 public:
+  /// Get the device accelerated computations are supposed to be running on.
+  std::optional<MooseEnum> getComputeDevice() const;
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+  /// Get the device torch is supposed to be running on.
+  torch::DeviceType getLibtorchDevice() const { return _libtorch_device; }
+#endif
+
   /**
    * Stores configuration options relating to the fixed-point solving
    * capability.  This is used for communicating input-file-based config from
@@ -116,10 +151,15 @@ public:
   }
 
   /**
-   * Get the parameters of the object
-   * @return The parameters of the object
+   * Get the shell exit code for the application
+   * @return The shell exit code
    */
-  InputParameters & parameters() { return _pars; }
+  int exitCode() const { return _exit_code; }
+
+  /**
+   * Sets the exit code that the application will exit with.
+   */
+  void setExitCode(const int exit_code) { _exit_code = exit_code; }
 
   /**
    * The RankMap is a useful object for determining how the processes
@@ -135,34 +175,10 @@ public:
   /**
    * Get the SolutionInvalidity for this app
    */
-  SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
-
   ///@{
-  /**
-   * Retrieve a parameter for the object
-   * @param name The name of the parameter
-   * @return The value of the parameter
-   */
-  template <typename T>
-  const T & getParam(const std::string & name);
-
-  template <typename T>
-  const T & getParam(const std::string & name) const;
+  SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
+  const SolutionInvalidity & solutionInvalidity() const { return _solution_invalidity; }
   ///@}
-
-  /**
-   * Retrieve a renamed parameter for the object. This helper makes sure we
-   * check both names before erroring, and that only one parameter is passed to avoid
-   * silent errors
-   * @param old_name the old name for the parameter
-   * @param new_name the new name for the parameter
-   */
-  template <typename T>
-  const T & getRenamedParam(const std::string & old_name, const std::string & new_name) const;
-
-  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
-
-  inline bool isParamSetByUser(const std::string & nm) const { return _pars.isParamSetByUser(nm); }
 
   /**
    * Run the application
@@ -340,22 +356,11 @@ public:
   /**
    * @return The Parser
    **/
+  ///@{
+  const Parser & parser() const;
   Parser & parser();
+  ///@}
 
-private:
-  /**
-   * Internal function used to recursively create the executor objects.
-   *
-   * Called by createExecutors
-   *
-   * @param current_executor_name The name of the executor currently needing to be built
-   * @param possible_roots The names of executors that are currently candidates for being the root
-   */
-  void recursivelyCreateExecutors(const std::string & current_executor_name,
-                                  std::list<std::string> & possible_roots,
-                                  std::list<std::string> & current_branch);
-
-public:
   /**
    * After adding all of the Executor Params - this function will actually cause all of them to be
    * built
@@ -427,12 +432,15 @@ public:
   /**
    * Set the Exodus reader to restart variables from an Exodus mesh file
    */
-  void setExReaderForRestart(std::shared_ptr<ExodusII_IO> && exreader) { _ex_reader = exreader; }
+  void setExReaderForRestart(std::shared_ptr<libMesh::ExodusII_IO> && exreader)
+  {
+    _ex_reader = exreader;
+  }
 
   /**
    * Get the Exodus reader to restart variables from an Exodus mesh file
    */
-  ExodusII_IO * getExReaderForRestart() const { return _ex_reader.get(); }
+  libMesh::ExodusII_IO * getExReaderForRestart() const { return _ex_reader.get(); }
 
   /**
    * Actually build everything in the input file.
@@ -504,10 +512,16 @@ public:
   }
 
   /**
-   *  Whether or not this simulation should only run half its transient (useful for testing
+   * Whether or not this simulation should only run half its transient (useful for testing
    * recovery)
    */
   bool testCheckpointHalfTransient() const { return _test_checkpoint_half_transient; }
+
+  /**
+   * Whether or not this simulation should fail a timestep and repeat (for testing).
+   * Selection rules for which time step to fail in TransientBase.C constructor.
+   */
+  bool testReStep() const { return _test_restep; }
 
   /**
    * Store a map of outputter names and file numbers
@@ -538,12 +552,13 @@ public:
    * Get the OutputWarehouse objects
    */
   OutputWarehouse & getOutputWarehouse();
+  const OutputWarehouse & getOutputWarehouse() const;
 
   /**
    * Get SystemInfo object
    * @return A pointer to the SystemInformation object
    */
-  const SystemInfo * getSystemInfo() const { return _sys_info.get(); }
+  const SystemInfo & getSystemInfo() const { return _sys_info; }
 
   ///@{
   /**
@@ -805,6 +820,11 @@ public:
   bool isUltimateMaster() const { return !_multiapp_level; }
 
   /**
+   * Returns whether to use the parent app mesh as the mesh for this app
+   */
+  bool useMasterMesh() const { return _use_master_mesh; }
+
+  /**
    * Returns a pointer to the master mesh
    */
   const MooseMesh * masterMesh() const { return _master_mesh; }
@@ -818,6 +838,11 @@ public:
    * Gets the system that manages the MeshGenerators
    */
   MeshGeneratorSystem & getMeshGeneratorSystem() { return _mesh_generator_system; }
+
+  /**
+   * Gets the system that manages the ChainControls
+   */
+  ChainControlDataSystem & getChainControlDataSystem() { return _chain_control_system; }
 
   /**
    * Add a mesh generator that will act on the meshes in the system
@@ -937,20 +962,6 @@ public:
    */
   const hit::Node * getCurrentActionHitNode() const;
 
-private:
-  /**
-   * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
-   * private because only this object knows when we should remove relationship managers: when we are
-   * adding relationship managers to this object's storage, we perform an operator>= comparison
-   * between our existing RMs and the RM we are trying to add. If any comparison returns true, we do
-   * not add the new RM because the comparison indicates that we would gain no new coverage.
-   * However, if no comparison return true, then we add the new RM and we turn the comparison
-   * around! Consequently if our new RM is >= than any of our preexisting RMs, we remove those
-   * preexisting RMs using this method
-   */
-  void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
-
-public:
   /**
    * Attach the relationship managers of the given type
    * Note: Geometric relationship managers that are supposed to be attached late
@@ -998,7 +1009,7 @@ public:
   bool defaultAutomaticScaling() const { return _automatic_automatic_scaling; }
 
   // Return the communicator for this application
-  const std::shared_ptr<Parallel::Communicator> getCommunicator() const { return _comm; }
+  const std::shared_ptr<libMesh::Parallel::Communicator> getCommunicator() const { return _comm; }
 
   /**
    * Return the container of relationship managers
@@ -1048,23 +1059,95 @@ public:
   const std::vector<T *> & getInterfaceObjects() const;
 
   static void addAppParam(InputParameters & params);
+  static void addInputParam(InputParameters & params);
+
+  /**
+   * Whether or not we are forcefully restarting (allowing the load of potentially
+   * incompatibie checkpoints); used within RestartableDataReader
+   */
+  bool forceRestart() const { return _force_restart; }
+
+  /// Returns whether the flag for unused parameters is set to throw a warning only
+  bool unusedFlagIsWarning() const { return _enable_unused_check == WARN_UNUSED; }
+
+  /// Returns whether the flag for unused parameters is set to throw an error
+  bool unusedFlagIsError() const { return _enable_unused_check == ERROR_UNUSED; }
+
+#ifdef MOOSE_MFEM_ENABLED
+  /**
+   * Create/configure the MFEM device with the provided \p device_string. More than one device can
+   * be configured. If supplying multiple devices, they should be comma separated
+   */
+  void setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMProblemSolve>);
+
+  /**
+   * Get the MFEM device object
+   */
+  std::shared_ptr<mfem::Device> getMFEMDevice(Moose::PassKey<MultiApp>) { return _mfem_device; }
+
+  /**
+   * Get the configured MFEM devices
+   */
+  const std::set<std::string> & getMFEMDevices(Moose::PassKey<MultiApp>) const;
+#endif
+
+  /**
+   * Get whether Kokkos is available
+   * @returns
+   * 1) True if MOOSE is configured with Kokkos and every process has an associated GPU,
+   * 2) True if MOOSE is configured with Kokkos and GPU capablities are disabled,
+   * 3) False otherwise.
+   */
+  bool isKokkosAvailable() const
+  {
+#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+    return _has_kokkos_gpus;
+#else
+    return true;
+#endif
+#else
+    return false;
+#endif
+  }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Get whether there is any Kokkos object added by actions
+   * @returns Whether there is any Kokkos object added by actions
+   */
+  bool hasKokkosObjects() const { return _has_kokkos_objects; }
+
+  /**
+   * Allocate Kokkos memory pool
+   * @param size The memory pool size in the number of bytes
+   * @param ways The number of parallel ways
+   */
+  void allocateKokkosMemoryPool(std::size_t size, unsigned int ways) const;
+
+  /**
+   * Get Kokkos memory pool
+   * @returns The Kokkos memory pool
+   */
+  const Moose::Kokkos::MemoryPool & getKokkosMemoryPool() const;
+#endif
 
 protected:
   /**
    * Helper method for dynamic loading of objects
    */
-  void dynamicRegistration(const Parameters & params);
+  void dynamicRegistration(const libMesh::Parameters & params);
 
   /**
    * Recursively loads libraries and dependencies in the proper order to fully register a
    * MOOSE application that may have several dependencies. REQUIRES: dynamic linking loader support.
    */
   void loadLibraryAndDependencies(const std::string & library_filename,
-                                  const Parameters & params,
+                                  const libMesh::Parameters & params,
                                   bool load_dependencies = true);
 
   /// Constructor is protected so that this object is constructed through the AppFactory object
-  MooseApp(InputParameters parameters);
+  MooseApp(const InputParameters & parameters);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
@@ -1084,17 +1167,27 @@ protected:
    */
   void errorCheck();
 
-  /// The name of this object
-  const std::string _name;
-
-  /// Parameters of this object
-  InputParameters _pars;
+  /**
+   * Outputs machine readable data (JSON, YAML, etc.) either to the screen (if no filename was
+   * provided as an argument to the parameter param) or to a file (if a filename was provided).
+   */
+  void outputMachineReadableData(const std::string & param,
+                                 const std::string & start_marker,
+                                 const std::string & end_marker,
+                                 const std::string & data) const;
+  ///@{ register a new capability
+  static void addCapability(const std::string & capability,
+                            CapabilityUtils::Type value,
+                            const std::string & doc);
+  static void
+  addCapability(const std::string & capability, const char * value, const std::string & doc);
+  //@}
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;
 
   /// The MPI communicator this App is going to use
-  const std::shared_ptr<Parallel::Communicator> _comm;
+  const std::shared_ptr<libMesh::Parallel::Communicator> _comm;
 
   /// The output file basename
   std::string _output_file_base;
@@ -1117,9 +1210,6 @@ protected:
   /// Offset of the local App time to the "global" problem time
   Real _global_time_offset;
 
-  /// Command line object
-  std::shared_ptr<CommandLine> _command_line;
-
   /// Syntax of the input file
   Syntax _syntax;
 
@@ -1136,8 +1226,14 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
 
-  /// Parser for parsing the input file
+  /// Parser for parsing the input file (owns the root hit node)
   const std::shared_ptr<Parser> _parser;
+
+  /// The CommandLine object
+  const std::shared_ptr<CommandLine> _command_line;
+
+  /// System Information
+  SystemInfo _sys_info;
 
   /// Builder for building app related parser tree
   Moose::Builder _builder;
@@ -1191,9 +1287,6 @@ protected:
   /// Boolean to indicate whether to use an eigenvalue executioner
   bool _use_eigen_value;
 
-  /// System Information
-  std::unique_ptr<SystemInfo> _sys_info;
-
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK
   {
@@ -1206,13 +1299,17 @@ protected:
 
   /// Indicates whether warnings or errors are displayed when overridden parameters are detected
   bool _error_overridden;
+  /// Indicates if simulation is ready to exit, and keeps track of which param caused it to exit
+  std::string _early_exit_param;
   bool _ready_to_exit;
+  /// The exit code
+  int _exit_code;
 
   /// This variable indicates when a request has been made to restart from an Exodus file
   bool _initial_from_file;
 
   /// The Exodus reader when _initial_from_file is set to true
-  std::shared_ptr<ExodusII_IO> _ex_reader;
+  std::shared_ptr<libMesh::ExodusII_IO> _ex_reader;
 
   /// This variable indicates that DistributedMesh should be used for the libMesh mesh underlying MooseMesh.
   bool _distributed_mesh_on_command_line;
@@ -1229,6 +1326,9 @@ protected:
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _use_split;
 
+  /// Whether or not we are forcefully attempting to load checkpoints (--force-restart)
+  const bool _force_restart;
+
   /// Whether or not FPE trapping should be turned on.
   bool _trap_fpe;
 
@@ -1236,7 +1336,9 @@ protected:
   std::string _restart_recover_base;
 
   /// Whether or not this simulation should only run half its transient (useful for testing recovery)
-  bool _test_checkpoint_half_transient;
+  const bool _test_checkpoint_half_transient;
+  /// Whether or not this simulation should fail its middle timestep and repeat (for testing)
+  const bool _test_restep;
 
   /// Map of outputer name and file number (used by MultiApps to propagate file numbers down through the multiapps)
   std::map<std::string, unsigned int> _output_file_numbers;
@@ -1255,7 +1357,8 @@ protected:
   /// GhostingFunctor). Anytime we clone in attachRelationshipManagers we create a map entry from
   /// the cloned undisplaced relationship manager to its displaced clone counterpart. We leverage
   /// this map when removing relationship managers/ghosting functors
-  std::unordered_map<RelationshipManager *, std::shared_ptr<GhostingFunctor>> _undisp_to_disp_rms;
+  std::unordered_map<RelationshipManager *, std::shared_ptr<libMesh::GhostingFunctor>>
+      _undisp_to_disp_rms;
 
   struct DynamicLibraryInfo
   {
@@ -1268,6 +1371,47 @@ protected:
   std::unordered_map<std::string, DynamicLibraryInfo> _lib_handles;
 
 private:
+  /**
+   * Internal function used to recursively create the executor objects.
+   *
+   * Called by createExecutors
+   *
+   * @param current_executor_name The name of the executor currently needing to be built
+   * @param possible_roots The names of executors that are currently candidates for being the root
+   */
+  void recursivelyCreateExecutors(const std::string & current_executor_name,
+                                  std::list<std::string> & possible_roots,
+                                  std::list<std::string> & current_branch);
+
+  /**
+   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
+   * Apps and Modules may register additional capabilities in their registerAll
+   * function.
+   */
+  void registerCapabilities();
+
+  /**
+   * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
+   * private because only this object knows when we should remove relationship managers: when we are
+   * adding relationship managers to this object's storage, we perform an operator>= comparison
+   * between our existing RMs and the RM we are trying to add. If any comparison returns true, we do
+   * not add the new RM because the comparison indicates that we would gain no new coverage.
+   * However, if no comparison return true, then we add the new RM and we turn the comparison
+   * around! Consequently if our new RM is >= than any of our preexisting RMs, we remove those
+   * preexisting RMs using this method
+   */
+  void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+  /**
+   * Function to determine the device which should be used by libtorch on this
+   * application. We use this function to decide what is available on different
+   * builds.
+   * @param device Enum to describe if a cpu or a gpu should be used.
+   */
+  torch::DeviceType determineLibtorchDeviceType(const MooseEnum & device) const;
+#endif
+
   ///@{
   /// Structs that are used in the _interface_registry
   struct InterfaceRegistryObjectsBase
@@ -1343,7 +1487,7 @@ private:
   RelationshipManager & createRMFromTemplateAndInit(const RelationshipManager & template_rm,
                                                     MooseMesh & moose_mesh,
                                                     MeshBase & mesh,
-                                                    const DofMap * dof_map = nullptr);
+                                                    const libMesh::DofMap * dof_map = nullptr);
 
   /**
    * Creates a recoverable PerfGraph.
@@ -1378,14 +1522,20 @@ private:
    * read/writable location for the user.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool copyInputs() const;
+  bool copyInputs();
 
   /**
    * Handles the run input parameter logic: Checks to see whether a directory exists in user space
    * and launches the TestHarness to process the given directory.
    * @return a Boolean value used to indicate whether the application should exit early
    */
-  bool runInputs() const;
+  bool runInputs();
+
+  /**
+   * Helper that reports an error if the given capability is reserved and
+   * should not be added via addCapability().
+   */
+  static void checkReservedCapability(const std::string & capability);
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
@@ -1407,6 +1557,9 @@ private:
   /// Numbering in all the sub-apps on the same level
   unsigned int _multiapp_number;
 
+  /// Whether to use the parent app mesh for this app
+  const bool _use_master_mesh;
+
   /// The mesh from master app
   const MooseMesh * const _master_mesh;
 
@@ -1415,6 +1568,9 @@ private:
 
   /// The system that manages the MeshGenerators
   MeshGeneratorSystem _mesh_generator_system;
+
+  /// The system that manages the ChainControls
+  ChainControlDataSystem _chain_control_system;
 
   RestartableDataReader _rd_reader;
 
@@ -1454,50 +1610,46 @@ private:
   /// the backup will not be filled yet.
   std::unique_ptr<Backup> * const _initial_backup;
 
+#ifdef MOOSE_LIBTORCH_ENABLED
+  /// The libtorch device this app is using (converted from compute_device)
+  const torch::DeviceType _libtorch_device;
+#endif
+
+#ifdef MOOSE_MFEM_ENABLED
+  /// The MFEM Device object
+  std::shared_ptr<mfem::Device> _mfem_device;
+
+  /// MFEM supported devices based on user-provided config
+  std::set<std::string> _mfem_devices;
+#endif
+
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;
   friend class SubProblem;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Query the Kokkos GPUs in the system and check whether every process has an associated GPU
+   */
+  void queryKokkosGPUs();
+
+  /**
+   * Deallocate Kokkos memory pool
+   */
+  void deallocateKokkosMemoryPool();
+
+  /**
+   * Flag whether every process has an associated Kokkos GPU
+   */
+  bool _has_kokkos_gpus = false;
+
+  /**
+   * Flag whether there is any Kokkos object added by actions
+   */
+  bool _has_kokkos_objects = false;
+#endif
 };
-
-template <typename T>
-const T &
-MooseApp::getParam(const std::string & name)
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
-}
-
-template <typename T>
-const T &
-MooseApp::getParam(const std::string & name) const
-{
-  return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0), this);
-}
-
-template <typename T>
-const T &
-MooseApp::getRenamedParam(const std::string & old_name, const std::string & new_name) const
-{
-  // this enables having a default on the new parameter but bypassing it with the old one
-  // Most important: accept new parameter
-  if (isParamSetByUser(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
-  // Second most: accept old parameter
-  else if (isParamValid(old_name) && !isParamSetByUser(new_name))
-    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0), this);
-  // Third most: accept default for new parameter
-  else if (isParamValid(new_name) && !isParamValid(old_name))
-    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0), this);
-  // Refuse: no default, no value passed
-  else if (!isParamValid(old_name) && !isParamValid(new_name))
-    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
-               "' is being retrieved without being set.\n"
-               "Did you mispell it?");
-  // Refuse: both old and new parameters set by user
-  else
-    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
-               "' may not be provided alongside former parameter '" + old_name + "'");
-}
 
 template <class T>
 void
@@ -1533,3 +1685,11 @@ MooseApp::getInterfaceObjects() const
   const static std::vector<T *> empty;
   return empty;
 }
+
+#ifdef MOOSE_MFEM_ENABLED
+inline const std::set<std::string> &
+MooseApp::getMFEMDevices(Moose::PassKey<MultiApp>) const
+{
+  return _mfem_devices;
+}
+#endif

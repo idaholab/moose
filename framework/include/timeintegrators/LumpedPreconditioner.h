@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,7 +26,7 @@ class LumpedPreconditioner;
  * Class to that applies the lumped mass matrix preconditioner
  * in the ExplicitTimeIntegrator
  */
-class LumpedPreconditioner : public Preconditioner<Real>
+class LumpedPreconditioner : public libMesh::Preconditioner<Real>
 {
 public:
   LumpedPreconditioner(const NumericVector<Real> & diag_inverse)

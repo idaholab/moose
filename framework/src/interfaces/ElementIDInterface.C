@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,6 +31,14 @@ ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
     _ei_name(moose_object->name())
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+ElementIDInterface::ElementIDInterface(const ElementIDInterface & object,
+                                       const Moose::Kokkos::FunctorCopy &)
+  : _obj_parameters(object._obj_parameters), _id_mesh(object._id_mesh), _ei_name(object._ei_name)
+{
+}
+#endif
 
 unsigned int
 ElementIDInterface::getElementIDIndex(const std::string & id_parameter_name,

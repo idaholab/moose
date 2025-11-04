@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,7 +34,7 @@ protected:
     Z
   };
 
-  virtual const FEType & getFEType() override;
+  virtual const libMesh::FEType & getFEType() override;
 
   virtual void setupMesh() override;
   virtual void init() override;

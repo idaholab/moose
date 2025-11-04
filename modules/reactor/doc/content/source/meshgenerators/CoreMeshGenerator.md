@@ -4,7 +4,7 @@
 
 ## Overview
 
-This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), and [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md).
+This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md), and [`ControlDrumMeshGenerator`](ControlDrumMeshGenerator.md).
 
 The `CoreMeshGenerator` object generates core-like reactor geometry structures in either square or hexagonal geometries with block ID assignments and reporting (extra integer) IDs, as described in [`PatternedCartesianMeshGenerator`](PatternedCartesianMeshGenerator.md) and [`PatternedHexMeshGenerator`](PatternedHexMeshGenerator.md). There is expected to only be a single `CoreMeshGenerator` in a Mesh definition.
 
@@ -35,11 +35,28 @@ The `CoreMeshGenerator` objects automatically assigns boundary information. The 
 
 If the core is extruded to three dimensions the top-most boundary ID must be assigned using [!param](/Mesh/ReactorMeshParams/top_boundary_id) and will have the name "top", while the bottom-most boundary must be assigned using [!param](/Mesh/ReactorMeshParams/bottom_boundary_id) and will have the name "bottom".
 
+## Flexible Assembly Stitching
+
+By default, `CoreMeshGenerator` will stitch assemblies created by [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md) together without regard for the number and location of nodes at the exterior boundaries of the assemblies. This works if very similar assemblies are being stitched together. However, this will lead to an output core mesh with hanging nodes if dissimilar assemblies are being stitched together. The following situations are identified as scenarios where such hanging nodes can occur between stitched assemblies:
+
+1. Two assemblies have the same constituent pin geometry but vary in total number of pins in the pin lattice
+2. Two assemblies have the same pin lattice structure and geometry, but the constituent pins of each assembly are subdivided into a different number of sectors per side.
+3. One assembly is defined as a heterogeneous mesh (contains one or more pins), and the other assembly is homogenized.
+
+`CoreMeshGenerator` will throw a warning if it detects that assembly stitching may lead to hanging nodes. If this happens, the user can regenerate the core mesh by setting [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) to `true` to enable flexible assembly stitching. This flexible assembly stitching algorithm deletes the outermost mesh interval and replaces it with a triangulated region using [`FlexiblePatternGenerator`](FlexiblePatternGenerator.md). For a homogeneous assembly, the entire assembly region is triangulated. By doing so, the number of nodes at the outer boundary of each input assembly will be identical and positioned at the same locations, thus enabling stitching of dissimilar assemblies. In order to control the number of sectors at the outer assembly boundary after the triangulation step, the user can set this parameter using [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/num_sectors_at_flexible_boundary). If the core lattice consists of any structures created with [ControlDrumMeshGenerator](ControlDrumMeshGenerator.md), then [ReactorMeshParams](ReactorMeshParams.md)/[!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) must be set to `true`. The following three images describe how flexible assembly patterning can be used to address the issue of hanging nodes for the three cases listed above:
+
+!media reactor/meshgenerators/rgmb_flexible_stitching_case1.png style=width:70%;
+      alt=Assemblies with different numbers of pins, stitched together.
+
+!media reactor/meshgenerators/rgmb_flexible_stitching_case2.png style=width:70%;
+       alt=Assemblies with the same number of pins but different number of sectors per side, stitched together.
+
+!media reactor/meshgenerators/rgmb_flexible_stitching_case3.png style=width:70%;
+       alt=A heterogeneous and homogeneous assembly, stitched together.
+
 ## Metadata Information
 
-Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. [!param](/Mesh/CoreMeshGenerator/show_rgmb_metadata) can be set to true in order to see the values of these metadata entries as console output.
-
-At the core level, the following metadata is defined on the output mesh:
+Users may be interested in defining metadata to represent the reactor geometry and region IDs assigned to each geometry zone, which may be useful to users who want mesh geometry and composition information without having to inspect the generated mesh itself. At the core level, the following metadata is defined on the output mesh:
 
 - `assembly_names`: Mesh generator names of input assemblies in lattice, similar to input parameter (/Mesh/CoreMeshGenerator/inputs) but with the dummy assembly name excluded
 - `lattice`: 2-D lattice of assemblies in core, where each location represents the 0-based index of the assembly in the list of names under the `assembly_names` metadata entry. A -1 entry represents a dummy assembly.
@@ -62,10 +79,14 @@ For applications where an output mesh does not need to be created and meshing ro
 This is the resulting mesh block layout, where by default a single block is assigned to all of the quadrilateral elements in the mesh:
 
 !media reactor/meshgenerators/core_mesh_generator.png style=width:40%;
+       alt=Mesh layout generated above, with all of the quad elements making up a single block.
 
 This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins and assemblies:
 
-!media reactor/meshgenerators/core_mesh_generator_rid.png style=width:40%;
+!media reactor/meshgenerators/core_mesh_generator_rid.png
+       style=width:40%;
+       alt=The region IDs for the above mesh, with the region ID set for each constituent pin and assembly.
+ 
 
 ## Periphery Mesh Generation
 
@@ -77,7 +98,9 @@ The `CoreMeshGenerator` includes support for meshing a circular reactor peripher
 
 This is the resulting mesh block layout:
 
-!media reactor/meshgenerators/core_mesh_generator_ptmg.png style=width:40%;
+!media reactor/meshgenerators/core_mesh_generator_ptmg.png
+       style=width:40%;
+       alt=Reactor core mesh with hexagonal assemblies and a circular periphery.
 
 !syntax parameters /Mesh/CoreMeshGenerator
 

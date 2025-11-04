@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,4 +49,6 @@ def get_language(filename):
         return 'cpp'
     elif ext == '.py':
         return 'python'
+    elif ext == '.i':
+        return 'moose'
     return 'text'

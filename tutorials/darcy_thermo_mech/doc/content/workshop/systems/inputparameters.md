@@ -60,7 +60,7 @@ params.addParam<int>("year", 1980, "Provide the year you were born.");
 
 Here the default is overridden by a user-provided value
 
-```text
+```moose
 [UserObjects]
   [date_object]
     type = Date
@@ -79,7 +79,7 @@ Adds an input file parameter, of type `int`, must be supplied in the input file.
 params.addRequiredParam<int>("month", "Provide the month you were born.");
 ```
 
-```text
+```moose
 [UserObjects]
   [date_object]
     type = Date
@@ -100,7 +100,7 @@ params.addRequiredCoupledVar("temperature", "The temperature (C) of interest.");
 params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atmosphere.");
 ```
 
-```text
+```moose
 [Variables]
   [P][]
   [T][]
@@ -120,7 +120,7 @@ params.addCoupledVar("pressure", 101.325, "The pressure (kPa) of the atmosphere.
 Within the input file it is possible to used a variable name or a constant value for a `coupledVar`
 parameter.
 
-```text
+```moose
 pressure = P
 pressure = 42
 ```
@@ -152,7 +152,7 @@ Each application is capable of generating documentation from the `validParams` f
 
 +Option 2+: Command line `--show-input` generates a tree based on your input file\\
 
-+Option 3+: [mooseframework.org/syntax](syntax/index.md alternative=https://mooseframework.org/syntax)
++Option 3+: [https://mooseframework.inl.gov/syntax](syntax/index.md alternative=https://mooseframework.inl.gov/syntax)
 
 !---
 
@@ -182,6 +182,7 @@ functions.
 - SubdomainName
 - BoundaryName
 - FileName
+- DataFileName
 - VariableName
 - FunctionName
 - UserObjectName

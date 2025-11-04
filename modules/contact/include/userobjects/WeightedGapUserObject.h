@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,10 +40,7 @@ public:
    * @param node Node pointer
    * @return The normal contact pressure at the node
    */
-  virtual Real getNormalContactPressure(const Node * const /*node*/) const
-  {
-    mooseError("Not available in base class.");
-  }
+  virtual Real getNormalContactPressure(const Node * const /*node*/) const = 0;
 
   /**
    * @param node Node pointer

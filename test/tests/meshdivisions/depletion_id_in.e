@@ -1,1 +1,1 @@
-../../../modules/reactor/test/tests/meshgenerators/reporting_id/depletion_id/depletion_id_in.e
+../positions/depletion_id_in.e

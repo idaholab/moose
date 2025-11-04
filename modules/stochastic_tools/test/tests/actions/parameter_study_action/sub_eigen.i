@@ -26,7 +26,7 @@
   [rhs]
     type = MatReaction
     variable = u
-    mob_name = L
+    reaction_rate = L
     extra_vector_tags = 'eigen'
   []
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,21 +28,4 @@ PointValueSampler::PointValueSampler(const InputParameters & parameters)
   : PointVariableSamplerBase(parameters)
 {
   _points = getParam<std::vector<Point>>("points");
-}
-
-void
-PointValueSampler::initialize()
-{
-  // Generate new Ids if the point vector has grown (non-negative counting numbers)
-  if (_points.size() > _ids.size())
-  {
-    auto old_size = _ids.size();
-    _ids.resize(_points.size());
-    std::iota(_ids.begin() + old_size, _ids.end(), old_size);
-  }
-  // Otherwise sync the ids array to be smaller if the point vector has been shrunk
-  else if (_points.size() < _ids.size())
-    _ids.resize(_points.size());
-
-  PointVariableSamplerBase::initialize();
 }

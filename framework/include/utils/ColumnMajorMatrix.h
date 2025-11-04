@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,6 @@
 #pragma once
 
 #include "DenseMatrix.h"
-#include "Moose.h" // using namespace libMesh
 #include "MooseError.h"
 #include "ADReal.h"
 #include "MooseTypes.h"
@@ -421,8 +420,8 @@ ColumnMajorMatrixTempl<T>::fill(TypeTensor<T> & tensor)
     mooseError(
         "Cannot fill tensor! The ColumnMajorMatrix doesn't have the same number of entries!");
 
-  for (const auto j : make_range(Moose::dim))
-    for (const auto i : make_range(Moose::dim))
+  for (const auto j : libMesh::make_range(Moose::dim))
+    for (const auto i : libMesh::make_range(Moose::dim))
       tensor(i, j) = _values[j * Moose::dim + i];
 }
 
@@ -729,8 +728,8 @@ ColumnMajorMatrixTempl<T>::operator+=(const TypeTensor<T> & rhs)
     mooseError("Cannot perform matrix addition and assignment! The shapes of the two operands are "
                "not compatible!");
 
-  for (const auto j : make_range(Moose::dim))
-    for (const auto i : make_range(Moose::dim))
+  for (const auto j : libMesh::make_range(Moose::dim))
+    for (const auto i : libMesh::make_range(Moose::dim))
       (*this)(i, j) += rhs(i, j);
 
   return *this;

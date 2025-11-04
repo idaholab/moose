@@ -52,14 +52,14 @@ cp = 1
 
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '1 0'
+        momentum_inlet_functors = '1 0'
 
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'noslip noslip'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '0'
+        pressure_functors = '0'
 
         mass_advection_interpolation = 'average'
         momentum_advection_interpolation = 'average'
@@ -71,28 +71,32 @@ cp = 1
         specific_heat = ${cp}
 
         energy_inlet_types = 'fixed-temperature'
-        energy_inlet_function = '1'
+        energy_inlet_functors = '1'
 
         energy_wall_types = 'heatflux heatflux'
-        energy_wall_function = '0 0'
+        energy_wall_functors = '0 0'
 
         energy_advection_interpolation = 'average'
       []
     []
-    [ScalarTransport]
-      [heat]
-        passive_scalar_names = 'scalar'
+  []
+[]
+# This separation is introduced for documentation purposes.
+# Both could be nested under Physics/NavierStokes
+[Physics/NavierStokes]
+  [ScalarTransport]
+    [heat]
+      passive_scalar_names = 'scalar'
 
-        passive_scalar_diffusivity = ${diff}
-        passive_scalar_source = 0.1
-        passive_scalar_coupled_source = U
-        passive_scalar_coupled_source_coeff = 0.1
+      passive_scalar_diffusivity = ${diff}
+      passive_scalar_source = 0.1
+      passive_scalar_coupled_source = U
+      passive_scalar_coupled_source_coeff = 0.1
 
-        passive_scalar_inlet_types = 'fixed-value'
-        passive_scalar_inlet_function = '1'
+      passive_scalar_inlet_types = 'fixed-value'
+      passive_scalar_inlet_functors = '1'
 
-        passive_scalar_advection_interpolation = 'average'
-      []
+      passive_scalar_advection_interpolation = 'average'
     []
   []
 []

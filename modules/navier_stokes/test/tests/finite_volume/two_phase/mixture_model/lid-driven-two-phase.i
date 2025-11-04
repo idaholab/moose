@@ -20,8 +20,8 @@ g = -9.81
     xmax = .1
     ymin = 0
     ymax = .1
-    nx = 10
-    ny = 10
+    nx = 5
+    ny = 5
   []
 []
 
@@ -38,6 +38,10 @@ g = -9.81
   [phase_2]
     type = INSFVScalarFieldVariable
   []
+  [lambda]
+    family = SCALAR
+    order = FIRST
+  []
 []
 
 [UserObjects]
@@ -47,12 +51,6 @@ g = -9.81
     v = vel_y
     pressure = pressure
   []
-  [pin_pressure]
-    type = NSPressurePin
-    variable = pressure
-    pin_type = point-value
-    point = '0 0 0'
-  []
 []
 
 [FVKernels]
@@ -60,6 +58,12 @@ g = -9.81
     type = INSFVMassAdvection
     variable = pressure
     rho = 'rho_mixture'
+  []
+  [mean_zero_pressure]
+    type = FVPointValueConstraint
+    variable = pressure
+    lambda = lambda
+    point = '0 0 0'
   []
 
   [u_time]
@@ -93,6 +97,7 @@ g = -9.81
     momentum_component = 'x'
     gravity = '0 ${g} 0'
   []
+  # NOTE: the friction terms for u and v are missing
 
   [v_time]
     type = INSFVMomentumTimeDerivative
@@ -233,6 +238,7 @@ g = -9.81
     rho_d = ${rho_d}
     particle_diameter = ${dp}
     linear_coef_name = 'Darcy_coefficient'
+    gravity = '0 ${g} 0'
   []
   [populate_v_slip]
     type = WCNSFV2PSlipVelocityFunctorMaterial
@@ -245,6 +251,7 @@ g = -9.81
     rho_d = ${rho_d}
     particle_diameter = ${dp}
     linear_coef_name = 'Darcy_coefficient'
+    gravity = '0 ${g} 0'
   []
   [compute_phase_1]
     type = ADParsedFunctorMaterial
@@ -323,6 +330,7 @@ g = -9.81
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
+
   [TimeStepper]
     type = IterationAdaptiveDT
     optimal_iterations = 7
@@ -331,11 +339,12 @@ g = -9.81
     cutback_factor = 0.5
     dt = 1e-3
   []
-  nl_max_its = 10
+  nl_max_its = 20
   nl_rel_tol = 1e-03
   nl_abs_tol = 1e-9
   l_max_its = 5
   end_time = 1e8
+  line_search=none
 []
 
 [Outputs]
@@ -343,5 +352,6 @@ g = -9.81
   [CSV]
     type = CSV
     execute_on = 'FINAL'
+    execute_scalars_on = NONE
   []
 []

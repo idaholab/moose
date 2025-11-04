@@ -1,72 +1,159 @@
 [Tests]
-  [./testdirichlet]
-    type = 'Exodiff'
-    input = '2d_diffusion_test.i'
-    exodiff = 'out.e'
-    scale_refine = 5
-    requirement = 'The system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
-    issues = '#6397'
-    design = '/DirichletBC.md'
-  [../]
-
-  [./testneumann]
-    type = 'Exodiff'
-    input = '2d_diffusion_neumannbc_test.i'
-    exodiff = 'neumannbc_out.e'
-    scale_refine = 5
-    requirement = 'The system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
-    issues = '#1410'
-    design = '/NeumannBC.md'
-  [../]
-
-  [./testmatdiffusion]
-    type = 'Exodiff'
-    input = 'matdiffusion.i'
-    exodiff = 'matdiffusion_out.e'
-    requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
-    issues = '#12074'
-    design = '/MatDiffusion.md'
-  [../]
-
-  [./testbodyforce]
-    type = 'Exodiff'
-    input = '2d_diffusion_bodyforce_test.i'
-    exodiff = 'bodyforce_out.e'
-    scale_refine = 5
-    requirement = 'The system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
-    issues = '#6136'
-    design = '/BodyForce.md'
-  [../]
-
-  [./test_jacobian]
+  [test_jacobian]
     type = 'PetscJacobianTester'
-    input = '2d_diffusion_test.i'
+    input = 'dirichletbc.i'
     cli_args = 'Outputs/exodus=false'
     recover = false
     requirement = 'The system shall provide a tester that checks hand-coded Jacobian against finite difference Jacobian using -snes_type=test option.'
     issues = '#2337'
     design = 'framework_stp.md'
-  [../]
-
-  [./test_force_iteration]
+  []
+  [force_iteration]
     type = 'Exodiff'
-    input = '2d_diffusion_test.i'
-    exodiff = 'out.e'
+    input = 'dirichletbc.i'
+    exodiff = 'dirichletbc_out.e'
     cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
     petsc_version = '>=3.8.4'
-    prereq = testdirichlet
+    prereq = dirichletbc/nonad
     requirement = 'The system shall force the solver to take at least one iteration regardless of the initial residual norm when the snes_force_iteration option is specified.'
     issues = '#10594'
     design = 'Transient.md'
-  [../]
-
-  [./actual_linear_solver]
+  []
+  [actual_linear_solver]
     type = RunApp
-    input = '2d_diffusion_test.i'
+    input = 'dirichletbc.i'
     cli_args = 'Executioner/solve_type=linear Outputs/exodus=false'
     absent_out = 'Nonlinear \|R\|'
     requirement = 'The system shall not compute an extra residual if the linear solver is used.'
     issues = '#11760'
     design = 'FEProblem.md'
-  [../]
+  []
+
+
+  [dirichletbc]
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem with Dirichlet '
+                  'boundary conditions using'
+    design = '/ADDirichletBC.md /DirichletBC.md'
+    issues = '#6397 #13260'
+    [nonad]
+      type = 'Exodiff'
+      input = 'dirichletbc.i'
+      exodiff = 'dirichletbc_out.e'
+      scale_refine = 5
+      detail = 'without automatic differentiation, '
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'dirichletbc.i'
+      exodiff = 'ad_dirichletbc_out.e'
+      scale_refine = 5
+      detail = "with automatic differentiation, and"
+      cli_args = 'AD=AD Outputs/file_base=ad_dirichletbc_out'
+    []
+    [ad-jac]
+      type = 'PetscJacobianTester'
+      input = 'dirichletbc.i'
+      scale_refine = 5
+      difference_tol = 1e-7
+      detail = "compute the correct Jacobian matrix."
+      cli_args = 'AD=AD Outputs/exodus=false'
+    []
+  []
+
+  [neumannbc]
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem Neumann boundary '
+                  'conditions using'
+    design = '/NeumannBC.md /ADNeumannBC.md'
+    issues = '#1410 #12903'
+    [nonad]
+      type = 'Exodiff'
+      input = 'neumannbc.i'
+      exodiff = 'neumannbc_out.e'
+      scale_refine = 5
+      detail = 'without automatic differentiation, '
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'neumannbc.i'
+      exodiff = 'ad_neumannbc_out.e'
+      scale_refine = 5
+      detail = "with automatic differentiation, and"
+      cli_args = 'AD=AD Outputs/file_base=ad_neumannbc_out'
+    []
+    [ad-jac]
+      type = 'PetscJacobianTester'
+      input = 'neumannbc.i'
+      scale_refine = 5
+      difference_tol = 1e-7
+      detail = "compute the correct Jacobian matrix."
+      cli_args = 'AD=AD Outputs/exodus=false'
+    []
+  []
+  [bodyforce]
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem including a '
+                  'volumetric source term using'
+    design = '/BodyForce.md /ADBodyForce.md'
+    issues = '#6136 #13260'
+    [nonad]
+      type = 'Exodiff'
+      input = 'bodyforce.i'
+      exodiff = 'bodyforce_out.e'
+      scale_refine = 5
+      detail = 'without automatic differentiation, '
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'bodyforce.i'
+      exodiff = 'ad_bodyforce_out.e'
+      scale_refine = 5
+      detail = "with automatic differentiation, and"
+      cli_args = 'AD=AD Outputs/file_base=ad_bodyforce_out'
+    []
+    [ad-jac]
+      type = 'PetscJacobianTester'
+      input = 'bodyforce.i'
+      scale_refine = 5
+      detail = "compute the correct Jacobian matrix."
+      cli_args = 'AD=AD Outputs/exodus=false'
+    []
+  []
+  [matdiffusion]
+    requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
+    design = '/MatDiffusion.md'
+    issues = '#12074 #13260'
+    [nonad]
+      type = 'Exodiff'
+      input = 'matdiffusion.i'
+      exodiff = 'matdiffusion_out.e'
+      detail = 'without automatic differentiation, '
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'matdiffusion.i'
+      exodiff = 'ad_matdiffusion_out.e'
+      scale_refine = 5
+      detail = "with automatic differentiation, and"
+      cli_args = 'AD=AD Outputs/file_base=ad_matdiffusion_out'
+    []
+  []
+  [matdiffusion_coupled]
+    requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property coupled with two variables'
+    issues = '#12074 #15915'
+    design = '/MatDiffusion.md'
+    [nonad]
+      type = 'Exodiff'
+      input = 'matdiffusion_coupled.i'
+      exodiff = 'matdiffusion_coupled_out.e'
+      detail = 'without automatic differentiation, '
+      cli_args = 'Kernels/u_diff/args=v Kernels/v_diff/args=u'
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'matdiffusion_coupled.i'
+      exodiff = 'ad_matdiffusion_coupled_out.e'
+      scale_refine = 5
+      detail = "with automatic differentiation, and"
+      cli_args = 'AD=AD Outputs/file_base=ad_matdiffusion_coupled_out'
+    []
+  []
 []

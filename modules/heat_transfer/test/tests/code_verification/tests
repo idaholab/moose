@@ -4,11 +4,11 @@
   [spatial_csv]
     type = CSVDiff
     command = mes_spatial.py
-    recover = false 
+    recover = false
     csvdiff = 'cartesian_test_no1_first_order.csv'
     requirement = 'The MOOSE solutions shall converge to the analytic solutions with an expected order of accuracy (two for linear, three for quadratic) where a standard set of heat conduction problems is used for code verification.'
     valgrind = none
-    method = opt
+    capabilities = 'method=opt'
     heavy = true
     required_python_packages = 'sympy'
   []

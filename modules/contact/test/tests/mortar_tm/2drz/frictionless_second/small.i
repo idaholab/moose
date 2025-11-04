@@ -4,10 +4,6 @@ elem = QUAD9
 order = SECOND
 name = 'small'
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   patch_size = 80
   patch_update_strategy = auto
@@ -58,6 +54,7 @@ name = 'small'
     old_block = '1 2'
     new_block = 'plank block'
   []
+  coord_type = RZ
 []
 
 [GlobalParams]
@@ -77,7 +74,7 @@ name = 'small'
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [block]
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
                       'strain_yy strain_zz'

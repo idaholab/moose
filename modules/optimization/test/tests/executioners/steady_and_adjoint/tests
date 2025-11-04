@@ -33,8 +33,6 @@
       input = nonlinear_diffusion.i
       exodiff = nonlinear_diffusion_out.e
       detail = 'have non-linear material properties.'
-      # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
     []
   []
 []

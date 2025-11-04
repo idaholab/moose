@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -70,9 +70,9 @@ class MooseVariableDataFV : public MooseVariableDataBase<OutputType>, public Mes
 {
 public:
   // type for gradient, second and divergence of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
 
   // shortcut for types storing values on quadrature points
   typedef MooseArray<OutputType> FieldVariableValue;
@@ -85,9 +85,9 @@ public:
   typedef typename Moose::ShapeType<OutputType>::type OutputShape;
 
   // type for gradient, second and divergence of shape functions of template class OutputType
-  typedef typename TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
-  typedef typename TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
-  typedef typename TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShape>::type OutputShapeGradient;
+  typedef typename libMesh::TensorTools::IncrementRank<OutputShapeGradient>::type OutputShapeSecond;
+  typedef typename libMesh::TensorTools::DecrementRank<OutputShape>::type OutputShapeDivergence;
 
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
@@ -101,7 +101,7 @@ public:
 
   bool isNodal() const override { return false; }
   bool hasDoFsOnNodes() const override { return false; }
-  FEContinuity getContinuity() const override { return DISCONTINUOUS; }
+  libMesh::FEContinuity getContinuity() const override { return libMesh::DISCONTINUOUS; }
 
   /**
    * Returns whether this data structure needs automatic differentiation calculations
@@ -251,13 +251,18 @@ public:
   const DoFValue & dofValuesDotOld() const;
   const DoFValue & dofValuesDotDot() const;
   const DoFValue & dofValuesDotDotOld() const;
-  const MooseArray<Number> & dofValuesDuDotDu() const;
-  const MooseArray<Number> & dofValuesDuDotDotDu() const;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDu() const;
+  const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const;
 
   /**
    * Return the AD dof values
    */
   const MooseArray<ADReal> & adDofValues() const;
+
+  /**
+   * Return the AD dof time derivatives
+   */
+  const MooseArray<ADReal> & adDofValuesDot() const;
 
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
@@ -270,7 +275,7 @@ public:
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
    */
-  void computeIncrementAtQps(const NumericVector<Number> & increment_vec);
+  void computeIncrementAtQps(const libMesh::NumericVector<libMesh::Number> & increment_vec);
 
   /// checks if a Dirichlet BC exists on this face
   bool hasDirichletBC() const { return _has_dirichlet_bc; }
@@ -298,7 +303,7 @@ private:
   /// A const reference to the owning MooseVariableFV object
   const MooseVariableFV<OutputType> & _var;
 
-  const FEType & _fe_type;
+  const libMesh::FEType & _fe_type;
 
   const unsigned int _var_num;
 
@@ -308,7 +313,7 @@ private:
   Moose::ElementType _element_type;
 
   /// Continuity type of the variable
-  FEContinuity _continuity;
+  libMesh::FEContinuity _continuity;
 
   /// Increment in the variable used in dampers
   FieldVariableValue _increment;
@@ -368,19 +373,19 @@ private:
   FieldVariableValue _u_dot;
 
   /// u_dotdot (second time derivative)
-  FieldVariableValue _u_dotdot, _u_dotdot_bak;
+  FieldVariableValue _u_dotdot;
 
   /// u_dot_old (time derivative)
-  FieldVariableValue _u_dot_old, _u_dot_old_bak;
+  FieldVariableValue _u_dot_old;
 
   /// u_dotdot_old (second time derivative)
-  FieldVariableValue _u_dotdot_old, _u_dotdot_old_bak;
+  FieldVariableValue _u_dotdot_old;
 
   /// derivative of u_dot wrt u
   VariableValue _du_dot_du;
 
   /// derivative of u_dotdot wrt u
-  VariableValue _du_dotdot_du, _du_dotdot_du_bak;
+  VariableValue _du_dotdot_du;
 
   /// Pointer to time integrator
   const TimeIntegrator * const _time_integrator;
@@ -401,7 +406,7 @@ private:
   const bool _displaced;
 
   /// The quadrature rule
-  const QBase * _qrule;
+  const libMesh::QBase * _qrule;
 
   /// A dummy ADReal variable
   ADReal _ad_real_dummy = 0;
@@ -471,6 +476,14 @@ MooseVariableDataFV<OutputType>::adDofValues() const
 {
   _need_ad = true;
   return _ad_dof_values;
+}
+
+template <typename OutputType>
+const MooseArray<ADReal> &
+MooseVariableDataFV<OutputType>::adDofValuesDot() const
+{
+  _need_ad = _need_ad_u_dot = true;
+  return _ad_dofs_dot;
 }
 
 template <typename OutputType>

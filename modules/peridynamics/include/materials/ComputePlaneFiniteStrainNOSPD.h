@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,6 +29,7 @@ protected:
   virtual Real computeQpOutOfPlaneDeformationGradient();
   virtual Real computeQpOutOfPlaneDeformationGradientOld();
   ///@}
+
 private:
   ///@{ Scalar out-of-plane strain for generalized plane strain
   const bool _scalar_out_of_plane_strain_coupled;

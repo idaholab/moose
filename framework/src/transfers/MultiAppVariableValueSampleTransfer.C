@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,6 +20,8 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
+
+using namespace libMesh;
 
 registerMooseObject("MooseApp", MultiAppVariableValueSampleTransfer);
 
@@ -54,7 +56,7 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 {
   MultiAppTransfer::initialSetup();
 
-  variableIntegrityCheck(_to_var_name);
+  variableIntegrityCheck(_to_var_name, false);
 
   if (isParamValid("from_multi_app"))
     getFromMultiApp()->problemBase().mesh().errorIfDistributedMesh(

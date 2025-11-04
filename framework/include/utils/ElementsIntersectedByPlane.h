@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,10 +32,10 @@ namespace Moose
  * @param intersected_elems The elements intersected by the plane.  Will be empty if there are no
  * intersections.
  */
-void elementsIntersectedByPlane(const Point & p0,
-                                const Point & normal,
-                                const MeshBase & mesh,
-                                std::vector<const Elem *> & intersected_elems);
+void elementsIntersectedByPlane(const libMesh::Point & p0,
+                                const libMesh::Point & normal,
+                                const libMesh::MeshBase & mesh,
+                                std::vector<const libMesh::Elem *> & intersected_elems);
 
 /**
  * Find all of the elements intersected by a plane.
@@ -46,9 +46,9 @@ void elementsIntersectedByPlane(const Point & p0,
  * @param intersected_elems The elements intersected by the plane.  Will be empty if there are no
  * intersections.
  */
-void elementsIntersectedByPlane(const Point & p0,
-                                const Point & p1,
-                                const Point & p2,
-                                const MeshBase & mesh,
-                                std::vector<const Elem *> & intersected_elems);
+void elementsIntersectedByPlane(const libMesh::Point & p0,
+                                const libMesh::Point & p1,
+                                const libMesh::Point & p2,
+                                const libMesh::MeshBase & mesh,
+                                std::vector<const libMesh::Elem *> & intersected_elems);
 }

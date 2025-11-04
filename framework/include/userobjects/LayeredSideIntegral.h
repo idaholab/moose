@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "LayeredSideIntegralBase.h"
+#include "LayeredIntegralBase.h"
 #include "SideIntegralVariableUserObject.h"
 
 /**
@@ -17,7 +17,7 @@
  * partial sums for the specified number of intervals in a direction
  * (x,y,z).
  */
-class LayeredSideIntegral : public LayeredSideIntegralBase<SideIntegralVariableUserObject>
+class LayeredSideIntegral : public LayeredIntegralBase<SideIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();

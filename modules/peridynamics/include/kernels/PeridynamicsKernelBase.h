@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,8 +12,7 @@
 #include "Kernel.h"
 #include "Assembly.h"
 #include "SystemBase.h"
-
-class PeridynamicsMesh;
+#include "PeridynamicsMesh.h"
 
 /**
  * Base kernel class for peridynamic models

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,119 +8,31 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVScalarTransportPhysics.h"
-#include "WCNSFVCoupledAdvectionPhysicsHelper.h"
-#include "WCNSFVFlowPhysics.h"
-#include "NSFVAction.h"
+#include "WCNSFVFlowPhysicsBase.h"
+#include "NSFVBase.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_variable");
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_ic");
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_fv_kernel");
-registerMooseAction("NavierStokesApp", WCNSFVScalarTransportPhysics, "add_fv_bc");
+registerWCNSFVScalarTransportBaseTasks("NavierStokesApp", WCNSFVScalarTransportPhysics);
 
 InputParameters
 WCNSFVScalarTransportPhysics::validParams()
 {
-  InputParameters params = NavierStokesPhysicsBase::validParams();
-  params += WCNSFVCoupledAdvectionPhysicsHelper::validParams();
-  params.addClassDescription(
-      "Define the Navier Stokes weakly-compressible scalar field transport equation(s)");
-
-  params += NSFVAction::commonScalarFieldAdvectionParams();
-
-  // TODO Remove the parameter once NavierStokesFV syntax has been removed
-  params.addParam<bool>(
-      "add_scalar_equation",
-      "Whether to add the scalar transport equation. This parameter is not necessary if "
-      "using the Physics syntax");
-
-  // These parameters are not shared because the NSFVPhysics use functors
-  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "passive_scalar_inlet_function",
-      std::vector<std::vector<MooseFunctorName>>(),
-      "Functors for inlet boundaries in the passive scalar equations.");
-
-  // New functor boundary conditions
-  params.deprecateParam(
-      "passive_scalar_inlet_function", "passive_scalar_inlet_functors", "01/01/2025");
-
-  // No need for the duplication
-  params.addParam<std::vector<MooseFunctorName>>("passive_scalar_source", "Passive scalar sources");
-
-  // Spatial finite volume discretization scheme
-  params.transferParam<MooseEnum>(NSFVAction::validParams(),
-                                  "passive_scalar_advection_interpolation");
-  params.transferParam<MooseEnum>(NSFVAction::validParams(), "passive_scalar_face_interpolation");
-  params.transferParam<bool>(NSFVAction::validParams(), "passive_scalar_two_term_bc_expansion");
-
-  // Nonlinear equation solver scaling
-  params.addRangeCheckedParam<std::vector<Real>>(
-      "passive_scalar_scaling",
-      "passive_scalar_scaling > 0.0",
-      "The scaling factor for the passive scalar field variables.");
-
-  // Parameter groups
-  params.addParamNamesToGroup("passive_scalar_names initial_scalar_variables", "Variable");
-  params.addParamNamesToGroup(
-      "passive_scalar_advection_interpolation passive_scalar_face_interpolation "
-      "passive_scalar_two_term_bc_expansion passive_scalar_scaling",
-      "Numerical scheme");
-  params.addParamNamesToGroup("passive_scalar_inlet_types passive_scalar_inlet_functors",
-                              "Inlet boundary");
-
+  InputParameters params = WCNSFVScalarTransportPhysicsBase::validParams();
+  params.addClassDescription("Define the Navier Stokes weakly-compressible scalar field transport "
+                             "equation(s) using the nonlinear finite volume discretization");
+  params.transferParam<MooseEnum>(NSFVBase::validParams(), "passive_scalar_face_interpolation");
+  params.addParamNamesToGroup("passive_scalar_face_interpolation", "Numerical scheme");
   return params;
 }
 
 WCNSFVScalarTransportPhysics::WCNSFVScalarTransportPhysics(const InputParameters & parameters)
-  : NavierStokesPhysicsBase(parameters),
-    WCNSFVCoupledAdvectionPhysicsHelper(parameters, this),
-    _passive_scalar_names(getParam<std::vector<NonlinearVariableName>>("passive_scalar_names")),
-    _has_scalar_equation(isParamValid("add_scalar_equation") ? getParam<bool>("add_scalar_equation")
-                                                             : !usingNavierStokesFVSyntax()),
-    _passive_scalar_sources(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
-    _passive_scalar_coupled_sources(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
-    _passive_scalar_sources_coef(
-        getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
-    _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
-    _passive_scalar_inlet_functors(
-        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_inlet_functors"))
+  : WCNSFVScalarTransportPhysicsBase(parameters)
 {
-  for (const auto & scalar_name : _passive_scalar_names)
-    saveNonlinearVariableName(scalar_name);
-
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_scalar_equation)
-    return;
-
-  // These parameters must be passed for every passive scalar at a time
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, MooseFunctorName>(
-      "passive_scalar_names", "passive_scalar_diffusivity", true);
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
-      "passive_scalar_names", "passive_scalar_coupled_source", true);
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, MooseFunctorName>(
-      "passive_scalar_names", "passive_scalar_source", true);
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, Real>(
-      "passive_scalar_names", "passive_scalar_scaling", true);
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, FunctionName>(
-      "passive_scalar_names", "initial_scalar_variables", true);
-  checkVectorParamsSameLengthIfSet<NonlinearVariableName, std::vector<MooseFunctorName>>(
-      "passive_scalar_names", "passive_scalar_inlet_functors", true);
-  if (_passive_scalar_inlet_functors.size())
-    checkTwoDVectorParamMultiMooseEnumSameLength<MooseFunctorName>(
-        "passive_scalar_inlet_functors", "passive_scalar_inlet_types", false);
-
-  if (_passive_scalar_sources_coef.size())
-    checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
-                                                            "passive_scalar_coupled_source_coeff");
-
-  if (_porous_medium_treatment)
-    _flow_equations_physics->paramError("porous_medium_treatment",
-                                        "Porous media scalar advection is currently unimplemented");
 }
 
 void
-WCNSFVScalarTransportPhysics::addNonlinearVariables()
+WCNSFVScalarTransportPhysics::addSolverVariables()
 {
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_scalar_equation)
@@ -136,36 +48,20 @@ WCNSFVScalarTransportPhysics::addNonlinearVariables()
   for (const auto name_i : index_range(_passive_scalar_names))
   {
     // Dont add if the user already defined the variable
-    if (nonlinearVariableExists(_passive_scalar_names[name_i], /*error_if_aux=*/true))
+    if (!shouldCreateVariable(_passive_scalar_names[name_i], _blocks, /*error if aux*/ true))
     {
-      checkBlockRestrictionIdentical(
-          _passive_scalar_names[name_i],
-          getProblem().getVariable(0, _passive_scalar_names[name_i]).blocks());
+      reportPotentiallyMissedParameters({"system_names", "passive_scalar_scaling"},
+                                        "INSFVScalarFieldVariable");
       continue;
     }
 
+    params.set<SolverSystemName>("solver_sys") = getSolverSystem(name_i);
     if (isParamValid("passive_scalar_scaling"))
       params.set<std::vector<Real>>("scaling") = {
           getParam<std::vector<Real>>("passive_scalar_scaling")[name_i]};
 
     getProblem().addVariable("INSFVScalarFieldVariable", _passive_scalar_names[name_i], params);
   }
-}
-
-void
-WCNSFVScalarTransportPhysics::addFVKernels()
-{
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_scalar_equation)
-    return;
-
-  if (isTransient())
-    addScalarTimeKernels();
-
-  addScalarAdvectionKernels();
-  addScalarDiffusionKernels();
-  if (_passive_scalar_sources.size() || _passive_scalar_coupled_sources.size())
-    addScalarSourceKernels();
 }
 
 void
@@ -178,14 +74,16 @@ WCNSFVScalarTransportPhysics::addScalarTimeKernels()
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = vname;
 
-    getProblem().addFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
+    if (shouldCreateTimeDerivative(vname, _blocks, /* error if already defined */ false))
+      getProblem().addFVKernel(kernel_type, prefix() + "ins_" + vname + "_time", params);
   }
 }
 
 void
 WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
 {
-  const std::string kernel_type = "INSFVScalarFieldAdvection";
+  const std::string kernel_type =
+      _porous_medium_treatment ? "PINSFVScalarFieldAdvection" : "INSFVScalarFieldAdvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
 
   assignBlocks(params, _blocks);
@@ -193,6 +91,10 @@ WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") =
       getParam<MooseEnum>("passive_scalar_advection_interpolation");
+  setSlipVelocityParams(params);
+  if (_porous_medium_treatment)
+    params.set<MooseFunctorName>(NS::porosity) =
+        _flow_equations_physics->getPorosityFunctorName(/*smoothed=*/true);
 
   for (const auto & vname : _passive_scalar_names)
   {
@@ -204,19 +106,22 @@ WCNSFVScalarTransportPhysics::addScalarAdvectionKernels()
 void
 WCNSFVScalarTransportPhysics::addScalarDiffusionKernels()
 {
+  // Direct specification of diffusion term
   const auto passive_scalar_diffusivities =
       getParam<std::vector<MooseFunctorName>>("passive_scalar_diffusivity");
-  if (passive_scalar_diffusivities.empty())
-    return;
-  const std::string kernel_type = "FVDiffusion";
-  InputParameters params = getFactory().getValidParams(kernel_type);
-  assignBlocks(params, _blocks);
-  for (const auto name_i : index_range(_passive_scalar_names))
+
+  if (passive_scalar_diffusivities.size())
   {
-    params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-    params.set<MooseFunctorName>("coeff") = passive_scalar_diffusivities[name_i];
-    getProblem().addFVKernel(
-        kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
+    const std::string kernel_type = "FVDiffusion";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    for (const auto name_i : index_range(_passive_scalar_names))
+    {
+      params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+      params.set<MooseFunctorName>("coeff") = passive_scalar_diffusivities[name_i];
+      getProblem().addFVKernel(
+          kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
+    }
   }
 }
 
@@ -245,26 +150,12 @@ WCNSFVScalarTransportPhysics::addScalarSourceKernels()
         params.set<MooseFunctorName>("v") = _passive_scalar_coupled_sources[scalar_i][i];
         if (_passive_scalar_sources_coef.size())
           params.set<Real>("coef") = _passive_scalar_sources_coef[scalar_i][i];
-
         getProblem().addFVKernel(kernel_type,
                                  prefix() + "ins_" + _passive_scalar_names[scalar_i] +
                                      "_coupled_source_" + std::to_string(i),
                                  params);
       }
   }
-}
-
-void
-WCNSFVScalarTransportPhysics::addFVBCs()
-{
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_scalar_equation)
-    return;
-
-  addScalarInletBC();
-  // There is typically no wall flux of passive scalars, similarly we rarely know
-  // their concentrations at the outlet at the beginning of the simulation
-  // TODO: we will know the outlet values in case of flow reversal. Implement scalar outlet
 }
 
 void
@@ -306,10 +197,10 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
     {
       if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
       {
-        const std::string bc_type = "FVFunctionDirichletBC";
+        const std::string bc_type = "FVADFunctorDirichletBC";
         InputParameters params = getFactory().getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-        params.set<FunctionName>("function") = _passive_scalar_inlet_functors[name_i][bc_ind];
+        params.set<MooseFunctorName>("functor") = _passive_scalar_inlet_functors[name_i][bc_ind];
         params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
         getProblem().addFVBC(
@@ -357,41 +248,8 @@ WCNSFVScalarTransportPhysics::addScalarInletBC()
 }
 
 void
-WCNSFVScalarTransportPhysics::addInitialConditions()
+WCNSFVScalarTransportPhysics::addScalarOutletBC()
 {
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_scalar_equation)
-    return;
-  if (!_define_variables && parameters().isParamSetByUser("initial_scalar_variables"))
-    paramError("initial_scalar_variables",
-               "Scalar variables are defined externally of NavierStokesFV, so should their inital "
-               "conditions");
-
-  InputParameters params = getFactory().getValidParams("FunctionIC");
-  assignBlocks(params, _blocks);
-
-  // We want to set ICs only if the user specified them
-  if (parameters().isParamSetByUser("initial_scalar_variables"))
-  {
-    for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
-    {
-      params.set<VariableName>("variable") = _passive_scalar_names[name_i];
-      params.set<FunctionName>("function") =
-          getParam<std::vector<FunctionName>>("initial_scalar_variables")[name_i];
-
-      getProblem().addInitialCondition("FunctionIC", _passive_scalar_names[name_i] + "_ic", params);
-    }
-  }
-}
-
-unsigned short
-WCNSFVScalarTransportPhysics::getNumberAlgebraicGhostingLayersNeeded() const
-{
-  unsigned short necessary_layers = getParam<unsigned short>("ghost_layers");
-  necessary_layers =
-      std::max(necessary_layers, _flow_equations_physics->getNumberAlgebraicGhostingLayersNeeded());
-  if (getParam<MooseEnum>("passive_scalar_face_interpolation") == "skewness-corrected")
-    necessary_layers = std::max(necessary_layers, (unsigned short)3);
-
-  return necessary_layers;
+  // Advection outlet is naturally handled by the advection flux kernel
+  return;
 }

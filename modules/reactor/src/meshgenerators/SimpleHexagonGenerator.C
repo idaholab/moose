@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,8 +44,8 @@ SimpleHexagonGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>=0",
                                                 "Optional customized external boundary id.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<BoundaryName>("external_boundary_name",
+                                "Optional customized external boundary name.");
   params.addParamNamesToGroup("block_id block_name external_boundary_id external_boundary_name",
                               "Customized Subdomain/Boundary");
   params.addClassDescription(
@@ -74,8 +74,8 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
     _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string())
+                                ? getParam<BoundaryName>("external_boundary_name")
+                                : BoundaryName())
 {
   if (_radial_intervals > 1 && _element_type != ElemType::HYBRID)
     paramError(
@@ -144,10 +144,10 @@ SimpleHexagonGenerator::generate()
       for (unsigned int i = 0; i < HEXAGON_NUM_SIDES; i++)
       {
         Elem * elem = mesh->add_elem(new Quad4);
-        elem->set_node(0) = nodes[HEXAGON_NUM_SIDES * j + i];
-        elem->set_node(1) = nodes[HEXAGON_NUM_SIDES * j + (i + 1) % HEXAGON_NUM_SIDES];
-        elem->set_node(2) = nodes[HEXAGON_NUM_SIDES * (j + 1) + (i + 1) % HEXAGON_NUM_SIDES];
-        elem->set_node(3) = nodes[HEXAGON_NUM_SIDES * (j + 1) + i];
+        elem->set_node(0, nodes[HEXAGON_NUM_SIDES * j + i]);
+        elem->set_node(1, nodes[HEXAGON_NUM_SIDES * j + (i + 1) % HEXAGON_NUM_SIDES]);
+        elem->set_node(2, nodes[HEXAGON_NUM_SIDES * (j + 1) + (i + 1) % HEXAGON_NUM_SIDES]);
+        elem->set_node(3, nodes[HEXAGON_NUM_SIDES * (j + 1) + i]);
         // Assign the default external boundary id if applicable so that the mesh can be used as
         // input of `PatterneHexMeshGenerator`.
         if (j == 0)
@@ -160,10 +160,10 @@ SimpleHexagonGenerator::generate()
     for (unsigned int i = 0; i < HEXAGON_NUM_SIDES; i++)
     {
       Elem * elem = mesh->add_elem(new Tri3);
-      elem->set_node(0) = nodes[HEXAGON_NUM_SIDES * _radial_intervals];
-      elem->set_node(2) = nodes[HEXAGON_NUM_SIDES * (_radial_intervals - 1) + i];
-      elem->set_node(1) =
-          nodes[HEXAGON_NUM_SIDES * (_radial_intervals - 1) + (i + 1) % HEXAGON_NUM_SIDES];
+      elem->set_node(0, nodes[HEXAGON_NUM_SIDES * _radial_intervals]);
+      elem->set_node(2, nodes[HEXAGON_NUM_SIDES * (_radial_intervals - 1) + i]);
+      elem->set_node(
+          1, nodes[HEXAGON_NUM_SIDES * (_radial_intervals - 1) + (i + 1) % HEXAGON_NUM_SIDES]);
       // Assign the default external boundary id if applicable so that the mesh can be used as input
       // of `PatterneHexMeshGenerator`.
       if (_element_type != ElemType::HYBRID)
@@ -177,10 +177,10 @@ SimpleHexagonGenerator::generate()
     for (unsigned int i = 0; i < HEXAGON_NUM_SIDES / 3; i++)
     {
       Elem * elem = mesh->add_elem(new Quad4);
-      elem->set_node(0) = nodes[i * 3];
-      elem->set_node(1) = nodes[(i * 3 + 3) % HEXAGON_NUM_SIDES];
-      elem->set_node(2) = nodes[i * 3 + 2];
-      elem->set_node(3) = nodes[i * 3 + 1];
+      elem->set_node(0, nodes[i * 3]);
+      elem->set_node(1, nodes[(i * 3 + 3) % HEXAGON_NUM_SIDES]);
+      elem->set_node(2, nodes[i * 3 + 2]);
+      elem->set_node(3, nodes[i * 3 + 1]);
       // Assign the default external boundary id so that the mesh can be used as input of
       // `PatterneHexMeshGenerator`.
       boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);

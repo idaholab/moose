@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,6 +58,11 @@ public:
    * cached warehouse.
    */
   MooseObjectWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
+
+  /**
+   * const version of the above
+   */
+  const MooseObjectWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid) const;
 
   /**
    * Retrieve a moose object warehouse in which every moose object has one of the given matrix tags.
@@ -179,6 +184,13 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
   }
 
   return matrix_tag_to_object_warehouse[tag_id];
+}
+
+template <typename T>
+const MooseObjectWarehouse<T> &
+MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid) const
+{
+  return const_cast<MooseObjectTagWarehouse<T> *>(this)->getMatrixTagObjectWarehouse(tag_id, tid);
 }
 
 template <typename T>

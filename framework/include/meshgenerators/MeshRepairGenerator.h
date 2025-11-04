@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,6 +38,9 @@ private:
 
   /// whether to split subdomains using each element's type
   const bool _elem_type_separation;
+
+  /// Whether to merge boundaries with the same name but different ID
+  const bool _boundary_id_merge;
 
   /// @brief Removes the elements with an volume value below the user threshold
   /// @param mesh the mesh to modify

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,6 +9,7 @@
 
 #include "SystemInfo.h"
 #include "ExecutablePath.h"
+#include "CommandLine.h"
 #include "MooseRevision.h" ///< This file is auto-generated and contains the revision
 
 #include "libmesh/libmesh_config.h"
@@ -20,7 +21,9 @@
 #include <locale>
 #endif
 
-SystemInfo::SystemInfo(int argc, char * argv[]) : _argc(argc), _argv(argv) {}
+#ifdef MOOSE_LIBTORCH_ENABLED
+#include <torch/version.h>
+#endif
 
 std::string
 SystemInfo::getInfo() const
@@ -39,13 +42,15 @@ SystemInfo::getInfo() const
       << LIBMESH_DETECTED_SLEPC_VERSION_MINOR << '.' << LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR
       << '\n';
 #endif
+#ifdef MOOSE_LIBTORCH_ENABLED
+  oss << std::setw(25) << "Libtorch Version: " << TORCH_VERSION << '\n';
+#endif
 
   // Current Time
   oss << std::setw(25) << "Current Time: " << getTimeStamp() << "\n";
 
   // Executable Timestamp
-  std::string executable_path = getExecutable();
-  std::string executable_time = getExecutableTimeStamp(executable_path);
+  const std::string executable_time = getExecutableTimeStamp();
   if (!executable_time.empty())
     oss << std::setw(25) << "Executable Timestamp: " << executable_time << "\n";
 
@@ -130,12 +135,7 @@ SystemInfo::getTimeStamp(std::time_t * time_stamp) const
 std::string
 SystemInfo::getExecutable() const
 {
-  std::string executable(_argv[0]);
-  size_t last_slash = executable.find_last_of("/");
-  if (last_slash != std::string::npos)
-    executable = executable.substr(last_slash + 1);
-  std::string exe(Moose::getExecutablePath() + executable);
-  return exe;
+  return Moose::getExec();
 }
 
 std::string

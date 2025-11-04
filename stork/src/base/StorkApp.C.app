@@ -13,7 +13,7 @@ StorkApp::validParams()
   return params;
 }
 
-StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
+StorkApp::StorkApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   StorkApp::registerAll(_factory, _action_factory, _syntax);
 }
@@ -21,9 +21,9 @@ StorkApp::StorkApp(InputParameters parameters) : MooseApp(parameters)
 StorkApp::~StorkApp() {}
 
 void
-StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
+StorkApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
-  ModulesApp::registerAllObjects<StorkApp>(f, af, s);
+  ModulesApp::registerAllObjects<StorkApp>(f, af, syntax);
   Registry::registerObjectsTo(f, {"StorkApp"});
   Registry::registerActionsTo(af, {"StorkApp"});
 

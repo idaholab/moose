@@ -15,7 +15,7 @@ where $\rho_l \left[ \frac{kg}{m^3} \right]$ is the liquid density, $L \left[ \f
 For an example on how to use this object see the model of the Gallium
 melting experiment below [!cite](gau1986melting)
 
-!listing modules/navier_stokes/examples/solidification/galium_melting.i
+!listing modules/navier_stokes/examples/solidification/gallium_melting.i
 
 !syntax parameters /FVKernels/NSFVPhaseChangeSource
 

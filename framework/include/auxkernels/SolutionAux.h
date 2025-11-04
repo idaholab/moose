@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 
 #include "AuxKernel.h"
 
-class SolutionUserObject;
+class SolutionUserObjectBase;
 
 /**
  * AuxKernel for reading a solution from file.
@@ -41,7 +41,7 @@ protected:
   virtual Real computeValue() override;
 
   /// Reference to the SolutionUserObject storing the solution
-  const SolutionUserObject & _solution_object;
+  const SolutionUserObjectBase & _solution_object;
 
   /// The variable name of interest
   std::string _var_name;

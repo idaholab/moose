@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,6 +49,9 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
     _moose_object_name_dlsi(moose_object->name())
 {
   std::partial_sum(_lengths.begin(), _lengths.end(), _section_end.begin());
+
+  if (_lengths.size() != _n_elems.size())
+    mooseError("The parameters 'length' and 'n_elems' must have the same number of entries.");
 
   // Compute the axial coordinates of the centers of each element
   unsigned int k_section_begin = 0;

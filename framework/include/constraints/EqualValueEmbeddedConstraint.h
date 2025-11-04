@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,37 +10,41 @@
 #pragma once
 
 // MOOSE includes
-#include "NodeElemConstraint.h"
+#include "GenericNodeElemConstraint.h"
+
+class DisplacedProblem;
+class FEProblemBase;
 
 /**
  * A EqualValueEmbeddedConstraint forces the value of a variable to be the same
  * on overlapping portion of two blocks
  */
-class EqualValueEmbeddedConstraint : public NodeElemConstraint
+template <bool is_ad>
+class EqualValueEmbeddedConstraintTempl : public GenericNodeElemConstraint<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  EqualValueEmbeddedConstraint(const InputParameters & parameters);
+  EqualValueEmbeddedConstraintTempl(const InputParameters & parameters);
 
-  virtual void timestepSetup() override{};
-  virtual void jacobianSetup() override{};
-  virtual void residualEnd() override{};
+  virtual void timestepSetup() override {}
+  virtual void jacobianSetup() override {}
+  virtual void residualEnd() override {}
 
   virtual bool addCouplingEntriesToJacobian() override { return true; }
 
-  bool shouldApply() override;
+  bool shouldApply() override final;
 
   /**
    * Prepare the residual contribution of the current constraint required to enforce it
    * based on the specified formulation.
    */
-  void reinitConstraint();
+  virtual void reinitConstraint();
 
 protected:
   virtual void prepareSecondaryToPrimaryMap() override;
   virtual Real computeQpSecondaryValue() override;
-  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+  virtual GenericReal<is_ad> computeQpResidual(Moose::ConstraintType type) override;
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
   virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
                                         unsigned int jvar) override;
@@ -55,5 +59,10 @@ protected:
   /// copy of the residual before the constraint is applied
   NumericVector<Number> & _residual_copy;
   /// constraint force needed to enforce the constraint
-  Real _constraint_residual;
+  GenericReal<is_ad> _constraint_residual;
+
+  usingGenericNodeElemConstraint;
 };
+
+typedef EqualValueEmbeddedConstraintTempl<false> EqualValueEmbeddedConstraint;
+typedef EqualValueEmbeddedConstraintTempl<true> ADEqualValueEmbeddedConstraint;

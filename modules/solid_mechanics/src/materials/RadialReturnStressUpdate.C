@@ -1,6 +1,6 @@
 
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -95,8 +95,8 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
   if (this->_pars.isParamSetByUser("use_substep"))
   {
     if (this->_pars.isParamSetByUser("use_substepping"))
-      this->template paramError(
-          "use_substep", "Remove this parameter and just keep `use_substepping` in the input");
+      this->paramError("use_substep",
+                       "Remove this parameter and just keep `use_substepping` in the input");
 
     if (parameters.get<bool>("use_substep"))
     {
@@ -109,13 +109,13 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
 
   if (this->_pars.isParamSetByUser("maximum_number_substeps") &&
       _use_substepping == SubsteppingType::NONE)
-    this->template paramError(
+    this->paramError(
         "maximum_number_substeps",
         "The parameter maximum_number_substeps can only be used when the substepping option "
         "(use_substepping) is not set to NONE");
 
   if (_adaptive_substepping && _use_substepping == SubsteppingType::NONE)
-    this->template paramError(
+    this->paramError(
         "adaptive_substepping",
         "The parameter adaptive_substepping can only be used when the substepping option "
         "(use_substepping) is not set to NONE");
@@ -245,6 +245,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
     bool compute_full_tangent_operator,
     RankFourTensor & tangent_operator)
 {
+  using std::sqrt;
 
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration
@@ -254,7 +255,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   GenericReal<is_ad> dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   GenericReal<is_ad> effective_trial_stress = MetaPhysicL::raw_value(dev_trial_stress_squared)
-                                                  ? std::sqrt(3.0 / 2.0 * dev_trial_stress_squared)
+                                                  ? sqrt(3.0 / 2.0 * dev_trial_stress_squared)
                                                   : 0.0;
 
   computeStressInitialize(effective_trial_stress, elasticity_tensor);
@@ -318,6 +319,8 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
     bool compute_full_tangent_operator,
     RankFourTensor & tangent_operator)
 {
+  using std::sqrt;
+
   // if only one substep is needed, then call the original update state method
   if (total_number_substeps == 1)
   {
@@ -368,7 +371,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
       const RankTwoTensor deviatoric_sub_stress_new = sub_stress_new.deviatoric();
       const Real dev_sub_stress_new_squared =
           deviatoric_sub_stress_new.doubleContraction(deviatoric_sub_stress_new);
-      effective_sub_stress_new = std::sqrt(3.0 / 2.0 * dev_sub_stress_new_squared);
+      effective_sub_stress_new = sqrt(3.0 / 2.0 * dev_sub_stress_new_squared);
     }
     else
       libmesh_ignore(effective_sub_stress_new);

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,5 +36,11 @@ private:
   Real & _value;
 
   /// The old value (from the old vector, not stateful)
-  Real _old_value;
+  Real & _old_value;
+
+  /// Current time step being run
+  const int & _t_step;
+
+  /// The last time step this postprocessor was run on
+  int & _last_t_step;
 };

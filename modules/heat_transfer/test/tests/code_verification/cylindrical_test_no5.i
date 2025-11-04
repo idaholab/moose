@@ -13,16 +13,13 @@
     elem_type = EDGE2
     nx = 1
   [../]
+  coord_type = RZ
 []
 
 [Variables]
   [./u]
     order = FIRST
   [../]
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Functions]

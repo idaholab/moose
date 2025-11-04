@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -84,7 +84,7 @@ StochasticToolsAction::act()
             params.set<bool>("solve") = false;
 
           if (!params.isParamSetByUser("kernel_coverage_check"))
-            params.set<bool>("kernel_coverage_check") = false;
+            params.set<MooseEnum>("kernel_coverage_check") = "false";
 
           if (!params.isParamSetByUser("skip_nl_system_check"))
             params.set<bool>("skip_nl_system_check") = true;
@@ -106,7 +106,7 @@ StochasticToolsAction::act()
       // Set the object parameters
       InputParameters & params = action->getObjectParams();
       params.set<bool>("solve") = false;
-      params.set<bool>("kernel_coverage_check") = false;
+      params.set<MooseEnum>("kernel_coverage_check") = "false";
       params.set<bool>("skip_nl_system_check") = true;
 
       // Add Action to the warehouse

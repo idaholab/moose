@@ -5,7 +5,7 @@
 With the pressure equation handled, the heat conduction equation is next.
 
 !equation
-C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
+\rho c_p \left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla\cdot k \nabla T = 0
 
 !---
 
@@ -43,9 +43,12 @@ GenericConstantMaterial is a simple way to define constant material properties.
 
 Two input parameters are provided using "list" syntax common to MOOSE:
 
-```text
-prop_names  = 'conductivity density'
-prop_values = '0.01         200'
+```moose
+[Materials/material]
+  type = GenericConstantMaterial
+  prop_names  = 'conductivity density'
+  prop_values = '0.01         200'
+[]
 ```
 
 !---
@@ -56,7 +59,7 @@ prop_values = '0.01         200'
 
 !---
 
-## Step 5b: Running Input File
+## Step 5a: Running Input File
 
 ```bash
 cd ~/projects/moose/tutorials/darcy_thermo_mech/step5_heat_conduction
@@ -74,7 +77,7 @@ cd problems
 To create a time-dependent problem add in the time derivative:
 
 !equation
-C \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
+\rho c_p \frac{\partial T}{\partial t} - \nabla \cdot k \nabla T = 0
 
 The time term exists in the heat transfer module as `ADHeatConductionTimeDerivative`, thus
 only an update to the input file is required to run the transient case.
@@ -97,7 +100,7 @@ only an update to the input file is required to run the transient case.
 
 ## Step 5b: Time-dependent Input File
 
-!listing step05_heat_conduction/problems/step5b_transient.i
+!listing step05_heat_conduction/problems/step5b_transient.i diff=step05_heat_conduction/problems/step5a_steady.i
 
 !---
 
@@ -141,7 +144,7 @@ rather than being replaced with a known flux, as is done in a `NeumannBC`.
 
 ## Step5c: Outflow Input File
 
-!listing step05_heat_conduction/problems/step5c_outflow.i
+!listing step05_heat_conduction/problems/step5c_outflow.i diff=step05_heat_conduction/problems/step5b_transient.i
 
 !---
 
@@ -159,3 +162,4 @@ cd problems
 ## Step 5c: Results
 
 !media darcy_thermo_mech/step05c_result.webm
+       alt=Time evolution of the temperature, obtained by running the simulation above.

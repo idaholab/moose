@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,6 +22,8 @@ CSVFileTimes::validParams()
   params.addParam<unsigned int>("time_column_index", 0, "Index for the column with the time");
   // File is loaded on all processes
   params.set<bool>("auto_broadcast") = false;
+  // CSV file set the time sequence during initialization stage
+  params.set<bool>("dynamic_time_sequence") = false;
 
   return params;
 }

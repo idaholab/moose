@@ -1,13 +1,16 @@
 [Tests]
+  design = 'phase_field/CALPHAD.md'
+  issues = '#5862'
   [CrFe_sigma]
     type = RunApp
     input = 'CrFe_sigma.i'
-    check_input = True
+    requirement = 'The system shall be able to model the sublattice concentrations of the sigma phase of a Fe-Cr system with a fixed Cr concentration.'
   []
   [CrFe]
     type = RunApp
     input = 'CrFe.i'
     check_input = True
-    skip = 'prerequisite file missing'
+    prereq = 'CrFe_sigma'
+    requirement = 'The system shall be able to model diffusion and phase transformation of a Fe-Cr system with BCC and sigma phases present.'
   []
 []

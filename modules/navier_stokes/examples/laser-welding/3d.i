@@ -195,6 +195,12 @@ sb=5.67e-8
     boundary = 'front'
     use_displaced_mesh = true
   []
+  [surface_tension]
+    type = INSADSurfaceTensionBC
+    variable = vel
+    boundary = 'front'
+    use_displaced_mesh = true
+  []
   [displace_x_top]
     type = INSADDisplaceBoundaryBC
     boundary = 'front'

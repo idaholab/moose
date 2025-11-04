@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148 #20514 #23367 #24508 #26921'
+  issues = '#18628 #20148 #20514 #23367 #24508 #26921 #28164'
   [hexagon_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -18,6 +18,46 @@
     requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary.'
     recover = false
   []
+  [hexagon_boundary_quad8]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_quad8.e'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+                Mesh/pattern/background_block_name="assem_block"
+                Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
+                Mesh/pattern/boundary_region_element_type=QUAD8
+                Mesh/hex_1/tri_element_type=TRI6
+                Mesh/hex_1/quad_element_type=QUAD8
+                --mesh-only "patterned_hex_quad8.e"'
+    requirement ='The system shall be able to stitch hexagonal meshes to form a larger patterned mesh with a hexagonal boundary using QUAD8 elements.'
+    recover = false
+  []
+  [hexagon_boundary_quad9]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_quad9.e'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+                Mesh/pattern/background_block_name="assem_block"
+                Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
+                Mesh/pattern/boundary_region_element_type=QUAD9
+                Mesh/hex_1/tri_element_type=TRI6
+                Mesh/hex_1/quad_element_type=QUAD9
+                --mesh-only "patterned_hex_quad9.e"'
+    requirement ='The system shall be able to stitch hexagonal meshes to form a larger patterned mesh with a hexagonal boundary using QUAD9 elements.'
+    recover = false
+  []
   [hexagon_boundary_no_interface]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -32,7 +72,6 @@
                 Mesh/pattern/duct_block_ids=30
                 Mesh/pattern/duct_block_names="duct_block"
                 Mesh/pattern/uniform_mesh_on_sides=true
-                Mesh/pattern/create_interface_boundaries=false
                 --mesh-only "patterned_hex_no_interface.e"'
     requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary and without interface boundaries defined.'
     recover = false
@@ -69,6 +108,14 @@
     exodiff = 'patterned_pattern.e'
     cli_args = '--mesh-only "patterned_pattern.e"'
     requirement ='The system shall stitch hexagon meshes twice to form a larger mesh.'
+    recover = false
+  []
+  [patterned_pattern_allow_unused]
+    type = 'Exodiff'
+    input = 'patterned_pattern_unused.i'
+    exodiff = 'patterned_pattern.e'
+    cli_args = 'Mesh/pattern_2/allow_unused_inputs=true --mesh-only "patterned_pattern.e"'
+    requirement ='The system shall allow input structures to be defined in "inputs" without being part of the hexagonal lattice.'
     recover = false
   []
   [patterned_pattern_cd]
@@ -204,7 +251,7 @@
     type = 'RunException'
     input = 'patterned_2d_err.i'
     cli_args = '--mesh-only "patterned_err.e"'
-    expect_err = 'All the meshes provided in inputs must be used here.'
+    expect_err = 'All the meshes provided in inputs must be used in the lattice pattern.'
     requirement ='The system shall throw an error if not all the hexagonal meshes provided in inputs are used in pattern.'
   []
   [err_no_appropriate_pitch_meta]

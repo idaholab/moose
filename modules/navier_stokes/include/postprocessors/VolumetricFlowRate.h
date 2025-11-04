@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,7 +13,7 @@
 #include "SideIntegralPostprocessor.h"
 #include "MathFVUtils.h"
 
-class RhieChowInterpolatorBase;
+class RhieChowFaceFluxProvider;
 
 /**
  * This postprocessor computes the volumetric flow rate through a boundary, internal or external to
@@ -60,5 +60,8 @@ protected:
   Moose::FV::InterpMethod _velocity_interp_method;
 
   /// The Rhie-Chow interpolation user object
-  const RhieChowInterpolatorBase * const _rc_uo;
+  const RhieChowFaceFluxProvider * const _rc_uo;
+
+  /// If the velocity of the potentially moving mesh should be subtracted or not
+  const bool _subtract_mesh_velocity;
 };

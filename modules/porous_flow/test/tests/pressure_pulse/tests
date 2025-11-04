@@ -239,6 +239,7 @@
   [pressure_pulse_1d_fullys_saturated_fv]
     type = 'CSVDiff'
     input = 'pressure_pulse_1d_fully_saturated_fv.i'
+    prereq = 'pressure_pulse_1d_fv'
     csvdiff = 'pressure_pulse_1d_fv.csv'
     rel_err = 1.0E-5
     threading = '!pthreads'

@@ -7,7 +7,7 @@
       type = 'Exodiff'
       input = mixing_length_eddy_viscosity.i
       exodiff = mixing_length_eddy_viscosity_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       mesh_mode = REPLICATED
       valgrind = 'none'
       recover = false
@@ -19,7 +19,7 @@
       type = 'Exodiff'
       input = steady.i
       exodiff = steady_out.e
-      method = "!dbg"
+      capabilities = 'method!=dbg'
       mesh_mode = REPLICATED
       valgrind = 'none'
       recover = false

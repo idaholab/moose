@@ -69,8 +69,6 @@ There is an entire field of science about [!ac](HPC) and massively parallel proc
 !alert tip title=Try to target 20,000 [!ac](DOFs)-per-process.
 MOOSE developers tend to agree that 20,000 is the ideal number of [!ac](DOFs) that a single process may be responsible for. This value is reported as "`Num Local DOFs`" in the terminal printout at the beginning of every execution. There are, of course, some exceptions; if a problem exhibits speedup with less than 20,000 [!ac](DOFs)/process, then just use that.
 
-*For more information about application performance, please visit the [application_development/performance_benchmarking.md] page.*
-
 ## Demonstration
 
 To demonstrate the importance of parallel execution, the current Darcy pressure input file will be

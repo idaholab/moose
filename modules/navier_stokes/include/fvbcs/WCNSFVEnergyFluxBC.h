@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,8 @@
 #pragma once
 
 #include "WCNSFVFluxBCBase.h"
+
+class SinglePhaseFluidProperties;
 
 /**
  * Flux boundary condition for the weakly compressible energy equation
@@ -33,8 +35,22 @@ protected:
   const PostprocessorValue * const _energy_pp;
 
   /// Fluid specific heat capacity functor
-  const Moose::Functor<ADReal> & _cp;
+  const Moose::Functor<ADReal> * _cp;
 
   /// Fluid temperature functor
   const Moose::Functor<ADReal> & _temperature;
+
+  /// Fluid pressure functor
+  const Moose::Functor<ADReal> * const _pressure;
+
+  /// Pointer to the specific enthalpy functor
+  const Moose::Functor<ADReal> * const _h_fluid;
+
+  /// Fluid properties object
+  const SinglePhaseFluidProperties * const _fluid;
+
+private:
+  /// Computes the enthalpy using what the user has specified
+  template <typename T>
+  ADReal enthalpy(const T & loc_arg, const Moose::StateArg & state, const bool inflow) const;
 };

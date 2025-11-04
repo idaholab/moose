@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,10 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "ElementIntegralVariableUserObject.h"
+#include "SpatialUserObjectFunctor.h"
 #include "Enumerate.h"
 #include "DelimitedFileReader.h"
 #include "LayeredBase.h"
+#include "FEProblemBase.h"
+#include "Positions.h"
 
 // Forward Declarations
 class UserObject;
@@ -26,7 +28,7 @@ class UserObject;
  * closest to each one of those points.
  */
 template <typename UserObjectType, typename BaseType>
-class NearestPointBase : public BaseType
+class NearestPointBase : public SpatialUserObjectFunctor<BaseType>
 {
 public:
   static InputParameters validParams();
@@ -90,7 +92,7 @@ template <typename UserObjectType, typename BaseType>
 InputParameters
 NearestPointBase<UserObjectType, BaseType>::validParams()
 {
-  InputParameters params = BaseType::validParams();
+  InputParameters params = SpatialUserObjectFunctor<BaseType>::validParams();
 
   params.addParam<std::vector<Point>>("points",
                                       "Computations will be lumped into values at these points.");
@@ -98,6 +100,12 @@ NearestPointBase<UserObjectType, BaseType>::validParams()
                             "A filename that should be looked in for points. Each "
                             "set of 3 values in that file will represent a Point. "
                             "This and 'points' cannot be both supplied.");
+  params.addParam<PositionsName>(
+      "positions_object",
+      "The name of a Positions object that will contain "
+      "the locations. This, 'points' and 'points(_file)' cannot be both supplied. "
+      "Note that only the vector of initial Positions are used at this time. "
+      "Updates to the 'positions' vector are not supported.");
 
   MooseEnum distnorm("point=0 radius=1", "point");
   params.addParam<MooseEnum>(
@@ -115,14 +123,13 @@ NearestPointBase<UserObjectType, BaseType>::validParams()
 
 template <typename UserObjectType, typename BaseType>
 NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParameters & parameters)
-  : BaseType(parameters),
+  : SpatialUserObjectFunctor<BaseType>(parameters),
     _dist_norm(this->template getParam<MooseEnum>("dist_norm")),
     _axis(this->template getParam<MooseEnum>("axis"))
 {
   if (this->template getParam<MooseEnum>("dist_norm") != "radius" &&
       parameters.isParamSetByUser("axis"))
-    this->template paramError("axis",
-                              "'axis' should only be set if 'dist_norm' is set to 'radius'");
+    this->paramError("axis", "'axis' should only be set if 'dist_norm' is set to 'radius'");
 
   fillPoints();
 
@@ -153,12 +160,13 @@ template <typename UserObjectType, typename BaseType>
 void
 NearestPointBase<UserObjectType, BaseType>::fillPoints()
 {
-  if (isParamValid("points") && isParamValid("points_file"))
-    mooseError(name(), ": Both 'points' and 'points_file' cannot be specified simultaneously.");
-
   if (isParamValid("points"))
   {
     _points = this->template getParam<std::vector<Point>>("points");
+    if (isParamValid("points_file"))
+      this->paramError("points_file", "Cannot be specified together with 'points'");
+    if (isParamValid("positions_object"))
+      this->paramError("positions_object", "Cannot be specified together with 'points'");
   }
   else if (isParamValid("points_file"))
   {
@@ -168,9 +176,20 @@ NearestPointBase<UserObjectType, BaseType>::fillPoints()
     file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
     file.read();
     _points = file.getDataAsPoints();
+
+    if (isParamValid("positions_object"))
+      this->paramError("positions_object", "Cannot be specified together with 'points_file'");
+  }
+  else if (isParamValid("positions_object"))
+  {
+    const auto & positions_name = this->template getParam<PositionsName>("positions_object");
+    const auto problem = this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");
+    _points = problem->getPositionsObject(positions_name).getPositions(/*initial_positions*/ true);
   }
   else
-    mooseError(name(), ": You need to supply either 'points' or 'points_file' parameter.");
+    mooseError(
+        name(),
+        ": You need to supply either 'points', 'points_file' or 'positions_object' parameter.");
 }
 
 template <typename UserObjectType, typename BaseType>

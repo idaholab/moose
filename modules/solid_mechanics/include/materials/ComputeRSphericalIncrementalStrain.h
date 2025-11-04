@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeIncrementalSmallStrain.h"
+#include "ComputeIncrementalStrain.h"
 
 /**
  * ComputeRSphericalIncrementalStrain defines a strain increment only
@@ -17,7 +17,7 @@
  * polar and azimuthal directions are functions of the radial displacement.
 
  */
-class ComputeRSphericalIncrementalStrain : public ComputeIncrementalSmallStrain
+class ComputeRSphericalIncrementalStrain : public ComputeIncrementalStrain
 {
 public:
   static InputParameters validParams();

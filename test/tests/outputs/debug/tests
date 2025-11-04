@@ -133,6 +133,7 @@
       type = RunApp
       input = 'show_execution_kernels_bcs.i'
       expect_out = '\[DBG\] limit_v limit_u'
+      should_crash = true
       detail = 'elemental dampers,'
       cli_args = "--color off Dampers/active='limit_v limit_u'"
     []
@@ -204,7 +205,7 @@
       type = RunApp
       input = 'show_execution_linear_fv_elemental.i'
       cli_args = '--color off'
-      expect_out = '\[DBG\] reaction_2 source_2'
+      expect_out = '\[DBG\] (source_2|reaction_2) (source_2|reaction_2)'
       detail = 'linear finite volume elemental kernels,'
       # in parallel, no guarantee block 1 is present on rank 0
       max_parallel = 1
@@ -232,6 +233,7 @@
       type = RunApp
       input = 'show_execution_nodal_aux_bcs.i'
       expect_out = '\[DBG\] limit_u'
+      should_crash = true
       detail = 'nodal dampers,'
       cli_args = "--color off Dampers/inactive=''"
     []
@@ -336,6 +338,37 @@
       cli_args = '--color off'
       # No guarantee to have a single boundary on rank 0 beyond one rank
       max_parallel = 4
+    []
+  []
+
+  [show_block_restriction]
+    # These tests check whether the BlockRestrictionDebugOutput object works if it is defined via the
+    # parameter 'show_block_restriction' in the [Debug] block or directly within an [Output] block.
+
+    requirement = 'The system shall include the ability to output block-restriction of objects'
+    design = 'Debug/index.md'
+    issues = '#28290'
+
+    [debug_parameter]
+      type = RunApp
+      input = show_block_restriction_debug.i
+      detail = "when requested via debug parameter."
+      expect_out = "Block-Restrictions \(2 subdomains\)\: showing active objects[\n\s]*"
+                   "Subdomain \'BaseMesh\' \(id 0\):[\n\s]*"
+                   "Variables \(1 item\)\: u[\n\s]*"
+                   "Kernels \(1 item\)\: diff[\n\s]*"
+                   "Materials \(1 item\): block"
+    []
+
+    [block]
+      type = RunApp
+      input = show_block_restriction.i
+      detail = "when requested as output-block."
+      expect_out = "Block-Restrictions \(2 subdomains\)\: showing active objects[\n\s]*"
+                   "Subdomain \'BaseMesh\' \(id 0\):[\n\s]*"
+                   "Variables \(1 item\)\: u[\n\s]*"
+                   "Kernels \(1 item\)\: diff[\n\s]*"
+                   "Materials \(1 item\): block"
     []
   []
 []

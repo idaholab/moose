@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -81,8 +81,8 @@ public:
     if (_pool.empty())
     {
       _num_created++;
-      return std::move(PtrType(new T(std::forward<Args>(args)...),
-                               ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}}));
+      return PtrType(new T(std::forward<Args>(args)...),
+                     ExternalDeleter{std::weak_ptr<SharedPool<T> *>{_this_ptr}});
     }
     else
     {

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,12 +32,22 @@
 
 #include "libmesh/string_to_enum.h"
 
+using namespace libMesh;
+
+std::map<VariableName, int> Simulation::_component_variable_order_map;
+
+void
+Simulation::setComponentVariableOrder(const VariableName & var, int index)
+{
+  _component_variable_order_map[var] = index;
+}
+
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   : ParallelObject(fe_problem.comm()),
     LoggingInterface(_log),
     _thm_mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
-    _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>("_moose_app"))),
+    _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>(MooseBase::app_param))),
     _thm_factory(_thm_app.getFactory()),
     _thm_pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
@@ -564,10 +574,66 @@ Simulation::addComponentScalarIC(const VariableName & var_name, const std::vecto
   addSimInitialCondition(class_name, genName(var_name, "ic"), params);
 }
 
+std::vector<VariableName>
+Simulation::sortAddedComponentVariables() const
+{
+  // Check that no index in order map is used more than once.
+  // Also, convert the map to a vector of pairs to be sorted.
+  std::set<int> indices;
+  std::vector<std::pair<VariableName, int>> registered_var_index_pairs;
+  for (const auto & var_and_index : _component_variable_order_map)
+  {
+    registered_var_index_pairs.push_back(var_and_index);
+
+    const auto ind = var_and_index.second;
+    auto insert_return = indices.insert(ind);
+    if (!insert_return.second)
+      mooseError("The index ", ind, " was used for multiple component variables.");
+  }
+
+  // Collect all of the added variable names into an unsorted vector.
+  std::vector<VariableName> vars_unsorted;
+  for (const auto & var_and_data : _vars)
+    vars_unsorted.push_back(var_and_data.first);
+
+  // The sorting works as follows. For those variables that are listed in
+  // _component_variable_order_map, these are ordered before those that are not,
+  // in the order of their indices in the map. Those not in the map are sorted
+  // alphabetically.
+
+  // Sort registered_var_index_pairs by value (index)
+  std::sort(registered_var_index_pairs.begin(),
+            registered_var_index_pairs.end(),
+            [](const std::pair<VariableName, int> & a, const std::pair<VariableName, int> & b)
+            { return a.second < b.second; });
+
+  // Loop over the ordered, registered variable names and add a variable to the
+  // sorted list if in vars_unsorted. When this happens, delete the element from
+  // vars_unsorted, leaving only unregistered variable names after the loop.
+  std::vector<VariableName> vars_sorted;
+  for (const auto & var_index_pair : registered_var_index_pairs)
+  {
+    const auto & var = var_index_pair.first;
+    if (std::find(vars_unsorted.begin(), vars_unsorted.end(), var) != vars_unsorted.end())
+    {
+      vars_sorted.push_back(var);
+      vars_unsorted.erase(std::remove(vars_unsorted.begin(), vars_unsorted.end(), var),
+                          vars_unsorted.end());
+    }
+  }
+
+  // Sort the remaining (unregistered) variables alphabetically and then add
+  // them to the end of the full list.
+  std::sort(vars_unsorted.begin(), vars_unsorted.end());
+  vars_sorted.insert(vars_sorted.end(), vars_unsorted.begin(), vars_unsorted.end());
+
+  return vars_sorted;
+}
+
 void
 Simulation::addVariables()
 {
-  Transient * trex = dynamic_cast<Transient *>(getApp().getExecutioner());
+  TransientBase * trex = dynamic_cast<TransientBase *>(getApp().getExecutioner());
   if (trex)
   {
     Moose::TimeIntegratorType ti_type = trex->getTimeScheme();
@@ -582,15 +648,27 @@ Simulation::addVariables()
   if (_components.size() == 0)
     return;
 
-  // let all components add their variables
+  // Cache the variables that components request to add
   for (auto && comp : _components)
     comp->addVariables();
 
-  // pass the variables to MOOSE
-  for (auto && v : _vars)
+  // Sort the variables for a consistent ordering
+  const auto var_names = sortAddedComponentVariables();
+
+  // Report the ordering if the executioner is verbose
+  if (_fe_problem.getParam<MooseEnum>("verbose_setup") != "false")
   {
-    const VariableName & name = v.first;
-    VariableInfo & vi = v.second;
+    std::stringstream ss;
+    ss << "The system ordering of variables added by Components is as follows:\n";
+    for (const auto & var : var_names)
+      ss << "  " << var << "\n";
+    mooseInfo(ss.str());
+  }
+
+  // Add the variables to the problem
+  for (const auto & name : var_names)
+  {
+    VariableInfo & vi = _vars[name];
 
     if (vi._nl)
       _fe_problem.addVariable(vi._var_type, name, vi._params);
@@ -696,17 +774,16 @@ Simulation::setupCoordinateSystem()
 
   for (auto && comp : _components)
   {
-    GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp.get());
-    if (gc != NULL && gc->parent() == nullptr)
+    if (comp->parent() == nullptr)
     {
-      const std::vector<SubdomainName> & subdomains = gc->getSubdomainNames();
-      const std::vector<Moose::CoordinateSystemType> & coord_sys = gc->getCoordSysTypes();
+      const auto & subdomains = comp->getSubdomainNames();
+      const auto & coord_sys = comp->getCoordSysTypes();
 
       for (unsigned int i = 0; i < subdomains.size(); i++)
       {
         blocks.push_back(subdomains[i]);
         // coord_types.push_back("XYZ");
-        coord_types.push_back(coord_sys[i] == Moose::COORD_RZ ? "RZ" : "XYZ");
+        coord_types.setAdditionalValue(coord_sys[i] == Moose::COORD_RZ ? "RZ" : "XYZ");
       }
     }
   }
@@ -732,8 +809,11 @@ Simulation::couplingMatrixIntegrityCheck() const
   if (!_fe_problem.shouldSolve())
     return;
 
-  const TimeIntegrator * ti =
-      _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getTimeIntegrator();
+  const TimeIntegrator * ti = nullptr;
+  const auto & time_integrators =
+      _fe_problem.getNonlinearSystemBase(/*nl_sys_num=*/0).getTimeIntegrators();
+  if (!time_integrators.empty())
+    ti = time_integrators.front().get();
   // Yes, this is horrible. Don't ask why...
   if ((dynamic_cast<const ExplicitTimeIntegrator *>(ti) != nullptr) ||
       (dynamic_cast<const ExplicitEuler *>(ti) != nullptr) ||

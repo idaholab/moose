@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ PiecewiseTabularBase::validParams()
   MooseEnum axis("x=0 y=1 z=2");
   params.addParam<MooseEnum>(
       "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
-  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
+  params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the output values");
   params.declareControllable("scale_factor");
 
   // Data from input file parameters
@@ -213,8 +213,8 @@ PiecewiseTabularBase::buildFromJSON()
     mooseError("Missing 'x_keys' parameters for loading data from JSON");
   if (!isParamValid("y_keys"))
     mooseError("Missing 'y_keys' parameters for loading data from JSON");
-  json_uo.getVector(getParam<std::vector<std::string>>("x_keys"), _raw_x);
-  json_uo.getVector(getParam<std::vector<std::string>>("y_keys"), _raw_y);
+  json_uo.getVector<Real>(getParam<std::vector<std::string>>("x_keys"), _raw_x);
+  json_uo.getVector<Real>(getParam<std::vector<std::string>>("y_keys"), _raw_y);
   _raw_data_loaded = true;
 
   // Size mismatch error

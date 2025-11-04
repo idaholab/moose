@@ -1,6 +1,6 @@
 # Paraview Basics
 
-Paraview can read a number of different file formats, including the Exodus II
+Paraview can read a number of different file formats, including the Exodus
 format, which is the primary output format for MOOSE.
 
 ## Paraview Workspace

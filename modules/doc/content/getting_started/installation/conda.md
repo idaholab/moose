@@ -1,10 +1,14 @@
 # Conda MOOSE Environment
 
-!style! halign=left
-Our preferred method for obtaining dependencies necessary for MOOSE-based
-application development is via Conda's myriad array of libraries. Follow these
-instructions to create an environment on your machine using Conda.
-!style-end!
+!style halign=left
+Our preferred method for obtaining dependencies necessary for MOOSE-based application development is
+via Conda's myriad array of available libraries. Follow these instructions to create an environment
+on your machine using Conda.
+
+!alert tip
+Those interested in operating in their own optimized environment, please seek help from one of our
+'[From Source](getting_started/installation/index.md optional=True)' instructional pages. Our Conda
+packages are designed to 'just work', making them unsuitable for things like benchmark case studies.
 
 !include getting_started/installation/install_miniconda.md
 

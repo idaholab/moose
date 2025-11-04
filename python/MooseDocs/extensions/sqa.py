@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -141,7 +141,7 @@ class SQAExtension(command.CommandExtension):
                     path = os.path.join(MooseDocs.ROOT_DIR, d)
                 if not os.path.isdir(path):
                     msg = "Input directory does not exist: %s"
-                    LOG.error(msg, path)
+                    LOG.warning(msg, path)
                     continue
                 directories.append(path)
 
@@ -494,10 +494,18 @@ class SQAVerificationCommand(SQARequirementsCommand):
         settings['link-{}'.format(subcommand)] = True
         matrix = SQARequirementMatrix(parent)
         SQARequirementMatrixHeading(matrix, category=category, string=subcommand.title())
+
+        # Used in check for number of verification and/or validation requirements
+        num_vv_reqs = 0
+
         for requirements in self.extension.requirements(category).values():
             for req in requirements:
                 if getattr(req, subcommand) is not None:
                     self._addRequirement(matrix, info, page, req, requirements, category, settings)
+                    num_vv_reqs += 1
+
+        if num_vv_reqs == 0:
+            tokens.String(parent, content="No test cases of this type exist for this application, beyond those of its dependencies.")
 
         return parent
 

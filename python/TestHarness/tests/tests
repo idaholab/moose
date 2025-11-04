@@ -36,6 +36,12 @@
     issues = '#10647'
     collections = 'FAILURE_ANALYSIS'
   []
+  [format_result]
+    type = PythonUnitTest
+    input = test_FormatResult.py
+    requirement = "The system shall support the output of single-lined test results with a user configurable format string"
+    issues = '#30755'
+  []
   [min_ad_size]
     type = PythonUnitTest
     input = test_MinADSize.py
@@ -84,7 +90,7 @@
     requirement = "The system shall perform all operations required of the TestHarness except executing a test"
     issues = "#8637"
   []
-  [dislpay_required]
+  [display_required]
     type = PythonUnitTest
     input = test_DisplayRequired.py
     requirement = "The system shall run only tests designated with display_required."
@@ -112,13 +118,6 @@
     input = test_Syntax.py
     requirement = "The system shall report a failure due to issues with input files"
     issues = "#9249"
-    collections = 'FAILURE_ANALYSIS'
-  []
-  [required_objects]
-    type = PythonUnitTest
-    input = test_RequiredObjects.py
-    requirement = "The system shall report a failure if a test requires an object not present in the executable"
-    issues = '#6781'
     collections = 'FAILURE_ANALYSIS'
   []
   [required_apps]
@@ -182,12 +181,6 @@
     input = test_Recover.py
     requirement = "The system shall be able to perform recovery of a test"
     issues = '#11492'
-  []
-  [pbs_tests]
-    type = PythonUnitTest
-    input = test_PBS.py
-    requirement = "The system shall be able to submit jobs to a PBS third party scheduler"
-    issues = '#12138'
   []
   [trim_output]
     type = PythonUnitTest
@@ -263,12 +256,6 @@
     issues = '#22946'
     requirement = "The system shall be able to evaluate a given test with a user-supplied evaluation function."
   []
-  [test_failed_json]
-    type = PythonUnitTest
-    input = test_FailedJSON.py
-    requirement = "The system shall test for a valid json output dump"
-    issues = '#21967'
-  []
   [test_install_type]
     type = PythonUnitTest
     input = test_InstallType.py
@@ -286,5 +273,83 @@
     input = test_SoftHeavyDependency.py
     requirement = "The system shall not skip non-heavy tests for which heavy tests depend on"
     issues = '#26215'
+  []
+  [test_output_interface]
+    type = PythonUnitTest
+    input = test_OutputInterface.py
+    requirement = 'The system shall provide a common interface for storing and retrieving output that supports sanitization
+    issues = '#27562'
+  []
+  [test_method]
+    type = PythonUnitTest
+    input = test_GetExecutable.py
+    requirement = "The system shall test the functionality of the TestHarness.getExecutable method."
+    issues = '#30200'
+  []
+  [test_capture_perf_graph]
+    type = PythonUnitTest
+    input = test_CapturePerfGraph.py
+    requirement = "The system shall support systematically capturing performance statistics from the execution of MOOSE application tests."
+    issues = '#30569'
+  []
+  [validationcase]
+    type = PythonUnitTest
+    input = test_ValidationCase.py
+    requirement = 'The system shall provide an interface for storing results and data for validation cases'
+    issues = '#30517'
+  []
+  [validation]
+    type = PythonUnitTest
+    input = test_Validation.py
+    requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
+    issues = '#30517'
+  []
+  [resultsstore_storedresults]
+    type = PythonUnitTest
+    input = test_resultsstore_storedresults.py
+    requirement = 'The system shall provide a python interface for interacting with previous test results stored in a database'
+    issues = '#30819'
+  []
+  [resultsstore_reader]
+    type = PythonUnitTest
+    input = test_resultsstore_reader.py
+    requirement = 'The system shall provide a python interface for loading previous test results from a database'
+    issues = '#30819'
+  []
+  [resultsstore_civetstore]
+    type = PythonUnitTest
+    input = test_resultsstore_civetstore.py
+    requirement = 'The system shall provide a python interface for storing test results into a database for future access'
+    issues = '#31675'
+  []
+  [resultsstore_combined]
+    type = PythonUnitTest
+    input = test_resultsstore_combined.py
+    requirement = 'The system shall provide python interfaces to both store and load test results into a database'
+    issues = '#31675'
+  []
+  [augmented_capabilities]
+    type = PythonUnitTest
+    input = test_AugmentedCapabilities.py
+    requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite.'
+    issues = '#31135'
+  []
+  [only_tests_that_require]
+    type = PythonUnitTest
+    input = test_OnlyTestsThatRequire.py
+    requirement = 'The system shall provide the ability to filter tests based on whether or not they are dependent on certain capabilities.'
+    issues = '#31310'
+  []
+  [append_pythonpath]
+    type = PythonUnitTest
+    input = test_append_pythonpath.py
+    requirement = 'The system shall be able to import python utilities when running tests.'
+    issues = '#31457'
+  []
+  [resultssummary]
+    type = PythonUnitTest
+    input = test_resultssummary.py
+    requirement = 'The system shall provide a system that summaries the changes in tests within a pull request event`
+    issues = '#31645'
   []
 []

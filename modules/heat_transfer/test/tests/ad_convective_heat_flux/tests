@@ -23,4 +23,19 @@
       allow_test_objects = true
     [../]
   [../]
+  [functor]
+    requirement = 'The system shall provide a convective flux boundary condition which couples'
+    [fv]
+      type = Exodiff
+      input = 'fe_fv_coupled.i'
+      exodiff = 'fe_fv_coupled_out.e'
+      detail = 'finite-volume quantities from neighboring subdomains and'
+    []
+    [error]
+      type = RunException
+      input = 'fe_fv_coupled_error.i'
+      expect_err = 'Functor must either be defined on all of the primary side of the boundary or on all of the secondary side.'
+      detail = 'throw an error if coupled quantity is not consistently on one side of boundary.'
+    []
+  []
 []

@@ -39,6 +39,8 @@
   type = Transient
   num_steps = 5
   dt = 0.01
+  dtmin = 1e-4
+  nl_max_its = 10
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'

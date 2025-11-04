@@ -1,0 +1,97 @@
+[Tests]
+  issues = '#30796'
+  design = 'ParameterMeshFunction.md'
+  [parameter_mesh]
+    requirement = 'The system shall be able to evaluate a mesh-based interpolation function by '
+    [create_1d]
+      type = CheckFiles
+      input = create_mesh_1d.i
+      check_files = 'create_mesh_1d_out.e create_mesh_1d_out_param_vec_0001.csv'
+      detail = 'creating 1D mesh and '
+    []
+    [evaluate]
+      type = Exodiff
+      input = parameter_mesh_1d.i
+      prereq = parameter_mesh/create_1d
+      exodiff = parameter_mesh_1d_out.e
+      detail = 'evaluating the 1d parameter values;'
+    []
+    [create_2d]
+      type = CheckFiles
+      input = create_mesh_2d.i
+      check_files = 'create_mesh_2d_out.e create_mesh_2d_out_param_vec_0001.csv'
+      detail = 'creating 2D mesh and'
+      recover = false
+    []
+    [evaluate_2d]
+      type = Exodiff
+      input = parameter_mesh_2d.i
+      prereq = parameter_mesh/create_2d
+      exodiff = parameter_mesh_2d_out.e
+      detail = 'evaluating the 2D mesh parameter values;'
+    []
+    [create_3d]
+      type = CheckFiles
+      input = create_mesh_3d.i
+      check_files = 'create_mesh_3d_out.e create_mesh_3d_out_param_vec_0001.csv'
+      detail = 'creating 3d mesh and'
+      recover = false
+    []
+    [evaluate_3d]
+      type = Exodiff
+      input = parameter_mesh_3d.i
+      prereq = parameter_mesh/create_3d
+      exodiff = parameter_mesh_3d_out.e
+      detail = 'evaluating the 3d mesh parameter values;'
+    []
+    [create_tri]
+      type = CheckFiles
+      input = create_mesh_2d.i
+      cli_args = 'Mesh/gmg/elem_type=TRI'
+      check_files = 'create_mesh_2d_out.e create_mesh_2d_out_param_vec_0001.csv'
+      detail = 'using triangle element meshes'
+    []
+    [evaluate_tri]
+      type = Exodiff
+      input = parameter_mesh_2d.i
+      prereq = parameter_mesh/create_tri
+      cli_args = 'Outputs/file_base=parameter_mesh_tri_out'
+      exodiff = parameter_mesh_tri_out.e
+      detail = 'evaluating the triangle mesh parameter values;'
+    []
+    [create_tet]
+      type = CheckFiles
+      input = create_mesh_3d.i
+      cli_args = 'Mesh/gmg/elem_type=TET'
+      check_files = 'create_mesh_3d_out.e create_mesh_3d_out_param_vec_0001.csv'
+      detail = 'using tetrahedral element meshes'
+    []
+    [evaluate_tet]
+      type = Exodiff
+      input = parameter_mesh_3d.i
+      prereq = parameter_mesh/create_tet
+      cli_args = 'Outputs/file_base=parameter_mesh_tet_out'
+      exodiff = parameter_mesh_tet_out.e
+      detail = 'evaluating the tetrahedral mesh parameter values;'
+    []
+  []
+  [check_dbgs]
+    requirement = 'The system shall prevent'
+    [create_second]
+      type = CheckFiles
+      input = create_mesh_2d.i
+      cli_args = 'Mesh/gmg/elem_type=QUAD8'
+      check_files = 'create_mesh_2d_out.e create_mesh_2d_out_param_vec_0001.csv'
+      detail = 'using second order element meshes'
+      recover = false
+    []
+    [evaluate_second]
+      type = RunException
+      input = parameter_mesh_2d.i
+      prereq = check_dbgs/create_second
+      expect_err = "Closet point projection currently does not support second order elements."
+      detail = 'with closest point projection;'
+      recover = false
+    []
+  []
+[]

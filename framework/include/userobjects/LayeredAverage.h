@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,25 +9,17 @@
 
 #pragma once
 
-#include "LayeredIntegral.h"
+#include "LayeredVolumeAverageBase.h"
+#include "ElementIntegralVariableUserObject.h"
 
 /**
  * This UserObject computes averages of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).
  */
-class LayeredAverage : public LayeredIntegral
+class LayeredAverage : public LayeredVolumeAverageBase<ElementIntegralVariableUserObject>
 {
 public:
   static InputParameters validParams();
 
   LayeredAverage(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
-
-protected:
-  /// Value of the volume for each layer
-  std::vector<Real> _layer_volumes;
 };

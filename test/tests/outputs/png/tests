@@ -12,7 +12,7 @@
       input = 'simple_transient_diffusion.i'
       check_files = 'simple_transient_diffusion_png_001.png'
       library_mode = 'DYNAMIC'
-      libpng = true
+      capabilities = 'libpng'
 
       detail = 'for 2D square images,'
     []
@@ -23,7 +23,7 @@
       check_files = 'adv_diff_reaction_test_png_001.png'
       max_parallel = 1 # Test uses PETSc options that require a serial run
       library_mode = 'DYNAMIC'
-      libpng = true
+      capabilities = 'libpng'
 
       detail = 'arbitrary shapped domains,'
     []
@@ -32,7 +32,7 @@
       input = 'wedge.i'
       check_files = 'wedge_png_001.png'
       library_mode = 'DYNAMIC'
-      libpng = true
+      capabilities = 'libpng'
 
       detail = 'and complex shapes with periodic boudary conditions.'
     []

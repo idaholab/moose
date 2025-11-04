@@ -7,7 +7,7 @@
 
 [VectorPostprocessors]
   [test]
-    type = LibtorchTorchScriptNeuralNetTest
+    type = TorchScriptModuleTest
     filename = "my_net.pt"
   []
 []

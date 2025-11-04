@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,7 @@ SimpleTurbine1Phase::SimpleTurbine1Phase(const InputParameters & params)
   : JunctionParallelChannels1Phase(params),
     _on(getParam<bool>("on")),
     _power(getParam<Real>("power")),
-    _W_dot_var_name(genName(name(), "W_dot"))
+    _W_dot_var_name(junctionVariableName("W_dot"))
 {
 }
 
@@ -41,7 +41,7 @@ SimpleTurbine1Phase::addVariables()
 {
   JunctionParallelChannels1Phase::addVariables();
 
-  getTHMProblem().addSimVariable(false, _W_dot_var_name, FEType(FIRST, SCALAR));
+  addJunctionVariable(false, _W_dot_var_name);
 }
 
 void
@@ -53,9 +53,11 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
   {
     const std::string class_name = "ADSimpleTurbine1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
+    params.set<bool>("use_scalar_variables") = false;
+    params.set<subdomain_id_type>("junction_subdomain_id") = _junction_subdomain_id;
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
-    params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
+    params.set<std::vector<processor_id_type>>("processor_ids") = getConnectedProcessorIDs();
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
     params.set<std::string>("component_name") = name();
@@ -89,12 +91,13 @@ SimpleTurbine1Phase::addMooseObjects()
 
   {
     const std::string nm = genName(name(), "W_dot_aux");
-    const std::string class_name = "SimpleTurbinePowerAux";
+    const std::string class_name = "SimpleTurbinePowerFieldAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = _W_dot_var_name;
     params.set<Real>("value") = _power;
     params.set<bool>("on") = _on;
-    getTHMProblem().addAuxScalarKernel(class_name, nm, params);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    getTHMProblem().addAuxKernel(class_name, nm, params);
     connectObject(params, nm, "power", "value");
     connectObject(params, nm, "on");
   }

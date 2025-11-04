@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,10 @@
 
 #include "FVDirichletBCBase.h"
 
+/**
+ * A template class for finite volume dirichlet boundary conditions.
+ * @tparam whether automatic differentiation is used or not
+ */
 template <bool is_ad>
 class FVFunctorDirichletBCTempl : public FVDirichletBCBase
 {
@@ -19,7 +23,7 @@ public:
 
   static InputParameters validParams();
 
-  ADReal boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const override;
 
 private:
   /// The value for this BC

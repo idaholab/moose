@@ -16,9 +16,9 @@ class TestFVOneVarDiffusionInterface(unittest.TestCase):
 class TestFVOneVarDiffusionInterfaceHarmonic(unittest.TestCase):
     def test(self):
         df1 = mms.run_spatial('test.i', 4,
-                              "FVKernels/diff_right/coeff_interp_method=harmonic "+
-                              "FVKernels/diff_left/coeff_interp_method=harmonic "+
-                              "FVInterfaceKernels/interface/coeff_interp_method=harmonic "+
+                              "FVKernels/diff_right/coeff_interp_method=harmonic",
+                              "FVKernels/diff_left/coeff_interp_method=harmonic",
+                              "FVInterfaceKernels/interface/coeff_interp_method=harmonic",
                               "FVInterfaceKernels/interface/coeff_interp_method=harmonic",
                               y_pp=['L2u'])
 

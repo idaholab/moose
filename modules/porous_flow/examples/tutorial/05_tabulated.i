@@ -92,7 +92,9 @@
     fp = true_water
     temperature_min = 275
     interpolated_properties = 'density viscosity enthalpy internal_energy'
-    fluid_property_file = water97_tabulated.csv
+    fluid_property_output_file = water97_tabulated.csv
+    # Comment out the fp parameter and uncomment below to use the newly generated tabulation
+    # fluid_property_file = water97_tabulated.csv
   []
 []
 

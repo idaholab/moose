@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -50,7 +50,8 @@ MultiControlDrumFunction::MultiControlDrumFunction(const InputParameters & param
     _rotation_start_time(getParam<Real>("rotation_start_time")),
     _rotation_end_time(getParam<Real>("rotation_end_time")),
     _use_control_drum_id(getParam<bool>("use_control_drum_id")),
-    _control_drum_id(getElementIDByName("control_drum_id")),
+    _control_drum_id(_use_control_drum_id ? getElementIDByName("control_drum_id")
+                                          : DofObject::invalid_id),
     _control_drum_positions(
         getMeshProperty<std::vector<Point>>("control_drum_positions", _mesh_generator)),
     _control_drums_azimuthal_meta(getMeshProperty<std::vector<std::vector<Real>>>(

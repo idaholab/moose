@@ -4,8 +4,8 @@
     input = '2D_stretch_failure_BPD.i'
     exodiff = '2D_stretch_failure_BPD.e'
     map = false
-    requirement = 'StretchBasedFailureCriterionPD shall determine the bond status based on given critical stretch.'
-    design = 'modules/peridynamics/StretchBasedFailureCriterionPD.md'
+    requirement = 'The system shall be able to determine the bond status based on given critical stretch.'
+    design = 'StretchBasedFailureCriterionPD.md'
     issues = '#11561'
   [../]
   [./2D_stress_failure_H1NOSPD]
@@ -13,8 +13,8 @@
     input = '2D_stress_failure_H1NOSPD.i'
     exodiff = '2D_stress_failure_H1NOSPD.e'
     map = false
-    requirement = 'RankTwoBasedFailureCriteriaNOSPD shall determine the bond status based on given critical stress.'
-    design = 'modules/peridynamics/RankTwoBasedFailureCriteriaNOSPD.md'
+    requirement = 'The system shall be able to determine the bond status based on given critical stress.'
+    design = 'RankTwoBasedFailureCriteriaNOSPD.md'
     issues = '#11561'
   [../]
   [./2D_singular_shape_tensor_H1NOSPD]
@@ -22,8 +22,8 @@
     input = '2D_singular_shape_tensor_H1NOSPD.i'
     exodiff = '2D_singular_shape_tensor_H1NOSPD.e'
     map = false
-    requirement = 'SingularShapeTensorEliminatorUserObjectPD shall remove singular shape tensor.'
-    design = 'modules/peridynamics/SingularShapeTensorEliminatorUserObjectPD.md'
+    requirement = 'The system shall be able to remove singular shape tensor.'
+    design = 'SingularShapeTensorEliminatorUserObjectPD.md'
     issues = '#15393'
   [../]
   [./2D_bond_status_convergence_BPD]
@@ -33,7 +33,7 @@
     map = false
     requirement = 'The system shall provide a means for computing the number of peridynamic bonds that changed status during
                    the last Picard update to check convergence of the Picard iterations.'
-    design = 'modules/peridynamics/BondStatusConvergedPostprocessorPD.md'
+    design = 'BondStatusConvergedPostprocessorPD.md'
     issues = '#15532'
   [../]
   [./2D_bond_status_convergence_H1NOSPD]
@@ -43,7 +43,7 @@
     map = false
     requirement = 'The system shall provide a means for computing the number of peridynamic bonds that changed status during
                    the last Picard update to check convergence of the Picard iterations.'
-    design = 'modules/peridynamics/BondStatusConvergedPostprocessorPD.md'
+    design = 'BondStatusConvergedPostprocessorPD.md'
     issues = '#15532'
     skip = 'time out test'
   [../]

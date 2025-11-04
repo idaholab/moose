@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ OnOffNeumannBC::validParams()
 OnOffNeumannBC::OnOffNeumannBC(const InputParameters & parameters) : NeumannBC(parameters) {}
 
 bool
-OnOffNeumannBC::shouldApply()
+OnOffNeumannBC::shouldApply() const
 {
   return (_t_step == 1) ? false : true;
 }

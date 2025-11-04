@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -83,6 +83,18 @@ PiecewiseLinearBase::average() const
 {
   return integral() /
          (_linear_interp->domain(_linear_interp->getSampleSize() - 1) - _linear_interp->domain(0));
+}
+
+Real
+PiecewiseLinearBase::timeIntegral(Real t1, Real t2, const Point & p) const
+{
+  if (_has_axis)
+    // function is constant in time; evaluate at arbitrary point in time
+    // and multiply by time integral domain width
+    return value(t1, p) * (t2 - t1);
+  else
+    // function is piecewise linear in time
+    return _scale_factor * _linear_interp->integratePartial(t1, t2);
 }
 
 void

@@ -4,12 +4,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = 2d.e
+  coord_type = RZ
 []
 
 [Variables]
@@ -54,7 +51,7 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     volumetric_locking_correction = true
     add_variables = true

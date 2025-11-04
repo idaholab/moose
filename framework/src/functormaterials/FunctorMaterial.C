@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,6 +27,10 @@ FunctorMaterial::validParams()
 
   // Remove MaterialBase parameters that are not used
   params.suppressParameter<bool>("compute");
+  params.suppressParameter<std::vector<BoundaryName>>("boundary");
+  params.suppressParameter<MooseEnum>("constant_on");
+  params.suppressParameter<MaterialPropertyName>("prop_getter_suffix");
+  params.suppressParameter<bool>("use_interpolated_state");
 
   return params;
 }

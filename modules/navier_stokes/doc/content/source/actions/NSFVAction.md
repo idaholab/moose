@@ -4,7 +4,7 @@ This class allows us to set up Navier-Stokes equations for porous medium or clea
 
 !alert warning
 This action is deprecated and is replaced by the `WCNSFVPhysics` classes. The deprecated
-syntax can currently still be used.
+syntax can currently still be used. Please refer to the [section on how to transition to the new Physics syntax](NavierStokesFV/index.md#transition) for guidance on how to use the current syntax.
 
 ## Overview
 

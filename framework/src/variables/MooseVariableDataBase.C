@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -67,14 +67,6 @@ MooseVariableDataBase<OutputType>::MooseVariableDataBase(const MooseVariableFiel
   _vector_tag_grad.reserve(max_future_num_vector_tags);
   _vector_tag_grad.resize(num_vector_tags);
 
-  auto num_matrix_tags = _subproblem.numMatrixTags();
-
-  _matrix_tags_dof_u.resize(num_matrix_tags);
-  _need_matrix_tag_dof_u.resize(num_matrix_tags, false);
-
-  _need_matrix_tag_u.resize(num_matrix_tags, false);
-  _matrix_tag_u.resize(num_matrix_tags);
-
   // Always fetch the dof values for the solution tag
   const auto soln_tag = _subproblem.getVectorTagID(Moose::SOLUTION_TAG);
   _need_vector_tag_dof_u[soln_tag] = true;
@@ -86,6 +78,19 @@ MooseVariableDataBase<OutputType>::MooseVariableDataBase(const MooseVariableFiel
   _nodal_value_array.resize(1);
   _nodal_value_old_array.resize(1);
   _nodal_value_older_array.resize(1);
+}
+
+template <typename OutputType>
+void
+MooseVariableDataBase<OutputType>::sizeMatrixTagData()
+{
+  auto num_matrix_tags = _subproblem.numMatrixTags();
+
+  _matrix_tags_dof_u.resize(num_matrix_tags);
+  _need_matrix_tag_dof_u.resize(num_matrix_tags, false);
+
+  _need_matrix_tag_u.resize(num_matrix_tags, false);
+  _matrix_tag_u.resize(num_matrix_tags);
 }
 
 template <typename OutputType>
@@ -566,32 +571,35 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
       if ((_subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
            _subproblem.safeAccessTaggedVectors()) ||
           _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
+      {
         // tag is defined on problem but may not be used by a system
         // the grain tracker requires being able to read from solution vectors that we are also in
         // the process of writing :-/
+        // Note: the extra vector tags are also still not closed when a TagVectorAux uses them
         if (_sys.hasVector(tag) /* && _sys.getVector(tag).closed()*/)
         {
           auto & vec = _sys.getVector(tag);
           _vector_tags_dof_u[tag].resize(n);
           vec.get(_dof_indices, &_vector_tags_dof_u[tag][0]);
         }
+      }
 
   if (_subproblem.safeAccessTaggedMatrices())
   {
     auto & active_coupleable_matrix_tags =
         _subproblem.getActiveFEVariableCoupleableMatrixTags(_tid);
+
     for (auto tag : active_coupleable_matrix_tags)
     {
       _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         {
+          mooseAssert(_sys.getMatrix(tag).closed(),
+                      "Matrix with tag '" + std::to_string(tag) + "' should be closed");
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < n; i++)
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
-          }
         }
     }
   }
@@ -600,7 +608,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
   {
     _dof_du_dot_du.resize(n);
     for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dot_du[i] = _sys.duDotDu();
+      _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
   }
   if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
   {
@@ -680,8 +688,12 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
          _subproblem.safeAccessTaggedVectors()) ||
         _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
       // tag is defined on problem but may not be used by a system
-      if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+      if (_sys.hasVector(tag))
+      {
+        mooseAssert(_sys.getVector(tag).closed(),
+                    "Vector with tag '" + std::to_string(tag) + "' should be closed");
         getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
+      }
 
   if (_subproblem.safeAccessTaggedMatrices())
   {
@@ -691,15 +703,14 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
     {
       _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         {
+          mooseAssert(_sys.getMatrix(tag).closed(),
+                      "Matrix with tag '" + std::to_string(tag) + "' should be closed");
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < n; i++)
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             for (unsigned j = 0; j < _count; j++)
               _matrix_tags_dof_u[tag][i](j) = mat(_dof_indices[i] + j, _dof_indices[i] + j);
-          }
         }
     }
   }
@@ -708,7 +719,7 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
   {
     _dof_du_dot_du.resize(n);
     for (decltype(n) i = 0; i < n; ++i)
-      _dof_du_dot_du[i] = _sys.duDotDu();
+      _dof_du_dot_du[i] = _sys.duDotDu(_var.number());
   }
   if (_need_du_dotdot_du || _need_dof_du_dotdot_du)
   {
@@ -796,12 +807,14 @@ MooseVariableDataBase<RealVectorValue>::assignNodalValue()
       auto & dof_values_old = _vector_tags_dof_u[_old_solution_tag];
       for (decltype(n) i = 0; i < n; ++i)
         _nodal_value_old(i) = dof_values_old[i];
+      _nodal_value_old_array[0] = _nodal_value_old;
     }
     if (oldestSolutionStateRequested() >= 2)
     {
       auto & dof_values_older = _vector_tags_dof_u[_older_solution_tag];
       for (decltype(n) i = 0; i < n; ++i)
         _nodal_value_older(i) = dof_values_older[i];
+      _nodal_value_older_array[0] = _nodal_value_older;
     }
     if (_need_dof_values_dot)
       for (decltype(n) i = 0; i < n; ++i)

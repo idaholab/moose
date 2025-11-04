@@ -35,7 +35,7 @@
 
 [Postprocessors]
   [./num_dofs]
-    type = NumElems
+    type = NumElements
   [../]
 [../]
 

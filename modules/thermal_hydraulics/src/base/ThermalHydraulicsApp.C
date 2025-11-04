@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,15 +18,14 @@
 #include "MiscApp.h"
 
 #include "AppFactory.h"
+#include "Simulation.h"
 
+#include "FlowModelSinglePhase.h"
 #include "SinglePhaseFluidProperties.h"
 #include "TwoPhaseFluidProperties.h"
 #include "TwoPhaseNCGFluidProperties.h"
 
 std::map<THM::FlowModelID, std::string> ThermalHydraulicsApp::_flow_model_map;
-
-std::map<THM::FlowModelID, std::map<std::string, std::string>>
-    ThermalHydraulicsApp::_closures_class_names_map;
 
 namespace THM
 {
@@ -43,6 +42,7 @@ FlowModelID FM_INVALID = registerFlowModelID();
 FlowModelID FM_SINGLE_PHASE = registerFlowModelID();
 FlowModelID FM_TWO_PHASE = registerFlowModelID();
 FlowModelID FM_TWO_PHASE_NCG = registerFlowModelID();
+FlowModelID FM_GAS_MIX = registerFlowModelID();
 
 } // namespace THM
 
@@ -58,30 +58,13 @@ ThermalHydraulicsApp::validParams()
 
 registerKnownLabel("ThermalHydraulicsApp");
 
-ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters) : MooseApp(parameters)
+ThermalHydraulicsApp::ThermalHydraulicsApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 ThermalHydraulicsApp::~ThermalHydraulicsApp() {}
-
-void
-ThermalHydraulicsApp::registerObjects(Factory & /*factory*/)
-{
-  mooseError("registerObjects() is deprecated and not supported in THM");
-}
-
-void
-ThermalHydraulicsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-  mooseError("associateSyntax() is deprecated and not supported in THM");
-}
-
-void
-ThermalHydraulicsApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseError("registerExecFlags() is deprecated and not supported in THM");
-}
 
 void
 ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
@@ -100,11 +83,22 @@ ThermalHydraulicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
-  registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
-  registerClosuresOption("none", "Closures1PhaseNone", THM::FM_SINGLE_PHASE);
-
   // flow models
   registerFlowModel(THM::FM_SINGLE_PHASE, FlowModelSinglePhase);
+
+  // Component variable ordering:
+  // Note that this particular order ({rhoA, rhoEA, rhouA}) corresponds to the
+  // the alphabetic ordering, which was the ordering used before this ordering
+  // feature was implemented. We preserve this order for ease of transition,
+  // but an order such as {rhoA, rhouA, rhoEA} may work as well.
+  Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOA, 0);
+  Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOEA, 1);
+  Simulation::setComponentVariableOrder(FlowModelSinglePhase::RHOUA, 2);
+  Simulation::setComponentVariableOrder("rhoV", 3);
+  Simulation::setComponentVariableOrder("rhouV", 4);
+  Simulation::setComponentVariableOrder("rhovV", 5);
+  Simulation::setComponentVariableOrder("rhowV", 6);
+  Simulation::setComponentVariableOrder("rhoEV", 7);
 }
 
 const std::string &
@@ -130,45 +124,6 @@ ThermalHydraulicsApp::registerApps()
   RdgApp::registerApps();
   SolidPropertiesApp::registerApps();
   MiscApp::registerApps();
-}
-
-const std::string &
-ThermalHydraulicsApp::getClosuresClassName(const std::string & closures_option,
-                                           const THM::FlowModelID & flow_model_id)
-{
-  const std::string closures_option_lc = MooseUtils::toLower(closures_option);
-
-  if (_closures_class_names_map.find(flow_model_id) != _closures_class_names_map.end())
-  {
-    const auto & map_for_flow_model = _closures_class_names_map.at(flow_model_id);
-    if (map_for_flow_model.find(closures_option_lc) != map_for_flow_model.end())
-    {
-      const std::string & closures_class = map_for_flow_model.at(closures_option_lc);
-      mooseDeprecated("The closures system now uses objects created in the input file instead of "
-                      "enumerated options.\n",
-                      "To remove this warning, add the following block to your input file "
-                      "(replacing 'my_closures' as you choose):\n",
-                      "  [Closures]\n    [my_closures]\n      type = ",
-                      closures_class,
-                      "\n    []\n  []\n",
-                      "Then, set the 'closures' parameter in your flow channel to this name:\n",
-                      "  closures = my_closures");
-      return closures_class;
-    }
-    else
-      mooseError("The closures option '" + closures_option_lc + "' is not registered.");
-  }
-  else
-    mooseError("The closures option '" + closures_option_lc + "' is not registered.");
-}
-
-void
-ThermalHydraulicsApp::registerClosuresOption(const std::string & closures_option,
-                                             const std::string & class_name,
-                                             const THM::FlowModelID & flow_model_id)
-{
-  const std::string closures_option_lc = MooseUtils::toLower(closures_option);
-  _closures_class_names_map[flow_model_id][closures_option_lc] = class_name;
 }
 
 //

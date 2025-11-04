@@ -52,6 +52,7 @@
     type = MatReaction
     variable = eta
     v = w
+    reaction_rate = L
   [../]
 
   [./ACInterface]

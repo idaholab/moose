@@ -12,4 +12,11 @@
     requirement = "The system shall support the ability transfer vectors of post processing data "
                   "between the parent application and sub-applications."
   []
+  [errors]
+    type = RunException
+    input = 'parent.i'
+    cli_args = "MultiApps/sub/cli_args='Postprocessors/send/execute_on=TRANSFER'"
+    expect_err = 'should not be executed on EXEC_TRANSFER, because this transfer has indicated it does not support it'
+    requirement = 'The system shall error if the postprocessors sending data from the multiapp are executed on transfers, as this execution flag is intended to be used in the parent application.'
+  []
 []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,9 +21,17 @@
 #include <tuple>
 #include <type_traits>
 
+// Used in numerous downstream classes without 'libMesh::' prefix
+using libMesh::demangle;
+
 namespace MetaPhysicL
 {
 class LogicError;
+}
+
+namespace hit
+{
+class Node;
 }
 
 // this function allows streaming tuples to ostreams
@@ -79,12 +87,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
   do                                                                                               \
   {                                                                                                \
     if (err != MPI_SUCCESS)                                                                        \
-    {                                                                                              \
-      if (libMesh::global_n_processors() == 1)                                                     \
-        print_trace();                                                                             \
-      libmesh_here();                                                                              \
-      MOOSE_ABORT;                                                                                 \
-    }                                                                                              \
+      moose::internal::mooseErrorRaw("");                                                          \
   } while (0)
 
 #define mooseException(...)                                                                        \
@@ -110,12 +113,7 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
       else                                                                                         \
       {                                                                                            \
         Moose::err << _assert_oss_.str() << std::flush;                                            \
-        if (libMesh::global_n_processors() == 1)                                                   \
-          print_trace();                                                                           \
-        else                                                                                       \
-          libMesh::write_traceout();                                                               \
-        libmesh_here();                                                                            \
-        MOOSE_ABORT;                                                                               \
+        moose::internal::mooseErrorRaw("");                                                        \
       }                                                                                            \
     }                                                                                              \
   } while (0)
@@ -124,6 +122,30 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
 template <typename... Args>
 [[noreturn]] void mooseError(Args &&... args);
 
+/**
+ * Exception to be thrown whenever we have _throw_on_error set and a
+ * mooseError() is emitted.
+ *
+ * Enables adding the context of the hit node from the location in input
+ * associated with the error, which can be used in the MooseServer to
+ * produce diagnostics without parsing messages.
+ */
+class MooseRuntimeError : public std::runtime_error
+{
+public:
+  MooseRuntimeError(const std::string & message, const hit::Node * const node)
+    : runtime_error(message), _node(node)
+  {
+  }
+
+  /// Get the associated hit node, if any
+  const hit::Node * getNode() const { return _node; }
+
+private:
+  /// The associated hit node, if any
+  const hit::Node * const _node;
+};
+
 class MooseVariableFieldBase;
 
 namespace moose
@@ -131,7 +153,7 @@ namespace moose
 
 namespace internal
 {
-inline Threads::spin_mutex moose_stream_lock;
+inline libMesh::Threads::spin_mutex moose_stream_lock;
 
 /// Builds and returns a string of the form:
 ///
@@ -159,7 +181,14 @@ mooseMsgFmt(const std::string & msg, const std::string & title, const std::strin
  */
 std::string mooseMsgFmt(const std::string & msg, const std::string & color);
 
-[[noreturn]] void mooseErrorRaw(std::string msg, const std::string prefix = "");
+/**
+ * Main callback for emitting a moose error.
+ * @param msg The error message
+ * @param prefix Optional prefix to add to every line of the error (for multiapp prefixes)
+ * @param node Optional HIT node to associate with the error, adding file path context
+ */
+[[noreturn]] void
+mooseErrorRaw(std::string msg, const std::string & prefix = "", const hit::Node * node = nullptr);
 
 /**
  * All of the following are not meant to be called directly - they are called by the normal macros
@@ -190,7 +219,7 @@ mooseWarningStream(S & oss, Args &&... args)
     throw std::runtime_error(msg);
 
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
     oss << msg << std::flush;
   }
 }
@@ -206,7 +235,7 @@ mooseUnusedStream(S & oss, Args &&... args)
     throw std::runtime_error(msg);
 
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
     oss << msg << std::flush;
   }
 }
@@ -219,7 +248,7 @@ mooseInfoStreamRepeated(S & oss, Args &&... args)
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Info ***", COLOR_CYAN);
   {
-    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
     oss << msg << std::flush;
   }
 }
@@ -242,23 +271,18 @@ mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args 
   mooseStreamAll(ss, args...);
 
   const auto color = expired ? COLOR_RED : COLOR_YELLOW;
-  std::string msg =
-      print_title
-          ? mooseMsgFmt(
-                ss.str(),
-                "*** Warning, This code is deprecated and will be removed in future versions:",
-                color)
-          : mooseMsgFmt(ss.str(), color);
+  std::string msg = print_title ? mooseMsgFmt(ss.str(), "*** Deprecation Warning ***", color)
+                                : mooseMsgFmt(ss.str(), color);
   oss << msg;
   ss.str("");
   if (Moose::show_trace)
   {
     if (libMesh::global_n_processors() == 1)
-      print_trace(ss);
+      libMesh::print_trace(ss);
     else
       libMesh::write_traceout();
     {
-      Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+      libMesh::Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
       oss << ss.str() << std::endl;
     };
   };

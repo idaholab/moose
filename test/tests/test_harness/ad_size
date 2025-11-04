@@ -2,11 +2,11 @@
   [too_few]
     type = RunApp
     input = good.i
-    min_ad_size = 1000
+    capabilities = 'ad_size>=1000'
   []
   [enough]
     type = RunApp
     input = good.i
-    min_ad_size = 10
+    capabilities = 'ad_size>=10'
   []
 []

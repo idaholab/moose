@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,17 +20,20 @@ registerMooseAction("HeatTransferApp", HeatConductionFV, "add_preconditioning");
 InputParameters
 HeatConductionFV::validParams()
 {
-  InputParameters params = HeatConductionPhysics::validParams();
+  InputParameters params = HeatConductionPhysicsBase::validParams();
   params.addClassDescription(
       "Creates the heat conduction equation discretized with nonlinear finite volume");
 
   // Material properties
   params.addRequiredParam<MooseFunctorName>("thermal_conductivity_functor",
-                                            "Thermal conductivity functor (material property)");
-  params.addParam<MaterialPropertyName>("specific_heat", "cp", "Specific heat  material property");
-  params.addParam<MaterialPropertyName>("density", "density", "Density material property");
-  params.addParamNamesToGroup("thermal_conductivity_functor specific_heat density",
-                              "Thermal properties");
+                                            "Thermal conductivity functor material property");
+  params.addParam<MaterialPropertyName>("specific_heat", "Specific heat material property");
+  params.addParam<MooseFunctorName>("specific_heat_functor", "Specific heat functor");
+  params.addParam<MaterialPropertyName>("density", "Density material property");
+  params.addParam<MooseFunctorName>("density_functor", "Density functor");
+  params.addParamNamesToGroup(
+      "thermal_conductivity_functor specific_heat specific_heat_functor density density_functor",
+      "Thermal properties");
 
   params.addRangeCheckedParam<Real>("temperature_scaling",
                                     1,
@@ -41,8 +44,16 @@ HeatConductionFV::validParams()
 }
 
 HeatConductionFV::HeatConductionFV(const InputParameters & parameters)
-  : HeatConductionPhysics(parameters)
+  : HeatConductionPhysicsBase(parameters)
 {
+  // Not compatible
+  // TODO: we could bake this into a single call
+  checkParamsBothSetOrNotSet("specific_heat_functor", "density_functor");
+  checkParamsBothSetOrNotSet("specific_heat", "density");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat", "density_functor");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat", "specific_heat_functor");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat_functor", "specific_heat");
+  checkSecondParamNotSetIfFirstOneSet("specific_heat_functor", "density");
 }
 
 void
@@ -57,6 +68,7 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVDiffusion";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("coeff") =
         getParam<MooseFunctorName>("thermal_conductivity_functor");
@@ -66,17 +78,52 @@ HeatConductionFV::addFVKernels()
   {
     const std::string kernel_type = "FVCoupledForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
     params.set<MooseFunctorName>("v") = getParam<VariableName>("heat_source_var");
+    if (isParamValid("heat_source_blocks"))
+      params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("heat_source_blocks");
     getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_source", params);
   }
-  if (isTransient())
+  if (isParamValid("heat_source_functor"))
   {
-    const std::string kernel_type = "FVHeatConductionTimeDerivative";
+    const std::string kernel_type = "FVBodyForce";
     InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = _temperature_name;
-    params.applyParameter(parameters(), "specific_heat");
-    params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
+    const auto & functor_name = getParam<MooseFunctorName>("heat_source_functor");
+    if (MooseUtils::parsesToReal(functor_name))
+      params.set<Real>("value") = std::stod(functor_name);
+    else if (getProblem().hasFunction(functor_name))
+      params.set<FunctionName>("function") = functor_name;
+    else if (getProblem().hasPostprocessorValueByName(functor_name))
+      params.set<PostprocessorName>("postprocessor") = functor_name;
+    else
+      paramError("heat_source_functor",
+                 "Unsupported functor type. Consider using 'heat_source_var'.");
+    getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_source_functor", params);
+  }
+  if (shouldCreateTimeDerivative(_temperature_name, _blocks, /*error if already defined*/ false))
+  {
+    const bool use_functors =
+        isParamValid("density_functor") || isParamValid("specific_heat_functor");
+    const std::string kernel_type =
+        use_functors ? "FVFunctorHeatConductionTimeDerivative" : "FVHeatConductionTimeDerivative";
+    InputParameters params = getFactory().getValidParams(kernel_type);
+    assignBlocks(params, _blocks);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+    if (use_functors)
+    {
+      params.set<MooseFunctorName>("specific_heat") =
+          getParam<MooseFunctorName>("specific_heat_functor");
+      params.set<MooseFunctorName>("density") = getParam<MooseFunctorName>("density_functor");
+    }
+    else
+    {
+      params.applyParameter(parameters(), "specific_heat");
+      params.set<MaterialPropertyName>("density_name") = getParam<MaterialPropertyName>("density");
+    }
     getProblem().addFVKernel(kernel_type, prefix() + _temperature_name + "_time", params);
   }
 }
@@ -148,17 +195,61 @@ HeatConductionFV::addFVBCs()
       }
     }
   }
+  if (isParamValid("fixed_convection_boundaries"))
+  {
+    const std::string bc_type = "FVFunctorConvectiveHeatFluxBC";
+    InputParameters params = getFactory().getValidParams(bc_type);
+    params.set<NonlinearVariableName>("variable") = _temperature_name;
+    params.set<bool>("is_solid") = true;
+    params.set<MooseFunctorName>("T_solid") = _temperature_name;
+
+    const auto & convective_boundaries =
+        getParam<std::vector<BoundaryName>>("fixed_convection_boundaries");
+    const auto & boundary_T_fluid =
+        getParam<std::vector<MooseFunctorName>>("fixed_convection_T_fluid");
+    const auto & boundary_htc = getParam<std::vector<MooseFunctorName>>("fixed_convection_htc");
+    // Optimization if all the same
+    if (std::set<MooseFunctorName>(boundary_T_fluid.begin(), boundary_T_fluid.end()).size() == 1 &&
+        std::set<MooseFunctorName>(boundary_htc.begin(), boundary_htc.end()).size() == 1 &&
+        convective_boundaries.size() > 1)
+    {
+      params.set<std::vector<BoundaryName>>("boundary") = convective_boundaries;
+      params.set<MooseFunctorName>("T_bulk") = boundary_T_fluid[0];
+      params.set<MooseFunctorName>("heat_transfer_coefficient") = boundary_htc[0];
+      getProblem().addFVBC(
+          bc_type, prefix() + _temperature_name + "_fixed_convection_bc_all", params);
+    }
+    else
+    {
+      for (const auto i : index_range(convective_boundaries))
+      {
+        params.set<std::vector<BoundaryName>>("boundary") = {convective_boundaries[i]};
+        params.set<MooseFunctorName>("T_bulk") = boundary_T_fluid[i];
+        params.set<MooseFunctorName>("heat_transfer_coefficient") = boundary_htc[i];
+        getProblem().addFVBC(bc_type,
+                             prefix() + _temperature_name + "_fixed_convection_bc_" +
+                                 convective_boundaries[i],
+                             params);
+      }
+    }
+  }
 }
 
 void
-HeatConductionFV::addNonlinearVariables()
+HeatConductionFV::addSolverVariables()
 {
-  if (nonlinearVariableExists(_temperature_name, /*error_if_aux=*/true))
+  if (!shouldCreateVariable(_temperature_name, _blocks, /*error if aux*/ true))
+  {
+    reportPotentiallyMissedParameters({"system_names", "temperature_scaling"},
+                                      "MooseVariableFVReal");
     return;
+  }
 
   const std::string variable_type = "MooseVariableFVReal";
   InputParameters params = getFactory().getValidParams(variable_type);
+  assignBlocks(params, _blocks);
   params.set<std::vector<Real>>("scaling") = {getParam<Real>("temperature_scaling")};
+  params.set<SolverSystemName>("solver_sys") = getSolverSystem(_temperature_name);
 
   getProblem().addVariable(variable_type, _temperature_name, params);
 }

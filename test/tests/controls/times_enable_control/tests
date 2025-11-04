@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#28141'
+  design = 'TimesEnableControl.md'
+  [times_to_hit]
+    type = CSVDiff
+    input = times_enable.i
+    csvdiff = times_enable_out.csv
+    requirement = "The system shall be able to enable/disable an object based on whether the "
+                  "simulation time hits the times specified in a times object."
+    allow_test_objects = true
+  []
+  [times_to_pass]
+    type = CSVDiff
+    input = times_enable.i
+    cli_args = "Times/times_on/times='0 1 4.5 7.5 9.5'"
+    csvdiff = times_enable_out.csv
+    requirement = "The system shall be able to enable/disable an object based on whether the "
+                  "simulation time passes the times specified in a times object."
+    allow_test_objects = true
+    prereq = 'times_to_hit'
+  []
+[]

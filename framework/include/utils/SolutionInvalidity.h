@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -34,7 +34,7 @@ class VariadicTable;
  * The SolutionInvalidity will contain all the information about the occurrence(s) of solution
  * invalidity
  */
-class SolutionInvalidity : protected ConsoleStreamInterface, public ParallelObject
+class SolutionInvalidity : protected ConsoleStreamInterface, public libMesh::ParallelObject
 {
 public:
   using SolutionInvalidityRegistry = moose::internal::SolutionInvalidityRegistry;
@@ -45,10 +45,28 @@ public:
   SolutionInvalidity(MooseApp & app);
 
   /// Increments solution invalid occurrences for each solution id
-  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
+  void flagInvalidSolutionInternal(const InvalidSolutionID _invalid_solution_id);
 
-  /// Loop over all the tracked objects and determine whether solution invalid is detected
-  bool solutionInvalid() const;
+  /**
+   * Whether or not an invalid solution was encountered that was a warning.
+   *
+   * This must be called after a sync.
+   */
+  bool hasInvalidSolutionWarning() const;
+
+  /**
+   * Whether or not an invalid solution was encountered that was an error.
+   *
+   * This must be called after a sync.
+   */
+  bool hasInvalidSolutionError() const;
+
+  /**
+   * Whether or not any invalid solution was encountered (error or warning).
+   *
+   * This must be called after a sync.
+   */
+  bool hasInvalidSolution() const;
 
   /// Reset the number of solution invalid occurrences back to zero for the current time step
   void resetSolutionInvalidTimeStep();
@@ -60,14 +78,27 @@ public:
   void solutionInvalidAccumulation();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
-  void solutionInvalidAccumulationTimeStep();
+  void solutionInvalidAccumulationTimeStep(const unsigned int timestep_index);
+
+  /// Compute the total number of solution invalid occurrences
+  void computeTotalCounts();
+
+  /// Struct used in InvalidCounts for storing the time history of invalid occurrences
+  struct TimestepCounts
+  {
+    TimestepCounts() : timestep_index(std::numeric_limits<unsigned int>::max()) {}
+    TimestepCounts(unsigned int timestep_index) : timestep_index(timestep_index) {}
+    unsigned int timestep_index;
+    unsigned int counts = 0;
+  };
 
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {
-    unsigned int counts;
-    unsigned int timestep_counts;
-    unsigned int total_counts;
+    unsigned int current_counts = 0;
+    unsigned int current_timestep_counts = 0;
+    unsigned int total_counts = 0;
+    std::vector<TimestepCounts> timestep_counts;
   };
 
   /// Access the private solution invalidity counts
@@ -80,11 +111,20 @@ public:
   void print(const ConsoleStream & console) const;
 
   /**
+   * Print the time history table of Solution Invalid warnings
+   * @param console The output stream to output to
+   */
+  void printHistory(const ConsoleStream & console, unsigned int & timestep_interval_size) const;
+
+  /**
    * Immediately print the section and message for debug purpose
    */
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
-  void sync();
+  /**
+   * Sync iteration counts to main processor
+   */
+  void syncIteration();
 
   friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
   friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
@@ -104,13 +144,31 @@ private:
   /// Build a VariadicTable for solution invalidity
   FullTable summaryTable() const;
 
+  typedef VariadicTable<std::string, std::string, unsigned long int, unsigned long int> TimeTable;
+
+  /// Build a VariadicTable for solution invalidity history
+  TimeTable transientTable(unsigned int & time_interval) const;
+
   /// Create a registry to keep track of the names and occurrences of the solution invalidity
   SolutionInvalidityRegistry & _solution_invalidity_registry;
 
   /// Store the solution invalidity counts
   std::vector<InvalidCounts> _counts;
+
+  /// Whether or not we've synced (can check counts/existance of warnings or errors)
+  bool _has_synced;
+  /// Whether or not we have a warning (only after a sync)
+  bool _has_solution_warning;
+  /// Whether or not we have an invalid solution (only after a sync)
+  bool _has_solution_error;
 };
 
 // datastore and dataload for recover
+void dataStore(std::ostream & stream,
+               SolutionInvalidity::TimestepCounts & timestep_counts,
+               void * context);
+void dataLoad(std::istream & stream,
+              SolutionInvalidity::TimestepCounts & timestep_counts,
+              void * context);
 void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context);
 void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context);

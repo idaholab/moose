@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Material.h"
-#include "HomogenizationConstraint.h"
+#include "HomogenizationInterface.h"
 
 /// Calculate the tensor corresponding to homogenization gradient
 ///
@@ -18,7 +18,7 @@
 /// constant deformation gradient over the domain and casts it into
 /// a RankTwo material property
 ///
-class ComputeHomogenizedLagrangianStrain : public Material
+class ComputeHomogenizedLagrangianStrain : public HomogenizationInterface<Material>
 {
 public:
   static InputParameters validParams();
@@ -30,12 +30,6 @@ protected:
 protected:
   /// The base name for material properties
   const std::string _base_name;
-
-  /// The homogenization constraint userobject
-  const HomogenizationConstraint & _constraint;
-
-  /// Constraint map
-  const Homogenization::ConstraintMap & _cmap;
 
   /// ScalarVariable with the field
   const VariableValue & _macro_gradient;

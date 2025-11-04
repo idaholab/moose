@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,8 +10,10 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "RhieChowMassFlux.h"
-#include "LinearFVAdvectionDiffusionBC.h"
+
+class RhieChowMassFlux;
+class LinearFVBoundaryCondition;
+class LinearFVAdvectionDiffusionBC;
 
 /**
  * Kernel that implements the stress tensor and advection terms for the momentum
@@ -106,6 +108,10 @@ protected:
   /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _face_mass_flux;
+
+  /// Multiplier that ensures the normal of the boundary always points outwards, even in cases
+  /// when the boundary is within the mesh.
+  Real _boundary_normal_factor;
 
   /// The cached matrix contribution
   Real _stress_matrix_contribution;

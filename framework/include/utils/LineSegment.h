@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,6 @@
 #pragma once
 
 // MOOSE includes
-#include "Moose.h" // using namespace libMesh
 #include "DataIO.h"
 
 #include "json.h"
@@ -53,7 +52,7 @@ public:
    */
   bool contains_point(const Point & p) const;
 
-  bool intersect(const Plane & pl, Point & intersect_p) const;
+  bool intersect(const libMesh::Plane & pl, Point & intersect_p) const;
 
   bool intersect(const LineSegment & l1, Point & intersect_p) const;
 

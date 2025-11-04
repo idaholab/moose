@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #include "MooseError.h"
 #include "Axisymmetric2D3DSolutionFunction.h"
-#include "SolutionUserObject.h"
+#include "SolutionUserObjectBase.h"
 
 registerMooseObject("MooseApp", Axisymmetric2D3DSolutionFunction);
 
@@ -107,7 +107,7 @@ Axisymmetric2D3DSolutionFunction::initialSetup()
   // Get a pointer to the SolutionUserObject. A pointer is used because the UserObject is not
   // available during the
   // construction of the function
-  _solution_object_ptr = &getUserObject<SolutionUserObject>("solution");
+  _solution_object_ptr = &getUserObject<SolutionUserObjectBase>("solution");
 
   // If 'from_variable' is not specified, get the value from the SolutionUserObject
   if (_var_names.size() == 0)

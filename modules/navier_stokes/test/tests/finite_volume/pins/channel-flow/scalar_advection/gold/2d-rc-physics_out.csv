@@ -1,0 +1,3 @@
+time,inlet-momx,inlet-scalar,inlet-u,mid-scalar,outlet-momx,outlet-scalar,outlet-u
+0,0,0,0,0,0,0,0
+1,-1,-2,-1,4.875,1,9,1

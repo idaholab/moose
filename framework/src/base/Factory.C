@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 #include "Registry.h"
 #include "InfixIterator.h"
 #include "InputParameterWarehouse.h"
+#include "FEProblemBase.h"
 // Just for testing...
 #include "Diffusion.h"
 
@@ -77,9 +78,50 @@ Factory::getValidParams(const std::string & obj_name) const
 
   // Return the parameters
   auto params = it->second->buildParameters();
-  params.addPrivateParam("_moose_app", &_app);
+  params.addPrivateParam(MooseBase::app_param, &_app);
 
   return params;
+}
+
+template <class ptr_type>
+ptr_type
+Factory::createTempl(const std::string & obj_name,
+                     const std::string & name,
+                     const InputParameters & parameters,
+                     const THREAD_ID tid,
+                     const std::optional<std::string> & deprecated_method_name)
+{
+  static_assert(std::is_same_v<ptr_type, std::unique_ptr<MooseObject>> ||
+                    std::is_same_v<ptr_type, std::shared_ptr<MooseObject>>,
+                "Invalid ptr_type");
+
+  if (deprecated_method_name)
+  {
+    const std::string name = "Factory::" + *deprecated_method_name;
+    mooseDeprecated(name + "() is deprecated, please use name" + "<T>() instead");
+  }
+
+  // Build the parameters that are stored in the InputParameterWarehouse for this
+  // object, set a few other things and do a little error checking
+  auto & warehouse_params = initialize(obj_name, name, parameters, tid);
+
+  // Mark that we're constructing this object
+  _currently_constructing.push_back(&warehouse_params);
+
+  // Construct the object
+  auto & registry_entry = *_name_to_object.at(obj_name);
+  ptr_type obj;
+  if constexpr (std::is_same_v<ptr_type, std::unique_ptr<MooseObject>>)
+    obj = registry_entry.build(warehouse_params);
+  else
+    obj = registry_entry.buildShared(warehouse_params);
+
+  // Done constructing the object
+  _currently_constructing.pop_back();
+
+  finalize(obj_name, *obj);
+
+  return obj;
 }
 
 std::unique_ptr<MooseObject>
@@ -89,21 +131,11 @@ Factory::createUnique(const std::string & obj_name,
                       THREAD_ID tid /* =0 */,
                       bool print_deprecated /* =true */)
 {
+  std::optional<std::string> deprecated_method_name;
   if (print_deprecated)
-    mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
-
-  // Build the parameters that are stored in the InputParameterWarehouse for this
-  // object, set a few other things and do a little error checking
-  auto & warehouse_params = initialize(obj_name, name, parameters, tid);
-
-  // call the function pointer to build the object
-  _currently_constructing.push_back(&warehouse_params);
-  auto obj = _name_to_object.at(obj_name)->build(warehouse_params);
-  _currently_constructing.pop_back();
-
-  finalize(obj_name, *obj);
-
-  return obj;
+    deprecated_method_name = "createUnique";
+  return createTempl<std::unique_ptr<MooseObject>>(
+      obj_name, name, parameters, tid, deprecated_method_name);
 }
 
 std::shared_ptr<MooseObject>
@@ -113,13 +145,11 @@ Factory::create(const std::string & obj_name,
                 THREAD_ID tid /* =0 */,
                 bool print_deprecated /* =true */)
 {
-  std::shared_ptr<MooseObject> object =
-      createUnique(obj_name, name, parameters, tid, print_deprecated);
-
-  if (auto fep = std::dynamic_pointer_cast<FEProblemBase>(object))
-    _app.actionWarehouse().problemBase() = fep;
-
-  return object;
+  std::optional<std::string> deprecated_method_name;
+  if (print_deprecated)
+    deprecated_method_name = "create";
+  return createTempl<std::shared_ptr<MooseObject>>(
+      obj_name, name, parameters, tid, deprecated_method_name);
 }
 
 void
@@ -305,8 +335,8 @@ Factory::initialize(const std::string & type,
     if (const auto hit_node = _app.getCurrentActionHitNode())
       params.setHitNode(*hit_node, {});
 
-  // Set the _type parameter
-  params.set<std::string>("_type") = type;
+  // Set the type parameter
+  params.set<std::string>(MooseBase::type_param) = type;
 
   // Check to make sure that all required parameters are supplied
   params.finalize(name);
@@ -353,3 +383,17 @@ Factory::finalize(const std::string & type, const MooseObject & object)
     }
   }
 }
+
+// Explicit instantiation for Factory::createTempl
+template std::unique_ptr<MooseObject>
+Factory::createTempl<std::unique_ptr<MooseObject>>(const std::string &,
+                                                   const std::string &,
+                                                   const InputParameters &,
+                                                   const THREAD_ID,
+                                                   const std::optional<std::string> &);
+template std::shared_ptr<MooseObject>
+Factory::createTempl<std::shared_ptr<MooseObject>>(const std::string &,
+                                                   const std::string &,
+                                                   const InputParameters &,
+                                                   const THREAD_ID,
+                                                   const std::optional<std::string> &);

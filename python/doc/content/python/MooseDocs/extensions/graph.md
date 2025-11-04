@@ -9,14 +9,14 @@ sections. [plotly-ext-config] lists the configuration options for the extension.
                 id=plotly-ext-config
                 caption=Available configuration options for the `PlotlyExtension` object.
 
-The syntax for the support chart types is defined in a manner that allows for all [plotly]
+The syntax for the supported chart types is defined in a manner that allows for all [plotly]
 settings to be available for defining the data as well as the chart layout. For a complete list
 of available options refer to the [reference manual](https://plot.ly/javascript/reference).
 
 
 ## Scatter and Line Plots
 
-[Scatter and line](https://plot.ly/javascript/line-and-scatter/) plots are create with the
+[Scatter and line](https://plot.ly/javascript/line-and-scatter/) plots are created with the
 `scatter` sub-command. As shown in the [plotly] documentation the plot command accepts
 a single JSON data structure that contains the data and settings for each line. For simplicity
 and to remain consistent with the library this same data structure is used within MooseDocs,

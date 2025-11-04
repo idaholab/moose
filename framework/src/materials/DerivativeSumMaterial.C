@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,8 +24,7 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
                                             "Base name of the parsed sum material property");
 
   // All arguments of the parsed expression (free energy) being summed
-  params.addRequiredCoupledVar("args", "Vector of names of variables being summed");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+  params.addRequiredCoupledVar("coupled_variables", "Vector of names of variables being summed");
 
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "

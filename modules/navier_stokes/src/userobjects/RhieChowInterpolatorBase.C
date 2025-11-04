@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,24 +22,13 @@
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"
 
-#include "libmesh/mesh_base.h"
-#include "libmesh/elem_range.h"
-#include "libmesh/parallel_algebra.h"
-#include "libmesh/remote_elem.h"
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
-#include "timpi/parallel_sync.h"
-
 using namespace libMesh;
 
 InputParameters
 RhieChowInterpolatorBase::validParams()
 {
-  auto params = GeneralUserObject::validParams();
+  auto params = RhieChowFaceFluxProvider::validParams();
   params += TaggingInterface::validParams();
-  params += BlockRestrictable::validParams();
   params += ADFunctorInterface::validParams();
 
   params.addClassDescription(
@@ -64,9 +53,8 @@ RhieChowInterpolatorBase::validParams()
 }
 
 RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & params)
-  : GeneralUserObject(params),
+  : RhieChowFaceFluxProvider(params),
     TaggingInterface(this),
-    BlockRestrictable(this),
     ADFunctorInterface(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
@@ -85,7 +73,6 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _us(libMesh::n_threads(), nullptr),
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _displaced(dynamic_cast<DisplacedProblem *>(&(UserObject::_subproblem)))
 {
   if (!_p)
@@ -142,11 +129,12 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _velocity_interp_method = Moose::FV::InterpMethod::RhieChow;
 }
 
-bool
-RhieChowInterpolatorBase::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+Real
+RhieChowInterpolatorBase::getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
+                                                const FaceInfo & fi,
+                                                const Moose::StateArg & time,
+                                                const THREAD_ID tid,
+                                                bool subtract_mesh_velocity) const
 {
-  if (fi_elem_side)
-    return hasBlocks(fi.elem().subdomain_id());
-  else
-    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
+  return raw_value(this->getVelocity(m, fi, time, tid, subtract_mesh_velocity)) * fi.normal();
 }

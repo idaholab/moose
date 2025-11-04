@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,8 @@
 #include "AddVariableAction.h"
 
 #include "libmesh/string_to_enum.h"
+
+using namespace libMesh;
 
 registerMooseAction("PhaseFieldApp", ConservedAction, "add_variable");
 
@@ -49,8 +51,8 @@ ConservedAction::validParams()
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addRequiredParam<MaterialPropertyName>("mobility", "The mobility used with the kernel");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this kernel depends on");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments this kernel depends on");
 
   params.addRequiredParam<MaterialPropertyName>(
       "free_energy", "Base name of the free energy function F defined in a free energy material");

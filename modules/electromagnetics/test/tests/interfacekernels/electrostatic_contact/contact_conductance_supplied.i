@@ -28,9 +28,6 @@
     input = create_interface
     block = 3
   []
-[]
-
-[Problem]
   coord_type = RZ
 []
 

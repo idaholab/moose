@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -242,4 +242,14 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
               _kappa_var_ptr->dofIndices(),
               svar.dofIndices(),
               _kappa_var_ptr->scalingFactor());
+}
+
+void
+KernelScalarBase::computeResidualAndJacobian()
+{
+  Kernel::computeResidualAndJacobian(); // compute and assemble regular variable contributions
+
+  if (_is_implicit)
+    for (const auto * jvar : getCoupledMooseScalarVars())
+      computeOffDiagJacobianScalar(jvar->number());
 }

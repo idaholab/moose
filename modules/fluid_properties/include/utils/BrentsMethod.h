@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,10 +11,18 @@
 
 // MOOSE includes
 #include "Moose.h"
+#include "MooseTypes.h"
 
 // C++ includes
 #include <functional>
 
+/**
+ * Brent's method is used to find the root of a function f(x), i.e., find
+ * x such that f(x) = 0.
+ *
+ * First, brackets x1 and x2 are found such that f(x) changes sign between
+ * x1 and x2, implying that there is a root between the points.
+ */
 namespace BrentsMethod
 {
 /**

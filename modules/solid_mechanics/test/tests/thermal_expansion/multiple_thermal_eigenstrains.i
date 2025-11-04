@@ -123,7 +123,7 @@
     poissons_ratio = 0.3
   [../]
   [./small_strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     eigenstrain_names = 'eigenstrain1 eigenstrain2'
   [../]
   [./small_stress]

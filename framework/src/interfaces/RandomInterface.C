@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,7 +32,7 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
   : _random_data(nullptr),
     _generator(nullptr),
     _ri_problem(problem),
-    _ri_name(parameters.get<std::string>("_object_name")),
+    _ri_name(parameters.getObjectName()),
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
     _reset_on(EXEC_LINEAR),
@@ -40,6 +40,21 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
     _curr_element(problem.assembly(tid, 0).elem())
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+RandomInterface::RandomInterface(const RandomInterface & object, const Moose::Kokkos::FunctorCopy &)
+  : _random_data(object._random_data),
+    _generator(object._generator),
+    _ri_problem(object._ri_problem),
+    _ri_name(object._ri_name),
+    _master_seed(object._master_seed),
+    _is_nodal(object._is_nodal),
+    _reset_on(object._reset_on),
+    _curr_node(object._curr_node),
+    _curr_element(object._curr_element)
+{
+}
+#endif
 
 RandomInterface::~RandomInterface() {}
 

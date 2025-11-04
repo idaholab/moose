@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -55,3 +55,13 @@ typedef ProjectedStatefulMaterialAuxTempl<RankFourTensor, false>
     ProjectedStatefulMaterialRankFourTensorAux;
 typedef ProjectedStatefulMaterialAuxTempl<RankFourTensor, true>
     ADProjectedStatefulMaterialRankFourTensorAux;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class ProjectedStatefulMaterialAuxTempl<Real, false>;
+extern template class ProjectedStatefulMaterialAuxTempl<Real, true>;
+extern template class ProjectedStatefulMaterialAuxTempl<RealVectorValue, false>;
+extern template class ProjectedStatefulMaterialAuxTempl<RealVectorValue, true>;
+extern template class ProjectedStatefulMaterialAuxTempl<RankTwoTensor, false>;
+extern template class ProjectedStatefulMaterialAuxTempl<RankTwoTensor, true>;
+extern template class ProjectedStatefulMaterialAuxTempl<RankFourTensor, false>;
+extern template class ProjectedStatefulMaterialAuxTempl<RankFourTensor, true>;

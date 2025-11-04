@@ -17,6 +17,7 @@
     exodiff = 'ad_power_law_substepping_out.e'
     valgrind = HEAVY
     requirement = 'The system shall converge under large deformation owing to the help of substepping using automatic differentiation'
+    capabilities = 'method!=dbg'
   []
   [ad_power_law_adaptive_substepping_increment]
     # We only check that the simulation converges with adaptive substepping

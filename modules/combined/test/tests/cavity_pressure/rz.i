@@ -28,16 +28,13 @@
 #
 # At t = 1, p = 200.
 
-[Problem]
-  coord_type = RZ
-[]
-
 [GlobalParams]
   displacements = 'disp_r disp_z'
 []
 
 [Mesh]
   file = rz.e
+  coord_type = RZ
 []
 
 [Functions]

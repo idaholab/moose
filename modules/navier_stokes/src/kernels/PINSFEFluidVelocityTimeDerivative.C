@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,8 @@ PINSFEFluidVelocityTimeDerivative::validParams()
   params.addRequiredCoupledVar("pressure", "coupled pressure");
   params.addRequiredCoupledVar("temperature", "coupled temperature");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
+  params.addClassDescription("Add the transient term for one component of the porous media "
+                             "momentum conservation equation");
 
   return params;
 }

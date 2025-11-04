@@ -33,12 +33,9 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = gravity_rz_test.e
+  coord_type = RZ
 []
 
 [Variables]
@@ -48,7 +45,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master/All]
+[Physics/SolidMechanics/QuasiStatic/All]
   volumetric_locking_correction = true
   strain = FINITE
   add_variables = true

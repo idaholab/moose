@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -164,15 +164,27 @@ LinearFVDiffusion::computeBoundaryRHSContribution(const LinearFVBoundaryConditio
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction)
-  {
-    const auto correction_vector =
-        _current_face_info->normal() -
-        1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
+  // This should only be used for BCs where the gradient of the value is computed and
+  // not prescribed.
 
-    grad_contrib += _diffusion_coeff(face_arg, determineState()) *
-                    _var.gradSln(*_current_face_info->elemInfo()) * correction_vector *
-                    _current_face_area;
+  if (_use_nonorthogonal_correction && diff_bc->useBoundaryGradientExtrapolation())
+  {
+    // We support internal boundaries as well. In that case we have to decide on which side
+    // of the boundary we are on.
+    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                               ? _current_face_info->elemInfo()
+                               : _current_face_info->neighborInfo();
+    const Real boundary_normal_multiplier =
+        (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
+
+    // Unit vector to the boundary. Unfortunately, we have to recompute it because the value
+    // stored in the face info is only correct for external boundaries
+    const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
+    const auto correction_vector =
+        _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
+
+    grad_contrib += _diffusion_coeff(face_arg, determineState()) * _var.gradSln(*elem_info) *
+                    boundary_normal_multiplier * correction_vector * _current_face_area;
   }
 
   return grad_contrib;

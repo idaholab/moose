@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -30,4 +30,6 @@ InputPositions::InputPositions(const InputParameters & parameters) : Positions(p
 {
   _positions = getParam<std::vector<Point>>("positions");
   _initialized = true;
+  // Sort (if requested) and create KDTree
+  finalize();
 }

@@ -316,3 +316,17 @@ class DAG(object):
         if dep_node not in graph.get(ind_node, []):
             return
         graph[ind_node].remove(dep_node)
+
+    # Added by the MOOSE group
+    def is_dependency(self, ind_node, dep_node, graph=None):
+        """ Returns whether or not dep_node depends on ind_node """
+        if not graph:
+            graph = self.graph
+
+        deps = graph[ind_node]
+        if dep_node in deps:
+            return True
+        for node in deps:
+            if self.is_dependency(node, dep_node, graph=graph):
+                return True
+        return False

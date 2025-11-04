@@ -193,6 +193,7 @@
     primary = base_front
     secondary = ball_back
     penalty = 1.0e3
+    verbose = true
   []
 []
 
@@ -210,7 +211,7 @@
     block = 2
   []
   [strain_block]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y disp_z'
     implicit = false
   []

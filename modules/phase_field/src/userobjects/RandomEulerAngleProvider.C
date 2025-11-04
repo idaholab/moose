@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,7 +26,7 @@ RandomEulerAngleProvider::validParams()
 RandomEulerAngleProvider::RandomEulerAngleProvider(const InputParameters & params)
   : EulerAngleProvider(params),
     _grain_tracker(getUserObject<GrainTrackerInterface>("grain_tracker_object")),
-    _angles(0)
+    _angles(declareRestartableData<std::vector<EulerAngles>>("random_angles", 0))
 {
   _random.seed(0, getParam<unsigned int>("seed"));
 }

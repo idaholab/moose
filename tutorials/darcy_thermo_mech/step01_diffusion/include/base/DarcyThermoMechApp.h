@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,7 +16,7 @@ class DarcyThermoMechApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  DarcyThermoMechApp(InputParameters parameters);
+  DarcyThermoMechApp(const InputParameters & parameters);
 
   static void registerApps();
   static void registerAll(Factory & factory, ActionFactory & action_factory, Syntax & syntax);

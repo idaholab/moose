@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -70,7 +70,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::prepareEvaluationOfInterpValues(
 
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
-    const unsigned int var_index, std::vector<MeshFunction> & local_meshfuns)
+    const unsigned int var_index, std::vector<libMesh::MeshFunction> & local_meshfuns)
 {
   local_meshfuns.reserve(_from_problems.size());
 
@@ -108,7 +108,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValues(
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctions(
     const std::vector<BoundingBox> & local_bboxes,
-    std::vector<MeshFunction> & local_meshfuns,
+    std::vector<libMesh::MeshFunction> & local_meshfuns,
     const std::vector<std::pair<Point, unsigned int>> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
@@ -143,7 +143,13 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but for shape evaluation we really do expect only one value to even be valid
         if (detectConflict(val, outgoing_vals[i_pt].first, distance, outgoing_vals[i_pt].second))
-          registerConflict(i_from, 0, local_pt, distance, true);
+        {
+          // In the nearest-position/app mode, we save conflicts in the reference frame
+          if (_nearest_positions_obj)
+            registerConflict(i_from, 0, pt, distance, true);
+          else
+            registerConflict(i_from, 0, local_pt, distance, true);
+        }
 
         // No need to consider decision factors if value is invalid
         if (val == GeneralFieldTransfer::BetterOutOfMeshValue)

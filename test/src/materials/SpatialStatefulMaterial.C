@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -46,7 +46,8 @@ SpatialStatefulMaterial::computeQpProperties()
 {
 #ifndef NDEBUG
   if (_t_step == 1 && !MooseUtils::absoluteFuzzyEqual(_diffusivity_old[_qp], _initial_diffusivity))
-    mooseError("stateful properties have not been properly intialized!");
+    mooseError(std::string(_bnd ? "Boundary " : "") +
+               "stateful properties have not been properly intialized!");
 #endif
   _diffusivity[_qp] = _diffusivity_old[_qp] + _q_point[_qp](0) + _q_point[_qp](1);
 }

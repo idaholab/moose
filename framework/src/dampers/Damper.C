@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,7 @@ Damper::validParams()
   InputParameters params = MooseObject::validParams();
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("Damper");
+  params.registerSystemAttributeName("Damper");
   params.addParam<Real>("min_damping",
                         0.0,
                         "Minimum value of computed damping. Damping lower than "

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #include "VolumetricFlowRate.h"
 #include "MathFVUtils.h"
-#include "INSFVRhieChowInterpolator.h"
+#include "RhieChowInterpolatorBase.h"
 #include "NSFVUtils.h"
 
 #include <cmath>
@@ -38,6 +38,9 @@ VolumetricFlowRate::validParams()
                                     "set the advected quantity when finite volume is being used.");
   params += Moose::FV::interpolationParameters();
   params.addParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
+  params.addParam<bool>("subtract_mesh_velocity",
+                        "To subtract the velocity of the potentially moving mesh. Defaults to true "
+                        "if a displaced problem exists, else false.");
   return params;
 }
 
@@ -53,8 +56,11 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _adv_quant(isParamValid("advected_quantity") ? &getFunctor<ADReal>("advected_quantity")
                                                  : nullptr),
     _rc_uo(isParamValid("rhie_chow_user_object")
-               ? &getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object")
-               : nullptr)
+               ? &getUserObject<RhieChowFaceFluxProvider>("rhie_chow_user_object")
+               : nullptr),
+    _subtract_mesh_velocity(isParamValid("subtract_mesh_velocity")
+                                ? getParam<bool>("subtract_mesh_velocity")
+                                : _fe_problem.haveDisplaced())
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -84,27 +90,37 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
 
     Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   }
+
+  if (_subtract_mesh_velocity && _rc_uo && !_rc_uo->supportMeshVelocity())
+    paramError("subtract_mesh_velocity",
+               "Rhie Chow user object does not support subtracting the mesh velocity");
+  if (_subtract_mesh_velocity && !_fe_problem.haveDisplaced())
+    paramError(
+        "subtract_mesh_velocity",
+        "No displaced problem, thus the mesh velocity is 0 and does not need to be subtracted");
 }
 
 void
 VolumetricFlowRate::initialSetup()
 {
-  if (_rc_uo && _rc_uo->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
-      !_rc_uo->segregated())
+  const auto * rc_base = dynamic_cast<const RhieChowInterpolatorBase *>(_rc_uo);
+  if (_rc_uo && rc_base &&
+      rc_base->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow &&
+      !rc_base->segregated())
   {
     // We must make sure the A coefficients in the Rhie Chow interpolator are present on
     // both sides of the boundaries so that interpolation coefficients may be computed
     for (const auto bid : boundaryIDs())
-      const_cast<RhieChowInterpolatorBase *>(_rc_uo)->ghostADataOnBoundary(bid);
+      const_cast<RhieChowInterpolatorBase *>(rc_base)->ghostADataOnBoundary(bid);
 
     // On INITIAL, we cannot compute Rhie Chow coefficients on internal surfaces because
     // - the time integrator is not ready to compute time derivatives
     // - the setup routine is called too early for porosity functions to be initialized
     // We must check that the boundaries requested are all external
-    if (getExecuteOnEnum().contains(EXEC_INITIAL))
+    if (getExecuteOnEnum().isValueSet(EXEC_INITIAL))
       for (const auto bid : boundaryIDs())
       {
-        if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, _rc_uo->blockIDs()))
+        if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, rc_base->blockIDs()))
           paramError(
               "execute_on",
               "Boundary '",
@@ -131,8 +147,8 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   const auto state = determineState();
 
   // Get face value for velocity
-  const auto vel = MetaPhysicL::raw_value(_rc_uo->getVelocity(
-      _velocity_interp_method, *fi, state, _tid, /*subtract_mesh_velocity=*/true));
+  const auto face_flux = MetaPhysicL::raw_value(_rc_uo->getVolumetricFaceFlux(
+      _velocity_interp_method, *fi, state, _tid, _subtract_mesh_velocity));
 
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
@@ -145,11 +161,12 @@ VolumetricFlowRate::computeFaceInfoIntegral(const FaceInfo * fi)
   const auto adv_quant_face = MetaPhysicL::raw_value(
       (*_adv_quant)(Moose::FaceArg({fi,
                                     Moose::FV::limiterType(_advected_interp_method),
-                                    MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                                    face_flux > 0,
                                     correct_skewness,
-                                    elem}),
+                                    elem,
+                                    nullptr}),
                     state));
-  return fi->normal() * adv_quant_face * vel;
+  return face_flux * adv_quant_face;
 }
 
 Real

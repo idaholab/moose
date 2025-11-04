@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseConfig.h"
 #ifdef MOOSE_HAVE_LIBPNG
 
 #include <fstream>
@@ -106,13 +105,13 @@ PNGOutput::makeMeshFunc()
 
   // Set up the mesh_function
   if (_nl_sys_num == libMesh::invalid_uint)
-    _mesh_function =
-        std::make_unique<MeshFunction>(*_es_ptr,
-                                       _problem_ptr->getAuxiliarySystem().serializedSolution(),
-                                       _problem_ptr->getAuxiliarySystem().dofMap(),
-                                       var_nums);
+    _mesh_function = std::make_unique<libMesh::MeshFunction>(
+        *_es_ptr,
+        _problem_ptr->getAuxiliarySystem().serializedSolution(),
+        _problem_ptr->getAuxiliarySystem().dofMap(),
+        var_nums);
   else
-    _mesh_function = std::make_unique<MeshFunction>(
+    _mesh_function = std::make_unique<libMesh::MeshFunction>(
         *_es_ptr,
         _problem_ptr->getNonlinearSystem(_nl_sys_num).serializedSolution(),
         _problem_ptr->getNonlinearSystem(_nl_sys_num).dofMap(),

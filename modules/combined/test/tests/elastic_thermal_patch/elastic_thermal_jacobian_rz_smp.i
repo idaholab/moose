@@ -6,12 +6,9 @@
   volumetric_locking_correction = true
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = elastic_thermal_patch_rz_test.e
+  coord_type = RZ
 []
 
 [Functions]
@@ -44,9 +41,9 @@
   [../]
 []
 
-[Modules]
-    [TensorMechanics]
-        [Master]
+[Physics]
+    [SolidMechanics]
+        [QuasiStatic]
             displacements = 'disp_x disp_y'
             [All]
                 displacements = 'disp_x disp_y'

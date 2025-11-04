@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#29667'
+  design = 'THMMesh.md'
+  [no_components_and_mesh]
+    type = 'RunException'
+    input = 'test.i'
+    requirement = 'The system shall error if using both a regular mesh, usually created in the Mesh syntax, and components, usually created in the Components syntax.'
+    expect_err = "The Components block cannot be used to add a Component in conjunction with the Mesh block at this time"
+  []
+[]

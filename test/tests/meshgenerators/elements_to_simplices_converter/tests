@@ -1,0 +1,80 @@
+[Tests]
+  design = 'meshgenerators/ElementsToSimplicesConverter.md'
+  issues = '#26579'
+  [test]
+    requirement = "The system shall be able to "
+    [simple_hex_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_hex_convert_in.e'
+      cli_args = '--mesh-only simple_hex_convert_in.e 
+                  Mesh/gmg/elem_type=HEX8'
+      recover = false
+      detail ='convert a 3D mesh consisting of only HEX8 elements.'
+    []
+# libMesh all_tri() only has first-order support for hexes
+#    [second_order_hex_convert]
+#      type = 'Exodiff'
+#      input = 'simple_convert.i'
+#      exodiff = 'second_order_hex_convert_in.e'
+#      cli_args = '--mesh-only second_order_hex_convert_in.e 
+#                  Mesh/gmg/elem_type=HEX27'
+#      recover = false
+#      detail ='convert a 3D mesh consisting of only HEX27 elements.'
+#    []
+    [simple_prism_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_prism_convert_in.e'
+      cli_args = '--mesh-only simple_prism_convert_in.e 
+                  Mesh/gmg/elem_type=PRISM6'
+      recover = false
+      detail ='convert a 3D mesh consisting of only PRISM6 elements.'
+    []
+    [second_order_prism_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'second_order_prism_convert_in.e'
+      cli_args = '--mesh-only second_order_prism_convert_in.e 
+                  Mesh/gmg/elem_type=PRISM18'
+      recover = false
+      detail ='convert a 3D mesh consisting of only PRISM18 elements.'
+    []
+# libMesh all_tri() doesn't have pyramid support yet.
+#    [simple_pyramid_convert]
+#      type = 'Exodiff'
+#      input = 'simple_convert.i'
+#      exodiff = 'simple_pyramid_convert_in.e'
+#      cli_args = '--mesh-only simple_pyramid_convert_in.e 
+#                  Mesh/gmg/elem_type=PYRAMID5'
+#      recover = false
+#      detail ='convert a 3D mesh consisting of only PYRAMID5 elements.'
+#    []
+    [simple_tet_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'simple_tet_convert_in.e'
+      cli_args = '--mesh-only simple_tet_convert_in.e 
+                  Mesh/gmg/elem_type=TET4'
+      recover = false
+      detail ='convert a 3D mesh consisting of only TET4 elements.'
+    []
+    [second_order_tet_convert]
+      type = 'Exodiff'
+      input = 'simple_convert.i'
+      exodiff = 'second_order_tet_convert_in.e'
+      cli_args = '--mesh-only second_order_tet_convert_in.e 
+                  Mesh/gmg/elem_type=TET10'
+      recover = false
+      detail ='accept a 3D mesh consisting of only TET10 elements.'
+    []
+    [hex_prism_convert]
+      type = 'Exodiff'
+      input = 'hex_prism_convert.i'
+      exodiff = 'hex_prism_convert_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail ='convert a 3D mesh with mixed element types.'
+    []
+  []
+[]

@@ -62,6 +62,13 @@ object's variable *must* be defined on the block - otherwise the IC for the
 next lowest block ID for the node is used - and so forth until one has the
 variable defined.
 
+## Old and Older ICs
+
+The ICs system supports the ability to set ICs on old and older states. This can be useful for initializing old and older states of variables needed for various time integration schemes. It can be set with the [!param](/ICs/ConstantIC/state) parameter and specifying `OLD` or `OLDER`.
+
+
+
+
 !syntax list /ICs objects=True actions=False subsystems=False
 
 !syntax list /ICs objects=False actions=False subsystems=True

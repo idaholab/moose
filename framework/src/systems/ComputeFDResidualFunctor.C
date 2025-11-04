@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,7 +18,7 @@ ComputeFDResidualFunctor::ComputeFDResidualFunctor(FEProblemBase & fe_problem)
 void
 ComputeFDResidualFunctor::residual(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
-                                   NonlinearImplicitSystem & sys)
+                                   libMesh::NonlinearImplicitSystem & sys)
 {
   _fe_problem.computingNonlinearResid(false);
   _fe_problem.computeResidualSys(sys, soln, residual);

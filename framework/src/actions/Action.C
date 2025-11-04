@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,17 +20,19 @@
 #include "InputParameterWarehouse.h"
 #include "ActionFactory.h"
 
+const std::string Action::unique_action_name_param = "_unique_action_name";
+
 InputParameters
 Action::validParams()
 {
-  InputParameters params = Moose::Builder::validParams();
+  InputParameters params = ParallelParamObject::validParams();
+  params += Moose::Builder::validParams();
 
+  params.addPrivateParam<std::string>(unique_action_name_param);
   params.addPrivateParam<std::string>("_moose_docs_type",
                                       "action"); // the type of syntax for documentation system
-  params.addPrivateParam<std::string>("_action_name"); // the name passed to ActionFactory::create
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
-  params.addPrivateParam<std::string>("action_type");
   params.addPrivateParam<ActionWarehouse *>("awh", nullptr);
 
   params.addParam<std::vector<std::string>>(
@@ -42,29 +44,19 @@ Action::validParams()
 }
 
 Action::Action(const InputParameters & parameters)
-  : MooseBase(parameters.get<std::string>("action_type"),
-              parameters.get<std::string>("_action_name"),
-              *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor"),
-              parameters),
-    MooseBaseParameterInterface(*this, parameters),
-    MooseBaseErrorInterface(static_cast<MooseBase &>(*this)),
-    MeshMetaDataInterface(
-        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+  : ParallelParamObject(parameters),
+    MeshMetaDataInterface(_app),
     PerfGraphInterface(
-        parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")
-            ->perfGraph(),
+        _app.perfGraph(),
         "Action" +
-            (parameters.get<std::string>("action_type") != ""
-                 ? std::string("::") + parameters.get<std::string>("action_type")
-                 : "") +
-            (parameters.get<std::string>("_action_name") != ""
-                 ? std::string("::") + parameters.get<std::string>("_action_name")
-                 : "") +
+            (parameters.getObjectType() != "" ? std::string("::") + parameters.getObjectType()
+                                              : "") +
+            (parameters.getObjectName() != "" ? std::string("::") + parameters.getObjectName()
+                                              : "") +
             (parameters.isParamValid("task") && parameters.get<std::string>("task") != ""
                  ? std::string("::") + parameters.get<std::string>("task")
                  : "")),
-    ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    DataFileInterface<Action>(*this),
+    SolutionInvalidInterface(this, parameters),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
                                : ""),
@@ -99,8 +91,8 @@ Action::addRelationshipManager(
   // These need unique names
   static unsigned int unique_object_id = 0;
 
-  auto new_name = moose_object_pars.get<std::string>("_moose_base") + '_' + name() + '_' + rm_name +
-                  "_" + Moose::stringify(rm_type) + " " + std::to_string(unique_object_id);
+  auto new_name = moose_object_pars.getBase() + '_' + name() + '_' + rm_name + "_" +
+                  Moose::stringify(rm_type) + " " + std::to_string(unique_object_id);
 
   auto rm_params = _factory.getValidParams(rm_name);
   rm_params.set<Moose::RelationshipManagerType>("rm_type") = rm_type;

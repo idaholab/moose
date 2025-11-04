@@ -8,6 +8,10 @@
   [../]
 []
 
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Variables]
   [./v]
     family = MONOMIAL

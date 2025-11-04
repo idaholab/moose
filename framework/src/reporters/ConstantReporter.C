@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,6 +23,8 @@ ConstantReporter::validParams()
   params += addReporterTypeParams<std::string>("string");
   params += addReporterTypeParams<dof_id_type>("dof_id_type");
   params += addReporterTypeParams<Point>("point");
+  params += addReporterTypeParams<RealEigenVector>("eigen_vector", false, false);
+  params += addReporterTypeParams<RealEigenMatrix>("eigen_matrix", false, false);
 
   return params;
 }
@@ -38,4 +40,10 @@ ConstantReporter::ConstantReporter(const InputParameters & parameters) : General
   declareConstantVectorReporterValues<Real>("real");
   declareConstantVectorReporterValues<std::string>("string");
   declareConstantVectorReporterValues<dof_id_type>("dof_id_type");
+  declareConstantVectorVectorReporterValues<int>("integer");
+  declareConstantVectorVectorReporterValues<Real>("real");
+  declareConstantVectorVectorReporterValues<std::string>("string");
+  declareConstantVectorVectorReporterValues<dof_id_type>("dof_id_type");
+  declareConstantReporterValue<RealEigenVector>("eigen_vector");
+  declareConstantReporterValue<RealEigenMatrix>("eigen_matrix");
 }

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#8437'
+  issues = '#8437 #26920'
   design = 'syntax/Materials/index.md'
   [./real]
     requirement = 'The system shall be able to produce a valid Real material object on the fly for use in calculations requiring material properties'
@@ -48,4 +48,50 @@
       detail = 'with values determined by functions using automatic differentiation.'
     [../]
   [../]
+  [./symmetric_ranktwotensor]
+    requirement = 'The system shall be able to compute a SymmetricRankTwoTensor material object'
+    [./constant]
+      type = 'CSVDiff'
+      input = 'generic_constant_symmetric_rank_two_tensor.i'
+      csvdiff = 'generic_constant_symmetric_rank_two_tensor_out.csv'
+      detail = 'with constant values.'
+    [../]
+    [./ad_constant]
+      type = 'CSVDiff'
+      input = 'ad_generic_constant_symmetric_rank_two_tensor.i'
+      csvdiff = 'ad_generic_constant_symmetric_rank_two_tensor_out.csv'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
+  [../]
+  [realvectorvalue]
+    requirement = 'The system shall be able to compute a RealVectorValue material property'
+    [./constant]
+      type = 'Exodiff'
+      input = 'generic_constant_real_vector_value.i'
+      exodiff = 'generic_constant_real_vector_value_out.e'
+      detail = 'with constant values.'
+    [../]
+    [./ad_constant]
+      type = 'Exodiff'
+      input = 'ad_generic_constant_real_vector_value.i'
+      exodiff = 'ad_generic_constant_real_vector_value_out.e'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
+  [../]
+  [vector_of_real]
+    requirement = 'The system shall be able to compute a standard vector of real material property'
+    [constant]
+      type = 'Exodiff'
+      input = 'generic_constant_std_vector_real.i'
+      exodiff = 'generic_constant_std_vector_real_out.e'
+      detail = 'with constant values, and'
+    []
+    [ad_constant]
+      type = 'Exodiff'
+      input = 'generic_constant_std_vector_real.i'
+      cli_args = 'Materials/vector/type=ADGenericConstantStdVectorMaterial Outputs/file_base=ad_generic_constant_std_vector_real_out'
+      exodiff = 'ad_generic_constant_std_vector_real_out.e'
+      detail = 'with constant values using automatic differentiation.'
+    []
+  []
 []

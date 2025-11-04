@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,27 +9,47 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "GenericKernel.h"
+#include "libmesh/dense_vector.h"
 
 /**
  * Advection of the variable by the velocity provided by the user.
  * Options for numerical stabilization are: none; full upwinding
  */
-class ConservativeAdvection : public Kernel
+template <bool is_ad>
+class ConservativeAdvectionTempl : public GenericKernel<is_ad>
 {
 public:
+  static InputParameters generalParams();
   static InputParameters validParams();
 
-  ConservativeAdvection(const InputParameters & parameters);
+  ConservativeAdvectionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
+  virtual const GenericReal<is_ad> & getUNodal(const std::size_t n) const { return _u_nodal[n]; }
+
+  /// Material property multiplied against the velocity to scale advection strength
+  const GenericMaterialProperty<Real, is_ad> & _scalar;
+
+  /// Flag to determine if coupled variable is present
+  const bool _coupled_variable_present;
+
+  /// Coupled variable variable number
+  const unsigned int _coupled_variable_var;
 
   /// advection velocity
-  const VectorVariableValue & _velocity;
+  const MooseArray<GenericRealVectorValue<is_ad>> * _velocity;
+
+  /// Flag to determine if user supplied variable is used as advective quantity
+  const bool _user_supplied_adv_quant;
+
+  /// Quantity, as a variable value, that is advected. Defaults to the equation variable if unspecified
+  const MooseArray<GenericReal<is_ad>> & _adv_quant;
 
   /// enum to make the code clearer
   enum class JacRes
@@ -42,17 +62,26 @@ protected:
   const enum class UpwindingType { none, full } _upwinding;
 
   /// Nodal value of u, used for full upwinding
-  const VariableValue & _u_nodal;
+  const GenericVariableValue<is_ad> & _u_nodal;
 
   /// In the full-upwind scheme, whether a node is an upwind node
   std::vector<bool> _upwind_node;
 
   /// In the full-upwind scheme d(total_mass_out)/d(variable_at_node_i)
-  std::vector<Real> _dtotal_mass_out;
+  std::vector<GenericReal<is_ad>> _dtotal_mass_out;
 
   /// Returns - _grad_test * velocity
-  Real negSpeedQp() const;
+  virtual GenericReal<is_ad> negSpeedQp() const;
 
   /// Calculates the fully-upwind Residual and Jacobian (depending on res_or_jac)
   void fullUpwind(JacRes res_or_jac);
+
+  usingGenericKernelMembers;
+
+private:
+  /// A container for holding the local residuals
+  libMesh::DenseVector<GenericReal<is_ad>> _my_local_re;
 };
+
+typedef ConservativeAdvectionTempl<false> ConservativeAdvection;
+typedef ConservativeAdvectionTempl<true> ADConservativeAdvection;

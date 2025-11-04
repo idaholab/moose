@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,8 +11,10 @@
 
 #include "FVFluxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "FVDiffusionInterpolationInterface.h"
 
-class INSFVMixingLengthScalarDiffusion : public FVFluxKernel
+class INSFVMixingLengthScalarDiffusion : public FVFluxKernel,
+                                         public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();

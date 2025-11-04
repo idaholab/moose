@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 
 #include "FVElementalKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 /**
  * Computes source the sink terms for the turbulent kinetic energy.
@@ -53,21 +54,24 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Maximum mixing length allowed for the domain
-  const Real _max_mixing_length;
-
   /// Linearized model?
   const bool _linearized_model;
 
-  /// No equilibrium treatement
-  const bool _non_equilibrium_treatment;
+  /// Method used for wall treatment
+  NS::WallTreatmentEnum _wall_treatment;
 
   /// C_mu constant
   const Real _C_mu;
 
+  // Production Limiter Constant
+  const Real _C_pl;
+
+  /// For Newton solves we want to add extra zero-valued terms regardless of y-plus to avoid sparsity pattern changes as y-plus changes near the walls
+  const bool _newton_solve;
+
   ///@{
   /// Maps for wall treatement
-  std::map<const Elem *, bool> _wall_bounded;
+  std::unordered_set<const Elem *> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}

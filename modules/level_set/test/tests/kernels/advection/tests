@@ -6,7 +6,7 @@
     input = advection_mms.i
     csvdiff = advection_mms_out.csv
     # This problem uses SuperLU.
-    superlu = true
+    capabilities = 'superlu'
     requirement = "The LevelSetAdvection Kernel shall converage at the correct rate as tested by the method of manufactured solutions."
   [../]
 []

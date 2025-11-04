@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -45,6 +45,18 @@ ComputeMortarFunctor::ComputeMortarFunctor(
                                       _fe_problem,
                                       _amg,
                                       0,
+                                      _secondary_ip_sub_to_mats,
+                                      _primary_ip_sub_to_mats,
+                                      _secondary_boundary_mats);
+}
+
+void
+ComputeMortarFunctor::setupMortarMaterials()
+{
+  Moose::Mortar::setupMortarMaterials(_mortar_constraints,
+                                      _fe_problem,
+                                      _amg,
+                                      /*thread id*/ 0,
                                       _secondary_ip_sub_to_mats,
                                       _primary_ip_sub_to_mats,
                                       _secondary_boundary_mats);

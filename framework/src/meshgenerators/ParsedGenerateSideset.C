@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -39,13 +39,11 @@ ParsedGenerateSideset::validParams()
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   // This sideset generator can only handle a single new sideset name, not a vector of names
-  // This sideset generator can only handle a single new sideset name
   params.suppressParameter<std::vector<BoundaryName>>("new_boundary");
 
-  params.addClassDescription("A MeshGenerator that adds element sides to a sideset if the "
-                             "centroid satisfies the `combinatorial_geometry` expression. "
-                             "Optionally, element sides are also added if they are included in "
-                             "`included_subdomains` and if they feature the designated normal.");
+  params.addClassDescription(
+      "A MeshGenerator that adds element sides to a sideset if the centroid of the side satisfies "
+      "the `combinatorial_geometry` expression.");
 
   return params;
 }
@@ -57,25 +55,14 @@ ParsedGenerateSideset::ParsedGenerateSideset(const InputParameters & parameters)
 {
   _boundary_names.push_back(getParam<BoundaryName>("new_sideset_name"));
 
-  // base function object
+  // Create parsed function
   _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // add the constant expressions
-  addFParserConstants(_func_F,
+  parsedFunctionSetup(_func_F,
+                      _function,
+                      "x,y,z",
                       getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-
-  // parse function
-  if (_func_F->Parse(_function, "x,y,z") >= 0)
-    mooseError("Invalid function\n",
-               _function,
-               "\nin ParsedAddSideset ",
-               name(),
-               ".\n",
-               _func_F->ErrorMsg());
+                      getParam<std::vector<std::string>>("constant_expressions"),
+                      comm());
 
   _func_params.resize(3);
 }
@@ -129,7 +116,6 @@ ParsedGenerateSideset::generate()
   }
   finalize();
   boundary_info.sideset_name(boundary_ids[0]) = _boundary_names[0];
-  boundary_info.nodeset_name(boundary_ids[0]) = _boundary_names[0];
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);

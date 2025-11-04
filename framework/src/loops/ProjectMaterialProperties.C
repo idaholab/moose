@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -57,7 +57,7 @@ ProjectMaterialProperties::~ProjectMaterialProperties() {}
 void
 ProjectMaterialProperties::subdomainChanged()
 {
-  _need_internal_side_material = _fe_problem.needSubdomainMaterialOnSide(_subdomain, _tid);
+  _need_internal_side_material = _fe_problem.needInternalNeighborSideMaterial(_subdomain, _tid);
 }
 
 void

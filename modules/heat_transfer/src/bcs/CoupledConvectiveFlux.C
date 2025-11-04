@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,6 +19,7 @@ CoupledConvectiveFlux::validParams()
   InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("T_infinity", "Field holding far-field temperature");
   params.addRequiredParam<Real>("coefficient", "Heat transfer coefficient");
+  params.addClassDescription("Integrated boundary condition for modeling a convective heat flux.");
 
   return params;
 }

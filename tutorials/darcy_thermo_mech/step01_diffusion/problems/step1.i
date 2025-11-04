@@ -11,17 +11,13 @@
   rz_coord_axis = X               # Which axis the symmetry is around
 []
 
-[Variables]
-  [pressure]
-    # Adds a Linear Lagrange variable by default
-  []
+[Variables/pressure]
+  # Adds a Linear Lagrange variable by default
 []
 
-[Kernels]
-  [diffusion]
-    type = ADDiffusion  # Laplacian operator using automatic differentiation
-    variable = pressure # Operate on the "pressure" variable from above
-  []
+[Kernels/diffusion]
+  type = ADDiffusion  # Laplacian operator using automatic differentiation
+  variable = pressure # Operate on the "pressure" variable from above
 []
 
 [BCs]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,10 +37,16 @@ public:
    * Handles 'outputs' parameter for objects that desire control of variable outputs
    * @param parameters The parameters object holding data for the class to use.
    * @param build_list If false the buildOutputHideVariableList must be called explicitly, this
-   * behavior
-   *                   is required for automatic output of material properties
+   * behavior is required for automatic output of material properties
    */
   OutputInterface(const InputParameters & parameters, bool build_list = true);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  OutputInterface(const OutputInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   static InputParameters validParams();
 

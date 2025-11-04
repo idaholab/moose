@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,7 +42,7 @@ TimeIntervalTimes::TimeIntervalTimes(const InputParameters & parameters) : Times
     start_time = getParam<Real>("start_time");
   else
   {
-    if (auto transient = dynamic_cast<Transient *>(_app.getExecutioner()))
+    if (auto transient = dynamic_cast<TransientBase *>(_app.getExecutioner()))
       start_time = transient->getStartTime();
     else
       mooseError("If the parameter 'start_time' is not provided, the executioner type must be "
@@ -55,7 +55,7 @@ TimeIntervalTimes::TimeIntervalTimes(const InputParameters & parameters) : Times
     end_time = getParam<Real>("end_time");
   else
   {
-    if (auto transient = dynamic_cast<Transient *>(_app.getExecutioner()))
+    if (auto transient = dynamic_cast<TransientBase *>(_app.getExecutioner()))
       end_time = transient->endTime();
     else
       mooseError(

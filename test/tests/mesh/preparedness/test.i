@@ -110,6 +110,7 @@
       stitch_boundaries_pairs = '1   3;
                                  1   3;
                                  0   2'
+      merge_boundaries_with_same_name = false
   []
   [rename_boundary_stitch_1_2_6]
       type = RenameBoundaryGenerator
@@ -172,7 +173,8 @@
   [stitch_1_2_6_5]
       type = StitchedMeshGenerator
       inputs = 'rename_boundary_stitch_1_2_6 rename_boundary_region_5'
-      stitch_boundaries_pairs = '2     3;'
+      stitch_boundaries_pairs = '2     3'
+      merge_boundaries_with_same_name = false
   []
   [region_7_gen]
       type = CartesianMeshGenerator
@@ -205,6 +207,7 @@
     type = StitchedMeshGenerator
     inputs = 'stitch_1_2_6_5 region_7_move'
     stitch_boundaries_pairs = '2 0'
+    merge_boundaries_with_same_name = false
   []
   [rename_boundary_1]
     type = BoundaryDeletionGenerator
@@ -319,7 +322,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_factor_shift_type'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type'
   petsc_options_value = 'lu        100                NONZERO'
 
   # Tolerances.

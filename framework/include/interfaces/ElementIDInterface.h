@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -23,8 +23,16 @@ class MooseObject;
 class ElementIDInterface
 {
 public:
-  ElementIDInterface(const MooseObject * moose_object);
   static InputParameters validParams();
+
+  ElementIDInterface(const MooseObject * moose_object);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ElementIDInterface(const ElementIDInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   virtual ~ElementIDInterface() {}
 

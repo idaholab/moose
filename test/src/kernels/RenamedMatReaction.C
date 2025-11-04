@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,7 +15,8 @@ InputParameters
 RenamedMatReaction::validParams()
 {
   InputParameters params = MatReaction::validParams();
-  params.renameParam("mob_name", "reaction_coefficient", "The reaction rate used with the kernel");
+  params.renameParam(
+      "reaction_rate", "reaction_coefficient", "The reaction rate used with the kernel");
   return params;
 }
 

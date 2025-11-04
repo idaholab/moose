@@ -4,7 +4,6 @@
 []
 
 [Problem]
-  coord_type = RZ
   type = ReferenceResidualProblem
   reference_vector = 'ref'
   extra_tag_vectors = 'ref'
@@ -22,6 +21,7 @@
   []
   # For NodalVariableValue to work with distributed mesh
   allow_renumbering = false
+  coord_type = RZ
 []
 
 [Functions]
@@ -53,9 +53,8 @@
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
-    add_variables = true
     strain = FINITE
     block = '1 2'
     use_automatic_differentiation = false

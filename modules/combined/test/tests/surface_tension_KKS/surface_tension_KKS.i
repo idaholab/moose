@@ -11,9 +11,6 @@
   dim = 1
   nx = 200
   xmax = 200
-[]
-
-[Problem]
   coord_type = RSPHERICAL
 []
 
@@ -112,7 +109,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     add_variables = true
     generate_output = 'hydrostatic_stress stress_xx stress_yy stress_zz'
@@ -171,7 +168,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_ppt
     w        = 0.0033
-    args = 'cp cm'
+    coupled_variables = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC
@@ -249,7 +246,7 @@
     type = ElasticEnergyMaterial
     base_name = matrix
     f_name = fe_m
-    args = ' '
+    coupled_variables = ' '
   [../]
 # Total free energy of the matrix
   [./Total_energy_matrix]
@@ -272,7 +269,7 @@
     type = ElasticEnergyMaterial
     base_name = ppt
     f_name = fe_p
-    args = ' '
+    coupled_variables = ' '
   [../]
 
 # Total free energy of the precipitate

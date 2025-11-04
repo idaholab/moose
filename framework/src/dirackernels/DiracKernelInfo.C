@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/enum_point_locator_type.h"
 #include "libmesh/point.h"
+
+using namespace libMesh;
 
 DiracKernelInfo::DiracKernelInfo()
   : _point_locator(), _point_equal_distance_sq(libMesh::TOLERANCE * libMesh::TOLERANCE)

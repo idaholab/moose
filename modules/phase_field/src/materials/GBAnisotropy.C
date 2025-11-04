@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,8 @@ InputParameters
 GBAnisotropy::validParams()
 {
   InputParameters params = GBAnisotropyBase::validParams();
+  params.addClassDescription(
+      "A material to compute anisotropic grain boundary energies and mobilities.");
   params.addRequiredParam<Real>("wGB", "Diffuse GB width in nm");
   return params;
 }

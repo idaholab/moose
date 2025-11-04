@@ -17,8 +17,8 @@
       num_layers = '5 3 5'
       biases = '1.6 1.0 0.625'
       direction = '0 0 1'
-      bottom_sideset = '4'
-      top_sideset = '5'
+      bottom_boundary = 4
+      top_boundary = 5
       subdomain_swaps = '0 1;
                          0 2;
                          0 3'

@@ -23,7 +23,7 @@ with by placing a cutoff on the upwinding in PorousFlow.  Secondly, upwinding is
 The remainder of this
 section describes full upwinding for the single-phase unsaturated situation.
 The multi-phase, multi-component scenario, and the advective term in the
-heat-flow equation are analogous.  
+heat-flow equation are analogous.
 
 The weak form of the Darcy flux of for a single element is
 \begin{equation}
@@ -68,7 +68,7 @@ by [!cite](dalen1979).
 The residual at the downwind nodes is determined by conserving mass.
 Specifically, let
 \begin{equation}
-I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \textrm{and}\ \ \
+I_{\mathrm{up}} = \sum_{I_{a}\geq 0} m_a I_{a} \ \ \ \textrm{and}\ \ \
 I_{\mathrm{down}} = -\sum_{I_{a}<0} I_{a} \ .
 \end{equation}
 Then

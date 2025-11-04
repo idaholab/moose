@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,8 +32,17 @@ class TransientInterface
 {
 public:
   TransientInterface(const MooseObject * moose_object);
-  static InputParameters validParams();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  TransientInterface(const TransientInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   virtual ~TransientInterface();
+
+  static InputParameters validParams();
 
   bool isImplicit() { return _is_implicit; }
 
@@ -59,6 +68,9 @@ protected:
 
   /// Time
   Real & _t;
+
+  /// Old time
+  const Real & _t_old;
 
   /// The number of the time step
   int & _t_step;

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -103,6 +103,10 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters)
   // Now that we know kernel_variable_number is OK, _var must be OK,
   // so ensure that reinit is called on _var:
   addMooseVariableDependency(_var);
+
+  // Error if a strain base_name is provided but doesn't exist
+  if (parameters.isParamSetByUser("base_name") && !_has_total_strain)
+    paramError("base_name", "A strain base_name ", _base_name, " does not exist");
 }
 
 Real

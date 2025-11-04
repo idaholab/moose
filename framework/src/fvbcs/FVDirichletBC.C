@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,7 +26,7 @@ FVDirichletBC::FVDirichletBC(const InputParameters & parameters)
 }
 
 ADReal
-FVDirichletBC::boundaryValue(const FaceInfo & /*fi*/) const
+FVDirichletBC::boundaryValue(const FaceInfo & /*fi*/, const Moose::StateArg & /*state*/) const
 {
   return _val;
 }

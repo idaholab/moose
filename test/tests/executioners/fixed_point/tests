@@ -18,7 +18,8 @@
       exodiff = 'nonlinear_fixed_point_out.e'
 
       detail = "nonlinear problems."
-      rel_err = 7e-6
+      # nonlinear tolerance (fixed point problem) is only 1e-2
+      rel_err = 2e-5
     []
   []
 
@@ -50,7 +51,8 @@
       type = RunException
       input = '2d_diffusion_fixed_point.i'
       cli_args = '"Problem/solve=false" "Executioner/disable_fixed_point_residual_norm_check=true" "Executioner/fixed_point_rel_tol=1"'
-      expect_err = "fixed_point_rel_tol will be ignored because the fixed point residual check is disabled."
+      expect_err = "fixed_point_rel_tol will be ignored because the fixed point residual check is "
+                   "disabled."
       detail = 'fixed_point_rel_tol is set by the user and disable_fixed_point_residual_norm_check is set to true.'
     []
 
@@ -58,7 +60,8 @@
       type = RunException
       input = '2d_diffusion_fixed_point.i'
       cli_args = '"Problem/solve=false" "Executioner/disable_fixed_point_residual_norm_check=true" "Executioner/fixed_point_abs_tol=1"'
-      expect_err = "fixed_point_abs_tol will be ignored because the fixed point residual check is disabled."
+      expect_err = "fixed_point_abs_tol will be ignored because the fixed point residual check is "
+                   "disabled."
       detail = 'fixed_point_abs_tol is set by the user and disable_fixed_point_residual_norm_check is set to true.'
     []
 
@@ -66,7 +69,8 @@
       type = RunException
       input = '2d_diffusion_fixed_point.i'
       cli_args = '"Problem/solve=false" "Executioner/disable_fixed_point_residual_norm_check=true" "Executioner/fixed_point_force_norms=true"'
-      expect_err = "fixed_point_force_norms will be ignored because the fixed point residual check is disabled."
+      expect_err = "fixed_point_force_norms will be ignored because the fixed point residual check "
+                   "is disabled."
       detail = 'fixed_point_force_norms is set by the user and disable_fixed_point_residual_norm_check is set to true.'
     []
   []

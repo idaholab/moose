@@ -32,6 +32,7 @@
     cli_args = '--yaml'
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
     errors = 'zzzzzzzzzz'
+    valgrind = HEAVY
     issues = '#920'
     design = 'YAMLFormatter.md'
     requirement = 'The system shall be able to dump YAML data.'
@@ -41,9 +42,10 @@
     type = 'RunApp'
     input = ''
     absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
+    valgrind = HEAVY
     # suppress error checking, the word 'ERROR' shows up in the yaml dump
     errors = 'zzzzz zzzzz'
-    cli_args = '--yaml /Executioner'
+    cli_args = '--yaml-search /Executioner'
     issues = '#2855'
     design = 'YAMLFormatter.md'
     requirement = 'The system shall only give Executioner output once.'
@@ -62,7 +64,7 @@
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.plt'
-    tecplot = true
+    capabilities = 'tecplot'
     issues = '#3403'
     design = 'Tecplot.md'
     requirement = 'The system shall support Tecplot output given in Tecplot binary format if the Tecplot API is available.'
@@ -72,7 +74,7 @@
     type = 'CheckFiles'
     input = 'output_test_tecplot_binary.i'
     check_files = 'output_test_tecplot_binary_out_0000.dat'
-    tecplot = false
+    capabilities = '!tecplot'
     allow_warnings = true
     design = 'Tecplot.md'
     issues = '#3403'
@@ -258,7 +260,7 @@
   [definition_valenum_test]
     type = 'RunApp'
     input = ''
-    expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GIN" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*}'
+    expect_out = '\'execute_on\'{[^{]*{[^}]*ValEnums=\[ "NONE" "INI[^]]*?GENCE" "FINAL" "CUSTOM"[^]]*\][^}]*}[^}]*}'
     cli_args = '--definition'
     # suppress error checking, the word 'ERROR' shows up in the definition dump
     errors = 'zzzzzzzzzz'

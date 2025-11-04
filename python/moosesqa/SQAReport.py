@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,7 +28,7 @@ class SQAReport(object):
 
     def __init__(self, **kwargs):
         self.title = kwargs.pop('title', '')
-        self.show_warning = kwargs.pop('show_warning', True)
+        self.show_warning = kwargs.pop('show_warning', False)
         self.show_error = kwargs.pop('show_error', True)
         self.show_critical = kwargs.pop('show_critical', True)
         self.status = kwargs.pop('status', SQAReport.Status.PASS)

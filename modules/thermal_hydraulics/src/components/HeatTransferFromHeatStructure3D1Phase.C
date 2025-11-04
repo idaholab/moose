@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -51,7 +51,7 @@ HeatTransferFromHeatStructure3D1Phase::HeatTransferFromHeatStructure3D1Phase(
   addDependency(_hs_name);
 }
 
-const FEType &
+const libMesh::FEType &
 HeatTransferFromHeatStructure3D1Phase::getFEType()
 {
   return HeatConductionModel::feType();
@@ -138,7 +138,9 @@ HeatTransferFromHeatStructure3D1Phase::init()
       const auto subdomain_names = flow_channel.getSubdomainNames();
       _flow_channel_subdomains.insert(
           _flow_channel_subdomains.end(), subdomain_names.begin(), subdomain_names.end());
-      _flow_channel_closures.push_back(flow_channel.getClosures());
+
+      const auto & closures = flow_channel.getClosuresObjects();
+      _flow_channel_closures.insert(_flow_channel_closures.end(), closures.begin(), closures.end());
 
       fch_num_elems.push_back(flow_channel.getNumElems());
 
@@ -241,10 +243,12 @@ HeatTransferFromHeatStructure3D1Phase::addVariables()
   if (!_app.isRestarting())
     getTHMProblem().addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
 
+  getTHMProblem().addSimVariable(false,
+                                 FlowModel::TEMPERATURE_WALL,
+                                 libMesh::FEType(CONSTANT, MONOMIAL),
+                                 _flow_channel_subdomains);
   getTHMProblem().addSimVariable(
-      false, FlowModel::TEMPERATURE_WALL, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
-  getTHMProblem().addSimVariable(
-      false, _T_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
+      false, _T_wall_name, libMesh::FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
 
   // wall temperature initial condition
   if (!getTHMProblem().hasInitialConditionsFromFile() && !_app.isRestarting())

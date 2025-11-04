@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,6 +24,8 @@
 // libMesh includes
 #include "libmesh/enum_norm_type.h"
 
+using namespace libMesh;
+
 registerMooseObject("MooseApp", Console);
 
 InputParameters
@@ -37,6 +39,10 @@ Console::validParams()
   params.addClassDescription("Object for screen output.");
 
   params += TableOutput::enableOutputTypes("system_information scalar postprocessor input");
+
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_on");
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_postprocessors_on");
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_scalars_on");
 
   // Screen and file output toggles
   params.addParam<bool>("output_screen", true, "Output to the screen");
@@ -125,8 +131,8 @@ Console::validParams()
                                      "the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear relationship execution output",
-                      "framework mesh aux nonlinear execution");
+  MultiMooseEnum info("framework mesh aux nonlinear linear relationship execution output",
+                      "framework mesh aux nonlinear linear execution");
   params.addParam<MultiMooseEnum>("system_info",
                                   info,
                                   "List of information types to display "
@@ -214,13 +220,13 @@ Console::Console(const InputParameters & parameters)
     // Honor the 'print_linear_residuals' option, only if 'linear' has not been set in 'execute_on'
     // by the user
     if (common && common->getParam<bool>("print_linear_residuals"))
-      _execute_on.push_back("linear");
+      _execute_on.setAdditionalValue("linear");
     else
-      _execute_on.erase("linear");
+      _execute_on.eraseSetValue("linear");
     if (common && common->getParam<bool>("print_nonlinear_residuals"))
-      _execute_on.push_back("nonlinear");
+      _execute_on.setAdditionalValue("nonlinear");
     else
-      _execute_on.erase("nonlinear");
+      _execute_on.eraseSetValue("nonlinear");
   }
 
   if (!_pars.isParamSetByUser("perf_log") && common && common->getParam<bool>("print_perf_log"))
@@ -235,12 +241,12 @@ Console::Console(const InputParameters & parameters)
   {
     const ExecFlagEnum & common_execute_on = common->getParam<ExecFlagEnum>("execute_on");
     for (auto & mme : common_execute_on)
-      _execute_on.push_back(mme);
+      _execute_on.setAdditionalValue(mme);
   }
 
   // If --show-outputs is used, enable it
   if (_app.getParam<bool>("show_outputs"))
-    _system_info_flags.push_back("output");
+    _system_info_flags.setAdditionalValue("output");
 }
 
 Console::~Console()
@@ -289,14 +295,14 @@ Console::initialSetup()
   // If the user adds "final" to the execute on, append this to the postprocessors, scalars, etc.,
   // but only
   // if the parameter (e.g., postprocessor_execute_on) has not been modified by the user.
-  if (_execute_on.contains("final"))
+  if (_execute_on.isValueSet("final"))
   {
     if (!_pars.isParamSetByUser("postprocessor_execute_on"))
-      _advanced_execute_on["postprocessors"].push_back("final");
+      _advanced_execute_on["postprocessors"].setAdditionalValue("final");
     if (!_pars.isParamSetByUser("scalars_execute_on"))
-      _advanced_execute_on["scalars"].push_back("final");
+      _advanced_execute_on["scalars"].setAdditionalValue("final");
     if (!_pars.isParamSetByUser("vector_postprocessor_execute_on"))
-      _advanced_execute_on["vector_postprocessors"].push_back("final");
+      _advanced_execute_on["vector_postprocessors"].setAdditionalValue("final");
   }
 }
 
@@ -342,16 +348,16 @@ Console::output()
   // Write the timestep information ("Time Step 0 ..."), this is controlled with "execute_on"
   // We only write the initial and final here. All of the intermediate outputs will be written
   // through timestepSetup.
-  if (type == EXEC_INITIAL && _execute_on.contains(EXEC_INITIAL))
+  if (type == EXEC_INITIAL && _execute_on.isValueSet(EXEC_INITIAL))
     writeTimestepInformation(/*output_dt = */ false);
-  else if (type == EXEC_FINAL && _execute_on.contains(EXEC_FINAL))
+  else if (type == EXEC_FINAL && _execute_on.isValueSet(EXEC_FINAL))
   {
     if (wantOutput("postprocessors", type) || wantOutput("scalars", type))
       _console << "\nFINAL:\n";
   }
 
   // Print Non-linear Residual (control with "execute_on")
-  if (type == EXEC_NONLINEAR && _execute_on.contains(EXEC_NONLINEAR))
+  if (type == EXEC_NONLINEAR && _execute_on.isValueSet(EXEC_NONLINEAR))
   {
     if (_nonlinear_iter == 0)
       _old_nonlinear_norm = std::numeric_limits<Real>::max();
@@ -363,7 +369,7 @@ Console::output()
   }
 
   // Print Linear Residual (control with "execute_on")
-  else if (type == EXEC_LINEAR && _execute_on.contains(EXEC_LINEAR))
+  else if (type == EXEC_LINEAR && _execute_on.isValueSet(EXEC_LINEAR))
   {
     if (_linear_iter == 0)
       _old_linear_norm = std::numeric_limits<Real>::max();
@@ -522,6 +528,8 @@ Console::formatTime(const Real t) const
         oss << std::scientific;
       oss << second;
     }
+    else if (days == 0)
+      oss << "0s";
   }
   return oss.str();
 }
@@ -698,44 +706,72 @@ Console::outputSystemInformation()
   if (_app.multiAppNumber() > 0)
     return;
 
-  if (_system_info_flags.contains("framework"))
+  if (_system_info_flags.isValueSet("framework"))
     _console << ConsoleUtils::outputFrameworkInformation(_app);
 
-  if (_system_info_flags.contains("mesh"))
+  if (_system_info_flags.isValueSet("mesh"))
     _console << ConsoleUtils::outputMeshInformation(*_problem_ptr);
 
-  if (_system_info_flags.contains("nonlinear"))
+  if (_system_info_flags.isValueSet("nonlinear"))
   {
     for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
     {
-      std::string output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
+      std::string output = ConsoleUtils::outputSolverSystemInformation(*_problem_ptr, i);
       if (!output.empty())
-        _console << "Nonlinear System" +
-                        (_problem_ptr->numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
-                        ":\n"
-                 << output;
+      {
+        _console << "Nonlinear System";
+        if (_problem_ptr->numNonlinearSystems() > 1)
+          _console << " [" + _problem_ptr->getNonlinearSystemNames()[i] + "]";
+        _console << ":\n" << output;
+      }
     }
   }
 
-  if (_system_info_flags.contains("aux"))
+  if (_system_info_flags.isValueSet("linear"))
+    for (const auto i : make_range(_problem_ptr->numLinearSystems()))
+    {
+      std::string output = ConsoleUtils::outputSolverSystemInformation(
+          *_problem_ptr, _problem_ptr->numNonlinearSystems() + i);
+      if (!output.empty())
+        _console << "Linear System" +
+                        (_problem_ptr->numLinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
+                        ":\n"
+                 << output;
+    }
+
+  if (_system_info_flags.isValueSet("aux"))
   {
     std::string output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
     if (!output.empty())
       _console << "Auxiliary System:\n" << output;
   }
 
-  if (_system_info_flags.contains("relationship"))
+  if (_system_info_flags.isValueSet("relationship"))
   {
     std::string output = ConsoleUtils::outputRelationshipManagerInformation(_app);
     if (!output.empty())
       _console << "Relationship Managers:\n" << output;
   }
 
-  if (_system_info_flags.contains("execution"))
+  if (_system_info_flags.isValueSet("execution"))
     _console << ConsoleUtils::outputExecutionInformation(_app, *_problem_ptr);
 
-  if (_system_info_flags.contains("output"))
+  if (_app.getParam<bool>("show_data_paths"))
+    _console << ConsoleUtils::outputDataFilePaths();
+
+  if (_app.getParam<bool>("show_data_params"))
+    _console << ConsoleUtils::outputDataFileParams(_app);
+
+  if (_system_info_flags.isValueSet("output"))
     _console << ConsoleUtils::outputOutputInformation(_app);
+
+  if (!_app.getParam<bool>("use_legacy_initial_residual_evaluation_behavior"))
+    for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
+      if (_problem_ptr->getNonlinearSystemBase(i).usePreSMOResidual())
+      {
+        _console << ConsoleUtils::outputPreSMOResidualInformation();
+        break;
+      }
 
   // Output the legacy flags, these cannot be turned off so they become annoying to people.
   _console << ConsoleUtils::outputLegacyInformation(_app);
@@ -753,10 +789,23 @@ Console::meshChanged()
     std::string output;
     for (const auto i : make_range(_problem_ptr->numNonlinearSystems()))
     {
-      output = ConsoleUtils::outputNonlinearSystemInformation(*_problem_ptr, i);
+      output = ConsoleUtils::outputSolverSystemInformation(*_problem_ptr, i);
       if (!output.empty())
-        _console << "Nonlinear System" +
-                        (_problem_ptr->numNonlinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
+      {
+        _console << "Nonlinear System";
+        if (_problem_ptr->numNonlinearSystems() > 1)
+          _console << " [" + _problem_ptr->getNonlinearSystemNames()[i] + "]";
+        _console << ":\n" << output;
+      }
+    }
+
+    for (const auto i : make_range(_problem_ptr->numLinearSystems()))
+    {
+      output = ConsoleUtils::outputSolverSystemInformation(*_problem_ptr,
+                                                           _problem_ptr->numNonlinearSystems() + i);
+      if (!output.empty())
+        _console << "Linear System" +
+                        (_problem_ptr->numLinearSystems() > 1 ? (" " + std::to_string(i)) : "") +
                         ":\n"
                  << output;
     }

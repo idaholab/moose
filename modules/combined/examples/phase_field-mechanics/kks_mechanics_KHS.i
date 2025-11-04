@@ -293,7 +293,7 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     f_name = f_el_mat
-    args = 'eta'
+    coupled_variables = 'eta'
     outputs = exodus
   [../]
 
@@ -343,7 +343,7 @@
   [../]
   [./C]
     type = CompositeElasticityTensor
-    args = eta
+    coupled_variables = eta
     tensors = 'C_matrix               C_ppt'
     weights = 'one_minus_h_explicit   h'
   [../]
@@ -418,7 +418,7 @@
     fa_name  = fm
     fb_name  = fp
     w        = 0.0264
-    args = 'cp cm'
+    coupled_variables = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

@@ -64,6 +64,8 @@
     variable = indicator_const_mon
     displaced_source_mesh = true
     execute_on = 'initial timestep_begin'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [pull_indicator_nodal]
     type = MultiAppGeneralFieldShapeEvaluationTransfer
@@ -72,6 +74,8 @@
     variable = indicator_nodal
     displaced_source_mesh = true
     execute_on = 'initial timestep_begin'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
   [pull_indicator_higher]
     type = MultiAppGeneralFieldShapeEvaluationTransfer

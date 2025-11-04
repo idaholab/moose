@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,13 +21,16 @@ protected:
   template <typename T>
   T f(const T & x)
   {
-    return 2 * x + 3 + std::exp(x) - std::pow(6 * x, 2) + std::sin(x - 3) * std::cos(-x);
+    using std::exp, std::pow, std::sin, std::cos;
+
+    return 2 * x + 3 + exp(x) - pow(6 * x, 2) + sin(x - 3) * cos(-x);
   }
 
   template <typename T>
   T df_dx(const T & x)
   {
-    return 2 + std::exp(x) - 72 * x + std::cos(x - 3) * std::cos(-x) +
-           std::sin(x - 3) * std::sin(-x);
+    using std::exp, std::pow, std::sin, std::cos;
+
+    return 2 + exp(x) - 72 * x + cos(x - 3) * cos(-x) + sin(x - 3) * sin(-x);
   }
 };

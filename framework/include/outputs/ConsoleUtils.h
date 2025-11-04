@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -55,10 +55,10 @@ std::string outputMeshInformation(FEProblemBase & problem, bool verbose = true);
 std::string outputAuxiliarySystemInformation(FEProblemBase & problem);
 
 /**
- * Output the Nonlinear system information
+ * Output a solver system information
  */
-std::string outputNonlinearSystemInformation(FEProblemBase & problem,
-                                             const unsigned int nl_sys_num);
+std::string outputSolverSystemInformation(FEProblemBase & problem,
+                                          const unsigned int solver_sys_num);
 
 /**
  * Output action RelationshipManager information
@@ -80,12 +80,27 @@ std::string outputOutputInformation(MooseApp & app);
  * @param system The libMesh system to output
  * @see outputAuxiliarySystemInformation outputNonlinearSystemInformation
  */
-std::string outputSystemInformationHelper(System & system);
+std::string outputSystemInformationHelper(libMesh::System & system);
+
+/**
+ * Output the information about pre-SMO residual evaluation
+ */
+std::string outputPreSMOResidualInformation();
 
 /**
  * Output the legacy flag information
  */
 std::string outputLegacyInformation(MooseApp & app);
+
+/**
+ * Output the registered data paths for searching
+ */
+std::string outputDataFilePaths();
+
+/**
+ * Output the (param path = value) pairs for each DataFileName parameter
+ */
+std::string outputDataFileParams(MooseApp & app);
 
 /**
  * Helper function function for stringstream formatting

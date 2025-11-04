@@ -1,0 +1,10 @@
+[Tests]
+  design = 'PIDChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'pid_chain_control.i'
+    csvdiff = 'pid_chain_control_out.csv'
+    requirement = 'The system shall be able to compute chain control data using a proportional-integral-derivative controller.'
+  []
+[]

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -62,7 +62,7 @@ class PDFExtension(command.CommandExtension):
                     msg += "The heading with the following text is greater than level 4, which " \
                            "should be avoided if you plan on using the pdf extension with the " \
                            "LatexRenderer. The level is being set to 4. Please see " \
-                           "www.mooseframework.org for details."
+                           "https://mooseframework.inl.gov for details."
                     msg += '\n  %s'
                     LOG.warning(msg, node.text())
                     node['level'] = 4

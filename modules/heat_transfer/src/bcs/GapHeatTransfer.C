@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,7 @@
 #include "MooseVariable.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
+#include "GhostBoundary.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -77,6 +78,16 @@ GapHeatTransfer::validParams()
   // Node based options
   params.addCoupledVar("gap_distance", "Distance across the gap");
   params.addCoupledVar("gap_temp", "Temperature on the other side of the gap");
+
+  params.addRelationshipManager(
+      "GhostBoundary",
+      Moose::RelationshipManagerType::GEOMETRIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        auto & boundary = rm_params.set<std::vector<BoundaryName>>("boundary");
+        boundary = obj_params.get<std::vector<BoundaryName>>("boundary");
+        boundary.push_back(obj_params.get<BoundaryName>("paired_boundary"));
+      });
 
   return params;
 }
@@ -444,15 +455,16 @@ GapHeatTransfer::computeGapValues()
   else
   {
     Node * qnode = _mesh.getQuadratureNode(_current_elem, _current_side, _qp);
-    _pinfo = _penetration_locator->_penetration_info[qnode->id()];
 
     _gap_temp = 0.0;
     _gap_distance = std::numeric_limits<Real>::max();
     _has_info = false;
     _edge_multiplier = 1.0;
 
-    if (_pinfo)
+    if (auto it = _penetration_locator->_penetration_info.find(qnode->id());
+        it != _penetration_locator->_penetration_info.end() && it->second)
     {
+      _pinfo = it->second;
       _gap_distance = _pinfo->_distance;
       _has_info = true;
 
@@ -470,6 +482,7 @@ GapHeatTransfer::computeGapValues()
     }
     else
     {
+      _pinfo = nullptr;
       if (_warnings)
         mooseWarning("No gap value information found for node ",
                      qnode->id(),

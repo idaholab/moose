@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -45,8 +45,11 @@ MeshGenerator::validParams()
   params.registerBase("MeshGenerator");
 
   params.addPrivateParam<bool>("_has_generate_data", false);
+  params.addPrivateParam<bool>("_has_generate_csg", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
   params.addPrivateParam<bool>(data_only_param, false);
+  // Controls are not created early enough
+  params.suppressParameter<std::vector<std::string>>("control_tags");
 
   return params;
 }
@@ -62,7 +65,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   const auto & system = _app.getMeshGeneratorSystem();
   if (isDataOnly())
   {
-    if (!hasGenerateData())
+    // Skip the requirement for generateData() if we are generating CSG object
+    if (!hasGenerateCSG() && !hasGenerateData())
       system.dataDrivenError(*this, "does not support data-driven generation");
     if (hasSaveMesh())
       system.dataDrivenError(*this, "has 'save_with_name' set");
@@ -70,6 +74,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   if (_save_with_name == system.mainMeshGeneratorName())
     paramError(
         "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
+  if (getParam<bool>("nemesis") && !getParam<bool>("output"))
+    paramError("nemesis", "Should only be set to true if 'output=true'");
 }
 
 void
@@ -82,6 +88,18 @@ bool
 MeshGenerator::hasGenerateData(const InputParameters & params)
 {
   return params.get<bool>("_has_generate_data");
+}
+
+void
+MeshGenerator::setHasGenerateCSG(InputParameters & params)
+{
+  params.set<bool>("_has_generate_csg") = true;
+}
+
+bool
+MeshGenerator::hasGenerateCSG(const InputParameters & params)
+{
+  return params.get<bool>("_has_generate_csg");
 }
 
 const MeshGeneratorName *
@@ -142,7 +160,7 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
 {
   mooseAssert(!mesh_generator_name.empty(), "Empty name");
   const auto & mg_sys = _app.getMeshGeneratorSystem();
-  if (!_app.constructingMeshGenerators())
+  if (!hasGenerateCSG() && !_app.constructingMeshGenerators())
     mooseError("Cannot get a mesh outside of construction");
   if (!mg_sys.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
   {
@@ -154,7 +172,9 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
                "order of your MeshGenerators.\n\nThe most likely case is a sub generator whose "
                "input(s) are not declared as a sub dependency in the generator creating them.";
     else
-      error << "was not found.";
+      error << "was not found.\nMesh generators that can be found: "
+            << Moose::stringify(mg_sys.getMeshGeneratorNames());
+
     if (param_name.size())
       paramError(param_name, error.str());
     else
@@ -197,6 +217,40 @@ MeshGenerator::getMeshesByName(const std::vector<MeshGeneratorName> & mesh_gener
   for (const auto & name : mesh_generator_names)
     meshes.push_back(&getMeshByName(name));
   return meshes;
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGenerator::getCSGBase(const std::string & param_name)
+{
+  const MeshGeneratorName * name = getMeshGeneratorNameFromParam(param_name, false);
+  return getCSGBaseByName(*name);
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGenerator::getCSGBaseByName(const MeshGeneratorName & mesh_generator_name)
+{
+  checkGetMesh(mesh_generator_name, "");
+
+  auto & csg_base = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
+  if (!csg_base)
+    mooseError("Requested CSG object from " + mesh_generator_name + " returned a null object.");
+  _requested_csg_bases.emplace_back(mesh_generator_name, &csg_base);
+  return csg_base;
+}
+
+std::vector<std::unique_ptr<CSG::CSGBase> *>
+MeshGenerator::getCSGBases(const std::string & param_name)
+{
+  return getCSGBasesByName(getMeshGeneratorNamesFromParam(param_name));
+}
+
+std::vector<std::unique_ptr<CSG::CSGBase> *>
+MeshGenerator::getCSGBasesByName(const std::vector<MeshGeneratorName> & mesh_generator_names)
+{
+  std::vector<std::unique_ptr<CSG::CSGBase> *> csg_bases;
+  for (const auto & name : mesh_generator_names)
+    csg_bases.push_back(&getCSGBaseByName(name));
+  return csg_bases;
 }
 
 void
@@ -300,7 +354,7 @@ MeshGenerator::generateInternal()
 
     if (!getParam<bool>("nemesis"))
     {
-      ExodusII_IO exio(*mesh);
+      libMesh::ExodusII_IO exio(*mesh);
 
       if (mesh->mesh_dimension() == 1)
         exio.write_as_dimension(3);
@@ -312,7 +366,7 @@ MeshGenerator::generateInternal()
     }
     else
     {
-      Nemesis_IO nemesis_io(*mesh);
+      libMesh::Nemesis_IO nemesis_io(*mesh);
 
       // Default to non-HDF5 output for wider compatibility
       nemesis_io.set_hdf5_writing(false);
@@ -324,6 +378,25 @@ MeshGenerator::generateInternal()
   return mesh;
 }
 
+std::unique_ptr<CSG::CSGBase>
+MeshGenerator::generateInternalCSG()
+{
+  mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
+  auto csg_obj = generateCSG();
+  for (const auto & [requested_name, requested_csg] : _requested_csg_bases)
+    if (*requested_csg)
+      mooseError(
+          "The CSGBase object from input ",
+          _app.getMeshGenerator(requested_name).type(),
+          " '",
+          _app.getMeshGenerator(requested_name).name(),
+          "' was not moved.\n\nThe MeshGenerator system requires that the memory from all input "
+          "meshes\nare managed by the requesting MeshGenerator during the generate phase.\n\nThis "
+          "is achieved with a std::move() operation within the generateCSG() method.");
+
+  return csg_obj;
+}
+
 void
 MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
@@ -333,7 +406,7 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
     mooseError("Can only call addMeshSubgenerator() during MeshGenerator construction");
 
   // In case the user forgot it
-  params.set<MooseApp *>("_moose_app") = &_app;
+  params.set<MooseApp *>(MooseBase::app_param) = &_app;
 
   // Set this to be data-only if this generator is data only
   params.set<bool>(data_only_param) = isDataOnly();
@@ -419,4 +492,11 @@ MeshGenerator::generateData()
 {
   mooseAssert(!hasGenerateData(), "Inconsistent flag");
   mooseError("This MeshGenerator does not have a generateData() implementation.");
+}
+
+[[nodiscard]] std::unique_ptr<CSG::CSGBase>
+MeshGenerator::generateCSG()
+{
+  mooseAssert(!hasGenerateCSG(), "Inconsistent flag");
+  mooseError("This MeshGenerator does not have a generateCSG() implementation.");
 }

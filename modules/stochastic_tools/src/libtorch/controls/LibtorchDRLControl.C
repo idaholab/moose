@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchDRLControl.h"
-#include "LibtorchTorchScriptNeuralNet.h"
+#include "TorchScriptModule.h"
 #include "LibtorchArtificialNeuralNet.h"
 #include "Transient.h"
 
@@ -64,13 +64,8 @@ LibtorchDRLControl::execute()
 
     // If this is the first time this control is called and we need to use older values, fill up the
     // needed old values using the initial values
-    if (!_initialized)
-    {
-      _old_responses.clear();
-      for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-        _old_responses.push_back(_current_response);
-      _initialized = true;
-    }
+    if (_old_responses.empty())
+      _old_responses.assign(num_old_timesteps, _current_response);
 
     // Organize the old an current solution into a tensor so we can evaluate the neural net
     torch::Tensor input_tensor = prepareInputTensor();

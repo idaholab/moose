@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -30,7 +30,7 @@ public:
   Split(const InputParameters & parameters);
   virtual ~Split() = default;
 
-  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix = "-");
+  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix = "");
 
 protected:
   /// Which splitting to use
@@ -63,7 +63,4 @@ protected:
   MooseEnum _schur_type;
   MooseEnum _schur_pre;
   ///@}
-
-  /// Additional PETSc options
-  Moose::PetscSupport::PetscOptions _petsc_options;
 };

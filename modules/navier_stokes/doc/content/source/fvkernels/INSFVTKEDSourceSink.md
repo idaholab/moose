@@ -8,19 +8,16 @@ A different treatment is used for the bulk and the near wall regions.
 
 ## Bulk formulation:
 
-The turbulent production $G_k$ is modeled as follows:
+The production of turbulent kinetic energy dissipation $G_\epsilon$ is modeled as follows:
 
 \begin{equation}
-G_{\epsilon} = C_{1,\epsilon} \rho C_{\mu} S^2 k \,,
+G_{\epsilon} = C_{1,\epsilon} \frac{\epsilon}{k} G_k \,,
 \end{equation}
 
 where:
 
 - $C_{1,\epsilon} = 1.44$ is a closure parameter,
-- $\rho$ is the density
-- $C_{\mu} = 0.09$ is another closure parameter,
-- $S$ is the shear strain tensor internal norm, defined as $S = \sqrt{2\mathbf{S}:\mathbf{S}}$ with the shear strain tensor defined as $\mathbf{S} = \frac{1}{2} [\nabla \vec{u} + (\nabla \vec{u})^T]$,
-- $k$ is the turbulent kinetic energy, which generally comes from a coupled transport equation or can be set by the user for reproducing canonical cases.
+- $G_k$ is the limited turbulent kinetic energy production. For more details please refer to [INSFVTKESourceSink](INSFVTKESourceSink.md).
 
 The destruction of the turbulent kinetic energy dissipation rate is modeled as follows:
 
@@ -32,6 +29,7 @@ where:
 
 - $C_{2,\epsilon} = 1.92$ is a closure parameter,
 - $\epsilon$ is the solution variable, i.e., the dissipation rate of the turbulent kinetic energy,
+- $k$ is the turbulent kinetic energy,
 - $t_k = \frac{k}{\epsilon}$ is the turbulent time scale; if the [!param](/FVKernels/INSFVTKEDSourceSink/linearized_model) is `true`, this timescale is computed from the previous iteration; if [!param](/FVKernels/INSFVTKEDSourceSink/linearized_model) is `false`, in a nonlinear solve, this timescale is aded to the Jacobian.
 
 ## Wall formulation:
@@ -41,12 +39,12 @@ treatment in which the equilibrium value for the $\epsilon = \epsilon_{eq}$ is s
 A separate formulation is used for the `sub-laminar` and `logarithmic` boundary layers.
 The determination of whether the near-wall cell lies in the laminar or logarithmic region
 is performed via the non-dimensional wall distance $y^+$.
-The non-dimensional wall distance can be as defined differently according to the
-[!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) parameter.
+The non-dimensional wall distance can be defined differently according to the
+[!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) parameter. 
 
-If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) is `false`, the
-standard wall function formulations is used in
-which $y^+$ is found by an incremental fixed point algorithm as follows:
+The four formulations are described in more detail in [INSFVTurbulentViscosityWallFunction.md]. 
+
+If an equilibrium [!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) is defined, i.e. `eq_newton`,`eq_incremental` or `eq_linearized`, the standard wall function formulations are used in which $y^+$ is found:
 
 \begin{equation}
 y^+ = \frac{\rho y_p u_{\tau}}{\mu} \,,
@@ -59,11 +57,11 @@ where:
 - $u_{\tau}$ is the friction velocity, defined as $u_{\tau} = \sqrt{\frac{\tau_w}{\rho}}$ with $\tau_w$ the shear stress at the wall for which the condition is applied,
 - $\mu$ is the dynamic molecular viscosity.
 
-If [!param](/FVKernels/INSFVTKEDSourceSink/non_equilibrium_treatment) is `true`,
-non-equilibrium wall function formulations is used in which the $y^+$ is defined as follows:
+If a non-equilibrium [!param](/FVKernels/INSFVTKEDSourceSink/wall_treatment) is defined, i.e. `neq`,
+the $y^+$ is defined non-iteratively as follows:
 
 \begin{equation}
-y^+ = \frac{C_{\mu}^{0.25} y_p \sqrt{k}}{\mu} \,,
+y^+ = \frac{y_p \sqrt{\sqrt{C_{\mu}}k}}{\mu} \,,
 \end{equation}
 
 !alert note
@@ -76,7 +74,7 @@ A different value is used for $\epsilon_{eq}$ in each of the two regions.
 For the `sub-laminar` boundary layer, the equilibrium value is determined as follows:
 
 \begin{equation}
-\epsilon_{eq} = 2 \frac{k \mu_t}{y_p^2}\,,
+\epsilon_{eq} = 2 \frac{k \mu}{y_p^2}\,,
 \end{equation}
 
 where:

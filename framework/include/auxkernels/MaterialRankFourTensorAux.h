@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,13 +17,13 @@
  * property, for example stiffness, and output the value for the
  * supplied indices.
  */
-
-class MaterialRankFourTensorAux : public MaterialAuxBase<RankFourTensor>
+template <bool is_ad>
+class MaterialRankFourTensorAuxTempl : public MaterialAuxBaseTempl<RankFourTensor, is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MaterialRankFourTensorAux(const InputParameters & parameters);
+  MaterialRankFourTensorAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real getRealValue() override;
@@ -35,3 +35,6 @@ protected:
   const unsigned int _l;
   ///@}
 };
+
+typedef MaterialRankFourTensorAuxTempl<false> MaterialRankFourTensorAux;
+typedef MaterialRankFourTensorAuxTempl<true> ADMaterialRankFourTensorAux;

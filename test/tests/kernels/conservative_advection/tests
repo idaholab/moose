@@ -2,6 +2,45 @@
   design = 'ConservativeAdvection.md'
   issues = '#11852'
 
+  [error]
+    requirement = 'The system shall handle unique cases when trying to compute conservative advection '
+    [u_velocity]
+      type = RunException
+      input = no_upwinding_1D_coupled.i
+      cli_args = 'Kernels/advection/velocity_as_variable_gradient=u'
+      detail = 'by throwing an error when no the member variable gradient is used as velocity is given,'
+      expect_err = "if the gradient used as the velocity is the same as the member variable"
+    []
+    [no_velocity]
+      type = RunException
+      input = no_upwinding_1D.i
+      detail = 'by throwing an error when no velocity is given,'
+      expect_err = "One and only one of the following input variables must be specified: velocity_variable, velocity_material, or velocity_as_variable_gradient."
+    []
+    [ad_no_velocity]
+      type = RunException
+      input = ad_no_upwinding_1D.i
+      detail = 'by throwing an error when no velocity is given when using AD,'
+      expect_err = "One and only one of the following input variables must be specified: velocity_variable, velocity_material, or velocity_as_variable_gradient."
+    []
+    [deprecated_velocity]
+      type = RunException
+      input = no_upwinding_1D.i
+      detail = 'by throwing a deprecation warning when no velocity is given when using AD,'
+      cli_args = "Kernels/advection/velocity='1 0 0'"
+      allow_deprecated = False
+      expect_err = "'velocity' has been deprecated and will be removed on 12/31/2025. Please use 'velocity_variable' instead."
+    []
+    [ad_deprecated_velocity]
+      type = RunException
+      input = ad_no_upwinding_1D.i
+      detail = 'by throwing a deprecation warning when velocity is given when using AD,'
+      cli_args = "Kernels/advection/velocity=v"
+      allow_deprecated = False
+      expect_err = "'velocity' has been deprecated and will be removed on 12/31/2025. Please use 'velocity_material' instead."
+    []
+  []
+
   [upwinding]
     requirement = 'The system shall include the ability to compute the residual contribution from '
                   'the conservative form of the advection operator'
@@ -11,31 +50,82 @@
       input = no_upwinding_jacobian.i
       ratio_tol = 1E-7
       difference_tol = 1E-7
-
-      detail = 'without upwinding in 3D,'
+      detail = 'and compute a perfect jacobian without upwinding in 3D,'
     []
     [full_upwinding_jacobian]
       type = PetscJacobianTester
       input = full_upwinding_jacobian.i
       ratio_tol = 1E-7
       difference_tol = 1E-7
-
-      detail = 'with upwinding in 3D,'
+      detail = 'and compute a perfect jacobian with upwinding in 3D,'
     []
     [no_upwinding_1D]
       type = Exodiff
       input = no_upwinding_1D.i
       exodiff = no_upwinding_1D_out.e
       abs_zero = 1E-7
-
-      detail = 'without upwinding in 1D,'
+      cli_args = "Kernels/advection/velocity_variable='1 0 0'"
+      detail = 'without upwinding in 1D, with velocity given as a variable,'
+    []
+    [no_upwinding_1D_mat]
+      type = Exodiff
+      input = no_upwinding_1D.i
+      exodiff = no_upwinding_1D_mat_out.e
+      abs_zero = 1E-7
+      cli_args = "Outputs/file_base=no_upwinding_1D_mat_out Kernels/advection/velocity_material=v"
+      detail = 'without upwinding in 1D, with velocity given as a material,'
+    []
+    [no_upwinding_1D_coupled_aux]
+      type = Exodiff
+      input = no_upwinding_1D_coupled_aux.i
+      exodiff = no_upwinding_1D_coupled_aux_out.e
+      abs_zero = 1E-7
+      detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled aux variable,'
+    []
+    [no_upwinding_1D_coupled_aux_jacobian]
+      type = PetscJacobianTester
+      input = no_upwinding_1D_coupled_aux.i
+      cli_args = 'Executioner/num_steps=1'
+      ratio_tol = 1E-7
+      difference_tol = 1E-7
+      detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled aux variable and compute a perfect jacobian without upwinding in 1D,'
+    []
+    [no_upwinding_1D_coupled]
+      type = Exodiff
+      input = no_upwinding_1D_coupled.i
+      exodiff = no_upwinding_1D_coupled_out.e
+      abs_zero = 1E-7
+      detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled variable,'
+    []
+    [no_upwinding_1D_coupled_jacobian]
+      type = PetscJacobianTester
+      input = no_upwinding_1D_coupled.i
+      cli_args = 'Executioner/num_steps=1'
+      ratio_tol = 1E-7
+      difference_tol = 1E-7
+      detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled variable and compute a perfect jacobian without upwinding in 1D,'
+    []
+    [ad_no_upwinding_1D]
+      type = Exodiff
+      input = ad_no_upwinding_1D.i
+      exodiff = ad_no_upwinding_1D_out.e
+      abs_zero = 1E-7
+      cli_args = "Kernels/advection/velocity_variable='1 0 0'"
+      detail = 'without upwinding in 1D, with velocity given as a variable, using AD,'
+    []
+    [ad_no_upwinding_1D_mat]
+      type = Exodiff
+      input = ad_no_upwinding_1D.i
+      exodiff = ad_no_upwinding_1D_mat_out.e
+      abs_zero = 1E-7
+      cli_args = "Outputs/file_base=ad_no_upwinding_1D_mat_out Kernels/advection/velocity_material=v"
+      detail = 'without upwinding in 1D, with velocity given as a material, using AD,'
     []
     [full_upwinding_1D]
       type = Exodiff
       input = full_upwinding_1D.i
       exodiff = full_upwinding_1D_out.e
       abs_zero = 1E-7
-
       detail = 'with upwinding in 1D,'
     []
     [no_upwinding_2D]
@@ -43,7 +133,6 @@
       input = no_upwinding_2D.i
       exodiff = no_upwinding_2D_out.e
       abs_zero = 1E-7
-
       detail = 'without upwinding in 2D,'
     []
     [full_upwinding_2D]
@@ -51,7 +140,6 @@
       input = full_upwinding_2D.i
       exodiff = full_upwinding_2D_out.e
       abs_zero = 1E-7
-
       detail = 'with upwinding in 2D,'
     []
     [none_in_all_out]
@@ -59,7 +147,6 @@
       input = none_in_all_out.i
       exodiff = none_in_all_out_out.e
       abs_zero = 1E-7
-
       detail = 'with upwinding and an outflow boundary condition, and'
     []
     [none_in_none_out]
@@ -67,7 +154,6 @@
       input = none_in_none_out.i
       csvdiff = none_in_none_out_out.csv
       abs_zero = 1E-7
-
       detail = 'without any outflow boundary conditions.'
     []
   []

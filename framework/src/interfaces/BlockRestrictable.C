@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -46,11 +46,12 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
                                                   : NULL),
     _boundary_ids(_empty_boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
-    _blk_name(moose_object->getParam<std::string>("_object_name")),
-    _blk_dim(libMesh::invalid_uint)
+    _blk_name(moose_object->name()),
+    _blk_dim(libMesh::invalid_uint),
+    _moose_object(moose_object)
 {
   if (initialize)
-    initializeBlockRestrictable(moose_object);
+    initializeBlockRestrictable(_moose_object);
 }
 
 // Dual restricted constructor
@@ -64,10 +65,11 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
                                                   : NULL),
     _boundary_ids(boundary_ids),
     _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
-    _blk_name(moose_object->getParam<std::string>("_object_name")),
-    _blk_dim(libMesh::invalid_uint)
+    _blk_name(moose_object->name()),
+    _blk_dim(libMesh::invalid_uint),
+    _moose_object(moose_object)
 {
-  initializeBlockRestrictable(moose_object);
+  initializeBlockRestrictable(_moose_object);
 }
 
 void
@@ -84,7 +86,14 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 
   // Populate the MaterialData pointer
   if (_blk_feproblem != NULL)
-    _blk_material_data = &_blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
+  {
+#ifdef MOOSE_KOKKOS_ENABLED
+    if (_moose_object->isKokkosObject({}))
+      _blk_material_data = &_blk_feproblem->getKokkosMaterialData(Moose::BLOCK_MATERIAL_DATA);
+    else
+#endif
+      _blk_material_data = &_blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
+  }
 
   // The 'block' input is defined
   if (moose_object->isParamValid("block"))
@@ -176,6 +185,11 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     _blk_dim = _blk_mesh->getBlocksMaxDimension(_blocks);
   else
     _blk_dim = _blk_mesh->dimension();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (moose_object->isKokkosObject({}))
+    initializeKokkosBlockRestrictable(_blk_mesh->getKokkosMesh());
+#endif
 }
 
 bool
@@ -217,6 +231,12 @@ BlockRestrictable::hasBlocks(const SubdomainName & name) const
 
 bool
 BlockRestrictable::hasBlocks(const std::vector<SubdomainName> & names) const
+{
+  return hasBlocks(_blk_mesh->getSubdomainIDs(names));
+}
+
+bool
+BlockRestrictable::hasBlocks(const std::set<SubdomainName> & names) const
 {
   return hasBlocks(_blk_mesh->getSubdomainIDs(names));
 }
@@ -338,7 +358,8 @@ BlockRestrictable::checkVariable(const MooseVariableFieldBase & variable) const
 {
   // a variable defined on all internal sides does not need this check because
   // it can be coupled with other variables in DG kernels
-  if (variable.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) > 0)
+  if (!_blk_mesh->interiorLowerDBlocks().empty() &&
+      variable.activeOnSubdomains(_blk_mesh->interiorLowerDBlocks()))
     return;
 
   if (!isBlockSubset(variable.activeSubdomains()))

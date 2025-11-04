@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,3 +19,11 @@ NonADFunctorInterface::NonADFunctorInterface(const MooseObject * const moose_obj
   : FunctorInterface(moose_object)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+NonADFunctorInterface::NonADFunctorInterface(const NonADFunctorInterface & object,
+                                             const Moose::Kokkos::FunctorCopy & key)
+  : FunctorInterface(object, key)
+{
+}
+#endif

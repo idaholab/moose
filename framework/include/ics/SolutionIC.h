@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 
 #include "InitialCondition.h"
 
-class SolutionUserObject;
+class SolutionUserObjectBase;
 
 /**
  * Class for reading an initial condition from a solution user object
@@ -27,7 +27,7 @@ public:
 
 protected:
   /// SolutionUserObject containing the solution of interest
-  const SolutionUserObject & _solution_object;
+  const SolutionUserObjectBase & _solution_object;
 
   /// The variable name extracted from the SolutionUserObject
   const VariableName & _solution_object_var_name;

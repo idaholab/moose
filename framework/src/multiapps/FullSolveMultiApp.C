@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,7 +10,7 @@
 #include "FullSolveMultiApp.h"
 #include "LayeredSideDiffusiveFluxAverage.h"
 #include "Executioner.h"
-#include "Transient.h"
+#include "TransientBase.h"
 #include "Console.h"
 
 // libMesh
@@ -24,13 +24,6 @@ FullSolveMultiApp::validParams()
   InputParameters params = MultiApp::validParams();
   params.addClassDescription("Performs a complete simulation during each execution.");
   params.addParam<bool>(
-      "no_backup_and_restore",
-      false,
-      "True to turn off restore for this multiapp. This is useful when doing steady-state "
-      "Picard iterations where we want to use the solution of previous Picard iteration as the "
-      "initial guess of the current Picard iteration.");
-  params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
-  params.addParam<bool>(
       "keep_full_output_history",
       false,
       "Whether or not to keep the full output history when this multiapp has multiple entries");
@@ -41,9 +34,7 @@ FullSolveMultiApp::validParams()
 }
 
 FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
-  : MultiApp(parameters),
-    _no_restore(getParam<bool>("no_restore")),
-    _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
+  : MultiApp(parameters), _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
 {
   // You could end up with some dirty hidden behavior if you do this. We could remove this check,
   // but I don't think that it's sane to do so.
@@ -81,7 +72,7 @@ FullSolveMultiApp::initialSetup()
 
       if (_ignore_diverge)
       {
-        Transient * tex = dynamic_cast<Transient *>(ex);
+        TransientBase * tex = dynamic_cast<TransientBase *>(ex);
         if (tex && tex->parameters().get<bool>("error_on_dtmin"))
           mooseError("Requesting to ignore failed solutions, but 'Executioner/error_on_dtmin' is "
                      "true in sub-application. Set this parameter to false in sub-application to "

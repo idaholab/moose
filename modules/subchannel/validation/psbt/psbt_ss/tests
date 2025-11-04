@@ -1,0 +1,15 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#29196 #29199 #29237 #29505'
+  [psbt_case_01-5237]
+    type = CSVDiff
+    input = psbt.i
+    csvdiff = psbt_out.csv
+    capabilities = 'method!=dbg'
+    valgrind = NONE
+    recover = false
+    abs_zero = 1e-5
+    max_threads = 1
+    requirement = 'The system will examine the subchannel solver for the psbt case'
+  []
+[]

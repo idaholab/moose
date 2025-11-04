@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,6 +17,7 @@
 
 // Forward Declarations
 enum class ExplicitDynamicsContactModel;
+class DisplacedProblem;
 
 /**
  * A ExplicitDynamicsContactConstraint does mechanical contact for explicit dynamics simulations.
@@ -73,8 +74,10 @@ public:
 
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
 
-  virtual void overwriteBoundaryVariables(NumericVector<Number> & soln,
-                                          const Node & secondary_node) const override;
+  virtual void overwriteBoundaryVariables(NumericVector<Number> &, const Node &) const override
+  {
+    return;
+  };
 
 protected:
   /**
@@ -89,7 +92,6 @@ protected:
 
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real gapOffset(const Node & node);
-  Real nodalArea(const Node & node);
   Real getPenalty(const Node & node);
 
   const unsigned int _component;
@@ -107,12 +109,6 @@ protected:
   const bool _has_mapped_primary_gap_offset;
   const MooseVariable * const _mapped_primary_gap_offset_var;
 
-  MooseVariable * _nodal_area_var;
-  const MooseVariable * _nodal_density_var;
-  const MooseVariable * _nodal_wave_speed_var;
-
-  SystemBase & _aux_system;
-  const NumericVector<Number> * const _aux_solution;
   const Real _penalty;
 
   const bool _print_contact_nodes;
@@ -120,12 +116,6 @@ protected:
   const static unsigned int _no_iterations;
 
   NumericVector<Number> & _residual_copy;
-
-  /// Density material for neighbor projection
-  const MaterialProperty<Real> & _neighbor_density;
-
-  /// Wave speed material for neighbor projection
-  const MaterialProperty<Real> & _neighbor_wave_speed;
 
   /// Nodal gap rate (output for debugging or analyst perusal)
   MooseWritableVariable * _gap_rate;
@@ -137,11 +127,14 @@ protected:
   /// Z component of velocity at the closest point
   const VariableValue & _neighbor_vel_z;
 
-  /// Whether to overwrite contact boundary nodal solution
-  const bool _overwrite_current_solution;
-
 private:
   std::unordered_map<dof_id_type, Real> _dof_to_position;
+
+  /**
+   * @param lumped_mass The inverted lumped mass vector
+   * @return Effictive mass of the face
+   */
+  Real computeFaceMass(const NumericVector<Real> & lumped_mass);
 };
 
 inline const std::unordered_set<unsigned int> &

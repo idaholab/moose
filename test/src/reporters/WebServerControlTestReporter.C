@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,10 +17,14 @@ WebServerControlTestReporter::validParams()
   auto params = GeneralReporter::validParams();
   params.addParam<bool>("bool_value", "Test bool value");
   params.addParam<Real>("real_value", "Test Real value");
+  params.addParam<int>("int_value", "Test int value");
   params.addParam<std::vector<Real>>("vec_real_value", "Test vector Real value");
+  params.addParam<std::vector<int>>("vec_int_value", "Test vector int value");
   params.addParam<std::string>("string_value", "Test string value");
   params.addParam<std::vector<std::string>>("vec_string_value", "Test vector string value");
-  params.declareControllable("bool_value real_value vec_real_value string_value vec_string_value");
+  params.addParam<RealEigenMatrix>("matrix_value", "Test RealEigenMatrix value");
+  params.declareControllable("bool_value real_value int_value vec_real_value vec_int_value "
+                             "string_value vec_string_value matrix_value");
   return params;
 }
 
@@ -29,9 +33,12 @@ WebServerControlTestReporter::WebServerControlTestReporter(const InputParameters
 {
   declare<bool>("bool_value");
   declare<Real>("real_value");
+  declare<int>("int_value");
   declare<std::vector<Real>>("vec_real_value");
+  declare<std::vector<int>>("vec_int_value");
   declare<std::string>("string_value");
   declare<std::vector<std::string>>("vec_string_value");
+  declare<RealEigenMatrix>("matrix_value");
 }
 
 void

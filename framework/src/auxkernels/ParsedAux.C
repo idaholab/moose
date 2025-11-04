@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedAux.h"
-#include "MooseApp.h"
 
 registerMooseObject("MooseApp", ParsedAux);
 
@@ -21,10 +20,13 @@ ParsedAux::validParams()
       "Sets a field variable value to the evaluation of a parsed expression.");
 
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "Parsed function expression to compute");
-  params.deprecateParam("function", "expression", "02/07/2024");
-  params.addCoupledVar("args", "Vector of coupled variable names");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+      "expression", "FunctionExpression", "Parsed function expression to compute");
+  params.addCoupledVar("coupled_variables", "Vector of coupled variable names");
+
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "material_properties", {}, "Material properties (Real-valued) in the expression");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "ad_material_properties", {}, "AD material properties (ADReal-valued) in the expression");
 
   params.addParam<bool>(
       "use_xyzt",
@@ -38,7 +40,20 @@ ParsedAux::validParams()
       "constant_expressions",
       {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
-
+  params.addParam<std::vector<MooseFunctorName>>(
+      "functor_names", {}, "Functors to use in the parsed expression");
+  params.addParam<std::vector<std::string>>(
+      "functor_symbols",
+      {},
+      "Symbolic name to use for each functor in 'functor_names' in the parsed expression. If not "
+      "provided, then the actual functor names will be used in the parsed expression.");
+  params.addParam<bool>(
+      "evaluate_functors_on_qp",
+      true,
+      "Whether to evaluate functors using the ElemQpArg/ElemSideQpArg or the ElemArg/FaceArg "
+      "functor arguments. The behavior of a functor for each argument is implementation-defined by "
+      "the functor. But for most functors, the former two use the quadrature rule points as "
+      "evaluation locations, while the latter two use the element centroid/face centroid.");
   return params;
 }
 
@@ -48,71 +63,158 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _function(getParam<std::string>("expression")),
     _nargs(coupledComponents("coupled_variables")),
     _args(coupledValues("coupled_variables")),
-    _use_xyzt(getParam<bool>("use_xyzt"))
+    _matprop_names(getParam<std::vector<MaterialPropertyName>>("material_properties")),
+    _ad_matprop_names(getParam<std::vector<MaterialPropertyName>>("ad_material_properties")),
+    _n_matprops(_matprop_names.size()),
+    _n_ad_matprops(_ad_matprop_names.size()),
+    _use_xyzt(getParam<bool>("use_xyzt")),
+    _xyzt({"x", "y", "z", "t"}),
+    _functor_names(getParam<std::vector<MooseFunctorName>>("functor_names")),
+    _n_functors(_functor_names.size()),
+    _functor_symbols(getParam<std::vector<std::string>>("functor_symbols")),
+    _use_qp_functor_arguments(getParam<bool>("evaluate_functors_on_qp"))
 {
+
+  for (const auto i : make_range(_nargs))
+    _coupled_variable_names.push_back(getFieldVar("coupled_variables", i)->name());
+
+  // sanity checks
+  if (!_functor_symbols.empty() && (_functor_symbols.size() != _n_functors))
+    paramError("functor_symbols", "functor_symbols must be the same length as functor_names.");
+  if (isNodal() && _use_qp_functor_arguments && isParamSetByUser("evaluate_functors_on_qp"))
+    paramError("evaluate_functors_on_qp", "QPs are not used for computing variable nodal values.");
+
+  validateFunctorSymbols();
+  validateFunctorNames();
+  // We need the FaceInfo generated
+  if (_bnd && !_use_qp_functor_arguments)
+    _subproblem.needFV();
+
   // build variables argument
   std::string variables;
 
   // coupled field variables
-  for (std::size_t i = 0; i < _nargs; ++i)
-    variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
+  for (const auto i : index_range(_coupled_variable_names))
+    variables += (i == 0 ? "" : ",") + _coupled_variable_names[i];
 
-  // "system" variables
-  const std::vector<std::string> xyzt = {"x", "y", "z", "t"};
+  // adding functors to the expression
+  if (_functor_symbols.size())
+    for (const auto & symbol : _functor_symbols)
+      variables += (variables.empty() ? "" : ",") + symbol;
+  else
+    for (const auto & name : _functor_names)
+      variables += (variables.empty() ? "" : ",") + name;
+
+  // material properties
+  for (const auto & matprop : _matprop_names)
+    variables += (variables.empty() ? "" : ",") + matprop;
+  for (const auto & matprop : _ad_matprop_names)
+    variables += (variables.empty() ? "" : ",") + matprop;
+  if (isNodal() && (_matprop_names.size() || _ad_matprop_names.size()))
+    mooseError("Material properties cannot be retrieved in a nodal auxkernel. Use a different "
+               "auxiliary variable family.");
+
+  // positions and time
   if (_use_xyzt)
-    for (auto & v : xyzt)
+    for (auto & v : _xyzt)
       variables += (variables.empty() ? "" : ",") + v;
 
-  // base function object
+  // Create parsed function
   _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // add the constant expressions
-  addFParserConstants(_func_F,
+  parsedFunctionSetup(_func_F,
+                      _function,
+                      variables,
                       getParam<std::vector<std::string>>("constant_names"),
-                      getParam<std::vector<std::string>>("constant_expressions"));
-
-  // parse function
-  if (_func_F->Parse(_function, variables) >= 0)
-    mooseError(
-        "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
-
-  // optimize
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-
-  // just-in-time compile
-  if (_enable_jit)
-  {
-    // let rank 0 do the JIT compilation first
-    if (_communicator.rank() != 0)
-      _communicator.barrier();
-
-    _func_F->JITCompile();
-
-    // wait for ranks > 0 to catch up
-    if (_communicator.rank() == 0)
-      _communicator.barrier();
-  }
+                      getParam<std::vector<std::string>>("constant_expressions"),
+                      comm());
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_nargs + (_use_xyzt ? 4 : 0));
+  _func_params.resize(_nargs + _n_functors + _n_matprops + _n_ad_matprops + (_use_xyzt ? 4 : 0));
+
+  // keep pointers to the material properties
+  for (const auto & name : _matprop_names)
+    _matprops.push_back(&getMaterialProperty<Real>(name));
+  for (const auto & name : _ad_matprop_names)
+    _ad_matprops.push_back(&getADMaterialProperty<Real>(name));
+
+  // keep pointers to the functors
+  for (const auto & name : _functor_names)
+    _functors.push_back(&getFunctor<Real>(name));
 }
 
 Real
 ParsedAux::computeValue()
 {
-  for (std::size_t j = 0; j < _nargs; ++j)
+  // Variables
+  for (const auto j : make_range(_nargs))
     _func_params[j] = (*_args[j])[_qp];
 
+  // Functors
+  const auto & state = determineState();
+  if (isNodal())
+  {
+    const Moose::NodeArg node_arg = {_current_node,
+                                     &Moose::NodeArg::undefined_subdomain_connection};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(node_arg, state);
+  }
+  else if (_bnd && _use_qp_functor_arguments)
+  {
+    const Moose::ElemSideQpArg side_qp_arg = {
+        _current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(side_qp_arg, state);
+  }
+  else if (_bnd)
+  {
+    const Moose::FaceArg face_arg = {_mesh.faceInfo(_current_elem, _current_side),
+                                     Moose::FV::LimiterType::CentralDifference,
+                                     /*elem_is_upwind*/ true,
+                                     /*correct skewness*/ true,
+                                     /*face_side*/ nullptr,
+                                     /*state_limiter*/ nullptr};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(face_arg, state);
+  }
+  else if (_use_qp_functor_arguments)
+  {
+    const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(qp_arg, state);
+  }
+  else
+  {
+    const Moose::ElemArg elem_arg = {_current_elem, /*correct skewness*/ true};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(elem_arg, state);
+  }
+
+  // Material properties
+  for (const auto j : make_range(_n_matprops))
+    _func_params[_nargs + _n_functors + j] = (*_matprops[j])[_qp];
+  for (const auto j : make_range(_n_ad_matprops))
+    _func_params[_nargs + _n_functors + _n_matprops + j] = (*_ad_matprops[j])[_qp].value();
+
+  // Positions and time
   if (_use_xyzt)
   {
-    for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
-      _func_params[_nargs + j] = isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
-    _func_params[_nargs + 3] = _t;
+    for (const auto j : make_range(Moose::dim))
+      _func_params[_nargs + _n_functors + _n_matprops + _n_ad_matprops + j] =
+          isNodal() ? (*_current_node)(j) : _q_point[_qp](j);
+    _func_params[_nargs + _n_functors + _n_matprops + _n_ad_matprops + 3] = _t;
   }
 
   return evaluate(_func_F);
+}
+
+void
+ParsedAux::validateFunctorSymbols()
+{
+  validateGenericVectorNames(_functor_symbols, "functor_symbols");
+}
+
+void
+ParsedAux::validateFunctorNames()
+{
+  validateGenericVectorNames(_functor_names, "functor_names");
 }

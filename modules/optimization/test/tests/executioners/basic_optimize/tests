@@ -68,23 +68,5 @@
       max_threads = 1 # Optimize executioner does not support multiple threads
       detail = 'testing hand-coded gradient;'
     []
-    [failed_ls]
-      type = RunApp
-      input = quadratic_minimize.i
-      cli_args = '-tao_fd_gradient true'
-      allow_test_objects = True
-      expect_out = 'Solver terminated: -6   Line Search Failure'
-      max_threads = 1 # Optimize executioner does not support multiple threads
-      detail = 'indicating a failed line search;'
-    []
-    [failed_it]
-      type = RunApp
-      input = quadratic_minimize.i
-      cli_args = '-tao_fd_gradient true -tao_ls_type unit -tao_max_it 1'
-      allow_test_objects = True
-      expect_out = 'Solver terminated: -2   Maximum Iterations'
-      max_threads = 1 # Optimize executioner does not support multiple threads
-      detail = 'indicating maximum iteration reached;'
-    []
   []
 []

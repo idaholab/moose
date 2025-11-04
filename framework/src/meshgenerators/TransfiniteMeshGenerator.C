@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,8 +29,8 @@ TransfiniteMeshGenerator::validParams()
   MooseEnum edge_type("LINE=1 CIRCARC=2 DISCRETE=3 PARSED=4");
 
   params.addRequiredParam<std::vector<Point>>("corners", "The x,y,z positions of the nodes");
-  // Define edge types
 
+  // Define edge types
   params.addRequiredParam<MooseEnum>("bottom_type", edge_type, "type of the bottom (y) boundary");
   params.addRequiredParam<MooseEnum>("top_type", edge_type, "type of the top (y) boundary");
   params.addRequiredParam<MooseEnum>("left_type", edge_type, "type of the left (x) boundary");
@@ -186,21 +186,21 @@ TransfiniteMeshGenerator::generate()
     for (unsigned int idy = 0; idy < _ny - 1; idy++)
     {
       Elem * elem = mesh->add_elem(new Quad4);
-      elem->set_node(0) = nodes[idy + idx * _ny];
-      elem->set_node(1) = nodes[idy + (idx + 1) * _ny];
-      elem->set_node(2) = nodes[idy + 1 + (idx + 1) * _ny];
-      elem->set_node(3) = nodes[idy + 1 + idx * _ny];
+      elem->set_node(0, nodes[idy + idx * _ny]);
+      elem->set_node(1, nodes[idy + (idx + 1) * _ny]);
+      elem->set_node(2, nodes[idy + 1 + (idx + 1) * _ny]);
+      elem->set_node(3, nodes[idy + 1 + idx * _ny]);
 
       if (idy == 0) // add bottom boundary (boundary_id = 0)
         boundary_info.add_side(elem, 0, 0);
 
-      if (idx == _nx - 2) // add right boundary (boundary_id = 3)
-        boundary_info.add_side(elem, 1, 2);
+      if (idx == _nx - 2) // add right boundary (boundary_id = 1)
+        boundary_info.add_side(elem, 1, 1);
 
-      if (idy == _ny - 2) // add top boundary (boundary_id = 1)
-        boundary_info.add_side(elem, 2, 1);
+      if (idy == _ny - 2) // add top boundary (boundary_id = 2)
+        boundary_info.add_side(elem, 2, 2);
 
-      if (idx == 0) // add left boundary (boundary_id = 2)
+      if (idx == 0) // add left boundary (boundary_id = 3)
         boundary_info.add_side(elem, 3, 3);
     }
   }
@@ -208,14 +208,14 @@ TransfiniteMeshGenerator::generate()
   boundary_info.sideset_name(0) = "bottom";
   boundary_info.nodeset_name(0) = "bottom";
 
-  boundary_info.sideset_name(3) = "right";
-  boundary_info.nodeset_name(3) = "right";
+  boundary_info.sideset_name(1) = "right";
+  boundary_info.nodeset_name(1) = "right";
 
-  boundary_info.sideset_name(1) = "top";
-  boundary_info.nodeset_name(1) = "top";
+  boundary_info.sideset_name(2) = "top";
+  boundary_info.nodeset_name(2) = "top";
 
-  boundary_info.sideset_name(2) = "left";
-  boundary_info.nodeset_name(2) = "left";
+  boundary_info.sideset_name(3) = "left";
+  boundary_info.nodeset_name(3) = "left";
 
   mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -98,7 +98,7 @@ class TestSQARequirementsAST(MooseDocsTestCase):
         ast = self.tokenize(text)
         self._assertAST_common(ast(0))
         self._assertAST_tree(ast(1))
-        self.assertToken(ast(0)(6), 'SQARequirementMatrixItem', size=4)
+        self.assertToken(ast(0)(6), 'SQARequirementMatrixItem', size=6)
         self.assertToken(ast(0)(6)(2), 'SQARequirementCollections', size=0, collections={"Andrew"})
 
     def testASTTypesLink(self):
@@ -160,51 +160,70 @@ class TestSQAVerificationAndValidation(MooseDocsTestCase):
         if ext == sqa:
             return dict(active=True,
                         categories=dict(Demo=dict(directories=['python/MooseDocs/test'],
-                                                  specs=['demo'])))
+                                                  specs=['demo']),
+                                        Empty=dict(directories=['python/MooseDocs/test'],
+                                                   specs=['demo2'])))
     def testVerification(self):
         text = "!sqa verification category=Demo link-spec=false link-design=false link-issues=false link-results=false link-collections=false link-types=false"
         ast = self.tokenize(text)
-        self.assertToken(ast(0), 'SQARequirementMatrix', size=3)
+        self.assertToken(ast(0), 'SQARequirementMatrix', size=9)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo')
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=2)
-        self.assertToken(ast(0)(1)(0), 'SQARequirementText', size=3)
-        self.assertToken(ast(0)(1)(0)(0), 'Word', content='Requirement')
-        self.assertToken(ast(0)(1)(0)(1), 'Space', count=1)
-        self.assertToken(ast(0)(1)(0)(2), 'Word', content='Four')
+        self.assertToken(ast(0)(3), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(0)(3)(0), 'SQARequirementText', size=3)
+        self.assertToken(ast(0)(3)(0)(0), 'Word', content='Requirement')
+        self.assertToken(ast(0)(3)(0)(1), 'Space', count=1)
+        self.assertToken(ast(0)(3)(0)(2), 'Word', content='Three')
+        self.assertToken(ast(0)(3)(1), 'Paragraph', size=3)
+        self.assertToken(ast(0)(3)(1)(0), 'String', content='Verification: ')
+        self.assertToken(ast(0)(3)(1)(1), 'AutoLink', page='sqa.md')
 
-        self.assertToken(ast(0)(1)(1), 'Paragraph', size=3)
-        self.assertToken(ast(0)(1)(1)(0), 'String', content='Verification: ')
-        self.assertToken(ast(0)(1)(1)(1), 'AutoLink', page='katex.md')
+        self.assertToken(ast(0)(4), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(0)(4)(0), 'SQARequirementText', size=3)
+        self.assertToken(ast(0)(4)(1), 'Paragraph', size=3)
+        self.assertToken(ast(0)(4)(1)(0), 'String', content='Verification: ')
+        self.assertToken(ast(0)(4)(1)(1), 'AutoLink', page='katex.md')
 
-        self.assertToken(ast(0)(2), 'SQARequirementMatrixItem', size=3)
-        self.assertToken(ast(0)(2)(0), 'SQARequirementText', size=5)
-        self.assertToken(ast(0)(2)(1), 'SQARequirementDetails', size=2)
-        self.assertToken(ast(0)(2)(2), 'Paragraph', size=3)
-        self.assertToken(ast(0)(2)(2)(0), 'String', content='Verification: ')
-        self.assertToken(ast(0)(2)(2)(1), 'AutoLink', page='bibtex.md')
+        self.assertToken(ast(0)(5), 'SQARequirementMatrixItem', size=3)
+        self.assertToken(ast(0)(5)(0), 'SQARequirementText', size=5)
+        self.assertToken(ast(0)(5)(1), 'SQARequirementDetails', size=2)
+        self.assertToken(ast(0)(5)(2), 'Paragraph', size=3)
+        self.assertToken(ast(0)(5)(2)(0), 'String', content='Verification: ')
+        self.assertToken(ast(0)(5)(2)(1), 'AutoLink', page='bibtex.md')
 
     def testValidation(self):
         text = "!sqa validation category=Demo link-spec=false link-design=false link-issues=false link-results=false link-collections=false link-types=false"
         ast = self.tokenize(text)
-        self.assertToken(ast(0), 'SQARequirementMatrix', size=3)
+        self.assertToken(ast(0), 'SQARequirementMatrix', size=9)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo')
         self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=2)
         self.assertToken(ast(0)(1)(0), 'SQARequirementText', size=3)
         self.assertToken(ast(0)(1)(0)(0), 'Word', content='Requirement')
         self.assertToken(ast(0)(1)(0)(1), 'Space', count=1)
-        self.assertToken(ast(0)(1)(0)(2), 'Word', content='Three')
+        self.assertToken(ast(0)(1)(0)(2), 'Word', content='One')
 
         self.assertToken(ast(0)(1)(1), 'Paragraph', size=3)
         self.assertToken(ast(0)(1)(1)(0), 'String', content='Validation: ')
-        self.assertToken(ast(0)(1)(1)(1), 'AutoLink', page='alert.md')
+        self.assertToken(ast(0)(1)(1)(1), 'AutoLink', page='special.md')
 
-        self.assertToken(ast(0)(2), 'SQARequirementMatrixItem', size=3)
-        self.assertToken(ast(0)(2)(0), 'SQARequirementText', size=5)
-        self.assertToken(ast(0)(2)(1), 'SQARequirementDetails', size=2)
-        self.assertToken(ast(0)(2)(2), 'Paragraph', size=5)
-        self.assertToken(ast(0)(2)(2)(0), 'String', content='Validation: ')
-        self.assertToken(ast(0)(2)(2)(1), 'AutoLink', page='katex.md')
-        self.assertToken(ast(0)(2)(2)(3), 'AutoLink', page='bibtex.md')
+        self.assertToken(ast(0)(3), 'SQARequirementMatrixItem', size=2)
+        self.assertToken(ast(0)(3)(0), 'SQARequirementText', size=3)
+        self.assertToken(ast(0)(3)(1), 'Paragraph', size=3)
+        self.assertToken(ast(0)(3)(1)(0), 'String', content='Validation: ')
+        self.assertToken(ast(0)(3)(1)(1), 'AutoLink', page='alert.md')
+
+        self.assertToken(ast(0)(7), 'SQARequirementMatrixItem', size=3)
+        self.assertToken(ast(0)(7)(0), 'SQARequirementText', size=5)
+        self.assertToken(ast(0)(7)(1), 'SQARequirementDetails', size=2)
+        self.assertToken(ast(0)(7)(2), 'Paragraph', size=5)
+        self.assertToken(ast(0)(7)(2)(0), 'String', content='Validation: ')
+        self.assertToken(ast(0)(7)(2)(1), 'AutoLink', page='katex.md')
+        self.assertToken(ast(0)(7)(2)(3), 'AutoLink', page='bibtex.md')
+
+    def testVAndVNoTests(self):
+        text = "!sqa validation category=Empty link-spec=false link-design=false link-issues=false link-results=false link-collections=false link-types=false"
+        ast = self.tokenize(text)
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), 'String', size=0, content='No test cases of this type exist for this application, beyond those of its dependencies.')
 
 class TestSQARequirementsCrossReference(MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, autolink, heading, civet, sqa, table, modal]
@@ -224,7 +243,7 @@ class TestSQARequirementsCrossReference(MooseDocsTestCase):
         self.assertToken(ast(0), 'SQARequirementMatrix', size=7)
         self.assertToken(ast(0)(0), 'SQARequirementMatrixHeading', category='Demo', size=1)
         self.assertToken(ast(0)(0)(0), 'AutoLink', page='core.md', size=0)
-        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=7)
+        self.assertToken(ast(0)(1), 'SQARequirementMatrixItem', size=9)
 
         self.assertToken(ast(0)(1)(0), 'SQARequirementText', size=3)
         self.assertToken(ast(0)(1)(0)(0), 'Word', content='Requirement')
@@ -610,6 +629,7 @@ class TestSQARequiremetnsWithCollectionsAndTypesAST(MooseDocsTestCase):
         self.assertToken(ast(0,0), 'SQARequirementMatrixHeading', string='Tree')
         self.assertToken(ast(0,1), 'SQARequirementMatrixItem', reqname='r0')
         self.assertToken(ast(0,2), 'SQARequirementMatrixItem', reqname='r2')
+        self.assertToken(ast(1), 'String', size=0, content='No requirements of this type exist for this application, beyond those of its dependencies.')
 
 class TestSQARegex(unittest.TestCase):
     def testIssue(self):

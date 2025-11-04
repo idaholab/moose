@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -93,7 +93,10 @@ ADCompute2DFiniteStrain::computeProperties()
   {
     // Finalize volumetric locking correction
     if (_volumetric_locking_correction)
-      _Fhat[_qp] *= std::cbrt(ave_Fhat.det() / _Fhat[_qp].det());
+    {
+      using std::cbrt;
+      _Fhat[_qp] *= cbrt(ave_Fhat.det() / _Fhat[_qp].det());
+    }
 
     computeQpStrain();
   }

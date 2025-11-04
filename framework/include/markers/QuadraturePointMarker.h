@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,7 @@
 #include "Marker.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
+#include "MooseVariableInterface.h"
 
 class QuadraturePointMarker : public Marker,
                               public MooseVariableInterface<Real>,

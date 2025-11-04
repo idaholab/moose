@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,7 +20,7 @@ NearestPointAverage::validParams()
 
   // The base type (ElementAverageValue) and the user object type (ElementVariableVPP) are
   // postprocessor and VPP respectively and this object is meant to be a UO
-  params.set<std::string>("_moose_base") = "UserObject";
+  params.registerBase("UserObject");
 
   params.addClassDescription(
       "Compute element variable averages for nearest-point based subdomains");

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -47,6 +47,9 @@ public:
    * @param svar_num, the number of the (other) scalar variable
    */
   void computeOffDiagJacobianScalar(unsigned int svar_num) override;
+
+  /// Compute the residual and Jacobian together
+  virtual void computeResidualAndJacobian() override;
 
 protected:
   /**

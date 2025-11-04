@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,7 +37,8 @@ GapFluxModelSimple::GapFluxModelSimple(const InputParameters & parameters)
 ADReal
 GapFluxModelSimple::computeFlux() const
 {
-  const auto l = std::max(_gap_width, _min_gap);
+  using std::max;
+  const auto l = max(_gap_width, _min_gap);
 
   return _k * (_primary_T[_qp] - _secondary_T[_qp]) / l;
 }

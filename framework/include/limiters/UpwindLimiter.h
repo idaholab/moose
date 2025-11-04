@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,8 +24,15 @@ template <typename T>
 class UpwindLimiter : public Limiter<T>
 {
 public:
-  T
-  limit(const T &, const T &, const VectorValue<T> *, const RealVectorValue &) const override final
+  T limit(const T &,
+          const T &,
+          const VectorValue<T> *,
+          const VectorValue<T> *,
+          const RealVectorValue &,
+          const Real &,
+          const Real &,
+          const FaceInfo *,
+          const bool &) const override final
   {
     return 0;
   }

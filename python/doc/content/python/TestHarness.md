@@ -45,6 +45,32 @@ through, but some of the important ones are:
 - `--recover`: Run all of the tests in "recovery" mode.  This runs the test halfway, stops, then
   attempts to "recover" it and run until the end.  This is very rigorous testing that tests whether
   everything in your application can work with restart/recover.
+
+- `--restep`: Run all of the tests in "restep" mode. This triggers the middle
+  timestep of the simulation to be rejected and redone. This emulates the
+  behavior of a failed solve on timestep, where it tries again with a smaller
+  timestep size; except "restep" does not change the size. The goal is to test
+  if the system retains any state after a timestep is rejected and have
+  different behavior when it is repeated, where this test mode will likely show
+  a failure. The `--restep` flag simply runs the tests with the command-line
+  option `--test-restep`, which can be used to help debug restep failures.
+  Common causes of restep failures include:
+
+  - The system could not find the middle timestep properly. Setting `num_steps`
+    to something close to the actual number of steps will resolve this.
+  - [Controls](Controls/index.md) objects executing on `timestep_end`. Consider
+    changing the test's logic to use `timestep_begin` controls instead.
+  - Unresolved dependencies between objects. Most commonly, this involves
+    function-postprocessor dependencies and cyclic dependencies between user
+    objects.
+  - Stateful class member variables in objects. Typically, this can be resolved
+    by checking if the current timestep is greater than the previous timestep
+    the object was run on. See
+    [Predictor::timestepSetup](framework/src/predictors/Predictor.C) for an
+    example.
+  - Specifying `Executioner/abort_on_solve_fail=true` in the test input or
+    in the command line arguments (`cli_args`).
+
 - `--opt` (The default) Builds an optimized executable suitable for running calculations.
 - `--dbg` An executable meant for use in a debugger (like gdb or lldb). Will be very slow and not meant to be used on large problems
 - `--oprof` Not normally used. Can be used for "code profiling": running your code with a utility like oprof, gprof, vtune, etc.
@@ -89,7 +115,6 @@ Tester system is completely pluggable and extendable. The list of default tester
 - [AnalyzeJacobian](AnalyzeJacobian.md)
 - [PetscJacobianTester](PetscJacobianTester.md)
 - [PythonUnitTest](PythonUnitTest.md) (includes [Method of Manufactured solutions](python/mms.md) testing)
-- [BenchmarkTesting](application_development/performance_benchmarking.md)
 
 
 ## Test Specifications
@@ -104,7 +129,7 @@ that MOOSE [uses](/application_usage/input_syntax.html optional=True). An exampl
 
 MOOSE has various configurations for evaluating whether a created test is successful or not. Depending on what type of Tester you specify in the "test specification" file, these can range from comparing the output of JSON, XML, CSV, or Exodus files, or matching a pattern in the output of the test using a regular expression.
 
-Sometimes, it may not be possible to properly evaluate a test with the built-in checks MOOSE provides. In this situation, MOOSE has functionality for evaluating a test using a custom, user-supplied evaluation function. 
+Sometimes, it may not be possible to properly evaluate a test with the built-in checks MOOSE provides. In this situation, MOOSE has functionality for evaluating a test using a custom, user-supplied evaluation function.
 
 To do this, create a Python script in the folder containing your test. The script should be blank aside from a single function named `custom_evaluation(output)`:
 
@@ -235,4 +260,13 @@ Ran 2 tests in 2.9 seconds.
 ```
 
 Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
-   
+
+# Validation
+
+The TestHarness can also be utilized for performing validation. The results of the validation checks are stored within the JSON  output that each test harness execution produces, providing a method to store the validation results in a database.
+
+This validation is enabled via the `validation_test` parameter available within all TestHarness testers. This parameter is to be set to the path of a python script (within the tester directory) that contains the contents of the validation test(s).
+
+See the following for a commented example for a script that would be provided as the `validation_test`:
+
+!listing test_harness/validation_ok.py

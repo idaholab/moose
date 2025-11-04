@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "InitialConditionInterface.h"
 #include "MooseObject.h"
 #include "Coupleable.h"
 #include "FunctionInterface.h"
@@ -36,6 +37,7 @@ class Point;
  * hierarchy: the `compute` method
  */
 class InitialConditionBase : public MooseObject,
+                             public InitialConditionInterface,
                              public BlockRestrictable,
                              public Coupleable,
                              public MaterialPropertyInterface,

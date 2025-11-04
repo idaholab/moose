@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,6 +31,14 @@ protected:
 private:
   /// Routine to check sideset orientation near subdomains
   void checkSidesetsOrientation(const std::unique_ptr<MeshBase> & mesh) const;
+  //// Routine to check is mesh is fully covered in sidesets
+  void checkWatertightSidesets(const std::unique_ptr<MeshBase> & mesh) const;
+  //// Routine to check is mesh is fully covered in nodesets
+  void checkWatertightNodesets(const std::unique_ptr<MeshBase> & mesh) const;
+  /// Helper function that finds the intersection between the given vectors
+  std::vector<boundary_id_type>
+  findBoundaryOverlap(const std::vector<boundary_id_type> & watertight_boundaries,
+                      std::vector<boundary_id_type> & boundary_ids) const;
   /// Routine to check the element volumes
   void checkElementVolumes(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check the element types in each subdomain
@@ -45,6 +53,8 @@ private:
   void checkNonConformalMeshFromAdaptivity(const std::unique_ptr<MeshBase> & mesh) const;
   /// Routine to check whether the Jacobians (elem and side) are not negative
   void checkLocalJacobians(const std::unique_ptr<MeshBase> & mesh) const;
+  //// Routine to check for non matching edges
+  void checkNonMatchingEdges(const std::unique_ptr<MeshBase> & mesh) const;
 
   /**
    * Utility routine to output the final diagnostics level in the desired mode
@@ -58,6 +68,14 @@ private:
 
   /// whether to check that sidesets are consistently oriented using neighbor subdomains
   const MooseEnum _check_sidesets_orientation;
+  /// whether to check that each external side is assigned to a sideset
+  const MooseEnum _check_watertight_sidesets;
+  /// whether to check that each external node is assigned to a nodeset
+  const MooseEnum _check_watertight_nodesets;
+  /// Names of boundaries to be checked in watertight checks
+  std::vector<BoundaryName> _watertight_boundary_names;
+  /// IDs of boundaries to be checked in watertight checks
+  std::vector<BoundaryID> _watertight_boundaries;
   /// whether to check element volumes
   const MooseEnum _check_element_volumes;
   /// minimum size for element volume to be counted as a tiny element
@@ -74,6 +92,10 @@ private:
   const MooseEnum _check_non_conformal_mesh;
   /// tolerance for detecting when meshes are not conformal
   const Real _non_conformality_tol;
+  //// whether to check for intersecting edges
+  const MooseEnum _check_non_matching_edges;
+  //// tolerance for detecting when edges intersect
+  const Real _non_matching_edge_tol;
   /// whether to check for the adaptivity of non-conformal meshes
   const MooseEnum _check_adaptivity_non_conformality;
   /// whether to check for negative jacobians in the domain

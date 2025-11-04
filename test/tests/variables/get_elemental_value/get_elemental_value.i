@@ -62,7 +62,6 @@
   scheme = implicit-euler
   dt = 1
   num_steps = 5
-  abort_on_solve_fail = true
 
   solve_type = NEWTON
 []

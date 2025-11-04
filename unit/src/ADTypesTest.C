@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -67,6 +67,7 @@ TEST(ADTypesTest, EigenMatrix_ADReal)
   m1 << 1, 2, 3, 4, 5, 6, 7, 8, 9;
 
   const Eigen::Matrix<Real, 3, 3> m2 = MetaPhysicL::raw_value(m1);
+  const Eigen::Matrix<ADReal, 3, 3> diff = m1 - m2;
 
-  EXPECT_EQ((m1 - m2).norm(), 0.0);
+  EXPECT_EQ(MetaPhysicL::raw_value(diff).norm(), 0.0);
 }

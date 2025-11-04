@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,8 +58,10 @@ ADWallHeatTransferCoefficientGnielinskiMaterial::ADWallHeatTransferCoefficientGn
 void
 ADWallHeatTransferCoefficientGnielinskiMaterial::computeQpProperties()
 {
+  using std::max, std::sqrt, std::pow, std::log10;
+
   ADReal Pr = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
-  ADReal Re = std::max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
+  ADReal Re = max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
 
   if (Re < 2300 || Re > 5E+6 || Pr < 0.5 || Pr > 2000)
   {
@@ -69,8 +71,8 @@ ADWallHeatTransferCoefficientGnielinskiMaterial::computeQpProperties()
         "significant errors in your results!"));
   }
 
-  ADReal f = std::pow(1.82 * std::log10(Re) - 1.64, -2.0);
-  ADReal Nu = ((f / 8.0) * std::max(0.0, Re - 1000.0) * Pr) /
-              (1.0 + 12.7 * std::sqrt(f / 8.0) * (std::pow(Pr, 2.0 / 3.0) - 1.0));
+  ADReal f = pow(1.82 * log10(Re) - 1.64, -2.0);
+  ADReal Nu = ((f / 8.0) * max(0.0, Re - 1000.0) * Pr) /
+              (1.0 + 12.7 * sqrt(f / 8.0) * (pow(Pr, 2.0 / 3.0) - 1.0));
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }

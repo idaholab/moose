@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,10 +54,11 @@ protected:
   /// Thermal expansion coefficient of the solid porous skeleton
   const Real _exp_coeff;
 
-  /// Drained bulk modulus of the porous skeleton
-  const Real _solid_bulk;
+  /// Drained bulk modulus of the porous skeleton (as a functor; can be variable, function, etc.)
+  /// Only used if _fluid is True.
+  const Moose::Functor<Real> * _solid_bulk;
 
-  /// Short-hand number (biot-1)/solid_bulk
+  /// Short-hand number (biot-1). Please note: this variable is *not* yet divided by solid_bulk
   const Real _coeff;
 
   /// Reference temperature

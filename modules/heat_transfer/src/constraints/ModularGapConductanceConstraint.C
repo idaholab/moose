@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #include "ModularGapConductanceConstraint.h"
 #include "GapFluxModelBase.h"
 #include "GapFluxModelPressureDependentConduction.h"
+#include "AutomaticMortarGeneration.h"
 
 #include "MooseError.h"
 
@@ -47,6 +48,12 @@ ModularGapConductanceConstraint::validParams()
   // FEProblemBase::addConstraint will automatically correct it to false. However,
   // this will still prompt a call from AugmentSparsityOnInterface to get a displaced
   // mortar interface since object._use_displaced_mesh = true.
+
+  // These parameter groups have to match the MortarGapHeatTransferAction's
+  params.addParamNamesToGroup("gap_flux_models", "Gap flux models");
+  params.addParamNamesToGroup(
+      "gap_geometry_type max_gap cylinder_axis_point_1 cylinder_axis_point_2 sphere_origin",
+      "Gap geometry");
 
   return params;
 }
@@ -264,19 +271,20 @@ ModularGapConductanceConstraint::computeSurfaceIntegrationFactor() const
 ADReal
 ModularGapConductanceConstraint::computeGapLength() const
 {
+  using std::log, std::min;
 
   if (_gap_geometry_type == GapGeometry::CYLINDER)
   {
-    const auto denominator = _radius * std::log(_r2 / _r1);
-    return std::min(denominator, _max_gap);
+    const auto denominator = _radius * log(_r2 / _r1);
+    return min(denominator, _max_gap);
   }
   else if (_gap_geometry_type == GapGeometry::SPHERE)
   {
     const auto denominator = _radius * _radius * ((1.0 / _r1) - (1.0 / _r2));
-    return std::min(denominator, _max_gap);
+    return min(denominator, _max_gap);
   }
   else
-    return std::min(_r2 - _r1, _max_gap);
+    return min(_r2 - _r1, _max_gap);
 }
 
 void

@@ -13,6 +13,11 @@ This function is similar to [NearestReporterCoordinatesFunction.md], except it u
 | Linear | `LAGRANGE` | `FIRST` |
 | Quadratic | `LAGRANGE` | `SECOND` |
 
+The
+[!param](/Functions/ParameterMeshFunction/project_points) allows for parameter mesh to be an any linear element mesh that doesn't fully encompass the simulation mesh. A point not encompassed by the parameter mesh will be projected onto the nearest mesh element on the parameter mesh to determine the function value. This method will not work with quad4 that are not coplanar, including other volume elements that may not have coplanar sides.
+
+When using point projection, the [!param](/Functions/ParameterMeshFunction/kdtree_candidates) parameter controls the efficiency of the closest point search algorithm. This parameter determines how many nearest mesh nodes are considered when finding the optimal element for projection. The default value of 5 is sufficient for most cases and provides a good balance between accuracy and performance. Users can increase this value (e.g., to 10-20) for complex geometries where higher accuracy is needed, though values above 10 typically provide diminishing returns while increasing computational cost.
+
 !alert warning
 The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type=REPLICATED` when creating the mesh.
 

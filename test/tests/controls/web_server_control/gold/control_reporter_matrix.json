@@ -1,0 +1,70 @@
+{
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "matrix_value": {
+                    "type": "Eigen::Matrix<double, -1, -1, 0, -1, -1>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "matrix_value": [
+                    [
+                        0.0,
+                        1.0
+                    ]
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "matrix_value": [
+                    [
+                        0.0,
+                        10.0,
+                        20.0
+                    ],
+                    [
+                        30.0,
+                        40.0,
+                        50.0
+                    ]
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "matrix_value": [
+                    [
+                        0.0,
+                        100.0,
+                        200.0,
+                        300.0
+                    ],
+                    [
+                        400.0,
+                        500.0,
+                        600.0,
+                        700.0
+                    ],
+                    [
+                        800.0,
+                        900.0,
+                        1000.0,
+                        1100.0
+                    ]
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

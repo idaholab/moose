@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -44,9 +44,9 @@ NonlocalDamageTempl<is_ad>::initialSetup()
       &this->getMaterialByName(_local_damage_model_name));
 
   if (!_local_damage_model)
-    this->template paramError("damage_model",
-                              "Damage Model " + _local_damage_model_name +
-                                  " is not compatible with NonlocalDamage model");
+    this->paramError("damage_model",
+                     "Damage Model " + _local_damage_model_name +
+                         " is not compatible with NonlocalDamage model");
 }
 
 template <bool is_ad>

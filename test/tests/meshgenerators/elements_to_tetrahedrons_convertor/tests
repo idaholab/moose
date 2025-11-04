@@ -1,7 +1,7 @@
 [Tests]
   design = 'meshgenerators/ElementsToTetrahedronsConverter.md'
-  issues = '#26579'
-  [test]
+  issues = '#26579 #30158'
+  [general]
     requirement = "The system shall be able to "
     [simple_hex_convert]
       type = 'Exodiff'
@@ -17,7 +17,7 @@
       type = 'Exodiff'
       input = 'simple_convert.i'
       exodiff = 'simple_prism_convert_in.e'
-      cli_args = '--mesh-only simple_prism_convert_in.e 
+      cli_args = '--mesh-only simple_prism_convert_in.e
                   Mesh/gmg/elem_type=PRISM6'
       mesh_mode = 'REPLICATED'
       recover = false
@@ -27,7 +27,7 @@
       type = 'Exodiff'
       input = 'simple_convert.i'
       exodiff = 'simple_pyramid_convert_in.e'
-      cli_args = '--mesh-only simple_pyramid_convert_in.e 
+      cli_args = '--mesh-only simple_pyramid_convert_in.e
                   Mesh/gmg/elem_type=PYRAMID5'
       mesh_mode = 'REPLICATED'
       recover = false
@@ -37,7 +37,7 @@
       type = 'Exodiff'
       input = 'simple_convert.i'
       exodiff = 'simple_tet_convert_in.e'
-      cli_args = '--mesh-only simple_tet_convert_in.e 
+      cli_args = '--mesh-only simple_tet_convert_in.e
                   Mesh/gmg/elem_type=TET4'
       mesh_mode = 'REPLICATED'
       recover = false
@@ -51,6 +51,40 @@
       mesh_mode = 'REPLICATED'
       recover = false
       detail ='convert a 3D mesh with mixed element types.'
+    []
+  []
+
+  [sideset_retain]
+    requirement = "The system shall be able to covert a 3D mesh into TET4 elements and retain the sidesets "
+    [hex8]
+      type = 'Exodiff'
+      input = 'hex_elems.i'
+      exodiff = 'hex_elems_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'when the mesh contains HEX8 elements with different node id orders.'
+    []
+    [prism6]
+      type = 'Exodiff'
+      input = 'prism_elems.i'
+      exodiff = 'prism_elems_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'when the mesh contains PRISM6 elements with different node id orders.'
+    []
+    [pyramid5]
+      type = 'Exodiff'
+      input = 'pyramid_elems.i'
+      exodiff = 'pyramid_elems_in.e'
+      exodiff_opts = '-pedantic'
+      cli_args = '--mesh-only'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'when the mesh contains PYRAMID5 elements with different node id orders.'
     []
   []
 

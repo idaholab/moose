@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -92,10 +92,10 @@ protected:
 
     InputParameters problem_params = _factory.getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("_object_name") = "name2";
+    problem_params.set<std::string>(MooseBase::name_param) = "name2";
     _fe_problem = _factory.create<FEProblem>("FEProblem", "problem", problem_params);
 
-    _fe_problem->createQRules(QGAUSS, FIRST, FIRST, FIRST);
+    _fe_problem->createQRules(libMesh::QGAUSS, libMesh::FIRST, libMesh::FIRST, libMesh::FIRST);
 
     _app->actionWarehouse().problemBase() = _fe_problem;
   }

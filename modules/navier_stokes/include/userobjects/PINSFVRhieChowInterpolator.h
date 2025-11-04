@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,8 +25,10 @@ public:
   static InputParameters validParams();
   PINSFVRhieChowInterpolator(const InputParameters & params);
 
-  void meshChanged() override;
-  void residualSetup() override;
+  virtual void meshChanged() override;
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
 
 protected:
   const Moose::FunctorBase<ADReal> & epsilon(THREAD_ID tid) const override;
@@ -64,14 +66,11 @@ protected:
 
 private:
   /**
-   * called during the first \p execute and upon \p meshChanged, this method performs the
-   * interpolations and reconstructions of porosity.
-   * Cannot be called in initialSetup because UOs are initialized before Functions
+   * called during the first \p initialize() and upon \p meshChanged(), this method performs the
+   * interpolations and reconstructions of porosity. Cannot be called in \p initialSetup() because
+   * UOs are initialized before Functions
    */
   void pinsfvSetup();
-
-  /// Whether the setup has been done
-  bool _pinsfv_setup_done;
 };
 
 inline const Moose::FunctorBase<ADReal> &

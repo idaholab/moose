@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,6 +27,15 @@ public:
   static InputParameters validParams();
 
   InertialForceTempl(const InputParameters & parameters);
+
+  static std::pair<GenericReal<is_ad>, GenericReal<is_ad>>
+  computeNewmarkBetaVelAccel(const GenericReal<is_ad> & u,
+                             const Real u_old,
+                             const Real vel_old,
+                             const Real accel_old,
+                             const Real beta,
+                             const Real gamma,
+                             const Real dt);
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual();
@@ -60,7 +69,7 @@ private:
   const VariableValue * _du_dotdot_du;
 
   /// The TimeIntegrator
-  TimeIntegrator & _time_integrator;
+  const TimeIntegrator & _time_integrator;
 
   using InertialForceParent<is_ad>::_dt;
   using InertialForceParent<is_ad>::_i;

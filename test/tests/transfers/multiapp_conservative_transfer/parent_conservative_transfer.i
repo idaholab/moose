@@ -62,6 +62,8 @@
     to_multi_app = sub
     from_postprocessors_to_be_preserved = 'from_postprocessor'
     to_postprocessors_to_be_preserved = 'to_postprocessor'
+    # Test features non-overlapping meshes
+    error_on_miss = false
   []
 []
 

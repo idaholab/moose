@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,63 +10,175 @@
 #include "ConservativeAdvection.h"
 #include "SystemBase.h"
 
-registerMooseObject("MooseApp", ConservativeAdvection);
+using namespace libMesh;
 
+registerMooseObject("MooseApp", ConservativeAdvection);
+registerMooseObject("MooseApp", ADConservativeAdvection);
+
+template <bool is_ad>
 InputParameters
-ConservativeAdvection::validParams()
+ConservativeAdvectionTempl<is_ad>::generalParams()
 {
-  InputParameters params = Kernel::validParams();
+  InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
-                             "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
-  params.addRequiredCoupledVar("velocity", "Velocity vector");
+                             "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$. Velocity can be "
+                             "given as 1) a variable, for which the gradient is automatically "
+                             "taken, 2) a vector variable, or a 3) vector material.");
+  params.addParam<MaterialPropertyName>(
+      "velocity_scalar_coef",
+      "1.0",
+      "Name of material property multiplied against the velocity to scale advection strength.");
   MooseEnum upwinding_type("none full", "none");
   params.addParam<MooseEnum>("upwinding_type",
                              upwinding_type,
                              "Type of upwinding used.  None: Typically results in overshoots and "
                              "undershoots, but numerical diffusion is minimized.  Full: Overshoots "
                              "and undershoots are avoided, but numerical diffusion is large");
+  params.addParam<MaterialPropertyName>("advected_quantity",
+                                        "An optional material property to be advected. If not "
+                                        "supplied, then the variable will be used.");
+  params.addCoupledVar(
+      "velocity_as_variable_gradient",
+      "Gradient of this coupled variable is used to define the advection velocity. "
+      "Can be supplied instead of velocity material or velocity variable.");
   return params;
 }
 
-ConservativeAdvection::ConservativeAdvection(const InputParameters & parameters)
-  : Kernel(parameters),
-    _velocity(coupledVectorValue("velocity")),
-    _upwinding(getParam<MooseEnum>("upwinding_type").getEnum<UpwindingType>()),
-    _u_nodal(_var.dofValues()),
+template <>
+InputParameters
+ConservativeAdvectionTempl<false>::validParams()
+{
+  InputParameters params = generalParams();
+  params.addCoupledVar("velocity", "Velocity vector");
+  params.deprecateCoupledVar("velocity", "velocity_variable", "12/31/2025");
+  params.addParam<MaterialPropertyName>("velocity_material", "Velocity vector given as a material");
+  return params;
+}
+
+template <>
+InputParameters
+ConservativeAdvectionTempl<true>::validParams()
+{
+  InputParameters params = generalParams();
+  params.addCoupledVar("velocity_variable", "Velocity vector given as a variable");
+  params.addParam<MaterialPropertyName>("velocity", "Velocity vector given as a material");
+  params.deprecateParam("velocity", "velocity_material", "12/31/2025");
+  return params;
+}
+
+template <bool is_ad>
+ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParameters & parameters)
+  : GenericKernel<is_ad>(parameters),
+    _scalar(this->template getGenericMaterialProperty<Real, is_ad>("velocity_scalar_coef")),
+    _coupled_variable_present(isParamValid("velocity_as_variable_gradient")),
+    _coupled_variable_var(_coupled_variable_present ? coupled("velocity_as_variable_gradient") : 0),
+    _velocity(
+        _coupled_variable_present
+            ? &this->template coupledGenericGradient<is_ad>("velocity_as_variable_gradient")
+            : (this->isParamValid("velocity_variable")
+                   ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
+                   : (this->isParamValid("velocity_material")
+                          ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
+                                     "velocity_material")
+                                 .get()
+                          : nullptr))),
+    _user_supplied_adv_quant(isParamValid("advected_quantity")),
+    _adv_quant(
+        _user_supplied_adv_quant
+            ? this->template getGenericMaterialProperty<Real, is_ad>("advected_quantity").get()
+            : _u),
+    _upwinding(
+        this->template getParam<MooseEnum>("upwinding_type").template getEnum<UpwindingType>()),
+    _u_nodal(_var.template genericDofValues<is_ad>()),
     _upwind_node(0),
     _dtotal_mass_out(0)
 {
+  if (_coupled_variable_present && _coupled_variable_var == _var.number())
+    paramError("velocity_as_variable_gradient",
+               "Use a different kernel (i.e., diffusion) if the gradient used as the velocity is "
+               "the same as the member variable");
+  if (_upwinding != UpwindingType::none && this->isParamValid("advected_quantity"))
+    paramError(
+        "advected_quantity",
+        "Upwinding is not compatible with an advected quantity that is not the primary variable.");
+
+  if (!_velocity || (_coupled_variable_present && this->isParamValid("velocity_material")) ||
+      (_coupled_variable_present && this->isParamValid("velocity_variable")) ||
+      (this->isParamValid("velocity_variable") && this->isParamValid("velocity_material")))
+    paramError(
+        "velocity_as_variable_gradient",
+        "One and only one of the following input variables must be specified: velocity_variable, "
+        "velocity_material, or velocity_as_variable_gradient.");
+
+  if (this->_has_diag_save_in)
+    paramError("diag_save_in",
+               "_local_ke not computed for global AD indexing. Save-in is deprecated anyway. Use "
+               "the tagging system instead.");
 }
 
-Real
-ConservativeAdvection::negSpeedQp() const
+template <bool is_ad>
+GenericReal<is_ad>
+ConservativeAdvectionTempl<is_ad>::negSpeedQp() const
 {
-  return -_grad_test[_i][_qp] * _velocity[_qp];
+  return -_grad_test[_i][_qp] * (*_velocity)[_qp] * _scalar[_qp];
 }
 
-Real
-ConservativeAdvection::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+ConservativeAdvectionTempl<is_ad>::computeQpResidual()
 {
   // This is the no-upwinded version
-  // It gets called via Kernel::computeResidual()
-  return negSpeedQp() * _u[_qp];
+  // It gets called via GenericKernel<is_ad>::computeResidual()
+  return negSpeedQp() * _adv_quant[_qp];
 }
 
+template <>
 Real
-ConservativeAdvection::computeQpJacobian()
+ConservativeAdvectionTempl<false>::computeQpJacobian()
 {
   // This is the no-upwinded version
-  // It gets called via Kernel::computeJacobian()
-  return negSpeedQp() * _phi[_j][_qp];
+  // It gets called via GenericKernel<false>::computeJacobian()
+  if (!_user_supplied_adv_quant)
+    return negSpeedQp() * _phi[_j][_qp];
+  return 0.0;
 }
 
+template <>
+Real
+ConservativeAdvectionTempl<true>::computeQpJacobian()
+{
+  mooseError("Internal error, should never get here when using AD");
+  return 0.0;
+}
+
+template <>
+Real
+ConservativeAdvectionTempl<false>::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // This is the non-upwinded version
+  // It gets called via GenericKernel<false>::computeOffDiagJacobian()
+  if (_coupled_variable_present && _coupled_variable_var == jvar)
+    return -_grad_test[_i][_qp] * _grad_phi[_j][_qp] * _adv_quant[_qp] * _scalar[_qp];
+  else
+    return 0.0;
+}
+
+template <>
+Real
+ConservativeAdvectionTempl<true>::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+{
+  mooseError("Internal error, should never get here when using AD");
+  return 0.0;
+}
+
+template <bool is_ad>
 void
-ConservativeAdvection::computeResidual()
+ConservativeAdvectionTempl<is_ad>::computeResidual()
 {
   switch (_upwinding)
   {
     case UpwindingType::none:
-      Kernel::computeResidual();
+      GenericKernel<is_ad>::computeResidual();
       break;
     case UpwindingType::full:
       fullUpwind(JacRes::CALCULATE_RESIDUAL);
@@ -74,13 +186,14 @@ ConservativeAdvection::computeResidual()
   }
 }
 
+template <bool is_ad>
 void
-ConservativeAdvection::computeJacobian()
+ConservativeAdvectionTempl<is_ad>::computeJacobian()
 {
   switch (_upwinding)
   {
     case UpwindingType::none:
-      Kernel::computeJacobian();
+      GenericKernel<is_ad>::computeJacobian();
       break;
     case UpwindingType::full:
       fullUpwind(JacRes::CALCULATE_JACOBIAN);
@@ -88,100 +201,95 @@ ConservativeAdvection::computeJacobian()
   }
 }
 
+template <bool is_ad>
 void
-ConservativeAdvection::fullUpwind(JacRes res_or_jac)
+ConservativeAdvectionTempl<is_ad>::fullUpwind(JacRes res_or_jac)
 {
   // The number of nodes in the element
   const unsigned int num_nodes = _test.size();
 
   // Even if we are computing the Jacobian we still need to compute the outflow from each node to
   // see which nodes are upwind and which are downwind
-  prepareVectorTag(_assembly, _var.number());
+  _my_local_re.resize(_var.dofIndices().size());
 
-  if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-    prepareMatrixTag(_assembly, _var.number(), _var.number());
+  if (!is_ad && (res_or_jac == JacRes::CALCULATE_JACOBIAN))
+    prepareMatrixTag(this->_assembly, _var.number(), _var.number());
 
-  // Compute the outflux from each node and store in _local_re
-  // If _local_re is positive at the node, mass (or whatever the Variable represents) is flowing out
-  // of the node
+  // Compute the outflux from each node and store in _my_local_re
+  // If _my_local_re is positive at the node, mass (or whatever the Variable represents) is flowing
+  // out of the node
   _upwind_node.resize(num_nodes);
   for (_i = 0; _i < num_nodes; ++_i)
   {
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      _local_re(_i) += _JxW[_qp] * _coord[_qp] * negSpeedQp();
-    _upwind_node[_i] = (_local_re(_i) >= 0.0);
+    for (_qp = 0; _qp < this->_qrule->n_points(); _qp++)
+      _my_local_re(_i) += this->_JxW[_qp] * this->_coord[_qp] * negSpeedQp();
+    _upwind_node[_i] = (MetaPhysicL::raw_value(_my_local_re(_i)) >= 0.0);
   }
 
   // Variables used to ensure mass conservation
-  Real total_mass_out = 0.0;
-  Real total_in = 0.0;
+  GenericReal<is_ad> total_mass_out = 0.0;
+  GenericReal<is_ad> total_in = 0.0;
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
     _dtotal_mass_out.assign(num_nodes, 0.0);
 
-  for (unsigned int n = 0; n < num_nodes; ++n)
+  for (const auto n : make_range(num_nodes))
   {
     if (_upwind_node[n])
     {
-      if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-      {
-        if (_test.size() == _phi.size())
-          /* u at node=n depends only on the u at node=n, by construction.  For
-           * linear-lagrange variables, this means that Jacobian entries involving the derivative
-           * will only be nonzero for derivatives wrt variable at node=n.  Hence the
-           * (n, n) in the line below.  The above "if" statement catches other variable types
-           * (eg constant monomials)
-           */
-          _local_ke(n, n) += _local_re(n);
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+        {
+          if (_test.size() == _phi.size())
+            /* u at node=n depends only on the u at node=n, by construction.  For
+             * linear-lagrange variables, this means that Jacobian entries involving the derivative
+             * will only be nonzero for derivatives wrt variable at node=n.  Hence the
+             * (n, n) in the line below.  The above "if" statement catches other variable types
+             * (eg constant monomials)
+             */
+            _local_ke(n, n) += _my_local_re(n);
 
-        _dtotal_mass_out[n] += _local_ke(n, n);
-      }
-      _local_re(n) *= _u_nodal[n];
-      total_mass_out += _local_re(n);
+          _dtotal_mass_out[n] += _local_ke(n, n);
+        }
+      _my_local_re(n) *= getUNodal(n);
+      total_mass_out += _my_local_re(n);
     }
-    else                        // downwind node
-      total_in -= _local_re(n); // note the -= means the result is positive
+    else                           // downwind node
+      total_in -= _my_local_re(n); // note the -= means the result is positive
   }
 
   // Conserve mass over all phases by proportioning the total_mass_out mass to the inflow nodes,
   // weighted by their local_re values
-  for (unsigned int n = 0; n < num_nodes; ++n)
-  {
+  for (const auto n : make_range(num_nodes))
     if (!_upwind_node[n]) // downwind node
     {
-      if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
-        for (_j = 0; _j < _phi.size(); _j++)
-          _local_ke(n, _j) += _local_re(n) * _dtotal_mass_out[_j] / total_in;
-      _local_re(n) *= total_mass_out / total_in;
+      if constexpr (!is_ad)
+        if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
+          for (_j = 0; _j < _phi.size(); _j++)
+            _local_ke(n, _j) += _my_local_re(n) * _dtotal_mass_out[_j] / total_in;
+      _my_local_re(n) *= total_mass_out / total_in;
     }
-  }
 
   // Add the result to the residual and jacobian
   if (res_or_jac == JacRes::CALCULATE_RESIDUAL)
   {
-    accumulateTaggedLocalResidual();
+    this->addResiduals(this->_assembly, _my_local_re, _var.dofIndices(), _var.scalingFactor());
 
-    if (_has_save_in)
+    if (this->_has_save_in)
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (const auto & var : _save_in)
-        var->sys().solution().add_vector(_local_re, var->dofIndices());
+      for (const auto & var : this->_save_in)
+        var->sys().solution().add_vector(MetaPhysicL::raw_value(_my_local_re), var->dofIndices());
     }
   }
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
   {
-    accumulateTaggedLocalMatrix();
-
-    if (_has_diag_save_in)
-    {
-      unsigned int rows = _local_ke.m();
-      DenseVector<Number> diag(rows);
-      for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i, i);
-
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (const auto & var : _diag_save_in)
-        var->sys().solution().add_vector(diag, var->dofIndices());
-    }
+    if constexpr (is_ad)
+      this->addJacobian(this->_assembly, _my_local_re, _var.dofIndices(), _var.scalingFactor());
+    else
+      accumulateTaggedLocalMatrix();
   }
 }
+
+template class ConservativeAdvectionTempl<false>;
+template class ConservativeAdvectionTempl<true>;

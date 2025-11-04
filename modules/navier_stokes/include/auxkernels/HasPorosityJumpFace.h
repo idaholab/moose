@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,5 +25,5 @@ protected:
   Real computeValue() override;
 
   /// The porosity
-  const Moose::Functor<ADReal> & _eps;
+  const Moose::Functor<Real> & _eps;
 };

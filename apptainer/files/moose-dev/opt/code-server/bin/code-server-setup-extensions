@@ -1,0 +1,10 @@
+#!/bin/sh
+# Helper script for installing pre downloaded extensions that
+# are recommended for users; takes additional arguments and
+# passes them to the code-server command (for example, to pass
+# something like --extensions-dir, where the extensions
+# are installed)
+set -e
+for extension in /opt/code-server/extensions/*; do
+    code-server --force --install-extension=${extension} "$@"
+done

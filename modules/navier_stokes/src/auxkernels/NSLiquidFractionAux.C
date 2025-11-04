@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,9 +26,9 @@ NSLiquidFractionAux::validParams()
 
 NSLiquidFractionAux::NSLiquidFractionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _T(getFunctor<ADReal>(NS::temperature)),
-    _T_solidus(getFunctor<ADReal>("T_solidus")),
-    _T_liquidus(getFunctor<ADReal>("T_liquidus"))
+    _T(getFunctor<Real>(NS::temperature)),
+    _T_solidus(getFunctor<Real>("T_solidus")),
+    _T_liquidus(getFunctor<Real>("T_liquidus"))
 {
 }
 
@@ -40,11 +40,11 @@ NSLiquidFractionAux::computeValue()
   const auto elem_arg = makeElemArg(_current_elem);
   const auto state = determineState();
 
-  if (raw_value(_T_liquidus(elem_arg, state)) < raw_value(_T_solidus(elem_arg, state)))
+  if (_T_liquidus(elem_arg, state) < _T_solidus(elem_arg, state))
     mooseError("The specified liquidus temperature is smaller than the solidus temperature.");
 
-  Real fl = raw_value((_T(elem_arg, state) - _T_solidus(elem_arg, state)) /
-                      (_T_liquidus(elem_arg, state) - _T_solidus(elem_arg, state)));
+  Real fl = (_T(elem_arg, state) - _T_solidus(elem_arg, state)) /
+            (_T_liquidus(elem_arg, state) - _T_solidus(elem_arg, state));
 
   fl = (fl > 1.0) ? 1.0 : fl;
   fl = (fl < 0.0) ? 0.0 : fl;

@@ -24,6 +24,10 @@
   - [As a developer of the application](application_development/profiling.md)
   - [As a user](source/outputs/PerfGraphOutput.md)
 
+## Civet Failures
+
+- Troubleshoot errors only occuring on your PRs using our
+  [Apptainer containers](help/inl/apptainer.md).
 
 Numerous questions/answers can also be found in on the following resources.
 Please search whether your question has already been answered before posting,

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,6 +15,8 @@ InputParameters
 AccumulateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
+  params.addClassDescription("Accumulates one or more variables and this auxiliary variable into "
+                             "this auxiliary variable");
   params.addRequiredCoupledVar(
       "accumulate_from_variable",
       "Variable whose values are to be accumulated into the current variable");

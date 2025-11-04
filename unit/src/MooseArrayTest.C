@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,8 @@
 #include "gtest/gtest.h"
 
 #include "MooseArray.h"
+
+using libMesh::Real;
 
 TEST(MooseArray, defaultConstructor)
 {

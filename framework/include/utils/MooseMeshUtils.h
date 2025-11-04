@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "libmesh/mesh_base.h"
+#include "libmesh/replicated_mesh.h"
 #include "libmesh/boundary_info.h"
 
 #include "MooseUtils.h"
@@ -18,6 +18,24 @@
 
 namespace MooseMeshUtils
 {
+
+// Used to temporarily store information about which lower-dimensional
+// sides to add and what subdomain id to use for the added sides.
+struct ElemSidePair
+{
+  ElemSidePair(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
+
+  Elem * elem;
+  unsigned short int side;
+};
+
+/**
+ * Merges the boundary IDs of boundaries that have the same names
+ * but different IDs.
+ * @param mesh The input mesh whose boundaries we will modify
+ */
+void mergeBoundaryIDsWithSameName(MeshBase & mesh);
+
 /**
  * Changes the old boundary ID to a new ID in the mesh
  *
@@ -107,6 +125,8 @@ SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase 
  */
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
+std::set<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
+                                            const std::set<SubdomainName> & subdomain_name);
 
 /**
  * Calculates the centroid of a MeshBase.
@@ -254,14 +274,14 @@ BoundaryID getNextFreeBoundaryID(MeshBase & input_mesh);
  * @param input mesh over which to determine subdomain IDs
  * @param subdomain ID
  */
-bool hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id);
+bool hasSubdomainID(const MeshBase & input_mesh, const SubdomainID & id);
 
 /**
  * Whether a particular subdomain name exists in the mesh
  * @param input mesh over which to determine subdomain names
  * @param subdomain name
  */
-bool hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name);
+bool hasSubdomainName(const MeshBase & input_mesh, const SubdomainName & name);
 
 /**
  * Whether a particular boundary ID exists in the mesh
@@ -276,6 +296,22 @@ bool hasBoundaryID(const MeshBase & input_mesh, const BoundaryID id);
  * @param boundary name
  */
 bool hasBoundaryName(const MeshBase & input_mesh, const BoundaryName & name);
+
+/**
+ * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
+ * based on connectivity
+ * @param node_assm vector of pairs of node ids that represent the sides
+ * @param elem_id_list vector of element ids that represent the elements that contain the sides
+ * @param midpoint_node_list vector of node ids that represent the midpoints of the sides for
+ * quadratic sides
+ * @param ordered_node_list vector of node ids that represent the ordered nodes
+ * @param ordered_elem_id_list vector of element corresponding to the ordered nodes
+ * */
+void makeOrderedNodeList(std::vector<std::pair<dof_id_type, dof_id_type>> & node_assm,
+                         std::vector<dof_id_type> & elem_id_list,
+                         std::vector<dof_id_type> & midpoint_node_list,
+                         std::vector<dof_id_type> & ordered_node_list,
+                         std::vector<dof_id_type> & ordered_elem_id_list);
 
 /**
  * Convert a list of sides in the form of a vector of pairs of node ids into a list of ordered nodes
@@ -316,4 +352,103 @@ getIDFromName(const T & name)
 
   return id_Q;
 }
+
+/**
+ * Swap two nodes within an element
+ * @param elem element whose nodes need to be swapped
+ * @param nd1 index of the first node to be swapped
+ * @param nd2 index of the second node to be swapped
+ */
+void swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2);
+
+/**
+ * Reprocess the swap related input parameters to make pairs out of them to ease further processing
+ * @param class_name name of the mesh generator class used for exception messages
+ * @param id_name name of the parameter to be swapped used for exception messages
+ * @param id_swaps vector of vectors of the ids to be swapped
+ * @param id_swap_pairs vector of maps of the swapped pairs
+ * @param row_index_shift shift to be applied to the row index in the exception messages (useful
+ * when this method is utilized to process a fraction of a long vector)
+ */
+template <typename T>
+void
+idSwapParametersProcessor(const std::string & class_name,
+                          const std::string & id_name,
+                          const std::vector<std::vector<T>> & id_swaps,
+                          std::vector<std::unordered_map<T, T>> & id_swap_pairs,
+                          const unsigned int row_index_shift = 0)
+{
+  id_swap_pairs.resize(id_swaps.size());
+  for (const auto i : index_range(id_swaps))
+  {
+    const auto & swaps = id_swaps[i];
+    auto & swap_pairs = id_swap_pairs[i];
+
+    if (swaps.size() % 2)
+      throw MooseException("Row ",
+                           row_index_shift + i + 1,
+                           " of ",
+                           id_name,
+                           " in ",
+                           class_name,
+                           " does not contain an even number of entries! Num entries: ",
+                           swaps.size());
+
+    swap_pairs.reserve(swaps.size() / 2);
+    for (unsigned int j = 0; j < swaps.size(); j += 2)
+      swap_pairs[swaps[j]] = swaps[j + 1];
+  }
+}
+
+/**
+ * Reprocess the elem_integers_swaps into maps so they are easier to use
+ * @param class_name name of the mesh generator class used for exception messages
+ * @param num_sections number of sections in the mesh
+ * @param num_integers number of extra element integers in the mesh
+ * @param elem_integers_swaps vector of vectors of vectors of extra element ids to be swapped
+ * @param elem_integers_swap_pairs vector of maps of the swapped pairs
+ */
+void extraElemIntegerSwapParametersProcessor(
+    const std::string & class_name,
+    const unsigned int num_sections,
+    const unsigned int num_integers,
+    const std::vector<std::vector<std::vector<dof_id_type>>> & elem_integers_swaps,
+    std::vector<std::unordered_map<dof_id_type, dof_id_type>> & elem_integers_swap_pairs);
+
+/**
+ * Build a lower-dimensional mesh from a boundary of an input mesh
+ * Note: The lower-dimensional mesh will only have one subdomain and one boundary.
+ *       Error will be thrown if the mesh does not have the boundary.
+ *       This function works only with replicated mesh, for similar functionality with
+ *       distributed meshes, please refer to LowerDBlockFromSidesetGenerator generator.
+ * @param input_mesh  The input mesh
+ * @param boundary_id The boundary id
+ */
+std::unique_ptr<ReplicatedMesh> buildBoundaryMesh(const ReplicatedMesh & input_mesh,
+                                                  const boundary_id_type boundary_id);
+
+/**
+ * Create a new subdomain by generating new side elements from a list of sidesets in a given mesh.
+ * @param mesh The mesh to work on
+ * @param boundary_names The names of the sidesets to be used to create the new subdomain
+ * @param new_subdomain_id The ID of the new subdomain to be created based on the sidesets
+ * @param new_subdomain_name The name of the new subdomain to be created based on the sidesets
+ * @param type_name The type of the mesh generator that is calling this method, used for error
+ *                  messages and debugging purposes.
+ */
+void createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
+                                 std::vector<BoundaryName> boundary_names,
+                                 const SubdomainID new_subdomain_id,
+                                 const SubdomainName new_subdomain_name,
+                                 const std::string type_name);
+
+/**
+ * Convert a list of blocks in a given mesh to a standalone new mesh.
+ * @param source_mesh The source mesh from which the blocks will be converted
+ * @param target_mesh The target mesh to which the blocks will be converted
+ * @param target_blocks The names of the blocks to be converted to the target mesh
+ */
+void convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
+                        std::unique_ptr<MeshBase> & target_mesh,
+                        const std::vector<SubdomainName> & target_blocks);
 }

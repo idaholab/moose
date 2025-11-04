@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,6 +32,7 @@ FVBoundaryCondition::validParams()
   params += BoundaryRestrictableRequired::validParams();
   params += TaggingInterface::validParams();
   params += ADFunctorInterface::validParams();
+  params += GeometricSearchInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -72,7 +73,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     ADFunctorInterface(this),
     _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),
+    _fv_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(changeSystem(parameters, _var)),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid, _var.kind() == Moose::VAR_SOLVER ? _sys.number() : 0)),
@@ -85,12 +86,13 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
 Moose::FaceArg
 FVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
                                         const Moose::FV::LimiterType limiter_type,
-                                        const bool correct_skewness) const
+                                        const bool correct_skewness,
+                                        const Moose::StateArg * state_limiter) const
 {
   if (!fi)
     fi = _face_info;
 
-  return makeFace(*fi, limiter_type, true, correct_skewness);
+  return makeFace(*fi, limiter_type, true, correct_skewness, state_limiter);
 }
 
 bool

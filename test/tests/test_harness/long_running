@@ -1,6 +1,6 @@
 [Tests]
   [./long_running]
-    type = RunApp
-    input = long_running.i
+    type = RunCommand
+    command = 'python -c "import time; time.sleep(15)"'
   [../]
 []

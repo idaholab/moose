@@ -8,7 +8,7 @@ the solve. The spatial dependence of this variable's contribution to the residua
 then be examined.
 
 More information about debugging convergence issues may be found
-[here](modules/doc/content/application_usage/failed_solves.md optional=True).
+[here](application_usage/failed_solves.md optional=True).
 
 !syntax parameters /AuxKernels/DebugResidualAux
 

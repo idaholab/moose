@@ -1,0 +1,35 @@
+{
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "int_value": {
+                    "type": "int"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "int_value": -1234
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "int_value": -5000
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "int_value": 1
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

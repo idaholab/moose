@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -241,7 +241,8 @@ Moose::FaceArg
 FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
                                       const FaceInfo * fi,
                                       const Moose::FV::LimiterType limiter_type,
-                                      const bool correct_skewness) const
+                                      const bool correct_skewness,
+                                      const Moose::StateArg * state_limiter) const
 {
   if (!fi)
     fi = _face_info;
@@ -255,7 +256,7 @@ FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
                                 ? nullptr
                                 : (defined_on_elem_side ? fi->elemPtr() : fi->neighborPtr());
 
-  return {fi, limiter_type, true, correct_skewness, elem};
+  return {fi, limiter_type, true, correct_skewness, elem, state_limiter};
 }
 
 bool

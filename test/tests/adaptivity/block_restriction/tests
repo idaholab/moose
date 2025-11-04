@@ -1,0 +1,17 @@
+[Tests]
+  design = 'syntax/Adaptivity/index.md'
+  issues = '#14531'
+  [block]
+    type = Exodiff
+    input = 'test.i'
+    exodiff = 'test_out.e-s002'
+    requirement = 'The system shall be able to use block-restricted indicators for adaptivity.'
+  []
+  [mismatch]
+    type = RunException
+    input = test.i
+    cli_args = 'Adaptivity/Markers/errorfrac/block="0 1"'
+    expect_err = 'The block restriction of the marker is larger than the block restriction of its indicator.'
+    requirement = 'The system shall emit a warning if the block restriction of the marker is larger than that of its indicator.'
+  []
+[]

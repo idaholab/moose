@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,7 +17,6 @@
 InputParameters
 OutputInterface::validParams()
 {
-
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Interface to handle the restriction of outputs from objects");
   params.addParam<std::vector<OutputName>>("outputs",
@@ -33,17 +32,16 @@ OutputInterface::validParams()
 }
 
 OutputInterface::OutputInterface(const InputParameters & parameters, bool build_list)
-  : _oi_moose_app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  : _oi_moose_app(*parameters.getCheckedPointerParam<MooseApp *>(MooseBase::app_param)),
     _oi_output_warehouse(_oi_moose_app.getOutputWarehouse()),
     _oi_outputs(parameters.get<std::vector<OutputName>>("outputs").begin(),
                 parameters.get<std::vector<OutputName>>("outputs").end())
 {
-
   // By default it is assumed that the variable name associated with 'outputs' is the name
   // of the block, this is the case for Markers, Indicators, VectorPostprocessors, and
   // Postprocessors.
-  // However, for Materials this is not the case, so the call to buildOutputHideVariableList must be
-  // disabled, the build_list allows for this behavior. The hide lists are handled by
+  // However, for Materials this is not the case, so the call to buildOutputHideVariableList must
+  // be disabled, the build_list allows for this behavior. The hide lists are handled by
   // MaterialOutputAction in this case.
   //
   // Variables/AuxVariables also call the buildOutputHideVariableList method later, because when
@@ -52,10 +50,19 @@ OutputInterface::OutputInterface(const InputParameters & parameters, bool build_
   if (build_list)
   {
     std::set<std::string> names_set;
-    names_set.insert(parameters.get<std::string>("_object_name"));
+    names_set.insert(parameters.getObjectName());
     buildOutputHideVariableList(names_set);
   }
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+OutputInterface::OutputInterface(const OutputInterface & object, const Moose::Kokkos::FunctorCopy &)
+  : _oi_moose_app(object._oi_moose_app),
+    _oi_output_warehouse(object._oi_output_warehouse),
+    _oi_outputs(object._oi_outputs)
+{
+}
+#endif
 
 void
 OutputInterface::buildOutputHideVariableList(std::set<std::string> variable_names)

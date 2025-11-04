@@ -29,7 +29,7 @@ while True:
     ax.plot(getDistances(df['x'], df['y']), df['pillars_normal_lm'], label = 'Step %d' % step)
     step += 1
 
-# setup  gegend and axis labels
+# setup  legend and axis labels
 ax.legend(loc='upper left')
 ax.set_xlabel('Distance along contact surface')
 ax.set_ylabel('Contact pressure')

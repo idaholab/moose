@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -124,7 +124,10 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         {
           _fe_problem.reinitNodeFace(node, boundary_id, _tid);
           for (const auto & nodal_kernel : active_involved_kernels)
+          {
+            nodal_kernel->setSubdomains(Moose::NodeArg::undefined_subdomain_connection);
             nodal_kernel->computeOffDiagJacobian(jvar);
+          }
 
           _num_cached++;
         }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -17,8 +17,8 @@
  * provide all derivatives.
  */
 template <bool is_ad>
-class DerivativeParsedMaterialTempl : public DerivativeParsedMaterialHelperTempl<is_ad>,
-                                      public ParsedMaterialBase
+class DerivativeParsedMaterialTempl : public ParsedMaterialBase,
+                                      public DerivativeParsedMaterialHelperTempl<is_ad>
 {
 public:
   static InputParameters validParams();

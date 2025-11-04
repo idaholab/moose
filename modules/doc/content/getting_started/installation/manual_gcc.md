@@ -20,7 +20,7 @@ cd gcc-__GCC__
 ./contrib/download_prerequisites
 !package-end!
 
-Configure GCC using the recommended arguments:
+Configure GCC using our recommended arguments, in addition to any optimizations you require:
 
 !package! code
 mkdir gcc-build

@@ -1,0 +1,48 @@
+{
+    "reporters": {
+        "test": {
+            "type": "WebServerControlTestReporter",
+            "values": {
+                "vec_int_value": {
+                    "type": "std::vector<int>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "test": {
+                "vec_int_value": [
+                    0,
+                    -100,
+                    12345
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "test": {
+                "vec_int_value": [
+                    -1,
+                    -2,
+                    -3,
+                    4,
+                    5
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "test": {
+                "vec_int_value": [
+                    888,
+                    -1000
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

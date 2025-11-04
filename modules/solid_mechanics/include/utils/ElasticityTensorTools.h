@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -135,6 +135,27 @@ toVoigtNotation(GenericDenseMatrix<is_ad> & voigt_matrix,
     {
       toVoigtNotationIndexConversion(i, a, b);
       toVoigtNotationIndexConversion(j, c, d);
+      voigt_matrix(i, j) = tensor(a, b, c, d);
+    }
+}
+
+void toMooseVoigtNotationIndexConversion(int, int &, int &);
+
+template <bool is_ad>
+void
+toMooseVoigtNotation(GenericDenseMatrix<is_ad> & voigt_matrix,
+                     const GenericRankFourTensor<is_ad> & tensor)
+{
+  static std::vector<int> index_vector = {0, 1, 2, 3, 4, 5};
+  int a = 0;
+  int b = 0;
+  int c = 0;
+  int d = 0;
+  for (int i : index_vector)
+    for (int j : index_vector)
+    {
+      toMooseVoigtNotationIndexConversion(i, a, b);
+      toMooseVoigtNotationIndexConversion(j, c, d);
       voigt_matrix(i, j) = tensor(a, b, c, d);
     }
 }

@@ -74,7 +74,7 @@
                   Executioner/type=Eigenvalue'
       expect_err = 'is not supported for an eigenvalue solve.'
       allow_test_objects = true
-      slepc = true
+      capabilities = 'slepc'
       detail = 'when the study is set to execute with residual kernels and an eigenvalue executioner,'
     []
     [error_if_tracing]
@@ -247,7 +247,7 @@
       expect_err = 'Element does not contain vertices in ElemExtrema'
       allow_test_objects = true
       # will hit assertions before the error outside of opt
-      method = opt
+      capabilities = 'method=opt'
       detail = 'building an element extrema edge for invalid vertices'
     []
     [get_elem_normals_unimplemented]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -35,12 +35,45 @@ public:
   static const unsigned int N_EQ;
 
 protected:
+  virtual void setupMesh() override;
   virtual void check() const override;
 
   /**
    * Builds user object for computing and storing the fluxes
    */
   virtual void buildVolumeJunctionUserObject();
+
+  /**
+   * Returns the name of junction variable, depending on whether scalar
+   *
+   * @param[in] var_base  Base variable name
+   */
+  std::string junctionVariableName(const std::string & var_base) const;
+
+  /**
+   * Adds a junction variable to the problem, as a scalar or field variable
+   *
+   * @param[in] is_nonlinear  Is the variable nonlinear?
+   * @param[in] var  Variable name
+   * @param[in] scaling_factor  Scaling factor for variable if nonlinear
+   */
+  void addJunctionVariable(bool is_nonlinear, const VariableName & var, Real scaling_factor = 1.0);
+
+  /**
+   * Adds a junction IC to the problem, as a scalar or field variable
+   *
+   * @param[in] var  Variable name
+   * @param[in] value  IC value
+   */
+  void addJunctionIC(const VariableName & var, Real value);
+
+  /**
+   * Adds a VolumeJunctionIC to the problem
+   *
+   * @param[in] var  Variable name
+   * @param[in] quantity  Quantity to compute
+   */
+  void addVolumeJunctionIC(const VariableName & var, const std::string & quantity);
 
   /// Volume of the junction
   const Real _volume;

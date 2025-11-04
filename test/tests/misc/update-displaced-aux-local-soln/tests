@@ -1,0 +1,10 @@
+[Tests]
+  design = 'DisplacedProblem.md'
+  issues = '#30749'
+  [test]
+    type = CSVDiff
+    input = test.i
+    csvdiff = test_out.csv
+    requirement = 'The system shall sync information from the undisplaced auxiliary system solution to the displaced auxiliary system parallel and current local solution.'
+  []
+[]

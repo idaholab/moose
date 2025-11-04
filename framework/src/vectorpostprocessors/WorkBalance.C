@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -228,7 +228,7 @@ public:
 
   processor_id_type _this_pid;
 
-  ElemSideBuilder _elem_side_builder;
+  libMesh::ElemSideBuilder _elem_side_builder;
 
   std::unique_ptr<PetscExternalPartitioner> _petsc_partitioner;
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,7 @@
 #include "MaterialPropertyInterface.h"
 #include "GeometricSearchInterface.h"
 #include "ElementIDInterface.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
 /**
  * This is the common base class for the three main

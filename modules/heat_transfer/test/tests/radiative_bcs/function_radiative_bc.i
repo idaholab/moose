@@ -60,6 +60,8 @@
     boundary = bot_right
     # htc/(stefan-boltzmann*4*T_inf^3)
     emissivity_function = '3/(5.670367e-8*4*300*300*300)'
+    # Using previous default
+    Tinfinity = 0
   [../]
 []
 

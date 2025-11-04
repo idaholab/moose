@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -262,7 +262,7 @@ SobolReporterContext<InType, OutType>::storeSobol(nlohmann::json & json,
   json["FIRST_ORDER"] = first_order;
   json["TOTAL"] = total;
 
-  if (val.first.size() >= 2 * nparam)
+  if (val.first.size() > 2 * nparam)
   {
     std::pair<std::vector<std::vector<OutType>>, std::vector<std::vector<std::vector<OutType>>>>
         second_order;

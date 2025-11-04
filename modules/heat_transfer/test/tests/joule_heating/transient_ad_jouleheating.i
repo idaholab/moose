@@ -8,82 +8,90 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     initial_condition = 293.0 #in K
-  [../]
-  [./elec]
-  [../]
+  []
+  [elec]
+  []
 []
 
 [Kernels]
-  [./HeatDiff]
+  [HeatDiff]
     type = ADHeatConduction
     variable = T
-  [../]
-  [./HeatTdot]
+  []
+  [HeatTdot]
     type = ADHeatConductionTimeDerivative
     variable = T
-  [../]
-  [./HeatSrc]
+  []
+  [HeatSrc]
     type = ADJouleHeatingSource
     variable = T
-    elec = elec
-  [../]
-  [./electric]
+    heating_term = 'electric_field_heating'
+  []
+  [electric]
     type = ADHeatConduction
     variable = elec
     thermal_conductivity = electrical_conductivity
-  [../]
+  []
 []
 
 [BCs]
-  [./lefttemp]
+  [lefttemp]
     type = ADDirichletBC
     boundary = left
     variable = T
     value = 293 #in K
-  [../]
-  [./elec_left]
+  []
+  [elec_left]
     type = ADDirichletBC
     variable = elec
     boundary = left
     value = 1 #in V
-  [../]
-  [./elec_right]
+  []
+  [elec_right]
     type = ADDirichletBC
     variable = elec
     boundary = right
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./k]
+  [ElectromagneticMaterial]
+    type = ElectromagneticHeatingMaterial
+    electric_field = elec
+    electric_field_heating_name = electric_field_heating
+    electrical_conductivity = electrical_conductivity
+    formulation = 'time'
+    solver = 'electrostatic'
+  []
+  [k]
     type = ADGenericConstantMaterial
     prop_names = 'thermal_conductivity'
     prop_values = '397.48' #copper in W/(m K)
-  [../]
-  [./cp]
+  []
+  [cp]
     type = ADGenericConstantMaterial
     prop_names = 'specific_heat'
     prop_values = '385.0' #copper in J/(kg K)
-  [../]
-  [./rho]
+  []
+  [rho]
     type = ADGenericConstantMaterial
     prop_names = 'density'
     prop_values = '8920.0' #copper in kg/(m^3)
-  [../]
-  [./sigma] #copper is default material
+  []
+  [sigma] #copper is default material
     type = ADElectricalConductivity
     temperature = T
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

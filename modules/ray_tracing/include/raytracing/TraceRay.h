@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -514,7 +514,7 @@ private:
   std::vector<unsigned long long int> _results;
 
   /// Helper for building element sides without excessive allocation
-  ElemSideBuilder _elem_side_builder;
+  libMesh::ElemSideBuilder _elem_side_builder;
 
   /// Reusable for getting the RayBCs in onBoundary()
   std::vector<RayBoundaryConditionBase *> _on_boundary_ray_bcs;

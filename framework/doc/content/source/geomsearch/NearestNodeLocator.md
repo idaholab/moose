@@ -6,8 +6,12 @@
 - The size of the Neighborhood can be controlled in the input file by setting the `patch_size` parameter in the `Mesh` section.
 
 !media media/geomsearch/nearest_node_diagram.jpg
+       style=display:block;margin:auto;
+       alt=Diagram showing the distance being checked between a secondary node and each node on the primary boundary which is in the "neighborhood".
 
 - To use a NearestNodeLocator
-    - `#include "NearestNodeLocator.h"`
-    - call `getNearestNodeLocator(primary_id, secondary_id)` to create the object.
+
+  - `#include "NearestNodeLocator.h"`
+  - call `getNearestNodeLocator(primary_id, secondary_id)` to create the object.
+
 - The functions `distance()` and `nearestNode()` both take a node ID and return either the distance to the nearest node or a `Node` pointer for the nearest node respectively.

@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,6 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test for RUNNING status in the TestHarness
         """
-        output = self.runTests('-i', 'long_running').decode('utf-8')
+        output = self.runTests('-i', 'long_running').output
         self.assertIn('RUNNING', output)
         self.assertIn('[FINISHED]', output)

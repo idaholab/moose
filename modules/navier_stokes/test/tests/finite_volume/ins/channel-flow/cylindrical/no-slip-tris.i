@@ -25,9 +25,6 @@ velocity_interp_method = 'rc'
   ymax = 4.1
   elem_type = TRI3
   dim = 2
-[]
-
-[Problem]
   coord_type = 'RZ'
 []
 
@@ -105,13 +102,13 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = vel_x
-    function = 0
+    functor = 0
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = vel_y
-    function = 1
+    functor = 1
   []
   [free-slip-wall-u]
     type = INSFVNaturalFreeSlipBC

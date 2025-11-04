@@ -10,6 +10,7 @@
       input = 'parent.i'
       exodiff = 'parent_out.e parent_out_sub0.e'
       allow_warnings = true
+      restep = false # This is already testing what happens when a timestep is repeated
 
       detail = "The simulation shall continue by reducing the time step and"
     []
@@ -23,10 +24,8 @@
       max_time = 60
       min_parallel = 2
       prereq = 'group/test_failure'
-      superlu = true
+      capabilities = 'superlu & compiler!=clang'
       allow_warnings = true
-      compiler = 'INTEL GCC' # 6855
-
       detail = "support the failure and the ability to limit the number of processors for the sub-application."
     []
   []

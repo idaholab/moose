@@ -20,9 +20,9 @@
     coeff = 2
   []
   [ffn]
-    type = UserForcingFunctionNodalKernel
+    type = UserForcingFunctorNodalKernel
     variable = u
-    function = 1
+    functor = 1
   []
 []
 

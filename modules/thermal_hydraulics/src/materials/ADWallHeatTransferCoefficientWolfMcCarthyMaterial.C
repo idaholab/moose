@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,10 +58,12 @@ ADWallHeatTransferCoefficientWolfMcCarthyMaterial::
 void
 ADWallHeatTransferCoefficientWolfMcCarthyMaterial::computeQpProperties()
 {
+  using std::pow, std::max;
+
   ADReal Pr = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
-  ADReal Re = std::max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
-  ADReal Nu = 0.025 * std::pow(Re, 0.8) * std::pow(Pr, 0.4) *
-              std::pow(std::max(_T[_qp], _T_wall[_qp]) / _T[_qp], -0.55);
+  ADReal Re = max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
+  ADReal Nu =
+      0.025 * pow(Re, 0.8) * pow(Pr, 0.4) * pow(max(_T[_qp], _T_wall[_qp]) / _T[_qp], -0.55);
 
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }

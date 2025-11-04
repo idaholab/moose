@@ -13,7 +13,7 @@ There are two main systems for aggregating data: Postprocessors and VectorPostpr
 
 ## Step 8: Input File
 
-!listing step08_postprocessors/problems/step8.i
+!listing step08_postprocessors/problems/step8.i diff=step06_coupled_darcy_heat_conduction/problems/step6a_coupled.i
 
 !---
 
@@ -31,3 +31,4 @@ cd problems
 ## Step 8: Result
 
 !media darcy_thermo_mech/step08_result.mp4
+       alt=Output from simulation above, showing the time evolution of the temperature field; a plot of the average temperature and outlet heat flux as functions of time; and the temperature profile as a function of the y-coordinate about one third of the way along the domain.

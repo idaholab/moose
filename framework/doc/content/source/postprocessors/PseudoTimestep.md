@@ -16,8 +16,8 @@ This object computes a timestep to accelerate the convergence to steady-state us
 The change in timestep is determined by the steady-state residual behavior from one iteration to another, i.e., small changes in residual indicate larger timesteps are allowed. In contrast, significant changes in the residual indicate a timestep decrease is necessary.
 Following [!citep](bucker2009cfl), we recognize and implement three methods.
 
-The user must make a method choice, between `SER`, `EXP` and `RDM`, which are implemented as listed below. 
-All methods require a parameter [!param](/Postprocessors/PseudoTimestep/alpha), which controls how sensitive the timestep should be with respect to residual changes, and [!param](/Postprocessors/PseudoTimestep/initial_dt) to provide a first timestep length. 
+The user must make a method choice, between `SER`, `EXP` and `RDM`, which are implemented as listed below.
+All methods require a parameter [!param](/Postprocessors/PseudoTimestep/alpha), which controls how sensitive the timestep should be with respect to residual changes, and [!param](/Postprocessors/PseudoTimestep/initial_dt) to provide a first timestep length.
 If nothing is known about the problem we recommend `initial_dt = 1` and `alpha = 2`, keeping in mind that a high [!param](/Postprocessors/PseudoTimestep/alpha) corresponds to a higher sensitivity to residual changes. More specific choices for fluid dynamics problems are available in [!citep](bucker2009cfl) or [!citep](ceze2013pseudo). The parameter [!param](/Postprocessors/PseudoTimestep/alpha) is always larger than 0, noting that for some versions of Pseudo Timestep Continuation methods it can be lower than 1. We refer the user to the literature, or to perform a preliminary study for their specific problem.
 
 Methods supported include:
@@ -46,12 +46,12 @@ Methods supported include:
 
   where $\alpha$ is a user chosen parameter, $k$ is the current iteration step.
 
-As noted also in [!citep](bucker2009cfl) the EXP method has an infinite growth, so for this method a [!param](/Postprocessors/PseudoTimestep/max_dt) parameter may be recommended. If no [!param](/Postprocessors/PseudoTimestep/max_dt) is provided by the user then infinite growth of the timestep is not bounded and the user will be informed by a message at the console. Ideally this method is used in conjunction with a steady state detection, i.e. setting [!param](/Executioner/Transient/steady_state_detection) to `true` and a [!param](/Executioner/Transient/steady_state_tolerance). 
+As noted also in [!citep](bucker2009cfl) the EXP method has an infinite growth, so for this method a [!param](/Postprocessors/PseudoTimestep/max_dt) parameter may be recommended. If no [!param](/Postprocessors/PseudoTimestep/max_dt) is provided by the user then infinite growth of the timestep is not bounded and the user will be informed by a message at the console. Ideally this method is used in conjunction with a steady state detection, i.e. setting [!param](/Executioner/Transient/steady_state_detection) to `true` and a [!param](/Executioner/Transient/steady_state_tolerance).
 
 ## Example Input File Syntax
 
-!listing test/tests/postprocessors/pseudotimestep/fv_burgers_pseudo.i 
-    block=Postprocessors 
+!listing test/tests/postprocessors/pseudotimestep/fv_burgers_pseudo.i
+    block=Postprocessors
 
 !syntax parameters /Postprocessors/PseudoTimestep
 

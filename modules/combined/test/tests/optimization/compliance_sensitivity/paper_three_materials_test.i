@@ -91,7 +91,7 @@ C3 = 1.0
   []
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = SMALL
     add_variables = true
@@ -150,6 +150,7 @@ C3 = 1.0
                  "if(mat_den<${rho1},E1,if(mat_den<${rho2},E2,E3))"
     coupled_variables = 'mat_den'
     property_name = E_phys
+    epsilon = 1e-12
   []
 
   [Cost_mat]
@@ -164,6 +165,7 @@ C3 = 1.0
                  "if(mat_den<${rho1},C1,if(mat_den<${rho2},C2,C3))"
     coupled_variables = 'mat_den'
     property_name = Cost_mat
+    epsilon = 1e-12
   []
   [CostDensity]
     type = ParsedMaterial
@@ -188,7 +190,6 @@ C3 = 1.0
     type = CostSensitivity
     design_density = mat_den
     cost = Cost_mat
-    outputs = 'exodus'
   []
 []
 
@@ -264,7 +265,6 @@ C3 = 1.0
 []
 
 [Outputs]
-  exodus = true
   [out]
     type = CSV
     execute_on = 'TIMESTEP_END'

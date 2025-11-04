@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,7 +38,7 @@ public:
   /// Get the standard deviation vector
   const std::vector<Real> & getStdDev() const { return _stdev; }
 
-  /// Methods for computing and setting mean and standard
+  /// Methods for computing and setting mean and standard deviation
   void computeSet(const RealEigenMatrix & input);
 
   /// Helper for dataStore

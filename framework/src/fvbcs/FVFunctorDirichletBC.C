@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -52,17 +52,20 @@ FVFunctorDirichletBCTempl<is_ad>::FVFunctorDirichletBCTempl(const InputParameter
 
 template <bool is_ad>
 ADReal
-FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
+FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi,
+                                                const Moose::StateArg & state) const
 {
   auto sfa = singleSidedFaceArg(&fi);
   if (!_use_other_side)
-    return _functor(sfa, determineState());
+    return _functor(sfa, state);
   else if (fi.elemPtr() == sfa.face_side)
-    return _functor({&fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()},
-                    determineState());
+    return _functor(
+        {&fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr(), nullptr},
+        state);
   else
-    return _functor({&fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr()},
-                    determineState());
+    return _functor(
+        {&fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr(), nullptr},
+        state);
 }
 
 template class FVFunctorDirichletBCTempl<false>;

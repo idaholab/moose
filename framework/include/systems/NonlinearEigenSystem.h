@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,7 +14,7 @@
 #include "NonlinearSystemBase.h"
 #include "SlepcEigenSolverConfiguration.h"
 
-#include "libmesh/eigen_system.h"
+#include "libmesh/condensed_eigen_system.h"
 
 // forward declarations
 class EigenProblem;
@@ -22,6 +22,13 @@ class KernelBase;
 class ResidualObject;
 
 #ifdef LIBMESH_HAVE_SLEPC
+
+#include <slepceps.h>
+
+namespace Moose
+{
+void assemble_matrix(EquationSystems & es, const std::string & system_name);
+}
 
 /**
  * Nonlinear eigenvalue system to be solved
@@ -36,7 +43,8 @@ public:
   /**
    * Quit the current solve as soon as possible.
    */
-  virtual void stopSolve(const ExecFlagType & exec_flag) override;
+  virtual void stopSolve(const ExecFlagType & exec_flag,
+                         const std::set<TagID> & vector_tags_to_close) override;
 
   /**
    * Returns the current nonlinear iteration number.  In libmesh, this is
@@ -74,7 +82,7 @@ public:
    */
   unsigned int getNumConvergedEigenvalues() const { return _eigen_sys.get_n_converged(); };
 
-  virtual NonlinearSolver<Number> * nonlinearSolver() override;
+  virtual libMesh::NonlinearSolver<Number> * nonlinearSolver() override;
 
   /**
    * Retrieve snes from slepc eigen solver. It is valid for only nonlinear eigen solver.
@@ -87,7 +95,7 @@ public:
    */
   virtual EPS getEPS();
 
-  EigenSystem & sys() { return _eigen_sys; }
+  libMesh::CondensedEigenSystem & sys() { return _eigen_sys; }
 
   /**
    * For eigenvalue problems (including standard and generalized), inhomogeneous (Dirichlet or
@@ -160,13 +168,22 @@ public:
 
   TagID precondMatrixTag() const { return _precond_tag; }
 
-  virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
+  virtual void attachPreconditioner(libMesh::Preconditioner<Number> * preconditioner) override;
 
-  Preconditioner<Number> * preconditioner() const { return _preconditioner; }
+  libMesh::Preconditioner<Number> * preconditioner() const { return _preconditioner; }
 
   virtual void turnOffJacobian() override;
 
   void residualAndJacobianTogether() override;
+
+  /**
+   * Initialize the condensed matrices. This is a no-op if there are no
+   * constraints in the DofMap
+   */
+  void initializeCondensedMatrices();
+
+  virtual void postInit() override;
+  virtual void reinit() override;
 
 protected:
   virtual void postAddResidualObject(ResidualObject & object) override;
@@ -174,7 +191,7 @@ protected:
   void computeScalingJacobian() override;
   void computeScalingResidual() override;
 
-  EigenSystem & _eigen_sys;
+  libMesh::CondensedEigenSystem & _eigen_sys;
   EigenProblem & _eigen_problem;
   std::unique_ptr<SlepcEigenSolverConfiguration> _solver_configuration;
   std::vector<std::pair<Real, Real>> _eigen_values;
@@ -188,7 +205,11 @@ protected:
   TagID _precond_tag;
   bool _precond_matrix_includes_eigen;
   // Libmesh preconditioner
-  Preconditioner<Number> * _preconditioner;
+  libMesh::Preconditioner<Number> * _preconditioner;
+
+  /// The number of degrees of freedom constrained at the libMesh level, e.g. via hanging node or
+  /// periodic boundary constraints
+  dof_id_type _num_constrained_dofs;
 };
 
 #else

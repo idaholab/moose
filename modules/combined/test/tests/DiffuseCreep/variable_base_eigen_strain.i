@@ -128,7 +128,7 @@
     M_name = mobility_prop
     tensors = diffusivity
     weights = var_dep
-    args = c
+    coupled_variables = c
   [../]
   [./phase_normal]
     type = PhaseNormalTensor
@@ -166,7 +166,7 @@
     eigenstrain_name = eigenstrain
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     displacements = 'disp_x disp_y'
     eigenstrain_names = eigenstrain
   [../]

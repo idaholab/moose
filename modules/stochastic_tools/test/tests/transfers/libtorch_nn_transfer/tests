@@ -8,6 +8,6 @@
     skip_keys = 'reporters time time_step'
     requirement = "The system shall be able to transfer an artificial neural network between a "
                   "trainer object and a control object residing on different apps."
-    libtorch = true
+    capabilities = 'libtorch'
   []
 []

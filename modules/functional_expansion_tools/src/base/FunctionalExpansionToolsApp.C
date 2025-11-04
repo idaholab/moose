@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,7 @@ FunctionalExpansionToolsApp::validParams()
 
 registerKnownLabel("FunctionalExpansionToolsApp");
 
-FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters parameters)
+FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {
   FunctionalExpansionToolsApp::registerAll(_factory, _action_factory, _syntax);
@@ -48,28 +48,13 @@ FunctionalExpansionToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax
   Registry::registerActionsTo(af, {"FunctionalExpansionToolsApp"});
 }
 
-void
-FunctionalExpansionToolsApp::registerObjects(Factory & factory)
-{
-  mooseDeprecated("use registerAll instead of registerObjects");
-  Registry::registerObjectsTo(factory, {"FunctionalExpansionToolsApp"});
-}
-
-void
-FunctionalExpansionToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  Registry::registerActionsTo(action_factory, {"FunctionalExpansionToolsApp"});
-  /* Uncomment Syntax parameters and register your new objects here! */
-}
-
 extern "C" void
 FunctionalExpansionToolsApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
   FunctionalExpansionToolsApp::registerAll(f, af, s);
 }
 extern "C" void
-FunctionalExpansionToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+FunctionalExpansionToolsApp__registerApps()
 {
-  FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
+  FunctionalExpansionToolsApp::registerApps();
 }

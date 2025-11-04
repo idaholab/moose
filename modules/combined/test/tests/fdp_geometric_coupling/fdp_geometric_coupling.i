@@ -34,7 +34,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./block1]
     block = 1
     volumetric_locking_correction = true

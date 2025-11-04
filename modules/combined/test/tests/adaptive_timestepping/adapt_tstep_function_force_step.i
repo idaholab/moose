@@ -8,7 +8,6 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
-  block = 1
   volumetric_locking_correction = true
   displacements = 'disp_x disp_y disp_z'
 []
@@ -41,7 +40,7 @@
 []
 
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = FINITE
     incremental = true

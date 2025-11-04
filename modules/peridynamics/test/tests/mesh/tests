@@ -6,9 +6,9 @@
     exodiff = '2D_center_crack_in.e'
     recover = false
     map = false
-    requirement = 'PeridynamicsMesh shall generate peridynamic mesh with
+    requirement = 'The system shall be able to generate peridynamic mesh with
                    pre-existing center crack.'
-    design = 'modules/peridynamics/PeridynamicsMesh.md'
+    design = 'PeridynamicsMesh.md'
     issues = '#11561'
   [../]
 
@@ -19,9 +19,9 @@
     exodiff = '2D_double_edged_cracks_in.e'
     recover = false
     map = false
-    requirement = 'PeridynamicsMesh shall generate peridynamic mesh with
+    requirement = 'The system shall be able to generate peridynamic mesh with
                    pre-existing double edged cracks.'
-    design = 'modules/peridynamics/PeridynamicsMesh.md'
+    design = 'PeridynamicsMesh.md'
     issues = '#11561'
   [../]
 
@@ -32,9 +32,9 @@
     exodiff = '2D_convert_one_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate peridynamic mesh for given
+    requirement = 'The system shall be able to generate peridynamic mesh for given
                    mesh block and delete the converted FE mesh.'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#11561'
   [../]
 
@@ -45,9 +45,9 @@
     exodiff = '2D_convert_one_retain_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate peridynamic mesh for given
+    requirement = 'The system shall be able to generate peridynamic mesh for given
                    mesh block and retain the converted FE mesh.'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#11561'
   [../]
 
@@ -58,9 +58,9 @@
     exodiff = '2D_convert_all_retain_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given
+    requirement = 'The system shall be able to generate peridynamic meshes for given
                    mesh blocks and retain the converted FE meshes.'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#11561'
   [../]
 
@@ -71,9 +71,9 @@
     exodiff = '3D_sideset_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
+    requirement = 'The system shall be able to generate sidesets using phantom FE elements
                    based on sidesets of FE meshes for 3D peridynamic meshes.'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#11561'
   [../]
 
@@ -84,9 +84,9 @@
     exodiff = '2D_sidesets_partial_boundary_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
+    requirement = 'The system shall be able to generate sidesets using phantom FE elements
                    based on sidesets of 2D FE mesh with partial boundary for sidesets.'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#17723'
   [../]
 
@@ -97,9 +97,9 @@
     exodiff = '3D_sidesets_partial_boundary_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate sidesets using phantom FE elements
+    requirement = 'The system shall be able to generate sidesets using phantom FE elements
                    based on sidesets of 3D FE mesh with partial boundary for sidesets.'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#17723'
   [../]
 
@@ -110,11 +110,11 @@
     exodiff = '2D_single_interface_block_in.e'
     recover = false
     map = false
-    requirement = 'MeshGeneratorPD shall generate peridynamic meshes for given
+    requirement = 'The system shall be able to generate peridynamic meshes for given
                    mesh blocks and build interfacial bonds between specified mesh blocks.
                    Mesh blocks can be combined to a single mesh block for
                    both converted blocks and interface blocks'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#11561'
   [../]
 
@@ -123,9 +123,9 @@
     input = 'Error_nonexisting_blockID.i'
     cli_args = '--mesh-only'
     expect_err = "Block ID 3 in the 'blocks_to_pd' does not exist in the FE mesh!"
-    requirement = 'MeshGeneratorPD shall generate an error message when
+    requirement = 'The system shall be able to generate an error message when
                    a block specified to be converted does not exist in the mesh'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#17723'
   [../]
 
@@ -134,9 +134,9 @@
     input = 'Error_wrong_bonding_blockID.i'
     cli_args = '--mesh-only'
     expect_err = "Block ID 3 in the 'bonding_block_pairs' does not exist in the FE mesh!"
-    requirement = 'MeshGeneratorPD shall generate an error message when
+    requirement = 'The system shall be able to generate an error message when
                    a block specified for bonding pairs does not exist in the mesh'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#17723'
   [../]
 
@@ -145,9 +145,9 @@
     input = 'Error_nonexisting_sideset.i'
     cli_args = '--mesh-only'
     expect_err = "Sideset ID 3 in the 'sidesets_to_pd' does not exist in the finite element mesh!"
-    requirement = 'MeshGeneratorPD shall generate an error message when
+    requirement = 'The system shall be able to generate an error message when
                    a specified sideset does not exist in the mesh'
-    design = 'modules/peridynamics/MeshGeneratorPD.md'
+    design = 'MeshGeneratorPD.md'
     issues = '#17723'
   [../]
 []

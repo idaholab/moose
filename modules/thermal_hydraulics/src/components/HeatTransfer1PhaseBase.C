@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,7 +9,7 @@
 
 #include "HeatTransfer1PhaseBase.h"
 #include "FlowModelSinglePhase.h"
-#include "FlowChannel1Phase.h"
+#include "FlowChannel1PhaseBase.h"
 #include "ClosuresBase.h"
 #include "MooseUtils.h"
 
@@ -39,10 +39,10 @@ HeatTransfer1PhaseBase::initSecondary()
   HeatTransferBase::initSecondary();
 
   // determine names of heat transfer variables
-  if (hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
+  if (hasComponentByName<FlowChannel1PhaseBase>(_flow_channel_name))
   {
-    const FlowChannel1Phase & flow_channel =
-        getComponentByName<FlowChannel1Phase>(_flow_channel_name);
+    const FlowChannel1PhaseBase & flow_channel =
+        getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name);
     const std::string Hw_suffix = flow_channel.getHeatTransferNamesSuffix(name());
 
     _Hw_1phase_name = FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL + Hw_suffix;
@@ -56,8 +56,10 @@ HeatTransfer1PhaseBase::check() const
 {
   HeatTransferBase::check();
 
-  if (_closures != nullptr && hasComponentByName<FlowChannel1Phase>(_flow_channel_name))
-    _closures->checkHeatTransfer(*this, getComponentByName<FlowChannel1Phase>(_flow_channel_name));
+  for (const auto & closures : _closures_objects)
+    if (closures && hasComponentByName<FlowChannel1PhaseBase>(_flow_channel_name))
+      closures->checkHeatTransfer(*this,
+                                  getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name));
 }
 
 void
@@ -65,8 +67,9 @@ HeatTransfer1PhaseBase::addMooseObjects()
 {
   HeatTransferBase::addMooseObjects();
 
-  _closures->addMooseObjectsHeatTransfer(*this,
-                                         getComponentByName<FlowChannel1Phase>(_flow_channel_name));
+  for (const auto & closures : _closures_objects)
+    closures->addMooseObjectsHeatTransfer(
+        *this, getComponentByName<FlowChannel1PhaseBase>(_flow_channel_name));
 }
 
 const MaterialPropertyName &

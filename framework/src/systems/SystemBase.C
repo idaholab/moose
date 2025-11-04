@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,10 +26,14 @@
 #include "MooseUtils.h"
 #include "FVBoundaryCondition.h"
 #include "FEProblemBase.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/static_condensation.h"
+
+using namespace libMesh;
 
 /// Free function used for a libMesh callback
 void
@@ -76,7 +80,6 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _var_kind(var_kind),
     _max_var_n_dofs_per_elem(0),
     _max_var_n_dofs_per_node(0),
-    _time_integrator(nullptr),
     _automatic_scaling(false),
     _verbose(false),
     _solution_states_initialized(false)
@@ -334,9 +337,8 @@ SystemBase::prepareLowerD(THREAD_ID tid)
 }
 
 void
-SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
+SystemBase::reinitElem(const Elem * const elem, THREAD_ID tid)
 {
-
   if (_subproblem.hasActiveElementalMooseVariables(tid))
   {
     const std::set<MooseVariableFieldBase *> & active_elemental_moose_variables =
@@ -351,6 +353,13 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
     for (const auto & var : vars)
       var->computeElemValues();
   }
+
+  if (system().has_static_condensation())
+    for (auto & [tag, matrix] : _active_tagged_matrices)
+    {
+      libmesh_ignore(tag);
+      cast_ptr<StaticCondensation *>(matrix)->set_current_elem(*elem);
+    }
 }
 
 void
@@ -651,7 +660,6 @@ SystemBase::closeTaggedVector(const TagID tag)
                "' in system '",
                name(),
                "' because there is no vector associated with that tag");
-
   getVector(tag).close();
 }
 
@@ -677,8 +685,8 @@ SystemBase::zeroTaggedVector(const TagID tag)
                "' in system '",
                name(),
                "' because there is no vector associated with that tag");
-
-  getVector(tag).zero();
+  if (!_subproblem.vectorTagNotZeroed(tag))
+    getVector(tag).zero();
 }
 
 void
@@ -713,7 +721,7 @@ SystemBase::addVariable(const std::string & var_type,
 {
   _numbered_vars.resize(libMesh::n_threads());
 
-  auto components = parameters.get<unsigned int>("components");
+  const auto components = parameters.get<unsigned int>("components");
 
   // Convert the std::vector parameter provided by the user into a std::set for use by libMesh's
   // System::add_variable method
@@ -737,10 +745,33 @@ SystemBase::addVariable(const std::string & var_type,
     if (fe_field_type == TYPE_VECTOR)
       mooseError("Vector family type cannot be used in an array variable");
 
+    std::vector<std::string> array_var_component_names;
+    const bool has_array_names = parameters.isParamValid("array_var_component_names");
+    if (has_array_names)
+    {
+      array_var_component_names =
+          parameters.get<std::vector<std::string>>("array_var_component_names");
+      if (array_var_component_names.size() != components)
+        parameters.paramError("array_var_component_names",
+                              "Must be the same size as 'components' (size ",
+                              components,
+                              ") for array variable '",
+                              name,
+                              "'");
+    }
+
     // Build up the variable names
     std::vector<std::string> var_names;
     for (unsigned int i = 0; i < components; i++)
-      var_names.push_back(SubProblem::arrayVariableComponent(name, i));
+    {
+      if (!has_array_names)
+        array_var_component_names.push_back(std::to_string(i));
+      var_names.push_back(name + "_" + array_var_component_names[i]);
+    }
+
+    // makes sure there is always a name, either the provided one or '1 2 3 ...'
+    parameters.set<std::vector<std::string>>("array_var_component_names") =
+        array_var_component_names;
 
     // The number returned by libMesh is the _last_ variable number... we want to hold onto the
     // _first_
@@ -748,13 +779,21 @@ SystemBase::addVariable(const std::string & var_type,
 
     // Set as array variable
     if (parameters.isParamSetByUser("array") && !parameters.get<bool>("array"))
-      mooseError("Variable '",
-                 name,
-                 "' is an array variable ('components' > 1) but 'array' is set to false.");
+      parameters.paramError("array",
+                            "Must be set to true for variable '",
+                            name,
+                            "' because 'components' > 1 (is an array variable)");
     parameters.set<bool>("array") = true;
   }
   else
+  {
+    if (parameters.isParamSetByUser("array_var_component_names"))
+      parameters.paramError("array_var_component_names",
+                            "Should not be set because this variable (",
+                            name,
+                            ") is a non-array variable");
     var_num = system().add_variable(name, fe_type, &blocks);
+  }
 
   parameters.set<unsigned int>("_var_num") = var_num;
   parameters.set<SystemBase *>("_system_base") = this;
@@ -785,6 +824,14 @@ SystemBase::addVariable(const std::string & var_type,
         mooseError("This should be a functor");
     }
 
+    if (auto scalar_var = dynamic_cast<MooseVariableScalar *>(var.get()))
+    {
+      if (auto * const functor = dynamic_cast<Moose::FunctorBase<ADReal> *>(scalar_var))
+        _subproblem.addFunctor(name, *functor, tid);
+      else
+        mooseError("Scalar variables should be functors");
+    }
+
     if (var->blockRestricted())
       for (const SubdomainID & id : var->blockIDs())
         for (MooseIndex(components) component = 0; component < components; ++component)
@@ -797,6 +844,7 @@ SystemBase::addVariable(const std::string & var_type,
   // getMaxVariableNumber is an API method used in Rattlesnake
   if (var_num > _max_var_number)
     _max_var_number = var_num;
+  _du_dot_du.resize(var_num + 1);
 }
 
 bool
@@ -1068,31 +1116,7 @@ SystemBase::disassociateDefaultMatrixTags()
 }
 
 void
-SystemBase::activeMatrixTag(TagID tag)
-{
-  mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot active Matrix with matrix_tag : " << tag << "that does not exist");
-
-  if (_matrix_tag_active_flags.size() < tag + 1)
-    _matrix_tag_active_flags.resize(tag + 1);
-
-  _matrix_tag_active_flags[tag] = true;
-}
-
-void
-SystemBase::deactiveMatrixTag(TagID tag)
-{
-  mooseAssert(_subproblem.matrixTagExists(tag),
-              "Cannot deactivate Matrix with matrix_tag : " << tag << "that does not exist");
-
-  if (_matrix_tag_active_flags.size() < tag + 1)
-    _matrix_tag_active_flags.resize(tag + 1);
-
-  _matrix_tag_active_flags[tag] = false;
-}
-
-void
-SystemBase::deactiveAllMatrixTags()
+SystemBase::deactivateAllMatrixTags()
 {
   auto num_matrix_tags = _subproblem.numMatrixTags();
 
@@ -1100,18 +1124,23 @@ SystemBase::deactiveAllMatrixTags()
 
   for (decltype(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
     _matrix_tag_active_flags[tag] = false;
+  _active_tagged_matrices.clear();
 }
 
 void
-SystemBase::activeAllMatrixTags()
+SystemBase::activateAllMatrixTags()
 {
   auto num_matrix_tags = _subproblem.numMatrixTags();
 
   _matrix_tag_active_flags.resize(num_matrix_tags);
+  _active_tagged_matrices.clear();
 
-  for (decltype(num_matrix_tags) tag = 0; tag < num_matrix_tags; tag++)
+  for (const auto tag : make_range(num_matrix_tags))
     if (hasMatrix(tag))
+    {
       _matrix_tag_active_flags[tag] = true;
+      _active_tagged_matrices.emplace(tag, &getMatrix(tag));
+    }
     else
       _matrix_tag_active_flags[tag] = false;
 }
@@ -1184,8 +1213,8 @@ SystemBase::copyVars(ExodusII_IO & io)
         const auto & array_var = getFieldVariable<RealEigenVector>(0, vci._dest_name);
         for (MooseIndex(var.count()) i = 0; i < var.count(); ++i)
         {
-          const auto exodus_var = _subproblem.arrayVariableComponent(vci._source_name, i);
-          const auto system_var = array_var.componentName(i);
+          const auto & exodus_var = var.arrayVariableComponent(i);
+          const auto & system_var = array_var.componentName(i);
           if (var.isNodal())
             io.copy_nodal_solution(system(), exodus_var, system_var, timestep);
           else
@@ -1211,10 +1240,9 @@ SystemBase::copyVars(ExodusII_IO & io)
 }
 
 void
-SystemBase::update(const bool update_libmesh_system)
+SystemBase::update()
 {
-  if (update_libmesh_system)
-    system().update();
+  system().update();
 }
 
 void
@@ -1230,8 +1258,25 @@ void
 SystemBase::copySolutionsBackwards()
 {
   system().update();
-
   copyOldSolutions();
+  copyPreviousNonlinearSolutions();
+}
+
+/**
+ * Shifts the solutions backwards in nonlinear iteration history
+ */
+void
+SystemBase::copyPreviousNonlinearSolutions()
+{
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Nonlinear)].size();
+  if (states > 1)
+    for (unsigned int i = states - 1; i > 0; --i)
+      solutionState(i, Moose::SolutionIterationType::Nonlinear) =
+          solutionState(i - 1, Moose::SolutionIterationType::Nonlinear);
+
+  if (solutionPreviousNewton())
+    *solutionPreviousNewton() = *currentSolution();
 }
 
 /**
@@ -1240,23 +1285,29 @@ SystemBase::copySolutionsBackwards()
 void
 SystemBase::copyOldSolutions()
 {
-  // Copying the solutions backward so the current solution will become the old, and the old will
-  // become older. The same applies to the nonlinear iterates.
-  for (const auto iteration_index : index_range(_solution_states))
-  {
-    const auto states = _solution_states[iteration_index].size();
-    if (states > 1)
-      for (unsigned int i = states - 1; i > 0; --i)
-        solutionState(i, Moose::SolutionIterationType(iteration_index)) =
-            solutionState(i - 1, Moose::SolutionIterationType(iteration_index));
-  }
+  // copy the solutions backward: current->old, old->older
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
+  if (states > 1)
+    for (unsigned int i = states - 1; i > 0; --i)
+      solutionState(i) = solutionState(i - 1);
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
   if (solutionUDotDotOld())
     *solutionUDotDotOld() = *solutionUDotDot();
-  if (solutionPreviousNewton())
-    *solutionPreviousNewton() = *currentSolution();
+}
+
+void
+SystemBase::copyPreviousFixedPointSolutions()
+{
+  const auto n_states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::FixedPoint)]
+          .size();
+  if (n_states > 1)
+    for (unsigned int i = n_states - 1; i > 0; --i)
+      solutionState(i, Moose::SolutionIterationType::FixedPoint) =
+          solutionState(i - 1, Moose::SolutionIterationType::FixedPoint);
 }
 
 /**
@@ -1341,6 +1392,8 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state,
   }
   else if (iteration_type == Moose::SolutionIterationType::Nonlinear && state == 1)
     return Moose::PREVIOUS_NL_SOLUTION_TAG;
+  else if (iteration_type == Moose::SolutionIterationType::FixedPoint && state == 1)
+    return Moose::PREVIOUS_FP_SOLUTION_TAG;
 
   return "solution_state_" + std::to_string(state) + "_" + Moose::stringify(iteration_type);
 }
@@ -1357,7 +1410,9 @@ SystemBase::solutionState(const unsigned int state,
                " was requested in ",
                name(),
                " but only up to state ",
-               _solution_states[static_cast<unsigned short>(iteration_type)].size() - 1,
+               (_solution_states[static_cast<unsigned short>(iteration_type)].size() == 0)
+                   ? 0
+                   : _solution_states[static_cast<unsigned short>(iteration_type)].size() - 1,
                " is available.");
 
   const auto & solution_states = _solution_states[static_cast<unsigned short>(iteration_type)];
@@ -1381,11 +1436,25 @@ SystemBase::solutionState(const unsigned int state,
   return *_solution_states[static_cast<unsigned short>(iteration_type)][state];
 }
 
+libMesh::ParallelType
+SystemBase::solutionStateParallelType(const unsigned int state,
+                                      const Moose::SolutionIterationType iteration_type) const
+{
+  if (!hasSolutionState(state, iteration_type))
+    mooseError("solutionStateParallelType() may only be called if the solution state exists.");
+
+  return _solution_states[static_cast<unsigned short>(iteration_type)][state]->type();
+}
+
 void
 SystemBase::needSolutionState(const unsigned int state,
-                              const Moose::SolutionIterationType iteration_type)
+                              const Moose::SolutionIterationType iteration_type,
+                              const libMesh::ParallelType parallel_type)
 {
   libmesh_parallel_only(this->comm());
+  mooseAssert(!Threads::in_threads,
+              "This routine is not thread-safe. Request the solution state before using it in "
+              "a threaded region.");
 
   if (hasSolutionState(state, iteration_type))
     return;
@@ -1405,11 +1474,21 @@ SystemBase::needSolutionState(const unsigned int state,
     {
       auto tag = _subproblem.addVectorTag(oldSolutionStateVectorName(i, iteration_type),
                                           Moose::VECTOR_TAG_SOLUTION);
-      solution_states[i] = &addVector(tag, true, GHOSTED);
+      solution_states[i] = &addVector(tag, true, parallel_type);
     }
     else
+    {
+      // If the existing parallel type is PARALLEL and GHOSTED is now requested,
+      // this would require an upgrade, which is risky if anybody has already
+      // stored a pointer to the existing vector, since the upgrade would create
+      // a new vector and make that pointer null. If the existing parallel type
+      // is GHOSTED and PARALLEL is now requested, we don't need to do anything.
+      if (parallel_type == GHOSTED && solutionStateParallelType(i, iteration_type) == PARALLEL)
+        mooseError("The solution state has already been declared as PARALLEL");
+
       mooseAssert(solution_states[i] == &getVector(oldSolutionStateVectorName(i, iteration_type)),
                   "Inconsistent solution state");
+    }
 }
 
 void
@@ -1573,6 +1652,75 @@ SystemBase::serializedSolution()
   }
 
   return *_serialized_solution;
+}
+
+void
+SystemBase::addTimeIntegrator(const std::string & type,
+                              const std::string & name,
+                              InputParameters & parameters)
+{
+  parameters.set<SystemBase *>("_sys") = this;
+  _time_integrators.push_back(_factory.create<TimeIntegrator>(type, name, parameters));
+}
+
+void
+SystemBase::copyTimeIntegrators(const SystemBase & other_sys)
+{
+  _time_integrators = other_sys._time_integrators;
+}
+
+const TimeIntegrator *
+SystemBase::queryTimeIntegrator(const unsigned int var_num) const
+{
+  for (auto & ti : _time_integrators)
+    if (ti->integratesVar(var_num))
+      return ti.get();
+
+  return nullptr;
+}
+
+const TimeIntegrator &
+SystemBase::getTimeIntegrator(const unsigned int var_num) const
+{
+  const auto * const ti = queryTimeIntegrator(var_num);
+
+  if (ti)
+    return *ti;
+  else
+    mooseError("No time integrator found that integrates variable number ",
+               std::to_string(var_num));
+}
+
+const std::vector<std::shared_ptr<TimeIntegrator>> &
+SystemBase::getTimeIntegrators()
+{
+  return _time_integrators;
+}
+
+const Number &
+SystemBase::duDotDu(const unsigned int var_num) const
+{
+  return _du_dot_du[var_num];
+}
+
+const std::set<SubdomainID> &
+SystemBase::getSubdomainsForVar(const std::string & var_name) const
+{
+  return getSubdomainsForVar(getVariable(0, var_name).number());
+}
+
+std::string
+SystemBase::prefix() const
+{
+  return system().prefix_with_name() ? system().prefix() : "";
+}
+
+void
+SystemBase::sizeVariableMatrixData()
+{
+  for (const auto & warehouse : _vars)
+    for (const auto & [var_num, var_ptr] : warehouse.numberToVariableMap())
+      var_ptr->sizeMatrixTagData();
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,

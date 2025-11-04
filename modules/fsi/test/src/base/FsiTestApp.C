@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -19,7 +19,7 @@ FsiTestApp::validParams()
   return params;
 }
 
-FsiTestApp::FsiTestApp(InputParameters parameters) : MooseApp(parameters)
+FsiTestApp::FsiTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   FsiTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
@@ -40,7 +40,7 @@ FsiTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
 void
 FsiTestApp::registerApps()
 {
-  registerApp(FsiApp);
+  FsiApp::registerApps();
   registerApp(FsiTestApp);
 }
 

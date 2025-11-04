@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -32,11 +32,6 @@ public:
   static InputParameters validParams();
 
   DiracKernelBase(const InputParameters & parameters);
-
-  /**
-   * This gets called by computeOffDiagJacobian() at each quadrature point.
-   */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /**
    * Computes the off-diagonal Jacobian for variable jvar.

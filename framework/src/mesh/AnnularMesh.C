@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -167,7 +167,7 @@ AnnularMesh::buildMesh()
   mesh.clear();
   mesh.set_mesh_dimension(2);
   mesh.set_spatial_dimension(2);
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  libMesh::BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   const unsigned num_angular_nodes = (_full_annulus ? _nt : _nt + 1);
   const unsigned num_nodes =
@@ -207,11 +207,11 @@ AnnularMesh::buildMesh()
       const Real x = current_r * std::cos(angle * M_PI / 180.0);
       const Real y = current_r * std::sin(angle * M_PI / 180.0);
       nodes[node_id] = mesh.add_point(Point(x, y, 0.0), node_id);
-      Elem * elem = mesh.add_elem(new Quad4);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
-      elem->set_node(3) = nodes[node_id - num_angular_nodes];
+      Elem * elem = mesh.add_elem(new libMesh::Quad4);
+      elem->set_node(0, nodes[node_id]);
+      elem->set_node(1, nodes[node_id - 1]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes - 1]);
+      elem->set_node(3, nodes[node_id - num_angular_nodes]);
       elem->subdomain_id() = _quad_subdomain_id;
       node_id++;
 
@@ -231,11 +231,11 @@ AnnularMesh::buildMesh()
     if (_full_annulus)
     {
       // add element connecting to node at angle=0
-      Elem * elem = mesh.add_elem(new Quad4);
-      elem->set_node(0) = nodes[node_id - num_angular_nodes];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
-      elem->set_node(3) = nodes[node_id - 2 * num_angular_nodes];
+      Elem * elem = mesh.add_elem(new libMesh::Quad4);
+      elem->set_node(0, nodes[node_id - num_angular_nodes]);
+      elem->set_node(1, nodes[node_id - 1]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes - 1]);
+      elem->set_node(3, nodes[node_id - 2 * num_angular_nodes]);
       elem->subdomain_id() = _quad_subdomain_id;
 
       if (layer_num == _nr)
@@ -254,18 +254,18 @@ AnnularMesh::buildMesh()
     boundary_info.add_node(node_id, 0); // boundary_id=0 is centre
     for (unsigned angle_num = 0; angle_num < num_angular_nodes - 1; ++angle_num)
     {
-      Elem * elem = mesh.add_elem(new Tri3);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - num_angular_nodes + angle_num];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes + angle_num + 1];
+      Elem * elem = mesh.add_elem(new libMesh::Tri3);
+      elem->set_node(0, nodes[node_id]);
+      elem->set_node(1, nodes[node_id - num_angular_nodes + angle_num]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes + angle_num + 1]);
       elem->subdomain_id() = _tri_subdomain_id;
     }
     if (_full_annulus)
     {
-      Elem * elem = mesh.add_elem(new Tri3);
-      elem->set_node(0) = nodes[node_id];
-      elem->set_node(1) = nodes[node_id - 1];
-      elem->set_node(2) = nodes[node_id - num_angular_nodes];
+      Elem * elem = mesh.add_elem(new libMesh::Tri3);
+      elem->set_node(0, nodes[node_id]);
+      elem->set_node(1, nodes[node_id - 1]);
+      elem->set_node(2, nodes[node_id - num_angular_nodes]);
       elem->subdomain_id() = _tri_subdomain_id;
     }
   }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -50,12 +50,21 @@ INSFVOutletPressureBCTempl<T>::INSFVOutletPressureBCTempl(const InputParameters 
 
 template <class T>
 ADReal
-INSFVOutletPressureBCTempl<T>::boundaryValue(const FaceInfo & fi) const
+INSFVOutletPressureBCTempl<T>::boundaryValue(const FaceInfo & fi,
+                                             const Moose::StateArg & state) const
 {
   if (_functor)
-    return (*_functor)(singleSidedFaceArg(&fi), determineState());
+    return (*_functor)(singleSidedFaceArg(&fi), state);
   else if (_function)
-    return _function->value(_t, fi.faceCentroid());
+  {
+    if (state.state != 0 && state.iteration_type == Moose::SolutionIterationType::Time)
+    {
+      mooseAssert(state.state == 1, "We cannot access values beyond the previous time step.");
+      return _function->value(_t_old, fi.faceCentroid());
+    }
+    else
+      return _function->value(_t, fi.faceCentroid());
+  }
   else
     return *_pp_value;
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -45,7 +45,4 @@ TimeSequenceStepperFailTest::step()
                    << std::endl);
     _converged = false;
   }
-
-  if (converged())
-    _current_step++;
 }

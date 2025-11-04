@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,7 +20,7 @@ VectorVariableComponentAux::validParams()
       "Creates a field consisting of one component of a coupled vector variable.");
   params.addRequiredCoupledVar("vector_variable",
                                "The variable from which to compute the component");
-  params.addParam<MooseEnum>("component", component, "The component to compute");
+  params.addRequiredParam<MooseEnum>("component", component, "The component to compute");
   return params;
 }
 

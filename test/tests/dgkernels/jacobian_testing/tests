@@ -6,7 +6,6 @@
     input = coupled_dg_jac_test.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
-    petsc_version = '<3.9.0 || >=3.9.4'
     mesh_mode = REPLICATED
     requirement = "The DGCoupledDiffusion object shall compute the correct Jacobian."
   [../]

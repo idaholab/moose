@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@
 #include "libmesh/int_range.h"
 
 GeometricSearchData::GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh)
-  : _subproblem(subproblem), _mesh(mesh), _first(true)
+  : _subproblem(subproblem), _mesh(mesh), _first(true), _search_using_point_locator(false)
 {
   // do a check on the boundary IDs to see if any conflict will rise from computing QP node set IDs
   const auto & nodeset_ids = _mesh.meshNodesetIds();
@@ -169,6 +169,10 @@ GeometricSearchData::getPenetrationLocator(const BoundaryName & primary,
                                 secondary_id,
                                 order,
                                 getNearestNodeLocator(primary_id, secondary_id));
+
+    if (_search_using_point_locator)
+      pl->setUsePointLocator(true);
+
     _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, secondary_id)] = pl;
   }
 
@@ -203,6 +207,10 @@ GeometricSearchData::getQuadraturePenetrationLocator(const BoundaryName & primar
                                 qsecondary_id,
                                 order,
                                 getQuadratureNearestNodeLocator(primary_id, secondary_id));
+
+    if (_search_using_point_locator)
+      pl->setUsePointLocator(true);
+
     _penetration_locators[std::pair<BoundaryID, BoundaryID>(primary_id, qsecondary_id)] = pl;
   }
 
@@ -309,6 +317,22 @@ GeometricSearchData::addElementPairLocator(const BoundaryID interface_id,
                                            std::shared_ptr<ElementPairLocator> epl)
 {
   _element_pair_locators[interface_id] = epl;
+}
+
+void
+GeometricSearchData::setSearchUsingPointLocator(bool state)
+{
+  if (state != _search_using_point_locator)
+  {
+    for (auto & [key, val] : _penetration_locators)
+    {
+      libmesh_ignore(key);
+      if (val)
+        val->setUsePointLocator(state);
+    }
+  }
+
+  _search_using_point_locator = state;
 }
 
 void

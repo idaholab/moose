@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -77,6 +77,8 @@ template <typename R2>
 ADReal
 ADStressDivergenceTensorsTempl<R2>::computeQpResidual()
 {
+  using std::exp;
+
   ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
   // volumetric locking correction
@@ -85,7 +87,7 @@ ADStressDivergenceTensorsTempl<R2>::computeQpResidual()
 
   if (_ndisp != 3 && _out_of_plane_strain_coupled && _use_displaced_mesh)
   {
-    const ADReal out_of_plane_thickness = std::exp((*_out_of_plane_strain)[_qp]);
+    const ADReal out_of_plane_thickness = exp((*_out_of_plane_strain)[_qp]);
     residual *= out_of_plane_thickness;
   }
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,21 +58,23 @@ ADComputePlaneFiniteStrain::ADComputePlaneFiniteStrain(const InputParameters & p
 ADReal
 ADComputePlaneFiniteStrain::computeOutOfPlaneGradDisp()
 {
+  using std::exp;
   /**
    * This is consistent with the approximation of stretch rate tensor
    * D = log(sqrt(Fhat^T * Fhat)) / dt
    */
   if (_scalar_out_of_plane_strain_coupled)
-    return std::exp((*_scalar_out_of_plane_strain[getCurrentSubblockIndex()])[0]) - 1.0;
+    return exp((*_scalar_out_of_plane_strain[getCurrentSubblockIndex()])[0]) - 1.0;
   else
-    return std::exp(_out_of_plane_strain[_qp]) - 1.0;
+    return exp(_out_of_plane_strain[_qp]) - 1.0;
 }
 
 Real
 ADComputePlaneFiniteStrain::computeOutOfPlaneGradDispOld()
 {
+  using std::exp;
   if (_scalar_out_of_plane_strain_coupled)
-    return std::exp((*_scalar_out_of_plane_strain_old[getCurrentSubblockIndex()])[0]) - 1.0;
+    return exp((*_scalar_out_of_plane_strain_old[getCurrentSubblockIndex()])[0]) - 1.0;
   else
-    return std::exp(_out_of_plane_strain_old[_qp]) - 1.0;
+    return exp(_out_of_plane_strain_old[_qp]) - 1.0;
 }

@@ -4,7 +4,7 @@ This class produces a yaml dump of the `InputParameters` that is machine parsabl
 any YAML formatter.
 
 This formatter is used for the `--yaml` command line option, described
-[here](modules/doc/content/application_usage/command_line_usage.md optional=True). It is also available for the
+[here](application_usage/command_line_usage.md optional=True). It is also available for the
 application developer, either directly or using an [AdvancedOutput](syntax/Outputs/index.md#advanced-output).
 
 ## Example output

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -45,6 +45,13 @@ public:
    * Store this as a _reference_ in the constructor.
    */
   const VariableValue & uOld() const;
+
+  /**
+   * \returns Whether this scalar kernel computes a Jacobian. This may be false for scalar kernels
+   * which delegate their Jacobian computation to elemental kernels, e.g. when this scalar kernel is
+   * computing a residual for a Lagrange multiplier that has no on-diagonal dependence
+   */
+  virtual bool computesJacobian() const { return true; }
 
 protected:
   /// Scalar variable

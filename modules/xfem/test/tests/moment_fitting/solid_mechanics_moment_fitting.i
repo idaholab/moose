@@ -47,7 +47,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     strain = SMALL
   [../]
@@ -149,7 +149,7 @@
 
 [Postprocessors]
   [./numel]
-    type = NumElems
+    type = NumElements
     execute_on = timestep_end
   [../]
   [./integral]

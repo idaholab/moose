@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,6 +25,7 @@
  * 1. SIMPLE INTERFACE:
  *    There are three static functions that are suitable as a drop in replacement for the
  *    random number capabilities available in the standard C++ library.
+ *    This interface DOES NOT SUPPORT restart/recover
  *
  * 2. ADVANCED INTERFACE:
  *    When creating an instance of this class, one can maintain an arbitrary number of

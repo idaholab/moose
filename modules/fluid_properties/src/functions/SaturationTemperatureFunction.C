@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -30,19 +30,24 @@ SaturationTemperatureFunction::SaturationTemperatureFunction(const InputParamete
   : Function(parameters),
     FunctionInterface(this),
 
-    _p_fn(getFunction("p")),
-    _fp_2phase(getUserObject<TwoPhaseFluidProperties>("fp_2phase"))
+    _p_fn(getFunction("p"))
 {
+}
+
+void
+SaturationTemperatureFunction::initialSetup()
+{
+  _fp_2phase = &getUserObject<TwoPhaseFluidProperties>("fp_2phase");
 }
 
 Real
 SaturationTemperatureFunction::value(Real t, const Point & point) const
 {
-  return _fp_2phase.T_sat(_p_fn.value(t, point));
+  return _fp_2phase->T_sat(_p_fn.value(t, point));
 }
 
 RealVectorValue
 SaturationTemperatureFunction::gradient(Real t, const Point & point) const
 {
-  return _fp_2phase.dT_sat_dp(_p_fn.value(t, point)) * _p_fn.gradient(t, point);
+  return _fp_2phase->dT_sat_dp(_p_fn.value(t, point)) * _p_fn.gradient(t, point);
 }

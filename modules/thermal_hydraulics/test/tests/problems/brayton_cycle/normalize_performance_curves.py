@@ -3,7 +3,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-from thm_utilities import readCSVFile, writeCSVFile
+from moose_thm.thm_utilities import readCSVFile, writeCSVFile
 
 # Tuples of (shaft speed in [rpm], filename suffix)
 cases = [

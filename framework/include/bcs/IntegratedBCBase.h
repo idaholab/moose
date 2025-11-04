@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,8 @@ public:
   IntegratedBCBase(const InputParameters & parameters);
 
   void prepareShapes(unsigned int var_num) override final;
+
+  virtual bool shouldApply() const override;
 
 protected:
   /// current element
@@ -63,4 +65,7 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
+
+  /// Whether to allow skipping the execution of the boundary condition outside of its domain of definition
+  const bool _skip_execution_outside_variable_domain;
 };

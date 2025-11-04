@@ -19,14 +19,14 @@
     paired_block = 1
     new_boundary = 'circle'
   []
-  [delete]
+  [delete_circle]
     type = BlockDeletionGenerator
     input = in_between
     block = '1'
   []
   [final_ccmg]
     type = RenameBlockGenerator
-    input = delete
+    input = delete_circle
     old_block = '2 3'
     new_block = '0 0'
   []
@@ -55,7 +55,8 @@
     inputs = 'final_ccmg left right'
     stitch_boundaries_pairs = 'left right; right left'
     clear_stitched_boundary_ids = false
-    prevent_boundary_ids_overlap = false
+    prevent_boundary_ids_overlap = true
+    merge_boundaries_with_same_name = true
   []
 
   [middle_top_sideset]
@@ -109,7 +110,8 @@
     type = StitchedMeshGenerator
     inputs = 'top_middle_block top_left_block top_right_block'
     stitch_boundaries_pairs = 'left right; right left'
-    prevent_boundary_ids_overlap = false
+    prevent_boundary_ids_overlap = true
+    merge_boundaries_with_same_name = true
   []
   [top_bottom_sideset]
     input = combined_top
@@ -123,7 +125,8 @@
     inputs = 'top_bottom_sideset middle_bottom_sideset'
     stitch_boundaries_pairs = 'top_bottom middle_top'
     clear_stitched_boundary_ids = false
-    prevent_boundary_ids_overlap = false
+    prevent_boundary_ids_overlap = true
+    merge_boundaries_with_same_name = true
   []
   [create_fused_top_sideset]
     input = combined_middle_top
@@ -169,7 +172,8 @@
     type = StitchedMeshGenerator
     inputs = 'bottom_middle_block bottom_left_block bottom_right_block'
     stitch_boundaries_pairs = 'left right; right left'
-    prevent_boundary_ids_overlap = false
+    prevent_boundary_ids_overlap = true
+    merge_boundaries_with_same_name = true
   []
   [bottom_top_sideset]
     input = combined_bottom
@@ -183,7 +187,8 @@
     inputs = 'create_fused_top_sideset bottom_top_sideset'
     stitch_boundaries_pairs = 'middle_bottom bottom_top'
     clear_stitched_boundary_ids = false
-    prevent_boundary_ids_overlap = false
+    prevent_boundary_ids_overlap = true
+    merge_boundaries_with_same_name = true
   []
   [create_fused_bottom_sideset]
     input = combined_final
@@ -208,5 +213,10 @@
     combinatorial_geometry = 'x > ${fparse x_max-rundoff}'
     normal = '1 0 0'
     new_sideset_name = 'right_boundary'
+  []
+  [sideset_removal]
+    input = create_fused_right_sideset
+    type = BoundaryDeletionGenerator
+    boundary_names = 'bottom top left right middle_bottom middle_top bottom_top top_bottom'
   []
 []

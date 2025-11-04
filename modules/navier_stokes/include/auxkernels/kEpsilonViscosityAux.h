@@ -1,7 +1,6 @@
 
-
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,6 +12,7 @@
 
 #include "AuxKernel.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 /**
  * Computes the turbuent viscosity for the k-Epsilon model.
@@ -30,44 +30,46 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  /// Local method to find friction velocity.
-  /// This method may need to be reimplemented for each new turbulence model
-  ADReal findUStarLocalMethod(const ADReal & u, const Real & dist);
-
   /// The dimension of the domain
   const unsigned int _dim;
 
   /// x-velocity
-  const Moose::Functor<ADReal> & _u_var;
+  const Moose::Functor<Real> & _u_var;
   /// y-velocity
-  const Moose::Functor<ADReal> * _v_var;
+  const Moose::Functor<Real> * _v_var;
   /// z-velocity
-  const Moose::Functor<ADReal> * _w_var;
+  const Moose::Functor<Real> * _w_var;
 
   /// Turbulent kinetic energy
-  const Moose::Functor<ADReal> & _k;
+  const Moose::Functor<Real> & _k;
   /// Turbulent kinetic energy dissipation rate
-  const Moose::Functor<ADReal> & _epsilon;
+  const Moose::Functor<Real> & _epsilon;
 
   /// Density
-  const Moose::Functor<ADReal> & _rho;
+  const Moose::Functor<Real> & _rho;
   /// Dynamic viscosity
-  const Moose::Functor<ADReal> & _mu;
+  const Moose::Functor<Real> & _mu;
 
   /// C-mu closure coefficient
   const Real _C_mu;
 
+  // Maximum allowable mu_t_ratio : mu/mu_t
+  const Real _mu_t_ratio_max;
+
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
-
-  /// If the user wants the linearized computation of y_plus
-  const bool _linearized_yplus;
 
   /// If the user wants to enable bulk wall treatment
   const bool _bulk_wall_treatment;
 
-  /// IF the user requested non-equilibrium wall treatment
-  const bool _non_equilibrium_treatment;
+  /// Method used for wall treatment
+  NS::WallTreatmentEnum _wall_treatment;
+
+  /// Method used to limit the k-e time scale
+  const MooseEnum _scale_limiter;
+
+  /// Whether we are using a newton solve
+  const bool _newton_solve;
 
   // -- Parameters of the wall function method
 
@@ -79,7 +81,7 @@ protected:
 
   ///@{
   /// Maps for wall bounded elements
-  std::map<const Elem *, bool> _wall_bounded;
+  std::unordered_set<const Elem *> _wall_bounded;
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}

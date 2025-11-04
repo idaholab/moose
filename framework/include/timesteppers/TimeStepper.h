@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,7 +14,7 @@
 #include "ScalarCoupleable.h"
 
 class FEProblemBase;
-class Transient;
+class TransientBase;
 
 /**
  * Base class for time stepping
@@ -119,7 +119,7 @@ protected:
 
   FEProblemBase & _fe_problem;
   /// Reference to transient executioner
-  Transient & _executioner;
+  TransientBase & _executioner;
 
   /// Values from executioner
   Real & _time;

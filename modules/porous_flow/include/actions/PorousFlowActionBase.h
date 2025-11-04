@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,6 +49,12 @@ protected:
 
   /// The name of the PorousFlowDictator object to be added
   const std::string _dictator_name;
+
+  /// if this vector is not empty the variables, kernels and materials are restricted to these subdomains
+  std::vector<SubdomainName> _subdomain_names;
+
+  /// indicates, if the vector of subdomain names is set (dont set block restrictions, if not)
+  const bool _subdomain_names_set;
 
   /// Number of aqueous-equilibrium secondary species
   const unsigned int _num_aqueous_equilibrium;

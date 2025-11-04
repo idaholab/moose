@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "LayeredSideIntegralBase.h"
+#include "LayeredIntegralBase.h"
 #include "SideIntegralFunctorUserObject.h"
 
 /**
  * Computes layered side integrals of a functor.
  */
-class LayeredSideIntegralFunctor : public LayeredSideIntegralBase<SideIntegralFunctorUserObject>
+class LayeredSideIntegralFunctor : public LayeredIntegralBase<SideIntegralFunctorUserObject>
 {
 public:
   static InputParameters validParams();

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,7 +11,7 @@
 
 #include "ActiveLearningReporterBase.h"
 #include "ActiveLearningGaussianProcess.h"
-#include "GaussianProcess.h"
+#include "GaussianProcessSurrogate.h"
 #include "SurrogateModelInterface.h"
 
 class ActiveLearningGPDecision : public ActiveLearningReporterTempl<Real>,

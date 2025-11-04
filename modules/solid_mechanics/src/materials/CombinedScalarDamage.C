@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -53,9 +53,9 @@ CombinedScalarDamageTempl<is_ad>::initialSetup()
     if (model)
       _damage_models.push_back(model);
     else
-      this->template paramError("damage_model",
-                                "Damage Model " + _damage_models_names[i] +
-                                    " is not compatible with CombinedScalarDamage");
+      this->paramError("damage_model",
+                       "Damage Model " + _damage_models_names[i] +
+                           " is not compatible with CombinedScalarDamage");
   }
 }
 
@@ -63,12 +63,14 @@ template <bool is_ad>
 void
 CombinedScalarDamageTempl<is_ad>::updateQpDamageIndex()
 {
+  using std::max, std::min;
+
   switch (_combination_type)
   {
     case CombinationType::Maximum:
       _damage_index[_qp] = _damage_index_old[_qp];
       for (unsigned int i = 0; i < _damage_models.size(); ++i)
-        _damage_index[_qp] = std::max(_damage_index[_qp], _damage_models[i]->getQpDamageIndex(_qp));
+        _damage_index[_qp] = max(_damage_index[_qp], _damage_models[i]->getQpDamageIndex(_qp));
       break;
     case CombinationType::Product:
       _damage_index[_qp] = 1.0;
@@ -78,6 +80,5 @@ CombinedScalarDamageTempl<is_ad>::updateQpDamageIndex()
       break;
   }
 
-  _damage_index[_qp] =
-      std::max(_damage_index_old[_qp], std::max(0.0, std::min(1.0, _damage_index[_qp])));
+  _damage_index[_qp] = max(_damage_index_old[_qp], max(0.0, min(1.0, _damage_index[_qp])));
 }

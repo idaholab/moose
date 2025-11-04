@@ -1,0 +1,20 @@
+[Tests]
+  design = 'ParsedChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'parsed_chain_control.i'
+    csvdiff = 'parsed_chain_control_out.csv'
+    requirement = 'The system shall be able to parse and evaluate a function expression to populate chain control data.'
+  []
+  [invalid_symbol]
+    type = RunException
+    input = 'parsed_chain_control.i'
+    cli_args = "
+      ChainControls/parsed_ctrl/expression='f'
+      ChainControls/parsed_ctrl/symbol_names='f'
+      ChainControls/parsed_ctrl/symbol_values='fake'"
+    expect_err = "Invalid 'symbol_values' entry 'fake'"
+    requirement = 'The system shall report an error if an invalid symbol is used in the parsed chain control.'
+  []
+[]

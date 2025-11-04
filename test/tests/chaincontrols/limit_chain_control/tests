@@ -1,0 +1,10 @@
+[Tests]
+  design = 'LimitChainControl.md'
+  issues = '#28948'
+  [test]
+    type = CSVDiff
+    input = 'limit_chain_control.i'
+    csvdiff = 'limit_chain_control_out.csv'
+    requirement = 'The system shall be able to limit a chain control data between a minimum and maximum value.'
+  []
+[]

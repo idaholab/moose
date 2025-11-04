@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,9 +28,10 @@ auto
 cylindricalThermalConductance(const T1 & k, const T2 & r_inner, const T3 & r_outer)
 {
   mooseAssert(r_outer > r_inner, "Outer radius must be larger than inner radius.");
+  using std::log;
 
   const auto r_avg = 0.5 * (r_inner + r_outer);
-  return k / (r_avg * std::log(r_outer / r_inner));
+  return k / (r_avg * log(r_outer / r_inner));
 }
 
 /**
@@ -81,10 +82,11 @@ cylindricalGapRadiationHeatFlux(const T1 & r_inner,
                                 const Real & sigma = HeatConduction::Constants::sigma)
 {
   mooseAssert(r_outer > r_inner, "Outer radius must be larger than inner radius.");
+  using std::pow;
 
   const auto rad_resistance =
       1.0 / emiss_inner + r_inner / r_outer * (1.0 - emiss_outer) / emiss_outer;
-  return sigma * (std::pow(T_inner, 4) - std::pow(T_outer, 4)) / rad_resistance;
+  return sigma * (pow(T_inner, 4) - pow(T_outer, 4)) / rad_resistance;
 }
 
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,9 @@ GapConductance::validParams()
 {
   InputParameters params = Material::validParams();
   params += GapConductance::actionParameters();
+  params.addClassDescription(
+      "Material to compute an effective gap conductance based on the thermal conductivity of the "
+      "gap and diffusive approximation to the radiative heat transfer.");
 
   params.addRequiredCoupledVar("variable", "Temperature variable");
 
@@ -65,6 +68,15 @@ GapConductance::validParams()
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
+  // These parameter groups match the ones in ThermalContactAction
+  params.addParamNamesToGroup("gap_distance", "Gap size");
+  params.addParamNamesToGroup("paired_boundary", "Gap surface definition");
+  params.addParamNamesToGroup("order quadrature", "Integration");
+  params.addParamNamesToGroup("warnings", "Diagnostics and debug");
+  params.addParamNamesToGroup(
+      "gap_conductivity gap_conductivity_function gap_conductivity_function_variable",
+      "Gap conductivity");
+
   return params;
 }
 
@@ -98,6 +110,12 @@ GapConductance::actionParameters()
       "max_gap", 1e6, "max_gap>=0", "A maximum gap (denominator) size");
   params.addRangeCheckedParam<unsigned int>(
       "min_gap_order", 0, "min_gap_order<=1", "Order of the Taylor expansion below min_gap");
+
+  params.addParamNamesToGroup("appended_property_name", "Material property retrieval");
+  params.addParamNamesToGroup("gap_geometry_type cylinder_axis_point_1 cylinder_axis_point_2",
+                              "Gap geometry");
+  params.addParamNamesToGroup("emissivity_primary emissivity_secondary", "Radiative heat transfer");
+  params.addParamNamesToGroup("min_gap max_gap min_gap_order", "Gap size");
 
   return params;
 }

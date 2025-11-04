@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -89,15 +89,17 @@ template <bool is_ad>
 void
 ArrheniusMaterialPropertyTempl<is_ad>::computeQpProperties()
 {
-  const GenericReal<is_ad> temp = std::max(_temperature[_qp], 1e-30);
+  using std::max, std::exp;
+
+  const GenericReal<is_ad> temp = max(_temperature[_qp], 1e-30);
 
   _diffusivity[_qp] = 0.0;
   _diffusivity_dT[_qp] = 0.0;
 
   for (unsigned int i = 0; i < _number; ++i)
   {
-    _diffusivity[_qp] += _D_0[i] * std::exp(-_Q[i] / _R / temp);
-    _diffusivity_dT[_qp] += _D_0[i] * std::exp(-_Q[i] / _R / temp) * _Q[i];
+    _diffusivity[_qp] += _D_0[i] * exp(-_Q[i] / _R / temp);
+    _diffusivity_dT[_qp] += _D_0[i] * exp(-_Q[i] / _R / temp) * _Q[i];
   }
 
   _diffusivity_dT[_qp] /= (_R * Utility::pow<2>(temp));

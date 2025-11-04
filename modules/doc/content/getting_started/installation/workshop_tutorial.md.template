@@ -5,46 +5,45 @@ A MOOSE installation binary comes with several examples you can run to make sure
 sound, as well as moving some of the example inputs into a safe location you can play with.
 !style-end!
 
-There are examples for each physics solver available by name, in the following directory:
+You may query the executable for the available inputs with the following:
 
 ```bash
-ls {{MOOSE_SHARE}}
+moose-opt --show-copyable-inputs
 ```
 
-!alert! note
-Not everything you find in this directory is a physics library. We are working on an elegant way to
-ask `moose` for all available solvers.
-!alert-end!
+which will show something like this:
 
-For now, lets copy the `{{TUTORIAL}}` into a safe location for editing:
+```
+The following directories are installable into a user-writeable directory:
+
+chemical_reactions combined contact electromagnetics external_petsc_solver fluid_properties framework fsi functional_expansion_tools geochemistry heat_transfer level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor reactor_tutorial richards scalar_transport solid_mechanics solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem
+
+To install one or more directories of inputs, execute the binary with the "--copy-inputs" flag. e.g.:
+$ moose-opt --copy-inputs chemical_reactions
+```
+
+For now, lets copy `{{TUTORIAL}}` into a safe location for editing:
 
 ```bash
 mkdir -p ~/projects/examples
 cd ~/projects/examples
-moose --copy-inputs {{TUTORIAL}}
+moose-opt --copy-inputs {{TUTORIAL}}
   <output trimmed>
 Directory successfully copied into ./moose/{{TUTORIAL}}/
 ```
 
-!alert! note title=Directory successfully copied into...
-Take note of the information being displayed in the output. `moose` is alerting to the directory
-structure it created (`the last line`), and sometimes may not represent the exact wordage in the
-following instructions. e.g. Linux machines will report "combined", Macintosh machines will report
-"moose".
-!alert-end!
-
-With the {{TUTORIAL}}'s examples and inputs copied, move into the {{TUTORIAL}} directory and
+With {{TUTORIAL}}'s examples and inputs copied, move into the {{TUTORIAL}} directory and
 instruct `moose` to run the tests:
 
 ```bash
 cd ./moose/{{TUTORIAL}}
-moose --run -j 6
+moose-opt --run -j 6
 ```
 
 Testing will commence and take a few moments to finish. There may be several skipped tests for one
 reason or another. This is normal. However none of the tests should fail.
 
-Next, we will run a single input file manually, to demonstrate how you will ultimately use `moose`.
+Next, we will run a single input file manually, to demonstrate how you will ultimately use `moose-opt`.
 Peruse the subdirectories and find an input file you wish to run:
 
 !alert! tip
@@ -59,7 +58,7 @@ find . -name '*.i'
 
 ```bash
 # cd into the directory containing the input file you wish to run
-moose -i <the input file you chose>.i --mesh-only
+moose-opt -i <the input file you chose>.i --mesh-only
 ```
 
 You will see some information scroll by, and ultimately end back at your prompt. If you perform a

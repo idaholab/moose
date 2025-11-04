@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,7 +40,7 @@ def newToken(name, parent=None, **defaults):
 
 class Token(NodeBase):
     """
-    Base class for AST tokens. All tokens are of this type, but should be generate with the
+    Base class for AST tokens. All tokens are of this type, but should be generated with the
     newToken function to assign default attributes.
 
     Input:

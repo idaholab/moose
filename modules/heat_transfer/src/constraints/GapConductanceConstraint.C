@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -48,6 +48,8 @@ GapConductanceConstraint::GapConductanceConstraint(const InputParameters & param
 ADReal
 GapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
+  using std::max;
+
   switch (mortar_type)
   {
     case Moose::MortarType::Primary:
@@ -69,8 +71,7 @@ GapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type)
           ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
         }
 
-      auto l =
-          std::max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
+      auto l = max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
       return (_lambda[_qp] - _k * (_u_primary[_qp] - _u_secondary[_qp]) / l) * _test[_i][_qp];
     }
 

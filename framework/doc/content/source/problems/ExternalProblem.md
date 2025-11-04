@@ -5,7 +5,7 @@ coupled codes (MOOSE-Wrapped Apps). The external coupling interface should overr
 "solve" method along with a method for testing convergence of the last solve.
 
 More information on using the `ExternalProblem` for wrapping applications may be found
-in the [application development documentation](modules/doc/content/application_development/moose_wrapped_apps.md optional=True).
+in the [application development documentation](application_development/moose_wrapped_apps.md optional=True).
 
 ## Examples
 

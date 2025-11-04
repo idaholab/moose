@@ -18,7 +18,9 @@
       detail = 'using regular material properties in RZ geometry.'
       # We remove the thermal resistance BC from the top, since the conduction formulation there
       # is incorrect. We also move the thermal resistance BC to the outer cylinder, makes more sense than at r=0
-      cli_args = "Problem/coord_type=RZ FVBCs/left/boundary=right FVBCs/left/geometry=cylindrical FVBCs/left/inner_radius=2 FVBCs/other/boundary='left bottom' Outputs/file_base=test_rz_out"
+      cli_args = "Mesh/coord_type=RZ FVBCs/left/boundary=right FVBCs/left/geometry=cylindrical "
+                 "FVBCs/left/inner_radius=2 FVBCs/other/boundary='left bottom' "
+                 "Outputs/file_base=test_rz_out"
     []
     [functor_matprop]
       type = Exodiff
@@ -35,7 +37,9 @@
       detail = 'using functor material properties in RZ geometry.'
       # We remove the thermal resistance BC from the top, since the conduction formulation there
       # is incorrect. We also move the thermal resistance BC to the outer cylinder, makes more sense than at r=0
-      cli_args = "Problem/coord_type=RZ FVBCs/left/boundary=right FVBCs/left/geometry=cylindrical FVBCs/left/inner_radius=2 FVBCs/other/boundary='left bottom' Outputs/file_base=test_functor_rz_out"
+      cli_args = "Mesh/coord_type=RZ FVBCs/left/boundary=right FVBCs/left/geometry=cylindrical "
+                 "FVBCs/left/inner_radius=2 FVBCs/other/boundary='left bottom' "
+                 "Outputs/file_base=test_functor_rz_out"
     []
   []
 []

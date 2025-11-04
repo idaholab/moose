@@ -38,7 +38,7 @@
     assembly_type = 1
     inputs = 'pin1 pin2'
     pattern = '0 0;
-               0 1;'
+               0 1'
     extrude = true
   []
 

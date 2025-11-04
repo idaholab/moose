@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,24 +27,32 @@ public:
 
   GeometricSearchInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * Retrieve the PentrationLocator associated with the two sides.
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  GeometricSearchInterface(const GeometricSearchInterface & object,
+                           const Moose::Kokkos::FunctorCopy & key);
+#endif
+
+  /**
+   * Retrieve the PenetrationLocator associated with the two sides.
    */
   PenetrationLocator &
   getPenetrationLocator(const BoundaryName & primary, const BoundaryName & secondary, Order order);
 
   /**
-   * Retrieve the Quadrature PentrationLocator associated with the two sides.
+   * Retrieve the Quadrature PenetrationLocator associated with the two sides.
    *
-   * A "Quadrature" version means that it's going to find the penetration each quadrature point on
-   * this boundary
+   * A "Quadrature" version means that it's going to find the penetration of each quadrature point
+   * on this boundary
    */
   PenetrationLocator & getQuadraturePenetrationLocator(const BoundaryName & primary,
                                                        const BoundaryName & secondary,
                                                        Order order);
 
   /**
-   * Retrieve the PentrationLocator associated with the two sides.
+   * Retrieve the PenetrationLocator associated with the two sides.
    */
   NearestNodeLocator & getNearestNodeLocator(const BoundaryName & primary,
                                              const BoundaryName & secondary);

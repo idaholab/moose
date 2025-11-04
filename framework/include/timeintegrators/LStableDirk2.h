@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,6 +49,7 @@ public:
                                 ADReal & ad_u_dotdot) const override;
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
+  virtual bool overridesSolve() const override { return true; }
 
 protected:
   /**
@@ -61,10 +62,10 @@ protected:
   unsigned int _stage;
 
   //! Buffer to store non-time residual from first stage solve.
-  NumericVector<Number> & _residual_stage1;
+  NumericVector<Number> * _residual_stage1;
 
   //! Buffer to store non-time residual from second stage solve
-  NumericVector<Number> & _residual_stage2;
+  NumericVector<Number> * _residual_stage2;
 
   // The parameter of the method, set at construction time and cannot be changed.
   const Real _alpha;

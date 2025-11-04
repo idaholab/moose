@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,6 +21,11 @@ CSV::validParams()
   InputParameters params = TableOutput::validParams();
   params.addClassDescription("Output for postprocessors, vector postprocessors, and scalar "
                              "variables using comma seperated values (CSV).");
+
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_on");
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_postprocessors_on");
+  addMultiAppFixedPointIterationEndExecFlag(params, "execute_scalars_on");
+
   params.addParam<bool>("sort_columns", false, "Toggle the sorting of columns alphabetically.");
 
   // Options for aligning csv output with whitespace padding
@@ -102,9 +107,9 @@ CSV::initialSetup()
   const auto n_pps = getPostprocessorOutput().size();
   const auto n_scalars = getScalarOutput().size();
   const auto n_reporters = getReporterOutput().size();
-  const bool pp_active = n_pps > 0 && !pp_execute_on.contains(EXEC_NONE);
-  const bool scalar_active = n_scalars > 0 && !scalar_execute_on.contains(EXEC_NONE);
-  const bool reporter_active = n_reporters > 0 && !reporter_execute_on.contains(EXEC_NONE);
+  const bool pp_active = n_pps > 0 && !pp_execute_on.isValueSet(EXEC_NONE);
+  const bool scalar_active = n_scalars > 0 && !scalar_execute_on.isValueSet(EXEC_NONE);
+  const bool reporter_active = n_reporters > 0 && !reporter_execute_on.isValueSet(EXEC_NONE);
   if ((pp_execute_on != scalar_execute_on && pp_active && scalar_active) ||
       (pp_execute_on != reporter_execute_on && pp_active && reporter_active))
     mooseError("The parameters 'execute_postprocessors_on', 'execute_scalars_on', and "

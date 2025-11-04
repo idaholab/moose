@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -84,7 +84,9 @@ template <bool is_ad>
 void
 PorousFlowPermeabilityExponentialTempl<is_ad>::computeQpProperties()
 {
-  _permeability_qp[_qp] = _k_anisotropy * _BB * std::exp(_porosity_qp[_qp] * _AA);
+  using std::exp;
+
+  _permeability_qp[_qp] = _k_anisotropy * _BB * exp(_porosity_qp[_qp] * _AA);
 
   if constexpr (!is_ad)
   {

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,7 +16,9 @@
 // libMesh includes
 #include "libmesh/fe.h"
 
-registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "setup_darcy");
+registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "add_aux_variable");
+registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "add_aux_kernel");
+registerMooseAction("DarcyThermoMechApp", SetupDarcySimulation, "add_kernel");
 
 InputParameters
 SetupDarcySimulation::validParams()

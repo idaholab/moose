@@ -197,44 +197,44 @@ scale_Fe = ${fparse 1.0 / eqm_Fe}
   [rate_H2O_auxk]
     type = ParsedAux
     variable = rate_H2O
-    args = 'rate_H2O_times_vv nodal_void_volume'
-    function = 'rate_H2O_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_H2O_times_vv nodal_void_volume'
+    expression = 'rate_H2O_times_vv / nodal_void_volume'
   []
   [rate_CH3COO]
     type = ParsedAux
     variable = rate_CH3COO
-    args = 'rate_CH3COO_times_vv nodal_void_volume'
-    function = 'rate_CH3COO_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_CH3COO_times_vv nodal_void_volume'
+    expression = 'rate_CH3COO_times_vv / nodal_void_volume'
   []
   [rate_CH4]
     type = ParsedAux
     variable = rate_CH4
-    args = 'rate_CH4_times_vv nodal_void_volume'
-    function = 'rate_CH4_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_CH4_times_vv nodal_void_volume'
+    expression = 'rate_CH4_times_vv / nodal_void_volume'
   []
   [rate_HS]
     type = ParsedAux
     variable = rate_HS
-    args = 'rate_HS_times_vv nodal_void_volume'
-    function = 'rate_HS_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_HS_times_vv nodal_void_volume'
+    expression = 'rate_HS_times_vv / nodal_void_volume'
   []
   [rate_Ca]
     type = ParsedAux
     variable = rate_Ca
-    args = 'rate_Ca_times_vv nodal_void_volume'
-    function = 'rate_Ca_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_Ca_times_vv nodal_void_volume'
+    expression = 'rate_Ca_times_vv / nodal_void_volume'
   []
   [rate_SO4]
     type = ParsedAux
     variable = rate_SO4
-    args = 'rate_SO4_times_vv nodal_void_volume'
-    function = 'rate_SO4_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_SO4_times_vv nodal_void_volume'
+    expression = 'rate_SO4_times_vv / nodal_void_volume'
   []
   [rate_Fe]
     type = ParsedAux
     variable = rate_Fe
-    args = 'rate_Fe_times_vv nodal_void_volume'
-    function = 'rate_Fe_times_vv / nodal_void_volume'
+    coupled_variables = 'rate_Fe_times_vv nodal_void_volume'
+    expression = 'rate_Fe_times_vv / nodal_void_volume'
   []
 []
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,8 +21,8 @@ class ComputeBoundaryInitialConditionThread
   : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
+  // Set IC on all variables
   ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem);
-
   // Splitting Constructor
   ComputeBoundaryInitialConditionThread(ComputeBoundaryInitialConditionThread & x,
                                         Threads::split split);
@@ -30,4 +30,15 @@ public:
   void onNode(ConstBndNodeRange::const_iterator & nd);
 
   void join(const ComputeBoundaryInitialConditionThread & /*y*/);
+
+private:
+  /// @brief the names of target variables for which the initial conditions are applied
+  const std::set<VariableName> * _target_vars = nullptr;
+
+  /// Set IC on specific variables
+  ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem,
+                                        const std::set<VariableName> * target_vars);
+
+  // Allow FEProblemBase to access the private constructor
+  friend class FEProblemBase;
 };

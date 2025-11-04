@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,6 +26,7 @@
 #include "MooseVariableDependencyInterface.h"
 #include "ADFunctorInterface.h"
 #include "FaceArgInterface.h"
+#include "MooseVariableInterface.h"
 
 // Forward declarations
 template <typename>
@@ -37,6 +38,7 @@ class Problem;
 class SubProblem;
 class SystemBase;
 class Assembly;
+class FEProblemBase;
 
 /**
  * Base class for creating new types of boundary conditions.
@@ -91,7 +93,8 @@ protected:
   Moose::FaceArg singleSidedFaceArg(
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
-      bool correct_skewness = false) const;
+      bool correct_skewness = false,
+      const Moose::StateArg * state_limiter = nullptr) const;
 
   MooseVariableFV<Real> & _var;
 
@@ -99,7 +102,7 @@ protected:
   SubProblem & _subproblem;
 
   /// Reference to the ruling finite volume problem
-  FVProblemBase & _fv_problem;
+  FEProblemBase & _fv_problem;
 
   /// Reference to SystemBase
   SystemBase & _sys;

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "AuxKernel.h"
 #include "Assembly.h"
+
+#include <unordered_set>
 
 /**
  * A base class for the various Material related AuxKernal objects.
@@ -37,7 +39,7 @@ public:
 protected:
   virtual RT computeValue() override;
 
-  /// Perform a sanity check on teh retrieved value (e.g. to check dynamic sizes)
+  /// Perform a sanity check on the retrieved value (e.g. to check dynamic sizes)
   virtual void checkFullValue() {}
 
   /// Returns material property values at quadrature points
@@ -53,6 +55,9 @@ protected:
   Moose::GenericType<T, is_ad> _full_value;
 
 private:
+  /// Helper function to retrieve the property or functor
+  const PropertyType & getPropertyHelper();
+
   /// Multiplier for the material property
   const Real _factor;
 
@@ -94,12 +99,7 @@ template <typename T, bool is_ad, bool is_functor, typename RT>
 MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<RT>(parameters),
-    _prop([this]() -> const auto & {
-      if constexpr (is_functor)
-        return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
-      else
-        return this->template getGenericMaterialProperty<T, is_ad>("property");
-    }()),
+    _prop(getPropertyHelper()),
     _selected_qp(this->isParamValid("selected_qp")
                      ? this->template getParam<unsigned int>("selected_qp")
                      : libMesh::invalid_uint),
@@ -107,6 +107,16 @@ MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::MaterialAuxBaseTempl(
     _offset(this->template getParam<RT>("offset")),
     _current_subdomain_id(this->_assembly.currentSubdomainID())
 {
+}
+
+template <typename T, bool is_ad, bool is_functor, typename RT>
+const typename MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::PropertyType &
+MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::getPropertyHelper()
+{
+  if constexpr (is_functor)
+    return this->template getFunctor<Moose::GenericType<T, is_ad>>("functor");
+  else
+    return this->template getGenericMaterialProperty<T, is_ad>("property");
 }
 
 template <typename T, bool is_ad, bool is_functor, typename RT>
@@ -118,7 +128,8 @@ MaterialAuxBaseTempl<T, is_ad, is_functor, RT>::computeValue()
   {
     if (this->isNodal())
     {
-      const Moose::NodeArg node_arg{this->_current_node, _current_subdomain_id};
+      const std::set<SubdomainID> sub_id_set = {_current_subdomain_id};
+      const Moose::NodeArg node_arg{this->_current_node, &sub_id_set};
       const auto state = this->determineState();
       _full_value = _prop(node_arg, state);
     }

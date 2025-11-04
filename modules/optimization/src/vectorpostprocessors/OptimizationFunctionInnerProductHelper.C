@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,9 +38,7 @@ OptimizationFunctionInnerProductHelper::OptimizationFunctionInnerProductHelper(
     _simulation_time(_ip_problem.getMooseApp().getStartTime())
 {
   if (!_function)
-    mooseError("Function requested by ",
-               parameters.get<std::string>("_type"),
-               " must be an OptimizationFunction.");
+    parameters.paramError("function", "Function must be an OptimizationFunction.");
 }
 
 void

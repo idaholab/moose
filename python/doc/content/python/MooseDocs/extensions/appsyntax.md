@@ -28,7 +28,7 @@ description of the object. To display this text the `!syntax description` comman
 the MOOSE input file syntax for the object as in [appsyntax-description].
 
 !devel! example id=appsyntax-description caption=Example use of the `!syntax description` command.
-!syntax description /Mesh/FileMesh style=color:green
+!syntax description /Mesh/FileMesh
 !devel-end!
 
 !listing framework/src/mesh/FileMesh.C start=template
@@ -57,8 +57,8 @@ command are shown in [appsyntax-parameters-settings].
 ## Input Files (`!syntax inputs`) id=inputs
 
 In many cases it is useful to know where in the examples, tutorials, or tests an object is utilized
-in an input file. Therefore, `inputs` sub-command is defined. [appsyntax-inputs-example] lists
-all the input files that use include the ConstantDamper object and [appsyntax-inputs-settings]
+in an input file. Therefore, the `inputs` sub-command is defined. [appsyntax-inputs-example] lists
+all the input files that include the ConstantDamper object and [appsyntax-inputs-settings]
 provides the available settings for the `inputs` command.
 
 !devel settings module=MooseDocs.extensions.appsyntax

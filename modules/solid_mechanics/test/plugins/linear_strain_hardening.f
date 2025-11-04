@@ -28,6 +28,7 @@ C
      2     STRAN(NTENS),DSTRAN(NTENS),TIME(2),PREDEF(1),DPRED(1),
      3     PROPS(NPROPS),COORDS(3),DROT(3,3),DFGRD0(3,3),DFGRD1(3,3)
 C
+      DOUBLE PRECISION STRESS, DROT, DFGRD0, DFGRD1, DTIME, STRESSROT
 C
       PARAMETER (ONE=1.0,TWO=2.0,THREE=3.0)
 C
@@ -69,6 +70,13 @@ C
 C
 C     ELASTIC STIFFNESS
 C
+C     Fully initialize DDSDDE to zero
+      DO I = 1, NTENS
+         DO J = 1, NTENS
+            DDSDDE(I,J) = 0.0
+         END DO
+      END DO
+
       DO K1=1, NDI
          DO K2=1, NDI
             DDSDDE(K2, K1)=ELAM
@@ -155,6 +163,10 @@ C      PRINT *, PJ
          END DO
          DO K=NDI+1,NTENS
             DIR(K) = ((THREE/TWO)*STRESS(K))/PJ
+         END DO
+      ELSE
+         DO K=1,NTENS
+            DIR(K) = 0.0
          END DO
       END IF
 C      PRINT *, DIR

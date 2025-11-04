@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,8 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
+
+using namespace libMesh;
 
 namespace Moose
 {
@@ -115,7 +117,11 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, const StateAr
     return result;
   }
   else
+  {
+    (void)elem_arg; // WE do this because the GCC min complains that it is not used and
+                    // [[maybe_unused]] doesnt work for GCC min
     mooseError("Cell center reconstruction is not implemented!");
+  }
 }
 
 template <typename T, typename Map>

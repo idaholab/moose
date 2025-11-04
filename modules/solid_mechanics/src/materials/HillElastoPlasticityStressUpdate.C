@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -218,6 +218,7 @@ void
 HillElastoPlasticityStressUpdateTempl<is_ad>::computeElasticityTensorEigenDecomposition()
 {
   // Helper method to compute qp matrices required for the elasto-plasticity algorithm.
+  using std::sqrt;
 
   GenericRankFourTensor<is_ad> elasticity_tensor = _elasticity_tensor[_qp];
 
@@ -251,7 +252,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeElasticityTensorEigenDecomp
   GenericDenseMatrix<is_ad> sqrt_Delta(6, 6);
   for (unsigned int i = 0; i < 6; i++)
   {
-    sqrt_Delta(i, i) = std::sqrt(_elasticity_eigenvalues[_qp](i));
+    sqrt_Delta(i, i) = sqrt(_elasticity_eigenvalues[_qp](i));
   }
 
   GenericDenseMatrix<is_ad> eigenvectors_elasticity_transpose(6, 6);
@@ -349,7 +350,8 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeOmega(
   if (omega == 0.0)
     omega = 1.0e-36;
 
-  return std::sqrt(omega);
+  using std::sqrt;
+  return sqrt(omega);
 }
 
 template <bool is_ad>
@@ -371,6 +373,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeResidual(
     const GenericDenseVector<is_ad> & stress_sigma,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::pow;
 
   // If in elastic regime, just return
   if (_yield_condition <= 0.0)
@@ -415,10 +418,10 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeResidual(
 
   // A small value of 1.0e-30 is added to the hardening variable to avoid numerical issues
   // related to hardening variable becoming negative early in the iteration leading to non-
-  // convergence. Note that std::pow(x,n) requires x to be positive if n is less than 1.
+  // convergence. Note that pow(x,n) requires x to be positive if n is less than 1.
 
   GenericReal<is_ad> s_y =
-      _hardening_constant * std::pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent) +
+      _hardening_constant * pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent) +
       _yield_stress;
 
   GenericReal<is_ad> residual = 0.0;
@@ -434,6 +437,8 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeDerivative(
     const GenericDenseVector<is_ad> & stress_sigma,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::pow;
+
   // If in elastic regime, return unit derivative
   if (_yield_condition <= 0.0)
     return 1.0;
@@ -443,8 +448,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeDerivative(
 
   GenericReal<is_ad> hardeningVariable = computeHardeningValue(delta_gamma, omega);
   GenericReal<is_ad> sy =
-      _hardening_constant * std::pow(hardeningVariable + 1.0e-30, _hardening_exponent) +
-      _yield_stress;
+      _hardening_constant * pow(hardeningVariable + 1.0e-30, _hardening_exponent) + _yield_stress;
   GenericReal<is_ad> sy_alpha = _hardening_derivative;
 
   GenericReal<is_ad> omega_gamma;
@@ -508,9 +512,9 @@ template <bool is_ad>
 Real
 HillElastoPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative()
 {
+  using std::pow;
   return _hardening_constant * _hardening_exponent *
-         MetaPhysicL::raw_value(
-             std::pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent - 1));
+         MetaPhysicL::raw_value(pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent - 1));
 }
 
 template <bool is_ad>
@@ -521,6 +525,8 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
     const GenericDenseVector<is_ad> & stress_dev,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::sqrt;
+
   // e^P = delta_gamma * hill_tensor * stress
   GenericDenseVector<is_ad> inelasticStrainIncrement_vector(6);
   GenericDenseVector<is_ad> hill_stress(6);
@@ -561,7 +567,7 @@ HillElastoPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
   GenericReal<is_ad> eq_plastic_strain_inc = Mepsilon.dot(inelasticStrainIncrement_vector);
 
   if (eq_plastic_strain_inc > 0.0)
-    eq_plastic_strain_inc = std::sqrt(eq_plastic_strain_inc);
+    eq_plastic_strain_inc = sqrt(eq_plastic_strain_inc);
 
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + eq_plastic_strain_inc;
 

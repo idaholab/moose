@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -333,6 +333,7 @@ CaloricallyImperfectGas::c_from_v_e(Real v, Real e) const
 ADReal
 CaloricallyImperfectGas::c_from_v_e(const ADReal & v, const ADReal & e) const
 {
+  using std::sqrt;
   const auto T = T_from_v_e(v, e);
 
   const auto c2 = gamma_from_v_e(v, e) * _R_specific * T;
@@ -340,7 +341,7 @@ CaloricallyImperfectGas::c_from_v_e(const ADReal & v, const ADReal & e) const
     return getNaN("Sound speed squared (gamma * R * T) is negative: c2 = " +
                   Moose::stringify(MetaPhysicL::raw_value(c2)) + ".");
 
-  return std::sqrt(c2);
+  return sqrt(c2);
 }
 
 void
@@ -367,7 +368,8 @@ CaloricallyImperfectGas::c_from_p_T(Real p, Real T) const
 ADReal
 CaloricallyImperfectGas::c_from_p_T(const ADReal & p, const ADReal & T) const
 {
-  return std::sqrt(gamma_from_p_T(p, T) * _R_specific * T);
+  using std::sqrt;
+  return sqrt(gamma_from_p_T(p, T) * _R_specific * T);
 }
 
 void
@@ -754,7 +756,11 @@ CaloricallyImperfectGas::cv_from_T_v(Real T, Real /*v*/) const
   return cv_from_T(T);
 }
 
-Real CaloricallyImperfectGas::e_spndl_from_v(Real /*v*/) const { return _e_c; }
+Real
+CaloricallyImperfectGas::e_spndl_from_v(Real /*v*/) const
+{
+  return _e_c;
+}
 
 void
 CaloricallyImperfectGas::v_e_spndl_from_T(Real /*T*/, Real & v, Real & e) const

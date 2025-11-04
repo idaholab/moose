@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,8 @@ NavierStokesTestApp::validParams()
 
 registerKnownLabel("NavierStokesTestApp");
 
-NavierStokesTestApp::NavierStokesTestApp(InputParameters parameters) : NavierStokesApp(parameters)
+NavierStokesTestApp::NavierStokesTestApp(const InputParameters & parameters)
+  : NavierStokesApp(parameters)
 {
   NavierStokesTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +45,8 @@ NavierStokesTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 NavierStokesTestApp::registerApps()
 {
-  registerApp(NavierStokesApp);
+  NavierStokesApp::registerApps();
   registerApp(NavierStokesTestApp);
-}
-
-void
-NavierStokesTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"NavierStokesTestApp"});
-}
-
-void
-NavierStokesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"NavierStokesTestApp"});
-}
-
-void
-NavierStokesTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

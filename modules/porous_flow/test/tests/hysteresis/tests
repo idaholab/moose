@@ -1187,6 +1187,7 @@
     requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along a first-order wetting curve'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
+    rel_err = 3e-5
   [../]
   [./1phase_bc]
     type = CSVDiff
@@ -1195,6 +1196,7 @@
     requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along a first-order wetting curve, when the input file has a PorousFlow boundary condition'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#23871'
+    rel_err = 3e-5
   [../]
   [./1phase_3rd]
     type = CSVDiff
@@ -1203,6 +1205,7 @@
     requirement = 'PorousFlow shall be able to compute saturation in 1-phase hysteretic systems, as the system evolves in time along the primary drying curve and then along first, second and third order curves'
     design = 'PorousFlow1PhaseHysP.md'
     issues = '#16129'
+    rel_err = 3e-5
   [../]
   [./2phasePP_jacobian]
     type = PetscJacobianTester

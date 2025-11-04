@@ -1,5 +1,5 @@
 ///* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,6 +31,12 @@ public:
   virtual const MooseVariableFieldBase & neighborVariable() const override;
 
 protected:
+  /**
+   * @param qp The current quadrature point index
+   * @returns The solid velocity
+   */
+  virtual ADRealVectorValue solidVelocity(const unsigned int qp) const;
+
   /// The penalty factor
   const Real _penalty;
 

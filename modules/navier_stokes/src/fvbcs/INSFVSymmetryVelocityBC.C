@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -38,8 +38,7 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
 ADReal
 INSFVSymmetryVelocityBC::computeSegregatedContribution()
 {
-  const bool use_elem = _face_info->faceType(std::make_pair(_var.number(), _var.sys().number())) ==
-                        FaceInfo::VarFaceNeighbors::ELEM;
+  const bool use_elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM);
   const auto elem_arg =
       use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
 

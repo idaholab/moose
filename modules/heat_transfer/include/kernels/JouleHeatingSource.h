@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,6 +12,13 @@
 #include "HeatSource.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
+
+/**
+ *  NOTE: The non-AD version of JouleHeatingSource will be deprecated in the near future
+          (10/01/2025) in favor of exclusively using the AD version of
+          JouleHeatingSource, since the ADJouleHeatingSource can calculate both
+          electrostatic and electromagnetic Joule heating.
+ */
 
 /**
  * This kernel calculates the heat source term corresponding to joule heating,

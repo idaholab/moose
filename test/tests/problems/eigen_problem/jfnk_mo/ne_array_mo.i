@@ -1,13 +1,28 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  xmin = 0
-  xmax = 10
-  ymin = 0
-  ymax = 10
-  elem_type = QUAD4
-  nx = 8
-  ny = 8
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 10
+    elem_type = QUAD4
+    nx = 8
+    ny = 8
+  []
+  [left_block]
+    type = SubdomainBoundingBoxGenerator
+    bottom_left = '0 0 0'
+    top_right = '5 10 0'
+    block_id = 1
+    input = gen
+  []
+  [refine]
+    type = RefineBlockGenerator
+    input = left_block
+    refinement = '0 0'
+    block = '1 0'
+  []
 []
 
 # the minimum eigenvalue of this problem is 2*(PI/a)^2;

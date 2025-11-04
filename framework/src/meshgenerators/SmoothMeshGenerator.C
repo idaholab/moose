@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -49,7 +49,7 @@ SmoothMeshGenerator::generate()
 
   auto mesh = dynamic_pointer_cast<ReplicatedMesh>(old_mesh);
 
-  LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh));
+  libMesh::LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh));
 
   lms.smooth(_iterations);
 

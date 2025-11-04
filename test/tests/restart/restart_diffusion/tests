@@ -105,7 +105,10 @@
     type = 'RunException'
     input = 'exodus_refined_restart_2_test.i'
     expect_err = 'Initial conditions have been specified during an Exodus restart'
-    cli_args = 'Variables/u/initial_condition=3 Problem/allow_initial_conditions_with_restart=false'
+    cli_args = "ICs/ic_over_restart/type=ConstantIC
+                ICs/ic_over_restart/variable=u
+                ICs/ic_over_restart/value=1
+                Problem/allow_initial_conditions_with_restart=false"
     issues = "#21423"
     requirement = "The system shall issue a useful error message stating that initial conditions "
                   "should not be used when restarting."

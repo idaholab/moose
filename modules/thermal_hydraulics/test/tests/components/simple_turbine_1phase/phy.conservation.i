@@ -133,8 +133,9 @@
     boundary = outlet
   []
   [W_dot]
-    type = ScalarVariable
-    variable = turbine:W_dot
+    type = ElementAverageValue
+    variable = W_dot
+    block = 'turbine'
   []
   [energy_diff]
     type = LinearCombinationPostprocessor
@@ -164,7 +165,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = ' lu'
 
-  nl_rel_tol = 1e-7
+  nl_rel_tol = 0
   nl_abs_tol = 2e-6
 
   nl_max_its = 10

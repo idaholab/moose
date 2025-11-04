@@ -43,7 +43,6 @@
     background_intervals = 2
     hexagon_size = ${fparse 40.0/sqrt(3.0)}
     ring_offset = 0.6
-    azimuthal_interval_style = equal_length
     assembly_orientation = pin_up
   []
   [pattern]

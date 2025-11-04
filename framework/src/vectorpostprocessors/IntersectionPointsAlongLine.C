@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -65,7 +65,7 @@ IntersectionPointsAlongLine::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  std::unique_ptr<PointLocatorBase> pl = _fe_problem.mesh().getPointLocator();
+  std::unique_ptr<libMesh::PointLocatorBase> pl = _fe_problem.mesh().getPointLocator();
 
   // We may not have any elements along the given line; if so then
   // that shouldn't throw a libMesh error.

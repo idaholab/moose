@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -48,8 +48,7 @@
                                              ADReal & d##want##d2,                                 \
                                              std::vector<ADReal> & d##want##dx) const              \
   {                                                                                                \
-    fluidPropError(                                                                                \
-        name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not  implemented.");           \
+    imperfectJacobianMessage(__PRETTY_FUNCTION__, " derivative derivatives not  implemented.");    \
     Real dummy, tmp1, tmp2;                                                                        \
     std::vector<Real> x_raw(x.size(), 0);                                                          \
     std::vector<Real> tmp3(x.size(), 0);                                                           \
@@ -81,7 +80,7 @@
                                              Real & d##want##d2,                                   \
                                              std::vector<Real> & d##want##dx) const                \
   {                                                                                                \
-    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
+    imperfectJacobianMessage(__PRETTY_FUNCTION__, " derivatives not implemented.");                \
     d##want##d1 = 0;                                                                               \
     d##want##d2 = 0;                                                                               \
     std::fill(d##want##dx.begin(), d##want##dx.end(), 0.);                                         \
@@ -89,6 +88,8 @@
   }                                                                                                \
                                                                                                    \
   propfuncAD(want, prop1, prop2)
+
+class SinglePhaseFluidProperties;
 
 /**
  * Base class for fluid properties of vapor mixtures
@@ -106,6 +107,19 @@ public:
   VaporMixtureFluidProperties(const InputParameters & parameters);
   virtual ~VaporMixtureFluidProperties();
 
+  /**
+   * Gets the primary component single-phase fluid properties
+   */
+  virtual const SinglePhaseFluidProperties & getPrimaryFluidProperties() const = 0;
+
+  /**
+   * Gets a secondary component single-phase fluid properties
+   *
+   * @param[in] i  Index of the secondary fluid properties (0 is first secondary)
+   */
+  virtual const SinglePhaseFluidProperties &
+  getSecondaryFluidProperties(unsigned int i = 0) const = 0;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
   // clang-format off
@@ -114,8 +128,10 @@ public:
   propfunc(p, v, e)
   propfunc(T, v, e)
   propfunc(c, v, e)
+  propfunc(v, p, T)
   propfunc(rho, p, T)
   propfunc(e, p, T)
+  propfunc(s, p, T)
   propfunc(c, p, T)
   propfunc(cp, p, T)
   propfunc(cv, p, T)
@@ -132,7 +148,15 @@ public:
       /**
        * Returns the number of secondary vapors
        */
-      virtual unsigned int getNumberOfSecondaryVapors() const = 0;
+      virtual unsigned int getNumberOfSecondaryVapors() const
+  {
+    return numberOfComponents() - 1;
+  }
+
+  /**
+   * Returns the number of components in the mixture
+   */
+  virtual unsigned int numberOfComponents() const = 0;
 
   /**
    * Computes the mass fraction of the primary vapor given mass fractions of the
@@ -147,9 +171,27 @@ public:
    */
   Real primaryMassFraction(const std::vector<Real> & x) const;
 
-private:
+  /**
+   * Computes the mixture molar mass for given molar fractions and molar masses
+   *
+   * @param[in] molar_fractions  Molar fractions for all vapors
+   * @param[in] molar_masses  Molar masses for all vapors
+   */
+  Real mixtureMolarMass(const std::vector<Real> & molar_fractions,
+                        const std::vector<Real> & molar_masses) const;
+
+  /**
+   * Computes the mass fractions for given molar fractions and molar masses
+   *
+   * @param[in] molar_fractions  Molar fractions for all vapors
+   * @param[in] molar_masses  Molar masses for all vapors
+   */
+  std::vector<Real> massFractionsFromMolarFractions(const std::vector<Real> & molar_fractions,
+                                                    const std::vector<Real> & molar_masses) const;
+
+protected:
   template <typename... Args>
-  void fluidPropError(Args... args) const
+  void imperfectJacobianMessage(Args... args) const
   {
     if (_allow_imperfect_jacobians)
       mooseDoOnce(mooseWarning(std::forward<Args>(args)...));
@@ -159,3 +201,19 @@ private:
 };
 
 #pragma GCC diagnostic pop
+
+// Macro to avoid compilation issues associated with overloading virtual methods
+#define usingVaporMixtureFluidPropertiesMembers                                                    \
+  using VaporMixtureFluidProperties::p_from_v_e;                                                   \
+  using VaporMixtureFluidProperties::T_from_v_e;                                                   \
+  using VaporMixtureFluidProperties::c_from_v_e;                                                   \
+  using VaporMixtureFluidProperties::rho_from_p_T;                                                 \
+  using VaporMixtureFluidProperties::v_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::s_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::e_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::c_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::cp_from_p_T;                                                  \
+  using VaporMixtureFluidProperties::cv_from_p_T;                                                  \
+  using VaporMixtureFluidProperties::mu_from_p_T;                                                  \
+  using VaporMixtureFluidProperties::k_from_p_T;                                                   \
+  using VaporMixtureFluidProperties::e_from_p_rho

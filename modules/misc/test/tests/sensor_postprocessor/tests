@@ -31,4 +31,12 @@
     design = 'ThermocoupleSensorPostprocessor.md'
     issues = '#25590'
   [../]
+  [./time_delay_test]
+    type = 'CSVDiff'
+    input = 'time_delay_test.i'
+    csvdiff = 'time_delay_test_out.csv'
+    requirement = 'The system process a signal and send out a sensor signal with time-delay'
+    design = 'GeneralSensorPostprocessor.md'
+    issues = '#31167'
+  [../]
 []

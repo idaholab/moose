@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -109,7 +109,7 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
 
   const auto strong_resid = _normal * v * advected_quant;
 
-  _rc_uo.addToA((_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? &fi.elem() : fi.neighborPtr(),
+  _rc_uo.addToA((_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? fi.elemPtr() : fi.neighborPtr(),
                 _index,
                 a * (fi.faceArea() * fi.faceCoord()));
 

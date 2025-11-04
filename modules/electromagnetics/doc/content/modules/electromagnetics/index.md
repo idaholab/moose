@@ -44,6 +44,10 @@ electromagnetic simulations to other physical domains. Features include:
   of electrostatic contact with a floating block sandwiched between a driven/powered block and a grounded
   block
 
+## Multiphysics Coupling Cases
+
+- [Coupling electromagnetics and heat transfer modules for wire heating](combined/examples/current_heating_of_wire.md optional=true) - Example of heating a copper wire through Joule heating by suppling the fusing current
+
 ## Citing
 
 !! em-citation-start

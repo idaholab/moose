@@ -85,7 +85,7 @@ dt = 1.e-3
     type = ParsedFunction
     expression = '-(tau_driving+tau_fr)*omega'
     symbol_names = 'tau_driving tau_fr omega'
-    symbol_values = 'turbine:driving_torque turbine:friction_torque shaft:omega'
+    symbol_values = 'driving_torque friction_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
@@ -96,6 +96,19 @@ dt = 1.e-3
 []
 
 [Postprocessors]
+  [driving_torque]
+    type = ElementAverageValue
+    variable = driving_torque
+    block = 'turbine'
+    execute_on = 'initial timestep_end'
+  []
+  [friction_torque]
+    type = ElementAverageValue
+    variable = friction_torque
+    block = 'turbine'
+    execute_on = 'initial timestep_end'
+  []
+
   # mass conservation
   [mass_pipes]
     type = ElementIntegralVariablePostprocessor
@@ -104,8 +117,9 @@ dt = 1.e-3
     execute_on = 'initial timestep_end'
   []
   [mass_turbine]
-    type = ScalarVariable
-    variable = turbine:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'turbine'
     execute_on = 'initial timestep_end'
   []
   [mass_tot]
@@ -129,8 +143,9 @@ dt = 1.e-3
     execute_on = 'initial timestep_end'
   []
   [E_turbine]
-    type = ScalarVariable
-    variable = turbine:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'turbine'
     execute_on = 'initial timestep_end'
   []
   [E_tot]
@@ -142,6 +157,7 @@ dt = 1.e-3
   [S_energy]
     type = FunctionValuePostprocessor
     function = S_energy_fcn
+    indirect_dependencies = 'driving_torque friction_torque'
     execute_on = 'initial timestep_end'
   []
   [E_change]

@@ -1,1 +1,0 @@
-BCs/right/value=0.5 BCs/right/value=1 BCs/right/value=2 BCs/right/value=3

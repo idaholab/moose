@@ -42,7 +42,6 @@
   youngs_modulus = 207000
   block = 0
   incremental = true
-  used_by_xfem_to_grow_crack = true
 []
 
 [UserObjects]

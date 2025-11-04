@@ -5,7 +5,7 @@
     type = RunApp
     input = 'fig3.i'
     check_input = True
-    method = 'OPT'
+    capabilities = 'method=opt'
     cli_args = 'L=10'
     requirement = 'The system shall provide a valid input to reproduce fig. 3 in https://dx.doi.org/10.1016/j.commatsci.2017.02.017'
   [../]
@@ -13,14 +13,14 @@
     type = RunApp
     input = 'fig6.i'
     check_input = True
-    method = 'OPT'
+    capabilities = 'method=opt'
     requirement = 'The system shall provide a valid input to reproduce fig. 6 in https://dx.doi.org/10.1016/j.commatsci.2017.02.017'
   [../]
   [./fig7a]
     type = RunApp
     input = 'fig7a.i'
     check_input = True
-    method = 'OPT'
+    capabilities = 'method=opt'
     cli_args = 'RADIUS=20'
     requirement = 'The system shall provide a valid input to reproduce fig. 7a in https://dx.doi.org/10.1016/j.commatsci.2017.02.017'
   [../]
@@ -28,7 +28,7 @@
     type = RunApp
     input = 'fig7b.i'
     check_input = True
-    method = 'OPT'
+    capabilities = 'method=opt'
     cli_args = 'RADIUS=20'
     requirement = 'The system shall provide a valid input to reproduce fig. 7b in https://dx.doi.org/10.1016/j.commatsci.2017.02.017'
   [../]
@@ -36,7 +36,7 @@
     type = RunApp
     input = 'fig8.i'
     check_input = True
-    method = 'OPT'
+    capabilities = 'method=opt'
     requirement = 'The system shall provide a valid input to reproduce fig. 8 in https://dx.doi.org/10.1016/j.commatsci.2017.02.017'
   [../]
 []

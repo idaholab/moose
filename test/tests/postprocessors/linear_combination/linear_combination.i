@@ -18,7 +18,7 @@
 [Postprocessors]
   [./pp1]
     # number of elements, equal to 2
-    type = NumElems
+    type = NumElements
   [../]
   [./pp2]
     # number of nodes, equal to 3

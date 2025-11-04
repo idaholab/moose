@@ -176,7 +176,7 @@ dt = 1.e-3
     type = ParsedFunction
     expression = '-(tau_isen+tau_diss)*omega'
     symbol_names = 'tau_isen tau_diss omega'
-    symbol_values = 'compressor:isentropic_torque compressor:dissipation_torque shaft:omega'
+    symbol_values = 'isentropic_torque dissipation_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
@@ -187,6 +187,19 @@ dt = 1.e-3
 []
 
 [Postprocessors]
+  [isentropic_torque]
+    type = ElementAverageValue
+    variable = isentropic_torque
+    block = 'compressor'
+    execute_on = 'initial timestep_end'
+  []
+  [dissipation_torque]
+    type = ElementAverageValue
+    variable = dissipation_torque
+    block = 'compressor'
+    execute_on = 'initial timestep_end'
+  []
+
   # mass conservation
   [mass_pipes]
     type = ElementIntegralVariablePostprocessor
@@ -195,8 +208,9 @@ dt = 1.e-3
     execute_on = 'initial timestep_end'
   []
   [mass_compressor]
-    type = ScalarVariable
-    variable = compressor:rhoV
+    type = ElementAverageValue
+    variable = rhoV
+    block = 'compressor'
     execute_on = 'initial timestep_end'
   []
   [mass_tot]
@@ -220,8 +234,9 @@ dt = 1.e-3
     execute_on = 'initial timestep_end'
   []
   [E_compressor]
-    type = ScalarVariable
-    variable = compressor:rhoEV
+    type = ElementAverageValue
+    variable = rhoEV
+    block = 'compressor'
     execute_on = 'initial timestep_end'
   []
   [E_tot]
@@ -233,6 +248,7 @@ dt = 1.e-3
   [S_energy]
     type = FunctionValuePostprocessor
     function = S_energy_fcn
+    indirect_dependencies = 'isentropic_torque dissipation_torque'
     execute_on = 'initial timestep_end'
   []
   [E_change]

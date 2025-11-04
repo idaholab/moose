@@ -8,7 +8,6 @@
     exodiff = '1d_out.e'
     max_parallel = 1
     max_threads = 1
-    compiler = 'GCC CLANG'
 
     requirement = 'The system shall support the use of constrains using the mortar method in 1D.'
   [../]

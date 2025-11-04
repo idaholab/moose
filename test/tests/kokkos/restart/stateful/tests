@@ -1,0 +1,76 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosMaterials/index.md'
+
+  [restart]
+    requirement = 'The Kokkos system shall be able to restart a transient calculation with stateful material properties by'
+    [write_checkpoint]
+      type = RunApp
+      input = 'kokkos_stateful_prop_spatial_test.i'
+      detail = 'writing the stateful material properties into a checkpoint file.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [load_checkpoint]
+      type = Exodiff
+      input = 'kokkos_stateful_prop_spatial_test_restart.i'
+      exodiff = 'kokkos_stateful_prop_spatial_test_restart_out.e'
+      detail = 'loading the checkpoint file that contains the stateful material properties.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      prereq = 'restart/write_checkpoint'
+    []
+  []
+
+  [error]
+    requirement = 'In a restarted calculation, the Kokkos system shall error when'
+    [not_stored]
+      type = RunException
+      input = 'kokkos_stateful_prop_spatial_test_restart.i'
+      expect_err = 'The stateful material properties in KokkosStatefulSpatialTest \"stateful\" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
+      cli_args = 'KokkosKernels/heat/prop_name=other
+                  KokkosBCs/right/prop_name=other
+                  KokkosMaterials/stateful/prop_name=other
+                  KokkosAuxKernels/active=\'\''
+      detail = 'a restarted material declares a stateful material property that was not stored.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      prereq = 'restart/write_checkpoint'
+    []
+    [state_mismatch]
+      type = RunException
+      input = 'kokkos_stateful_prop_spatial_test_restart.i'
+      expect_err = 'The number of states for the restarted stateful material property \'thermal_conductivity\' do not match.'
+      cli_args = 'KokkosMaterials/stateful/declare_older=true'
+      detail = 'a restarted material declares a stateful material property that has different number of states with the stored property.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      prereq = 'restart/write_checkpoint'
+    []
+    [ambiguity]
+      type = RunException
+      input = 'kokkos_stateful_prop_spatial_test_restart.i'
+      expect_err = 'The stateful material property \'thermal_conductivity\' was declared in KokkosStatefulSpatialTest \"another_stateful\" but was not declared in that object on checkpoint.'
+      cli_args = 'KokkosMaterials/active=another_stateful'
+      detail = 'a new material declares a stateful property with the same name with a stored property.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      prereq = 'restart/write_checkpoint'
+    []
+  []
+
+  [pass]
+    type = RunApp
+    input = 'kokkos_stateful_prop_spatial_test_restart.i'
+    cli_args = 'KokkosKernels/heat/prop_name=other
+                KokkosBCs/right/prop_name=other
+                KokkosMaterials/another_stateful/prop_name=other
+                KokkosMaterials/active=another_stateful
+                KokkosAuxKernels/active=\'\''
+    requirement = 'In a restarted calculation, the Kokkos system shall not error when a new material declares a new stateful property.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+    prereq = 'restart/write_checkpoint'
+    recover = false
+  []
+[]

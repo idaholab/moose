@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,7 +14,7 @@
 class NonlinearSystemBase;
 
 /**
- * A solve object for use with a nonlinear system solver
+ * A solve object for use with a single nonlinear system to solve
  */
 class NonlinearSolveObject : public SolveObject
 {

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,30 +20,26 @@ namespace Moose
 /**
  * Create a MooseApp from command-line arguments.
  */
-std::shared_ptr<MooseApp>
-createMooseApp(const std::string & default_app_name, int argc, char * argv[]);
-
-/**
- * Adds the command line parameters needed from within \p main, which
- * will also need to be added to MooseApp so that they show up in --help
- */
-void addMainCommandLineParams(InputParameters & params);
+std::unique_ptr<MooseApp>
+createMooseApp(const std::string & default_app_type, int argc, char * argv[]);
 
 /**
  * Initialize, create and run a MooseApp
  */
 template <typename DefaultAppType>
-void
+int
 main(int argc, char * argv[])
 {
   MooseInit init(argc, argv);
 
   DefaultAppType::registerApps();
 
-  const auto default_app_name = MooseUtils::prettyCppType<DefaultAppType>();
+  const auto default_app_type = MooseUtils::prettyCppType<DefaultAppType>();
 
-  auto app = createMooseApp(default_app_name, argc, argv);
+  auto app = createMooseApp(default_app_type, argc, argv);
 
   app->run();
+
+  return app->exitCode();
 }
 }

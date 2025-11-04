@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -42,7 +42,13 @@ public:
   virtual void jacobianSetup(THREAD_ID tid = 0) const;
   virtual void residualSetup(THREAD_ID tid = 0) const;
   virtual void updateActive(THREAD_ID tid = 0);
-  void sort(THREAD_ID tid = 0);
+  /**
+   * By default, this method only sorts block and boundary-wise object storages that are used by the
+   * MOOSE threaded element loops. Kokkos, however, computes all elements and faces at once
+   * regardless of block and boundary and uses all-object storages. Therefore, the Kokkos material
+   * warehouse sets \p sort_all_objects to true to sort the all-object storages.
+   */
+  void sort(THREAD_ID tid = 0, bool sort_all_objects = false);
   ///@}
 
   /**

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -85,6 +85,8 @@ ADWallHTCGnielinskiAnnularMaterial::ADWallHTCGnielinskiAnnularMaterial(
 void
 ADWallHTCGnielinskiAnnularMaterial::computeQpProperties()
 {
+  using std::pow, std::log10, std::log, std::sqrt;
+
   const ADReal Pr = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
 
   ADReal K;
@@ -94,7 +96,7 @@ ADWallHTCGnielinskiAnnularMaterial::computeQpProperties()
       mooseError(
           "If wall temperature ever exceeds the fluid temperature, even in iteration, and the "
           "fluid is a gas, then the parameter 'gas_heating_correction_exponent' must be provided.");
-    K = std::pow(_T[_qp] / _T_wall[_qp], _n);
+    K = pow(_T[_qp] / _T_wall[_qp], _n);
   }
   else
   {
@@ -102,7 +104,7 @@ ADWallHTCGnielinskiAnnularMaterial::computeQpProperties()
     const ADReal mu_wall = _fp.mu_from_p_T(_p[_qp], _T_wall[_qp]);
     const ADReal k_wall = _fp.k_from_p_T(_p[_qp], _T_wall[_qp]);
     const ADReal Pr_wall = THM::Prandtl(cp_wall, mu_wall, k_wall);
-    K = std::pow(Pr / Pr_wall, 0.11);
+    K = pow(Pr / Pr_wall, 0.11);
   }
 
   ADReal Re = THM::Reynolds(1.0, _rho[_qp], _vel[_qp], _D_h, _mu[_qp]);
@@ -116,20 +118,20 @@ ADWallHTCGnielinskiAnnularMaterial::computeQpProperties()
     Re = 1e4;
   }
   const ADReal Re_star =
-      Re * ((1 + _a * _a) * std::log(_a) + (1 - _a * _a)) / (std::pow(1 - _a, 2) * std::log(_a));
+      Re * ((1 + _a * _a) * log(_a) + (1 - _a * _a)) / (pow(1 - _a, 2) * log(_a));
 
-  const ADReal f_ann = std::pow(1.8 * std::log10(Re_star) - 1.5, -2.0);
+  const ADReal f_ann = pow(1.8 * log10(Re_star) - 1.5, -2.0);
   const ADReal k1 = 1.07 + 900.0 / Re - 0.63 / (1.0 + 10.0 * Pr);
 
   ADReal F_ann;
   if (_at_inner_wall)
-    F_ann = 0.75 * std::pow(_a, -0.17);
+    F_ann = 0.75 * pow(_a, -0.17);
   else
-    F_ann = 0.9 - 0.15 * std::pow(_a, 0.6);
+    F_ann = 0.9 - 0.15 * pow(_a, 0.6);
 
   const ADReal Nu = f_ann / 8.0 * Re * Pr /
-                    (k1 + 12.7 * std::sqrt(f_ann / 8.0) * (std::pow(Pr, 2.0 / 3.0) - 1.0)) *
-                    (1.0 + std::pow(_D_h / _L, 2.0 / 3.0)) * F_ann * K;
+                    (k1 + 12.7 * sqrt(f_ann / 8.0) * (pow(Pr, 2.0 / 3.0) - 1.0)) *
+                    (1.0 + pow(_D_h / _L, 2.0 / 3.0)) * F_ann * K;
 
   _htc_wall[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h);
 }

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -140,24 +140,6 @@ std::string
 CombinedTestApp::getInstallableInputs() const
 {
   return COMBINED_INSTALLABLE_DIRS;
-}
-
-void
-CombinedTestApp::registerObjects(Factory & /*factory*/)
-{
-  mooseError("registerObjects is deprecated, fix the calling application");
-}
-
-void
-CombinedTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
-  mooseError("associateSyntax is deprecated, fix the calling application");
-}
-
-void
-CombinedTestApp::registerExecFlags(Factory & /*factory*/)
-{
-  mooseError("registerExecFlags is deprecated, fix the calling application");
 }
 
 extern "C" void

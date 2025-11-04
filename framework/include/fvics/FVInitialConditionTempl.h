@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVInitialConditionBase.h"
+#include "MooseVariableFEBase.h"
 
 // libMesh
 #include "libmesh/point.h"
@@ -18,6 +19,8 @@
 
 // forward declarations
 class FEProblemBase;
+template <typename>
+class MooseVariableField;
 
 /**
  * This is a template class that implements the workhorse `compute` and `computeNodal` methods. The
@@ -40,7 +43,7 @@ public:
 
   static InputParameters validParams();
 
-  virtual MooseVariableFEBase & variable() override { return _base_var; }
+  virtual MooseVariableFEBase & variable() override;
 
   virtual void computeElement(const ElemInfo & elem_info) override;
 
@@ -73,3 +76,6 @@ FVInitialConditionTempl<T>::validParams()
 }
 
 typedef FVInitialConditionTempl<Real> FVInitialCondition;
+
+// Prevent implicit instantiation in other translation units where these classes are used
+extern template class FVInitialConditionTempl<Real>;

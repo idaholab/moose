@@ -1,3 +1,7 @@
+[Problem]
+  use_hash_table_matrix_assembly = true
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 1

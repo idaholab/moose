@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -200,6 +200,13 @@ protected:
    */
   virtual void init();
 
+  /// Add an additional variable to the hide list
+  void hideAdditionalVariable(const std::string & category, const std::string & var_name)
+  {
+    _execute_data[category].hide.insert(var_name);
+    _execute_data[category].output.erase(var_name);
+  }
+
   /**
    * Handles logic for determining if a step should be output
    * @return True if a call if output should be performed
@@ -354,7 +361,7 @@ private:
   OutputDataWarehouse _execute_data;
 
   /// Storage for the last output time for the various output types, this is used to avoid duplicate output when using OUTPUT_FINAL flag
-  std::map<std::string, Real> _last_execute_time;
+  std::map<std::string, Real> & _last_execute_time;
 
   /// Flags for outputting PP/VPP data as a reporter
   const bool _postprocessors_as_reporters, _vectorpostprocessors_as_reporters;
@@ -408,7 +415,7 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
     {
       if (!_advanced_execute_on.contains(execute_data_name) ||
           (_advanced_execute_on[execute_data_name].isValid() &&
-           _advanced_execute_on[execute_data_name].contains("none")))
+           _advanced_execute_on[execute_data_name].isValueSet("none")))
       {
         const bool is_pp_type = (execute_data_name == "postprocessors");
         const std::string pp_type_str = is_pp_type ? "post-processor" : "vector post-processor";

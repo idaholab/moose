@@ -31,7 +31,7 @@ C_{inc} = \nabla_{j}\theta_{c}^{i} - \nabla_{j}\theta_{c,old}^{i}
 C = C_{old} + C_{inc}
 
 !alert note
-This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/modules/solid_mechanics/doc/theory/cosserat.pdf))
+This object is part of the Cosserat mechanics model. See the theory manual (at [solid_mechanics/doc/theory/cosserat.pdf](https://github.com/idaholab/moose/tree/next/modules/solid_mechanics/doc/theory/cosserat.pdf))
 for more explanation.
 
 !syntax parameters /Materials/ComputeCosseratIncrementalSmallStrain

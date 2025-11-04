@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,8 @@ StochasticToolsTestApp::validParams()
 
 registerKnownLabel("StochasticToolsTestApp");
 
-StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : MooseApp(parameters)
+StochasticToolsTestApp::StochasticToolsTestApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   StochasticToolsTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +45,8 @@ StochasticToolsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 StochasticToolsTestApp::registerApps()
 {
-  registerApp(StochasticToolsApp);
+  StochasticToolsApp::registerApps();
   registerApp(StochasticToolsTestApp);
-}
-
-void
-StochasticToolsTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"StochasticToolsTestApp"});
-}
-
-void
-StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"StochasticToolsTestApp"});
-}
-
-void
-StochasticToolsTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

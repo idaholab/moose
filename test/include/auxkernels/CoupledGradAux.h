@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -27,7 +27,7 @@ protected:
   virtual Real computeValue();
 
   /// Gradient being set by this kernel
-  RealGradient _grad;
+  libMesh::RealGradient _grad;
   /// The number of coupled variable
   int _coupled;
   /// The value of coupled gradient

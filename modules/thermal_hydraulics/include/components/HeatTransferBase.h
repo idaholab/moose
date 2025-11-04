@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -93,8 +93,8 @@ protected:
   /// flag that the heated perimeter was specified via an input parameter
   const bool _P_hf_provided;
 
-  /// Used closures
-  std::shared_ptr<ClosuresBase> _closures;
+  /// Used closures object(s)
+  std::vector<std::shared_ptr<ClosuresBase>> _closures_objects;
 
   /// heated perimeter name
   VariableName _P_hf_name;

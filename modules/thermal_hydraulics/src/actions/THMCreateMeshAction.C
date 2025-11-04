@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -65,7 +65,10 @@ THMCreateMeshAction::act()
   }
   else if (_current_task == "uniform_refine_mesh")
   {
-    auto level = _app.getParam<unsigned int>("refinements");
-    _mesh->setUniformRefineLevel(level, false);
+    if (_app.isParamSetByUser("refinements"))
+    {
+      auto level = _app.getParam<unsigned int>("refinements");
+      _mesh->setUniformRefineLevel(level, false);
+    }
   }
 }

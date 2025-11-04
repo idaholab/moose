@@ -15,14 +15,11 @@
   xmax = 1.0
   ymin = 0.0
   ymax = 1.0
+  coord_type = RZ
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [AuxVariables]

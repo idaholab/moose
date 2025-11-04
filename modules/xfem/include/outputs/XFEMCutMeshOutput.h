@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,7 +16,7 @@
 #include "libmesh/exodusII_io.h"
 
 // Forward declarations
-class MeshCut2DUserObjectBase;
+class MeshCutUserObjectBase;
 
 /**
  * Outputs the cutting mesh used by XFEM to an Exodus file.  The output file contains only the mesh,
@@ -35,11 +35,11 @@ public:
 
 private:
   /// The mesh cutting user object
-  const MeshCut2DUserObjectBase & _cutter_uo;
+  const MeshCutUserObjectBase & _cutter_uo;
 
   /// The EquationSystems
-  std::unique_ptr<EquationSystems> _es;
+  std::unique_ptr<libMesh::EquationSystems> _es;
 
-  /// Exodus for outputing points and values
-  std::unique_ptr<ExodusII_IO> _exodus_io;
+  /// Exodus for outputting points and values
+  std::unique_ptr<libMesh::ExodusII_IO> _exodus_io;
 };

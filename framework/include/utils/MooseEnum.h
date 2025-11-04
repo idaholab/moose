@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,8 @@
 
 // MOOSE includes
 #include "MooseEnumBase.h"
+
+#include <optional>
 
 // Forward declarations
 namespace libMesh
@@ -104,7 +106,7 @@ public:
   MooseEnum & operator=(const std::string & name);
   MooseEnum & operator=(int value);
   MooseEnum & operator=(const MooseEnumItem & item);
-  void assign(const std::string & name);
+  void assign(const std::string & name, const std::optional<std::string> & context = {});
   void assign(int value);
   void assign(const MooseEnumItem & item);
   ///@}

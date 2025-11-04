@@ -36,14 +36,14 @@ advected_interp_method = 'upwind'
 
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '1 0'
+        momentum_inlet_functors = '1 0'
 
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'noslip symmetry'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '0'
+        pressure_functors = '0'
 
         momentum_advection_interpolation = ${advected_interp_method}
         mass_advection_interpolation = ${advected_interp_method}
@@ -55,23 +55,27 @@ advected_interp_method = 'upwind'
         passive_scalar_names = 'scalar'
         passive_scalar_source = 0.1
         passive_scalar_inlet_types = 'fixed-value'
-        passive_scalar_inlet_function = '1'
+        passive_scalar_inlet_functors = '1'
         passive_scalar_advection_interpolation = ${advected_interp_method}
       []
     []
-    [Turbulence]
-      [mixing-length]
-        turbulence_handling = 'mixing-length'
-        coupled_flow_physics = flow
-        scalar_transport_physics = scalars
+  []
+[]
+# This separation is introduced for documentation purposes.
+# Both could be nested under Physics/NavierStokes
+[Physics/NavierStokes]
+  [Turbulence]
+    [mixing-length]
+      turbulence_handling = 'mixing-length'
+      coupled_flow_physics = flow
+      scalar_transport_physics = scalars
 
-        passive_scalar_schmidt_number = 1.0
+      Sc_t = 1.0
 
-        von_karman_const = ${von_karman_const}
-        mixing_length_delta = 1e9
-        mixing_length_walls = 'top bottom'
-        mixing_length_aux_execute_on = 'initial'
-      []
+      von_karman_const = ${von_karman_const}
+      mixing_length_delta = 1e9
+      mixing_length_walls = 'top bottom'
+      mixing_length_aux_execute_on = 'initial'
     []
   []
 []

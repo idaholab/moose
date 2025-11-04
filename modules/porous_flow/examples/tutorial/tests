@@ -7,6 +7,8 @@
     issues = '#10959'
     design = 'tutorial_00.md'
     requirement = 'PorousFlow tutorial shall explain the 3D model used during the tutorial'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./00_2D]
     type = Exodiff
@@ -16,6 +18,8 @@
     issues = '#10959'
     design = 'tutorial_00.md'
     requirement = 'PorousFlow tutorial shall explain the 2D model used during the tutorial'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./01]
     type = Exodiff
@@ -25,6 +29,8 @@
     issues = '#10959'
     design = 'tutorial_01.md'
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./03]
     type = Exodiff
@@ -34,6 +40,8 @@
     issues = '#10959'
     design = 'tutorial_03.md'
     requirement = 'PorousFlow tutorial shall explain how to use the BasicTHM action to study single-phase fluid flow coupled with heat flow'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./04]
     type = Exodiff
@@ -76,6 +84,8 @@
     issues = '#10959'
     design = 'tutorial_06.md'
     requirement = 'PorousFlow tutorial shall explain how to add a tracer in a single-phase situation and how to use the PorousFlowFullySaturated Action'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./06_KT]
     type = Exodiff
@@ -85,6 +95,8 @@
     cli_args = 'Executioner/end_time=1E5'
     threading = '!pthreads'
     issues = '#10426'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md tutorial_06.md'
     requirement = 'PorousFlow shall implement Kuzmin-Turek stabilization for unsaturated single-phase flow, and users shall be able to activate it using the PorousFlow Action system'
   [../]
@@ -127,6 +139,8 @@
     issues = '#10959'
     design = 'tutorial_10.md'
     requirement = 'PorousFlow tutorial shall explain how to use the PorousFlow Kernels and Materials'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./11]
     type = Exodiff
@@ -152,6 +166,8 @@
     issues = '#10959'
     design = 'tutorial_11.md'
     requirement = 'PorousFlow tutorial shall present a 2-phase THM borehole injection problem in 3D and explain how to reduce it to 2D'
+    # Uses a ParsedGenerateSideset
+    mesh_mode = 'replicated'
   [../]
   [./13]
     type = Exodiff

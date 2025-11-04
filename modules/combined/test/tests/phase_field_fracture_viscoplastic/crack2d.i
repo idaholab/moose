@@ -8,9 +8,9 @@
   volumetric_locking_correction = true
 []
 
-[Modules]
-  [./TensorMechanics]
-    [./Master]
+[Physics]
+  [./SolidMechanics]
+    [./QuasiStatic]
       [./All]
         add_variables = true
         strain = Finite
@@ -19,6 +19,8 @@
       [../]
     [../]
   [../]
+[]
+[Modules]
   [./PhaseField]
     [./Nonconserved]
       [./c]

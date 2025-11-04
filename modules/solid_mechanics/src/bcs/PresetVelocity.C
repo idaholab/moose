@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,8 @@ InputParameters
 PresetVelocity::validParams()
 {
   InputParameters params = DirichletBCBase::validParams();
+  params.addClassDescription(
+      "Sets the boundary displacements through time from an imposed velocity");
 
   params.addParam<Real>(
       "velocity", 1, "Value of the velocity.  Used as scale factor if function is given.");

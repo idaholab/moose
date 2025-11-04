@@ -3,27 +3,20 @@
   dim = 1
 []
 
-[Variables]
-  [u]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-
 [Problem]
-  type = SlowProblem
-  seconds_to_sleep = '0.0 0.0 0.1 0.1 0.5 0.2 0.2 0.1 0.1 0.1'
-  kernel_coverage_check = false
+  solve = false
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
   num_steps = 10
+  verbose = true
 
   [TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = SolutionTimeAdaptiveDTTest
     dt = 0.5
+    fake_wall_time_sequence = '100 100 200 200 600 300 300 200 200 200 300'
   []
 []
 

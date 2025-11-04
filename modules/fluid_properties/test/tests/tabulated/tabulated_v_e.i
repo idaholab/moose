@@ -19,19 +19,7 @@
     family = MONOMIAL
     order = CONSTANT
   []
-  [rho]
-    family = MONOMIAL
-    order = CONSTANT
-  []
   [mu]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [e]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [h]
     family = MONOMIAL
     order = CONSTANT
   []
@@ -62,16 +50,6 @@
 []
 
 [AuxKernels]
-  [viscosity]
-    type = MaterialRealAux
-    variable = mu
-    property = mu
-  []
-  [thermal_conductivity]
-    type = MaterialRealAux
-    variable = k
-    property = k
-  []
   [pressure]
     type = MaterialRealAux
     variable = p
@@ -81,6 +59,16 @@
     type = MaterialRealAux
     variable = T
     property = temperature
+  []
+  [viscosity]
+    type = MaterialRealAux
+    variable = mu
+    property = mu
+  []
+  [s]
+    type = MaterialRealAux
+    variable = 's'
+    property = 's'
   []
   [cv]
     type = MaterialRealAux
@@ -97,6 +85,11 @@
     variable = c
     property = c
   []
+  [thermal_conductivity]
+    type = MaterialRealAux
+    variable = k
+    property = k
+  []
   [g]
     type = MaterialRealAux
     variable = g
@@ -111,11 +104,19 @@
   [tabulated]
     type = TabulatedBicubicFluidProperties
     interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
+
+    # Uncomment this to read the tabulation
     # fluid_property_file = fluid_properties.csv
-    save_file = true
+    # Uncomment this to use the CO2 fluid properties above
+    # fp = 'co2'
+
+    # Uncomment this to write out a tabulation
+    # fluid_property_output_file = 'fluid_properties.csv'
+
+    # Enable the use of the (v,e) variables
     construct_pT_from_ve = true
     construct_pT_from_vh = true
-    error_on_out_of_bounds = false
+    out_of_bounds_behavior = 'set_to_closest_bound'
 
     # Tabulation range
     temperature_min = 280
@@ -149,15 +150,25 @@
 []
 
 [Postprocessors]
+  [p]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = p
+  []
+  [T]
+    type = ElementalVariableValue
+    elementid = 0
+    variable = T
+  []
   [mu]
     type = ElementalVariableValue
     elementid = 0
     variable = mu
   []
-  [e]
+  [s]
     type = ElementalVariableValue
     elementid = 0
-    variable = e
+    variable = s
   []
   [cv]
     type = ElementalVariableValue
@@ -173,16 +184,6 @@
     type = ElementalVariableValue
     elementid = 0
     variable = c
-  []
-  [p]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = p
-  []
-  [T]
-    type = ElementalVariableValue
-    elementid = 0
-    variable = T
   []
   [k]
     type = ElementalVariableValue

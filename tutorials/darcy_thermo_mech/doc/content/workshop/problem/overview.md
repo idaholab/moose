@@ -7,7 +7,9 @@ connected via a pipe that contains a filter consisting of close-packed steel sph
 velocity and temperature of the fluid inside the filter. The pipe is 0.304 m in length and 0.0514 m
 in diameter.
 
-!media darcy_thermo_mech/problem_schematic.png style=width:60%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/problem_schematic.png
+       style=width:60%;margin-left:auto;margin-right:auto;display:block;
+       alt=Diagram illustrating the pressure vessel problem described above.
 
 !style fontsize=large
 Pamuk and Ozdemir, [*"Friction factor, permeability, and inertial coefficient of oscillating flow through porous media of packed balls"*](https://www.sciencedirect.com/science/article/pii/S0894177711002640), Experimental Thermal and Fluid Science, v. 38, pp. 134-139, 2012.
@@ -32,7 +34,7 @@ Darcy's Law:
 \vec{u} = -\frac{\mathbf{K}}{\mu} (\nabla p - \rho \vec{g})
 
 where $\vec{u}$ is the fluid velocity, $\epsilon$ is porosity, $\mathbf{K}$ is the permeability
-tensor, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\vec{g}$ is the
+tensor, $\mu$ is fluid viscosity, $p$ is the pressure, $\rho$ is the density, $\c_p$ is the specific heat, $\vec{g}$ is the
 gravity vector, and $T$ is the temperature.
 
 !---
@@ -45,17 +47,17 @@ $p$ and $T$:
 -\nabla \cdot \frac{\mathbf{K}}{\mu} \nabla p  = 0
 
 !equation
-C\left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla \cdot k \nabla T = 0
+\rho c_p \left( \frac{\partial T}{\partial t} + \epsilon \vec{u}\cdot\nabla T \right) - \nabla \cdot k \nabla T = 0
 
 !---
 
-The parameters $\rho$, $C$, and $k$ are the porosity-dependent density, heat capacity, and thermal
+The parameters $\rho$, $c_p$, and $k$ are the porosity-dependent density, specific heat capacity, and thermal
 conductivity of the combined fluid/solid medium, defined by:
 
 !equation
 \rho \equiv \epsilon \rho_f + (1-\epsilon) \rho_s
 \\
-C \equiv \epsilon \rho_f {c_p}_f + (1-\epsilon) \rho_s {c_p}_s
+\rho c_p \equiv \epsilon \rho_f {c_p}_f + (1-\epsilon) \rho_s {c_p}_s
 \\
 k \equiv \epsilon k_f + (1-\epsilon) k_s
 

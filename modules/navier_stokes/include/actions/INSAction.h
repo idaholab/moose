@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -73,7 +73,7 @@ protected:
   /// Temperature function names at fixed temperature boundaries
   std::vector<FunctionName> _temperature_function;
   /// FE type for various variables
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
   /// Whether we use AD or not
   bool _use_ad;
   /// Temperature variable name to facilitate temperature variable added outside

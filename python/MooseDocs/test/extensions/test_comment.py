@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -72,9 +72,6 @@ class TestInlineComment(MooseDocsTestCase):
         self.assertToken(ast(0)(5), 'Word', content='and')
         self.assertToken(ast(0)(6), 'Space')
         self.assertToken(ast(0)(7), 'Word', content='not')
-
-class TestHTMLComment(TestInlineComment):
-    TEXT = "Not comment<!--this is-->\nand not"
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

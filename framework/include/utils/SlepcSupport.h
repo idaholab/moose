@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MultiMooseEnum.h"
 #include "libmesh/libmesh_config.h"
 
 #ifdef LIBMESH_HAVE_SLEPC
@@ -28,6 +29,8 @@
 
 class EigenProblem;
 class InputParameters;
+class SolverParams;
+class MultiMooseEnum;
 
 namespace Moose
 {
@@ -60,12 +63,16 @@ void setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParame
  * Push all SLEPc/PETSc options into SLEPc/PETSc side. Options could come from commandline,
  * SolverParams, params, etc.
  */
-void slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params);
+void slepcSetOptions(EigenProblem & eigen_problem,
+                     SolverParams & solver_params,
+                     const InputParameters & params);
 
 /**
  * Control eigen solver tolerances via SLEPc options
  */
-void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem, const InputParameters & params);
+void setSlepcEigenSolverTolerances(EigenProblem & eigen_problem,
+                                   const SolverParams & solver_params,
+                                   const InputParameters & params);
 
 /**
  * Set SLEPc/PETSc options to trigger free power iteration
@@ -79,14 +86,32 @@ void clearFreeNonlinearPowerIterations(const InputParameters & params);
 
 /**
  * Form matrix according to tag
+ * @param snes The PETSc nonlinear solver context associated with the eigensolver
+ * @param x The current eigen solution vector from SLEPc. This vector will have a size corresponding
+ * to the number of unconstrained degrees of freedom
+ * @param eigen_mat The matrix we want to form coming from SLEPc. As for \p x, this will be sized
+ * corresponding to the number of unconstrained degrees of freedom
+ * @param all_dofs_mat This matrix corresponds to the "global" matrix, representing both
+ * unconstrained and constrained degrees of freedom. We will pass this matrix to MOOSE's assembly
+ * framework and then if the problem has constraints we will selectively copy the submatrix
+ * representing unconstrained dofs to \p eigen_mat. (Else this matrix and \p eigen_mat are the same
+ * so no copy is required)
+ * @param ctx The eigensolver context which corresponds to the MOOSE \p EigenProblem
+ * @param tag The MOOSE \p TagID for the matrix
  */
-void moosePetscSNESFormMatrixTag(SNES snes, Vec x, Mat mat, void * ctx, TagID tag);
+void moosePetscSNESFormMatrixTag(
+    SNES snes, Vec x, Mat eigen_mat, SparseMatrix<Number> & all_dofs_mat, void * ctx, TagID tag);
 
 /**
- * Form multiple matrices for multiple tags
+ * Form multiple matrices for multiple tags. This function is conceptually the same as \p
+ * moosePetscSNESForMatrixTag() but allows passing in multiple matrices to be formed
  */
-void moosePetscSNESFormMatricesTags(
-    SNES snes, Vec x, std::vector<Mat> & mats, void * ctx, const std::set<TagID> & tags);
+void moosePetscSNESFormMatricesTags(SNES snes,
+                                    Vec x,
+                                    std::vector<Mat> & eigen_mats,
+                                    std::vector<SparseMatrix<Number> *> & all_dofs_mats,
+                                    void * ctx,
+                                    const std::set<TagID> & tags);
 
 /**
  * Form Jacobian matrix A. It is a SLEPc callback

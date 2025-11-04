@@ -1,0 +1,23 @@
+[Tests]
+  design = syntax/Problem/index.md
+  issues = '#29632'
+  [MFEMDataCollections]
+    type = CheckFiles
+    input = ../kernels/diffusion.i
+    cli_args = 'Outputs/active="ParaViewDataCollection VisItDataCollection ConduitDataCollection" '
+               'Outputs/ParaViewDataCollection/file_base=OutputData/ParaViewDataCollection'
+    check_files = 'OutputData/ParaViewDataCollection/Run0/Run0.pvd '
+                  'OutputData/ParaViewDataCollection/Run0/Cycle000001/proc000000.vtu '
+                  'OutputData/VisItDataCollection/Run0_000000/mesh.000000 '
+                  'OutputData/VisItDataCollection/Run0_000001/concentration.000000 '
+                  'OutputData/VisItDataCollection/Run0_000001.mfem_root '
+                  'OutputData/ConduitDataCollection/Run_000001/domain_000000.conduit_bin '
+                  'OutputData/ConduitDataCollection/Run_000001/domain_000000.conduit_bin_json '
+                  'OutputData/ConduitDataCollection/Run_000001.root'
+    requirement = 'The system shall have the ability to write out MFEM solutions to '
+                  'ParaView, VisIt and Conduit data collections.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+[]

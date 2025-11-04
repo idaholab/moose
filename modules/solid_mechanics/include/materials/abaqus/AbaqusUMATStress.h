@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,14 +12,15 @@
 #include "ComputeGeneralStressBase.h"
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
-#include "StepUOInterface.h"
+#include "RotationTensor.h"
+#include "AnalysisStepUOInterface.h"
 
-class StepUserObject;
+class AnalysisStepUserObject;
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUMATStress : public ComputeGeneralStressBase, public StepUOInterface
+class AbaqusUMATStress : public ComputeGeneralStressBase, public AnalysisStepUOInterface
 {
 public:
   static InputParameters validParams();
@@ -80,13 +81,6 @@ protected:
 
   // Function pointer to the dynamically loaded function
   umat_t _umat;
-
-  /// specific elastic strain energy
-  Real _aqSSE;
-  /// plastic dissipation
-  Real _aqSPD;
-  /// creep dissipation
-  Real _aqSCD;
 
   /**
    * Volumetric heat generation per unit time at the end of the increment caused by mechanical
@@ -214,15 +208,20 @@ protected:
   MaterialProperty<std::vector<Real>> & _state_var;
   const MaterialProperty<std::vector<Real>> & _state_var_old;
 
+  // energy quantities
   MaterialProperty<Real> & _elastic_strain_energy;
+  const MaterialProperty<Real> & _elastic_strain_energy_old;
   MaterialProperty<Real> & _plastic_dissipation;
+  const MaterialProperty<Real> & _plastic_dissipation_old;
   MaterialProperty<Real> & _creep_dissipation;
+  const MaterialProperty<Real> & _creep_dissipation_old;
 
   /// recommended maximum timestep for this model under the current conditions
   MaterialProperty<Real> & _material_timestep;
 
   // Time step rotation increment
   const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment;
+  const OptionalMaterialProperty<RankTwoTensor> & _rotation_increment_old;
 
   // Coupled temperature field
   const VariableValue & _temperature;
@@ -246,10 +245,16 @@ protected:
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
 
+  /// Rotation information
+  const bool _use_orientation;
+  const RotationTensor _R;
+  MaterialProperty<RankTwoTensor> & _total_rotation;
+  const MaterialProperty<RankTwoTensor> & _total_rotation_old;
+
 private:
   /// Method being used to compute strain and rotation increments
   const ComputeFiniteStrain::DecompMethod _decomposition_method;
 
   /// User object that determines step number
-  const StepUserObject * _step_user_object;
+  const AnalysisStepUserObject * _step_user_object;
 };

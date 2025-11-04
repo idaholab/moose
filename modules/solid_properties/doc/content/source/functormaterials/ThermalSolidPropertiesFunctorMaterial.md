@@ -2,17 +2,14 @@
 
 ## Description
 
-The `ThermalSolidPropertiesFunctorMaterial` material declares
-density, specific heat, and thermal
-conductivity as functor material properties. They are evaluated on-the-fly
-on every query.
+`ThermalSolidPropertiesFunctorMaterial` declares functor material properties for
+density, specific heat, and thermal conductivity, and specific internal energy.
 
-!alert warning title=Conservation on fixed-sized domains
-Using a variable density can lead to mass/energy conservation errors if using
-a fixed-size domain. If this is a concern, it is recommended to use
-a constant density, specified independently using a [GenericFunctorMaterial.md] for example.
-For the density parameter of `ThermalSolidPropertiesFunctorMaterial` you may then use a
-placeholder dummy name.
+The parameter [!param](/FunctorMaterials/ThermalSolidPropertiesFunctorMaterial/use_constant_density)
+can be used to specify that the density should be constant, evaluated at the temperature
+[!param](/FunctorMaterials/ThermalSolidPropertiesFunctorMaterial/T_ref). This is
+useful because for fixed-sized domains, mass/energy conservation errors result
+from using a variable density.
 
 !syntax parameters /FunctorMaterials/ThermalSolidPropertiesFunctorMaterial
 

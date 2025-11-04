@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -26,10 +26,10 @@ class RunCommand(Tester):
         # Create the command line string to run
         return self.command
 
-    def processResults(self, moose_dir, options, output):
-        if self.exit_code == 77 :
+    def processResults(self, moose_dir, options, exit_code, runner_output):
+        if exit_code == 77 :
             self.setStatus(self.skip)
-        elif self.exit_code != 0 :
-            self.setStatus(self.fail, 'CODE %d' % self.exit_code)
+        elif exit_code != 0:
+            self.setStatus(self.fail, 'CODE %d' % exit_code)
 
-        return output
+        return ''

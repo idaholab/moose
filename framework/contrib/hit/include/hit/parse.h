@@ -7,6 +7,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <optional>
 
 #include "wasphit/HITInterpreter.h"
 #include "wasphit/HITNodeView.h"
@@ -89,21 +90,81 @@ enum class TraversalOrder
 
 class Node;
 
-/// Error is the superclass for all hit parser related errors.  This includes errors for
-/// requesting values of the wrong type from a parsed hit tree.
-class Error : public std::exception
+/**
+ * Struct that contains the context for an error message.
+ *
+ * Of importance is that it supports the ability to associate
+ * a specific node or file path to an error, which allows for file path
+ * association with errors.
+ */
+struct ErrorMessage
 {
-public:
-  Error(const std::string & msg);
-  virtual const char * what() const noexcept override;
-  std::string msg;
+  ErrorMessage(const std::string & message);
+  ErrorMessage(const std::string & message, const std::string & filename);
+  ErrorMessage(const std::string & message,
+               const std::string & filename,
+               const int line,
+               const int column);
+  ErrorMessage(const std::string & message,
+               const std::string & filename,
+               const int start_line,
+               const int start_column,
+               const int end_line,
+               const int end_column);
+  ErrorMessage(const std::string & message, const Node * node);
+
+  /**
+   * Structure that stores line information
+   */
+  struct LineInfo
+  {
+    /// The starting line in the file
+    int start_line;
+    /// The starting column in the file
+    int start_column;
+    /// The ending line in the file
+    int end_line;
+    /// The ending column in the file
+    int end_column;
+  };
+
+  /// The associated node (if any)
+  const hit::Node * node;
+  /// The associated filename (if any)
+  std::optional<std::string> filename;
+  /// The associated file line information (if any)
+  std::optional<LineInfo> lineinfo;
+  /// The message (not including the location prefix)
+  std::string message;
+  /// The prefixed message (includes the location prefix)
+  std::string prefixed_message;
+
+private:
+  /**
+   * Helper for setting prefixed_message
+   */
+  std::string buildPrefixedMessage() const;
 };
 
-/// ParserError represents a parsing error (i.e. bad syntax, invalid characters, etc.).
-class ParseError : public Error
+std::ostream & operator<<(std::ostream & stream, const ErrorMessage & error);
+
+/**
+ * Main exception for errors.
+ *
+ * Could contain multiple error messages if many could be captured at once.
+ */
+struct Error : public std::exception
 {
-public:
-  ParseError(const std::string & msg);
+  Error() = delete;
+  Error(const std::vector<ErrorMessage> & error_messages);
+  Error(const std::string & message, const Node * node = nullptr);
+
+  virtual const char * what() const noexcept override;
+
+  /// The individual error messages, with node context if available
+  std::vector<ErrorMessage> error_messages;
+  /// The complete error message, used in what()
+  std::string message;
 };
 
 /// Walker is an interface that can be implemented to perform operations that traverse a
@@ -173,8 +234,7 @@ public:
   void remove();
 
   /// getNodeView returns a copy of the underlying wasp::HITNodeView wrapped by this Node
-  wasp::HITNodeView getNodeView();
-
+  wasp::HITNodeView getNodeView() const { return _hnv; }
   /// type returns the type of the node (e.g. one of Field, Section, Comment, etc.)
   NodeType type() const;
   /// path returns this node's local/direct contribution its full hit path.  For section nodes, this
@@ -200,19 +260,23 @@ public:
   /// the following functions return the stored value of the node (if any exists) of the type
   /// indicated in the function name. If the node holds a value of a different type or doesn't hold
   /// a value at all, an exception will be thrown.
-  virtual bool boolVal();
-  virtual int64_t intVal();
-  virtual double floatVal();
+  ///@{
+  virtual bool boolVal() const;
+  virtual int64_t intVal() const;
+  virtual double floatVal() const;
+  ///@}
   /// strVal is special in that it only throws an exception if the node doesn't hold a value at
   /// all.  All nodes with a value hold data that was originally represented as a string in the
   /// parsed input - so this returns that raw string.
   virtual std::string strVal() const;
   /// the vec-prefixed value retrieval functions assume the node holds a string-typed value holding
   /// whitespace delimited entries of the element type indicated in the function name.
-  virtual std::vector<double> vecFloatVal();
-  virtual std::vector<bool> vecBoolVal();
-  virtual std::vector<int> vecIntVal();
-  virtual std::vector<std::string> vecStrVal();
+  ///@{
+  virtual std::vector<double> vecFloatVal() const;
+  virtual std::vector<bool> vecBoolVal() const;
+  virtual std::vector<int> vecIntVal() const;
+  virtual std::vector<std::string> vecStrVal() const;
+  ///@}
 
   /// addChild adds a node to the ordered set of this node's children.  This node assumes/takes
   /// ownership of the memory of the passed child.
@@ -223,14 +287,21 @@ public:
   void insertChild(std::size_t index, Node * child);
 
   /// children returns a list of this node's children of the given type t.
+  ///@{
+  std::vector<const Node *> children(NodeType t = NodeType::All) const;
   std::vector<Node *> children(NodeType t = NodeType::All);
+  ///@}
+
   /// parent returns a pointer to this node's parent node or nullptr if this node has no parent.
   ///@{
   Node * parent() { return _parent; }
   const Node * parent() const { return _parent; }
   ///@}
   /// root returns the root node for the gepot tree this node resides in.
+  ///@{
   Node * root();
+  const Node * root() const;
+  ///@}
   /// Whether or not this is the root
   bool isRoot() const { return parent() == nullptr; }
   /// clone returns a complete (deep) copy of this node.  The caller will be responsible for
@@ -246,8 +317,9 @@ public:
   /// identical to this nodes tree downward.  indent is the indent level using indent_text as the
   /// indent string (repeated once for each level).  maxlen is the maximum line length before
   /// breaking string values.
-  virtual std::string
-  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) = 0;
+  virtual std::string render(int indent = 0,
+                             const std::string & indent_text = default_indent,
+                             int maxlen = 0) const = 0;
 
   /// walk does a depth-first traversal of the hit tree starting at this node (it
   /// doesn't visit any nodes that require traversing this node's parent) calling the passed
@@ -259,8 +331,11 @@ public:
 
   /// find follows the tree along the given path starting at this node (downward not checking any
   /// nodes that require traversing this node's parent) and returns the first node it finds at the
-  /// given relative path if any or nullptr otherwise.
-  Node * find(const std::string & path);
+  /// given relative path if any or nullptr otherwise. If /p check; throw if not found.
+  ///@{
+  const Node * find(const std::string & path, const bool check = false) const;
+  Node * find(const std::string & path, const bool check = false);
+  ///@}
 
   /// param searches for the node at the given path (empty path indicates *this* node) and returns
   /// the value stored at that node in the form of the given type T.  The node at the given path
@@ -268,20 +343,20 @@ public:
   /// a value that cannot be represented as type T, an exception is also thrown.  All (field) nodes
   /// can return their value as a std::string type.
   template <typename T>
-  T param(const std::string & path = "")
+  T param(const std::string & path = "") const
   {
     auto n = this;
     if (path != "")
       n = find(path);
     if (n == nullptr)
-      throw Error("no parameter named '" + path + "'");
+      throw Error("no parameter named '" + path + "'", this);
     return paramInner<T>(n);
   }
 
   /// paramOptional is identical to param except if no node is found at the given path, default_val
   /// is returned instead of the value returned by the param function.
   template <typename T>
-  T paramOptional(const std::string & path, T default_val)
+  T paramOptional(const std::string & path, T default_val) const
   {
     if (find(path) == nullptr)
       return default_val;
@@ -294,7 +369,7 @@ protected:
 
 private:
   template <typename T>
-  T paramInner(Node *)
+  T paramInner(const Node *) const
   {
     throw Error("unsupported c++ type '" + std::string(typeid(T).name()) + "'");
   }
@@ -306,85 +381,83 @@ private:
 
 template <>
 inline bool
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->boolVal();
 }
 template <>
 inline int64_t
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->intVal();
 }
 template <>
 inline int
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->intVal();
 }
 template <>
 inline unsigned int
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   if (n->intVal() < 0)
-    throw Error("negative value read from file '" + n->filename() + "' on line " +
-                std::to_string(n->line()));
+    throw Error("negative value read", n);
   return n->intVal();
 }
 template <>
 inline float
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->floatVal();
 }
 template <>
 inline double
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->floatVal();
 }
 template <>
 inline std::string
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->strVal();
 }
 template <>
 inline std::vector<bool>
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->vecBoolVal();
 }
 template <>
 inline std::vector<int>
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->vecIntVal();
 }
 template <>
 inline std::vector<unsigned int>
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   auto tmp = n->vecIntVal();
   std::vector<unsigned int> vec;
   for (auto val : tmp)
   {
     if (val < 0)
-      throw Error("negative value read from file '" + n->filename() + "' on line " +
-                  std::to_string(n->line()));
+      throw Error("negative value read", n);
     vec.push_back(val);
   }
   return vec;
 }
 template <>
 inline std::vector<double>
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->vecFloatVal();
 }
 template <>
 inline std::vector<float>
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   auto tmp = n->vecFloatVal();
   std::vector<float> vec;
@@ -394,7 +467,7 @@ Node::paramInner(Node * n)
 }
 template <>
 inline std::vector<std::string>
-Node::paramInner(Node * n)
+Node::paramInner(const Node * n) const
 {
   return n->vecStrVal();
 }
@@ -413,8 +486,9 @@ public:
   /// override the value of the is_inline flag setting for this comment
   void setInline(bool is_inline);
 
-  virtual std::string
-  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+  virtual std::string render(int indent = 0,
+                             const std::string & indent_text = default_indent,
+                             int maxlen = 0) const override;
 
   virtual Node * clone(bool absolute_path = false) override;
 
@@ -429,7 +503,7 @@ public:
   Blank() : Node() {}
   virtual std::string render(int /*indent = 0*/,
                              const std::string & /*indent_text = default_indent*/,
-                             int /*maxlen = 0*/) override
+                             int /*maxlen = 0*/) const override
   {
     return "\n";
   }
@@ -451,8 +525,9 @@ public:
   /// path returns the hit path located in the section's header i.e. the section's name.
   virtual std::string path() const override;
 
-  virtual std::string
-  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+  virtual std::string render(int indent = 0,
+                             const std::string & indent_text = default_indent,
+                             int maxlen = 0) const override;
 
   virtual Node * clone(bool absolute_path = false) override;
 };
@@ -481,8 +556,9 @@ public:
   /// path returns the hit Field name (i.e. content before the "=")
   virtual std::string path() const override;
 
-  virtual std::string
-  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
+  virtual std::string render(int indent = 0,
+                             const std::string & indent_text = default_indent,
+                             int maxlen = 0) const override;
 
   virtual Node * clone(bool absolute_path = false) override;
 
@@ -499,13 +575,13 @@ public:
   /// the value set by setVal.
   std::string val() const;
 
-  virtual std::vector<double> vecFloatVal() override;
-  virtual std::vector<bool> vecBoolVal() override;
-  virtual std::vector<int> vecIntVal() override;
-  virtual std::vector<std::string> vecStrVal() override;
-  virtual bool boolVal() override;
-  virtual int64_t intVal() override;
-  virtual double floatVal() override;
+  virtual std::vector<double> vecFloatVal() const override;
+  virtual std::vector<bool> vecBoolVal() const override;
+  virtual std::vector<int> vecIntVal() const override;
+  virtual std::vector<std::string> vecStrVal() const override;
+  virtual bool boolVal() const override;
+  virtual int64_t intVal() const override;
+  virtual double floatVal() const override;
   virtual std::string strVal() const override;
 
 private:
@@ -517,9 +593,11 @@ private:
 /// contains any invalid hit syntax.  fname is label given as a convenience (and can be any
 /// string) used to prefix any error messages generated during the parsing process.  The caller
 /// accepts ownership of the returned root node and is responsible for destructing it.
-/// if optional std::ostream * errors is provided then syntax errors are added to that stream
-/// on parse failure and the root is returned instead of this function throwing an exception.
-Node * parse(const std::string & fname, const std::string & input, std::ostream * errors = nullptr);
+/// If \p syntax_errors is provided then syntax errors are added as messages
+/// on parse failure and the root is returned instead of this function throwing an Error.
+Node * parse(const std::string & fname,
+             const std::string & input,
+             std::vector<ErrorMessage> * syntax_errors = nullptr);
 
 /// parses the file checking for errors but does not return any node tree.
 inline void
@@ -536,16 +614,9 @@ check(const std::string & fname, const std::string & input)
 /// node trees.
 void merge(Node * from, Node * into);
 
-/// explode walks the tree converting/exploding any fields that have path separators into them into
-/// actuall sections/subsections/etc. with the final path element as the field name.  For example,
-/// "foo/bar=42" becomes nodes with the structure "[foo] bar=42 []".  If nodes for sections already
-/// exist in the tree, the fields will be moved into them rather than new sections created.  The
-/// returned node is the root of the exploded tree.
-Node * explode(Node * n);
-
 // Formatter is used to automatically format hit syntax/input to be uniform in a specified style.
-// After creating a formatter object and configuring it as desired by modifying/calling its members
-// you use the "format" function to format hit text as desired.
+// After creating a formatter object and configuring it as desired by modifying/calling its
+// members you use the "format" function to format hit text as desired.
 class Formatter : public Walker
 {
 public:

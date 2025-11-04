@@ -1,6 +1,4 @@
-phase_field_crystal/PFCTrad/pfct_newton_split1_asm1_10.i
 phase_field_crystal/PFCTrad/PFCTrad_test.i
-phase_field_crystal/PFCTrad/pfct_newton_split1_asm5.i
 phase_field_crystal/PFCEnergyDensity/auxkernel.i
 GrandPotentialPFM/GrandPotentialAnisotropyAntitrap.i
 GrandPotentialPFM/GrandPotentialMultiphase.i

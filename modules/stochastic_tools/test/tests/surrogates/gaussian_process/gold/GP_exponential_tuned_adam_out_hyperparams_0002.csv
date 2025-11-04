@@ -1,2 +1,2 @@
-gamma,length_factor0,length_factor1,noise_variance,signal_variance
+covar:gamma,covar:length_factor0,covar:length_factor1,covar:noise_variance,covar:signal_variance
 2,1.1825106799973,4.1275288319727,1e-06,2.1930930794295

@@ -30,6 +30,7 @@
     cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=material_recover'
     prereq = 'material'
     recover = false
+    restep = false # Restep isn't compatible with recover tests
     requirement = "The nucleation system shall recoverable"
     design = 'materials/DiscreteNucleation.md'
     issues = '#5472'
@@ -58,6 +59,7 @@
     cli_args = 'Executioner/num_steps=5 Outputs/recover/type=Checkpoint Outputs/recover/file_base=parallel_recover'
     prereq = 'parallel'
     recover = false
+    restep = false # Restep isn't compatible with recover tests
     requirement = "The nucleation system shall recoverable"
     design = 'userobjects/DiscreteNucleationInserter.md'
     issues = '#5472'

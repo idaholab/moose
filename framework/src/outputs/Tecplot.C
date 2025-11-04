@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ InputParameters
 Tecplot::validParams()
 {
   // Get the base class parameters
-  InputParameters params = OversampleOutput::validParams();
+  InputParameters params = SampledOutput::validParams();
 
   // Add binary toggle
   params.addParam<bool>("binary", false, "Set Tecplot files to output in binary format");
@@ -45,7 +45,7 @@ Tecplot::validParams()
 }
 
 Tecplot::Tecplot(const InputParameters & parameters)
-  : OversampleOutput(parameters),
+  : SampledOutput(parameters),
     _binary(getParam<bool>("binary")),
     _ascii_append(getParam<bool>("ascii_append")),
     _first_time(declareRestartableData<bool>("first_time", true))
@@ -63,7 +63,7 @@ Tecplot::Tecplot(const InputParameters & parameters)
 void
 Tecplot::output()
 {
-  TecplotIO out(*_mesh_ptr, _binary, getOutputTime() + _app.getGlobalTimeOffset());
+  libMesh::TecplotIO out(*_mesh_ptr, _binary, getOutputTime() + _app.getGlobalTimeOffset());
 
   // Only set the append flag on the TecplotIO object if the user has
   // asked for it, and this is not the first time we called output().

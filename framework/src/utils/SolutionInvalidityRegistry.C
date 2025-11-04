@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -31,11 +31,14 @@ SolutionInvalidityRegistry::SolutionInvalidityRegistry()
 
 InvalidSolutionID
 SolutionInvalidityRegistry::registerInvalidity(const std::string & object_type,
-                                               const std::string & message)
+                                               const std::string & message,
+                                               const bool warning)
 {
   const SolutionInvalidityName name(object_type, message);
-  const auto create_item = [&object_type, &message](const std::size_t id)
-  { return SolutionInvalidityInfo(object_type, message, id); };
+  if (keyExists(name))
+    mooseAssert(item(id(name)).warning == warning, "Inconsistent registration for a warning");
+  const auto create_item = [&object_type, &message, &warning](const std::size_t id)
+  { return SolutionInvalidityInfo(object_type, message, id, warning); };
   return registerItem(name, create_item);
 }
 

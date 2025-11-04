@@ -24,6 +24,7 @@
                   'different blocks using distinct interface plug-ins.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
+    capabilities = 'method!=dbg'
   []
   [multiple_blocks_two_materials_parallel]
     type = 'Exodiff'
@@ -36,6 +37,7 @@
                   'different blocks using distinct interface plug-ins in multi processor runs.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = in_tree
+    capabilities = 'method!=dbg'
   []
   [rve_multimaterial_umat]
     type = 'Exodiff'
@@ -46,7 +48,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     # A demonstration test, no need run this through a debug executable, which is already tested
-    method = opt
+    capabilities = 'method=opt'
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
                   'the blocks are meshed contiguously using the UMAT interface.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
@@ -61,7 +63,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     # A demonstration test, no need run this through a debug executable, which is already tested
-    method = opt
+    capabilities = 'method=opt'
     requirement = 'The system shall be able to simulate a multiblock solid mechanics test in which '
                   'the blocks are meshed contiguously.'
   []

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -16,6 +16,7 @@ InputParameters
 ScalarInitialCondition::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += InitialConditionInterface::validParams();
   params.addParam<VariableName>(
       "variable", "The variable this initial condition is supposed to provide values for.");
 
@@ -26,6 +27,7 @@ ScalarInitialCondition::validParams()
 
 ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameters)
   : MooseObject(parameters),
+    InitialConditionInterface(parameters),
     ScalarCoupleable(this),
     FunctionInterface(this),
     UserObjectInterface(this),

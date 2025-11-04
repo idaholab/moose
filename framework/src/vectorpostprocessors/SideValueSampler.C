@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,15 +29,34 @@ SideValueSampler::validParams()
 }
 
 SideValueSampler::SideValueSampler(const InputParameters & parameters)
-  : SideVectorPostprocessor(parameters), SamplerBase(parameters, this, _communicator)
+  : SideVectorPostprocessor(parameters),
+    SamplerBase(parameters, this, _communicator),
+    _qp_sampling(true)
 {
   std::vector<std::string> var_names(_coupled_moose_vars.size());
   _values.resize(_coupled_moose_vars.size());
 
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
+  {
     var_names[i] = _coupled_moose_vars[i]->name();
+    SamplerBase::checkForStandardFieldVariableType(_coupled_moose_vars[i]);
+  }
 
-  // Initialize the datastructions in SamplerBase
+  if (!_coupled_fv_moose_vars.empty())
+  {
+    const auto num_fv_vars = _coupled_fv_moose_vars.size();
+    if (num_fv_vars != _coupled_moose_vars.size())
+      paramError(
+          "variable",
+          "This object cannot accept mixed FE and FV variables, please make "
+          "sure all the provided variables are either FE or FV by separating this vector "
+          "postprocessor "
+          "into two blocks, one for finite element and another for finite volume variables!");
+
+    _qp_sampling = false;
+  }
+
+  // Initialize the data structures in SamplerBase
   SamplerBase::setupVariables(var_names);
 }
 
@@ -50,12 +69,39 @@ SideValueSampler::initialize()
 void
 SideValueSampler::execute()
 {
-  for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-      _values[i] = (dynamic_cast<MooseVariable *>(_coupled_moose_vars[i]))->sln()[_qp];
+  if (_qp_sampling)
+    for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
+        _values[i] = (dynamic_cast<MooseVariable *>(_coupled_moose_vars[i]))->sln()[_qp];
 
-    SamplerBase::addSample(_q_point[_qp], _current_elem->id(), _values);
+      SamplerBase::addSample(_q_point[_qp], _current_elem->id(), _values);
+    }
+  else
+  {
+    getFaceInfos();
+
+    const auto state = determineState();
+
+    for (const auto & fi : _face_infos)
+    {
+      for (unsigned int i = 0; i < _coupled_fv_moose_vars.size(); i++)
+      {
+        mooseAssert(_coupled_fv_moose_vars[i]->hasFaceSide(*fi, true) ||
+                        _coupled_fv_moose_vars[i]->hasFaceSide(*fi, false),
+                    "Variable " + _coupled_fv_moose_vars[i]->name() +
+                        " should be defined on one side of the face!");
+
+        const auto * elem =
+            _coupled_fv_moose_vars[i]->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr();
+
+        const auto face_arg = Moose::FaceArg(
+            {fi, Moose::FV::LimiterType::CentralDifference, true, false, elem, nullptr});
+        _values[i] = MetaPhysicL::raw_value((*_coupled_fv_moose_vars[i])(face_arg, state));
+      }
+
+      SamplerBase::addSample(fi->faceCentroid(), _current_elem->id(), _values);
+    }
   }
 }
 

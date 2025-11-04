@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,7 +15,8 @@
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
-#include "NodeElemConstraint.h"
+#include "NodeElemConstraintBase.h"
+#include "FEProblemBase.h"
 
 ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*threaded=*/false) {}
 
@@ -33,7 +34,8 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
       std::dynamic_pointer_cast<MortarConstraintBase>(object);
   std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
   std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
-  std::shared_ptr<NodeElemConstraint> nec = std::dynamic_pointer_cast<NodeElemConstraint>(object);
+  std::shared_ptr<NodeElemConstraintBase> nec =
+      std::dynamic_pointer_cast<NodeElemConstraintBase>(object);
 
   // NodeFaceConstraint
   if (nfc)
@@ -79,7 +81,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
       _element_constraints[interface_id].addObject(ec);
   }
 
-  // NodeElemConstraint
+  // NodeElemConstraintBase
   else if (nec)
   {
     MooseMesh & mesh = nec->getParam<FEProblemBase *>("_fe_problem_base")->mesh();
@@ -190,13 +192,13 @@ ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id
   return it->second.getActiveObjects();
 }
 
-const std::vector<std::shared_ptr<NodeElemConstraint>> &
+const std::vector<std::shared_ptr<NodeElemConstraintBase>> &
 ConstraintWarehouse::getActiveNodeElemConstraints(SubdomainID secondary_id,
                                                   SubdomainID primary_id,
                                                   bool displaced) const
 {
   std::map<std::pair<SubdomainID, SubdomainID>,
-           MooseObjectWarehouse<NodeElemConstraint>>::const_iterator it,
+           MooseObjectWarehouse<NodeElemConstraintBase>>::const_iterator it,
       end_it;
 
   if (displaced)
@@ -210,10 +212,11 @@ ConstraintWarehouse::getActiveNodeElemConstraints(SubdomainID secondary_id,
     end_it = _node_elem_constraints.end();
   }
 
-  mooseAssert(it != end_it,
-              "Unable to locate storage for NodeElemConstraint objects for the given secondary and "
-              "primary id pair: ["
-                  << secondary_id << ", " << primary_id << "]");
+  mooseAssert(
+      it != end_it,
+      "Unable to locate storage for NodeElemConstraintBase objects for the given secondary and "
+      "primary id pair: ["
+          << secondary_id << ", " << primary_id << "]");
   return it->second.getActiveObjects();
 }
 
@@ -270,7 +273,7 @@ ConstraintWarehouse::hasActiveNodeElemConstraints(SubdomainID secondary_id,
                                                   bool displaced) const
 {
   std::map<std::pair<SubdomainID, SubdomainID>,
-           MooseObjectWarehouse<NodeElemConstraint>>::const_iterator it,
+           MooseObjectWarehouse<NodeElemConstraintBase>>::const_iterator it,
       end_it;
 
   if (displaced)
@@ -288,7 +291,8 @@ ConstraintWarehouse::hasActiveNodeElemConstraints(SubdomainID secondary_id,
   return (it != end_it && it->second.hasActiveObjects());
 }
 
-void ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
+void
+ConstraintWarehouse::updateActive(THREAD_ID /*tid*/)
 {
   MooseObjectWarehouse<Constraint>::updateActive();
   _nodal_constraints.updateActive();

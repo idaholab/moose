@@ -64,7 +64,7 @@
     shear_modulus = 2.0
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeIncrementalStrain
     eigenstrain_names = ini_stress
   [../]
   [./ini_stress]

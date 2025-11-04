@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -53,6 +53,9 @@ public:
   virtual void
   k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
 
+  virtual Real criticalPressure() const override { return _p_crit; }
+  virtual Real criticalTemperature() const override { return _T_crit; }
+
 protected:
   const Real _drho_dp;
   const Real _drho_dT;
@@ -70,6 +73,8 @@ protected:
   const Real _dcp_de;
   const Real _dk_dv;
   const Real _dk_de;
+  const Real _p_crit;
+  const Real _T_crit;
 };
 
 #pragma GCC diagnostic pop

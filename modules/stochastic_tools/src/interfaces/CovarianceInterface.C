@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CovarianceInterface.h"
+#include "CovarianceFunctionBase.h"
 
 InputParameters
 CovarianceInterface::validParams()
@@ -27,7 +28,7 @@ CovarianceInterface::getCovarianceFunctionByName(const UserObjectName & name) co
   _covar_feproblem.theWarehouse()
       .query()
       .condition<AttribName>(name)
-      .condition<AttribSystem>("CovarianceFunctionBase")
+      .condition<AttribSystem>("CovarianceFunction")
       .queryInto(models);
   if (models.empty())
     mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");

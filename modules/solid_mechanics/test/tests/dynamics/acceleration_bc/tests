@@ -4,19 +4,18 @@
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
-    compiler = 'GCC CLANG'
 
     requirement = "The PresetAcceleration class shall accurately prescribe the"
                   " acceleration at the given boundary."
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#7642"
+    capabilities = 'method!=dbg'
   [../]
   [./acceleration_bc_ti]
     type = 'Exodiff'
     input = 'AccelerationBC_test.i'
     exodiff = 'AccelerationBC_test_out.e'
     abs_zero = 1e-08
-    compiler = 'GCC CLANG'
 
     requirement = "The PresetAcceleration class shall accurately prescribe the"
                   " acceleration at the given boundary when the Newmark-Beta time"
@@ -24,5 +23,6 @@
     design = "Dynamics.md PresetAcceleration.md"
     issues = "#12185"
     prereq = "acceleration_bc"
+    capabilities = 'method!=dbg'
   [../]
 []

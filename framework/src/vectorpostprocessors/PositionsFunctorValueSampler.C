@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,20 +24,20 @@ PositionsFunctorValueSampler::validParams()
       "Positions object specifying the points where you want to evaluate the functors");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "functors", "The functors we want to evaluate at the positions");
-  params.addParam<bool>("discontinuous", false, "Indicate that the functors are discontinuous");
+  params.addRequiredParam<bool>("discontinuous", "Indicate whether the functors are discontinuous");
 
   return params;
 }
 
 PositionsFunctorValueSampler::PositionsFunctorValueSampler(const InputParameters & parameters)
   : PointSamplerBase(parameters),
-    NonADFunctorInterface(this),
     _positions(_fe_problem.getPositionsObject(getParam<PositionsName>("positions")))
 {
   const auto & functor_names = getParam<std::vector<MooseFunctorName>>("functors");
   for (const auto & functor_name : functor_names)
     _functors.push_back(&getFunctor<Real>(functor_name));
 
+  // Checks all elements around the face when discontinuous
   _discontinuous_at_faces = getParam<bool>("discontinuous");
 
   // Initialize the data structures in SamplerBase

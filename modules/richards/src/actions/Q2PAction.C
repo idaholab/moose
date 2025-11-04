@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -214,8 +214,8 @@ Q2PAction::act()
 
   if (_current_task == "add_aux_variable")
   {
-    FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
-                   Utility::string_to_enum<FEFamily>("LAGRANGE"));
+    libMesh::FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
+                            Utility::string_to_enum<libMesh::FEFamily>("LAGRANGE"));
     auto type = AddVariableAction::variableType(fe_type);
     auto var_params = _factory.getValidParams(type);
     var_params.set<MooseEnum>("family") = "LAGRANGE";

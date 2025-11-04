@@ -21,9 +21,9 @@ Some of the capability at your fingertips:
 More Information
 ================
 
-**For more information, including installation instructions, please see the official website: [mooseframework.org](https://mooseframework.org)**
+**For more information, including installation instructions, please see the official website: [https://mooseframework.inl.gov](https://mooseframework.inl.gov)**
 
 Contributing
 ============
 
-For information on how to contribute code changes to MOOSE please [see this article](https://mooseframework.org/framework/contributing.html).
+For information on how to contribute code changes to MOOSE please [see this article](https://mooseframework.inl.gov/framework/contributing.html).

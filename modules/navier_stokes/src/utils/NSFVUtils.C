@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -54,8 +54,9 @@ interpolationParameters()
 
 namespace NS
 {
-std::tuple<bool, ADReal, ADReal>
-isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
+template <class T>
+std::tuple<bool, T, T>
+isPorosityJumpFace(const Moose::FunctorBase<T> & porosity,
                    const FaceInfo & fi,
                    const Moose::StateArg & time)
 {
@@ -68,10 +69,15 @@ isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
               "Porosity should have blocks on both elem and neighbor");
 
   const Moose::FaceArg face_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr(), nullptr};
   const Moose::FaceArg face_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr(), nullptr};
   const auto eps_elem = porosity(face_elem, time), eps_neighbor = porosity(face_neighbor, time);
   return {!MooseUtils::relativeFuzzyEqual(eps_elem, eps_neighbor), eps_elem, eps_neighbor};
 }
+
+template std::tuple<bool, Real, Real> isPorosityJumpFace<Real>(
+    const Moose::FunctorBase<Real> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
+template std::tuple<bool, ADReal, ADReal> isPorosityJumpFace<ADReal>(
+    const Moose::FunctorBase<ADReal> & porosity, const FaceInfo & fi, const Moose::StateArg & time);
 }

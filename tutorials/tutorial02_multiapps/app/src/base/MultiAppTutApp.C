@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ MultiAppTutApp::validParams()
   return params;
 }
 
-MultiAppTutApp::MultiAppTutApp(InputParameters parameters) : MooseApp(parameters)
+MultiAppTutApp::MultiAppTutApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   MultiAppTutApp::registerAll(_factory, _action_factory, _syntax);
 }

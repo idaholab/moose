@@ -1,0 +1,17 @@
+[Tests]
+  design = 'SubChannelPointValue.md'
+  issues = '#29226 #29486'
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    recover = False
+    requirement = 'The system will print a variable on a specific subchannel and height in quadrilateral assemblies'
+  []
+  [subchannel_height]
+    type = 'RunException'
+    input = 'test_error.i'
+    expect_err = ": No element located at given height."
+    requirement = 'The system will test the user provided height'
+  []
+[]

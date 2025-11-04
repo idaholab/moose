@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,8 +9,10 @@
 
 // MOOSE includes
 #include "DomainIntegralAction.h"
+#include "ExecFlagRegistry.h"
 #include "Factory.h"
 #include "FEProblem.h"
+#include "Moose.h"
 #include "Parser.h"
 #include "CrackFrontDefinition.h"
 #include "MooseMesh.h"
@@ -32,7 +34,7 @@ InputParameters
 DomainIntegralAction::validParams()
 {
   InputParameters params = Action::validParams();
-  addCrackFrontDefinitionParams(params);
+  CrackFrontDefinition::includeCrackFrontDefinitionParams(params);
   MultiMooseEnum integral_vec(
       "JIntegral CIntegral KFromJIntegral InteractionIntegralKI InteractionIntegralKII "
       "InteractionIntegralKIII InteractionIntegralT");
@@ -131,13 +133,6 @@ DomainIntegralAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
-  params.addParam<bool>(
-      "used_by_xfem_to_grow_crack",
-      false,
-      "Flag to trigger domainIntregal vector postprocessors to be executed on nonlinear.  This "
-      "updates the values in the vector postprocessor which will allow the crack to grow in XFEM "
-      "cutter objects that use the domainIntegral vector postprocssor values as a growth "
-      "criterion.");
   params.addParam<bool>("output_vpp",
                         true,
                         "Flag to control the vector postprocessor outputs. Select false to "
@@ -178,8 +173,7 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _incremental(getParam<bool>("incremental")),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false),
     _fgm_crack(false),
-    _use_ad(getParam<bool>("use_automatic_differentiation")),
-    _used_by_xfem_to_grow_crack(getParam<bool>("used_by_xfem_to_grow_crack"))
+    _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
 
   if (isParamValid("functionally_graded_youngs_modulus_crack_dir_gradient") !=
@@ -364,6 +358,9 @@ DomainIntegralAction::act()
   const std::string aux_stress_base_name("aux_stress");
   const std::string aux_grad_disp_base_name("aux_grad_disp");
 
+  // checking if built with xfem and setting flags for vpps used by xfem
+  std::vector<std::string> xfem_exec_flags = {EXEC_XFEM_MARK, EXEC_TIMESTEP_END};
+
   std::string ad_prepend = "";
   if (_use_ad)
     ad_prepend = "AD";
@@ -373,11 +370,11 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
+    if (_use_crack_front_points_provider)
     {
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END, EXEC_NONLINEAR};
       // The CrackFrontDefinition updates the vpps and MUST execute before them
       params.set<int>("execution_order_group") = -1;
+      params.set<ExecFlagEnum>("execute_on") = xfem_exec_flags;
     }
     else
       params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -738,13 +735,8 @@ DomainIntegralAction::act()
       if (!getParam<bool>("output_vpp"))
         params.set<std::vector<OutputName>>("outputs") = {"none"};
 
-      if (_use_crack_front_points_provider && _used_by_xfem_to_grow_crack)
-      {
-        // The CrackFrontDefinition updates this vpp and MUST execute before it
-        // This is enforced by setting the execution_order_group = -1 for the CrackFrontDefinition
-        // The CrackFrontDefinition must execute on nonlinear to update with xfem updates
-        params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END, EXEC_NONLINEAR};
-      }
+      if (_use_crack_front_points_provider)
+        params.set<ExecFlagEnum>("execute_on") = xfem_exec_flags;
       else
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
 

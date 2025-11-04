@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -64,7 +64,7 @@ PatternedHexMeshGenerator::validParams()
                         false,
                         "Whether a positions file is generated in the core mesh mode.");
   params.addParam<bool>("assign_control_drum_id",
-                        true,
+                        false,
                         "Whether control drum id is assigned to the mesh as an extra integer.");
   std::string position_file_default = "positions_meta.data";
   params.addParam<std::string>(
@@ -101,8 +101,8 @@ PatternedHexMeshGenerator::validParams()
   params.addParam<bool>("create_outward_interface_boundaries",
                         true,
                         "Whether the outward interface boundary sidesets are created.");
-  params.addParam<std::string>(
-      "external_boundary_name", std::string(), "Optional customized external boundary name.");
+  params.addParam<BoundaryName>(
+      "external_boundary_name", BoundaryName(), "Optional customized external boundary name.");
   params.addParam<bool>("deform_non_circular_region",
                         true,
                         "Whether the non-circular region (outside the rings) can be deformed.");
@@ -120,8 +120,17 @@ PatternedHexMeshGenerator::validParams()
       "interface_boundary_id_shift_pattern",
       "User-defined shift values for each pattern cell. A double-indexed array starting with the "
       "upper-left corner.");
+  MooseEnum quad_elem_type("QUAD4 QUAD8 QUAD9", "QUAD4");
+  params.addParam<MooseEnum>(
+      "boundary_region_element_type",
+      quad_elem_type,
+      "Type of the quadrilateral elements to be generated in the boundary region.");
+  params.addParam<bool>(
+      "allow_unused_inputs",
+      false,
+      "Whether additional input assemblies can be part of inputs without being used in lattice");
   params.addParamNamesToGroup(
-      "background_block_id background_block_name duct_block_ids "
+      "background_block_id background_block_name duct_block_ids boundary_region_element_type "
       "duct_block_names external_boundary_id external_boundary_name "
       "create_inward_interface_boundaries create_outward_interface_boundaries",
       "Customized Subdomain/Boundary");
@@ -164,7 +173,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(getParam<std::string>("external_boundary_name")),
+    _external_boundary_name(getParam<BoundaryName>("external_boundary_name")),
     _create_inward_interface_boundaries(getParam<bool>("create_inward_interface_boundaries")),
     _create_outward_interface_boundaries(getParam<bool>("create_outward_interface_boundaries")),
     _hexagon_size_style(
@@ -172,7 +181,10 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _use_reporting_id(isParamValid("id_name")),
     _use_exclude_id(isParamValid("exclude_id")),
-    _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern"))
+    _use_interface_boundary_id_shift(isParamValid("interface_boundary_id_shift_pattern")),
+    _boundary_quad_elem_type(
+        getParam<MooseEnum>("boundary_region_element_type").template getEnum<QUAD_ELEM_TYPE>()),
+    _allow_unused_inputs(getParam<bool>("allow_unused_inputs"))
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
   declareMeshProperty("input_pitch_meta", 0.0);
@@ -214,10 +226,11 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
   if (*std::max_element(pattern_max_array.begin(), pattern_max_array.end()) >= _input_names.size())
     paramError("pattern",
                "Elements of this parameter must be smaller than the length of input_name.");
-  if ((unsigned int)std::distance(pattern_1d.begin(),
-                                  std::unique(pattern_1d.begin(), pattern_1d.end())) <
-      _input_names.size())
-    paramError("pattern", "All the meshes provided in inputs must be used here.");
+  if (std::set<unsigned int>(pattern_1d.begin(), pattern_1d.end()).size() < _input_names.size() &&
+      !_allow_unused_inputs)
+    paramError("pattern",
+               "All the meshes provided in inputs must be used in the lattice pattern. To bypass "
+               "this requirement, set 'allow_unused_inputs = true'");
 
   if (isParamValid("background_block_id"))
   {
@@ -861,6 +874,12 @@ PatternedHexMeshGenerator::generate()
         out_mesh->add_point(p_tmp, node_azi_list[i * side_intervals + j - 1].second);
       }
     }
+
+    // if quadratic elements are used, additional nodes need to be adjusted based on the new
+    // boundary node locations. adjust side mid-edge nodes to the midpoints of the corner
+    // points, and if QUAD9, adjust center point to new centroid.
+    if (_boundary_quad_elem_type != QUAD_ELEM_TYPE::QUAD4)
+      adjustPeripheralQuadraticElements(*out_mesh, _boundary_quad_elem_type);
   }
 
   MeshTools::Modification::rotate(*out_mesh, _rotate_angle, 0.0, 0.0);
@@ -872,7 +891,6 @@ PatternedHexMeshGenerator::generate()
     const Real azi_tol = 1E-8;
     std::vector<std::tuple<Real, Point, std::vector<Real>, dof_id_type>> control_drum_tmp;
     std::vector<dof_id_type> control_drum_id_sorted;
-    unsigned int id = out_mesh->get_elem_integer_index("control_drum_id");
     for (unsigned int i = 0; i < control_drum_positions_x.size(); ++i)
     {
       control_drum_positions_x[i] -= origin_x;
@@ -917,6 +935,7 @@ PatternedHexMeshGenerator::generate()
 
     if (_assign_control_drum_id)
     {
+      unsigned int id = out_mesh->get_elem_integer_index("control_drum_id");
       for (const auto & elem : out_mesh->element_ptr_range())
       {
         dof_id_type unsorted_control_drum_id = elem->get_extra_integer(id);
@@ -1062,11 +1081,13 @@ PatternedHexMeshGenerator::addPeripheralMesh(
                                           sub_positions_inner,
                                           sub_d_positions_outer,
                                           i,
+                                          _boundary_quad_elem_type,
                                           _create_inward_interface_boundaries,
                                           (i != extra_dist.size() - 1) &&
                                               _create_outward_interface_boundaries);
-      if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
-        meshp0->prepare_for_use();
+
+      // The other_mesh must be prepared before stitching
+      meshp0->prepare_for_use();
 
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);

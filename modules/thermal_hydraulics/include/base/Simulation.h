@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -29,13 +29,23 @@ class THMProblem;
 class Simulation : public libMesh::ParallelObject, public LoggingInterface, public NamingInterface
 {
 public:
+  /**
+   * Sets a component variable order index.
+   *
+   * See Component system documentation for more information.
+   *
+   * @param[in] var  Variable to order
+   * @param[in] index  Order index
+   */
+  static void setComponentVariableOrder(const VariableName & var, int index);
+
   Simulation(FEProblemBase & fe_problem, const InputParameters & params);
   virtual ~Simulation();
 
   /**
    * Gets the FE type for the flow in this simulation
    */
-  const FEType & getFlowFEType() const { return _flow_fe_type; }
+  const libMesh::FEType & getFlowFEType() const { return _flow_fe_type; }
 
   /**
    * Sets up quadrature rules
@@ -138,8 +148,10 @@ public:
    * @param[in] fe_type   FEType of the variable
    * @param[in] scaling_factor   Scaling factor for the variable
    */
-  void
-  addSimVariable(bool nl, const VariableName & name, FEType fe_type, Real scaling_factor = 1.0);
+  void addSimVariable(bool nl,
+                      const VariableName & name,
+                      libMesh::FEType fe_type,
+                      Real scaling_factor = 1.0);
 
   /**
    * Queues a variable of type MooseVariable to be added to the nonlinear or aux system.
@@ -152,7 +164,7 @@ public:
    */
   void addSimVariable(bool nl,
                       const VariableName & name,
-                      FEType fe_type,
+                      libMesh::FEType fe_type,
                       const std::vector<SubdomainName> & subdomain_names,
                       Real scaling_factor = 1.0);
 
@@ -415,7 +427,7 @@ protected:
   const InputParameters & _thm_pars;
 
   /// finite element type for the flow in the simulation
-  FEType _flow_fe_type;
+  libMesh::FEType _flow_fe_type;
 
   /**
    * Setup equations to be solved in this simulation
@@ -463,6 +475,17 @@ protected:
 
 public:
   Real _zero;
+
+private:
+  /**
+   * Returns a sorted list of the variables added by components
+   *
+   * See Component system documentation for more information.
+   */
+  std::vector<VariableName> sortAddedComponentVariables() const;
+
+  /// Component variable order map; see setComponentVariableOrder for more info
+  static std::map<VariableName, int> _component_variable_order_map;
 };
 
 template <typename T>

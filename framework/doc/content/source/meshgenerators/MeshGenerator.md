@@ -5,7 +5,7 @@ This is the base class for the `MeshGenerator` system.
 There are two types of mesh generators:
 
 - Those who create a mesh (examples: [GeneratedMeshGenerator.md], [AnnularMeshGenerator.md], [FileMeshGenerator.md]).
-- Those who modify an existing mesh (examples: [MeshExtruderGenerator.md], [StitchedMeshGenerator.md], [RenameBlockGenerator.md], [RenameBoundaryGenerator.md]).
+- Those who modify an existing mesh (examples: [MeshExtruderGenerator.md], [StitchMeshGenerator.md], [RenameBlockGenerator.md], [RenameBoundaryGenerator.md]).
 
 The purpose of these objects is to create complex meshes using only one input file. Indeed, you can use several MeshGenerator blocks in your input file. Those represent the different steps necessary to create your complex mesh. Note that an option exists for printing mesh information to screen (see [#showing-mesh-information]) for tracking down problems when generating complex meshes with multiple mesh generators.
 
@@ -58,7 +58,7 @@ For mesh generators that create a mesh, care must be taken as to the parallel ty
 
 You should +only+ use these APIs to create the base mesh in generators that create meshes. This is very important, because the internal preparation of the meshes for use is dependent on the parallel type of the mesh.
 
-For mesh generators that modify an existing mesh, you should have as an input parameter a `MeshGeneratorName` (or multiple, as a `std::vector<MeshGeneratorName>` if applicable) to obtain the mesh(es) to modify. You can then obtain said meshes via `MeshGenerator::getMesh()` and `MeshGenerator::getMeshByName()`. For examples, see [RenameBoundaryGenerator.md] and [StitchedMeshGenerator.md]. You then act on said meshes by overriding the `generate()` method, and returning the resulting mesh.
+For mesh generators that modify an existing mesh, you should have as an input parameter a `MeshGeneratorName` (or multiple, as a `std::vector<MeshGeneratorName>` if applicable) to obtain the mesh(es) to modify. You can then obtain said meshes via `MeshGenerator::getMesh()` and `MeshGenerator::getMeshByName()`. For examples, see [RenameBoundaryGenerator.md] and [StitchMeshGenerator.md]. You then act on said meshes by overriding the `generate()` method, and returning the resulting mesh.
 
 ### Using Sub MeshGenerators
 
@@ -188,3 +188,19 @@ to a generator that is data-driven.
 This is an advanced method that requires a heavy understanding of all generators that
 exist in the generation tree, and thus it is not enabled by default. To enable it, the
 parameter `allow_data_driven_mesh_generation` on your application can be set to true.
+
+## Generating CSG Models
+
+The system optionally supports the generation of base data for a [!ac](CSG).
+In this execution setting, a `CSGBase` object is created, which contains the surfaces, cells, and universes needed to define the equivalent MOOSE geometry as a CSG model for use with downstream Monte Carlo codes.
+[!ac](CSG) generation is triggered using the `--csg-only` command line option, and a `generateCSG()` method is overridden for each generator that is defined within the mesh input file.
+In order to indicate to the mesh generation system that [!ac](CSG) generation is supported, the following call for `setHasGenerateCSG` is made within the parameters of the generator:
+
+!listing ExampleCSGInfiniteSquareMeshGenerator.C start=Declare that this generator end=setHasGenerateCSG include-end=true
+
+When running with `--csg-only` as a command line option, all mesh generators that are part of the input file will call `generateData()` and then `generateCSG()` instead of `generate()`.
+The logic for defining the `CSGBase` object should be contained within the `generateCSG()` routine for each mesh generator.
+No finite element mesh is created using this execution mode.
+
+For more information about the theory of [!ac](CSG) as a geometry representation, please see [syntax/CSG/index.md].
+Additional information about implementing `generateCSG()` methods for each mesh generator can be found in [source/csg/CSGBase.md].

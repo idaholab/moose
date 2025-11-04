@@ -174,19 +174,19 @@ pressure_tag = "pressure_grad"
     type = INSFVInletVelocityBC
     boundary = 'back'
     variable = vel_x
-    function = '0'
+    functor = '0'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'back'
     variable = vel_y
-    function = '0'
+    functor = '0'
   []
   [inlet-w]
     type = INSFVInletVelocityBC
     boundary = 'back'
     variable = vel_z
-    function = '1.1'
+    functor = '1.1'
   []
   [walls-u]
     type = INSFVNoSlipWallBC
@@ -252,14 +252,14 @@ pressure_tag = "pressure_grad"
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.95
   num_iterations = 150
-  pressure_absolute_tolerance = 1e-13
-  momentum_absolute_tolerance = 1e-13
-  energy_absolute_tolerance = 1e-13
+  pressure_absolute_tolerance = 1e-11
+  momentum_absolute_tolerance = 1e-11
+  energy_absolute_tolerance = 1e-11
   print_fields = false
 
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  energy_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-13
+  pressure_l_abs_tol = 1e-13
+  energy_l_abs_tol = 1e-13
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0

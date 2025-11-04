@@ -1,0 +1,20 @@
+[Tests]
+  design = 'BoundaryLayerSubdomainGenerator.md'
+  issues = '#29747'
+  [internal]
+    type = Exodiff
+    input = internal.i
+    exodiff = 'internal_in.e'
+    cli_args = '--mesh-only'
+    recover = false # not necessary on mesh-only inputs
+    requirement = 'The system shall be able to generate a boundary layer of elements with a different subdomain on an internal sideset.'
+  []
+  [external]
+    type = Exodiff
+    input = external.i
+    exodiff = 'external_in.e'
+    cli_args = '--mesh-only'
+    recover = false # not necessary on mesh-only inputs
+    requirement = 'The system shall be able to generate a boundary layer of elements with a different subdomain on an external sideset.'
+  []
+[]

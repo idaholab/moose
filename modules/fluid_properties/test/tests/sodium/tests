@@ -10,7 +10,7 @@
     # exceeding the critical temperature. The temperature variable stays within
     # this critical temperature, but temperature computed from the given enthalpy
     # does not.
-    method = 'OPT'
+    capabilities = 'method=opt'
     requirement = 'The system shall be able to compute liquid sodium properties and compare exactly to analytical expressions.'
   []
   [constant]

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,10 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifdef LIBTORCH_ENABLED
+#ifdef MOOSE_LIBTORCH_ENABLED
 
 #include "LibtorchNeuralNetControl.h"
-#include "LibtorchTorchScriptNeuralNet.h"
+#include "TorchScriptModule.h"
 #include "LibtorchUtils.h"
 
 #include "Transient.h"
@@ -62,11 +62,11 @@ LibtorchNeuralNetControl::validParams()
 
 LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & parameters)
   : Control(parameters),
+    _old_responses(declareRestartableData<std::vector<std::vector<Real>>>("old_responses")),
     _control_names(getParam<std::vector<std::string>>("parameters")),
     _current_control_signals(std::vector<Real>(_control_names.size(), 0.0)),
     _response_names(getParam<std::vector<PostprocessorName>>("responses")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
-    _initialized(false),
     _response_shift_factors(isParamValid("response_shift_factors")
                                 ? getParam<std::vector<Real>>("response_shift_factors")
                                 : std::vector<Real>(_response_names.size(), 0.0)),
@@ -108,7 +108,7 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
   {
     std::string filename = getParam<std::string>("filename");
     if (getParam<bool>("torch_script_format"))
-      _nn = std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(filename);
+      _nn = std::make_shared<Moose::TorchScriptModule>(filename);
     else
     {
       unsigned int num_inputs = _response_names.size() * _input_timesteps;
@@ -152,11 +152,8 @@ LibtorchNeuralNetControl::execute()
     updateCurrentResponse();
 
     // If this is the first timestep, we fill up the old values with the initial value
-    if (!_initialized)
-    {
+    if (_old_responses.empty())
       _old_responses.assign(num_old_timesteps, _current_response);
-      _initialized = true;
-    }
 
     // Organize the old an current solution into a tensor so we can evaluate the neural net
     torch::Tensor input_tensor = prepareInputTensor();

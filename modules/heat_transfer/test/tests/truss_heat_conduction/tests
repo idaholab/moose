@@ -64,7 +64,7 @@
                   'solutions for a bar embedded in a continuum represented '
                   'various ways.'
     type = RunCommand
-    method = opt
+    capabilities = 'method=opt'
     command = "python3 temp_plots.py"
     required_python_packages = 'matplotlib'
   []

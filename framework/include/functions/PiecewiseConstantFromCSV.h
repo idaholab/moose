@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -46,5 +46,5 @@ protected:
   const PropertyReadFile::ReadTypeEnum _read_type;
 
   /// The point locator is used when values are sorted by elements or blocks in the CSV
-  std::unique_ptr<PointLocatorBase> _point_locator;
+  std::unique_ptr<libMesh::PointLocatorBase> _point_locator;
 };

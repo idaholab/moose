@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -22,7 +22,7 @@ OptimizationTestApp::validParams()
 
 registerKnownLabel("OptimizationTestApp");
 
-OptimizationTestApp::OptimizationTestApp(InputParameters parameters) : MooseApp(parameters)
+OptimizationTestApp::OptimizationTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   OptimizationTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -44,25 +44,8 @@ OptimizationTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bo
 void
 OptimizationTestApp::registerApps()
 {
-  registerApp(OptimizationApp);
+  OptimizationApp::registerApps();
   registerApp(OptimizationTestApp);
-}
-
-void
-OptimizationTestApp::registerObjects(Factory & factory)
-{
-  Registry::registerObjectsTo(factory, {"OptimizationTestApp"});
-}
-
-void
-OptimizationTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
-{
-  Registry::registerActionsTo(action_factory, {"OptimizationTestApp"});
-}
-
-void
-OptimizationTestApp::registerExecFlags(Factory & /*factory*/)
-{
 }
 
 extern "C" void

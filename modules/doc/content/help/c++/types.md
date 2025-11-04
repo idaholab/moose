@@ -124,16 +124,16 @@ YourObject::validParams()
 
 ## C++ Standard Template Library (STL) Data Structures
 
-- [vector](http://www.cplusplus.com/reference/vector/vector/)
-- [list](http://www.cplusplus.com/reference/list/list/)
-- [map](http://www.cplusplus.com/reference/map/map/), [multimap](http://www.cplusplus.com/reference/multimap/multimap)
-- [set](http://www.cplusplus.com/reference/set/set/), [multiset](http://www.cplusplus.com/reference/set/set)
-- [stack](http://www.cplusplus.com/reference/stack/stack/)
-- [queue](http://www.cplusplus.com/reference/queue/queue/), [priority_queue](http://www.cplusplus.com/reference/priorityqueue/priorityqueue)
-- [deque](http://www.cplusplus.com/reference/deque/deque/)
-- [bitset](http://www.cplusplus.com/reference/bitset/bitset/)
-- [unordered_map](http://www.cplusplus.com/reference/unorderedmap/unorderedmap/) (C++11)
-- [unordered_set](http://www.cplusplus.com/reference/unorderedset/unorderedset/) (C++11)
+- [vector](https://cplusplus.com/reference/vector/vector/)
+- [list](https://cplusplus.com/reference/list/list/)
+- [map](https://cplusplus.com/reference/map/map/), [multimap](https://cplusplus.com/reference/map/multimap)
+- [set](https://cplusplus.com/reference/set/set/), [multiset](https://cplusplus.com/reference/set/set)
+- [stack](https://cplusplus.com/reference/stack/stack/)
+- [queue](https://cplusplus.com/reference/queue/queue/), [priority_queue](https://cplusplus.com/reference/queue/priority_queue/)
+- [deque](https://cplusplus.com/reference/deque/deque/)
+- [bitset](https://cplusplus.com/reference/bitset/bitset/)
+- [unordered_map](https://cplusplus.com/reference/unordered_map/unordered_map/) (C++11)
+- [unordered_set](https://cplusplus.com/reference/unordered_set/unordered_set/) (C++11)
 
 [](---)
 

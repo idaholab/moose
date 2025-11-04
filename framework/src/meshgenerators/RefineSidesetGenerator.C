@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -160,7 +160,7 @@ RefineSidesetGenerator::recursive_refine(std::vector<boundary_id_type> boundary_
         elem->set_refinement_flag(Elem::REFINE);
   }
 
-  MeshRefinement refinedmesh(*mesh);
+  libMesh::MeshRefinement refinedmesh(*mesh);
   if (!_enable_neighbor_refinement)
     refinedmesh.face_level_mismatch_limit() = 0;
 

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -47,7 +47,8 @@ enum class InterpMethod
   VanLeer,
   MinMod,
   SOU,
-  QUICK
+  QUICK,
+  Venkatakrishnan
 };
 
 enum class LinearFVComputationMode
@@ -471,13 +472,23 @@ std::pair<T, T>
 interpCoeffs(const Limiter<T> & limiter,
              const T & phi_upwind,
              const T & phi_downwind,
-             const VectorValue<T> * const grad_phi_upwind,
+             const libMesh::VectorValue<T> * const grad_phi_upwind,
+             const libMesh::VectorValue<T> * const grad_phi_face,
+             const Real & max_value,
+             const Real & min_value,
              const FaceInfo & fi,
              const bool fi_elem_is_upwind)
 {
   // Using beta, w_f, g nomenclature from Greenshields
-  const auto beta = limiter(
-      phi_upwind, phi_downwind, grad_phi_upwind, fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()));
+  const auto beta = limiter(phi_upwind,
+                            phi_downwind,
+                            grad_phi_upwind,
+                            grad_phi_face,
+                            fi_elem_is_upwind ? fi.dCN() : Point(-fi.dCN()),
+                            max_value,
+                            min_value,
+                            &fi,
+                            fi_elem_is_upwind);
 
   const auto w_f = fi_elem_is_upwind ? fi.gC() : (1. - fi.gC());
 
@@ -491,7 +502,7 @@ interpCoeffs(const Limiter<T> & limiter,
  */
 template <typename Scalar,
           typename Vector,
-          typename Enable = typename std::enable_if<ScalarTraits<Scalar>::value>::type>
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<Scalar>::value>::type>
 Scalar
 interpolate(const Limiter<Scalar> & limiter,
             const Scalar & phi_upwind,
@@ -500,7 +511,16 @@ interpolate(const Limiter<Scalar> & limiter,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
-  auto pr = interpCoeffs(limiter, phi_upwind, phi_downwind, grad_phi_upwind, fi, fi_elem_is_upwind);
+  auto pr =
+      interpCoeffs(limiter,
+                   phi_upwind,
+                   phi_downwind,
+                   grad_phi_upwind,
+                   /*grad_phi_face*/ static_cast<const libMesh::VectorValue<Scalar> *>(nullptr),
+                   /* max_value */ std::numeric_limits<Real>::max(),
+                   /* min_value */ std::numeric_limits<Real>::min(),
+                   fi,
+                   fi_elem_is_upwind);
   return pr.first * phi_upwind + pr.second * phi_downwind;
 }
 
@@ -508,7 +528,7 @@ interpolate(const Limiter<Scalar> & limiter,
  * Vector overload
  */
 template <typename Limiter, typename T, typename Tensor>
-VectorValue<T>
+libMesh::VectorValue<T>
 interpolate(const Limiter & limiter,
             const TypeVector<T> & phi_upwind,
             const TypeVector<T> & phi_downwind,
@@ -519,13 +539,13 @@ interpolate(const Limiter & limiter,
   mooseAssert(limiter.constant() || grad_phi_upwind,
               "Non-null gradient only supported for constant limiters.");
 
-  const VectorValue<T> * const gradient_example = nullptr;
-  VectorValue<T> ret;
+  const libMesh::VectorValue<T> * const gradient_example = nullptr;
+  libMesh::VectorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
   {
     if (grad_phi_upwind)
     {
-      const VectorValue<T> gradient = grad_phi_upwind->row(i);
+      const libMesh::VectorValue<T> gradient = grad_phi_upwind->row(i);
       ret(i) =
           interpolate(limiter, phi_upwind(i), phi_downwind(i), &gradient, fi, fi_elem_is_upwind);
     }
@@ -538,45 +558,302 @@ interpolate(const Limiter & limiter,
 }
 
 /**
- * Interpolates with a limiter and a face argument
- * @return a pair of pairs. The first pair corresponds to the interpolation coefficients with the
- * first corresponding to the face information element and the second corresponding to the face
- * information neighbor. This pair should sum to unity. The second pair corresponds to the face
- * information functor element value and neighbor
+ * This function performs a full limited interpolation of a variable, taking into account
+ * the values and gradients at both upwind and downwind locations, as well as geometric
+ * information and limits. It applies the specified limiter to ensure the interpolation
+ * adheres to the constraints imposed by the limiter.
+ *
+ * @tparam T The data type of the scalar values and the return type.
+ * @param limiter The limiter object used to compute the flux limiting ratio.
+ * @param phi_upwind The field value at the upwind location.
+ * @param phi_downwind The field value at the downwind location.
+ * @param grad_phi_upwind Pointer to the gradient at the upwind location.
+ * @param grad_phi_face Pointer to the gradient at the face location.
+ * @param fi FaceInfo object containing geometric details such as face centroid and cell centroids.
+ * @param fi_elem_is_upwind Boolean indicating if the face info element is upwind.
+ * @param max_value The maximum allowable value.
+ * @param min_value The minimum allowable value.
+ * @return The computed limited interpolation value.
+ */
+template <typename T>
+T
+fullLimitedInterpolation(const Limiter<T> & limiter,
+                         const T & phi_upwind,
+                         const T & phi_downwind,
+                         const VectorValue<T> * const grad_phi_upwind,
+                         const VectorValue<T> * const grad_phi_face,
+                         const Real & max_value,
+                         const Real & min_value,
+                         const FaceArg & face)
+{
+  // Compute the direction vector based on whether the current element is upwind
+  const auto dCD = face.elem_is_upwind ? face.fi->dCN() : Point(-face.fi->dCN());
+
+  // Compute the flux limiting ratio using the specified limiter
+  const auto beta = limiter(phi_upwind,
+                            phi_downwind,
+                            grad_phi_upwind,
+                            grad_phi_face,
+                            dCD,
+                            max_value,
+                            min_value,
+                            face.fi,
+                            face.elem_is_upwind);
+
+  // Determine the face centroid and the appropriate cell centroid
+  const auto & face_centroid = face.fi->faceCentroid();
+  const auto & cell_centroid =
+      face.elem_is_upwind ? face.fi->elemCentroid() : face.fi->neighborCentroid();
+
+  // Compute the delta value at the face
+  T delta_face;
+  if (face.limiter_type == LimiterType::Venkatakrishnan || face.limiter_type == LimiterType::SOU)
+    delta_face = (*grad_phi_upwind) * (face_centroid - cell_centroid);
+  else
+    delta_face = (*grad_phi_face) * (face_centroid - cell_centroid);
+
+  // Return the interpolated value
+  return phi_upwind + beta * delta_face;
+}
+
+/**
+ * This function calculates the minimum and maximum values within a two-cell stencil. The stencil
+ * includes the immediate neighboring elements of the face's associated element and the neighboring
+ * elements of those neighbors. It evaluates the values using a provided functor and accounts for
+ * the valid (non-null) neighbors.
+ *
+ * @tparam T The data type for the values being computed. This is typically a scalar type.
+ * @tparam FEK Enumeration type FunctorEvaluationKind with a default value of
+ * FunctorEvaluationKind::Value. This determines the kind of evaluation the functor will perform.
+ * @tparam Enable A type trait used for SFINAE (Substitution Failure Is Not An Error) to ensure that
+ * T is a valid scalar type as determined by ScalarTraits<T>.
+ *
+ * @param functor An object of a functor class derived from FunctorBase<T>. This object provides the
+ * genericEvaluate method to compute the value at a given element and time.
+ * @param face An argument representing the face in the computational domain. The face provides
+ * access to neighboring elements via neighbor_ptr_range().
+ * @param time An argument representing the state or time at which the evaluation is performed.
+ *
+ * @return std::pair<T, T> A pair containing the minimum and maximum values computed across the
+ * two-cell stencil. The first element is the maximum value, and the second element is the minimum
+ * value.
  */
 template <typename T,
           FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
           typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+std::pair<Real, Real>
+computeMinMaxValue(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
+{
+  // Initialize max_value to 0 and min_value to a large value
+  Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
+
+  // Iterate over the direct neighbors of the element associated with the face
+  for (const auto neighbor : (*face.fi).elem().neighbor_ptr_range())
+  {
+    // If not a valid neighbor, skip to the next one
+    if (neighbor == nullptr)
+      continue;
+
+    // Evaluate the functor at the neighbor and update max_value and min_value
+    const ElemArg local_cell_arg = {neighbor, false};
+    const auto value =
+        MetaPhysicL::raw_value(functor.template genericEvaluate<FEK>(local_cell_arg, time));
+    max_value = std::max(max_value, value);
+    min_value = std::min(min_value, value);
+  }
+
+  // Iterate over the neighbors of the neighbor
+  for (const auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
+  {
+    // If not a valid neighbor, skip to the next one
+    if (neighbor == nullptr)
+      continue;
+
+    // Evaluate the functor at the neighbor and update max_value and min_value
+    const ElemArg local_cell_arg = {neighbor, false};
+    const auto value =
+        MetaPhysicL::raw_value(functor.template genericEvaluate<FEK>(local_cell_arg, time));
+    max_value = std::max(max_value, value);
+    min_value = std::min(min_value, value);
+  }
+
+  // Return a pair containing the computed maximum and minimum values
+  return std::make_pair(max_value, min_value);
+}
+
+/**
+ * This function calculates the minimum and maximum values of a specified component within a
+ * two-cell stencil. The stencil includes the immediate neighboring elements of the face's
+ * associated element and the neighboring elements of those neighbors. It evaluates the values using
+ * a provided functor and accounts for the valid (non-null) neighbors.
+ *
+ * @tparam T The data type for the values being computed. This is typically a scalar type.
+ *
+ * @param functor An object of a functor class derived from FunctorBase<VectorValue<T>>. This object
+ * provides the operator() method to compute the value at a given element and time.
+ * @param face An argument representing the face in the computational domain. The face provides
+ * access to neighboring elements via neighbor_ptr_range().
+ * @param time An argument representing the state or time at which the evaluation is performed.
+ * @param component An unsigned integer representing the specific component of the vector to be
+ * evaluated.
+ *
+ * @return std::pair<T, T> A pair containing the minimum and maximum values of the specified
+ * component computed across the two-cell stencil. The first element is the maximum value, and the
+ * second element is the minimum value.
+ *
+ * Usage:
+ * This function is typically used in the finite volume methods for min-max computations over
+ * stencils (neighborhoods). It helps compute the limiting for limited second order upwind at the
+ * faces.
+ */
+template <typename T>
+std::pair<Real, Real>
+computeMinMaxValue(const FunctorBase<VectorValue<T>> & functor,
+                   const FaceArg & face,
+                   const StateArg & time,
+                   const unsigned int & component)
+{
+  // Initialize max_value to 0 and min_value to a large value
+  Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
+
+  // Iterate over the direct neighbors of the element associated with the face
+  for (const auto neighbor : (*face.fi).elem().neighbor_ptr_range())
+  {
+    // If not a valid neighbor, skip to the next one
+    if (neighbor == nullptr)
+      continue;
+
+    // Evaluate the functor at the neighbor for the specified component and update max_value and
+    // min_value
+    const ElemArg local_cell_arg = {neighbor, false};
+    const auto value = MetaPhysicL::raw_value(functor(local_cell_arg, time)(component));
+    max_value = std::max(max_value, value);
+    min_value = std::min(min_value, value);
+  }
+
+  // Iterate over the neighbors of the neighbor associated with the face
+  for (const auto neighbor : (*face.fi).neighbor().neighbor_ptr_range())
+  {
+    // If not a valid neighbor, skip to the next one
+    if (neighbor == nullptr)
+      continue;
+
+    // Evaluate the functor at the neighbor for the specified component and update max_value and
+    // min_value
+    const ElemArg local_cell_arg = {neighbor, false};
+    const auto value = MetaPhysicL::raw_value(functor(local_cell_arg, time)(component));
+    max_value = std::max(max_value, value);
+    min_value = std::min(min_value, value);
+  }
+
+  // Return a pair containing the computed maximum and minimum values
+  return std::make_pair(max_value, min_value);
+}
+
+/**
+ * This function interpolates values using a specified limiter and face argument. It evaluates the
+ * values at upwind and downwind locations and computes interpolation coefficients and advected
+ * values.
+ *
+ * @tparam T The data type for the values being interpolated. This is typically a scalar type.
+ * @tparam FEK Enumeration type FunctorEvaluationKind with a default value of
+ * FunctorEvaluationKind::Value. This determines the kind of evaluation the functor will perform.
+ * @tparam Enable A type trait used for SFINAE (Substitution Failure Is Not An Error) to ensure that
+ * T is a valid scalar type as determined by ScalarTraits<T>.
+ *
+ * @param functor An object of a functor class derived from FunctorBase<T>. This object provides the
+ * genericEvaluate method to compute the value at a given element and time.
+ * @param face An argument representing the face in the computational domain. The face provides
+ * access to neighboring elements and limiter type.
+ * @param time An argument representing the state or time at which the evaluation is performed.
+ *
+ * @return std::pair<std::pair<T, T>, std::pair<T, T>> A pair of pairs.
+ *                         - The first pair corresponds to the interpolation coefficients, with the
+ * first value corresponding to the face information element and the second to the face information
+ * neighbor. This pair should sum to unity.
+ *                         - The second pair corresponds to the face information functor element
+ * value and neighbor value.
+ *
+ * Usage:
+ * This function is used for interpolating values at faces in a finite volume method, ensuring that
+ * the interpolation adheres to the constraints imposed by the limiter.
+ */
+template <typename T,
+          FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<T>::value>::type>
 std::pair<std::pair<T, T>, std::pair<T, T>>
 interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
+  // Ensure only supported FunctorEvaluationKinds are used
   static_assert((FEK == FunctorEvaluationKind::Value) || (FEK == FunctorEvaluationKind::Dot),
                 "Only Value and Dot evaluations currently supported");
 
+  // Determine the gradient evaluation kind
   constexpr FunctorEvaluationKind GFEK = FunctorGradientEvaluationKind<FEK>::value;
   typedef typename FunctorBase<T>::GradientType GradientType;
   static const GradientType zero(0);
 
   mooseAssert(face.fi, "this must be non-null");
+
+  // Construct the limiter based on the face limiter type
   const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
 
+  // Determine upwind and downwind arguments based on the face element
   const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
   const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
+
+  // Evaluate the functor at the upwind and downwind locations
   auto phi_upwind = functor.template genericEvaluate<FEK>(upwind_arg, time);
   auto phi_downwind = functor.template genericEvaluate<FEK>(downwind_arg, time);
 
+  // Initialize the interpolation coefficients
   std::pair<T, T> interp_coeffs;
+
+  // Compute interpolation coefficients for Upwind or CentralDifference limiters
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
-    interp_coeffs =
-        interpCoeffs(*limiter, phi_upwind, phi_downwind, &zero, *face.fi, face.elem_is_upwind);
+    interp_coeffs = interpCoeffs(*limiter,
+                                 phi_upwind,
+                                 phi_downwind,
+                                 &zero,
+                                 &zero,
+                                 std::numeric_limits<Real>::max(),
+                                 std::numeric_limits<Real>::min(),
+                                 *face.fi,
+                                 face.elem_is_upwind);
   else
   {
-    const auto grad_phi_upwind = functor.template genericEvaluate<GFEK>(upwind_arg, time);
-    interp_coeffs = interpCoeffs(
-        *limiter, phi_upwind, phi_downwind, &grad_phi_upwind, *face.fi, face.elem_is_upwind);
+    // Determine the time argument for the limiter
+    auto * time_arg = face.state_limiter;
+    if (!time_arg)
+    {
+      static Moose::StateArg temp_state(0, Moose::SolutionIterationType::Time);
+      time_arg = &temp_state;
+    }
+
+    Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
+
+    // Compute min-max values for min-max limiters
+    if (face.limiter_type == LimiterType::Venkatakrishnan || face.limiter_type == LimiterType::SOU)
+      std::tie(max_value, min_value) = computeMinMaxValue(functor, face, *time_arg);
+
+    // Evaluate the gradient of the functor at the upwind and downwind locations
+    const auto grad_phi_upwind = functor.template genericEvaluate<GFEK>(upwind_arg, *time_arg);
+    const auto grad_phi_face = functor.template genericEvaluate<GFEK>(face, *time_arg);
+
+    // Compute the interpolation coefficients using the specified limiter
+    interp_coeffs = interpCoeffs(*limiter,
+                                 phi_upwind,
+                                 phi_downwind,
+                                 &grad_phi_upwind,
+                                 &grad_phi_face,
+                                 max_value,
+                                 min_value,
+                                 *face.fi,
+                                 face.elem_is_upwind);
   }
 
+  // Return the interpolation coefficients and advected values
   if (face.elem_is_upwind)
     return std::make_pair(std::move(interp_coeffs),
                           std::make_pair(std::move(phi_upwind), std::move(phi_downwind)));
@@ -586,12 +863,36 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face, co
         std::make_pair(std::move(phi_downwind), std::move(phi_upwind)));
 }
 
+/**
+ * This function interpolates values at faces in a computational grid using a specified functor,
+ * face argument, and evaluation kind. It handles different limiter types and performs
+ * interpolation accordingly.
+ *
+ * @tparam T The data type for the values being interpolated. This is typically a scalar type.
+ * @tparam FEK Enumeration type FunctorEvaluationKind with a default value of
+ * FunctorEvaluationKind::Value. This determines the kind of evaluation the functor will perform.
+ * @tparam Enable A type trait used for SFINAE (Substitution Failure Is Not An Error) to ensure that
+ * T is a valid scalar type as determined by ScalarTraits<T>.
+ *
+ * @param functor An object of a functor class derived from FunctorBase<T>. This object provides the
+ * genericEvaluate method to compute the value at a given element and time.
+ * @param face An argument representing the face in the computational domain. The face provides
+ * access to neighboring elements and limiter type.
+ * @param time An argument representing the state or time at which the evaluation is performed.
+ *
+ * @return T The interpolated value at the face.
+ *
+ * Usage:
+ * This function is used for interpolating values at faces in a finite volume method, ensuring that
+ * the interpolation adheres to the constraints imposed by the limiter.
+ */
 template <typename T,
           FunctorEvaluationKind FEK = FunctorEvaluationKind::Value,
-          typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+          typename Enable = typename std::enable_if<libMesh::ScalarTraits<T>::value>::type>
 T
 interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
 {
+  // Ensure only supported FunctorEvaluationKinds are used
   static_assert((FEK == FunctorEvaluationKind::Value) || (FEK == FunctorEvaluationKind::Dot),
                 "Only Value and Dot evaluations currently supported");
 
@@ -600,29 +901,103 @@ interpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg
   if (face.limiter_type == LimiterType::CentralDifference)
     return linearInterpolation<T, FEK>(functor, face, time);
 
-  const auto [interp_coeffs, advected] = interpCoeffsAndAdvected<T, FEK>(functor, face, time);
-  return interp_coeffs.first * advected.first + interp_coeffs.second * advected.second;
+  if (face.limiter_type == LimiterType::Upwind ||
+      face.limiter_type == LimiterType::CentralDifference)
+  {
+    // Compute interpolation coefficients and advected values
+    const auto [interp_coeffs, advected] = interpCoeffsAndAdvected<T, FEK>(functor, face, time);
+    // Return the interpolated value
+    return interp_coeffs.first * advected.first + interp_coeffs.second * advected.second;
+  }
+  else
+  {
+    // Determine the gradient evaluation kind
+    constexpr FunctorEvaluationKind GFEK = FunctorGradientEvaluationKind<FEK>::value;
+    typedef typename FunctorBase<T>::GradientType GradientType;
+    static const GradientType zero(0);
+    const auto & limiter =
+        Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
+
+    // Determine upwind and downwind arguments based on the face element
+    const auto & upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
+    const auto & downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
+    const auto & phi_upwind = functor.template genericEvaluate<FEK>(upwind_arg, time);
+    const auto & phi_downwind = functor.template genericEvaluate<FEK>(downwind_arg, time);
+
+    // Determine the time argument for the limiter
+    auto * time_arg = face.state_limiter;
+    if (!time_arg)
+    {
+      static Moose::StateArg temp_state(0, Moose::SolutionIterationType::Time);
+      time_arg = &temp_state;
+    }
+
+    // Initialize min-max values
+    Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
+    if (face.limiter_type == LimiterType::Venkatakrishnan || face.limiter_type == LimiterType::SOU)
+      std::tie(max_value, min_value) = computeMinMaxValue(functor, face, *time_arg);
+
+    // Evaluate the gradient of the functor at the upwind and downwind locations
+    const auto & grad_phi_upwind = functor.template genericEvaluate<GFEK>(upwind_arg, *time_arg);
+    const auto & grad_phi_face = functor.template genericEvaluate<GFEK>(face, *time_arg);
+
+    // Perform full limited interpolation and return the interpolated value
+    return fullLimitedInterpolation(*limiter,
+                                    phi_upwind,
+                                    phi_downwind,
+                                    &grad_phi_upwind,
+                                    &grad_phi_face,
+                                    max_value,
+                                    min_value,
+                                    face);
+  }
 }
 
+/**
+ * This function interpolates vector values at faces in a computational grid using a specified
+ * functor, face argument, and limiter type. It handles different limiter types and performs
+ * interpolation accordingly.
+ *
+ * @tparam T The data type for the vector values being interpolated. This is typically a scalar
+ * type.
+ *
+ * @param functor An object of a functor class derived from FunctorBase<VectorValue<T>>. This object
+ * provides the operator() method to compute the value at a given element and time.
+ * @param face An argument representing the face in the computational domain. The face provides
+ * access to neighboring elements and limiter type.
+ * @param time An argument representing the state or time at which the evaluation is performed.
+ *
+ * @return VectorValue<T> The interpolated vector value at the face.
+ *
+ * Usage:
+ * This function is used for interpolating vector values at faces in a finite volume method,
+ * ensuring that the interpolation adheres to the constraints imposed by the limiter.
+ */
 template <typename T>
-VectorValue<T>
-interpolate(const FunctorBase<VectorValue<T>> & functor,
+libMesh::VectorValue<T>
+interpolate(const FunctorBase<libMesh::VectorValue<T>> & functor,
             const FaceArg & face,
             const StateArg & time)
 {
-  static const VectorValue<T> grad_zero(0);
+  // Define a zero gradient vector for initialization
+  static const libMesh::VectorValue<T> grad_zero(0);
 
   mooseAssert(face.fi, "this must be non-null");
+
+  // Construct the limiter based on the face limiter type
   const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
 
+  // Determine upwind and downwind arguments based on the face element
   const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
   const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
   auto phi_upwind = functor(upwind_arg, time);
   auto phi_downwind = functor(downwind_arg, time);
 
-  VectorValue<T> ret;
+  // Initialize the return vector value
+  libMesh::VectorValue<T> ret;
   T coeff_upwind, coeff_downwind;
 
+  // Compute interpolation coefficients and advected values for Upwind or CentralDifference limiters
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
   {
@@ -633,6 +1008,9 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
                                                             component_upwind,
                                                             component_downwind,
                                                             &grad_zero,
+                                                            &grad_zero,
+                                                            std::numeric_limits<Real>::max(),
+                                                            std::numeric_limits<Real>::min(),
                                                             *face.fi,
                                                             face.elem_is_upwind);
       ret(i) = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
@@ -640,20 +1018,70 @@ interpolate(const FunctorBase<VectorValue<T>> & functor,
   }
   else
   {
-    const auto grad_phi_upwind = functor.gradient(upwind_arg, time);
+    // Determine the time argument for the limiter
+    auto * time_arg = face.state_limiter;
+    if (!time_arg)
+    {
+      static Moose::StateArg temp_state(0, Moose::SolutionIterationType::Time);
+      time_arg = &temp_state;
+    }
+
+    // Evaluate the gradient of the functor at the upwind and downwind locations
+    const auto & grad_phi_upwind = functor.gradient(upwind_arg, *time_arg);
+    const auto & grad_phi_downwind = functor.gradient(downwind_arg, *time_arg);
+
+    const auto coeffs = interpCoeffs(InterpMethod::Average, *face.fi, face.elem_is_upwind);
+
+    // Compute interpolation coefficients and advected values for each component
     for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
     {
       const auto &component_upwind = phi_upwind(i), component_downwind = phi_downwind(i);
-      const VectorValue<T> grad = grad_phi_upwind.row(i);
-      std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(
-          *limiter, component_upwind, component_downwind, &grad, *face.fi, face.elem_is_upwind);
-      ret(i) = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
+      const libMesh::VectorValue<T> &grad_upwind = grad_phi_upwind.row(i),
+                                    grad_face = coeffs.first * grad_phi_upwind.row(i) +
+                                                coeffs.second * grad_phi_downwind.row(i);
+
+      // Initialize min-max values
+      Real max_value(std::numeric_limits<Real>::min()), min_value(std::numeric_limits<Real>::max());
+      if (face.limiter_type == LimiterType::Venkatakrishnan ||
+          face.limiter_type == LimiterType::SOU)
+        std::tie(max_value, min_value) = computeMinMaxValue(functor, face, *time_arg, i);
+
+      // Perform full limited interpolation for the component
+      ret(i) = fullLimitedInterpolation(*limiter,
+                                        component_upwind,
+                                        component_downwind,
+                                        &grad_upwind,
+                                        &grad_face,
+                                        max_value,
+                                        min_value,
+                                        face);
     }
   }
 
+  // Return the interpolated vector value
   return ret;
 }
 
+/**
+ * This function interpolates container values at faces in a computational grid using a specified
+ * functor, face argument, and limiter type. It handles different limiter types and performs
+ * interpolation accordingly.
+ *
+ * @tparam T The data type for the container values being interpolated. This is typically a
+ * container type such as a vector or array.
+ *
+ * @param functor An object of a functor class derived from FunctorBase<T>. This object provides the
+ * operator() method to compute the value at a given element and time.
+ * @param face An argument representing the face in the computational domain. The face provides
+ * access to neighboring elements and limiter type.
+ * @param time An argument representing the state or time at which the evaluation is performed.
+ *
+ * @return T The interpolated container value at the face.
+ *
+ * Usage:
+ * This function is used for interpolating container values at faces in a finite volume method,
+ * ensuring that the interpolation adheres to the constraints imposed by the limiter.
+ */
 template <typename T>
 T
 containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const StateArg & time)
@@ -684,6 +1112,9 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
                                                             component_upwind,
                                                             component_downwind,
                                                             example_gradient,
+                                                            example_gradient,
+                                                            std::numeric_limits<Real>::max(),
+                                                            std::numeric_limits<Real>::min(),
                                                             *face.fi,
                                                             face.elem_is_upwind);
       ret[i] = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
@@ -696,8 +1127,15 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face, const
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
       const auto & grad = grad_phi_upwind[i];
-      std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(
-          *limiter, component_upwind, component_downwind, &grad, *face.fi, face.elem_is_upwind);
+      std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
+                                                            component_upwind,
+                                                            component_downwind,
+                                                            &grad,
+                                                            example_gradient,
+                                                            std::numeric_limits<Real>::max(),
+                                                            std::numeric_limits<Real>::min(),
+                                                            *face.fi,
+                                                            face.elem_is_upwind);
       ret[i] = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
     }
   }

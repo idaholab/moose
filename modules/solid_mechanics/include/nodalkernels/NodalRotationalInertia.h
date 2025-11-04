@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,6 +14,7 @@
 
 // Forward Declarations
 class TimeIntegrator;
+class AuxiliarySystem;
 
 /**
  * Calculates the inertial torque and inertia proportional damping
@@ -105,5 +106,5 @@ protected:
   const VariableValue * _du_dotdot_du;
 
   /// The TimeIntegrator
-  TimeIntegrator & _time_integrator;
+  const TimeIntegrator & _time_integrator;
 };

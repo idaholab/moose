@@ -1,5 +1,5 @@
 #* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
+#* https://mooseframework.inl.gov
 #*
 #* All rights reserved, see COPYRIGHT for full restrictions
 #* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -14,9 +14,7 @@ class MooseObject(object):
 
     @staticmethod
     def validParams():
-        params = InputParameters()
-
-        return params
+        return InputParameters()
 
     ##
     # MooseObject can be built via two methods:
@@ -47,6 +45,8 @@ class MooseObject(object):
         return self._pars
 
     def getParam(self, name):
+        if not self._pars.isValid(name):
+            raise KeyError(f'Parameter {name} is not valid')
         return self._pars[name]
 
     def isParamValid(self, name):

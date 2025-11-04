@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -40,10 +40,9 @@ INSFVInletIntensityTKEBC::INSFVInletIntensityTKEBC(const InputParameters & param
 }
 
 ADReal
-INSFVInletIntensityTKEBC::boundaryValue(const FaceInfo & fi) const
+INSFVInletIntensityTKEBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const
 {
   const auto boundary_face = singleSidedFaceArg(&fi);
-  const auto state = determineState();
 
   ADRealVectorValue velocity(_u(boundary_face, state));
   if (_v)

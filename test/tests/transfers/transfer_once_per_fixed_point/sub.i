@@ -30,6 +30,7 @@
 []
 
 [Postprocessors]
+  # This is the number of fixed point iterations of the grand child app
   [num_fixed_point_its]
     type = NumFixedPointIterations
   []

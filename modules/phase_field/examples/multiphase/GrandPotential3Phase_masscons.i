@@ -164,12 +164,12 @@
     type = MatReaction
     variable = w
     v = c
-    mob_name = -1
+    reaction_rate = -1
   []
   [ca_rxn]
     type = MatReaction
     variable = w
-    mob_name = 'hoverk_a'
+    reaction_rate = 'hoverk_a'
     args = 'etaa0 etab0 etad0'
   []
   [ca_bodyforce]
@@ -182,7 +182,7 @@
   [cb_rxn]
     type = MatReaction
     variable = w
-    mob_name = 'hoverk_b'
+    reaction_rate = 'hoverk_b'
     args = 'etaa0 etab0 etad0'
   []
   [cb_bodyforce]
@@ -195,7 +195,7 @@
   [cd_rxn]
     type = MatReaction
     variable = w
-    mob_name = 'hoverk_d'
+    reaction_rate = 'hoverk_d'
     args = 'etaa0 etab0 etad0'
   []
   [cd_bodyforce]

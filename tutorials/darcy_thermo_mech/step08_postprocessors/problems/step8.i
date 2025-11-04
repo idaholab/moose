@@ -20,13 +20,6 @@
   []
 []
 
-[AuxVariables]
-  [velocity]
-    order = CONSTANT
-    family = MONOMIAL_VEC
-  []
-[]
-
 [Kernels]
   [darcy_pressure]
     type = DarcyPressure
@@ -47,16 +40,18 @@
   []
 []
 
-[AuxKernels]
-  [velocity]
-    type = DarcyVelocity
-    variable = velocity
-    execute_on = timestep_end
-    pressure = pressure
-  []
-[]
-
 [BCs]
+  [inlet_temperature]
+    type = FunctionDirichletBC
+    variable = temperature
+    boundary = left
+    function = 'if(t<0,350+50*t,350)'
+  []
+  [outlet_temperature]
+    type = HeatConductionOutflow
+    variable = temperature
+    boundary = right
+  []
   [inlet]
     type = DirichletBC
     variable = pressure
@@ -69,26 +64,13 @@
     boundary = right
     value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
   []
-  [inlet_temperature]
-    type = FunctionDirichletBC
-    variable = temperature
-    boundary = left
-    function = 'if(t<0,350+50*t,350)'
-  []
-  [outlet_temperature]
-    type = HeatConductionOutflow
-    variable = temperature
-    boundary = right
-  []
 []
 
-[Materials]
-  [column]
-    type = PackedColumn
-    radius = 1
-    temperature = temperature
-    porosity = '0.25952 + 0.7*y/0.0257'
-  []
+[Materials/column]
+  type = PackedColumn
+  temperature = temperature
+  radius = 1
+  porosity = '0.25952 + 0.7*y/0.0257'
 []
 
 [Postprocessors]
@@ -104,15 +86,25 @@
   []
 []
 
-[VectorPostprocessors]
-  [temperature_sample]
-    type = LineValueSampler
-    num_points = 500
-    start_point = '0.1 0      0'
-    end_point =   '0.1 0.0257 0'
-    variable = temperature
-    sort_by = y
-  []
+[VectorPostprocessors/temperature_sample]
+  type = LineValueSampler
+  num_points = 500
+  start_point = '0.1 0      0'
+  end_point =   '0.1 0.0257 0'
+  variable = temperature
+  sort_by = y
+[]
+
+[AuxVariables/velocity]
+  order = CONSTANT
+  family = MONOMIAL_VEC
+[]
+
+[AuxKernels/velocity]
+  type = DarcyVelocity
+  variable = velocity
+  execute_on = timestep_end
+  pressure = pressure
 []
 
 [Problem]
@@ -121,16 +113,15 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
-  automatic_scaling = true
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-
   end_time = 100
   dt = 0.25
   start_time = -1
 
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
+  automatic_scaling = true
   steady_state_tolerance = 1e-5
   steady_state_detection = true
 

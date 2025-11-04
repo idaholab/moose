@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -18,6 +18,8 @@ InputParameters
 MaterialVectorAuxKernelAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params.addClassDescription(
+      "Outputs all components of the standard vector-valued properties specified");
   params.addRequiredParam<unsigned int>(
       "grain_num", "Value that specifies the number of grains to create aux kernels for.");
   params.addRequiredParam<std::vector<std::string>>(

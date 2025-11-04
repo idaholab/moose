@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,7 +15,6 @@
 #include "MooseTypes.h"
 #include "VariableWarehouse.h"
 #include "InputParameters.h"
-#include "MooseObjectWarehouseBase.h"
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
 
@@ -56,7 +55,7 @@ void extraSendList(std::vector<dof_id_type> & send_list, void * context);
 /**
  * Free function used for a libMesh callback
  */
-void extraSparsity(SparsityPattern::Graph & sparsity,
+void extraSparsity(libMesh::SparsityPattern::Graph & sparsity,
                    std::vector<dof_id_type> & n_nz,
                    std::vector<dof_id_type> & n_oz,
                    void * context);
@@ -137,33 +136,46 @@ public:
   /**
    * Gets writeable reference to the dof map
    */
-  virtual DofMap & dofMap();
+  virtual libMesh::DofMap & dofMap();
 
   /**
    * Gets const reference to the dof map
    */
-  virtual const DofMap & dofMap() const;
+  virtual const libMesh::DofMap & dofMap() const;
 
   /**
    * Get the reference to the libMesh system
    */
-  virtual System & system() = 0;
-  virtual const System & system() const = 0;
+  virtual libMesh::System & system() = 0;
+  virtual const libMesh::System & system() const = 0;
 
   /**
-   * Initialize the system
+   * This is called prior to the libMesh system has been init'd. MOOSE system wrappers can use this
+   * method to add vectors and matrices to the libMesh system
    */
-  virtual void init(){};
+  virtual void preInit() {}
+
+  /*
+   * This is called after the libMesh system has been init'd. This can be used to initialize MOOSE
+   * system data that relies on the libMesh system data already being initialized
+   */
+  virtual void postInit() {}
+
+  /**
+   * Reinitialize the system when the degrees of freedom in this system have changed. This is called
+   * after the libMesh system has been reinit'd
+   */
+  virtual void reinit() {}
 
   /**
    * Called only once, just before the solve begins so objects can do some precalculations
    */
-  virtual void initializeObjects(){};
+  virtual void initializeObjects() {}
 
   /**
    * Update the system (doing libMesh magic)
    */
-  virtual void update(bool update_libmesh_system = true);
+  void update();
 
   /**
    * Solve the system (using libMesh magic)
@@ -171,6 +183,8 @@ public:
   virtual void solve();
 
   virtual void copyOldSolutions();
+  virtual void copyPreviousNonlinearSolutions();
+  virtual void copyPreviousFixedPointSolutions();
   virtual void restoreSolutions();
 
   /**
@@ -212,11 +226,19 @@ public:
       Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time) const;
 
   /**
+   * Returns the parallel type of the given solution state
+   */
+  libMesh::ParallelType
+  solutionStateParallelType(const unsigned int state,
+                            const Moose::SolutionIterationType iteration_type) const;
+
+  /**
    * Registers that the solution state \p state is needed.
    */
   virtual void needSolutionState(
       const unsigned int state,
-      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time);
+      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time,
+      libMesh::ParallelType parallel_type = GHOSTED);
 
   /**
    * Whether or not the system has the solution state (0 = current, 1 = old, 2 = older, etc).
@@ -231,9 +253,9 @@ public:
    */
   virtual void addDotVectors();
 
-  virtual Number & duDotDu() { return _du_dot_du; }
+  virtual std::vector<Number> & duDotDus() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
-  virtual const Number & duDotDu() const { return _du_dot_du; }
+  virtual const Number & duDotDu(unsigned int var_num = 0) const;
   virtual const Number & duDotDotDu() const { return _du_dotdot_du; }
 
   virtual NumericVector<Number> * solutionUDot() { return _u_dot; }
@@ -343,22 +365,17 @@ public:
   /**
    * Get a raw SparseMatrix
    */
-  virtual SparseMatrix<Number> & getMatrix(TagID tag);
+  virtual libMesh::SparseMatrix<Number> & getMatrix(TagID tag);
 
   /**
    * Get a raw SparseMatrix
    */
-  virtual const SparseMatrix<Number> & getMatrix(TagID tag) const;
+  virtual const libMesh::SparseMatrix<Number> & getMatrix(TagID tag) const;
 
   /**
-   *  Make all exsiting matrices ative
+   *  Make all existing matrices active
    */
-  virtual void activeAllMatrixTags();
-
-  /**
-   *  Active a matrix for tag
-   */
-  virtual void activeMatrixTag(TagID tag);
+  virtual void activateAllMatrixTags();
 
   /**
    *  If or not a matrix tag is active
@@ -366,14 +383,9 @@ public:
   virtual bool matrixTagActive(TagID tag) const;
 
   /**
-   *  deactive a matrix for tag
-   */
-  virtual void deactiveMatrixTag(TagID tag);
-
-  /**
    * Make matrices inactive
    */
-  virtual void deactiveAllMatrixTags();
+  virtual void deactivateAllMatrixTags();
 
   /**
    * Close all matrices associated the tags
@@ -389,12 +401,12 @@ public:
   /**
    * Associate a matrix to a tag
    */
-  virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag);
+  virtual void associateMatrixToTag(libMesh::SparseMatrix<Number> & matrix, TagID tag);
 
   /**
    * Disassociate a matrix from a tag
    */
-  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag);
+  virtual void disassociateMatrixFromTag(libMesh::SparseMatrix<Number> & matrix, TagID tag);
 
   /**
    * Disassociate any matrix that is associated with a given tag
@@ -428,7 +440,7 @@ public:
   /**
    * Will modify the sparsity pattern to add logical geometric connections
    */
-  virtual void augmentSparsity(SparsityPattern::Graph & sparsity,
+  virtual void augmentSparsity(libMesh::SparsityPattern::Graph & sparsity,
                                std::vector<dof_id_type> & n_nz,
                                std::vector<dof_id_type> & n_oz) = 0;
 
@@ -625,7 +637,7 @@ public:
    * Get minimal quadrature order needed for integrating variables in this system
    * @return The minimal order of quadrature
    */
-  virtual Order getMinQuadratureOrder();
+  virtual libMesh::Order getMinQuadratureOrder();
 
   /**
    * Prepare the system for use
@@ -757,10 +769,7 @@ public:
    * @param var_name The name of the variable
    * @return the set of subdomain ids where the variable is active (defined)
    */
-  const std::set<SubdomainID> & getSubdomainsForVar(const std::string & var_name) const
-  {
-    return getSubdomainsForVar(getVariable(0, var_name).number());
-  }
+  const std::set<SubdomainID> & getSubdomainsForVar(const std::string & var_name) const;
 
   /**
    * Remove a vector from the system with the given name.
@@ -781,7 +790,7 @@ public:
    * vector.
    */
   NumericVector<Number> &
-  addVector(const std::string & vector_name, const bool project, const ParallelType type);
+  addVector(const std::string & vector_name, const bool project, const libMesh::ParallelType type);
 
   /**
    * Adds a solution length vector to the system with the specified TagID
@@ -796,7 +805,8 @@ public:
    *                                            The ghosting pattern is the same as the solution
    * vector.
    */
-  NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
+  NumericVector<Number> &
+  addVector(TagID tag, const bool project, const libMesh::ParallelType type);
 
   /**
    * Close vector with the given tag
@@ -836,7 +846,7 @@ public:
    *
    * @param tag_name The name of the tag
    */
-  SparseMatrix<Number> & addMatrix(TagID tag);
+  libMesh::SparseMatrix<Number> & addMatrix(TagID tag);
 
   /**
    * Removes a matrix with a given tag
@@ -858,25 +868,16 @@ public:
 
   virtual void computeVariables(const NumericVector<Number> & /*soln*/) {}
 
-  void copyVars(ExodusII_IO & io);
+  void copyVars(libMesh::ExodusII_IO & io);
 
   /**
    * Copy current solution into old and older
    */
   virtual void copySolutionsBackwards();
 
-  virtual void addTimeIntegrator(const std::string & /*type*/,
-                                 const std::string & /*name*/,
-                                 InputParameters & /*parameters*/)
-  {
-  }
-
-  virtual void addTimeIntegrator(std::shared_ptr<TimeIntegrator> /*ti*/) {}
-
-  TimeIntegrator * getTimeIntegrator() { return _time_integrator.get(); }
-  const TimeIntegrator * getTimeIntegrator() const { return _time_integrator.get(); }
-
-  std::shared_ptr<TimeIntegrator> getSharedTimeIntegrator() { return _time_integrator; }
+  void addTimeIntegrator(const std::string & type,
+                         const std::string & name,
+                         InputParameters & parameters);
 
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
@@ -937,6 +938,40 @@ public:
    */
   virtual void compute(ExecFlagType type) = 0;
 
+  /**
+   * Copy time integrators from another system
+   */
+  void copyTimeIntegrators(const SystemBase & other_sys);
+
+  /**
+   * Retrieve the time integrator that integrates the given variable's equation
+   */
+  const TimeIntegrator & getTimeIntegrator(const unsigned int var_num) const;
+
+  /**
+   * Retrieve the time integrator that integrates the given variable's equation. If no suitable time
+   * integrator is found (this could happen for instance if we're solving a non-transient problem),
+   * then a nullptr will be returned
+   */
+  const TimeIntegrator * queryTimeIntegrator(const unsigned int var_num) const;
+
+  /**
+   * @returns All the time integrators owned by this system
+   */
+  const std::vector<std::shared_ptr<TimeIntegrator>> & getTimeIntegrators();
+
+  /**
+   * @returns The prefix used for this system for solver settings for PETSc. This prefix is used to
+   * prevent collision of solver settings for different systems. Note that this prefix does not have
+   * a leading dash so it's appropriate for passage straight to PETSc APIs
+   */
+  std::string prefix() const;
+
+  /**
+   * size the matrix data for each variable for the number of matrix tags we have
+   */
+  void sizeVariableMatrixData();
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
@@ -977,13 +1012,17 @@ protected:
   /// old solution vector for u^dotdot
   NumericVector<Number> * _u_dotdot_old;
 
-  Real _du_dot_du;
+  /// Derivative of time derivative of u with respect to uj. This depends on the time integration
+  /// scheme
+  std::vector<Real> _du_dot_du;
   Real _du_dotdot_du;
 
   /// Tagged vectors (pointer)
   std::vector<NumericVector<Number> *> _tagged_vectors;
   /// Tagged matrices (pointer)
-  std::vector<SparseMatrix<Number> *> _tagged_matrices;
+  std::vector<libMesh::SparseMatrix<Number> *> _tagged_matrices;
+  /// Active tagged matrices. A matrix is active if its tag-matrix pair is present in the map. We use a map instead of a vector so that users can easily add and remove to this container with calls to (de)activateMatrixTag
+  std::unordered_map<TagID, libMesh::SparseMatrix<Number> *> _active_tagged_matrices;
   /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;
 
@@ -1007,7 +1046,7 @@ protected:
   size_t _max_var_n_dofs_per_node;
 
   /// Time integrator
-  std::shared_ptr<TimeIntegrator> _time_integrator;
+  std::vector<std::shared_ptr<TimeIntegrator>> _time_integrators;
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFieldBase *>> _numbered_vars;
@@ -1040,8 +1079,9 @@ private:
   TagName oldSolutionStateVectorName(const unsigned int,
                                      Moose::SolutionIterationType iteration_type) const;
 
-  /// The solution states (0 = current, 1 = old, 2 = older, etc)
-  std::array<std::vector<NumericVector<Number> *>, 2> _solution_states;
+  /// 2D array of solution state vector pointers; first index corresponds to
+  /// SolutionIterationType, second index corresponds to state index (0=current, 1=old, 2=older)
+  std::array<std::vector<NumericVector<Number> *>, 3> _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
 };

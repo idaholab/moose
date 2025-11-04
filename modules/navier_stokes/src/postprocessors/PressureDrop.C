@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -233,19 +233,22 @@ PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi)
   {
     mooseAssert(_pressure.hasFaceSide(*fi, true) == _weighting_functor->hasFaceSide(*fi, true),
                 "Pressure and weighting functor have to be defined on the same side of the face!");
-    const auto ssf = Moose::FaceArg(
+    auto ssf = Moose::FaceArg(
         {fi,
          Moose::FV::limiterType(_weight_interp_method),
          MetaPhysicL::raw_value((*_weighting_functor)(elem_arg, state)) * fi->normal() > 0,
          correct_skewness,
-         elem});
+         elem,
+         nullptr});
     const auto face_weighting = MetaPhysicL::raw_value((*_weighting_functor)(ssf, state));
+    // Dont use upwinding or an advection limiter for pressure
+    ssf.limiter_type = Moose::FV::LimiterType::CentralDifference;
     return fi->normal() * face_weighting * _pressure(ssf, state);
   }
   else
   {
     const auto ssf = Moose::FaceArg(
-        {fi, Moose::FV::limiterType(_weight_interp_method), true, correct_skewness, elem});
+        {fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, elem, nullptr});
     return _pressure(ssf, state);
   }
 }
@@ -268,7 +271,8 @@ PressureDrop::computeFaceInfoWeightIntegral(const FaceInfo * fi) const
          Moose::FV::limiterType(_weight_interp_method),
          MetaPhysicL::raw_value((*_weighting_functor)(elem_arg, state)) * fi->normal() > 0,
          correct_skewness,
-         _weighting_functor->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr()});
+         _weighting_functor->hasFaceSide(*fi, true) ? fi->elemPtr() : fi->neighborPtr(),
+         nullptr});
     return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf, state));
   }
   else

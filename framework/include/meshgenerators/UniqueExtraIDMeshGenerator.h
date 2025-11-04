@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -28,4 +28,6 @@ protected:
   const std::vector<ExtraElementIDName> _extra_ids;
   /// lag to indicate if new_id_rule is defined
   const bool _use_new_id_rule;
+  /// Whether or not we add the new extra ID for elements in certain subdomains
+  const bool _has_restriction;
 };

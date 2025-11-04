@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -13,12 +13,16 @@
 #include "Executioner.h"
 #include "MooseMesh.h"
 #include "NonlinearSystem.h"
+#include "AuxiliarySystem.h"
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 #include "EigenExecutionerBase.h"
+#include "Convergence.h"
+#include "ConvergenceIterationTypes.h"
+#include "MooseUtils.h"
 
 InputParameters
-FixedPointSolve::validParams()
+FixedPointSolve::fixedPointDefaultConvergenceParams()
 {
   InputParameters params = emptyInputParameters();
 
@@ -26,14 +30,19 @@ FixedPointSolve::validParams()
       "fixed_point_min_its", 1, "Specifies the minimum number of fixed point iterations.");
   params.addParam<unsigned int>(
       "fixed_point_max_its", 1, "Specifies the maximum number of fixed point iterations.");
-  params.addParam<bool>(
-      "accept_on_max_fixed_point_iteration",
-      false,
-      "True to treat reaching the maximum number of fixed point iterations as converged.");
   params.addParam<bool>("disable_fixed_point_residual_norm_check",
                         false,
                         "Disable the residual norm evaluation thus the three parameters "
                         "fixed_point_rel_tol, fixed_point_abs_tol and fixed_point_force_norms.");
+  params.addParam<bool>(
+      "fixed_point_force_norms",
+      false,
+      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
+      "existence of active MultiApps with those execute_on flags, default: false.");
+  params.addParam<bool>(
+      "accept_on_max_fixed_point_iteration",
+      false,
+      "True to treat reaching the maximum number of fixed point iterations as converged.");
   params.addRangeCheckedParam<Real>("fixed_point_rel_tol",
                                     1e-8,
                                     "fixed_point_rel_tol>0",
@@ -48,15 +57,15 @@ FixedPointSolve::validParams()
                                     "during fixed point iterations. This check is "
                                     "performed based on the main app's nonlinear "
                                     "residual.");
-  params.addParam<bool>(
-      "fixed_point_force_norms",
-      false,
-      "Force the evaluation of both the TIMESTEP_BEGIN and TIMESTEP_END norms regardless of the "
-      "existence of active MultiApps with those execute_on flags, default: false.");
 
-  // Parameters for using a custom postprocessor for convergence checks
   params.addParam<PostprocessorName>("custom_pp",
                                      "Postprocessor for custom fixed point convergence check.");
+  params.addParam<bool>("direct_pp_value",
+                        false,
+                        "True to use direct postprocessor value "
+                        "(scaled by value on first iteration). "
+                        "False (default) to use difference in postprocessor "
+                        "value between fixed point iterations.");
   params.addRangeCheckedParam<Real>("custom_rel_tol",
                                     1e-8,
                                     "custom_rel_tol>0",
@@ -71,12 +80,27 @@ FixedPointSolve::validParams()
                                     "during fixed point iterations. This check is "
                                     "performed based on postprocessor defined by "
                                     "the custom_pp residual.");
-  params.addParam<bool>("direct_pp_value",
-                        false,
-                        "True to use direct postprocessor value "
-                        "(scaled by value on first iteration). "
-                        "False (default) to use difference in postprocessor "
-                        "value between fixed point iterations.");
+
+  params.addParamNamesToGroup(
+      "fixed_point_min_its fixed_point_max_its disable_fixed_point_residual_norm_check "
+      "accept_on_max_fixed_point_iteration fixed_point_rel_tol fixed_point_abs_tol "
+      "fixed_point_force_norms custom_pp direct_pp_value custom_abs_tol custom_rel_tol",
+      "Fixed point iterations");
+
+  return params;
+}
+
+InputParameters
+FixedPointSolve::validParams()
+{
+  InputParameters params = emptyInputParameters();
+  params += FixedPointSolve::fixedPointDefaultConvergenceParams();
+
+  params.addParam<ConvergenceName>(
+      "multiapp_fixed_point_convergence",
+      "Name of the Convergence object to use to assess convergence of the "
+      "MultiApp fixed point solve. If not provided, a default Convergence "
+      "will be constructed internally from the executioner parameters.");
 
   // Parameters for relaxing the fixed point process
   params.addRangeCheckedParam<Real>("relaxation_factor",
@@ -103,11 +127,8 @@ FixedPointSolve::validParams()
                         "their solve converges, for transient executioners only.");
 
   params.addParamNamesToGroup(
-      "fixed_point_min_its fixed_point_max_its accept_on_max_fixed_point_iteration "
-      "disable_fixed_point_residual_norm_check fixed_point_rel_tol fixed_point_abs_tol "
-      "fixed_point_force_norms custom_pp fixed_point_rel_tol fixed_point_abs_tol direct_pp_value "
-      "relaxation_factor transformed_variables transformed_postprocessors auto_advance "
-      "custom_abs_tol custom_rel_tol",
+      "multiapp_fixed_point_convergence "
+      "relaxation_factor transformed_variables transformed_postprocessors auto_advance",
       "Fixed point iterations");
 
   params.addParam<unsigned int>(
@@ -126,16 +147,8 @@ FixedPointSolve::validParams()
 
 FixedPointSolve::FixedPointSolve(Executioner & ex)
   : SolveObject(ex),
-    _min_fixed_point_its(getParam<unsigned int>("fixed_point_min_its")),
-    _max_fixed_point_its(getParam<unsigned int>("fixed_point_max_its")),
-    _has_fixed_point_its(_max_fixed_point_its > 1),
-    _accept_max_it(getParam<bool>("accept_on_max_fixed_point_iteration")),
-    _has_fixed_point_norm(!getParam<bool>("disable_fixed_point_residual_norm_check")),
-    _fixed_point_rel_tol(getParam<Real>("fixed_point_rel_tol")),
-    _fixed_point_abs_tol(getParam<Real>("fixed_point_abs_tol")),
-    _fixed_point_force_norms(getParam<bool>("fixed_point_force_norms")),
-    _fixed_point_custom_pp(isParamValid("custom_pp") ? &getPostprocessorValue("custom_pp")
-                                                     : nullptr),
+    _has_fixed_point_its(getParam<unsigned int>("fixed_point_max_its") > 1 ||
+                         isParamSetByUser("multiapp_fixed_point_convergence")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
@@ -143,11 +156,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
     _fixed_point_status(MooseFixedPointConvergenceReason::UNSOLVED),
-    _custom_rel_tol(getParam<Real>("custom_rel_tol")),
-    _custom_abs_tol(getParam<Real>("custom_abs_tol")),
-    _pp_old(0.0),
-    _pp_new(std::numeric_limits<Real>::max()),
-    _pp_scaling(1),
     _max_xfem_update(getParam<unsigned int>("max_xfem_update")),
     _update_xfem_at_timestep_begin(getParam<bool>("update_xfem_at_timestep_begin")),
     _xfem_update_count(0),
@@ -161,10 +169,6 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
   if (!parameters().isParamSetByAddParam("relaxed_variables"))
     _transformed_vars = getParam<std::vector<std::string>>("relaxed_variables");
 
-  if (_min_fixed_point_its > _max_fixed_point_its)
-    paramError("fixed_point_min_its",
-               "The minimum number of fixed point iterations may not exceed the maximum.");
-
   if (_transformed_vars.size() > 0 && _transformed_pps.size() > 0)
     mooseWarning(
         "Both variable and postprocessor transformation are active. If the two share dofs, the "
@@ -177,18 +181,25 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
   }
 
-  if (!_has_fixed_point_norm && parameters().isParamSetByUser("fixed_point_rel_tol"))
-    paramWarning(
-        "disable_fixed_point_residual_norm_check",
-        "fixed_point_rel_tol will be ignored because the fixed point residual check is disabled.");
-  if (!_has_fixed_point_norm && parameters().isParamSetByUser("fixed_point_abs_tol"))
-    paramWarning(
-        "disable_fixed_point_residual_norm_check",
-        "fixed_point_abs_tol will be ignored because the fixed point residual check is disabled.");
-  if (!_has_fixed_point_norm && parameters().isParamSetByUser("fixed_point_force_norms"))
-    paramWarning("disable_fixed_point_residual_norm_check",
-                 "fixed_point_force_norms will be ignored because the fixed point residual check "
-                 "is disabled.");
+  if (isParamValid("multiapp_fixed_point_convergence"))
+    _problem.setMultiAppFixedPointConvergenceName(
+        getParam<ConvergenceName>("multiapp_fixed_point_convergence"));
+  else
+    _problem.setNeedToAddDefaultMultiAppFixedPointConvergence();
+}
+
+void
+FixedPointSolve::initialSetup()
+{
+  SolveObject::initialSetup();
+
+  allocateStorage(true);
+
+  if (_has_fixed_point_its)
+  {
+    auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    conv.checkIterationType(ConvergenceIterationTypes::MULTIAPP_FIXED_POINT);
+  }
 }
 
 bool
@@ -197,11 +208,6 @@ FixedPointSolve::solve()
   TIME_SECTION("PicardSolve", 1);
 
   Real current_dt = _problem.dt();
-
-  _fixed_point_timestep_begin_norm.clear();
-  _fixed_point_timestep_end_norm.clear();
-  _fixed_point_timestep_begin_norm.resize(_max_fixed_point_its);
-  _fixed_point_timestep_end_norm.resize(_max_fixed_point_its);
 
   bool converged = true;
 
@@ -218,7 +224,7 @@ FixedPointSolve::solve()
   {
     // Snag all of the local dof indices for all of these variables
     AllLocalDofIndicesThread aldit(_problem, _transformed_vars);
-    ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+    libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
 
     transformed_dofs = aldit.getDofIndices();
@@ -232,50 +238,43 @@ FixedPointSolve::solve()
     {
       // Snag all of the local dof indices for all of these variables
       AllLocalDofIndicesThread aldit(_problem, _secondary_transformed_variables);
-      ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
+      libMesh::ConstElemRange & elem_range = *_problem.mesh().getActiveLocalElementRange();
       Threads::parallel_reduce(elem_range, aldit);
 
       secondary_transformed_dofs = aldit.getDofIndices();
     }
 
     // To detect a new time step
-    if (_old_entering_time == _problem.time())
+    if (_old_entering_time == _problem.time() &&
+        _fixed_point_status != MooseFixedPointConvergenceReason::UNSOLVED)
     {
       // Keep track of the iteration number of the main app
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      saveVariableValues(false);
+      if (!_app.isUltimateMaster())
+        saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
       _main_fixed_point_it = 0;
   }
 
-  for (_fixed_point_it = 0; _fixed_point_it < _max_fixed_point_its; ++_fixed_point_it)
+  if (_has_fixed_point_its)
+  {
+    auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    convergence.initialize();
+  }
+
+  _fixed_point_it = 0;
+  while (true)
   {
     if (_has_fixed_point_its)
     {
-      if (_fixed_point_it == 0)
-      {
-        if (_has_fixed_point_norm)
-        {
-          // First fixed point iteration - need to save off the initial nonlinear residual
-          _fixed_point_initial_norm = _problem.computeResidualL2Norm();
-          _console << COLOR_MAGENTA << "Initial fixed point residual norm: " << COLOR_DEFAULT;
-          if (_fixed_point_initial_norm == std::numeric_limits<Real>::max())
-            _console << " MAX ";
-          else
-            _console << std::scientific << _fixed_point_initial_norm;
-          _console << COLOR_DEFAULT << "\n" << std::endl;
-        }
-      }
-      else
+      if (_fixed_point_it != 0)
       {
         // For every iteration other than the first, we need to restore the state of the MultiApps
-        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_END);
-        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
@@ -283,31 +282,32 @@ FixedPointSolve::solve()
                << std::endl;
     }
 
-    // Save last postprocessor value as value before solve
-    if (_fixed_point_custom_pp && _fixed_point_it > 0 && !getParam<bool>("direct_pp_value"))
-      _pp_old = *_fixed_point_custom_pp;
-
     // Solve a single application for one time step
-    bool solve_converged = solveStep(_fixed_point_timestep_begin_norm[_fixed_point_it],
-                                     _fixed_point_timestep_end_norm[_fixed_point_it],
-                                     transformed_dofs);
-
-    // Get new value and print history for the custom postprocessor convergence criterion
-    if (_fixed_point_custom_pp)
-      computeCustomConvergencePostprocessor();
+    const bool solve_converged = solveStep(transformed_dofs);
 
     if (solve_converged)
     {
       if (_has_fixed_point_its)
       {
-        if (_has_fixed_point_norm)
-          // Print the evolution of the main app residual over the fixed point iterations
-          printFixedPointConvergenceHistory();
+        _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_ITERATION_END);
 
         // Examine convergence metrics & properties and set the convergence reason
         bool break_out = examineFixedPointConvergence(converged);
+
         if (break_out)
+        {
+          // Except DefaultMultiAppFixedPointConvergence, convergence objects will not
+          // update _fixed_point_status, so we give those cases generic values:
+          if (_fixed_point_status == MooseFixedPointConvergenceReason::CONVERGED_NONLINEAR)
+          {
+            if (converged)
+              _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_OBJECT;
+            else
+              _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_OBJECT;
+          }
+
           break;
+        }
       }
     }
     else
@@ -318,21 +318,26 @@ FixedPointSolve::solve()
       break;
     }
 
-    if (converged)
-    {
-      // Fixed point iteration loop ends right above
-      _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
-      _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
-      if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
-      {
-        _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-        return false;
-      }
-      _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
-    }
-
     _problem.dt() =
         current_dt; // _dt might be smaller than this at this point for multistep methods
+
+    _fixed_point_it++;
+
+    if (!_has_fixed_point_its)
+      break;
+  }
+
+  if (converged)
+  {
+    // Fixed point iteration loop ends right above
+    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+    if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
+    {
+      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+      return false;
+    }
+    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
   }
 
   // Save postprocessors after the solve and their potential timestep_end execution
@@ -355,10 +360,6 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
     printFixedPointConvergenceReason();
 
-  // clear history to avoid displaying it again on next solve that can happen for example during
-  // transient
-  _pp_history.str("");
-
   return converged;
 }
 
@@ -370,17 +371,9 @@ FixedPointSolve::saveAllValues(const bool primary)
 }
 
 bool
-FixedPointSolve::solveStep(Real & begin_norm,
-                           Real & end_norm,
-                           const std::set<dof_id_type> & transformed_dofs)
+FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 {
   bool auto_advance = autoAdvance();
-
-  // Compute previous norms for coloring the norm output
-  Real begin_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_begin_norm[_fixed_point_it - 1]
-                                             : std::numeric_limits<Real>::max());
-  Real end_norm_old = (_fixed_point_it > 0 ? _fixed_point_timestep_end_norm[_fixed_point_it - 1]
-                                           : std::numeric_limits<Real>::max());
 
   _executioner.preSolve();
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
@@ -416,14 +409,11 @@ FixedPointSolve::solveStep(Real & begin_norm,
       _problem.time() == _old_entering_time)
     transformPostprocessors(false);
 
-  if (_has_fixed_point_its && _has_fixed_point_norm)
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_BEGIN) || _fixed_point_force_norms)
-    {
-      begin_norm = _problem.computeResidualL2Norm();
-
-      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_BEGIN MultiApps: "
-               << Console::outputNorm(begin_norm_old, begin_norm) << std::endl;
-    }
+  if (_has_fixed_point_its)
+  {
+    auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+    convergence.preExecute();
+  }
 
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
@@ -433,6 +423,10 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   // Save the current values of variables and postprocessors, before the solve
   saveAllValues(true);
+
+  // Save the previous fixed point iteration solution and aux variables
+  _solver_sys.copyPreviousFixedPointSolutions();
+  _aux.copyPreviousFixedPointSolutions();
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
@@ -453,7 +447,7 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
-    _console << "\nXFEM modified mesh, repeating step" << std::endl;
+    _console << "\nRepeating step due to XFEM mesh modification" << std::endl;
     _xfem_repeat_step = true;
     ++_xfem_update_count;
   }
@@ -463,7 +457,6 @@ FixedPointSolve::solveStep(Real & begin_norm,
     {
       _xfem_repeat_step = false;
       _xfem_update_count = 0;
-      _console << "\nXFEM did not modify mesh, continuing" << std::endl;
     }
 
     _problem.onTimestepEnd();
@@ -485,78 +478,30 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   _executioner.postSolve();
 
-  if (_has_fixed_point_its && _has_fixed_point_norm)
-    if (_problem.hasMultiApps(EXEC_TIMESTEP_END) || _fixed_point_force_norms)
-    {
-      end_norm = _problem.computeResidualL2Norm();
-
-      _console << COLOR_MAGENTA << "Fixed point residual norm after TIMESTEP_END MultiApps: "
-               << Console::outputNorm(end_norm_old, end_norm) << std::endl;
-    }
-
   return true;
-}
-
-void
-FixedPointSolve::computeCustomConvergencePostprocessor()
-{
-  if ((_fixed_point_it == 0 && getParam<bool>("direct_pp_value")) ||
-      !getParam<bool>("direct_pp_value"))
-    _pp_scaling = *_fixed_point_custom_pp;
-  _pp_new = *_fixed_point_custom_pp;
-
-  auto ppname = getParam<PostprocessorName>("custom_pp");
-  _pp_history << std::setw(2) << _fixed_point_it + 1 << " fixed point " << ppname << " = "
-              << Console::outputNorm(std::numeric_limits<Real>::max(), _pp_new, 8) << std::endl;
-  _console << _pp_history.str();
 }
 
 bool
 FixedPointSolve::examineFixedPointConvergence(bool & converged)
 {
-  if (_fixed_point_it + 2 > _min_fixed_point_its)
-  {
-    Real max_norm = std::max(_fixed_point_timestep_begin_norm[_fixed_point_it],
-                             _fixed_point_timestep_end_norm[_fixed_point_it]);
+  _problem.execute(EXEC_MULTIAPP_FIXED_POINT_CONVERGENCE);
 
-    Real max_relative_drop = max_norm / _fixed_point_initial_norm;
-
-    if (_has_fixed_point_norm && max_norm < _fixed_point_abs_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_ABS;
-      return true;
-    }
-    if (_has_fixed_point_norm && max_relative_drop < _fixed_point_rel_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
-      return true;
-    }
-    if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-      return true;
-    }
-    if (std::abs((_pp_new - _pp_old) / _pp_scaling) < _custom_rel_tol)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-      return true;
-    }
-  }
-  if (_fixed_point_it + 1 == _max_fixed_point_its)
+  auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
+  const auto status = convergence.checkConvergence(_fixed_point_it);
+  switch (status)
   {
-    if (_accept_max_it)
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::REACH_MAX_ITS;
+    case Convergence::MooseConvergenceStatus::CONVERGED:
       converged = true;
-    }
-    else
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS;
+      return true;
+    case Convergence::MooseConvergenceStatus::DIVERGED:
       converged = false;
-    }
-    return true;
+      return true;
+    case Convergence::MooseConvergenceStatus::ITERATING:
+      converged = false;
+      return false;
+    default:
+      mooseError("Should not reach here");
   }
-  return false;
 }
 
 void
@@ -571,11 +516,14 @@ FixedPointSolve::printFixedPointConvergenceReason()
     case MooseFixedPointConvergenceReason::CONVERGED_RELATIVE:
       _console << "CONVERGED_RELATIVE";
       break;
-    case MooseFixedPointConvergenceReason::CONVERGED_CUSTOM:
-      _console << "CONVERGED_CUSTOM";
+    case MooseFixedPointConvergenceReason::CONVERGED_PP:
+      _console << "CONVERGED_PP";
       break;
     case MooseFixedPointConvergenceReason::REACH_MAX_ITS:
       _console << "REACH_MAX_ITS";
+      break;
+    case MooseFixedPointConvergenceReason::CONVERGED_OBJECT:
+      _console << "CONVERGED_OBJECT (see Convergence object)";
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_MAX_ITS:
       _console << "DIVERGED_MAX_ITS";
@@ -585,6 +533,9 @@ FixedPointSolve::printFixedPointConvergenceReason()
       break;
     case MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP:
       _console << "DIVERGED_FAILED_MULTIAPP";
+      break;
+    case MooseFixedPointConvergenceReason::DIVERGED_OBJECT:
+      _console << "DIVERGED_OBJECT (see Convergence object)";
       break;
     default:
       // UNSOLVED and CONVERGED_NONLINEAR should not be hit when coupling
@@ -607,4 +558,13 @@ FixedPointSolve::autoAdvance() const
     auto_advance = _auto_advance_user_value;
 
   return auto_advance;
+}
+
+bool
+FixedPointSolve::performingRelaxation(const bool primary) const
+{
+  if (primary)
+    return !MooseUtils::absoluteFuzzyEqual(_relax_factor, 1.0);
+  else
+    return !MooseUtils::absoluteFuzzyEqual(_secondary_relaxation_factor, 1.0);
 }

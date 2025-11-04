@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SteadyAndAdjoint.h"
+#include "FEProblemBase.h"
 
 registerMooseObject("OptimizationApp", SteadyAndAdjoint);
 
@@ -22,6 +23,13 @@ SteadyAndAdjoint::validParams()
   // We need the full matrix for the adjoint solve, so set this to NEWTON
   params.set<MooseEnum>("solve_type") = "newton";
   params.suppressParameter<MooseEnum>("solve_type");
+
+  // The adjoint system (second one) is solved by _adjoint_solve
+  // This is a parameter of the MultiSystemSolveObject, which we set from here, the executioner.
+  // We seek to prevent the MultiSystemSolveObject from solving both systems
+  // This is abusing input parameters, but SolveObjects do not have their own syntax
+  // and we need to send this parameter from the executioner to the default nested SolveObject
+  params.renameParam("system_names", "forward_system", "");
 
   return params;
 }
@@ -38,7 +46,7 @@ SteadyAndAdjoint::execute()
   if (_app.isRecovering())
   {
     _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
-    _last_solve_converged = false;
+    _last_solve_converged = true;
     return;
   }
 
@@ -54,10 +62,22 @@ SteadyAndAdjoint::execute()
   _problem.timestepSetup();
 
   // Solving forward and adjoint problem here (only difference from Steady)
-  _last_solve_converged = _fixed_point_solve->solve() && _adjoint_solve.solve();
+  _last_solve_converged = _fixed_point_solve->solve();
 
   if (!lastSolveConverged())
-    _console << "Aborting as solve did not converge" << std::endl;
+    _console << "Forward solve did not converge." << std::endl;
+
+  _console << "Starting Adjoint solve" << std::endl;
+
+  // this is to check that they are both true
+  bool adjoint_solve_converged = _adjoint_solve.solve();
+  _last_solve_converged &= adjoint_solve_converged;
+
+  if (!lastSolveConverged())
+  {
+    if (!adjoint_solve_converged)
+      _console << "Adjoint solve did not converge." << std::endl;
+  }
   else
   {
     _time = _time_step;

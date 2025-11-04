@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -33,7 +33,7 @@
   using FunctionParserUtils<T>::_eval_error_msg;                                                   \
   using FunctionParserUtils<T>::_func_params
 
-// Helper class to pic the correct function parser
+/// Helper class to pick the correct function parser
 template <bool is_ad>
 struct GenericSymFunctionTempl
 {
@@ -64,27 +64,53 @@ public:
   /// Shorthand for an smart pointer to an autodiff function parser object.
   typedef std::shared_ptr<SymFunction> SymFunctionPtr;
 
-  /// apply input paramters to internal feature flags of the parser object
-  void setParserFeatureFlags(SymFunctionPtr &);
+  /// apply input parameters to internal feature flags of the parser object
+  void setParserFeatureFlags(SymFunctionPtr &) const;
 
 protected:
   /// Evaluate FParser object and check EvalError
   GenericReal<is_ad> evaluate(SymFunctionPtr &, const std::string & object_name = "");
+  /**
+   * Evaluate FParser object and check EvalError
+   *
+   * This version uses a supplied vector of function parameters, which is useful
+   * if an object uses more than one parsed function, which may have different
+   * function parameter values.
+   */
+  GenericReal<is_ad> evaluate(SymFunctionPtr &,
+                              const std::vector<GenericReal<is_ad>> &,
+                              const std::string & object_name = "");
 
   /// add constants (which can be complex expressions) to the parser object
   void addFParserConstants(SymFunctionPtr & parser,
                            const std::vector<std::string> & constant_names,
-                           const std::vector<std::string> & constant_expressions);
+                           const std::vector<std::string> & constant_expressions) const;
 
-  // run FPOptimizer on the parsed function
+  /// run FPOptimizer on the parsed function
   virtual void functionsOptimize(SymFunctionPtr & parsed_function);
 
-  //@{ feature flags
+  /**
+   * Performs setup steps on a SymFunction
+   * @param function reference to pointer to the function to set up
+   * @param expression expression to parse
+   * @param variables comma separated string holding all the variables of the expression
+   * @param constant_names vector of names (symbols) of constants in the expression
+   * @param constant_expressions vectors of expressions (=values) of constants in the expression
+   * @param comm communicator used to stagger JIT file creations
+   */
+  void parsedFunctionSetup(SymFunctionPtr & function,
+                           const std::string & expression,
+                           const std::string & variables,
+                           const std::vector<std::string> & constant_names,
+                           const std::vector<std::string> & constant_expressions,
+                           const libMesh::Parallel::Communicator & comm) const;
+
+  ///@{ feature flags
   bool _enable_jit;
   bool _enable_ad_cache;
   bool _disable_fpoptimizer;
   bool _enable_auto_optimize;
-  //@}
+  ///@}
 
   /// Enum for failure method
   const enum class FailureMethod { nan, nan_warning, error, exception } _evalerror_behavior;
@@ -97,6 +123,9 @@ protected:
 
   /// Array to stage the parameters passed to the functions when calling Eval.
   std::vector<GenericReal<is_ad>> _func_params;
+
+  /// fuzzy comparison tolerance
+  const Real _epsilon;
 };
 
 template <>

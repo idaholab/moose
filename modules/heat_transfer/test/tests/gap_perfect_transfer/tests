@@ -1,0 +1,20 @@
+[Tests]
+  design = 'GapPerfectConductance.md'
+  issues = '#28963'
+  [perfect_conductance]
+    requirement = 'The system shall support nearly perfect gap conductance (no change in temperature across the gap) through '
+    [test]
+      type = CSVDiff
+      input = perfect_transfer_gap.i
+      csvdiff = perfect_transfer_gap_out.csv
+      detail = 'the use of a penalty parameter, and'
+    []
+    [error_check]
+      type = RunException
+      input = perfect_transfer_gap.i
+      cli_args = "ThermalContact/thermal_contact_1/type=GapHeatTransfer"
+      expect_err = "This parameter should only be set by the user when 'type=GapPerfectConductance'."
+      detail = 'error if the penalty is set for other heat transfer types.'
+    []
+  []
+[]

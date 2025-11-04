@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
 
   ContactSplit(const InputParameters & params);
-  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix = "-") override;
+  virtual void setup(NonlinearSystemBase & nl, const std::string & prefix) override;
 
 protected:
   const std::vector<std::pair<BoundaryName, BoundaryName>> _contact_pairs;

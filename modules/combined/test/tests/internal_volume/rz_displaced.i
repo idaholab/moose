@@ -36,15 +36,12 @@
   displacements = 'disp_x disp_y'
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [Mesh]
   file = meshes/rz_displaced.e
   # This test uses ElementalVariableValue postprocessors on specific
   # elements, so element numbering needs to stay unchanged
   allow_renumbering = false
+  coord_type = RZ
 []
 
 [Functions]
@@ -74,7 +71,7 @@
   [../]
 []
 
-[Modules/TensorMechanics/Master]
+[Physics/SolidMechanics/QuasiStatic]
   [./all]
     volumetric_locking_correction = false
     decomposition_method = EigenSolution

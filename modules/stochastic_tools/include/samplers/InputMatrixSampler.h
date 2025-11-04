@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -20,6 +20,11 @@ public:
   static InputParameters validParams();
 
   InputMatrixSampler(const InputParameters & parameters);
+
+  /**
+   * Update number of rows if the controllable parameter has changed
+   */
+  void executeSetUp() override;
 
 protected:
   /// Return the sample for the given row and column

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -24,7 +24,7 @@ InputParameters
 CouplingFunctorCheckAction::validParams()
 {
   auto params = Action::validParams();
-  params.set<std::string>("_action_name") = "coupling_functor_check";
+  params.set<std::string>(MooseBase::name_param) = "coupling_functor_check";
   return Action::validParams();
 }
 
@@ -36,12 +36,11 @@ CouplingFunctorCheckAction::CouplingFunctorCheckAction(const InputParameters & p
 void
 CouplingFunctorCheckAction::act()
 {
-  // If we're doing Jacobian-free, then we have no matrix and we can just return
-  if (_problem->solverParams()._type == Moose::ST_JFNK)
-    return;
-
   for (const auto i : make_range(_problem->numNonlinearSystems()))
   {
+    if (_problem->solverParams(i)._type == Moose::ST_JFNK)
+      continue;
+
     auto & nl = _problem->getNonlinearSystemBase(i);
     auto & dgs = nl.getDGKernelWarehouse();
     auto & iks = nl.getInterfaceKernelWarehouse();

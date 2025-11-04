@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -59,10 +59,10 @@ PeripheralTriangleMeshGenerator::validParams()
       "Polynomial power of the inverse distance interpolation algorithm for automatic area "
       "function calculation.");
 
-  params.addParam<SubdomainName>("peripheral_ring_block_name",
-                                 "The block name assigned to the created peripheral layer.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<SubdomainName>(
+      "peripheral_ring_block_name", "", "The block name assigned to the created peripheral layer.");
+  params.addParam<BoundaryName>("external_boundary_name",
+                                "Optional customized external boundary name.");
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>(
       "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
@@ -82,13 +82,7 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     _peripheral_ring_radius(getParam<Real>("peripheral_ring_radius")),
     _peripheral_ring_num_segments(getParam<unsigned int>("peripheral_ring_num_segments")),
     _desired_area(getParam<Real>("desired_area")),
-    _desired_area_func(getParam<std::string>("desired_area_func")),
-    _peripheral_ring_block_name(isParamValid("peripheral_ring_block_name")
-                                    ? getParam<SubdomainName>("peripheral_ring_block_name")
-                                    : (SubdomainName) ""),
-    _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string())
+    _desired_area_func(getParam<std::string>("desired_area_func"))
 {
   // Calculate outer boundary points
 
@@ -142,9 +136,13 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<bool>("refine_boundary") = false;
     params.set<std::vector<bool>>("refine_holes") = std::vector<bool>{false};
     params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>{true};
-    params.set<BoundaryName>("output_boundary") = _external_boundary_name;
-    params.set<SubdomainName>("output_subdomain_name") = _peripheral_ring_block_name;
+    if (isParamValid("external_boundary_name"))
+      params.set<BoundaryName>("output_boundary") =
+          getParam<BoundaryName>("external_boundary_name");
+    params.set<SubdomainName>("output_subdomain_name") =
+        getParam<SubdomainName>("peripheral_ring_block_name");
     params.set<MooseEnum>("tri_element_type") = getParam<MooseEnum>("tri_element_type");
+    params.set<bool>("verbose_stitching") = false;
     addMeshSubgenerator("XYDelaunayGenerator", _input_name + "_periphery", params);
     _build_mesh = &getMeshByName(_input_name + "_periphery");
   }

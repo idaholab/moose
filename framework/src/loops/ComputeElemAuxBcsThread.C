@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,7 +58,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
     const Elem * elem = belem->_elem;
     unsigned short int side = belem->_side;
     BoundaryID boundary_id = belem->_bnd_id;
-    SubdomainID last_did = Elem::invalid_subdomain_id;
+    SubdomainID last_sub_id = Elem::invalid_subdomain_id;
 
     // need to update the boundary ID in assembly
     _fe_problem.setCurrentBoundaryID(boundary_id, _tid);
@@ -71,11 +71,11 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
       if (iter != boundary_kernels.end() && !(iter->second.empty()))
       {
         printBoundaryExecutionInformation(boundary_id, iter->second);
-        auto did = elem->subdomain_id();
-        if (did != last_did)
+        const auto sub_id = elem->subdomain_id();
+        if (sub_id != last_sub_id)
         {
-          _fe_problem.subdomainSetup(did, _tid);
-          last_did = did;
+          _fe_problem.subdomainSetup(sub_id, _tid);
+          last_sub_id = sub_id;
         }
         _fe_problem.setCurrentSubdomainID(elem, _tid);
         _fe_problem.prepare(elem, _tid);
@@ -112,7 +112,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
           }
           _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
-          _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+          _fe_problem.reinitMaterialsFaceOnBoundary(boundary_id, sub_id, _tid);
 
           _fe_problem.reinitMaterialsBoundary(boundary_id, _tid);
 

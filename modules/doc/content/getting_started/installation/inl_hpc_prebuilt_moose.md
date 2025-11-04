@@ -6,8 +6,13 @@ pre-built versions of MOOSE. To request access to these clusters, please follow 
 [INL's Nuclear Computational Resource Center](https://inl.gov/ncrc/) website.
 !style-end!
 
-Once access has been granted, log into Sawtooth or Lemhi using either [inl/hpc_ondemand.md]
-Interactive Shell services, or directly by following our [SSH Primer](inl/hpc_remote.md).
+Once access has been granted, log into Sawtooth, Bitterroot, or Windriver using either 
+[inl/hpc_ondemand.md] Interactive Shell services, or directly by following our 
+[SSH Primer](inl/hpc_remote.md).
+
+At the time of this writing, the following [!ac](INL) [!ac](HPC) clusters are available for use:
+
+!include ncrc/hpc_cluster_information.md
 
 !alert! tip
 If you are waiting to be granted access, you can instead follow our
@@ -21,20 +26,17 @@ Load the following modules:
 !style-end!
 
 ```bash
-module load use.moose moose-apps moose
+module load use.moose moose-openmpi
 ```
 
 !alert warning
 If you receive an error about modules not being known, please make sure you are logged into either
-Sawtooth or Lemhi.
-
-!alert tip
-In generally, Sawtooth may have a more up-to-date version.
+WindRiver, Bitterroot, or Sawtooth.
 
 Once loaded, `moose` becomes available. You need now only provide input files to run simulations.
 Example input files are also available while this module is loaded.
 
-!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$MOOSE_DIR/moose/share/moose TUTORIAL=heat_conduction
+!template load file=getting_started/installation/workshop_tutorial.md.template MOOSE_SHARE=$MOOSE_DIR/moose/share/moose TUTORIAL=heat_transfer
 
 ## View Results
 

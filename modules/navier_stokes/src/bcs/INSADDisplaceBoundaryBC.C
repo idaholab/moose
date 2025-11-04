@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -36,7 +36,7 @@ INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & paramet
     _component(getParam<unsigned short>("component")),
     _sub_id(_mesh.getSubdomainID(getParam<SubdomainName>("associated_subdomain")))
 {
-  if (!dynamic_cast<ImplicitEuler *>(_sys.getTimeIntegrator()))
+  if (!dynamic_cast<const ImplicitEuler *>(&_sys.getTimeIntegrator(_var.number())))
     mooseError("This boundary condition hard-codes a displacement update with the form of an "
                "implicit Euler discretization. Consequently please use the default time "
                "integrator, ImplicitEuler.");
@@ -45,6 +45,7 @@ INSADDisplaceBoundaryBC::INSADDisplaceBoundaryBC(const InputParameters & paramet
 ADReal
 INSADDisplaceBoundaryBC::computeQpResidual()
 {
-  const Moose::NodeArg nd{_current_node, _sub_id};
+  const std::set<SubdomainID> sub_id_set = {_sub_id};
+  const Moose::NodeArg nd{_current_node, &sub_id_set};
   return _u - (_u_old + this->_dt * _velocity(nd, determineState())(_component));
 }

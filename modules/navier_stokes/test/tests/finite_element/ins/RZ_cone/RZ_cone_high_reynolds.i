@@ -10,9 +10,6 @@
 
 [Mesh]
   file = 'cone_linear_alltri.e'
-[]
-
-[Problem]
   coord_type = RZ
 []
 

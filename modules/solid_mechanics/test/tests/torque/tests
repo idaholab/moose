@@ -7,6 +7,9 @@
     exodiff = 'torque_small_out.e'
     abs_zero = 1e-9
     requirement = 'The mechanics system shall provide a way to apply a torque to a boundary for small strain simulations.'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
+    capabilities = 'method!=dbg'
   []
   [ad]
     type = Exodiff
@@ -14,5 +17,8 @@
     exodiff = 'ad_torque_small_out.e'
     abs_zero = 1e-9
     requirement = 'The mechanics system shall provide a way to apply a torque to a boundary for small strain simulations with automatic differentiation.'
+    # PR #26848. Clang 16 Apple Si is not compatible.
+    machine = X86_64
+    capabilities = 'method!=dbg'
   []
 []

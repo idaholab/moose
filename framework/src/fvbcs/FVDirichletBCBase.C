@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVDirichletBCBase.h"
+#include "MooseVariableFV.h"
 
 InputParameters
 FVDirichletBCBase::validParams()
@@ -19,6 +20,7 @@ FVDirichletBCBase::validParams()
 }
 
 FVDirichletBCBase::FVDirichletBCBase(const InputParameters & parameters)
-  : FVBoundaryCondition(parameters)
+  : FVBoundaryCondition(parameters),
+    _var_sys_numbers_pair(std::make_pair(_var.number(), _var.sys().number()))
 {
 }

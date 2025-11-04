@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -37,6 +37,8 @@ MultiAppVectorPostprocessorTransfer::validParams()
                              "N sub-apps or"
                              " collects Postprocessor values from N sub-apps "
                              "into a VectorPostprocessor");
+  MultiAppTransfer::addUserObjectExecutionCheckParam(params);
+
   return params;
 }
 
@@ -58,6 +60,11 @@ MultiAppVectorPostprocessorTransfer::executeToMultiapp()
       getToMultiApp()->problemBase().getVectorPostprocessorValueByName(_master_vpp_name,
                                                                        _vector_name);
 
+  // Execute VPP if it was specified to execute on transfers
+  checkParentAppUserObjectExecuteOn(_master_vpp_name);
+  _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::PRE_AUX, _master_vpp_name);
+  _fe_problem.computeUserObjectByName(EXEC_TRANSFER, Moose::POST_AUX, _master_vpp_name);
+
   if (vpp.size() != getToMultiApp()->numGlobalApps())
     mooseError("VectorPostprocessor ",
                _master_vpp_name,
@@ -77,6 +84,7 @@ MultiAppVectorPostprocessorTransfer::executeFromMultiapp()
   const VectorPostprocessorValue & vpp =
       getFromMultiApp()->problemBase().getVectorPostprocessorValueByName(_master_vpp_name,
                                                                          _vector_name);
+  errorIfObjectExecutesOnTransferInSourceApp(_sub_pp_name);
 
   if (vpp.size() != getFromMultiApp()->numGlobalApps())
     mooseError("VectorPostprocessor ",

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -25,8 +25,6 @@ ADAverageWallTemperature3EqnMaterial::validParams()
       "Hw_sources", "Vector of wall heat transfer coefficients from individual sources");
   params.addRequiredCoupledVar("P_hf_sources",
                                "Vector of heated perimeters from individual sources");
-  params.addRequiredParam<MaterialPropertyName>(
-      "Hw_average", "Weighted average of wall heat transfer coefficients");
   params.addRequiredCoupledVar("T_fluid", "Fluid temperature");
   params.addRequiredCoupledVar("P_hf_total", "Total heat flux perimeter from all sources");
 
@@ -38,7 +36,6 @@ ADAverageWallTemperature3EqnMaterial::ADAverageWallTemperature3EqnMaterial(
   : Material(parameters),
     _T_wall(declareADProperty<Real>("T_wall")),
     _n_values(coupledComponents("T_wall_sources")),
-    _Hw_average(getADMaterialProperty<Real>("Hw_average")),
     _T_fluid(adCoupledValue("T_fluid")),
     _P_hf_total(adCoupledValue("P_hf_total"))
 {
@@ -66,9 +63,13 @@ ADAverageWallTemperature3EqnMaterial::ADAverageWallTemperature3EqnMaterial(
 void
 ADAverageWallTemperature3EqnMaterial::computeQpProperties()
 {
-  const ADReal denominator = _Hw_average[_qp] * _P_hf_total[_qp];
+  using std::abs;
 
-  if (std::abs(denominator) < 1e-15)
+  ADReal denominator = 0;
+  for (unsigned int i = 0; i < _n_values; i++)
+    denominator += (*(_Hw_sources[i]))[_qp] * (*(_P_hf_sources[i]))[_qp];
+
+  if (abs(denominator) < 1e-15)
   {
     // use alternate definition to avoid division by zero: heated-perimeter-weighted average
     ADReal numerator = 0;

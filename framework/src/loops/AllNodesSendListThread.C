@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -15,7 +15,7 @@
 AllNodesSendListThread::AllNodesSendListThread(FEProblemBase & fe_problem,
                                                const MooseMesh & mesh,
                                                const std::vector<unsigned int> & var_nums,
-                                               const System & system)
+                                               const libMesh::System & system)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _ref_mesh(mesh),
     _var_nums(var_nums),

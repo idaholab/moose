@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -58,6 +58,8 @@ CNSFVHLLCBase::hllcData() const
 std::array<ADReal, 3>
 CNSFVHLLCBase::waveSpeed(const HLLCData & hllc_data, const ADRealVectorValue & normal)
 {
+  using std::sqrt, std::min, std::max;
+
   const ADReal & rho1 = hllc_data.rho_elem;
   const ADReal u1 = hllc_data.vel_elem.norm();
   const ADReal q1 = normal * hllc_data.vel_elem;
@@ -79,20 +81,20 @@ CNSFVHLLCBase::waveSpeed(const HLLCData & hllc_data, const ADRealVectorValue & n
   const ADReal c2 = hllc_data.fluid.c_from_v_e(v2, e2);
 
   // compute Roe-averaged variables
-  const ADReal sqrt_rho1 = std::sqrt(rho1);
-  const ADReal sqrt_rho2 = std::sqrt(rho2);
+  const ADReal sqrt_rho1 = sqrt(rho1);
+  const ADReal sqrt_rho2 = sqrt(rho2);
   const ADReal u_roe = (sqrt_rho1 * u1 + sqrt_rho2 * u2) / (sqrt_rho1 + sqrt_rho2);
   const ADReal q_roe = (sqrt_rho1 * q1 + sqrt_rho2 * q2) / (sqrt_rho1 + sqrt_rho2);
   const ADReal H_roe = (sqrt_rho1 * H1 + sqrt_rho2 * H2) / (sqrt_rho1 + sqrt_rho2);
   const ADReal h_roe = H_roe - 0.5 * u_roe * u_roe;
-  const ADReal rho_roe = std::sqrt(rho1 * rho2);
+  const ADReal rho_roe = sqrt(rho1 * rho2);
   const ADReal v_roe = 1.0 / rho_roe;
   const ADReal e_roe = hllc_data.fluid.e_from_v_h(v_roe, h_roe);
   const ADReal c_roe = hllc_data.fluid.c_from_v_e(v_roe, e_roe);
 
   // compute wave speeds
-  ADReal SL = std::min(q1 - c1, q_roe - c_roe);
-  ADReal SR = std::max(q2 + c2, q_roe + c_roe);
+  ADReal SL = min(q1 - c1, q_roe - c_roe);
+  ADReal SR = max(q2 + c2, q_roe + c_roe);
   ADReal SM = (rho2 * q2 * (SR - q2) - rho1 * q1 * (SL - q1) + p1 - p2) /
               (rho2 * (SR - q2) - rho1 * (SL - q1));
 

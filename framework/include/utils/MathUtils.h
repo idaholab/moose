@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseError.h"
+#include "MooseTypes.h"
 #include "libmesh/libmesh.h"
 #include "libmesh/utility.h"
 #include "libmesh/numeric_vector.h"
@@ -123,23 +124,28 @@ heavyside(T x)
 
 template <typename T>
 T
-regularizedHeavyside(T x, Real smoothing_length)
+regularizedHeavyside(const T & x, Real smoothing_length)
 {
   if (x <= -smoothing_length)
     return 0.0;
   else if (x < smoothing_length)
-    return 0.5 * (1 + std::sin(libMesh::pi * x / 2 / smoothing_length));
+  {
+    using std::sin;
+    return 0.5 * (1 + sin(libMesh::pi * x / 2 / smoothing_length));
+  }
   else
     return 1.0;
 }
 
 template <typename T>
 T
-regularizedHeavysideDerivative(T x, Real smoothing_length)
+regularizedHeavysideDerivative(const T & x, Real smoothing_length)
 {
   if (x < smoothing_length && x > -smoothing_length)
-    return 0.25 * libMesh::pi / smoothing_length *
-           (std::cos(libMesh::pi * x / 2 / smoothing_length));
+  {
+    using std::cos;
+    return 0.25 * libMesh::pi / smoothing_length * (cos(libMesh::pi * x / 2 / smoothing_length));
+  }
   else
     return 0.0;
 }
@@ -158,12 +164,13 @@ negativePart(T x)
   return x < 0.0 ? x : 0.0;
 }
 
-template <typename T,
-          typename T2,
-          typename T3,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <
+    typename T,
+    typename T2,
+    typename T3,
+    typename std::enable_if<libMesh::ScalarTraits<T>::value && libMesh::ScalarTraits<T2>::value &&
+                                libMesh::ScalarTraits<T3>::value,
+                            int>::type = 0>
 void
 addScaled(const T & a, const T2 & b, T3 & result)
 {
@@ -173,9 +180,11 @@ addScaled(const T & a, const T2 & b, T3 & result)
 template <typename T,
           typename T2,
           typename T3,
-          typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>
+          typename std::enable_if<libMesh::ScalarTraits<T>::value, int>::type = 0>
 void
-addScaled(const T & scalar, const NumericVector<T2> & numeric_vector, NumericVector<T3> & result)
+addScaled(const T & scalar,
+          const libMesh::NumericVector<T2> & numeric_vector,
+          libMesh::NumericVector<T3> & result)
 {
   result.add(scalar, numeric_vector);
 }
@@ -327,8 +336,8 @@ smootherStep(T x, T2 start, T2 end, bool derivative = false)
   }
   x = (x - start) / (end - start);
   if (derivative)
-    return 30.0 * Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
-  return Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
+    return 30.0 * libMesh::Utility::pow<2>(x) * (x * (x - 2.0) + 1.0) / (end - start);
+  return libMesh::Utility::pow<3>(x) * (x * (x * 6.0 - 15.0) + 10.0);
 }
 
 enum class ComputeType
@@ -353,9 +362,9 @@ smootherStep(const X & x, const S & start, const E & end)
   }
   const auto u = (x - start) / (end - start);
   if constexpr (compute_type == ComputeType::derivative)
-    return 30.0 * Utility::pow<2>(u) * (u * (u - 2.0) + 1.0) / (end - start);
+    return 30.0 * libMesh::Utility::pow<2>(u) * (u * (u - 2.0) + 1.0) / (end - start);
   if constexpr (compute_type == ComputeType::value)
-    return Utility::pow<3>(u) * (u * (u * 6.0 - 15.0) + 10.0);
+    return libMesh::Utility::pow<3>(u) * (u * (u * 6.0 - 15.0) + 10.0);
 }
 
 /**
@@ -453,6 +462,14 @@ timeDerivName(const T & base_prop_name)
 {
   return "d" + base_prop_name + "_dt";
 }
+
+/**
+ * Computes the Kronecker product of two matrices.
+ * @param product Reference to the product matrix
+ * @param mat_A Reference to the first matrix
+ * @param mat_B Reference to the other matrix
+ */
+void kron(RealEigenMatrix & product, const RealEigenMatrix & mat_A, const RealEigenMatrix & mat_B);
 
 } // namespace MathUtils
 

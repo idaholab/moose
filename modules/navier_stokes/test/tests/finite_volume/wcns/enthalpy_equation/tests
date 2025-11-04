@@ -1,0 +1,73 @@
+[Tests]
+  design = 'LinearFVEnthalpyFunctorMaterial.md INSFVEnthalpyFunctorMaterial.md'
+  issues = '#29531 #31043'
+  [1d]
+    requirement = 'The system shall be able to solve a one-dimensional enthalpy conservation equation using'
+    [analytical_outlet_temperature_userdefined]
+      type = CSVDiff
+      input = 1d_test_h.i
+      csvdiff = 1d_test_h_out.csv
+      detail = 'user-defined enthalpy function;'
+      abs_zero = 1e-5
+      rel_err = 1e-5
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [analytical_outlet_temperature_fp]
+      type = CSVDiff
+      input = 1d_test_h_fp.i
+      csvdiff = 1d_test_h_fp_out.csv
+      detail = 'an enthalpy function defined in fluid properties,'
+      abs_zero = 1e-5
+      rel_err = 1e-5
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [analytical_outlet_temperature_fp_nonlinearFV]
+      type = CSVDiff
+      input = 1d_test_h_fp-nonlinearFV.i
+      csvdiff = 1d_test_h_fp-nonlinearFV_out.csv
+      detail = 'using an enthalpy function defined in fluid properties and the nonlinear finite volume implementation'
+      abs_zero = 1e-5
+      rel_err = 1e-5
+    []
+  []
+  [2d-fp]
+    type = 'Exodiff'
+    input = 'enthalpy_equation.i'
+    exodiff = 'enthalpy_equation_out.e'
+    abs_zero = 1e-5
+    rel_err = 1e-5
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [2d-fp-physics]
+    type = 'Exodiff'
+    input = 'enthalpy_equation-physics.i'
+    exodiff = 'enthalpy_equation-physics_out.e'
+    abs_zero = 1e-5
+    rel_err = 1e-5
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax.'
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [2d-fp-physics-flux-vel-inlet]
+    type = 'CSVDiff'
+    input = 'enthalpy_equation-physics-nonlinearFV.i'
+    cli_args = "Physics/NavierStokes/Flow/flow/momentum_inlet_types='flux-velocity'
+                Physics/NavierStokes/Flow/flow/flux_inlet_pps='${bulk_u}'"
+    csvdiff = 'enthalpy_equation-physics-nonlinearFV_out.csv'
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume implementation and flux boundary conditions in the momentum equation.'
+  []
+  [2d-fp-physics-dirichlet-vel-and-T-inlet]
+    type = 'CSVDiff'
+    input = 'enthalpy_equation-physics-nonlinearFV.i'
+    cli_args = "Physics/NavierStokes/Flow/flow/momentum_inlet_types='fixed-velocity'
+                Physics/NavierStokes/Flow/flow/momentum_inlet_functors='${bulk_u} 0'
+                Physics/NavierStokes/FluidHeatTransfer/energy/energy_inlet_types='fixed-temperature'"
+    csvdiff = 'enthalpy_equation-physics-nonlinearFV_out.csv'
+    ignore_columns = 'area_pp_left pdrop'
+    # pdrop is at 1e-2 difference
+    # we expect some difference between dirichlet and flux BCs for a non-constant cp non-constant rho fluid
+    rel_err = 2e-3
+    prereq = '2d-fp-physics-flux-vel-inlet'
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume implementation and Dirichlet boundary conditions on velocity.'
+  []
+[]

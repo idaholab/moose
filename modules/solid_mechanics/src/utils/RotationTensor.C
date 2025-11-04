@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -9,6 +9,8 @@
 
 #include "RotationTensor.h"
 #include "libmesh/libmesh.h"
+
+using namespace libMesh;
 
 RotationTensor::RotationTensor(Axis axis, Real angle) { update(axis, angle); }
 

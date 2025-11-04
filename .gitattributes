@@ -17,6 +17,7 @@ contrib/* linguist-vendored
 *.xml linguist-vendored
 
 *.C linguist-language=C++
+*.K linguist-language=C++
 
 # TODO(rwcarlsen): Remove this after a while.
 framework/include/**/*.h merge=clang-format

@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -10,6 +10,7 @@
 #pragma once
 
 // Moose includes
+#include "MooseTypes.h"
 #include "Restartable.h"
 #include "PenetrationInfo.h"
 #include "PerfGraphInterface.h"
@@ -60,6 +61,8 @@ public:
                     Point & closest_point,
                     RealVectorValue & normal);
 
+  void setUsePointLocator(bool state);
+
   int intersect2D_Segments(Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point * I0, Point * I1);
   int inSegment(Point P, Point SP0, Point SP1);
 
@@ -67,10 +70,10 @@ public:
   BoundaryID _primary_boundary;
   BoundaryID _secondary_boundary;
 
-  FEType _fe_type;
+  libMesh::FEType _fe_type;
 
   // One FE for each thread and for each dimension
-  std::vector<std::vector<FEBase *>> _fe;
+  std::vector<std::vector<libMesh::FEBase *>> _fe;
 
   NearestNodeLocator & _nearest_node;
 
@@ -97,6 +100,8 @@ protected:
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to
                                    // perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+  bool _use_point_locator; // Use a PointLocator rather than relying on mesh connectivity to
+                           // find element patches
 
   const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
 };
