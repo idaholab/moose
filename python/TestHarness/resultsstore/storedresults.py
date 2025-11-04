@@ -770,12 +770,7 @@ class StoredResult:
         self.load_all_tests()
         return list(self._tests.values())
 
-    def serialize(
-        self,
-        test_filter: Optional[list[TestName]] = None,
-        load_all_tests: bool = True,
-        in_place: bool = False,
-    ) -> dict:
+    def serialize(self, test_filter: Optional[list[TestName]] = None) -> dict:
         """
         Serialize this result.
 
@@ -788,18 +783,12 @@ class StoredResult:
         -------------------
         test_filter : Optional[list[TestName]]
             Only store these named tests, if provided.
-        load_all_tests : bool
-            Whether or not to load all tests before storing.
-        in_place : bool
-            Whether or not to do the serialization with in-place data
-            (faster, but invalidates data in this object).
         """
-        # Load all tests for storage if requested
-        if load_all_tests:
-            self.load_all_tests()
+        # Load all tests so that they can be stored
+        self.load_all_tests()
 
-        # Copy if not working in-place, otherwise use this data
-        data = self.data if in_place else deepcopy(self.data)
+        # Copy so that we don't modify this object's data
+        data = deepcopy(self.data)
 
         # Convert datetime to str that can be converted back
         data["time"] = str(data["time"])
@@ -810,9 +799,7 @@ class StoredResult:
         # before civet version 4
         tests_have_time = self.civet_version < 4
 
-        # Delete tests ahead of time that we don't need;
-        # don't worry about optimizing this so just
-        # use the standard iterator
+        # Delete tests ahead of time that we don't need
         if test_filter:
             for folder in results_folder_iterator(data):
                 for test in folder.test_iterator():
@@ -820,51 +807,43 @@ class StoredResult:
                         test.delete()
                 folder.delete_if_empty()
 
-        # Don't use the iterator here; it adds significant overhead
-        # and we want serialization to be quick
-        for folder_name, folder_entry in data["tests"].items():
-            folder_tests_entry = folder_entry["tests"]
-            for test_name in list(folder_tests_entry.keys()):
-                # Get the data at the moment; this could be different
-                # if it was stored as an ObjectId and loaded later
-                test_data = folder_tests_entry[test_name]
+        for test in results_test_iterator(data):
+            # Get the data at the moment; this could be different
+            # if it was stored as an ObjectId and loaded later
+            test_data = test.value
 
-                if isinstance(test_data, ObjectId):
-                    # Is an ObjectID and we have loaded it
-                    if (
-                        self._tests
-                        and (
-                            stored_test := self._tests.get(
-                                TestName(folder_name, test_name)
-                            )
-                        )
-                        is not None
-                    ):
-                        test_data = (
-                            stored_test.data if in_place else deepcopy(stored_test.data)
-                        )
-                        folder_tests_entry[test_name] = test_data
-                    # Is an ObjectId and we didn't load it
-                    else:
-                        folder_tests_entry[test_name] = str(test_data)
-                        # Nothing else to do
-                        continue
+            if isinstance(test_data, ObjectId):
+                # Is an ObjectID and we have loaded it
+                if (
+                    self._tests
+                    and (stored_test := self._tests.get(test.name)) is not None
+                ):
+                    test_data = stored_test.data
+                    test.set_value(test_data)
+                # Is an ObjectId and we didn't load it
+                else:
+                    test.set_value(str(test_data))
+                    # Nothing else to do
+                    continue
 
-                # Convert IDs to string
-                if (id := test_data.get("_id")) is not None:
-                    test_data["_id"] = str(id)
-                    test_data["result_id"] = str(test_data["result_id"])
+            # Convert IDs to string
+            if (id := test_data.get("_id")) is not None:
+                test_data["_id"] = str(id)
+                test_data["result_id"] = str(test_data["result_id"])
 
-                # Convert binary JSON metadata to dict
-                if (tester := test_data.get("tester")) is not None and (
-                    json_metadata := tester.get("json_metadata")
-                ) is not None:
-                    tester["json_metadata"] = {
-                        k: decompress(v) for k, v in json_metadata.items()
-                    }
+            # Convert binary JSON metadata to dict
+            if (tester := test_data.get("tester")) is not None and (
+                json_metadata := tester.get("json_metadata")
+            ) is not None:
+                for k, v in json_metadata.items():
+                    print(k, type(v))
+                tester["json_metadata"] = {
+                    k: decompress(v) for k, v in json_metadata.items()
+                }
 
-                if tests_have_time:
-                    test_data["time"] = str(test_data["time"])
+            # Convert time
+            if tests_have_time:
+                test_data["time"] = str(test_data["time"])
 
         return data
 
@@ -888,33 +867,29 @@ class StoredResult:
         # before civet version 4
         tests_have_time = StoredResult._get_civet_version(data) < 4
 
-        # Convert each test; we don't use the iterator here
-        # because this is quite an expensive function and
-        # it's worth the performance
-        for folder_entry in data["tests"].values():
-            folder_tests_entry = folder_entry["tests"]
-            for test_name in list(folder_tests_entry.keys()):
-                test_entry = folder_tests_entry[test_name]
-                if isinstance(test_entry, dict):
-                    # Convert string id to ObjectID
-                    if (id := test_entry.get("_id")) is not None:
-                        test_entry["_id"] = ObjectId(id)
-                        test_entry["result_id"] = ObjectId(test_entry["result_id"])
+        # Convert each test
+        for test in results_test_iterator(data):
+            test_entry = test.value
+            if isinstance(test_entry, dict):
+                # Convert string id to ObjectID
+                if (id := test_entry.get("_id")) is not None:
+                    test_entry["_id"] = ObjectId(id)
+                    test_entry["result_id"] = ObjectId(test_entry["result_id"])
 
-                    # Convert string JSON metadata to binary
-                    if (tester := test_entry.get("tester")) is not None and (
-                        json_metadata := tester.get("json_metadata")
-                    ) is not None:
-                        tester["json_metadata"] = {
-                            k: compress(v) for k, v in json_metadata.items()
-                        }
+                # Convert string JSON metadata to binary
+                if (tester := test_entry.get("tester")) is not None and (
+                    json_metadata := tester.get("json_metadata")
+                ) is not None:
+                    tester["json_metadata"] = {
+                        k: compress(v) for k, v in json_metadata.items()
+                    }
 
-                    # Convert time if it exists (removed after
-                    # civet_version 3)
-                    if tests_have_time:
-                        test_entry["time"] = datetime.fromisoformat(test_entry["time"])
-                else:
-                    folder_tests_entry[test_name] = ObjectId(test_entry)
+                # Convert time if it exists (removed after
+                # civet_version 3)
+                if tests_have_time:
+                    test_entry["time"] = datetime.fromisoformat(test_entry["time"])
+            else:
+                test_entry.set_value(ObjectId(test_entry))
 
         return data
 
