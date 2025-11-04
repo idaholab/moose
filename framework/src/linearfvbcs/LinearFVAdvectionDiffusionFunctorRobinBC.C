@@ -21,12 +21,11 @@ LinearFVAdvectionDiffusionFunctorRobinBC::validParams()
       "finite volume system and whose face values are determined using "
       "three functors. This kernel is "
       "only designed to work with advection-diffusion problems.");
-  params.addRequiredParam<MooseFunctorName>(
-      "alpha", "The functor which is the coefficient of the normal gradient term.");
-  params.addRequiredParam<MooseFunctorName>(
-      "beta", "The functor which is the coefficient of the scalar term.");
-  params.addRequiredParam<MooseFunctorName>(
-      "gamma", "The functor which is the constant term on the RHS of the Robin BC expression.");
+  params.addParam<MooseFunctorName>(
+      "alpha", 1.0, "Functor for the coefficient of the normal gradient term.");
+  params.addParam<MooseFunctorName>("beta", 1.0, "Functor for the coefficient of the scalar term.");
+  params.addParam<MooseFunctorName>(
+      "gamma", 1.0, "Functor for the constant term on the RHS of the Robin BC.");
   return params;
 }
 
@@ -52,6 +51,24 @@ LinearFVAdvectionDiffusionFunctorRobinBC::LinearFVAdvectionDiffusionFunctorRobin
 }
 
 Real
+LinearFVAdvectionDiffusionFunctorRobinBC::getAlpha(Moose::FaceArg face, Moose::StateArg state) const
+{
+  return _alpha(face, state);
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorRobinBC::getBeta(Moose::FaceArg face, Moose::StateArg state) const
+{
+  return _beta(face, state);
+}
+
+Real
+LinearFVAdvectionDiffusionFunctorRobinBC::getGamma(Moose::FaceArg face, Moose::StateArg state) const
+{
+  return _gamma(face, state);
+}
+
+Real
 LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
@@ -62,9 +79,9 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValue() const
                                : _current_face_info->neighborInfo();
   const auto state = determineState();
 
-  const auto alpha = _alpha(face, state);
-  const auto beta = _beta(face, state);
-  const auto gamma = _gamma(face, state);
+  const auto alpha = getAlpha(face, state);
+  const auto beta = getBeta(face, state);
+  const auto gamma = getGamma(face, state);
 
   const auto phi = _var.getElemValue(*elem_info, state);
   const auto grad_phi = _var.gradSln(*elem_info);
@@ -83,7 +100,7 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryNormalGradient() const
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  const auto alpha = _alpha(face, state);
+  const auto alpha = getAlpha(face, state);
   mooseAssert(!MooseUtils::isZero(alpha), "Alpha should not be 0!");
   const auto beta = _beta(face, state);
   const auto gamma = _gamma(face, state);
@@ -96,8 +113,8 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueMatrixContribution
 {
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
-  const auto alpha = _alpha(face, state);
-  const auto beta = _beta(face, state);
+  const auto alpha = getAlpha(face, state);
+  const auto beta = getBeta(face, state);
   const auto & nhat = _current_face_info->normal();
 
   return alpha / (alpha + (beta * computeCellToFaceVector() * nhat));
@@ -114,9 +131,11 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryValueRHSContribution() 
   const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
-  const auto alpha = _alpha(face, state);
-  const auto beta = _beta(face, state);
-  const auto gamma = _gamma(face, state);
+
+  const auto alpha = getAlpha(face, state);
+  const auto beta = getBeta(face, state);
+  const auto gamma = getGamma(face, state);
+
   const auto & grad_phi = _var.gradSln(*elem_info);
 
   const auto & nhat = _current_face_info->normal();
@@ -136,8 +155,9 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientMatrixContribut
   const auto face = singleSidedFaceArg(_current_face_info);
   const auto state = determineState();
 
-  const auto alpha = _alpha(face, state);
-  const auto beta = _beta(face, state);
+  const auto alpha = getAlpha(face, state);
+  const auto beta = getBeta(face, state);
+
   const auto & nhat = _current_face_info->normal();
 
   return beta / (alpha + (beta * computeCellToFaceVector() * nhat));
@@ -156,9 +176,9 @@ LinearFVAdvectionDiffusionFunctorRobinBC::computeBoundaryGradientRHSContribution
   const auto state = determineState();
   const auto & grad_phi = _var.gradSln(*elem_info);
 
-  const auto alpha = _alpha(face, state);
-  const auto beta = _beta(face, state);
-  const auto gamma = _gamma(face, state);
+  const auto alpha = getAlpha(face, state);
+  const auto beta = getBeta(face, state);
+  const auto gamma = getGamma(face, state);
 
   const auto & nhat = _current_face_info->normal();
 
