@@ -65,43 +65,18 @@ CSGHexagonalLattice::setUniverses(
   _nrow = universes.size();
   _universe_map = universes;
 }
+void
+CSGHexagonalLattice::setPitch(const Real pitch)
+{
+  if (pitch < 0)
+    mooseError("Lattice " + getName() + " must have pitch greater than 0.");
+  _pitch = pitch;
+}
 
 std::unordered_map<std::string, std::any>
 CSGHexagonalLattice::getDimensions() const
 {
-  return {{"nrow", _nrow}, {"pitch", _pitch}};
-}
-
-void
-CSGHexagonalLattice::updateDimension(const std::string & dim_name, std::any dim_value)
-{
-  if (dim_name == "nrow")
-  {
-    // number of lattice elements can only be changed if _universe_map is not already set
-    if (_universe_map.size() > 0)
-      mooseError("Cannot update the dimension " + dim_name + " of the lattice " + getName() +
-                 ". Universe map is already defined.");
-    else
-    {
-      auto v = std::any_cast<int>(dim_value);
-      if (v < 1)
-        mooseError("Updated number of rows nrow for lattice " + getName() + " must be >= 1.");
-      if (v % 2 == 0)
-        mooseError("Updated number of rows nrow for lattice " + getName() +
-                   " must be an odd number.");
-      _nrow = v;
-    }
-  }
-  else if (dim_name == "pitch")
-  {
-    auto v = std::any_cast<Real>(dim_value);
-    if (v <= 0.0)
-      mooseError("Updated pitch value for lattice " + getName() + " must be > 0.");
-    _pitch = v;
-  }
-  else
-    mooseError("Dimension " + dim_name + " is not an allowable dimension for lattice type " +
-               getType() + ". Allowable dimension types are: nrow, pitch.");
+  return {{"nrow", _nrow}, {"nring", nRowToRing(_nrow)}, {"pitch", _pitch}};
 }
 
 bool

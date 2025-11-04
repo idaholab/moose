@@ -33,6 +33,14 @@ CSGCartesianLattice::CSGCartesianLattice(const std::string & name, const Real pi
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
+void
+CSGCartesianLattice::setPitch(const Real pitch)
+{
+  if (pitch < 0)
+    mooseError("Lattice " + getName() + " must have pitch greater than 0.");
+  _pitch = pitch;
+}
+
 bool
 CSGCartesianLattice::isValidUniverseMap(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const
@@ -63,35 +71,6 @@ CSGCartesianLattice::setUniverses(
   _nx0 = universes.size();
   _nx1 = universes[0].size();
   _universe_map = universes;
-}
-
-void
-CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_value)
-{
-  if (dim_name == "pitch")
-  {
-    auto val = *std::any_cast<Real>(&dim_value);
-    if (val <= 0.0)
-      mooseError("Updated pitch value for lattice " + getName() + " must be > 0.");
-    _pitch = val;
-  }
-  else if (dim_name == "nx0" || dim_name == "nx1")
-  {
-    // number of lattice elements can only be changed if _universe_map is not already set
-    if (_universe_map.size() > 0)
-      mooseError("Cannot update the dimension " + dim_name + " of the lattice " + getName() +
-                 ". Universe map is already defined.");
-    else
-    {
-      auto val = *std::any_cast<int>(&dim_value);
-      if (val < 1)
-        mooseError("Updated " + dim_name + " value for lattice " + getName() + " must be >= 1.");
-      dim_name == "nx0" ? _nx0 = val : _nx1 = val;
-    }
-  }
-  else
-    mooseError("Dimension " + dim_name + " is not an allowable dimension for lattice type " +
-               getType() + " allowable dimension types are: nx0, nx1, pitch.");
 }
 
 std::unordered_map<std::string, std::any>
