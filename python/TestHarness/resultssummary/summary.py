@@ -241,7 +241,7 @@ class TestHarnessResultsSummary:
 
         test_table = []
         for test_name in test_names:
-            test_result = test_results.get_test(test_name.folder, test_name.name)
+            test_result = test_results.get_test(test_name)
             # Test is skipped, so show time as SKIP
             if test_result.status is not None and \
                 test_result.status_value == 'SKIP':
@@ -298,8 +298,8 @@ class TestHarnessResultsSummary:
 
         same_table = []
         for test_name in same_names:
-            base_result = base_results.get_test(test_name.folder, test_name.name)
-            head_result = head_results.get_test(test_name.folder, test_name.name)
+            base_result = base_results.get_test(test_name)
+            head_result = head_results.get_test(test_name)
             # Skip to check relative run time if run time is None, Zero or below the threshold
             if  base_result.run_time is None or \
                 head_result.run_time is None or \

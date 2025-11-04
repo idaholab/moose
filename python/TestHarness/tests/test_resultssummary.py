@@ -190,9 +190,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         mock_get_commit_results.return_value = base_result_with_tests
         mock_init_reader.return_value = None
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
 
         summary = TestHarnessResultsSummary(None)
         removed_table = summary._build_diff_table(
@@ -215,10 +213,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
-
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         summary = TestHarnessResultsSummary(None)
         added_table = summary._build_diff_table(head_test_names, head_result_with_tests)
 
@@ -241,9 +236,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         head_test._data["timing"]["runner_run"] = None
 
         summary = TestHarnessResultsSummary(None)
@@ -268,9 +261,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         head_test._data["status"]["status"] = "SKIP"
 
         summary = TestHarnessResultsSummary(None)
@@ -303,12 +294,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock base and head runtime, so that absolute relative run time rate is higher than fake_run_time_rate_floor
         base_test._data["timing"]["runner_run"] = 10.00
         head_test._data["timing"]["runner_run"] = 4.0
@@ -355,12 +342,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock base and head runtime, so that absolute relative run time rate is higher than fake_run_time_rate_floor
         base_test._data["timing"]["runner_run"] = 0.00
         head_test._data["timing"]["runner_run"] = 4.0
@@ -397,9 +380,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock head run time as None
         head_test._data["timing"]["runner_run"] = None
 
@@ -435,9 +416,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock base run time as None
         base_test._data["timing"]["runner_run"] = None
 
@@ -473,9 +452,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = 0.5
 
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock head run time is lower than the head run time threshold (fake_run_time_floor)
         base_test._data["timing"]["runner_run"] = None
 
@@ -511,9 +488,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock head run time is lower than the head run time threshold (fake_run_time_floor)
         head_test._data["timing"]["runner_run"] = 0.5
 
@@ -549,12 +524,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_commit_results.return_value = head_result_with_tests
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
         base_test._data["timing"]["runner_run"] = 10.00
         head_test._data["timing"]["runner_run"] = 13.00
@@ -617,9 +588,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_no_tests
         mock_init_reader.return_value = None
 
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
 
         summary = TestHarnessResultsSummary(None)
         removed_table, added_table, same_table = summary.diff_table(
@@ -654,9 +623,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
 
         summary = TestHarnessResultsSummary(None)
         removed_table, added_table, same_table = summary.diff_table(
@@ -695,12 +662,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_commit_results.return_value = head_result_with_tests
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
         base_test._data["timing"]["runner_run"] = 10.0
         head_test._data["timing"]["runner_run"] = 17.0
@@ -1111,12 +1074,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_commit_results.return_value = base_result_with_tests
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-        base_test = base_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
-        head_test = head_result_with_tests.get_test(
-            MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name
-        )
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME)
         # Mock base and head runtime, so that abs relative run time rate is higher than fake_run_time_rate_floor
         base_test._data["timing"]["runner_run"] = 15.00
         head_test._data["timing"]["runner_run"] = 10.00
