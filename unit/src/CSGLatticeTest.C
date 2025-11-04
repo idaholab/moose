@@ -182,7 +182,8 @@ TEST(CSGLatticeTest, testGetDimensions)
         {std::cref(univ1), std::cref(univ1)}};
     auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0, univ_map);
     auto dims_map = hex_lattice.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 3); // should be 2*nring -1
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 3);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nring"]), 2); // should be (nrow + 1)/2
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
   }
 }
@@ -430,101 +431,28 @@ TEST(CSGLatticeTest, testGetUniqueUniverses)
   ASSERT_EQ(unique[1].get(), univ2);
 }
 
-// test CSGCartesianLattice::UpdateDimension
-TEST(CSGLatticeTest, testCartUpdateDimension)
+// test CSG[Cartesian/Hexagonal]Lattice::setPitch
+TEST(CSGLatticeTest, testSetPitch)
 {
-  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
   {
-    // update valid: pitch, nx0, and nx1
-    cart_lattice.updateDimension("pitch", 1.5);
-    cart_lattice.updateDimension("nx0", 2);
-    cart_lattice.updateDimension("nx1", 3);
-    // check new dimensions
-    auto dims_map = cart_lattice.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.5);
+    // cartesian lattice set pitch
+    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
+    // set valid pitch
+    cart_lattice.setPitch(2.5);
+    ASSERT_EQ(cart_lattice.getPitch(), 2.5);
+    // try to set invalid pitch (raise error)
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.setPitch(-0.5); },
+                                   "must have pitch greater than 0.");
   }
   {
-    // try update each value to something invalid (raise error)
-    Moose::UnitUtils::assertThrows([&cart_lattice]()
-                                   { cart_lattice.updateDimension("pitch", 0.0); },
-                                   "Updated pitch value for lattice cartlat must be > 0.");
-    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("nx0", -3); },
-                                   "Updated nx0 value for lattice cartlat must be >= 1.");
-    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("nx1", -6); },
-                                   "Updated nx1 value for lattice cartlat must be >= 1.");
-  }
-  {
-    // update invalid: nx0 or nx1 when universes are already set (raise error)
-    // set the universe map first
-    const auto univ1 = CSGUniverse("univ1", false);
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
-    auto new_lat = CSGCartesianLattice("cartlat2", 1.0, univ_map);
-    // try to update each dimension: pitch is valid, nx0 and nx1 are not valid
-    new_lat.updateDimension("pitch", 2.0);
-    auto dims_map = new_lat.getDimensions();
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 2.0);
-    Moose::UnitUtils::assertThrows([&new_lat]() { new_lat.updateDimension("nx0", 3); },
-                                   "Cannot update the dimension nx0 of the lattice cartlat2. "
-                                   "Universe map is already defined.");
-    Moose::UnitUtils::assertThrows([&new_lat]() { new_lat.updateDimension("nx1", 6); },
-                                   "Cannot update the dimension nx1 of the lattice cartlat2. "
-                                   "Universe map is already defined.");
-  }
-  {
-    // try to update a dimension that does not exists
-    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("elmo", 3); },
-                                   "Dimension elmo is not an allowable dimension for lattice type");
-  }
-}
-
-// test CSGHexagonalLattice::UpdateDimension
-TEST(CSGLatticeTest, testHexUpdateDimension)
-{
-  auto lat = CSGHexagonalLattice("lat", 1.0);
-  {
-    // update valid: pitch and nrow
-    lat.updateDimension("pitch", 1.5);
-    lat.updateDimension("nrow", 5); // 5 rows, should correspond to 3 rings
-    // check new dimensions
-    auto dims_map = lat.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 5);
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.5);
-  }
-  {
-    // try update each value to something invalid (raise error)
-    Moose::UnitUtils::assertThrows([&lat]() { lat.updateDimension("pitch", 0.0); },
-                                   "Updated pitch value for lattice lat must be > 0.");
-    Moose::UnitUtils::assertThrows(
-        [&lat]() { lat.updateDimension("nrow", 2); },
-        "Updated number of rows nrow for lattice lat must be an odd number.");
-    Moose::UnitUtils::assertThrows([&lat]() { lat.updateDimension("nrow", -6); },
-                                   "Updated number of rows nrow for lattice lat must be >= 1.");
-  }
-  {
-    // update invalid: nrow when universes are already set (raise error)
-    // set the universe map first
-    const auto univ1 = CSGUniverse("univ1", false);
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1)}};
-    auto new_lat = CSGHexagonalLattice("hex_lat", 1.0, univ_map);
-    // try to update each dimension: pitch is valid, nrow not valid
-    new_lat.updateDimension("pitch", 2.0);
-    auto dims_map = new_lat.getDimensions();
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 2.0);
-    Moose::UnitUtils::assertThrows([&new_lat]() { new_lat.updateDimension("nrow", 3); },
-                                   "Cannot update the dimension nrow of the lattice hex_lat. "
-                                   "Universe map is already defined.");
-  }
-  {
-    // try to update a dimension that does not exists
-    Moose::UnitUtils::assertThrows([&lat]() { lat.updateDimension("elmo", 3); },
-                                   "Dimension elmo is not an allowable dimension for lattice type");
+    // hexagonal lattice set pitch
+    auto hex_lat = CSGHexagonalLattice("hex_lat", 1.0);
+    // set valid pitch
+    hex_lat.setPitch(2.5);
+    ASSERT_EQ(hex_lat.getPitch(), 2.5);
+    // try to set invalid pitch (raise error)
+    Moose::UnitUtils::assertThrows([&hex_lat]() { hex_lat.setPitch(-0.5); },
+                                   "must have pitch greater than 0.");
   }
 }
 

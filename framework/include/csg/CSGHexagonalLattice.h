@@ -62,16 +62,6 @@ public:
   virtual std::unordered_map<std::string, std::any> getDimensions() const override;
 
   /**
-   * @brief update the specified lattice geometric dimension to the specified value.
-   * Valid dimensions are: pitch (Real) and nrow (int). If the universe map has already been set on
-   * the lattice, nrow cannot be updated.
-   *
-   * @param dim_name
-   * @param dim_value
-   */
-  virtual void updateDimension(const std::string & dim_name, std::any dim_value) override;
-
-  /**
    * @brief check if provided index in row-element form is valid for the given hexagonal lattice
    *
    * @param index in row-element form
@@ -164,6 +154,13 @@ public:
    * @return pitch
    */
   Real getPitch() const { return _pitch; }
+
+  /**
+   * @brief set the pitch of the lattice
+   *
+   * @param pitch new pitch value
+   */
+  void setPitch(Real pitch);
 
 protected:
   /// compare the dimensions _nrow and _pitch of this lattice to another lattice
