@@ -14,9 +14,9 @@
 #include "PiecewiseTabularInterface.h"
 
 /**
- * Function base which provides a piecewise approximation to a provided (x,y) point data set via
- * input parameter specifications. Derived classes, which control the order (constant, linear) of
- * the approximation and how the (x,y) data set is generated, should be used directly.
+ * Piecewise tabular base class which provides a piecewise approximation to a provided (x,y) point
+ * data set via input parameter specifications. Derived classes, which control the order (constant,
+ * linear) of the approximation and how the (x,y) data set is generated, should be used directly.
  */
 class KokkosPiecewiseTabularBase : public KokkosPiecewiseBase, public PiecewiseTabularInterface
 {

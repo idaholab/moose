@@ -23,7 +23,7 @@ public:
 
   KokkosPiecewiseBase(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION auto functionSize() const { return _raw_x.size(); }
+  KOKKOS_FUNCTION dof_id_type functionSize() const { return _raw_x.size(); }
   KOKKOS_FUNCTION Real domain(const unsigned int i) const { return _raw_x[i]; }
   KOKKOS_FUNCTION Real range(const unsigned int i) const { return _raw_y[i]; }
 

@@ -12,7 +12,7 @@
 #include "KokkosObjectAction.h"
 
 /**
- * Adds a Kokkos kernel for GPU computation
+ * Adds a Kokkos kernel
  * Associated with the [KokkosKernels] syntax
  */
 class AddKokkosKernelAction : public KokkosObjectAction

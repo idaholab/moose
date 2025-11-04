@@ -651,9 +651,20 @@ public:
   virtual Function & getFunction(const std::string & name, const THREAD_ID tid = 0);
 
 #ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Add a Kokkos function to the problem
+   * @param type The Kokkos function type
+   * @param name The Kokkos function name
+   * @param parameters The Kokkos function input parameters
+   */
   virtual void addKokkosFunction(const std::string & type,
                                  const std::string & name,
                                  InputParameters & parameters);
+  /**
+   * Get whether a Kokkos function exists
+   * @param name The Kokkos function name
+   * @returns Whether a Kokkos function exists
+   */
   virtual bool hasKokkosFunction(const std::string & name);
   /**
    * Get a Kokkos function in an abstract type
@@ -663,6 +674,7 @@ public:
   virtual Moose::Kokkos::Function getKokkosFunction(const std::string & name);
   /**
    * Get a Kokkos function in a concrete type
+   * @tparam T the function type
    * @param name The Kokkos function name
    * @returns The reference of the Kokkos function in the concrete type
    */

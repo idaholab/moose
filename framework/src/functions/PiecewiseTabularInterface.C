@@ -105,7 +105,7 @@ PiecewiseTabularInterface::buildFromFile(const libMesh::Parallel::Communicator &
 {
   // Input parameters
   const auto & data_file_name = _parameters.get<FileName>("data_file");
-  const MooseEnum format = _parameters.get<MooseEnum>("format");
+  const MooseEnum & format = _parameters.get<MooseEnum>("format");
 
   // xy_in_file_only does not make sense here as it restricts the file to exactly
   // two cows/columns, which is not a likely scenario when looking up data by name.

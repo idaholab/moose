@@ -12,7 +12,7 @@
 #include "KokkosObjectAction.h"
 
 /**
- * Adds a Kokkos material for GPU computation
+ * Adds a Kokkos material
  * Associated with the [KokkosMaterials] syntax
  */
 class AddKokkosMaterialAction : public KokkosObjectAction

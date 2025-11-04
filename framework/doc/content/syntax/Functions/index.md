@@ -25,7 +25,7 @@ Moose `Function`s should override the following member functions:
 and may optionally override the following member functions, which is only needed
 for some particular functionality:
 
-- `Real timeIntegral(Real t1, Real t1, const Point & p)`, which computes the
+- `Real timeIntegral(Real t1, Real t2, const Point & p)`, which computes the
   time integral of the function at the spatial point `p` between the time values
   `t1` and `t2`.
 

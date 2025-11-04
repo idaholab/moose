@@ -12,8 +12,6 @@
 #include "KokkosPiecewiseTabularBase.h"
 #include "KokkosUtils.h"
 
-using Moose::Kokkos::Real3;
-
 /**
  * Function which provides a piecewise constant interpolation of a provided (x,y) point data set.
  */
@@ -23,6 +21,8 @@ public:
   static InputParameters validParams();
 
   KokkosPiecewiseConstant(const InputParameters & parameters);
+
+  using Real3 = Moose::Kokkos::Real3;
 
   KOKKOS_FUNCTION Real value(Real t, Real3 p) const;
   KOKKOS_FUNCTION Real integral() const;
@@ -41,7 +41,7 @@ KokkosPiecewiseConstant::value(Real t, Real3 p) const
   const Real x = _has_axis ? p(_axis) : t;
 
   const auto len = functionSize();
-  const Real tolerance = 1.0e-14;
+  constexpr Real tolerance = 1.0e-14;
 
   // endpoint cases
   if ((_direction == Direction::LEFT && x < (1 + tolerance * sign(domain(0))) * domain(0)) ||

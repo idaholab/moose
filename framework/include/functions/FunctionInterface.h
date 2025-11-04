@@ -89,6 +89,7 @@ public:
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Get a Kokkos function of an abstract type with a given name
+   * Calling this function will error out currently if Kokkos was configured with GPU
    * @param name The name of the parameter key of the Kokkos function to retrieve
    * @return The copy of the Kokkos function of the abstract type with name associated with the
    * parameter 'name'
@@ -97,6 +98,7 @@ public:
 
   /**
    * Get a Kokkos function of an abstract type with a given name
+   * Calling this function will error out currently if Kokkos was configured with GPU
    * @param name The name of the Kokkos function to retrieve
    * @return The copy of the Kokkos function of the abstract type with name 'name'
    */
@@ -140,7 +142,7 @@ public:
 
 private:
 #ifdef MOOSE_KOKKOS_ENABLED
-  /// Helper function to retrieve a Kokkos function of concrete type
+  /// Helper function to retrieve a Kokkos function
   const Moose::FunctionBase * getKokkosFunctionByNameHelper(const FunctionName & name) const;
 #endif
 
