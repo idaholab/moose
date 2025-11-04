@@ -344,8 +344,6 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  // const_cast<EquationSystem *>(this)->CopyVec(sol, _trueBlockSol);
-  //_trueBlockSol.mfem::Vector::operator=(sol);
   static_cast<mfem::Vector &>(_trueBlockSol) = sol;
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
@@ -380,7 +378,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
       _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
     }
 
-    const_cast<EquationSystem *>(this)->CopyVec(_BlockResidual, residual);
+    residual = static_cast<mfem::Vector &>(_BlockResidual);
     const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
   }
 
@@ -388,7 +386,6 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 
   if (!_non_linear)
   {
-    //_jacobian->AddMult(sol, residual);
     residual = 0.0;
     _jacobian->Mult(sol, residual);
   }
@@ -401,14 +398,8 @@ void
 TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt,
                                                      const mfem::Vector & x_old)
 {
-  // Update the old vector
-  mfem::BlockVector block_x_old;
-  block_x_old.Update(*_block_true_offsets);
   mfem::ParGridFunction u_old_gf;
-
-  // Update the old vector
-  CopyVec(x_old, block_x_old);
-  // mfem::BlockVector block_x_old(const_cast<mfem::Vector &>(x_old), *_block_true_offsets);
+  mfem::BlockVector block_x_old(const_cast<mfem::Vector &>(x_old), *_block_true_offsets);
 
   // Update the xs boundary conditions
   ApplyEssentialBCs();

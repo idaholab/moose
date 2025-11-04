@@ -115,8 +115,6 @@ public:
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
 
-  void CopyVec(const mfem::Vector & x, mfem::Vector & y) { y = x; }
-
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
