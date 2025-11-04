@@ -455,9 +455,4 @@ TEST(CSGLatticeTest, testSetPitch)
                                    "must have pitch greater than 0.");
   }
 }
-
-TEST(CSGLatticeTest, testConvert)
-{
-  // test converting ring to row indices for hex lattices and vice versa
-}
 }
