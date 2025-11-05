@@ -694,27 +694,30 @@ class StoredResult:
         if self._all_tests_loaded:
             return
 
+        # If we haven't loaded anything yet, we can skip checking
+        # if the test(s) is already loaded
+        load_all = len(self._tests) == 0
+
         # Find the tests that either do not exist in self._tests or
         # exist as unitialized
         db_tests: dict[ObjectId, TestName] = {}
-        build_tests: list[Tuple[TestName, dict]] = []
         for it in results_test_iterator(self.data):
             name = it.name
-            if name not in self._tests:
+            if load_all or name not in self._tests:
                 data = it.value
                 # Stored separately, mark to be pulled from database
-                if isinstance(data, ObjectId):
-                    db_tests[data] = name
-                # Stored within, use the data directly
+                if isinstance(it.value, ObjectId):
+                    db_tests[it.value] = name
+                # Stored within, build directly
                 else:
-                    build_tests.append((name, data))
+                    self._tests[name] = self._build_test(data, name)
 
         # Load tests needed from the database
         if db_tests:
             docs = self._find_tests_data(list(db_tests.keys()))
             for doc in docs:
                 name = db_tests[doc["_id"]]
-                build_tests.append((name, doc))
+                self._tests[name] = self._build_test(doc, name)
 
             # Make sure we found every test
             if len(docs) != len(db_tests):
@@ -723,13 +726,8 @@ class StoredResult:
                 ]
                 raise KeyError(f"Failed to load test results for _id={missing}")
 
-        # Build the tests
-        for name, data in build_tests:
-            self._tests[name] = self._build_test(data, name)
-
         # Mark that we've loaded everything
         self._all_tests_loaded = True
-        self._test_names_loaded = True
 
     def get_tests(self) -> Iterable[StoredTestResult]:
         """
