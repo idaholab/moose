@@ -295,37 +295,44 @@ class TestResultsStoredResults(TestHarnessTestCase):
             # Tester properties
             self.assertEqual(test_result.tester, data["tester"])
 
+            test_json_metadata = test_result.get_json_metadata()
+            test_perf_graph = test_result.get_perf_graph()
+
             # JSON metadata, which only appears for tests that ran
             if test_result.status_value == "OK":
                 # Decompress the data and compare
                 json_metadata = data["tester"]["json_metadata"]
                 if json_metadata is not None:
-                    self.assertEqual(len(json_metadata), len(test_result.json_metadata))
+                    self.assertEqual(len(json_metadata), len(test_json_metadata))
                     for k, v in json_metadata.items():
-                        self.assertIn(k, test_result.json_metadata)
+                        self.assertIn(k, test_json_metadata)
                         decompressed = decompress_dict(v)
-                        self.assertEqual(test_result.json_metadata[k], decompressed)
+                        self.assertEqual(test_json_metadata[k], decompressed)
 
                 # Should thus have a perf_graph entry
+                test_perf_graph = test_result.get_perf_graph()
                 self.assertEqual(
-                    test_result.perf_graph, decompress_dict(json_metadata["perf_graph"])
+                    test_perf_graph, decompress_dict(json_metadata["perf_graph"])
                 )
             # Test didn't run, so no metadata or perf_graph
             else:
-                self.assertEqual(len(test_result.json_metadata), 0)
-                self.assertIsNone(test_result.perf_graph)
+                self.assertEqual(len(test_json_metadata), 0)
+                self.assertIsNone(test_perf_graph)
 
             # Validation data
             results_i = 0
             for case in job.validation_cases:
+                validation_data = test_result.get_validation_data()
+                validation_results = test_result.get_validation_results()
+
                 # Results equivalent to the actual Job Result objects
                 for v in case.results:
-                    self.assertEqual(v, test_result.validation_results[results_i])
+                    self.assertEqual(v, validation_results[results_i])
                     results_i += 1
 
                 # Validation data is equivalent to the actual Data objects
                 for k, v in case.data.items():
-                    self.assertEqual(v, test_result.validation_data[k])
+                    self.assertEqual(v, validation_data[k])
 
     def testStoredResultNoCheck(self):
         """Test building a StoredResult with check=False."""
@@ -451,7 +458,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         built_result = self.buildResult(delete_test_key=["tester"])
         for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.tester)
-            self.assertEqual(len(test_result.json_metadata), 0)
+            self.assertEqual(len(test_result.get_json_metadata()), 0)
 
     def testNoStatus(self):
         """Test status not being available in a test result."""
@@ -487,8 +494,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
             self.assertEqual(test._validation_results, new_test._validation_results)
             self.assertEqual(test._validation_data, new_test._validation_data)
 
-            self.assertEqual(test.json_metadata, new_test.json_metadata)
-            self.assertEqual(test.perf_graph, new_test.perf_graph)
+            self.assertEqual(test.get_json_metadata(), new_test.get_json_metadata())
+            self.assertEqual(test.get_perf_graph(), new_test.get_perf_graph())
 
         # Compare all of the data
         new_data = deepcopy(new_result.data)

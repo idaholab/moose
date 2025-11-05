@@ -89,11 +89,11 @@ class StoredTestResult:
         self._name: TestName = name
         # The combined results that this test comes from
         self._results: "StoredResult" = result
-        # Converted validation results (built on the fly)
+        # Converted validation results; built in get_validation_results()
         self._validation_results: Optional[list[ValidationResult]] = None
-        # Converted validation data (built on the fly)
+        # Converted validation data; built in get_validation_data()
         self._validation_data: Optional[dict[str, ValidationData]] = None
-        # Decompressed JSON metadata (built on the fly)
+        # Decompressed JSON metadata; built in get_json_metadata()
         self._json_metadata: Optional[dict[str, dict]] = None
 
         # Sanity check on all of our data and methods
@@ -122,10 +122,6 @@ class StoredTestResult:
             assert isinstance(self.hpc, (dict, NoneType))
             assert isinstance(self.hpc_id, (str, NoneType))
             assert isinstance(self.validation, (dict, NoneType))
-            assert isinstance(self.validation_results, (list, NoneType))
-            assert isinstance(self.validation_data, (dict, NoneType))
-            assert isinstance(self.json_metadata, (dict, NoneType))
-            assert isinstance(self.perf_graph, (dict, NoneType))
 
     @property
     def data(self) -> dict:
@@ -254,122 +250,89 @@ class StoredTestResult:
         """
         return self.data.get("validation")
 
-    @property
-    def validation_data(self) -> dict[str, ValidationData]:
+    def get_validation_data(self) -> dict[str, ValidationData]:
         """
-        Get the 'data' entry in 'validation' for this test, if any.
+        Get the built ValidationData objects for this test, if any.
 
         Will build the ValidationData representation on first call.
         """
+        # Build on first load
         if self._validation_data is None:
-            self._validation_data = self._buildValidationData()
+            self._validation_data = {}
+            if self.validation is not None:
+                input = deepcopy(self.validation.get("data", {}))
+
+                for k, v in input.items():
+                    # Bounds is saved as a list; convert to tuple
+                    if v.get("bounds") is not None:
+                        v["bounds"] = tuple(v["bounds"])
+
+                    # Before version 1, the data type was not stored
+                    if self.results.validation_version == 0:
+                        data_type = "ValidationScalarData"
+                    # After version 1, the type is explicitly available
+                    else:
+                        data_type = v.pop("type")
+                    if data_type not in ValidationDataTypesStr:
+                        raise ValueError(
+                            f"Unknown validation data type {data_type} for data '{k}'"
+                        )
+
+                    # Build the underlying data class instead of a dict
+                    self._validation_data[k] = getattr(
+                        validation_dataclasses_module, data_type
+                    )(**v)
+
         return self._validation_data
 
-    @property
-    def validation_results(self) -> list[ValidationResult]:
+    def get_validation_results(self) -> list[ValidationResult]:
         """
-        Get the 'data' entry in 'validation' for this test, if any.
+        Get the build ValidationResult objects for this test, if any.
 
         Will build the ValidationResult representation on first call.
         """
+        # Build on first load
         if self._validation_results is None:
-            self._validation_results = self._buildValidationResults()
+            self._validation_results = []
+            if self.validation is not None:
+                self._validation_results += [
+                    ValidationResult(**v)
+                    for v in deepcopy(self.validation.get("results", []))
+                ]
+
         return self._validation_results
 
-    def _buildValidationResults(self) -> list[ValidationResult]:
+    def get_json_metadata(self) -> dict[str, dict]:
         """
-        Convert validation results in JSON to the underlying objects.
-
-        Used on-the-fly in validation_results if not built.
-        """
-        if self.validation is not None:
-            return [
-                ValidationResult(**v)
-                for v in deepcopy(self.validation.get("results", []))
-            ]
-        return []
-
-    def _buildValidationData(self) -> dict[str, ValidationData]:
-        """
-        Convert valiation data in JSON to the underlying objects.
-
-        Used on-the-fly in validation_data if not built.
-        """
-        if self.validation is None:
-            return {}
-
-        input = deepcopy(self.validation.get("data", {}))
-        data = {}
-
-        for k, v in input.items():
-            # Bounds is saved as a list; convert to tuple
-            if v.get("bounds") is not None:
-                v["bounds"] = tuple(v["bounds"])
-
-            # Before version 1, the data type was not stored
-            if self.results.validation_version == 0:
-                data_type = "ValidationScalarData"
-            # After version 1, the type is explicitly available
-            else:
-                data_type = v.pop("type")
-            if data_type not in ValidationDataTypesStr:
-                raise ValueError(
-                    f"Unknown validation data type {data_type} for data '{k}'"
-                )
-
-            # Build the underlying data class instead of a dict
-            data[k] = getattr(validation_dataclasses_module, data_type)(**v)
-
-        return data
-
-    @property
-    def json_metadata(self) -> dict[str, dict]:
-        """
-        Get the 'json_metadata' entry from the Tester entry, if any.
+        Get the JSON metadata from the Tester entry, if any.
 
         Will trigger a decompression of the data on first call.
         """
+        # Build on first load
         if self._json_metadata is None:
-            self._json_metadata = self._buildJSONMetadata()
+            self._json_metadata = {}
+
+            if (tester := self.tester) and (
+                json_metadata := tester.get("json_metadata")
+            ):
+                assert isinstance(json_metadata, dict)
+
+                for k, v in json_metadata.items():
+                    assert isinstance(v, bytes)
+                    try:
+                        loaded = decompress_dict(v)
+                    except Exception:
+                        raise ValueError(
+                            f"Failed to decompress json_metadata {k} "
+                            f"in test {self.name}"
+                        )
+                    self._json_metadata[k] = loaded
+
         return self._json_metadata
 
-    def _buildJSONMetadata(self) -> dict[str, dict]:
-        """
-        Build the tester.json_metadata entry.
-
-        This is needed because JSON metadata is stored as
-        a compressed binary string in data, in which here
-        we will decompress the underlying data into its
-        original dict.
-
-        Used on-the-fly in json_metadata if not built.
-        """
-        # No metadata without a tester (stored in the tester)
-        if self.tester is None:
-            return {}
-        # If no json_metadata key, there was none
-        json_metadata = self.tester.get("json_metadata")
-        if json_metadata is None:
-            return {}
-
-        assert isinstance(json_metadata, dict)
-
-        json_metadata_decompressed = {}
-        for k, v in json_metadata.items():
-            assert isinstance(v, bytes)
-            try:
-                loaded = decompress_dict(v)
-            except Exception:
-                raise ValueError(
-                    f"Failed to decompress json_metadata {k} " f"in test {self.name}"
-                )
-            json_metadata_decompressed[k] = loaded
-        return json_metadata_decompressed
-
-    @property
-    def perf_graph(self) -> Optional[dict]:
+    def get_perf_graph(self) -> Optional[dict]:
         """Get the perf_graph entry in the JSON metadata, if any."""
-        return self.json_metadata.get("perf_graph") if self.json_metadata else None
+        return self.get_json_metadata().get("perf_graph")
 
 
 class StoredResult:
