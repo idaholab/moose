@@ -329,6 +329,24 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
     def testStoredResultNoCheck(self):
         """Test building a StoredResult with check=False."""
+        data = self.captureResult().result_data
+
+        # Make most of the data bad, which should not be caught
+        for key in ["_id", "testharness", "civet", "event_sha", "event_cause", "time"]:
+            self.assertIn(key, data)
+            data[key] = None
+        for key in ["hpc", "validation_version"]:
+            self.assertNotIn(key, data)
+            data[key] = None
+        for key in ["pr_num"]:
+            self.assertIn(key, data)
+            data[key] = "foo"
+        for key in ["base_sha"]:
+            self.assertIn(key, data)
+            data[key] = 1234
+
+        result = StoredResult(data, check=False)
+        self.assertFalse(result.check)
 
     @patch.object(StoredResult, "_find_test_data")
     def testGetTest(self, patch_find_test_data):
