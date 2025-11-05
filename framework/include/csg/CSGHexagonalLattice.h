@@ -112,6 +112,11 @@ protected:
   /// compare the dimensions _nrow and _pitch of this lattice to another lattice
   virtual bool compareDimensions(const CSGLattice & other) const override;
 
+  /**
+   * @brief set the universes that define the lattice layout
+   *
+   * @param universes list of list of universes to set as the lattice map
+   */
   virtual void setUniverses(
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) override;
 
@@ -125,13 +130,14 @@ protected:
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGLatticeTest, testHexSetUniverses);
-///@}
+  ///@}
 #endif
 };
 
 /// methods to help convert between number of rows and rings
 // get the total number of rings from the number of rows
 int nRowToRing(int nrow);
+
 // get the total number of rows from the number of rings
 int nRingToRow(int nring);
 
