@@ -33,6 +33,7 @@ from TestHarness.resultsstore.utils import (
     compress_dict,
     decompress_dict,
     results_has_test,
+    results_num_tests,
     results_test_entry,
     results_test_iterator,
 )
@@ -417,7 +418,7 @@ class TestCIVETStore(TestHarnessTestCase):
         else:
             self.assertIsNone(build_tests)
 
-        num_tests = len(list(results_test_iterator(build_result)))
+        num_tests = results_num_tests(build_result)
 
         out_regex = rf"Storing {num_tests} tests"
         if build_kwargs.get("ignore_skipped"):

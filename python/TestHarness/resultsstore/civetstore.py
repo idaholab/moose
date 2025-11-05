@@ -30,8 +30,8 @@ from TestHarness.resultsstore.auth import (
 from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
-    results_folder_iterator,
-    results_test_iterator,
+    mutable_results_folder_iterator,
+    mutable_results_test_iterator,
 )
 
 NoneType = type(None)
@@ -388,7 +388,7 @@ class CIVETStore:
         # Remove skipped tests if requested
         num_skipped_tests = 0
         if kwargs.get("ignore_skipped"):
-            for folder in results_folder_iterator(results):
+            for folder in mutable_results_folder_iterator(results):
                 for test in folder.test_iterator():
                     if test.value["status"]["status"] == "SKIP":
                         num_skipped_tests += 1
@@ -397,7 +397,7 @@ class CIVETStore:
 
         # Cleanup each test as needed
         num_tests = 0
-        for test in results_test_iterator(results):
+        for test in mutable_results_test_iterator(results):
             test_values = test.value
             num_tests += 1
 
@@ -439,7 +439,7 @@ class CIVETStore:
             tests = {}
             tests_size = 0
             oversized_tests = []
-            for test in results_test_iterator(results):
+            for test in mutable_results_test_iterator(results):
                 # Test data in the result entry, separated
                 test_data = deepcopy(test.value)
                 # Store and check test size
@@ -529,7 +529,7 @@ class CIVETStore:
         test_ids = None
         if tests:
             test_ids = []
-            for result_test in results_test_iterator(result):
+            for result_test in mutable_results_test_iterator(result):
                 # Get the separate test data
                 test_data = tests[result_test.name]
 

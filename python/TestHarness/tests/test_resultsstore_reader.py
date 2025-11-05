@@ -27,6 +27,7 @@ from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
     decompress,
+    mutable_results_test_iterator,
     results_test_iterator,
 )
 
@@ -264,7 +265,7 @@ class TestResultsReader(unittest.TestCase):
         tests: dict[ObjectId, dict] = {}
         # Remove the tests entries and store them as IDs instead
         for result_entry in gold.values():
-            for test in results_test_iterator(result_entry):
+            for test in mutable_results_test_iterator(result_entry):
                 test_entry = test.value
                 if "_id" in test_entry:
                     tests[test_entry["_id"]] = deepcopy(test_entry)
@@ -526,6 +527,13 @@ class TestResultsReader(unittest.TestCase):
             test_results = results.get_test(TEST_TEST_NAME)
             self.assertIsNotNone(test_results)
             self.assertEqual(test_results.name, TEST_TEST_NAME)
+
+    def testRecreateResult(self):
+        gold = self.deserializeGold()
+        for data in gold.values():
+            result = StoredResult(data)
+            new_result = StoredResult(deepcopy(result.data))
+            self.assertEqual(result.data, new_result.data)
 
 
 if __name__ == "__main__":

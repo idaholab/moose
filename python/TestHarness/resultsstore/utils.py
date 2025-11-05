@@ -13,14 +13,16 @@
 import json
 import zlib
 from dataclasses import dataclass
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 
 
 @dataclass(frozen=True)
 class TestName:
     """Name for a test (folder and name)."""
 
+    # Name of the folder
     folder: str
+    # Name of the test in the folder
     name: str
 
     def __str__(self):
@@ -73,12 +75,21 @@ def results_has_folder(results: dict, folder: str) -> bool:
     return folder in results["tests"]
 
 
+def results_query_test(results: dict, name: TestName) -> Optional[dict]:
+    """Query a test in the TestHarness JSON results."""
+    assert isinstance(results, dict)
+    assert isinstance(name, TestName)
+
+    if (folder := results["tests"].get(name.folder)) and (
+        test := folder["tests"].get(name.name)
+    ):
+        return test
+    return None
+
+
 def results_has_test(results: dict, name: TestName) -> bool:
     """Check whether or not the TestHarness JSON results has the given test."""
-    return (
-        results_has_folder(results, name.folder)
-        and name.name in results_folder_entry(results, name.folder)["tests"]
-    )
+    return results_query_test(results, name) is not None
 
 
 def results_set_test_value(results: dict, name: TestName, value: Any):
@@ -87,9 +98,64 @@ def results_set_test_value(results: dict, name: TestName, value: Any):
 
 
 @dataclass
+class ResultsFolderIterator:
+    """Iterator for a test folder in TestHarness results JSON output."""
+
+    # The name of the folder
+    name: str
+    # The value for the folder
+    value: dict
+
+    @property
+    def tests(self):
+        """Get the underlying test data for the test folder."""
+        return self.value["tests"]
+
+    @property
+    def num_tests(self):
+        """Get the number of tests in the test folder."""
+        return len(self.tests)
+
+
+def results_folder_iterator(results: dict) -> Iterator[ResultsFolderIterator]:
+    """Iterate through test folder entries in TestHarness results JSON output."""
+    for name, value in results["tests"].items():
+        yield ResultsFolderIterator(name, value)
+
+
+def results_num_tests(results: dict) -> int:
+    """Get the total number of tests in TestHarness results JSON output."""
+    return sum(it.num_tests for it in results_folder_iterator(results))
+
+
+@dataclass
 class ResultsTestIterator:
+    """Iterator for a test entry in TestHarness results JSON output."""
+
+    # The combined test name
+    name: TestName
+    # The test value
+    value: dict
+
+
+def results_test_iterator(
+    results: dict,
+) -> Iterator[ResultsTestIterator]:
+    """Iterate through test entries in TestHarness results JSON output."""
+    for folder_name, folder_entry in results["tests"].items():
+        for test_name, test_value in folder_entry["tests"].items():
+            yield ResultsTestIterator(TestName(folder_name, test_name), test_value)
+
+
+def results_test_names(results: dict) -> list[TestName]:
+    """Get the names of all tests in TestHarness results JSON output."""
+    return [v.name for v in results_test_iterator(results)]
+
+
+@dataclass
+class MutableResultsTestIterator:
     """
-    Iterator that represents a single test entry in TestHarness results JSON output.
+    Iterator for a mutable test entry in TestHarness results JSON output.
 
     Enables modification while iterating through the tests entry in the results.
     """
@@ -121,9 +187,9 @@ class ResultsTestIterator:
 
 
 @dataclass
-class ResultsFolderIterator:
+class MutableResultsFolderIterator:
     """
-    Iterator that represents a single test folder in TestHarness results JSON output.
+    Iterator for a mutable test folder in TestHarness results JSON output.
 
     Enables modification while iterating through the tests entry in the results.
     """
@@ -143,15 +209,19 @@ class ResultsFolderIterator:
         """Get the underlying tests in the dict."""
         return self.value["tests"]
 
-    def test_iterator(self) -> Iterator[ResultsTestIterator]:
+    @property
+    def num_tests(self):
+        """Get the number of tests in the dict."""
+        return len(self.tests)
+
+    def test_iterator(self) -> Iterator[MutableResultsTestIterator]:
         """Create an iterator over the underlying tests."""
         for test_name in list(self.tests.keys()):
-            yield ResultsTestIterator(self.name, test_name, self.tests)
+            yield MutableResultsTestIterator(self.name, test_name, self.tests)
 
     def delete(self):
         """Delete the folder entry in the tests dict."""
         del self._tests_entry[self.name]
-        self._deleted = True
 
     def delete_if_empty(self):
         """Delete the folder entry in the tests dict if it has no tests."""
@@ -159,31 +229,29 @@ class ResultsFolderIterator:
             self.delete()
 
 
-def results_folder_iterator(results: dict) -> Iterator[ResultsFolderIterator]:
+def mutable_results_folder_iterator(
+    results: dict,
+) -> Iterator[MutableResultsFolderIterator]:
     """
-    Iterate through test folder entries in TestHarness results JSON output.
+    Iterate through mutable test folder entries in TestHarness results JSON output.
 
     Enables modification while iterating.
     """
     tests_entry = results["tests"]
     for folder_name in list(tests_entry.keys()):
-        yield ResultsFolderIterator(folder_name, tests_entry)
+        yield MutableResultsFolderIterator(folder_name, tests_entry)
 
 
-def results_test_iterator(results: dict) -> Iterator[ResultsTestIterator]:
+def mutable_results_test_iterator(
+    results: dict,
+) -> Iterator[MutableResultsTestIterator]:
     """
-    Iterate through test entries in TestHarness results JSON output.
+    Iterate through mutable test entries in TestHarness results JSON output.
 
     Enables modification while iterating.
     """
-    # Reuse the same iterator for optimization
-    it = ResultsTestIterator("", "", {})
-
     tests_entry = results["tests"]
     for folder_name, folder_entry in tests_entry.items():
         folder_tests_entry = folder_entry["tests"]
-        it._folder_tests_entry = folder_tests_entry
         for test_name in list(folder_tests_entry.keys()):
-            it.folder_name = folder_name
-            it.test_name = test_name
-            yield it
+            yield MutableResultsTestIterator(folder_name, test_name, folder_tests_entry)

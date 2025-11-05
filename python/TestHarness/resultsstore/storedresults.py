@@ -12,7 +12,7 @@
 import importlib
 from copy import deepcopy
 from datetime import datetime
-from typing import Callable, Optional
+from typing import Callable, Iterable, Optional, Tuple
 
 from bson.objectid import ObjectId
 from pymongo.database import Database
@@ -22,9 +22,13 @@ from TestHarness.resultsstore.utils import (
     compress,
     decompress,
     decompress_dict,
-    results_folder_iterator,
+    mutable_results_folder_iterator,
+    mutable_results_test_iterator,
     results_has_test,
+    results_num_tests,
+    results_query_test,
     results_test_iterator,
+    results_test_names,
 )
 from TestHarness.validation.dataclasses import (
     ValidationData,
@@ -423,16 +427,18 @@ class StoredResult:
         # The loaded database, filled on first use
         self._database: Optional[Database] = None
 
-        # Loaded test objects
+        # Loaded StoredTestResult objects; filled within
+        # [get,query]_test() and load_all_tests()
         self._tests: dict[TestName, StoredTestResult] = {}
 
-        # Whether or not we have loaded all tests
+        # Whether or not self._tests is complete; triggered
+        # by calling load_all_tests() and implies that we no
+        # longer need to load any tests if true
         self._all_tests_loaded: bool = False
 
         # Sanity check on all of our methods (in order of definition)
         if self.check:
-            if self._database_getter is not None:
-                assert isinstance(self._database_getter, Callable)
+            assert isinstance(self._database_getter, (NoneType, Callable))
             assert isinstance(self.check, bool)
             assert isinstance(self.data, dict)
             assert isinstance(self.id, ObjectId)
@@ -453,10 +459,10 @@ class StoredResult:
             if self.base_sha:
                 assert len(self.base_sha) == 40
             assert isinstance(self.time, datetime)
-            assert isinstance(self.num_tests, int)
-            assert isinstance(self.test_names, list)
-            for v in self.test_names:
-                assert isinstance(v, TestName)
+            assert isinstance(self.get_num_tests(), int)
+            names = self.get_test_names()
+            assert isinstance(names, list)
+            assert all(isinstance(v, TestName) for v in names)
 
     @property
     def check(self) -> bool:
@@ -585,15 +591,17 @@ class StoredResult:
         """Get the time these tests were added to the database."""
         return self.data["time"]
 
-    @property
-    def num_tests(self) -> int:
-        """Get the number of stored tests."""
-        return len(list(results_test_iterator(self.data)))
+    def get_num_tests(self) -> int:
+        """Get the number of tests."""
+        if self._all_tests_loaded:
+            return len(self._tests)
+        return results_num_tests(self.data)
 
-    @property
-    def test_names(self) -> list[TestName]:
-        """Get the combined names of all tests."""
-        return [v.name for v in results_test_iterator(self.data)]
+    def get_test_names(self) -> Iterable[TestName]:
+        """Get the names of all of the tests."""
+        if self._all_tests_loaded:
+            return self._tests.keys()
+        return results_test_names(self.data)
 
     def has_test(self, name: TestName) -> bool:
         """
@@ -607,13 +615,13 @@ class StoredResult:
         """
         assert isinstance(name, TestName)
 
-        # Check the cache first (faster lookup)
+        # Check the loaded tests first
         if name in self._tests:
             return True
-        # Not in the cache, but we've loaded all so nothing here
-        elif self._all_tests_loaded:
+        # Not in the loaded tests but all are loaded, doesn't exist
+        if self._all_tests_loaded:
             return False
-        # Slower linear lookup in the test data
+        # Slower lookup in the data
         return results_has_test(self.data, name)
 
     def _find_test_data(self, id: ObjectId) -> Optional[dict]:
@@ -660,33 +668,28 @@ class StoredResult:
         """
         assert isinstance(name, TestName)
 
-        # Search for the data in the cache
-        value = self._tests.get(name)
-        if value is not None:
+        # Search for the data in loaded tests; fastest lookup
+        if value := self._tests.get(name):
             return value
-
-        # If all tests have been loaded, there's nothing left to check
+        # If all are loaded and it's not in self._tests,
+        # it doesn't exist
         if self._all_tests_loaded:
             return None
 
-        # Find it in the data to build
-        test_entry = None
-        for entry in results_test_iterator(self.data):
-            if entry.name == name:
-                test_entry = entry.value
-                break
-        if test_entry is None:
+        # Look for the test in the data
+        data = results_query_test(self.data, name)
+        if data is None:
             return None
 
         # Pull from database
-        if isinstance(test_entry, ObjectId):
-            id = test_entry
-            test_entry = self._find_test_data(id)
-            if test_entry is None:
+        if isinstance(data, ObjectId):
+            id = data
+            data = self._find_test_data(id)
+            if data is None:
                 raise DatabaseException(f"Database missing tests._id={id}")
 
         # Build the true object from the data
-        test_result = self._build_test(test_entry, name)
+        test_result = self._build_test(data, name)
 
         # And store in the cache
         self._tests[name] = test_result
@@ -728,47 +731,51 @@ class StoredResult:
         if self._all_tests_loaded:
             return
 
-        # Get tests that need to be loaded; need a mapping
-        # of id -> name so that we can go from a document
-        # to a name when obtaining data from the database
-        load_tests = {}
-        for entry in results_test_iterator(self.data):
-            name = entry.name
+        # Find the tests that either do not exist in self._tests or
+        # exist as unitialized
+        db_tests: dict[ObjectId, TestName] = {}
+        build_tests: list[Tuple[TestName, dict]] = []
+        for it in results_test_iterator(self.data):
+            name = it.name
             if name not in self._tests:
-                value = entry.value
+                data = it.value
                 # Stored separately, mark to be pulled from database
-                if isinstance(value, ObjectId):
-                    load_tests[value] = name
-                # Stored within, load now
+                if isinstance(data, ObjectId):
+                    db_tests[data] = name
+                # Stored within, use the data directly
                 else:
-                    self._tests[name] = self._build_test(value, name)
+                    build_tests.append((name, data))
 
         # Load tests needed from the database
-        if load_tests:
-            loaded_docs = self._find_tests_data(list(load_tests.keys()))
-            for doc in loaded_docs:
-                id = doc["_id"]
-                name = load_tests[id]
-                self._tests[name] = self._build_test(doc, name)
+        if db_tests:
+            docs = self._find_tests_data(list(db_tests.keys()))
+            for doc in docs:
+                name = db_tests[doc["_id"]]
+                build_tests.append((name, doc))
 
             # Make sure we found every test
-            if len(loaded_docs) != len(load_tests):
+            if len(docs) != len(db_tests):
                 missing = [
-                    str(name) for name in load_tests.values() if name not in self._tests
+                    str(name) for name in db_tests.values() if name not in self._tests
                 ]
                 raise KeyError(f"Failed to load test results for _id={missing}")
 
+        # Build the tests
+        for name, data in build_tests:
+            self._tests[name] = self._build_test(data, name)
+
         # Mark that we've loaded everything
         self._all_tests_loaded = True
+        self._test_names_loaded = True
 
-    def get_tests(self) -> list[StoredTestResult]:
+    def get_tests(self) -> Iterable[StoredTestResult]:
         """
         Get all of the test results.
 
         Will load all tests that have not been loaded from the database.
         """
         self.load_all_tests()
-        return list(self._tests.values())
+        return self._tests.values()
 
     def serialize(self, test_filter: Optional[list[TestName]] = None) -> dict:
         """
@@ -801,23 +808,20 @@ class StoredResult:
 
         # Delete tests ahead of time that we don't need
         if test_filter:
-            for folder in results_folder_iterator(data):
+            for folder in mutable_results_folder_iterator(data):
                 for test in folder.test_iterator():
                     if test.name not in test_filter:
                         test.delete()
                 folder.delete_if_empty()
 
-        for test in results_test_iterator(data):
+        for test in mutable_results_test_iterator(data):
             # Get the data at the moment; this could be different
             # if it was stored as an ObjectId and loaded later
             test_data = test.value
 
             if isinstance(test_data, ObjectId):
                 # Is an ObjectID and we have loaded it
-                if (
-                    self._tests
-                    and (stored_test := self._tests.get(test.name)) is not None
-                ):
+                if self._tests and (stored_test := self._tests.get(test.name)):
                     test_data = stored_test.data
                     test.set_value(test_data)
                 # Is an ObjectId and we didn't load it
@@ -866,7 +870,7 @@ class StoredResult:
         tests_have_time = StoredResult._get_civet_version(data) < 4
 
         # Convert each test
-        for test in results_test_iterator(data):
+        for test in mutable_results_test_iterator(data):
             test_entry = test.value
             if isinstance(test_entry, dict):
                 # Convert string id to ObjectID

@@ -29,6 +29,7 @@ from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
     decompress_dict,
+    mutable_results_test_iterator,
     results_set_test_value,
     results_test_entry,
     results_test_iterator,
@@ -188,6 +189,10 @@ class TestResultsStoredResults(TestHarnessTestCase):
             "-i", "validation", "--capture-perf-graph", exit_code=132
         )
 
+        # For pylance
+        assert isinstance(result.results, dict)
+        assert isinstance(result.harness, TestHarness)
+
         converted = self.convertTestHarnessResults(result.results, **kwargs)
         return self.CapturedResult(
             result_data=converted.result_data,
@@ -212,7 +217,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         results = StoredResult(captured_result.result_data)
         if not kwargs.get("no_tests", False):
-            self.assertEqual(results.num_tests, len(captured_result.test_data))
+            self.assertEqual(results.get_num_tests(), len(captured_result.test_data))
 
         return self.BuiltResult(
             harness=captured_result.harness,
@@ -248,9 +253,9 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         # Has same number of tests
         self.assertEqual(
-            results.num_tests, len(list(results_test_iterator(results.data)))
+            results.get_num_tests(),
+            len(list(results_test_iterator(results.data))),
         )
-        self.assertEqual(results.num_tests, len(results.get_tests()))
         for test_result in results.get_tests():
             data = built_result.test_data[test_result.name]
 
@@ -323,6 +328,9 @@ class TestResultsStoredResults(TestHarnessTestCase):
                 for k, v in case.data.items():
                     self.assertEqual(v, test_result.validation_data[k])
 
+    def testStoredResultNoCheck(self):
+        """Test building a StoredResult with check=False."""
+
     @patch.object(StoredResult, "_find_test_data")
     def testGetTest(self, patch_find_test_data):
         """Tests when tests are stored as ObjectId and then loaded."""
@@ -336,7 +344,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         )
 
         result = StoredResult(result_data)
-        self.assertEqual(result.num_tests, len(test_data))
+        self.assertEqual(result.get_num_tests(), len(test_data))
 
         for name, data in test_data.items():
             self.assertTrue(result.has_test(name))
@@ -367,7 +375,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         built_result = self.buildResult(test_in_results=False)
         results = built_result.results
 
-        for name in results.test_names:
+        for name in results.get_test_names():
             id = results_test_entry(results.data, name)
             with self.assertRaisesRegex(
                 DatabaseException, f"Database missing tests._id={id}"
@@ -450,10 +458,12 @@ class TestResultsStoredResults(TestHarnessTestCase):
         self.assertEqual(result.data["tests"].keys(), new_result.data["tests"].keys())
         # And the underlying test objects should also be the same
         new_result.load_all_tests()
-        for test_name in result.test_names:
+        for test_name in result.get_test_names():
             test = result._tests[test_name]
+            assert isinstance(test, StoredTestResult)  # for pylance
 
             new_test = new_result._tests[test_name]
+            assert isinstance(new_test, StoredTestResult)  # for pylance
             self.assertEqual(test._data, new_test._data)
             self.assertEqual(test.name, new_test.name)
 
@@ -487,7 +497,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         result = StoredResult(result_data)
 
         # Tests should not be loaded yet
-        test_names = result.test_names
+        test_names = result.get_test_names()
         self.assertTrue(test_names)
         for name in test_names:
             self.assertNotIn(name, result._tests)
@@ -509,9 +519,10 @@ class TestResultsStoredResults(TestHarnessTestCase):
         results = built_result.results
 
         # Load tests
-        test_names = results.test_names
+        self.assertEqual(0, len(results._tests))
+        num_tests = results.get_num_tests()
         results.load_all_tests()
-        self.assertEqual(len(test_names), len(results._tests))
+        self.assertEqual(num_tests, len(results._tests))
 
         serialized = results.serialize()
 
@@ -549,6 +560,26 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         with self.assertRaisesRegex(KeyError, "Failed to load test results"):
             StoredResult(captured_result.result_data).load_all_tests()
+
+    def testRecreateResult(self):
+        """
+        Test recreating a result with just the data.
+
+        This enables caching of results in web applications.
+        """
+        result = self.buildResult().results
+        new_result = StoredResult(deepcopy(result.data))
+        self.assertEqual(result.data, new_result.data)
+
+    # def testRecreateResultNoCheck(self):
+    #     """
+    #     Test recreating a result with just the data.
+
+    #     This enables caching of results in web applications.
+    #     """
+    #     result = self.buildResult().results
+    #     new_result = StoredResult(deepcopy(result.data))
+    #     self.assertEqual(result.data, new_result.data)
 
 
 if __name__ == "__main__":
