@@ -27,12 +27,6 @@ public:
   KOKKOS_FUNCTION Real domain(const unsigned int i) const { return _raw_x[i]; }
   KOKKOS_FUNCTION Real range(const unsigned int i) const { return _raw_y[i]; }
 
-  /**
-   * Provides a means for explicitly setting the x and y data. This must
-   * be called in the constructor of inherited classes.
-   */
-  virtual void setData(const std::vector<Real> & x, const std::vector<Real> & y);
-
 protected:
   ///@{ raw function data as read
   Moose::Kokkos::Array<Real> _raw_x;

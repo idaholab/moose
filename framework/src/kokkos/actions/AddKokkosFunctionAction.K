@@ -31,6 +31,14 @@ AddKokkosFunctionAction::act()
   FunctionParserBase<Real> fp;
   std::string vars = "x,y,z,t,NaN,pi,e";
   if (fp.Parse(_name, vars) == -1) // -1 for success
-    mooseWarning("Function name '" + _name + "' could evaluate as a ParsedFunction");
+    mooseError(
+        "Function name '",
+        _name,
+        "' can be interpreted as a parsed function expression. This can be problematic. As an "
+        "example you may name a function 'x' whose functional form is 'xy'. You probably wouldn't "
+        "do this, but let's assume for the sake of argument. You might also write somewhere in a "
+        "consumer object 'function = x'. Well, MOOSE supports direct construction of parsed "
+        "functions from 'FunctionName' parameters, so is this consumer going to end up using the "
+        "functional form 'x' or 'xy'? It is undefined behavior.");
   _problem->addKokkosFunction(_type, _name, _moose_object_pars);
 }

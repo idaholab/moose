@@ -674,7 +674,7 @@ public:
   virtual Moose::Kokkos::Function getKokkosFunction(const std::string & name);
   /**
    * Get a Kokkos function in a concrete type
-   * @tparam T the function type
+   * @tparam T The Kokkos function type
    * @param name The Kokkos function name
    * @returns The reference of the Kokkos function in the concrete type
    */

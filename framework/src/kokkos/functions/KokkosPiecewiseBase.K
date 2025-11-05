@@ -19,13 +19,3 @@ KokkosPiecewiseBase::KokkosPiecewiseBase(const InputParameters & parameters)
   : FunctionBase(parameters)
 {
 }
-
-void
-KokkosPiecewiseBase::setData(const std::vector<Real> & x, const std::vector<Real> & y)
-{
-  _raw_x = x;
-  _raw_y = y;
-
-  if (_raw_x.size() != _raw_y.size())
-    mooseError("In KokkosPiecewiseBase ", _name, ": Lengths of x and y data do not match.");
-}
