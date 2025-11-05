@@ -529,6 +529,12 @@ class TestResultsReader(unittest.TestCase):
             self.assertEqual(test_results.name, TEST_TEST_NAME)
 
     def testRecreateResult(self):
+        """
+        Test recreating a result directly from its data.
+
+        This is used in applications that need to quickly
+        serialize a result.
+        """
         gold = self.deserializeGold()
         for data in gold.values():
             result = StoredResult(data)

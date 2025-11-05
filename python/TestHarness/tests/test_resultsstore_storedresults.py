@@ -29,7 +29,6 @@ from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
     decompress_dict,
-    mutable_results_test_iterator,
     results_set_test_value,
     results_test_entry,
     results_test_iterator,
