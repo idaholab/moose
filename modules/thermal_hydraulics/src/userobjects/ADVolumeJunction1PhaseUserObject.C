@@ -206,6 +206,8 @@ ADVolumeJunction1PhaseUserObject::computeResidual(const std::vector<ADReal> & fl
                                                   const RealVectorValue & ni,
                                                   bool is_primary_connection) const
 {
+  using std::abs;
+
   const RealVectorValue nJi = -ni;
 
   RealVectorValue t1, t2;

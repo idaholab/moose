@@ -34,6 +34,9 @@ public:
   /// Number of equations for the junction
   static const unsigned int N_EQ;
 
+  UserObjectName getVolumeJunctionUserObjectName() const { return _junction_uo_name; }
+  UserObjectName getNumericalFluxName(unsigned int i) const { return _numerical_flux_names[i]; }
+
 protected:
   virtual void setupMesh() override;
   virtual void check() const override;
