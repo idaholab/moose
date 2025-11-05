@@ -31,7 +31,11 @@ PolyLineMeshFollowingNodeSetGenerator::validParams()
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we get the sideset from");
   params.addRequiredParam<BoundaryName>("nodeset", "Nodeset to follow to form the polyline");
   params.addRequiredParam<Real>("search_radius",
-                                "Radius of the cylinder used to find points in the nodeset");
+                                "Radius of the sphere used to find points in the nodeset");
+  params.addParam<bool>(
+      "ignore_nodes_behind",
+      false,
+      "Ignore nodes in the nodeset that are behind the current point in the polyline");
   params.addParam<bool>("loop", false, "Whether edges should form a closed loop");
 
   // Discretization parameters
@@ -67,6 +71,7 @@ PolyLineMeshFollowingNodeSetGenerator::PolyLineMeshFollowingNodeSetGenerator(
     _input(getMesh("input")),
     _starting_point(getParam<Point>("starting_point")),
     _starting_direction(getParam<Point>("starting_direction")),
+    _ignore_nodes_behind(getParam<bool>("ignore_nodes_behind")),
     _loop(getParam<bool>("loop")),
     _line_subdomain(getParam<SubdomainName>("line_subdomain")),
     _start_boundary(getParam<BoundaryName>("start_boundary")),
@@ -114,7 +119,7 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
   unsigned int n_segments = 0;
   for (auto i : make_range(n_points))
   {
-    // Move the point forward in the known direction
+    // Move the point forward in the search direction
     const auto previous_point = current_point;
     current_point += previous_direction * _dx;
 
@@ -127,14 +132,20 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
     for (const auto n_id : nodeset_nodes)
       if ((current_point - base_mesh->node_ref(n_id)).norm_sq() < search_radius_sq)
       {
-        barycenter += base_mesh->node_ref(n_id);
-        n_sum++;
+        if (!_ignore_nodes_behind ||
+            ((base_mesh->node_ref(n_id) - current_point) * previous_direction >= 0))
+        {
+          barycenter += base_mesh->node_ref(n_id);
+          n_sum++;
+        }
       }
     if (n_sum > 0)
       barycenter /= n_sum;
-    else
+    else if (!_ignore_nodes_behind)
       mooseError("Did not find any nodes in the nodeset near the current point at: ",
                  current_point);
+    else
+      barycenter = previous_point;
 
     if (MooseUtils::absoluteFuzzyEqual((barycenter - previous_point).norm_sq(), 0))
     {
@@ -146,19 +157,20 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
     const auto new_direction = (barycenter - previous_point).unit();
     previous_direction = new_direction;
 
-    // Add the barycenter as the new point
+    // Set the new point towards the barycenter
     n_segments++;
-    mesh.add_point(barycenter, (i + 1) * _num_edges_between_points);
-    current_point = barycenter;
+    // Note: this dx could be different than the dx used to search the barycenter
+    current_point = previous_point + _dx * new_direction;
+    mesh.add_point(current_point, (i + 1) * _num_edges_between_points);
     if (_verbose)
-      _console << i << ": new point: " << barycenter << " new direction " << previous_direction
+      _console << i << ": new point: " << current_point << " new direction " << previous_direction
                << std::endl;
 
     // Add the additional edges in between if requested
     if (_num_edges_between_points > 1)
     {
       auto p = previous_point;
-      const Point pvec = (barycenter - previous_point) / _num_edges_between_points;
+      const Point pvec = (current_point - previous_point) / _num_edges_between_points;
       for (auto j : make_range(1u, _num_edges_between_points))
       {
         p += pvec;
