@@ -835,8 +835,6 @@ class StoredResult:
             if (tester := test_data.get("tester")) is not None and (
                 json_metadata := tester.get("json_metadata")
             ) is not None:
-                for k, v in json_metadata.items():
-                    print(k, type(v))
                 tester["json_metadata"] = {
                     k: decompress(v) for k, v in json_metadata.items()
                 }
