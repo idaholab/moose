@@ -1,0 +1,317 @@
+# air
+rho = 1.177
+mu = 1.846e-5
+k = .0262
+cp = 1006
+beta = 3.33e-3
+T_0 = 300
+T_hot = 301
+T_cold = 300
+l = 3e-2
+expt_l = ${fparse 0.1 * l}
+p_pin_loc = ${fparse 0.95 * l}
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+  advected_interp_method = 'upwind'
+[]
+
+[Mesh]
+  [gen]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = ${l}
+    ymin = 0
+    ymax = ${l}
+    nx = 10
+    ny = 10
+  []
+  [left_bottom_corner]
+    type = SubdomainBoundingBoxGenerator
+    block_id = 1
+    bottom_left = '0 0 0'
+    input = gen
+    top_right = '${expt_l} ${expt_l} 0'
+  []
+  [new_sideset]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = left_bottom_corner
+    new_boundary = experiment
+    paired_block = 1
+    primary_block = 0
+  []
+  [remove]
+    type = BlockDeletionGenerator
+    input = new_sideset
+    block = '1'
+  []
+  coord_type = 'RZ'
+  uniform_refine = 2
+[]
+
+[Problem]
+  linear_sys_names = 'u_system v_system pressure_system energy_system'
+  previous_nl_solution_required = true
+[]
+
+# [AuxVariables]
+#   [vel_lagrange_x]
+#   []
+#   [vel_lagrange_y]
+#   []
+# []
+
+# [AuxKernels]
+#   [vel_lagrange_x]
+#     type = ProjectionAux
+#     variable = vel_lagrange_x
+#     v = vel_x
+#     execute_on = timestep_end
+#   []
+#   [vel_lagrange_y]
+#     type = ProjectionAux
+#     variable = vel_lagrange_y
+#     v = vel_y
+#     execute_on = timestep_end
+#   []
+# []
+
+[UserObjects]
+  [rc]
+    type = RhieChowMassFlux
+    u = vel_x
+    v = vel_y
+    pressure = pressure
+    rho = ${rho}
+    p_diffusion_kernel = p_diffusion
+    body_force_kernel_names = "u_buoyancy; v_buoyancy"
+  []
+[]
+
+[Variables]
+  [vel_x]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0.0
+    solver_sys = u_system
+  []
+  [vel_y]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0.0
+    solver_sys = v_system
+  []
+  [pressure]
+    type = MooseLinearVariableFVReal
+    solver_sys = pressure_system
+    initial_condition = 0.2
+  []
+  [T_fluid]
+    type = MooseLinearVariableFVReal
+    solver_sys = energy_system
+    initial_condition = ${T_cold}
+  []
+[]
+
+[LinearFVKernels]
+  [u_advection_stress]
+    type = LinearWCNSFVMomentumFlux
+    variable = vel_x
+    mu = ${mu}
+    u = vel_x
+    v = vel_y
+    momentum_component = 'x'
+    use_nonorthogonal_correction = false
+  []
+  [v_advection_stress]
+    type = LinearWCNSFVMomentumFlux
+    variable = vel_y
+    mu = ${mu}
+    u = vel_x
+    v = vel_y
+    momentum_component = 'y'
+    use_nonorthogonal_correction = false
+  []
+  [u_pressure]
+    type = LinearFVMomentumPressure
+    variable = vel_x
+    pressure = pressure
+    momentum_component = 'x'
+  []
+  [v_pressure]
+    type = LinearFVMomentumPressure
+    variable = vel_y
+    pressure = pressure
+    momentum_component = 'y'
+  []
+  [u_buoyancy]
+    type = LinearFVMomentumBoussinesq
+    variable = vel_x
+    T_fluid = T_fluid
+    gravity = '0 -9.8 0'
+    rho = ${rho}
+    ref_temperature = ${T_0}
+    alpha_name = ${beta}
+    momentum_component = 'x'
+  []
+  [v_buoyancy]
+    type = LinearFVMomentumBoussinesq
+    variable = vel_y
+    T_fluid = T_fluid
+    gravity = '0 -9.8 0'
+    rho = ${rho}
+    ref_temperature = ${T_0}
+    alpha_name = ${beta}
+    momentum_component = 'y'
+  []
+  [p_diffusion]
+    type = LinearFVAnisotropicDiffusion
+    variable = pressure
+    diffusion_tensor = Ainv
+    use_nonorthogonal_correction = false
+  []
+  [HbyA_divergence]
+    type = LinearFVDivergence
+    variable = pressure
+    face_flux = HbyA
+    force_boundary_execution = true
+  []
+  [heat_advection]
+    type = LinearFVEnergyAdvection
+    variable = T_fluid
+    advected_quantity = temperature
+    cp = ${cp}
+  []
+  [conduction]
+    type = LinearFVDiffusion
+    variable = T_fluid
+    diffusion_coeff = ${k}
+  []
+[]
+
+[LinearFVBCs]
+  # [right_y]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   variable = vel_y
+  #   boundary = 'right'
+  #   functor = 1
+  # []
+  [no_slip_x]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    variable = vel_x
+    boundary = 'top right bottom experiment'
+    functor = 0
+  []
+  [no_slip_y]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    variable = vel_y
+    boundary = 'top right bottom experiment'
+    # boundary = 'top bottom experiment'
+    functor = 0
+  []
+  [symmetry-u]
+    type = LinearFVVelocitySymmetryBC
+    variable = vel_x
+    momentum_component = x
+    u = vel_x
+    v = vel_y
+    boundary = 'left'
+  []
+  [symmetry-v]
+    type = LinearFVVelocitySymmetryBC
+    variable = vel_y
+    momentum_component = y
+    u = vel_x
+    v = vel_y
+    boundary = 'left'
+  []
+  [symmetry-p]
+    type = LinearFVPressureSymmetryBC
+    variable = pressure
+    boundary = 'left'
+    HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+  []
+  [pressure-extrapolation]
+    type = LinearFVExtrapolatedPressureBC
+    boundary = 'right top bottom experiment'
+    variable = pressure
+    use_two_term_expansion = true
+  []
+  [T_symmetry]
+    type = LinearFVAdvectionDiffusionScalarSymmetryBC
+    boundary = 'left'
+    variable = T_fluid
+  []
+  [T_adiabatic]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    boundary = 'bottom'
+    functor = 0
+    variable = T_fluid
+  []
+  [T_hot]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'experiment'
+    functor = ${T_hot}
+    variable = T_fluid
+  []
+  [T_cold]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'top right'
+    functor = ${T_cold}
+    variable = T_fluid
+  []
+[]
+
+[Executioner]
+  type = SIMPLE
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  energy_l_abs_tol = 1e-10
+  momentum_l_tol = 0
+  pressure_l_tol = 0
+  energy_l_tol = 0
+  momentum_systems = 'u_system v_system'
+  pressure_system = 'pressure_system'
+  energy_system = 'energy_system'
+  momentum_equation_relaxation = 0.8
+  pressure_variable_relaxation = 0.3
+  energy_equation_relaxation = 0.9
+  num_iterations = 1500
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
+  energy_absolute_tolerance = 1e-8
+  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
+  momentum_petsc_options_value = 'hypre boomeramg'
+  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
+  pressure_petsc_options_value = 'hypre boomeramg'
+  energy_petsc_options_iname = '-pc_type -pc_hypre_type'
+  energy_petsc_options_value = 'hypre boomeramg'
+  print_fields = false
+
+  pin_pressure = true
+  pressure_pin_value = 0.0
+  pressure_pin_point = '${p_pin_loc} ${p_pin_loc} 0.0'
+[]
+
+[Outputs]
+  exodus = true
+  csv = false
+  perf_graph = false
+  print_nonlinear_residuals = false
+  print_linear_residuals = true
+[]
+
+[Postprocessors]
+  [rayleigh]
+    type = RayleighNumber
+    cp_ave = ${cp}
+    gravity_magnitude = 9.8
+    k_ave = ${k}
+    l = ${l}
+    mu_ave = ${mu}
+    rho_ave = ${rho}
+    beta = ${beta}
+    T_cold = ${T_cold}
+    T_hot = ${T_hot}
+    execute_on = 'initial timestep_end'
+  []
+[]
