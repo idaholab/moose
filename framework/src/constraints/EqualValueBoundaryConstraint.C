@@ -94,37 +94,50 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   _primary_node_vector.clear();
   _connected_nodes.clear();
 
+  // user provide nothing
+  if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
+    mooseError("Please specify secondary node ids or boundary id.");
+
   if (_primary_node_id == std::numeric_limits<unsigned int>::max() &&
       isParamSetByUser("primary_node_coord"))
   {
     const Real eps = libMesh::TOLERANCE;
 
+    int primary_node_number = 0;
     for (const auto & bd_node : *_mesh.getBoundaryNodeRange())
     {
       if ((*(bd_node->_node) - _primary_node_coord).norm() < eps)
       {
-        _primary_node_id = bd_node->_node->id();
-        break;
+        // either the node id should be in the secondary node ids list
+        // or the node should be on the secondary boundary
+        if (std::find(_secondary_node_ids.begin(),
+                      _secondary_node_ids.end(),
+                      bd_node->_node->id()) != _secondary_node_ids.end() ||
+            bd_node->_bnd_id == _mesh.getBoundaryID(_secondary_node_set_id))
+        {
+          _primary_node_id = bd_node->_node->id();
+          primary_node_number++;
+        }
       }
     }
 
-    _mesh.comm().min(_primary_node_id);
+    _mesh.comm().sum(primary_node_number);
 
-    if (_primary_node_id == std::numeric_limits<unsigned int>::max())
-      mooseWarning(
-          "Couldn't find a node ID for the specified primary_node_coord. We go with default "
-          "behavior of choosing primary node.");
+    if (primary_node_number == 0)
+      mooseError("Couldn't find a node ID for the specified primary_node_coord. We go with default "
+                 "behavior of choosing primary node.");
+    else if (primary_node_number > 1)
+      mooseError("Multiple nodes found for the specified primary_node_coord.");
+
+    _mesh.comm().min(_primary_node_id);
   }
   else if (_primary_node_id != std::numeric_limits<unsigned int>::max() &&
            isParamSetByUser("primary_node_coord"))
     mooseError(
         "Both 'primary' and 'primary_node_coord' parameters are set. They are mutually exclusive.");
 
-  // user provide nothing
-  if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
-    mooseError("Please specify secondary node ids or boundary id.");
   // user provide boundary name
-  else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
+  if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
   {
     std::vector<dof_id_type> nodelist =
         _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
