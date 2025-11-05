@@ -68,7 +68,7 @@ public:
    *
    * @return list of list of universe names
    */
-  const std::vector<std::vector<const std::string>> getUniverseNames() const;
+  const std::vector<std::vector<const std::string>> getUniverseNameMap() const;
 
   /**
    * @brief whether or not the universe of the specified name exists in the lattice

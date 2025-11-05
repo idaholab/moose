@@ -45,7 +45,7 @@ CSGLattice::hasUniverse(const std::string & name) const
 }
 
 const std::vector<std::vector<const std::string>>
-CSGLattice::getUniverseNames() const
+CSGLattice::getUniverseNameMap() const
 {
   std::vector<std::vector<const std::string>> name_map;
   for (auto univ_list : _universe_map)

@@ -278,6 +278,95 @@ TEST(CSGLatticeTest, testHexSetUniverses)
   }
 }
 
+TEST(CSGLatticeTest, testGetUniverseNames)
+{
+  std::string name1 = "pinky";
+  std::string name2 = "brain";
+  const auto univ1 = CSGUniverse(name1, false);
+  const auto univ2 = CSGUniverse(name2, false);
+  // create cartesian lattice with 2x2 universe map
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ2)}, {std::cref(univ2), std::cref(univ1)}};
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+  auto name_map = cart_lattice.getUniverseNameMap();
+  ASSERT_EQ(name_map.size(), 2);
+  ASSERT_EQ(name_map[0].size(), 2);
+  ASSERT_EQ(name_map[1].size(), 2);
+  ASSERT_EQ(name_map[0][0], name1);
+  ASSERT_EQ(name_map[0][1], name2);
+  ASSERT_EQ(name_map[1][0], name2);
+  ASSERT_EQ(name_map[1][1], name1);
+}
+
+TEST(CSGLatticeTest, testHasUniverse)
+{
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ2)}};
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+  // check for existing universes
+  ASSERT_TRUE(cart_lattice.hasUniverse("univ1"));
+  ASSERT_TRUE(cart_lattice.hasUniverse("univ2"));
+  // check for non-existing universe
+  ASSERT_FALSE(cart_lattice.hasUniverse("univ3"));
+}
+
+// tests CSGCartesianLattice::isValidIndex function
+TEST(CSGLatticeTest, testCartIsValidIndex)
+{
+  // create initial lattice of all univ1 elements
+  const auto univ1 = CSGUniverse("univ1", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+  {
+    // test valid index locations
+    ASSERT_TRUE(cart_lattice.isValidIndex(std::make_pair(0, 0)));
+    ASSERT_TRUE(cart_lattice.isValidIndex(std::make_pair(1, 2)));
+  }
+  {
+    // test invalid index locations
+    ASSERT_FALSE(cart_lattice.isValidIndex(std::make_pair(2, 0)));  // row out of bounds
+    ASSERT_FALSE(cart_lattice.isValidIndex(std::make_pair(0, 3)));  // col out of bounds
+    ASSERT_FALSE(cart_lattice.isValidIndex(std::make_pair(-1, 0))); // negative row
+    ASSERT_FALSE(cart_lattice.isValidIndex(std::make_pair(0, -1))); // negative col
+  }
+}
+
+TEST(CSGLatticeTest, testHexIsValidIndex)
+{
+  // create initial lattice of all univ1 elements
+  const auto univ1 = CSGUniverse("univ1", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1)}};
+  auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0, univ_map);
+  {
+    // valid list of indices for 2-ring hex lattice:
+    std::vector<std::pair<int, int>> valid_indices = {std::make_pair(0, 0),
+                                                      std::make_pair(0, 1),
+                                                      std::make_pair(1, 0),
+                                                      std::make_pair(1, 1),
+                                                      std::make_pair(1, 2),
+                                                      std::make_pair(2, 0),
+                                                      std::make_pair(2, 1)};
+    // check that all valid indices return true
+    for (const auto & index : valid_indices)
+      ASSERT_TRUE(hex_lattice.isValidIndex(index));
+  }
+  {
+    // check invalid for each case is caught
+    ASSERT_FALSE(hex_lattice.isValidIndex(std::make_pair(0, 2)));  // col out of bounds (row 0)
+    ASSERT_FALSE(hex_lattice.isValidIndex(std::make_pair(1, 3)));  // col out of bounds (row 1)
+    ASSERT_FALSE(hex_lattice.isValidIndex(std::make_pair(3, 0)));  // row out of bounds
+    ASSERT_FALSE(hex_lattice.isValidIndex(std::make_pair(-1, 0))); // negative row
+    ASSERT_FALSE(hex_lattice.isValidIndex(std::make_pair(0, -1))); // negative col
+  }
+}
+
 /// tests CSGCartesianLattice::setUniverseAtIndex function
 TEST(CSGLatticeTest, testCartSetUniverseAtIndex)
 {
@@ -329,7 +418,7 @@ TEST(CSGLatticeTest, testCartSetUniverseAtIndex)
 }
 
 /// tests CSGCartesianLattice different methods for retrieving universes or locations of universes
-TEST(CSGLatticeTest, testCartGetMethods)
+TEST(CSGLatticeTest, testGetMethods)
 {
   // test get all and get by name (valid and invalid) and get at index (valid and invalid)
   // create initial lattice of all univ1 elements
@@ -409,6 +498,53 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   {
     // all lattices 2-7 should differ from each other in some way
     std::vector<CSGCartesianLattice> diff_compare = {l2, l3, l4, l5, l6, l7};
+    for (std::size_t i = 0; i < diff_compare.size(); i++)
+    {
+      for (std::size_t j = i + 1; j < diff_compare.size(); ++j)
+        ASSERT_TRUE(diff_compare[i] != diff_compare[j]);
+    }
+  }
+}
+
+TEST(CSGLatticeTest, testHexLatticeEquality)
+{
+  // universe maps to use for different lattice comparisons
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map1 = {
+      {std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map2 = {
+      {std::cref(univ2), std::cref(univ2)},
+      {std::cref(univ2), std::cref(univ2), std::cref(univ2)},
+      {std::cref(univ2), std::cref(univ2)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map3 = {
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+  // identical lattices
+  auto l1 = CSGHexagonalLattice("hexlat", 1.0, univ_map1);
+  auto l2 = CSGHexagonalLattice("hexlat", 1.0, univ_map1);
+  // lattice that differs by name only
+  auto l3 = CSGHexagonalLattice("hexlat1", 1.0, univ_map1);
+  // lattice that differs by universe map items
+  auto l4 = CSGHexagonalLattice("hexlat", 1.0, univ_map2);
+  // lattice that differs by pitch
+  auto l5 = CSGHexagonalLattice("hexlat", 2.0, univ_map1);
+  // lattice that differs by nrow/rings
+  auto l6 = CSGHexagonalLattice("hexlat", 1.0, univ_map3);
+
+  // check equality
+  {
+    ASSERT_TRUE(l1 == l2);
+  }
+  // check inequality
+  {
+    // all lattices 2-6 should differ from each other in some way
+    std::vector<CSGHexagonalLattice> diff_compare = {l2, l3, l4, l5, l6};
     for (std::size_t i = 0; i < diff_compare.size(); i++)
     {
       for (std::size_t j = i + 1; j < diff_compare.size(); ++j)

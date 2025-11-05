@@ -272,7 +272,7 @@ CSGBase::createHexagonalLattice(
     for (const CSGUniverse & univ : univ_list)
     {
       if (!checkUniverseInBase(univ))
-        mooseError("Cannot create Hexagonal lattice " + name + ". Universe " + univ.getName() +
+        mooseError("Cannot create hexagonal lattice " + name + ". Universe " + univ.getName() +
                    " is not in the CSGBase instance.");
     }
   }
@@ -572,7 +572,7 @@ CSGBase::generateOutput() const
       csg_json["lattices"][lat_name][dim.first] = anyToJson(dim.second);
     }
     // write the map of universe names: list of lists
-    csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNames();
+    csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
   }
 
   return csg_json;
