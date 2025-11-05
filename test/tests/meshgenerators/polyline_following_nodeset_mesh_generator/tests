@@ -7,5 +7,9 @@
     cli_args = '--mesh-only'
     exodiff = '2d_channel_in.e'
     requirement = 'The system shall be able to generate a polyline following a nodeset.'
+    # mesh generation test
+    recover = false
+    # not implemented for distributed
+    mesh_mode = replicated
   []
 []
