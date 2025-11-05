@@ -53,7 +53,7 @@ two_term_bc=true
 
 [LinearFVBCs]
   [symm]
-    type = LinearFVScalarSymmetryBC
+    type = LinearFVAdvectionDiffusionScalarSymmetryBC
     variable = u
     boundary = "bottom"
     use_two_term_expansion = ${two_term_bc}

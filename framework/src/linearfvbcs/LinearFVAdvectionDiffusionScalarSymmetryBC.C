@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LinearFVScalarSymmetryBC.h"
+#include "LinearFVAdvectionDiffusionScalarSymmetryBC.h"
 
-registerMooseObject("MooseApp", LinearFVScalarSymmetryBC);
+registerMooseObject("MooseApp", LinearFVAdvectionDiffusionScalarSymmetryBC);
 
 InputParameters
-LinearFVScalarSymmetryBC::validParams()
+LinearFVAdvectionDiffusionScalarSymmetryBC::validParams()
 {
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addClassDescription("Adds a symmetry boundary condition for a scalar quantity.");
@@ -23,7 +23,8 @@ LinearFVScalarSymmetryBC::validParams()
   return params;
 }
 
-LinearFVScalarSymmetryBC::LinearFVScalarSymmetryBC(const InputParameters & parameters)
+LinearFVAdvectionDiffusionScalarSymmetryBC::LinearFVAdvectionDiffusionScalarSymmetryBC(
+    const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
     _two_term_expansion(getParam<bool>("use_two_term_expansion"))
 {
@@ -32,7 +33,7 @@ LinearFVScalarSymmetryBC::LinearFVScalarSymmetryBC(const InputParameters & param
 }
 
 Real
-LinearFVScalarSymmetryBC::computeBoundaryValue() const
+LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryValue() const
 {
   // We allow internal boundaries too so we need to check which side we are on
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
@@ -58,14 +59,14 @@ LinearFVScalarSymmetryBC::computeBoundaryValue() const
 }
 
 Real
-LinearFVScalarSymmetryBC::computeBoundaryNormalGradient() const
+LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryNormalGradient() const
 {
   // We don't have this on a symmetry plane
   return 0.0;
 }
 
 Real
-LinearFVScalarSymmetryBC::computeBoundaryValueMatrixContribution() const
+LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryValueMatrixContribution() const
 {
   // No matter if we have a one-term or two-term expansion we will always
   // have a contribution to the matrix
@@ -73,7 +74,7 @@ LinearFVScalarSymmetryBC::computeBoundaryValueMatrixContribution() const
 }
 
 Real
-LinearFVScalarSymmetryBC::computeBoundaryValueRHSContribution() const
+LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryValueRHSContribution() const
 {
   // If we request linear extrapolation, we add the gradient term to the right hand
   // side.
@@ -96,14 +97,14 @@ LinearFVScalarSymmetryBC::computeBoundaryValueRHSContribution() const
 }
 
 Real
-LinearFVScalarSymmetryBC::computeBoundaryGradientMatrixContribution() const
+LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryGradientMatrixContribution() const
 {
   // Nothing to add here, considering that we have a symmetry condition
   return 0.0;
 }
 
 Real
-LinearFVScalarSymmetryBC::computeBoundaryGradientRHSContribution() const
+LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryGradientRHSContribution() const
 {
   // Nothing to add here, considering that we have a symmetry condition
   return 0.0;

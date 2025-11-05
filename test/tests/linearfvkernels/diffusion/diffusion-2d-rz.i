@@ -44,7 +44,7 @@
     functor = analytic_solution
   []
   [symmetry]
-    type = LinearFVScalarSymmetryBC
+    type = LinearFVAdvectionDiffusionScalarSymmetryBC
     variable = u
     boundary = "left"
   []

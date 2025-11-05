@@ -1,4 +1,4 @@
-# LinearFVScalarSymmetryBC
+# LinearFVAdvectionDiffusionScalarSymmetryBC
 
 ## Description
 
@@ -30,8 +30,8 @@ while $u_C$ and $\nabla u_C$ denote the cell center and cell gradient values of 
 - In its current formulation, the stencil achieves only first-order spatial
   convergence on meshes composed of triangles and tetrahedra.
 
-!syntax parameters /LinearFVBCs/LinearFVScalarSymmetryBC
+!syntax parameters /LinearFVBCs/LinearFVAdvectionDiffusionScalarSymmetryBC
 
-!syntax inputs /LinearFVBCs/LinearFVScalarSymmetryBC
+!syntax inputs /LinearFVBCs/LinearFVAdvectionDiffusionScalarSymmetryBC
 
-!syntax children /LinearFVBCs/LinearFVScalarSymmetryBC
+!syntax children /LinearFVBCs/LinearFVAdvectionDiffusionScalarSymmetryBC

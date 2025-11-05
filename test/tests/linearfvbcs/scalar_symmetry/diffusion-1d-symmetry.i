@@ -48,7 +48,7 @@ diff = 0.1
 
 [LinearFVBCs]
   [rob_l]
-    type = LinearFVScalarSymmetryBC
+    type = LinearFVAdvectionDiffusionScalarSymmetryBC
     variable = u
     boundary = "left"
     use_two_term_expansion = true

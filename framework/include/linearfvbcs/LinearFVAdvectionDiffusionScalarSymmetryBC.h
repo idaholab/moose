@@ -14,7 +14,7 @@
 /**
  * Class implementing a symmetry boundary condition for scalar quantities
  */
-class LinearFVScalarSymmetryBC : public LinearFVAdvectionDiffusionBC
+class LinearFVAdvectionDiffusionScalarSymmetryBC : public LinearFVAdvectionDiffusionBC
 {
 public:
   static InputParameters validParams();
@@ -23,7 +23,7 @@ public:
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVScalarSymmetryBC(const InputParameters & parameters);
+  LinearFVAdvectionDiffusionScalarSymmetryBC(const InputParameters & parameters);
 
   /// Overriding all of these
   virtual Real computeBoundaryValue() const override;

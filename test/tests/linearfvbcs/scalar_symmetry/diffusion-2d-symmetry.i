@@ -58,7 +58,7 @@ diff = 0.1 # diffusion coeff.
     functor = u_exact
   []
   [symm]
-    type = LinearFVScalarSymmetryBC
+    type = LinearFVAdvectionDiffusionScalarSymmetryBC
     variable = u
     boundary = "bottom left"
     use_two_term_expansion = true
