@@ -12,7 +12,7 @@
 import importlib
 from copy import deepcopy
 from datetime import datetime
-from typing import Callable, Iterable, Optional, Tuple
+from typing import Callable, Iterable, Optional
 
 from bson.objectid import ObjectId
 from pymongo.database import Database
