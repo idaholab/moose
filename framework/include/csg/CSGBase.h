@@ -439,6 +439,7 @@ public:
   /**
    * @brief generate the JSON representation output for the CSG object
    *
+   * @return nlohmann::json JSON object representing the CSG model
    */
   nlohmann::json generateOutput() const;
 
@@ -623,7 +624,12 @@ private:
 #endif
 };
 
-// helper function to convert std::any to json
+/**
+ * @brief Helper function to convert std::any to json
+ *
+ * @param data std::any object to convert
+ * @return nlohmann::json representation of the data
+ */
 nlohmann::json anyToJson(const std::any & data);
 
 } // namespace CSG

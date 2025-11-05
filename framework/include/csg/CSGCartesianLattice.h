@@ -112,6 +112,11 @@ protected:
   // type)
   virtual bool compareDimensions(const CSGLattice & other) const override;
 
+  /**
+   * @brief set the universes that define the lattice layout
+   *
+   * @param universes list of list of universes to set as the lattice map
+   */
   virtual void setUniverses(
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) override;
 
@@ -125,9 +130,6 @@ protected:
   int _nx1;
 
   friend class CSGBase;
-
-  /// @brief string names of the dimension parameters that defined the geometry of the lattice
-  // MooseEnum _dimension_names{"nx0 nx1 pitch"};
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
