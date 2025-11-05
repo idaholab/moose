@@ -43,7 +43,7 @@
 
 [Materials]
   [rc]
-    type = GenericConstant2DArray
+    type = ADGenericConstant2DArray
     prop_name = rc
     prop_value = '1 0; -0.1 1'
   []

@@ -26,14 +26,14 @@ ADArrayReaction::validParams()
 
 ADArrayReaction::ADArrayReaction(const InputParameters & parameters)
   : ADArrayKernel(parameters),
-    _r(hasMaterialProperty<ADReal>("reaction_coefficient")
-           ? &getMaterialProperty<Real>("reaction_coefficient")
+    _r(hasADMaterialProperty<Real>("reaction_coefficient")
+           ? &getADMaterialProperty<Real>("reaction_coefficient")
            : nullptr),
-    _r_array(hasMaterialProperty<RealEigenVector>("reaction_coefficient")
-                 ? &getMaterialProperty<RealEigenVector>("reaction_coefficient")
+    _r_array(hasADMaterialProperty<RealEigenVector>("reaction_coefficient")
+                 ? &getADMaterialProperty<RealEigenVector>("reaction_coefficient")
                  : nullptr),
-    _r_2d_array(hasMaterialProperty<RealEigenMatrix>("reaction_coefficient")
-                    ? &getMaterialProperty<RealEigenMatrix>("reaction_coefficient")
+    _r_2d_array(hasADMaterialProperty<RealEigenMatrix>("reaction_coefficient")
+                    ? &getADMaterialProperty<RealEigenMatrix>("reaction_coefficient")
                     : nullptr)
 {
   if (!_r && !_r_array && !_r_2d_array)

@@ -40,7 +40,6 @@ typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
  * Real                Real                  Real
  * RealVectorValue     RealVectorValue       Real
  * RealEigenVector     Real                  RealEigenVector
- * ADRealEigenVector   ADReal                ADRealEigenVector
  *
  */
 template <typename OutputType>

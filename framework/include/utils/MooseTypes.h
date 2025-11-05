@@ -149,6 +149,7 @@ typedef Eigen::Matrix<ADReal, Eigen::Dynamic, 1> ADRealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim * Moose::dim> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
+typedef Eigen::Matrix<ADReal, Eigen::Dynamic, Eigen::Dynamic> ADRealEigenMatrix;
 typedef TensorValue<Real> RealTensorValue;
 
 namespace TensorTools
@@ -197,6 +198,7 @@ using libMesh::RealGradient;
 
 // Bring these common types added to the libMesh namespace in this header
 // to global namespace
+using libMesh::ADRealEigenMatrix;
 using libMesh::ADRealEigenVector;
 using libMesh::DenseMatrix;
 using libMesh::DenseVector;
@@ -519,6 +521,13 @@ struct ADType<RealEigenVector>
 {
   typedef ADRealEigenVector type;
 };
+
+template <>
+struct ADType<RealEigenMatrix>
+{
+  typedef ADRealEigenMatrix type;
+};
+
 template <>
 struct ADType<VariableValue>
 {
@@ -709,6 +718,8 @@ template <bool is_ad>
 using GenericDenseMatrix = Moose::GenericType<DenseMatrix<Real>, is_ad>;
 template <bool is_ad>
 using GenericRealEigenVector = Moose::GenericType<RealEigenVector, is_ad>;
+template <bool is_ad>
+using GenericRealEigenMatrix = Moose::GenericType<RealEigenMatrix, is_ad>;
 
 namespace Moose
 {
