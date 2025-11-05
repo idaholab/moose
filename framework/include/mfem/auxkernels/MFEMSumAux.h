@@ -16,7 +16,7 @@
 #include "MFEMAuxKernel.h"
 
 /*
- * Class to scale and sum two MFEM variables, and store the result in a third variable.
+ * Class to scale and sum an arbitrary number of MFEM variables into an auxiliary variable.
  */
 class MFEMSumAux : public MFEMAuxKernel
 {

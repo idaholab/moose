@@ -3504,6 +3504,10 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, boo
     // Threads::parallel_reduce(range, cd);
 
     cd(range);
+
+    if (is_jacobian)
+      for (const auto tid : make_range(libMesh::n_threads()))
+        _fe_problem.addCachedJacobian(tid);
   }
 }
 

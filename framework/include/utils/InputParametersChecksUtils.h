@@ -233,7 +233,7 @@ InputParametersChecksUtils<C>::checkVectorParamsSameLength(const std::string & p
   // handle empty vector defaults
   else if (forwardIsParamValid(param1) || forwardIsParamValid(param2))
     if (forwardGetParam<std::vector<T>>(param1).size() ||
-        forwardGetParam<std::vector<T>>(param2).size())
+        forwardGetParam<std::vector<S>>(param2).size())
       checkParamsBothSetOrNotSet(param1, param2);
 }
 
@@ -286,7 +286,7 @@ InputParametersChecksUtils<C>::checkTwoDVectorParamsSameLength(const std::string
   // handle empty vector defaults
   else if (forwardIsParamValid(param1) || forwardIsParamValid(param2))
     if (forwardGetParam<std::vector<T>>(param1).size() ||
-        forwardGetParam<std::vector<T>>(param2).size())
+        forwardGetParam<std::vector<S>>(param2).size())
       checkParamsBothSetOrNotSet(param1, param2);
 }
 

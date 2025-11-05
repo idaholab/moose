@@ -72,7 +72,7 @@
   [./all]
     type = FunctionDirichletBC
     variable = u
-    boundary = '1 2 3 4'
+    boundary = '1 3'
     function = exact_sln
   [../]
 []

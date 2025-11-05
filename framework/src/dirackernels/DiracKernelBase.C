@@ -79,12 +79,6 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
   statefulPropertiesAllowed(false);
 }
 
-Real
-DiracKernelBase::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  return 0;
-}
-
 void
 DiracKernelBase::addPoint(const Elem * elem, Point p, unsigned /*id*/)
 {

@@ -49,7 +49,7 @@ public:
   /**
    * This gets called by computeOffDiagJacobian() at each quadrature point.
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /**
    * Computes the off-diagonal Jacobian for variable jvar.
@@ -96,17 +96,4 @@ protected:
   const typename OutputTools<T>::VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
   const typename OutputTools<T>::VariableGradient & _grad_u;
-
-  /// drop duplicate points or consider them in residual and Jacobian
-  const bool _drop_duplicate_points;
-
-  // @{ Point-not-found behavior
-  enum class PointNotFoundBehavior
-  {
-    ERROR,
-    WARNING,
-    IGNORE
-  };
-  const PointNotFoundBehavior _point_not_found_behavior;
-  // @}
 };
