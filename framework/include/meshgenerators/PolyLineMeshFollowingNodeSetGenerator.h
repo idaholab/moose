@@ -33,6 +33,8 @@ protected:
   const Point _starting_point;
   /// Starting direction for the polyline
   const Point _starting_direction;
+  /// Whether to only look in front of the polyline for nodes in the nodeset
+  const bool _ignore_nodes_behind;
   /// Whether edges should form a closed loop. Will error if the nodeset does not loop back on itself
   const bool _loop;
 
