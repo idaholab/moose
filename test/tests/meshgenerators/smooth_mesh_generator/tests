@@ -1,13 +1,24 @@
 [Tests]
-  [./smooth_mesh_generator_test]
+  requirement = 'The system shall be able to use libmesh mesh modification tools.'
+  [laplace_smooth_mesh_generator]
     type = 'Exodiff'
-    input = 'mesh_smoother_generator.i'
+    input = 'laplace_mesh_smoother_generator.i'
     cli_args = '--mesh-only'
-    exodiff = 'mesh_smoother_generator_in.e'
-    requirement = 'The system shall be able to use libmesh mesh modification tools.'
+    exodiff = 'laplace_mesh_smoother_generator_in.e'
     design = 'meshgenerators/SmoothMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
+
+  [variational_smooth_mesh_generator]
+    type = 'Exodiff'
+    input = 'variational_mesh_smoother_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'variational_mesh_smoother_generator_in.e'
+    design = 'meshgenerators/SmoothMeshGenerator.md'
+    issues = '#28424 #22141'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  []
 []

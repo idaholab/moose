@@ -1,17 +1,13 @@
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = concentric_circle_mesh_in.e
   []
 
-  [./smooth]
+  [smooth]
     type = SmoothMeshGenerator
-    algorithm = laplace
     input = fmg
+    algorithm = laplace
     iterations = 3
   []
-[]
-
-[Outputs]
-  exodus = true
 []
