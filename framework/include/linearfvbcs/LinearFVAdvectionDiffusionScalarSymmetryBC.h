@@ -25,7 +25,7 @@ public:
    */
   LinearFVAdvectionDiffusionScalarSymmetryBC(const InputParameters & parameters);
 
-  /// Overriding all of these
+  // Overriding all of these
   virtual Real computeBoundaryValue() const override;
   virtual Real computeBoundaryNormalGradient() const override;
   virtual Real computeBoundaryValueMatrixContribution() const override;

@@ -44,7 +44,7 @@ LinearFVAdvectionDiffusionScalarSymmetryBC::computeBoundaryValue() const
   auto boundary_value = _var.getElemValue(*elem_info, determineState());
 
   // If we request linear extrapolation, we add the gradient term as well. We make sure
-  // that the zer normal gradient is respected (by subtracting the normal component).
+  // that the zero normal gradient is respected (by subtracting the normal component).
   if (_two_term_expansion)
   {
     const auto cell_gradient = _var.gradSln(*elem_info);

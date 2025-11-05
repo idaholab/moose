@@ -13,6 +13,12 @@ For a boundary face with unit normal $\mathbf{n}$, the pressure degrees of freed
 p_f = p_P, \qquad \frac{\partial p}{\partial n}\biggr\rvert_f = 0,
 \end{equation}
 
+!alert note
+The current approximation of the face value assumes that the face centroid is
+close to the point where the line from the cell center in the normal direction
+intersects the face. This means that on unstructured meshes, this results
+a spatially first-order discretization.
+
 and the residual contribution stemming from the Rhie-Chow momentum-flux correction is
 
 \begin{equation}

@@ -76,6 +76,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryValue() const
   auto boundary_value = _var.getElemValue(*elem_info, determineState());
   auto reflected_boundary_value = boundary_value;
 
+  // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   auto scaled_normal = _current_face_info->normal();
   scaled_normal *= 2 * scaled_normal(_index);
 
@@ -95,6 +96,8 @@ LinearFVVelocitySymmetryBC::computeBoundaryNormalGradient() const
                              : _current_face_info->neighborInfo();
 
   Real boundary_normal_grad = 0.0;
+
+  // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   auto scaled_normal = _current_face_info->normal();
   scaled_normal *= scaled_normal(_index);
 
@@ -123,7 +126,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  // Real boundary_value_rhs = 0.0;
+  // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   auto scaled_normal = _current_face_info->normal();
   scaled_normal *= scaled_normal(_index);
 
@@ -138,6 +141,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
 Real
 LinearFVVelocitySymmetryBC::computeBoundaryGradientMatrixContribution() const
 {
+  // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   const auto normal_component = _current_face_info->normal()(_index);
   const auto normal_component_sq = normal_component * normal_component;
 
@@ -153,6 +157,8 @@ LinearFVVelocitySymmetryBC::computeBoundaryGradientRHSContribution() const
                              : _current_face_info->neighborInfo();
 
   auto boundary_value = _var.getElemValue(*elem_info, determineState());
+
+  // We don't have to flip the sign of the normal because we are subtacting normal*normal.
   const auto normal_component = _current_face_info->normal()(_index);
   const auto normal_component_sq = normal_component * normal_component;
   return computeBoundaryNormalGradient() -

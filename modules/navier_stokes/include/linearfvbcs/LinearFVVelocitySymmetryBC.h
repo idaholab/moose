@@ -12,7 +12,15 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Class implementing a symmetry boundary condition for the velocity variable
+ * Class implementing a symmetry boundary condition for the velocity variable.
+ * The implementation is based on the method discussed in:
+ * @book{greenshieldsweller2022,
+ *  title     = "Notes on Computational Fluid Dynamics: General Principles",
+ *  author    = "Greenshields, Christopher and Weller, Henry",
+ *  year      = 2022,
+ *  publisher = "CFD Direct Ltd",
+ *  address   = "Reading, UK"
+ * }
  */
 class LinearFVVelocitySymmetryBC : public LinearFVAdvectionDiffusionBC
 {

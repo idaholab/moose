@@ -8,7 +8,8 @@ the cell-centered velocity across the symmetry normal,
 removing the normal component while preserving the tangential components. This provides
 the classical symmetry condition of zero normal velocity together with a zero-gradient
 tangential velocity, making the operator consistent with the linearised momentum fluxes
-used by SIMPLE-like algorithms.
+used by SIMPLE-like algorithms. The implementation is based on the
+methodology in [!cite](greenshieldsweller2022).
 
 Let $\mathbf{u}_P$ denote the cell-center velocity adjacent to the face with unit
 normal $\mathbf{n}$. The boundary condition projects out the normal contribution,
@@ -30,6 +31,12 @@ present in the problem dimension are required.
 
 This boundary condition is typically paired with the momentum flux kernel
 [LinearWCNSFVMomentumFlux.md] and [LinearFVPressureSymmetryBC.md] on symmetry planes of channel flows, as demonstrated in:
+
+!alert note
+The current approximation of the face value assumes that the face centroid is
+close to the point where the line from the cell center in the normal direction
+intersects the face. This means that on unstructured meshes, this results
+a spatially first-order discretization.
 
 !listing /modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d-symmetric/channel.i block=LinearFVBCs/symmetry-u
 
