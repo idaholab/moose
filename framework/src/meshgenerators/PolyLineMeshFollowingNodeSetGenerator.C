@@ -91,6 +91,8 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
   auto uptr_mesh = buildMeshBaseObject();
   MeshBase & mesh = *uptr_mesh;
   std::unique_ptr<MeshBase> base_mesh = std::move(_input);
+  if (!base_mesh->is_serial())
+    paramError("input", "Input mesh must not be distributed");
 
   // Get nodeset ID in input mesh
   const auto nodeset_id =
