@@ -126,7 +126,7 @@ initial_dt = 15
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
-    initial_condition = 0.2
+    initial_condition = 0
   []
   [T_fluid]
     type = MooseLinearVariableFVReal
