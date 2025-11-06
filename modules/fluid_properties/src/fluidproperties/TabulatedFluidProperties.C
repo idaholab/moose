@@ -392,12 +392,54 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
                                         (_e_min + _e_max) / 2,
                                         v,
                                         e,
-                                        1e-8,
-                                        1e-8,
+                                        _tolerance,
+                                        _tolerance,
                                         p_from_v_e,
                                         T_from_v_e,
-                                        100,
-                                        true);
+                                        _max_newton_its,
+                                        false);
+    return v;
+  }
+  else
+  {
+    if (_fp)
+      return 1.0 / _fp->rho_from_p_T(pressure, temperature);
+    else
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
+  }
+}
+
+ADReal
+TabulatedFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_interpolate_density && _create_direct_pT_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    return 1.0 / _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
+  }
+  else if (!_fp && (_create_direct_ve_interpolations || _file_name_ve_in != ""))
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    ADReal v, e;
+    auto p_from_v_e = [&](ADReal v, ADReal e, ADReal & new_p, ADReal & dp_dv, ADReal & dp_de)
+    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
+    auto T_from_v_e = [&](ADReal v, ADReal e, ADReal & new_T, ADReal & dT_dv, ADReal & dT_de)
+    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
+    FluidPropertiesUtils::NewtonSolve2D(pressure_nc,
+                                        temperature_nc,
+                                        (_v_min + _v_max) / 2,
+                                        (_e_min + _e_max) / 2,
+                                        v,
+                                        e,
+                                        _tolerance,
+                                        _tolerance,
+                                        p_from_v_e,
+                                        T_from_v_e,
+                                        _max_newton_its,
+                                        false);
     return v;
   }
   else
