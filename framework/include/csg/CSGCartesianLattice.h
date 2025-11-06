@@ -51,6 +51,16 @@ public:
   virtual ~CSGCartesianLattice() = default;
 
   /**
+   * @brief clone this Cartesian lattice
+   *
+   * @return std::unique_ptr<CSGLattice> unique pointer to cloned Cartesian lattice
+   */
+  std::unique_ptr<CSGLattice> clone() const override
+  {
+    return std::make_unique<CSGCartesianLattice>(*this);
+  }
+
+  /**
    * @brief get the map of data that defines the geometric dimensions of the lattice:
    *  - nx0: number of mesh elements in the first dimension (int); ie, rows
    *  - nx1: number of mesh elements in the second dimension (int); ie, columns

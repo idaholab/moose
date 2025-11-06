@@ -95,11 +95,29 @@ protected:
   CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice);
 
   /**
-   * @brief Get map of all names to universes in universe list
+   * @brief return whether lattice with given name exists in lattice list
+   *
+   * @param name name of the lattice
+   * @return true if lattice name exists, otherwise false
+   */
+  bool hasLattice(const std::string & name) { return _lattices.find(name) != _lattices.end(); }
+
+  /**
+   * @brief Get map of all names to lattices in lattice list
    *
    * @return map of all names to CSGLattice pointers
    */
   std::unordered_map<std::string, std::unique_ptr<CSGLattice>> & getLatticeListMap()
+  {
+    return _lattices;
+  }
+
+  /**
+   * @brief Get const map of all names to lattices in lattice list
+   *
+   * @return map of all names to CSGLattice pointers
+   */
+  const std::unordered_map<std::string, std::unique_ptr<CSGLattice>> & getLatticeListMap() const
   {
     return _lattices;
   }
