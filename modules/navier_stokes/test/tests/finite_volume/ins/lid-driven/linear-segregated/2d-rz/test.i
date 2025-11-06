@@ -1,23 +1,42 @@
 # air
-rho = 1.177
-mu = 1.846e-5
-k = .0262
-cp = 1006
-beta = 3.33e-3
+# rho = 1.177
+# mu = 1.846e-5
+# k = .0262
+# cp = 1006
+# beta = 3.33e-3
+# water
+# rho = 997
+# mu = 8.55e-4
+# k = .613
+# cp = 4182
+# beta = 2.57e-4
+# glycerol-water
+# rho = 1110
+# mu = 5e-3
+# k = .4
+# cp = 3500
+# beta = 3.8e-4
+# glycerol
+rho = 1260
+mu = 1.41
+k = .285
+cp = 2410
+beta = 5e-4
+
 T_0 = 300
 T_hot = 301
 T_cold = 300
-l = 1e-1
+l = 10
 expt_l_factor = 0.5
 expt_l = '${fparse expt_l_factor * l}'
 p_pin_loc = '${fparse 0.95 * l}'
 n = 100
 h = '${fparse l / n}'
-initial_dt = ${l}
+initial_dt = 15
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = 'average'
+  advected_interp_method = 'upwind'
 []
 
 [Mesh]
@@ -208,12 +227,6 @@ initial_dt = ${l}
 []
 
 [LinearFVBCs]
-  # [right_y]
-  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
-  #   variable = vel_y
-  #   boundary = 'right'
-  #   functor = 1
-  # []
   [no_slip_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_x
@@ -224,7 +237,6 @@ initial_dt = ${l}
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_y
     boundary = 'top right bottom experiment'
-    # boundary = 'top bottom experiment'
     functor = 0
   []
   [symmetry-u]
@@ -249,7 +261,7 @@ initial_dt = ${l}
     boundary = 'left'
     HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
   []
-  [pressure-extrapolation]
+  [pressure-flux]
     type = LinearFVPressureFluxBC
     boundary = 'right top bottom experiment'
     variable = pressure
@@ -292,12 +304,12 @@ initial_dt = ${l}
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 1.0
-  pressure_variable_relaxation = 1.0
-  energy_equation_relaxation = 1.0
+  momentum_equation_relaxation = 0.9
+  pressure_variable_relaxation = 0.9
+  energy_equation_relaxation = 0.9
   num_iterations = 1500
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
+  pressure_absolute_tolerance = 1e-7
+  momentum_absolute_tolerance = 1e-7
   energy_absolute_tolerance = 1e-7
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
@@ -311,16 +323,16 @@ initial_dt = ${l}
   pressure_pin_value = 0.0
   pressure_pin_point = '${p_pin_loc} ${p_pin_loc} 0.0'
 
-  num_steps = 40
+  num_steps = 10000
   num_piso_iterations = 0
 
-  # dtmax = ${dtmax}
+  dtmax = ${initial_dt}
 
   [TimeStepper]
     type = PostprocessorDT
     postprocessor = new_dt_for_unity_cfl
     dt = ${initial_dt}
-    scale = 0.1
+    scale = 1
   []
 []
 
