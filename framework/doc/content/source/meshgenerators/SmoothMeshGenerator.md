@@ -156,14 +156,33 @@ As an example, here is an original mesh going through 12 iterations of this smoo
        caption=12 iterations of Laplacian smoothing.  Coloring is by element quality (higher is better).
        style=width:50%;padding:20px;
 
-### Example 2 — Variational smoothing
+### Example 2 — Variational smoothing (fixed boundary nodes)
 
 Here is an example of the variational smoother applied to a mesh with 3 subdomains and nonlinear boundaries.
 Note that the locations of the (subdomain)boundary nodes do not change.
 
+!listing test/tests/meshgenerators/smooth_mesh_generator/variational_mesh_smoother_generator.i block=Mesh
+
 !media media/mesh/variational_smoother_ex1.png
        id=inl-logo
        caption=Variational smoother applied to mesh with nonlinear boundary. The original mesh is shown on the left and the smoothed mesh is shown on the right.
+       style=width:50%;padding:20px;
+
+### Example 3 — Variational smoothing (sliding boundary nodes)
+
+Here is an example of the variational smoother applied to a mesh with 2 subdomains and linear boundaries.
+Note that while the locations of the (subdomain)boundary nodes change, these boundaries are still preserved.
+
+!listing test/tests/meshgenerators/smooth_mesh_generator/variational_mesh_smoother_generator_sliding_nodes.i block=Mesh
+
+!media media/mesh/variational_smoother_ex3_distorted.png
+       id=inl-logo
+       caption=Original mesh.
+       style=width:50%;padding:20px;
+
+!media media/mesh/variational_smoother_ex3_smoothed.png
+       id=inl-logo
+       caption=Variationally smoothed mesh.
        style=width:50%;padding:20px;
 
 !syntax parameters /Mesh/SmoothMeshGenerator
