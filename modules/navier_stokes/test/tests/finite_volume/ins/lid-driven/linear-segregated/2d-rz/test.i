@@ -219,10 +219,11 @@ p_pin_loc = '${fparse 0.95 * l}'
     HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
   []
   [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
+    type = LinearFVPressureFluxBC
     boundary = 'right top bottom experiment'
     variable = pressure
-    use_two_term_expansion = true
+    HbyA_flux = HbyA
+    Ainv = Ainv
   []
   [T_symmetry]
     type = LinearFVAdvectionDiffusionScalarSymmetryBC
