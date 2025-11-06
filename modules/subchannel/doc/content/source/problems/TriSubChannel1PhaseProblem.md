@@ -86,6 +86,7 @@ The following relation is used depending on the subchannel type~\cite{Todreas}:
 \end{equation}
 
 ### Dittus-Boelter Correlation for Turbulent Nusselt Number
+
 The Dittus-Boelter equation~\cite{incropera1990} is implemented as follows:
 
 \begin{equation}
@@ -98,6 +99,7 @@ where:
 - $Pr$: Prandtl number
 
 ### Gnielinski Correlation for Turbulent Nusselt Number
+
 A modified Gnielinski correlation for low Prandtl numbers is used for calculating the Nusselt number for transitional and turbulent flows. The baseline correlation is taken from Angelucci's work~\cite{angelucci2018}. The modified correlation reads as follows:
 
 \begin{equation}
@@ -115,6 +117,7 @@ This modification retains predictions within experimental uncertainty at high $P
 With this modification, at low $Pr$ numbers (approximately for $Pr < 0.01$), one can expect behavior similar to that of the Lubarsky and Kaufman correlation from this modified Gnielinski correlation.
 
 ### Kazimi-Carelli Correlation for Turbulent Nusselt Number
+
 The Kazimi-Carelli correlation~\cite{kazimi1976} is used for calculating the Nusselt number in rod bundles, considering the geometry of the bundle.
 
 \begin{equation}
