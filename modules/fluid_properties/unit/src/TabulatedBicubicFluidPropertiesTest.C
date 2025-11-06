@@ -429,8 +429,8 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
   Real e = _idg_fp->e_from_p_T(p, T);
   Real v = _idg_fp->v_from_p_T(p, T);
 
-  // NOTE: direct from (v,e) currently does not support
-  //       calls with (p, T), (p, rho), (p, s).
+  // NOTE: direct from (v,e) currently does not support (p, s)
+  // and only a selection of calls from (p, T) and (p, rho)
 
   // check computation of fluid props from v, e
   {
@@ -571,6 +571,21 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
     Moose::_throw_on_warning = true;
   }
 
+  // check computations from p, T
+  {
+    // density
+    Real p = _tab_ve_from_fp->p_from_v_e(v, e);
+    Real T = _tab_ve_from_fp->T_from_v_e(v, e);
+    REL_TEST(1. / v, _tab_ve_from_fp->rho_from_p_T(p, T), 1e-6);
+  }
+
+  // check computations from p, rho
+  {
+    // specific internal energy
+    Real p = _tab_ve_from_fp->p_from_v_e(v, e);
+    REL_TEST(e, _tab_ve_from_fp->e_from_p_rho(p, 1. / v), 1e-6);
+  }
+
   // AD p_from_v_e
   {
     DNDerivativeType dvdx;
@@ -611,6 +626,51 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
     _tab_ve_from_fp->T_from_v_e(v, e, TT, dT_dv, dT_de);
     REL_TEST(T_ad.derivatives()[0], dT_dv, 0.0001);
     REL_TEST(T_ad.derivatives()[1], dT_de, 0.0001);
+  }
+
+  // AD e_from_p_rho
+  {
+    DNDerivativeType dpdx;
+    DNDerivativeType drhodx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dpdx, 0, 1);
+    Moose::derivInsert(dpdx, 1, 0);
+    Moose::derivInsert(drhodx, 0, 0);
+    Moose::derivInsert(drhodx, 1, 1);
+
+    Real rho = 1. / v;
+    ADReal p_ad(p, dpdx);
+    ADReal rho_ad(rho, drhodx);
+    ADReal e_ad = _tab_ve_from_fp->e_from_p_rho(p_ad, rho_ad);
+
+    Real e, de_dp, de_drho;
+    _tab_ve_from_fp->e_from_p_rho(p, rho, e, de_dp, de_drho);
+    REL_TEST(e_ad.derivatives()[0], de_dp, 0.0001);
+    REL_TEST(e_ad.derivatives()[1], de_drho, 0.0001);
+  }
+
+  // AD rho_from_p_T
+  {
+    DNDerivativeType dpdx;
+    DNDerivativeType dTdx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dpdx, 0, 1);
+    Moose::derivInsert(dpdx, 1, 0);
+    Moose::derivInsert(dTdx, 0, 0);
+    Moose::derivInsert(dTdx, 1, 1);
+
+    Real p = _tab_ve_from_fp->p_from_v_e(v, e);
+    Real T = _tab_ve_from_fp->p_from_v_e(v, e);
+    ADReal p_ad(p, dpdx);
+    ADReal T_ad(T, dTdx);
+    ADReal rho_ad = _tab_ve_from_fp->rho_from_p_T(p_ad, T_ad);
+
+    Real rho, drho_dp, drho_dT;
+    _tab_ve_from_fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+    REL_TEST(rho_ad.derivatives()[0], drho_dp, 0.0001);
+    REL_TEST(rho_ad.derivatives()[1], drho_dT, 0.0001);
   }
 
   // cannot test AD c_from_v_e because co2 props do not
