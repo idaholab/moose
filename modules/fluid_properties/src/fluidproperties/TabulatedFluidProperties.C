@@ -378,6 +378,28 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
   }
+  else if (!_fp && (_create_direct_ve_interpolations || _file_name_ve_in != ""))
+  {
+    checkInputVariables(pressure, temperature);
+    Real v, e;
+    auto p_from_v_e = [&](Real v, Real e, Real & new_p, Real & dp_dv, Real & dp_de)
+    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
+    auto T_from_v_e = [&](Real v, Real e, Real & new_T, Real & dT_dv, Real & dT_de)
+    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
+    FluidPropertiesUtils::NewtonSolve2D(pressure,
+                                        temperature,
+                                        (_v_min + _v_max) / 2,
+                                        (_e_min + _e_max) / 2,
+                                        v,
+                                        e,
+                                        1e-8,
+                                        1e-8,
+                                        p_from_v_e,
+                                        T_from_v_e,
+                                        100,
+                                        true);
+    return v;
+  }
   else
   {
     if (_fp)
@@ -419,6 +441,8 @@ TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return _property_ipol[_density_idx]->sample(pressure, temperature);
   }
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    return 1. / v_from_p_T(pressure, temperature);
   else
   {
     if (_fp)
