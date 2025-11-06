@@ -556,8 +556,27 @@ TabulatedFluidProperties::e_from_p_T(
 Real
 TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho) const
 {
-  Real T = T_from_p_rho(pressure, rho);
-  Real e = e_from_p_T(pressure, T);
+  Real e;
+  // Use v,e data, we already have v from rho
+  if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  {
+    auto lambda = [&](Real v, Real current_e, Real & new_p, Real & dp_dv, Real & dp_de)
+    { p_from_v_e(v, current_e, new_p, dp_dv, dp_de); };
+    const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
+                                                        pressure,
+                                                        /*initial guess*/ (_e_min + _e_max) / 2,
+                                                        _tolerance,
+                                                        lambda,
+                                                        name() + "::e_from_p_rho",
+                                                        _max_newton_its);
+    e = pair.first;
+  }
+  // May use rho_from_p_T with derivatives in a Newton solve
+  else
+  {
+    Real T = T_from_p_rho(pressure, rho);
+    e = e_from_p_T(pressure, T);
+  }
   return e;
 }
 
