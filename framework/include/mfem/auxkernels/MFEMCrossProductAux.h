@@ -17,7 +17,6 @@
  * Project s(x) * (U x V) onto a vector MFEM auxvariable.
  *
  * Notes:
- *   - Default L2_FECollection with map_type = VALUE and optional map_type = INTEGRAL .
  *   - Currently supports only interior DOFs (no shared/constrained DOFs).
  *   - Enforces 3D: mesh dimension and all involved vdim must be 3.
  */
@@ -42,11 +41,14 @@ protected:
   /// Scaling factor applied on the resulting field
   const mfem::real_t _scale_factor;
 
+  /// Coefficient wrappers
   mfem::VectorGridFunctionCoefficient _u_coef;
   mfem::VectorGridFunctionCoefficient _v_coef;
   mfem::VectorCrossProductCoefficient _cross_uv;
   mfem::ConstantCoefficient _scale_c;
-  mfem::ScalarVectorProductCoefficient _final_coef; // coef suffix !!
+
+  ///Final coefficient that applies the scale factor to the crossproduct
+  mfem::ScalarVectorProductCoefficient _final_coef;
 };
 
 #endif // MOOSE_MFEM_ENABLED

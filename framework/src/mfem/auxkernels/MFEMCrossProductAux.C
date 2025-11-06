@@ -55,7 +55,7 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
     mooseError("MFEMCrossProductAux requires the target variable to use L2_FECollection.");
 
-  // // Must have no shared/constrained DOFs (pure interior DOFs)
+  // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
     mooseError("MFEMCrossProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");

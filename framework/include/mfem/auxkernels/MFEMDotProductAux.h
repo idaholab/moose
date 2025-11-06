@@ -16,11 +16,9 @@
 /**
  * Project s(x) * (U . V) onto a scalar MFEM auxvariable.
  *
- * Parameters:
- *   - first_source_vec (VariableName): vector MFEM variable U
- *   - second_source_vec (VariableName): vector MFEM variable V
- *   - scale_factor (mfem::real_t, default=1.0): constant multiplier
- *   - scale_variable (VariableName, optional): scalar MFEM variable s(x)
+ * Notes:
+ *  - Currently supports only interior DOFs (no shared/constrained DOFs).
+ *  - The target variable's FE Space must be L2.
  */
 class MFEMDotProductAux : public MFEMAuxKernel
 {
@@ -33,20 +31,22 @@ public:
   void execute() override;
 
 protected:
-  // Names of vector sources
+  /// Names of vector sources
   const VariableName _u_var_name;
   const VariableName _v_var_name;
 
-  // References to the vector ParGridFunctions
+  /// References to the vector ParGridFunctions
   const mfem::ParGridFunction & _u_var;
   const mfem::ParGridFunction & _v_var;
   const mfem::real_t _scale_factor;
 
+  /// Coefficient wrappers
   mfem::VectorGridFunctionCoefficient _u_coef;
   mfem::VectorGridFunctionCoefficient _v_coef;
   mfem::InnerProductCoefficient _dot_uv;
   mfem::ConstantCoefficient _scale_c;
 
+  ///Final coefficient that applies the scale factor to the inner product
   mfem::ProductCoefficient _final_coef;
 };
 
