@@ -8,8 +8,9 @@ T_0 = 300
 T_hot = 301
 T_cold = 300
 l = 3e-2
-expt_l = ${fparse 0.1 * l}
-p_pin_loc = ${fparse 0.95 * l}
+expt_l_factor = 0.5
+expt_l = '${fparse expt_l_factor * l}'
+p_pin_loc = '${fparse 0.95 * l}'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
