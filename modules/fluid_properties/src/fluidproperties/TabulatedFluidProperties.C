@@ -555,6 +555,24 @@ TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
   }
 }
 
+ADReal
+TabulatedFluidProperties::e_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_interpolate_internal_energy && _create_direct_pT_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    return _property_ipol[_internal_energy_idx]->sample(pressure_nc, temperature_nc);
+  }
+  else
+  {
+    if (_fp)
+      return _fp->e_from_p_T(pressure, temperature);
+    else
+      paramError("fp", "No fluid properties or csv data provided for internal energy.");
+  }
+}
+
 void
 TabulatedFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
@@ -572,6 +590,33 @@ TabulatedFluidProperties::e_from_p_T(
     else
       paramError("fp", "No fluid properties or csv data provided for internal energy.");
   }
+}
+
+ADReal
+TabulatedFluidProperties::e_from_p_rho(const ADReal & pressure, const ADReal & rho) const
+{
+  ADReal e;
+  // Use v,e data, we already have v from rho
+  if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  {
+    auto lambda = [&](ADReal v, ADReal current_e, ADReal & new_p, ADReal & dp_dv, ADReal & dp_de)
+    { p_from_v_e(v, current_e, new_p, dp_dv, dp_de); };
+    const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
+                                                        pressure,
+                                                        /*initial guess*/ (_e_min + _e_max) / 2,
+                                                        _tolerance,
+                                                        lambda,
+                                                        name() + "::e_from_p_rho",
+                                                        _max_newton_its);
+    e = pair.first;
+  }
+  // May use rho_from_p_T with derivatives in a Newton solve
+  else
+  {
+    const auto T = T_from_p_rho(pressure, rho);
+    e = e_from_p_T(pressure, T);
+  }
+  return e;
 }
 
 Real
@@ -637,6 +682,30 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
                .first;
   // check for nans
   if (std::isnan(T))
+    mooseError("Conversion from pressure (p = ",
+               pressure,
+               ") and density (rho = ",
+               rho,
+               ") to temperature failed to converge.");
+  return T;
+}
+
+ADReal
+TabulatedFluidProperties::T_from_p_rho(const ADReal & pressure, const ADReal & rho) const
+{
+  auto lambda =
+      [&](ADReal p, ADReal current_T, ADReal & new_rho, ADReal & drho_dp, ADReal & drho_dT)
+  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+  ADReal T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                               rho,
+                                               _T_initial_guess,
+                                               _tolerance,
+                                               lambda,
+                                               name() + "::T_from_p_rho",
+                                               _max_newton_its)
+                 .first;
+  // check for nans
+  if (std::isnan(T.value()))
     mooseError("Conversion from pressure (p = ",
                pressure,
                ") and density (rho = ",
