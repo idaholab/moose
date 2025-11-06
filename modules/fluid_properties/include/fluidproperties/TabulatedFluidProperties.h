@@ -190,8 +190,10 @@ protected:
 
   /**
    * Checks initial guess for Newton Method
+   * @param post_reading_tabulation whether the check is performed at construction (false) or after
+   * reading a file tabulation (true)
    */
-  virtual void checkInitialGuess() const;
+  virtual void checkInitialGuess(bool post_reading_tabulation) const;
 
   /// Read tabulation data from file
   void readFileTabulationData(bool use_pT);

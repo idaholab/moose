@@ -212,7 +212,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior"))
 {
   // Check that initial guess (used in Newton Method) is within min and max values
-  checkInitialGuess();
+  checkInitialGuess(false);
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
     mooseError("temperature_max must be greater than temperature_min");
@@ -1521,8 +1521,9 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 
       // Write out date and fluid type
       time_t now = std::time(&now);
-        file_out << "# " << _fp ? _fp->fluidName() : ""
-                 << " properties (p,T) tabulation created by TabulatedFluidProperties on " << ctime(&now) << "\n";
+      file_out << "# " << (_fp ? _fp->fluidName() : "")
+               << " properties (p,T) tabulation created by TabulatedFluidProperties on "
+               << ctime(&now) << "\n";
 
       // Write out column names
       file_out << "pressure, temperature";
@@ -1557,8 +1558,9 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 
       // Write out date and fluid type
       time_t now = std::time(&now);
-        file_out << "# " << _fp ? _fp->fluidName() : ""
-                 << " properties (v,e) tabulation created by TabulatedFluidProperties on " << ctime(&now) << "\n";
+      file_out << "# " << (_fp ? _fp->fluidName() : "")
+               << " properties (v,e) tabulation created by TabulatedFluidProperties on "
+               << ctime(&now) << "\n";
 
       // Write out column names
       file_out << "specific_volume, internal_energy, pressure, temperature";
@@ -1872,9 +1874,12 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
 }
 
 void
-TabulatedFluidProperties::checkInitialGuess() const
+TabulatedFluidProperties::checkInitialGuess(bool post_reading_tabulation) const
 {
-  if (_fp && (_construct_pT_from_ve || _construct_pT_from_vh))
+  // First condition applies when generating a tabulation
+  // Second condition applies when using a pre-generated loaded tabulation
+  if ((!post_reading_tabulation && _fp && (_construct_pT_from_ve || _construct_pT_from_vh)) ||
+      (post_reading_tabulation && (_file_name_in != "" || _file_name_ve_in != "")))
   {
     if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
       mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +
@@ -2010,6 +2015,7 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
     _pressure_max = _pressure.back();
     _temperature_min = _temperature.front();
     _temperature_max = _temperature.back();
+    checkInitialGuess(true);
 
     // Extract the fluid property data from the file
     for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
@@ -2041,6 +2047,15 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
     _properties_ve.reserve(_interpolated_properties.size());
     for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
       _properties_ve.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
+
+    // Obtain the min/max T, p and check the initial guess
+    const auto & p_col = column_data[data_index.find("pressure")->second];
+    _pressure_min = *std::min_element(p_col.begin(), p_col.end());
+    _pressure_max = *std::max_element(p_col.begin(), p_col.end());
+    const auto & T_col = column_data[data_index.find("temperature")->second];
+    _temperature_min = *std::min_element(T_col.begin(), T_col.end());
+    _temperature_max = *std::max_element(T_col.begin(), T_col.end());
+    checkInitialGuess(true);
   }
 }
 
