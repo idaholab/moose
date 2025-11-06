@@ -27,8 +27,10 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/libmesh_common.h"
 
-#include <vector>
+// C++
+#include <cstring> // for "Jacobian" exception test
 #include <utility>
+#include <vector>
 
 namespace Moose
 {

@@ -135,6 +135,9 @@
 
 #include "metaphysicl/dualnumber.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 using namespace libMesh;
 
 // Anonymous namespace for helper function

@@ -24,6 +24,9 @@
 #include "libmesh/point.h"
 #include "libmesh/mesh_base.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 ComputeMortarFunctor::ComputeMortarFunctor(
     const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
     const AutomaticMortarGeneration & amg,

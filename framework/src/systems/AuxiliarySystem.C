@@ -31,6 +31,9 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 using namespace libMesh;
 
 // AuxiliarySystem ////////

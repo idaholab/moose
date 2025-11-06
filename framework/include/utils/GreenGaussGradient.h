@@ -17,6 +17,9 @@
 #include "ArrayComponentFunctor.h"
 #include "libmesh/elem.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 namespace Moose
 {
 namespace FV

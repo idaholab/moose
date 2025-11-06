@@ -16,6 +16,9 @@
 #include "libmesh/libmesh_exceptions.h"
 #include "libmesh/elem.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 /**
  * Base class for assembly-like calculations.
  */
