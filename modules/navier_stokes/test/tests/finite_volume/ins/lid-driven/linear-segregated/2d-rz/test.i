@@ -56,27 +56,12 @@ p_pin_loc = '${fparse 0.95 * l}'
   previous_nl_solution_required = true
 []
 
-# [AuxVariables]
-#   [vel_lagrange_x]
-#   []
-#   [vel_lagrange_y]
-#   []
-# []
-
-# [AuxKernels]
-#   [vel_lagrange_x]
-#     type = ProjectionAux
-#     variable = vel_lagrange_x
-#     v = vel_x
-#     execute_on = timestep_end
-#   []
-#   [vel_lagrange_y]
-#     type = ProjectionAux
-#     variable = vel_lagrange_y
-#     v = vel_y
-#     execute_on = timestep_end
-#   []
-# []
+[AuxVariables]
+  [vel_z]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
 
 [UserObjects]
   [rc]
