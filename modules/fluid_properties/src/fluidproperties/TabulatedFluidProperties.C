@@ -405,7 +405,8 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return 1.0 / _fp->rho_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
   }
 }
 
@@ -425,7 +426,8 @@ TabulatedFluidProperties::v_from_p_T(
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
   }
   // convert from rho to v
   v = 1.0 / rho;
@@ -448,7 +450,8 @@ TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->rho_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
   }
 }
 
@@ -467,7 +470,8 @@ TabulatedFluidProperties::rho_from_p_T(
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
   }
 }
 
@@ -489,7 +493,8 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
   }
 }
 
