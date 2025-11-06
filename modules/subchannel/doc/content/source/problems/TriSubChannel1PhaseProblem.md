@@ -58,11 +58,11 @@ for the pin and the [!param](/Problem/TriSubChannel1PhaseProblem/duct_htc_correl
 The bounding laminar and turbulent Reynolds numbers for the turbulent transition are defined as follows:
 
 \begin{equation}
-Re_L = 300 \times 10^{1.7 \times (P/D_{\text{pin} - 1.0)}
+Re_L = 300 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
 \end{equation}
 
 \begin{equation}
-Re_T = 10^4 \times 10^{1.7 \times (P/D_{\text{pin} - 1.0)}
+Re_T = 10^4 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
 \end{equation}
 
 where:
