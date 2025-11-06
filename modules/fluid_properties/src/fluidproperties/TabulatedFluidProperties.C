@@ -455,6 +455,27 @@ TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
   }
 }
 
+ADReal
+TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_interpolate_density && _create_direct_pT_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    return _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
+  }
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    return 1. / v_from_p_T(pressure, temperature);
+  else
+  {
+    if (_fp)
+      return _fp->rho_from_p_T(pressure, temperature);
+    else
+      mooseError(__PRETTY_FUNCTION__,
+                 "\nNo fluid properties, interpolation, or csv data provided for density.");
+  }
+}
+
 void
 TabulatedFluidProperties::rho_from_p_T(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
@@ -1129,6 +1150,26 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
                "\nNo tabulation or fluid property 'fp' object to compute value");
 }
 
+void
+TabulatedFluidProperties::p_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
+{
+  if (_interpolate_pressure && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
+  ADReal vc = v, ec = e;
+  checkInputVariablesVE(vc, ec);
+
+  if (_create_direct_ve_interpolations && _interpolate_pressure)
+    _property_ve_ipol[_p_idx]->sampleValueAndDerivatives(vc, ec, p, dp_dv, dp_de);
+  else if (_construct_pT_from_ve)
+    _p_from_v_e_ipol->sampleValueAndDerivatives(vc, ec, p, dp_dv, dp_de);
+  else if (_fp)
+    _fp->p_from_v_e(vc, ec, p, dp_dv, dp_de);
+  else
+    mooseError(__PRETTY_FUNCTION__,
+               "\nNo tabulation or fluid property 'fp' object to compute value");
+}
+
 Real
 TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 {
@@ -1160,6 +1201,26 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
     _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
   else if (_fp)
     _fp->T_from_v_e(v, e, T, dT_dv, dT_de);
+  else
+    mooseError(__PRETTY_FUNCTION__,
+               "\nNo tabulation or fluid property 'fp' object to compute value");
+}
+
+void
+TabulatedFluidProperties::T_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & T, ADReal & dT_dv, ADReal & dT_de) const
+{
+  if (_interpolate_temperature && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
+  ADReal vc = v, ec = e;
+  checkInputVariablesVE(vc, ec);
+
+  if (_create_direct_ve_interpolations && _interpolate_temperature)
+    _property_ve_ipol[_T_idx]->sampleValueAndDerivatives(vc, ec, T, dT_dv, dT_de);
+  else if (_construct_pT_from_ve)
+    _T_from_v_e_ipol->sampleValueAndDerivatives(vc, ec, T, dT_dv, dT_de);
+  else if (_fp)
+    _fp->T_from_v_e(vc, ec, T, dT_dv, dT_de);
   else
     mooseError(__PRETTY_FUNCTION__,
                "\nNo tabulation or fluid property 'fp' object to compute value");
