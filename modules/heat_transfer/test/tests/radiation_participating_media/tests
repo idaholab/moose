@@ -5,9 +5,9 @@
     type = 'CSVDiff'
     input = 'rad_isothermal_medium_1d.i'
     csvdiff = 'rad_isothermal_medium_1d_adiabatic.csv'
-    cli_args = 'wall_temperature=100.0 Outputs/file_base=rad_isothermal_medium_1d_adiabatic'
+    cli_args = 'wall_temperature=100.0'
     max_threads = 1
-    requirement = 'Solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution for adiabatic conditions.'
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution for adiabatic conditions.'
   []
   [1d_rad_ambient_heating]
     type = 'CSVDiff'
@@ -15,7 +15,7 @@
     csvdiff = 'rad_isothermal_medium_1d_ambheating.csv'
     cli_args = 'wall_temperature=120.0 Outputs/file_base=rad_isothermal_medium_1d_ambheating'
     max_threads = 1
-    requirement = 'Solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution under ambient heating conditions.'
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution under ambient heating conditions.'
   []
   [1d_rad_ambient_cooling]
     type = 'CSVDiff'
@@ -23,6 +23,6 @@
     csvdiff = 'rad_isothermal_medium_1d_ambcooling.csv'
     cli_args = 'wall_temperature=80.0 Outputs/file_base=rad_isothermal_medium_1d_ambcooling'
     max_threads = 1
-    requirement = 'Solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution under ambient cooling conditions.'
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution under ambient cooling conditions.'
   []
 []

@@ -106,9 +106,7 @@ sigma = 5.670374419e-8
 []
 
 [Outputs]
-  exodus = false
   file_base = rad_isothermal_medium_1d_adiabatic
-  [csv]
-    type = CSV
-  []
+  csv = true
+  execute_on = timestep_end
 []

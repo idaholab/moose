@@ -47,7 +47,6 @@ LinearFVP1RadiationSourceSink::computeRightHandSideContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const auto state_arg = determineState();
 
-  // The contribution to the right hand side is s_C*V_C
   return 4.0 * HeatConduction::Constants::sigma *
           _sigma_a(elem_arg,state_arg) *
           Utility::pow<4>(_temperature_radiation(elem_arg,state_arg)) * _current_elem_volume;
