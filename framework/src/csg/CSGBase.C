@@ -13,14 +13,18 @@ namespace CSG
 {
 
 CSGBase::CSGBase()
-  : _surface_list(CSGSurfaceList()), _cell_list(CSGCellList()), _universe_list(CSGUniverseList())
+  : _surface_list(CSGSurfaceList()),
+    _cell_list(CSGCellList()),
+    _universe_list(CSGUniverseList()),
+    _lattice_list(CSGLatticeList())
 {
 }
 
 CSGBase::CSGBase(const CSGBase & other_base)
   : _surface_list(other_base.getSurfaceList()),
     _cell_list(CSGCellList()),
-    _universe_list(CSGUniverseList())
+    _universe_list(CSGUniverseList()),
+    _lattice_list(CSGLatticeList())
 {
   // Iterate through all cell references from the other CSGBase instance and
   // create new CSGCell pointers based on these references. This is done
@@ -40,6 +44,11 @@ CSGBase::CSGBase(const CSGBase & other_base)
   // any universe exist in the universe list that are not connected to the cell list.
   for (const auto & [name, univ] : other_base.getUniverseList().getUniverseListMap())
     addUniverseToList(*univ);
+
+  // Iterate through all lattice references from the other CSGBase instance and
+  // create new CSGLattice pointers based on these references.
+  for (const auto & [name, lattice] : other_base.getLatticeList().getLatticeListMap())
+    addLatticeToList(*lattice);
 }
 
 CSGBase::~CSGBase() {}
@@ -62,13 +71,21 @@ CSGBase::addCellToList(const CSGCell & cell)
     const auto mat_name = cell.getFillMaterial();
     return _cell_list.addMaterialCell(name, mat_name, region);
   }
+  else if (fill_type == "LATTICE")
+  {
+    // add lattice recursively to capture all linked universes in the lattice
+    const CSGLattice & lattice = addLatticeToList(cell.getFillLattice());
+    return _cell_list.addLatticeCell(name, lattice, region);
+  }
   // Otherwise if the cell has a universe fill, we need to recursively define
   // all linked universes and cells first before defining this cell
-  else
+  else if (fill_type == "UNIVERSE")
   {
     const auto & univ = addUniverseToList(cell.getFillUniverse());
     return _cell_list.addUniverseCell(name, univ, region);
   }
+  else
+    mooseError("Cell " + name + " has unrecognized fill type " + fill_type);
 }
 
 const CSGUniverse &
@@ -87,6 +104,36 @@ CSGBase::addUniverseToList(const CSGUniverse & univ)
   for (const auto & univ_cell : univ_cells)
     current_univ_cells.push_back(addCellToList(univ_cell));
   return createUniverse(name, current_univ_cells);
+}
+
+const CSGLattice &
+CSGBase::addLatticeToList(const CSGLattice & lattice)
+{
+  // If lattice has already been created, we just return a reference to it
+  const auto name = lattice.getName();
+  if (_lattice_list.hasLattice(name))
+    return _lattice_list.getLattice(name);
+
+  // Clone the lattice (associated universes need to be transferred and set)
+  auto cloned_lattice = lattice.clone();
+
+  // If lattice has associated universes, we need to add them to this CSGBase instance as well.
+  // addUniverseToList is called recursively in case associated universes have not been added to
+  // the universe list yet.
+  if (lattice.getUniverses().size() > 0)
+  {
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> current_univ_map;
+    for (const auto & univ_list : lattice.getUniverses())
+    {
+      std::vector<std::reference_wrapper<const CSGUniverse>> current_univ_list;
+      for (const auto & univ_ref : univ_list)
+        current_univ_list.push_back(addUniverseToList(univ_ref.get()));
+      current_univ_map.push_back(current_univ_list);
+    }
+    cloned_lattice->setUniverses(current_univ_map);
+  }
+  // Use addLattice to add the cloned lattice
+  return addLattice(std::move(cloned_lattice));
 }
 
 const CSGCell &
@@ -278,6 +325,24 @@ CSGBase::createHexagonalLattice(
   }
   auto & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
   return lattice;
+}
+
+const CSGLattice &
+CSGBase::addLattice(std::unique_ptr<CSGLattice> lattice)
+{
+  auto latt = lattice.get();
+  // make sure all universes are a part of this base instance
+  auto universes = lattice->getUniverses();
+  for (auto univ_list : universes)
+  {
+    for (const CSGUniverse & univ : univ_list)
+    {
+      if (!checkUniverseInBase(univ))
+        mooseError("Cannot add lattice " + latt->getName() + " of type " + latt->getType() +
+                   ". Universe " + univ.getName() + " is not in the CSGBase instance.");
+    }
+  }
+  return _lattice_list.addLattice(std::move(lattice));
 }
 
 void
@@ -520,7 +585,6 @@ CSGBase::generateOutput() const
   csg_json["surfaces"] = {};
   csg_json["cells"] = {};
   csg_json["universes"] = {};
-  csg_json["lattices"] = {};
 
   // get all surfaces information
   auto all_surfs = getAllSurfaces();
@@ -559,20 +623,22 @@ CSGBase::generateOutput() const
       csg_json["universes"][univ_name]["root"] = u.isRoot();
   }
 
-  // print out lattice information
+  // print out lattice information if lattices exist
   auto all_lats = getAllLattices();
-  for (const CSGLattice & lat : all_lats)
+  if (all_lats.size() > 0)
   {
-    const auto & lat_name = lat.getName();
-    // write out dimensions dictionary
-    const auto & lat_dims = lat.getDimensions();
-    csg_json["lattices"][lat_name] = {};
-    for (const auto & dim : lat_dims)
+    csg_json["lattices"] = {};
+    for (const CSGLattice & lat : all_lats)
     {
-      csg_json["lattices"][lat_name][dim.first] = anyToJson(dim.second);
+      const auto & lat_name = lat.getName();
+      // write out dimensions dictionary
+      const auto & lat_dims = lat.getDimensions();
+      csg_json["lattices"][lat_name] = {};
+      for (const auto & dim : lat_dims)
+        csg_json["lattices"][lat_name][dim.first] = anyToJson(dim.second);
+      // write the map of universe names: list of lists
+      csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
     }
-    // write the map of universe names: list of lists
-    csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
   }
 
   return csg_json;

@@ -53,6 +53,16 @@ public:
   virtual ~CSGHexagonalLattice() = default;
 
   /**
+   * @brief clone this hexagonal lattice
+   *
+   * @return std::unique_ptr<CSGLattice> unique pointer to cloned hexagonal lattice
+   */
+  std::unique_ptr<CSGLattice> clone() const override
+  {
+    return std::make_unique<CSGHexagonalLattice>(*this);
+  }
+
+  /**
    * @brief Get the map of data that defines the geometric dimensions of the lattice:
    *  - nrow: number of rows in the hex lattice (int)
    *  - pitch: pitch of the lattice element (Real)

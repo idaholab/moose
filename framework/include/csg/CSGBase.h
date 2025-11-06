@@ -346,6 +346,16 @@ public:
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
+   * @brief add a unique lattice pointer to this base instance; universes that make the lattice
+   * must already be a part of this CSGBase instance.
+   *
+   * @param lattice pointer to lattice to add
+   *
+   * @return reference to CSGLattice that was added
+   */
+  const CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice);
+
+  /**
    * @brief add the universe to the lattice at the specified location
    *
    * @param lattice lattice to update
@@ -516,6 +526,13 @@ private:
   CSGUniverseList & getUniverseList() { return _universe_list; }
 
   /**
+   * @brief Get a const reference to the CSGLatticeList object
+   *
+   * @return CSGLatticeList
+   */
+  const CSGLatticeList & getLatticeList() const { return _lattice_list; }
+
+  /**
    * @brief Get the CSGLatticeList object
    *
    * @return CSGLatticeList
@@ -601,6 +618,14 @@ private:
    * @param univ reference to CSGUniverse that should be added to universe list
    */
   const CSGUniverse & addUniverseToList(const CSGUniverse & univ);
+
+  /**
+   * @brief Add a new lattice to the lattice list based on a lattice reference.
+   * This method is called by the copy constructor of CSGBase
+   *
+   * @param lattice reference to CSGLattice that should be added to universe list
+   */
+  const CSGLattice & addLatticeToList(const CSGLattice & lattice);
 
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;

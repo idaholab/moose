@@ -39,6 +39,9 @@ public:
    */
   virtual ~CSGLattice() = default;
 
+  // Pure virtual clone method that derived classes must implement
+  virtual std::unique_ptr<CSGLattice> clone() const = 0;
+
   /**
    * @brief Get the name of lattice
    *
