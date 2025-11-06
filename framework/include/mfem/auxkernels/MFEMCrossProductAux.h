@@ -16,12 +16,6 @@
 /**
  * Project s(x) * (U x V) onto a vector MFEM auxvariable.
  *
- * Parameters:
- *   - variable (AuxVariableName, required): AuxVariable name (inherited)
- *   - first_source_vec (VariableName, required): vector MFEM variable U (vdim = 3)
- *   - second_source_vec (VariableName, required): vector MFEM variable V (vdim = 3)
- *   - scale_factor (mfem::real_t, default=1.0): constant multiplier s(x)=scale_factor
- *
  * Notes:
  *   - Default L2_FECollection with map_type = VALUE and optional map_type = INTEGRAL .
  *   - Currently supports only interior DOFs (no shared/constrained DOFs).
@@ -38,13 +32,14 @@ public:
   void execute() override;
 
 protected:
-  // Names of vector sources
+  /// Names of vector sources
   const VariableName _u_var_name;
   const VariableName _v_var_name;
 
-  // References to the vector ParGridFunctions
+  /// References to the vector ParGridFunctions
   const mfem::ParGridFunction & _u_var;
   const mfem::ParGridFunction & _v_var;
+  /// Scaling factor applied on the resulting field
   const mfem::real_t _scale_factor;
 
   mfem::VectorGridFunctionCoefficient _u_coef;
@@ -52,9 +47,6 @@ protected:
   mfem::VectorCrossProductCoefficient _cross_uv;
   mfem::ConstantCoefficient _scale_c;
   mfem::ScalarVectorProductCoefficient _final_coef; // coef suffix !!
-
-  // Constant multiplier
-  // const mfem::real_t _scale_factor;
 };
 
 #endif // MOOSE_MFEM_ENABLED

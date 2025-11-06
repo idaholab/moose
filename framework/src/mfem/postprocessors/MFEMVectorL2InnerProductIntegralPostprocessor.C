@@ -19,7 +19,7 @@ MFEMVectorL2InnerProductIntegralPostprocessor::validParams()
 {
   InputParameters params = MFEMPostprocessor::validParams();
   params += MFEMBlockRestrictable::validParams();
-  params.addClassDescription("Calculates the total flux of a vector field through an interface");
+  params.addClassDescription("Calculates integral of the L2 inner product of two variables in the domain");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of optional scalar coefficient to scale integrand by.");
   params.addRequiredParam<VariableName>("primal_variable",
@@ -43,15 +43,11 @@ MFEMVectorL2InnerProductIntegralPostprocessor::MFEMVectorL2InnerProductIntegralP
     _subdomain_integrator(_primal_var.ParFESpace())
 {
   if (isSubdomainRestricted())
-  {
     _subdomain_integrator.AddDomainIntegrator(
         new mfem::VectorDomainLFIntegrator(_scaled_dual_var_coef), getSubdomainMarkers());
-  }
   else
-  {
     _subdomain_integrator.AddDomainIntegrator(
         new mfem::VectorDomainLFIntegrator(_scaled_dual_var_coef));
-  }
 }
 
 void

@@ -40,7 +40,7 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
     _scale_c(_scale_factor),
     _final_coef(_scale_c, _cross_uv)
 {
-  // // Must be vector L2 with interior DOFs
+  // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   const int mesh_dim = fes->GetMesh()->Dimension();
 
@@ -51,7 +51,7 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
   if (fes->GetVDim() != 3)
     mooseError("MFEMCrossProductAux requires AuxVariable to have vdim == 3.");
 
-  // // Must be L2
+  // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
     mooseError("MFEMCrossProductAux requires the target variable to use L2_FECollection.");
 
@@ -64,14 +64,6 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
 void
 MFEMCrossProductAux::execute()
 {
-  // // Build vector coefficient: s(x) * (U x V)
-  // mfem::VectorGridFunctionCoefficient Ucoef(&_u_var);
-  // mfem::VectorGridFunctionCoefficient Vcoef(&_v_var);
-  // mfem::VectorCrossProductCoefficient cross_uv(Ucoef, Vcoef); // vector-valued
-
-  // // s(x) = constant scale factor for now
-  // mfem::ConstantCoefficient scoef(_scale_factor);
-  // mfem::ScalarVectorProductCoefficient final_vec(scoef, cross_uv); // vector-valued
 
   // MFEM element projection for L2
   _result_var = 0.0;

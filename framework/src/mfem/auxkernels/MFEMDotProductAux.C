@@ -42,7 +42,7 @@ MFEMDotProductAux::MFEMDotProductAux(const InputParameters & parameters)
   // Must be L2
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
-    mooseError("MFEMDotProductAux requires the target variable to use L2_FECollection.");
+    paramError("variable", "The target variable must use L2_FECollection.");
 
   // Must have no shared/constrained DOFs
   if (fes->GetTrueVSize() != fes->GetVSize())
