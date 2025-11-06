@@ -12,6 +12,7 @@
 []
 
 [FESpaces]
+  inactive = "L2FESpace"
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
@@ -21,6 +22,12 @@
     type = MFEMVectorFESpace
     fec_type = RT
     fec_order = CONSTANT
+  []
+  [L2FESpace]
+    type = MFEMScalarFESpace
+    fec_type = L2
+    fec_order = CONSTANT
+    fec_map =   VALUE
   []
 []
 
@@ -32,18 +39,32 @@
 []
 
 [AuxVariables]
+  inactive = "joule_heating"
   [db_dt_field]
     type = MFEMVariable
     fespace = HDivFESpace
   []
+  [joule_heating]
+    type = MFEMVariable
+    fespace = L2FESpace
+  []
 []
 
 [AuxKernels]
+  inactive = "joule_Q_aux"
   [curl]
     type = MFEMCurlAux
     variable = db_dt_field
     source = e_field
     scale_factor = -1.0
+    execute_on = TIMESTEP_END
+  []
+  [joule_Q_aux]
+    type = MFEMDotProductAux
+    variable = joule_heating
+    first_source_vec = e_field
+    second_source_vec = e_field
+    scale_factor = 1.0
     execute_on = TIMESTEP_END
   []
 []
