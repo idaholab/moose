@@ -150,6 +150,24 @@ TEST(NewtonInversion, NewtonSolve2D)
   EXPECT_NEAR(return_x1, x1_soln, tol);
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
+  // First problem again
+  // Try a degenerate case where the second function has 0 derivative
+  y1 = -3;
+  y2 = -37;
+  x1_soln = -4;
+  x2_soln = -11;
+  auto func2_with_cte = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
+  {
+    function_g2(x, y, g, dgdx, dgdy);
+    // creates an empty row in the Jacobian
+    dgdy = 0;
+    dgdx = 0;
+  };
+  FluidPropertiesUtils::NewtonSolve2D(
+      y1, y2, guess1, x2_soln, return_x1, return_x2, 1e-8, 1e-8, func1, func2_with_cte);
+  EXPECT_NEAR(return_x1, x1_soln, tol);
+  EXPECT_NEAR(return_x2, x2_soln, tol);
+
   // If there is no solution it should not converge
   y1 = -2000;
   y2 = -2000; // no solution
