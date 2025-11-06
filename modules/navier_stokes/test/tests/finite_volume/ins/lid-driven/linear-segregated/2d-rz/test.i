@@ -7,14 +7,17 @@ beta = 3.33e-3
 T_0 = 300
 T_hot = 301
 T_cold = 300
-l = 3e-2
+l = 1e-1
 expt_l_factor = 0.5
 expt_l = '${fparse expt_l_factor * l}'
 p_pin_loc = '${fparse 0.95 * l}'
+n = 100
+h = '${fparse l / n}'
+initial_dt = ${l}
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = 'upwind'
+  advected_interp_method = 'average'
 []
 
 [Mesh]
@@ -25,8 +28,8 @@ p_pin_loc = '${fparse 0.95 * l}'
     xmax = ${l}
     ymin = 0
     ymax = ${l}
-    nx = 10
-    ny = 10
+    nx = ${n}
+    ny = ${n}
   []
   [left_bottom_corner]
     type = SubdomainBoundingBoxGenerator
@@ -48,7 +51,6 @@ p_pin_loc = '${fparse 0.95 * l}'
     block = '1'
   []
   coord_type = 'RZ'
-  uniform_refine = 2
 []
 
 [Problem]
@@ -61,6 +63,20 @@ p_pin_loc = '${fparse 0.95 * l}'
     family = MONOMIAL
     order = CONSTANT
   []
+  [vel_mag]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [vel_mag]
+    type = VectorMagnitudeAux
+    variable = vel_mag
+    x = vel_x
+    y = vel_y
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [UserObjects]
@@ -72,8 +88,8 @@ p_pin_loc = '${fparse 0.95 * l}'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     body_force_kernel_names = "u_buoyancy; v_buoyancy"
-    # pressure_projection_method = consistent
-    pressure_projection_method = standard
+    pressure_projection_method = consistent
+    # pressure_projection_method = standard
   []
 []
 
@@ -101,6 +117,16 @@ p_pin_loc = '${fparse 0.95 * l}'
 []
 
 [LinearFVKernels]
+  [u_time]
+    type = LinearFVTimeDerivative
+    variable = vel_x
+    factor = ${rho}
+  []
+  [v_time]
+    type = LinearFVTimeDerivative
+    variable = vel_y
+    factor = ${rho}
+  []
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
@@ -163,13 +189,18 @@ p_pin_loc = '${fparse 0.95 * l}'
     face_flux = HbyA
     force_boundary_execution = true
   []
+  [heat_time]
+    type = LinearFVTimeDerivative
+    variable = T_fluid
+    factor = '${fparse rho*cp}'
+  []
   [heat_advection]
     type = LinearFVEnergyAdvection
     variable = T_fluid
     advected_quantity = temperature
     cp = ${cp}
   []
-  [conduction]
+  [heat_conduction]
     type = LinearFVDiffusion
     variable = T_fluid
     diffusion_coeff = ${k}
@@ -251,7 +282,7 @@ p_pin_loc = '${fparse 0.95 * l}'
 []
 
 [Executioner]
-  type = SIMPLE
+  type = PIMPLE
   momentum_l_abs_tol = 1e-10
   pressure_l_abs_tol = 1e-10
   energy_l_abs_tol = 1e-10
@@ -261,13 +292,13 @@ p_pin_loc = '${fparse 0.95 * l}'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 0.8
-  pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.9
+  momentum_equation_relaxation = 1.0
+  pressure_variable_relaxation = 1.0
+  energy_equation_relaxation = 1.0
   num_iterations = 1500
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
-  energy_absolute_tolerance = 1e-8
+  energy_absolute_tolerance = 1e-7
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -279,12 +310,25 @@ p_pin_loc = '${fparse 0.95 * l}'
   pin_pressure = true
   pressure_pin_value = 0.0
   pressure_pin_point = '${p_pin_loc} ${p_pin_loc} 0.0'
+
+  num_steps = 40
+  num_piso_iterations = 0
+
+  # dtmax = ${dtmax}
+
+  [TimeStepper]
+    type = PostprocessorDT
+    postprocessor = new_dt_for_unity_cfl
+    dt = ${initial_dt}
+    scale = 0.1
+  []
 []
 
 [Outputs]
   exodus = true
-  csv = false
-  perf_graph = false
+  csv = true
+  checkpoint = true
+  perf_graph = true
   print_nonlinear_residuals = false
   print_linear_residuals = true
 []
@@ -302,5 +346,24 @@ p_pin_loc = '${fparse 0.95 * l}'
     T_cold = ${T_cold}
     T_hot = ${T_hot}
     execute_on = 'initial timestep_end'
+  []
+  [vel_max]
+    type = ElementExtremeValue
+    variable = vel_mag
+  []
+  [dt]
+    type = TimestepSize
+  []
+  [cfl]
+    type = ParsedPostprocessor
+    expression = 'vel_max * dt / h'
+    constant_names = 'h'
+    constant_expressions = '${h}'
+    pp_names = 'vel_max dt'
+  []
+  [new_dt_for_unity_cfl]
+    type = ParsedPostprocessor
+    expression = 'dt / cfl'
+    pp_names = 'dt cfl'
   []
 []
