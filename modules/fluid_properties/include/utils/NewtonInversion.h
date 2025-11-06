@@ -120,6 +120,7 @@ NewtonSolve(const T & x,
  * convergence checking
  * @param[in] f_from_x_y two-variable function returning both values and derivatives as references
  * @param[in] g_from_x_y two-variable function returning both values and derivatives as references
+ * @param[in] caller_name routine calling this solve
  * @param[in] max_its the maximum number of iterations for Newton's method
  * @param[in] debug whether to output the solution, residual and Jacobian on every iteration
  */
@@ -135,6 +136,7 @@ NewtonSolve2D(const T & f,
               const Real g_tol,
               const Functor1 & f_from_x_y,
               const Functor2 & g_from_x_y,
+              const std::string & caller_name = "",
               const unsigned int max_its = 100,
               bool debug = false)
 {
@@ -159,7 +161,7 @@ NewtonSolve2D(const T & f,
   };
 
   DenseVector<T> u = {{x0, y0}};
-  DenseVector<T> minus_R(system_size), func_evals(system_size), u_update;
+  DenseVector<T> minus_R(system_size), func_evals(system_size), u_update(system_size);
   DenseMatrix<T> J(system_size, system_size);
   unsigned int iteration = 0;
 #ifndef NDEBUG
@@ -174,6 +176,14 @@ NewtonSolve2D(const T & f,
   {
     x_final = u(0);
     y_final = u(1);
+  };
+  auto status_string = [&u, &func_evals, &targets, &minus_R](unsigned int comp) -> std::stringstream
+  {
+    std::stringstream ss;
+    ss << "Current solution for component " << comp << ": " << u(comp)
+       << " (current ordinate: " << func_evals(comp) << " -> target: " << targets(comp)
+       << ", scaled residual: " << minus_R(comp) << ")";
+    return ss;
   };
   if (debug)
     std::cout << "Target values:\n" << targets << std::endl;
@@ -199,7 +209,7 @@ NewtonSolve2D(const T & f,
       if (isnan(minus_R(i)))
       {
         assign_solution();
-        mooseException("NaN detected in Newton solve");
+        mooseException(caller_name + ": NaN detected in Newton solve");
       }
 
     if (debug)
@@ -224,7 +234,7 @@ NewtonSolve2D(const T & f,
       else
       {
         if (degenerate_row != -1)
-          mooseException("Jacobian is all zeros in NewtonSolve2D");
+          mooseException(caller_name + ": Jacobian is all zeros in NewtonSolve2D");
         degenerate_row = i;
       }
     }
@@ -264,7 +274,8 @@ NewtonSolve2D(const T & f,
       if (isnan(u(i)))
       {
         assign_solution();
-        mooseException("NaN detected in NewtonSolve2D");
+        mooseException(caller_name + ": NaN detected in NewtonSolve2D\n" + status_string(0).str() +
+                       "\n" + status_string(1).str());
       }
 
     if (converged)
@@ -275,7 +286,9 @@ NewtonSolve2D(const T & f,
 
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
-    mooseException(
-        "Newton solve convergence failed: maximum number of iterations, ", max_its, ", exceeded");
+    mooseException(caller_name +
+                       ": Newton solve convergence failed: maximum number of iterations, ",
+                   max_its,
+                   ", exceeded.\n" + status_string(0).str() + "\n" + status_string(1).str());
 }
 } // namespace FluidPropertiesUtils

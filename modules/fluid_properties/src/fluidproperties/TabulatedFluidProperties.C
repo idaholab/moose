@@ -396,6 +396,7 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
                                         _tolerance,
                                         p_from_v_e,
                                         T_from_v_e,
+                                        name() + "::v_from_p_T",
                                         _max_newton_its,
                                         false);
     return v;
@@ -438,6 +439,7 @@ TabulatedFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & tem
                                         _tolerance,
                                         p_from_v_e,
                                         T_from_v_e,
+                                        name() + "::v_from_p_T",
                                         _max_newton_its,
                                         false);
     return v;
