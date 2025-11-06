@@ -1521,17 +1521,15 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 
       // Write out date and fluid type
       time_t now = std::time(&now);
-      if (_fp)
-        file_out << "# " << _fp->fluidName()
-                 << " properties created by TabulatedFluidProperties on " << ctime(&now) << "\n";
-      else
-        file_out << "# tabulated properties created by TabulatedFluidProperties on " << ctime(&now)
-                 << "\n";
+        file_out << "# " << _fp ? _fp->fluidName() : ""
+                 << " properties (p,T) tabulation created by TabulatedFluidProperties on " << ctime(&now) << "\n";
 
       // Write out column names
       file_out << "pressure, temperature";
       for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
-        file_out << ", " << _interpolated_properties[i];
+        if (_interpolated_properties[i] != "pressure" &&
+            _interpolated_properties[i] != "temperature")
+          file_out << ", " << _interpolated_properties[i];
       file_out << "\n";
 
       // Write out the fluid property data
@@ -1557,10 +1555,17 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
       MooseUtils::checkFileWriteable(file_name_ve);
       std::ofstream file_out(file_name_ve.c_str());
 
+      // Write out date and fluid type
+      time_t now = std::time(&now);
+        file_out << "# " << _fp ? _fp->fluidName() : ""
+                 << " properties (v,e) tabulation created by TabulatedFluidProperties on " << ctime(&now) << "\n";
+
       // Write out column names
       file_out << "specific_volume, internal_energy, pressure, temperature";
       for (const auto i : index_range(_properties))
-        if (_interpolated_properties[i] != "internal_energy")
+        if (_interpolated_properties[i] != "internal_energy" &&
+            _interpolated_properties[i] != "pressure" &&
+            _interpolated_properties[i] != "temperature")
           file_out << ", " << _interpolated_properties[i];
       file_out << "\n";
 
