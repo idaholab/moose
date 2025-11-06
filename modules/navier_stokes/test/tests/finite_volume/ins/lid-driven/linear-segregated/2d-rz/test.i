@@ -72,6 +72,8 @@ p_pin_loc = '${fparse 0.95 * l}'
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
     body_force_kernel_names = "u_buoyancy; v_buoyancy"
+    # pressure_projection_method = consistent
+    pressure_projection_method = standard
   []
 []
 
