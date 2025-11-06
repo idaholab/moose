@@ -318,7 +318,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
         throw; // not "throw e;" - that destroys type info!
 
-      mooseException("We caught a libMesh Jacobian exception: ", e.what());
+      mooseException("We caught a libMesh degeneracy exception in ThreadedElementLoopBase:\n",
+                     e.what());
     }
   }
   catch (MooseException & e)

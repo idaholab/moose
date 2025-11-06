@@ -76,8 +76,9 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
       if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
         throw;
 
-      mooseException("We caught a libMesh degeneracy in ComputeJacobianForScalingThread: ",
-                     e.what());
+      mooseException(
+          "We caught a libMesh degeneracy exception in ComputeJacobianForScalingThread:\n",
+          e.what());
     }
   }
   catch (MooseException & e)

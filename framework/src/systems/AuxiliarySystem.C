@@ -810,7 +810,7 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
             if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
               throw;
 
-            _fe_problem.setException("The following error was raised during mortar "
+            _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
                                      "nodal Auxiliary variable computation:\n" +
                                      std::string(e.what()));
           }

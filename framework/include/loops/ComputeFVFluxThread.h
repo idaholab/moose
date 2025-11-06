@@ -331,7 +331,8 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
         throw;
 
-      mooseException("We caught a libMesh exception: ", e.what());
+      mooseException("We caught a libMesh degeneracy exception in ComputeFVFluxThread:\n",
+                     e.what());
     }
   }
   catch (MooseException & e)

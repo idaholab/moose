@@ -186,7 +186,9 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
       if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
         throw;
 
-      _fe_problem.setException("We caught a degeneracy from libMesh:" + std::string(e.what()));
+      _fe_problem.setException(
+          "We caught a libMesh degeneracy exception in ComputeMortarFunctor:\n" +
+          std::string(e.what()));
     }
   }
   PARALLEL_CATCH;
