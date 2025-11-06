@@ -70,6 +70,41 @@ SmoothMeshGenerator::SmoothMeshGenerator(const InputParameters & parameters)
     _absolute_residual_tolerance(getParam<Real>("absolute_residual_tolerance")),
     _verbosity(getParam<unsigned int>("verbosity"))
 {
+  if (isParamSetByUser("algorithm"))
+  {
+    // Warn the user if they try to mix laplace smoother params with variational
+    // smoother params
+
+    std::vector<std::string> check_params;
+    std::string other_algorithm;
+    if (_algorithm == "laplace")
+    {
+      other_algorithm = "variational";
+      check_params = {"dilation_weight",
+                      "preserve_subdomain_boundaries",
+                      "relative_residual_tolerance",
+                      "absolute_residual_tolerance",
+                      "verbosity"};
+    }
+
+    else // _algorithm == "variational"
+    {
+      other_algorithm = "laplace";
+      check_params = {"iterations"};
+    }
+
+    for (const auto & param_name : check_params)
+      if (isParamSetByUser(param_name))
+        mooseWarning(type(),
+                     " param '",
+                     param_name,
+                     "' applies to algorithm='",
+                     other_algorithm,
+                     "' only and has no effect on the ",
+                     "currently selected algorithm='",
+                     _algorithm,
+                     "'.");
+  }
 }
 
 std::unique_ptr<MeshBase>

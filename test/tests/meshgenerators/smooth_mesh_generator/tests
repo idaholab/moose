@@ -1,24 +1,49 @@
 [Tests]
-  requirement = 'The system shall be able to use libmesh mesh modification tools.'
-  [laplace_smooth_mesh_generator]
-    type = 'Exodiff'
-    input = 'laplace_mesh_smoother_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'laplace_mesh_smoother_generator_in.e'
-    design = 'meshgenerators/SmoothMeshGenerator.md'
-    issues = '#11640'
-    mesh_mode = 'REPLICATED'
-    recover = false
+  design = 'meshgenerators/SmoothMeshGenerator.md'
+  [algorithms]
+    requirement = 'The system shall be able to use libmesh mesh modification tools:'
+    [laplace_smooth_mesh_generator]
+      type = 'Exodiff'
+      input = 'laplace_mesh_smoother_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'laplace_mesh_smoother_generator_in.e'
+      issues = '#11640'
+      mesh_mode = 'REPLICATED'
+      recover = false
+      detail = 'lapalce smoothing algorithm'
+    []
+
+    [variational_smooth_mesh_generator]
+      type = 'Exodiff'
+      input = 'variational_mesh_smoother_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'variational_mesh_smoother_generator_in.e'
+      issues = '#28424 #22141'
+      recover = false
+      detail = 'variational smoothing algorithm'
+    []
   []
 
-  [variational_smooth_mesh_generator]
-    type = 'Exodiff'
-    input = 'variational_mesh_smoother_generator.i'
-    cli_args = '--mesh-only'
-    exodiff = 'variational_mesh_smoother_generator_in.e'
-    design = 'meshgenerators/SmoothMeshGenerator.md'
-    issues = '#28424 #22141'
-    mesh_mode = 'REPLICATED'
-    recover = false
+  [warnings]
+    requirement = 'The SmoothMeshGenerator shall warn the user when:'
+    issues = '#28424'
+    [unused_variational_params]
+       type = RunException
+       input = 'laplace_mesh_smoother_generator.i'
+       cli_args = 'Mesh/smooth/preserve_subdomain_boundaries=false --mesh-only'
+       mesh_mode = 'REPLICATED'
+       recover = false
+       detail = 'they set variational params for a laplace smooth'
+       expect_err = "SmoothMeshGenerator param 'preserve_subdomain_boundaries' applies to algorithm='variational' only and has no effect on the currently selected algorithm='laplace'."
+    []
+
+    [unused_laplace_params]
+       type = RunException
+       input = 'variational_mesh_smoother_generator.i'
+       cli_args = 'Mesh/smooth/iterations=10 --mesh-only'
+       recover = false
+       detail = 'they set laplace params for a variational smooth'
+       expect_err = "SmoothMeshGenerator param 'iterations' applies to algorithm='laplace' only and has no effect on the currently selected algorithm='variational'."
+    []
   []
 []
