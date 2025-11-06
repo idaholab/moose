@@ -149,8 +149,7 @@ class ResultsReader:
         """Whether or not to validate data types on build."""
         return self._check
 
-    @property
-    def client(self) -> pymongo.MongoClient:
+    def getClient(self) -> pymongo.MongoClient:
         """
         Get the pymongo client.
 
@@ -168,32 +167,21 @@ class ResultsReader:
         assert isinstance(self._client, pymongo.MongoClient)
         return self._client
 
-    def _databaseGetter(self) -> Database:
+    def getDatabase(self) -> Database:
         """
         Get the pymongo database.
 
-        On the first call this will query the database from the client.
-
-        Passed to constructed StoredResult objects so that
-        they can also setup the database on first use if needed.
+        On first call this will query the database from the client
+        and start the connection.
         """
         if self._database is None:
             name = self._database_name
-            client = self.client
+            client = self.getClient()
             if name not in client.list_database_names():
                 raise ValueError(f"Database {name} not found")
             self._database = client.get_database(name)
         assert isinstance(self._database, Database)
         return self._database
-
-    @property
-    def database(self) -> Database:
-        """
-        Get the pymongo database.
-
-        On first call this will query the database from the client.
-        """
-        return self._databaseGetter()
 
     def close(self):
         """Close the database connection if it exists."""
@@ -245,7 +233,7 @@ class ResultsReader:
         Used so that it can be easily mocked in unit tests.
         """
         kwargs["sort"] = self.mongo_sort_id
-        with self.database.results.find(*args, **kwargs) as cursor:
+        with self.getDatabase().results.find(*args, **kwargs) as cursor:
             return [d for d in cursor]
 
     def getLatestPushResults(self, num: int) -> list[StoredResult]:
@@ -336,7 +324,7 @@ class ResultsReader:
 
         # Search for the value
         filter = {index: {"$eq": value}}
-        data = self.database.results.find_one(filter, sort=self.mongo_sort_id)
+        data = self.getDatabase().results.find_one(filter, sort=self.mongo_sort_id)
 
         # No such thing
         if data is None:
@@ -376,7 +364,7 @@ class ResultsReader:
         if result is None:
             try:
                 result = StoredResult(
-                    data, database_getter=self._databaseGetter, check=self.check
+                    data, database_getter=self.getDatabase, check=self.check
                 )
             except Exception as e:
                 raise ValueError(f"Failed to build result _id={id}") from e

@@ -389,7 +389,7 @@ class TestResultsReader(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError, f"Database {PROD_DATABASE_NAME} not found"
         ):
-            reader.database
+            reader.getDatabase()
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
@@ -397,7 +397,7 @@ class TestResultsReader(unittest.TestCase):
         name = "foo1234"
         reader = ResultsReader(name)
         with self.assertRaisesRegex(ValueError, f"Database {name} not found"):
-            reader.database
+            reader.getDatabase()
 
     @unittest.skipUnless(
         os.environ.get("TEST_RESULTSREADER_READER"),
