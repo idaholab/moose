@@ -95,22 +95,22 @@ Component::executeSetupMesh()
 }
 
 void
-Component::connectObject(const InputParameters & params,
-                         const std::string & mooseName,
-                         const std::string & name) const
+Component::connectObject(const InputParameters & obj_params,
+                         const std::string & obj_name,
+                         const std::string & param) const
 {
-  connectObject(params, mooseName, name, name);
+  connectObject(obj_params, obj_name, param, param);
 }
 
 void
-Component::connectObject(const InputParameters & params,
-                         const std::string & mooseName,
-                         const std::string & name,
-                         const std::string & par_name) const
+Component::connectObject(const InputParameters & obj_params,
+                         const std::string & obj_name,
+                         const std::string & comp_param,
+                         const std::string & obj_param) const
 {
-  MooseObjectParameterName alias("component", this->name(), name, "::");
-  MooseObjectParameterName par_value(params.getBase(), mooseName, par_name);
-  _app.getInputParameterWarehouse().addControllableParameterAlias(alias, par_value);
+  MooseObjectParameterName alias("component", this->name(), comp_param, "::");
+  MooseObjectParameterName obj_controlled_param(obj_params.getBase(), obj_name, obj_param);
+  _app.getInputParameterWarehouse().addControllableParameterAlias(alias, obj_controlled_param);
 }
 
 void
