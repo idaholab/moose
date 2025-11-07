@@ -80,7 +80,7 @@ The modeling of each regime is explained below.
 
 #### Laminar Nusselt Number
 
-The following relation is used depending on the subchannel type~\cite{Todreas}:
+The following relation is used depending on the subchannel type [!cite](Todreas):
 
 \begin{equation}
 \text{Nu}_{\text{laminar}} =
@@ -93,7 +93,7 @@ The following relation is used depending on the subchannel type~\cite{Todreas}:
 
 ### Dittus-Boelter Correlation for Turbulent Nusselt Number
 
-The Dittus-Boelter equation~\cite{incropera1990} is implemented as follows:
+The Dittus-Boelter equation [!cite](incropera1990) is implemented as follows:
 
 \begin{equation}
 \text{Nu}_{\text{turbulent}} = 0.023 \times Re^{0.8} \times Pr^{0.4},
@@ -108,7 +108,7 @@ where:
 
 ### Gnielinski Correlation for Turbulent Nusselt Number
 
-A modified Gnielinski correlation for low Prandtl numbers is used for calculating the Nusselt number for transitional and turbulent flows. The baseline correlation is taken from Angelucci's work~\cite{angelucci2018}. The modified correlation reads as follows:
+A modified Gnielinski correlation for low Prandtl numbers is used for calculating the Nusselt number for transitional and turbulent flows. The baseline correlation is taken from Angelucci's work [!cite](angelucci2018). The modified correlation reads as follows:
 
 \begin{equation}
 \text{Nu}_{\text{turbulent}} = \frac{f/8.0 \times (Re - 1000) \times (Pr + 0.01)}{1 + 12.7 \times \sqrt{f/8.0} \times \left( (Pr + 0.01)^{2/3} - 1 \right)},
@@ -128,7 +128,7 @@ With this modification, at low $Pr$ numbers (approximately for $Pr < 0.01$), one
 
 ### Kazimi-Carelli Correlation for Turbulent Nusselt Number
 
-The Kazimi-Carelli correlation~\cite{kazimi1976} is used for calculating the Nusselt number in rod bundles, considering the geometry of the bundle.
+The Kazimi-Carelli correlation [!cite](kazimi1976) is used for calculating the Nusselt number in rod bundles, considering the geometry of the bundle.
 
 \begin{equation}
 \text{Nu}_{\text{turbulent}} = 4.0 + 0.33 \times \left( \frac{p}{D} \right)^{3.8} \times \left( \frac{Pe}{100} \right)^{0.86} + 0.16 \times \left( \frac{p}{D} \right)^{5},
