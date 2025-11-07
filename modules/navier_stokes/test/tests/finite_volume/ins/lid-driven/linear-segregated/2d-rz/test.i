@@ -23,7 +23,7 @@ k = .285
 cp = 2410
 beta = 5e-4
 
-T_0 = 300
+T_0 = 300.0
 T_hot = 301
 T_cold = 300
 l = 10
@@ -131,7 +131,7 @@ initial_dt = 15
   [T_fluid]
     type = MooseLinearVariableFVReal
     solver_sys = energy_system
-    initial_condition = ${T_cold}
+    initial_condition = ${T_0} # ${T_cold}
   []
 []
 
@@ -295,9 +295,9 @@ initial_dt = 15
 
 [Executioner]
   type = PIMPLE
-  momentum_l_abs_tol = 1e-10
-  pressure_l_abs_tol = 1e-10
-  energy_l_abs_tol = 1e-10
+  momentum_l_abs_tol = 1e-9
+  pressure_l_abs_tol = 1e-9
+  energy_l_abs_tol = 1e-9
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -305,12 +305,12 @@ initial_dt = 15
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
   momentum_equation_relaxation = 0.9
-  pressure_variable_relaxation = 0.9
+  pressure_variable_relaxation = 1.0
   energy_equation_relaxation = 0.9
   num_iterations = 1500
-  pressure_absolute_tolerance = 1e-7
-  momentum_absolute_tolerance = 1e-7
-  energy_absolute_tolerance = 1e-7
+  pressure_absolute_tolerance = 1e-6
+  momentum_absolute_tolerance = 1e-6
+  energy_absolute_tolerance = 1e-6
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -326,14 +326,14 @@ initial_dt = 15
   num_steps = 10000
   num_piso_iterations = 0
 
-  dtmax = ${initial_dt}
+  dt = ${initial_dt}
 
-  [TimeStepper]
-    type = PostprocessorDT
-    postprocessor = new_dt_for_unity_cfl
-    dt = ${initial_dt}
-    scale = 1
-  []
+  # [TimeStepper]
+  #   type = PostprocessorDT
+  #   postprocessor = new_dt_for_unity_cfl
+  #   dt = ${initial_dt}
+  #   scale = 1
+  # []
 []
 
 [Outputs]
