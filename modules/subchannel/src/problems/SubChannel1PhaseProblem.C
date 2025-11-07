@@ -2619,6 +2619,14 @@ SubChannel1PhaseProblem::externalSolve()
   _Wij_old = _Wij;
   _console << "Finished executing subchannel solver\n";
 
+  // set SumWij at the inlet equal to the one on the first axial level  (for visualization purposes)
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, 1);
+    _SumWij_soln->set(node_in, (*_SumWij_soln)(node_out)); // kg/sec
+  }
+
   /// Assigning temperature to the fuel pins
   if (_pin_mesh_exist)
   {
