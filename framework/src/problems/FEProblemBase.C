@@ -135,6 +135,9 @@
 
 #include "metaphysicl/dualnumber.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 using namespace libMesh;
 
 // Anonymous namespace for helper function
@@ -7392,10 +7395,6 @@ FEProblemBase::handleException(const std::string & calling_method)
   {
     throw;
   }
-  catch (const libMesh::LogicError & e)
-  {
-    setException(create_exception_message("libMesh::LogicError", e));
-  }
   catch (const MooseException & e)
   {
     setException(create_exception_message("MooseException", e));
@@ -7420,11 +7419,17 @@ FEProblemBase::handleException(const std::string & calling_method)
   }
   catch (const std::exception & e)
   {
-    const auto message = create_exception_message("std::exception", e);
-    if (_regard_general_exceptions_as_errors)
-      mooseError(message);
+    // This might be libMesh detecting a degenerate Jacobian or matrix
+    if (strstr(e.what(), "Jacobian") || strstr(e.what(), "singular"))
+      setException(create_exception_message("libMesh DegenerateMap", e));
     else
-      setException(message);
+    {
+      const auto message = create_exception_message("std::exception", e);
+      if (_regard_general_exceptions_as_errors)
+        mooseError(message);
+      else
+        setException(message);
+    }
   }
 
   checkExceptionAndStopSolve();

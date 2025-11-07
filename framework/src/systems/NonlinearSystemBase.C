@@ -3462,7 +3462,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     // Allow the libmesh error/exception on negative jacobian
     const std::string & message = e.what();
     if (message.find("Jacobian") == std::string::npos)
-      throw e;
+      throw;
   }
 
   _communicator.min(damping);

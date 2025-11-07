@@ -700,8 +700,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
                  "about adding your debugger.");
 
     // Finish up the command
-    command_stream << "\""
-                   << " & ";
+    command_stream << "\"" << " & ";
     std::string command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
@@ -2250,12 +2249,12 @@ MooseApp::run()
   catch (Parser::Error & err)
   {
     mooseAssert(_parser->getThrowOnError(), "Should be true");
-    throw err;
+    throw;
   }
   catch (MooseRuntimeError & err)
   {
     mooseAssert(Moose::_throw_on_error, "Should be true");
-    throw err;
+    throw;
   }
   catch (std::exception & err)
   {

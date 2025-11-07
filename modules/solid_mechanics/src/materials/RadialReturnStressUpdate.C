@@ -444,7 +444,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
     {
       // if we are not using adaptive substepping we just rethrow the exception
       if (!_adaptive_substepping)
-        throw e;
+        throw;
 
       // otherwise we double the number of substeps and try again
       num_substeps *= 2;

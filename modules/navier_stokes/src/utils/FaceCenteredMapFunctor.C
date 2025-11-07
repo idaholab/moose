@@ -135,11 +135,8 @@ template <typename T, typename Map>
 typename FaceCenteredMapFunctor<T, Map>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
 {
-  try
-  {
-    return libmesh_map_find(*this, fi->id());
-  }
-  catch (libMesh::LogicError &)
+  auto it = this->find(fi->id());
+  if (it == this->end())
   {
     if (!_sub_ids.empty() && !_sub_ids.count(fi->elem().subdomain_id()))
     {
@@ -162,6 +159,8 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
 
     return typename FaceCenteredMapFunctor<T, Map>::ValueType();
   }
+
+  return it->second;
 }
 
 template class FaceCenteredMapFunctor<ADRealVectorValue,
