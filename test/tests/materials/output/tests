@@ -274,4 +274,10 @@
     requirement = "The system shall be able to not show the field variable names for outputting material data added by materials."
     prereq = show_added_aux_vars
   []
+  [long_vector_properties]
+    type = 'Exodiff'
+    input = 'output_vector_props.i'
+    exodiff = 'output_vector_props_out.e'
+    requirement = "The system shall be able to output vector material properties whose size is greater than 10."
+  []
 []
