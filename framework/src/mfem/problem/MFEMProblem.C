@@ -85,7 +85,7 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
   std::shared_ptr<MFEMIndicator> estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
 
   // construct the estimator itself
-  estimator->createEstimator();
+  mooseAssert(estimator->createEstimator(), "Couldn't create estimator with name '" + name + "'");
 }
 
 void
