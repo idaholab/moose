@@ -375,6 +375,9 @@ ADComputeSmearedCrackingStress::updateCrackingStateAndStress()
   const ADReal youngs_modulus =
       ElasticityTensorTools::getIsotropicYoungsModulus(_elasticity_tensor[_qp]);
 
+  const ADReal poissons_ratio = 
+      ElasticityTensorTools::getIsotropicPoissonsRatio(_elasticity_tensor[_qp]);
+
   ADReal cracking_stress = _cracking_stress[_qp];
 
   if (cracking_stress > 0)
@@ -453,7 +456,8 @@ ADComputeSmearedCrackingStress::updateCrackingStateAndStress()
                                                      _crack_initiation_strain[_qp](i),
                                                      _crack_max_strain[_qp](i),
                                                      cracking_stress,
-                                                     youngs_modulus);
+                                                     youngs_modulus, 
+                                                     poissons_ratio);
         _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
       }
 

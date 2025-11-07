@@ -12,16 +12,16 @@
 #include "ADSmearedCrackSofteningBase.h"
 
 /**
- * ADAbruptSoftening is a smeared crack softening model that abruptly
- * drops the stress upon crack initiation and relies on automatic
- * differentiation. It is for use with ADComputeSmearedCrackingStress.
+ * ExponentialEnergyBasedSoftening is a smeared crack softening model that
+ * uses an exponential softening curve where the softening slope is 
+ * dependent on each element size and the fracture toughness.
  */
-class ADAbruptSoftening : public ADSmearedCrackSofteningBase
+class ADExponentialEnergyBasedSoftening : public ADSmearedCrackSofteningBase
 {
 public:
   static InputParameters validParams();
 
-  ADAbruptSoftening(const InputParameters & parameters);
+  ADExponentialEnergyBasedSoftening(const InputParameters & parameters);
 
   virtual void computeCrackingRelease(ADReal & stress,
                                       ADReal & stiffness_ratio,
@@ -35,4 +35,7 @@ public:
 protected:
   /// Residual stress after full softening
   const Real & _residual_stress;
+
+  /// Fracture toughness
+  const Real & _fracture_toughness;
 };

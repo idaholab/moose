@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
+//* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -7,19 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ExponentialEnergyBasedSoftening.h" 
+#include "ADExponentialEnergyBasedSoftening.h"
 
 #include "MooseMesh.h"
 
-registerMooseObject("SolidMechanicsApp", ExponentialEnergyBasedSoftening);
+registerMooseObject("SolidMechanicsApp", ADExponentialEnergyBasedSoftening);
 
 InputParameters
-ExponentialEnergyBasedSoftening::validParams()
+ADExponentialEnergyBasedSoftening::validParams()
 {
-  InputParameters params = SmearedCrackSofteningBase::validParams();
+  InputParameters params = ADSmearedCrackSofteningBase::validParams();
   params.addClassDescription(
       "Softening model with an exponential softening response upon cracking. This "
-      "class is intended to be used with ComputeSmearedCrackingStress.");
+      "class is intended to be used with ADComputeSmearedCrackingStress and relies on automatic "
+      "differentiation.");
   params.addRangeCheckedParam<Real>(
       "residual_stress",
       0.0,
@@ -32,30 +33,30 @@ ExponentialEnergyBasedSoftening::validParams()
   return params;
 }
 
-ExponentialEnergyBasedSoftening::ExponentialEnergyBasedSoftening(const InputParameters & parameters)
-  : SmearedCrackSofteningBase(parameters),
+ADExponentialEnergyBasedSoftening::ADExponentialEnergyBasedSoftening(const InputParameters & parameters)
+  : ADSmearedCrackSofteningBase(parameters),
     _residual_stress(getParam<Real>("residual_stress")),
     _fracture_toughness(getParam<Real>("fracture_toughness"))
 {
 }
 
 void
-ExponentialEnergyBasedSoftening::computeCrackingRelease(Real & stress,
-                                             Real & stiffness_ratio,
-                                             const Real /*strain*/,
-                                             const Real crack_initiation_strain,
-                                             const Real crack_max_strain,
-                                             const Real cracking_stress,
-                                             const Real youngs_modulus, 
-                                             const Real poissons_ratio)
+ADExponentialEnergyBasedSoftening::computeCrackingRelease(ADReal & stress,
+                                               ADReal & stiffness_ratio,
+                                               const ADReal & /*strain*/,
+                                               const ADReal & crack_initiation_strain,
+                                               const ADReal & crack_max_strain,
+                                               const ADReal & cracking_stress,
+                                               const ADReal & youngs_modulus, 
+                                               const ADReal & poissons_ratio)
 {
   mooseAssert(crack_max_strain >= crack_initiation_strain,
               "crack_max_strain must be >= crack_initiation_strain");
-  
+
   unsigned int dim = _current_elem->dim();
   
   // Get estimate of element size
-  Real ele_len = 0.0;
+  ADReal ele_len = 0.0;
   if (dim == 3) {
     ele_len = std::cbrt(_current_elem->volume());
   } else {
@@ -63,12 +64,12 @@ ExponentialEnergyBasedSoftening::computeCrackingRelease(Real & stress,
   }
 
   // Calculate initial slope of exponential curve
-  const Real energy_release_rate = (_fracture_toughness * _fracture_toughness) * (1 - poissons_ratio * poissons_ratio) / youngs_modulus;
-  const Real frac_stress_sqr = cracking_stress * cracking_stress;
-  const Real l_max = 2 * energy_release_rate * youngs_modulus / frac_stress_sqr;
+  const ADReal energy_release_rate = (_fracture_toughness * _fracture_toughness) * (1 - poissons_ratio * poissons_ratio) / youngs_modulus;
+  const ADReal frac_stress_sqr = cracking_stress * cracking_stress;
+  const ADReal l_max = 2 * energy_release_rate * youngs_modulus / frac_stress_sqr;
 
   // Check against maximum allowed element size - avoid the divide by zero by capping at a large slope
-  Real initial_slope = -1e5*youngs_modulus;
+  ADReal initial_slope = -1e5*youngs_modulus;
   if (ele_len < l_max) // TODO: need to log if this isn't true
     initial_slope = -frac_stress_sqr / (energy_release_rate / ele_len - frac_stress_sqr / (2*youngs_modulus));
 
