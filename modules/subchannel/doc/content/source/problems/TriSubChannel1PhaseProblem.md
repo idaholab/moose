@@ -20,12 +20,14 @@ T_{s,\text{pin}}(z) = \frac{1}{N} \sum_{sc=1}^N T_{bulk,sc}(z) + \frac{q'_{\text
 \end{equation}
 
 where:
+
 - $T_{s,\text{pin}}(z)$ is the surface temperature for the pin at a height $z$
 - $N$ is the number of subchannel neighboring the pin
 - $T_{bulk,sc}(z)$ is the bulk temperature for a subchannel $sc$ neighboring the pin at a height $z$
 - $q'_{\text{pin}}(z)$ is the linear heat generation rate for the pin at a height $z$
 - $D_{\text{pin}}(z)$ is the pin diameter at a height $z$
 - $h_{sc}(z)$ is the heat exchange coefficient for a subchannel $sc$ neighboring the pin at a height $z$
+
 
 For the duct, the duct surface temperature is defined as follows:
 
@@ -46,8 +48,10 @@ h = \frac{\text{Nu} \times k}{D_h}
 \end{equation}
 
 where:
+
 - $k$ is the thermal conductivity of the subchannel neighboring the structure
 - $D_h$ is the hydraulics diameter of the subchannel neighboring the structure
+
 
 The following correlations have been implemented for the Nusselt number
 which can be selected via the [!param](/Problem/TriSubChannel1PhaseProblem/pin_htc_correlation) parameter
@@ -66,8 +70,10 @@ Re_T = 10^4 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
 \end{equation}
 
 where:
+
 - P is the pitch
-- D_{\text{pin} is the pin diameter
+- D$_{\text{pin}}$ is the pin diameter
+
 
 The flow is laminar if $Re \leq Re_L$, turbulent if $Re \geq Re_T$, and in the transition regime if it lies in between.
 The modeling of each regime is explained below.
@@ -94,9 +100,11 @@ The Dittus-Boelter equation~\cite{incropera1990} is implemented as follows:
 \end{equation}
 
 where:
+
 - $Nu$: Nusselt number
 - $Re$: Reynolds number
 - $Pr$: Prandtl number
+
 
 ### Gnielinski Correlation for Turbulent Nusselt Number
 
@@ -107,10 +115,12 @@ A modified Gnielinski correlation for low Prandtl numbers is used for calculatin
 \end{equation}
 
 where:
+
 - $Nu$: Nusselt number
 - $Re$: Reynolds number
 - $Pr$: Prandtl number
-- $f: Darcy friction factor
+- $f$: Darcy friction factor
+
 
 The key modification in the correlation is the addition of $0.01$ to the Prandtl number.
 This modification retains predictions within experimental uncertainty at high $Pr$ numbers but enables the correlation to be used at low $Pr$ numbers.
@@ -125,6 +135,7 @@ The Kazimi-Carelli correlation~\cite{kazimi1976} is used for calculating the Nus
 \end{equation}
 
 where:
+
 - $Nu$: Nusselt number
 - $p$: Pitch, the center-to-center distance between adjacent rods
 - $D$: Diameter of the rod
@@ -132,6 +143,7 @@ where:
 - $Pe$: Peclet number ($Pe = Re \times Pr$)
 - $Re$: Reynolds number
 - $Pr$: Prandtl number
+
 
 !alert note
 The Kazimi-Carelli correlation is not currently implemented for computing the duct surface temperature.
