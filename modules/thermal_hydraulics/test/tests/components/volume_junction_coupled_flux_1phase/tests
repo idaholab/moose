@@ -1,0 +1,10 @@
+[Tests]
+  design = 'VolumeJunctionCoupledFlux1Phase.md'
+  issues = '#31850'
+  [test]
+    type = CSVDiff
+    input = 'main.i'
+    csvdiff = 'main_out.csv main_out_child0.csv'
+    requirement = 'The system shall be able to coupled a single-phase volume junction to an external application.'
+  []
+[]

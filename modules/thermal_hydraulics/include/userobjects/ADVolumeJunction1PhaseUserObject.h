@@ -28,6 +28,14 @@ public:
 
   virtual void finalize() override;
 
+  std::vector<ADReal> compute3DFlux(const ADNumericalFlux3EqnBase & numerical_flux,
+                                    const std::vector<ADReal> & Ui,
+                                    const RealVectorValue & ni) const;
+  std::vector<ADReal> computeResidual(const std::vector<ADReal> & flux_3d,
+                                      const std::vector<ADReal> & Ui,
+                                      const RealVectorValue & ni,
+                                      bool is_primary_connection) const;
+
 protected:
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
 
