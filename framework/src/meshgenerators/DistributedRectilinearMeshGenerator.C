@@ -82,7 +82,7 @@ DistributedRectilinearMeshGenerator::validParams()
   params.addParam<MooseEnum>(
       "partition", partition, "Which method (graph linear square) use to partition mesh");
 
-  MooseEnum elem_types(LIST_GEOM_ELEM); // no default
+  MooseEnum elem_types("EDGE2 QUAD4 HEX8"); // no default
   params.addParam<MooseEnum>("elem_type",
                              elem_types,
                              "The type of element from libMesh to "
