@@ -58,6 +58,16 @@ MFEMRefinementMarker::setUp()
   // fetch const ref to the estimator
   _estimator = &getUserObjectByName<MFEMIndicator>(_estimator_name);
 
+  // Check if p-refinement is supported by the fespace supplied with the variable
+  auto & fespace = _estimator->getFESpace();
+
+  if (_use_p_refinement and !fespace.PRefinementSupported())
+  {
+    mooseWarning("Specified p-refinement on an unsupported FESpace or geometry. Only H1 and L2 are "
+                 "supported by mfem");
+    _use_p_refinement = false;
+  }
+
   _threshold_refiner = std::make_unique<mfem::ThresholdRefiner>(*(_estimator->getEstimator()));
   _threshold_refiner->SetTotalErrorFraction(_error_threshold);
 }
