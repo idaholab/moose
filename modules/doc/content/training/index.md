@@ -3,9 +3,9 @@
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 
-- MOOSE Framework Fundamentals (2026 January 6-7, Rensselaer Polytechnic Institute)
+- [MOOSE Framework Fundamentals](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration) (2026 January 6-7, Rensselaer Polytechnic Institute)
 
-- BISON Fuels Performance (2026 January 8-9, Rensselaer Polytechnic Institute)
+- [BISON Fuels Performance](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration) (2026 January 8-9, Rensselaer Polytechnic Institute)
 
 - MOOSE Modeling and Simulation User Training (2026 April 16th, Texas A&M)
 
