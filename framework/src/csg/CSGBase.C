@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGBase.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -635,7 +636,7 @@ CSGBase::generateOutput() const
       const auto & lat_dims = lat.getDimensions();
       csg_json["lattices"][lat_name] = {};
       for (const auto & dim : lat_dims)
-        csg_json["lattices"][lat_name][dim.first] = anyToJson(dim.second);
+        csg_json["lattices"][lat_name][dim.first] = CSGUtils::anyToJson(dim.second);
       // write the map of universe names: list of lists
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
     }
@@ -661,21 +662,6 @@ bool
 CSGBase::operator!=(const CSGBase & other) const
 {
   return !(*this == other);
-}
-
-nlohmann::json
-anyToJson(const std::any & data)
-{
-  if (data.type() == typeid(int))
-    return nlohmann::json(std::any_cast<int>(data));
-  else if (data.type() == typeid(std::string))
-    return nlohmann::json(std::any_cast<std::string>(data));
-  else if (data.type() == typeid(Real))
-    return nlohmann::json(std::any_cast<Real>(data));
-  else if (data.type() == typeid(bool))
-    return nlohmann::json(std::any_cast<bool>(data));
-  else
-    mooseError("Unsupported any data type to convert to JSON.");
 }
 
 } // namespace CSG
