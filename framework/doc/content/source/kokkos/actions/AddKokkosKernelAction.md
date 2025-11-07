@@ -1,4 +1,4 @@
-# AddKokkosKokkosKernelAction
+# AddKokkosKernelAction
 
 !if! function=hasCapability('kokkos')
 

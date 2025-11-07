@@ -1249,6 +1249,7 @@ class FunctorCopy
   friend class MaterialBase;
   friend class Material;
   friend class AuxKernel;
+  friend class FunctionBase;
 
   FunctorCopy() = default;
   FunctorCopy(const FunctorCopy &) = delete;

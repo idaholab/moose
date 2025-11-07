@@ -88,7 +88,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   if (_blk_feproblem != NULL)
   {
 #ifdef MOOSE_KOKKOS_ENABLED
-    if (_moose_object->isKokkosObject({}))
+    if (_moose_object->isKokkosObject())
       _blk_material_data = &_blk_feproblem->getKokkosMaterialData(Moose::BLOCK_MATERIAL_DATA);
     else
 #endif
@@ -187,7 +187,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
     _blk_dim = _blk_mesh->dimension();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (moose_object->isKokkosObject({}))
+  if (moose_object->isKokkosObject())
     initializeKokkosBlockRestrictable(_blk_mesh->getKokkosMesh());
 #endif
 }

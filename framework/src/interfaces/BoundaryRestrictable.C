@@ -44,7 +44,7 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, boo
     _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _bnd_material_data(
 #ifdef MOOSE_KOKKOS_ENABLED
-        moose_object->isKokkosObject({})
+        moose_object->isKokkosObject()
             ? _bnd_feproblem->getKokkosMaterialData(Moose::BOUNDARY_MATERIAL_DATA)
             :
 #endif
@@ -69,7 +69,7 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
     _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
     _bnd_material_data(
 #ifdef MOOSE_KOKKOS_ENABLED
-        moose_object->isKokkosObject({})
+        moose_object->isKokkosObject()
             ? _bnd_feproblem->getKokkosMaterialData(Moose::BOUNDARY_MATERIAL_DATA)
             :
 #endif
@@ -186,7 +186,7 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object.isKokkosObject({}))
+  if (_moose_object.isKokkosObject())
     initializeKokkosBoundaryRestrictable(_bnd_mesh);
 #endif
 }

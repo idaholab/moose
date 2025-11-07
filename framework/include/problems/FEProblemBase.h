@@ -98,10 +98,16 @@ class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
 
+namespace Moose
+{
+class FunctionBase;
+}
+
 #ifdef MOOSE_KOKKOS_ENABLED
 namespace Moose::Kokkos
 {
 class MaterialPropertyStorage;
+class Function;
 }
 #endif
 
@@ -643,6 +649,38 @@ public:
   addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, const THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, const THREAD_ID tid = 0);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Add a Kokkos function to the problem
+   * @param type The Kokkos function type
+   * @param name The Kokkos function name
+   * @param parameters The Kokkos function input parameters
+   */
+  virtual void addKokkosFunction(const std::string & type,
+                                 const std::string & name,
+                                 InputParameters & parameters);
+  /**
+   * Get whether a Kokkos function exists
+   * @param name The Kokkos function name
+   * @returns Whether a Kokkos function exists
+   */
+  virtual bool hasKokkosFunction(const std::string & name);
+  /**
+   * Get a Kokkos function in an abstract type
+   * @param name The Kokkos function name
+   * @returns The copy of the Kokkos function in the abstract type
+   */
+  virtual Moose::Kokkos::Function getKokkosFunction(const std::string & name);
+  /**
+   * Get a Kokkos function in a concrete type
+   * @tparam T The Kokkos function type
+   * @param name The Kokkos function name
+   * @returns The reference of the Kokkos function in the concrete type
+   */
+  template <typename T>
+  T & getKokkosFunction(const std::string & name);
+#endif
 
   /// Add a MeshDivision
   virtual void
@@ -2901,6 +2939,10 @@ protected:
   /// functions
   MooseObjectWarehouse<Function> _functions;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  MooseObjectWarehouse<Moose::FunctionBase> _kokkos_functions;
+#endif
+
   /// convergence warehouse
   MooseObjectWarehouse<Convergence> _convergences;
 
@@ -3554,3 +3596,35 @@ FEProblemBase::clearCurrentResidualVectorTags()
 {
   _current_residual_vector_tags.clear();
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+template <typename T>
+T &
+FEProblemBase::getKokkosFunction(const std::string & name)
+{
+  if (!hasKokkosFunction(name))
+  {
+    // If we didn't find a function, it might be a default function, attempt to construct one now
+    std::istringstream ss(name);
+    Real real_value;
+
+    // First see if it's just a constant. If it is, build a ConstantFunction
+    if (ss >> real_value && ss.eof())
+    {
+      InputParameters params = _factory.getValidParams("KokkosConstantFunction");
+      params.set<Real>("value") = real_value;
+      addKokkosFunction("KokkosConstantFunction", ss.str(), params);
+    }
+
+    // Try once more
+    if (!hasKokkosFunction(name))
+      mooseError("Unable to find Kokkos function '" + name, "'");
+  }
+
+  auto * const ret = dynamic_cast<T *>(_kokkos_functions.getActiveObject(name).get());
+  if (!ret)
+    mooseError("No Kokkos function named '", name, "' of appropriate type");
+
+  return *ret;
+}
+#endif

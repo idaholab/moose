@@ -9,14 +9,7 @@
 
 #pragma once
 
-#include "MooseObject.h"
-#include "SetupInterface.h"
-#include "TransientInterface.h"
-#include "PostprocessorInterface.h"
-#include "UserObjectInterface.h"
-#include "Restartable.h"
-#include "MeshChangedInterface.h"
-#include "ScalarCoupleable.h"
+#include "FunctionBase.h"
 #include "MooseFunctor.h"
 #include "ChainedReal.h"
 
@@ -33,15 +26,7 @@ class Point;
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Function : public MooseObject,
-                 public SetupInterface,
-                 public TransientInterface,
-                 public PostprocessorInterface,
-                 public UserObjectInterface,
-                 public Restartable,
-                 public MeshChangedInterface,
-                 public ScalarCoupleable,
-                 public Moose::FunctorBase<Real>
+class Function : public Moose::FunctionBase, public Moose::FunctorBase<Real>
 {
 public:
   /**
