@@ -1,4 +1,4 @@
-# Exponential Softening
+# Exponential Energy Based Softening
 
 !syntax description /Materials/ExponentialEnergyBasedSoftening
 
