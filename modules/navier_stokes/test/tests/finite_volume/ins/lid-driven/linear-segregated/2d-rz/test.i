@@ -373,9 +373,9 @@ initial_dt = 15
     constant_expressions = '${h}'
     pp_names = 'vel_max dt'
   []
-  [new_dt_for_unity_cfl]
-    type = ParsedPostprocessor
-    expression = 'dt / cfl'
-    pp_names = 'dt cfl'
-  []
+  # [new_dt_for_unity_cfl]
+  #   type = ParsedPostprocessor
+  #   expression = 'dt / cfl'
+  #   pp_names = 'dt cfl'
+  # []
 []
