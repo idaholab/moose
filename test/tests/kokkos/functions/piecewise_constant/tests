@@ -1,0 +1,42 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosPiecewiseConstant.md'
+  [piecewise_constant]
+    requirement = 'The Kokkos function system shall include a piece-wise constant function based on x- and y-data'
+    [x_y]
+      type = 'Exodiff'
+      input = 'kokkos_piecewise_constant.i'
+      exodiff = 'kokkos_piecewise_constant_out.e'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      detail = 'provided separately as two vectors in the input,'
+    []
+    [xy_data]
+      type = 'Exodiff'
+      input = 'kokkos_piecewise_constant.i'
+      cli_args = 'KokkosKernels/diff/coef=func_xy_data KokkosAuxKernels/coef_aux/function=func_xy_data'
+      exodiff = 'kokkos_piecewise_constant_out.e'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      detail = 'provided as a table in the input,'
+    []
+    [csv]
+      type = 'Exodiff'
+      input = 'kokkos_piecewise_constant.i'
+      cli_args = 'KokkosKernels/diff/coef=func_csv KokkosAuxKernels/coef_aux/function=func_csv'
+      exodiff = 'kokkos_piecewise_constant_out.e'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      detail = 'provided as a CSV file,'
+    []
+    [json]
+      type = 'Exodiff'
+      input = 'kokkos_piecewise_constant.i'
+      cli_args = 'KokkosKernels/diff/coef=func_json KokkosAuxKernels/coef_aux/function=func_json'
+      exodiff = 'kokkos_piecewise_constant_out.e'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu'
+      detail = 'provided as a JSON file.'
+    []
+  []
+[]

@@ -1,0 +1,66 @@
+<VTKFile type="UnstructuredGrid" version="2.2" byte_order="LittleEndian">
+<UnstructuredGrid>
+<Piece NumberOfPoints="8" NumberOfCells="1">
+<Points>
+<DataArray type="Float64" NumberOfComponents="3" format="ascii">
+0 0 0
+1 0 0
+0 1 0
+1 1 0
+0 0 1
+1 0 1
+0 1 1
+1 1 1
+</DataArray>
+</Points>
+<Cells>
+<DataArray type="Int32" Name="connectivity" format="ascii">
+0 1 3 2 4 5 7 6 
+</DataArray>
+<DataArray type="Int32" Name="offsets" format="ascii">
+8
+</DataArray>
+<DataArray type="UInt8" Name="types" format="ascii">
+12
+</DataArray>
+</Cells>
+<CellData Scalars="attribute">
+<DataArray type="Int32" Name="attribute" format="ascii">
+1
+</DataArray>
+</CellData>
+<PointData >
+<DataArray type="Float64" Name="b_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
+0 1 0 
+0 1 0 
+0 1 0 
+0 1 0 
+0 1 0 
+0 1 0 
+0 1 0 
+0 1 0 
+</DataArray>
+<DataArray type="Float64" Name="e_field" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
+1 0 0 
+1 0 0 
+1 0 0 
+1 0 0 
+1 0 0 
+1 0 0 
+1 0 0 
+1 0 0 
+</DataArray>
+<DataArray type="Float64" Name="lorentz_force" NumberOfComponents="3" ComponentName0="0" ComponentName1="1" ComponentName2="2" format="ascii" >
+0 0 0 
+0 0 0 
+0 0 0 
+0 0 0 
+0 0 0 
+0 0 0 
+0 0 0 
+0 0 0 
+</DataArray>
+</PointData>
+</Piece>
+</UnstructuredGrid>
+</VTKFile>

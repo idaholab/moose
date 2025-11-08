@@ -12,7 +12,7 @@
 #include "KokkosObjectAction.h"
 
 /**
- * Adds a Kokkos nodal kernel for GPU computation
+ * Adds a Kokkos nodal kernel
  * Associated with the [KokkosNodalKernels] syntax
  */
 class AddKokkosNodalKernelAction : public KokkosObjectAction

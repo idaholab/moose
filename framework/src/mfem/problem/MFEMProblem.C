@@ -360,7 +360,7 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else
+  else if ("MFEMParsedFunction" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,

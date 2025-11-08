@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosConstantFunction.md'
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_constant_function.i'
+    exodiff = 'kokkos_constant_function_out.e'
+    requirement = 'The Kokkos function system shall include a constant function and the ability to retrieve it as an abstract type.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu'
+  []
+[]

@@ -1,0 +1,13 @@
+[Tests]
+  [MFEMParsedFunction]
+    type = CSVDiff
+    input = parsed_function_source.i
+    csvdiff = OutputData/ParsedFunctionSource.csv
+    design = 'MFEMParsedFunction.md'
+    issues = '#31145'
+    requirement = 'The system shall have the ability to parse non-linear functions of problem variables'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
+  []
+[]

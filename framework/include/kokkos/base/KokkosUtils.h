@@ -19,6 +19,18 @@ namespace Utils
 {
 
 /**
+ * Returns the sign of a value
+ * @param x The value
+ * @returns The sign of the value
+ */
+template <typename T>
+KOKKOS_INLINE_FUNCTION T
+sign(T x)
+{
+  return x >= 0.0 ? 1.0 : -1.0;
+}
+
+/**
  * Find a value in an array
  * @param target The target value to find
  * @param begin The pointer to the first element of the array

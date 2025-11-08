@@ -152,6 +152,10 @@ addActionTypes(Syntax & syntax)
 #endif
 
   registerMooseObjectTask("add_function",                 Function,                  false);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_function",                 KokkosFunction);
+#endif
+
   registerMooseObjectTask("add_distribution",             Distribution,              false);
   registerMooseObjectTask("add_sampler",                  Sampler,                   false);
 
@@ -584,6 +588,11 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  registerSyntax("AddKokkosFunctionAction", "KokkosFunctions/*");
+  syntax.registerSyntaxType("KokkosFunctions/*", "FunctionName");
+#endif
 
   registerSyntax("AddMeshDivisionAction", "MeshDivisions/*");
   syntax.registerSyntaxType("MeshDivisions/*", "MeshDivisionName");

@@ -12,7 +12,7 @@
 #include "KokkosObjectAction.h"
 
 /**
- * Adds a Kokkos boundary condition for GPU computation
+ * Adds a Kokkos boundary condition
  * Associated with the [KokkosBCs] syntax
  */
 class AddKokkosBCAction : public KokkosObjectAction
