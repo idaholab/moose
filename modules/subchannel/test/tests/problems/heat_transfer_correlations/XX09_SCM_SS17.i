@@ -28,7 +28,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
     nrings = ${n_rings}
-    n_cells = 50
+    n_cells = 20
     flat_to_flat = ${inner_duct_in}
     unheated_length_exit = ${unheated_length_exit}
     heated_length = ${heated_length}
@@ -42,7 +42,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     type = SCMTriPinMeshGenerator
     input = subchannel
     nrings = ${n_rings}
-    n_cells = 50
+    n_cells = 20
     unheated_length_exit = ${unheated_length_exit}
     heated_length = ${heated_length}
     pitch = ${fuel_pin_pitch}
@@ -52,7 +52,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     type = SCMTriDuctMeshGenerator
     input = fuel_pins
     nrings = ${n_rings}
-    n_cells = 50
+    n_cells = 20
     flat_to_flat = ${inner_duct_in}
     unheated_length_exit = ${unheated_length_exit}
     heated_length = ${heated_length}
@@ -69,64 +69,13 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
 []
 
-[AuxVariables]
-  [mdot]
-    block = subchannel
-  []
-  [SumWij]
-    block = subchannel
-  []
-  [P]
-    block = subchannel
-  []
-  [DP]
-    block = subchannel
-  []
-  [h]
-    block = subchannel
-  []
-  [T]
-    block = subchannel
-  []
-  [rho]
-    block = subchannel
-  []
-  [S]
-    block = subchannel
-  []
-  [w_perim]
-    block = subchannel
-  []
-  [mu]
-    block = subchannel
-  []
-  [displacement]
-    block = subchannel
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [duct_heat_flux]
-    block = duct
-  []
-  [Tduct]
-    block = duct
-  []
-[]
-
 [FluidProperties]
   [sodium]
     type = PBSodiumFluidProperties
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
@@ -141,10 +90,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
-
-  # Heat Transfer Correlations
-  pin_htc_correlation = 'gnielinski'
-  duct_htc_correlation = 'gnielinski'
 []
 
 [ICs]
@@ -162,7 +107,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     type = SCMTriPowerIC
     variable = q_prime
     power = ${Power_initial}
-    filename = "pin_power_profile61.txt"
+    filename = "pin_power_profile61_uniform.txt"
     axial_heat_rate = axial_heat_rate
   []
 
@@ -245,158 +190,26 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 []
 
 [Postprocessors]
-  [TTC-27]
-    type = SubChannelPointValue
-    variable = T
-    index = 91
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
+  ### Central pin inlet temperature
+  [Pin_Temp_0_Inlet]
+    type = SCMPinSurfaceTemperature
+    index = 0
+    height = ${fparse heated_length*0.01}
   []
-  [TTC-28]
-    type = SubChannelPointValue
-    variable = T
-    index = 50
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
+  ### Central pin center temperature
+  [Pin_Temp_1_Center]
+    type = SCMPinSurfaceTemperature
+    index = 0
+    height = ${fparse heated_length*0.5}
   []
-  [TTC-29]
-    type = SubChannelPointValue
-    variable = T
-    index = 21
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-30]
-    type = SubChannelPointValue
-    variable = T
-    index = 4
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-31]
-    type = SubChannelPointValue
-    variable = T
-    index = 2
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-32]
-    type = SubChannelPointValue
-    variable = T
-    index = 16
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-33]
-    type = SubChannelPointValue
-    variable = T
-    index = 42
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-34]
-    type = SubChannelPointValue
-    variable = T
-    index = 80
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [TTC-35]
-    type = SubChannelPointValue
-    variable = T
-    index = 107
-    execute_on = 'TIMESTEP_END'
-    height = 0.322
-  []
-  [MTC-20]
-  type = SubChannelPointValue
-  variable = T
-  index = 33
-  execute_on = 'TIMESTEP_END'
-  height = 0.172
-  []
-  [MTC-22]
-    type = SubChannelPointValue
-    variable = T
-    index = 3
-    execute_on = 'TIMESTEP_END'
-    height = 0.172
-  []
-  [MTC-24]
-    type = SubChannelPointValue
-    variable = T
-    index = 28
-    execute_on = 'TIMESTEP_END'
-    height = 0.172
-  []
-  [MTC-25]
-    type = SubChannelPointValue
-    variable = T
-    index = 60
-    execute_on = 'TIMESTEP_END'
-    height = 0.172
-  []
-  [MTC-26]
-    type = SubChannelPointValue
-    variable = T
-    index = 106
-    execute_on = 'TIMESTEP_END'
-    height = 0.172
-  []
-  [14TC-37]
-    type = SubChannelPointValue
-    variable = T
-    index = 52
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
-  []
-  [14TC-39]
-    type = SubChannelPointValue
-    variable = T
-    index = 6
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
-  []
-  [14TC-41]
-    type = SubChannelPointValue
-    variable = T
-    index = 40
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
-  []
-  [14TC-43]
-    type = SubChannelPointValue
-    variable = T
-    index = 105
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
+  ### Central pin outlet temperature
+  [Pin_Temp_2_Outlet]
+    type = SCMPinSurfaceTemperature
+    index = 0
+    height = ${fparse heated_length*0.99}
   []
 []
 
 [Executioner]
   type = Steady
-[]
-
-################################################################################
-# A multiapp that projects data to a detailed mesh
-################################################################################
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = '3d_SCM_SS.i'
-    execute_on = 'FINAL'
-  []
-[]
-
-[Transfers]
-  [subchannel_transfer]
-    type = SCMSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
-  []
-  [pin_transfer]
-    type = SCMPinSolutionTransfer
-    to_multi_app = viz
-    variable = 'Tpin q_prime'
-  []
 []

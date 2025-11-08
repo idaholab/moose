@@ -1,0 +1,43 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md'
+  issues = '#31464'
+  [EBR-II_SHRT-17_SS]
+    requirement = 'The system shall be able to model the EBR-II steady state SHRT-17 case, '
+    [dittus_boelter]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'dittus_boelter.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Dittus Boelter correlation.'
+      cli_args = 'SubChannel/pin_htc_correlation=dittus-boelter SubChannel/duct_htc_correlation=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties T_in=300.0'
+    []
+    [gnielinski]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'gnielinski.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Gnielinski correlation.'
+      cli_args = 'SubChannel/pin_htc_correlation=gnielinski SubChannel/duct_htc_correlation=gnielinski Outputs/file_base=gnielinski'
+    []
+    [kazimi_carelli]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'kazimi-carelli.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Kazimi Carelli correlation.'
+      cli_args = 'SubChannel/pin_htc_correlation=kazimi-carelli SubChannel/duct_htc_correlation=gnielinski Outputs/file_base=kazimi-carelli'
+    []
+  []
+[]
