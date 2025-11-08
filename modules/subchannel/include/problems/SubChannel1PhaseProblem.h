@@ -138,6 +138,22 @@ protected:
     }
   }
 
+  /**
+   * Solve a linear system (A * x = rhs) with a simple PCJACOBI KSP and populate the
+   * enthalpy solution into _h_soln for nodes [first_node, last_node].
+   *
+   * Uses member tolerances (_rtol, _atol, _dtol, _maxit), mesh (_subchannel_mesh),
+   * channel count (_n_channels), and error/solution handles (mooseError, _h_soln).
+   *
+   * @param A            PETSc matrix (operators)
+   * @param rhs          PETSc vector (right-hand side)
+   * @param first_node   inclusive start axial node index
+   * @param last_node    inclusive end axial node index
+   * @param ksp_prefix   options prefix for KSP (e.g. "h_sys_"), may be nullptr
+   */
+  PetscErrorCode solveAndPopulateEnthalpy(
+      Mat A, Vec rhs, unsigned int first_node, unsigned int last_node, const char * ksp_prefix);
+
   PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
   /// number of axial blocks
@@ -201,8 +217,6 @@ protected:
   const bool _staggered_pressure_bool;
   /// Segregated solve
   const bool _segregated_bool;
-  /// Thermal monolithic bool
-  const bool _monolithic_thermal_bool;
   /// Boolean to printout information related to subchannel solve
   const bool _verbose_subchannel;
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin

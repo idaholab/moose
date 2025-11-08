@@ -66,7 +66,6 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   staggered_pressure = false
-  monolithic_thermal = true
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind
