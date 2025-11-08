@@ -26,7 +26,7 @@ beta = 5e-4
 T_0 = 300.0
 T_hot = 301
 T_cold = 300
-initial_dt = 10
+initial_dt = 30
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -129,7 +129,7 @@ initial_dt = 10
     v = vel_y
     w = vel_z
     momentum_component = 'x'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -139,7 +139,7 @@ initial_dt = 10
     v = vel_y
     w = vel_z
     momentum_component = 'y'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [w_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -149,7 +149,7 @@ initial_dt = 10
     v = vel_y
     w = vel_z
     momentum_component = 'z'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -183,7 +183,7 @@ initial_dt = 10
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -206,6 +206,7 @@ initial_dt = 10
     type = LinearFVDiffusion
     variable = T_fluid
     diffusion_coeff = ${k}
+    use_nonorthogonal_correction = true
   []
 []
 
@@ -257,28 +258,28 @@ initial_dt = 10
 
 [Executioner]
   type = PIMPLE
-  momentum_l_abs_tol = 1e-6
-  pressure_l_abs_tol = 1e-6
-  energy_l_abs_tol = 1e-6
+  momentum_l_abs_tol = 1e-7
+  pressure_l_abs_tol = 1e-8
+  energy_l_abs_tol = 1e-7
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
   momentum_systems = 'u_system v_system w_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 1.0
+  momentum_equation_relaxation = 0.85
   pressure_variable_relaxation = 1.0
   energy_equation_relaxation = 1.0
   num_iterations = 1500
   pressure_absolute_tolerance = 1e-4
   momentum_absolute_tolerance = 1e-4
   energy_absolute_tolerance = 1e-4
-  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg'
-  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
-  pressure_petsc_options_value = 'hypre boomeramg'
-  energy_petsc_options_iname = '-pc_type -pc_hypre_type'
-  energy_petsc_options_value = 'hypre boomeramg'
+  momentum_petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths -pc_hypre_boomeramg_truncfactor -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type'
+  momentum_petsc_options_value = 'hypre boomeramg 4 1 0.1 0.6 HMIS ext+i'
+  pressure_petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths -pc_hypre_boomeramg_truncfactor -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type'
+  pressure_petsc_options_value = 'hypre boomeramg 2 1 0.1 0.6 HMIS ext+i'
+  energy_petsc_options_iname = '-pc_type -pc_hypre_type -pc_hypre_boomeramg_agg_nl -pc_hypre_boomeramg_agg_num_paths -pc_hypre_boomeramg_truncfactor -pc_hypre_boomeramg_strong_threshold -pc_hypre_boomeramg_coarsen_type -pc_hypre_boomeramg_interp_type'
+  energy_petsc_options_value = 'hypre boomeramg 4 1 0.1 0.6 HMIS ext+i'
   print_fields = false
 
   pin_pressure = true
@@ -288,23 +289,24 @@ initial_dt = 10
   num_steps = 10000
   num_piso_iterations = 0
 
-  dtmax = ${initial_dt}
+  dt = ${initial_dt}
 
-  [TimeStepper]
-    type = PostprocessorDT
-    postprocessor = new_dt_for_unity_cfl
-    dt = ${initial_dt}
-    scale = 1
-  []
+  # [TimeStepper]
+  #   type = PostprocessorDT
+  #   postprocessor = new_dt_for_unity_cfl
+  #   dt = ${initial_dt}
+  #   scale = 1
+  # []
 []
 
 [Outputs]
-  exodus = true
+  nemesis = true
   csv = true
   checkpoint = true
   perf_graph = true
   print_nonlinear_residuals = false
   print_linear_residuals = true
+  time_step_interval = 10
 []
 
 [Postprocessors]
