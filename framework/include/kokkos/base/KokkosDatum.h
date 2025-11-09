@@ -113,6 +113,18 @@ public:
    * @returns Whether the current datum is on a node
    */
   KOKKOS_FUNCTION bool isNodal() const { return _node != libMesh::DofObject::invalid_id; }
+  /**
+   * Get whether the a variable is defined on the current node
+   * @param var The variable
+   * @returns Whether the variable is defined on the current node
+   */
+  KOKKOS_FUNCTION bool isNodalDefined(const Variable & var) const
+  {
+    if (!isNodal() || !var.nodal())
+      return false;
+
+    return _systems[var.sys()].isNodalDefined(_node, var.var());
+  }
 
   /**
    * Get the inverse of Jacobian matrix

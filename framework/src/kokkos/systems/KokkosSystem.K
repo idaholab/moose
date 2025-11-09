@@ -436,9 +436,6 @@ System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 void
 System::setActiveSolutionTags(const std::set<TagID> & tags)
 {
-  if (!_active_variables.size())
-    return;
-
   std::set<TagID> active_solution_tags;
 
   for (auto tag : tags)
