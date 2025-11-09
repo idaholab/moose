@@ -66,6 +66,23 @@ VectorPostprocessor::VectorPostprocessor(const MooseObject * moose_object)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+VectorPostprocessor::VectorPostprocessor(const VectorPostprocessor & object,
+                                         const Moose::Kokkos::FunctorCopy & key)
+  : OutputInterface(object, key),
+    NonADFunctorInterface(object, key),
+    _vpp_name(object._vpp_name),
+    _vpp_fe_problem(object._vpp_fe_problem),
+    _parallel_type(object._parallel_type),
+    _vpp_moose_object(object._vpp_moose_object),
+    _vpp_tid(object._vpp_tid),
+    _contains_complete_history(object._contains_complete_history),
+    _is_distributed(object._is_distributed),
+    _is_broadcast(object._is_broadcast)
+{
+}
+#endif
+
 VectorPostprocessorValue &
 VectorPostprocessor::declareVector(const std::string & vector_name)
 {
