@@ -34,11 +34,25 @@ public:
    * Dispatch this functor with Kokkos parallel_for() given a Kokkos execution policy
    * @param policy The Kokkos execution policy
    */
-  virtual void parallelFor(const Policy & policy) = 0;
+  virtual void parallelFor(const Policy & /* policy */)
+  {
+    mooseError("parallelFor() called for an instance that is not a dispatcher.");
+  }
+  /**
+   * Dispatch this functor with Kokkos parallel_reduce() given a Kokkos execution policy and result
+   * buffer
+   * @param policy The Kokkos execution policy
+   * @param result The result buffer
+   */
+  virtual void parallelReduce(const Policy & /* policy */,
+                              ::Kokkos::View<Real *, ::Kokkos::HostSpace> & /* result */)
+  {
+    mooseError("parallelReduce() called for an instance that is not a reducer.");
+  }
 };
 
 /**
- * Class that dispatches an operation of a Kokkos functor.
+ * Class that dispatches a parallel loop operation of a Kokkos functor.
  * Calls operator() of the functor with a specified function tag.
  * @tparam Operation The function tag of operator() to be dispatched
  * @tparam Object The functor class type
@@ -72,12 +86,86 @@ public:
   }
 
   /**
-   * The parallel computation entry function called by Kokkos
+   * The parallel computation entry function called by Kokkos::parallel_for
    */
   KOKKOS_FUNCTION void operator()(const ThreadID tid) const
   {
     _functor_device(Operation{}, tid, _functor_device);
   }
+
+private:
+  /**
+   * Reference of the functor on host
+   */
+  const Object & _functor_host;
+  /**
+   * Copy of the functor on device
+   */
+  const Object _functor_device;
+};
+
+/**
+ * Class that dispatches a parallel reduction operation of a Kokkos functor.
+ * Calls operator() of the functor with a specified function tag.
+ * @tparam Operation The function tag of operator() to be dispatched
+ * @tparam Object The functor class type
+ */
+template <typename Operation, typename Object>
+class Reducer : public DispatcherBase
+{
+public:
+  /**
+   * Constructor
+   * @param object The pointer to the functor. This reducer is constructed by the base class of
+   * functors, and the actual type of functors is unknown by the base class. Therefore, it is passed
+   * as a void pointer and cast to the actual type here.
+   */
+  Reducer(const void * object)
+    : _functor_host(*static_cast<const Object *>(object)), _functor_device(_functor_host)
+  {
+  }
+  /**
+   * Copy constructor for parallel dispatch
+   */
+  Reducer(const Reducer & functor)
+    : value_count(functor.value_count),
+      _functor_host(functor._functor_host),
+      _functor_device(functor._functor_host)
+  {
+  }
+
+  void parallelReduce(const Policy & policy,
+                      ::Kokkos::View<Real *, ::Kokkos::HostSpace> & result) override final
+  {
+    value_count = result.size();
+
+    ::Kokkos::parallel_reduce(policy, *this, result);
+    ::Kokkos::fence();
+  }
+
+  using value_type = Real[];
+  using size_type = ::Kokkos::View<Real *>::size_type;
+
+  size_type value_count;
+
+  /**
+   * The parallel computation entry function called by Kokkos::parallel_reduce
+   */
+  KOKKOS_FUNCTION void operator()(const ThreadID tid, value_type result) const
+  {
+    _functor_device(Operation{}, tid, _functor_device, result);
+  }
+
+  /**
+   * Functions required by the reducer concept of Kokkos
+   */
+  ///@{
+  KOKKOS_FUNCTION void join(value_type result, const value_type source) const
+  {
+    _functor_device.join(Operation{}, result, source);
+  }
+  KOKKOS_FUNCTION void init(value_type result) const { _functor_device.init(Operation{}, result); }
+  ///@}
 
 private:
   /**
@@ -99,6 +187,7 @@ class DispatcherRegistryEntryBase
 {
 public:
   virtual ~DispatcherRegistryEntryBase() {}
+
   /**
    * Build a dispatcher for this operation and functor
    * @param object The pointer to the functor
@@ -132,6 +221,7 @@ private:
  * @tparam Operation The function tag of operator() to be dispatched
  * @tparam Object The functor class type
  */
+///@{
 template <typename Operation, typename Object>
 class DispatcherRegistryEntry : public DispatcherRegistryEntryBase
 {
@@ -141,6 +231,17 @@ public:
     return std::make_unique<Dispatcher<Operation, Object>>(object);
   }
 };
+
+template <typename Operation, typename Object>
+class ReducerRegistryEntry : public DispatcherRegistryEntryBase
+{
+public:
+  std::unique_ptr<DispatcherBase> build(const void * object) const override final
+  {
+    return std::make_unique<Reducer<Operation, Object>>(object);
+  }
+};
+///@}
 
 /**
  * Class that registers dispatchers of all Kokkos functors
@@ -163,12 +264,27 @@ public:
    * @param name The registered object type name
    */
   template <typename Operation, typename Object>
-  static void add(const std::string & name)
+  static void addDispatcher(const std::string & name)
   {
     auto operation = std::type_index(typeid(Operation));
 
     getRegistry()._dispatchers[std::make_pair(operation, name)] =
         std::make_unique<DispatcherRegistryEntry<Operation, Object>>();
+  }
+
+  /**
+   * Register a reducer of an operation of a functor
+   * @tparam Operation The function tag of operator() to be dispatched
+   * @tparam Object The functor class type
+   * @param name The registered object type name
+   */
+  template <typename Operation, typename Object>
+  static void addReducer(const std::string & name)
+  {
+    auto operation = std::type_index(typeid(Operation));
+
+    getRegistry()._dispatchers[std::make_pair(operation, name)] =
+        std::make_unique<ReducerRegistryEntry<Operation, Object>>();
   }
 
   /**
@@ -253,9 +369,9 @@ private:
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
-    DispatcherRegistry::add<classname::ResidualLoop, classname>(objectname);                       \
-    DispatcherRegistry::add<classname::JacobianLoop, classname>(objectname);                       \
-    DispatcherRegistry::add<classname::OffDiagJacobianLoop, classname>(objectname);                \
+    DispatcherRegistry::addDispatcher<classname::ResidualLoop, classname>(objectname);             \
+    DispatcherRegistry::addDispatcher<classname::JacobianLoop, classname>(objectname);             \
+    DispatcherRegistry::addDispatcher<classname::OffDiagJacobianLoop, classname>(objectname);      \
     DispatcherRegistry::hasUserMethod<classname::JacobianLoop>(                                    \
         objectname, &classname::computeQpJacobian != classname::defaultJacobian());                \
     DispatcherRegistry::hasUserMethod<classname::OffDiagJacobianLoop>(                             \
@@ -282,12 +398,12 @@ private:
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
-    DispatcherRegistry::add<classname::ElementInit, classname>(objectname);                        \
-    DispatcherRegistry::add<classname::SideInit, classname>(objectname);                           \
-    DispatcherRegistry::add<classname::NeighborInit, classname>(objectname);                       \
-    DispatcherRegistry::add<classname::ElementCompute, classname>(objectname);                     \
-    DispatcherRegistry::add<classname::SideCompute, classname>(objectname);                        \
-    DispatcherRegistry::add<classname::NeighborCompute, classname>(objectname);                    \
+    DispatcherRegistry::addDispatcher<classname::ElementInit, classname>(objectname);              \
+    DispatcherRegistry::addDispatcher<classname::SideInit, classname>(objectname);                 \
+    DispatcherRegistry::addDispatcher<classname::NeighborInit, classname>(objectname);             \
+    DispatcherRegistry::addDispatcher<classname::ElementCompute, classname>(objectname);           \
+    DispatcherRegistry::addDispatcher<classname::SideCompute, classname>(objectname);              \
+    DispatcherRegistry::addDispatcher<classname::NeighborCompute, classname>(objectname);          \
     DispatcherRegistry::hasUserMethod<classname::ElementInit>(                                     \
         objectname, &classname::initQpStatefulProperties != classname::defaultInitStateful());     \
     DispatcherRegistry::hasUserMethod<classname::SideInit>(                                        \
@@ -316,8 +432,8 @@ private:
   {                                                                                                \
     using namespace Moose::Kokkos;                                                                 \
                                                                                                    \
-    DispatcherRegistry::add<classname::ElementLoop, classname>(objectname);                        \
-    DispatcherRegistry::add<classname::NodeLoop, classname>(objectname);                           \
+    DispatcherRegistry::addDispatcher<classname::ElementLoop, classname>(objectname);              \
+    DispatcherRegistry::addDispatcher<classname::NodeLoop, classname>(objectname);                 \
                                                                                                    \
     return 0;                                                                                      \
   }                                                                                                \
