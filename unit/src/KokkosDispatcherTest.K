@@ -12,8 +12,12 @@
 void
 KokkosDispatcherTest::SetUp()
 {
-  Moose::Kokkos::DispatcherRegistry::add<KokkosDispatcherTestObject::TestLoop,
-                                         KokkosDispatcherTestObject>("KokkosDispatcherTestObject");
+  Moose::Kokkos::DispatcherRegistry::addDispatcher<KokkosDispatcherTestObject::TestLoop,
+                                                   KokkosDispatcherTestObject>(
+      "KokkosDispatcherTestObject");
+
+  Moose::Kokkos::DispatcherRegistry::addReducer<KokkosReducerTestObject::TestLoop,
+                                                KokkosReducerTestObject>("KokkosReducerTestObject");
 }
 
 TEST_F(KokkosDispatcherTest, dispatchKokkosObject)
@@ -31,4 +35,19 @@ TEST_F(KokkosDispatcherTest, dispatchKokkosObject)
   EXPECT_EQ(array[0], 0);
   EXPECT_EQ(array[1], 1);
   EXPECT_EQ(array[2], 2);
+}
+
+TEST_F(KokkosDispatcherTest, reduceKokkosObject)
+{
+  Kokkos::View<Real *, Kokkos::HostSpace> array("array", 3);
+  Moose::Kokkos::Policy policy(0, 3);
+  KokkosReducerTestObject object(3);
+
+  auto dispatcher = Moose::Kokkos::DispatcherRegistry::build<KokkosReducerTestObject::TestLoop>(
+      &object, "KokkosReducerTestObject");
+  dispatcher->parallelReduce(policy, array);
+
+  EXPECT_EQ(array(0), 3);
+  EXPECT_EQ(array(1), 6);
+  EXPECT_EQ(array(2), 9);
 }
