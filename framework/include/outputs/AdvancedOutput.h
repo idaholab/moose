@@ -387,12 +387,23 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   oss << "execute_" << execute_data_name << "_on";
   std::string execute_on_name = oss.str();
 
-  std::vector<UserObject *> objs;
+  std::vector<UserObjectBase *> objs;
   _problem_ptr->theWarehouse()
       .query()
       .condition<AttribSystem>("UserObject")
       .condition<AttribThread>(0)
       .queryIntoUnsorted(objs);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  std::vector<UserObjectBase *> kokkos_objs;
+  _problem_ptr->theWarehouse()
+      .query()
+      .condition<AttribSystem>("KokkosUserObject")
+      .condition<AttribThread>(0)
+      .queryIntoUnsorted(kokkos_objs);
+
+  objs.insert(objs.end(), kokkos_objs.begin(), kokkos_objs.end());
+#endif
 
   for (const auto & obj : objs)
   {

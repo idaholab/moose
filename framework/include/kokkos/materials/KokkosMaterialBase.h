@@ -45,7 +45,7 @@ public:
    */
   virtual void initialSetup() override;
 
-  // Unused for Kokkos materials because all elements are computed in parallel
+  // Unused for Kokkos materials because all subdomains are computed in parallel
   virtual void subdomainSetup() override final {}
 
   /**
