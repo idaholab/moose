@@ -35,18 +35,24 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
   auto & blocks = blockRestricted() ? blockIDs() : meshBlockIDs();
 
   std::set<ContiguousElementID> element_ids;
-  std::set<ContiguousNodeID> node_ids;
+  std::vector<ContiguousNodeID> node_ids;
 
   for (auto block : blocks)
   {
     element_ids.insert(mesh->getSubdomainContiguousElementIDs(block).begin(),
                        mesh->getSubdomainContiguousElementIDs(block).end());
-    node_ids.insert(mesh->getSubdomainContiguousNodeIDs(block).begin(),
+    node_ids.insert(node_ids.end(),
+                    mesh->getSubdomainContiguousNodeIDs(block).begin(),
                     mesh->getSubdomainContiguousNodeIDs(block).end());
   }
 
   _kokkos_element_ids = element_ids;
-  _kokkos_node_ids = node_ids;
+
+  if (_moose_object->isParamValid("unique_node_execute") &&
+      !_moose_object->getParam<bool>("unique_node_execute"))
+    _kokkos_node_ids = node_ids;
+  else
+    _kokkos_node_ids = std::set<ContiguousNodeID>(node_ids.begin(), node_ids.end());
 
   if (_moose_object->isParamValid("_material_data_type") &&
       _moose_object->getParam<Moose::MaterialDataType>("_material_data_type") !=
