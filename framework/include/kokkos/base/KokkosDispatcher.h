@@ -448,3 +448,53 @@ private:
 #define registerKokkosAuxKernelAliased(app, classname, alias)                                      \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosAuxKernelFunction(classname, alias)
+
+// UserObject
+
+#define callRegisterKokkosUserObjectFunction(classname, objectname)                                \
+  static char registerKokkosUserObject##classname()                                                \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addDispatcher<classname::DefaultLoop, classname>(objectname);              \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_dispatcher_userobject_##classname, __COUNTER__) =                \
+      registerKokkosUserObject##classname()
+
+#define registerKokkosUserObject(app, classname)                                                   \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosUserObjectFunction(classname, #classname)
+
+#define registerKokkosUserObjectAliased(app, classname, alias)                                     \
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosUserObjectFunction(classname, alias)
+
+// Postprocessor, VectorPostprocessor, Reporter
+
+#define callRegisterKokkosReducerFunction(classname, objectname)                                   \
+  static char registerKokkosReducer##classname()                                                   \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::addReducer<classname::DefaultLoop, classname>(objectname);                 \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_reducer_##classname, __COUNTER__) =                              \
+      registerKokkosReducer##classname()
+
+#define registerKokkosReducer(app, classname)                                                      \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosReducerFunction(classname, #classname)
+
+#define registerKokkosReducerAliased(app, classname, alias)                                        \
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosReducerFunction(classname, alias)
+
+#define registerKokkosPostprocessor(app, classname) registerKokkosReducer(app, classname)
+#define registerKokkosPostprocessorAliased(app, classname, alias)                                  \
+  registerKokkosReducerAliased(app, classname, alias)
