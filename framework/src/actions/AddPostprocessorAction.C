@@ -29,5 +29,10 @@ AddPostprocessorAction::AddPostprocessorAction(const InputParameters & params)
 void
 AddPostprocessorAction::act()
 {
-  _problem->addPostprocessor(_type, _name, _moose_object_pars);
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_moose_object_pars.isParamValid(MooseBase::kokkos_object_param))
+    _problem->addKokkosPostprocessor(_type, _name, _moose_object_pars);
+  else
+#endif
+    _problem->addPostprocessor(_type, _name, _moose_object_pars);
 }
