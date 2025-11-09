@@ -37,6 +37,38 @@ private:
   Moose::Kokkos::Array<unsigned int> _array;
 };
 
+class KokkosReducerTestObject
+{
+public:
+  KokkosReducerTestObject(const unsigned int n) : _n(n) {}
+
+  struct TestLoop
+  {
+  };
+
+  KOKKOS_FUNCTION void
+  operator()(TestLoop, const ThreadID tid, const KokkosReducerTestObject &, Real * result) const
+  {
+    for (unsigned int i = 0; i < _n; ++i)
+      result[i] += (i + 1) * tid;
+  }
+
+  KOKKOS_FUNCTION void join(TestLoop, Real * result, const Real * source) const
+  {
+    for (unsigned int i = 0; i < _n; ++i)
+      result[i] += source[i];
+  }
+
+  KOKKOS_FUNCTION void init(TestLoop, Real * result) const
+  {
+    for (unsigned int i = 0; i < _n; ++i)
+      result[i] = 0;
+  }
+
+private:
+  const unsigned int _n;
+};
+
 class KokkosDispatcherTest : public ::testing::Test
 {
 public:
