@@ -16,8 +16,7 @@
 InputParameters
 Postprocessor::validParams()
 {
-  InputParameters params = UserObject::validParams();
-  params += OutputInterface::validParams();
+  InputParameters params = OutputInterface::validParams();
   params += NonADFunctorInterface::validParams();
 
   params.addParamNamesToGroup("outputs", "Advanced");
