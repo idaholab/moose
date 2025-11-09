@@ -80,6 +80,17 @@ public:
   ///@}
 
   /**
+   * Shim for hook method that can be leveraged to implement static polymorphism
+   */
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeValueShim(const Derived & auxkernel,
+                                        const unsigned int qp,
+                                        AssemblyDatum & datum) const
+  {
+    return auxkernel.computeValue(qp, datum);
+  }
+
+  /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
@@ -253,7 +264,7 @@ AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & dat
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    const auto value = auxkernel.computeValue(qp, datum);
+    const auto value = auxkernel.computeValueShim(auxkernel, qp, datum);
 
     datum.reinit();
 
@@ -280,7 +291,7 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
-  auto value = auxkernel.computeValue(0, datum);
+  auto value = auxkernel.computeValueShim(auxkernel, 0, datum);
 
   setNodeSolution(value, datum);
 }

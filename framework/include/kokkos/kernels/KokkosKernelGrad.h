@@ -75,6 +75,27 @@ public:
   ///@}
 
   /**
+   * Shims for hook methods that can be leveraged to implement static polymorphism
+   */
+  ///{@
+  template <typename Derived>
+  KOKKOS_FUNCTION Real3 computeQpResidualShim(const Derived & kernel,
+                                              const unsigned int qp,
+                                              AssemblyDatum & datum) const
+  {
+    return kernel.computeQpResidual(qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real3 computeQpJacobianShim(const Derived & kernel,
+                                              const unsigned int j,
+                                              const unsigned int qp,
+                                              AssemblyDatum & datum) const
+  {
+    return kernel.computeQpJacobian(j, qp, datum);
+  }
+  ///@}
+
+  /**
    * The parallel computation bodies that hide the base class methods to optimize for factoring
    * out the gradient of test function
    */
@@ -98,7 +119,7 @@ KernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum & datu
         {
           datum.reinit();
 
-          Real3 value = datum.JxW(qp) * kernel.computeQpResidual(qp, datum);
+          Real3 value = datum.JxW(qp) * kernel.computeQpResidualShim(kernel, qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _grad_test(datum, i, qp);
@@ -129,7 +150,7 @@ KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datu
 
             if (j != j_old)
             {
-              value = datum.JxW(qp) * kernel.computeQpJacobian(j, qp, datum);
+              value = datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, j, qp, datum);
               j_old = j;
             }
 

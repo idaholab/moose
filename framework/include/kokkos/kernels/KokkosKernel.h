@@ -105,6 +105,39 @@ public:
   ///@}
 
   /**
+   * Shims for hook methods that can be leveraged to implement static polymorphism
+   */
+  ///{@
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & kernel,
+                                             const unsigned int i,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+  {
+    return kernel.computeQpResidual(i, qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & kernel,
+                                             const unsigned int i,
+                                             const unsigned int j,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+  {
+    return kernel.computeQpJacobian(i, j, qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobianShim(const Derived & kernel,
+                                                    const unsigned int i,
+                                                    const unsigned int j,
+                                                    const unsigned int jvar,
+                                                    const unsigned int qp,
+                                                    AssemblyDatum & datum) const
+  {
+    return kernel.computeQpOffDiagJacobian(i, j, jvar, qp, datum);
+  }
+  ///@}
+
+  /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
@@ -237,7 +270,7 @@ Kernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) c
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * kernel.computeQpResidual(i, qp, datum);
+            local_re[i] += datum.JxW(qp) * kernel.computeQpResidualShim(kernel, i, qp, datum);
         }
       });
 }
@@ -259,7 +292,7 @@ Kernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) c
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * kernel.computeQpJacobian(i, j, qp, datum);
+            local_ke[ij] += datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, i, j, qp, datum);
           }
         }
       });
@@ -282,8 +315,8 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] +=
-                datum.JxW(qp) * kernel.computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+            local_ke[ij] += datum.JxW(qp) * kernel.computeQpOffDiagJacobianShim(
+                                                kernel, i, j, datum.jvar(), qp, datum);
           }
         }
       });

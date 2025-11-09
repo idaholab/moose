@@ -406,6 +406,44 @@ The Kokkos-MOOSE base classes are carefully designed to avoid the CRTP by levera
 Namely, the base classes themselves are not template classes, which alleviates the burden of users in dealing with templates.
 However, any polymorphic pattern implemented on GPU in the derived class level will likely require the CRTP.
 
+#### Alternative Way to Implement Static Polymorphism
+
+While the CRTP is a generic design pattern for implementing static polymorphism, the use of class templates can complicate class designs.
+In Kokkos-MOOSE objects, there is an alternative way to implement static polymorphism by defining shims instead of hook methods.
+Analogously to the original MOOSE objects, Kokkos-MOOSE objects also provide the hook methods for the user to implement their own algorithms (e.g., `computeQpResidual()` in [Kokkos Kernels](syntax/KokkosKernels/index.md)).
+These hook methods, if implemented in the base class, do not have the information about the derived class type.
+Therefore, the user should rely on the CRTP to know the derived class type at compile time if they want to implement a polymorphic pattern in the hook methods.
+
+To alleviate the burden of the CRTP implementation, Kokkos-MOOSE provides additional shims around the hook methods for advanced users.
+These shims simply invoke the hook methods and relay the arguments, but they receive an additional argument which is the object itself in its actual type.
+Namely, the user can call the desired derived class methods using the actual objects available in the shims.
+In case of the [Kokkos Kernels](syntax/KokkosKernels/index.md) as an example, `computeQpResidual()` is called by the shim `computeQpResidualShim()`.
+`computeQpResidual()` has the following signature with arbitrary user codes in it:
+
+```cpp
+KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
+                                       const unsigned int qp,
+                                       AssemblyDatum & datum) const;
+{
+  // User codes
+}
+```
+
+And `computeQpResidualShim()` is defined as the following by default, which is a single line function that simply calls `computeQpResidual()`:
+
+```cpp
+template <typename Derived>
+KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & kernel,
+                                           const unsigned int i,
+                                           const unsigned int qp,
+                                           AssemblyDatum & datum) const
+{
+  return kernel.computeQpResidual(i, qp, datum);
+}
+```
+
+If the user defines `computeQpResidualShim()` in their base class with the given signature instead of `computeQpResidual()`, they can customize it to call any method of `kernel` whose type is known in compile time.
+
 ### Separate Compilation
 
 Last but not the least, all Kokkos codes should only be included in the source files with a special `*.K` extension.

@@ -105,6 +105,39 @@ public:
   ///@}
 
   /**
+   * Shims for hook methods that can be leveraged to implement static polymorphism
+   */
+  ///{@
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & bc,
+                                             const unsigned int i,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+  {
+    return bc.computeQpResidual(i, qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & bc,
+                                             const unsigned int i,
+                                             const unsigned int j,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+  {
+    return bc.computeQpJacobian(i, j, qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobianShim(const Derived & bc,
+                                                    const unsigned int i,
+                                                    const unsigned int j,
+                                                    const unsigned int jvar,
+                                                    const unsigned int qp,
+                                                    AssemblyDatum & datum) const
+  {
+    return bc.computeQpOffDiagJacobian(i, j, jvar, qp, datum);
+  }
+  ///@}
+
+  /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
@@ -228,7 +261,7 @@ IntegratedBC::computeResidualInternal(const Derived & bc, AssemblyDatum & datum)
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * bc.computeQpResidual(i, qp, datum);
+            local_re[i] += datum.JxW(qp) * bc.computeQpResidualShim(bc, i, qp, datum);
         }
       });
 }
@@ -250,7 +283,7 @@ IntegratedBC::computeJacobianInternal(const Derived & bc, AssemblyDatum & datum)
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * bc.computeQpJacobian(i, j, qp, datum);
+            local_ke[ij] += datum.JxW(qp) * bc.computeQpJacobianShim(bc, i, j, qp, datum);
           }
         }
       });
@@ -274,7 +307,7 @@ IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum &
             unsigned int j = ij / datum.n_jdofs();
 
             local_ke[ij] +=
-                datum.JxW(qp) * bc.computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+                datum.JxW(qp) * bc.computeQpOffDiagJacobianShim(bc, i, j, datum.jvar(), qp, datum);
           }
         }
       });
