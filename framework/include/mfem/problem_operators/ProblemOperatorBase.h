@@ -27,8 +27,6 @@ public:
   virtual void Init(mfem::BlockVector & X);
   virtual void Solve() = 0;
 
-  virtual int GetProblemSize();
-
   mfem::Array<int> _block_true_offsets;
   mfem::Array<int> _global_block_true_offsets;
 

@@ -748,7 +748,6 @@ MFEMProblem::hRefine()
   if (useAMR())
   {
     _problem_data._refiner->hRefine(*_problem_data.pmesh);
-    ;
   }
   else
   {
@@ -780,7 +779,7 @@ MFEMProblem::pRefine()
   else
   {
     mooseError(
-        "Called EquationSystemProblemOperator::hRefine(), even though _use_amr is set to false.");
+        "Called EquationSystemProblemOperator::pRefine(), even though _use_amr is set to false.");
   }
 }
 
