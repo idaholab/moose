@@ -483,9 +483,7 @@ class TestHarnessResultsSummary:
         assert isinstance(removed_table, (list, NoneType))
         assert isinstance(added_table, (list, NoneType))
         assert isinstance(same_table, (list, NoneType))
-        print("table")
-        print(removed_table)
-        print(added_table)
+
         summary = []
         # All table are none, display no change
         if removed_table is None and added_table is None and same_table is None:
