@@ -76,7 +76,8 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
     {
       // Continue if we find a libMesh degenerate map exception, but
       // just re-throw for any real error
-      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+          !strstr(e.what(), "det != 0"))
         throw;
 
       mooseException(

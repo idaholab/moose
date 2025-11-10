@@ -186,7 +186,8 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
     }
     catch (std::exception & e)
     {
-      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+          !strstr(e.what(), "det != 0"))
         throw;
 
       _fe_problem.setException(

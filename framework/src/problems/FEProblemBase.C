@@ -7420,7 +7420,8 @@ FEProblemBase::handleException(const std::string & calling_method)
   catch (const std::exception & e)
   {
     // This might be libMesh detecting a degenerate Jacobian or matrix
-    if (strstr(e.what(), "Jacobian") || strstr(e.what(), "singular"))
+    if (strstr(e.what(), "Jacobian") || strstr(e.what(), "singular") ||
+        strstr(e.what(), "det != 0"))
       setException(create_exception_message("libMesh DegenerateMap", e));
     else
     {
