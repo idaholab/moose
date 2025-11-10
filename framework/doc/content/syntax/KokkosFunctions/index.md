@@ -43,7 +43,7 @@ This is the limitation of the current Kokkos-MOOSE function implementation which
 It is recommended to store the acquired function in a `ReferenceWrapper` instance.
 Otherwise, it should be stored as a copy, and it becomes your responsibility to maintain synchronization between the original function and the copy.
 
-## Use of Dynamic Polymorphism
+## Use of Dynamic Polymorphism id=kokkos_rdc
 
 Unlike most of other Kokkos-MOOSE objects, functions are pluggable objects that are to be used in other objects.
 Therefore, it is desired to use functions type-agnostically in your object so that any type of function can be plugged in.
