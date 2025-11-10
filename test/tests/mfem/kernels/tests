@@ -128,6 +128,7 @@
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with quadrilateral elements. This test is equivalent to MFEM Example 22.'
     capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
@@ -146,6 +147,7 @@
                'sigma=10'
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with triangular elements. This test is equivalent to MFEM Example 22 on the star mesh.'
     capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
     max_parallel = 1
     recover = false
   []
