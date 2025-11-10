@@ -25,7 +25,6 @@ public:
   // Build forms
   virtual void Init(GridFunctions & gridfunctions,
                     ComplexGridFunctions & cmplx_gridfunctions,
-                    const FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level) override;
 
   virtual void BuildEquationSystem() override;

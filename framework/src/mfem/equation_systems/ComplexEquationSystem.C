@@ -9,7 +9,6 @@ namespace Moose::MFEM
 void
 ComplexEquationSystem::Init(GridFunctions & gridfunctions,
                             ComplexGridFunctions & cmplx_gridfunctions,
-                            const FESpaces & /*fespaces*/,
                             mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;

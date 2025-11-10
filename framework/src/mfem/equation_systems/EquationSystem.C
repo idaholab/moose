@@ -123,7 +123,6 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                      ComplexGridFunctions & cmplx_gridfunctions,
-                     const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -477,9 +476,10 @@ TimeDependentEquationSystem::TimeDependentEquationSystem(
 
 void
 TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                                  ComplexGridFunctions & cmplx_gridfunctions,
                                   mfem::AssemblyLevel assembly_level)
 {
-  EquationSystem::Init(gridfunctions, assembly_level);
+  EquationSystem::Init(gridfunctions, cmplx_gridfunctions, assembly_level);
   for (auto & test_var_name : _test_var_names)
     _td_var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));

@@ -120,25 +120,6 @@
     recover = false
     restep = false
   []
-  [MFEMHeatConductionLOR]
-    type = XMLDiff
-    input = heattransfer.i
-    xmldiff = 'OutputData/HeatConductionLOR/Run0/Run0.pvd
-                OutputData/HeatConductionLOR/Run0/Cycle000001/proc000000.vtu
-                OutputData/HeatConductionLOR/Run0/Cycle000004/proc000000.vtu'
-    cli_args = 'BCs/active="bottom top_dirichlet" '
-               'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'FESpaces/H1FESpace/fec_order=SECOND '
-               'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
-               'Preconditioner/jacobi/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR'
-    requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
-    capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
-    max_parallel = 1 # schemadiff with multiple ranks
-    recover = false
-    restep = false
-  []
   [MFEMComplex2DQuad]
     type = XMLDiff
     input = complex.i

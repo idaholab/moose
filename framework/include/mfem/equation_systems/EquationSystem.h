@@ -52,7 +52,6 @@ public:
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
                     ComplexGridFunctions & cmplx_gridfunctions,
-                    const FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
 
   /// Build linear forms and eliminate constrained DoFs
@@ -318,7 +317,8 @@ public:
   TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
   /// Initialise
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+  virtual void Init(GridFunctions & gridfunctions,
+                    ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);

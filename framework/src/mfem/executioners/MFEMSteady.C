@@ -68,7 +68,6 @@ MFEMSteady::init()
   _mfem_problem_data.eqn_system->Init(
       _mfem_problem_data.gridfunctions,
       _mfem_problem_data.cmplx_gridfunctions,
-      _mfem_problem_data.fespaces,
       getParam<MooseEnum>("assembly_level").getEnum<mfem::AssemblyLevel>());
 
   for (const auto & problem_operator : getProblemOperators())
