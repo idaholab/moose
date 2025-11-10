@@ -12,6 +12,8 @@ This is the Kokkos version of [TimeDerivativeNodalKernel](TimeDerivativeNodalKer
 
 !syntax inputs /NodalKernels/KokkosTimeDerivativeNodalKernel
 
+!syntax children /NodalKernels/KokkosTimeDerivativeNodalKernel
+
 !if-end!
 
 !else

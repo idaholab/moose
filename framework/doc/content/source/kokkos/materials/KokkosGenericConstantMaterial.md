@@ -12,6 +12,8 @@ This is the Kokkos version of [GenericConstantMaterial](GenericConstantMaterial.
 
 !syntax inputs /Materials/KokkosGenericConstantMaterial
 
+!syntax children /Materials/KokkosGenericConstantMaterial
+
 !if-end!
 
 !else

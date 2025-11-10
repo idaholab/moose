@@ -12,6 +12,8 @@ This is the Kokkos version of [ConstantRate](ConstantRate.md). See the original 
 
 !syntax inputs /NodalKernels/KokkosConstantRate
 
+!syntax children /NodalKernels/KokkosConstantRate
+
 !if-end!
 
 !else

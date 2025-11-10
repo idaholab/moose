@@ -12,6 +12,8 @@ This is the Kokkos version of [VariableTimeIntegrationAux](VariableTimeIntegrati
 
 !syntax inputs /AuxKernels/KokkosVariableTimeIntegrationAux
 
+!syntax children /AuxKernels/KokkosVariableTimeIntegrationAux
+
 !if-end!
 
 !else

@@ -12,6 +12,8 @@ This is the Kokkos version of [Diffusion](Diffusion.md). See the original docume
 
 !syntax inputs /Kernels/KokkosDiffusion
 
+!syntax children /Kernels/KokkosDiffusion
+
 !if-end!
 
 !else

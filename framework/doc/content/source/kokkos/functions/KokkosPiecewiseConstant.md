@@ -12,6 +12,8 @@ This is the Kokkos version of [PiecewiseConstant](PiecewiseConstant.md). See the
 
 !syntax inputs /Functions/KokkosPiecewiseConstant
 
+!syntax children /Functions/KokkosPiecewiseConstant
+
 !if-end!
 
 !else

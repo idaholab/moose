@@ -12,6 +12,8 @@ This is the Kokkos version of [ReactionNodalKernel](ReactionNodalKernel.md). See
 
 !syntax inputs /NodalKernels/KokkosReactionNodalKernel
 
+!syntax children /NodalKernels/KokkosReactionNodalKernel
+
 !if-end!
 
 !else

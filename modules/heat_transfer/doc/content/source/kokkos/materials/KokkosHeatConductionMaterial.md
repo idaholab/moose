@@ -15,6 +15,8 @@ Kokkos-MOOSE does not support functions yet. Therefore, [!param](/Materials/Heat
 
 !syntax inputs /Materials/KokkosHeatConductionMaterial
 
+!syntax children /Materials/KokkosHeatConductionMaterial
+
 !if-end!
 
 !else

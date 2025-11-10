@@ -12,6 +12,8 @@ This is the Kokkos version of [VacuumBC](VacuumBC.md). See the original document
 
 !syntax inputs /BCs/KokkosVacuumBC
 
+!syntax children /BCs/KokkosVacuumBC
+
 !if-end!
 
 !else

@@ -15,6 +15,8 @@ Kokkos-MOOSE does not support functions yet. Therefore, [!param](/BCs/RadiativeH
 
 !syntax inputs /BCs/KokkosRadiativeHeatFluxBC
 
+!syntax children /BCs/KokkosRadiativeHeatFluxBC
+
 !if-end!
 
 !else

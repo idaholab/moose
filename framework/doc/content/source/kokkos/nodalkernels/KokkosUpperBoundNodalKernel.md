@@ -12,6 +12,8 @@ This is the Kokkos version of [UpperBoundNodalKernel](UpperBoundNodalKernel.md).
 
 !syntax inputs /NodalKernels/KokkosUpperBoundNodalKernel
 
+!syntax children /NodalKernels/KokkosUpperBoundNodalKernel
+
 !if-end!
 
 !else

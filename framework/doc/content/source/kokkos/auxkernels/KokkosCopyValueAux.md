@@ -12,6 +12,8 @@ This is the Kokkos version of [CopyValueAux](CopyValueAux.md). See the original 
 
 !syntax inputs /AuxKernels/KokkosCopyValueAux
 
+!syntax children /AuxKernels/KokkosCopyValueAux
+
 !if-end!
 
 !else

@@ -12,6 +12,8 @@ This is the Kokkos version of [ConstantAux](ConstantAux.md). See the original do
 
 !syntax inputs /AuxKernels/KokkosConstantAux
 
+!syntax children /AuxKernels/KokkosConstantAux
+
 !if-end!
 
 !else

@@ -12,6 +12,8 @@ This is the Kokkos version of [ConstantFunction](ConstantFunction.md). See the o
 
 !syntax inputs /Functions/KokkosConstantFunction
 
+!syntax children /Functions/KokkosConstantFunction
+
 !if-end!
 
 !else

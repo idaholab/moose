@@ -12,6 +12,8 @@ This is the Kokkos version of [ConvectiveHeatFluxBC](ConvectiveHeatFluxBC.md). S
 
 !syntax inputs /BCs/KokkosConvectiveHeatFluxBC
 
+!syntax children /BCs/KokkosConvectiveHeatFluxBC
+
 !if-end!
 
 !else

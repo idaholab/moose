@@ -12,6 +12,8 @@ This is the Kokkos version of [CoupledForce](CoupledForce.md). See the original 
 
 !syntax inputs /Kernels/KokkosCoupledForce
 
+!syntax children /Kernels/KokkosCoupledForce
+
 !if-end!
 
 !else

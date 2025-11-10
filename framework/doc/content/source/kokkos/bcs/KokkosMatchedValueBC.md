@@ -12,6 +12,8 @@ This is the Kokkos version of [MatchedValueBC](MatchedValueBC.md). See the origi
 
 !syntax inputs /BCs/KokkosMatchedValueBC
 
+!syntax children /BCs/KokkosMatchedValueBC
+
 !if-end!
 
 !else

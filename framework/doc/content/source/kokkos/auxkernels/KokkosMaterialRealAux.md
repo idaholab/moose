@@ -12,6 +12,8 @@ This is the Kokkos version of [MaterialRealAux](MaterialRealAux.md). See the ori
 
 !syntax inputs /AuxKernels/KokkosMaterialRealAux
 
+!syntax children /AuxKernels/KokkosMaterialRealAux
+
 !if-end!
 
 !else

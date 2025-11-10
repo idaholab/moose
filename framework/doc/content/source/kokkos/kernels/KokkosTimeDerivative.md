@@ -12,6 +12,8 @@ This is the Kokkos version of [TimeDerivative](TimeDerivative.md). See the origi
 
 !syntax inputs /Kernels/KokkosTimeDerivative
 
+!syntax children /Kernels/KokkosTimeDerivative
+
 !if-end!
 
 !else

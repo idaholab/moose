@@ -12,6 +12,8 @@ This is the Kokkos version of [TagVectorAux](TagVectorAux.md). See the original 
 
 !syntax inputs /AuxKernels/KokkosTagVectorAux
 
+!syntax children /AuxKernels/KokkosTagVectorAux
+
 !if-end!
 
 !else

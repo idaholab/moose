@@ -12,6 +12,8 @@ This is the Kokkos version of [Reaction](Reaction.md). See the original document
 
 !syntax inputs /Kernels/KokkosReaction
 
+!syntax children /Kernels/KokkosReaction
+
 !if-end!
 
 !else

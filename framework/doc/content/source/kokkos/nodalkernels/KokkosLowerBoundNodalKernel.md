@@ -12,6 +12,8 @@ This is the Kokkos version of [LowerBoundNodalKernel](LowerBoundNodalKernel.md).
 
 !syntax inputs /NodalKernels/KokkosLowerBoundNodalKernel
 
+!syntax children /NodalKernels/KokkosLowerBoundNodalKernel
+
 !if-end!
 
 !else

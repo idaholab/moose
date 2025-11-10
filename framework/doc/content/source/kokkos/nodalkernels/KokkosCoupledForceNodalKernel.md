@@ -12,6 +12,8 @@ This is the Kokkos version of [CoupledForceNodalKernel](CoupledForceNodalKernel.
 
 !syntax inputs /NodalKernels/KokkosCoupledForceNodalKernel
 
+!syntax children /NodalKernels/KokkosCoupledForceNodalKernel
+
 !if-end!
 
 !else

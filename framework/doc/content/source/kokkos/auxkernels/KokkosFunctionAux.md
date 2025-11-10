@@ -12,6 +12,8 @@ This is the Kokkos version of [FunctionAux](FunctionAux.md). See the original do
 
 !syntax inputs /AuxKernels/KokkosFunctionAux
 
+!syntax children /AuxKernels/KokkosFunctionAux
+
 !if-end!
 
 !else

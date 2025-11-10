@@ -15,6 +15,8 @@ Kokkos-MOOSE does not support displaced meshes yet. Therefore, the Kokkos versio
 
 !syntax inputs /Kernels/KokkosHeatConduction
 
+!syntax children /Kernels/KokkosHeatConduction
+
 !if-end!
 
 !else

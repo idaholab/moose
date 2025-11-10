@@ -12,6 +12,8 @@ This is the Kokkos version of [NeumannBC](NeumannBC.md). See the original docume
 
 !syntax inputs /BCs/KokkosNeumannBC
 
+!syntax children /BCs/KokkosNeumannBC
+
 !if-end!
 
 !else

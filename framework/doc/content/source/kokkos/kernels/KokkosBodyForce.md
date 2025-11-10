@@ -15,6 +15,8 @@ The original version supports functions, but the Kokkos version does not support
 
 !syntax inputs /Kernels/KokkosBodyForce
 
+!syntax children /Kernels/KokkosBodyForce
+
 !if-end!
 
 !else

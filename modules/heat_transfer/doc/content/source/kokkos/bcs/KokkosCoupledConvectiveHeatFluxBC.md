@@ -12,6 +12,8 @@ This is the Kokkos version of [CoupledConvectiveHeatFluxBC](CoupledConvectiveHea
 
 !syntax inputs /BCs/KokkosCoupledConvectiveHeatFluxBC
 
+!syntax children /BCs/KokkosCoupledConvectiveHeatFluxBC
+
 !if-end!
 
 !else

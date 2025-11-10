@@ -12,6 +12,8 @@ This is the Kokkos version of [CoupledTimeDerivative](CoupledTimeDerivative.md).
 
 !syntax inputs /Kernels/KokkosCoupledTimeDerivative
 
+!syntax children /Kernels/KokkosCoupledTimeDerivative
+
 !if-end!
 
 !else

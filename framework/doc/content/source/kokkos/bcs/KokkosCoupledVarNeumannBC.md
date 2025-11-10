@@ -12,6 +12,8 @@ This is the Kokkos version of [CoupledVarNeumannBC](CoupledVarNeumannBC.md). See
 
 !syntax inputs /BCs/KokkosCoupledVarNeumannBC
 
+!syntax children /BCs/KokkosCoupledVarNeumannBC
+
 !if-end!
 
 !else

@@ -12,6 +12,8 @@ This is the Kokkos version of [MatCoupledForce](MatCoupledForce.md). See the ori
 
 !syntax inputs /Kernels/KokkosMatCoupledForce
 
+!syntax children /Kernels/KokkosMatCoupledForce
+
 !if-end!
 
 !else

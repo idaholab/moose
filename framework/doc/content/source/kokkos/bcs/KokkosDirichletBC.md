@@ -12,6 +12,8 @@ This is the Kokkos version of [DirichletBC](DirichletBC.md). See the original do
 
 !syntax inputs /BCs/KokkosDirichletBC
 
+!syntax children /BCs/KokkosDirichletBC
+
 !if-end!
 
 !else

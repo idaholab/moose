@@ -12,6 +12,8 @@ This is the Kokkos version of [PostprocessorNeumannBC](PostprocessorNeumannBC.md
 
 !syntax inputs /BCs/KokkosPostprocessorNeumannBC
 
+!syntax children /BCs/KokkosPostprocessorNeumannBC
+
 !if-end!
 
 !else
