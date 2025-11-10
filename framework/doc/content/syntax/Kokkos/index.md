@@ -412,7 +412,7 @@ The Kokkos-MOOSE base classes are carefully designed to avoid the CRTP by levera
 Namely, the base classes themselves are not template classes, which alleviates the burden of users in dealing with templates.
 However, any polymorphic pattern implemented on GPU in the derived class level will likely require the CRTP.
 
-#### Alternative Way to Implement Static Polymorphism
+#### Alternative Way to Implement Static Polymorphism id=kokkos_shim
 
 While the CRTP is a generic design pattern for implementing static polymorphism, the use of class templates can complicate class designs.
 In Kokkos-MOOSE objects, there is an alternative way to implement static polymorphism by defining shims instead of hook methods.
@@ -478,6 +478,8 @@ The following objects are currently available in Kokkos-MOOSE:
 - [Materials](syntax/KokkosMaterials/index.md)
 - [AuxKernels](syntax/KokkosAuxKernels/index.md)
 - [Functions](syntax/KokkosFunctions/index.md)
+- [UserObjects](syntax/KokkosUserObjects/index.md)
+- [Postprocessors](syntax/KokkosPostprocessors/index.md)
 
 !if-end!
 

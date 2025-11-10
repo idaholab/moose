@@ -21,7 +21,7 @@ The following input file snippet demonstrates the use of the
 [ElementExtremeValue](ElementExtremeValue.md) to compute the minimum and maximum of the solution
 variable "u".
 
-!listing element_extreme_value.i block=Postprocessors
+!listing postprocessors/element_extreme_value/element_extreme_value.i block=Postprocessors
 
 This snippet is a part of a test that may be executed using the MOOSE test application as follows.
 

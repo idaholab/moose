@@ -13,7 +13,7 @@ Kokkos-MOOSE kernels do not support coupling with scalar variables and automatic
 The Kokkos-MOOSE kernels are designed to resemble the original MOOSE kernels as much as possible for easier porting and adaptation.
 However, some differences still exist due to the fundamentally different programming paradigm between CPU and GPU.
 You can create your own kernel by subclassing `Moose::Kokkos::Kernel` as is done in the original MOOSE by inheriting `Kernel`.
-However, your kernel should now be registered with `registerKokkosResidualObject()` instead of `registerMooseObject()`.
+However, your kernel should now be registered with either `registerKokkosKernel()` or `registerKokkosResidualObject()` instead of `registerMooseObject()`.
 Also, the signatures of hook methods are different.
 In the original MOOSE, the following virtual functions should or optionally have been overriden:
 
