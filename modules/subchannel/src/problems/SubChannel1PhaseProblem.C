@@ -477,7 +477,7 @@ SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args
       const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
       friction_args.S = (*_S_flow_soln)(node);
       friction_args.w_perim = (*_w_perim_soln)(node);
-      Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
+      Real f_darcy = _friction_closure->computeFrictionFactor(_friction_args) / 8.0;
 
       /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
       /// which is what we should see in practice, i.e., for very low Pr numbers the heat exchange

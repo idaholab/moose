@@ -121,10 +121,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   deformation = true
   verbose_subchannel = true
 
-<<<<<<< HEAD
   # Heat Transfer Correlations
   pin_htc_correlation = 'gnielinski'
-=======
   # friction model
   friction_closure = 'cheng'
 []
@@ -133,7 +131,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
   []
->>>>>>> 10cdc9e11a (fix cheng todreas tests Refs #30049)
 []
 
 [ICs]
