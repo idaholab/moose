@@ -21,6 +21,7 @@ from TestHarness.resultsstore.auth import (
     has_authentication,
     load_authentication,
 )
+from TestHarness.resultsstore.resultcollection import ResultCollection
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
 from TestHarness.resultsstore.utils import TestName
 
@@ -38,7 +39,7 @@ class ResultsReader:
     """Utility for reading test harness results stored in a mongodb database."""
 
     # Default sort ID from mongo
-    mongo_sort_id = sort = [("_id", pymongo.DESCENDING)]
+    mongo_sort_id = [("_id", pymongo.DESCENDING)]
 
     def __init__(
         self,
@@ -226,17 +227,21 @@ class ResultsReader:
 
         return test_results
 
-    def _findResults(self, *args, **kwargs) -> list[dict]:
+    def _findResults(self, filter: dict, limit: int) -> list[dict]:
         """
         Query the results database collection.
 
         Used so that it can be easily mocked in unit tests.
         """
-        kwargs["sort"] = self.mongo_sort_id
-        with self.getDatabase().results.find(*args, **kwargs) as cursor:
+        assert isinstance(filter, dict)
+        assert isinstance(limit, int)
+
+        with self.getDatabase().results.find(
+            filter, {"tests": 0}, sort=self.mongo_sort_id, limit=limit
+        ) as cursor:
             return [d for d in cursor]
 
-    def getLatestPushResults(self, num: int) -> list[StoredResult]:
+    def getLatestPushResults(self, num: int) -> ResultCollection:
         """Get the latest results from push events, newest to oldest."""
         assert isinstance(num, int)
         assert num > 0
@@ -246,7 +251,7 @@ class ResultsReader:
             results.append(result)
             if len(results) == num:
                 break
-        return results
+        return ResultCollection(results, self.getDatabase)
 
     def iterateLatestPushResults(
         self, num: Optional[int] = None
@@ -273,12 +278,12 @@ class ResultsReader:
             # At end of cache, pull more results
             if i == len(self._latest_push_results):
                 # Searching for only events
-                filter = {"event_cause": {"$ne": "pr"}}
+                match = {"event_cause": {"$ne": "pr"}}
                 # Only search past what we've searched so far
                 if self._last_latest_push_event_id is not None:
-                    filter["_id"] = {"$lt": self._last_latest_push_event_id}
+                    match["_id"] = {"$lt": self._last_latest_push_event_id}
 
-                cursor = self._findResults(filter, limit=batch_size)
+                docs = self._findResults(match, limit=batch_size)
 
                 # After the first batch size (could be set by num),
                 # only pull one at a time. We should only ever
@@ -287,8 +292,8 @@ class ResultsReader:
                 if isinstance(num, int):
                     batch_size = 1
 
-                for data in cursor:
-                    id = data.get("_id")
+                for doc in docs:
+                    id = doc["_id"]
                     assert isinstance(id, ObjectId)
 
                     # So that we know where to search next time
@@ -297,14 +302,13 @@ class ResultsReader:
                     # Due to invalidation, we could have multiple results
                     # from the same event. If we already have this event
                     # (the latest version of it), skip this one
-                    event_id = data.get("event_id")
+                    event_id = doc.get("event_id")
                     if event_id is not None and any(
                         r.event_id == event_id for r in self._latest_push_results
                     ):
                         continue
 
-                    # Build/get the result and store it for future use
-                    result = self._buildResults(data)
+                    result = self._buildResults(doc)
                     self._latest_push_results.append(result)
 
             if i < len(self._latest_push_results):
@@ -364,7 +368,8 @@ class ResultsReader:
         if result is None:
             try:
                 result = StoredResult(
-                    data, database_getter=self.getDatabase, check=self.check
+                    data,
+                    check=self.check,
                 )
             except Exception as e:
                 raise ValueError(f"Failed to build result _id={id}") from e

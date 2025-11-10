@@ -1,0 +1,8 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = validation.i
+    validation_test = validation.py
+    csvdiff = validation_out.csv
+  []
+[]

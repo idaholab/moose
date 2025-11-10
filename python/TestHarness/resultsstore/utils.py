@@ -12,12 +12,60 @@
 import json
 import zlib
 from dataclasses import dataclass
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator, Optional, Tuple, Type
+
+
+@dataclass
+class MongoPath:
+    """Represents a path in a mongo database document."""
+
+    def __init__(self, *args: str):
+        """
+        Initialize state.
+
+        Arguments:
+        ---------
+        *args : str
+            The elements in the path.
+
+        """
+        assert args
+        self._path: Tuple[str, ...] = args
+
+    @property
+    def path(self) -> Tuple[str, ...]:
+        """Get the path."""
+        return self._path
+
+    @property
+    def query_path(self) -> str:
+        """
+        Get the mongodb string path for querying this path.
+
+        Replaces "." (which is a separator for keys) with a
+        literal dot character.
+        """
+        clean = [v.replace(".", "\uff0e") for v in self.path]
+        return ".".join(clean)
+
+    def extend(self, *args: str) -> "MongoPath":
+        """
+        Create a new MongoPath with this path extended.
+
+        Arguments:
+        ---------
+        *args : str
+            The elements in the path.
+
+        """
+        return MongoPath(*self.path, *args)
 
 
 @dataclass(frozen=True)
 class TestName:
     """Name for a test (folder and name)."""
+
+    __test__ = False  # prevents pytest collection
 
     # Name of the folder
     folder: str
@@ -27,6 +75,11 @@ class TestName:
     def __str__(self):
         """Build the combined test name."""
         return f"{self.folder}.{self.name}"
+
+    @property
+    def mongo_path(self) -> MongoPath:
+        """Get the path in the database for this test."""
+        return MongoPath("tests", self.folder, "tests", self.name)
 
 
 def compress(value: str) -> bytes:
@@ -53,25 +106,11 @@ def decompress_dict(compressed: bytes) -> dict:
     return json.loads(decompress(compressed))
 
 
-def results_folder_entry(results: dict, folder_name: str) -> dict:
-    """Get the given folder's entry in TestHarness JSON results."""
-    assert isinstance(results, dict)
-    assert isinstance(folder_name, str)
-    return results["tests"][folder_name]
-
-
 def results_test_entry(results: dict, name: TestName) -> Any:
     """Get the given test's entry in TestHarness JSON results."""
     assert isinstance(results, dict)
     assert isinstance(name, TestName)
     return results["tests"][name.folder]["tests"][name.name]
-
-
-def results_has_folder(results: dict, folder: str) -> bool:
-    """Check whether or not the TestHarness JSON results has the given test folder."""
-    assert isinstance(results, dict)
-    assert isinstance(folder, str)
-    return folder in results["tests"]
 
 
 def results_query_test(results: dict, name: TestName) -> Optional[dict]:
@@ -185,6 +224,21 @@ class MutableResultsTestIterator:
         del self._folder_tests_entry[self.test_name]
 
 
+def mutable_results_test_iterator(
+    results: dict,
+) -> Iterator[MutableResultsTestIterator]:
+    """
+    Iterate through mutable test entries in TestHarness results JSON output.
+
+    Enables modification while iterating.
+    """
+    tests_entry = results["tests"]
+    for folder_name, folder_entry in tests_entry.items():
+        folder_tests_entry = folder_entry["tests"]
+        for test_name in list(folder_tests_entry.keys()):
+            yield MutableResultsTestIterator(folder_name, test_name, folder_tests_entry)
+
+
 @dataclass
 class MutableResultsFolderIterator:
     """
@@ -241,16 +295,39 @@ def mutable_results_folder_iterator(
         yield MutableResultsFolderIterator(folder_name, tests_entry)
 
 
-def mutable_results_test_iterator(
-    results: dict,
-) -> Iterator[MutableResultsTestIterator]:
-    """
-    Iterate through mutable test entries in TestHarness results JSON output.
+def _type_error_message(key: Any, value: Any, types: Type | Tuple[Type, ...]) -> str:
+    """Produce an error message for get_typed()."""
+    valid_types = ", ".join(
+        [v.__name__ for v in (list(types) if isinstance(types, Tuple) else [types])]
+    )
+    return (
+        f"Key '{key}' of type {type(value).__name__} is "
+        f"not of valid type(s): {valid_types}"
+    )
 
-    Enables modification while iterating.
+
+def get_typed(
+    container: dict, key: Any, types: Type | Tuple[Type, ...], default: Any = None
+) -> Any:
     """
-    tests_entry = results["tests"]
-    for folder_name, folder_entry in tests_entry.items():
-        folder_tests_entry = folder_entry["tests"]
-        for test_name in list(folder_tests_entry.keys()):
-            yield MutableResultsTestIterator(folder_name, test_name, folder_tests_entry)
+    Get a value from a container given a key, requiring a type.
+
+    Arguments:
+    ---------
+    container : dict
+        The container to search in.
+    key : Any
+        The key to search in the container.
+    types : Type | Tuple[Type, ...]
+        The valid types.
+
+    Optional arguments:
+    ------------------
+    default : Any
+        The default value; defaults to None.
+
+    """
+    value = container.get(key, default)
+    if not isinstance(value, types):
+        raise TypeError(_type_error_message(key, value, types))
+    return value

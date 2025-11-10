@@ -1,0 +1,15 @@
+[Tests]
+  [ok]
+    type = RunCommand
+    command = 'echo foo'
+  []
+  [fail]
+    type = RunCommand
+    command = 'test -f foo'
+  []
+  [skip]
+    type = RunCommand
+    command = 'echo foo'
+    skip = 'skip'
+  []
+[]

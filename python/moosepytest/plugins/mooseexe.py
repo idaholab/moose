@@ -62,7 +62,7 @@ def find_moose_test_exe() -> Tuple[Optional[str], list[str]]:
 
     """
     this_dir = os.path.dirname(__file__)
-    test_dir = os.path.abspath(os.path.join(this_dir, "..", "..", "test"))
+    test_dir = os.path.abspath(os.path.join(this_dir, "..", "..", "..", "test"))
     if not os.path.isdir(test_dir):
         test_dir = None
 

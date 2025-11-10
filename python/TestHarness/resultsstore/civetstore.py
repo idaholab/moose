@@ -16,17 +16,13 @@ import os
 import re
 from copy import deepcopy
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional, Sequence, Tuple
 
 from bson import encode
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 
-from TestHarness.resultsstore.auth import (
-    Authentication,
-    has_authentication,
-    load_authentication,
-)
+from TestHarness.resultsstore import auth
 from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
@@ -93,7 +89,7 @@ class CIVETStore:
     CIVET_VERSION = 6
 
     @staticmethod
-    def parse_args() -> argparse.Namespace:
+    def parse_args(args: Sequence[str]) -> argparse.Namespace:
         """Parse command-line arguments."""
         parser = argparse.ArgumentParser(
             description="Converts test results from a CIVET run for "
@@ -125,10 +121,10 @@ class CIVETStore:
             default=MAX_RESULT_SIZE,
             help="Max size of a result for tests to be stored within it",
         )
-        return parser.parse_args()
+        return parser.parse_args(args)
 
     @staticmethod
-    def load_authentication() -> Optional[Authentication]:
+    def load_authentication() -> Optional[auth.Authentication]:
         """
         Load mongo authentication, if available.
 
@@ -138,12 +134,7 @@ class CIVETStore:
         environment from the file set by env var
         CIVET_STORE_AUTH_FILE if it is available.
         """
-        return load_authentication("CIVET_STORE")
-
-    @staticmethod
-    def has_authentication() -> bool:
-        """Check whether or not authentication is available."""
-        return has_authentication("CIVET_STORE")
+        return auth.load_authentication("CIVET_STORE")
 
     @staticmethod
     def get_document_size(doc: dict) -> float:
@@ -403,8 +394,7 @@ class CIVETStore:
 
             # Remove all output from results
             for key in ["output", "output_files"]:
-                if key in test_values:
-                    del test_values[key]
+                del test_values[key]
 
             # Remove keys if requested
             for entry in ["status", "timing", "tester"]:
@@ -486,6 +476,89 @@ class CIVETStore:
             auth.host, auth.port, username=auth.username, password=auth.password
         )
 
+    @staticmethod
+    def _build_database(
+        result: dict, tests: Optional[dict[TestName, dict]]
+    ) -> Tuple[dict, list[dict]]:
+        """
+        Build entries for the database from the return of build().
+
+        Parameters
+        ----------
+        result : dict
+            The top level result entry.
+        tests : Optional[dict[TestName, dict]]
+            The separate test entires, if any.
+
+        """
+        # Don't modify the input
+        result = deepcopy(result)
+
+        # Assign an ID for the result
+        result_id = ObjectId()
+        result["_id"] = result_id
+
+        # Build the tests to be stored separately, if any
+        insert_tests = []
+        test_ids = None
+        if tests:
+            tests = deepcopy(tests)
+            test_ids = []
+            for result_test in mutable_results_test_iterator(result):
+                # Get the separate test data
+                test_data = tests[result_test.name]
+
+                # Assign an ID to the test
+                test_id = ObjectId()
+                test_ids.append(test_id)
+                test_data["_id"] = test_id
+                test_data["result_id"] = result_id
+
+                # Add to be inserted later
+                insert_tests.append(test_data)
+
+                # Set the ID in the results for this test
+                # to this test's ID
+                assert result_test.value is None
+                result_test.set_value(test_id)
+
+        return result, insert_tests
+
+    def _insert_database(self, database: str, result: dict, tests: list[dict]) -> None:
+        """
+        Insert a result and optionally separate tests into the database.
+
+        Used in store(), but kept separate for unit testing.
+
+        Parameters
+        ----------
+        database : str
+            The name of the mongo database to store into.
+        result : dict
+            The results to store.
+        tests : list[dict]
+            The separate tests to store.
+
+        """
+        assert isinstance(database, str)
+        assert isinstance(result, dict)
+        assert isinstance(tests, list)
+        result_id = result["_id"]
+        assert isinstance(result_id, ObjectId)
+
+        with self.setup_client() as client:
+            db = client[database]
+
+            inserted_result = db.results.insert_one(result)
+            assert inserted_result.acknowledged
+            assert inserted_result.inserted_id == result_id
+            print(f"Inserted result {inserted_result.inserted_id} into {database}")
+
+            if tests:
+                inserted_tests = db.tests.insert_many(tests)
+                assert inserted_tests.acknowledged
+                print(f"Inserted {len(tests)} tests into {database}")
+
     def store(
         self, database: str, results: dict, base_sha: str, **kwargs
     ) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
@@ -516,54 +589,18 @@ class CIVETStore:
             within the results document (determined by build())
 
         """
-        assert isinstance(database, str)
-
+        # Get the data
         result, tests = self.build(results, base_sha, **kwargs)
 
-        # Assign an ID for the result
-        result_id = ObjectId()
-        result["_id"] = result_id
-
-        # Build the tests to be stored separately, if any
-        insert_tests = []
-        test_ids = None
-        if tests:
-            test_ids = []
-            for result_test in mutable_results_test_iterator(result):
-                # Get the separate test data
-                test_data = tests[result_test.name]
-
-                # Assign an ID to the test
-                test_id = ObjectId()
-                test_ids.append(test_id)
-                test_data["_id"] = test_id
-                test_data["result_id"] = result_id
-
-                # Add to be inserted later
-                insert_tests.append(test_data)
-
-                # Set the ID in the results for this test
-                # to this test's ID
-                assert result_test.value is None
-                result_test.set_value(test_id)
+        # Build for storage in the database
+        insert_result, insert_tests = self._build_database(result, tests)
 
         # Do the insertion
-        with self.setup_client() as client:
-            db = client[database]
+        self._insert_database(database, insert_result, insert_tests)
 
-            inserted_result = db.results.insert_one(result)
-            assert inserted_result.acknowledged
-            assert result_id == inserted_result.inserted_id
-            print(f"Inserted result {result_id} into {database}")
-
-            if insert_tests:
-                inserted_tests = db.tests.insert_many(insert_tests)
-                assert inserted_tests.acknowledged
-                assert isinstance(test_ids, list)
-                assert set(test_ids) == set(inserted_tests.inserted_ids)
-                print(f"Inserted {len(test_ids)} tests into {database}")
-
-        return result_id, test_ids
+        return insert_result["_id"], (
+            [v["_id"] for v in insert_tests] if insert_tests else None
+        )
 
     def main(
         self, result_path: str, database: str, base_sha: str, **kwargs
@@ -610,6 +647,8 @@ class CIVETStore:
         return self.store(database, results, base_sha, **kwargs)
 
 
-if __name__ == "__main__":
-    args = CIVETStore.parse_args()
+if __name__ == "__main__":  # pragma: no cover
+    from sys import argv
+
+    args = CIVETStore.parse_args(argv[1:])
     CIVETStore().main(**vars(args))
