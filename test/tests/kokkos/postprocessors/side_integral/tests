@@ -1,0 +1,45 @@
+[Tests]
+  issues = '#30655'
+
+  [side_integral]
+    design = 'KokkosSideIntegralVariablePostprocessor.md KokkosSideIntegralMaterialProperty.md'
+    requirement = 'The Kokkos system shall compute the integral over a side of'
+    [variable]
+      type = 'CSVDiff'
+      input = 'kokkos_side_integral_value_test.i'
+      csvdiff = 'kokkos_side_integral_value_test_out.csv'
+      detail = 'a variable and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [material_property]
+      type = 'CSVDiff'
+      input = 'kokkos_side_integral_material_property.i'
+      csvdiff = 'kokkos_side_integral_material_property_out.csv'
+      detail = 'a scalar material property.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+
+  [side_average]
+    design = 'KokkosSideAverageValue.md KokkosSideAverageMaterialProperty.md'
+    requirement = 'The Kokkos system shall compute the area-weighted average over a side of'
+    [variable]
+      type = 'CSVDiff'
+      input = 'kokkos_side_average_value_test.i'
+      csvdiff = 'kokkos_side_average_value_test_out.csv'
+      detail = 'a variable and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [material_property]
+      type = 'CSVDiff'
+      input = 'kokkos_side_average_material_property.i'
+      csvdiff = 'kokkos_side_average_material_property_out.csv'
+      detail = 'a scalar material property.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

@@ -56,17 +56,17 @@
 
 [Postprocessors]
   [T]
-    type = ElementAverageValue
+    type = KokkosElementAverageValue
     variable = T
     execute_on = 'timestep_end'
   []
   [T_old]
-    type = ElementAverageValue
+    type = KokkosElementAverageValue
     variable = T_old
     execute_on = 'timestep_end'
   []
   [T_older]
-    type = ElementAverageValue
+    type = KokkosElementAverageValue
     variable = T_older
     execute_on = 'timestep_end'
   []

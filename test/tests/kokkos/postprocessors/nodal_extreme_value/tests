@@ -1,0 +1,45 @@
+[Tests]
+  design = 'KokkosNodalExtremeValue.md'
+  issues = '#30655'
+
+  [nodal_extreme]
+    requirement = 'The Kokkos system shall compute the value of a nodal field variable at the point where'
+    [value]
+      type = 'Exodiff'
+      input = 'kokkos_nodal_extreme_pps_test.i'
+      exodiff = 'kokkos_nodal_extreme_pps_test_out.e'
+      detail = 'the variable reaches the extreme (min/max) value and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [proxy]
+      type = 'CSVDiff'
+      input = 'kokkos_nodal_proxy_extreme_value.i'
+      csvdiff = 'kokkos_nodal_proxy_extreme_value_out.csv'
+      detail = 'the proxy variable reaches the extreme (min/max) value.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+
+  [nodal_max]
+    requirement = 'The Kokkos system shall compute the maximum value of a field variable by sampling nodes'
+    [whole_domain]
+      type = 'Exodiff'
+      input = 'kokkos_nodal_max_value_test.i'
+      exodiff = 'kokkos_nodal_max_value_test_out.e'
+      abs_zero = 1e-8
+      detail = 'over the whole domain and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [block_restricted]
+      type = 'Exodiff'
+      input = 'kokkos_block_nodal_pps_test.i'
+      exodiff = 'kokkos_block_nodal_pps_test_out.e'
+      detail = 'within a subdomain.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]
