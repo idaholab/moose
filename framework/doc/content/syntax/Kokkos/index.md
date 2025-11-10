@@ -472,6 +472,8 @@ The following objects are currently available in Kokkos-MOOSE:
 - [Materials](syntax/KokkosMaterials/index.md)
 - [AuxKernels](syntax/KokkosAuxKernels/index.md)
 - [Functions](syntax/KokkosFunctions/index.md)
+- [UserObjects](syntax/KokkosUserObjects/index.md)
+- [Postprocessors](syntax/KokkosPostprocessors/index.md)
 
 !if-end!
 
