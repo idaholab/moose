@@ -24,6 +24,7 @@ MFEMIndicator::validParams()
   params.addRequiredParam<VariableName>("variable", "Variable to perform amr with");
   params.addRequiredParam<std::string>("kernel", "Kernel to perform amr with");
 
+  params.suppressParameter<std::vector<OutputName>>("outputs");
   return params;
 }
 
