@@ -99,8 +99,6 @@ Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_
     _sim.addMaterial(
         class_name, genName(heat_transfer.name(), "Hw_material", flow_channel.name()), params);
   }
-
-  heat_transfer.makeFunctionControllableIfConstant(Hw_fn_name, "Hw");
 }
 
 void

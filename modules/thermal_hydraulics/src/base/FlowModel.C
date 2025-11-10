@@ -89,8 +89,6 @@ FlowModel::addCommonInitialConditions()
       const Function & fn = _sim.getFunction(area_function);
       _sim.addConstantIC(AREA, fn.value(0, Point()), block);
       _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
-
-      _flow_channel.makeFunctionControllableIfConstant(area_function, "Area", "value");
     }
     else
     {
