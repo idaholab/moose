@@ -55,7 +55,4 @@ private:
 
   /// Storage for all the proposed variances
   std::vector<Real> _var_test;
-
-  /// A temporary vector to facilitate the sampling
-  std::vector<Real> _sample_vector;
 };

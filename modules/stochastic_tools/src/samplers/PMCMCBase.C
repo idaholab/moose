@@ -54,7 +54,7 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
                                              : nullptr),
     _upper_bound(isParamValid("upper_bound") ? &getParam<std::vector<Real>>("upper_bound")
                                              : nullptr),
-    _variance_bound(isParamValid("variance_bound") ? &getParam<Real>("variance_bound") : nullptr),
+    _variance_bound(getParam<Real>("variance_bound")),
     _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds"))

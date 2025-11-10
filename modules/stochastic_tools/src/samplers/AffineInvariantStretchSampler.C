@@ -75,10 +75,8 @@ AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
               ? (_previous_state_var[index_req] +
                  _affine_step[j] * (_previous_state_var[j] - _previous_state_var[index_req]))
               : _var_prior->quantile(getRand(seed_value));
-      if (_new_var_samples[j] < 0.0)
+      if (_new_var_samples[j] < 0.0 || _new_var_samples[j] > _variance_bound)
         indicator = 1;
-      if (_variance_bound)
-        indicator = (_new_var_samples[j] > (*_variance_bound)) ? 1 : indicator;
     }
     if (!indicator)
       ++j;

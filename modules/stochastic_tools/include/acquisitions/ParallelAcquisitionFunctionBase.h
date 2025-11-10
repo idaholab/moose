@@ -68,7 +68,7 @@ public:
                           const std::vector<Real> & input2,
                           const std::vector<Real> & length_scales);
 
-private:
+protected:
   /**
    * Implementation hook for derived classes (no size checks here).
    * @param acq The computed acquisition function values

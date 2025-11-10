@@ -127,7 +127,7 @@ protected:
   const std::vector<Real> * _upper_bound;
 
   /// Upper bound for variance for making the next proposal
-  const Real * _variance_bound;
+  const Real & _variance_bound;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;

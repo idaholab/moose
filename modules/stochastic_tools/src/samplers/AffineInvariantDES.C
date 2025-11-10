@@ -119,10 +119,8 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value)
                           diff);
       _new_var_samples[j] = (_t_step > decisionStep()) ? (_previous_state_var[j] + diff)
                                                        : _var_prior->quantile(getRand(seed_value));
-      if (_new_var_samples[j] < 0.0)
+      if (_new_var_samples[j] < 0.0 || _new_var_samples[j] > _variance_bound)
         indicator = 1;
-      if (_variance_bound)
-        indicator = (_new_var_samples[j] > (*_variance_bound)) ? 1 : indicator;
     }
     if (!indicator)
       ++j;
