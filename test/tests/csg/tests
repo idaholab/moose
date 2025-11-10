@@ -30,6 +30,24 @@
         mesh_mode = REPLICATED
         detail = 'has a single mesh generator depend on multiple downstream mesh generators.'
     []
+    [csg_only_cart_lattice]
+        type = 'JSONDiff'
+        input = 'csg_lattice_cart.i'
+        cli_args = '--csg-only'
+        jsondiff = 'csg_lattice_cart_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'uses multiple existing CSG representations from other mesh generators to create a Cartesian lattice.'
+    []
+    [csg_only_hex_lattice]
+        type = 'JSONDiff'
+        input = 'csg_lattice_hex.i'
+        cli_args = '--csg-only'
+        jsondiff = 'csg_lattice_hex_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'uses multiple existing CSG representations from other mesh generators to create a hexagonal lattice.'
+    []
     [csg_only_final_generator]
         type = 'JSONDiff'
         input = 'csg_only_chained.i'

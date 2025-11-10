@@ -1,0 +1,165 @@
+{
+  "cells": {
+    "cart_lat_lattice_cell": {
+      "fill": "cart_lat_lattice",
+      "filltype": "LATTICE",
+      "region":
+          "(-cart_lat_surf_plus_x & +cart_lat_surf_minus_x & -cart_lat_surf_plus_y & +cart_lat_surf_minus_y)"
+    },
+    "sq1_square_cell": {
+      "fill": "square_material",
+      "filltype": "CSG_MATERIAL",
+      "region": "(+sq1_surf_plus_x & -sq1_surf_minus_x & -sq1_surf_plus_y & +sq1_surf_minus_y)"
+    },
+    "sq2_square_cell": {
+      "fill": "square_material",
+      "filltype": "CSG_MATERIAL",
+      "region": "(+sq2_surf_plus_x & -sq2_surf_minus_x & -sq2_surf_plus_y & +sq2_surf_minus_y)"
+    }
+  },
+  "lattices": {
+    "cart_lat_lattice": {
+      "nx0": 2,
+      "nx1": 2,
+      "pitch": 5.0,
+      "universes": [
+        [
+          "sq1_univ",
+          "sq1_univ"
+        ],
+        [
+          "sq1_univ",
+          "sq2_univ"
+        ]
+      ]
+    }
+  },
+  "surfaces": {
+    "cart_lat_surf_minus_x": {
+      "coefficients": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -5.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "cart_lat_surf_minus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -5.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "cart_lat_surf_plus_x": {
+      "coefficients": {
+        "a": 1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 5.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "cart_lat_surf_plus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 5.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq1_surf_minus_x": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 2.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq1_surf_minus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -2.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq1_surf_plus_x": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -2.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq1_surf_plus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 2.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq2_surf_minus_x": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 1.5
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq2_surf_minus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -1.5
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq2_surf_plus_x": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -1.5
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq2_surf_plus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 1.5
+      },
+      "type": "CSG::CSGPlane"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "cart_lat_lattice_cell"
+      ],
+      "root": true
+    },
+    "sq1_univ": {
+      "cells": [
+        "sq1_square_cell"
+      ]
+    },
+    "sq2_univ": {
+      "cells": [
+        "sq2_square_cell"
+      ]
+    }
+  }
+}
