@@ -62,8 +62,6 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
 #ifdef MOOSE_KOKKOS_ENABLED
     _is_kokkos_object(_mi_moose_object.isKokkosObject()),
-#else
-    _is_kokkos_object(false),
 #endif
     _material_data_type(getMaterialDataType(boundary_ids)),
     _material_data(
