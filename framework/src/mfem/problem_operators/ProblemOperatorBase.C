@@ -72,22 +72,6 @@ ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
     trial_var->SetFromTrueVector();
   }
 }
-
-int
-ProblemOperatorBase::GetProblemSize()
-{
-  // update the global block offsets first
-  _global_block_true_offsets.SetSize(_trial_variables.size() + 1);
-  _global_block_true_offsets[0] = 0;
-  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
-  {
-    _global_block_true_offsets[ind + 1] = _trial_variables.at(ind)->ParFESpace()->GlobalTrueVSize();
-  }
-  _global_block_true_offsets.PartialSum();
-
-  // return the last element - this is the sum of all the FESpace sizes
-  return _global_block_true_offsets[_trial_variables.size()];
-}
 }
 
 #endif

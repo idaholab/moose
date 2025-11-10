@@ -283,9 +283,7 @@ public:
 
   void setUpAMR();
 
-  //! Return true when it's time to stop
   void hRefine();
-  //! Return true when it's time to stop
   void pRefine();
 
   bool useHRefinement() const;

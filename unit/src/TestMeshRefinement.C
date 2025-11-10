@@ -13,6 +13,11 @@ SolveEquationAndCheckResidual(std::unique_ptr<Moose::MFEM::EquationSystemProblem
                               std::shared_ptr<Moose::MFEM::EquationSystem> &,
                               mfem::BlockVector &);
 
+/**
+ * Unit test to check that a diffusion problem solves correctly
+ * after being uniformly refined. In particular, the MFEMProblem must
+ * correctly update the gridfunctions and FESpaces.
+ */
 class MFEMMeshRefinementTest : public MFEMObjectUnitTest
 {
 public:
@@ -50,12 +55,6 @@ public:
     bc_low_terminal_params.set<std::vector<BoundaryName>>("boundary") = {"2"};
     _mfem_problem->addBoundaryCondition(
         "MFEMScalarDirichletBC", "low_terminal", bc_low_terminal_params);
-
-    // diffusion coefficient material
-    // InputParameters coef_params = _factory.getValidParams("MFEMGenericFunctorMaterial");
-    // coef_params.set<MFEMScalarCoefficientName>("prop_names") = {"diffusivity"};
-    // coef_params.set<std::vector<double>>("prop_values") = {1.0};
-    // _mfem_problem->addFunctorMaterial("MFEMGenericFunctorMaterial", "material1", coef_params);
 
     // diffusion kernel
     InputParameters kernel_params = _factory.getValidParams("MFEMDiffusionKernel");
