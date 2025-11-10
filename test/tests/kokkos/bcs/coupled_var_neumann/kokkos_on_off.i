@@ -16,7 +16,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosDiffusion
     variable = u
@@ -32,7 +32,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [active_right]
     type = KokkosConstantAux
     variable = active
@@ -56,7 +56,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

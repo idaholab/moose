@@ -8,9 +8,9 @@ This is the Kokkos version of [VacuumBC](VacuumBC.md). See the original document
 
 !listing test/tests/kokkos/bcs/misc_bcs/kokkos_vacuum_bc_test.i start=[top] end=[] include-end=true
 
-!syntax parameters /KokkosBCs/KokkosVacuumBC
+!syntax parameters /BCs/KokkosVacuumBC
 
-!syntax inputs /KokkosBCs/KokkosVacuumBC
+!syntax inputs /BCs/KokkosVacuumBC
 
 !if-end!
 

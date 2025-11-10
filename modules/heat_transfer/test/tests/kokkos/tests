@@ -37,7 +37,7 @@
     [material]
       type = 'Exodiff'
       input = 'kokkos_convective_heat_flux.i'
-      cli_args = 'KokkosBCs/right/T_infinity=Tinf KokkosBCs/right/heat_transfer_coefficient=htc'
+      cli_args = 'BCs/right/T_infinity=Tinf BCs/right/heat_transfer_coefficient=htc'
       exodiff = 'kokkos_convective_heat_flux_out.e'
       detail = 'material properties,'
       capabilities = 'kokkos'

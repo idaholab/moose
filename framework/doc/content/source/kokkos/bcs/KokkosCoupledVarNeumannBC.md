@@ -8,9 +8,9 @@ This is the Kokkos version of [CoupledVarNeumannBC](CoupledVarNeumannBC.md). See
 
 !listing test/tests/kokkos/bcs/coupled_var_neumann/kokkos_coupled_var_neumann.i start=[right] end=[] include-end=true
 
-!syntax parameters /KokkosBCs/KokkosCoupledVarNeumannBC
+!syntax parameters /BCs/KokkosCoupledVarNeumannBC
 
-!syntax inputs /KokkosBCs/KokkosCoupledVarNeumannBC
+!syntax inputs /BCs/KokkosCoupledVarNeumannBC
 
 !if-end!
 

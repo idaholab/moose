@@ -146,7 +146,7 @@ The following material types are not supported by Kokkos-MOOSE yet:
 - Interface materials
 - Discrete materials
 
-!syntax list /KokkosMaterials objects=True actions=False subsystems=False
+!syntax list /Materials objects=True actions=False subsystems=False
 
 !if-end!
 

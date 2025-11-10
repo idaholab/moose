@@ -8,9 +8,9 @@ This is the Kokkos version of [CopyValueAux](CopyValueAux.md). See the original 
 
 !listing test/tests/kokkos/auxkernels/copy_value_aux/kokkos_copy_old_aux.i start=[T_older] end=[] include-end=true
 
-!syntax parameters /KokkosAuxKernels/KokkosCopyValueAux
+!syntax parameters /AuxKernels/KokkosCopyValueAux
 
-!syntax inputs /KokkosAuxKernels/KokkosCopyValueAux
+!syntax inputs /AuxKernels/KokkosCopyValueAux
 
 !if-end!
 

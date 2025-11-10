@@ -38,7 +38,7 @@ num_steps=10
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [time]
     type = KokkosTimeDerivative
     variable = u
@@ -54,7 +54,7 @@ num_steps=10
   []
 []
 
-[KokkosNodalKernels]
+[NodalKernels]
   [upper_bound]
     type = KokkosUpperBoundNodalKernel
     variable = lm_upper
@@ -84,7 +84,7 @@ num_steps=10
 []
 
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     boundary = left

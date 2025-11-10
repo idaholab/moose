@@ -8,9 +8,9 @@ This is the Kokkos version of [TimeDerivativeNodalKernel](TimeDerivativeNodalKer
 
 !listing test/tests/kokkos/nodalkernels/constant_rate/kokkos_constant_rate.i start=[td] end=[] include-end=true
 
-!syntax parameters /KokkosNodalKernels/KokkosTimeDerivativeNodalKernel
+!syntax parameters /NodalKernels/KokkosTimeDerivativeNodalKernel
 
-!syntax inputs /KokkosNodalKernels/KokkosTimeDerivativeNodalKernel
+!syntax inputs /NodalKernels/KokkosTimeDerivativeNodalKernel
 
 !if-end!
 

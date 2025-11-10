@@ -8,9 +8,9 @@ This is the Kokkos version of [DirichletBC](DirichletBC.md). See the original do
 
 !listing test/tests/kokkos/bcs/coupled_dirichlet_bc/kokkos_coupled_dirichlet_bc.i start=[left_u] end=[] include-end=true
 
-!syntax parameters /KokkosBCs/KokkosDirichletBC
+!syntax parameters /BCs/KokkosDirichletBC
 
-!syntax inputs /KokkosBCs/KokkosDirichletBC
+!syntax inputs /BCs/KokkosDirichletBC
 
 !if-end!
 

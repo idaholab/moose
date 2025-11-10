@@ -8,9 +8,9 @@ This is the Kokkos version of [ConstantRate](ConstantRate.md). See the original 
 
 !listing test/tests/kokkos/nodalkernels/constant_rate/kokkos_constant_rate.i start=[constant_rate] end=[] include-end=true
 
-!syntax parameters /KokkosNodalKernels/KokkosConstantRate
+!syntax parameters /NodalKernels/KokkosConstantRate
 
-!syntax inputs /KokkosNodalKernels/KokkosConstantRate
+!syntax inputs /NodalKernels/KokkosConstantRate
 
 !if-end!
 

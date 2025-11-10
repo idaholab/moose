@@ -8,9 +8,9 @@ This is the Kokkos version of [CoupledForceNodalKernel](CoupledForceNodalKernel.
 
 !listing test/tests/kokkos/nodalkernels/constraint_enforcement/kokkos_lower_bound.i start=[forces] end=[] include-end=true
 
-!syntax parameters /KokkosNodalKernels/KokkosCoupledForceNodalKernel
+!syntax parameters /NodalKernels/KokkosCoupledForceNodalKernel
 
-!syntax inputs /KokkosNodalKernels/KokkosCoupledForceNodalKernel
+!syntax inputs /NodalKernels/KokkosCoupledForceNodalKernel
 
 !if-end!
 

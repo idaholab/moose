@@ -8,9 +8,9 @@ This is the Kokkos version of [LowerBoundNodalKernel](LowerBoundNodalKernel.md).
 
 !listing test/tests/kokkos/nodalkernels/constraint_enforcement/kokkos_lower_bound.i start=[positive_constraint] end=[] include-end=true
 
-!syntax parameters /KokkosNodalKernels/KokkosLowerBoundNodalKernel
+!syntax parameters /NodalKernels/KokkosLowerBoundNodalKernel
 
-!syntax inputs /KokkosNodalKernels/KokkosLowerBoundNodalKernel
+!syntax inputs /NodalKernels/KokkosLowerBoundNodalKernel
 
 !if-end!
 

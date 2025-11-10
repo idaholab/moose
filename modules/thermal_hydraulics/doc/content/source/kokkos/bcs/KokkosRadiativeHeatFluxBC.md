@@ -11,9 +11,9 @@ Kokkos-MOOSE does not support functions yet. Therefore, [!param](/BCs/RadiativeH
 
 !listing thermal_hydraulics/test/tests/kokkos/kokkos_radiation_heat_flux_bc.i start=[bc] end=[] include-end=true
 
-!syntax parameters /KokkosBCs/KokkosRadiativeHeatFluxBC
+!syntax parameters /BCs/KokkosRadiativeHeatFluxBC
 
-!syntax inputs /KokkosBCs/KokkosRadiativeHeatFluxBC
+!syntax inputs /BCs/KokkosRadiativeHeatFluxBC
 
 !if-end!
 

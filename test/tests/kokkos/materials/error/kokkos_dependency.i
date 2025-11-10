@@ -18,7 +18,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosCoefDiffusion
     variable = u
@@ -26,7 +26,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u
@@ -42,7 +42,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [mat1]
     type = KokkosCoupledMaterial
     mat_prop = 'prop-a'

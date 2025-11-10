@@ -6,11 +6,11 @@ This is the Kokkos version of [FunctionAux](FunctionAux.md). See the original do
 
 ## Example Syntax
 
-!listing test/tests/kokkos/functions/piecewise_constant/kokkos_piecewise_constant.i block=KokkosAuxKernels
+!listing test/tests/kokkos/functions/piecewise_constant/kokkos_piecewise_constant.i block=AuxKernels
 
-!syntax parameters /KokkosAuxKernels/KokkosFunctionAux
+!syntax parameters /AuxKernels/KokkosFunctionAux
 
-!syntax inputs /KokkosAuxKernels/KokkosFunctionAux
+!syntax inputs /AuxKernels/KokkosFunctionAux
 
 !if-end!
 

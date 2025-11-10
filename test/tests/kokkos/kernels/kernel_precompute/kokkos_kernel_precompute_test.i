@@ -18,7 +18,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   active = 'diff conv'
 
   [diff]
@@ -33,7 +33,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   active = 'bottom top'
 
   [bottom]

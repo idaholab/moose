@@ -14,7 +14,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosMatDiffusionTest
     variable = u
@@ -27,7 +27,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u
@@ -43,7 +43,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   # This material couples in a stateful property from StatefulTest
   [coupled_mat]
     type = KokkosCoupledMaterial

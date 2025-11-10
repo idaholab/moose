@@ -120,11 +120,12 @@ public:
   captureDump(addInterfaceKernel,         "InterfaceKernels")
   captureDump(addKernel,                  "Kernels")
 #ifdef MOOSE_KOKKOS_ENABLED
-  captureDump(addKokkosAuxKernel,         "KokkosAuxKernels")
-  captureDump(addKokkosBoundaryCondition, "KokkosBCs")
-  captureDump(addKokkosKernel,            "KokkosKernels")
-  captureDump(addKokkosMaterial,          "KokkosMaterials")
-  captureDump(addKokkosNodalKernel,       "KokkosNodalKernels")
+  captureDump(addKokkosAuxKernel,         "AuxKernels")
+  captureDump(addKokkosBoundaryCondition, "BCs")
+  captureDump(addKokkosFunction,          "Functions")
+  captureDump(addKokkosKernel,            "Kernels")
+  captureDump(addKokkosMaterial,          "Materials")
+  captureDump(addKokkosNodalKernel,       "NodalKernels")
 #endif
   captureDump(addLinearFVBC,              "LinearFVBCs")
   captureDump(addLinearFVKernel,          "LinearFVKernels")

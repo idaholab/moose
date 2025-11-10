@@ -11,9 +11,9 @@ The original version supports functions, but the Kokkos version does not support
 
 !listing test/tests/kokkos/kernels/2d_diffusion/kokkos_2d_diffusion_bodyforce_test.i start=[bf] end=[] include-end=true
 
-!syntax parameters /KokkosKernels/KokkosBodyForce
+!syntax parameters /Kernels/KokkosBodyForce
 
-!syntax inputs /KokkosKernels/KokkosBodyForce
+!syntax inputs /Kernels/KokkosBodyForce
 
 !if-end!
 

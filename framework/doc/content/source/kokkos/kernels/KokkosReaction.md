@@ -8,9 +8,9 @@ This is the Kokkos version of [Reaction](Reaction.md). See the original document
 
 !listing test/tests/kokkos/kernels/material_coupled_force/kokkos_material_coupled_force.i start=[reaction] end=[] include-end=true
 
-!syntax parameters /KokkosKernels/KokkosReaction
+!syntax parameters /Kernels/KokkosReaction
 
-!syntax inputs /KokkosKernels/KokkosReaction
+!syntax inputs /Kernels/KokkosReaction
 
 !if-end!
 

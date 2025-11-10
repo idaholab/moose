@@ -16,7 +16,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [heat]
     type = KokkosMatDiffusionTest
     variable = u
@@ -29,7 +29,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u
@@ -46,7 +46,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [volatile]
     type = KokkosGenericConstantMaterial
     prop_names = 'thermal_conductivity'

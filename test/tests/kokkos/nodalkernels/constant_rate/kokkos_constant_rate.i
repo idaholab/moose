@@ -12,7 +12,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosCoefDiffusion
     variable = u
@@ -24,7 +24,7 @@
   []
 []
 
-[KokkosNodalKernels]
+[NodalKernels]
   [td]
     type = KokkosTimeDerivativeNodalKernel
     variable = nodal_ode
@@ -36,7 +36,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

@@ -8,9 +8,9 @@ This is the Kokkos version of [TagVectorAux](TagVectorAux.md). See the original 
 
 !listing test/tests/kokkos/tag/kokkos_2d_diffusion_tag_vector.i start=[TagVectorAux1] end=[] include-end=true
 
-!syntax parameters /KokkosAuxKernels/KokkosTagVectorAux
+!syntax parameters /AuxKernels/KokkosTagVectorAux
 
-!syntax inputs /KokkosAuxKernels/KokkosTagVectorAux
+!syntax inputs /AuxKernels/KokkosTagVectorAux
 
 !if-end!
 

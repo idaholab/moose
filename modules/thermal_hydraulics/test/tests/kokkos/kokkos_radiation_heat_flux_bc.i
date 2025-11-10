@@ -11,7 +11,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [bc]
     type = KokkosRadiativeHeatFluxBC
     variable = T

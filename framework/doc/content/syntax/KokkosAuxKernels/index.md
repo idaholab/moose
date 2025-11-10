@@ -50,7 +50,7 @@ See the following source code of `KokkosCopyValueAux`, where `computeElementInte
 !listing framework/src/kokkos/auxkernels/KokkosCopyValueAux.K id=kokkos-copy-aux-source language=cpp
          caption=The `KokkosCopyValueAux` source file.
 
-!syntax list /KokkosAuxKernels objects=True actions=False subsystems=False
+!syntax list /AuxKernels objects=True actions=False subsystems=False
 
 !if-end!
 

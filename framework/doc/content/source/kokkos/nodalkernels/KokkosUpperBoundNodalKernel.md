@@ -8,9 +8,9 @@ This is the Kokkos version of [UpperBoundNodalKernel](UpperBoundNodalKernel.md).
 
 !listing test/tests/kokkos/nodalkernels/constraint_enforcement/kokkos_upper_bound.i start=[positive_constraint] end=[] include-end=true
 
-!syntax parameters /KokkosNodalKernels/KokkosUpperBoundNodalKernel
+!syntax parameters /NodalKernels/KokkosUpperBoundNodalKernel
 
-!syntax inputs /KokkosNodalKernels/KokkosUpperBoundNodalKernel
+!syntax inputs /NodalKernels/KokkosUpperBoundNodalKernel
 
 !if-end!
 

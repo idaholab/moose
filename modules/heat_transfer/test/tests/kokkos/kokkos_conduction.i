@@ -11,14 +11,14 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [heat_conduction]
     type = KokkosHeatConduction
     variable = temp
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = temp
@@ -33,7 +33,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [conduction]
     type = KokkosHeatConductionMaterial
     thermal_conductivity = 10
