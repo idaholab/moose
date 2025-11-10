@@ -474,40 +474,53 @@ class TestHarnessResultsSummary:
                 - Removed tests
                 - Added tests with runtime
                 - Same tests with high relative runtime rate
-            If no tests are present in a category, None is displayed
+            If all table is None, 'No change' will display.
+            If one or more table is available:
+                - there is no removed_table, Removed tests portion won't display
+                - there is no same_table, Run time changes portion won't display
+                - there is no added_table, 'No added tests' will display
         """
         assert isinstance(removed_table, (list, NoneType))
         assert isinstance(added_table, (list, NoneType))
         assert isinstance(same_table, (list, NoneType))
 
         summary = []
+        # All table are none, display no change
+        if removed_table is None and added_table is None and same_table is None:
+            summary.append("\nNo change\n")
+        else:
         # Format removed table
-        summary.append(
-            self._format_table(
-                "\n### Removed tests\n",
-                removed_table,
-                ["Test","Time (s)"],
-                ""
+            if removed_table:
+                summary.append(
+                    self._format_table(
+                        "\n### Removed tests\n",
+                        removed_table,
+                        ["Test","Time (s)"],
+                        ""
+                    )
+                )
+            # Format added table
+            if added_table:
+                summary.append(
+                    self._format_table(
+                        "\n### Added tests\n",
+                        added_table,
+                        ["Test", "Time (s)"],
+                        ""
+                    )
+                )
+            else:
+                summary.append("\n### No added tests\n")
+            # Format same table
+            if same_table:
+                summary.append(
+                    self._format_table(
+                        "\n### Run time changes\n",
+                        same_table,
+                        ["Test", "Base (s)", "Head (s)", "+/-"],
+                        ""
+                    )
             )
-        )
-        # Format added table
-        summary.append(
-            self._format_table(
-                "\n### Added tests\n",
-                added_table,
-                ["Test", "Time (s)"],
-                ""
-            )
-        )
-        # Format same table
-        summary.append(
-            self._format_table(
-                "\n### Run time changes\n",
-                same_table,
-                ["Test", "Base (s)", "Head (s)", "+/-"],
-                ""
-            )
-        )
         return "\n".join(summary)
 
     def write_output(self, output_result: str, out_file: str) -> None:
