@@ -14,7 +14,7 @@ f_w \rightarrow
 64, & Re < 1\\
 \frac{64}{Re}, &1 \leq Re<5000\\
 0.316 Re^{-0.25}, &5000 \leq Re < 30000\\
-0.184 Re^{-0.20}, &30000 \leq Re
+0.184 Re^{-0.20}, &30000 \leq Re < 1e6
 \end{cases}
 \end{equation}
 

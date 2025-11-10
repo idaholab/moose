@@ -59,10 +59,14 @@ SCMFrictionMATRA::computeQuadLatticeFrictionFactor(const FrictionStruct & fricti
     a = 0.316;
     b = -0.25;
   }
-  else
+  else if (Re >= 30000 and Re < 1000000)
   {
     a = 0.184;
     b = -0.20;
+  }
+  else
+  {
+    flagInvalidSolution("MATRA correlation out of range");
   }
   return a * std::pow(Re, b);
 }
