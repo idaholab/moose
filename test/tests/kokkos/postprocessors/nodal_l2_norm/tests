@@ -1,0 +1,13 @@
+[Tests]
+  design = 'KokkosNodalL2Norm.md'
+  issues = '#30655'
+
+  [nodal_l2_norm]
+    type = 'CSVDiff'
+    input = 'kokkos_nodal_l2_norm.i'
+    csvdiff = kokkos_nodal_l2_norm_out.csv
+    requirement = 'The Kokkos system shall compute the L2 norm of nodal values of a variable.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
