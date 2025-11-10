@@ -437,4 +437,23 @@ CSGBase::generateOutput() const
   return csg_json;
 }
 
+bool
+CSGBase::operator==(const CSGBase & other) const
+{
+  const auto & surf_list = this->getSurfaceList();
+  const auto & other_surf_list = other.getSurfaceList();
+  const auto & cell_list = this->getCellList();
+  const auto & other_cell_list = other.getCellList();
+  const auto & univ_list = this->getUniverseList();
+  const auto & other_univ_list = other.getUniverseList();
+  return (surf_list == other_surf_list) && (cell_list == other_cell_list) &&
+         (univ_list == other_univ_list);
+}
+
+bool
+CSGBase::operator!=(const CSGBase & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

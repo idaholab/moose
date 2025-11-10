@@ -44,7 +44,10 @@ protected:
    * @param name name of universe
    * @return true if universe name exists, false otherwise
    */
-  bool hasUniverse(const std::string & name) { return _universes.find(name) != _universes.end(); }
+  bool hasUniverse(const std::string & name) const
+  {
+    return _universes.find(name) != _universes.end();
+  }
 
   /**
    * @brief Get non-const map of all names to universes in universe list
@@ -104,6 +107,12 @@ protected:
    * @param name new name
    */
   void renameUniverse(const CSGUniverse & universe, const std::string & name);
+
+  /// Operator overload for checking if two CSGUniverseList objects are equal
+  bool operator==(const CSGUniverseList & other) const;
+
+  /// Operator overload for checking if two CSGUniverseList objects are not equal
+  bool operator!=(const CSGUniverseList & other) const;
 
   /// Mapping of universe names to pointers of stored universe objects
   std::unordered_map<std::string, std::unique_ptr<CSGUniverse>> _universes;

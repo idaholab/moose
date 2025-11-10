@@ -651,4 +651,34 @@ TEST(CSGBaseTest, testUniverseLinking)
   // linking tree: ROOT_UNIVERSE -> c1 -> univ1
   ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
 }
+
+/**
+ * Tests associated with CSGBase::clone
+ */
+/// test CSGBase::clone and equality operators for CSGBase and CSG[Surface|Cell|Universe]List
+TEST(CSGBaseTest, testCSGBaseClone)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto & inner_univ = csg_obj->createUniverse("univ1");
+  std::unique_ptr<CSG::CSGSurface> sphere_ptr_inner =
+      std::make_unique<CSG::CSGSphere>("inner_surf", 3.0);
+  auto & csg_sphere_inner = csg_obj->addSurface(std::move(sphere_ptr_inner));
+  csg_obj->createCell("cell_inner", "mat1", -csg_sphere_inner, &inner_univ);
+
+  // create cell with universe fill
+  std::unique_ptr<CSG::CSGSurface> sphere_ptr_outer =
+      std::make_unique<CSG::CSGSphere>("outer_surf", 5.0);
+  auto & csg_sphere_outer = csg_obj->addSurface(std::move(sphere_ptr_outer));
+  csg_obj->createCell("cell_univ_fill", inner_univ, -csg_sphere_outer);
+  csg_obj->createCell("cell_void", +csg_sphere_outer);
+  auto csg_obj_clone = csg_obj->clone();
+
+  ASSERT_TRUE(*csg_obj == *csg_obj_clone);
+
+  // Add new surface to csg_obj, csg_obj and csg_obj_clone should no longer be equal
+  std::unique_ptr<CSG::CSGSurface> sphere_ptr_new =
+      std::make_unique<CSG::CSGSphere>("new_surf", 6.0);
+  csg_obj->addSurface(std::move(sphere_ptr_new));
+  ASSERT_TRUE(*csg_obj != *csg_obj_clone);
+}
 }

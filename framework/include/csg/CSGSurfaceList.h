@@ -63,6 +63,17 @@ protected:
   std::vector<std::reference_wrapper<const CSGSurface>> getAllSurfaces() const;
 
   /**
+   * @brief return whether surface with given name exists in surface list
+   *
+   * @param name name of surface
+   * @return true if surface name exists, false otherwise
+   */
+  bool hasSurface(const std::string & name) const
+  {
+    return _surfaces.find(name) != _surfaces.end();
+  }
+
+  /**
    * @brief Get a surface by name
    *
    * @param name name of surface
@@ -87,6 +98,12 @@ protected:
    * @param name new name of surface
    */
   void renameSurface(const CSGSurface & surface, const std::string & name);
+
+  /// Operator overload for checking if two CSGSurfaceList objects are equal
+  bool operator==(const CSGSurfaceList & other) const;
+
+  /// Operator overload for checking if two CSGSurfaceList objects are not equal
+  bool operator!=(const CSGSurfaceList & other) const;
 
   /// Mapping of surface names to pointers of stored surface objects
   std::unordered_map<std::string, std::unique_ptr<CSGSurface>> _surfaces;

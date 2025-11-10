@@ -318,6 +318,12 @@ public:
    */
   nlohmann::json generateOutput() const;
 
+  /// Operator overload for checking if two CSGBase objects are equal
+  bool operator==(const CSGBase & other) const;
+
+  /// Operator overload for checking if two CSGBase objects are not equal
+  bool operator!=(const CSGBase & other) const;
+
 private:
   /**
    * @brief Get a Surface object by name.

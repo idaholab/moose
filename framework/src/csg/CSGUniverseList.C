@@ -73,4 +73,34 @@ CSGUniverseList::renameUniverse(const CSGUniverse & universe, const std::string 
   addUniverse(std::move(existing_univ));
 }
 
+bool
+CSGUniverseList::operator==(const CSGUniverseList & other) const
+{
+  const auto all_univs = this->getAllUniverses();
+  const auto other_univs = other.getAllUniverses();
+
+  // Check that same number of universes are defined in both lists
+  if (all_univs.size() != other_univs.size())
+    return false;
+
+  // Iterate through each CSGUniverse in list and check equality of universe
+  // with other list
+  for (const auto & univ : all_univs)
+  {
+    const auto & univ_name = univ.get().getName();
+    if (!other.hasUniverse(univ_name))
+      return false;
+    const auto & other_univ = other.getUniverse(univ_name);
+    if (univ.get() != other_univ)
+      return false;
+  }
+  return true;
+}
+
+bool
+CSGUniverseList::operator!=(const CSGUniverseList & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

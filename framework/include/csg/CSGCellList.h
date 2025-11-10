@@ -70,7 +70,7 @@ protected:
    * @param name name of cell
    * @return true if cell name exists, false otherwise
    */
-  bool hasCell(const std::string & name) { return _cells.find(name) != _cells.end(); }
+  bool hasCell(const std::string & name) const { return _cells.find(name) != _cells.end(); }
 
   /**
    * @brief Get non-const map of all names to cells in cell list
@@ -120,6 +120,12 @@ protected:
    * @param name new name
    */
   void renameCell(const CSGCell & cell, const std::string & name);
+
+  /// Operator overload for checking if two CSGCellList objects are equal
+  bool operator==(const CSGCellList & other) const;
+
+  /// Operator overload for checking if two CSGCellList objects are not equal
+  bool operator!=(const CSGCellList & other) const;
 
   /// Mapping of cell names to pointers of stored cell objects
   std::unordered_map<std::string, std::unique_ptr<CSGCell>> _cells;
