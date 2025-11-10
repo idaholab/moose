@@ -280,7 +280,7 @@
     cli_args = 'Outputs/print_unsupported_prop_names=false'
     allow_warnings = true
     absent_out = "The types for total 1 material properties:"
-    requirement = "The system shall be able to not show the field variable names for outputting material data added by materials."
+    requirement = "The system shall be able to not show the list of unsupported properties when outputting material data added by materials."
     prereq = dont_show_added_aux_vars
   []
   [long_vector_properties]
