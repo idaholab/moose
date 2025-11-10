@@ -16,11 +16,11 @@ namespace CSGUtils
 {
 
 CSGRegion
-getInnerRegion(const std::vector<std::reference_wrapper<const CSGSurface>> & radial_surfaces,
+getInnerRegion(const std::vector<std::reference_wrapper<const CSGSurface>> & surfaces,
                const libMesh::Point & origin)
 {
   CSGRegion inner_region;
-  for (const auto & surf_ref : radial_surfaces)
+  for (const auto & surf_ref : surfaces)
   {
     const auto & surf = surf_ref.get();
     const auto direction = surf.getHalfspaceFromPoint(origin);

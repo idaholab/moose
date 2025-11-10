@@ -453,7 +453,7 @@ private:
    * @brief Add a new universe to the universe list based on a universe reference.
    * This method is called by the copy constructor of CSGBase
    *
-   * @param cell reference to CSGCell that should be added to universe list
+   * @param univ reference to CSGUniverse that should be added to universe list
    */
   const CSGUniverse & addUniverseToList(const CSGUniverse & univ);
 

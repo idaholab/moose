@@ -741,7 +741,7 @@ PinMeshGenerator::generateCSG()
     if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
     {
       // We are in the innermost radial region, the radial region is inner_region
-      inner_region = CSGUtils::getInnerRegion(radial_surfaces);
+      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
       radial_region = inner_region;
     }
     else
@@ -749,7 +749,7 @@ PinMeshGenerator::generateCSG()
       // For all other regions, the radial region is the intersection of inner_region and
       // outer_region
       outer_region = ~inner_region;
-      inner_region = CSGUtils::getInnerRegion(radial_surfaces);
+      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
       radial_region = inner_region & outer_region;
     }
     radial_regions.push_back(radial_region);

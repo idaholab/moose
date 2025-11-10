@@ -80,7 +80,7 @@ protected:
   // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane
   void coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3);
 
-  // Normalize plane coefficients so that a^2 + b^2 + c^2 = 1
+  /// Normalize plane coefficients so that a^2 + b^2 + c^2 = 1
   void normalizePlaneCoefficients();
 
   /// Value of a in equation of plane
