@@ -26,7 +26,7 @@ beta = 5e-4
 T_0 = 300.0
 T_hot = 301
 T_cold = 300
-initial_dt = 30
+initial_dt = 20
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -258,18 +258,18 @@ initial_dt = 30
 
 [Executioner]
   type = PIMPLE
-  momentum_l_abs_tol = 1e-7
+  momentum_l_abs_tol = 1e-8
   pressure_l_abs_tol = 1e-8
-  energy_l_abs_tol = 1e-7
+  energy_l_abs_tol = 1e-8
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
   momentum_systems = 'u_system v_system w_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 0.85
-  pressure_variable_relaxation = 1.0
-  energy_equation_relaxation = 1.0
+  momentum_equation_relaxation = 0.80
+  pressure_variable_relaxation = 0.95
+  energy_equation_relaxation = 0.9
   num_iterations = 1500
   pressure_absolute_tolerance = 1e-4
   momentum_absolute_tolerance = 1e-4
@@ -286,7 +286,7 @@ initial_dt = 30
   pressure_pin_value = 0.0
   pressure_pin_point = '0 0 30'
 
-  num_steps = 10000
+  num_steps = 15000
   num_piso_iterations = 0
 
   dt = ${initial_dt}
@@ -306,7 +306,7 @@ initial_dt = 30
   perf_graph = true
   print_nonlinear_residuals = false
   print_linear_residuals = true
-  time_step_interval = 10
+  time_step_interval = 20
 []
 
 [Postprocessors]
