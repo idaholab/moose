@@ -14,6 +14,10 @@ where
 - $\rho_\text{ref} = \rho(p_\text{ref}, T_\text{ref})$ is the reference density, and
 - $\mathbf{g}$ is the gravity acceleration vector.
 
+!alert warning
+Note that this formulation is only exact if the density does not change between
+$\mathbf{r}_\text{ref}$ and $\mathbf{r}$.
+
 !syntax parameters /Functions/HydrostaticPressureFunction
 
 !syntax inputs /Functions/HydrostaticPressureFunction
