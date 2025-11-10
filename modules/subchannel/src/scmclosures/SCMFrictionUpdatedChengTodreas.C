@@ -41,35 +41,35 @@ Real
 SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
-  auto Re = friction_args.Re;
-  auto i_ch = friction_args.i_ch;
-  auto S = friction_args.S;
-  auto w_perim = friction_args.w_perim;
-  auto Dh_i = 4.0 * S / w_perim;
+  const auto Re = friction_args.Re;
+  const auto i_ch = friction_args.i_ch;
+  const auto S = friction_args.S;
+  const auto w_perim = friction_args.w_perim;
+  const auto Dh_i = 4.0 * S / w_perim;
   Real aL, b1L, b2L, cL;
   Real aT, b1T, b2T, cT;
   const Real & pitch = _subchannel_mesh.getPitch();
   const Real & pin_diameter = _subchannel_mesh.getPinDiameter();
   const Real & wire_lead_length = _tri_sch_mesh->getWireLeadLength();
   const Real & wire_diameter = _tri_sch_mesh->getWireDiameter();
-  auto p_over_d = pitch / pin_diameter;
-  auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+  const auto p_over_d = pitch / pin_diameter;
+  const auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   // This gap is a constant value for the whole assembly. Might want to make it
   // subchannel specific in the future if we have duct deformation.
-  auto gap = _tri_sch_mesh->getDuctToPinGap();
-  auto w_over_d = (pin_diameter + gap) / pin_diameter;
-  auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
-  auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
-  auto theta = std::acos(wire_lead_length /
-                         std::sqrt(Utility::pow<2>(wire_lead_length) +
+  const auto gap = _tri_sch_mesh->getDuctToPinGap();
+  const auto w_over_d = (pin_diameter + gap) / pin_diameter;
+  const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
+  const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
+  const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  const auto theta = std::acos(
+      wire_lead_length / std::sqrt(Utility::pow<2>(wire_lead_length) +
                                    Utility::pow<2>(libMesh::pi * (pin_diameter + wire_diameter))));
-  auto wd_t = (19.56 - 98.71 * (wire_diameter / pin_diameter) +
-               303.47 * Utility::pow<2>((wire_diameter / pin_diameter))) *
-              std::pow((wire_lead_length / pin_diameter), -0.541);
-  auto wd_l = 1.4 * wd_t;
-  auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
-  auto ws_l = ws_t;
+  const auto wd_t = (19.56 - 98.71 * (wire_diameter / pin_diameter) +
+                     303.47 * Utility::pow<2>((wire_diameter / pin_diameter))) *
+                    std::pow((wire_lead_length / pin_diameter), -0.541);
+  const auto wd_l = 1.4 * wd_t;
+  const auto ws_t = -11.0 * std::log(wire_lead_length / pin_diameter) + 19.0;
+  const auto ws_l = ws_t;
   Real pw_p = 0.0;
   Real ar = 0.0;
   Real a_p = 0.0;
@@ -229,23 +229,23 @@ Real
 SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
     const FrictionStruct & friction_args) const
 {
-  auto Re = friction_args.Re;
-  auto i_ch = friction_args.i_ch;
+  const auto Re = friction_args.Re;
+  const auto i_ch = friction_args.i_ch;
   /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
   Real aL, b1L, b2L, cL;
   Real aT, b1T, b2T, cT;
-  auto pitch = _subchannel_mesh.getPitch();
-  auto pin_diameter = _subchannel_mesh.getPinDiameter();
+  const auto pitch = _subchannel_mesh.getPitch();
+  const auto pin_diameter = _subchannel_mesh.getPinDiameter();
   // This gap is a constant value for the whole assembly. Might want to make it
   // subchannel specific in the future if we have duct deformation.
-  auto side_gap = _quad_sch_mesh->getSideGap();
-  auto w = (pin_diameter / 2.0) + (pitch / 2.0) + side_gap;
-  auto p_over_d = pitch / pin_diameter;
-  auto w_over_d = w / pin_diameter;
-  auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
-  auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-  auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
-  auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+  const auto side_gap = _quad_sch_mesh->getSideGap();
+  const auto w = (pin_diameter / 2.0) + (pitch / 2.0) + side_gap;
+  const auto p_over_d = pitch / pin_diameter;
+  const auto w_over_d = w / pin_diameter;
+  const auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
+  const auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
+  const auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  const auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
 
   // Find the coefficients of bare Pin bundle friction factor
   // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume

@@ -42,7 +42,7 @@ Real
 SCMFrictionMATRA::computeQuadLatticeFrictionFactor(const FrictionStruct & friction_args) const
 {
   auto Re = friction_args.Re;
-  Real a, b;
+  Real a(0.0), b(0.0);
   if (Re < 1)
   {
     a = 64.0;
