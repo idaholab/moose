@@ -152,7 +152,7 @@ public:
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException &){};
+  virtual void caughtMooseException(MooseException &) {};
 
   /**
    * Whether or not the loop should continue.
@@ -318,7 +318,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
     {
       // Continue if we find a libMesh degenerate map exception, but
       // just re-throw for any real error
-      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+          !strstr(e.what(), "det != 0"))
         throw; // not "throw e;" - that destroys type info!
 
       mooseException("We caught a libMesh degeneracy exception in ThreadedElementLoopBase:\n",

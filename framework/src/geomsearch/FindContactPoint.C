@@ -212,7 +212,7 @@ findContactPoint(PenetrationInfo & p_info,
       catch (std::exception & e)
       {
         // Make sure this *is* just a bad mapping Jacobian
-        if (!strstr(e.what(), "Jacobian"))
+        if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "det != 0"))
           throw;
 
         ref_point(0) -= mult * update(0);

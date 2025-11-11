@@ -1438,7 +1438,9 @@ MeshDiagnosticsGenerator::checkLocalJacobians(const std::unique_ptr<MeshBase> & 
       }
       catch (std::exception & e)
       {
-        if (!strstr(e.what(), "Jacobian"))
+        // In 2D dbg/devel modes libMesh could hit
+        // libmesh_assert_not_equal_to on a side reinit
+        if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "det != 0"))
           throw;
 
         num_bad_side_qp_jacobians++;
