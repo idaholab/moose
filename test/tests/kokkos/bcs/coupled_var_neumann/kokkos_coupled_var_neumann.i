@@ -16,7 +16,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosDiffusion
     variable = u
@@ -43,7 +43,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

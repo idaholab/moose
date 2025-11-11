@@ -1476,44 +1476,8 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_radial_heat_conduction_rhs));
     LibmeshPetscCall(VecAXPY(_hc_sys_h_rhs, 1.0, _hc_sweep_enthalpy_rhs));
 
-    if (_segregated_bool || (!_monolithic_thermal_bool))
-    {
-      // Assembly the matrix system
-      KSP ksploc;
-      PC pc;
-      Vec sol;
-      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-      LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
-      LibmeshPetscCall(KSPGetPC(ksploc, &pc));
-      LibmeshPetscCall(PCSetType(pc, PCJACOBI));
-      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-      LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "h_sys_"));
-      LibmeshPetscCall(KSPSetFromOptions(ksploc));
-      LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
-      // VecView(sol, PETSC_VIEWER_STDOUT_WORLD);
-      PetscScalar * xx;
-      LibmeshPetscCall(VecGetArray(sol, &xx));
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        auto iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto h_out = xx[iz_ind * _n_channels + i_ch];
-          if (h_out < 0)
-          {
-            mooseError(name(),
-                       " : Calculation of negative Enthalpy h_out = : ",
-                       h_out,
-                       " Axial Level= : ",
-                       iz);
-          }
-          _h_soln->set(node_out, h_out);
-        }
-      }
-      LibmeshPetscCall(KSPDestroy(&ksploc));
-      LibmeshPetscCall(VecDestroy(&sol));
-    }
+    // Use system to solve for and populate enthalpy
+    LibmeshPetscCall(this->solveAndPopulateEnthalpy(
+        _hc_sys_h_mat, _hc_sys_h_rhs, first_node, last_node, "h_sys_"));
   }
 }

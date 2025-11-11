@@ -8,9 +8,11 @@ This is the Kokkos version of [CoupledTimeDerivative](CoupledTimeDerivative.md).
 
 !listing test/tests/kokkos/kernels/coupled_time_derivative/kokkos_coupled_time_derivative_test.i start=[time_v] end=[] include-end=true
 
-!syntax parameters /KokkosKernels/KokkosCoupledTimeDerivative
+!syntax parameters /Kernels/KokkosCoupledTimeDerivative
 
-!syntax inputs /KokkosKernels/KokkosCoupledTimeDerivative
+!syntax inputs /Kernels/KokkosCoupledTimeDerivative
+
+!syntax children /Kernels/KokkosCoupledTimeDerivative
 
 !if-end!
 

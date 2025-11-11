@@ -16,6 +16,9 @@
 #include "libmesh/libmesh_exceptions.h"
 #include "libmesh/elem.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 /**
  * Base class for assembly-like calculations.
  */
@@ -149,7 +152,7 @@ public:
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException &){};
+  virtual void caughtMooseException(MooseException &) {};
 
   /**
    * Whether or not the loop should continue.
@@ -307,13 +310,20 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       post();
       resetExecPrintedSets();
     }
-    catch (libMesh::LogicError & e)
-    {
-      mooseException("We caught a libMesh error in ThreadedElementLoopBase:", e.what());
-    }
     catch (MetaPhysicL::LogicError & e)
     {
       moose::translateMetaPhysicLError(e);
+    }
+    catch (std::exception & e)
+    {
+      // Continue if we find a libMesh degenerate map exception, but
+      // just re-throw for any real error
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+          !strstr(e.what(), "det != 0"))
+        throw; // not "throw e;" - that destroys type info!
+
+      mooseException("We caught a libMesh degeneracy exception in ThreadedElementLoopBase:\n",
+                     e.what());
     }
   }
   catch (MooseException & e)

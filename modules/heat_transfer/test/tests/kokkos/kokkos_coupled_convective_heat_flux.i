@@ -28,7 +28,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosDiffusion
     variable = u
@@ -55,7 +55,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [right]
     type = KokkosCoupledConvectiveHeatFluxBC
     variable = u

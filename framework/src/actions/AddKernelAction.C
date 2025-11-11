@@ -27,14 +27,26 @@ AddKernelAction::AddKernelAction(const InputParameters & params) : MooseObjectAc
 void
 AddKernelAction::act()
 {
-  if (_current_task == "add_kernel")
-    _problem->addKernel(_type, _name, _moose_object_pars);
-  else
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_moose_object_pars.isParamValid(MooseBase::kokkos_object_param))
   {
-    if (getAllTasks().find("add_aux_bc") != getAllTasks().end())
-      mooseWarning("The [AuxBCs] block is deprecated, all AuxKernels including both block and "
-                   "boundary restricted should be added within the [AuxKernels] block");
+    if (_current_task == "add_kernel")
+      _problem->addKokkosKernel(_type, _name, _moose_object_pars);
+    else
+      _problem->addKokkosAuxKernel(_type, _name, _moose_object_pars);
+  }
+  else
+#endif
+  {
+    if (_current_task == "add_kernel")
+      _problem->addKernel(_type, _name, _moose_object_pars);
+    else
+    {
+      if (getAllTasks().find("add_aux_bc") != getAllTasks().end())
+        mooseWarning("The [AuxBCs] block is deprecated, all AuxKernels including both block and "
+                     "boundary restricted should be added within the [AuxKernels] block");
 
-    _problem->addAuxKernel(_type, _name, _moose_object_pars);
+      _problem->addAuxKernel(_type, _name, _moose_object_pars);
+    }
   }
 }

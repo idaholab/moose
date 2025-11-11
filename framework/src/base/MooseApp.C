@@ -700,8 +700,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
                  "about adding your debugger.");
 
     // Finish up the command
-    command_stream << "\""
-                   << " & ";
+    command_stream << "\"" << " & ";
     std::string command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
@@ -1712,8 +1711,19 @@ MooseApp::setupOptions()
 
 #ifdef MOOSE_KOKKOS_ENABLED
   for (auto & action : _action_warehouse.allActionBlocks())
-    if (action->isParamValid("_kokkos_action"))
+  {
+    auto object_action = std::dynamic_pointer_cast<MooseObjectAction>(action);
+    if (object_action &&
+        object_action->getObjectParams().isParamValid(MooseBase::kokkos_object_param))
+    {
+      if (!isKokkosAvailable())
+        mooseError("Attempted to add a ",
+                   object_action->getMooseObjectType(),
+                   " but no GPU was detected in the system.");
+
       _has_kokkos_objects = true;
+    }
+  }
 #endif
 
   Moose::out << std::flush;
@@ -2250,12 +2260,12 @@ MooseApp::run()
   catch (Parser::Error & err)
   {
     mooseAssert(_parser->getThrowOnError(), "Should be true");
-    throw err;
+    throw;
   }
   catch (MooseRuntimeError & err)
   {
     mooseAssert(Moose::_throw_on_error, "Should be true");
-    throw err;
+    throw;
   }
   catch (std::exception & err)
   {

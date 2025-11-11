@@ -42,7 +42,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [mat]
     type = KokkosGenericConstantMaterial
     prop_names = 'm1 m2'
@@ -50,7 +50,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [reaction]
     type = KokkosReaction
     variable = u

@@ -8,7 +8,7 @@
       type = Exodiff
       input = 'kokkos_stateful_prop_test.i'
       exodiff = 'kokkos_stateful_prop_test_current_out.e'
-      cli_args = 'KokkosKernels/heat/prop_state=\'current\'
+      cli_args = 'Kernels/heat/prop_state=\'current\'
                   Outputs/file_base=kokkos_stateful_prop_test_current_out'
       detail = 'use current state in other calculations.'
       capabilities = 'kokkos'
@@ -18,7 +18,7 @@
       type = Exodiff
       input = 'kokkos_stateful_prop_test.i'
       exodiff = 'kokkos_stateful_prop_test_old_out.e'
-      cli_args = 'KokkosKernels/heat/prop_state=\'old\'
+      cli_args = 'Kernels/heat/prop_state=\'old\'
                   Outputs/file_base=kokkos_stateful_prop_test_old_out'
       detail = 'use old state in other calculations.'
       capabilities = 'kokkos'
@@ -28,7 +28,7 @@
       type = Exodiff
       input = 'kokkos_stateful_prop_test.i'
       exodiff = 'kokkos_stateful_prop_test_older_out.e'
-      cli_args = 'KokkosKernels/heat/prop_state=\'older\'
+      cli_args = 'Kernels/heat/prop_state=\'older\'
                   Outputs/file_base=kokkos_stateful_prop_test_older_out'
       detail = 'use older state in other calculations.'
       capabilities = 'kokkos'

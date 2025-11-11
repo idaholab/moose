@@ -14,7 +14,7 @@
     [xy_data]
       type = 'Exodiff'
       input = 'kokkos_piecewise_constant.i'
-      cli_args = 'KokkosKernels/diff/coef=func_xy_data KokkosAuxKernels/coef_aux/function=func_xy_data'
+      cli_args = 'Kernels/diff/coef=func_xy_data AuxKernels/coef_aux/function=func_xy_data'
       exodiff = 'kokkos_piecewise_constant_out.e'
       capabilities = 'kokkos'
       compute_devices = 'cpu'
@@ -23,7 +23,7 @@
     [csv]
       type = 'Exodiff'
       input = 'kokkos_piecewise_constant.i'
-      cli_args = 'KokkosKernels/diff/coef=func_csv KokkosAuxKernels/coef_aux/function=func_csv'
+      cli_args = 'Kernels/diff/coef=func_csv AuxKernels/coef_aux/function=func_csv'
       exodiff = 'kokkos_piecewise_constant_out.e'
       capabilities = 'kokkos'
       compute_devices = 'cpu'
@@ -32,7 +32,7 @@
     [json]
       type = 'Exodiff'
       input = 'kokkos_piecewise_constant.i'
-      cli_args = 'KokkosKernels/diff/coef=func_json KokkosAuxKernels/coef_aux/function=func_json'
+      cli_args = 'Kernels/diff/coef=func_json AuxKernels/coef_aux/function=func_json'
       exodiff = 'kokkos_piecewise_constant_out.e'
       capabilities = 'kokkos'
       compute_devices = 'cpu'

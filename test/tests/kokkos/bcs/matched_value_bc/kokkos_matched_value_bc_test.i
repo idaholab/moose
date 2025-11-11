@@ -25,7 +25,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   active = 'diff_u diff_v'
 
   [diff_u]
@@ -39,7 +39,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   active = 'right_v left_u'
 
   [right_v]

@@ -146,11 +146,8 @@ CellCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, const StateAr
 {
   const Elem * const elem = elem_arg.elem;
 
-  try
-  {
-    return libmesh_map_find(*this, elem->id());
-  }
-  catch (libMesh::LogicError &)
+  auto it = this->find(elem->id());
+  if (it == this->end())
   {
     if (!_sub_ids.empty() && !_sub_ids.count(elem->subdomain_id()))
       mooseError("Attempted to evaluate CellCenteredMapFunctor '",
@@ -165,6 +162,8 @@ CellCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, const StateAr
                  "' with a key that does not yet exist in the map. Make sure to fill your "
                  "CellCenteredMapFunctor for all elements you will attempt to access later.");
   }
+
+  return it->second;
 }
 
 template <typename T, typename Map>

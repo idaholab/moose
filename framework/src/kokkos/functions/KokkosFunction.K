@@ -18,7 +18,8 @@ InputParameters
 FunctionBase::validParams()
 {
   InputParameters params = Moose::FunctionBase::validParams();
-  params.registerBase("KokkosFunction");
+
+  params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
 
   return params;
 }

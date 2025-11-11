@@ -19,7 +19,7 @@ See the following source codes of `KokkosCoupledForceNodalKernel` for an example
 !listing framework/src/kokkos/nodalkernels/KokkosCoupledForceNodalKernel.K id=kokkos-force-nodal-source language=cpp
          caption=The `KokkosCoupledForceNodalKernel` source file.
 
-!syntax list /KokkosNodalKernels objects=True actions=False subsystems=False
+!syntax list /NodalKernels objects=True actions=False subsystems=False
 
 !if-end!
 

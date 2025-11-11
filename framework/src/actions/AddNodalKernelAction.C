@@ -28,5 +28,10 @@ AddNodalKernelAction::AddNodalKernelAction(const InputParameters & params)
 void
 AddNodalKernelAction::act()
 {
-  _problem->addNodalKernel(_type, _name, _moose_object_pars);
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_moose_object_pars.isParamValid(MooseBase::kokkos_object_param))
+    _problem->addKokkosNodalKernel(_type, _name, _moose_object_pars);
+  else
+#endif
+    _problem->addNodalKernel(_type, _name, _moose_object_pars);
 }

@@ -63,7 +63,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [MidpointTimeIntegrator]
     type = KokkosVariableTimeIntegrationAux
     variable_to_integrate = u

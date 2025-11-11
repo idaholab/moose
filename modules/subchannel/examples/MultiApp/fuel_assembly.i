@@ -145,11 +145,14 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   implicit = false
   segregated = true
   staggered_pressure = false
-  monolithic_thermal = false
 
   # Tolerances
   P_tol = 1.0e-4
   T_tol = 1.0e-8
+
+  # Heat Transfer Correlations
+  pin_htc_correlation = 'gnielinski'
+  duct_htc_correlation = 'gnielinski'
 
   # Output
   compute_density = true

@@ -15,6 +15,9 @@
 
 #include "libmesh/quadrature.h" // _qrule
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 registerMooseObject("SolidMechanicsApp", ElementJacobianDamper);
 
 InputParameters
@@ -130,12 +133,13 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
     }
     catch (std::exception & e)
     {
-      // Allow the libmesh error/exception on negative jacobian
-      const std::string & message = e.what();
-      if (message.find("Jacobian") == std::string::npos)
-        throw e;
-      else
-        _fe_problem.setException(message);
+      // Continue if we find a libMesh degenerate map exception, but
+      // just throw for any real error
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+          !strstr(e.what(), "det != 0"))
+        throw;
+
+      _fe_problem.setException(e.what());
     }
   }
   PARALLEL_CATCH;

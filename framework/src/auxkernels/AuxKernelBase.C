@@ -62,6 +62,8 @@ AuxKernelBase::validParams()
   params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerSystemAttributeName("AuxKernel");
 
+  params.registerBase("AuxKernel");
+
   return params;
 }
 

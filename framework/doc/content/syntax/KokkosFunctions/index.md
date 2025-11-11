@@ -60,7 +60,7 @@ Kokkos imposes a restriction to have a consistent RDC configuration across the w
 The non-templated `getKokkosFunction()` code path is hypothetically functional under the assumption that the MOOSE software stack can be built with the RDC option, but this hypothetical will only become a reality after a PETSc build system rework.
 The PETSc and MOOSE team are looking into this issue, and it is expected to be resolved in the foreseeable future.
 
-!syntax list /KokkosFunctions objects=True actions=False subsystems=False
+!syntax list /Functions objects=True actions=False subsystems=False
 
 !if-end!
 

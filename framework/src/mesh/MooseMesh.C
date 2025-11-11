@@ -37,9 +37,7 @@
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/fe_base.h"
 #include "libmesh/fe_interface.h"
-#include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/mesh_communication.h"
-#include "libmesh/mesh_inserter_iterator.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_elem.h"
@@ -3274,7 +3272,7 @@ namespace // Anonymous namespace for helpers
 {
 // A class for templated methods that expect output iterator
 // arguments, which adds objects to the Mesh.
-// Although any mesh_inserter_iterator can add any object, we
+// Although extra_ghost_elem_inserter can add any object, we
 // template it around object type so that type inference and
 // iterator_traits will work.
 // This object specifically is used to insert extra ghost elems into the mesh

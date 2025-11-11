@@ -47,7 +47,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [copy_u]
     type = KokkosCopyValueAux
     variable = u_copy

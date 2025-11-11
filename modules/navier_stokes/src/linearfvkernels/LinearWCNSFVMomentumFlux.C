@@ -252,8 +252,8 @@ LinearWCNSFVMomentumFlux::computeInternalStressRHSContribution()
           trace_neighbor += w_grad_neighbor(2);
         }
       }
-      deviatoric_vector_elem(_index) -= 2 / 3 * trace_elem;
-      deviatoric_vector_neighbor(_index) -= 2 / 3 * trace_neighbor;
+      deviatoric_vector_elem(_index) -= 2. / 3 * trace_elem;
+      deviatoric_vector_neighbor(_index) -= 2. / 3 * trace_neighbor;
 
       _stress_rhs_contribution += _mu(face_arg, state_arg) *
                                   (interp_coeffs.first * deviatoric_vector_elem +
@@ -346,7 +346,7 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
       }
     }
 
-    frace_grad_approx(_index) -= 2 / 3 * trace_elem;
+    frace_grad_approx(_index) -= 2. / 3 * trace_elem;
 
     // We support internal boundaries too so we have to make sure the normal points always outward
     grad_contrib += _mu(face_arg, state_arg) * frace_grad_approx * _boundary_normal_factor *

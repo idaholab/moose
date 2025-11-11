@@ -17,7 +17,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [heat]
     type = KokkosMatDiffusionTest
     variable = u
@@ -31,7 +31,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [prop1_output_init]
     type = KokkosMaterialRealAux
     variable = prop1
@@ -45,7 +45,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [bottom]
     type = KokkosDirichletBC
     variable = u
@@ -61,7 +61,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [stateful]
     type = KokkosStatefulTest
     prop_names = thermal_conductivity

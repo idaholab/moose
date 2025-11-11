@@ -10,14 +10,14 @@
   []
 []
 
-[KokkosFunctions]
+[Functions]
   [constant]
     type = KokkosConstantFunction
     value = 2
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosFuncCoefDiffusion
     variable = u
@@ -29,7 +29,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

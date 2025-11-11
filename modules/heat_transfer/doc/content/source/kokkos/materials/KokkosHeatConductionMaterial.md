@@ -11,9 +11,11 @@ Kokkos-MOOSE does not support functions yet. Therefore, [!param](/Materials/Heat
 
 !listing heat_transfer/test/tests/kokkos/kokkos_conduction.i start=[conduction] end=[] include-end=true
 
-!syntax parameters /KokkosMaterials/KokkosHeatConductionMaterial
+!syntax parameters /Materials/KokkosHeatConductionMaterial
 
-!syntax inputs /KokkosMaterials/KokkosHeatConductionMaterial
+!syntax inputs /Materials/KokkosHeatConductionMaterial
+
+!syntax children /Materials/KokkosHeatConductionMaterial
 
 !if-end!
 

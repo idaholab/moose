@@ -13,6 +13,9 @@
 
 #include "libmesh/elem.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 using namespace libMesh;
 
 ComputeJacobianForScalingThread::ComputeJacobianForScalingThread(FEProblemBase & fe_problem,
@@ -65,13 +68,21 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
 
       post();
     }
-    catch (libMesh::LogicError & e)
-    {
-      mooseException("We caught a libMesh error in ComputeJacobianForScalingThread: ", e.what());
-    }
     catch (MetaPhysicL::LogicError & e)
     {
       moose::translateMetaPhysicLError(e);
+    }
+    catch (std::exception & e)
+    {
+      // Continue if we find a libMesh degenerate map exception, but
+      // just re-throw for any real error
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+          !strstr(e.what(), "det != 0"))
+        throw;
+
+      mooseException(
+          "We caught a libMesh degeneracy exception in ComputeJacobianForScalingThread:\n",
+          e.what());
     }
   }
   catch (MooseException & e)

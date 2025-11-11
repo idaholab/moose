@@ -22,7 +22,7 @@
   []
 []
 
-[KokkosFunctions]
+[Functions]
   [func_x_y]
     type = KokkosPiecewiseConstant
     x = '0.0 0.5'
@@ -45,7 +45,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosFuncCoefDiffusion
     variable = u
@@ -57,7 +57,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [coef_aux]
     type = KokkosFunctionAux
     variable = coef
@@ -65,7 +65,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

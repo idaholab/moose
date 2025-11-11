@@ -33,7 +33,7 @@ KernelBase::validParams()
                                 [](const InputParameters &, InputParameters & rm_params)
                                 { rm_params.set<unsigned short>("layers") = 0; });
 
-  params.registerBase("KokkosKernel");
+  params.registerBase("Kernel");
 
   return params;
 }

@@ -34,10 +34,10 @@ MaterialOutputAction::validParams()
   InputParameters params = Action::validParams();
   params.addClassDescription("Outputs material properties to various Outputs objects, based on the "
                              "parameters set in each Material");
-  /// A flag to tell this action whether or not to print the unsupported properties
-  /// Note: A derived class can set this to false, override materialOutput and output
-  ///       a particular property that is not supported by this class.
-  params.addPrivateParam("print_unsupported_prop_names", true);
+  params.addParam<bool>(
+      "print_unsupported_prop_names",
+      true,
+      "Flag to tell this action whether or not to print the unsupported properties.");
   params.addParam<bool>("print_automatic_aux_variable_creation",
                         true,
                         "Flag to print list of aux variables created for automatic output by "
@@ -401,7 +401,6 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
 
   // Handle the case the material property is of a variable input-defined size
   bool variable_size = false;
-  std::string variable_size_symbols;
   if (index_symbols == "variable_size")
   {
     variable_size = true;
@@ -422,9 +421,6 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
                            "the size must be known during the simulation setup phase."));
       return {};
     }
-    // Use indices as symbols
-    for (const auto i : make_range(size_inner))
-      variable_size_symbols += std::to_string(i);
   }
 
   std::vector<std::string> names;
@@ -436,9 +432,11 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
         for (i[0] = 0; i[0] < (dim < 1 ? 1 : size_inner); ++i[0])
         {
           std::string var_name = var_name_base;
-          const auto & symbols = variable_size ? variable_size_symbols : index_symbols;
           for (const auto j : make_range(dim))
-            var_name += Moose::stringify(symbols[i[j]]);
+            if (variable_size)
+              var_name += Moose::stringify(i[j]);
+            else
+              var_name += Moose::stringify(index_symbols[i[j]]);
 
           names.push_back(var_name);
 
@@ -447,7 +445,7 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
             auto params = getParams(kernel_name, property_name, var_name, material);
             for (const auto j : make_range(dim))
               params.template set<unsigned int>(param_names[j]) = i[j];
-            _problem->addAuxKernel(kernel_name, material.name() + var_name, params);
+            _problem->addAuxKernel(kernel_name, material.name() + "_" + var_name, params);
           }
         }
   return names;

@@ -31,6 +31,9 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 using namespace libMesh;
 
 // AuxiliarySystem ////////
@@ -659,7 +662,7 @@ AuxiliarySystem::getDependObjects()
     }
   }
 
-  // Nodal ElementalAuxKernels
+  // Elemental KokkosAuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
         _kokkos_elemental_aux_storage.getActiveObjects();
@@ -793,12 +796,6 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
                 _fe_problem, mortar_nodal_warehouse, bnd_id, index);
             Threads::parallel_reduce(bnd_nodes, mnabt);
           }
-          catch (libMesh::LogicError & e)
-          {
-            _fe_problem.setException("The following libMesh::LogicError was raised during mortar "
-                                     "nodal Auxiliary variable computation:\n" +
-                                     std::string(e.what()));
-          }
           catch (MooseException & e)
           {
             _fe_problem.setException("The following MooseException was raised during mortar nodal "
@@ -808,6 +805,18 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
           catch (MetaPhysicL::LogicError & e)
           {
             moose::translateMetaPhysicLError(e);
+          }
+          catch (std::exception & e)
+          {
+            // Continue if we find a libMesh degenerate map exception, but
+            // just re-throw for any real error
+            if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular") &&
+                !strstr(e.what(), "det != 0"))
+              throw;
+
+            _fe_problem.setException("We caught a libMesh degeneracy exception during mortar "
+                                     "nodal Auxiliary variable computation:\n" +
+                                     std::string(e.what()));
           }
         }
         PARALLEL_CATCH;

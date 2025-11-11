@@ -12,7 +12,7 @@
   [invalid_type]
     type = 'RunException'
     input = 'kokkos_concrete_function.i'
-    cli_args = 'KokkosKernels/diff/coef=piecewise_constant'
+    cli_args = 'Kernels/diff/coef=piecewise_constant'
     expect_err = 'Kokkos function \'piecewise_constant\' is not of type \'KokkosConstantFunction\''
     requirement = 'The Kokkos function system shall error when a provided function is not of the requested concrete type.'
     capabilities = 'kokkos'

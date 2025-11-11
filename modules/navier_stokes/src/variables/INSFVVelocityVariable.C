@@ -27,8 +27,10 @@
 #include "libmesh/dense_matrix.h"
 #include "libmesh/libmesh_common.h"
 
-#include <vector>
+// C++
+#include <cstring> // for "Jacobian" exception test
 #include <utility>
+#include <vector>
 
 namespace Moose
 {
@@ -410,8 +412,13 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem,
     else
       return grad;
   }
-  catch (libMesh::LogicError &)
+  catch (std::exception & e)
   {
+    // Don't ignore any *real* errors; we only handle matrix
+    // singularity here
+    if (!strstr(e.what(), "singular"))
+      throw;
+
     // Retry without two-term
     mooseAssert(_two_term_boundary_expansion,
                 "I believe we should only get singular systems when two-term boundary expansion is "

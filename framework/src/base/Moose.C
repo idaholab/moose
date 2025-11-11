@@ -126,35 +126,20 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
   appendMooseObjectTask  ("add_kernel",                   ArrayKernel);
-#ifdef MOOSE_KOKKOS_ENABLED
-  appendMooseObjectTask  ("add_kernel",                   KokkosKernel);
-#endif
 
   registerMooseObjectTask("add_variable",                 MooseVariableBase,         false);
   registerMooseObjectTask("add_aux_variable",             MooseVariableBase,         false);
   registerMooseObjectTask("add_elemental_field_variable", MooseVariableBase,         false);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,               false);
-#ifdef MOOSE_KOKKOS_ENABLED
-  appendMooseObjectTask  ("add_nodal_kernel",             KokkosNodalKernel);
-#endif
 
   registerMooseObjectTask("add_functor_material",         FunctorMaterial,           false);
   registerMooseObjectTask("add_material",                 MaterialBase,              false);
   appendDeprecatedMooseObjectTask("add_material",         FunctorMaterial);
-#ifdef MOOSE_KOKKOS_ENABLED
-  appendMooseObjectTask  ("add_material",                 KokkosMaterial);
-#endif
 
   registerMooseObjectTask("add_bc",                       BoundaryCondition,         false);
-#ifdef MOOSE_KOKKOS_ENABLED
-  appendMooseObjectTask  ("add_bc",                       KokkosBoundaryCondition);
-#endif
 
   registerMooseObjectTask("add_function",                 Function,                  false);
-#ifdef MOOSE_KOKKOS_ENABLED
-  appendMooseObjectTask  ("add_function",                 KokkosFunction);
-#endif
 
   registerMooseObjectTask("add_distribution",             Distribution,              false);
   registerMooseObjectTask("add_sampler",                  Sampler,                   false);
@@ -162,9 +147,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,                 false);
   appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
   appendMooseObjectTask  ("add_aux_kernel",               ArrayAuxKernel);
-#ifdef MOOSE_KOKKOS_ENABLED
-  appendMooseObjectTask  ("add_aux_kernel",               KokkosAuxKernel); 
-#endif
+
   registerMooseObjectTask("add_bound",                    Bounds,                    false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,              false);
@@ -563,14 +546,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntaxTask("AddBCAction", "BCs/*", "add_bc");
 
-#ifdef MOOSE_KOKKOS_ENABLED
-  registerSyntaxTask("AddKokkosKernelAction", "KokkosKernels/*", "add_kernel");
-  registerSyntaxTask("AddKokkosNodalKernelAction", "KokkosNodalKernels/*", "add_nodal_kernel");
-  registerSyntaxTask("AddKokkosKernelAction", "KokkosAuxKernels/*", "add_aux_kernel");
-
-  registerSyntaxTask("AddKokkosBCAction", "KokkosBCs/*", "add_bc");
-#endif
-
   registerSyntax("CreateProblemAction", "Problem");
   registerSyntax("DynamicObjectRegistrationAction", "Problem");
 
@@ -588,11 +563,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddFunctionAction", "Functions/*");
   syntax.registerSyntaxType("Functions/*", "FunctionName");
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  registerSyntax("AddKokkosFunctionAction", "KokkosFunctions/*");
-  syntax.registerSyntaxType("KokkosFunctions/*", "FunctionName");
-#endif
 
   registerSyntax("AddMeshDivisionAction", "MeshDivisions/*");
   syntax.registerSyntaxType("MeshDivisions/*", "MeshDivisionName");
@@ -633,11 +603,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("AddMaterialAction", "Materials/*");
   syntax.registerSyntaxType("Materials/*", "MaterialName");
-
-#ifdef MOOSE_KOKKOS_ENABLED
-  registerSyntax("AddKokkosMaterialAction", "KokkosMaterials/*");
-  syntax.registerSyntaxType("KokkosMaterials/*", "MaterialName");
-#endif
 
   registerSyntax("AddFunctorMaterialAction", "FunctorMaterials/*");
   syntax.registerSyntaxType("FunctorMaterials/*", "MaterialName");

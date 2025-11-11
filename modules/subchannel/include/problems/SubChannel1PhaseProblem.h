@@ -49,6 +49,33 @@ protected:
 
   /// Returns friction factor
   virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
+
+  struct NusseltStruct
+  {
+    Real Re, Pr;
+    unsigned int i_pin, iz, i_ch;
+    MooseEnum htc_correlation;
+    // parameterized constructor
+    NusseltStruct(Real Re_,
+                  Real Pr_,
+                  unsigned int i_pin_,
+                  unsigned int iz_,
+                  unsigned int i_ch_,
+                  const MooseEnum & htc_corr)
+      : Re(Re_), Pr(Pr_), i_pin(i_pin_), iz(iz_), i_ch(i_ch_), htc_correlation(htc_corr)
+    {
+    }
+  };
+
+  /// The correlation used for computing the heat transfer correlation near the pin
+  const MooseEnum _pin_htc_correlation;
+  /// The correlation used for computing the heat transfer correlation near the duct
+  const MooseEnum _duct_htc_correlation;
+  NusseltStruct _nusselt_args;
+
+  /// Function that computes the Nusselt number given a heat exchange correlation
+  Real computeNusseltNumber(const NusseltStruct & nusselt_args);
+
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -110,6 +137,22 @@ protected:
         mooseError(name(), ": Invalid gravity direction: expected counter_flow, co_flow, or none");
     }
   }
+
+  /**
+   * Solve a linear system (A * x = rhs) with a simple PCJACOBI KSP and populate the
+   * enthalpy solution into _h_soln for nodes [first_node, last_node].
+   *
+   * Uses member tolerances (_rtol, _atol, _dtol, _maxit), mesh (_subchannel_mesh),
+   * channel count (_n_channels), and error/solution handles (mooseError, _h_soln).
+   *
+   * @param A            PETSc matrix (operators)
+   * @param rhs          PETSc vector (right-hand side)
+   * @param first_node   inclusive start axial node index
+   * @param last_node    inclusive end axial node index
+   * @param ksp_prefix   options prefix for KSP (e.g. "h_sys_"), may be nullptr
+   */
+  PetscErrorCode solveAndPopulateEnthalpy(
+      Mat A, Vec rhs, unsigned int first_node, unsigned int last_node, const char * ksp_prefix);
 
   PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
@@ -174,8 +217,6 @@ protected:
   const bool _staggered_pressure_bool;
   /// Segregated solve
   const bool _segregated_bool;
-  /// Thermal monolithic bool
-  const bool _monolithic_thermal_bool;
   /// Boolean to printout information related to subchannel solve
   const bool _verbose_subchannel;
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin

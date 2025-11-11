@@ -37,5 +37,11 @@ AddFunctionAction::act()
         "consumer object 'function = x'. Well, MOOSE supports direct construction of parsed "
         "functions from 'FunctionName' parameters, so is this consumer going to end up using the "
         "functional form 'x' or 'xy'? It is undefined behavior.");
-  _problem->addFunction(_type, _name, _moose_object_pars);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_moose_object_pars.isParamValid(MooseBase::kokkos_object_param))
+    _problem->addKokkosFunction(_type, _name, _moose_object_pars);
+  else
+#endif
+    _problem->addFunction(_type, _name, _moose_object_pars);
 }

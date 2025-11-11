@@ -19,7 +19,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosDiffusion
     variable = u
@@ -30,7 +30,7 @@
   []
 []
 
-[KokkosNodalKernels]
+[NodalKernels]
   [source]
     type = KokkosConstantRate
     variable = u
