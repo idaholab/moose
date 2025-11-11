@@ -1,11 +1,20 @@
 [Tests]
-  [./test]
+  [test]
     type = 'RunException'
     input = 'node_list_from_side_list.i'
     expect_err = 'the following node sets \(ids\) do not exist on the mesh: left \(4\)'
-
     requirement = 'The system shall issue a diagnostic when a referenced node set does not exist in the mesh'
     design = 'MooseMesh.md'
     issues = '#13509 #6985 #6987'
-  [../]
+  []
+
+  [displace_node_list]
+    type = 'Exodiff'
+    input = 'displace_node_list.i'
+    cli_args = '--mesh-only'
+    exodiff = 'displace_node_list_in.e'
+    recover = false
+    issues = '#30385'
+    requirement = 'The system shall allow displacing rather than merging into a nodeset whose id conflicts with a sideset'
+  []
 []
