@@ -42,7 +42,7 @@ initial_dt = 20
     type = FileMeshGenerator
     file = zach-mesh_in.e
   []
-  # uniform_refine = 1
+  uniform_refine = 1
 []
 
 [Problem]
@@ -312,7 +312,7 @@ initial_dt = 20
   print_nonlinear_residuals = false
   print_linear_residuals = true
   time_step_interval = 20
-  # file_base = once-refined
+  file_base = once-refined
 []
 
 [Postprocessors]
