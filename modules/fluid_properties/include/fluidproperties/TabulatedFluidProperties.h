@@ -262,7 +262,14 @@ protected:
   void missingVEInterpolationError(const std::string & function_name) const;
 
   // Utility to forward errors related to fluid properties methods not implemented
-  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine) const;
+  [[noreturn]] void TabulationNotImplementedError(const std::string & desired_routine) const;
+  /// Utility to forward errors related to fluid properties needing more data for their computation
+  /// This should generally be used as an 'else' condition to if (_interpolate_property) / else if (_fp)
+  [[noreturn]] void NeedTabulationOrFPError(const std::string & desired_routine,
+                                            const std::string & needed_property) const;
+  /// Utility to forward errors related to properties being requested for tabulation, but no tabulation is present
+  /// This should generally be used as an 'else' condition to if (_interpolate_needed_property)
+  [[noreturn]] void NeedTabulationError(const std::string & needed_property) const;
 
   /// File name of input tabulated data file
   FileName _file_name_in;
