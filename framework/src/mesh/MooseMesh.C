@@ -134,6 +134,11 @@ MooseMesh::validParams()
       "construct_node_list_from_side_list",
       true,
       "Whether or not to generate nodesets from the sidesets (currently often required).");
+  params.addParam<bool>(
+      "displace_node_list_by_side_list",
+      false,
+      "Whether to renumber existing nodesets with ids matching sidesets and "
+      "without names matching sidesets, rather than to merge them with the sideset.");
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   params.addParam<unsigned int>("ghosting_patch_size",
@@ -215,7 +220,8 @@ MooseMesh::validParams()
   params.addParamNamesToGroup("add_subdomain_ids add_subdomain_names add_sideset_ids "
                               "add_sideset_names add_nodeset_ids add_nodeset_names",
                               "Pre-declaration of future mesh sub-entities");
-  params.addParamNamesToGroup("construct_node_list_from_side_list build_all_side_lowerd_mesh",
+  params.addParamNamesToGroup("construct_node_list_from_side_list build_all_side_lowerd_mesh "
+                              "displace_node_list_by_side_list",
                               "Automatic definition of mesh element sides entities");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
@@ -252,6 +258,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _has_lower_d(false),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
+    _displace_node_list_by_side_list(getParam<bool>("displace_node_list_by_side_list")),
     _need_delete(false),
     _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true),
@@ -320,6 +327,7 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _has_lower_d(other_mesh._has_lower_d),
     _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
+    _displace_node_list_by_side_list(other_mesh._displace_node_list_by_side_list),
     _need_delete(other_mesh._need_delete),
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
@@ -3020,8 +3028,38 @@ MooseMesh::getBoundaryIDs() const
 void
 MooseMesh::buildNodeListFromSideList()
 {
+  auto & boundary_info = getMesh().get_boundary_info();
+
   if (_construct_node_list_from_side_list)
-    getMesh().get_boundary_info().build_node_list_from_side_list();
+  {
+    if (_displace_node_list_by_side_list)
+    {
+      // Don't want to use auto here - the rbegin trick relies on a
+      // sorted set and we want the compiler to scream if libMesh ever
+      // switches type
+      const std::set<boundary_id_type> & node_bcids = boundary_info.get_node_boundary_ids();
+      const std::set<boundary_id_type> & side_bcids = boundary_info.get_side_boundary_ids();
+
+      boundary_id_type next_bcid = 0;
+      if (!node_bcids.empty())
+        next_bcid = std::max(next_bcid, cast_int<boundary_id_type>(*node_bcids.rbegin() + 1));
+      if (!side_bcids.empty())
+        next_bcid = std::max(next_bcid, cast_int<boundary_id_type>(*side_bcids.rbegin() + 1));
+
+      // If any side bcid is already a node bcid with a different name,
+      // that's a different boundary condition that we need to reassign
+      // rather than overwrite or merge to.
+      for (auto bcid : side_bcids)
+        if (node_bcids.count(bcid) &&
+            boundary_info.get_sideset_name(bcid) != boundary_info.get_nodeset_name(bcid))
+        {
+          boundary_info.renumber_node_id(bcid, next_bcid++);
+          boundary_info.nodeset_name(bcid) = boundary_info.get_sideset_name(bcid);
+        }
+    }
+
+    boundary_info.build_node_list_from_side_list();
+  }
 }
 
 std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
