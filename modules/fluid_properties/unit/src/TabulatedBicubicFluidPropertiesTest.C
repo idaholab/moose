@@ -887,17 +887,17 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, generateTabulatedData)
   Real p = 1.5e6;
   Real T = 450.0;
 
-  // Generate the tabulated data
-  const_cast<TabulatedBicubicFluidProperties *>(_tab_gen_fp)->initialSetup();
+  // Generate the tabulated data from the CO2 fluid properties
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_pT_from_fp_gen)->initialSetup();
 
-  REL_TEST(_tab_gen_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->mu_from_p_T(p, T), _co2_fp->mu_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->k_from_p_T(p, T), _co2_fp->k_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
-  REL_TEST(_tab_gen_fp->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->mu_from_p_T(p, T), _co2_fp->mu_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->k_from_p_T(p, T), _co2_fp->k_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->cp_from_p_T(p, T), _co2_fp->cp_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->cv_from_p_T(p, T), _co2_fp->cv_from_p_T(p, T), 1.0e-4);
+  REL_TEST(_tab_pT_from_fp_gen->s_from_p_T(p, T), _co2_fp->s_from_p_T(p, T), 1.0e-4);
 }
 
 // Test that all fluid properties are properly passed back to the given user object

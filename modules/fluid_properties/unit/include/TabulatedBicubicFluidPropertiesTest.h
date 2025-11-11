@@ -53,7 +53,7 @@ protected:
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_fp_ve", tab_uo_ve_params);
     _tab_ve_from_pT = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp_ve");
 
-    // Tabulation  in (p, T) built from another FluidProperties, specifically for testing generation
+    // Tabulation in (p, T) built from another FluidProperties, specifically for testing generation
     InputParameters tab_gen_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
     tab_gen_uo_params.set<UserObjectName>("fp") = "co2_fp";
     tab_gen_uo_params.set<Real>("temperature_min") = 400;
@@ -63,8 +63,10 @@ protected:
     tab_gen_uo_params.set<unsigned int>("num_T") = 6;
     tab_gen_uo_params.set<unsigned int>("num_p") = 6;
     tab_gen_uo_params.set<MultiMooseEnum>("interpolated_properties") = properties;
-    _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_gen_fp", tab_gen_uo_params);
-    _tab_gen_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_gen_fp");
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "tab_pT_from_fp_gen", tab_gen_uo_params);
+    _tab_pT_from_fp_gen =
+        &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_pT_from_fp_gen");
 
     // Tabulation  in (v, e) built from another FluidProperties
     InputParameters tab_direct_ve_params =
@@ -81,8 +83,6 @@ protected:
     // set newton parameters for inversion
     tab_direct_ve_params.set<Real>("T_initial_guess") = 450;
     tab_direct_ve_params.set<Real>("p_initial_guess") = 1.5e6;
-    // tab_direct_ve_params.set<Real>("tolerance") = 1e-6;
-    tab_direct_ve_params.set<unsigned int>("max_newton_its") = 300;
     MultiMooseEnum properties_ve(
         "density enthalpy viscosity k c cv cp entropy pressure temperature",
         "density enthalpy viscosity k c cv cp entropy pressure temperature");
@@ -138,7 +138,7 @@ protected:
   // For testing values
   const TabulatedBicubicFluidProperties * _tab_pT_from_fp;
   const TabulatedBicubicFluidProperties * _tab_ve_from_pT;
-  const TabulatedBicubicFluidProperties * _tab_gen_fp;
+  const TabulatedBicubicFluidProperties * _tab_pT_from_fp_gen;
   const TabulatedBicubicFluidProperties * _tab_ve_from_fp;
 
   // These properties are for testing errors and warnings
