@@ -12,7 +12,7 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds contributions from a external source term discretized using the finite volume
+ * Kernel that adds contributions for the P1 model radiation source discretized using the finite volume
  * method to a linear system.
  */
 class LinearFVP1RadiationSourceSink : public LinearFVElementalKernel

@@ -12,8 +12,8 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Class implementing a Robin boundary condition for linear finite
- * volume variables. This is only applicable for advection-diffusion problems.
+ * Class implementing a Marshak boundary condition for P1 radiation model in
+ * linear finite volume variables. This is only applicable for advection-diffusion problems.
  */
 class LinearFVP1RadiationMarshakBC : public LinearFVAdvectionDiffusionBC
 {
@@ -39,10 +39,10 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  /// Functor giving the alpha coefficient (multiplying normal gradient)
+  /// Functor giving the wall temperature
   const Moose::Functor<Real> & _temperature_radiation;
-  /// Functor giving the beta coefficient (multiplying value)
+  /// Functor giving the P1 model diffusion coefficient
   const Moose::Functor<Real> & _coeff_diffusion;
-  /// Functor giving the gamma coefficient (on right hand side, treated explicitly)
+  /// Functor giving the wall emmisivity
   const Real & _eps_boundary;
 };
