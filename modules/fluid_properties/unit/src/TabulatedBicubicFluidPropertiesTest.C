@@ -143,12 +143,26 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFile)
   REL_TEST(dmu_dp, dmuc_dp, 1.0e-3);
   REL_TEST(dmu_dT, dmuc_dT, 1.0e-3);
 
+  Real k, dk_dp, dk_dT, kc, dkc_dp, dkc_dT;
+  _tab_pT_from_fp->k_from_p_T(p, T, k, dk_dp, dk_dT);
+  _co2_fp->k_from_p_T(p, T, kc, dkc_dp, dkc_dT);
+  REL_TEST(k, kc, 1.0e-4);
+  REL_TEST(dk_dp, dkc_dp, 1.0e-3);
+  REL_TEST(dk_dT, dkc_dT, 1.0e-3);
+
   Real e, de_dp, de_dT, ec, dec_dp, dec_dT;
   _tab_pT_from_fp->e_from_p_T(p, T, e, de_dp, de_dT);
   _co2_fp->e_from_p_T(p, T, ec, dec_dp, dec_dT);
   REL_TEST(e, ec, 1.0e-4);
   REL_TEST(de_dp, dec_dp, 1.0e-3);
   REL_TEST(de_dT, dec_dT, 1.0e-3);
+
+  Real s, ds_dp, ds_dT, sc, dsc_dp, dsc_dT;
+  _tab_pT_from_fp->s_from_p_T(p, T, s, ds_dp, ds_dT);
+  _co2_fp->s_from_p_T(p, T, sc, dsc_dp, dsc_dT);
+  REL_TEST(s, sc, 1.0e-4);
+  REL_TEST(ds_dp, dsc_dp, 1.0e-3);
+  REL_TEST(ds_dT, dsc_dT, 1.0e-3);
 }
 
 // Test tabulated fluid properties read from file including comments
@@ -197,6 +211,16 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     Real k1 = _tab_ve_from_pT->k_from_p_T(p, T);
     Real k2 = _tab_ve_from_pT->k_from_v_e(v, e);
     REL_TEST(k1, k2, 0.001);
+
+    // enthalpy
+    Real h1 = _tab_ve_from_pT->h_from_p_T(p, T);
+    Real h2 = _tab_ve_from_pT->h_from_v_e(v, e);
+    REL_TEST(h1, h2, 0.001);
+
+    // entropy
+    Real s1 = _tab_ve_from_pT->s_from_p_T(p, T);
+    Real s2 = _tab_ve_from_pT->s_from_v_e(v, e);
+    REL_TEST(s1, s2, 0.001);
   }
 
   // check computation of fluid props from p, s
@@ -359,6 +383,11 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     _tab_ve_from_pT->p_from_v_e(v, e, pp, dp_dv, dp_de);
     REL_TEST(p_ad.derivatives()[0], dp_dv, 0.0001);
     REL_TEST(p_ad.derivatives()[1], dp_de, 0.0001);
+
+    ADReal ad_pp, ad_dp_dv, ad_dp_de;
+    _tab_ve_from_pT->p_from_v_e(v_ad, e_ad, ad_pp, ad_dp_dv, ad_dp_de);
+    REL_TEST(p_ad.derivatives()[0], ad_dp_dv.value(), 0.0001);
+    REL_TEST(p_ad.derivatives()[1], ad_dp_de.value(), 0.0001);
   }
 
   // AD T_from_v_e
@@ -382,6 +411,11 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     _tab_ve_from_pT->T_from_v_e(v, e, TT, dT_dv, dT_de);
     REL_TEST(T_ad.derivatives()[0], dT_dv, 0.0001);
     REL_TEST(T_ad.derivatives()[1], dT_de, 0.0001);
+
+    ADReal ad_TT, ad_dT_dv, ad_dT_de;
+    _tab_ve_from_pT->T_from_v_e(v_ad, e_ad, ad_TT, ad_dT_dv, ad_dT_de);
+    REL_TEST(T_ad.derivatives()[0], ad_dT_dv.value(), 0.0001);
+    REL_TEST(T_ad.derivatives()[1], ad_dT_de.value(), 0.0001);
   }
 
   // cannot test AD c_from_v_e because co2 props do not
@@ -409,6 +443,32 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
     Real dT_dh = (TT_2 - T) / h / pert;
     REL_TEST(T_ad.derivatives()[0], dT_dp, 0.0001);
     REL_TEST(T_ad.derivatives()[1], dT_dh, 0.0001);
+  }
+
+  // AD rho_from_p_T (computed through (v,e) tabulations)
+  {
+    DNDerivativeType dpdx;
+    DNDerivativeType dTdx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dpdx, 0, 1);
+    Moose::derivInsert(dpdx, 1, 0);
+    Moose::derivInsert(dTdx, 0, 0);
+    Moose::derivInsert(dTdx, 1, 1);
+
+    ADReal p_ad(p, dpdx);
+    ADReal T_ad(T, dTdx);
+    ADReal rho_ad = _tab_ve_from_pT->rho_from_p_T(p_ad, T_ad);
+
+    Real rho, drho_dp, drho_dT;
+    _tab_ve_from_pT->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+    REL_TEST(rho_ad.derivatives()[0], drho_dp, 0.0001);
+    REL_TEST(rho_ad.derivatives()[1], drho_dT, 0.0001);
+
+    ADReal ad_rho, ad_drho_dp, ad_drho_dT;
+    _tab_ve_from_pT->rho_from_p_T(p_ad, T_ad, ad_rho, ad_drho_dp, ad_drho_dT);
+    REL_TEST(rho_ad.derivatives()[0], ad_drho_dp.value(), 0.0001);
+    REL_TEST(rho_ad.derivatives()[1], ad_drho_dT.value(), 0.0001);
   }
 }
 
