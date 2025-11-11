@@ -144,10 +144,10 @@ private:
 #ifdef MOOSE_KOKKOS_ENABLED
   /// Helper function to retrieve a Kokkos function
   const Moose::FunctionBase * getKokkosFunctionByNameHelper(const FunctionName & name) const;
-#endif
 
-  /// The object
+  /// Reference to the object
   const MooseObject & _fni_object;
+#endif
 
   /// Parameters of the object with this interface
   const InputParameters & _fni_params;
