@@ -1644,6 +1644,31 @@ TabulatedFluidProperties::s_from_v_e(Real v, Real e) const
     NeedTabulationOrFPError("s_from_v_e", "entropy");
 }
 
+void
+TabulatedFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
+{
+  if (_interpolate_entropy && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
+  checkInputVariablesVE(v, e);
+
+  if (_create_direct_ve_interpolations && _interpolate_entropy)
+    _property_ve_ipol[_entropy_idx]->sampleValueAndDerivatives(v, e, s, ds_dv, ds_de);
+  else if (_construct_pT_from_ve)
+  {
+    Real p, T, dT_dv, dT_de, dp_dv, dp_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real ds_dp, ds_dT;
+    s_from_p_T(p, T, s, ds_dp, ds_dT);
+    ds_dv = ds_dp * dp_dv + ds_dT * dT_dv;
+    ds_dv = ds_dp * dp_de + ds_dT * dT_de;
+  }
+  else if (_fp)
+    _fp->s_from_v_e(v, e, s, ds_dv, ds_de);
+  else
+    NeedTabulationOrFPError("s_from_v_e", "entropy");
+}
+
 Real
 TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
 {

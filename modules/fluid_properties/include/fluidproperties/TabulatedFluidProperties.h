@@ -174,6 +174,7 @@ public:
   virtual Real T_from_p_s(Real p, Real s) const;
   virtual void T_from_p_s(Real p, Real s, Real & T, Real & dT_dp, Real & dT_ds) const;
   virtual Real s_from_v_e(Real v, Real e) const override;
+  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
   virtual void
   s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
@@ -261,7 +262,7 @@ protected:
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;
 
-  // Utility to forward errors related to fluid properties methods not implemented
+  /// Utility to forward errors related to fluid properties methods not implemented
   [[noreturn]] void TabulationNotImplementedError(const std::string & desired_routine) const;
   /// Utility to forward errors related to fluid properties needing more data for their computation
   /// This should generally be used as an 'else' condition to if (_interpolate_property) / else if (_fp)
