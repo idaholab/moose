@@ -33,10 +33,11 @@ TabulatedFluidProperties::validParams()
                         true,
                         "Whether to load (from file) or create (from a fluid property object) "
                         "properties interpolations from pressure and temperature");
-  params.addParam<bool>("create_ve_interpolations",
-                        false,
-                        "Whether to load (from file) or create (from a fluid property object) "
-                        "properties interpolations from pressure and temperature");
+  params.addParam<bool>(
+      "create_ve_interpolations",
+      false,
+      "Whether to load (from file) or create (from a fluid property object) "
+      "properties interpolations from specific volume and specific internal energy");
 
   // Input / output
   params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
@@ -808,6 +809,8 @@ TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
       SinglePhaseFluidProperties::v_e_from_p_T(pressure, temperature, v, e);
       return _property_ve_ipol[_enthalpy_idx]->sample(v, e);
     }
+    else
+      NeedTabulationError("enthalpy");
   }
   else
   {
@@ -833,6 +836,8 @@ TabulatedFluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & tem
       SinglePhaseFluidProperties::v_e_from_p_T(pressure_nc, temperature_nc, v, e);
       return _property_ve_ipol[_enthalpy_idx]->sample(v, e);
     }
+    else
+      NeedTabulationError("enthalpy");
   }
   else if (_fp) // Assuming _fp can handle ADReal types
     return _fp->h_from_p_T(pressure, temperature);
@@ -1728,6 +1733,17 @@ TabulatedFluidProperties::NeedTabulationOrFPError(const std::string & desired_ro
              "' when either:\n- the property '" + needed_property +
              "' is tabulated and listed in the 'interpolated_properties' parameter.\n- the 'fp' "
              "parameter is provided.");
+}
+
+[[noreturn]] void
+TabulatedFluidProperties::NeedTabulationError(const std::string & needed_property) const
+{
+  mooseError("Property '" + needed_property +
+             "' is marked as interpolated but neither of the following methods are active:\n- "
+             "(p,T) interpolation created from fluid properties ('create_pT_interpolations' "
+             "parameter)\n- a (p,T) tabulation file ('fluid_property_file')\n- (v,e) interpolation "
+             "created from fluid properties or a (p,T) tabulation ('create_ve_interpolations' "
+             "parameter)\n- a (v,e) tabulation file ('fluid_property_ve_file' parameter)");
 }
 
 void
