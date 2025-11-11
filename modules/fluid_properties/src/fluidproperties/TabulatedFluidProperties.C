@@ -182,7 +182,7 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
     // work-around to allow use of 'fp' in GlobalParams
-    _fp(isParamValid("input_fp") ? (getParam<UserObjectName>("input_fp" != name())
+    _fp(isParamValid("input_fp") ? ((getParam<UserObjectName>("input_fp") != name())
                                         ? &getUserObject<SinglePhaseFluidProperties>("input_fp")
                                         : nullptr)
                                  : nullptr),

@@ -66,7 +66,7 @@ NewtonSolve(const T & x,
 
   using std::isnan;
   if (verbose)
-    std::cout << "Target value for 1D Newton inversion:\n" << y << std::endl;
+    Moose::out << "Target value for 1D Newton inversion:\n" << y << std::endl;
 
   do
   {
@@ -92,10 +92,10 @@ NewtonSolve(const T & x,
 
     if (verbose)
     {
-      std::cout << "Iteration " << iteration << std::endl;
-      std::cout << "Current solution vector: " << z << std::endl;
-      std::cout << "Current (minus) residual: " << -R << std::endl;
-      std::cout << "Current Jacobian: " << dy_dz << std::endl;
+      Moose::out << "Iteration " << iteration << std::endl;
+      Moose::out << "Current solution vector: " << z << std::endl;
+      Moose::out << "Current (minus) residual: " << -R << std::endl;
+      Moose::out << "Current Jacobian: " << dy_dz << std::endl;
     }
 
     // Check for NaNs
@@ -198,7 +198,7 @@ NewtonSolve2D(const T & f,
     return ss;
   };
   if (debug)
-    std::cout << "Target values for 2D Newton inversion:\n" << targets << std::endl;
+    Moose::out << "Target values for 2D Newton inversion:\n" << targets << std::endl;
 
   using std::isnan, std::max, std::abs;
 
@@ -226,10 +226,10 @@ NewtonSolve2D(const T & f,
 
     if (debug)
     {
-      std::cout << "Iteration " << iteration << std::endl;
-      std::cout << "Current solution vector:\n" << u << std::endl;
-      std::cout << "Current (minus) residual:\n" << minus_R << std::endl;
-      std::cout << "Current Jacobian:\n" << J << std::endl;
+      Moose::out << "Iteration " << iteration << std::endl;
+      Moose::out << "Current solution vector:\n" << u << std::endl;
+      Moose::out << "Current (minus) residual:\n" << minus_R << std::endl;
+      Moose::out << "Current Jacobian:\n" << J << std::endl;
     }
 
     // Do some Jacobi (rowmax) preconditioning and check for an empty row
@@ -264,7 +264,7 @@ NewtonSolve2D(const T & f,
     raw_J.svd(svs);
     raw_J2.evd(evs_real, evs_imag);
     if (debug)
-      std::cout << "Jacobian singular values:\n" << svs << std::endl;
+      Moose::out << "Jacobian singular values:\n" << svs << std::endl;
 #endif
 
     if (degenerate_row == -1)
