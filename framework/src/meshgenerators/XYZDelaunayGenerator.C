@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
+#include "MooseMeshElementConversionUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/int_range.h"
@@ -80,7 +81,21 @@ XYZDelaunayGenerator::validParams()
   params.addParam<bool>("convert_holes_for_stitching",
                         false,
                         "Whether to convert the 3D hole meshes with non-TRI3 surface sides into "
-                        "all-TET4 meshes to allow stitching.");
+                        "a compatible form.");
+
+  MooseEnum conversion_method("ALL SURFACE", "ALL");
+  params.addParam<MooseEnum>(
+      "conversion_method",
+      conversion_method,
+      "The method to convert 3D hole meshes into compatible meshes. Options are "
+      "ALL: convert all elements into TET4; SURFACE: convert only the surface elements "
+      "that are subject to stitching");
+
+  params.addParam<bool>(
+      "combined_stitching",
+      false,
+      "Whether to stitch all holes in one combined stitching step. This is efficient if a great "
+      "number of holes are to be stitched. But it is hard to debug if problems arise.");
 
   params.addRangeCheckedParam<Real>(
       "desired_volume",
@@ -110,6 +125,8 @@ XYZDelaunayGenerator::XYZDelaunayGenerator(const InputParameters & parameters)
     _hole_ptrs(getMeshes("holes")),
     _stitch_holes(getParam<std::vector<bool>>("stitch_holes")),
     _convert_holes_for_stitching(getParam<bool>("convert_holes_for_stitching")),
+    _conversion_method(parameters.get<MooseEnum>("conversion_method")),
+    _combined_stitching(parameters.get<bool>("combined_stitching")),
     _algorithm(parameters.get<MooseEnum>("algorithm")),
     _verbose_stitching(parameters.get<bool>("verbose_stitching"))
 {
@@ -122,6 +139,11 @@ XYZDelaunayGenerator::XYZDelaunayGenerator(const InputParameters & parameters)
     if (hole_boundaries.size() != _hole_ptrs.size())
       paramError("hole_boundaries", "Need one hole_boundaries entry per hole, if specified.");
   }
+
+  if (isParamSetByUser("conversion_method") && !_convert_holes_for_stitching)
+    paramError(
+        "conversion_method",
+        "This parameter is only applicable when convert_holes_for_stitching is set to true.");
 }
 
 std::unique_ptr<MeshBase>
@@ -156,18 +178,22 @@ XYZDelaunayGenerator::generate()
     // We do not need to worry about element order here as libMesh checks it
     std::set<ElemType> hole_elem_types;
     std::set<unsigned short> hole_elem_dims;
+    std::vector<std::pair<dof_id_type, unsigned int>> hole_elem_external_sides;
     for (auto elem : hole_mesh.element_ptr_range())
     {
       hole_elem_dims.emplace(elem->dim());
 
       // For a 3D element, we need to check the surface side element type instead of the element
-      // type
+      // type. It is also a good opportunity to define the external boundary.
       if (elem->dim() == 3)
         for (auto s : make_range(elem->n_sides()))
         {
           // Note that the entire external boundary is used for defining the hole at this time
           if (!elem->neighbor_ptr(s))
+          {
             hole_elem_types.emplace(elem->side_ptr(s)->type());
+            hole_elem_external_sides.emplace_back(elem->id(), s);
+          }
         }
       // For a non-3D element, we just need to record the element type
       else
@@ -189,6 +215,21 @@ XYZDelaunayGenerator::generate()
           paramError("holes",
                      "3D hole meshes with non-TRI3 surface elements cannot be stitched without "
                      "converting them to TET4. Consider setting convert_holes_for_stitching=true.");
+        else if (_stitch_holes.size() && _stitch_holes[hole_i] && _conversion_method == "SURFACE")
+        {
+          BoundaryID temp_ext_bid = MooseMeshUtils::getNextFreeBoundaryID(hole_mesh);
+          for (const auto & hees : hole_elem_external_sides)
+            hole_mesh.get_boundary_info().add_side(hees.first, hees.second, temp_ext_bid);
+          MooseMeshElementConversionUtils::transitionLayerGenerator(
+              hole_mesh, std::vector<BoundaryName>({std::to_string(temp_ext_bid)}), 1, false);
+          hole_mesh.get_boundary_info().remove_id(temp_ext_bid);
+          // MeshSerializer's destructor calls delete_remote_elements()
+          // For replicated meshes, we need to refresh the neighbor information
+          if (!hole_mesh.is_replicated())
+            hole_mesh.prepare_for_use();
+          else
+            hole_mesh.find_neighbors();
+        }
         else
           MeshTools::Modification::all_tri(**_hole_ptrs[hole_i]);
       }
@@ -516,18 +557,35 @@ XYZDelaunayGenerator::generate()
       const auto & increment_subdomain_map = hole_mesh.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
-      std::size_t n_nodes_stitched = mesh->stitch_meshes(hole_mesh,
-                                                         inner_bcid,
+      if (_combined_stitching)
+        MooseMeshUtils::copyIntoMesh(*mesh, hole_mesh, false, false, _communicator);
+      else
+      {
+        std::size_t n_nodes_stitched = mesh->stitch_meshes(hole_mesh,
+                                                           inner_bcid,
+                                                           new_hole_bcid,
+                                                           TOLERANCE,
+                                                           /*clear_stitched_bcids*/ true,
+                                                           _verbose_stitching,
+                                                           use_binary_search);
+
+        if (!n_nodes_stitched)
+          mooseError("Failed to stitch hole mesh ", hole_i, " to new tetrahedralization.");
+      }
+    }
+  }
+  if (doing_stitching && _combined_stitching)
+  {
+    std::size_t n_nodes_stitched = mesh->stitch_surfaces(inner_bcid,
                                                          new_hole_bcid,
                                                          TOLERANCE,
                                                          /*clear_stitched_bcids*/ true,
                                                          _verbose_stitching,
                                                          use_binary_search);
-
-      if (!n_nodes_stitched)
-        mooseError("Failed to stitch hole mesh ", hole_i, " to new tetrahedralization.");
-    }
+    if (!n_nodes_stitched)
+      mooseError("Failed to stitch hole meshes to new tetrahedralization.");
   }
+
   // Add user-specified sideset names
   if (hole_boundary_ids.size())
     for (auto h : index_range(_hole_ptrs))
