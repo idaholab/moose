@@ -41,6 +41,8 @@ TabulatedFluidProperties::validParams()
 
   // Input / output
   params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
+  params.deprecateParam("fp", "input_fp", "12/12/26");
+  // deprecate to be able to put "fp" in the GlobalParams without creating issues with TabulatedFP
   params.addParam<FileName>("fluid_property_file",
                             "Name of the csv file containing the tabulated fluid property data.");
   params.addParam<FileName>(
@@ -175,7 +177,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _fp(isParamValid("fp") ? &getUserObject<SinglePhaseFluidProperties>("fp") : nullptr),
+    _fp(isParamValid("input_fp") ? &getUserObject<SinglePhaseFluidProperties>("input_fp")
+                                 : nullptr),
     _allow_fp_and_tabulation(getParam<bool>("allow_fp_and_tabulation")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
@@ -258,14 +261,16 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
 
   // Can only and must receive one source of data between fp and tabulations
   if (_fp && (!_file_name_in.empty() || !_file_name_ve_in.empty()) && !_allow_fp_and_tabulation)
-    paramError("fluid_property_file",
-               "Cannot supply both a fluid properties object with 'fp' and a source tabulation "
-               "file with 'fluid_property_file', unless 'allow_fp_and_tabulation' is set to true");
+    paramError(
+        "fluid_property_file",
+        "Cannot supply both a fluid properties object with 'input_fp' and a source tabulation "
+        "file with 'fluid_property_file', unless 'allow_fp_and_tabulation' is set to true");
   if (!_fp && _file_name_in.empty() && _file_name_ve_in.empty())
-    paramError("fluid_property_file",
-               "Either a fluid properties object with the parameter 'fp' and a source tabulation "
-               "file with the parameter 'fluid_property_file' or 'fluid_property_ve_file' should "
-               "be provided.");
+    paramError(
+        "fluid_property_file",
+        "Either a fluid properties object with the parameter 'input_fp' and a source tabulation "
+        "file with the parameter 'fluid_property_file' or 'fluid_property_ve_file' should "
+        "be provided.");
   if (!_create_direct_pT_interpolations && !_create_direct_ve_interpolations)
     paramError("create_pT_interpolations", "Must create either (p,T) or (v,e) interpolations");
 
@@ -312,10 +317,10 @@ TabulatedFluidProperties::initialSetup()
     else
     {
       if (!_fp)
-        paramError(
-            "create_pT_interpolations",
-            "No FluidProperties (specified with 'fp' parameter) exists. Either specify a 'fp' or "
-            "specify a (p, T) tabulation file with the 'fluid_property_file' parameter");
+        paramError("create_pT_interpolations",
+                   "No FluidProperties (specified with 'input_fp' parameter) exists. Either "
+                   "specify a 'input_fp' or "
+                   "specify a (p, T) tabulation file with the 'fluid_property_file' parameter");
       _console << name() + ": Generating (p, T) tabulated data\n";
       _console << std::flush;
 
@@ -331,10 +336,10 @@ TabulatedFluidProperties::initialSetup()
     else
     {
       if (!_fp)
-        paramError(
-            "create_ve_interpolations",
-            "No FluidProperties (specified with 'fp' parameter) exists. Either specify a 'fp' or "
-            "specify a (v, e) tabulation file with the 'fluid_property_ve_file' parameter");
+        paramError("create_ve_interpolations",
+                   "No FluidProperties (specified with 'input_fp' parameter) exists. Either "
+                   "specify a 'input_fp' or "
+                   "specify a (v, e) tabulation file with the 'fluid_property_ve_file' parameter");
       _console << name() + ": Generating (v, e) tabulated data\n";
       _console << std::flush;
 
@@ -1764,7 +1769,7 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   }
   else
     mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+               "\nNo tabulation or fluid property 'input_fp' object to compute value");
   return h - T * s;
 }
 
@@ -1865,19 +1870,20 @@ TabulatedFluidProperties::s_from_h_p(
 TabulatedFluidProperties::TabulationNotImplementedError(const std::string & desired_routine) const
 {
   mooseError("TabulatedFluidProperties can only call the function '" + desired_routine +
-             "' when the 'fp' parameter is provided. It is currently not implemented using "
+             "' when the 'input_fp' parameter is provided. It is currently not implemented using "
              "tabulations, and this property is simply forwarded to the FluidProperties specified "
-             "in the 'fp' parameter");
+             "in the 'input_fp' parameter");
 }
 
 [[noreturn]] void
 TabulatedFluidProperties::NeedTabulationOrFPError(const std::string & desired_routine,
                                                   const std::string & needed_property) const
 {
-  mooseError("TabulatedFluidProperties can only call the function '" + desired_routine +
-             "' when either:\n- the property '" + needed_property +
-             "' is tabulated and listed in the 'interpolated_properties' parameter.\n- the 'fp' "
-             "parameter is provided.");
+  mooseError(
+      "TabulatedFluidProperties can only call the function '" + desired_routine +
+      "' when either:\n- the property '" + needed_property +
+      "' is tabulated and listed in the 'interpolated_properties' parameter.\n- the 'input_fp' "
+      "parameter is provided.");
 }
 
 [[noreturn]] void

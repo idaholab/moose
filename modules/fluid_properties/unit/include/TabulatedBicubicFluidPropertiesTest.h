@@ -36,7 +36,7 @@ protected:
 
     // Tabulation in (p, T) built from another FluidProperties
     InputParameters tab_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
-    tab_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    tab_uo_params.set<UserObjectName>("input_fp") = "co2_fp";
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_fp", tab_uo_params);
     _tab_pT_from_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp");
 
@@ -55,7 +55,7 @@ protected:
 
     // Tabulation in (p, T) built from another FluidProperties, specifically for testing generation
     InputParameters tab_gen_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
-    tab_gen_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    tab_gen_uo_params.set<UserObjectName>("input_fp") = "co2_fp";
     tab_gen_uo_params.set<Real>("temperature_min") = 400;
     tab_gen_uo_params.set<Real>("temperature_max") = 500;
     tab_gen_uo_params.set<Real>("pressure_min") = 1e6;
@@ -72,7 +72,7 @@ protected:
     InputParameters tab_direct_ve_params =
         _factory.getValidParams("TabulatedBicubicFluidProperties");
     // We use ideal gas as it has more (v,e) support than co2
-    tab_direct_ve_params.set<UserObjectName>("fp") = "idg_fp";
+    tab_direct_ve_params.set<UserObjectName>("input_fp") = "idg_fp";
     tab_direct_ve_params.set<MooseEnum>("out_of_bounds_behavior") = "set_to_closest_bound";
     tab_direct_ve_params.set<bool>("create_pT_interpolations") = false;
     tab_direct_ve_params.set<bool>("create_ve_interpolations") = true;
