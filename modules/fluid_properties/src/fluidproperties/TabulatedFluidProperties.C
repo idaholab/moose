@@ -804,10 +804,17 @@ TabulatedFluidProperties::T_from_p_s(
 Real
 TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_enthalpy && _create_direct_pT_interpolations)
+  if (_interpolate_enthalpy)
   {
     checkInputVariables(pressure, temperature);
-    return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
+    if (_create_direct_pT_interpolations)
+      return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
+    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    {
+      Real v, e;
+      SinglePhaseFluidProperties::v_e_from_p_T(pressure, temperature, v, e);
+      return _property_ve_ipol[_enthalpy_idx]->sample(v, e);
+    }
   }
   else
   {
@@ -821,7 +828,20 @@ TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 ADReal
 TabulatedFluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
-  if (_fp) // Assuming _fp can handle ADReal types
+  if (_interpolate_enthalpy)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    if (_create_direct_pT_interpolations)
+      return _property_ipol[_enthalpy_idx]->sample(pressure_nc, temperature_nc);
+    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    {
+      ADReal v, e;
+      SinglePhaseFluidProperties::v_e_from_p_T(pressure_nc, temperature_nc, v, e);
+      return _property_ve_ipol[_enthalpy_idx]->sample(v, e);
+    }
+  }
+  else if (_fp) // Assuming _fp can handle ADReal types
     return _fp->h_from_p_T(pressure, temperature);
   else
     FluidPropertiesForwardError("h_from_p_T");
