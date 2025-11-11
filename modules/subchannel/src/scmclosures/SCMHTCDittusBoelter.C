@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMHTCClosureDittusBoelter.h"
+#include "SCMHTCDittusBoelter.h"
 
-registerMooseObject("SubChannelApp", SCMHTCClosureDittusBoelter);
+registerMooseObject("SubChannelApp", SCMHTCDittusBoelter);
 
 InputParameters
-SCMHTCClosureDittusBoelter::validParams()
+SCMHTCDittusBoelter::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
   params.addClassDescription(
@@ -20,17 +20,14 @@ SCMHTCClosureDittusBoelter::validParams()
   return params;
 }
 
-SCMHTCClosureDittusBoelter::SCMHTCClosureDittusBoelter(const InputParameters & parameters)
+SCMHTCDittusBoelter::SCMHTCDittusBoelter(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
-// _is_tri_lattice(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh) != nullptr),
-// _tri_sch_mesh(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh)),
-// _quad_sch_mesh(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh))
 {
 }
 
 Real
-SCMHTCClosureDittusBoelter::computeNusseltNumber(const FrictionStruct & friction_args,
-                                                 const NusseltStruct & nusselt_args) const
+SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & friction_args,
+                                          const NusseltStruct & nusselt_args) const
 {
   (void)friction_args; // silence unused parameter
 
@@ -60,9 +57,9 @@ SCMHTCClosureDittusBoelter::computeNusseltNumber(const FrictionStruct & friction
 }
 
 Real
-SCMHTCClosureDittusBoelter::computeHTC(const FrictionStruct & friction_args,
-                                       const NusseltStruct & nusselt_args,
-                                       const Real & k) const
+SCMHTCDittusBoelter::computeHTC(const FrictionStruct & friction_args,
+                                const NusseltStruct & nusselt_args,
+                                const Real & k) const
 {
   // Compute HTC
   auto Nu = computeNusseltNumber(friction_args, nusselt_args);

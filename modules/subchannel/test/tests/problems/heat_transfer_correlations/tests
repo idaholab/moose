@@ -13,7 +13,7 @@
       recover = false
       max_parallel = 1
       detail = 'using the Dittus Boelter correlation.'
-      cli_args = 'SubChannel/pin_htc_correlation=dittus-boelter SubChannel/duct_htc_correlation=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties T_in=300.0'
+      cli_args = 'SubChannel/pin_HTC_closure=dittus-boelter SubChannel/duct_HTC_closure=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties T_in=300.0'
     []
     [gnielinski]
       type = CSVDiff

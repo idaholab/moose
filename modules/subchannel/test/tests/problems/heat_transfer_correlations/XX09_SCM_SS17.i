@@ -98,6 +98,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
   []
+  [dittus-boelter]
+    type = SCMHTCDittusBoelter
+  []
 []
 
 [ICs]

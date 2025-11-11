@@ -47,11 +47,15 @@ pin_diameter = 0.00950
   P_out = ${P_out}
   verbose_subchannel = true
   friction_closure = 'MATRA'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 
