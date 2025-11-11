@@ -413,24 +413,19 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromPTFileToVE)
 }
 
 // Test tabulated fluid properties read from file including comments
-TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
+TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEGeneratedFromFP)
 {
   // These values must be within the bounds specified in the header
   Real p = 1.223e6;
   Real T = 420.1;
   Real pert = 1.0e-7;
 
-  // Read the data file
-  Moose::_throw_on_warning = false;
+  // Generate the (v, e) tabulation from the FP user object
   const_cast<TabulatedBicubicFluidProperties *>(_tab_ve_from_fp)->initialSetup();
-  Moose::_throw_on_warning = true;
 
   // Use as a reference
   Real e = _idg_fp->e_from_p_T(p, T);
   Real v = _idg_fp->v_from_p_T(p, T);
-
-  // NOTE: direct from (v,e) currently does not support (p, s)
-  // and only a selection of calls from (p, T) and (p, rho)
 
   // check computation of fluid props from v, e
   {
