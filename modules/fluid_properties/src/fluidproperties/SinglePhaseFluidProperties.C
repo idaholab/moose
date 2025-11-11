@@ -42,9 +42,9 @@ SinglePhaseFluidProperties::validParams()
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
   : FluidProperties(parameters),
     // downstream apps are creating fluid properties without their parameters, hence the workaround
-    _tolerance(isParamValid("tolerance") ? getParam<Real>("tolerance") : 1e-8),
-    _T_initial_guess(isParamValid("T_initial_guess") ? getParam<Real>("T_initial_guess") : 400),
-    _p_initial_guess(isParamValid("p_initial_guess") ? getParam<Real>("p_initial_guess") : 2e5),
+    _tolerance(getParam<Real>("tolerance")),
+    _T_initial_guess(getParam<Real>("T_initial_guess")),
+    _p_initial_guess(getParam<Real>("p_initial_guess")),
     _max_newton_its(getParam<unsigned int>("max_newton_its")),
     _verbose_newton(getParam<bool>("verbose_newton"))
 {
