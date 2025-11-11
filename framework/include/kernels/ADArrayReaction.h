@@ -24,10 +24,10 @@ public:
 protected:
   virtual void computeQpResidual(ADRealEigenVector & residual) override;
 
-  /// scalar diffusion coefficient
+  /// scalar reaction coefficient
   const ADMaterialProperty<Real> * _r;
-  /// array diffusion coefficient
+  /// array reaction coefficient
   const ADMaterialProperty<RealEigenVector> * const _r_array;
-  /// matrix diffusion coefficient (notably for anisotropic diffusion)
+  /// matrix of reaction coefficients (for cross reaction terms between array variables)
   const ADMaterialProperty<RealEigenMatrix> * const _r_2d_array;
 };

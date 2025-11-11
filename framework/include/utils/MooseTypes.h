@@ -414,7 +414,6 @@ typedef MooseArray<ADRealVectorValue> ADVariableGradient;
 typedef MooseArray<ADRealTensorValue> ADVariableSecond;
 typedef MooseArray<ADRealVectorValue> ADVectorVariableValue;
 typedef MooseArray<ADRealTensorValue> ADVectorVariableGradient;
-
 typedef MooseArray<libMesh::TypeNTensor<3, ADReal>> ADVectorVariableSecond;
 typedef MooseArray<ADRealVectorValue> ADVectorVariableCurl;
 

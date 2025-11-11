@@ -18,9 +18,9 @@ ADArrayReaction::validParams()
   params += ADFunctorInterface::validParams();
   params.addRequiredParam<MaterialPropertyName>(
       "reaction_coefficient",
-      "The name of the reaction, can be scalar, vector, or matrix material property.");
+      "The name of the reaction (can be either a scalar, vector, or matrix) material property.");
   params.addClassDescription(
-      "An automatic differentiation kernel for the array reaction operator ($u$)");
+      "An automatic differentiation kernel for the array reaction operator ($r * u$)");
   return params;
 }
 

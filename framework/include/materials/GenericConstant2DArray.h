@@ -11,6 +11,9 @@
 
 #include "Material.h"
 
+/**
+ * Template for defining a constant array material property, using automatic differentiation or not
+ */
 template <bool is_ad>
 class GenericConstant2DArrayTempl : public Material
 {
