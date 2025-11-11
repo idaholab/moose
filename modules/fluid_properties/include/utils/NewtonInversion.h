@@ -35,6 +35,7 @@ namespace FluidPropertiesUtils
  * @param[in] caller_name name of the fluid properties appended to name of the routine calling the
  * method
  * @param[in] max_its the maximum number of iterations for Newton's method
+ * @param[in] verbose whether to output Newton iteration data
  * @return a pair in which the first member is the value z such that f(x, z) = y and the second
  * member is dy/dz
  */
@@ -46,7 +47,8 @@ NewtonSolve(const T & x,
             const Real tolerance,
             const Functor & y_from_x_z,
             const std::string & caller_name,
-            const unsigned int max_its = 100)
+            const unsigned int max_its = 100,
+            const bool verbose = false)
 {
   // R represents residual
 
@@ -63,6 +65,8 @@ NewtonSolve(const T & x,
   unsigned int iteration = 0;
 
   using std::isnan;
+  if (verbose)
+    std::cout << "Target value for 1D Newton inversion:\n" << y << std::endl;
 
   do
   {
@@ -85,6 +89,14 @@ NewtonSolve(const T & x,
 #endif
 
     z += -(R / dy_dz);
+
+    if (verbose)
+    {
+      std::cout << "Iteration " << iteration << std::endl;
+      std::cout << "Current solution vector: " << z << std::endl;
+      std::cout << "Current (minus) residual: " << -R << std::endl;
+      std::cout << "Current Jacobian: " << dy_dz << std::endl;
+    }
 
     // Check for NaNs
     if (isnan(z))
@@ -186,7 +198,7 @@ NewtonSolve2D(const T & f,
     return ss;
   };
   if (debug)
-    std::cout << "Target values:\n" << targets << std::endl;
+    std::cout << "Target values for 2D Newton inversion:\n" << targets << std::endl;
 
   using std::isnan, std::max, std::abs;
 

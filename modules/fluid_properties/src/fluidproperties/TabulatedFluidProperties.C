@@ -398,7 +398,7 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
                                         T_from_v_e,
                                         name() + "::v_from_p_T",
                                         _max_newton_its,
-                                        false);
+                                        _verbose_newton);
     return v;
   }
   else
@@ -441,7 +441,7 @@ TabulatedFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & tem
                                         T_from_v_e,
                                         name() + "::v_from_p_T",
                                         _max_newton_its,
-                                        false);
+                                        _verbose_newton);
     return v;
   }
   else
