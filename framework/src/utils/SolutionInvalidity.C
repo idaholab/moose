@@ -153,6 +153,16 @@ SolutionInvalidity::syncIteration()
     }
   }
 
+  // Quick check on if we have nothing to do in order to
+  // avoid sparse parallel communication
+  bool have_counts = data_to_send.size();
+  comm().max(have_counts);
+  if (!have_counts)
+  {
+    _has_synced = true;
+    return;
+  }
+
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
     mooseAssert(processor_id() == 0, "Should only receive on processor 0");
