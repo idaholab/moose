@@ -19,8 +19,8 @@ InputParameters
 LinearFVP1RadiationSourceSink::validParams()
 {
   InputParameters params = LinearFVElementalKernel::validParams();
-  params.addClassDescription(
-      "Implements the source and sink term for the P1 radiation model solving for incident radiation G.");
+  params.addClassDescription("Implements the source and sink term for the P1 radiation model "
+                             "solving for incident radiation G.");
   params.addRequiredParam<MooseFunctorName>("temperature_radiation", "The radiative temperature.");
   params.addParam<MooseFunctorName>(
       "absorption_coeff", 1.0, "The absorption coefficient of the material.");
@@ -37,8 +37,7 @@ LinearFVP1RadiationSourceSink::LinearFVP1RadiationSourceSink(const InputParamete
 Real
 LinearFVP1RadiationSourceSink::computeMatrixContribution()
 {
-  return _sigma_a(makeElemArg(_current_elem_info->elem()), determineState()) *
-         _current_elem_volume;
+  return _sigma_a(makeElemArg(_current_elem_info->elem()), determineState()) * _current_elem_volume;
 }
 
 Real
@@ -47,7 +46,6 @@ LinearFVP1RadiationSourceSink::computeRightHandSideContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const auto state_arg = determineState();
 
-  return 4.0 * HeatConduction::Constants::sigma *
-          _sigma_a(elem_arg,state_arg) *
-          Utility::pow<4>(_temperature_radiation(elem_arg,state_arg)) * _current_elem_volume;
+  return 4.0 * HeatConduction::Constants::sigma * _sigma_a(elem_arg, state_arg) *
+         Utility::pow<4>(_temperature_radiation(elem_arg, state_arg)) * _current_elem_volume;
 }

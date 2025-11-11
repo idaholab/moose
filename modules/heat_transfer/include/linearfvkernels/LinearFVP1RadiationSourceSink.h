@@ -12,8 +12,8 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds contributions for the P1 model radiation source discretized using the finite volume
- * method to a linear system.
+ * Kernel that adds contributions for the P1 model radiation source discretized using the finite
+ * volume method to a linear system.
  */
 class LinearFVP1RadiationSourceSink : public LinearFVElementalKernel
 {
@@ -31,7 +31,6 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
-
   /// The functor for the radiation temperature
   const Moose::Functor<Real> & _temperature_radiation;
 

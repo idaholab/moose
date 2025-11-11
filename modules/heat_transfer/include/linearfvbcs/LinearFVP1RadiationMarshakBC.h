@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionFunctorRobinBCBase.h"
 
 /**
  * Class implementing a Marshak boundary condition for P1 radiation model in
  * linear finite volume variables. This is only applicable for advection-diffusion problems.
  */
-class LinearFVP1RadiationMarshakBC : public LinearFVAdvectionDiffusionBC
+class LinearFVP1RadiationMarshakBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
 public:
   /**
@@ -26,23 +26,15 @@ public:
 
   static InputParameters validParams();
 
-  virtual Real computeBoundaryValue() const override;
-
-  virtual Real computeBoundaryNormalGradient() const override;
-
-  virtual Real computeBoundaryValueMatrixContribution() const override;
-
-  virtual Real computeBoundaryValueRHSContribution() const override;
-
-  virtual Real computeBoundaryGradientMatrixContribution() const override;
-
-  virtual Real computeBoundaryGradientRHSContribution() const override;
-
 protected:
-  /// Functor giving the wall temperature
+  virtual Real getAlpha(Moose::FaceArg face, Moose::StateArg state) const override;
+  virtual Real getBeta(Moose::FaceArg face, Moose::StateArg state) const override;
+  virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
+
+  /// Functor giving the alpha coefficient (multiplying normal gradient)
   const Moose::Functor<Real> & _temperature_radiation;
-  /// Functor giving the P1 model diffusion coefficient
+  /// Functor giving the beta coefficient (multiplying value)
   const Moose::Functor<Real> & _coeff_diffusion;
-  /// Functor giving the wall emmisivity
-  const Real & _eps_boundary;
+  /// Functor giving the gamma coefficient (on right hand side, treated explicitly)
+  const Moose::Functor<Real> & _eps_boundary;
 };
