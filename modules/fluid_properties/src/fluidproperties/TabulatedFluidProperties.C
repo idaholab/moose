@@ -680,11 +680,40 @@ void
 TabulatedFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  if (_interpolate_internal_energy && _create_direct_pT_interpolations)
+  if (_interpolate_internal_energy)
   {
     checkInputVariables(pressure, temperature);
-    _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
-        pressure, temperature, e, de_dp, de_dT);
+    if (_create_direct_pT_interpolations)
+      _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
+          pressure, temperature, e, de_dp, de_dT);
+    else
+      NeedTabulationError("internal_energy");
+  }
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  {
+    checkInputVariables(pressure, temperature);
+    Real v, dv_dp, dv_dT;
+    auto p_from_v_e = [&](Real v, Real e, Real & new_p, Real & dp_dv, Real & dp_de)
+    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
+    auto T_from_v_e = [&](Real v, Real e, Real & new_T, Real & dT_dv, Real & dT_de)
+    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
+    FluidPropertiesUtils::NewtonSolve2D(pressure,
+                                        temperature,
+                                        (_v_min + _v_max) / 2,
+                                        (_e_min + _e_max) / 2,
+                                        v,
+                                        dv_dp,
+                                        dv_dT,
+                                        e,
+                                        de_dp,
+                                        de_dT,
+                                        _tolerance,
+                                        _tolerance,
+                                        p_from_v_e,
+                                        T_from_v_e,
+                                        name() + "::v_from_p_T",
+                                        _max_newton_its,
+                                        _verbose_newton);
   }
   else
   {
@@ -1144,10 +1173,22 @@ TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
 void
 TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  if (_interpolate_entropy && _create_direct_pT_interpolations)
+  if (_interpolate_entropy)
   {
     checkInputVariables(p, T);
-    _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
+    if (_create_direct_pT_interpolations)
+      _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
+    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    {
+      Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+      SinglePhaseFluidProperties::v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+      Real ds_dv, ds_de;
+      _property_ve_ipol[_entropy_idx]->sampleValueAndDerivatives(v, e, s, ds_dv, ds_de);
+      ds_dp = ds_dv * dv_dp + ds_de * de_dp;
+      ds_dT = ds_dv * dv_dT + ds_de * de_dT;
+    }
+    else
+      NeedTabulationError("entropy");
   }
   else
   {
