@@ -17,14 +17,14 @@
 /**
  * A reporter to support parallel active learning for Bayesian UQ tasks
  */
-class BayesianActiveLearner : public GenericActiveLearner, public LikelihoodInterface
+class BayesianActiveLearner : public GenericActiveLearnerTempl<BayesianActiveLearningSampler>,
+                              public LikelihoodInterface
 
 {
 public:
   static InputParameters validParams();
 
   BayesianActiveLearner(const InputParameters & parameters);
-  virtual void initialize() override;
 
 protected:
   virtual void setupGPData(const std::vector<Real> & data_out,
@@ -43,12 +43,6 @@ private:
    * @param data_out The data vector containing the outputs from subApp evaluations
    */
   void computeLogLikelihood(const std::vector<Real> & data_out);
-
-  /// The base sampler
-  Sampler & _sampler;
-
-  /// Bayesian Active Learning Sampler
-  const BayesianActiveLearningSampler * const _bayes_al_sampler;
 
   /// Storage for new proposed variance samples
   const std::vector<Real> & _new_var_samples;

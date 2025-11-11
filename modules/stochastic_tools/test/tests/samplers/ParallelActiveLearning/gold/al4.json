@@ -41,11 +41,44 @@
   "time_steps": [
     {
       "conditional": {
-        "acquisition_function": [],
+        "acquisition_function": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
         "convergence_value": 0.0,
-        "inputs": [],
+        "inputs": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
         "outputs_required": [],
-        "sorted_indices": []
+        "sorted_indices": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
       },
       "constant": {
         "reporter_transfer:average:value": [

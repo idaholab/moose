@@ -25,52 +25,30 @@ BayesianActiveLearner::validParams()
 }
 
 BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
-  : GenericActiveLearner(parameters),
+  : GenericActiveLearnerTempl<BayesianActiveLearningSampler>(parameters),
     LikelihoodInterface(parameters),
-    _sampler(getSampler("sampler")),
-    _bayes_al_sampler(dynamic_cast<const BayesianActiveLearningSampler *>(&_sampler)),
-    _new_var_samples(_bayes_al_sampler->getVarSamples()),
-    _var_prior(_bayes_al_sampler->getVarPrior()),
-    _var_test(_bayes_al_sampler->getVarSampleTries()),
+    _new_var_samples(_al_sampler.getVarSamples()),
+    _var_prior(_al_sampler.getVarPrior()),
+    _var_test(_al_sampler.getVarSampleTries()),
     _noise(declareValue<Real>("noise"))
 {
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
     _likelihoods.push_back(getLikelihoodFunctionByName(name));
 
-  _num_confg_values = _bayes_al_sampler->getNumberOfConfigValues();
-  _num_confg_params = _bayes_al_sampler->getNumberOfConfigParams();
+  _num_confg_values = _al_sampler.getNumberOfConfigValues();
+  _num_confg_params = _al_sampler.getNumberOfConfigParams();
 
   // Resize the length scales depending upon whether variance is included
-  _n_dim = _sampler.getNumberOfCols() - _bayes_al_sampler->getNumberOfConfigParams();
+  _n_dim = _al_sampler.getNumberOfCols() - _al_sampler.getNumberOfConfigParams();
   _n_dim_plus_var = _n_dim + 1;
   if (_var_prior)
     _length_scales.resize(_n_dim_plus_var);
   else
     _length_scales.resize(_n_dim);
 
-  // Fetching the sampler characteristics
-  _props = _bayes_al_sampler->getNumParallelProposals();
-
   // Resize the log-likelihood vector to the number of parallel proposals
   _log_likelihood.resize(_props);
-}
-
-void
-BayesianActiveLearner::initialize()
-{
-  // Check whether the selected sampler is BayesianActiveLearningSampler or not
-  if (!_bayes_al_sampler)
-    paramError("sampler", "The selected sampler is not of type BayesianActiveLearningSampler.");
-
-  // Setting up the variable sizes to facilitate active learning
-  _gp_outputs_test.resize(_inputs_test.size());
-  _gp_std_test.resize(_inputs_test.size());
-  _acquisition_value.resize(_props);
-  _eval_outputs_current.resize(_props);
-  _generic.resize(1);
-  _sorted_indices.resize(_props);
-  _inputs_test = _bayes_al_sampler->getSampleTries();
 }
 
 void
