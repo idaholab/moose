@@ -60,6 +60,9 @@ TabulatedFluidProperties::validParams()
       "Whether to save the csv fluid properties file",
       "This parameter is no longer required. Whether to save a CSV tabulation file is controlled "
       "by specifying the 'fluid_property_output_file' parameter");
+  params.addParam<bool>("skip_header_tabulation",
+                        false,
+                        "Whether to skip the header in the tabulation output, useful for testing");
 
   // Data source on a per-property basis
   MultiMooseEnum properties(
@@ -168,7 +171,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
                           ? getParam<FileName>("fluid_property_ve_output_file")
                           : ""),
     _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
-                                         : isParamValid("fluid_property_output_file")),
+                                         : (isParamValid("fluid_property_output_file") ||
+                                            isParamValid("fluid_property_ve_output_file"))),
     _create_direct_pT_interpolations(getParam<bool>("create_pT_interpolations")),
     _create_direct_ve_interpolations(getParam<bool>("create_ve_interpolations")),
     _temperature_min(getParam<Real>("temperature_min")),
@@ -1900,19 +1904,24 @@ TabulatedFluidProperties::NeedTabulationError(const std::string & needed_propert
 void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 {
-  file_name = file_name.empty() ? "fluid_properties_" + name() + "_out.csv" : file_name;
   if (processor_id() == 0)
   {
+    // Write out the (p, T) interpolation tables
+    if (_file_name_out != "")
     {
+      file_name = file_name.empty() ? "fluid_properties_" + name() + "_out.csv" : file_name;
       MooseUtils::checkFileWriteable(file_name);
 
       std::ofstream file_out(file_name.c_str());
 
-      // Write out date and fluid type
-      time_t now = std::time(&now);
-      file_out << "# " << (_fp ? _fp->fluidName() : "")
-               << " properties (p,T) tabulation created by TabulatedFluidProperties on "
-               << ctime(&now) << "\n";
+      if (!getParam<bool>("skip_header_tabulation"))
+      {
+        // Write out date and fluid type
+        time_t now = std::time(&now);
+        file_out << "# " << (_fp ? _fp->fluidName() : "")
+                 << " properties (p,T) tabulation created by TabulatedFluidProperties on "
+                 << ctime(&now) << "\n";
+      }
 
       // Write out column names
       file_out << "pressure, temperature";
@@ -1936,8 +1945,8 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
       file_out.close();
     }
 
-    // Write out the (v,e) to (p,T) conversions
-    if (_construct_pT_from_ve)
+    // Write out the (v,e) interpolation tables
+    if (_file_name_ve_out != "" && (_construct_pT_from_ve || _create_direct_ve_interpolations))
     {
       const auto file_name_ve = (_file_name_ve_out == "")
                                     ? std::regex_replace(file_name, std::regex("\\.csv"), "_ve.csv")
@@ -1946,14 +1955,18 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
       std::ofstream file_out(file_name_ve.c_str());
 
       // Write out date and fluid type
-      time_t now = std::time(&now);
-      file_out << "# " << (_fp ? _fp->fluidName() : "")
-               << " properties (v,e) tabulation created by TabulatedFluidProperties on "
-               << ctime(&now) << "\n";
+      if (!getParam<bool>("skip_header_tabulation"))
+      {
+        time_t now = std::time(&now);
+        file_out << "# " << (_fp ? _fp->fluidName() : "")
+                 << " properties (v,e) tabulation created by TabulatedFluidProperties on "
+                 << ctime(&now) << "\n";
+      }
 
       // Write out column names
       file_out << "specific_volume, internal_energy, pressure, temperature";
-      for (const auto i : index_range(_properties))
+      for (const auto i : index_range(_interpolated_properties))
+        // Avoid writing the fixed columns twice
         if (_interpolated_properties[i] != "internal_energy" &&
             _interpolated_properties[i] != "pressure" &&
             _interpolated_properties[i] != "temperature")
@@ -1966,18 +1979,30 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
         {
           const auto v_val = _specific_volume[v];
           const auto e_val = _internal_energy[e];
-          const auto pressure = _p_from_v_e_ipol->sample(v_val, e_val);
-          const auto temperature = _T_from_v_e_ipol->sample(v_val, e_val);
-          file_out << v_val << ", " << e_val << ", " << pressure << ", " << temperature << ", ";
-          for (const auto i : index_range(_properties))
+          // Use the expected source for the grid. Note that the tabulations are already created
+          Real pressure, temperature;
+          if (_construct_pT_from_ve)
+          {
+            pressure = _p_from_v_e_ipol->sample(v_val, e_val);
+            temperature = _T_from_v_e_ipol->sample(v_val, e_val);
+          }
+          else
+          {
+            pressure = p_from_v_e(v_val, e_val);
+            temperature = T_from_v_e(v_val, e_val);
+          }
+          file_out << v_val << ", " << e_val << ", " << pressure << ", " << temperature
+                   << (_interpolated_properties.size() ? ", " : "");
+          for (const auto i : index_range(_interpolated_properties))
           {
             bool add_comma = true;
             if (i == _density_idx)
-              file_out << 1 / v_val;
+              file_out << 1. / v_val;
             else if (i == _enthalpy_idx)
-              file_out << h_from_p_T(pressure, temperature);
+              file_out << h_from_v_e(v_val, e_val);
             // Note that we could use (p,T) routine to generate this instead of (v,e)
-            // Or could use the _properties_ve array
+            // Or could use the _properties_ve array similar to what we do for (pressure,
+            // temperature)
             else if (i == _viscosity_idx)
               file_out << mu_from_v_e(v_val, e_val);
             else if (i == _k_idx)
@@ -1992,7 +2017,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
               file_out << s_from_v_e(v_val, e_val);
             else
               add_comma = false;
-            if (i != _properties.size() - 1 && add_comma)
+            if (i != _interpolated_properties.size() - 1 && add_comma)
               file_out << ", ";
           }
 
