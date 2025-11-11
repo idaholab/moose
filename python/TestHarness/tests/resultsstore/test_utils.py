@@ -256,3 +256,6 @@ class TestUtils(ResultsStoreTestCase):
         # Multiple types bad
         with self.assertRaises(TypeError):
             get_typed({"foo": "bar"}, "foo", (int, float))
+        # Raise a KeyError if missing
+        with self.assertRaisesRegex(KeyError, "Missing key 'foo'"):
+            get_typed({}, "foo", float, allow_missing=False)

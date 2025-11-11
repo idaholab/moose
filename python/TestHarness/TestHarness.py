@@ -224,6 +224,8 @@ class TestHarness:
     # 2 - Added 'abs_zero' key to ValidationNumericData
     VALIDATION_VERSION = 2
 
+    __test__ = False  # prevents pytest collection
+
     @staticmethod
     def build(argv: list, app_name: str, moose_dir: str, moose_python: Optional[str] = None,
               skip_testroot: bool = False) -> "TestHarness":

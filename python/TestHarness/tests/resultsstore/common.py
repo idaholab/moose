@@ -19,7 +19,6 @@ from unittest import TestCase
 import pytest
 from mock import patch
 from moosepytest.runtestharness import run_test_harness
-
 from TestHarness.resultsstore.utils import TestName
 
 # Cache for the TestHarness results

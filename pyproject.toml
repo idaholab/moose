@@ -5,7 +5,7 @@ include = '''
 (
   ^\/python\/moosecontrol\/.*.py$ |
   ^\/python\/TestHarness\/resultsstore\/.*.py$ |
-  ^\/python\/TestHarness/tests/test_resultsstore.*.py$
+  ^\/python\/TestHarness/tests/resultsstore\/.*.py$
 )
 '''
 
@@ -13,7 +13,7 @@ include = '''
 include = [
   "python/moosecontrol/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
-  "python/TestHarness/tests/test_resultsstore*.py"
+  "python/TestHarness/tests/resultsstore/**/*.py"
 ]
 exclude = ["python/moosecontrol/requests_unixsocket/*.py"]
 

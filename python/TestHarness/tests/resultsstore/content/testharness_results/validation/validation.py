@@ -31,3 +31,10 @@ class TestCase(ValidationCase):
             "coolunits",
             bounds=(self.value - 0.01, self.value + 0.01),
         )
+
+        self.addScalarData(
+            "unbounded_number",
+            self.value,
+            "Number",
+            "coolunits",
+        )

@@ -22,7 +22,6 @@ from typing import Optional, Tuple
 from bson.objectid import ObjectId
 from mock import patch
 from moosepytest.civet import is_civet_pull_request, is_civet_push
-
 from TestHarness.resultsstore.auth import Authentication
 from TestHarness.resultsstore.civetstore import (
     MAX_DOCUMENT_SIZE,

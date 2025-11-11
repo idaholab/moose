@@ -307,7 +307,11 @@ def _type_error_message(key: Any, value: Any, types: Type | Tuple[Type, ...]) ->
 
 
 def get_typed(
-    container: dict, key: Any, types: Type | Tuple[Type, ...], default: Any = None
+    container: dict,
+    key: Any,
+    types: Type | Tuple[Type, ...],
+    default: Any = None,
+    allow_missing: bool = False,
 ) -> Any:
     """
     Get a value from a container given a key, requiring a type.
@@ -325,9 +329,16 @@ def get_typed(
     ------------------
     default : Any
         The default value; defaults to None.
+    allow_missing : bool
+        Whether or not to allow a missing key.
 
     """
     value = container.get(key, default)
     if not isinstance(value, types):
+        if key not in container:
+            if allow_missing:
+                return value
+            else:
+                raise KeyError(f"Missing key '{key}'")
         raise TypeError(_type_error_message(key, value, types))
     return value
