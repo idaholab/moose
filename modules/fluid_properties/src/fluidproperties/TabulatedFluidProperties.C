@@ -181,7 +181,10 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _fp(isParamValid("input_fp") ? &getUserObject<SinglePhaseFluidProperties>("input_fp")
+    // work-around to allow use of 'fp' in GlobalParams
+    _fp(isParamValid("input_fp") ? (getParam<UserObjectName>("input_fp" != name())
+                                        ? &getUserObject<SinglePhaseFluidProperties>("input_fp")
+                                        : nullptr)
                                  : nullptr),
     _allow_fp_and_tabulation(getParam<bool>("allow_fp_and_tabulation")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
