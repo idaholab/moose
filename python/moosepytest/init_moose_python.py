@@ -20,7 +20,15 @@ import sys
 from importlib.util import find_spec
 
 if find_spec("moosepytest") is None:
-    this_dir = os.path.dirname(__file__)
-    moose_python = os.path.abspath(os.path.join(this_dir, "..", ".."))
+    # Look backwards until we find moosepytest
+    moose_python = None
+    dir = os.path.abspath(os.path.dirname(__file__))
+    while dir != os.path.dirname(dir):
+        if os.path.exists(os.path.join(dir, "moosepytest", "init_moose_python.py")):
+            moose_python = dir
+            break
+        dir = os.path.abspath(os.path.join(dir, ".."))
+    if moose_python is None:
+        raise FileNotFoundError("Failed to find moosepytest")
     sys.path.append(moose_python)
     assert find_spec("moosepytest")

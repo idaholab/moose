@@ -1,1 +1,0 @@
-../../../moosepytest/init_moose_python.py

@@ -7,13 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Configures pytest for the TestHarness.resultsstore module."""
+"""Configures pytest for the TestHarness module."""
 
 pytest_plugins = (
     # Configures pytest for finding and optionally
     # skipping tests that depend on MOOSE.
     "moosepytest.plugins.mooseexe",
 )
-
-# Cache for the TestHarness results; used in resultsstore.tests.common
-TESTHARNESS_RESULTS: dict = {}

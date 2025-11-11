@@ -22,6 +22,8 @@ from moosepytest.runtestharness import run_test_harness
 
 from TestHarness.resultsstore.utils import TestName
 
+# Cache for the TestHarness results
+TESTHARNESS_RESULTS: dict = {}
 # Path to the stored results file for when moose is not available
 TESTHARNESS_RESULTS_FILE = os.path.join(
     os.path.dirname(__file__), "content", "testharness_results.json"
@@ -83,7 +85,7 @@ class ResultsStoreTestCase(TestCase):
             The loaded JSON results from the TestHarness execution.
 
         """
-        from TestHarness.resultsstore.conftest import TESTHARNESS_RESULTS
+        from TestHarness.tests.resultsstore.common import TESTHARNESS_RESULTS
 
         key = f"args={','.join(args)},"
         key += f"kwargs={','.join([f"{k}={v}" for k, v in kwargs.items()])}"

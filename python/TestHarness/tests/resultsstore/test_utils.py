@@ -9,13 +9,6 @@
 
 """Test Test TestHarness.resultsstore.utils."""
 
-from TestHarness.resultsstore.tests.common import (
-    FOLDER_NAMES,
-    NUM_TEST_FOLDERS,
-    NUM_TESTS,
-    TEST_NAMES,
-    ResultsStoreTestCase,
-)
 from TestHarness.resultsstore.utils import (
     MongoPath,
     MutableResultsFolderIterator,
@@ -39,6 +32,13 @@ from TestHarness.resultsstore.utils import (
     results_test_entry,
     results_test_iterator,
     results_test_names,
+)
+from TestHarness.tests.resultsstore.common import (
+    FOLDER_NAMES,
+    NUM_TEST_FOLDERS,
+    NUM_TESTS,
+    TEST_NAMES,
+    ResultsStoreTestCase,
 )
 
 # A single test name to test with

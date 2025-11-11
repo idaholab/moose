@@ -1,10 +1,10 @@
 [run]
 concurrency = thread
 branch = True
+source =
+    resultsstore/*
 omit =
-    tests/*
-    */moosepytest/init_moose_python.py
-    conftest.py
+    resultsstore/*/tests
 parallel = False
 
 [report]

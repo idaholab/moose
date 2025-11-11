@@ -31,7 +31,6 @@ from TestHarness.resultsstore.civetstore import (
     OversizedResultError,
     OversizedTestsError,
 )
-from TestHarness.resultsstore.tests.common import ResultsStoreTestCase
 from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
@@ -40,6 +39,7 @@ from TestHarness.resultsstore.utils import (
     results_test_entry,
     results_test_iterator,
 )
+from TestHarness.tests.resultsstore.common import ResultsStoreTestCase
 
 # Name for the database used for testing database store
 TEST_DATABASE = "test_database"
