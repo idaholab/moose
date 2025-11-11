@@ -43,8 +43,10 @@ public:
   virtual Real computeNusseltNumber(const FrictionStruct & friction_info,
                                     const NusseltStruct & nusselt_info) const = 0;
 
-  virtual NusseltPreInfo computeNusseltNumberPreInfo(const NusseltStruct & nusselt_info) final;
+  virtual NusseltPreInfo
+  computeNusseltNumberPreInfo(const NusseltStruct & nusselt_info) const final;
 
   virtual Real computeHTC(const FrictionStruct & friction_info,
-                          const NusseltStruct & nusselt_info) const = 0;
+                          const NusseltStruct & nusselt_info,
+                          const Real & conduction_k) const = 0;
 };

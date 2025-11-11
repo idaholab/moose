@@ -23,7 +23,7 @@ SCMHTCClosureBase::SCMHTCClosureBase(const InputParameters & parameters)
 }
 
 NusseltPreInfo
-SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_args)
+SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_args) const
 {
   NusseltPreInfo info;
   info.Re = nusselt_args.Re;
