@@ -59,9 +59,9 @@ public:
   /**
    * @brief Get the arrangement of CSGUniverses in the lattice
    *
-   * @return list of list of pointers to universes
+   * @return list of list of universes in their lattice arrangement
    */
-  const std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & getUniverses() const
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> getUniverses() const
   {
     return _universe_map;
   }
