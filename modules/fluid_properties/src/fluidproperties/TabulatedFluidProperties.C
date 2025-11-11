@@ -379,7 +379,7 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
   {
     checkInputVariables(pressure, temperature);
     Real v, e;
@@ -420,7 +420,7 @@ TabulatedFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & tem
     checkInputVariables(pressure_nc, temperature_nc);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
   {
     ADReal pressure_nc = pressure, temperature_nc = temperature;
     checkInputVariables(pressure_nc, temperature_nc);
@@ -485,7 +485,7 @@ TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return _property_ipol[_density_idx]->sample(pressure, temperature);
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
     return 1. / v_from_p_T(pressure, temperature);
   else
   {
@@ -505,7 +505,7 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure, const ADReal & t
     checkInputVariables(pressure_nc, temperature_nc);
     return _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
     return 1. / v_from_p_T(pressure, temperature);
   else
   {
@@ -526,7 +526,7 @@ TabulatedFluidProperties::rho_from_p_T(
     _property_ipol[_density_idx]->sampleValueAndDerivatives(
         pressure, temperature, rho, drho_dp, drho_dT);
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
   {
     checkInputVariables(pressure, temperature);
     // use finite differencing stencil
@@ -596,8 +596,9 @@ TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
     else
       NeedTabulationError("internal_energy");
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
   {
+    checkInputVariables(pressure, temperature);
     const Real rho = rho_from_p_T(pressure, temperature);
     auto lambda = [&](Real v, Real current_e, Real & new_T, Real & dT_dv, Real & dT_de)
     { T_from_v_e(v, current_e, new_T, dT_dv, dT_de); };
@@ -632,13 +633,15 @@ TabulatedFluidProperties::e_from_p_T(const ADReal & pressure, const ADReal & tem
     else
       NeedTabulationError("internal_energy");
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
   {
-    const ADReal rho = rho_from_p_T(pressure, temperature);
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    const ADReal rho = rho_from_p_T(pressure_nc, temperature_nc);
     auto lambda = [&](ADReal v, ADReal current_e, ADReal & new_T, ADReal & dT_dv, ADReal & dT_de)
     { T_from_v_e(v, current_e, new_T, dT_dv, dT_de); };
     const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
-                                                        temperature,
+                                                        temperature_nc,
                                                         /*initial guess*/ (_e_min + _e_max) / 2,
                                                         _tolerance,
                                                         lambda,
@@ -669,7 +672,7 @@ TabulatedFluidProperties::e_from_p_T(
     else
       NeedTabulationError("internal_energy");
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
   {
     checkInputVariables(pressure, temperature);
     // use finite differencing stencil
@@ -692,7 +695,7 @@ TabulatedFluidProperties::e_from_p_rho(const ADReal & pressure, const ADReal & r
 {
   ADReal e;
   // Use v,e data, we already have v from rho
-  if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  if (_create_direct_ve_interpolations)
   {
     auto lambda = [&](ADReal v, ADReal current_e, ADReal & new_p, ADReal & dp_dv, ADReal & dp_de)
     { p_from_v_e(v, current_e, new_p, dp_dv, dp_de); };
@@ -720,8 +723,10 @@ TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho) const
 {
   Real e;
   // Use v,e data, we already have v from rho
-  if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  if (_create_direct_ve_interpolations)
   {
+    Real T_dummy = _T_initial_guess;
+    checkInputVariables(pressure, T_dummy);
     auto lambda = [&](Real v, Real current_e, Real & new_p, Real & dp_dv, Real & dp_de)
     { p_from_v_e(v, current_e, new_p, dp_dv, dp_de); };
     const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
@@ -783,7 +788,7 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
                                           _verbose_newton)
             .first;
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
     T = T_from_v_e(1. / rho, e_from_p_rho(pressure, rho));
   else
     NeedTabulationOrFPError("T_from_p_rho", "temperature");
@@ -823,7 +828,7 @@ TabulatedFluidProperties::T_from_p_rho(const ADReal & pressure, const ADReal & r
                  ") to temperature failed to converge.");
     return T;
   }
-  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+  else if (_create_direct_ve_interpolations)
     return T_from_v_e(1. / rho, e_from_p_rho(pressure, rho));
   else
     NeedTabulationOrFPError("AD T_from_p_rho", "temperature");
@@ -881,7 +886,7 @@ TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     if (_create_direct_pT_interpolations)
       return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
-    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    else if (_create_direct_ve_interpolations)
     {
       Real v, e;
       SinglePhaseFluidProperties::v_e_from_p_T(pressure, temperature, v, e);
@@ -908,7 +913,7 @@ TabulatedFluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & tem
     checkInputVariables(pressure_nc, temperature_nc);
     if (_create_direct_pT_interpolations)
       return _property_ipol[_enthalpy_idx]->sample(pressure_nc, temperature_nc);
-    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    else if (_create_direct_ve_interpolations)
     {
       ADReal v, e;
       SinglePhaseFluidProperties::v_e_from_p_T(pressure_nc, temperature_nc, v, e);
@@ -933,7 +938,7 @@ TabulatedFluidProperties::h_from_p_T(
     if (_create_direct_pT_interpolations)
       _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
           pressure, temperature, h, dh_dp, dh_dT);
-    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    else if (_create_direct_ve_interpolations)
     {
       Real v, e, dv_dp, dv_dT, de_dp, de_dT;
       SinglePhaseFluidProperties::v_e_from_p_T(
@@ -1157,7 +1162,7 @@ TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Rea
     checkInputVariables(p, T);
     if (_create_direct_pT_interpolations)
       _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
-    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    else if (_create_direct_ve_interpolations)
     {
       Real v, e, dv_dp, dv_dT, de_dp, de_dT;
       SinglePhaseFluidProperties::v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
@@ -1850,7 +1855,6 @@ void
 TabulatedFluidProperties::s_from_h_p(
     Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const
 {
-
   if (_fp)
     _fp->s_from_h_p(h, pressure, s, ds_dh, ds_dp);
   else
