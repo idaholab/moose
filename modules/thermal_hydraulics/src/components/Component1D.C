@@ -164,3 +164,25 @@ Component1D::getConnections(Component1DConnection::EEndType end_type) const
   else
     mooseError(name(), ": Invalid end type (", end_type, ").");
 }
+
+std::string
+Component1D::sortBy() const
+{
+  // choose the dominant direction
+  std::string dominant_direction = "x";
+  const Real x_abs = std::abs(_dir(0));
+  const Real y_abs = std::abs(_dir(1));
+  const Real z_abs = std::abs(_dir(2));
+  Real max_value = x_abs;
+  if (y_abs > max_value)
+  {
+    dominant_direction = "y";
+    max_value = y_abs;
+  }
+  if (z_abs > max_value)
+  {
+    dominant_direction = "z";
+    max_value = z_abs;
+  }
+  return dominant_direction;
+}

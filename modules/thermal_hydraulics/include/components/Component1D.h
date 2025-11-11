@@ -73,6 +73,7 @@ public:
 
 protected:
   virtual bool usingSecondOrderMesh() const override;
+  std::string sortBy() const;
 
   /// Map of end type to a list of connections
   std::map<Component1DConnection::EEndType, std::vector<Connection>> _connections;

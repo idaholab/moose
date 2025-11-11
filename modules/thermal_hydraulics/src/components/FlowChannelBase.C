@@ -98,6 +98,8 @@ FlowChannelBase::validParams()
                         "If true, when there are multiple heat transfer components connected to "
                         "this flow channel, use their index for naming related quantities; "
                         "otherwise, use the name of the heat transfer component.");
+  params.addParam<std::vector<VariableName>>(
+      "vpp_vars", {}, "Variables to add in an ElementValueSampler");
 
   params.setDocString(
       "orientation",
@@ -319,6 +321,18 @@ FlowChannelBase::addMooseObjects()
       getTHMProblem().addMaterial(
           class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "zero_mat"), params);
     }
+  }
+
+  const auto & vpp_vars = getParam<std::vector<VariableName>>("vpp_vars");
+  if (vpp_vars.size() > 0)
+  {
+    const std::string class_name = "ElementValueSampler";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    params.set<std::vector<VariableName>>("variable") = vpp_vars;
+    params.set<MooseEnum>("sort_by") = sortBy();
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    getTHMProblem().addVectorPostprocessor(class_name, name() + "_vars_vpp", params);
   }
 
   _flow_model->addMooseObjects();
