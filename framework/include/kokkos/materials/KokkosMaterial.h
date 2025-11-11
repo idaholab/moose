@@ -93,6 +93,24 @@ public:
   ///@}
 
   /**
+   * Shims for hook methods that can be leveraged to implement static polymorphism
+   */
+  ///{@
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  initQpStatefulPropertiesShim(const Derived & material, const unsigned int qp, Datum & datum) const
+  {
+    material.initQpStatefulProperties(qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  computeQpPropertiesShim(const Derived & material, const unsigned int qp, Datum & datum) const
+  {
+    material.computeQpProperties(qp, datum);
+  }
+  ///@}
+
+  /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
@@ -168,7 +186,7 @@ Material::operator()(ElementInit, const ThreadID tid, const Derived & material) 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
     datum.reinit();
-    material.initQpStatefulProperties(qp, datum);
+    material.initQpStatefulPropertiesShim(material, qp, datum);
   }
 }
 
@@ -183,7 +201,7 @@ Material::operator()(SideInit, const ThreadID tid, const Derived & material) con
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
     datum.reinit();
-    material.initQpStatefulProperties(qp, datum);
+    material.initQpStatefulPropertiesShim(material, qp, datum);
   }
 }
 
@@ -198,7 +216,7 @@ Material::operator()(NeighborInit, const ThreadID tid, const Derived & material)
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
     datum.reinit();
-    material.initQpStatefulProperties(qp, datum);
+    material.initQpStatefulPropertiesShim(material, qp, datum);
   }
 }
 
@@ -213,7 +231,7 @@ Material::operator()(ElementCompute, const ThreadID tid, const Derived & materia
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
     datum.reinit();
-    material.computeQpProperties(qp, datum);
+    material.computeQpPropertiesShim(material, qp, datum);
   }
 }
 
@@ -228,7 +246,7 @@ Material::operator()(SideCompute, const ThreadID tid, const Derived & material) 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
     datum.reinit();
-    material.computeQpProperties(qp, datum);
+    material.computeQpPropertiesShim(material, qp, datum);
   }
 }
 
@@ -243,7 +261,7 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
     datum.reinit();
-    material.computeQpProperties(qp, datum);
+    material.computeQpPropertiesShim(material, qp, datum);
   }
 }
 

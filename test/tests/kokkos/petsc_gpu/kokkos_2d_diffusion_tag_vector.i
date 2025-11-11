@@ -26,7 +26,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosDiffusion
     variable = u
@@ -34,7 +34,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [TagVectorAux1]
     type = KokkosTagVectorAux
     variable = tag_variable1
@@ -49,7 +49,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

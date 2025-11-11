@@ -8,9 +8,11 @@ This is the Kokkos version of [VariableTimeIntegrationAux](VariableTimeIntegrati
 
 !listing test/tests/kokkos/auxkernels/time_integration/kokkos_time_integration.i start=[SimpsonsTimeIntegrator] end=[] include-end=true
 
-!syntax parameters /KokkosAuxKernels/KokkosVariableTimeIntegrationAux
+!syntax parameters /AuxKernels/KokkosVariableTimeIntegrationAux
 
-!syntax inputs /KokkosAuxKernels/KokkosVariableTimeIntegrationAux
+!syntax inputs /AuxKernels/KokkosVariableTimeIntegrationAux
+
+!syntax children /AuxKernels/KokkosVariableTimeIntegrationAux
 
 !if-end!
 

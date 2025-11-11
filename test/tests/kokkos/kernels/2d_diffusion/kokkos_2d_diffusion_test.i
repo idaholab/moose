@@ -25,7 +25,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   active = 'diff'
 
   [diff]
@@ -34,7 +34,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   # BCs cannot be preset due to Jacobian test
   active = 'left right'
 

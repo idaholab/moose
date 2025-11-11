@@ -28,10 +28,10 @@
       type = RunException
       input = 'kokkos_stateful_prop_spatial_test_restart.i'
       expect_err = 'The stateful material properties in KokkosStatefulSpatialTest \"stateful\" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
-      cli_args = 'KokkosKernels/heat/prop_name=other
-                  KokkosBCs/right/prop_name=other
-                  KokkosMaterials/stateful/prop_name=other
-                  KokkosAuxKernels/active=\'\''
+      cli_args = 'Kernels/heat/prop_name=other
+                  BCs/right/prop_name=other
+                  Materials/stateful/prop_name=other
+                  AuxKernels/active=\'\''
       detail = 'a restarted material declares a stateful material property that was not stored.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
@@ -41,7 +41,7 @@
       type = RunException
       input = 'kokkos_stateful_prop_spatial_test_restart.i'
       expect_err = 'The number of states for the restarted stateful material property \'thermal_conductivity\' do not match.'
-      cli_args = 'KokkosMaterials/stateful/declare_older=true'
+      cli_args = 'Materials/stateful/declare_older=true'
       detail = 'a restarted material declares a stateful material property that has different number of states with the stored property.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
@@ -51,7 +51,7 @@
       type = RunException
       input = 'kokkos_stateful_prop_spatial_test_restart.i'
       expect_err = 'The stateful material property \'thermal_conductivity\' was declared in KokkosStatefulSpatialTest \"another_stateful\" but was not declared in that object on checkpoint.'
-      cli_args = 'KokkosMaterials/active=another_stateful'
+      cli_args = 'Materials/active=another_stateful'
       detail = 'a new material declares a stateful property with the same name with a stored property.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
@@ -62,11 +62,11 @@
   [pass]
     type = RunApp
     input = 'kokkos_stateful_prop_spatial_test_restart.i'
-    cli_args = 'KokkosKernels/heat/prop_name=other
-                KokkosBCs/right/prop_name=other
-                KokkosMaterials/another_stateful/prop_name=other
-                KokkosMaterials/active=another_stateful
-                KokkosAuxKernels/active=\'\''
+    cli_args = 'Kernels/heat/prop_name=other
+                BCs/right/prop_name=other
+                Materials/another_stateful/prop_name=other
+                Materials/active=another_stateful
+                AuxKernels/active=\'\''
     requirement = 'In a restarted calculation, the Kokkos system shall not error when a new material declares a new stateful property.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'

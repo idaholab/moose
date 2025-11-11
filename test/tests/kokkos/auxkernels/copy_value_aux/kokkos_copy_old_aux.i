@@ -17,7 +17,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [hctd]
     type = KokkosTimeDerivative
     variable = T
@@ -29,7 +29,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [T_old]
     type = KokkosCopyValueAux
     variable = T_old

@@ -19,7 +19,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosMatDiffusionTest
     variable = u
@@ -27,7 +27,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u
@@ -42,7 +42,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [coupling_u]
     type = KokkosVarCouplingMaterial
     block = 0

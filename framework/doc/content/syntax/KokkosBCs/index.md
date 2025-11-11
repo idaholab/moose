@@ -72,7 +72,7 @@ See the following source codes of `KokkosMatchedValueBC` for another example of 
 !listing framework/src/kokkos/bcs/KokkosMatchedValueBC.K id=kokkos-matched-source language=cpp
          caption=The `KokkosMatchedValueBC` source file.
 
-!syntax list /KokkosBCs objects=True actions=False subsystems=False
+!syntax list /BCs objects=True actions=False subsystems=False
 
 !if-end!
 

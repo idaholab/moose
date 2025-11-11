@@ -16,7 +16,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   active = 'diff'
   [diff]
     type = KokkosDiffusion
@@ -24,7 +24,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   active = 'left right'
   [left]
     type = KokkosDirichletBC

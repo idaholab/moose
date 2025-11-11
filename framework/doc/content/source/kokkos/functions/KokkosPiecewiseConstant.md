@@ -6,11 +6,13 @@ This is the Kokkos version of [PiecewiseConstant](PiecewiseConstant.md). See the
 
 ## Example Syntax
 
-!listing test/tests/kokkos/functions/piecewise_constant/kokkos_piecewise_constant.i block=KokkosFunctions
+!listing test/tests/kokkos/functions/piecewise_constant/kokkos_piecewise_constant.i block=Functions
 
-!syntax parameters /KokkosFunctions/KokkosPiecewiseConstant
+!syntax parameters /Functions/KokkosPiecewiseConstant
 
-!syntax inputs /KokkosFunctions/KokkosPiecewiseConstant
+!syntax inputs /Functions/KokkosPiecewiseConstant
+
+!syntax children /Functions/KokkosPiecewiseConstant
 
 !if-end!
 

@@ -18,7 +18,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [time_u]
     type = KokkosTimeDerivative
     variable = u
@@ -38,7 +38,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = v

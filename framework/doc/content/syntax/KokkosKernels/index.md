@@ -174,7 +174,7 @@ See the following source codes of `KokkosCoupledTimeDerivative` for an example o
 !listing framework/src/kokkos/kernels/KokkosCoupledTimeDerivative.K id=kokkos-time-derivative-source language=cpp
          caption=The `KokkosCoupledTimeDerivative` source file.
 
-!syntax list /KokkosKernels objects=True actions=False subsystems=False
+!syntax list /Kernels objects=True actions=False subsystems=False
 
 !if-end!
 

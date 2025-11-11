@@ -21,14 +21,14 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosDiffusion
     variable = u
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u
@@ -43,7 +43,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   [left_real_1D]
     type = Kokkos1DRealProperty
     block = 0

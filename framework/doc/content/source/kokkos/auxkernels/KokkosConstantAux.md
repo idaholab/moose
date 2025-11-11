@@ -8,9 +8,11 @@ This is the Kokkos version of [ConstantAux](ConstantAux.md). See the original do
 
 !listing test/tests/kokkos/bcs/coupled_var_neumann/kokkos_on_off.i start=[active_right] end=[] include-end=true
 
-!syntax parameters /KokkosAuxKernels/KokkosConstantAux
+!syntax parameters /AuxKernels/KokkosConstantAux
 
-!syntax inputs /KokkosAuxKernels/KokkosConstantAux
+!syntax inputs /AuxKernels/KokkosConstantAux
+
+!syntax children /AuxKernels/KokkosConstantAux
 
 !if-end!
 

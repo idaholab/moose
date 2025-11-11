@@ -63,7 +63,7 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDa
         unsigned int i = ij % datum.n_jdofs();
         unsigned int j = ij / datum.n_jdofs();
 
-        local_ke[ij - ijb] += datum.JxW(qp) * kernel.computeQpJacobian(i, j, qp, datum);
+        local_ke[ij - ijb] += datum.JxW(qp) * kernel.computeQpJacobianShim(kernel, i, j, qp, datum);
       }
     }
 

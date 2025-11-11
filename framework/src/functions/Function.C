@@ -16,8 +16,6 @@ InputParameters
 Function::validParams()
 {
   InputParameters params = FunctionBase::validParams();
-  params.registerBase("Function");
-
   return params;
 }
 

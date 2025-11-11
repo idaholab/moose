@@ -8,9 +8,11 @@ This is the Kokkos version of [GenericConstantMaterial](GenericConstantMaterial.
 
 !listing test/tests/kokkos/kernels/material_coupled_force/kokkos_material_coupled_force.i start=[mat] end=[] include-end=true
 
-!syntax parameters /KokkosMaterials/KokkosGenericConstantMaterial
+!syntax parameters /Materials/KokkosGenericConstantMaterial
 
-!syntax inputs /KokkosMaterials/KokkosGenericConstantMaterial
+!syntax inputs /Materials/KokkosGenericConstantMaterial
+
+!syntax children /Materials/KokkosGenericConstantMaterial
 
 !if-end!
 

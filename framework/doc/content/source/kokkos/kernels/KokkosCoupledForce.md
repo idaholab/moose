@@ -8,9 +8,11 @@ This is the Kokkos version of [CoupledForce](CoupledForce.md). See the original 
 
 !listing test/tests/kokkos/bcs/coupled_dirichlet_bc/kokkos_coupled_dirichlet_bc.i start=[coupled_force_u] end=[] include-end=true
 
-!syntax parameters /KokkosKernels/KokkosCoupledForce
+!syntax parameters /Kernels/KokkosCoupledForce
 
-!syntax inputs /KokkosKernels/KokkosCoupledForce
+!syntax inputs /Kernels/KokkosCoupledForce
+
+!syntax children /Kernels/KokkosCoupledForce
 
 !if-end!
 

@@ -18,12 +18,12 @@ import MooseDocs
 from .read import read
 
 #: Locates class definitions in header files
-# string starts with register(AD)MooseObject(Aliased)
+# string starts with register(AD)MooseObject(Aliased) or registerKokkos*
 # then the App name in double quotes, which must finish by App
 # then either a comma and one or more spaces, or a comma, spaces, a word (for aliased registration)
 # then the name of the registered class, captured in <class>, can be followed by quotes (alias)
 # then the registering function closing parenthesis and the C++ semicolon
-DEFINITION_RE = re.compile(r'register(|AD)MooseObject(|Aliased)\(\"\w+App\"(,\s+|,\s+\w+,\s+\")(?P<class>\w+)\"?\);')
+DEFINITION_RE = re.compile(r'(register(|AD)MooseObject(|Aliased)|registerKokkos\w+)\(\"\w+App\"(,\s+|,\s+\w+,\s+\")(?P<class>\w+)\"?\);')
 
 #: Locates class inheritance
 # <key> is captured as the first word after the 'public' word at the beginning of the expression
@@ -75,7 +75,7 @@ def build_class_database(source_dirs=None, include_dirs=None, input_dirs=None):
     # Locate filenames
     LOG = logging.getLogger('MooseDocs.common.build_class_database')
     try:
-        sources = _locate_filenames(source_dirs, '.C')
+        sources = _locate_filenames(source_dirs, ('.C', '.K'))
     except FileNotFoundError as err:
         LOG.warning(err)
         sources = []

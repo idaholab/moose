@@ -28,7 +28,6 @@ AuxKernelTempl<ComputeValueType>::validParams()
 {
   InputParameters params = AuxKernelBase::validParams();
 
-  params.registerBase("AuxKernel");
   if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(VectorAuxKernel).name())
     params.registerBase("VectorAuxKernel");
   if (typeid(AuxKernelTempl<ComputeValueType>).name() == typeid(ArrayAuxKernel).name())

@@ -8,9 +8,11 @@ This is the Kokkos version of [ReactionNodalKernel](ReactionNodalKernel.md). See
 
 !listing test/tests/kokkos/nodalkernels/reaction/kokkos_reaction.i start=[reaction] end=[] include-end=true
 
-!syntax parameters /KokkosNodalKernels/KokkosReactionNodalKernel
+!syntax parameters /NodalKernels/KokkosReactionNodalKernel
 
-!syntax inputs /KokkosNodalKernels/KokkosReactionNodalKernel
+!syntax inputs /NodalKernels/KokkosReactionNodalKernel
+
+!syntax children /NodalKernels/KokkosReactionNodalKernel
 
 !if-end!
 

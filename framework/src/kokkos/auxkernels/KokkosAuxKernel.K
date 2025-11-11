@@ -19,7 +19,6 @@ AuxKernel::validParams()
 {
   InputParameters params = AuxKernelBase::validParams();
   params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
-  params.registerBase("KokkosAuxKernel");
   return params;
 }
 

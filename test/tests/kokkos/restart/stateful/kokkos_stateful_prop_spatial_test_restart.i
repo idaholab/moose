@@ -21,7 +21,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [prop1_output]
     type = KokkosMaterialRealAux
     variable = prop1
@@ -29,7 +29,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [heat]
     type = KokkosMatDiffusionTest
     variable = u
@@ -41,7 +41,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u
@@ -57,7 +57,7 @@
   []
 []
 
-[KokkosMaterials]
+[Materials]
   active = stateful
   [stateful]
     type = KokkosStatefulSpatialTest

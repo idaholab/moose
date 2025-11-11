@@ -74,7 +74,7 @@ TimeKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datu
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * kernel.computeQpResidual(i, qp, datum);
+            local_re[i] += datum.JxW(qp) * kernel.computeQpResidualShim(kernel, i, qp, datum);
         }
 
         kernel.computeResidualAdditional(ib, ie, datum, local_re);

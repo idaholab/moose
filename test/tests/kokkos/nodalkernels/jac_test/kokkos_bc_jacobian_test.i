@@ -12,7 +12,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff_x]
     type = KokkosCoefDiffusion
     variable = u_x
@@ -25,7 +25,7 @@
   []
 []
 
-[KokkosNodalKernels]
+[NodalKernels]
   [test_y]
     type = KokkosJacobianCheck
     variable = u_y
@@ -38,7 +38,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left_x]
     type = KokkosDirichletBC
     variable = u_x

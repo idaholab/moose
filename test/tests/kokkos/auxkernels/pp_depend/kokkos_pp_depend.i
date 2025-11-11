@@ -22,7 +22,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   [diff]
     type = KokkosCoefDiffusion
     variable = u
@@ -30,7 +30,7 @@
   []
 []
 
-[KokkosAuxKernels]
+[AuxKernels]
   [pp_aux]
     type = KokkosPostprocessorAux
     variable = pp_aux
@@ -39,7 +39,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   [left]
     type = KokkosDirichletBC
     variable = u

@@ -94,6 +94,34 @@ public:
   ///@}
 
   /**
+   * Shims for hook methods that can be leveraged to implement static polymorphism
+   */
+  ///{@
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpResidualShim(const Derived & bc,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+  {
+    return bc.computeQpResidual(qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpJacobianShim(const Derived & bc,
+                                             const unsigned int qp,
+                                             AssemblyDatum & datum) const
+  {
+    return bc.computeQpJacobian(qp, datum);
+  }
+  template <typename Derived>
+  KOKKOS_FUNCTION Real computeQpOffDiagJacobianShim(const Derived & bc,
+                                                    const unsigned int jvar,
+                                                    const unsigned int qp,
+                                                    AssemblyDatum & datum) const
+  {
+    return bc.computeQpOffDiagJacobian(jvar, qp, datum);
+  }
+  ///@}
+
+  /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
@@ -125,7 +153,7 @@ NodalBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  Real local_re = bc.computeQpResidual(0, datum);
+  Real local_re = bc.computeQpResidualShim(bc, 0, datum);
 
   accumulateTaggedNodalResidual(false, local_re, node);
 }
@@ -142,7 +170,7 @@ NodalBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  Real local_ke = bc.computeQpJacobian(0, datum);
+  Real local_ke = bc.computeQpJacobianShim(bc, 0, datum);
 
   // This initializes the row to zero except the diagonal
   accumulateTaggedNodalMatrix(false, local_ke, node, _kokkos_var.var());
@@ -161,7 +189,7 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
 
   AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
-  Real local_ke = bc.computeQpOffDiagJacobian(jvar, 0, datum);
+  Real local_ke = bc.computeQpOffDiagJacobianShim(bc, jvar, 0, datum);
 
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
 }

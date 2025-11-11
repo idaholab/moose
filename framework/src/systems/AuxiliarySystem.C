@@ -662,7 +662,7 @@ AuxiliarySystem::getDependObjects()
     }
   }
 
-  // Nodal ElementalAuxKernels
+  // Elemental KokkosAuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
         _kokkos_elemental_aux_storage.getActiveObjects();

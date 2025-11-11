@@ -18,7 +18,7 @@
   []
 []
 
-[KokkosKernels]
+[Kernels]
   active = 'diff'
 
   [diff]
@@ -27,7 +27,7 @@
   []
 []
 
-[KokkosBCs]
+[BCs]
   active = 'left right'
 
   [left]
