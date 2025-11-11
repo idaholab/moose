@@ -12,5 +12,5 @@
 pytest_plugins = (
     # Configures pytest for finding and optionally
     # skipping tests that depend on MOOSE.
-    "moosepytest.mooseexe_plugin",
+    "moosepytest.plugins.mooseexe",
 )
