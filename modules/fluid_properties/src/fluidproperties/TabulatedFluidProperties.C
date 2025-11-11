@@ -890,11 +890,24 @@ void
 TabulatedFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  if (_interpolate_enthalpy && _create_direct_pT_interpolations)
+  if (_interpolate_enthalpy)
   {
     checkInputVariables(pressure, temperature);
-    _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
-        pressure, temperature, h, dh_dp, dh_dT);
+    if (_create_direct_pT_interpolations)
+      _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
+          pressure, temperature, h, dh_dp, dh_dT);
+    else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    {
+      Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+      SinglePhaseFluidProperties::v_e_from_p_T(
+          pressure, temperature, v, dv_dp, dv_dT, e, de_dp, de_dT);
+      Real dh_dv, dh_de;
+      _property_ve_ipol[_enthalpy_idx]->sampleValueAndDerivatives(v, e, h, dh_dv, dh_de);
+      dh_dp = dh_dv * dv_dp + dh_de * de_dp;
+      dh_dT = dh_dv * dv_dT + dh_de * de_dT;
+    }
+    else
+      NeedTabulationError("enthalpy");
   }
   else
   {
