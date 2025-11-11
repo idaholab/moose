@@ -133,7 +133,7 @@ MooseMesh::validParams()
   params.addParam<bool>(
       "construct_node_list_from_side_list",
       true,
-      "Whether or not to generate nodesets from the sidesets (usually a good idea).");
+      "Whether or not to generate nodesets from the sidesets (currently often required).");
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   params.addParam<unsigned int>("ghosting_patch_size",
