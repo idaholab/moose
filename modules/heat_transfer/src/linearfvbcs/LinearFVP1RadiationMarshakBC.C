@@ -42,7 +42,6 @@ LinearFVP1RadiationMarshakBC::getAlpha(Moose::FaceArg face, Moose::StateArg stat
 Real
 LinearFVP1RadiationMarshakBC::getBeta(Moose::FaceArg face, Moose::StateArg state) const
 {
-
   const auto beta = -_eps_boundary(face, state) / (2 * (2 - _eps_boundary(face, state)));
   return beta;
 }
@@ -50,7 +49,6 @@ LinearFVP1RadiationMarshakBC::getBeta(Moose::FaceArg face, Moose::StateArg state
 Real
 LinearFVP1RadiationMarshakBC::getGamma(Moose::FaceArg face, Moose::StateArg state) const
 {
-
   const auto gamma = -_eps_boundary(face, state) * 4 * HeatConduction::Constants::sigma *
                      Utility::pow<4>(_temperature_radiation(face, state)) /
                      ((2 * (2 - _eps_boundary(face, state))));
