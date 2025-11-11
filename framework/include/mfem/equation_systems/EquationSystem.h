@@ -32,7 +32,6 @@ class EquationSystem : public mfem::Operator
 
 public:
   friend class EquationSystemProblemOperator;
-  friend class TimeDomainEquationSystemProblemOperator;
 
   EquationSystem() = default;
   ~EquationSystem() override;
@@ -365,6 +364,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
+  friend class TimeDomainEquationSystemProblemOperator;
   TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
   /// Initialise
@@ -409,6 +409,7 @@ public:
           *(*boundary_markers[i]));
   }
   void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
+  void Print();
 
 protected:
   /// Coefficient for timestep scaling

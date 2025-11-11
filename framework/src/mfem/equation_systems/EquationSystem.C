@@ -126,26 +126,26 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyL
   _assembly_level = assembly_level;
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
-  SetTrialVariableNames();
+  //  SetTrialVariableNames();
 
-  for (auto & trial_var_name : _trial_var_names)
+  for (auto & test_var_name : _test_var_names)
   {
-    if (!gridfunctions.Has(trial_var_name))
+    if (!gridfunctions.Has(test_var_name))
     {
       mooseError("MFEM variable ",
-                 trial_var_name,
+                 test_var_name,
                  " requested by equation system during initialisation was "
                  "not found in gridfunctions");
     }
     // Store pointers to test FESpaces
-    _test_pfespaces.push_back(gridfunctions.Get(trial_var_name)->ParFESpace());
+    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(trial_var_name)->ParFESpace()));
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
-  SetTrialVariableNames();
+    SetTrialVariableNames();
 
   // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
@@ -344,6 +344,12 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
+  std::cout << "********************* Sol **********************" << std::endl;
+  sol.Print(std::cout);
+  std::cout << "****************** _td_var_ess_constraints *****" << std::endl;
+  //_var_ess_constraints.at(0)->Print(std::cout);
+  TimeDependentEquationSystem * child = dynamic_cast<TimeDependentEquationSystem *>(const_cast<EquationSystem *>(this));
+  child->Print();
   static_cast<mfem::Vector &>(_trueBlockSol) = sol;
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
@@ -360,7 +366,6 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     for (unsigned int i = 0; i < _test_var_names.size(); i++)
     {
       auto & test_var_name = _test_var_names.at(i);
-
       int offset = _BlockResidual.GetBlock(i).Size();
       mfem::Vector b(offset);
 
@@ -409,8 +414,8 @@ TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt,
   {
     u_old_gf.SetSpace(_test_pfespaces[i]);
     u_old_gf.SetFromTrueDofs(block_x_old.GetBlock(i));
-    *(_var_ess_constraints.at(i)) -= u_old_gf;
-    *(_var_ess_constraints.at(i)) /= dt;
+    *(_td_var_ess_constraints.at(i)) = *(_var_ess_constraints.at(i)) - u_old_gf;
+    *(_td_var_ess_constraints.at(i)) /= dt;
   }
 }
 
@@ -441,6 +446,7 @@ EquationSystem::UpdateJacobian() const
       }
     }
   }
+
 }
 
 mfem::Operator &
@@ -784,6 +790,10 @@ TimeDependentEquationSystem::ApplyEssentialBCs()
     EquationSystem::ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
+    std::cout << "New T = " << std::endl;
+    _td_var_ess_constraints.at(i)->Print(std::cout);
+    std::cout << "Old T = " << std::endl;
+    _eliminated_variables.Get(test_var_name)->Print(std::cout);
     *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
     *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
     // Apply any remaining Dirichlet BCs specified directly on du/dt
@@ -852,6 +862,12 @@ TimeDependentEquationSystem::UpdateEquationSystem(Moose::MFEM::GridFunctions & g
                                                   mfem::Array<int> & btoffsets)
 {
   EquationSystem::BuildEquationSystem(gridfunctions, btoffsets);
+}
+
+void
+TimeDependentEquationSystem::Print()
+{
+  _td_var_ess_constraints.at(0)->Print(std::cout);
 }
 
 } // namespace Moose::MFEM
