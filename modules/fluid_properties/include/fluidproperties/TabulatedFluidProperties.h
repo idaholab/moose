@@ -294,9 +294,9 @@ protected:
   /// Specific enthalpy vector
   std::vector<Real> _enthalpy;
 
-  /// Whether to create direct (p,T) interpolations
+  /// Whether the object has direct (p,T) interpolations (whether created from file or from _fp)
   const bool _create_direct_pT_interpolations;
-  /// Whether to create direct (v,e) interpolations
+  /// Whether the object has direct (v,e) interpolations (whether created from file or from _fp)
   const bool _create_direct_ve_interpolations;
 
   /// Tabulated fluid properties (read from file OR computed from _fp)
