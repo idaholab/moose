@@ -379,7 +379,7 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
   }
-  else if (!_fp && (_create_direct_ve_interpolations || _file_name_ve_in != ""))
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
   {
     checkInputVariables(pressure, temperature);
     Real v, e;
@@ -420,7 +420,7 @@ TabulatedFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & tem
     checkInputVariables(pressure_nc, temperature_nc);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
   }
-  else if (!_fp && (_create_direct_ve_interpolations || _file_name_ve_in != ""))
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
   {
     ADReal pressure_nc = pressure, temperature_nc = temperature;
     checkInputVariables(pressure_nc, temperature_nc);
@@ -529,31 +529,11 @@ TabulatedFluidProperties::rho_from_p_T(
   else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
   {
     checkInputVariables(pressure, temperature);
-    Real v, e, dv_dp, dv_dT, de_dp, de_dT;
-    auto p_from_v_e = [&](Real v, Real e, Real & new_p, Real & dp_dv, Real & dp_de)
-    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
-    auto T_from_v_e = [&](Real v, Real e, Real & new_T, Real & dT_dv, Real & dT_de)
-    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
-    FluidPropertiesUtils::NewtonSolve2D(pressure,
-                                        temperature,
-                                        (_v_min + _v_max) / 2,
-                                        (_e_min + _e_max) / 2,
-                                        v,
-                                        dv_dp,
-                                        dv_dT,
-                                        e,
-                                        de_dp,
-                                        de_dT,
-                                        _tolerance,
-                                        _tolerance,
-                                        p_from_v_e,
-                                        T_from_v_e,
-                                        name() + "::v_from_p_T",
-                                        _max_newton_its,
-                                        _verbose_newton);
-    rho = 1. / v;
-    drho_dp = -dv_dp / v / v;
-    drho_dT = -dv_dT / v / v;
+    // use finite differencing stencil
+    rho = rho_from_p_T(pressure, temperature);
+    Real eps = 1e-8;
+    drho_dp = (rho_from_p_T(pressure * (1 + eps), temperature) - rho) / (eps * pressure);
+    drho_dT = (rho_from_p_T(pressure, temperature * (1 + eps)) - rho) / (eps * temperature);
   }
   else
   {
@@ -692,28 +672,11 @@ TabulatedFluidProperties::e_from_p_T(
   else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
   {
     checkInputVariables(pressure, temperature);
-    Real v, dv_dp, dv_dT;
-    auto p_from_v_e = [&](Real v, Real e, Real & new_p, Real & dp_dv, Real & dp_de)
-    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
-    auto T_from_v_e = [&](Real v, Real e, Real & new_T, Real & dT_dv, Real & dT_de)
-    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
-    FluidPropertiesUtils::NewtonSolve2D(pressure,
-                                        temperature,
-                                        (_v_min + _v_max) / 2,
-                                        (_e_min + _e_max) / 2,
-                                        v,
-                                        dv_dp,
-                                        dv_dT,
-                                        e,
-                                        de_dp,
-                                        de_dT,
-                                        _tolerance,
-                                        _tolerance,
-                                        p_from_v_e,
-                                        T_from_v_e,
-                                        name() + "::v_from_p_T",
-                                        _max_newton_its,
-                                        _verbose_newton);
+    // use finite differencing stencil
+    e = e_from_p_T(pressure, temperature);
+    Real eps = 1e-8;
+    de_dp = (e_from_p_T(pressure * (1 + eps), temperature) - e) / (eps * pressure);
+    de_dT = (e_from_p_T(pressure, temperature * (1 + eps)) - e) / (eps * temperature);
   }
   else
   {
@@ -804,17 +767,26 @@ TabulatedFluidProperties::e_from_p_rho(
 Real
 TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
-  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
-  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
-                                             rho,
-                                             _T_initial_guess,
-                                             _tolerance,
-                                             lambda,
-                                             name() + "::T_from_p_rho",
-                                             _max_newton_its,
-                                             _verbose_newton)
-               .first;
+  Real T = _T_initial_guess;
+  if (_interpolate_density && _create_direct_pT_interpolations)
+  {
+    checkInputVariables(pressure, T);
+    auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
+    { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+    T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                          rho,
+                                          _T_initial_guess,
+                                          _tolerance,
+                                          lambda,
+                                          name() + "::T_from_p_rho",
+                                          _max_newton_its,
+                                          _verbose_newton)
+            .first;
+  }
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    T = T_from_v_e(1. / rho, e_from_p_rho(pressure, rho));
+  else
+    NeedTabulationOrFPError("T_from_p_rho", "temperature");
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from pressure (p = ",
@@ -828,26 +800,33 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 ADReal
 TabulatedFluidProperties::T_from_p_rho(const ADReal & pressure, const ADReal & rho) const
 {
-  auto lambda =
-      [&](ADReal p, ADReal current_T, ADReal & new_rho, ADReal & drho_dp, ADReal & drho_dT)
-  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  ADReal T = FluidPropertiesUtils::NewtonSolve(pressure,
-                                               rho,
-                                               _T_initial_guess,
-                                               _tolerance,
-                                               lambda,
-                                               name() + "::T_from_p_rho",
-                                               _max_newton_its,
-                                               _verbose_newton)
-                 .first;
-  // check for nans
-  if (std::isnan(T.value()))
-    mooseError("Conversion from pressure (p = ",
-               pressure,
-               ") and density (rho = ",
-               rho,
-               ") to temperature failed to converge.");
-  return T;
+  if (_interpolate_density)
+  {
+    auto lambda =
+        [&](ADReal p, ADReal current_T, ADReal & new_rho, ADReal & drho_dp, ADReal & drho_dT)
+    { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+    ADReal T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                                 rho,
+                                                 _T_initial_guess,
+                                                 _tolerance,
+                                                 lambda,
+                                                 name() + "::T_from_p_rho",
+                                                 _max_newton_its,
+                                                 _verbose_newton)
+                   .first;
+    // check for nans
+    if (std::isnan(T.value()))
+      mooseError("Conversion from pressure (p = ",
+                 pressure,
+                 ") and density (rho = ",
+                 rho,
+                 ") to temperature failed to converge.");
+    return T;
+  }
+  else if (_create_direct_ve_interpolations || _file_name_ve_in != "")
+    return T_from_v_e(1. / rho, e_from_p_rho(pressure, rho));
+  else
+    NeedTabulationOrFPError("AD T_from_p_rho", "temperature");
 }
 
 void
@@ -2601,10 +2580,10 @@ TabulatedFluidProperties::createVGridVector()
     if (_fp)
     {
       // extreme values of specific volume for the grid bounds
-      Real v1 = v_from_p_T(_pressure_min, _temperature_min);
-      Real v2 = v_from_p_T(_pressure_max, _temperature_min);
-      Real v3 = v_from_p_T(_pressure_min, _temperature_max);
-      Real v4 = v_from_p_T(_pressure_max, _temperature_max);
+      Real v1 = _fp->v_from_p_T(_pressure_min, _temperature_min);
+      Real v2 = _fp->v_from_p_T(_pressure_max, _temperature_min);
+      Real v3 = _fp->v_from_p_T(_pressure_min, _temperature_max);
+      Real v4 = _fp->v_from_p_T(_pressure_max, _temperature_max);
       _v_min = std::min({v1, v2, v3, v4});
       _v_max = std::max({v1, v2, v3, v4});
     }
@@ -2650,10 +2629,10 @@ TabulatedFluidProperties::createVEGridVectors()
     if (_fp)
     {
       // extreme values of internal energy for the grid bounds
-      Real e1 = e_from_p_T(_pressure_min, _temperature_min);
-      Real e2 = e_from_p_T(_pressure_max, _temperature_min);
-      Real e3 = e_from_p_T(_pressure_min, _temperature_max);
-      Real e4 = e_from_p_T(_pressure_max, _temperature_max);
+      Real e1 = _fp->e_from_p_T(_pressure_min, _temperature_min);
+      Real e2 = _fp->e_from_p_T(_pressure_max, _temperature_min);
+      Real e3 = _fp->e_from_p_T(_pressure_min, _temperature_max);
+      Real e4 = _fp->e_from_p_T(_pressure_max, _temperature_max);
       _e_min = std::min({e1, e2, e3, e4});
       _e_max = std::max({e1, e2, e3, e4});
     }
@@ -2698,10 +2677,10 @@ TabulatedFluidProperties::createVHGridVectors()
   if (_fp)
   {
     // extreme values of enthalpy for the grid bounds
-    Real h1 = h_from_p_T(_pressure_min, _temperature_min);
-    Real h2 = h_from_p_T(_pressure_max, _temperature_min);
-    Real h3 = h_from_p_T(_pressure_min, _temperature_max);
-    Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+    Real h1 = _fp->h_from_p_T(_pressure_min, _temperature_min);
+    Real h2 = _fp->h_from_p_T(_pressure_max, _temperature_min);
+    Real h3 = _fp->h_from_p_T(_pressure_min, _temperature_max);
+    Real h4 = _fp->h_from_p_T(_pressure_max, _temperature_max);
     _h_min = std::min({h1, h2, h3, h4});
     _h_max = std::max({h1, h2, h3, h4});
   }
