@@ -577,6 +577,17 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
     Real p = _tab_ve_from_fp->p_from_v_e(v, e);
     Real T = _tab_ve_from_fp->T_from_v_e(v, e);
     REL_TEST(1. / v, _tab_ve_from_fp->rho_from_p_T(p, T), 1e-6);
+
+    // internal energy
+    REL_TEST(e, _tab_ve_from_fp->e_from_p_T(p, T), 1e-6);
+
+    // enthalpy
+    Real h = _tab_ve_from_fp->h_from_v_e(v, e);
+    REL_TEST(h, _tab_ve_from_fp->h_from_p_T(p, T), 1e-6);
+
+    // entropy
+    Real s = _tab_ve_from_fp->s_from_v_e(v, e);
+    REL_TEST(s, _tab_ve_from_fp->s_from_p_T(p, T), 1e-6);
   }
 
   // check computations from p, rho
@@ -584,6 +595,30 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
     // specific internal energy
     Real p = _tab_ve_from_fp->p_from_v_e(v, e);
     REL_TEST(e, _tab_ve_from_fp->e_from_p_rho(p, 1. / v), 1e-6);
+  }
+
+  // check computations from p, h
+  {
+    // temperature
+    Real p = _tab_ve_from_fp->p_from_v_e(v, e);
+    Real T = _tab_ve_from_fp->T_from_v_e(v, e);
+    Real h = _tab_ve_from_fp->h_from_v_e(v, e);
+    REL_TEST(T, _tab_ve_from_fp->T_from_p_h(p, h), 1e-6);
+
+    // entropy
+    Real s = _tab_ve_from_fp->s_from_v_e(v, e);
+    REL_TEST(s, _tab_ve_from_fp->s_from_h_p(h, p), 1e-6);
+  }
+
+  // check computations from p, s
+  {
+    // temperature
+    Real p = _tab_ve_from_fp->p_from_v_e(v, e);
+    Real T = _tab_ve_from_fp->T_from_v_e(v, e);
+    Real s = _tab_ve_from_fp->s_from_v_e(v, e);
+    Moose::_throw_on_warning = false;
+    REL_TEST(T, _tab_ve_from_fp->T_from_p_s(p, s), 1e-6);
+    Moose::_throw_on_warning = true;
   }
 
   // AD p_from_v_e
@@ -648,6 +683,49 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromVEFile)
     _tab_ve_from_fp->e_from_p_rho(p, rho, e, de_dp, de_drho);
     REL_TEST(e_ad.derivatives()[0], de_dp, 0.0001);
     REL_TEST(e_ad.derivatives()[1], de_drho, 0.0001);
+  }
+
+  // AD T_from_p_rho
+  {
+    DNDerivativeType dpdx;
+    DNDerivativeType drhodx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dpdx, 0, 1);
+    Moose::derivInsert(dpdx, 1, 0);
+    Moose::derivInsert(drhodx, 0, 0);
+    Moose::derivInsert(drhodx, 1, 1);
+
+    Real rho = 1. / v;
+    ADReal p_ad(p, dpdx);
+    ADReal rho_ad(rho, drhodx);
+    ADReal T_ad = _tab_ve_from_fp->T_from_p_rho(p_ad, rho_ad);
+
+    Real T, dT_dp, dT_drho;
+    _tab_ve_from_fp->T_from_p_rho(p, rho, T, dT_dp, dT_drho);
+    REL_TEST(T_ad.derivatives()[0], dT_dp, 0.0001);
+    REL_TEST(T_ad.derivatives()[1], dT_drho, 0.0001);
+  }
+
+  // AD e_from_p_T
+  {
+    DNDerivativeType dpdx;
+    DNDerivativeType dTdx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dpdx, 0, 1);
+    Moose::derivInsert(dpdx, 1, 0);
+    Moose::derivInsert(dTdx, 0, 0);
+    Moose::derivInsert(dTdx, 1, 1);
+
+    ADReal p_ad(p, dpdx);
+    ADReal T_ad(T, dTdx);
+    ADReal e_ad = _tab_ve_from_fp->e_from_p_T(p_ad, T_ad);
+
+    Real e, de_dp, de_dT;
+    _tab_ve_from_fp->e_from_p_T(p, T, e, de_dp, de_dT);
+    REL_TEST(e_ad.derivatives()[0], de_dp, 0.0001);
+    REL_TEST(e_ad.derivatives()[1], de_dT, 0.0001);
   }
 
   // AD rho_from_p_T
