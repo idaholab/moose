@@ -14,6 +14,7 @@
     cli_args = '--mesh-only'
     exodiff = 'displace_node_list_in.e'
     recover = false
+    design = 'MooseMesh.md'
     issues = '#30385'
     requirement = 'The system shall be able to create a sufficient offset in the nodeset ids rather than merge converted sidesets into a nodeset whose id conflicts with a sideset'
   []
