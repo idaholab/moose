@@ -3032,13 +3032,14 @@ MooseMesh::buildNodeListFromSideList()
 
   if (_construct_node_list_from_side_list)
   {
+    const std::set<boundary_id_type> & side_bcids = boundary_info.get_side_boundary_ids();
+
     if (_displace_node_list_by_side_list)
     {
       // Don't want to use auto here - the rbegin trick relies on a
       // sorted set and we want the compiler to scream if libMesh ever
       // switches type
       const std::set<boundary_id_type> & node_bcids = boundary_info.get_node_boundary_ids();
-      const std::set<boundary_id_type> & side_bcids = boundary_info.get_side_boundary_ids();
 
       boundary_id_type next_bcid = 0;
       if (!node_bcids.empty())
@@ -3051,12 +3052,14 @@ MooseMesh::buildNodeListFromSideList()
       // rather than overwrite or merge to.
       for (auto bcid : side_bcids)
         if (node_bcids.count(bcid) &&
-            boundary_info.get_sideset_name(bcid) != boundary_info.get_nodeset_name(bcid))
-        {
+            (boundary_info.get_sideset_name(bcid) != boundary_info.get_nodeset_name(bcid)))
           boundary_info.renumber_node_id(bcid, next_bcid++);
-          boundary_info.nodeset_name(bcid) = boundary_info.get_sideset_name(bcid);
-        }
     }
+
+    // If any side bcid isn't already a node bcid, we should make
+    // sure that our new node bcid is given the same name.
+    for (auto bcid : side_bcids)
+      boundary_info.nodeset_name(bcid) = boundary_info.get_sideset_name(bcid);
 
     boundary_info.build_node_list_from_side_list();
   }
