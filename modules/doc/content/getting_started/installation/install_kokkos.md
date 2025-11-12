@@ -2,7 +2,7 @@
 
 The Kokkos capability of MOOSE acquires the Kokkos library through PETSc, so it requires PETSc to be configured with Kokkos support. You may achieve it by performing the following steps:
 
-1. After cloning the MOOSE repository, navigate to the root directory and run the following commands (you may replace `10` with however many cpus you wish to use for compilation):
+1. After cloning the MOOSE repository, navigate to the root directory and run the following commands (you may replace `10` with however many threads you wish to use for compilation):
 
 ```bash
 export METHOD=opt

@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [MatCoupledForce](MatCoupledForce.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/kernels/material_coupled_force/kokkos_material_coupled_force.i start=[coupled] end=[] include-end=true
 

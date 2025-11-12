@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [TagVectorAux](TagVectorAux.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/tag/kokkos_2d_diffusion_tag_vector.i start=[TagVectorAux1] end=[] include-end=true
 

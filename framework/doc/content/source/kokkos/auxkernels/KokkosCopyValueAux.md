@@ -4,7 +4,7 @@
 
 This is the Kokkos version of [CopyValueAux](CopyValueAux.md). See the original document for details.
 
-## Example Syntax
+## Example Input Syntax
 
 !listing test/tests/kokkos/auxkernels/copy_value_aux/kokkos_copy_old_aux.i block=AuxKernels
 

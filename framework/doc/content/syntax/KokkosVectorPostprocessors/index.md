@@ -1,4 +1,4 @@
-# Kokkos Postprocessors System
+# Kokkos VectorPostprocessors System
 
 !if! function=hasCapability('kokkos')
 
