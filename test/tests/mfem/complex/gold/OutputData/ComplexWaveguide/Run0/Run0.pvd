@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<VTKFile type="Collection" version="0.1" byte_order="LittleEndian">
-<Collection>
-<DataSet timestep="0" group="" part="0" file="Cycle000000/data.pvtu" name="mesh"/>
-<DataSet timestep="1" group="" part="0" file="Cycle000001/data.pvtu" name="mesh"/>
-</Collection>
-</VTKFile>
