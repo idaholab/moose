@@ -60,8 +60,10 @@ Mesh::initMap()
         if (!_maps->_local_node_id_mapping.count(&node))
           _maps->_local_node_id_mapping[&node] = _maps->_local_node_id_mapping.size();
 
+        // A node can belong to multiple subdomains
         if (node.processor_id() == _mesh.processor_id())
-          _maps->_subdomain_node_ids[subdomain].insert(_maps->_local_node_id_mapping[&node]);
+          for (auto subdomain : _mesh.getNodeBlockIds(node))
+            _maps->_subdomain_node_ids[subdomain].insert(_maps->_local_node_id_mapping[&node]);
       }
     }
   }
