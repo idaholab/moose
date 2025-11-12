@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#31820'
+  design = 'StochasticPackedVector.md'
+
+  [simulation]
+    type = JSONDiff
+    input = stochastic_packed_vector.i
+    jsondiff = stochastic_packed_vector_out.json
+    requirement = 'The system shall be able to pack selected columns from a sampler for further multi-output gaussian process surrogate model.'
+  []
+[]
