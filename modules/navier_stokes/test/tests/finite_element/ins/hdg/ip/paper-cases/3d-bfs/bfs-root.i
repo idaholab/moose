@@ -3,9 +3,14 @@
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = coarse45.msh
+    file = coarse13.msh
   []
-  second_order = true
+  [conversion]
+    type = ElementOrderConversionGenerator
+    input = file
+    conversion_type = COMPLETE_ORDER
+  []
+  # second_order = true
 []
 
 [BCs]
