@@ -972,7 +972,7 @@ TEST(CSGBaseTest, testUniverseLinking)
 /**
  * Tests associated with CSGBase::clone
  */
-/// test CSGBase::clone and equality operators for CSGBase and CSG[Surface|Cell|Universe]List
+/// test CSGBase::clone and equality operators for CSGBase and CSG[Surface|Cell|Universe|Lattice]List
 TEST(CSGBaseTest, testCSGBaseClone)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
@@ -988,8 +988,13 @@ TEST(CSGBaseTest, testCSGBaseClone)
   auto & csg_sphere_outer = csg_obj->addSurface(std::move(sphere_ptr_outer));
   csg_obj->createCell("cell_univ_fill", inner_univ, -csg_sphere_outer);
   csg_obj->createCell("cell_void", +csg_sphere_outer);
-  auto csg_obj_clone = csg_obj->clone();
+  // create lattice and cell with lattice fill
+  auto & lat_univ = csg_obj->createUniverse("lat_univ");
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{lat_univ}};
+  const CSGLattice & lat = csg_obj->createCartesianLattice("lat1", 2.0, univs);
+  csg_obj->createCell("cell_lat_fill", lat, -csg_sphere_outer);
 
+  auto csg_obj_clone = csg_obj->clone();
   ASSERT_TRUE(*csg_obj == *csg_obj_clone);
 
   // Add new surface to csg_obj, csg_obj and csg_obj_clone should no longer be equal

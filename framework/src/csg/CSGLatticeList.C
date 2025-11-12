@@ -90,4 +90,34 @@ CSGLatticeList::renameLattice(const CSGLattice & lattice, const std::string & na
   addLattice(std::move(existing_lat));
 }
 
+bool
+CSGLatticeList::operator==(const CSGLatticeList & other) const
+{
+  const auto all_lats = this->getAllLattices();
+  const auto other_lats = other.getAllLattices();
+
+  // Check that same number of cells are defined in both lists
+  if (all_lats.size() != other_lats.size())
+    return false;
+
+  // Iterate through each CSGLattices in list and check equality of each cell
+  // with other list
+  for (const auto & lat : all_lats)
+  {
+    const auto & lat_name = lat.get().getName();
+    if (!other.hasLattice(lat_name))
+      return false;
+    const auto & other_lat = other.getLattice(lat_name);
+    if (lat.get() != other_lat)
+      return false;
+  }
+  return true;
+}
+
+bool
+CSGLatticeList::operator!=(const CSGLatticeList & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG
