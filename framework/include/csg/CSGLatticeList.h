@@ -100,7 +100,10 @@ protected:
    * @param name name of the lattice
    * @return true if lattice name exists, otherwise false
    */
-  bool hasLattice(const std::string & name) { return _lattices.find(name) != _lattices.end(); }
+  bool hasLattice(const std::string & name) const
+  {
+    return _lattices.find(name) != _lattices.end();
+  }
 
   /**
    * @brief Get map of all names to lattices in lattice list
@@ -144,6 +147,12 @@ protected:
    * @param name new name
    */
   void renameLattice(const CSGLattice & lattice, const std::string & name);
+
+  /// Operator overload for checking if two CSGLatticeList objects are equal
+  bool operator==(const CSGLatticeList & other) const;
+
+  /// Operator overload for checking if two CSGLatticeList objects are not equal
+  bool operator!=(const CSGLatticeList & other) const;
 
   /// Mapping of universe names to pointers of stored universe objects
   std::unordered_map<std::string, std::unique_ptr<CSGLattice>> _lattices;

@@ -654,8 +654,10 @@ CSGBase::operator==(const CSGBase & other) const
   const auto & other_cell_list = other.getCellList();
   const auto & univ_list = this->getUniverseList();
   const auto & other_univ_list = other.getUniverseList();
+  const auto & lat_list = this->getLatticeList();
+  const auto & other_lat_list = other.getLatticeList();
   return (surf_list == other_surf_list) && (cell_list == other_cell_list) &&
-         (univ_list == other_univ_list);
+         (univ_list == other_univ_list) && (lat_list == other_lat_list);
 }
 
 bool
