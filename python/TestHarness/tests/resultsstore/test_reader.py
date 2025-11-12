@@ -21,6 +21,7 @@ import pytest
 import yaml
 from bson.objectid import ObjectId
 from mock import MagicMock
+from TestHarness.resultsstore.auth import Authentication
 from TestHarness.resultsstore.reader import ResultsReader, ResultsReaderContextManager
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.tests.resultsstore.common import (
@@ -36,8 +37,10 @@ from TestHarness.tests.resultsstore.common import (
 )
 from TestHarness.tests.resultsstore.test_auth import DEFAULT_AUTH, get_auth_env
 
-# Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
-HAS_AUTH = ResultsReader.has_authentication()
+# Authentication available in the environment, if any
+AUTH = ResultsReader.load_authentication()
+# Whether or not authentication is available
+HAS_AUTH = AUTH is not None
 
 DATABASE_NAME = "foodb"
 
@@ -48,7 +51,7 @@ class TestResultsReader(ResultsStoreTestCase):
     def test_init_client(self):
         """Test __init__() with a client passed in."""
         client = FakeMongoClient()
-        with patch.dict(os.environ, {}):
+        with patch.dict(os.environ, {}, clear=True):
             reader = ResultsReader(DATABASE_NAME, client)
         self.assertEqual(reader._database_name, DATABASE_NAME)
         self.assertTrue(reader.check)
@@ -60,7 +63,7 @@ class TestResultsReader(ResultsStoreTestCase):
     def test_init_env_auth(self):
         """Test __init__() with environment authentication."""
         auth_env = get_auth_env("RESULTS_READER")
-        with patch.dict(os.environ, auth_env):
+        with patch.dict(os.environ, auth_env, clear=True):
             reader = ResultsReader(DATABASE_NAME)
         self.assertEqual(asdict(reader._authentication), {**DEFAULT_AUTH, "port": None})
         self.assertIsNone(reader._client)
@@ -72,11 +75,17 @@ class TestResultsReader(ResultsStoreTestCase):
                 yaml.safe_dump(DEFAULT_AUTH, f)
 
             auth_env = {"RESULTS_READER_AUTH_FILE": auth_file.name}
-            with patch.dict(os.environ, auth_env):
+            with patch.dict(os.environ, auth_env, clear=True):
                 reader = ResultsReader(DATABASE_NAME)
 
         self.assertEqual(asdict(reader._authentication), {**DEFAULT_AUTH, "port": None})
         self.assertIsNone(reader._client)
+
+    def test_init_auth(self):
+        """Test __init__() with authentication by variable."""
+        auth = Authentication(**DEFAULT_AUTH)
+        reader = ResultsReader(DATABASE_NAME, authentication=auth)
+        self.assertEqual(id(reader._authentication), id(auth))
 
     def test_init_no_auth(self):
         """Test __init__() without any authentication."""
@@ -84,7 +93,7 @@ class TestResultsReader(ResultsStoreTestCase):
             patch.dict(os.environ, {}, clear=True),
             self.assertRaisesRegex(
                 ValueError,
-                "Must specify either 'client' or set RESULTS_READER_AUTH_FILE",
+                "Must specify either 'client', 'authentication' or set",
             ),
         ):
             ResultsReader(DATABASE_NAME)
@@ -124,19 +133,10 @@ class TestResultsReader(ResultsStoreTestCase):
             reader.load_authentication()
         patch_load_authentication.assert_called_once_with("RESULTS_READER")
 
-    def test_has_authentication(self):
-        """Test load_authentication calling the underlying has_authentication."""
-        reader = ResultsReader(DATABASE_NAME, FakeMongoClient())
-        with patch(
-            "TestHarness.resultsstore.reader.has_authentication"
-        ) as patch_has_authentication:
-            reader.has_authentication()
-        patch_has_authentication.assert_called_once_with("RESULTS_READER")
-
     def test_get_client(self):
         """Test get_client()."""
         auth_env = get_auth_env("RESULTS_READER")
-        with patch.dict(os.environ, auth_env, clear=False):
+        with patch.dict(os.environ, auth_env, clear=True):
             reader = ResultsReader(DATABASE_NAME)
         self.assertIsNone(reader._client)
 
@@ -185,7 +185,7 @@ class TestResultsReader(ResultsStoreTestCase):
     def test_close_without_client(self):
         """Test close() doing nothing if the client isn't set."""
         auth_env = get_auth_env("RESULTS_READER")
-        with patch.dict(os.environ, auth_env, clear=False):
+        with patch.dict(os.environ, auth_env, clear=True):
             reader = ResultsReader(DATABASE_NAME)
         reader.close()
 
@@ -238,7 +238,7 @@ class TestResultsReader(ResultsStoreTestCase):
     @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
     def test_find_results_live(self):
         """Test _find_results() with the live database."""
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=AUTH) as ctx:
             docs = ctx.reader._find_results({}, limit=2)
 
         # Should have two documents
@@ -267,7 +267,7 @@ class TestResultsReader(ResultsStoreTestCase):
     @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
     def test_aggregate_results_live(self):
         """Test _aggregate_results() with the live database."""
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=AUTH) as ctx:
             docs = ctx.reader._aggregate_results([{"$limit": 2}])
 
         # Should have two documents
@@ -308,7 +308,7 @@ class TestResultsReader(ResultsStoreTestCase):
     def test_build_result_live(self):
         """Test build_result() with the live database."""
         # Test the most recent result
-        with ResultsReader(TEST_DATABASE_NAME, check=True) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=AUTH, check=True) as ctx:
             reader = ctx.reader
             docs = reader._find_results({}, limit=1)
             self.assertEqual(len(docs), 1)
@@ -417,7 +417,7 @@ class TestResultsReader(ResultsStoreTestCase):
     def test_lastest_push_results_iterator(self):
         """Test last_push_results_iterator() with a live database."""
         num = 50
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=AUTH) as ctx:
             reader = ctx.reader
             it = reader.latest_push_results_iterator(num - 1)
             results = [next(it) for _ in range(num)]
@@ -467,7 +467,7 @@ class TestResultsReader(ResultsStoreTestCase):
     @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
     def test_get_latest_push_results_live(self):
         """Test get_latest_push_results() with a live database."""
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=AUTH) as ctx:
             reader = ctx.reader
             collection = reader.get_latest_push_results(10)
         assert collection is not None
@@ -568,7 +568,7 @@ class TestResultsReader(ResultsStoreTestCase):
         for gold_result in GOLD_RESULTS:
             event_id = gold_result.event_id
             if event_id is not None:
-                with ResultsReader(GOLD_DATABASE_NAME) as ctx:
+                with ResultsReader(GOLD_DATABASE_NAME, authentication=AUTH) as ctx:
                     reader = ctx.reader
                     collection = reader.get_event_result(event_id)
                     assert collection is not None
@@ -598,7 +598,7 @@ class TestResultsReader(ResultsStoreTestCase):
         # Test the gold events
         for gold_result in GOLD_RESULTS:
             event_sha = gold_result.event_sha
-            with ResultsReader(GOLD_DATABASE_NAME) as ctx:
+            with ResultsReader(GOLD_DATABASE_NAME, authentication=AUTH) as ctx:
                 reader = ctx.reader
                 collection = reader.get_commit_result(event_sha)
                 assert collection is not None

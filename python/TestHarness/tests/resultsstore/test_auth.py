@@ -18,7 +18,6 @@ from unittest.mock import patch
 import yaml
 from TestHarness.resultsstore.auth import (
     Authentication,
-    has_authentication,
     load_authentication,
 )
 
@@ -49,9 +48,8 @@ class TestAuth(TestCase):
 
     def test_load_authentication_env(self):
         """Test load_authentication() from environment."""
-        with patch.dict(os.environ, get_auth_env(), clear=False):
+        with patch.dict(os.environ, get_auth_env(), clear=True):
             auth = load_authentication(VAR_PREFIX)
-            self.assertTrue(has_authentication(VAR_PREFIX))
         for k, v in DEFAULT_AUTH.items():
             self.assertEqual(getattr(auth, k), v)
 
@@ -59,9 +57,8 @@ class TestAuth(TestCase):
         """Test load_authentication() from environment."""
         port = 1234
         auth_env = {**get_auth_env(), f"{VAR_PREFIX}_AUTH_PORT": str(port)}
-        with patch.dict(os.environ, auth_env, clear=False):
+        with patch.dict(os.environ, auth_env, clear=True):
             auth = load_authentication(VAR_PREFIX)
-            self.assertTrue(has_authentication(VAR_PREFIX))
         self.assertEqual(auth.port, port)
 
     def test_load_authentication_env_not_all(self):
@@ -70,14 +67,14 @@ class TestAuth(TestCase):
 
         del auth_env[f"{VAR_PREFIX}_AUTH_HOST"]
         with (
-            patch.dict(os.environ, auth_env, clear=False),
+            patch.dict(os.environ, auth_env, clear=True),
             self.assertRaisesRegex(ValueError, "must be set for authentication"),
         ):
             load_authentication(VAR_PREFIX)
 
         del auth_env[f"{VAR_PREFIX}_AUTH_USERNAME"]
         with (
-            patch.dict(os.environ, auth_env, clear=False),
+            patch.dict(os.environ, auth_env, clear=True),
             self.assertRaisesRegex(ValueError, "must be set for authentication"),
         ):
             load_authentication(VAR_PREFIX)
@@ -89,7 +86,7 @@ class TestAuth(TestCase):
                 yaml.safe_dump(DEFAULT_AUTH, f)
 
             auth_env = {f"{VAR_PREFIX}_AUTH_FILE": auth_file.name}
-            with patch.dict(os.environ, auth_env, clear=False):
+            with patch.dict(os.environ, auth_env, clear=True):
                 auth = load_authentication(VAR_PREFIX)
 
         for k, v in DEFAULT_AUTH.items():
@@ -105,7 +102,7 @@ class TestAuth(TestCase):
                 yaml.safe_dump(auth_vars, f)
 
             auth_env = {f"{VAR_PREFIX}_AUTH_FILE": auth_file.name}
-            with patch.dict(os.environ, auth_env, clear=False):
+            with patch.dict(os.environ, auth_env, clear=True):
                 auth = load_authentication(VAR_PREFIX)
 
         self.assertEqual(auth.port, port)
@@ -115,7 +112,7 @@ class TestAuth(TestCase):
         file = "/foo/bar"
         auth_env = {f"{VAR_PREFIX}_AUTH_FILE": file}
         with (
-            patch.dict(os.environ, auth_env, clear=False),
+            patch.dict(os.environ, auth_env, clear=True),
             self.assertRaisesRegex(
                 Exception, f"Failed to load credentials from '{file}'"
             ),

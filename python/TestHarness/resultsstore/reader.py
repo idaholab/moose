@@ -18,7 +18,6 @@ from pymongo.database import Database
 
 from TestHarness.resultsstore.auth import (
     Authentication,
-    has_authentication,
     load_authentication,
 )
 from TestHarness.resultsstore.resultcollection import ResultCollection
@@ -44,6 +43,7 @@ class ResultsReader:
         self,
         database_name: str,
         client: Optional[pymongo.MongoClient] = None,
+        authentication: Optional[Authentication] = None,
         check: bool = True,
         timeout: float = 5.0,
     ):
@@ -59,6 +59,8 @@ class ResultsReader:
         -------------------
         client : Optional[pymongo.MongoClient]
             The client to use or authentication to connect with.
+        authentication : Optional[Authentication]
+            Authentication to use to create a client; otherwise search the env.
         check : bool
             Whether or not to validate result data types (default = True).
         timeout : Number
@@ -66,6 +68,7 @@ class ResultsReader:
 
         """
         assert isinstance(database_name, str)
+        assert isinstance(authentication, (type(None), Authentication))
 
         # The name of the database
         self._database_name: str = database_name
@@ -79,15 +82,19 @@ class ResultsReader:
         # The mongo database, setup on first use
         self._database: Optional[Database] = None
         # The authentication for when we don't have a client
-        self._authentication: Optional[Authentication] = None
+        self._authentication: Optional[Authentication] = authentication
 
         # No client, load from the environment
         if client is None:
-            auth = self.load_authentication()
+            auth = (
+                authentication
+                if authentication is not None
+                else self.load_authentication()
+            )
             if auth is None:
                 raise ValueError(
-                    "Must specify either 'client' or set RESULTS_READER_AUTH_FILE "
-                    "with credentials"
+                    "Must specify either 'client', 'authentication' or set "
+                    "environment authentication with the RESULTS_READER_ prefix"
                 )
             self._authentication = auth
         # Passed an authentication, use it intead
@@ -138,11 +145,6 @@ class ResultsReader:
     def load_authentication() -> Optional[Authentication]:
         """Attempt to load the authentication environment."""
         return load_authentication("RESULTS_READER")
-
-    @staticmethod
-    def has_authentication() -> bool:
-        """Check whether or not environment authentication is available."""
-        return has_authentication("RESULTS_READER")
 
     @property
     def check(self) -> bool:

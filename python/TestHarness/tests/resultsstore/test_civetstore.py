@@ -142,7 +142,7 @@ class TestCIVETStore(ResultsStoreTestCase):
 
     @unittest.skipUnless(
         is_civet_pull_request(),
-        "Skipping because not on a CIVET PR",
+        "Not a CIVET PR",
     )
     def test_build_header_pr_live(self):
         """Test build_header() for a pull request when used on CIVET."""
@@ -181,7 +181,7 @@ class TestCIVETStore(ResultsStoreTestCase):
 
     @unittest.skipUnless(
         is_civet_push(),
-        "Skipping because not on a CIVET push",
+        "Not a CIVET push",
     )
     def test_build_header_push_live(self):
         """Test build_header() for a pull request when used on CIVET."""
@@ -707,7 +707,7 @@ class TestCIVETStore(ResultsStoreTestCase):
         patch_store.assert_called_once_with(TEST_DATABASE, results, base_sha)
 
     @pytest.mark.live_db
-    @unittest.skipUnless(HAS_AUTH, "Storer authentication unavailable")
+    @unittest.skipUnless(HAS_AUTH, "Storer auth unavailable")
     def test_main_live(self):
         """Test main() loading a result and storing live."""
         base_sha, civet_env = build_civet_env()
@@ -748,7 +748,7 @@ class TestCIVETStore(ResultsStoreTestCase):
                     client[LIVE_DATABASE].results.delete_one({"_id": result_id})
 
     @pytest.mark.live_db
-    @unittest.skipUnless(HAS_AUTH, "Storer authentication unavailable")
+    @unittest.skipUnless(HAS_AUTH, "Storer auth unavailable")
     def test_main_live_separate_tests(self):
         """Test main() loading a result and storing live with separate tests."""
         base_sha, civet_env = build_civet_env()

@@ -36,7 +36,8 @@ from TestHarness.tests.resultsstore.common import (
 FAKE_DATABASE_NAME = "foodb"
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
-HAS_AUTH = ResultsReader.has_authentication()
+READER_AUTH = ResultsReader.load_authentication()
+HAS_READER_AUTH = READER_AUTH is not None
 
 
 class TestResultCollection(ResultsStoreTestCase):
@@ -62,7 +63,7 @@ class TestResultCollection(ResultsStoreTestCase):
 
     def get_gold_collection(self) -> Tuple[ResultCollection, ResultsReader]:
         """Get a ResultCollection for the gold tests."""
-        reader = ResultsReader(GOLD_DATABASE_NAME)
+        reader = ResultsReader(GOLD_DATABASE_NAME, authentication=READER_AUTH)
 
         results = []
         for gold_result in GOLD_RESULTS:
@@ -86,11 +87,11 @@ class TestResultCollection(ResultsStoreTestCase):
                     self.assertNotIn(other_filter.value, test.data)
 
     @pytest.mark.live_db
-    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    @unittest.skipUnless(HAS_READER_AUTH, "Reader authentication unavailable")
     def test_get_all_tests_live(self):
         """Test get_all_tests() with a live database."""
         # Test the latest two events
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=READER_AUTH) as ctx:
             collection = ctx.reader.get_latest_push_results(2)
             assert collection is not None
             self.assertEqual(len(collection.results), 2)
@@ -123,11 +124,11 @@ class TestResultCollection(ResultsStoreTestCase):
         reader.close()
 
     @pytest.mark.live_db
-    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    @unittest.skipUnless(HAS_READER_AUTH, "Reader authentication unavailable")
     def test_get_tests_live(self):
         """Test get_tests() with a live database."""
         # Test the latest two events
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=READER_AUTH) as ctx:
             collection = ctx.reader.get_latest_push_results(2)
             assert collection is not None
             self.assertEqual(len(collection.results), 2)
@@ -187,11 +188,11 @@ class TestResultCollection(ResultsStoreTestCase):
         )
 
     @pytest.mark.live_db
-    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    @unittest.skipUnless(HAS_READER_AUTH, "Reader authentication unavailable")
     def test_get_test_names_live(self):
         """Test get_test_names() with a live database."""
         # Test the latest events
-        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+        with ResultsReader(TEST_DATABASE_NAME, authentication=READER_AUTH) as ctx:
             collection = ctx.reader.get_latest_push_results(2)
             assert collection is not None
             self.assertEqual(len(collection.results), 2)

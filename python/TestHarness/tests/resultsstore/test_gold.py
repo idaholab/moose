@@ -23,8 +23,9 @@ from TestHarness.tests.resultsstore.common import (
     ResultsStoreTestCase,
 )
 
-# Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
-HAS_AUTH = ResultsReader.has_authentication()
+# Authentication for the reader
+READER_AUTH = ResultsReader.load_authentication()
+HAS_READER_AUTH = READER_AUTH is not None
 
 GOLD_STORED_RESULTS_FILE = os.path.join(
     os.path.dirname(__file__), "content", "gold_stored_results.json"
@@ -37,13 +38,13 @@ class TestGold(ResultsStoreTestCase):
     """Test golded results for resultsstore."""
 
     @pytest.mark.live_db
-    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    @unittest.skipUnless(HAS_READER_AUTH, "Reader auth unavailable")
     def test_stored_results_live(self):
         """Test StoredResult for each gold."""
         ids = [v.id for v in GOLD_RESULTS]
 
         # Load from the database
-        with ResultsReader(GOLD_DATABASE_NAME) as ctx:
+        with ResultsReader(GOLD_DATABASE_NAME, authentication=READER_AUTH) as ctx:
             reader = ctx.reader
             docs = reader._find_results({"_id": {"$in": ids}}, limit=None)
             self.assertEqual(len(docs), len(ids))

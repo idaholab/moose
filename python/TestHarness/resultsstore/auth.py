@@ -86,8 +86,3 @@ def load_authentication(var_prefix: str) -> Optional[Authentication]:
         return Authentication(**values)
     except Exception as e:
         raise Exception(f"Failed to load credentials from '{auth_file}'") from e
-
-
-def has_authentication(var_prefix: str) -> bool:
-    """Check whether or not environment authentication is available."""
-    return load_authentication(var_prefix) is not None
