@@ -294,8 +294,17 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
     // We haven't allocated the scaling matrix yet
     create_q_scale_submat(MAT_INITIAL_MATRIX);
   else
-    // We have allocated the scaling matrix, so we can reuse
-    create_q_scale_submat(MAT_REUSE_MATRIX);
+  {
+    if (_set_schur_pre == SetSchurPreType::A11_AND_MASS)
+    {
+      // A11 has mucked with the nonzero pattern
+      LibmeshPetscCall(MatDestroy(&_Q_scale));
+      create_q_scale_submat(MAT_INITIAL_MATRIX);
+    }
+    else
+      // We have allocated the scaling matrix, so we can reuse
+      create_q_scale_submat(MAT_REUSE_MATRIX);
+  }
 
   // We don't need the pressure index set anymore
   LibmeshPetscCall(ISDestroy(&pressure_is));
