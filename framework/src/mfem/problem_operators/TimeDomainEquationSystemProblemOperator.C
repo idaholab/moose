@@ -28,7 +28,7 @@ TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
   GetEquationSystem()->BuildEquationSystem();
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
-  ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
+  ode_solver = std::make_unique<MFEMBackwardEulerStateSolver>();
   ode_solver->Init(*(this));
   SetTime(_problem.time());
 }

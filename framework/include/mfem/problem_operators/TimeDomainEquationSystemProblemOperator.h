@@ -13,6 +13,7 @@
 
 #include "TimeDomainProblemOperator.h"
 #include "EquationSystemInterface.h"
+#include "MFEMBackwardEulerStateSolver.h"
 
 namespace Moose::MFEM
 {
