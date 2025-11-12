@@ -627,6 +627,40 @@ TEST(CSGBaseTest, testCreateHexLattice)
   }
 }
 
+/// tests CSGBase::addLattice - meant to simulate creating a custom lattice type
+TEST(CSGBaseTest, testAddLattice)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto & univ = csg_obj->createUniverse("uni");
+  {
+    // create a lattice as a unique pointer and manually add it to the CSGBase (this is what would
+    // be done for a custom lattice type defined outside of the main framework)
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ}};
+    std::unique_ptr<CSGCartesianLattice> custom_lat =
+        std::make_unique<CSGCartesianLattice>("custom_lat", 1.0, univs);
+    // add to CSGBase
+    const CSGLattice & lat_ref = csg_obj->addLattice(std::move(custom_lat));
+    // check that it exists in the base now
+    auto all_lats = csg_obj->getAllLattices();
+    ASSERT_EQ(1, all_lats.size());
+    ASSERT_EQ(lat_ref, all_lats[0]);
+  }
+  {
+    // create a custom lattice containing a universe that was not in this base (raise error)
+    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
+    auto & univ2 = csg_obj2->createUniverse("uni");
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs2 = {{univ2}};
+    std::unique_ptr<CSGCartesianLattice> custom_lat2 =
+        std::make_unique<CSGCartesianLattice>("custom_lat2", 1.0, univs2);
+    // try to add to first CSGBase - raises error because universe is not in this base
+    Moose::UnitUtils::assertThrows([&csg_obj, &custom_lat2]()
+                                   { csg_obj->addLattice(std::move(custom_lat2)); },
+                                   "Cannot add lattice custom_lat2 of type "
+                                   "CSG::CSGCartesianLattice. Universe uni is not in the CSGBase "
+                                   "instance.");
+  }
+}
+
 /// tests the CSGBase::addUniverseToLattice method
 TEST(CSGBaseTest, testAddUniverseToLattice)
 {
