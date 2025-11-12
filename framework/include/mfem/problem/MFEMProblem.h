@@ -22,7 +22,6 @@ public:
   MFEMProblem(const InputParameters & params);
   virtual ~MFEMProblem() {}
 
-  virtual void initialSetup() override;
   virtual void externalSolve() override {}
   virtual void syncSolutions(Direction) override {}
 
@@ -160,10 +159,12 @@ public:
                      InputParameters & parameters);
 
   /**
-   * Add the nonlinear solver to the system. TODO: allow user to specify solver options,
-   * similar to the linear solvers.
+   * Add the nonlinear solver to the system.
    */
-  void addMFEMNonlinearSolver();
+  void addMFEMNonlinearSolver(unsigned int nl_max_its,
+                              mfem::real_t nl_abs_tol,
+                              mfem::real_t nl_rel_tol,
+                              unsigned int print_level);
 
   /**
    * Method used to get an mfem FEC depending on the variable family specified in the input file.
@@ -211,20 +212,8 @@ public:
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
 
-  /**
-   * set newton solver parameters
-   */
-  void setNewtonParamaters(unsigned int nl_max_its,
-                           mfem::real_t nl_abs_tol,
-                           mfem::real_t nl_rel_tol,
-                           unsigned int print_level);
-
 protected:
   MFEMProblemData _problem_data;
-  unsigned int _nl_max_its;
-  mfem::real_t _nl_abs_tol;
-  mfem::real_t _nl_rel_tol;
-  unsigned int _print_level;
 };
 
 #endif

@@ -47,7 +47,7 @@ MFEMProblemSolve::MFEMProblemSolve(
                                                  : "",
                        Moose::PassKey<MFEMProblemSolve>());
 
-  _mfem_problem.setNewtonParamaters(_nl_max_its, _nl_abs_tol, _nl_rel_tol, _print_level);
+  _mfem_problem.addMFEMNonlinearSolver(_nl_max_its, _nl_abs_tol, _nl_rel_tol, _print_level);
 }
 
 bool

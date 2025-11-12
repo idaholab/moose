@@ -40,13 +40,6 @@ MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(param
 }
 
 void
-MFEMProblem::initialSetup()
-{
-  FEProblemBase::initialSetup();
-  addMFEMNonlinearSolver();
-}
-
-void
 MFEMProblem::setMesh()
 {
   auto pmesh = mesh().getMFEMParMeshPtr();
@@ -76,15 +69,18 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 }
 
 void
-MFEMProblem::addMFEMNonlinearSolver()
+MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
+                                    mfem::real_t nl_abs_tol,
+                                    mfem::real_t nl_rel_tol,
+                                    unsigned int print_level)
 {
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(_nl_rel_tol);
-  nl_solver->SetAbsTol(_nl_abs_tol);
-  nl_solver->SetPrintLevel(_print_level);
-  nl_solver->SetMaxIter(_nl_max_its);
+  nl_solver->SetRelTol(nl_rel_tol);
+  nl_solver->SetAbsTol(nl_abs_tol);
+  nl_solver->SetPrintLevel(print_level);
+  nl_solver->SetMaxIter(nl_max_its);
 
   getProblemData().nonlinear_solver = nl_solver;
 }
@@ -510,18 +506,6 @@ std::shared_ptr<mfem::ParGridFunction>
 MFEMProblem::getGridFunction(const std::string & name)
 {
   return getUserObject<MFEMVariable>(name).getGridFunction();
-}
-
-void
-MFEMProblem::setNewtonParamaters(unsigned int nl_max_its,
-                                 mfem::real_t nl_abs_tol,
-                                 mfem::real_t nl_rel_tol,
-                                 unsigned int print_level)
-{
-  _nl_max_its = nl_max_its;
-  _nl_abs_tol = nl_abs_tol;
-  _nl_rel_tol = nl_rel_tol;
-  _print_level = print_level;
 }
 
 void

@@ -47,7 +47,7 @@ TimeDomainEquationSystemProblemOperator::Solve()
 
 void
 TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
-                                                       const mfem::Vector & X,
+                                                       const mfem::Vector & /*X*/,
                                                        mfem::Vector & dX_dt)
 {
   dX_dt = 0.0;
