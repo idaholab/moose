@@ -63,7 +63,9 @@ CSGHexagonalLattice::setUniverses(
                " with universes. Does not have valid dimensions for lattice type " + getType());
   // set dimensions attributes based on universe map (in case it differs from original dimensions)
   _nrow = universes.size();
+  _nring = nRowToRing(_nrow);
   _universe_map = universes;
+  buildIndexMap();
 }
 void
 CSGHexagonalLattice::setPitch(const Real pitch)
@@ -76,7 +78,7 @@ CSGHexagonalLattice::setPitch(const Real pitch)
 std::unordered_map<std::string, std::any>
 CSGHexagonalLattice::getDimensions() const
 {
-  return {{"nrow", _nrow}, {"nring", nRowToRing(_nrow)}, {"pitch", _pitch}};
+  return {{"nrow", _nrow}, {"nring", _nring}, {"pitch", _pitch}};
 }
 
 bool
@@ -120,6 +122,114 @@ int
 CSGHexagonalLattice::getNRings() const
 {
   return nRowToRing(_nrow);
+}
+
+void
+CSGHexagonalLattice::buildIndexMap()
+{
+  for (int ring = 0; ring < _nring; ++ring)
+  {
+    int num_elements = (ring == _nring - 1) ? 1 : 6 * (_nring - 1 - ring);
+    for (int element = 0; element < num_elements; ++element)
+    {
+      std::pair<int, int> ring_index = std::make_pair(ring, element);
+      std::pair<int, int> row_index = getRowIndexFromRingIndex(ring_index);
+      _row_to_ring_map[row_index] = ring_index;
+    }
+  }
+}
+
+std::pair<int, int>
+CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_ele_index) const
+{
+  int og_ring = ring_ele_index.first; // ring corresponds to the outermost ring as ring 0
+  int ring = _nring - og_ring - 1;    // convert to internal indexing (0 as innermost ring)
+  int element = ring_ele_index.second;
+
+  if (og_ring < 0 || og_ring >= _nring)
+    mooseError("Ring " + std::to_string(og_ring) + " is not valid for hexagonal lattice " +
+               getName());
+  if (element < 0 || element >= (ring == 0 ? 1 : 6 * ring))
+    mooseError("Element " + std::to_string(element) + " is not valid for ring " +
+               std::to_string(og_ring) + " in hexagonal lattice " + getName());
+
+  // Calculate the center row and column indices
+  int center_row = (_nrow - 1) / 2;
+  int center_col = center_row;
+
+  // Special case for the center element
+  if (ring == 0)
+    return {center_row, center_col};
+
+  // Calculate the side length of the hexagon for the given ring
+  int side_length = ring;
+
+  // Determine which side of the hexagon the element is on and get row/col from this
+  int side = element / side_length;
+  int offset = element % side_length; // position within the side moving counter-clockwise
+  int row, col;
+
+  // lamba to calculate the number of columns in any given row
+  auto calc_num_cols_in_row = [&](int r) { return _nrow - std::abs(center_row - r); };
+
+  // diagram of side numbers:
+  //            4
+  //         _______
+  //       /         \
+  //    3 /           \ 5
+  //     /             \
+  //     \             /
+  //    2 \           / 0
+  //       \ _______ /
+  //            1
+  switch (side)
+  {
+    case 0: // bottom right (contains starting element of the ring)
+      row = center_row + offset;
+      col = calc_num_cols_in_row(row) - og_ring - 1;
+      break;
+    case 1: // bottom
+      row = center_row + ring;
+      col = calc_num_cols_in_row(row) - og_ring - 1 - offset;
+      break;
+    case 2: // bottom left
+      row = center_row + (side_length - offset);
+      col = center_col - ring;
+      break;
+    case 3: // top left
+      row = center_row - offset;
+      col = center_col - ring;
+      break;
+    case 4: // top
+      row = center_row - ring;
+      col = center_col - ring + offset;
+      break;
+    case 5: // top right
+      row = center_row - (side_length - offset);
+      col = calc_num_cols_in_row(row) - og_ring - 1;
+      break;
+    default:
+      mooseError("Invalid side ID calculation in hexagonal lattice " + getName());
+  }
+
+  mooseAssert(isValidIndex(std::make_pair(row, col)),
+              "Calculated index (" + std::to_string(row) + ", " + std::to_string(col) +
+                  ") is not valid for hexagonal lattice " + getName());
+
+  return {row, col};
+}
+
+std::pair<int, int>
+CSGHexagonalLattice::getRingIndexFromRowIndex(const std::pair<int, int> & row_col_index) const
+{
+  if (!isValidIndex(row_col_index))
+    mooseError("Index (" + std::to_string(row_col_index.first) + ", " +
+               std::to_string(row_col_index.second) +
+               ") is not a valid index for hexagonal "
+               "lattice " +
+               getName());
+
+  return _row_to_ring_map.at(row_col_index);
 }
 
 /// convenience functions for converting between number of rows and number of rings
