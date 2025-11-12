@@ -284,7 +284,7 @@ EquationSystem::AssembleJacobian(
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
     blf->FormLinearSystem(
-        ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+        ess_tdof_lists.at(i), *(var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -344,12 +344,6 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  std::cout << "********************* Sol **********************" << std::endl;
-  sol.Print(std::cout);
-  std::cout << "****************** _td_var_ess_constraints *****" << std::endl;
-  //_var_ess_constraints.at(0)->Print(std::cout);
-  TimeDependentEquationSystem * child = dynamic_cast<TimeDependentEquationSystem *>(const_cast<EquationSystem *>(this));
-  child->Print();
   static_cast<mfem::Vector &>(_trueBlockSol) = sol;
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
@@ -399,25 +393,6 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   residual.HostRead();
 }
 
-void
-TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt,
-                                                     const mfem::Vector & x_old)
-{
-  mfem::ParGridFunction u_old_gf;
-  mfem::BlockVector block_x_old(const_cast<mfem::Vector &>(x_old), *_block_true_offsets);
-
-  // Update the xs boundary conditions
-  ApplyEssentialBCs();
-
-  // Update the dxdts boundary conditions
-  for (unsigned int i = 0; i < _test_var_names.size(); i++)
-  {
-    u_old_gf.SetSpace(_test_pfespaces[i]);
-    u_old_gf.SetFromTrueDofs(block_x_old.GetBlock(i));
-    *(_td_var_ess_constraints.at(i)) = *(_var_ess_constraints.at(i)) - u_old_gf;
-    *(_td_var_ess_constraints.at(i)) /= dt;
-  }
-}
 
 void
 EquationSystem::UpdateJacobian() const
@@ -790,10 +765,6 @@ TimeDependentEquationSystem::ApplyEssentialBCs()
     EquationSystem::ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
-    std::cout << "New T = " << std::endl;
-    _td_var_ess_constraints.at(i)->Print(std::cout);
-    std::cout << "Old T = " << std::endl;
-    _eliminated_variables.Get(test_var_name)->Print(std::cout);
     *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
     *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
     // Apply any remaining Dirichlet BCs specified directly on du/dt
@@ -862,12 +833,6 @@ TimeDependentEquationSystem::UpdateEquationSystem(Moose::MFEM::GridFunctions & g
                                                   mfem::Array<int> & btoffsets)
 {
   EquationSystem::BuildEquationSystem(gridfunctions, btoffsets);
-}
-
-void
-TimeDependentEquationSystem::Print()
-{
-  _td_var_ess_constraints.at(0)->Print(std::cout);
 }
 
 } // namespace Moose::MFEM

@@ -408,8 +408,6 @@ public:
           new ScaleIntegrator(*boundary_integrators[i], scale_factor, false),
           *(*boundary_markers[i]));
   }
-  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
-  void Print();
 
 protected:
   /// Coefficient for timestep scaling
