@@ -43,7 +43,7 @@ LinearFVKernel::LinearFVKernel(const InputParameters & params)
 
   // LinearFV does not need SNES options, not adding them will avoid petsc
   // unused option warnings.
-  Moose::PetscSupport::dontAddCommonSNESOptions(_fv_problem);
+  Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
 }
 
 void
