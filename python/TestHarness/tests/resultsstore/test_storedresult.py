@@ -9,6 +9,7 @@
 
 """Test TestHarness.resultsstore.storedresult.StoredResult."""
 
+import json
 from copy import deepcopy
 from typing import Optional
 
@@ -259,3 +260,12 @@ class TestStoredResult(ResultsStoreTestCase):
         ]:
             with self.assertRaisesRegex(TypeError, key):
                 build_stored_result(result, update={key: 1.0})
+
+    def test_serialize_deserialize(self):
+        """Test serialize() and deserialize()."""
+        result = self.run_test()
+        serialized = result.serialize()
+        dumped = json.dumps(serialized)
+        loaded = json.loads(dumped)
+        deserialized = StoredResult.deserialize(loaded)
+        self.assertEqual(result.data, deserialized)

@@ -9,6 +9,7 @@
 
 """Implement the StoredResult for storing a TestHarness result."""
 
+from copy import deepcopy
 from datetime import datetime
 from typing import Optional
 
@@ -183,3 +184,26 @@ class StoredResult:
     def time(self) -> datetime:
         """Get the time these tests were added to the database."""
         return get_typed(self.data, "time", datetime)
+
+    def serialize(self) -> dict:
+        """Serialize the data into something that is JSON dumpable."""
+        data = deepcopy(self.data)
+
+        # Convert datetime to str that can be converted back
+        data["time"] = str(data["time"])
+        # Convert ObjectID to string id
+        data["_id"] = str(data["_id"])
+
+        return data
+
+    @staticmethod
+    def deserialize(data: dict) -> dict:
+        """Deserialize the data serialized with serialize()."""
+        data = deepcopy(data)
+
+        # Convert datetime str to datetime object
+        data["time"] = datetime.fromisoformat(data["time"])
+        # Convert string id to ObjectID
+        data["_id"] = ObjectId(data["_id"])
+
+        return data

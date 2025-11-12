@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Test Test TestHarness.resultsstore.utils."""
+"""Test TestHarness.resultsstore.utils."""
 
 from TestHarness.resultsstore.utils import (
     MongoPath,
@@ -259,3 +259,5 @@ class TestUtils(ResultsStoreTestCase):
         # Raise a KeyError if missing
         with self.assertRaisesRegex(KeyError, "Missing key 'foo'"):
             get_typed({}, "foo", float, allow_missing=False)
+        # Allow missing
+        self.assertIsNone(get_typed({}, "foo", float, allow_missing=True))

@@ -11,14 +11,12 @@
 
 import json
 import os
-import random
-import string
 import unittest
 from copy import deepcopy
-from dataclasses import dataclass
 from tempfile import NamedTemporaryFile
 from typing import Optional, Tuple
 
+import pytest
 from bson.objectid import ObjectId
 from mock import patch
 from moosepytest.civet import is_civet_pull_request, is_civet_push
@@ -38,62 +36,27 @@ from TestHarness.resultsstore.utils import (
     results_test_entry,
     results_test_iterator,
 )
-from TestHarness.tests.resultsstore.common import ResultsStoreTestCase
+from TestHarness.tests.resultsstore.common import (
+    APPLICATION_REPO,
+    CIVET_SERVER,
+    FakeMongoClient,
+    ResultsStoreTestCase,
+    base_civet_env,
+    build_civet_env,
+)
 
-# Name for the database used for testing database store
+# Dummy database name
 TEST_DATABASE = "test_database"
 
-
-def random_git_sha() -> str:
-    """Generate a random Git SHA."""
-    hex_characters = string.hexdigits[:16]
-    random_sha = "".join(random.choice(hex_characters) for _ in range(40))
-    return random_sha
-
-
-def random_id() -> int:
-    """Generate a random ID."""
-    return random.randint(1, 1000000)
-
-
-# Dummy APPLICATION_REPO variable from the civet environment
-APPLICATION_REPO = "git@github.com:idaholab/moose"
-# Dummy CIVET_SERVER variable used in the civet environment
-CIVET_SERVER = "https://civet-be.inl.gov"
-
-
-def base_civet_env() -> Tuple[str, dict]:
-    """Build a random base CIVET environment for testing."""
-    # Dummy sha to use for the base commit
-    base_sha = random_git_sha()
-    # Dummy civet environment
-    env = {
-        "APPLICATION_REPO": APPLICATION_REPO,
-        "CIVET_BASE_SHA": random_git_sha(),
-        "CIVET_BASE_SSH_URL": "git@github.com:idaholab/moose.git",
-        "CIVET_EVENT_ID": str(random_id()),
-        "CIVET_HEAD_REF": "branchname",
-        "CIVET_HEAD_SHA": random_git_sha(),
-        "CIVET_JOB_ID": str(random_id()),
-        "CIVET_RECIPE_NAME": "Awesome recipe",
-        "CIVET_SERVER": CIVET_SERVER,
-        "CIVET_STEP_NAME": "Cool step",
-        "CIVET_STEP_NUM": str(random_id()),
-    }
-    return base_sha, env
-
-
-def build_civet_env() -> Tuple[str, dict]:
-    """Build a random base CIVET envrionment used for testing build()."""
-    env = {"CIVET_EVENT_CAUSE": "Pull request", "CIVET_PR_NUM": str(random_id())}
-    base_sha, base_env = base_civet_env()
-    env.update(base_env)
-    return base_sha, env
-
+# Name for the live database for storage
+LIVE_DATABASE = "civet_tests_moose_resultsstore_civetstore"
 
 # Default arguments to the TestHarness for running runTests()
 # that are used by most tests
 DEFAULT_TESTHARNESS_ARGS = ["--capture-perf-graph"]
+
+# Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
+HAS_AUTH = CIVETStore.load_authentication() is not None
 
 
 class TestCIVETStore(ResultsStoreTestCase):
@@ -607,45 +570,9 @@ class TestCIVETStore(ResultsStoreTestCase):
         if separate_tests:
             tests = [{"baz": "bang"}]
 
-        @dataclass
-        class FakeResult:
-            inserted_id: Optional[int] = None
-            acknowledged: bool = True
-
-        @dataclass
-        class FakeCollection:
-            inserted = None
-
-            def insert_one(self, value):
-                self.inserted = value
-                return FakeResult(value["_id"])
-
-            def insert_many(self, value):
-                self.inserted = value
-                return FakeResult()
-
-        results_collection = FakeCollection()
-        tests_collection = FakeCollection()
-
-        @dataclass
-        class FakeDatabase:
-            results = results_collection
-            tests = tests_collection
-
-        class FakeClient:
-            def __getitem__(self, key):
-                assert key == database
-                return FakeDatabase()
-
-        class FakeContext:
-            def __enter__(self) -> FakeClient:
-                return FakeClient()
-
-            def __exit__(self, *_):
-                pass
-
         civetstore = CIVETStore()
-        with patch.object(civetstore, "setup_client", return_value=FakeContext()):
+        fake_client = FakeMongoClient()
+        with patch.object(civetstore, "setup_client", return_value=fake_client):
             civetstore._insert_database(database, result, tests)
 
         # Check output
@@ -655,11 +582,12 @@ class TestCIVETStore(ResultsStoreTestCase):
             self.assertIn(f"Inserted {len(tests)} tests into {database}", output)
 
         # Check what was stored
-        self.assertEqual(results_collection.inserted, result)
+        fake_database = fake_client.get_database(database)
+        self.assertEqual(fake_database.results.inserted, result)
         if separate_tests:
-            self.assertEqual(tests_collection.inserted, tests)
+            self.assertEqual(fake_database.tests.inserted, tests)
         else:
-            self.assertIsNone(tests_collection.inserted)
+            self.assertIsNone(fake_database.tests.inserted)
 
     def test_insert_database(self):
         """Test _insert_database()."""
@@ -777,3 +705,101 @@ class TestCIVETStore(ResultsStoreTestCase):
                 civetstore.main(result_file.name, TEST_DATABASE, base_sha)
 
         patch_store.assert_called_once_with(TEST_DATABASE, results, base_sha)
+
+    @pytest.mark.live_db
+    @unittest.skipUnless(HAS_AUTH, "Storer authentication unavailable")
+    def test_main_live(self):
+        """Test main() loading a result and storing live."""
+        base_sha, civet_env = build_civet_env()
+        data = self.get_testharness_result()
+
+        civetstore = CIVETStore()
+
+        result_id = None
+
+        try:
+            # Run the insert
+            with NamedTemporaryFile() as result_file:
+                with open(result_file.name, "w") as f:
+                    json.dump(data, f)
+                result_id, test_ids = civetstore.main(
+                    result_file.name, LIVE_DATABASE, base_sha, env=civet_env
+                )
+
+            # Should have one inserted ID and no tests (tests contained within)
+            self.assertIsInstance(result_id, ObjectId)
+            self.assertIsNone(test_ids)
+
+            # Make sure the data exists in the database
+            with civetstore.setup_client() as client:
+                result = client[LIVE_DATABASE].results.find_one({"_id": result_id})
+            self.assertIsNotNone(result)
+
+            # Result should have contained tests
+            self.assertIsNotNone(result)
+            for test in results_test_iterator(data):
+                result_data = results_test_entry(result, test.name)
+                self.assertIsInstance(result_data, dict)
+
+        # Delete the entry
+        finally:
+            if result_id is not None:
+                with civetstore.setup_client() as client:
+                    client[LIVE_DATABASE].results.delete_one({"_id": result_id})
+
+    @pytest.mark.live_db
+    @unittest.skipUnless(HAS_AUTH, "Storer authentication unavailable")
+    def test_main_live_separate_tests(self):
+        """Test main() loading a result and storing live with separate tests."""
+        base_sha, civet_env = build_civet_env()
+        data = self.get_testharness_result()
+
+        civetstore = CIVETStore()
+
+        result_id = None
+        test_ids = None
+
+        try:
+            # Run the insert
+            with NamedTemporaryFile() as result_file:
+                with open(result_file.name, "w") as f:
+                    json.dump(data, f)
+                result_id, test_ids = civetstore.main(
+                    result_file.name,
+                    LIVE_DATABASE,
+                    base_sha,
+                    env=civet_env,
+                    max_result_size=1e-6,
+                )
+
+            # Should have one inserted ID and no tests (tests contained within)
+            self.assertIsInstance(result_id, ObjectId)
+            self.assertIsInstance(test_ids, list)
+            self.assertTrue(all(isinstance(v, ObjectId) for v in test_ids))
+
+            # Get result and tests
+            with civetstore.setup_client() as client:
+                db = client[LIVE_DATABASE]
+                result = db.results.find_one({"_id": result_id})
+                tests = [v for v in db.tests.find({"_id": {"$in": test_ids}})]
+
+            # Result should have separate tests
+            self.assertIsNotNone(result)
+            for test in results_test_iterator(data):
+                result_data = results_test_entry(result, test.name)
+                self.assertIsInstance(result_data, ObjectId)
+
+            # Test entries should link to the result
+            self.assertEqual(len(tests), len(test_ids))
+            for test in tests:
+                self.assertEqual(test["result_id"], result_id)
+                self.assertIn(test["_id"], test_ids)
+
+        # Delete the entries
+        finally:
+            if result_id is not None:
+                with civetstore.setup_client() as client:
+                    client[LIVE_DATABASE].results.delete_one({"_id": result_id})
+            if test_ids is not None:
+                with civetstore.setup_client() as client:
+                    client[LIVE_DATABASE].tests.delete_many({"_id": {"$in": test_ids}})

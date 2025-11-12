@@ -10,6 +10,7 @@
 """Test TestHarness.resultsstore.auth."""
 
 import os
+from copy import deepcopy
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 from unittest.mock import patch
@@ -22,8 +23,12 @@ from TestHarness.resultsstore.auth import (
 )
 
 VAR_PREFIX = "FOO"
-DEFAULT_ARGS = {"host": "HOSTNAME", "username": "USER", "password": "PASS"}
-DEFAULT_ENV = {f"{VAR_PREFIX}_AUTH_{k.upper()}": v for k, v in DEFAULT_ARGS.items()}
+DEFAULT_AUTH = {"host": "HOSTNAME", "username": "USER", "password": "PASS"}
+
+
+def get_auth_env(prefix: str = VAR_PREFIX) -> dict:
+    """Get an auth environment given the prefix."""
+    return deepcopy({f"{prefix}_AUTH_{k.upper()}": v for k, v in DEFAULT_AUTH.items()})
 
 
 class TestAuth(TestCase):
@@ -31,29 +36,29 @@ class TestAuth(TestCase):
 
     def test_authentication(self):
         """Test Authentication."""
-        auth = Authentication(**DEFAULT_ARGS)
-        for k, v in DEFAULT_ARGS.items():
+        auth = Authentication(**DEFAULT_AUTH)
+        for k, v in DEFAULT_AUTH.items():
             self.assertEqual(getattr(auth, k), v)
         self.assertIsNone(auth.port)
 
     def test_authentication_with_port(self):
         """Test Authentication with a port."""
         port = 1234
-        auth = Authentication(**DEFAULT_ARGS, port=port)
+        auth = Authentication(**DEFAULT_AUTH, port=port)
         self.assertEqual(auth.port, port)
 
     def test_load_authentication_env(self):
         """Test load_authentication() from environment."""
-        with patch.dict(os.environ, DEFAULT_ENV, clear=False):
+        with patch.dict(os.environ, get_auth_env(), clear=False):
             auth = load_authentication(VAR_PREFIX)
             self.assertTrue(has_authentication(VAR_PREFIX))
-        for k, v in DEFAULT_ARGS.items():
+        for k, v in DEFAULT_AUTH.items():
             self.assertEqual(getattr(auth, k), v)
 
     def test_load_authentication_env_with_port(self):
         """Test load_authentication() from environment."""
         port = 1234
-        auth_env = {**DEFAULT_ENV, f"{VAR_PREFIX}_AUTH_PORT": str(port)}
+        auth_env = {**get_auth_env(), f"{VAR_PREFIX}_AUTH_PORT": str(port)}
         with patch.dict(os.environ, auth_env, clear=False):
             auth = load_authentication(VAR_PREFIX)
             self.assertTrue(has_authentication(VAR_PREFIX))
@@ -61,7 +66,7 @@ class TestAuth(TestCase):
 
     def test_load_authentication_env_not_all(self):
         """Test load_authentication() with not all variables set."""
-        auth_env = {**DEFAULT_ENV}
+        auth_env = get_auth_env()
 
         del auth_env[f"{VAR_PREFIX}_AUTH_HOST"]
         with (
@@ -81,19 +86,19 @@ class TestAuth(TestCase):
         """Test load_authentication from file."""
         with NamedTemporaryFile() as auth_file:
             with open(auth_file.name, "w") as f:
-                yaml.safe_dump(DEFAULT_ARGS, f)
+                yaml.safe_dump(DEFAULT_AUTH, f)
 
             auth_env = {f"{VAR_PREFIX}_AUTH_FILE": auth_file.name}
             with patch.dict(os.environ, auth_env, clear=False):
                 auth = load_authentication(VAR_PREFIX)
 
-        for k, v in DEFAULT_ARGS.items():
+        for k, v in DEFAULT_AUTH.items():
             self.assertEqual(getattr(auth, k), v)
 
     def test_load_authentication_file_with_port(self):
         """Test load_authentication from file with a port."""
         port = 1234
-        auth_vars = {**DEFAULT_ARGS, "port": port}
+        auth_vars = {**DEFAULT_AUTH, "port": port}
 
         with NamedTemporaryFile() as auth_file:
             with open(auth_file.name, "w") as f:

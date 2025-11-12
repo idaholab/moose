@@ -1,0 +1,590 @@
+{
+  "68e7248e56c7e7f826a95d15": {
+    "_id": "68e7248e56c7e7f826a95d15",
+    "testharness": {
+      "version": 8,
+      "validation_version": 2,
+      "start_time": "2025-10-08 20:52:16",
+      "end_time": "2025-10-08 20:57:11",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild10-service/build/copied_tests,/ibmstor/scratch/romebuild10-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild10-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild10.headbuild.hpc.inl.gov",
+      "user": "romebuild10-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild10-service/build/container/moose-openmpi-x86_64_61f2cba.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "61f2cba",
+      "generator_version": "61f2cba"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 294.436311,
+      "time_max": 280.65000009536743,
+      "time_average": 280.65000009536743,
+      "hpc_time_queue_average": 0.0,
+      "hpc_time_wait_output_average": 0.1871192455291748,
+      "hpc_num_resubmitted": 0
+    },
+    "base_sha": "810a5570266435660fedf3c207e5b5a640699187",
+    "civet": {
+      "job_id": 3286754,
+      "job_url": "civet.inl.gov/job/3286754",
+      "recipe_name": "Performance",
+      "repo_url": "github.com/idaholab/moose",
+      "step_name": "Test",
+      "step": 1,
+      "event_url": "github.com/idaholab/moose/commit/61f2cba5825555e88e18564d03c54ca1959a8957"
+    },
+    "civet_version": 6,
+    "event_sha": "61f2cba5825555e88e18564d03c54ca1959a8957",
+    "event_id": 260206,
+    "event_cause": "push",
+    "pr_num": null,
+    "time": "2025-10-08 20:57:18.976000"
+  },
+  "68e6141590b44073432086b9": {
+    "_id": "68e6141590b44073432086b9",
+    "testharness": {
+      "version": 7,
+      "validation_version": 2,
+      "start_time": "2025-10-08 01:30:02",
+      "end_time": "2025-10-08 01:34:31",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild6-service/build/copied_tests,/ibmstor/scratch/romebuild6-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild6-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild6.headbuild.hpc.inl.gov",
+      "user": "romebuild6-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild6-service/build/container/moose-openmpi-x86_64_810a557.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "810a557",
+      "generator_version": "810a557"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 269.286607,
+      "time_max": 257.0699999332428,
+      "time_average": 257.0699999332428,
+      "hpc_time_queue_average": 0.9022407531738281,
+      "hpc_time_wait_output_average": 0.20076441764831543,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/810a5570266435660fedf3c207e5b5a640699187",
+      "job_id": 3284186,
+      "job_url": "civet.inl.gov/job/3284186",
+      "step": 2
+    },
+    "time": "2025-10-08 01:34:45.694000",
+    "event_sha": "810a5570266435660fedf3c207e5b5a640699187",
+    "event_cause": "push",
+    "event_id": 260038,
+    "pr_num": null,
+    "base_sha": "0d4abf2e847951e07f1000c85451192f0172456f",
+    "civet_version": 5
+  },
+  "68dedf7cbe5697c197720bae": {
+    "_id": "68dedf7cbe5697c197720bae",
+    "testharness": {
+      "version": 7,
+      "validation_version": 2,
+      "start_time": "2025-10-02 14:19:56",
+      "end_time": "2025-10-02 14:24:15",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild14-service/build/copied_tests,/ibmstor/scratch/romebuild14-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild14-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild14.headbuild.hpc.inl.gov",
+      "user": "romebuild14-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild14-service/build/container/moose-openmpi-x86_64_296c9e8.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "296c9e8",
+      "generator_version": "296c9e8"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 258.781593,
+      "time_max": 248.0199999809265,
+      "time_average": 248.0199999809265,
+      "hpc_time_queue_average": 0.0,
+      "hpc_time_wait_output_average": 0.18645310401916504,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/296c9e817d13b35624be2423775b309a34d9336c",
+      "job_id": 3273777,
+      "job_url": "civet.inl.gov/job/3273777",
+      "step": 2
+    },
+    "time": "2025-10-02 14:24:28.557000",
+    "event_sha": "296c9e817d13b35624be2423775b309a34d9336c",
+    "event_cause": "push",
+    "event_id": 259309,
+    "pr_num": null,
+    "base_sha": "e353a7cacb94c988483cfa0b1f074f4fb4edbec8",
+    "civet_version": 4
+  },
+  "68dac86a57e68e67a2888a74": {
+    "_id": "68dac86a57e68e67a2888a74",
+    "testharness": {
+      "version": 7,
+      "validation_version": 2,
+      "start_time": "2025-09-29 11:52:31",
+      "end_time": "2025-09-29 11:56:45",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild8-service/build/copied_tests,/ibmstor/scratch/romebuild8-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild8-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild8.headbuild.hpc.inl.gov",
+      "user": "romebuild8-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild8-service/build/container/moose-openmpi-x86_64_d64fb22.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "d64fb22",
+      "generator_version": "d64fb22"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 253.639915,
+      "time_max": 243.04999995231628,
+      "time_average": 243.04999995231628,
+      "hpc_time_queue_average": 0.0,
+      "hpc_time_wait_output_average": 0.18129277229309082,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/d64fb221531abf740a7917376216f4e03517fc80",
+      "job_id": 3258892,
+      "job_url": "civet.inl.gov/job/3258892",
+      "step": 2
+    },
+    "time": "2025-09-29 11:56:58.467000",
+    "event_sha": "d64fb221531abf740a7917376216f4e03517fc80",
+    "event_cause": "push",
+    "event_id": 258481,
+    "pr_num": null,
+    "base_sha": "683f2a61725790be34537345f8facfcb4ce77cbe",
+    "civet_version": 3
+  },
+  "68658fcbc8ec62f893b8e307": {
+    "_id": "68658fcbc8ec62f893b8e307",
+    "testharness": {
+      "version": 6,
+      "validation_version": 2,
+      "start_time": "2025-07-02 13:55:18",
+      "end_time": "2025-07-02 13:59:59",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild12-service/build/copied_tests,/ibmstor/scratch/romebuild12-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild12-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild12.headbuild.hpc.inl.gov",
+      "user": "romebuild12-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild12-service/build/container/moose-openmpi-x86_64_1134c7e.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "1134c7e",
+      "generator_version": "1134c7e"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 280.688414,
+      "time_max": 265.67000007629395,
+      "time_average": 265.67000007629395,
+      "hpc_time_queue_average": 0.8812222480773926,
+      "hpc_time_wait_output_average": 5.284553050994873,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/1134c7e383972783be2ea702f2738ece79fe6a59",
+      "job_id": 3008103,
+      "job_url": "civet.inl.gov/job/3008103",
+      "step": 2
+    },
+    "time": "2025-07-02 14:00:10.994000",
+    "event_sha": "1134c7e383972783be2ea702f2738ece79fe6a59",
+    "event_cause": "push",
+    "pr_num": null,
+    "base_sha": "c85466a90bec562091c9e8ad2606cee92273e182",
+    "civet_version": 2
+  },
+  "685c623b4022db39df9590c4": {
+    "_id": "685c623b4022db39df9590c4",
+    "testharness": {
+      "version": 5,
+      "start_time": "2025-06-25 14:50:52",
+      "end_time": "2025-06-25 14:55:06",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild11-service/build/copied_tests,/ibmstor/scratch/romebuild11-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild11-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild11.headbuild.hpc.inl.gov",
+      "user": "romebuild11-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild11-service/build/container/moose-openmpi-x86_64_3d48fa8.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "3d48fa8",
+      "generator_version": "3d48fa8"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 253.786278,
+      "time_max": 243.5199999809265,
+      "time_average": 243.5199999809265,
+      "hpc_time_queue_average": 1.7205686569213867,
+      "hpc_time_wait_output_average": 0.250499963760376,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/3d48fa82c081e141fd86390dfb9edd1f11c984ca",
+      "job_id": 2979889,
+      "job_url": "civet.inl.gov/job/2979889",
+      "step": 2
+    },
+    "time": "2025-06-25 14:55:23.907000",
+    "event_sha": "3d48fa82c081e141fd86390dfb9edd1f11c984ca",
+    "event_cause": "push",
+    "pr_num": null,
+    "base_sha": "45b8a536530388e7bb1ff563398b1e94f2d691fc"
+  },
+  "685b0fdf4110325560e2cc30": {
+    "_id": "685b0fdf4110325560e2cc30",
+    "testharness": {
+      "version": 5,
+      "start_time": "2025-06-24 14:46:37",
+      "end_time": "2025-06-24 14:51:31",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild8-service/build/copied_tests,/ibmstor/scratch/romebuild8-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild8-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild8.headbuild.hpc.inl.gov",
+      "user": "romebuild8-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild8-service/build/container/moose-openmpi-x86_64_45b8a53.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "45b8a53",
+      "generator_version": "45b8a53"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 293.871764,
+      "time_max": 269.67000007629395,
+      "time_average": 269.67000007629395,
+      "hpc_time_queue_average": 0.6547482013702393,
+      "hpc_time_wait_output_average": 4.306901931762695,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/45b8a536530388e7bb1ff563398b1e94f2d691fc",
+      "job_id": 2978100,
+      "job_url": "civet.inl.gov/job/2978100",
+      "step": 2,
+      "version": 1
+    },
+    "time": "2025-06-24 14:51:43.888000",
+    "event_sha": "45b8a536530388e7bb1ff563398b1e94f2d691fc",
+    "event_cause": "push",
+    "pr_num": null
+  },
+  "6857a572bbcb03d9dccfb1a8": {
+    "_id": "6857a572bbcb03d9dccfb1a8",
+    "testharness": {
+      "version": 5,
+      "start_time": "2025-06-22 00:36:19",
+      "end_time": "2025-06-22 00:40:39",
+      "args": [
+        "-i",
+        "performance",
+        "--capture-perf-graph",
+        "-t",
+        "--hpc-host",
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov",
+        "--hpc-project",
+        "civet_moose",
+        "--hpc-apptainer-no-home",
+        "--hpc-apptainer-bindpath",
+        "/scratch/romebuild13-service/build/copied_tests,/ibmstor/scratch/romebuild13-service/build/copied_tests"
+      ],
+      "input_file_name": "performance",
+      "root_dir": "/scratch/romebuild13-service/build/copied_tests/moose/performance",
+      "sep_files": false,
+      "scheduler": "RunSlurm",
+      "moose_dir": "/opt/moose"
+    },
+    "environment": {
+      "hostname": "romebuild13.headbuild.hpc.inl.gov",
+      "user": "romebuild13-service"
+    },
+    "apptainer": {
+      "path": "/scratch/romebuild13-service/build/container/moose-openmpi-x86_64_968f537.sif",
+      "generator_library": "app",
+      "generator_name": "moose-openmpi-x86_64",
+      "generator_tag": "968f537",
+      "generator_version": "968f537"
+    },
+    "hpc": {
+      "scheduler": "slurm",
+      "hosts": [
+        "windriver2.hpc.inl.gov",
+        "windriver1.hpc.inl.gov"
+      ]
+    },
+    "stats": {
+      "num_passed": 1,
+      "num_failed": 0,
+      "num_skipped": 0,
+      "num_total": 1,
+      "time_total": 259.65455,
+      "time_max": 247.3199999332428,
+      "time_average": 247.3199999332428,
+      "hpc_time_queue_average": 0.5276308059692383,
+      "hpc_time_wait_output_average": 0.6553988456726074,
+      "hpc_num_resubmitted": 0
+    },
+    "civet": {
+      "repo_url": "github.com/idaholab/moose",
+      "recipe_name": "Performance",
+      "step_name": "Store results",
+      "push_branch": "master",
+      "event_url": "github.com/idaholab/moose/commit/968f537a3c89ffb556fb7da18da28da52b592ee0",
+      "job_id": 2971591,
+      "job_url": "civet.inl.gov/job/2971591",
+      "step": 2
+    },
+    "time": "2025-06-22 00:40:50.747000",
+    "event_sha": "968f537a3c89ffb556fb7da18da28da52b592ee0",
+    "event_cause": "push",
+    "pr_num": null
+  }
+}

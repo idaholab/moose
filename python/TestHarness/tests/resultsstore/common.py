@@ -11,15 +11,76 @@
 
 import json
 import os
+import random
+import string
 from copy import deepcopy
+from dataclasses import dataclass
 from io import StringIO
-from typing import Optional
+from typing import Any, Iterator, Optional, Tuple
 from unittest import TestCase
 
 import pytest
+from bson.objectid import ObjectId
 from mock import patch
 from moosepytest.runtestharness import run_test_harness
+from pymongo import MongoClient
+from pymongo.database import Database
+from TestHarness.resultsstore.civetstore import CIVETStore
 from TestHarness.resultsstore.utils import TestName
+
+# Dummy APPLICATION_REPO variable from the civet environment
+APPLICATION_REPO = "git@github.com:idaholab/moose"
+# Dummy CIVET_SERVER variable used in the civet environment
+CIVET_SERVER = "https://civet-be.inl.gov"
+
+# Static object id for use in testing
+OBJECT_ID = ObjectId()
+
+
+def random_git_sha() -> str:
+    """Generate a random Git SHA."""
+    hex_characters = string.hexdigits[:16]
+    random_sha = "".join(random.choice(hex_characters) for _ in range(40))
+    return random_sha
+
+
+def random_id() -> int:
+    """Generate a random ID."""
+    return random.randint(1, 1000000)
+
+
+def base_civet_env() -> Tuple[str, dict]:
+    """Build a random base CIVET environment for testing."""
+    # Dummy sha to use for the base commit
+    base_sha = random_git_sha()
+    # Dummy civet environment
+    env = {
+        "APPLICATION_REPO": APPLICATION_REPO,
+        "CIVET_BASE_SHA": random_git_sha(),
+        "CIVET_BASE_SSH_URL": "git@github.com:idaholab/moose.git",
+        "CIVET_EVENT_ID": str(random_id()),
+        "CIVET_HEAD_REF": "branchname",
+        "CIVET_HEAD_SHA": random_git_sha(),
+        "CIVET_JOB_ID": str(random_id()),
+        "CIVET_RECIPE_NAME": "Awesome recipe",
+        "CIVET_SERVER": CIVET_SERVER,
+        "CIVET_STEP_NAME": "Cool step",
+        "CIVET_STEP_NUM": str(random_id()),
+    }
+    return base_sha, env
+
+
+def build_civet_env(pr: bool = True) -> Tuple[str, dict]:
+    """Build a random base CIVET envrionment used for testing build()."""
+    base_sha, civet_env = base_civet_env()
+    if pr:
+        civet_env.update(
+            {"CIVET_EVENT_CAUSE": "Pull request", "CIVET_PR_NUM": str(random_id())}
+        )
+    else:
+        civet_env.update({"CIVET_EVENT_CAUSE": "Push", "CIVET_PR_NUM": ""})
+    return base_sha, civet_env
+
 
 # Cache for the TestHarness results
 TESTHARNESS_RESULTS: dict = {}
@@ -119,3 +180,206 @@ class ResultsStoreTestCase(TestCase):
         assert isinstance(TESTHARNESS_RESULTS[key], dict)
 
         return deepcopy(TESTHARNESS_RESULTS[key])
+
+    def get_result_data(self, pr: bool = True) -> dict:
+        """Get dummy data for a result as it would be stored."""
+        data = self.get_testharness_result()
+
+        # Remove tests entry
+        del data["tests"]
+        # Add ID
+        data["_id"] = OBJECT_ID
+        # Add CIVET header
+        data.update(CIVETStore.build_header(*build_civet_env(pr=pr)))
+
+        return data
+
+
+@dataclass
+class FakeMongoResult:
+    """Fake mongodb insert result for testing."""
+
+    inserted_id: Optional[int] = None
+    acknowledged: bool = True
+
+
+class FakeMongoCursorIterator:
+    """Fake iterator for going through a mongo cursor."""
+
+    def __init__(self, values: list[Any]):
+        """Initialize state; set values."""
+        self.values = values
+
+    def __iter__(self) -> Iterator[Any]:
+        """Iterate through the values."""
+        yield from self.values
+
+
+class FakeMongoFind:
+    """Fake context for find in a mongo collection."""
+
+    def __init__(self, values: list[Any]):
+        """Initialize state; set values."""
+        self.values = values
+
+    def __enter__(self) -> FakeMongoCursorIterator:
+        """Fake enter; return the iterator."""
+        return FakeMongoCursorIterator(self.values)
+
+    def __exit__(self, *_, **__):
+        """Fake exit; do nothing."""
+        pass
+
+
+@dataclass
+class FakeMongoCollection:
+    """Fake mongodb collection for testing."""
+
+    inserted = None
+    find_values = None
+
+    def insert_one(self, value):
+        """Mimic insert_one."""
+        self.inserted = value
+        return FakeMongoResult(value["_id"])
+
+    def insert_many(self, value):
+        """Mimic insert_many."""
+        self.inserted = value
+        return FakeMongoResult()
+
+    def find(self, *_, **__):
+        """Mimic find."""
+        pass
+
+    def aggregate(self, *_, **__):
+        """Mimic aggregate."""
+        pass
+
+
+@dataclass
+class FakeMongoDatabase(Database):
+    """Fake mongodb Database for testing."""
+
+    def __init__(self, *_, **__):
+        """Init; do nothing."""
+        pass
+
+    # Results collection
+    results = FakeMongoCollection()
+    # Tests collection
+    tests = FakeMongoCollection()
+
+
+class FakeMongoClient(MongoClient):
+    """Fake MongoClient for testing."""
+
+    def __init__(self, *_, **__):
+        """Initialize state."""
+        # Database name -> fake database
+        self._databases: dict[str, FakeMongoDatabase] = {}
+
+    def get_database(self, name, *_, **__) -> FakeMongoDatabase:
+        """Get a database."""
+        if name not in self._databases:
+            self._databases[name] = FakeMongoDatabase()
+        return self._databases[name]
+
+    def __getitem__(self, name: str) -> FakeMongoDatabase:
+        """Get a database."""
+        return self.get_database(name)
+
+    def __enter__(self) -> "FakeMongoClient":
+        """Mimic context manager enter; just returns the client."""
+        return self
+
+    def __exit__(self, *_):
+        """Mimic conext manager exit; does nothing."""
+        pass
+
+    def close(self):
+        """Close; don't do anything."""
+        pass
+
+
+# Production database name for testing golds
+GOLD_DATABASE_NAME = "civet_tests_moose_performance"
+# Test database name for testing pull request results
+TEST_DATABASE_NAME = "civet_tests_moose_store_results_live"
+
+# Production database name for testing golds
+GOLD_DATABASE_NAME = "civet_tests_moose_performance"
+# The name of the test to use from the gold database
+GOLD_TEST_NAME = TestName("simple_transient_diffusion", "test")
+
+
+@dataclass
+class GoldResult:
+    """Storage for a gold test."""
+
+    # The result ID
+    id: ObjectId
+    # The expected civet_version
+    civet_version: int
+    # The event sha for the result
+    event_sha: str
+    # The event ID for the result (if any)
+    event_id: Optional[int] = None
+
+
+# Static set of results from which to build the gold file
+GOLD_RESULTS = [
+    GoldResult(
+        id=ObjectId("6857a572bbcb03d9dccfb1a8"),
+        civet_version=0,
+        event_sha="968f537a3c89ffb556fb7da18da28da52b592ee0",
+    ),
+    GoldResult(
+        id=ObjectId("685c623b4022db39df9590c4"),
+        civet_version=0,
+        event_sha="3d48fa82c081e141fd86390dfb9edd1f11c984ca",
+    ),
+    GoldResult(
+        id=ObjectId("685b0fdf4110325560e2cc30"),
+        civet_version=1,
+        event_sha="45b8a536530388e7bb1ff563398b1e94f2d691fc",
+    ),
+    # bump to civet_version=2
+    GoldResult(
+        id=ObjectId("68658fcbc8ec62f893b8e307"),
+        civet_version=2,
+        event_sha="1134c7e383972783be2ea702f2738ece79fe6a59",
+    ),
+    # bump to civet_version=3
+    # - added event_id
+    GoldResult(
+        id=ObjectId("68dac86a57e68e67a2888a74"),
+        civet_version=3,
+        event_id=258481,
+        event_sha="d64fb221531abf740a7917376216f4e03517fc80",
+    ),
+    # bump to civet_version=4
+    # - remove indices from tests
+    GoldResult(
+        id=ObjectId("68dedf7cbe5697c197720bae"),
+        civet_version=4,
+        event_id=259309,
+        event_sha="296c9e817d13b35624be2423775b309a34d9336c",
+    ),
+    # bump to civet_version=5
+    GoldResult(
+        id=ObjectId("68e6141590b44073432086b9"),
+        civet_version=5,
+        event_id=260038,
+        event_sha="810a5570266435660fedf3c207e5b5a640699187",
+    ),
+    # bump to civet_version=6
+    # - tests can be stored with results
+    # - store moved to CIVETStore object
+    GoldResult(
+        id=ObjectId("68e7248e56c7e7f826a95d15"),
+        civet_version=6,
+        event_id=260206,
+        event_sha="61f2cba5825555e88e18564d03c54ca1959a8957",
+    ),
+]

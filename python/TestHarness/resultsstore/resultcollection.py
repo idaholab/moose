@@ -16,7 +16,8 @@ from bson.objectid import ObjectId
 from pymongo import DESCENDING
 from pymongo.database import Database
 
-from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
+from TestHarness.resultsstore.storedresult import StoredResult
+from TestHarness.resultsstore.storedtestresult import StoredTestResult
 from TestHarness.resultsstore.testdatafilters import ALL_TEST_KEYS, TestDataFilter
 from TestHarness.resultsstore.utils import TestName, results_test_iterator
 
@@ -45,6 +46,8 @@ class ResultCollection:
 
         """
         assert isinstance(results, list)
+        assert len(results) > 0
+        assert all(isinstance(v, StoredResult) for v in results)
         assert isinstance(database_getter, Callable)
 
         # The underlying results in the collection
@@ -54,14 +57,14 @@ class ResultCollection:
         self._database_getter = database_getter
 
     @property
-    def result_ids(self) -> list[ObjectId]:
-        """Get the IDs of the results in the collection."""
-        return [r.id for r in self.results]
-
-    @property
     def results(self) -> list[StoredResult]:
         """Get the underlying results."""
         return self._results
+
+    @property
+    def result_ids(self) -> list[ObjectId]:
+        """Get the IDs of the results in the collection."""
+        return [r.id for r in self.results]
 
     def get_database(self) -> Database:
         """Get the database."""
