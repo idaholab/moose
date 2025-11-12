@@ -70,7 +70,9 @@ TabulatedFluidProperties::validParams()
       "density enthalpy internal_energy viscosity");
   params.addParam<MultiMooseEnum>("interpolated_properties",
                                   properties,
-                                  "Properties to interpolate if no data file is provided");
+                                  "Properties to interpolate. If unspecified and a data file is "
+                                  "provided, the properties from the data file will be used. If "
+                                  "specified, some properties from the data file can be ignored.");
 
   // (p,T) grid parameters
   params.addRangeCheckedParam<Real>(
@@ -2390,9 +2392,12 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
                      "understands. It will be ignored.");
       // We could be reading a (v,e) tabulation after having read a (p,T) tabulation, do not
       // insert twice
+      // Also only allow properties specified as interpolated if user passed the parameter
       else if (std::find(_interpolated_properties.begin(),
                          _interpolated_properties.end(),
-                         column_names[i]) == _interpolated_properties.end())
+                         column_names[i]) == _interpolated_properties.end() &&
+               (!isParamSetByUser("interpolated_properties") ||
+                _interpolated_properties_enum.contains(column_names[i])))
         _interpolated_properties.push_back(column_names[i]);
     }
   }

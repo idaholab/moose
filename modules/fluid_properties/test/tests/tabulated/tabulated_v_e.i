@@ -103,7 +103,7 @@
   []
   [tabulated]
     type = TabulatedBicubicFluidProperties
-    interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
+    interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy pressure temperature'
 
     # Uncomment this to read the tabulation
     # fluid_property_file = fluid_properties.csv
