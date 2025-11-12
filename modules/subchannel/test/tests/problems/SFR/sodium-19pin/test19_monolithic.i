@@ -44,16 +44,16 @@ P_out = 2.0e5 # Pa
   P_tol = 1.0e-6
   implicit = true
   segregated = false
-
-  # Heat Transfer Correlations
-  duct_htc_correlation = 'gnielinski'
-  # friction model
+  duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [gnielinski]
+    type = SCMHTCGnielinski
   []
 []
 

@@ -101,6 +101,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [dittus-boelter]
     type = SCMHTCDittusBoelter
   []
+  [gnielinski]
+    type = SCMHTCGnielinski
+  []
 []
 
 [ICs]

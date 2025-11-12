@@ -25,7 +25,7 @@
       recover = false
       max_parallel = 1
       detail = 'using the Gnielinski correlation.'
-      cli_args = 'SubChannel/pin_htc_correlation=gnielinski SubChannel/duct_htc_correlation=gnielinski Outputs/file_base=gnielinski'
+      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=gnielinski'
     []
     [kazimi_carelli]
       type = CSVDiff
