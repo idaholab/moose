@@ -114,13 +114,11 @@ class ResultCollection:
                 for test in results_test_iterator(doc):
                     value = test.value
                     name = test.name
-                    if not all_data:
-                        value = {k: value[k] for k in keys}
                     test_result = None
                     if isinstance(value, dict):
-                        test_result = StoredTestResult(
-                            test.value, name, result, filters
-                        )
+                        if not all_data:
+                            value = {k: value[k] for k in keys if k in value}
+                        test_result = StoredTestResult(value, name, result, filters)
                     else:
                         test_result = StoredTestResult({}, name, result, filters)
                         separate_tests.append((value, test_result))

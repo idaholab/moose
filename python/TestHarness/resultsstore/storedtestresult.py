@@ -280,13 +280,13 @@ class StoredTestResult:
         return get_typed(self.data, "hpc", (NoneType, dict))
 
     @property
-    def hpc_id(self) -> Optional[int]:
+    def hpc_id(self) -> Optional[str]:
         """
         Get the HPC job ID that ran this this test, if any.
 
         Requires filter TestDataFilter.HPC when loading tests.
         """
-        return get_typed(hpc, "id", int) if (hpc := self.hpc) else None
+        return get_typed(hpc, "id", str) if (hpc := self.hpc) else None
 
     @property
     def validation(self) -> Optional[dict]:

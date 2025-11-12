@@ -418,7 +418,7 @@ class TestResultsStoredResults(ResultsStoreTestCase):
         self.assertIsNone(test.hpc_id)
 
         # Does exist
-        hpc = {"id": 1234}
+        hpc = {"id": "1234"}
         test.data["hpc"] = hpc
         self.assertEqual(test.hpc_id, hpc["id"])
 
@@ -431,7 +431,7 @@ class TestResultsStoredResults(ResultsStoreTestCase):
     def test_hpc_id_bad_type(self):
         """Test hpc_id property with bad data."""
         test, _ = self.get_stored_test_result()
-        test.data["hpc"] = {"id": "foo"}
+        test.data["hpc"] = {"id": 1234}
         with self.assertRaisesRegex(TypeError, "id"):
             test.hpc_id
 
