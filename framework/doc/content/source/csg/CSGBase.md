@@ -209,6 +209,66 @@ When adding and removing cells to/from universes, it is important to maintain th
 
 !alert-end!
 
+### Lattices
+
+A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects.
+The `CSGBase` class supports the creation of two types of lattices: Cartesian and regular hexagonal.
+To create a lattice, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the `CSGLattice` object (`const CSGLattice &`).
+In both cases, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
+Optionally, the pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
+At the time that the universe arrangement is set, the dimensionality of the lattice is determined (i.e., the number of rows, columns, or rings for the lattice).
+If the dimensionality should be changed, a new complete universe arrangement can be set to overwrite the previous arrangement.
+
+!alert! note title=2D vs. 3D Lattices
+
+The `CSGBase` class supports only the creation of 2D lattices. A "3D" lattice can be created by filling multiple 3D cells with 2D lattices and arranging them in layers to form the desired 3D structure.
+
+!alert-end!
+
+The `CSGLattice` objects can be accessed or updated with the following methods from `CSGBase`:
+
+- `setLatticeUniverses`: sets the vector of vectors of `CSGUniverse`s as the lattice layout. The structure of the layout will be checked to ensure it compatible with the lattice type. This method can be used to overwrite the existing lattice structure and change the dimensions.
+- `addUniverseToLattice`: add a `CSGUniverse` to the lattice at the specified location (replaces the existing universe). The arrangement of universes in the lattice must be set already in order to use this method.
+- `renameLattice`: change the name of the `CSGLattice` object.
+- `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
+- `getLatticeByName`: retrieve a const reference to the `CSGLattice` object of the specified name.
+
+#### Cartesian Lattices
+
+A regular Cartesian lattice (`CSGCartesianLattice`) can be created directly from the `CSGBase` class using the `createCartesianLattice` method.
+This lattice can have any number of rows or columns, but each row must be the same length.
+The indexing scheme for the elements of the lattice assumes a (row, column) form with the 0th row and 0th column being the upper left corner of the lattice.
+For example, a 2x3 lattice would look like FIGURE and be defined as shown.
+
+!listing CSGBaseTest.C start=create a 2x3 lattice of universes end=dims_map
+
+ADD FIGURE
+
+#### Hexagonal Lattices
+
+A regular x-oriented hexagonal lattice (`CSGHexagonalLattice`) can be directly created from the `CSGBase` class using the `createHexagonalLattice` method.
+The arrangement of `CSGUniverse` objects in this lattice assumes a (row, column) indexing, with the top row being the 0th row and the left most element in each row being the 0th column.
+The length of the rows is expected to be consistent with the size of the lattice (i.e., the number of rings) and is verified when the universes are set or provided.
+For example, a 3-ring hexagonal lattice would be indexed as shown in FIGURE and defined as shown below.
+
+!listing CSGBaseTest.C start=create a 3-ring hexagonal lattice of universes end=dims_map
+
+ADD FIGURE
+
+Convenience methods are provided for `CSGHexagonalLattice` types to convert between the required (row, column) indexing scheme and a (ring, element) indexing scheme.
+In a (ring, element) scheme, the outermost ring is the 0th ring, and the right-most element is the 0th element with indices increasing counter-clockwise around the ring.
+For the 3-ring lattice above in FIGURE, the corresponding (ring, element) indices would be as shown in FIGURE.
+For any lattice, the (ring, element) index of a universe in the lattice can be retrieved from the (row, column) index by calling the `getRingIndexFromRowIndex` method.
+And similarly, if the (ring, element) index form is the know index, the corresponding (row, column) index can be retrieved using the `getRowIndexFromRingIndex` method.
+It is important to note that while these convenience methods exists, the `CSGUniverse` objects in the lattice can only be accessed using the (row, column) index.
+
+ADD FIGURE
+
+
+#### Defining Other Lattice Types
+
+TBD
+
 ## Updating Existing CSGBase Objects
 
 An empty `CSGBase` object can be [initialized](#initialization) on its own in each `generateCSG` method for each mesh generator.
@@ -286,7 +346,7 @@ Consult the Doxygen documentation for information on all object-specific methods
 
 ## Object Naming Recommendations
 
-For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
+For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, `CSGUniverse`, and `CSGLattice`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
