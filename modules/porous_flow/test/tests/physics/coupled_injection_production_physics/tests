@@ -1,0 +1,11 @@
+[Tests]
+  design = 'CoupledInjectionProductionPhysics.md'
+  issues = '#31899'
+
+  [test]
+    type = Exodiff
+    input = 'main.i'
+    exodiff = 'main_out.e'
+    requirement = 'The system shall be able to couple a porous flow problem to another application using point sources provided by another application.'
+  []
+[]
