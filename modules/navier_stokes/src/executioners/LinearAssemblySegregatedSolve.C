@@ -258,8 +258,6 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 
     if (_print_fields)
     {
-      _console << " solution after solve " << std::endl;
-      solution.print();
       _console << " matrix when we solve " << std::endl;
       mmat.print();
       _console << " rhs when we solve " << std::endl;
