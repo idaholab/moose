@@ -15,6 +15,6 @@
     exodiff = 'displace_node_list_in.e'
     recover = false
     issues = '#30385'
-    requirement = 'The system shall allow displacing rather than merging into a nodeset whose id conflicts with a sideset'
+    requirement = 'The system shall be able to create a sufficient offset in the nodeset ids rather than merge converted sidesets into a nodeset whose id conflicts with a sideset'
   []
 []
