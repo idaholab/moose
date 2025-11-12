@@ -110,7 +110,7 @@ def main():
         help="Starting uniform refine level (default: %(default)s)"
     )
     parser.add_argument(
-        "--proc-multiplier", type=int, required=True,
+        "--proc-multiplier", type=int,
         help="Multiplicative increase in ranks per case (required)."
     )
     parser.add_argument(
@@ -128,6 +128,9 @@ def main():
 
     args = parser.parse_args()
 
+    if args.num_cases > 1 and args.proc_multiplier is None:
+        parser.error("--proc-multiplier is required when --num-cases > 1")
+
     exec_path = args.exec
     input_file = args.input
     procs = args.start_procs
@@ -142,8 +145,9 @@ def main():
                  args.num_steps,
                  args.detach)
 
-        procs *= args.proc_multiplier
-        refine += 1
+        if _case < args.num_cases:
+            procs *= args.proc_multiplier
+            refine += 1
 
 
 if __name__ == "__main__":
