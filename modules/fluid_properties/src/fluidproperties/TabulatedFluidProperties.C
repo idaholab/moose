@@ -1794,9 +1794,7 @@ TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
 Real
 TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
-  if (_fp)
-    return _fp->T_from_p_h(pressure, enthalpy);
-  else
+  if (_create_direct_pT_interpolations || _create_direct_ve_interpolations)
   {
     auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
     { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
@@ -1818,15 +1816,17 @@ TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
                  ") to temperature failed to converge.");
     return T;
   }
+  else if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    NeedTabulationOrFPError("T_from_p_h", "temperature");
 }
 
 ADReal
 TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
 {
   using std::isnan;
-  if (_fp)
-    return _fp->T_from_p_h(pressure, enthalpy);
-  else
+  if (_create_direct_pT_interpolations || _create_direct_ve_interpolations)
   {
     auto lambda =
         [&](ADReal pressure, ADReal current_T, ADReal & new_h, ADReal & dh_dp, ADReal & dh_dT)
@@ -1854,6 +1854,10 @@ TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & ent
                  ") to temperature failed to converge.");
     return T;
   }
+  else if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    NeedTabulationOrFPError("T_from_p_h", "temperature");
 }
 
 Real
