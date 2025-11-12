@@ -6,7 +6,7 @@
 
 !! Intentional comment to provide extra spacing
 
-This class is used to model the axial friction factor for a subchannel assembly with bare fuel pins in a quadrilateral lattice. It implements the MATRA correlation [!cite](KIT). For Re number ranges: $0 leq Re < 5000$ where the MATRA correlation is not applicable, a custom model has been applied:
+This class is used to model the axial friction factor for a subchannel assembly with bare fuel pins in a quadrilateral lattice. It implements the MATRA correlation [!cite](KIT). For Re number ranges: $0 \leq Re < 5000$ where the MATRA correlation is not applicable, a custom model has been applied:
 
 \begin{equation}
 f_w \rightarrow

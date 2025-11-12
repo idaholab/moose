@@ -39,13 +39,9 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
-  /// Function that computes the added heat coming from the fuel pins, for channel i_ch and cell iz
-  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
-  /// Function that computes the heat added by the duct, for channel i_ch and cell iz
-  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
-
   const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
+  const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
 
   struct FrictionStruct
   {
@@ -75,6 +71,25 @@ public:
     {
     }
   } _nusselt_args;
+
+  /// Return the added heat coming from the fuel pins
+  Real getAddedHeatPin(unsigned int i_ch, unsigned int iz) const
+  {
+    return computeAddedHeatPin(i_ch, iz);
+  }
+
+  /// Return the added heat coming from the duct
+  Real getAddedHeatDuct(unsigned int i_ch, unsigned int iz) const
+  {
+    return computeAddedHeatDuct(i_ch, iz);
+  }
+
+protected:
+  /// Pure virtual: daughters provide different implementations
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const = 0;
+
+  /// Non-pure: implemented in the base (or override in a child if needed)
+  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) const;
 
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);

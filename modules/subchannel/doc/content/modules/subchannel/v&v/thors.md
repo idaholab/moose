@@ -21,8 +21,8 @@ THORS bundle 3A simulates the Fast Flux Test Facility and Clinch River Breeder R
 | Experiment Parameter (unit) | Value |
 | :- | :- |
 | Number of pins (---) | $19$ |
-| Rod pitch (cm) | $0.726$ |
-| Rod diameter (cm) | $0.5842$ |
+| Pin pitch (cm) | $0.726$ |
+| Pin diameter (cm) | $0.5842$ |
 | Wire wrap diameter (cm) | $0.142$ |
 | Wire wrap axial pitch (cm) | $30.48$ |
 | Flat-to-flat duct distance (cm) | $3.41$ |
@@ -108,8 +108,8 @@ THORS bundle 5B has the same fuel configuration as bundle 2B, except that 0.0711
 | Experiment Parameter (unit) | Value |
 | :- | :- |
 | Number of pins (---) | $19$ |
-| Rod pitch (cm) | $0.726$ |
-| Rod diameter (cm) | $0.5842$ |
+| Pin pitch (cm) | $0.726$ |
+| Pin diameter (cm) | $0.5842$ |
 | Wire wrap diameter (cm) | $0.1422$ |
 | Wire wrap axial pitch (cm) | $30.5$ |
 | Flat-to-flat duct distance (cm) | $3.241$ |
