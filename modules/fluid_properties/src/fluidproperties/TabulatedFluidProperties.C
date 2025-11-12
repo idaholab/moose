@@ -2296,7 +2296,9 @@ TabulatedFluidProperties::checkInitialGuess(bool post_reading_tabulation) const
   // First condition applies when generating a tabulation
   // Second condition applies when using a pre-generated loaded tabulation
   if ((!post_reading_tabulation && _fp && (_construct_pT_from_ve || _construct_pT_from_vh)) ||
-      (post_reading_tabulation && (_file_name_in != "" || _file_name_ve_in != "")))
+      (post_reading_tabulation && (_file_name_in != "" || _file_name_ve_in != "") &&
+       (_create_direct_ve_interpolations || isParamSetByUser("T_initial_guess") ||
+        isParamSetByUser("p_initial_guess"))))
   {
     if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
       mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +
