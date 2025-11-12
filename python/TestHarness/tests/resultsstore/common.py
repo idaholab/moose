@@ -147,8 +147,10 @@ class ResultsStoreTestCase(TestCase):
         """
         from TestHarness.tests.resultsstore.common import TESTHARNESS_RESULTS
 
-        key = f"args={','.join(args)},"
-        key += f"kwargs={','.join([f"{k}={v}" for k, v in kwargs.items()])}"
+        joined_args = ",".join(args)
+        kv_kwargs = [f"{k}={v}" for k, v in kwargs.items()]
+        joined_kwargs = ",".join(kv_kwargs)
+        key = f"args={joined_args},kwargs={joined_kwargs}"
 
         # Need to generate or load the results file on first call
         if key not in TESTHARNESS_RESULTS:
