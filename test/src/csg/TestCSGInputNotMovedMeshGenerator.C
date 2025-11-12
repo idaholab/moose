@@ -26,6 +26,7 @@ TestCSGInputNotMovedMeshGenerator::validParams()
 TestCSGInputNotMovedMeshGenerator::TestCSGInputNotMovedMeshGenerator(const InputParameters & params)
   : MeshGenerator(params), _mesh_ptr(getMesh("input"))
 {
+  static_cast<void>(getCSGBase("input"));
 }
 
 std::unique_ptr<MeshBase>
@@ -38,8 +39,6 @@ TestCSGInputNotMovedMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 TestCSGInputNotMovedMeshGenerator::generateCSG()
 {
-  static_cast<void>(getCSGBase("input"));
-
   // Create temporary CSG object to return
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   csg_obj->getRootUniverse();

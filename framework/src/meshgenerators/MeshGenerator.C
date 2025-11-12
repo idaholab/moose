@@ -232,8 +232,6 @@ MeshGenerator::getCSGBaseByName(const MeshGeneratorName & mesh_generator_name)
   checkGetMesh(mesh_generator_name, "");
 
   auto & csg_base = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
-  if (!csg_base)
-    mooseError("Requested CSG object from " + mesh_generator_name + " returned a null object.");
   _requested_csg_bases.emplace_back(mesh_generator_name, &csg_base);
   return csg_base;
 }
@@ -383,6 +381,7 @@ MeshGenerator::generateInternalCSG()
 {
   mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
   auto csg_obj = generateCSG();
+  mooseAssert(csg_obj, "Null CSG object");
   for (const auto & [requested_name, requested_csg] : _requested_csg_bases)
     if (*requested_csg)
       mooseError(

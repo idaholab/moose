@@ -21,6 +21,15 @@
         mesh_mode = REPLICATED
         detail = 'updates an existing CSG representation from another mesh generator.'
     []
+    [csg_only_one_to_many_dependencies]
+        type = 'JSONDiff'
+        input = 'csg_only_one_to_many_deps.i'
+        cli_args = '--csg-only'
+        jsondiff = 'csg_only_one_to_many_deps_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'has a single mesh generator depend on multiple downstream mesh generators.'
+    []
     [csg_only_final_generator]
         type = 'JSONDiff'
         input = 'csg_only_chained.i'

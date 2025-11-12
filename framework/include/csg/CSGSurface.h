@@ -101,6 +101,13 @@ public:
   bool operator!=(const CSGSurface & other) const;
 
 protected:
+  /**
+   * @brief Create clone of current surface, to be implemented by derived class
+   *
+   * @return unique_ptr to cloned surface
+   */
+  virtual std::unique_ptr<CSGSurface> clone() const = 0; // Pure virtual function
+
   // set the name of the surface - intentionally not public because
   // name needs to be managed at the CSGSurfaceList level
   void setName(const std::string & name) { _name = name; }

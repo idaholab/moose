@@ -80,4 +80,34 @@ CSGCellList::renameCell(const CSGCell & cell, const std::string & name)
   addCell(std::move(existing_cell));
 }
 
+bool
+CSGCellList::operator==(const CSGCellList & other) const
+{
+  const auto all_cells = this->getAllCells();
+  const auto other_cells = other.getAllCells();
+
+  // Check that same number of cells are defined in both lists
+  if (all_cells.size() != other_cells.size())
+    return false;
+
+  // Iterate through each CSGCell in list and check equality of each cell
+  // with other list
+  for (const auto & cell : all_cells)
+  {
+    const auto & cell_name = cell.get().getName();
+    if (!other.hasCell(cell_name))
+      return false;
+    const auto & other_cell = other.getCell(cell_name);
+    if (cell.get() != other_cell)
+      return false;
+  }
+  return true;
+}
+
+bool
+CSGCellList::operator!=(const CSGCellList & other) const
+{
+  return !(*this == other);
+}
+
 } // namespace CSG

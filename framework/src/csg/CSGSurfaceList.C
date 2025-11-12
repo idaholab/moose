@@ -19,6 +19,12 @@ namespace CSG
 
 CSGSurfaceList::CSGSurfaceList() {}
 
+CSGSurfaceList::CSGSurfaceList(const CSGSurfaceList & other_surface_list)
+{
+  for (const auto & [name, surf] : other_surface_list.getSurfaceListMap())
+    _surfaces.emplace(name, surf->clone());
+}
+
 CSGSurface &
 CSGSurfaceList::getSurface(const std::string & name) const
 {
@@ -62,6 +68,36 @@ CSGSurfaceList::renameSurface(const CSGSurface & surface, const std::string & na
   existing_surface->setName(name);
   _surfaces.erase(prev_name);
   addSurface(std::move(existing_surface));
+}
+
+bool
+CSGSurfaceList::operator==(const CSGSurfaceList & other) const
+{
+  const auto all_surfs = this->getAllSurfaces();
+  const auto other_surfs = other.getAllSurfaces();
+
+  // Check that same number of surfaces are defined in both lists
+  if (all_surfs.size() != other_surfs.size())
+    return false;
+
+  // Iterate through each CSGSurface in list and check equality of surface
+  // with other list
+  for (const auto & surf : all_surfs)
+  {
+    const auto & surf_name = surf.get().getName();
+    if (!other.hasSurface(surf_name))
+      return false;
+    const auto & other_surf = other.getSurface(surf_name);
+    if (surf.get() != other_surf)
+      return false;
+  }
+  return true;
+}
+
+bool
+CSGSurfaceList::operator!=(const CSGSurfaceList & other) const
+{
+  return !(*this == other);
 }
 
 } // namespace CSG

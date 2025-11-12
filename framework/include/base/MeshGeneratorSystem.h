@@ -290,6 +290,6 @@ private:
   /// Whether mesh generator system is running in CSG-only mode
   bool _csg_only;
 
-  /// Holds the output CSGBase object for each mesh generator
-  std::map<std::string, std::unique_ptr<CSG::CSGBase>> _csg_base_output;
+  /// Holds the output CSGBase object for each mesh generator - including duplicates when needed by multiple downstream generators (key is MG name, value list is duplicates)
+  std::map<std::string, std::list<std::unique_ptr<CSG::CSGBase>>> _csg_base_outputs;
 };

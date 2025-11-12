@@ -62,12 +62,22 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
 
   // Set reactor_params_name metadata for use by future mesh generators
   declareMeshProperty("reactor_params_name", std::string(_reactor_params));
+
+  // Store CSGBase object if we are in CSG only mode
+  if (_app.getMeshGeneratorSystem().getCSGOnly())
+    _reactor_params_csg = &getCSGBaseByName(_reactor_params);
 }
 
 void
-ReactorGeometryMeshBuilderBase::freeReactorMeshParams()
+ReactorGeometryMeshBuilderBase::freeReactorParamsMesh()
 {
   _reactor_params_mesh->reset();
+}
+
+void
+ReactorGeometryMeshBuilderBase::freeReactorParamsCSG()
+{
+  _reactor_params_csg->reset();
 }
 
 unsigned int
