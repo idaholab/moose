@@ -1,6 +1,6 @@
 !include ../3d-core.i
 
-n = 6
+n = 16
 
 [Mesh]
   [gen]
