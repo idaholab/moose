@@ -42,7 +42,7 @@ alpha = '${fparse 10 * degree^2}'
     order = SECOND
   []
   [pressure_bar]
-    family = LAGRANGE
+    family = SIDE_HIERARCHIC
     order = SECOND
   []
 []
