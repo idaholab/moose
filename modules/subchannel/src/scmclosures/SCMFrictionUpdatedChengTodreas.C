@@ -197,32 +197,28 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
       cL *= (1 + ws_l * (ar / a_p) * Utility::pow<2>(std::tan(theta)));
     }
   }
-  // laminar friction factor and turbulent friction factor coefficients (power-law form)
+  // laminar friction factor and turbulent friction factor coefficients
   const Real bL = -1.0;
   const Real bT = -0.18;
+  auto fL = cL * std::pow(Re, bL);
+  auto fT = cT * std::pow(Re, bT);
 
-  Real a, b;
   if (Re < ReL)
   {
     // laminar flow
-    a = cL;
-    b = bL;
+    return fL;
   }
   else if (Re > ReT)
   {
     // turbulent flow
-    a = cT;
-    b = bT;
+    return fT;
   }
   else
   {
-    // transitional regime: enforce f = a * Re^{b} with log-space blending
-    const Real b_eff = (1.0 - psi) * bL + psi * bT;
-    const Real a_eff = std::exp((1.0 - psi) * std::log(cL) + psi * std::log(cT));
-    a = a_eff;
-    b = b_eff;
+    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, 7)) +
+           fT * std::pow(psi, 1.0 / 3.0);
   }
-  return a * std::pow(Re, b);
 }
 
 Real
@@ -325,30 +321,26 @@ SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
     // turbulent flow friction factor for bare Pin bundle - Corner subchannel
     cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
   }
-  // laminar friction factor and turbulent friction factor coefficients (power-law form)
+  // laminar friction factor and turbulent friction factor coefficients
   const Real bL = -1.0;
   const Real bT = -0.18;
+  auto fL = cL * std::pow(Re, bL);
+  auto fT = cT * std::pow(Re, bT);
 
-  Real a, b;
   if (Re < ReL)
   {
     // laminar flow
-    a = cL;
-    b = bL;
+    return fL;
   }
   else if (Re > ReT)
   {
     // turbulent flow
-    a = cT;
-    b = bT;
+    return fT;
   }
   else
   {
-    // transitional regime: enforce f = a * Re^{b} with log-space blending
-    const Real b_eff = (1.0 - psi) * bL + psi * bT;
-    const Real a_eff = std::exp((1.0 - psi) * std::log(cL) + psi * std::log(cT));
-    a = a_eff;
-    b = b_eff;
+    // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
+    return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, 7)) +
+           fT * std::pow(psi, 1.0 / 3.0);
   }
-  return a * std::pow(Re, b);
 }
