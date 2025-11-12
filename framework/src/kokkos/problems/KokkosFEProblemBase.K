@@ -11,6 +11,8 @@
 #include "KokkosFunction.h"
 #include "KokkosUserObject.h"
 #include "KokkosPostprocessor.h"
+#include "KokkosVectorPostprocessor.h"
+#include "KokkosReporter.h"
 
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -148,6 +150,26 @@ FEProblemBase::addKokkosPostprocessor(const std::string & pp_name,
                                       InputParameters & parameters)
 {
   checkUserObjectNameCollision(name, "KokkosPostprocessor");
+
+  addKokkosUserObject(pp_name, name, parameters);
+}
+
+void
+FEProblemBase::addKokkosVectorPostprocessor(const std::string & pp_name,
+                                            const std::string & name,
+                                            InputParameters & parameters)
+{
+  checkUserObjectNameCollision(name, "KokkosVectorPostprocessor");
+
+  addKokkosUserObject(pp_name, name, parameters);
+}
+
+void
+FEProblemBase::addKokkosReporter(const std::string & pp_name,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  checkUserObjectNameCollision(name, "KokkosReporter");
 
   addKokkosUserObject(pp_name, name, parameters);
 }
@@ -553,5 +575,13 @@ FEProblemBase::kokkosJoinAndFinalize(const std::vector<Moose::Kokkos::UserObject
       _reporter_data.finalize(obj->name());
       setPostprocessorValueByName(obj->name(), pp->getValue());
     }
+
+    auto vpp = dynamic_cast<Moose::Kokkos::VectorPostprocessor *>(obj);
+    if (vpp)
+      _reporter_data.finalize(obj->name());
+
+    auto reporter = dynamic_cast<Moose::Kokkos::Reporter *>(obj);
+    if (reporter)
+      _reporter_data.finalize(obj->name());
   }
 }
