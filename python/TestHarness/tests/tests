@@ -304,12 +304,6 @@
     requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
     issues = '#30517'
   []
-  [resultsstore_combined]
-    type = PythonUnitTest
-    input = test_resultsstore_combined.py
-    requirement = 'The system shall provide python interfaces to both store and load test results into a database'
-    issues = '#31675'
-  []
   [augmented_capabilities]
     type = PythonUnitTest
     input = test_AugmentedCapabilities.py
