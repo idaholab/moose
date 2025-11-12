@@ -138,7 +138,8 @@ MooseMesh::validParams()
       "displace_node_list_by_side_list",
       true,
       "Whether to renumber existing nodesets with ids matching sidesets that "
-      "lack names matching sidesets, rather than to merge them with the sideset.");
+      "lack names matching sidesets, when constructing nodesets from sidesets via the default "
+      "'construct_node_list_from_side_list' option, rather than to merge them with the sideset.");
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   params.addParam<unsigned int>("ghosting_patch_size",
