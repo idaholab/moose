@@ -17,8 +17,7 @@
 InputParameters
 VectorPostprocessor::validParams()
 {
-  InputParameters params = UserObject::validParams();
-  params += OutputInterface::validParams();
+  InputParameters params = OutputInterface::validParams();
   params += NonADFunctorInterface::validParams();
   params.addParam<bool>("contains_complete_history",
                         false,
