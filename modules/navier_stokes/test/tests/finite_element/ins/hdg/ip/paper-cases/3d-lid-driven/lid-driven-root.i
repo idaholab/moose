@@ -15,7 +15,7 @@ n = 16
     nx = ${n}
     ny = ${n}
     nz = ${n}
-    elem_type = TET10
+    elem_type = TET14
   []
 []
 
