@@ -37,7 +37,7 @@
       recover = false
       max_parallel = 1
       detail = 'using the Kazimi Carelli correlation.'
-      cli_args = 'SubChannel/pin_htc_correlation=kazimi-carelli SubChannel/duct_htc_correlation=gnielinski Outputs/file_base=kazimi-carelli'
+      cli_args = 'SubChannel/pin_HTC_closure=kazimi-carelli SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=kazimi-carelli'
     []
   []
 []

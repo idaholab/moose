@@ -39,7 +39,14 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
-public:
+  /// Function that computes the added heat coming from the fuel pins, for channel i_ch and cell iz
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
+  /// Function that computes the heat added by the duct, for channel i_ch and cell iz
+  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
+
+  const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
+  const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
+
   struct FrictionStruct
   {
     unsigned int i_ch = 0;
