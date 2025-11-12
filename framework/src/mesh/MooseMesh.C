@@ -3047,11 +3047,19 @@ MooseMesh::buildNodeListFromSideList()
       // switches type
       const std::set<boundary_id_type> & node_bcids = boundary_info.get_node_boundary_ids();
 
+      // If we've got a reasonable largest BC id, we can just use the
+      // subsequent unused ones
       boundary_id_type next_bcid = 0;
       if (!node_bcids.empty())
         next_bcid = std::max(next_bcid, cast_int<boundary_id_type>(*node_bcids.rbegin() + 1));
       if (!side_bcids.empty())
         next_bcid = std::max(next_bcid, cast_int<boundary_id_type>(*side_bcids.rbegin() + 1));
+
+      // If we've got an unreasonable largest BC id, we should
+      // probably just search for unused ones with moderate values, so we
+      // don't risk wrapping.
+      if (next_bcid > 1000 || next_bcid <= 0)
+        next_bcid = 1000;
 
       // If any side bcid is already a node bcid with a different name,
       // that's a different boundary condition that we need to reassign
@@ -3059,7 +3067,13 @@ MooseMesh::buildNodeListFromSideList()
       for (auto bcid : side_bcids)
         if (node_bcids.count(bcid) &&
             (boundary_info.get_sideset_name(bcid) != boundary_info.get_nodeset_name(bcid)))
-          boundary_info.renumber_node_id(bcid, next_bcid++);
+        {
+          boundary_info.renumber_node_id(bcid, next_bcid);
+          do
+          {
+            ++next_bcid;
+          } while (node_bcids.count(next_bcid) || side_bcids.count(next_bcid));
+        }
     }
 
     // If any side bcid isn't already a node bcid, we should make
