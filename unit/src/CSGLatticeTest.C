@@ -81,7 +81,7 @@ TEST(CSGLatticeTest, testCreateCartLatticeInvalid)
   }
 }
 
-/// tests valiud CSGHexagonalLattice construction
+/// tests valid CSGHexagonalLattice construction
 TEST(CSGLatticeTest, testCreateHexLatticeValid)
 {
   {
@@ -278,7 +278,8 @@ TEST(CSGLatticeTest, testHexSetUniverses)
   }
 }
 
-TEST(CSGLatticeTest, testGetUniverseNames)
+/// tests CSGLattice::getUniverseNameMap function
+TEST(CSGLatticeTest, testGetUniverseNameMap)
 {
   std::string name1 = "pinky";
   std::string name2 = "brain";
@@ -298,6 +299,7 @@ TEST(CSGLatticeTest, testGetUniverseNames)
   ASSERT_EQ(name_map[1][1], name1);
 }
 
+/// tests CSGLattice::hasUniverse function
 TEST(CSGLatticeTest, testHasUniverse)
 {
   const auto univ1 = CSGUniverse("univ1", false);
@@ -312,7 +314,7 @@ TEST(CSGLatticeTest, testHasUniverse)
   ASSERT_FALSE(cart_lattice.hasUniverse("univ3"));
 }
 
-// tests CSGCartesianLattice::isValidIndex function
+/// tests CSGCartesianLattice::isValidIndex function
 TEST(CSGLatticeTest, testCartIsValidIndex)
 {
   // create initial lattice of all univ1 elements
@@ -335,6 +337,7 @@ TEST(CSGLatticeTest, testCartIsValidIndex)
   }
 }
 
+/// tests CSGHexagonalLattice::isValidIndex function
 TEST(CSGLatticeTest, testHexIsValidIndex)
 {
   // create initial lattice of all univ1 elements
@@ -454,7 +457,7 @@ TEST(CSGLatticeTest, testGetMethods)
   }
 }
 
-// test setName functionality
+/// test setName functionality
 TEST(CSGLatticeTest, testSetName)
 {
   auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
@@ -462,7 +465,7 @@ TEST(CSGLatticeTest, testSetName)
   ASSERT_EQ(cart_lattice.getName(), "new_name");
 }
 
-// test the == and != overloaded operators for lattices
+/// test the == and != overloaded operators for cartesian lattices
 TEST(CSGLatticeTest, testCartLatticeEquality)
 {
   // universe maps to use for different lattice comparisons
@@ -506,6 +509,7 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   }
 }
 
+/// test the == and != overloaded operators for hexagonal lattices
 TEST(CSGLatticeTest, testHexLatticeEquality)
 {
   // universe maps to use for different lattice comparisons
@@ -553,7 +557,7 @@ TEST(CSGLatticeTest, testHexLatticeEquality)
   }
 }
 
-// test CSGLattice::getUniqueUniverses
+/// test CSGLattice::getUniqueUniverses
 TEST(CSGLatticeTest, testGetUniqueUniverses)
 {
   const auto univ1 = CSGUniverse("univ1", false);
@@ -567,7 +571,7 @@ TEST(CSGLatticeTest, testGetUniqueUniverses)
   ASSERT_EQ(unique[1].get(), univ2);
 }
 
-// test CSG[Cartesian/Hexagonal]Lattice::setPitch
+/// test CSG[Cartesian/Hexagonal]Lattice::setPitch
 TEST(CSGLatticeTest, testSetPitch)
 {
   {

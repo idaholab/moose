@@ -113,6 +113,8 @@ CSGHexagonalLattice::compareDimensions(const CSGLattice & other) const
 
   if (std::any_cast<int>(this_dims["nrow"]) != std::any_cast<int>(other_dims["nrow"]))
     return false;
+  if (std::any_cast<int>(this_dims["nring"]) != std::any_cast<int>(other_dims["nring"]))
+    return false;
   if (std::any_cast<Real>(this_dims["pitch"]) != std::any_cast<Real>(other_dims["pitch"]))
     return false;
   return true;
