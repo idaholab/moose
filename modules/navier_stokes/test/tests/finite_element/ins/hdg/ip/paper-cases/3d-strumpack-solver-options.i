@@ -19,12 +19,16 @@
     [u]
       vars = 'vel_bar_x vel_bar_y vel_bar_z'
       petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
-      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  300         1e-8      unpreconditioned'
+      petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -sub_pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
+      petsc_options_value = 'asm      4               lu           gmres     1e-2      300                right        mumps                          300         1e-8      unpreconditioned'
+      # petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
+      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  300         1e-8      unpreconditioned'
     []
     [p]
       vars = 'pressure_bar'
       petsc_options = '-ksp_converged_reason'
+      # petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -ksp_max_it -ksp_atol -ksp_norm_type'
+      # petsc_options_value = 'lu       mumps                      fgmres    1e-2      300                right        300         1e-8      unpreconditioned'
       petsc_options_iname = '-pc_type -pc_jacobi_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -ksp_max_it -ksp_atol -ksp_norm_type'
       petsc_options_value = 'jacobi   diagonal        fgmres    1e-2      300                right        300         1e-8      unpreconditioned'
     []
