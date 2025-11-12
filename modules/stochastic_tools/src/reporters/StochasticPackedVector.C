@@ -17,8 +17,7 @@ StochasticPackedVector::validParams()
   InputParameters params = StochasticReporter::validParams();
   params.addClassDescription(
       "Packs selected scalar sampler columns into a single vector<Real> per sample.");
-  params.addRequiredParam<SamplerName>(
-      "sampler", "The sampler from which to extract rows.");
+  params.addRequiredParam<SamplerName>("sampler", "The sampler from which to extract rows.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "columns", "Zero-based indices of sampler columns to pack (size >= 2).");
   params.addRequiredParam<ReporterValueName>(
@@ -39,8 +38,8 @@ StochasticPackedVector::StochasticPackedVector(const InputParameters & parameter
   const auto ncols = _sampler.getNumberOfCols();
   for (auto c : _cols)
     if (c >= ncols)
-      paramError("columns",
-                 "Column index ", c, " is out of range for sampler with ", ncols, " columns.");
+      paramError(
+          "columns", "Column index ", c, " is out of range for sampler with ", ncols, " columns.");
 
   // Declare the packed reporter (vector<Real> per sample -> vector<vector<Real>> across samples)
   const auto & out_name = getParam<ReporterValueName>("output_name");
@@ -57,8 +56,11 @@ StochasticPackedVector::execute()
 
     // Safety: row width must match sampler width
     if (row.size() != static_cast<size_t>(_sampler.getNumberOfCols()))
-      mooseError("StochasticPackedVector: sampler row width (", row.size(),
-                 ") does not match sampler column count (", _sampler.getNumberOfCols(), ").");
+      mooseError("StochasticPackedVector: sampler row width (",
+                 row.size(),
+                 ") does not match sampler column count (",
+                 _sampler.getNumberOfCols(),
+                 ").");
 
     std::vector<Real> packed;
     packed.reserve(_cols.size());
