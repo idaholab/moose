@@ -51,16 +51,6 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
                                                        mfem::Vector & dX_dt)
 {
   dX_dt = 0.0;
-  //GetEquationSystem()->UpdateEssDerivativeVals(dt, X);
- 
-  for (const auto i : index_range(_trial_var_names))
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    std::cout << "************* I am a trial variable ************* " << trial_var_name << std::endl;
-    *(GetEquationSystem()->_td_var_ess_constraints.at(i)) =
-        *(_problem_data.gridfunctions.GetShared(trial_var_name));
-    GetEquationSystem()->_td_var_ess_constraints.at(i)->Print(std::cout);
-  }
 
   SetTestVariablesFromTrueVectors();
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
