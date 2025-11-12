@@ -189,17 +189,20 @@ alpha = '${fparse 10 * degree^2}'
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options = '-nl0_condensed_ksp_view'
-  petsc_options_iname = '-ksp_type'
-  petsc_options_value = 'preonly'
-  nl_abs_tol = 1e-7
+  petsc_options = '-nl0_condensed_ksp_view' # -mat_strumpack_verbose'
+  petsc_options_iname = '-ksp_type' # -mat_strumpack_compression_rel_tol'
+  petsc_options_value = 'preonly' #   1e-8'
   [TimeStepper]
     type = TimeSequenceStepper
     time_sequence = '1 10 50 100 150 200 250 350 400 600 800 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 3200 3400 3600 3800 4000 4200 4400 4600 4800 5000 5200 5400 5600 5800 6000 6200 6400 6600 6800 7000 7200 7400 7600 7800 8000 8200 8400 8600 8800 9000 9200 9400 9600 9800 10000'
     use_last_t_for_end_time = true
   []
-  abort_on_solve_fail = true
-  line_search = none
+  abort_on_solve_fail = false
+  nl_max_its = 10
+  line_search = basic
+  nl_rel_tol = 1e-9
+  nl_abs_tol = 1e-7
+  nl_rel_step_tol = 1e-10
 []
 
 [Outputs]
