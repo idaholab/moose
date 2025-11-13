@@ -12,18 +12,16 @@ slab_thickness = 3.0
 
 top_right_theta = '${fparse atan(box_length/box_width)}'
 
-ppin_height = ${fparse slab_thickness + box_height}
-
-# iolet_height = 7.9248
-# ilet_width = 0.5472
-# ilet_length = 0.4064
-# olet_width = 0.9144
-# olet_length = 0.1524
-# ilet1_theta = '${fparse 4*pi/3}'
-# ilet2_theta = '${fparse 3*pi/2}'
-# ilet3_theta = '${fparse 5*pi/3}'
-# olet1_theta = '${fparse pi/2}'
-# olet2_theta = '${fparse 2*pi/3}'
+iolet_height = 7.9248
+ilet_width = 0.5472
+ilet_length = 0.4064
+olet_width = 0.9144
+olet_length = 0.1524
+ilet1_theta = '${fparse 4*pi/3}'
+ilet2_theta = '${fparse 3*pi/2}'
+ilet3_theta = '${fparse 5*pi/3}'
+olet1_theta = '${fparse pi/2}'
+olet2_theta = '${fparse 2*pi/3}'
 
 approximate_mesh_size = 0.5 # meters
 nx_box = '${fparse ceil(box_width / approximate_mesh_size)}'
@@ -241,40 +239,38 @@ nz_slab = '${fparse ceil(slab_thickness / approximate_mesh_size)}'
     paired_block = '0'
   []
 
-  # [inlet_boundary]
-  #   type = ParsedGenerateSideset
-  #   input = air_box_boundary
-  #   combinatorial_geometry = 'tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse pi} - tpi, tpi);
-  #                             z >= (${iolet_height} - lh) & z < (${iolet_height} + lh) &
-  #                             ((t >= (${ilet1_theta} - th) & t < (${ilet1_theta} + th)) |
-  #                              (t >= (${ilet2_theta} - th) & t < (${ilet2_theta} + th)) |
-  #                              (t >= (${ilet3_theta} - th) & t < (${ilet3_theta} + th)))'
-  #   constant_names = 'lh th'
-  #   constant_expressions = '${fparse max(ilet_length, approximate_mesh_size) / 2}
-  #                           ${fparse max(ilet_width / cylinder_inner_radius, pi / (nx_box + ny_box)) / 2}'
-  #   new_sideset_name = inlet
-  #   included_boundaries = air_wall_boundary
-  # []
-  # [outlet_boundary]
-  #   type = ParsedGenerateSideset
-  #   input = inlet_boundary
-  #   combinatorial_geometry = 'tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse pi} - tpi, tpi);
-  #                             z >= (${iolet_height} - lh) & z < (${iolet_height} + lh) &
-  #                             ((t >= (${olet1_theta} - th) & t < (${olet1_theta} + th)) |
-  #                              (t >= (${olet2_theta} - th) & t < (${olet2_theta} + th)))'
-  #   constant_names = 'lh th'
-  #   constant_expressions = '${fparse max(olet_length, approximate_mesh_size) / 2}
-  #                           ${fparse max(olet_width / cylinder_inner_radius, pi / (nx_box + ny_box)) / 2}'
-  #   new_sideset_name = outlet
-  #   included_boundaries = air_wall_boundary
-  # []
+  [inlet_boundary]
+    type = ParsedGenerateSideset
+    input = air_box_boundary
+    combinatorial_geometry = 'tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse pi} - tpi, tpi);
+                              z >= (${iolet_height} - lh) & z < (${iolet_height} + lh) &
+                              ((t >= (${ilet1_theta} - th) & t < (${ilet1_theta} + th)) |
+                               (t >= (${ilet2_theta} - th) & t < (${ilet2_theta} + th)) |
+                               (t >= (${ilet3_theta} - th) & t < (${ilet3_theta} + th)))'
+    constant_names = 'lh th'
+    constant_expressions = '${fparse max(ilet_length, approximate_mesh_size) / 2}
+                            ${fparse max(ilet_width / cylinder_inner_radius, pi / (nx_box + ny_box)) / 2}'
+    new_sideset_name = inlet
+    included_boundaries = air_wall_boundary
+  []
+  [outlet_boundary]
+    type = ParsedGenerateSideset
+    input = inlet_boundary
+    combinatorial_geometry = 'tpi:=atan2(y, x);t:=if(tpi < 0, ${fparse pi} - tpi, tpi);
+                              z >= (${iolet_height} - lh) & z < (${iolet_height} + lh) &
+                              ((t >= (${olet1_theta} - th) & t < (${olet1_theta} + th)) |
+                               (t >= (${olet2_theta} - th) & t < (${olet2_theta} + th)))'
+    constant_names = 'lh th'
+    constant_expressions = '${fparse max(olet_length, approximate_mesh_size) / 2}
+                            ${fparse max(olet_width / cylinder_inner_radius, pi / (nx_box + ny_box)) / 2}'
+    new_sideset_name = outlet
+    included_boundaries = air_wall_boundary
+  []
 
   [remove_boundaries]
     type = BoundaryDeletionGenerator
-    # input = outlet_boundary
-    # boundary_names = 'ground outer_wall air_wall_boundary air_box_boundary inlet outlet'
-    input = air_box_boundary
-    boundary_names = 'room_floor_placeholder ground outer_wall air_wall_boundary air_box_boundary'
+    input = outlet_boundary
+    boundary_names = 'room_floor_placeholder ground outer_wall air_wall_boundary air_box_boundary inlet outlet'
     operation = keep
   []
 
