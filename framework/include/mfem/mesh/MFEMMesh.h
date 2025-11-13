@@ -44,6 +44,8 @@ public:
    */
   void buildMesh() override;
 
+  mfem::Mesh applyPeriodicBoundary(mfem::Mesh&);
+
   /**
    * Clones the mesh.
    */
@@ -96,6 +98,12 @@ private:
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
+
+  bool _periodic = false;
+
+  // the two boundaries we wanna glue together, if any
+  int _bdryAttr1;
+  int _bdryAttr2;
 };
 
 inline const mfem::ParMesh &
