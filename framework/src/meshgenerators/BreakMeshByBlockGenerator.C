@@ -513,7 +513,7 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
 
     if (has_reverse)
       // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
-      mesh.add_disconnected_boundaries(
+      mesh.add_disjoint_neighbor_boundary_pairs(
           boundary_id, _subid_pairs_to_boundary_id[rev_pair], RealVectorValue(0.0, 0.0, 0.0));
     else
     {
