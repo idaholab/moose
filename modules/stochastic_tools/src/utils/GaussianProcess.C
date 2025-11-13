@@ -281,7 +281,7 @@ GaussianProcess::sampleLengthscale(const RealEigenMatrix & out_vec, const RealEi
 
 
 void 
-GaussianProcess::check_settings(Settings &settings) {
+GaussianProcess::initialSettings(Settings &settings) {
   settings.l = 1;
   settings.u = 2;
 
@@ -310,7 +310,7 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
   unsigned int thin = 2;
 
   Settings settings;
-  check_settings(settings);
+  initialSettings(settings);
 
   Real noise_0 = 0.01;
   RealEigenMatrix lengthscale_0 = RealEigenMatrix::Constant(1, x.cols(), 0.5);

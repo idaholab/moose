@@ -194,6 +194,10 @@ GaussianProcessTrainer::postTrain()
 
     // Setup the covariance
     _tgp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+
+    // _tgp.paramStandardizer().set(0, 1, _n_dims);
+    // _tgp.dataStandardizer().set(0, 1, _n_outputs);
+    // _tgp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
   }
 
 }

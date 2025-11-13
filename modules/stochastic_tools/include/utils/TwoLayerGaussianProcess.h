@@ -215,7 +215,7 @@ public:
    * @param result Return value.
    */
   void sampleLengthscale(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real noise, const RealEigenMatrix & lengthscale_t,
-               unsigned int i, Real alpha, Real beta, Real l, Real u, SampleLengthscaleResult & result, Real ll_prev);
+               unsigned int i, Real alpha, Real beta, Real l, Real u, SampleLengthscaleResult & result, Real ll_prev, bool outer, bool cal_scale);
 
   /**
    * Samples from multivariate normal distribution.

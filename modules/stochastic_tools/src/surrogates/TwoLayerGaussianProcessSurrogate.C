@@ -92,7 +92,8 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   RealEigenMatrix prior_mean = RealEigenMatrix::Zero(_training_params.rows(), 1);
   Real prior_tau2 = 1;
   RealEigenMatrix mu_t = RealEigenMatrix::Zero(1, _tgp.getNmcmc());
-  RealEigenMatrix sigma_sum(1, 1);
+  // RealEigenMatrix sigma_sum(1, 1);
+  RealEigenMatrix sigma_sum = RealEigenMatrix::Zero(1, 1);
   RealEigenMatrix w_t;
   RealEigenMatrix w_new(1, _training_params.cols());
   RealEigenMatrix theta_w(1, _training_params.cols());
@@ -103,10 +104,16 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
     w_t = _tgp.getW()[t];
     w_new = RealEigenMatrix::Zero(1, _training_params.cols());
     for (unsigned int i = 0; i < _training_params.cols(); i++){
+
+      // prior_mean = _training_params.col(i);
+      // prior_mean_new(0,0) = test_points(0, i);
+
       theta_w = RealEigenMatrix::Constant(1, _training_params.cols(), _tgp.getLengthscaleW()(t,i));
-      _tgp.krig(w_t.col(i), x_old, test_points, theta_w, 1e-10, prior_tau2, false, prior_mean, prior_mean_new, krig_mean, krig_sigma);
+      _tgp.krig(w_t.col(i), x_old, test_points, theta_w, 1.5e-8, prior_tau2, false, prior_mean, prior_mean_new, krig_mean, krig_sigma);
       w_new.col(i) = krig_mean;
     }
+    // prior_mean_new = RealEigenMatrix::Zero(1, 1);;
+    // prior_mean = RealEigenMatrix::Zero(_training_params.rows(), 1);
     _tgp.krig(_tgp.getY(), _tgp.getW()[t], w_new, _tgp.getLengthscaleY().row(t), _tgp.getNoise()(t,0), _tgp.getScale()(t,0), true, prior_mean, prior_mean_new, krig_mean, krig_sigma);
     mu_t.col(t) = krig_mean;
     sigma_sum += krig_sigma;
@@ -123,6 +130,7 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   RealEigenMatrix pred_var = Sigma;
   RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
   // RealEigenMatrix std_dev_mat = pred_var.array();
+
   _tgp.getDataStandardizer().getDescaled(std_dev_mat);
 
   for (const auto output_i : make_range(n_outputs))
