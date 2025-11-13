@@ -359,12 +359,13 @@ TabulatedFluidProperties::initialSetup()
       generateVETabulatedData();
     }
   }
-  // Could be needed to get bounds computed from (p, T) bounds
-  else if (_fp)
-    createVEGridVectors();
 
   computePropertyIndicesInInterpolationVectors();
   constructInterpolation();
+
+  // Could be needed to get bounds computed from (p, T) bounds
+  if (_fp && !_create_direct_ve_interpolations)
+    createVEGridVectors();
 
   // Write tabulated data to file
   if (_save_file)
@@ -2633,7 +2634,17 @@ TabulatedFluidProperties::createVGridVector()
   mooseAssert(_file_name_ve_in.empty(), "We should be reading the specific volume grid from file");
   if (!_v_bounds_specified)
   {
-    if (_fp)
+    // if csv exists, get max and min values from csv file
+    if (_interpolate_density)
+    {
+      Real rho_max =
+          *std::max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+      Real rho_min =
+          *std::min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
+      _v_max = 1 / rho_min;
+      _v_min = 1 / rho_max;
+    }
+    else if (_fp)
     {
       // extreme values of specific volume for the grid bounds
       Real v1 = _fp->v_from_p_T(_pressure_min, _temperature_min);
@@ -2642,16 +2653,6 @@ TabulatedFluidProperties::createVGridVector()
       Real v4 = _fp->v_from_p_T(_pressure_max, _temperature_max);
       _v_min = std::min({v1, v2, v3, v4});
       _v_max = std::max({v1, v2, v3, v4});
-    }
-    // if csv exists, get max and min values from csv file
-    else if (_interpolate_density)
-    {
-      Real rho_max =
-          *std::max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
-      Real rho_min =
-          *std::min_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
-      _v_max = 1 / rho_min;
-      _v_min = 1 / rho_max;
     }
     else
       mooseWarning("Unable to compute grid bounds in specific volume. Please specify the v_min/max "
@@ -2686,7 +2687,15 @@ TabulatedFluidProperties::createVEGridVectors()
   createVGridVector();
   if (!_e_bounds_specified)
   {
-    if (_fp)
+    // if csv exists, get max and min values from csv file
+    if (_interpolate_internal_energy)
+    {
+      _e_min = *std::min_element(_properties[_internal_energy_idx].begin(),
+                                 _properties[_internal_energy_idx].end());
+      _e_max = *std::max_element(_properties[_internal_energy_idx].begin(),
+                                 _properties[_internal_energy_idx].end());
+    }
+    else if (_fp)
     {
       // extreme values of internal energy for the grid bounds
       Real e1 = _fp->e_from_p_T(_pressure_min, _temperature_min);
@@ -2695,14 +2704,6 @@ TabulatedFluidProperties::createVEGridVectors()
       Real e4 = _fp->e_from_p_T(_pressure_max, _temperature_max);
       _e_min = std::min({e1, e2, e3, e4});
       _e_max = std::max({e1, e2, e3, e4});
-    }
-    // if csv exists, get max and min values from csv file
-    else if (_interpolate_internal_energy)
-    {
-      _e_min = *std::min_element(_properties[_internal_energy_idx].begin(),
-                                 _properties[_internal_energy_idx].end());
-      _e_max = *std::max_element(_properties[_internal_energy_idx].begin(),
-                                 _properties[_internal_energy_idx].end());
     }
     else
       mooseWarning("Unable to compute grid bounds in internal energy. Please specify the e_min/max "

@@ -175,7 +175,7 @@
     allow_fp_and_tabulation = true
     fluid_property_file = fluid_properties_extended.csv
     # the test relies on forwarding enthalpy evaluations to 'water_true'
-    interpolated_properties = 'density viscosity'
+    interpolated_properties = 'density viscosity internal_energy'
   []
 []
 
