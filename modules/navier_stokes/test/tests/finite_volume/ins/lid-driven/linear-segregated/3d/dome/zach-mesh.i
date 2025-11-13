@@ -142,24 +142,11 @@ nz_slab = '${fparse ceil(slab_thickness / approximate_mesh_size)}'
     num_layers = '${nz_slab} ${nz_box} ${fparse nz_cylinder - nz_box}'
     subdomain_swaps = '0 2  1 2  2 2  3 2; 3 99; 0 1  3 99'
     bottom_boundary = 'ground'
-    downward_boundary_ids = "700 700 700 700; 700 500 700 700; 700 700 700 700"
-    downward_boundary_source_blocks = '0 1 2 3; 0 1 2 3; 0 1 2 3'
-  []
-  [remove_dummy_boundary]
-    type = BoundaryDeletionGenerator
-    input = cylinder_with_slab_extrusion
-    boundary_names = '700'
-  []
-  [rename_room_floor]
-    type = RenameBoundaryGenerator
-    input = remove_dummy_boundary
-    old_boundary = '500'
-    new_boundary = 'room_floor_placeholder'
   []
 
   [cylinder]
     type = BlockDeletionGenerator
-    input = rename_room_floor
+    input = cylinder_with_slab_extrusion
     block = 99
     new_boundary = outer_wall
   []
@@ -224,12 +211,21 @@ nz_slab = '${fparse ceil(slab_thickness / approximate_mesh_size)}'
     excluded_boundaries = 'ground'
     included_subdomains = '2'
   []
-  [air_wall_boundary]
+  [air_floor_boundary]
     type = SideSetsBetweenSubdomainsGenerator
     input = outer_boundary
+    new_boundary = 'air_floor_boundary'
+    primary_block = '1'
+    paired_block = '2'
+    normal = '0 0 -1'
+  []
+  [air_wall_boundary]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = air_floor_boundary
     new_boundary = air_wall_boundary
     primary_block = '1'
     paired_block = '2'
+    excluded_boundaries = 'air_floor_boundary'
   []
   [air_box_boundary]
     type = SideSetsBetweenSubdomainsGenerator
@@ -252,6 +248,7 @@ nz_slab = '${fparse ceil(slab_thickness / approximate_mesh_size)}'
                             ${fparse max(ilet_width / cylinder_inner_radius, pi / (nx_box + ny_box)) / 2}'
     new_sideset_name = inlet
     included_boundaries = air_wall_boundary
+    replace = True
   []
   [outlet_boundary]
     type = ParsedGenerateSideset
@@ -265,28 +262,20 @@ nz_slab = '${fparse ceil(slab_thickness / approximate_mesh_size)}'
                             ${fparse max(olet_width / cylinder_inner_radius, pi / (nx_box + ny_box)) / 2}'
     new_sideset_name = outlet
     included_boundaries = air_wall_boundary
+    replace = True
   []
 
   [remove_boundaries]
     type = BoundaryDeletionGenerator
     input = outlet_boundary
-    boundary_names = 'room_floor_placeholder ground outer_wall air_wall_boundary air_box_boundary inlet outlet'
+    boundary_names = 'ground outer_wall air_floor_boundary air_wall_boundary air_box_boundary inlet outlet'
     operation = keep
   []
 
-  # Only need block 1 for fluid natural convection simulation
   [delete]
     type = BlockDeletionGenerator
     input = remove_boundaries
     block = '0 2'
   []
-
-  [remove_selection_of_air_wall_boundary]
-    type = SideSetsFromNormalsGenerator
-    normals = '0 0 -1'
-    included_boundaries = "room_floor_placeholder"
-    replace = true
-    new_boundary = 'room_floor'
-    input = delete
-  []
 []
+
