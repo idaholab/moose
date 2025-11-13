@@ -1,2 +1,2 @@
-time,max_value,mean_value
-1,21.986818461349,20.0939488978
+time,max_value,mean_value,mean_value_analytic,relative_difference
+1,21.986818461349,20.0939488978,20.093580805411,1.8318904525303e-05

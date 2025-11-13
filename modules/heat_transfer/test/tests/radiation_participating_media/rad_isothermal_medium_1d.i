@@ -95,6 +95,15 @@ sigma = 5.670374419e-8
     type = ElementExtremeFunctorValue
     functor = G
   []
+  [mean_value_analytic]
+    type = ElementIntegralFunctorPostprocessor
+    functor = analytical_sol
+  []
+  [relative_difference]
+    type = RelativeDifferencePostprocessor
+    value1 = mean_value
+    value2 = mean_value_analytic
+  []
 []
 
 [Executioner]
