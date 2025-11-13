@@ -137,6 +137,7 @@ protected:
 
   // For testing values
   const TabulatedBicubicFluidProperties * _tab_pT_from_fp;
+  const TabulatedBicubicFluidProperties * _tab_pT_from_fp_idg;
   const TabulatedBicubicFluidProperties * _tab_ve_from_pT;
   const TabulatedBicubicFluidProperties * _tab_pT_from_fp_gen;
   const TabulatedBicubicFluidProperties * _tab_ve_from_fp;
