@@ -17,7 +17,7 @@ where $\vec u, \vec v \in H(\mathrm{curl})$ or $H(\mathrm{div})$.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/complex_waveguide.i block=BCs
+!listing test/tests/mfem/complex/complex_waveguide.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorFEMassIntegratedBC
 

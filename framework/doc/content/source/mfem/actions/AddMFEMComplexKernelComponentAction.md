@@ -12,7 +12,7 @@ Action called to add a real or imaginary component of an [MFEMComplexKernel](sou
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/complex.i block=Kernels
+!listing test/tests/mfem/complex/complex.i block=Kernels
 
 !syntax parameters /Kernels/AddMFEMComplexKernelComponentAction
 

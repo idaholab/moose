@@ -16,7 +16,7 @@ respect to the same `MFEMFESpace`.
 
 Preferentially, users should create an  `MFEMComplexVariable` with respect to an `MFEMFESpace`:
 
-!listing test/tests/mfem/kernels/complex.i block=Problem FESpaces Variables
+!listing test/tests/mfem/complex/complex.i block=Problem FESpaces Variables
 
 !syntax parameters /Variables/MFEMComplexVariable
 

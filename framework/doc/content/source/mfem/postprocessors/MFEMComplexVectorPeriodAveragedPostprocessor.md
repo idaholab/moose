@@ -18,7 +18,7 @@ where $\vec u$, $\vec v \in H(\mathrm{curl})$ or $H(\mathrm{div})$, $k$ is an op
 
 ## Example Input File Syntax
 
-!listing mfem/kernels/complex_waveguide.i block=Postprocessors
+!listing mfem/complex/complex_waveguide.i block=Postprocessors
 
 !syntax parameters /Postprocessors/MFEMComplexVectorPeriodAveragedPostprocessor
 

@@ -14,7 +14,7 @@ scalar coefficient on the boundary.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/complex.i block=BCs
+!listing test/tests/mfem/complex/complex.i block=BCs
 
 !syntax parameters /BCs/MFEMComplexScalarDirichletBC
 
