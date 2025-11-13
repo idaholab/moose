@@ -49,7 +49,7 @@ ElementExtremeFunctorValueTempl<is_ad>::getProxyValuePair()
   // but this could become a parameter in the future
   Moose::ElemArg elem = makeElemArg(_current_elem);
   return std::make_pair(MetaPhysicL::raw_value(_proxy_functor(elem, determineState())),
-                        MetaPhysicL::raw_value(_scale * _functor(elem, determineState())));
+                        _scale * MetaPhysicL::raw_value(_functor(elem, determineState())));
 }
 
 template class ElementExtremeFunctorValueTempl<false>;
