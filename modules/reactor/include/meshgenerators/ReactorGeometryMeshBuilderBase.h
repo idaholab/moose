@@ -200,7 +200,18 @@ protected:
    * that requests them. In our case, we move it into this MeshGenerator and then
    * release (delete) it.
    */
-  void freeReactorMeshParams();
+  void freeReactorParamsMesh();
+
+  /**
+   * Releases the CSG base object obtained in _reactor_params_csg.
+   *
+   * This _must_ be called in any object that derives from this one, because
+   * the MeshGenerator system requires that all meshes that are requested from
+   * the system are moved out of the MeshGenerator system and into the MeshGenerator
+   * that requests them. In our case, we move it into this MeshGenerator and then
+   * release (delete) it.
+   */
+  void freeReactorParamsCSG();
 
   /**
    * Checks whether parameter is defined in ReactorMeshParams metadata
@@ -270,6 +281,7 @@ protected:
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)
   std::unique_ptr<MeshBase> * _reactor_params_mesh;
+  std::unique_ptr<CSG::CSGBase> * _reactor_params_csg;
 };
 
 template <typename T>

@@ -62,6 +62,16 @@ public:
   virtual Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
 
 protected:
+  /**
+   * @brief create clone of CSGSphere object
+   *
+   * @return std::unordered_map<CSGSurface> unique_ptr to cloned sphere
+   */
+  virtual std::unique_ptr<CSGSurface> clone() const override
+  {
+    return std::make_unique<CSGSphere>(_name, Point(_x0, _y0, _z0), _r);
+  }
+
   // check that radius is positive
   void checkRadius() const;
 

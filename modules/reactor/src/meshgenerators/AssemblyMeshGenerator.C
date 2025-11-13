@@ -504,7 +504,7 @@ std::unique_ptr<MeshBase>
 AssemblyMeshGenerator::generate()
 {
   // Must be called to free the ReactorMeshParams mesh
-  freeReactorMeshParams();
+  freeReactorParamsMesh();
 
   // If bypass_mesh is true, return a null mesh. In this mode, an output mesh is not
   // generated and only metadata is defined on the generator, so logic related to

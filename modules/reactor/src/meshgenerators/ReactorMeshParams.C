@@ -59,6 +59,8 @@ ReactorMeshParams::validParams()
 
   // Declare that this generator has a generateData method
   MeshGenerator::setHasGenerateData(params);
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
   return params;
 }
 
@@ -106,12 +108,8 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
         "This parameter is only relevant when ReactorMeshParams/flexible_assembly_stitching is set "
         "to true. This value will be ignored");
 
-  // Option to bypass mesh generation is controlled by presence of Mesh/data_driven_generator
-  // and whether the current generator is in data only mode
-  const auto & moose_mesh = _app.actionWarehouse().getMesh();
-  const auto data_driven_generator =
-      moose_mesh->parameters().get<std::string>("data_driven_generator");
-  bool bypass_meshgen = (data_driven_generator != "") && isDataOnly();
+  // Option to bypass mesh generation depends on whether the current generator is in data only mode
+  bool bypass_meshgen = isDataOnly();
   this->declareMeshProperty(RGMB::bypass_meshgen, bypass_meshgen);
 
   if (isParamValid("top_boundary_id"))
@@ -150,4 +148,11 @@ ReactorMeshParams::generate()
   }
   auto mesh = buildMeshBaseObject();
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+std::unique_ptr<CSG::CSGBase>
+ReactorMeshParams::generateCSG()
+{
+  // This MeshGenerator does not produce a mesh, therefore return an empty CSGBase object
+  return std::make_unique<CSG::CSGBase>();
 }

@@ -27,6 +27,10 @@ To help determine the sign of these half-spaces, each surface type should have a
 The type of surface must be set for `_surface_type` in the surface constructor.
 It is recommended that this be done based on the class name using `MooseUtils::prettyCppType<SurfaceClassName>()` so that the surface type automatically matches the class that created it.
 
+### Creating a Surface Clone
+
+In order to make sure that clones of CSGBase objects are created properly, each derived `CSGSurface` type must implement a `clone()` method, which returns a `std::unique_ptr<CSGSurface>` from the given surface instance. This can typically be done by calling `std::make_unique` on the constructor for the derived surface type.
+
 ## Example
 
 Below shows how `CSGSphere` is implemented as an example.

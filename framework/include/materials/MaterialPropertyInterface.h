@@ -571,8 +571,10 @@ protected:
   /// Current threaded it
   const THREAD_ID _mi_tid;
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /// Whether the MOOSE object is a Kokkos object
   const bool _is_kokkos_object;
+#endif
 
   /// The type of data
   const Moose::MaterialDataType _material_data_type;
@@ -916,9 +918,11 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
                                                             MaterialData & material_data,
                                                             const unsigned int state)
 {
+#ifdef MOOSE_KOKKOS_ENABLED
   if (_is_kokkos_object)
     _mi_moose_object.mooseError(
         "Attempted to retrieve a standard MOOSE material property from a Kokkos object.");
+#endif
 
   if (_use_interpolated_state)
   {

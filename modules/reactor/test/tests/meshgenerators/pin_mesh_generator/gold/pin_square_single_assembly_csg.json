@@ -1,0 +1,120 @@
+{
+  "cells": {
+    "pin1_cell_radial_0": {
+      "fill": "rgmb_region_1",
+      "filltype": "CSG_MATERIAL",
+      "region": "-pin1_radial_ring_0"
+    },
+    "pin1_cell_radial_1": {
+      "fill": "rgmb_region_2",
+      "filltype": "CSG_MATERIAL",
+      "region":
+          "(+pin1_radial_duct_1_surf_0 & +pin1_radial_duct_1_surf_1 & +pin1_radial_duct_1_surf_2 & +pin1_radial_duct_1_surf_3 & ~(-pin1_radial_ring_0))"
+    },
+    "pin1_cell_radial_2": {
+      "fill": "rgmb_region_3",
+      "filltype": "CSG_MATERIAL",
+      "region":
+          "(+pin1_radial_duct_2_surf_0 & +pin1_radial_duct_2_surf_1 & +pin1_radial_duct_2_surf_2 & +pin1_radial_duct_2_surf_3 & ~(+pin1_radial_duct_1_surf_0 & +pin1_radial_duct_1_surf_1 & +pin1_radial_duct_1_surf_2 & +pin1_radial_duct_1_surf_3))"
+    },
+    "pin1_void_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region":
+          "~(+pin1_radial_duct_2_surf_0 & +pin1_radial_duct_2_surf_1 & +pin1_radial_duct_2_surf_2 & +pin1_radial_duct_2_surf_3)"
+    }
+  },
+  "surfaces": {
+    "pin1_radial_duct_1_surf_0": {
+      "coefficients": {
+        "a": -7.401486830834378e-17,
+        "b": -1.0,
+        "c": 4.934324553889585e-18,
+        "d": -3.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_1": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -1.4802973661668756e-16,
+        "c": 0.0,
+        "d": -3.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_2": {
+      "coefficients": {
+        "a": 1.4802973661668756e-16,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -3.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_1_surf_3": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 2.220446049250313e-16,
+        "c": 4.934324553889585e-18,
+        "d": -2.9999999999999996
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_0": {
+      "coefficients": {
+        "a": -6.252003827176149e-17,
+        "b": -1.0,
+        "c": -4.934324553889585e-18,
+        "d": -3.5515749999999997
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_1": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -1.2504007654352298e-16,
+        "c": 0.0,
+        "d": -3.5515750000000006
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_2": {
+      "coefficients": {
+        "a": 1.2504007654352298e-16,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -3.5515750000000006
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_2_surf_3": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 2.5008015308704596e-16,
+        "c": 0.0,
+        "d": -3.5515749999999997
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_ring_0": {
+      "coefficients": {
+        "r": 2.0,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "pin1_cell_radial_0",
+        "pin1_cell_radial_1",
+        "pin1_cell_radial_2",
+        "pin1_void_cell"
+      ],
+      "root": true
+    }
+  }
+}

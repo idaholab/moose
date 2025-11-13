@@ -1,0 +1,81 @@
+{
+  "cells": {
+    "pin1_cell_radial_0": {
+      "fill": "rgmb_region_1",
+      "filltype": "CSG_MATERIAL",
+      "region":
+          "(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5)"
+    },
+    "pin1_void_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region":
+          "~(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5)"
+    }
+  },
+  "surfaces": {
+    "pin1_radial_duct_0_surf_0": {
+      "coefficients": {
+        "a": -0.5,
+        "b": -0.8660254037844386,
+        "c": -1.2157403915043724e-18,
+        "d": -0.710315
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_0_surf_1": {
+      "coefficients": {
+        "a": 0.4999999999999998,
+        "b": -0.8660254037844386,
+        "c": 2.251140495306267e-18,
+        "d": -0.710315
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_0_surf_2": {
+      "coefficients": {
+        "a": 1.0,
+        "b": -4.0607956041690595e-16,
+        "c": 1.8503717077085946e-18,
+        "d": -0.710315
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_0_surf_3": {
+      "coefficients": {
+        "a": 0.5000000000000001,
+        "b": 0.8660254037844386,
+        "c": 5.657870399835408e-19,
+        "d": -0.7103149999999999
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_0_surf_4": {
+      "coefficients": {
+        "a": -0.4999999999999997,
+        "b": 0.8660254037844388,
+        "c": 6.4867158998663e-19,
+        "d": -0.710315
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct_0_surf_5": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 6.7679926736151015e-16,
+        "c": 1.850371707708595e-18,
+        "d": -0.710315
+      },
+      "type": "CSG::CSGPlane"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "pin1_cell_radial_0",
+        "pin1_void_cell"
+      ],
+      "root": true
+    }
+  }
+}

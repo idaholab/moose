@@ -40,8 +40,13 @@
   [dir]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
-    boundary = "left right top bottom"
+    boundary = "right top bottom"
     functor = analytic_solution
+  []
+  [symmetry]
+    type = LinearFVAdvectionDiffusionScalarSymmetryBC
+    variable = u
+    boundary = "left"
   []
 []
 
@@ -85,8 +90,8 @@
   type = Steady
   system_names = u_sys
   l_tol = 1e-10
-  multi_system_fixed_point=true
-  multi_system_fixed_point_convergence=linear
+  multi_system_fixed_point = true
+  multi_system_fixed_point_convergence = linear
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

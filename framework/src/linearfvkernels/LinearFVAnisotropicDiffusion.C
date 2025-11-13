@@ -200,7 +200,12 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
     scaled_diff_tensor(i) = _current_face_info->normal()(i) * scaled_diff_tensor(i);
 
   auto normal_scaled_diff_tensor = scaled_diff_tensor * _current_face_info->normal();
-  auto boundary_grad = _var.gradSln(*_current_face_info->elemInfo());
+  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+  mooseAssert(elem_info, "We should always have an element info for the current face");
+
+  auto boundary_grad = _var.gradSln(*elem_info);
 
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
@@ -218,11 +223,8 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction_on_boundary && diff_bc->useBoundaryGradientExtrapolation())
+  if (diff_bc->useBoundaryGradientExtrapolation() && _use_nonorthogonal_correction_on_boundary)
   {
-    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
     const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
     const auto correction_vector =
         _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;

@@ -35,9 +35,17 @@ public:
   CSGBase();
 
   /**
+   * Copy constructor
+   */
+  CSGBase(const CSGBase & other_base);
+
+  /**
    * Destructor
    */
   ~CSGBase();
+
+  /// Create a deep copy of this CSGBase instance
+  std::unique_ptr<CSGBase> clone() const { return std::make_unique<CSGBase>(*this); }
 
   /**
    * @brief add a unique surface pointer to this base instance
@@ -310,6 +318,12 @@ public:
    */
   nlohmann::json generateOutput() const;
 
+  /// Operator overload for checking if two CSGBase objects are equal
+  bool operator==(const CSGBase & other) const;
+
+  /// Operator overload for checking if two CSGBase objects are not equal
+  bool operator!=(const CSGBase & other) const;
+
 private:
   /**
    * @brief Get a Surface object by name.
@@ -335,21 +349,42 @@ private:
                           std::vector<std::string> & linked_universe_names) const;
 
   /**
-   * @brief Get the CSGSurfaceList object
+   * @brief Get a const reference to the CSGSurfaceList object
+   *
+   * @return CSGSurfaceList
+   */
+  const CSGSurfaceList & getSurfaceList() const { return _surface_list; }
+
+  /**
+   * @brief Get a non-const reference to the CSGSurfaceList object
    *
    * @return CSGSurfaceList
    */
   CSGSurfaceList & getSurfaceList() { return _surface_list; }
 
   /**
-   * @brief Get the CSGCellList object
+   * @brief Get a const reference to the CSGCellList object
+   *
+   * @return CSGCellList
+   */
+  const CSGCellList & getCellList() const { return _cell_list; }
+
+  /**
+   * @brief Get a non-const reference to the CSGCellList object
    *
    * @return CSGCellList
    */
   CSGCellList & getCellList() { return _cell_list; }
 
   /**
-   * @brief Get the CSGUniverseList object
+   * @brief Get a const reference to the CSGUniverseList object
+   *
+   * @return CSGUniverseList
+   */
+  const CSGUniverseList & getUniverseList() const { return _universe_list; }
+
+  /**
+   * @brief Get a non-const reference to the CSGUniverseList object
    *
    * @return CSGUniverseList
    */
@@ -411,6 +446,22 @@ private:
 
   // check that universe being accessed is a part of this CSGBase instance
   bool checkUniverseInBase(const CSGUniverse & universe) const;
+
+  /**
+   * @brief Add a new cell to the cell list based on a cell reference.
+   * This method is called by the copy constructor of CSGBase
+   *
+   * @param cell reference to CSGCell that should be added to cell list
+   */
+  const CSGCell & addCellToList(const CSGCell & cell);
+
+  /**
+   * @brief Add a new universe to the universe list based on a universe reference.
+   * This method is called by the copy constructor of CSGBase
+   *
+   * @param univ reference to CSGUniverse that should be added to universe list
+   */
+  const CSGUniverse & addUniverseToList(const CSGUniverse & univ);
 
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;

@@ -24,6 +24,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
+  std::unique_ptr<CSG::CSGBase> generateCSG() override;
+
   void generateData() override{};
 
 protected:

@@ -14,6 +14,10 @@
 #include "MooseApp.h"
 #include "MooseMeshUtils.h"
 #include "Factory.h"
+#include "CSGZCylinder.h"
+#include "CSGPlane.h"
+#include "CSGRegion.h"
+#include "CSGUtils.h"
 #include "libmesh/elem.h"
 
 registerMooseObject("ReactorApp", PinMeshGenerator);
@@ -89,6 +93,9 @@ PinMeshGenerator::validParams()
                              "substructures - the innermost "
                              "radial pin regions, the single bridging background region, and the "
                              "square or hexagonal ducts regions.");
+
+  // Declare that this generator has a generateCSG method
+  MeshGenerator::setHasGenerateCSG(params);
 
   return params;
 }
@@ -421,7 +428,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       copyMeshProperty<Real>("pattern_pitch_meta", name() + "_2D");
     declareMeshProperty("is_control_drum_meta", false);
 
-    if (_extrude && _mesh_dimensions == 3)
+    if (_extrude)
       build_mesh_name = callExtrusionMeshSubgenerators(build_mesh_name);
 
     // Store final mesh subgenerator
@@ -544,7 +551,7 @@ PinMeshGenerator::generateMetadata()
   declareMeshProperty(RGMB::is_homogenized, _homogenized);
   declareMeshProperty(RGMB::ring_radii, _ring_radii);
   declareMeshProperty(RGMB::duct_halfpitches, _duct_halfpitch);
-  declareMeshProperty(RGMB::extruded, _extrude && _mesh_dimensions == 3);
+  declareMeshProperty(RGMB::extruded, _extrude);
 
   unsigned int n_axial_levels =
       (_mesh_dimensions == 3)
@@ -580,7 +587,7 @@ std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
   // Must be called to free the ReactorMeshParams mesh
-  freeReactorMeshParams();
+  freeReactorParamsMesh();
 
   // If bypass_mesh is true, return a null mesh. In this mode, an output mesh is not
   // generated and only metadata is defined on the generator, so logic related to
@@ -689,4 +696,159 @@ PinMeshGenerator::generate()
   (*_build_mesh)->set_isnt_prepared();
 
   return std::move(*_build_mesh);
+}
+
+std::unique_ptr<CSG::CSGBase>
+PinMeshGenerator::generateCSG()
+{
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorParamsCSG();
+
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  unsigned int radial_index = 0;
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGSurface>>> surfaces_by_radial_region;
+
+  // Add surfaces corresponding to pin rings
+  for (const auto & radius : _ring_radii)
+  {
+    const auto surf_name = name() + "_radial_ring_" + std::to_string(radial_index);
+    std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
+        std::make_unique<CSG::CSGZCylinder>(surf_name, 0, 0, radius);
+    const auto & ring_surf = csg_obj->addSurface(std::move(ring_surf_ptr));
+    surfaces_by_radial_region.push_back({ring_surf});
+    ++radial_index;
+  }
+
+  // Add surfaces corresponding to pin ducts
+  for (const auto & duct_halfpitch : _duct_halfpitch)
+  {
+    const auto & duct_surfaces = getOuterRadialSurfaces(radial_index, duct_halfpitch, *csg_obj);
+    surfaces_by_radial_region.push_back(duct_surfaces);
+    ++radial_index;
+  }
+
+  // Add surfaces corresponding to outer pin boundary
+  const auto & duct_surfaces = getOuterRadialSurfaces(radial_index, _pitch / 2., *csg_obj);
+  surfaces_by_radial_region.push_back(duct_surfaces);
+
+  // Define all radial regions
+  std::vector<CSG::CSGRegion> radial_regions;
+  CSG::CSGRegion inner_region, outer_region;
+  for (const auto & radial_surfaces : surfaces_by_radial_region)
+  {
+    CSG::CSGRegion radial_region;
+    if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
+    {
+      // We are in the innermost radial region, the radial region is inner_region
+      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
+      radial_region = inner_region;
+    }
+    else
+    {
+      // For all other regions, the radial region is the intersection of inner_region and
+      // outer_region
+      outer_region = ~inner_region;
+      inner_region = CSGUtils::getInnerRegion(radial_surfaces, Point(0, 0, 0));
+      radial_region = inner_region & outer_region;
+    }
+    radial_regions.push_back(radial_region);
+  }
+
+  // Define all axial surfaces and regions
+  std::vector<CSG::CSGRegion> axial_regions;
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> surfaces_by_axial_region;
+  if (_extrude)
+  {
+    const auto axial_boundaries = getReactorParam<std::vector<Real>>(RGMB::axial_mesh_sizes);
+    Real axial_level = 0.;
+    for (const auto i : make_range(axial_boundaries.size() + 1))
+    {
+      axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
+      const auto surf_name = name() + "_axial_plane_" + std::to_string(i);
+      std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
+          std::make_unique<CSG::CSGPlane>(surf_name, 0, 0, 1, axial_level);
+      const auto & plane_surf = csg_obj->addSurface(std::move(plane_surf_ptr));
+      surfaces_by_axial_region.push_back(plane_surf);
+      if (i != 0)
+      {
+        const auto & lower_surf = surfaces_by_axial_region[i - 1].get();
+        const auto & upper_surf = surfaces_by_axial_region[i].get();
+        axial_regions.push_back((+lower_surf & -upper_surf));
+      }
+    }
+  }
+
+  // Define all cells within pin domain
+  for (const auto i : index_range(radial_regions))
+  {
+    for (const auto j : make_range(_extrude ? axial_regions.size() : 1))
+    {
+      auto cell_region = radial_regions[i];
+      auto cell_name = name() + "_cell_radial_" + std::to_string(i);
+      const auto region_id = _region_ids[j][i];
+      const auto mat_name = "rgmb_region_" + std::to_string(region_id);
+      if (_extrude)
+      {
+        // update name and region with axial info only if extruded
+        const auto axial_region = axial_regions[j];
+        cell_region &= axial_region;
+        cell_name += "_axial_" + std::to_string(j);
+      }
+      csg_obj->createCell(cell_name, mat_name, cell_region);
+    }
+  }
+
+  // Define void cell to cover region outside pin domain, where the complement of the last set
+  // inner_region is the outermost defined zone of the pin
+  const auto void_cell_name = name() + "_void_cell";
+  auto void_region = ~inner_region;
+  if (_extrude)
+  {
+    const auto & lowest_axial_surf = surfaces_by_axial_region.front().get();
+    const auto & highest_axial_surf = surfaces_by_axial_region.back().get();
+    void_region = (~inner_region & +lowest_axial_surf & -highest_axial_surf) | -lowest_axial_surf |
+                  +highest_axial_surf;
+  }
+  csg_obj->createCell(void_cell_name, void_region);
+
+  return csg_obj;
+}
+
+std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+PinMeshGenerator::getOuterRadialSurfaces(unsigned int radial_index,
+                                         Real halfpitch,
+                                         CSG::CSGBase & csg_obj)
+{
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> duct_surfaces;
+  auto n_surfaces = _mesh_geometry == "Square" ? 4 : 6;
+
+  // Convert halfpitch to radius (distance from vertex to center)
+  Real angle_offset_degrees = _mesh_geometry == "Square" ? 45 : 30;
+  Real angle_offset_radians = angle_offset_degrees * (M_PI / 180.);
+  const auto radius = halfpitch / std::cos(angle_offset_radians);
+
+  Real angle_increment_radians = 360. / n_surfaces * (M_PI / 180.);
+
+  for (const auto i : make_range(n_surfaces))
+  {
+    const auto surf_name =
+        name() + "_radial_duct_" + std::to_string(radial_index) + "_surf_" + std::to_string(i);
+
+    // Define 3 points on the surface
+    const auto current_angle = i * angle_increment_radians + angle_offset_radians;
+    const auto next_angle = (i + 1) * angle_increment_radians + angle_offset_radians;
+    libMesh::Point p0(radius * std::cos(current_angle), radius * std::sin(current_angle), 0.);
+    libMesh::Point p1(radius * std::cos(next_angle), radius * std::sin(next_angle), 0.);
+    libMesh::Point p2 = (p0 + p1) / 2.;
+    // Place third point above the two others to form a vertical plane
+    p2(2) = angle_offset_degrees;
+
+    std::unique_ptr<CSG::CSGSurface> duct_surf_ptr =
+        std::make_unique<CSG::CSGPlane>(surf_name, p0, p1, p2);
+    const auto & duct_surf = csg_obj.addSurface(std::move(duct_surf_ptr));
+    duct_surfaces.push_back(duct_surf);
+  }
+
+  return duct_surfaces;
 }

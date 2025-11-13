@@ -31,6 +31,7 @@ TestCSGAxialSurfaceMeshGenerator::TestCSGAxialSurfaceMeshGenerator(const InputPa
     _mesh_ptr(getMesh("input")),
     _axial_height(getParam<Real>("axial_height"))
 {
+  _build_csg = &getCSGBase("input");
 }
 
 std::unique_ptr<MeshBase>
@@ -45,7 +46,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
 {
   // get the existing CSGBase associated with the input mesh generator
   // this is the CSGBase object that will be updated
-  std::unique_ptr<CSG::CSGBase> csg_obj = std::move(getCSGBase("input"));
+  std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*_build_csg);
 
   // get the names of the current mesh generator and the input mesh generator
   // so that unique object naming can be enforced

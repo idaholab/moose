@@ -29,4 +29,6 @@ protected:
   std::unique_ptr<MeshBase> & _mesh_ptr;
   /// the axial height to set the input mesh to
   const Real _axial_height;
+  /// Holds the generated CSGBase object
+  std::unique_ptr<CSG::CSGBase> * _build_csg;
 };
