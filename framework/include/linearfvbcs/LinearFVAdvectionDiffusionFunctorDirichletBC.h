@@ -43,4 +43,6 @@ public:
 protected:
   /// The functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _functor;
+
+  const enum NormalComponent : int { X = 0, Y, Z, NONE } _normal_component;
 };
