@@ -27,7 +27,8 @@ getInnerRegion(const std::vector<std::reference_wrapper<const CSG::CSGSurface>> 
                const libMesh::Point & origin);
 
 /**
- * @brief Helper function to convert std::any to JSON type
+ * @brief Helper function to convert std::any to JSON type. Supported data types that can be
+ * converted are: int, unsigned int, Real, std::string, and bool.
  *
  * @param data std::any object to convert
  * @return nlohmann::json representation of the data

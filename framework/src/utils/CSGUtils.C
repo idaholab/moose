@@ -37,6 +37,8 @@ anyToJson(const std::any & data)
 {
   if (data.type() == typeid(int))
     return nlohmann::json(std::any_cast<int>(data));
+  else if (data.type() == typeid(unsigned int))
+    return nlohmann::json(std::any_cast<unsigned int>(data));
   else if (data.type() == typeid(std::string))
     return nlohmann::json(std::any_cast<std::string>(data));
   else if (data.type() == typeid(Real))
