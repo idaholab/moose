@@ -45,6 +45,8 @@ public:
   std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base) override;
 
+  mfem::Mesh applyPeriodicBoundary(mfem::Mesh&);
+
   /**
    * Returns true if mesh displacement is required.
    */
@@ -99,6 +101,12 @@ protected:
    * Use the accessors instead.
    */
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
+
+  bool _periodic = false;
+
+  // the two boundaries we wanna glue together, if any
+  int _bdryAttr1;
+  int _bdryAttr2;
 };
 
 inline const mfem::ParMesh &
