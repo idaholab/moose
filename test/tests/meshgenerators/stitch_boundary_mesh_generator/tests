@@ -7,7 +7,6 @@
       type = 'Exodiff'
       input = 'stitch_2d.i'
       cli_args = '--mesh-only'
-      mesh_mode = 'REPLICATED'
       recover = false
       exodiff = 'stitch_2d_in.e'
       detail = "in 2D, and"
@@ -16,7 +15,6 @@
       type = 'Exodiff'
       input = 'stitch_3d.i'
       cli_args = '--mesh-only'
-      mesh_mode = 'REPLICATED'
       recover = false
       exodiff = 'stitch_3d_in.e'
       detail = "in 3D."
