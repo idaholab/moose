@@ -940,6 +940,56 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   // T_from_p_h
   // vaporPressure with saturation pressure
   // vaporTemperature
+
+  // AD passthrough
+  // Switching to IdealGas FP to have more definitions
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_pT_from_fp_idg)->initialSetup();
+  DNDerivativeType dpdx;
+  DNDerivativeType dTdx;
+  Moose::derivInsert(dpdx, 0, 1);
+  Moose::derivInsert(dpdx, 1, 0);
+  Moose::derivInsert(dTdx, 0, 0);
+  Moose::derivInsert(dTdx, 1, 1);
+  ADReal p_ad(1.5e6, dpdx);
+  ADReal T_ad(450.0, dTdx);
+  // value
+  ABS_TEST(_tab_pT_from_fp_idg->v_from_p_T(p_ad, T_ad).value(),
+           _idg_fp->v_from_p_T(p_ad, T_ad).value(),
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->rho_from_p_T(p_ad, T_ad).value(),
+           _idg_fp->rho_from_p_T(p_ad, T_ad).value(),
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->e_from_p_T(p_ad, T_ad).value(),
+           _idg_fp->e_from_p_T(p_ad, T_ad).value(),
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->cp_from_p_T(p_ad, T_ad).value(),
+           _idg_fp->cp_from_p_T(p_ad, T_ad).value(),
+           tol);
+  // derivatives
+  ABS_TEST(_tab_pT_from_fp_idg->v_from_p_T(p_ad, T_ad).derivatives()[0],
+           _idg_fp->v_from_p_T(p_ad, T_ad).derivatives()[0],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->rho_from_p_T(p_ad, T_ad).derivatives()[0],
+           _idg_fp->rho_from_p_T(p_ad, T_ad).derivatives()[0],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->e_from_p_T(p_ad, T_ad).derivatives()[0],
+           _idg_fp->e_from_p_T(p_ad, T_ad).derivatives()[0],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->cp_from_p_T(p_ad, T_ad).derivatives()[0],
+           _idg_fp->cp_from_p_T(p_ad, T_ad).derivatives()[0],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->v_from_p_T(p_ad, T_ad).derivatives()[1],
+           _idg_fp->v_from_p_T(p_ad, T_ad).derivatives()[1],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->rho_from_p_T(p_ad, T_ad).derivatives()[1],
+           _idg_fp->rho_from_p_T(p_ad, T_ad).derivatives()[1],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->e_from_p_T(p_ad, T_ad).derivatives()[1],
+           _idg_fp->e_from_p_T(p_ad, T_ad).derivatives()[1],
+           tol);
+  ABS_TEST(_tab_pT_from_fp_idg->cp_from_p_T(p_ad, T_ad).derivatives()[1],
+           _idg_fp->cp_from_p_T(p_ad, T_ad).derivatives()[1],
+           tol);
 }
 
 // Test that all fluid properties are properly passed back to the given user object
