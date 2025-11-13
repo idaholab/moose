@@ -40,6 +40,19 @@ protected:
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_fp", tab_uo_params);
     _tab_pT_from_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp");
 
+    // Tabulation in (p, T) built from another FluidProperties, no p,T tabulation, only passthrough
+    // in p,T
+    InputParameters tab_uo_params_idg = _factory.getValidParams("TabulatedBicubicFluidProperties");
+    tab_uo_params_idg.set<UserObjectName>("input_fp") = "idg_fp";
+    tab_uo_params_idg.set<bool>("create_pT_interpolations") = true;
+    MultiMooseEnum properties_empty("density enthalpy internal_energy viscosity k cv cp entropy",
+                                    "");
+    tab_uo_params_idg.set<MultiMooseEnum>("interpolated_properties") = properties_empty;
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "tab_fp_pT_idg", tab_uo_params_idg);
+    _tab_pT_from_fp_idg =
+        &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp_pT_idg");
+
     // Tabulation in (v, e) built from loading a (p, T) tabulation
     InputParameters tab_uo_ve_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
     tab_uo_ve_params.set<bool>("construct_pT_from_ve") = true;
