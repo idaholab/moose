@@ -12,6 +12,8 @@
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 
+#include "libmesh/mesh_serializer.h"
+
 registerMooseObject("MooseApp", BoundaryElementConversionGenerator);
 
 InputParameters
@@ -62,11 +64,9 @@ BoundaryElementConversionGenerator::BoundaryElementConversionGenerator(
 std::unique_ptr<MeshBase>
 BoundaryElementConversionGenerator::generate()
 {
-  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
-  if (!replicated_mesh_ptr)
-    paramError("input", "Input is not a replicated mesh, which is required");
+  UnstructuredMesh & mesh = dynamic_cast<UnstructuredMesh &>(*_input);
 
-  ReplicatedMesh & mesh = *replicated_mesh_ptr;
+  libMesh::MeshSerializer serial_mesh(mesh);
 
   // collect the subdomain ids of the original mesh
   std::set<subdomain_id_type> original_subdomain_ids;
@@ -75,7 +75,6 @@ BoundaryElementConversionGenerator::generate()
   {
     original_subdomain_ids.emplace((*elem_it)->subdomain_id());
   }
-
   try
   {
     MooseMeshElementConversionUtils::transitionLayerGenerator(
@@ -93,7 +92,6 @@ BoundaryElementConversionGenerator::generate()
     else
       paramError("input", e.what());
   }
-
   try
   {
     MooseMeshElementConversionUtils::assignConvertedElementsSubdomainNameSuffix(
@@ -110,6 +108,12 @@ BoundaryElementConversionGenerator::generate()
     else // if (((std::string)e.what()).compare(26, 7, "PYRAMID5") == 0)
       paramError("converted_pyramid_element_subdomain_name_suffix", e.what());
   }
+
+  // MeshSerializer's destructor calls delete_remote_elements()
+  if (!mesh.is_replicated())
+    mesh.prepare_for_use();
+  else
+    mesh.set_isnt_prepared();
 
   return std::move(_input);
 }
