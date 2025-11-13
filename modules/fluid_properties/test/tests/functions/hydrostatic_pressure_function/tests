@@ -1,0 +1,10 @@
+[Tests]
+  design = 'HydrostaticPressureFunction.md'
+  issues = '#31843'
+  [test]
+    type = CSVDiff
+    input = 'hydrostatic_pressure_function.i'
+    csvdiff = 'hydrostatic_pressure_function_out_p_vpp_0000.csv'
+    requirement = 'The system shall provide a function to compute the hydrostatic pressure distribution.'
+  []
+[]

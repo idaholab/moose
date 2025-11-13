@@ -3,6 +3,8 @@ Content:
         root_dir: framework/doc/content
     fluid_properties:
         root_dir: modules/fluid_properties/doc/content
+    misc:
+        root_dir: ${MOOSE_DIR}/modules/misc/doc/content
     air:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/contrib/air/doc/content/source
         external: True
@@ -40,6 +42,7 @@ Extensions:
         includes:
             - framework/include
             - modules/fluid_properties/include
+            - modules/misc/include
             - ${MOOSE_DIR}/modules/fluid_properties/contrib/air/include
             - ${MOOSE_DIR}/modules/fluid_properties/contrib/carbon_dioxide/include
             - ${MOOSE_DIR}/modules/fluid_properties/contrib/helium/include
