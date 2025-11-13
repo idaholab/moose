@@ -9,6 +9,7 @@
 
 #include "TabulatedBicubicFluidPropertiesTest.h"
 #include "SinglePhaseFluidPropertiesTestUtils.h"
+#include "SinglePhaseFluidProperties.h"
 
 #include <fstream>
 
@@ -910,6 +911,7 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
 
   // As the flags for interpolation in TabulatedBicubicFluidProperties default to false,
   // properties will be passed through to the given fluid properties object
+  ABS_TEST(_tab_pT_from_fp->v_from_p_T(p, T), 1. / _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->rho_from_p_T(p, T), _co2_fp->rho_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->h_from_p_T(p, T), _co2_fp->h_from_p_T(p, T), tol);
   ABS_TEST(_tab_pT_from_fp->e_from_p_T(p, T), _co2_fp->e_from_p_T(p, T), tol);
@@ -938,6 +940,32 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, passthrough)
   // T_from_p_h
   // vaporPressure with saturation pressure
   // vaporTemperature
+}
+
+// Test that all fluid properties are properly passed back to the given user object
+// if they are not tabulated
+TEST_F(TabulatedBicubicFluidPropertiesTest, passthroughVE)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+  Real v = 1. / _idg_fp->rho_from_p_T(p, T);
+  Real e = _idg_fp->e_from_p_T(p, T);
+  const Real tol = REL_TOL_CONSISTENCY;
+
+  // need to generate (v,e) bounds
+  const_cast<TabulatedBicubicFluidProperties *>(_tab_ve_from_fp)->initialSetup();
+  // we use this tabulation based on idg as too many (v,e) routines are missing for CO2
+
+  // As the flags for interpolation in TabulatedBicubicFluidProperties default to false,
+  // properties will be passed through to the given fluid properties object
+  ABS_TEST(_tab_ve_from_fp->T_from_v_e(v, e), _idg_fp->T_from_v_e(v, e), tol);
+  ABS_TEST(_tab_ve_from_fp->p_from_v_e(v, e), _idg_fp->p_from_v_e(v, e), 3 * tol);
+  ABS_TEST(_tab_ve_from_fp->h_from_v_e(v, e), _idg_fp->h_from_v_e(v, e), tol);
+  ABS_TEST(_tab_ve_from_fp->mu_from_v_e(v, e), _idg_fp->mu_from_v_e(v, e), tol);
+  ABS_TEST(_tab_ve_from_fp->k_from_v_e(v, e), _idg_fp->k_from_v_e(v, e), tol);
+  ABS_TEST(_tab_ve_from_fp->cp_from_v_e(v, e), _idg_fp->cp_from_v_e(v, e), tol);
+  ABS_TEST(_tab_ve_from_fp->cv_from_v_e(v, e), _idg_fp->cv_from_v_e(v, e), tol);
+  ABS_TEST(_tab_ve_from_fp->s_from_v_e(v, e), _idg_fp->s_from_v_e(v, e), 30 * tol);
 }
 
 /**

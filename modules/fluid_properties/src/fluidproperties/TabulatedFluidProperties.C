@@ -222,7 +222,11 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _log_space_v(getParam<bool>("use_log_grid_v")),
     _log_space_e(getParam<bool>("use_log_grid_e")),
     _log_space_h(getParam<bool>("use_log_grid_h")),
-    _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior"))
+    _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior")),
+    _e_min(0),
+    _e_max(0),
+    _v_min(0),
+    _v_max(0)
 {
   // Check that initial guess (used in Newton Method) is within min and max values
   checkInitialGuess(false);
@@ -355,6 +359,9 @@ TabulatedFluidProperties::initialSetup()
       generateVETabulatedData();
     }
   }
+  // Could be needed to get bounds computed from (p, T) bounds
+  else if (_fp)
+    createVEGridVectors();
 
   computePropertyIndicesInInterpolationVectors();
   constructInterpolation();
@@ -2637,7 +2644,7 @@ TabulatedFluidProperties::createVGridVector()
       _v_max = std::max({v1, v2, v3, v4});
     }
     // if csv exists, get max and min values from csv file
-    else
+    else if (_interpolate_density)
     {
       Real rho_max =
           *std::max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
@@ -2646,6 +2653,10 @@ TabulatedFluidProperties::createVGridVector()
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
+    else
+      mooseWarning("Unable to compute grid bounds in specific volume. Please specify the v_min/max "
+                   "parameters");
+
     // Prevent changing the bounds of the grid
     _v_bounds_specified = true;
   }
@@ -2686,13 +2697,16 @@ TabulatedFluidProperties::createVEGridVectors()
       _e_max = std::max({e1, e2, e3, e4});
     }
     // if csv exists, get max and min values from csv file
-    else
+    else if (_interpolate_internal_energy)
     {
       _e_min = *std::min_element(_properties[_internal_energy_idx].begin(),
                                  _properties[_internal_energy_idx].end());
       _e_max = *std::max_element(_properties[_internal_energy_idx].begin(),
                                  _properties[_internal_energy_idx].end());
     }
+    else
+      mooseWarning("Unable to compute grid bounds in internal energy. Please specify the e_min/max "
+                   "parameters");
   }
 
   // Create e grid for interpolation
