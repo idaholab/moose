@@ -391,6 +391,18 @@ private:
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosResidualObjectFunction(classname, alias)
 
+#define registerKokkosKernel(app, classname) registerKokkosResidualObject(app, classname)
+#define registerKokkosKernelAliased(app, classname, alias)                                         \
+  registerKokkosResidualObjectAliased(app, classname, alias)
+
+#define registerKokkosNodalKernel(app, classname) registerKokkosResidualObject(app, classname)
+#define registerKokkosNodalKernelAliased(app, classname, alias)                                    \
+  registerKokkosResidualObjectAliased(app, classname, alias)
+
+#define registerKokkosBoundaryCondition(app, classname) registerKokkosResidualObject(app, classname)
+#define registerKokkosBoundaryConditionAliased(app, classname, alias)                              \
+  registerKokkosResidualObjectAliased(app, classname, alias)
+
 // Material
 
 #define callRegisterKokkosMaterialFunction(classname, objectname)                                  \
