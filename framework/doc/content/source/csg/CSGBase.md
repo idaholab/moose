@@ -213,11 +213,22 @@ When adding and removing cells to/from universes, it is important to maintain th
 
 A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects.
 The `CSGBase` class supports the creation of two types of lattices: Cartesian and regular hexagonal.
-To create a lattice, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the `CSGLattice` object (`const CSGLattice &`).
-In both cases, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
+To create either of these types of lattices, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the `CSGLattice` object (`const CSGLattice &`).
+For the Cartesian and hexagonal lattices, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
 Optionally, the pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
-At the time that the universe arrangement is set, the dimensionality of the lattice is determined (i.e., the number of rows, columns, or rings for the lattice).
-If the dimensionality should be changed, a new complete universe arrangement can be set to overwrite the previous arrangement.
+Below are two examples of creating a `CSGCartesianLattice` and `CSGHexagonalLattice`, both initialized with the set of `CSGUniverse` objects that define the lattice layout.
+
+!listing CSGBaseTest.C start=create a 2x3 lattice of universes end=dims_map
+
+!listing CSGBaseTest.C start=create a 3-ring hexagonal lattice of universes end=dims_map
+
+Custom lattice types can also be defined to be used with the `CSGBase` class.
+Information about how to define custom types of lattices can be found in [source/csg/CSGLattice.md].
+If using a custom type, the lattice can be created as a unique pointer and added to the base with `addLattice`.
+If there are already `CSGUniverse` objects in the lattice at the time of adding it to the base, the `CSGUniverse` objects must already exist in the `CSGBase` instance.
+An example of using `addLattice` is shown below (`CSGCartesianLattice` would be replaced with the custom type).
+
+!listing CSGBaseTest.C start=create a lattice as a unique pointer end=check that it exists
 
 !alert! note title=2D vs. 3D Lattices
 
@@ -227,47 +238,49 @@ The `CSGBase` class supports only the creation of 2D lattices. A "3D" lattice ca
 
 The `CSGLattice` objects can be accessed or updated with the following methods from `CSGBase`:
 
-- `setLatticeUniverses`: sets the vector of vectors of `CSGUniverse`s as the lattice layout. The structure of the layout will be checked to ensure it compatible with the lattice type. This method can be used to overwrite the existing lattice structure and change the dimensions.
-- `addUniverseToLattice`: add a `CSGUniverse` to the lattice at the specified location (replaces the existing universe). The arrangement of universes in the lattice must be set already in order to use this method.
+- `setLatticeUniverses`: sets the vector of vectors of `CSGUniverse` objects as the lattice layout.
+- `addUniverseToLattice`: add a `CSGUniverse` to the lattice at the specified location index (replaces the existing universe).
 - `renameLattice`: change the name of the `CSGLattice` object.
 - `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
 - `getLatticeByName`: retrieve a const reference to the `CSGLattice` object of the specified name.
 
-#### Cartesian Lattices
+#### Lattice Indexing
 
-A regular Cartesian lattice (`CSGCartesianLattice`) can be created directly from the `CSGBase` class using the `createCartesianLattice` method.
-This lattice can have any number of rows or columns, but each row must be the same length.
-The indexing scheme for the elements of the lattice assumes a (row, column) form with the 0th row and 0th column being the upper left corner of the lattice.
-For example, a 2x3 lattice would look like FIGURE and be defined as shown.
+Both the Cartesian and hexagonal lattice types follow a row-column $(i, j)$ indexing scheme for the location of universes in the lattice.
 
-!listing CSGBaseTest.C start=create a 2x3 lattice of universes end=dims_map
+For Cartesian lattices, there can be any number of rows and columns, but each row must be the same length.
+The indexing starts at the top left corner of the lattice with element $(0, 0)$.
+An example of the indices for a $2 \times 3$ Cartesian lattice is shown in FIGURE.
 
-ADD FIGURE
+ADD FIGURE (caption: Example of a $2 \times 3$ Cartesian lattice and the corresponding location indices)
 
-#### Hexagonal Lattices
+For hexagonal lattices, the lattice is assumed to be x-oriented and also uses the row-column $(i, j)$ indexing scheme, with element $(0, 0)$ being the top row, leftmost element.
+The length of the rows is expected to be consistent with the size of the lattice (i.e., the number of rings), which is verified when the universes are set.
+An example of the $(i, j)$ indices for a 3-ring hexagonal lattice is shown in FIGURE.
 
-A regular x-oriented hexagonal lattice (`CSGHexagonalLattice`) can be directly created from the `CSGBase` class using the `createHexagonalLattice` method.
-The arrangement of `CSGUniverse` objects in this lattice assumes a (row, column) indexing, with the top row being the 0th row and the left most element in each row being the 0th column.
-The length of the rows is expected to be consistent with the size of the lattice (i.e., the number of rings) and is verified when the universes are set or provided.
-For example, a 3-ring hexagonal lattice would be indexed as shown in FIGURE and defined as shown below.
+ADD FIGURE (caption: Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(i, j)$ form)
 
-!listing CSGBaseTest.C start=create a 3-ring hexagonal lattice of universes end=dims_map
+Convenience methods are provided for `CSGHexagonalLattice` objects to convert between the required $(i, j)$ indices and a ring-based $(r, i)$ indexing scheme.
+In the ring-based scheme, the outermost ring is the 0th ring, and the right-most element is the 0th item in the ring with indices increasing counter-clockwise around the ring.
+For the 3-ring lattice above in FIGURE, the corresponding $(r, i)$ indices would be as shown in FIGURE.
+For any lattice, the $(r, i)$ index of a universe in the lattice can be retrieved from the $(i, j)$ index by calling the `getRingIndexFromRowIndex` method.
+And similarly, if the $(r, i)$ index form is known, the corresponding $(i, j)$ index can be retrieved using the `getRowIndexFromRingIndex` method.
+It is important to note that while these convenience methods exists to convert between the two indexing schemes, the `CSGUniverse` objects in the lattice can only be accessed using the $(i, j)$ index.
 
-ADD FIGURE
+ADD FIGURE (caption: Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(r, i)$ form)
 
-Convenience methods are provided for `CSGHexagonalLattice` types to convert between the required (row, column) indexing scheme and a (ring, element) indexing scheme.
-In a (ring, element) scheme, the outermost ring is the 0th ring, and the right-most element is the 0th element with indices increasing counter-clockwise around the ring.
-For the 3-ring lattice above in FIGURE, the corresponding (ring, element) indices would be as shown in FIGURE.
-For any lattice, the (ring, element) index of a universe in the lattice can be retrieved from the (row, column) index by calling the `getRingIndexFromRowIndex` method.
-And similarly, if the (ring, element) index form is the know index, the corresponding (row, column) index can be retrieved using the `getRowIndexFromRingIndex` method.
-It is important to note that while these convenience methods exists, the `CSGUniverse` objects in the lattice can only be accessed using the (row, column) index.
+#### Defining the Universe Layout
 
-ADD FIGURE
+As mentioned above, the layout of the `CSGUniverse` objects of the lattice can be set at the time of initialization or set/updated later.
+At the time that the universes are set, the dimensionality of the lattice is determined (i.e., the number of rows, columns, or rings for the lattice).
+If the dimensionality should need to be changed, a new complete universe arrangement can be set to overwrite the previous arrangement using `setLatticeUniverses`.
+Anytime the universe layout is set or changed, the dimensionality will be validated to ensure it compatible with the lattice type.
+To replace a single element of the lattice, the `addUniverseToLattice` method can be used by providing the element location in $(i, j)$ form.
+In order to use this method, the full set of universes must have already been defined, either during the lattice initialization or with `setLatticeUniverses`.
 
+!listing CSGBaseTest.C start=initialize a lattice without universes and then end=getUniverses
 
-#### Defining Other Lattice Types
-
-TBD
+!listing CSGBaseTest.C start=csg_obj->addUniverseToLattice(lat, end=csg_obj->addUniverseToLattice(lat, include-end=true
 
 ## Updating Existing CSGBase Objects
 

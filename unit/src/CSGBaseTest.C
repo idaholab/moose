@@ -705,13 +705,13 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
   auto & univ2 = csg_obj->createUniverse("robin");
   std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
                                                                                     {univ1}};
-  const CSGLattice & lat = csg_obj->createCartesianLattice("batverse", 1.0, univs);
+  const CSGLattice & cartlat = csg_obj->createCartesianLattice("batverse", 1.0, univs);
   {
     // test valid set universes - overwrite old universes
     std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ2},
                                                                                           {univ2}};
-    csg_obj->setLatticeUniverses(lat, new_univs);
-    auto all_univs = lat.getUniverses();
+    csg_obj->setLatticeUniverses(cartlat, new_univs);
+    auto all_univs = cartlat.getUniverses();
     ASSERT_EQ(all_univs[0][0].get(), univ2);
     ASSERT_EQ(all_univs[1][0].get(), univ2);
   }
@@ -722,17 +722,17 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
     std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ3},
                                                                                           {univ2}};
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &lat, &new_univs]() { csg_obj->setLatticeUniverses(lat, new_univs); },
+        [&csg_obj, &cartlat, &new_univs]() { csg_obj->setLatticeUniverses(cartlat, new_univs); },
         "Cannot set universes for lattice batverse. Universe batman is not in the CSGBase "
         "instance.");
   }
   {
-    // set universes to lattice without universes already specified
-    const CSGLattice & lat2 = csg_obj->createCartesianLattice("batmobile", 1.0);
+    // initialize a lattice without universes and then add universes with setLatticeUniverses
+    const CSGLattice & lat = csg_obj->createCartesianLattice("new_lattice", 1.0);
     std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ1},
                                                                                           {univ1}};
-    csg_obj->setLatticeUniverses(lat2, new_univs);
-    auto all_univs = lat2.getUniverses();
+    csg_obj->setLatticeUniverses(lat, new_univs);
+    auto all_univs = lat.getUniverses();
     ASSERT_EQ(all_univs[0][0].get(), univ1);
     ASSERT_EQ(all_univs[1][0].get(), univ1);
   }
