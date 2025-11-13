@@ -68,6 +68,7 @@
     clear_stitched_boundary_ids = false
     stitch_boundaries_pair = '101 103'
   []
+  parallel_type = REPLICATED
 []
 
 [Outputs]

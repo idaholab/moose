@@ -56,7 +56,7 @@
     neighbor_var = v
     penalty = 1e6
     jump_prop_name = "average_jump"
-    boundary = 'interface'
+    boundary = 'Block0_Block1'
   []
 []
 
@@ -95,7 +95,7 @@
       var_primary = diffusivity_var
       var_secondary = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = Block0_Block1
       interface_value_type = average
       mat_prop_var_out_basename = diff_var
       nl_var_primary = u
@@ -109,7 +109,7 @@
       var_primary = diffusivity_var
       var_secondary = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = Block0_Block1
       interface_value_type = jump_primary_minus_secondary
       mat_prop_var_out_basename = diff_var
       nl_var_primary = u
@@ -123,7 +123,7 @@
       var_primary = diffusivity_var
       var_secondary = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = Block0_Block1
       interface_value_type = jump_secondary_minus_primary
       mat_prop_var_out_basename = diff_var
       nl_var_primary = u
@@ -137,7 +137,7 @@
       var_primary = diffusivity_var
       var_secondary = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = Block0_Block1
       interface_value_type = jump_abs
       mat_prop_var_out_basename = diff_var
       nl_var_primary = u
@@ -151,7 +151,7 @@
       var_primary = diffusivity_var
       var_secondary = diffusivity_var
       mat_prop_out_basename = diff
-      boundary = interface
+      boundary = Block0_Block1
       interface_value_type = primary
       mat_prop_var_out_basename = diff_var
       nl_var_primary = u
@@ -166,7 +166,7 @@
       var_secondary = diffusivity_var
       mat_prop_out_basename = diff
       mat_prop_var_out_basename = diff_var
-      boundary = interface
+      boundary = Block0_Block1
       interface_value_type = secondary
       nl_var_primary = u
       nl_var_secondary = v
@@ -179,73 +179,73 @@
     type = MaterialRealAux
     property = diff_average
     variable = diffusivity_average
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_jump_primary_minus_secondary]
     type = MaterialRealAux
     property = diff_jump_primary_minus_secondary
     variable = diffusivity_jump_primary_minus_secondary
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_jump_secondary_minus_primary]
     type = MaterialRealAux
     property = diff_jump_secondary_minus_primary
     variable = diffusivity_jump_secondary_minus_primary
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_jump_abs]
     type = MaterialRealAux
     property = diff_jump_abs
     variable = diffusivity_jump_abs
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_primary]
     type = MaterialRealAux
     property = diff_primary
     variable = diffusivity_primary
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_secondary]
     type = MaterialRealAux
     property = diff_secondary
     variable = diffusivity_secondary
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_avg_prev]
     type = MaterialRealAux
     property = diff_average_prev
     variable = diffusivity_average_prev
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_jump_primary_minus_secondary_prev]
     type = MaterialRealAux
     property = diff_jump_primary_minus_secondary_prev
     variable = diffusivity_jump_primary_minus_secondary_prev
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_jump_secondary_minus_primary_prev]
     type = MaterialRealAux
     property = diff_jump_secondary_minus_primary_prev
     variable = diffusivity_jump_secondary_minus_primary_prev
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_jump_abs_prev]
     type = MaterialRealAux
     property = diff_jump_abs_prev
     variable = diffusivity_jump_abs_prev
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_primary_prev]
     type = MaterialRealAux
     property = diff_primary_prev
     variable = diffusivity_primary_prev
-    boundary = interface
+    boundary = Block0_Block1
   []
   [./interface_material_secondary_prev]
     type = MaterialRealAux
     property = diff_secondary_prev
     variable = diffusivity_secondary_prev
-    boundary = interface
+    boundary = Block0_Block1
   []
   [diffusivity_var]
     type = MaterialRealAux
