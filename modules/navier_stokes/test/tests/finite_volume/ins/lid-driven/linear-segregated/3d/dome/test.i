@@ -2,6 +2,11 @@ box_height = 14.0
 slab_thickness = 3.0
 ppin_height = ${fparse slab_thickness + box_height}
 
+ilet_width = 0.5472
+ilet_length = 0.4064
+ilet_area = ${fparse ilet_widght * ilet_length}
+volumetric_flow_rate = 0.31478894915 # m3/s
+
 # air
 # rho = 1.177
 # mu = 1.846e-5
