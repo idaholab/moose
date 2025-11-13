@@ -22,6 +22,7 @@
       "nring": 3,
       "nrow": 5,
       "pitch": 5.0,
+      "type": "CSG::CSGHexagonalLattice",
       "universes": [
         [
           "sq1_univ",

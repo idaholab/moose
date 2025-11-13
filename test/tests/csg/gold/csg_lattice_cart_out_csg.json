@@ -22,6 +22,7 @@
       "nx0": 2,
       "nx1": 2,
       "pitch": 5.0,
+      "type": "CSG::CSGCartesianLattice",
       "universes": [
         [
           "sq1_univ",
