@@ -730,9 +730,8 @@ quadToTriOnLine(ReplicatedMesh & mesh,
                                                        cut_line_params[2],
                                                        true));
       }
-      if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) !=
-              (int)node_side_rec.size() &&
-          std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) > 0)
+      const auto num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+      if (num_nodes != (int)node_side_rec.size() && num_nodes > 0)
       {
         cross_elems_quad.push_back((*elem_it)->id());
         new_subdomain_ids.emplace((*elem_it)->subdomain_id() + tri_subdomain_id_shift);
@@ -801,11 +800,12 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
                                                 cut_line_params[2],
                                                 true);
     }
-    if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) == (int)node_side_rec.size() - n_points_on_line)
+    const auto num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+    if (num_nodes == node_side_rec.size() - n_points_on_line)
     {
       (*elem_it)->subdomain_id() = block_id_to_remove;
     }
-    else if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) > 0)
+    else if (num_nodes > 0)
     {
       if ((*elem_it)->n_vertices() != 3 || (*elem_it)->n_nodes() != 3)
         mooseError("The element across the cutting line is not TRI3, which is not supported.");
