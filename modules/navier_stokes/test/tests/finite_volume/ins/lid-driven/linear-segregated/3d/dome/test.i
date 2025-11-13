@@ -1,19 +1,17 @@
-box_height = 14.0
-slab_thickness = 3.0
-ppin_height = ${fparse slab_thickness + box_height}
-
 ilet_width = 0.5472
 ilet_length = 0.4064
-ilet_area = ${fparse ilet_widght * ilet_length}
+ilet_area = '${fparse ilet_width * ilet_length}'
 volumetric_flow_rate = 0.31478894915 # m3/s
+# Make this negative so that it's the opposite direction of the normal vector
+velocity_diri_condition = '${fparse -volumetric_flow_rate / ilet_area}'
 
 # air
-# rho = 1.177
-# mu = 1.846e-5
-# k = .0262
-# cp = 1006
-# beta = 3.33e-3
-# water
+rho = 1.177
+mu = 1.846e-5
+k = .0262
+cp = 1006
+beta = 3.33e-3
+# # water
 # rho = 997
 # mu = 8.55e-4
 # k = .613
@@ -25,17 +23,17 @@ volumetric_flow_rate = 0.31478894915 # m3/s
 # k = .4
 # cp = 3500
 # beta = 3.8e-4
-# glycerol
-rho = 1260
-mu = 1.41
-k = .285
-cp = 2410
-beta = 5e-4
+# # glycerol
+# rho = 1260
+# mu = 1.41
+# k = .285
+# cp = 2410
+# beta = 5e-4
 
 T_0 = 300.0
-T_hot = 301
-T_cold = 300
-initial_dt = 20
+T_hot = 373
+T_cold = ${T_0}
+initial_dt = .3
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -47,7 +45,7 @@ initial_dt = 20
     type = FileMeshGenerator
     file = zach-mesh_in.e
   []
-  uniform_refine = 1
+  uniform_refine = 0
 []
 
 [Problem]
@@ -221,34 +219,87 @@ initial_dt = 20
 []
 
 [LinearFVBCs]
+  [inlet_x]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'inlet'
+    functor = ${velocity_diri_condition}
+    variable = vel_x
+    normal_component = 'x'
+  []
+  [inlet_y]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'inlet'
+    functor = ${velocity_diri_condition}
+    variable = vel_y
+    normal_component = 'y'
+  []
+  [inlet_z]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'inlet'
+    functor = ${velocity_diri_condition}
+    variable = vel_z
+    normal_component = 'z'
+  []
+
+  [outlet_p]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'outlet'
+    variable = pressure
+    functor = 0
+  []
+  [outlet_x]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    variable = vel_x
+    use_two_term_expansion = true
+    boundary = outlet
+  []
+  [outlet_y]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    variable = vel_y
+    use_two_term_expansion = true
+    boundary = outlet
+  []
+  [outlet_z]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    variable = vel_z
+    use_two_term_expansion = true
+    boundary = outlet
+  []
+  [outlet_T]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    variable = T_fluid
+    use_two_term_expansion = true
+    boundary = outlet
+  []
+
   [no_slip_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_x
-    boundary = 'air_box_boundary air_wall_boundary room_floor'
+    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
     functor = 0
   []
   [no_slip_y]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_y
-    boundary = 'air_box_boundary air_wall_boundary room_floor'
+    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
     functor = 0
   []
   [no_slip_z]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_z
-    boundary = 'air_box_boundary air_wall_boundary room_floor'
+    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
     functor = 0
   []
   [pressure-flux]
     type = LinearFVPressureFluxBC
-    boundary = 'air_box_boundary air_wall_boundary room_floor'
+    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
   []
   [T_adiabatic]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
-    boundary = 'room_floor'
+    boundary = 'air_floor_boundary'
     functor = 0
     variable = T_fluid
   []
@@ -260,7 +311,7 @@ initial_dt = 20
   []
   [T_cold]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'air_wall_boundary'
+    boundary = 'air_wall_boundary inlet'
     functor = ${T_cold}
     variable = T_fluid
   []
@@ -292,32 +343,29 @@ initial_dt = 20
   energy_petsc_options_value = 'hypre boomeramg 4 1 0.1 0.6 HMIS ext+i'
   print_fields = false
 
-  pin_pressure = true
-  pressure_pin_value = 0.0
-  pressure_pin_point = '0 0 ${ppin_height}'
-
   num_steps = 15000
   num_piso_iterations = 0
 
-  dt = ${initial_dt}
+  # dtmax = ${initial_dt}
 
-  # [TimeStepper]
-  #   type = PostprocessorDT
-  #   postprocessor = new_dt_for_unity_cfl
-  #   dt = ${initial_dt}
-  #   scale = 1
-  # []
+  [TimeStepper]
+    type = PostprocessorDT
+    postprocessor = new_dt_for_unity_cfl
+    dt = ${initial_dt}
+    scale = 1
+  []
 []
 
 [Outputs]
-  nemesis = true
+  [nemesis]
+    type = Nemesis
+    time_step_interval = 20
+  []
   csv = true
   checkpoint = true
   perf_graph = true
   print_nonlinear_residuals = false
   print_linear_residuals = true
-  time_step_interval = 20
-  file_base = once-refined
 []
 
 [Postprocessors]
