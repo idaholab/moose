@@ -123,10 +123,11 @@ A cell is an object defined by a region and a fill.
 To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a const reference to the `CSGCell` object that is created (`const CSGCell &`).
 At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
 The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
-Three types of cell fills are currently supported: void, material, and universe.
+Three types of cell fills are currently supported: void, material, universe, and lattice.
 If creating a void cell, no fill has to be passed to the creation method.
 To create a cell with a material fill, simply provide it with a name of a material as a string.
 For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
+And for a `CSGLattice` fill, pass the shared pointer to the `CSGLattice`.
 Some examples of creating the different types of cells are shown below:
 
 !listing CSGBaseTest.C start=create a void cell with name cname1 and defined by region reg1 end=csg_obj include-end=true
@@ -134,6 +135,8 @@ Some examples of creating the different types of cells are shown below:
 !listing CSGBaseTest.C start=create a material-filled cell end=csg_obj include-end=true
 
 !listing CSGBaseTest.C start=create a universe-filled cell end=csg_obj include-end=true
+
+!listing CSGBaseTest.C start=create a lattice-filled cell end=csg_obj include-end=true
 
 !alert! note title=Materials as Placeholders
 
@@ -364,14 +367,15 @@ A recommended best practice is to include the mesh generator name (which can be 
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
 
-## Example Implementation
+## Example Implementations
 
-Provided here is an example implementation of the `generateCSG` method for a simple example [source/meshgenerators/MeshGenerator.md] that creates an infinite rectangular prism given an input parameter for `side_length`.
+Provided here are example implementations of the `generateCSG` method for three simple [source/meshgenerators/MeshGenerator.md] types.
+The first mesh generator creates an infinite rectangular prism given an input parameter for `side_length`.
 The code snippets provided here correspond to the `.C` file.
 
 !listing ExampleCSGInfiniteSquareMeshGenerator.C start=InputParameters
 
-The following example builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adding planes to create a finite rectangular prism.
+The next example mesh generator builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adds planes to create a finite rectangular prism.
 
 !listing TestCSGAxialSurfaceMeshGenerator.C start=InputParameters
 
@@ -385,8 +389,30 @@ Example Output:
 
 !listing csg_only_chained_out_csg.json
 
-To run the above example, use `--allow-test-objects`:
+A third example implementation shows the construction of a 2D lattice of universes, using the `ExampleCSGInfiniteSquareMeshGenerator` as input.
+
+!listing TestCSGLatticeMeshGenerator.C start=InputParameters
+
+For this example, the following input would generate the corresponding [!ac](JSON) output below.
+
+Example Input:
+
+!listing csg_lattice_cart.i
+
+Example Output:
+
+!listing csg_lattice_cart_out_csg.json
+
+!alert! note title=Running the Examples
+
+To run either of the above examples, use `--allow-test-objects`:
 
 ```shell
 ./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_only_chained.i
 ```
+
+```shell
+./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_lattice_cart.i
+```
+
+!alert-end!
