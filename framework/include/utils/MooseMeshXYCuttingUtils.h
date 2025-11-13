@@ -48,6 +48,23 @@ void lineRemoverMoveNode(libMesh::ReplicatedMesh & mesh,
                          const bool side_to_remove = true);
 
 /**
+ * Determines whether a point on XY-plane is on a given line, to within a tolerance
+ * @param px x coordinate of the point
+ * @param py y coordinate of the point
+ * @param param_1 parameter 1 (a) in line formula a*x+b*y+c=0
+ * @param param_2 parameter 2 (b) in line formula a*x+b*y+c=0
+ * @param param_3 parameter 3 (c) in line formula a*x+b*y+c=0
+ * @param dis_tol tolerance used in determining whether the point is on the line
+ * @return whether the point is on the line
+ */
+bool pointOnLine(const Real px,
+                 const Real py,
+                 const Real param_1,
+                 const Real param_2,
+                 const Real param_3,
+                 const Real dis_tol = libMesh::TOLERANCE);
+
+/**
  * Determines whether a point on XY-plane is on the side of a given line that needs to be removed
  * @param px x coordinate of the point
  * @param py y coordinate of the point
