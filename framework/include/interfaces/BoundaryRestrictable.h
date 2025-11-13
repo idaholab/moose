@@ -232,7 +232,7 @@ private:
   void initializeBoundaryRestrictable();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  void initializeKokkosBoundaryRestrictable(MooseMesh * mesh);
+  void initializeKokkosBoundaryRestrictable();
 #endif
 
 protected:

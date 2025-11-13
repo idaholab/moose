@@ -155,6 +155,11 @@ public:
   FEProblemBase(const InputParameters & parameters);
   virtual ~FEProblemBase();
 
+  /**
+   * @returns Whether the problem was initialized
+   */
+  bool initialized() const { return _initialized; }
+
   enum class CoverageCheckMode
   {
     FALSE,
@@ -2758,11 +2763,19 @@ public:
   /**
    * @returns whether any Kokkos object was added in the problem
    */
-  bool hasKokkosObjects() const { return _has_kokkos_objects; }
+  virtual bool hasKokkosObjects() const { return _has_kokkos_objects; }
   /**
    * @returns whether any Kokkos residual object was added in the problem
    */
   bool hasKokkosResidualObjects() const { return _has_kokkos_residual_objects; }
+  /**
+   * Add a function hook that needs to be called after Kokkos mesh initialization
+   * @param function The function to be called
+   */
+  void addKokkosMeshInitializationHook(std::function<void()> function)
+  {
+    _kokkos_mesh_initialization_hooks.push_back(function);
+  }
 #endif
 
 protected:
@@ -3392,6 +3405,9 @@ private:
 
   /// Whether we have any Kokkos residual objects
   bool _has_kokkos_residual_objects = false;
+
+  /// Container holding hooks for functions that need to be called after Kokkos mesh initialization
+  std::vector<std::function<void()>> _kokkos_mesh_initialization_hooks;
 #endif
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,

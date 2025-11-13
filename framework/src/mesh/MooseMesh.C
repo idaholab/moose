@@ -670,7 +670,8 @@ MooseMesh::update()
   computeMaxPerElemAndSide();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_app.hasKokkosObjects() || (_app.getExecutioner() && _app.feProblem().hasKokkosObjects()))
+  if (_app.getExecutioner() && _app.feProblem().initialized() &&
+      _app.feProblem().hasKokkosObjects())
     _kokkos_mesh->update();
 #endif
 
