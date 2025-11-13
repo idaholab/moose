@@ -150,10 +150,11 @@ SolverSystem::compute(const ExecFlagType type)
       compute_tds = true;
   }
 
+  // avoid division by dt which might be zero.
   if (compute_tds && _fe_problem.dt() > 0.)
     for (auto & ti : _time_integrators)
     {
-      // avoid division by dt which might be zero.
+      // Do things like compute integration weights
       ti->preStep();
       ti->computeTimeDerivatives();
     }
