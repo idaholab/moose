@@ -375,7 +375,7 @@ ComputeSmearedCrackingStress::updateCrackingStateAndStress()
   const Real youngs_modulus =
       ElasticityTensorTools::getIsotropicYoungsModulus(_elasticity_tensor[_qp]);
 
-  const Real poissons_ratio = 
+  const Real poissons_ratio =
       ElasticityTensorTools::getIsotropicPoissonsRatio(_elasticity_tensor[_qp]);
 
   Real cracking_stress = _cracking_stress[_qp];

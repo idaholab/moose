@@ -45,7 +45,7 @@ public:
                                       const ADReal & crack_initiation_strain,
                                       const ADReal & crack_max_strain,
                                       const ADReal & cracking_stress,
-                                      const ADReal & youngs_modulus, 
+                                      const ADReal & youngs_modulus,
                                       const ADReal & poissons_ratio) = 0;
 
   ///@{ Retained as empty methods to avoid a warning from ADMaterial.C in framework. These methods are unused in all inheriting classes and should not be overwritten.

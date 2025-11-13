@@ -13,7 +13,7 @@
 
 /**
  * ExponentialEnergyBasedSoftening is a smeared crack softening model that
- * uses an exponential softening curve where the softening slope is 
+ * uses an exponential softening curve where the softening slope is
  * dependent on each element size and the fracture toughness.
  */
 class ADExponentialEnergyBasedSoftening : public ADSmearedCrackSofteningBase
@@ -29,7 +29,7 @@ public:
                                       const ADReal & crack_initiation_strain,
                                       const ADReal & crack_max_strain,
                                       const ADReal & cracking_stress,
-                                      const ADReal & youngs_modulus, 
+                                      const ADReal & youngs_modulus,
                                       const ADReal & poissons_ratio) override;
 
 protected:

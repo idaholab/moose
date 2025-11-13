@@ -13,7 +13,7 @@
 
 /**
  * ExponentialEnergyBasedSoftening is a smeared crack softening model that
- * uses an exponential softening curve where the softening slope is 
+ * uses an exponential softening curve where the softening slope is
  * dependent on each element size and the fracture toughness.
  */
 class ExponentialEnergyBasedSoftening : public SmearedCrackSofteningBase
@@ -29,7 +29,7 @@ public:
                                       const Real crack_initiation_strain,
                                       const Real crack_max_strain,
                                       const Real cracking_stress,
-                                      const Real youngs_modulus, 
+                                      const Real youngs_modulus,
                                       const Real poissons_ratio) override;
 
 protected:

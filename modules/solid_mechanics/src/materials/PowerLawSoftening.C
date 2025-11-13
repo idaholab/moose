@@ -39,7 +39,7 @@ PowerLawSoftening::computeCrackingRelease(Real & stress,
                                           const Real /*crack_initiation_strain*/,
                                           const Real /*crack_max_strain*/,
                                           const Real cracking_stress,
-                                          const Real youngs_modulus, 
+                                          const Real youngs_modulus,
                                           const Real /*poissons_ratio*/)
 {
   if (stress > cracking_stress)

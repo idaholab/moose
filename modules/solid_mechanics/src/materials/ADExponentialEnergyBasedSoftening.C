@@ -33,7 +33,8 @@ ADExponentialEnergyBasedSoftening::validParams()
   return params;
 }
 
-ADExponentialEnergyBasedSoftening::ADExponentialEnergyBasedSoftening(const InputParameters & parameters)
+ADExponentialEnergyBasedSoftening::ADExponentialEnergyBasedSoftening(
+    const InputParameters & parameters)
   : ADSmearedCrackSofteningBase(parameters),
     _residual_stress(getParam<Real>("residual_stress")),
     _fracture_toughness(getParam<Real>("fracture_toughness"))
@@ -42,42 +43,48 @@ ADExponentialEnergyBasedSoftening::ADExponentialEnergyBasedSoftening(const Input
 
 void
 ADExponentialEnergyBasedSoftening::computeCrackingRelease(ADReal & stress,
-                                               ADReal & stiffness_ratio,
-                                               const ADReal & /*strain*/,
-                                               const ADReal & crack_initiation_strain,
-                                               const ADReal & crack_max_strain,
-                                               const ADReal & cracking_stress,
-                                               const ADReal & youngs_modulus, 
-                                               const ADReal & poissons_ratio)
+                                                          ADReal & stiffness_ratio,
+                                                          const ADReal & /*strain*/,
+                                                          const ADReal & crack_initiation_strain,
+                                                          const ADReal & crack_max_strain,
+                                                          const ADReal & cracking_stress,
+                                                          const ADReal & youngs_modulus,
+                                                          const ADReal & poissons_ratio)
 {
   mooseAssert(crack_max_strain >= crack_initiation_strain,
               "crack_max_strain must be >= crack_initiation_strain");
 
   unsigned int dim = _current_elem->dim();
-  
+
   // Get estimate of element size
   ADReal ele_len = 0.0;
-  if (dim == 3) {
+  if (dim == 3)
+  {
     ele_len = std::cbrt(_current_elem->volume());
-  } else {
+  }
+  else
+  {
     ele_len = std::sqrt(_current_elem->volume());
   }
 
   // Calculate initial slope of exponential curve
-  const ADReal energy_release_rate = (_fracture_toughness * _fracture_toughness) * (1 - poissons_ratio * poissons_ratio) / youngs_modulus;
+  const ADReal energy_release_rate = (_fracture_toughness * _fracture_toughness) *
+                                     (1 - poissons_ratio * poissons_ratio) / youngs_modulus;
   const ADReal frac_stress_sqr = cracking_stress * cracking_stress;
   const ADReal l_max = 2 * energy_release_rate * youngs_modulus / frac_stress_sqr;
 
-  // Check against maximum allowed element size - avoid the divide by zero by capping at a large slope
-  ADReal initial_slope = -1e5*youngs_modulus;
+  // Check against maximum allowed element size - avoid the divide by zero by capping at a large
+  // slope
+  ADReal initial_slope = -1e5 * youngs_modulus;
   if (ele_len < l_max) // TODO: need to log if this isn't true
-    initial_slope = -frac_stress_sqr / (energy_release_rate / ele_len - frac_stress_sqr / (2*youngs_modulus));
+    initial_slope =
+        -frac_stress_sqr / (energy_release_rate / ele_len - frac_stress_sqr / (2 * youngs_modulus));
 
   // Compute stress that follows exponental curve
   stress = cracking_stress *
-           (_residual_stress + (1.0 - _residual_stress)
-             * std::exp(initial_slope / cracking_stress *
-                       (crack_max_strain - crack_initiation_strain)));
+           (_residual_stress +
+            (1.0 - _residual_stress) * std::exp(initial_slope / cracking_stress *
+                                                (crack_max_strain - crack_initiation_strain)));
   // Compute ratio of current stiffness to original stiffness
   stiffness_ratio = stress * crack_initiation_strain / (crack_max_strain * cracking_stress);
 }
