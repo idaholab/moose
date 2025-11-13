@@ -20,6 +20,7 @@ LinearFVAdvectionDiffusionFunctorDirichletBC::validParams()
       "finite volume system and whose face values are determined using a functor. This kernel is "
       "only designed to work with advection-diffusion problems.");
   params.addRequiredParam<MooseFunctorName>("functor", "The functor for this boundary condition.");
+  MooseEnum normal_component("x y z none", "none");
   return params;
 }
 
@@ -33,6 +34,7 @@ Real
 LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryValue() const
 {
   return _functor(singleSidedFaceArg(_current_face_info), determineState());
+  ;
 }
 
 Real
@@ -42,9 +44,7 @@ LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryNormalGradient() co
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
-  return (_functor(singleSidedFaceArg(_current_face_info), determineState()) -
-          raw_value(_var(elem_arg, determineState()))) /
-         distance;
+  return (computeBoundaryValue() - raw_value(_var(elem_arg, determineState()))) / distance;
 }
 
 Real
@@ -59,7 +59,7 @@ Real
 LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryValueRHSContribution() const
 {
   // Fetch the boundary value from the provided functor.
-  return _functor(singleSidedFaceArg(_current_face_info), determineState());
+  return computeBoundaryValue();
 }
 
 Real
@@ -75,6 +75,5 @@ LinearFVAdvectionDiffusionFunctorDirichletBC::computeBoundaryGradientRHSContribu
 {
   // The boundary term from the central difference approximation of the
   // normal gradient.
-  return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
-         computeCellToFaceDistance();
+  return computeBoundaryValue() / computeCellToFaceDistance();
 }
