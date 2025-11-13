@@ -226,10 +226,9 @@ XYZDelaunayGenerator::generate()
           hole_mesh.get_boundary_info().remove_id(temp_ext_bid);
           // MeshSerializer's destructor calls delete_remote_elements()
           // For replicated meshes, we need to refresh the neighbor information
-          if (!hole_mesh.is_replicated())
-            hole_mesh.prepare_for_use();
-          else
-            hole_mesh.find_neighbors();
+          // Also, not doing prepare_for_use() causes an error in DEBUG mode
+          // in MeshTools::libmesh_assert_topology_consistent_procids()
+          hole_mesh.prepare_for_use();
         }
         else
           MeshTools::Modification::all_tri(**_hole_ptrs[hole_i]);
@@ -559,7 +558,13 @@ XYZDelaunayGenerator::generate()
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
       if (_combined_stitching)
+      {
+        // The main mesh has been serialized early and will last through the end of this MG
+        // If the hole mesh to be stitched is not serialized, it will cause parallelization
+        // issues after combining when the number of processors is large
+        libMesh::MeshSerializer serial_hole(hole_mesh);
         MooseMeshUtils::copyIntoMesh(*this, *mesh, hole_mesh, false, false, _communicator);
+      }
       else
       {
         std::size_t n_nodes_stitched = mesh->stitch_meshes(hole_mesh,
