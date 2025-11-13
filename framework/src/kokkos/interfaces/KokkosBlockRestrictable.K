@@ -27,23 +27,25 @@ BlockRestrictable::BlockRestrictable(const BlockRestrictable & object,
 }
 
 void
-BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh * mesh)
+BlockRestrictable::initializeKokkosBlockRestrictable()
 {
   if (_moose_object->isParamValid("_kokkos_material"))
     return;
 
   auto & blocks = blockRestricted() ? blockIDs() : meshBlockIDs();
 
+  auto kokkos_mesh = _blk_mesh->getKokkosMesh();
+
   std::set<ContiguousElementID> element_ids;
   std::vector<ContiguousNodeID> node_ids;
 
   for (auto block : blocks)
   {
-    element_ids.insert(mesh->getSubdomainContiguousElementIDs(block).begin(),
-                       mesh->getSubdomainContiguousElementIDs(block).end());
+    element_ids.insert(kokkos_mesh->getSubdomainContiguousElementIDs(block).begin(),
+                       kokkos_mesh->getSubdomainContiguousElementIDs(block).end());
     node_ids.insert(node_ids.end(),
-                    mesh->getSubdomainContiguousNodeIDs(block).begin(),
-                    mesh->getSubdomainContiguousNodeIDs(block).end());
+                    kokkos_mesh->getSubdomainContiguousNodeIDs(block).begin(),
+                    kokkos_mesh->getSubdomainContiguousNodeIDs(block).end());
   }
 
   _kokkos_element_ids = element_ids;
@@ -64,9 +66,9 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
 
     for (const auto eid : element_ids)
     {
-      auto type = mesh->getElementInfo(eid).type;
+      auto type = kokkos_mesh->getElementInfo(eid).type;
 
-      for (unsigned int side = 0; side < mesh->getNumSides(type); ++side)
+      for (unsigned int side = 0; side < kokkos_mesh->getNumSides(type); ++side)
         element_side_ids.insert({eid, side});
     }
 

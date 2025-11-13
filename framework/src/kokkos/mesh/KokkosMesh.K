@@ -23,6 +23,8 @@ Mesh::update()
 {
   initMap();
   initElement();
+
+  _initialized = true;
 }
 
 void

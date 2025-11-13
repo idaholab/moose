@@ -241,6 +241,8 @@ FEProblemBase::getKokkosMaterialPropertyStorageConsumers(Moose::MaterialDataType
 void
 FEProblemBase::initKokkos()
 {
+  TIME_SECTION("InitializeKokkos", 1, "Initializing Kokkos");
+
   // Error on unsupported options
 
   if (haveDisplaced())
@@ -248,6 +250,15 @@ FEProblemBase::initKokkos()
 
   if (adaptivity().isOn())
     mooseError("Kokkos does not support adaptivity yet.");
+
+  // Initialize Kokkos mesh
+
+  _mesh.getKokkosMesh()->update();
+
+  // Call functions that require Kokkos mesh to be initialized first
+
+  for (auto hook : _kokkos_mesh_initialization_hooks)
+    hook();
 
   // Initialize Kokkos assembly
 

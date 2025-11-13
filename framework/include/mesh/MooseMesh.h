@@ -663,6 +663,7 @@ public:
    * Accessor for Kokkos mesh object.
    */
 #ifdef MOOSE_KOKKOS_ENABLED
+  Moose::Kokkos::Mesh * getKokkosMesh() { return _kokkos_mesh.get(); }
   const Moose::Kokkos::Mesh * getKokkosMesh() const { return _kokkos_mesh.get(); }
 #endif
 

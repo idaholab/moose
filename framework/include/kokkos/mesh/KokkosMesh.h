@@ -65,6 +65,10 @@ public:
    */
   const MooseMesh & getMesh() { return _mesh; }
   /**
+   * Get whether the mesh was initialized
+   */
+  bool initialized() const { return _initialized; }
+  /**
    * Update the mesh
    */
   void update();
@@ -237,6 +241,11 @@ private:
    */
   const MooseMesh & _mesh;
   /**
+   * Flag whether the mesh was initialized
+   */
+  bool _initialized = false;
+
+  /**
    * The wrapper of host maps
    */
   struct MeshMap
@@ -359,7 +368,13 @@ public:
    */
   KOKKOS_FUNCTION const Mesh & kokkosMesh() const
   {
-    KOKKOS_IF_ON_HOST(return _mesh_host;)
+    KOKKOS_IF_ON_HOST(
+        if (!_mesh_host.initialized()) mooseError(
+            "kokkosMesh() was called too early. Kokkos mesh is available after problem "
+            "initialization. Override initialSetup() if you need to setup your object data "
+            "using the Kokkos mesh.");
+
+        return _mesh_host;)
 
     return _mesh_device;
   }
