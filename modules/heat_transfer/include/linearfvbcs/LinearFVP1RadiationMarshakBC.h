@@ -12,31 +12,29 @@
 #include "LinearFVAdvectionDiffusionFunctorRobinBCBase.h"
 
 /**
- * Class implementing a Robin boundary condition for linear finite
- * volume variables. This is only applicable for advection-diffusion problems.
- * alpha, beta, gamma are provided as functors and may vary in space/time.
+ * Class implementing a Marshak boundary condition for P1 radiation model in
+ * linear finite volume variables. This is only applicable for advection-diffusion problems.
  */
-class LinearFVAdvectionDiffusionFunctorRobinBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
+class LinearFVP1RadiationMarshakBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
 public:
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
    */
-  LinearFVAdvectionDiffusionFunctorRobinBC(const InputParameters & parameters);
+  LinearFVP1RadiationMarshakBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
-  /// Getter functions (consistent entry point for all derived classes)
   virtual Real getAlpha(Moose::FaceArg face, Moose::StateArg state) const override;
   virtual Real getBeta(Moose::FaceArg face, Moose::StateArg state) const override;
   virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
 
   /// Functor giving the alpha coefficient (multiplying normal gradient)
-  const Moose::Functor<Real> & _alpha;
+  const Moose::Functor<Real> & _temperature_radiation;
   /// Functor giving the beta coefficient (multiplying value)
-  const Moose::Functor<Real> & _beta;
+  const Moose::Functor<Real> & _coeff_diffusion;
   /// Functor giving the gamma coefficient (on right hand side, treated explicitly)
-  const Moose::Functor<Real> & _gamma;
+  const Moose::Functor<Real> & _eps_boundary;
 };
