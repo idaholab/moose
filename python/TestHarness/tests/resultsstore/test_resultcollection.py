@@ -42,6 +42,9 @@ FAKE_DATABASE_NAME = "foodb"
 READER_AUTH = ResultsReader.load_authentication()
 HAS_READER_AUTH = READER_AUTH is not None
 
+# Fake test name for testing
+TEST_NAME = TestName("foo", "bar")
+
 
 class TestResultCollection(ResultsStoreTestCase):
     """Test TestHarness.resultsstore.resultcollection.ResultCollection."""
@@ -250,3 +253,69 @@ class TestResultCollection(ResultsStoreTestCase):
         names = collection.get_test_names()
         reader.close()
         self.assertIn(GOLD_DATABASE_TEST_NAME, names)
+
+    def test_ResultCollection_get_all_tests(self):
+        """Test ResultCollection.get_all_tests() calling the parent method."""
+        result = StoredResult(self.get_result_data())
+        collection = ResultCollection(result, lambda: None)
+
+        with patch.object(
+            collection,
+            "_get_all_tests",
+            return_value={"foo": ["bar"], "baz": ["bang"]},
+        ) as patch_get_all_tests:
+            tests = collection.get_all_tests([TestDataFilter.ALL])
+
+        patch_get_all_tests.assert_called_once_with([TestDataFilter.ALL])
+        self.assertEqual(tests, {"foo": "bar", "baz": "bang"})
+
+    def test_ResultCollection_get_test(self):
+        """Test ResultCollection.get_test() calling the parent method."""
+        result = StoredResult(self.get_result_data())
+        collection = ResultCollection(result, lambda: None)
+
+        # No test
+        with patch.object(
+            collection,
+            "_get_tests",
+            return_value=None,
+        ) as patch_get_tests:
+            test = collection.get_test(TEST_NAME, [TestDataFilter.ALL])
+        patch_get_tests.assert_called_once_with(TEST_NAME, [TestDataFilter.ALL])
+        self.assertIsNone(test)
+
+        # One test
+        with patch.object(
+            collection,
+            "_get_tests",
+            return_value=["foo"],
+        ) as patch_get_tests:
+            test = collection.get_test(TEST_NAME, [TestDataFilter.ALL])
+        patch_get_tests.assert_called_once_with(TEST_NAME, [TestDataFilter.ALL])
+        self.assertEqual(test, "foo")
+
+    def test_ResultsCollection_get_all_tests(self):
+        """Test ResultsCollection.get_all_tests() calling the parent method."""
+        result = StoredResult(self.get_result_data())
+        collection = ResultsCollection([result], lambda: None)
+
+        with patch.object(
+            collection, "_get_all_tests", return_value="foo"
+        ) as patch_get_all_tests:
+            value = collection.get_all_tests([TestDataFilter.ALL])
+
+        patch_get_all_tests.assert_called_once_with([TestDataFilter.ALL])
+        self.assertEqual(value, "foo")
+
+    def test_ResultsCollection_get_tests(self):
+        """Test ResultsCollection.get_all_tests() calling the parent method."""
+        result = StoredResult(self.get_result_data())
+        collection = ResultsCollection([result], lambda: None)
+
+        with patch.object(
+            collection, "_get_tests", return_value="foo"
+        ) as patch_get_all_tests:
+            value = collection.get_tests(TEST_NAME, [TestDataFilter.ALL])
+
+        patch_get_all_tests.assert_called_once_with(TEST_NAME, [TestDataFilter.ALL])
+        self.assertEqual(value, "foo")
