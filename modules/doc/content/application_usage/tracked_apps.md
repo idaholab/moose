@@ -28,7 +28,7 @@ The purpose of these lists is two fold:
 
 - [OpenPronghorn](https://mooseframework.inl.gov/open_pronghorn/) - Coarse mesh computational fluid dynamics
 - [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
-- [hippo](https://github.com/aurora-multiphysics/hippo) - Integration of OpenFOAM and MOOSE to enable thermohydraulic simulations)
+- [hippo](https://github.com/aurora-multiphysics/hippo) - Integration of OpenFOAM and MOOSE to enable thermohydraulic simulations
 - [Saline](https://code.ornl.gov/neams/saline) - Molten salt fluid properties from MSTDB experimental data
 - [marlin](https://github.com/idaholab/marlin) - Spectral solver based on MOOSE and GPU-capable
 
@@ -39,6 +39,7 @@ The purpose of these lists is two fold:
 - [Deer](https://github.com/Argonne-National-Laboratory/deer) - Various mechanics modules for MOOSE
 - [MASTODON](https://github.com/idaholab/mastodon) - Structural dynamics, seismic analysis, and risk assessment
 - [RACCOON](https://github.com/hugary1995/raccoon) - Massively parallel FEM code for phase-field for fracture
+- [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
 
 ### Materials
 
@@ -79,6 +80,7 @@ The purpose of these lists is two fold:
 - [Proteus](https://github.com/aurora-multiphysics/proteus) - For developing Fusion Digital Twins.
 - [Ranger](https://github.com/idaholab/ranger) - Python-based auto-response bot that uses the GitHub API and LlamaIndex package to monitor and generate relevant responses for new discussions
 - [Virtual Test Bed](https://mooseframework.inl.gov/virtual_test_bed/) - An open repository of simulations of nuclear systems
+- [Isopod](https://github.com/idaholab/isopod) - Multiphysics PDE constrained optimization, mostly merged into MOOSE as the optimization module
 
 
 ## Closed Source Applications
@@ -120,7 +122,6 @@ We list here older, unmaintained, projects for consideration when naming a new p
 - [Dendragapus](https://github.com/jarons/dendragapus) - Application to explore modifications to Picard Iteration
 - [Slug](https://github.com/adamLange/slug) - Hyperloop air bearing simulation tool
 - [MaCaw](https://github.com/idaholab/macaw) - Domain-decomposed unstructured mesh Monte Carlo particle transport using OpenMC as a collision physics library
-- [Isopod](https://github.com/idaholab/isopod) - Multiphysics PDE constrained optimization
 
 
 ### Closed source
@@ -129,7 +130,6 @@ We list here older, unmaintained, projects for consideration when naming a new p
 - ELK - Former application for the electromagnetics module
 - FENIX - Multiphysics simulation suite with Griffin and Pronghorn, including Xenon and Samarium effects
 - MAMMOTH - Reactor physics application
-- [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
 - OSPREY - Off-gas SeParation and REcoverY for dispersed plug flow in a packed bed.
 - RATTLESNAKE - FEM Diffusion, SN, and PN code
 - YAK - Common object library for INL particle transport codes
