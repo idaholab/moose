@@ -15,7 +15,10 @@ from typing import Tuple
 import pytest
 from mock import patch
 from TestHarness.resultsstore.reader import ResultsReader
-from TestHarness.resultsstore.resultcollection import ResultCollection
+from TestHarness.resultsstore.resultcollection import (
+    ResultCollection,
+    ResultsCollection,
+)
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.storedtestresult import StoredTestResult
 from TestHarness.resultsstore.testdatafilters import TestDataFilter
@@ -43,8 +46,8 @@ HAS_READER_AUTH = READER_AUTH is not None
 class TestResultCollection(ResultsStoreTestCase):
     """Test TestHarness.resultsstore.resultcollection.ResultCollection."""
 
-    def test_init(self):
-        """Test __init__() and basic properties/getters."""
+    def test_ResultsCollection_init(self):
+        """Test ResultsCollection.__init__() for and basic properties/getters."""
         results = [StoredResult(self.get_result_data())]
 
         database = FakeMongoDatabase()
@@ -52,7 +55,7 @@ class TestResultCollection(ResultsStoreTestCase):
         def database_getter():
             return database
 
-        collection = ResultCollection(results, database_getter)
+        collection = ResultsCollection(results, database_getter)
 
         self.assertEqual(collection._results, results)
         self.assertEqual(collection._database_getter, database_getter)
@@ -61,7 +64,26 @@ class TestResultCollection(ResultsStoreTestCase):
         self.assertEqual(collection.result_ids, [v.id for v in results])
         self.assertEqual(id(collection.get_database()), id(database))
 
-    def get_gold_collection(self) -> Tuple[ResultCollection, ResultsReader]:
+    def test_ResultCollection_init(self):
+        """Test ResultCollection.__init__() for and basic properties/getters."""
+        result = StoredResult(self.get_result_data())
+
+        database = FakeMongoDatabase()
+
+        def database_getter():
+            return database
+
+        collection = ResultCollection(result, database_getter)
+
+        self.assertEqual(len(collection._results), 1)
+        self.assertEqual(collection._results[0], result)
+        self.assertEqual(collection._database_getter, database_getter)
+
+        self.assertEqual(collection.result, result)
+        self.assertEqual(collection.result_ids, [result.id])
+        self.assertEqual(id(collection.get_database()), id(database))
+
+    def get_gold_resultscollection(self) -> Tuple[ResultsCollection, ResultsReader]:
         """Get a ResultCollection for the gold tests."""
         reader = ResultsReader(GOLD_DATABASE_NAME, authentication=READER_AUTH)
 
@@ -69,11 +91,10 @@ class TestResultCollection(ResultsStoreTestCase):
         for gold_result in GOLD_RESULTS:
             collection = reader.get_commit_result(gold_result.event_sha)
             assert collection is not None
-            self.assertEqual(len(collection.results), 1)
-            results.append(collection.results[0])
+            results.append(collection.result)
 
         return (
-            ResultCollection(
+            ResultsCollection(
                 sorted(results, key=lambda v: v.id, reverse=True), reader.get_database
             ),
             reader,
@@ -107,7 +128,7 @@ class TestResultCollection(ResultsStoreTestCase):
                             self.check_filter(test, test_filter)
 
         # Test the gold events
-        collection, reader = self.get_gold_collection()
+        collection, reader = self.get_gold_resultscollection()
         for test_filter in TestDataFilter:
             all_tests = collection.get_all_tests((test_filter,))
             self.assertIn(GOLD_DATABASE_TEST_NAME, all_tests)
@@ -142,7 +163,7 @@ class TestResultCollection(ResultsStoreTestCase):
                     self.check_filter(test, test_filter)
 
         # Test the gold events
-        collection, reader = self.get_gold_collection()
+        collection, reader = self.get_gold_resultscollection()
         for test_filter in TestDataFilter:
             tests = collection.get_tests(GOLD_DATABASE_TEST_NAME, (test_filter,))
             self.assertEqual(len(tests), len(GOLD_RESULTS))
@@ -158,8 +179,34 @@ class TestResultCollection(ResultsStoreTestCase):
             self.assertTrue(any(test.id is None for test in tests))
         reader.close()
 
-    def test_get_test_names(self):
-        """Test get_test_names()."""
+    def test_ResultCollection_get_test_names(self):
+        """Test ResultCollection.get_test_names()."""
+        client = FakeMongoClient()
+        reader = ResultsReader(FAKE_DATABASE_NAME, client)
+        results = [StoredResult(self.get_result_data()) for _ in range(2)]
+
+        database = client.get_database(FAKE_DATABASE_NAME)
+        docs = [
+            {"tests": [["folder1", ["test1", "test2"]]]},
+        ]
+
+        collection = ResultCollection(results[0], reader.get_database)
+        with patch.object(
+            database.results, "aggregate", return_value=FakeMongoFind(docs)
+        ):
+            collection_names = collection.get_test_names()
+        self.assertEqual(
+            collection_names,
+            set(
+                [
+                    TestName("folder1", "test1"),
+                    TestName("folder1", "test2"),
+                ]
+            ),
+        )
+
+    def test_ResultsCollection_get_test_names(self):
+        """Test ResultsCollection.get_test_names()."""
         client = FakeMongoClient()
         reader = ResultsReader(FAKE_DATABASE_NAME, client)
         results = [StoredResult(self.get_result_data()) for _ in range(2)]
@@ -170,12 +217,11 @@ class TestResultCollection(ResultsStoreTestCase):
             {"tests": [["folder1", ["test1"]], ["folder2", ["test1"]]]},
         ]
 
-        collection = ResultCollection(results, reader.get_database)
+        collection = ResultsCollection(results, reader.get_database)
         with patch.object(
             database.results, "aggregate", return_value=FakeMongoFind(docs)
         ):
             collection_names = collection.get_test_names()
-
         self.assertEqual(
             collection_names,
             set(
@@ -200,7 +246,7 @@ class TestResultCollection(ResultsStoreTestCase):
             self.assertEqual(names, set([TEST_DATABASE_TEST_NAME]))
 
         # Test the gold events
-        collection, reader = self.get_gold_collection()
+        collection, reader = self.get_gold_resultscollection()
         names = collection.get_test_names()
         reader.close()
         self.assertIn(GOLD_DATABASE_TEST_NAME, names)

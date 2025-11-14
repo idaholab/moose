@@ -490,9 +490,7 @@ class TestResultsReader(ResultsStoreTestCase):
         patch_find_results.assert_called_once_with({index: {"$eq": value}}, limit=1)
 
         # Check built state
-        assert collection is not None
-        self.assertEqual(len(collection.results), 1)
-        self.assertEqual(len(reader._results), 1)
+        self.assertIsNotNone(collection)
         cache = getattr(reader, f"_{index}_results")
         self.assertEqual(len(cache), 1)
         self.assertIn(value, cache)
@@ -504,7 +502,7 @@ class TestResultsReader(ResultsStoreTestCase):
             collection_again = method(value)
         patch_find_results.assert_not_called()
         assert collection_again is not None
-        self.assertEqual(id(collection_again.results[0]), id(collection.results[0]))
+        self.assertEqual(id(collection_again.result), id(collection.result))
 
     def test_get_event_result(self):
         """Test get_event_result()."""
@@ -553,9 +551,7 @@ class TestResultsReader(ResultsStoreTestCase):
 
             collection = method(value)
             assert collection is not None
-            self.assertEqual(len(collection.results), 1)
-            result = collection.results[0]
-            self.assertEqual(getattr(result, index), value)
+            self.assertEqual(getattr(collection.result, index), value)
 
     @pytest.mark.live_db
     @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
@@ -572,8 +568,7 @@ class TestResultsReader(ResultsStoreTestCase):
                     reader = ctx.reader
                     collection = reader.get_event_result(event_id)
                     assert collection is not None
-                    self.assertEqual(len(collection.results), 1)
-                    result = collection.results[0]
+                    result = collection.result
 
                     self.assertEqual(result.id, gold_result.id)
                     self.assertEqual(result.civet_version, gold_result.civet_version)
@@ -603,9 +598,7 @@ class TestResultsReader(ResultsStoreTestCase):
                 collection = reader.get_commit_result(event_sha)
                 assert collection is not None
 
-                self.assertEqual(len(collection.results), 1)
-                result = collection.results[0]
-
+                result = collection.result
                 self.assertEqual(result.id, gold_result.id)
                 self.assertEqual(result.civet_version, gold_result.civet_version)
                 self.assertEqual(result.event_sha, event_sha)

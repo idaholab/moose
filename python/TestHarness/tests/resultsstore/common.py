@@ -9,24 +9,21 @@
 
 """Contains common testing utilities for TestHarness.resultsstore."""
 
-import json
 import os
 import random
 import string
-from copy import deepcopy
 from dataclasses import dataclass
 from io import StringIO
 from typing import Any, Iterator, Optional, Tuple
 from unittest import TestCase
 
-import pytest
 from bson.objectid import ObjectId
 from mock import patch
-from moosepytest.runtestharness import run_test_harness
 from pymongo import MongoClient
 from pymongo.database import Database
 from TestHarness.resultsstore.civetstore import CIVETStore
 from TestHarness.resultsstore.utils import TestName
+from TestHarness.tests.common import TestHarnessResultCache
 
 # Dummy APPLICATION_REPO variable from the civet environment
 APPLICATION_REPO = "git@github.com:idaholab/moose"
@@ -105,9 +102,29 @@ NUM_TESTS = len(TEST_NAMES)
 # Expected number of folders in the results for testing
 NUM_TEST_FOLDERS = len(FOLDER_NAMES)
 
+# Common directory where test content should go
+CONTENT_DIR = os.path.join(os.path.dirname(__file__), "content")
 
-class ResultsStoreTestCase(TestCase):
+# Set to True to rewrite the cache
+CACHED_TESTHARNESS_RESULTS_WRITE = False
+
+
+class ResultsStoreTestCase(TestCase, TestHarnessResultCache):
     """Common test case for testing TestHarness.resultsstore."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize state."""
+        # TestCase initializer
+        TestCase.__init__(self, *args, **kwargs)
+
+        # Setup cache for test harness results
+        TestHarnessResultCache.__init__(
+            self,
+            os.path.join(CONTENT_DIR, "cached_testharness_results.json"),
+            os.path.join(CONTENT_DIR, "testharness_results"),
+            "resultsstore",
+            CACHED_TESTHARNESS_RESULTS_WRITE,
+        )
 
     def setUp(self):
         """Add a patcher for mocking stdout."""
@@ -118,70 +135,6 @@ class ResultsStoreTestCase(TestCase):
     def tearDown(self):
         """Stop the stdout patcher."""
         self._stdout_patcher.stop()
-
-    @pytest.fixture(autouse=True)
-    def inject_fixtures(self, moose_exe):
-        """Inject pytest fixtures."""
-        # Get the found moose executable during init, if any
-        self.moose_exe: Optional[str] = moose_exe
-
-    def get_testharness_result(self, *args: str, **kwargs) -> dict:
-        """
-        Get a TestHarness JSON result for testing.
-
-        Uses caching to only call the test harness once for each set
-        of arguments.
-
-        Parameters
-        ----------
-        *args : str
-            Arguments to pass to the TestHarness execution.
-        **kwargs :
-            Keyword arguments to pass to run_test_harness().
-
-        Return
-        ------
-        dict :
-            The loaded JSON results from the TestHarness execution.
-
-        """
-        from TestHarness.tests.resultsstore.common import TESTHARNESS_RESULTS
-
-        joined_args = ",".join(args)
-        kv_kwargs = [f"{k}={v}" for k, v in kwargs.items()]
-        joined_kwargs = ",".join(kv_kwargs)
-        key = f"args={joined_args},kwargs={joined_kwargs}"
-
-        # Need to generate or load the results file on first call
-        if key not in TESTHARNESS_RESULTS:
-            # If MOOSE is available, generate the gold file
-            if isinstance(self.moose_exe, str):
-                test_dir = os.path.join(
-                    os.path.dirname(__file__), "content", "testharness_results"
-                )
-                result = run_test_harness(
-                    self.moose_exe,
-                    test_dir,
-                    "resultsstore",
-                    harness_args=args,
-                    **kwargs,
-                ).results
-                TESTHARNESS_RESULTS[key] = result
-
-                if TESTHARNESS_RESULTS_WRITE:
-                    with open(TESTHARNESS_RESULTS_FILE, "w") as f:
-                        json.dump(TESTHARNESS_RESULTS, f, indent=2)
-
-            # Otherwise, use the cached one
-            else:
-                with open(TESTHARNESS_RESULTS_FILE, "r") as f:
-                    TESTHARNESS_RESULTS = json.load(f)
-
-        assert isinstance(TESTHARNESS_RESULTS, dict)
-        assert key in TESTHARNESS_RESULTS
-        assert isinstance(TESTHARNESS_RESULTS[key], dict)
-
-        return deepcopy(TESTHARNESS_RESULTS[key])
 
     def get_result_data(self, pr: bool = True) -> dict:
         """Get dummy data for a result as it would be stored."""

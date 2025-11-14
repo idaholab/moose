@@ -3,6 +3,7 @@ concurrency = thread
 branch = True
 source =
     resultsstore/*
+    resultssummary/*
 omit =
     resultsstore/*/tests
 parallel = False

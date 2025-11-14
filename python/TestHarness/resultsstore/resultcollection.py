@@ -10,7 +10,7 @@
 """Implements the ResultCollection, storage for multiple test results."""
 
 from collections import defaultdict
-from typing import Callable, Iterable, Tuple
+from typing import Callable, Iterable, Optional, Tuple
 
 from bson.objectid import ObjectId
 from pymongo import DESCENDING
@@ -22,11 +22,13 @@ from TestHarness.resultsstore.testdatafilters import ALL_TEST_KEYS, TestDataFilt
 from TestHarness.resultsstore.utils import TestName, results_test_iterator
 
 
-class ResultCollection:
+class ResultsCollectionBase:
     """
-    Stores multiple test results and exposes methods to loading tests.
+    Base for a collection of results.
 
-    These objects wrap the results returned by the ResultsReader.
+    Enables having a collection that contains multiple
+    results and a collection that has a single result,
+    with the same underlying getters.
     """
 
     def __init__(
@@ -57,27 +59,21 @@ class ResultCollection:
         self._database_getter = database_getter
 
     @property
-    def results(self) -> list[StoredResult]:
-        """Get the underlying results."""
-        return self._results
-
-    @property
     def result_ids(self) -> list[ObjectId]:
         """Get the IDs of the results in the collection."""
-        return [r.id for r in self.results]
+        return [r.id for r in self._results]
 
     def get_database(self) -> Database:
         """Get the database."""
         return self._database_getter()
 
-    def get_all_tests(
+    def _get_all_tests(
         self, filters: Iterable[TestDataFilter]
     ) -> dict[TestName, list[StoredTestResult]]:
         """
         Get all test results.
 
-        This can be particularly expensive! Best to do it on a
-        per-test basis with get_tests() if possible.
+        Used in derived classes.
 
         Arguments:
         ---------
@@ -98,7 +94,7 @@ class ResultCollection:
 
         # Load the full documents; this is generally quicker
         # than trying to load just the data we need
-        result_it = iter(self.results)
+        result_it = iter(self._results)
         with self.get_database().results.find(
             {"_id": {"$in": self.result_ids}},
             {"tests": 1},
@@ -159,11 +155,13 @@ class ResultCollection:
 
         return tests
 
-    def get_tests(
+    def _get_tests(
         self, name: TestName, filters: Iterable[TestDataFilter]
     ) -> list[StoredTestResult]:
         """
         Get the results for the test with the given name.
+
+        Used in derived classes.
 
         Arguments:
         ---------
@@ -224,7 +222,7 @@ class ResultCollection:
 
         # Build test results from documents
         tests = []
-        result_it = iter(self.results)
+        result_it = iter(self._results)
         with self.get_database().results.aggregate(pipeline) as cursor:
             for doc in cursor:
                 id = doc["_id"]
@@ -296,3 +294,133 @@ class ResultCollection:
                     )
 
         return names
+
+
+class ResultCollection(ResultsCollectionBase):
+    """Store a single test result and exposes methods to loading tests."""
+
+    def __init__(
+        self,
+        result: StoredResult,
+        database_getter: Callable[[], Database],
+    ):
+        """
+        Initialize state.
+
+        Arguments:
+        ---------
+        result : StoredResult
+            The result in the collection.
+        database_getter : Callable[[], Database]
+            Function to be called to get the database.
+
+        """
+        super().__init__([result], database_getter)
+
+    @property
+    def result(self) -> StoredResult:
+        """Get the underlying result."""
+        assert len(self._results) == 1
+        return self._results[0]
+
+    def get_all_tests(
+        self, filters: Iterable[TestDataFilter]
+    ) -> dict[TestName, StoredTestResult]:
+        """
+        Get all test results for the result in the collection.
+
+        This can be particularly expensive! Best to do it on a
+        per-test basis with get_test() if possible.
+
+        Arguments:
+        ---------
+        filters : Iterable[TestDataFilter]
+            The TestDataFilter objects that represent which data
+            to obtain for the tests.
+
+        """
+        # Convert a value of list[StoredTestResult] to a single result
+        return {k: v[0] for k, v in self._get_all_tests(filters).items()}
+
+    def get_test(
+        self, name: TestName, filters: Iterable[TestDataFilter]
+    ) -> Optional[StoredTestResult]:
+        """
+        Get the test result for the given test name, if any.
+
+        Arguments:
+        ---------
+        name : TestName
+            The name of the test.
+        filters : Iterable[TestDataFilter]
+            The TestDataFilter objects that represent which data
+            to obtain for the tests.
+
+        """
+        tests = self._get_tests(name, filters)
+        if tests:
+            assert len(tests) == 1
+            return tests[0]
+        return None
+
+
+class ResultsCollection(ResultsCollectionBase):
+    """Store multiple test results and exposes methods to loading tests."""
+
+    def __init__(
+        self,
+        results: list[StoredResult],
+        database_getter: Callable[[], Database],
+    ):
+        """
+        Initialize state.
+
+        Arguments:
+        ---------
+        results : list[StoredResult]
+            The results in the collection.
+        database_getter : Callable[[], Database]
+            Function to be called to get the database.
+
+        """
+        super().__init__(results, database_getter)
+
+    @property
+    def results(self) -> list[StoredResult]:
+        """Get the underlying results."""
+        return self._results
+
+    def get_all_tests(
+        self, filters: Iterable[TestDataFilter]
+    ) -> dict[TestName, list[StoredTestResult]]:
+        """
+        Get all test results across all results in the collection.
+
+        This can be particularly expensive! Best to do it on a
+        per-test basis with get_tests() if possible.
+
+        Arguments:
+        ---------
+        filters : Iterable[TestDataFilter]
+            The TestDataFilter objects that represent which data
+            to obtain for the tests.
+
+        """
+        return self._get_all_tests(filters)
+
+    def get_tests(
+        self, name: TestName, filters: Iterable[TestDataFilter]
+    ) -> list[StoredTestResult]:
+        """
+        Get the test results for a test across all results in the collection.
+
+        Arguments:
+        ---------
+        name : TestName
+            The name of the test.
+        filters : Iterable[TestDataFilter]
+            The TestDataFilter objects that represent which data
+            to obtain for the tests.
+
+        """
+        return self._get_tests(name, filters)

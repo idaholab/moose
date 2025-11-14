@@ -20,7 +20,10 @@ from TestHarness.resultsstore.auth import (
     Authentication,
     load_authentication,
 )
-from TestHarness.resultsstore.resultcollection import ResultCollection
+from TestHarness.resultsstore.resultcollection import (
+    ResultCollection,
+    ResultsCollection,
+)
 from TestHarness.resultsstore.storedresult import StoredResult
 
 NoneType = type(None)
@@ -337,7 +340,7 @@ class ResultsReader:
                 self._found_final_push_event = True
                 return
 
-    def get_latest_push_results(self, num: int) -> ResultCollection:
+    def get_latest_push_results(self, num: int) -> ResultsCollection:
         """Get the latest results from push events, newest to oldest."""
         assert isinstance(num, int)
         assert num > 0
@@ -348,7 +351,7 @@ class ResultsReader:
             if len(results) == num:
                 break
 
-        return ResultCollection(results, self.get_database)
+        return ResultsCollection(results, self.get_database)
 
     def get_cached_result(self, index: str, value) -> Optional[ResultCollection]:
         """Get a result given a filter and store it in the cache."""
@@ -357,7 +360,7 @@ class ResultsReader:
         # Value exists in the cache
         cached_value = cache.get(value)
         if cached_value is not None:
-            return ResultCollection([cached_value], self.get_database)
+            return ResultCollection(cached_value, self.get_database)
 
         # Search for the value
         docs = self._find_results({index: {"$eq": value}}, limit=1)
@@ -377,7 +380,7 @@ class ResultsReader:
         # Build it and return
         result = self._build_result(data)
         cache[value] = result
-        return ResultCollection([result], self.get_database)
+        return ResultCollection(result, self.get_database)
 
     def get_event_result(self, event_id: int) -> Optional[ResultCollection]:
         """Get the latest result for the given event, if any."""

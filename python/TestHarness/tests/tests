@@ -322,10 +322,4 @@
     requirement = 'The system shall be able to import python utilities when running tests.'
     issues = '#31457'
   []
-  [resultssummary]
-    type = PythonUnitTest
-    input = test_resultssummary.py
-    requirement = 'The system shall provide a system that summaries the changes in tests within a pull request event`
-    issues = '#31645'
-  []
 []
