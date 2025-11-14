@@ -25,7 +25,8 @@ class WCNSFVScalarTransportPhysicsBase;
   registerMooseAction(app_name, derived_name, "add_fv_bc");                                        \
   registerMooseAction(app_name, derived_name, "add_aux_variable");                                 \
   registerMooseAction(app_name, derived_name, "add_aux_kernel");                                   \
-  registerMooseAction(app_name, derived_name, "add_material")
+  registerMooseAction(app_name, derived_name, "add_material");                                     \
+  registerMooseAction(app_name, derived_name, "add_functor_material")
 
 /**
  * Base class for a Physics that creates all the objects needed to add a turbulence model to an

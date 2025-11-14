@@ -307,7 +307,7 @@ WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(const bool use_ad)
       f_names.push_back(getSpecificHeatName());
     params.set<std::vector<std::string>>("functor_names") = f_names;
     const auto th_cond_name =
-    _thermal_conductivity_name[i] + (_turbulence_physics ? "_plus_kt" : "");
+        _thermal_conductivity_name[i] + (_turbulence_physics ? "_plus_kt" : "");
     if (!_turbulence_physics)
       params.set<std::string>("expression") =
           _thermal_conductivity_name[i] + "/" + getSpecificHeatName();

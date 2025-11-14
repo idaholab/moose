@@ -29,6 +29,8 @@ FunctorEffectiveDynamicViscosityTempl<is_ad>::validParams()
   params.addParam<Real>(NS::mu_t + "_extra_inverse_factor",
                         1.,
                         "Additional factor dividing the turbulent viscosity functor");
+  params.addParam<bool>(
+      "add_dynamic_viscosity", true, "Whether add the dynamic viscosity in the expression");
 
   return params;
 }
@@ -43,11 +45,18 @@ FunctorEffectiveDynamicViscosityTempl<is_ad>::FunctorEffectiveDynamicViscosityTe
     _scale_factor_real(getParam<Real>(NS::mu_t + "_extra_inverse_factor"))
 {
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
-  addFunctorProperty<GenericReal<is_ad>>(
-      getParam<MooseFunctorName>("property_name"),
-      [this](const auto & r, const auto & t) -> GenericReal<is_ad>
-      { return _mu(r, t) + _mu_t(r, t) / _scale_factor(r, t) / _scale_factor_real; },
-      clearance_schedule);
+  if (getParam<bool>("add_dynamic_viscosity"))
+    addFunctorProperty<GenericReal<is_ad>>(
+        getParam<MooseFunctorName>("property_name"),
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _mu(r, t) + _mu_t(r, t) / _scale_factor(r, t) / _scale_factor_real; },
+        clearance_schedule);
+  else
+    addFunctorProperty<GenericReal<is_ad>>(
+        getParam<MooseFunctorName>("property_name"),
+        [this](const auto & r, const auto & t) -> GenericReal<is_ad>
+        { return _mu_t(r, t) / _scale_factor(r, t) / _scale_factor_real; },
+        clearance_schedule);
 }
 
 template class FunctorEffectiveDynamicViscosityTempl<false>;

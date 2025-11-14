@@ -481,11 +481,13 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
           is_linear ? "FunctorEffectiveDynamicViscosity" : "ADFunctorEffectiveDynamicViscosity";
       InputParameters params = getFactory().getValidParams(mat_type);
       assignBlocks(params, _blocks);
-      params.set<MooseFunctorName>("property_name") = "mu_eff_passive_scalars";
+      params.set<MooseFunctorName>("property_name") =
+          is_linear ? "mu_eff_passive_scalars" : "mu_t_passive_scalar";
       params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
       params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
       const auto & rho_name = _flow_equations_physics->densityName();
       params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") = rho_name;
+      params.set<bool>("add_dynamic_viscosity") = is_linear ? true : false;
       const auto turbulent_schmidt_number = getParam<std::vector<Real>>("Sc_t");
       if (turbulent_schmidt_number.size() != 1)
         paramError("passive_scalar_schmidt_number",
