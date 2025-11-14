@@ -58,8 +58,10 @@ public:
   using OutputShapeSecond = typename MooseVariableField<OutputType>::OutputShapeSecond;
   using OutputShapeDivergence = typename MooseVariableField<OutputType>::OutputShapeDivergence;
 
-  using OutputData = typename MooseVariableField<OutputType>::OutputData;
-  using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
+  using DofValue = typename MooseVariableField<OutputType>::DofValue;
+  using DofValues = typename MooseVariableField<OutputType>::DofValues;
+  using ADDofValue = typename MooseVariableField<OutputType>::ADDofValue;
+  using ADDofValues = typename MooseVariableField<OutputType>::ADDofValues;
 
   using FieldVariablePhiValue = typename MooseVariableField<OutputType>::FieldVariablePhiValue;
   using FieldVariablePhiGradient =
@@ -253,12 +255,12 @@ public:
   // *********************************************************************************
   // *********************************************************************************
 
-  virtual void setDofValue(const OutputData & /*value*/, unsigned int /*index*/) override;
+  virtual void setDofValue(const DofValue & /*value*/, unsigned int /*index*/) override;
 
   virtual void getDofIndices(const Elem * elem,
                              std::vector<dof_id_type> & dof_indices) const override;
 
-  virtual void setDofValues(const DenseVector<OutputData> & values) override;
+  virtual void setDofValues(const DenseVector<DofValue> & values) override;
 
   virtual void clearDofIndices() override;
 
@@ -285,7 +287,7 @@ public:
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
-  [[noreturn]] virtual const DoFValue & nodalVectorTagValue(TagID) const override;
+  [[noreturn]] virtual const DofValues & nodalVectorTagValue(TagID) const override;
 
   virtual const std::vector<dof_id_type> & dofIndices() const final;
   virtual const std::vector<dof_id_type> & dofIndicesNeighbor() const final;
@@ -311,7 +313,7 @@ public:
   virtual void computeElemValues() override;
   virtual void computeFaceValues(const FaceInfo & /*fi*/) override {}
 
-  virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
+  virtual void setLowerDofValues(const DenseVector<DofValue> & values) override;
 
   virtual void insert(libMesh::NumericVector<libMesh::Number> & vector) override;
   virtual void insertLower(libMesh::NumericVector<libMesh::Number> & vector) override;
@@ -354,8 +356,8 @@ public:
   [[noreturn]] virtual const FieldVariablePhiSecond & secondPhiNeighbor() const override final;
 
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const override;
-  virtual const DoFValue & vectorTagDofValue(TagID tag) const override;
-  [[noreturn]] virtual const DoFValue & nodalMatrixTagValue(TagID tag) const override;
+  virtual const DofValues & vectorTagDofValue(TagID tag) const override;
+  [[noreturn]] virtual const DofValues & nodalMatrixTagValue(TagID tag) const override;
   virtual const FieldVariableValue & matrixTagValue(TagID tag) const override;
 
   virtual const FieldVariableValue & sln() const override;
@@ -388,23 +390,23 @@ public:
   [[noreturn]] virtual const ADTemplateVariableCurl<OutputType> &
   adCurlSlnNeighbor() const override;
 
-  virtual const DoFValue & dofValues() const override;
-  virtual const DoFValue & dofValuesOld() const override;
+  virtual const DofValues & dofValues() const override;
+  virtual const DofValues & dofValuesOld() const override;
 
-  virtual const DoFValue & dofValuesOlder() const override;
-  virtual const DoFValue & dofValuesPreviousNL() const override;
-  virtual const DoFValue & dofValuesNeighbor() const override;
-  virtual const DoFValue & dofValuesOldNeighbor() const override;
-  virtual const DoFValue & dofValuesOlderNeighbor() const override;
-  virtual const DoFValue & dofValuesPreviousNLNeighbor() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDot() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotNeighbor() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotOld() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotOldNeighbor() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotDot() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotDotNeighbor() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotDotOld() const override;
-  [[noreturn]] virtual const DoFValue & dofValuesDotDotOldNeighbor() const override;
+  virtual const DofValues & dofValuesOlder() const override;
+  virtual const DofValues & dofValuesPreviousNL() const override;
+  virtual const DofValues & dofValuesNeighbor() const override;
+  virtual const DofValues & dofValuesOldNeighbor() const override;
+  virtual const DofValues & dofValuesOlderNeighbor() const override;
+  virtual const DofValues & dofValuesPreviousNLNeighbor() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDot() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotNeighbor() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotOld() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotOldNeighbor() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotDot() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotDotNeighbor() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotDotOld() const override;
+  [[noreturn]] virtual const DofValues & dofValuesDotDotOldNeighbor() const override;
   [[noreturn]] virtual const MooseArray<libMesh::Number> & dofValuesDuDotDu() const override;
   [[noreturn]] virtual const MooseArray<libMesh::Number> &
   dofValuesDuDotDuNeighbor() const override;
@@ -412,9 +414,9 @@ public:
   [[noreturn]] virtual const MooseArray<libMesh::Number> &
   dofValuesDuDotDotDuNeighbor() const override;
 
-  [[noreturn]] virtual const MooseArray<ADReal> & adDofValues() const override;
-  [[noreturn]] virtual const MooseArray<ADReal> & adDofValuesNeighbor() const override;
-  [[noreturn]] virtual const MooseArray<ADReal> & adDofValuesDot() const override;
+  [[noreturn]] virtual const ADDofValues & adDofValues() const override;
+  [[noreturn]] virtual const ADDofValues & adDofValuesNeighbor() const override;
+  [[noreturn]] virtual const ADDofValues & adDofValuesDot() const override;
   [[noreturn]] virtual const dof_id_type & nodalDofIndex() const override final;
   [[noreturn]] virtual const dof_id_type & nodalDofIndexNeighbor() const override final;
 

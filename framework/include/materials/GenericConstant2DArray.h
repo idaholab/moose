@@ -11,12 +11,16 @@
 
 #include "Material.h"
 
-class GenericConstant2DArray : public Material
+/**
+ * Template for defining a constant array material property, using automatic differentiation or not
+ */
+template <bool is_ad>
+class GenericConstant2DArrayTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericConstant2DArray(const InputParameters & parameters);
+  GenericConstant2DArrayTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -25,5 +29,8 @@ protected:
   std::string _prop_name;
   const RealEigenMatrix & _prop_value;
 
-  MaterialProperty<RealEigenMatrix> & _property;
+  GenericMaterialProperty<RealEigenMatrix, is_ad> & _property;
 };
+
+typedef GenericConstant2DArrayTempl<false> GenericConstant2DArray;
+typedef GenericConstant2DArrayTempl<true> ADGenericConstant2DArray;

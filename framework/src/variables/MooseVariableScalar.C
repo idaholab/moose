@@ -174,15 +174,10 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
           sys.getVector(tag).get(_dof_indices, &_vector_tag_u[tag][0]);
 
     if (safe_access_tagged_matrices)
-    {
       for (auto tag : active_coupleable_matrix_tags)
         if (sys.hasMatrix(tag) && sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
           for (std::size_t i = 0; i != n; ++i)
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             _matrix_tag_u[tag][i] = sys.getMatrix(tag)(_dof_indices[i], _dof_indices[i]);
-          }
-    }
 
     if (_need_u_dot)
       (*u_dot).get(_dof_indices, &_u_dot[0]);
@@ -220,14 +215,9 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
         }
 
         if (safe_access_tagged_matrices)
-        {
           for (auto tag : active_coupleable_matrix_tags)
             if (sys.hasMatrix(tag) && sys.getMatrix(tag).closed() && _need_matrix_tag_u[tag])
-            {
-              Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
               _matrix_tag_u[tag][i] = sys.getMatrix(tag)(dof_index, dof_index);
-            }
-        }
 
         if (_need_u_dot)
           (*u_dot).get(one_dof_index, &_u_dot[i]);

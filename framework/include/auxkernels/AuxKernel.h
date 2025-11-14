@@ -144,8 +144,8 @@ protected:
   /// Quadrature point index
   unsigned int _qp;
 
-  /// number of local dofs for elemental variables
-  unsigned int _n_local_dofs;
+  /// number of shape functions for the finite element type and current DofObject
+  unsigned int _n_shapes;
 
   typedef typename Moose::DOFType<ComputeValueType>::type OutputData;
 

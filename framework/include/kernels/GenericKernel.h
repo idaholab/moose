@@ -16,7 +16,7 @@ template <bool is_ad>
 class GenericKernel : public Kernel
 {
 public:
-  static InputParameters validParams() { return Kernel::validParams(); };
+  static InputParameters validParams() { return Kernel::validParams(); }
   GenericKernel(const InputParameters & parameters) : Kernel(parameters) {}
 };
 
@@ -24,7 +24,7 @@ template <>
 class GenericKernel<true> : public ADKernel
 {
 public:
-  static InputParameters validParams() { return ADKernel::validParams(); };
+  static InputParameters validParams() { return ADKernel::validParams(); }
   GenericKernel(const InputParameters & parameters) : ADKernel(parameters) {}
 };
 

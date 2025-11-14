@@ -136,8 +136,6 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
       if (_num_cached == 20) // cache 20 nodes worth before adding into the jacobian
       {
         _num_cached = 0;
-        // vectors are thread-safe, but matrices are not yet
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
         _fe_problem.addCachedJacobian(_tid);
       }
     }

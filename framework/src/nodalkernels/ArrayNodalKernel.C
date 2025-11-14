@@ -29,17 +29,9 @@ ArrayNodalKernel::ArrayNodalKernel(const InputParameters & parameters)
     _var(*mooseVariable()),
     _u(_var.dofValues()),
     _count(_var.count()),
-    _work_vector(_count),
-    _work_dofs(_count)
+    _work_vector(_count)
 {
   addMooseVariableDependency(mooseVariable());
-}
-
-void
-ArrayNodalKernel::prepareDofs()
-{
-  const dof_id_type root_dof_idx = _var.nodalDofIndex();
-  std::iota(_work_dofs.begin(), _work_dofs.end(), root_dof_idx);
 }
 
 void
@@ -47,10 +39,9 @@ ArrayNodalKernel::computeResidual()
 {
   if (!_var.isNodalDefined())
     return;
-  prepareDofs();
   _qp = 0;
   computeQpResidual(_work_vector);
-  addResiduals(_assembly, _work_vector, _work_dofs, _var.arrayScalingFactor());
+  addResiduals(_assembly, _work_vector, _var.dofIndices(), _var.arrayScalingFactor());
 }
 
 void
@@ -58,12 +49,13 @@ ArrayNodalKernel::computeJacobian()
 {
   if (!_var.isNodalDefined())
     return;
-  prepareDofs();
   _qp = 0;
   const auto jacobian = computeQpJacobian();
+  const auto & dof_indices = _var.dofIndices();
+  mooseAssert(dof_indices.size() == _count, "The number of dofs should be equal to count");
   for (const auto i : make_range(_count))
     addJacobianElement(
-        _assembly, jacobian(i), _work_dofs[i], _work_dofs[i], _var.arrayScalingFactor()[i]);
+        _assembly, jacobian(i), dof_indices[i], dof_indices[i], _var.arrayScalingFactor()[i]);
 }
 
 void
@@ -76,18 +68,20 @@ ArrayNodalKernel::computeOffDiagJacobian(const unsigned int jvar_num)
     computeJacobian();
   else
   {
-    prepareDofs();
-
     const auto & jvar = getVariable(jvar_num);
     const auto jacobian = computeQpOffDiagJacobian(jvar);
-    const auto root_jvar_idx = _current_node->dof_number(_sys.number(), jvar_num, 0);
+    const auto & ivar_indices = _var.dofIndices();
+    const auto & jvar_indices = jvar.dofIndices();
+
+    mooseAssert(ivar_indices.size() == _count, "The number of dofs should be equal to count");
+    mooseAssert(jvar_indices.size() == jvar.count(), "The number of dofs should be equal to count");
 
     for (const auto i : make_range(_var.count()))
       for (const auto j : make_range(jvar.count()))
         addJacobianElement(_assembly,
                            jacobian(i, j),
-                           _work_dofs[i],
-                           root_jvar_idx + j,
+                           ivar_indices[i],
+                           jvar_indices[j],
                            _var.arrayScalingFactor()[i]);
   }
 }

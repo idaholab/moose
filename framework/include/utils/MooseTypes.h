@@ -145,9 +145,11 @@ namespace libMesh
 typedef VectorValue<Real> RealVectorValue;
 typedef Eigen::Matrix<Real, Moose::dim, 1> RealDIMValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> RealEigenVector;
+typedef Eigen::Matrix<ADReal, Eigen::Dynamic, 1> ADRealEigenVector;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim> RealVectorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim * Moose::dim> RealTensorArrayValue;
 typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic> RealEigenMatrix;
+typedef Eigen::Matrix<ADReal, Eigen::Dynamic, Eigen::Dynamic> ADRealEigenMatrix;
 typedef TensorValue<Real> RealTensorValue;
 
 namespace TensorTools
@@ -169,6 +171,24 @@ struct DecrementRank<Eigen::Matrix<Real, Eigen::Dynamic, Moose::dim>>
 {
   typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> type;
 };
+
+template <>
+struct IncrementRank<Eigen::Matrix<ADReal, Eigen::Dynamic, 1>>
+{
+  typedef Eigen::Matrix<ADReal, Eigen::Dynamic, Moose::dim> type;
+};
+
+template <>
+struct IncrementRank<Eigen::Matrix<ADReal, Eigen::Dynamic, Moose::dim>>
+{
+  typedef Eigen::Matrix<ADReal, Eigen::Dynamic, Moose::dim * Moose::dim> type;
+};
+
+template <>
+struct DecrementRank<Eigen::Matrix<ADReal, Eigen::Dynamic, Moose::dim>>
+{
+  typedef Eigen::Matrix<ADReal, Eigen::Dynamic, 1> type;
+};
 }
 }
 
@@ -178,6 +198,8 @@ using libMesh::RealGradient;
 
 // Bring these common types added to the libMesh namespace in this header
 // to global namespace
+using libMesh::ADRealEigenMatrix;
+using libMesh::ADRealEigenVector;
 using libMesh::DenseMatrix;
 using libMesh::DenseVector;
 using libMesh::RealDIMValue;
@@ -192,6 +214,11 @@ namespace MetaPhysicL
 {
 template <typename U>
 struct ReplaceAlgebraicType<libMesh::RealEigenVector, U>
+{
+  typedef U type;
+};
+template <typename U>
+struct ReplaceAlgebraicType<libMesh::ADRealEigenVector, U>
 {
   typedef U type;
 };
@@ -308,7 +335,7 @@ struct OutputTools
 
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
-  typedef MooseArray<OutputData> DoFValue;
+  typedef MooseArray<OutputData> DofValue;
   typedef OutputType OutputValue;
 };
 
@@ -348,7 +375,9 @@ typedef typename OutputTools<RealVectorValue>::VariableTestDivergence VectorVari
 
 // types for array variable
 typedef typename OutputTools<RealEigenVector>::VariableValue ArrayVariableValue;
+typedef typename OutputTools<ADRealEigenVector>::VariableValue ADArrayVariableValue;
 typedef typename OutputTools<RealEigenVector>::VariableGradient ArrayVariableGradient;
+typedef typename OutputTools<ADRealEigenVector>::VariableGradient ADArrayVariableGradient;
 typedef typename OutputTools<RealEigenVector>::VariableSecond ArrayVariableSecond;
 typedef typename OutputTools<RealEigenVector>::VariableCurl ArrayVariableCurl;
 typedef typename OutputTools<RealEigenVector>::VariableDivergence ArrayVariableDivergence;
@@ -364,6 +393,13 @@ typedef typename OutputTools<RealEigenVector>::VariableTestSecond ArrayVariableT
 typedef typename OutputTools<RealEigenVector>::VariableTestCurl ArrayVariableTestCurl;
 typedef typename OutputTools<RealEigenVector>::VariableTestDivergence ArrayVariableTestDivergence;
 
+/**
+ * AD Array typedefs
+ */
+/*
+typedef typename OutputTools<ADRealEigenVector>::VariableTestValue ADArrayVariableTestValue;
+typedef typename OutputTools<ADRealEigenVector>::VariableTestGradient ADArrayVariableTestGradient;
+*/
 /**
  * AD typedefs
  */
@@ -482,8 +518,15 @@ struct ADType<DenseMatrix<T>>
 template <>
 struct ADType<RealEigenVector>
 {
-  typedef RealEigenVector type;
+  typedef ADRealEigenVector type;
 };
+
+template <>
+struct ADType<RealEigenMatrix>
+{
+  typedef ADRealEigenMatrix type;
+};
+
 template <>
 struct ADType<VariableValue>
 {
@@ -672,6 +715,10 @@ template <bool is_ad>
 using GenericDenseVector = Moose::GenericType<DenseVector<Real>, is_ad>;
 template <bool is_ad>
 using GenericDenseMatrix = Moose::GenericType<DenseMatrix<Real>, is_ad>;
+template <bool is_ad>
+using GenericRealEigenVector = Moose::GenericType<RealEigenVector, is_ad>;
+template <bool is_ad>
+using GenericRealEigenMatrix = Moose::GenericType<RealEigenMatrix, is_ad>;
 
 namespace Moose
 {
@@ -1001,22 +1048,51 @@ struct DerivativeStringClass
 };
 
 /**
- * ContainerElement<R>:
- *  - We use std::declval<R&>() (note the '&') to model an *lvalue* of R.
- *    This forces std::data to pick the lvalue-qualified overload and yields
- *    the element type with correct constness (e.g., const double* for a
- *    const container). Using std::declval<R>() would model an rvalue and can
- *    select different overloads or constness, which is not what typical code
- *    sees when accessing a container's data().
- *  - Assumes R exposes contiguous storage (std::data) and a size().
- *  - Strips cv/ref qualifiers from the dereferenced pointer to get the element.
- *
- * Type trait created with assistance of ChatGPT 5
+ * Replacement for std::span which we only get in c++20. This concept was generated in conversation
+ * with chatgpt-5. A few notes
+ * - Denoting all methods as const is apparently the standard idiom for span views
+ * - We mark all these methods as noexcept because they are trivial. E.g. we do no bounds checking
+ *   or anything like that so there are no possibilities for throwing exceptions. By marking
+ *   noexcept we are making this property known to the compiler so it can potentially perform
+ *   optimizations
  */
-template <class Container>
-using ContainerElement =
-    std::remove_cv_t<std::remove_reference_t<decltype(*std::data(std::declval<Container &>()))>>;
+template <typename T>
+class Span
+{
+public:
+  using element_type = T;
+  using size_type = std::size_t;
+  using pointer = T *;
+  using reference = T &;
 
+  constexpr Span(T * ptr, size_type n) noexcept : _ptr(ptr), _n(n) {}
+
+  // observers (enough for std::data / std::size)
+  constexpr pointer data() const noexcept { return _ptr; }
+  constexpr size_type size() const noexcept { return _n; }
+  constexpr bool empty() const noexcept { return _n == 0; }
+
+  // optional element/iterator access
+  constexpr reference operator[](size_type i) const noexcept { return _ptr[i]; }
+  constexpr pointer begin() const noexcept { return _ptr; }
+  constexpr pointer end() const noexcept { return _ptr + _n; }
+
+private:
+  T * _ptr;
+  size_type _n;
+};
+
+/**
+ * Helper function for creating a span from a given \p container. This helper function will
+ * automatically deduce whether we're spanning over non-const or const elements  */
+template <class C>
+auto
+makeSpan(C & container, std::size_t offset, std::size_t n)
+{
+  using PointerType = decltype(std::data(container));
+  using ElementType = std::remove_pointer_t<PointerType>;
+  return Moose::Span<ElementType>{std::data(container) + offset, n};
+}
 } // namespace Moose
 
 namespace libMesh

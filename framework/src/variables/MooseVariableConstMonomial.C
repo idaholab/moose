@@ -42,26 +42,26 @@ void
 MooseVariableConstMonomial::computeElemValues()
 {
   _element_data->setGeometry(Moose::Volume);
-  _element_data->computeMonomialValues();
+  _element_data->computeConstantMonomialValues();
 }
 
 void
 MooseVariableConstMonomial::computeElemValuesFace()
 {
   _element_data->setGeometry(Moose::Face);
-  _element_data->computeMonomialValues();
+  _element_data->computeConstantMonomialValues();
 }
 
 void
 MooseVariableConstMonomial::computeNeighborValues()
 {
   _neighbor_data->setGeometry(Moose::Volume);
-  _neighbor_data->computeMonomialValues();
+  _neighbor_data->computeConstantMonomialValues();
 }
 
 void
 MooseVariableConstMonomial::computeNeighborValuesFace()
 {
   _neighbor_data->setGeometry(Moose::Face);
-  _neighbor_data->computeMonomialValues();
+  _neighbor_data->computeConstantMonomialValues();
 }

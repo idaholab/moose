@@ -10,9 +10,11 @@
 #include "GenericConstant2DArray.h"
 
 registerMooseObject("MooseApp", GenericConstant2DArray);
+registerMooseObject("MooseApp", ADGenericConstant2DArray);
 
+template <bool is_ad>
 InputParameters
-GenericConstant2DArray::validParams()
+GenericConstant2DArrayTempl<is_ad>::validParams()
 {
 
   InputParameters params = Material::validParams();
@@ -27,22 +29,33 @@ GenericConstant2DArray::validParams()
   return params;
 }
 
-GenericConstant2DArray::GenericConstant2DArray(const InputParameters & parameters)
+template <bool is_ad>
+GenericConstant2DArrayTempl<is_ad>::GenericConstant2DArrayTempl(const InputParameters & parameters)
   : Material(parameters),
     _prop_name(getParam<std::string>("prop_name")),
     _prop_value(getParam<RealEigenMatrix>("prop_value")),
-    _property(declareProperty<RealEigenMatrix>(_prop_name))
+    _property(declareGenericProperty<RealEigenMatrix, is_ad>(_prop_name))
 {
 }
 
+template <bool is_ad>
 void
-GenericConstant2DArray::initQpStatefulProperties()
+GenericConstant2DArrayTempl<is_ad>::initQpStatefulProperties()
 {
   computeQpProperties();
 }
 
+template <bool is_ad>
 void
-GenericConstant2DArray::computeQpProperties()
+GenericConstant2DArrayTempl<is_ad>::computeQpProperties()
 {
-  _property[_qp] = _prop_value;
+  auto & qp_prop = _property[_qp];
+  const auto m = _prop_value.rows(), n = _prop_value.cols();
+  qp_prop.resize(m, n);
+  for (const auto i : make_range(m))
+    for (const auto j : make_range(n))
+      qp_prop(i, j) = _prop_value(i, j);
 }
+
+template class GenericConstant2DArrayTempl<false>;
+template class GenericConstant2DArrayTempl<true>;

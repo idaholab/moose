@@ -9,22 +9,28 @@
 
 #pragma once
 
-#include "ArrayNodalKernel.h"
+#include "GenericArrayNodalKernel.h"
 
 /**
  * Represents a nodal reaction term equivalent to $a * u$
  */
-class ArrayReactionNodalKernel : public ArrayNodalKernel
+template <bool is_ad>
+class ArrayReactionNodalKernelTempl : public GenericArrayNodalKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ArrayReactionNodalKernel(const InputParameters & parameters);
+  ArrayReactionNodalKernelTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpResidual(RealEigenVector & residual) override;
+  virtual void computeQpResidual(GenericRealEigenVector<is_ad> & residual) override;
   virtual RealEigenVector computeQpJacobian() override;
 
   /// rate coefficient
   const RealEigenVector & _coeff;
+
+  usingGenericArrayNodalKernelMembers;
 };
+
+typedef ArrayReactionNodalKernelTempl<false> ArrayReactionNodalKernel;
+typedef ArrayReactionNodalKernelTempl<true> ADArrayReactionNodalKernel;

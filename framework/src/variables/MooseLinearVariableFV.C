@@ -290,14 +290,14 @@ MooseLinearVariableFV<OutputType>::getDofIndices(const Elem * elem,
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+MooseLinearVariableFV<OutputType>::setDofValue(const DofValue & value, unsigned int index)
 {
   _element_data->setDofValue(value, index);
 }
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
+MooseLinearVariableFV<OutputType>::setDofValues(const DenseVector<DofValue> & values)
 {
   _element_data->setDofValues(values);
 }
@@ -310,112 +310,112 @@ MooseLinearVariableFV<OutputType>::clearDofIndices()
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValues() const
 {
   return _element_data->dofValues();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesNeighbor() const
 {
   return _neighbor_data->dofValues();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesOld() const
 {
   return _element_data->dofValuesOld();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesOlder() const
 {
   return _element_data->dofValuesOlder();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesPreviousNL() const
 {
   return _element_data->dofValuesPreviousNL();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesOldNeighbor() const
 {
   return _neighbor_data->dofValuesOld();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesOlderNeighbor() const
 {
   return _neighbor_data->dofValuesOlder();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesPreviousNLNeighbor() const
 {
   return _neighbor_data->dofValuesPreviousNL();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDot() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotDot() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotOld() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotDotOld() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotNeighbor() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotDotNeighbor() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotOldNeighbor() const
 {
   timeIntegratorError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::dofValuesDotDotOldNeighbor() const
 {
   timeIntegratorError();
@@ -518,7 +518,7 @@ MooseLinearVariableFV<OutputType>::dofIndicesNeighbor() const
 
 template <typename OutputType>
 void
-MooseLinearVariableFV<OutputType>::setLowerDofValues(const DenseVector<OutputData> &)
+MooseLinearVariableFV<OutputType>::setLowerDofValues(const DenseVector<DofValue> &)
 {
   lowerDError();
 }
@@ -549,14 +549,14 @@ MooseLinearVariableFV<OutputType>::setNodalValue(const OutputType & /*value*/, u
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::nodalVectorTagValue(TagID) const
 {
   nodalError();
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::nodalMatrixTagValue(TagID) const
 {
   nodalError();
@@ -641,7 +641,7 @@ MooseLinearVariableFV<OutputType>::vectorTagValue(TagID tag) const
 }
 
 template <typename OutputType>
-const typename MooseLinearVariableFV<OutputType>::DoFValue &
+const typename MooseLinearVariableFV<OutputType>::DofValues &
 MooseLinearVariableFV<OutputType>::vectorTagDofValue(TagID tag) const
 {
   return _element_data->vectorTagDofValue(tag);
@@ -858,21 +858,21 @@ MooseLinearVariableFV<OutputType>::adCurlSlnNeighbor() const
 }
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseLinearVariableFV<OutputType>::ADDofValues &
 MooseLinearVariableFV<OutputType>::adDofValues() const
 {
   adError();
 }
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseLinearVariableFV<OutputType>::ADDofValues &
 MooseLinearVariableFV<OutputType>::adDofValuesNeighbor() const
 {
   adError();
 }
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseLinearVariableFV<OutputType>::ADDofValues &
 MooseLinearVariableFV<OutputType>::adDofValuesDot() const
 {
   adError();

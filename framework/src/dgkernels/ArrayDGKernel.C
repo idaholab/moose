@@ -149,8 +149,6 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
   accumulateTaggedLocalResidual();
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(_resid_vars_mutex);
     for (const auto & var : _save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
@@ -162,7 +160,6 @@ ArrayDGKernel::computeElemNeighResidual(Moose::DGResidualType type)
       else
         avar->addSolutionNeighbor(_local_re);
     }
-  }
 }
 
 void
@@ -195,7 +192,6 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
   if (_has_diag_save_in && (type == Moose::ElementElement || type == Moose::NeighborNeighbor))
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _diag_save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
@@ -210,7 +206,8 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
   }
 }
 
-RealEigenVector ArrayDGKernel::computeQpJacobian(Moose::DGJacobianType)
+RealEigenVector
+ArrayDGKernel::computeQpJacobian(Moose::DGJacobianType)
 {
   return RealEigenVector::Zero(_count);
 }
@@ -312,7 +309,6 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
       _var.number() == jvar.number())
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(_jacoby_vars_mutex);
     for (const auto & var : _diag_save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);

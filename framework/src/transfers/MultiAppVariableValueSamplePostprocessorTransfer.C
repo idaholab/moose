@@ -363,13 +363,14 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
         {
           std::vector<dof_id_type> dof_indices;
           _var.getDofIndices(elem, dof_indices);
-          mooseAssert(dof_indices.size() == 1,
-                      "The variable must be a constant monomial with one DoF on an element");
+          mooseAssert(dof_indices.size() == _var.count(),
+                      "The variable must be a constant monomial with one DoF on an element per "
+                      "component.");
           mooseAssert(pp_values[_cached_multiapp_pos_ids[i]] != std::numeric_limits<Real>::max(),
                       "We should have pulled all the data we needed.");
           for (unsigned int c = 0; c < n_subapps / _apps_per_component; ++c)
           {
-            solution.set(dof_indices[0] + getVariableComponent(_cached_multiapp_pos_ids[i]),
+            solution.set(dof_indices[getVariableComponent(_cached_multiapp_pos_ids[i])],
                          pp_values[_cached_multiapp_pos_ids[i]]);
             ++i;
           }

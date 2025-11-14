@@ -425,7 +425,7 @@ MooseVariableDataFV<OutputType>::computeValues()
   unsigned int num_dofs = _dof_indices.size();
 
   if (num_dofs > 0)
-    fetchDoFValues();
+    fetchDofValues();
   else
     // We don't have any dofs. There's nothing to do
     return;
@@ -665,7 +665,7 @@ MooseVariableDataFV<OutputType>::getDofIndices(const Elem * elem,
 }
 
 template <typename OutputType>
-const typename MooseVariableDataFV<OutputType>::DoFValue &
+const typename MooseVariableDataFV<OutputType>::DofValue &
 MooseVariableDataFV<OutputType>::dofValuesDot() const
 {
   if (_sys.solutionUDot())
@@ -680,7 +680,7 @@ MooseVariableDataFV<OutputType>::dofValuesDot() const
 }
 
 template <typename OutputType>
-const typename MooseVariableDataFV<OutputType>::DoFValue &
+const typename MooseVariableDataFV<OutputType>::DofValue &
 MooseVariableDataFV<OutputType>::dofValuesDotDot() const
 {
   if (_sys.solutionUDotDot())
@@ -696,7 +696,7 @@ MooseVariableDataFV<OutputType>::dofValuesDotDot() const
 }
 
 template <typename OutputType>
-const typename MooseVariableDataFV<OutputType>::DoFValue &
+const typename MooseVariableDataFV<OutputType>::DofValue &
 MooseVariableDataFV<OutputType>::dofValuesDotOld() const
 {
   if (_sys.solutionUDotOld())
@@ -711,7 +711,7 @@ MooseVariableDataFV<OutputType>::dofValuesDotOld() const
 }
 
 template <typename OutputType>
-const typename MooseVariableDataFV<OutputType>::DoFValue &
+const typename MooseVariableDataFV<OutputType>::DofValue &
 MooseVariableDataFV<OutputType>::dofValuesDotDotOld() const
 {
   if (_sys.solutionUDotDotOld())
@@ -744,7 +744,7 @@ MooseVariableDataFV<OutputType>::dofValuesDuDotDotDu() const
 
 template <typename OutputType>
 void
-MooseVariableDataFV<OutputType>::fetchADDoFValues()
+MooseVariableDataFV<OutputType>::fetchADDofValues()
 {
   auto n = _dof_indices.size();
   libmesh_assert(n);

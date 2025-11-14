@@ -192,7 +192,6 @@ dataStore(std::ostream & stream, T & v, void * /*context*/)
                 "dataStore() template specialization!\n\n");
 #endif
 
-  // Moose::out<<"Generic dataStore"<<std::endl;
   stream.write((char *)&v, sizeof(v));
   mooseAssert(!stream.bad(), "Failed to store");
 }
@@ -386,6 +385,22 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, void * context)
   }
 }
 
+template <typename T, int Rows, int Cols>
+void
+dataStore(std::ostream & stream, Eigen::Matrix<T, Rows, Cols> & v, void * context)
+{
+  auto m = cast_int<unsigned int>(v.rows());
+  dataStore(stream, m, context);
+  auto n = cast_int<unsigned int>(v.cols());
+  dataStore(stream, n, context);
+  for (const auto i : make_range(m))
+    for (const auto j : make_range(n))
+    {
+      auto & r = v(i, j);
+      dataStore(stream, r, context);
+    }
+}
+
 // Specializations (defined in .C)
 template <>
 void dataStore(std::ostream & stream, Real & v, void * context);
@@ -413,10 +428,6 @@ template <>
 void dataStore(std::ostream & stream, std::stringstream & s, void * context);
 template <>
 void dataStore(std::ostream & stream, ADReal & dn, void * context);
-template <>
-void dataStore(std::ostream & stream, RealEigenVector & v, void * context);
-template <>
-void dataStore(std::ostream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataStore(std::ostream & stream, libMesh::Parameters & p, void * context);
 
@@ -733,6 +744,24 @@ dataLoad(std::istream & stream, HashMap<T, U> & m, void * context)
   }
 }
 
+template <typename T, int Rows, int Cols>
+void
+dataLoad(std::istream & stream, Eigen::Matrix<T, Rows, Cols> & v, void * context)
+{
+  unsigned int m = 0;
+  dataLoad(stream, m, context);
+  unsigned int n = 0;
+  dataLoad(stream, n, context);
+  v.resize(m, n);
+  for (const auto i : make_range(m))
+    for (const auto j : make_range(n))
+    {
+      T r{};
+      dataLoad(stream, r, context);
+      v(i, j) = r;
+    }
+}
+
 // Specializations (defined in .C)
 template <>
 void dataLoad(std::istream & stream, Real & v, void * /*context*/);
@@ -760,10 +789,6 @@ template <>
 void dataLoad(std::istream & stream, std::stringstream & s, void * context);
 template <>
 void dataLoad(std::istream & stream, ADReal & dn, void * context);
-template <>
-void dataLoad(std::istream & stream, RealEigenVector & v, void * context);
-template <>
-void dataLoad(std::istream & stream, RealEigenMatrix & v, void * context);
 template <>
 void dataLoad(std::istream & stream, libMesh::Parameters & p, void * context);
 template <>
