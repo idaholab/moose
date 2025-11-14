@@ -173,9 +173,9 @@ qs = 5
 variables_to_sample = 'vel_x vel_y pressure advected_scalar TKE TKED'
 !include postprocessing.i
 
-# More postprocessor for temperature
+# More postprocessor for scalar conservation analysis
 [Postprocessors]
-  [outlet_T]
+  [outlet_scalar]
     type = SideAverageValue
     boundary = right
     variable = advected_scalar

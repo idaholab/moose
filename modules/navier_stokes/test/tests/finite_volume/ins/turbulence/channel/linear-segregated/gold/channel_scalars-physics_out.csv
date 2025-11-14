@@ -1,3 +1,3 @@
-time,S_out,balance_percent,outlet_T
+time,S_out,balance_percent,outlet_scalar
 0,0,0,0
 1,999.8931623636,0.010684905189595,501.671033708

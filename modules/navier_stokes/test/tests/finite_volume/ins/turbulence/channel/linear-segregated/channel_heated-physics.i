@@ -12,7 +12,8 @@ cp = 300
 # These are only needed when solving for enthalpy
 # Alternatively, a FluidProperties user object may be used
 [Materials]
-  active = ''
+  active = 'rho_h'
+  # These two are for solving for enthalpy without using a FluidProperties object
   [h_from_T]
     type = ParsedFunctorMaterial
     expression = '${cp} * T_fluid'
@@ -24,6 +25,13 @@ cp = 300
     expression = 'h / ${cp}'
     functor_names = 'h'
     property_name = 'T_from_p_h_functor'
+  []
+  # This one is for computing the enthalpy density without using a FluidProperties object
+  [rho_h]
+    type = ParsedFunctorMaterial
+    expression = '${rho} * ${cp}  * T_fluid'
+    functor_names = 'T_fluid'
+    property_name = 'rho_h'
   []
 []
 
