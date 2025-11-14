@@ -104,22 +104,18 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
         """Compare results to the expected environment."""
         # Compare results
         assert collection is not None
-        self.assertEqual(len(collection.results), 1)
-        result = collection.results[0]
-        self.compare_result(result, env, base_sha)
+        self.compare_result(collection.result, env, base_sha)
 
         # Get each test with all filter types
         for test_name in TEST_NAMES:
             for filter in TestDataFilter:
-                tests = collection.get_tests(test_name, (filter,))
-                self.assertEqual(len(tests), 1)
+                test = collection.get_test(test_name, (filter,))
+                self.assertIsNotNone(test)
 
         # Get all of the tests
         for filter in TestDataFilter:
             all_tests = collection.get_all_tests((filter,))
             self.assertEqual(set(all_tests.keys()), set(TEST_NAMES))
-            for tests in all_tests.values():
-                self.assertEqual(len(tests), 1)
 
     def run_get_cached_result_test(self, env: dict, base_sha: str, id: ObjectId):
         """Run run_[pr,event,commit]_result(), comparing the result."""
@@ -234,7 +230,6 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
                 reader = ctx.reader
                 collection = reader.get_commit_result(event_sha)
                 assert collection is not None
-                self.assertEqual(len(collection.results), 1)
                 self.compare_collection(collection, env, base_sha)
         finally:
             self.delete_documents(result_id, test_ids)
