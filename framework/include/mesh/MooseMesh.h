@@ -1423,8 +1423,12 @@ public:
    * @return The set of lower-dimensional blocks for boundary sides
    */
   const std::set<SubdomainID> & boundaryLowerDBlocks() const { return _lower_d_boundary_blocks; }
+
   /// Return construct node list from side list boolean
   bool getConstructNodeListFromSideList() { return _construct_node_list_from_side_list; }
+
+  /// Return displace node list by side list boolean
+  bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1843,6 +1847,10 @@ private:
 
   /// Whether or not to allow generation of nodesets from sidesets
   bool _construct_node_list_from_side_list;
+
+  /// Whether or not to displace unrelated nodesets by nodesets
+  /// constructed from sidesets
+  bool _displace_node_list_by_side_list;
 
   /// Whether we need to delete remote elements after init'ing the EquationSystems
   bool _need_delete;
