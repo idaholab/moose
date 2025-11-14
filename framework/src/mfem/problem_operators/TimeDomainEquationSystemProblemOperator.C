@@ -46,15 +46,15 @@ TimeDomainEquationSystemProblemOperator::Solve()
 
 void
 TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
-                                                       const mfem::Vector & /*X*/,
-                                                       mfem::Vector & dX_dt)
+                                                       const mfem::Vector & X_old,
+                                                       mfem::Vector & X_new)
 {
-  dX_dt = 0.0;
+  X_new = X_old;
   SetTestVariablesFromTrueVectors();
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
   {
     _trial_variables.at(ind)->MakeTRef(
-        _trial_variables.at(ind)->ParFESpace(), dX_dt, _block_true_offsets[ind]);
+        _trial_variables.at(ind)->ParFESpace(), X_new, _block_true_offsets[ind]);
   }
   _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
@@ -68,7 +68,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
 
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, dX_dt);
+  _problem_data.nonlinear_solver->Mult(_true_rhs, X_new);
   SetTrialVariablesFromTrueVectors();
 }
 

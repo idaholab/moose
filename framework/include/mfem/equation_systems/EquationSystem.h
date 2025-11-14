@@ -124,6 +124,7 @@ private:
   using mfem::Operator::RecoverFEMSolution;
 
 protected:
+protected:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
@@ -172,7 +173,8 @@ protected:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+      mfem::real_t scale_factor = -1.0);
 
   void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
@@ -185,7 +187,8 @@ protected:
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-          integrated_bc_map);
+          integrated_bc_map,
+      mfem::real_t scale_factor = -1.0);
 
   void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
@@ -219,14 +222,17 @@ EquationSystem::ApplyDomainBLFIntegrators(
     const std::string & trial_var_name,
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
+    mfem::real_t scale_factor)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
+      mfem::BilinearFormIntegrator * integ =
+          scale_factor > 0.0 ? new ScaleIntegrator(kernel->createBFIntegrator(), scale_factor, true)
+                             : kernel->createBFIntegrator();
       if (integ != nullptr)
       {
         kernel->isSubdomainRestricted()
@@ -266,7 +272,8 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map)
+        integrated_bc_map,
+    mfem::real_t scale_factor)
 {
   if (integrated_bc_map.Has(test_var_name) &&
       integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
@@ -274,7 +281,9 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & bc : bcs)
     {
-      mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
+      mfem::BilinearFormIntegrator * integ =
+          scale_factor > 0.0 ? new ScaleIntegrator(bc->createBFIntegrator(), scale_factor, true)
+                             : bc->createBFIntegrator();
       if (integ != nullptr)
       {
         bc->isBoundaryRestricted()
@@ -317,25 +326,13 @@ class TimeDependentEquationSystem : public EquationSystem
 public:
   TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
-  /// Initialise
-  virtual void Init(GridFunctions & gridfunctions,
-                    ComplexGridFunctions & cmplx_gridfunctions,
-                    mfem::AssemblyLevel assembly_level) override;
-
   virtual void SetTimeStep(mfem::real_t dt);
   virtual void UpdateEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
   virtual void BuildMixedBilinearForms() override;
-  virtual void ApplyEssentialBCs() override;
   virtual void EliminateCoupledVariables() override;
-  virtual void FormLegacySystem(mfem::OperatorHandle & op,
-                                mfem::BlockVector & truedXdt,
-                                mfem::BlockVector & trueRHS) override;
-  virtual void FormSystem(mfem::OperatorHandle & op,
-                          mfem::BlockVector & truedXdt,
-                          mfem::BlockVector & trueRHS) override;
 
   /// Fetch all integrators on a source bilinear form, scale them by a real factor, and add to a second target bilienar form.
   /// Useful for scaling bilinear form integrators by timesteps.
@@ -369,9 +366,6 @@ protected:
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _td_mblfs; // named according to trial variable
-
-  /// Gridfunctions holding essential constraints from Dirichlet BCs
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _td_var_ess_constraints;
 
   /// Map between variable names and their time derivatives
   const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
