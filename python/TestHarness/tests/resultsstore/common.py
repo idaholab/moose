@@ -280,6 +280,8 @@ class GoldResult:
     event_sha: str
     # The event ID for the result (if any)
     event_id: Optional[int] = None
+    # The ID for the test, if stored separately
+    test_id: Optional[ObjectId] = None
 
 
 # Static set of results from which to build the gold file

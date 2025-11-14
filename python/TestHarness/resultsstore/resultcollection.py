@@ -230,6 +230,7 @@ class ResultsCollectionBase:
 
                 if test_id := doc.get("test_id"):
                     doc["_id"] = test_id
+                    del doc["test_id"]
 
                 result = next(result_it)
                 assert result.id == id

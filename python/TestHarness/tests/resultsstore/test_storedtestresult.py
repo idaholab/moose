@@ -9,9 +9,11 @@
 
 """Test TestHarness.resultsstore.storedtestresult.StoredTestResult."""
 
+import json
 from copy import deepcopy
 from dataclasses import asdict
-from typing import Tuple
+from datetime import datetime
+from typing import Optional, Tuple
 
 from bson.objectid import ObjectId
 from mock import patch
@@ -49,6 +51,7 @@ class TestResultsStoredResults(ResultsStoreTestCase):
         stored_result: StoredResult,
         test_filter: TestDataFilter = TestDataFilter.ALL,
         separate_test: bool = False,
+        update_data: Optional[dict] = None,
     ) -> StoredTestResult:
         """
         Build a StoredTestResult for testing.
@@ -66,6 +69,8 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             The filter to use for the test.
         separate_test : bool
             Whether or not to store the test separately.
+        update_data : Optional[dict]
+            Extra data to add to each test.
 
         """
         has_all = test_filter == TestDataFilter.ALL
@@ -92,6 +97,10 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             data["_id"] = id
             data["result_id"] = stored_result.id
 
+        # Update data if requested
+        if update_data is not None:
+            data.update(update_data)
+
         stored_test_result = StoredTestResult(
             data, test.name, stored_result, test_filters
         )
@@ -117,6 +126,7 @@ class TestResultsStoredResults(ResultsStoreTestCase):
         test_filter: TestDataFilter = TestDataFilter.ALL,
         separate_test: bool = False,
         check: bool = True,
+        update_data: Optional[dict] = None,
     ) -> list[Tuple[StoredTestResult, dict]]:
         """
         Build StoredTestResult objects for testing.
@@ -129,6 +139,8 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             Whether or not to store the test separately.
         check : bool
             Value of check to pass to the StoredResult.
+        update_data : Optional[dict]
+            Update test data with this dict, if any.
         """
         result = self.get_testharness_result("--capture-perf-graph")
         stored_result = build_stored_result(result, check=check)
@@ -140,6 +152,7 @@ class TestResultsStoredResults(ResultsStoreTestCase):
                     stored_result,
                     test_filter=test_filter,
                     separate_test=separate_test,
+                    update_data=update_data,
                 ),
                 test.value,
             )
@@ -612,3 +625,32 @@ class TestResultsStoredResults(ResultsStoreTestCase):
         test, _ = self.get_stored_test_result(TestDataFilter.HPC)
         with self.assertRaisesRegex(ValueError, "TESTER"):
             test.get_perf_graph()
+
+    def run_test_serialize_deserialize(self, **kwargs):
+        """
+        Run a test for serialize() and deserialize().
+
+        Keyword arguments are passed to get_stored_test_results().
+        """
+        for test, _ in self.get_stored_test_results(**kwargs):
+            serialized = test.serialize()
+            dumped = json.dumps(serialized)
+            loaded = json.loads(dumped)
+            built = StoredTestResult.deserialize(loaded, test.result)
+            self.assertEqual(built.data, test.data)
+
+    def test_serialize_deserialize_tests_within(self):
+        """Test serialize() and deserialize() with tests stored within the result."""
+        self.run_test_serialize_deserialize(separate_test=False)
+
+    def test_serialize_deserialize_tests_separate(self):
+        """Test serialize() and deserialize() with tests stored separately."""
+        self.run_test_serialize_deserialize(separate_test=True)
+
+    def test_serialize_deserialize_tests_with_time(self):
+        """
+        Test serialize() and deserialize() with timing stored in tests.
+
+        This is for deprecated support.
+        """
+        self.run_test_serialize_deserialize(update_data={"time": datetime.now()})

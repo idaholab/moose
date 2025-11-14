@@ -22,6 +22,7 @@ from TestHarness.resultsstore.testdatafilters import (
 )
 from TestHarness.resultsstore.utils import (
     TestName,
+    compress_dict,
     decompress_dict,
     get_typed,
 )
@@ -379,3 +380,62 @@ class StoredTestResult:
         Requires filter TestDataFilter.TESTER when loading tests.
         """
         return get_typed(self.get_json_metadata(), "perf_graph", (NoneType, dict))
+
+    def serialize(self) -> dict:
+        """
+        Serialize the data so that it is JSON dumpable.
+
+        Can be reloaded with deserialize().
+        """
+        data = deepcopy(self.data)
+
+        data["serialized"] = {
+            "folder_name": self.folder_name,
+            "test_name": self.test_name,
+            "data_filters": [v.name for v in self._data_filters],
+        }
+
+        # Convert ObjectID to string ID
+        for key in ["_id", "result_id"]:
+            if value := data.get(key):
+                data[key] = str(value)
+
+        # Convert binary JSON metadata to dict
+        if json_metadata := self.get_json_metadata():
+            data["tester"]["json_metadata"] = json_metadata
+
+        # Time entry if it exists
+        if (time := data.get("time")) is not None:
+            data["time"] = str(time)
+
+        return data
+
+    @staticmethod
+    def deserialize(data: dict, result: StoredResult) -> "StoredTestResult":
+        """Deserialize data from serialize() into a test result."""
+        assert isinstance(data, dict)
+        assert isinstance(result, StoredResult)
+
+        serialized = data["serialized"]
+        name = TestName(serialized["folder_name"], serialized["test_name"])
+        filters = [TestDataFilter[v] for v in serialized["data_filters"]]
+        del data["serialized"]
+
+        # Convert string ID to ObjectID
+        for key in ["_id", "result_id"]:
+            if value := data.get(key):
+                data[key] = ObjectId(value)
+
+        # Convert JSON metadata back to binary
+        tester = data.get("tester", {})
+        json_metadata = tester.get("json_metadata")
+        if json_metadata:
+            data["tester"]["json_metadata"] = {
+                k: compress_dict(v) for k, v in json_metadata.items()
+            }
+
+        # Convert time to datettime
+        if (time := data.get("time")) is not None:
+            data["time"] = datetime.fromisoformat(time)
+
+        return StoredTestResult(data, name, result, filters)
