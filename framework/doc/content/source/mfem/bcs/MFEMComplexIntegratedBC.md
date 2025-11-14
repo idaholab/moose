@@ -10,7 +10,7 @@ Base class for objects applying complex-valued integrated boundary conditions to
 
 `MFEMComplexIntegratedBC` applies boundary integrator(s) to the weak form equation that is labeled
 according to the test variable name returned from `getTestVariableName()`, similar to
-[`MFEMKernel`](source/mfem/kernels/MFEMKernel.md) for domain integrators.
+[`MFEMComplexKernel`](source/mfem/kernels/MFEMKernel.md) for domain integrators.
 
 Similarly to how [`MFEMComplexKernel`](source/mfem/kernels/MFEMComplexKernel.md) works, `MFEMComplexIntegratedBC`
 is a container for two `MFEMIntegratedBC` objects, one representing the real part of the integrated BC, and the other

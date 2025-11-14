@@ -12,10 +12,8 @@ InputParameters
 MFEMComplexVariable::validParams()
 {
   InputParameters params = MFEMGeneralUserObject::validParams();
-  //// Create user-facing 'boundary' input for restricting inheriting object to boundaries.
   params.addRequiredParam<UserObjectName>("fespace",
                                           "The finite element space this variable is defined on.");
-  //// Require moose variable parameters (not used!)
   params += MooseVariableBase::validParams();
   params.addClassDescription(
       "Class for adding complex MFEM variables to the problem (`mfem::ParComplexGridFunction`s).");

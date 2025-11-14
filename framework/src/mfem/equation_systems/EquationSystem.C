@@ -122,7 +122,7 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 
 void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     ComplexGridFunctions & cmplx_gridfunctions,
+                     Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;

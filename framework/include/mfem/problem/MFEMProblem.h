@@ -220,6 +220,20 @@ public:
   MPI_Comm getComm() { return getProblemData().comm; }
 
   /**
+   * Return the ParMesh associated with a particular variable.
+   */
+  const mfem::ParMesh & getMFEMVariableMesh(std::string var_name)
+  {
+    if (_problem_data.gridfunctions.Has(var_name))
+      return *_problem_data.gridfunctions.Get(var_name)->ParFESpace()->GetParMesh();
+    else if (_problem_data.cmplx_gridfunctions.Has(var_name))
+      return *_problem_data.cmplx_gridfunctions.Get(var_name)->ParFESpace()->GetParMesh();
+    else
+      mooseError("Variable " + var_name +
+                 " not found in MFEMProblem real or complex gridfunctions.");
+  }
+
+  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();

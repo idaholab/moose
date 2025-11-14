@@ -27,25 +27,43 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
+  /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem() override;
+
+  /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms() override;
+
+  /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms() override;
+
+  /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs() override;
 
+  /// Add complex kernels
   void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);
+
+  /// Add complex integrated BCs
   void AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc);
+
+  /// Add complex essential BCs
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
+  /// Form linear system, with essential boundary conditions accounted for
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & trueX,
                           mfem::BlockVector & trueRHS) override;
+
+  /// Form linear system with legacy assembly
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS) override;
+
+  /// Update variable from solution vector after solve
   void RecoverComplexFEMSolution(mfem::BlockVector & trueX,
                                  Moose::MFEM::GridFunctions & gridfunctions,
                                  Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions);
 
+  /// Template method for applying BilinearFormIntegrators on domains from kernels to a SesquilinearForm
   template <class FormType>
   void ApplyDomainBLFIntegrators(
       const std::string & trial_var_name,
@@ -54,12 +72,14 @@ public:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> &
           kernels_map);
 
+  /// Method for applying LinearFormIntegrators on domains from kernels to a ParComplexLinearForm
   inline void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParComplexLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> &
           kernels_map);
 
+  /// Template method for applying BilinearFormIntegrators on boudaries from kernels to a SesquilinearForm
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
@@ -68,6 +88,7 @@ public:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>> &
           integrated_bc_map);
 
+  /// Method for applying LinearFormIntegrators on boundaries from kernels to a ParComplexLinearForm
   inline void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParComplexLinearForm> form,

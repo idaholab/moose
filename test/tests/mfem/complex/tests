@@ -26,7 +26,7 @@
                'BCs/dbc/coefficient_imag=0 '
                'Outputs/ParaViewDataCollection/file_base="OutputData/Complex2DTri" '
                'sigma=10'
-    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with triangular elements. This test is equivalent to MFEM Example 22 on the star mesh.'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with triangular elements.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1
@@ -36,7 +36,7 @@
     type = CSVDiff
     input = complex_waveguide.i
     csvdiff = 'OutputData/ComplexWaveguide.csv'
-    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with integrated boundary conditions on a rectangular waveguide with an obstruction.'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with vector Robin boundary conditions applied.'
     abs_zero = 1e-6
     capabilities = 'mfem'
     compute_devices = 'cpu' # csvdiff with cuda
