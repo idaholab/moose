@@ -11,7 +11,6 @@
 """Implement the TestHarnessResultSummary for building database summaries."""
 
 import argparse
-from numbers import Number
 from typing import List, Optional, Sequence, Tuple
 
 from tabulate import tabulate
@@ -33,7 +32,9 @@ class TestHarnessResultsSummary:
         """Initialize state given the name of the database."""
         self.reader = ResultsReader(database)
 
+    # Default for --run-time-floor argument
     DEFAULT_RUN_TIME_FLOOR: float = 2.0
+    # Default for --run-time-rate-floor argument
     DEFAULT_RUN_TIME_RATE_FLOOR: float = 0.5
 
     @staticmethod
@@ -263,9 +264,9 @@ class TestHarnessResultsSummary:
         return TestHarnessResultsSummary.sort_test_times(test_table, 1)
 
     @staticmethod
-    def relative_rate(head_time: Number, base_time: Number) -> float:
+    def relative_rate(head_time: float, base_time: float) -> float:
         """Get the relative difference between two times."""
-        return float((head_time - base_time) / base_time)
+        return (head_time - base_time) / base_time
 
     @staticmethod
     def _build_same_table(
