@@ -47,6 +47,10 @@ The diffusion coefficient parameter ([!param](/LinearFVKernels/LinearFVDiffusion
 accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
 
+!alert warning
+When using non-zero flux boundary condition, only a single `LinearFVFluxKernel` may be used, as otherwise
+the boundary conditions may be applied multiple times. This warning applies to all `LinearFVFluxKernel`-derived classes.
+
 ## Example input syntax
 
 The input file below shows a pure diffusion problem on a two-dimensional domain.

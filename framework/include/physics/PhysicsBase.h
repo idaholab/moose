@@ -250,6 +250,9 @@ protected:
   void reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
                                          const std::string & object_type) const;
 
+  /// Additional checks performed near the end of the setup phase
+  virtual void checkIntegrity() const {}
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 
@@ -278,8 +281,6 @@ private:
   virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
-  /// Additional checks performed near the end of the setup phase
-  virtual void checkIntegrity() const {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type

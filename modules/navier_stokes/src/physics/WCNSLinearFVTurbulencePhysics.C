@@ -79,6 +79,17 @@ WCNSLinearFVTurbulencePhysics::initializePhysicsAdditional()
 }
 
 void
+WCNSLinearFVTurbulencePhysics::checkIntegrity() const
+{
+  WCNSFVTurbulencePhysicsBase::checkIntegrity();
+
+  if (_flow_equations_physics &&
+      !_flow_equations_physics->getParam<bool>("include_deviatoric_stress"))
+    _flow_equations_physics->paramWarning(
+        "include_deviatoric_stress", "This should be set to true when using a turbulence model");
+}
+
+void
 WCNSLinearFVTurbulencePhysics::addSolverVariables()
 {
   if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
@@ -130,13 +141,10 @@ WCNSLinearFVTurbulencePhysics::addFVKernels()
   if (_turbulence_model == "none")
     return;
 
-  // Turbulence terms in other equations
-  if (_has_flow_equations)
-    addFlowTurbulenceKernels();
-  if (_has_energy_equation)
-    addFluidEnergyTurbulenceKernels();
-  if (_has_scalar_equations)
-    addScalarAdvectionTurbulenceKernels();
+  // For linear FV discretization:
+  // We have to add the kernel in the flow/heat/scalar physics with mu_eff instead of two kernels
+  // one with mu, one with mu_turb, and chose one of the two to NOT have the advective term
+  // Also, flux boundary conditions would be executed twice with two kernels
 
   // Turbulence models with their own set of equations
   if (_turbulence_model == "k-epsilon")
@@ -146,51 +154,6 @@ WCNSLinearFVTurbulencePhysics::addFVKernels()
     addKEpsilonAdvection();
     addKEpsilonDiffusion();
     addKEpsilonSink();
-  }
-}
-
-void
-WCNSLinearFVTurbulencePhysics::addFlowTurbulenceKernels()
-{
-  if (_turbulence_model == "k-epsilon")
-  {
-    // We have to add the kernel in the flow physics with mu_eff instead of two kernels
-    // one with mu, one with mu_turb, and chose one of the two to NOT have the advective term
-    // Also, flux boundary conditions would be executed twice with two kernels
-
-    if (!_flow_equations_physics->getParam<bool>("include_deviatoric_stress"))
-      _flow_equations_physics->paramWarning(
-          "include_deviatoric_stress", "This should be set to true when using a turbulence model");
-  }
-}
-
-void
-WCNSLinearFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
-{
-  const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
-  const auto & passive_scalar_schmidt_number = getParam<std::vector<Real>>("Sc_t");
-  if (passive_scalar_schmidt_number.size() != passive_scalar_names.size() &&
-      passive_scalar_schmidt_number.size() != 1)
-    paramError(
-        "Sc_t",
-        "The number of turbulent Schmidt numbers defined is not equal to the number of passive "
-        "scalar fields!");
-
-  if (_turbulence_model == "k-epsilon")
-  {
-    const std::string kernel_type = "LinearFVDiffusion";
-    InputParameters params = getFactory().getValidParams(kernel_type);
-    assignBlocks(params, _blocks);
-    params.set<bool>("use_nonorthogonal_correction") =
-        _scalar_transport_physics->getParam<bool>("use_nonorthogonal_correction");
-
-    for (const auto & name_i : index_range(passive_scalar_names))
-    {
-      params.set<LinearVariableName>("variable") = passive_scalar_names[name_i];
-      params.set<MooseFunctorName>("diffusion_coeff") = "mu_eff_passive_scalars";
-      getProblem().addLinearFVKernel(
-          kernel_type, prefix() + passive_scalar_names[name_i] + "_turbulent_diffusion", params);
-    }
   }
 }
 
@@ -240,6 +203,8 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonDiffusion()
     params.set<bool>("use_nonorthogonal_correction") =
         getParam<bool>("use_nonorthogonal_correction");
 
+    // Note: we have to use a single diffusion kernel in case we have a flux BC so it is not applied
+    // twice
     params.set<LinearVariableName>("variable") = _tke_name;
     params.set<MooseFunctorName>("diffusion_coeff") = "mu_eff_tke";
     getProblem().addLinearFVKernel(kernel_type, prefix() + "tke_diffusion_mu", params);

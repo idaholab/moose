@@ -474,27 +474,46 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
       getProblem().addMaterial(object_type, prefix() + "turbulent_heat_eff_conductivity", params);
     }
 
-    if (_has_scalar_equations &&
-        !getProblem().hasFunctor("mu_eff_passive_scalars", /*thread_id=*/0))
+    if (_has_scalar_equations)
     {
+      const auto scalar_diffs = _scalar_transport_physics->getParam<std::vector<MooseFunctorName>>(
+          "passive_scalar_diffusivity");
       const auto mat_type =
           is_linear ? "FunctorEffectiveDynamicViscosity" : "ADFunctorEffectiveDynamicViscosity";
       InputParameters params = getFactory().getValidParams(mat_type);
-      assignBlocks(params, _blocks);
-      params.set<MooseFunctorName>("property_name") =
-          is_linear ? "mu_eff_passive_scalars" : "mu_t_passive_scalar";
       params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
       params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
       const auto & rho_name = _flow_equations_physics->densityName();
       params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") = rho_name;
-      params.set<bool>("add_dynamic_viscosity") = is_linear ? true : false;
       const auto turbulent_schmidt_number = getParam<std::vector<Real>>("Sc_t");
-      if (turbulent_schmidt_number.size() != 1)
-        paramError("passive_scalar_schmidt_number",
-                   "A single passive scalar turbulent Schmidt number can and must be specified "
-                   "with k-epsilon");
-      params.set<Real>(NS::mu_t + "_extra_inverse_factor") = turbulent_schmidt_number[0];
-      getProblem().addMaterial(mat_type, prefix() + "mu_eff_passive_scalars", params);
+      assignBlocks(params, _blocks);
+      // LinearFV can only use 1 diffusion kernel per equation, so we create N_scalars mu_effs
+      if (is_linear)
+        for (const auto i : index_range(scalar_diffs))
+        {
+          if (!getProblem().hasFunctor(scalar_diffs[i] + "_eff", /*thread_id=*/0))
+          {
+            params.set<MooseFunctorName>("property_name") = scalar_diffs[i] + "_plus_mut/Sc_t";
+            params.set<bool>("add_dynamic_viscosity") = true;
+            params.set<Real>(NS::mu_t + "_extra_inverse_factor") =
+                (turbulent_schmidt_number.size() == 1 ? turbulent_schmidt_number[0]
+                                                      : turbulent_schmidt_number[i]);
+            getProblem().addMaterial(
+                mat_type, prefix() + "mu_eff_passive_scalar_" + std::to_string(i), params);
+          }
+        }
+      // WCNSFV can add multiple diffusion kernels
+      else
+      {
+        params.set<MooseFunctorName>("property_name") = "mu_t_passive_scalar";
+        params.set<bool>("add_dynamic_viscosity") = false;
+        if (turbulent_schmidt_number.size() != 1)
+          paramError("passive_scalar_schmidt_number",
+                     "A single passive scalar turbulent Schmidt number can and must be specified "
+                     "with k-epsilon and the WCNSFV discretization.");
+        params.set<Real>(NS::mu_t + "_extra_inverse_factor") = turbulent_schmidt_number[0];
+        getProblem().addMaterial(mat_type, prefix() + "mu_t_passive_scalars", params);
+      }
     }
   }
 }

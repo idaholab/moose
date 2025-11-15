@@ -94,7 +94,7 @@
     issues = '#29846 #29175'
     type = 'CSVDiff'
     input = 'channel_scalars-physics.i'
-    csvdiff = 'channel_scalars-physics_out.csv'
+    csvdiff = 'channel_scalars-physics_out.csv channel_scalars-physics_out_line_center_channel_0001.csv channel_scalars-physics_out_line_quarter_radius_channel_0001.csv channel_scalars-physics_out_side_bottom_0001.csv channel_scalars-physics_out_side_top_0001.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
