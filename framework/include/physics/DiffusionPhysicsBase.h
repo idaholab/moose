@@ -18,7 +18,7 @@ class ActionComponent;
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_preconditioning");                              \
   registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
-  registerMooseAction(app_name, derived_name, "add_ic_physics")
+  registerMooseAction(app_name, derived_name, "add_ics_physics")
 
 /**
  * Base class to host all common parameters and attributes of Physics actions to solve the diffusion

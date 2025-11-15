@@ -254,6 +254,15 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
         Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
             wall_boundaries_with_functors, momentum_wall_functors);
   }
+
+  addRequiredPhysicsTask("add_geometric_rm");
+  addRequiredPhysicsTask("add_variables_physics");
+  addRequiredPhysicsTask("add_ics_physics");
+  addRequiredPhysicsTask("add_materials_physics");
+  addRequiredPhysicsTask("add_user_object");
+  addRequiredPhysicsTask("add_postprocessor");
+  addRequiredPhysicsTask("add_corrector");
+  addRequiredPhysicsTask("get_turbulence_physics");
 }
 
 void

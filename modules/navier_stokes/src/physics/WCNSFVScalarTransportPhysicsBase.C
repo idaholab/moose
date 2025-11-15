@@ -104,6 +104,12 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
   if (_passive_scalar_sources_coef.size())
     checkTwoDVectorParamsSameLength<MooseFunctorName, Real>("passive_scalar_coupled_source",
                                                             "passive_scalar_coupled_source_coeff");
+
+  addRequiredPhysicsTask("get_turbulence_physics");
+  addRequiredPhysicsTask("add_variables_physics");
+  addRequiredPhysicsTask("add_ics_physics");
+  addRequiredPhysicsTask("add_fv_kernel");
+  addRequiredPhysicsTask("add_fv_bc");
 }
 
 void

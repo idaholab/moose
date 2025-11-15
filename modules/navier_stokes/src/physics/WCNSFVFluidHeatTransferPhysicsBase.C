@@ -120,6 +120,13 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
   if (isParamValid("energy_wall_types"))
     checkVectorParamAndMultiMooseEnumLength<MooseFunctorName>("energy_wall_functors",
                                                               "energy_wall_types");
+
+  addRequiredPhysicsTask("get_turbulence_physics");
+  addRequiredPhysicsTask("add_variables_physics");
+  addRequiredPhysicsTask("add_ics_physics");
+  addRequiredPhysicsTask("add_fv_kernel");
+  addRequiredPhysicsTask("add_fv_bc");
+  addRequiredPhysicsTask("add_materials_physics");
 }
 
 void

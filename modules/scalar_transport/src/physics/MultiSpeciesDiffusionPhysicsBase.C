@@ -102,7 +102,7 @@ MultiSpeciesDiffusionPhysicsBase::MultiSpeciesDiffusionPhysicsBase(
                                                             "initial_conditions_species");
 
   addRequiredPhysicsTask("add_preconditioning");
-  addRequiredPhysicsTask("add_ic");
+  addRequiredPhysicsTask("add_ics_physics");
 }
 
 void

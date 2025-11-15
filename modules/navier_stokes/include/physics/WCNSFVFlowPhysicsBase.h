@@ -17,7 +17,7 @@
   registerMooseAction(app_name, derived_name, "add_geometric_rm");                                 \
   registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
   registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
-  registerMooseAction(app_name, derived_name, "add_material");                                     \
+  registerMooseAction(app_name, derived_name, "add_materials_physics");                            \
   registerMooseAction(app_name, derived_name, "add_user_object");                                  \
   registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
   registerMooseAction(app_name, derived_name, "add_corrector");                                    \
