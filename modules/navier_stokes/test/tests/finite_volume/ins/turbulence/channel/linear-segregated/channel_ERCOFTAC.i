@@ -55,19 +55,14 @@
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    # we use mu_eff directly here to be able to have deviatoric term for both mu and mu_t
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
     use_deviatoric_terms = yes
-  []
-  [u_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_x
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -79,19 +74,13 @@
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
     use_deviatoric_terms = yes
-  []
-  [v_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_y
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -285,6 +274,17 @@
     wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
     mu_t_ratio_max = 1e20
+  []
+[]
+
+[FunctorMaterials]
+  [compute_mu_eff]
+    type = FunctorEffectiveDynamicViscosity
+    property_name = mu_eff
+    mu = ${mu}
+    mu_t = mu_t
+    mu_t_inverse_factor = 1
+    execute_on = 'ALWAYS'
   []
 []
 
