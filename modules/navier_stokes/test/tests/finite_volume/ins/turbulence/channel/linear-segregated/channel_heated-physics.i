@@ -11,7 +11,7 @@ cp = 300
 
 # These are only needed when solving for enthalpy
 # Alternatively, a FluidProperties user object may be used
-[Materials]
+[FunctorMaterials]
   active = 'rho_h'
   # These two are for solving for enthalpy without using a FluidProperties object
   [h_from_T]

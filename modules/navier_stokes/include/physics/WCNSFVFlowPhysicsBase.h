@@ -15,8 +15,8 @@
 #define registerWCNSFVFlowPhysicsBaseTasks(app_name, derived_name)                                 \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_geometric_rm");                                 \
-  registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
+  registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
+  registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
   registerMooseAction(app_name, derived_name, "add_material");                                     \
   registerMooseAction(app_name, derived_name, "add_user_object");                                  \
   registerMooseAction(app_name, derived_name, "add_postprocessor");                                \

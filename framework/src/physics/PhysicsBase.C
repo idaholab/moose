@@ -60,9 +60,11 @@ PhysicsBase::validParams()
                               "Restart from Exodus");
 
   // Options to turn off tasks
+  params.addParam<bool>("dont_create_solver_variables",
+                        false,
+                        "Whether to skip the 'add_variable'/'add_variables_physics' task(s)");
   params.addParam<bool>(
-      "dont_create_solver_variables", false, "Whether to skip the 'add_variable' task");
-  params.addParam<bool>("dont_create_ics", false, "Whether to skip the 'add_ic'/'add_fv_ic' task");
+      "dont_create_ics", false, "Whether to skip the 'add_ic'/'add_fv_ic/add_ics_physics' task(s)");
   params.addParam<bool>(
       "dont_create_kernels", false, "Whether to skip the 'add_kernel' task for each kernel type");
   params.addParam<bool>("dont_create_bcs",
@@ -73,9 +75,10 @@ PhysicsBase::validParams()
       "dont_create_aux_variables", false, "Whether to skip the 'add_aux_variable' task");
   params.addParam<bool>(
       "dont_create_aux_kernels", false, "Whether to skip the 'add_aux_kernel' task");
-  params.addParam<bool>("dont_create_materials",
-                        false,
-                        "Whether to skip the 'add_material' task for each material type");
+  params.addParam<bool>(
+      "dont_create_materials",
+      false,
+      "Whether to skip the 'add_material'/'add_materials_physics' task(s) for each material type");
   params.addParam<bool>(
       "dont_create_user_objects",
       false,
@@ -128,9 +131,11 @@ PhysicsBase::act()
   // Initialization and variables
   if (_current_task == "init_physics")
     initializePhysics();
-  else if (_current_task == "add_variable" && !getParam<bool>("dont_create_solver_variables"))
+  else if ((_current_task == "add_variable" || _current_task == "add_variables_physics") &&
+           !getParam<bool>("dont_create_solver_variables"))
     addSolverVariables();
-  else if ((_current_task == "add_ic" || _current_task == "add_fv_ic") &&
+  else if ((_current_task == "add_ic" || _current_task == "add_fv_ic" ||
+            _current_task == "add_ics_physics") &&
            !getParam<bool>("dont_create_ics"))
     addInitialConditions();
 
@@ -171,7 +176,8 @@ PhysicsBase::act()
     addAuxiliaryVariables();
   else if (_current_task == "add_aux_kernel" && !getParam<bool>("dont_create_aux_kernels"))
     addAuxiliaryKernels();
-  else if (_current_task == "add_material" && !getParam<bool>("dont_create_materials"))
+  else if ((_current_task == "add_material" || _current_task == "add_materials_physics") &&
+           !getParam<bool>("dont_create_materials"))
     addMaterials();
   else if (_current_task == "add_functor_material" && !getParam<bool>("dont_create_materials"))
     addFunctorMaterials();

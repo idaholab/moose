@@ -13,8 +13,8 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 
 #define registerWCNSFVScalarTransportBaseTasks(app_name, derived_name)                             \
-  registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
+  registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
+  registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
   registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
   registerMooseAction(app_name, derived_name, "add_fv_bc")
 

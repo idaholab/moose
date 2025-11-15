@@ -15,11 +15,11 @@
 
 #define registerWCNSFVFluidHeatTransferPhysicsBaseTasks(app_name, derived_name)                    \
   registerMooseAction(app_name, derived_name, "get_turbulence_physics");                           \
-  registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
+  registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
+  registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
   registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
   registerMooseAction(app_name, derived_name, "add_fv_bc");                                        \
-  registerMooseAction(app_name, derived_name, "add_material")
+  registerMooseAction(app_name, derived_name, "add_materials_physics")
 
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation

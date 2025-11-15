@@ -79,7 +79,7 @@
     type = 'CSVDiff'
     input = 'channel_heated-physics.i'
     cli_args = "Physics/NavierStokes/FluidHeatTransferSegregated/energy/solve_for_enthalpy=true
-                Materials/active='T_from_h h_from_T'
+                FunctorMaterials/active='T_from_h h_from_T'
                 Postprocessors/Q_out/advected_quantity=h"
     # same gold files
     prereq = 'channel_ERCOFTAC_linear_heated_physics'
