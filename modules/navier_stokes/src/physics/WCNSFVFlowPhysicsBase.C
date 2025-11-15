@@ -42,6 +42,13 @@ WCNSFVFlowPhysicsBase::validParams()
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
 
+  // Convenient for sharing the executioner block with a non-Physics syntax
+  // or for defining the RhieChow user object outside the Physics
+  params.addParam<UserObjectName>(
+      "rhie_chow_uo_name",
+      "Name of the Rhie Chow user object. Defaults to 'pins_rhie_chow_interpolator' for porous "
+      "flow and 'ins_rhie_chow_interpolator' for non-porous.");
+
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
   params += NSFVBase::commonMomentumBoundaryFluxesParams();
@@ -124,6 +131,10 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                               ? getParam<MooseFunctorName>("density_gravity")
                               : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
+    _rc_uo_name(isParamValid("rhie_chow_uo_name")
+                    ? getParam<UserObjectName>("rhie_chow_uo_name")
+                    : (_porous_medium_treatment ? "pins_rhie_chow_interpolator"
+                                                : "ins_rhie_chow_interpolator")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
@@ -482,4 +493,11 @@ WCNSFVFlowPhysicsBase::getCoupledTurbulencePhysics() const
   }
   // Did not find one
   return nullptr;
+}
+
+const UserObjectName &
+WCNSFVFlowPhysicsBase::rhieChowUOName() const
+{
+  mooseAssert(!_rc_uo_name.empty(), "The Rhie-Chow user-object name should be set!");
+  return _rc_uo_name;
 }

@@ -86,7 +86,7 @@ public:
   /// Get the name of the linear friction coefficient. Returns an empty string if no friction.
   virtual MooseFunctorName getLinearFrictionCoefName() const = 0;
   /// Return the name of the Rhie Chow user object
-  virtual UserObjectName rhieChowUOName() const = 0;
+  const UserObjectName & rhieChowUOName() const;
   /// Return the number of algebraic ghosting layers needed
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
@@ -179,6 +179,8 @@ protected:
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
 
+  /// name of the Rhie Chow user object
+  UserObjectName _rc_uo_name;
   /// The velocity face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
   /// The momentum face interpolation method for being advected

@@ -564,6 +564,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
 void
 WCNSLinearFVFlowPhysics::addUserObjects()
 {
+  mooseAssert(!_porous_medium_treatment, "Not implemented");
   // Rhie Chow user object for interpolation velocities
   addRhieChowUserObjects();
 }
@@ -640,13 +641,6 @@ WCNSLinearFVFlowPhysics::addFunctorMaterials()
             "ADParsedFunctorMaterial", prefix() + "gravity_helper_" + comp_axis[d], params);
       }
   }
-}
-
-UserObjectName
-WCNSLinearFVFlowPhysics::rhieChowUOName() const
-{
-  mooseAssert(!_porous_medium_treatment, "Not implemented");
-  return "ins_rhie_chow_interpolator";
 }
 
 unsigned short
