@@ -81,7 +81,14 @@ Standardizer::getStandardized(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
+  // std::cout << "mean data: " << _mean.data() << ", " << _mean.size() << std::endl;
+  // std::cout << "std data: " << _stdev.data() << ", " << _mean.size() << std::endl;
+  // std::cout << "mean: " << mean << std::endl;
+  // std::cout << "stdev: " << stdev << std::endl;
+  // std::cout << "input: " << input << std::endl;
+  // std::cout << "input array1: " << input.array() << "," << std::endl;
   input = (input.rowwise() - mean.transpose()).array().rowwise() / stdev.transpose().array();
+  // std::cout << "input array2: " << input.array() <<  "," << std::endl;
 }
 
 void
@@ -89,15 +96,27 @@ Standardizer::getDestandardized(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
+  // std::cout << "mean data: " << _mean.data() << ", " << _mean.size() << std::endl;
+  // std::cout << "std data: " << _stdev.data() << ", " << _stdev.size() << std::endl;
+  // std::cout << "mean: " << mean << std::endl;
+  // std::cout << "stdev: " << stdev << std::endl;
+  // std::cout << "input: " << input << std::endl;
+  // std::cout << "input array3: " << input.array() << "," << std::endl;
   input =
       (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
+  // std::cout << "input array4: " << input.array() <<  "," << std::endl;
 }
 
 void
 Standardizer::getDescaled(RealEigenMatrix & input) const
 {
   Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
+  // std::cout << "std data: " << _stdev.data() << ", " << _stdev.size() << std::endl;
+  // std::cout << "stdev: " << stdev << std::endl;
+  // std::cout << "input: " << input << std::endl;
+  // std::cout << "input array5: " << input.array() << "," << std::endl;
   input = input.array().rowwise() * stdev.transpose().array();
+  // std::cout << "input array6: " << input.array() <<  "," << std::endl;
 }
 
 /// Helper for dataStore
