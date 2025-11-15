@@ -36,12 +36,36 @@ TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 TimeDomainEquationSystemProblemOperator::Solve()
 {
+  // Initialise time derivative
+  for (const auto i : index_range(_trial_var_names))
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    auto & time_derivative_name =
+        _problem_data.time_derivative_map.getTimeDerivativeName(trial_var_name);
+    auto * trial_var = _problem_data.gridfunctions.Get(trial_var_name);
+    auto * trial_var_time_derivative = _problem_data.gridfunctions.Get(time_derivative_name);
+
+    *trial_var_time_derivative = *trial_var;
+  }
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
   _problem_data.ode_solver->Step(_problem_data.f, _problem.time(), _problem.dt());
   // Synchonise time dependent GridFunctions with updated DoF data.
   SetTestVariablesFromTrueVectors();
+
+  // Set time derivatives
+  for (const auto i : index_range(_trial_var_names))
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    auto & time_derivative_name =
+        _problem_data.time_derivative_map.getTimeDerivativeName(trial_var_name);
+    auto * trial_var = _problem_data.gridfunctions.Get(trial_var_name);
+    auto * trial_var_time_derivative = _problem_data.gridfunctions.Get(time_derivative_name);
+
+    *trial_var_time_derivative -= *trial_var;
+    *trial_var_time_derivative /= -_problem.dt();
+  }
 }
 
 void
