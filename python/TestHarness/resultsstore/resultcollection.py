@@ -10,7 +10,7 @@
 """Implements the ResultCollection, storage for multiple test results."""
 
 from collections import defaultdict
-from typing import Callable, Iterable, Optional, Tuple
+from typing import Callable, Iterable, Optional, Tuple, Union
 
 from bson.objectid import ObjectId
 from pymongo import DESCENDING
@@ -18,7 +18,12 @@ from pymongo.database import Database
 
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.storedtestresult import StoredTestResult
-from TestHarness.resultsstore.testdatafilters import ALL_TEST_KEYS, TestDataFilter
+from TestHarness.resultsstore.testdatafilters import (
+    ALL_TEST_KEYS,
+    TestDataFilter,
+    filter_as_iterable,
+    has_all_filter,
+)
 from TestHarness.resultsstore.utils import TestName, results_test_iterator
 
 
@@ -68,7 +73,7 @@ class ResultsCollectionBase:
         return self._database_getter()
 
     def _get_all_tests(
-        self, filters: Iterable[TestDataFilter]
+        self, test_filter: Union[Iterable[TestDataFilter], TestDataFilter]
     ) -> dict[TestName, list[StoredTestResult]]:
         """
         Get all test results.
@@ -77,15 +82,19 @@ class ResultsCollectionBase:
 
         Arguments:
         ---------
-        filters : Iterable[TestDataFilter]
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
 
         """
+        # Possibly convert single value to iterable
+        test_filter = filter_as_iterable(test_filter)
+
         # Whether or not all data was requested
-        all_data = TestDataFilter.ALL in filters
+        all_data = has_all_filter(test_filter)
+
         # Keys within the test data to get, if not all
-        keys = [v.value for v in filters]
+        keys = [v.value for v in test_filter]
 
         # Tests stored separately that we need to load later
         separate_tests: list[Tuple[ObjectId, StoredTestResult]] = []
@@ -114,9 +123,9 @@ class ResultsCollectionBase:
                     if isinstance(value, dict):
                         if not all_data:
                             value = {k: value[k] for k in keys if k in value}
-                        test_result = StoredTestResult(value, name, result, filters)
+                        test_result = StoredTestResult(value, name, result, test_filter)
                     else:
-                        test_result = StoredTestResult({}, name, result, filters)
+                        test_result = StoredTestResult({}, name, result, test_filter)
                         separate_tests.append((value, test_result))
                     tests[name].append(test_result)
 
@@ -156,7 +165,9 @@ class ResultsCollectionBase:
         return tests
 
     def _get_tests(
-        self, name: TestName, filters: Iterable[TestDataFilter]
+        self,
+        name: TestName,
+        test_filter: Union[Iterable[TestDataFilter], TestDataFilter],
     ) -> list[StoredTestResult]:
         """
         Get the results for the test with the given name.
@@ -167,7 +178,7 @@ class ResultsCollectionBase:
         ---------
         name : TestName
             The name of the test.
-        filters : Iterable[TestDataFilter]
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
 
@@ -175,11 +186,14 @@ class ResultsCollectionBase:
         # Path in the result doc for this test
         query_path = name.mongo_path.query_path
 
+        # Possibly convert single value to iterable
+        test_filter = filter_as_iterable(test_filter)
+
         # Keys within test data to get
         keys = (
             ALL_TEST_KEYS
-            if TestDataFilter.ALL in filters
-            else [v.value for v in filters]
+            if has_all_filter(test_filter)
+            else [v.value for v in test_filter]
         )
 
         pipeline = [
@@ -234,7 +248,7 @@ class ResultsCollectionBase:
 
                 result = next(result_it)
                 assert result.id == id
-                tests.append(StoredTestResult(doc, name, result, filters))
+                tests.append(StoredTestResult(doc, name, result, test_filter))
 
         return tests
 
@@ -325,7 +339,7 @@ class ResultCollection(ResultsCollectionBase):
         return self._results[0]
 
     def get_all_tests(
-        self, filters: Iterable[TestDataFilter]
+        self, test_filter: Union[Iterable[TestDataFilter], TestDataFilter]
     ) -> dict[TestName, StoredTestResult]:
         """
         Get all test results for the result in the collection.
@@ -335,16 +349,18 @@ class ResultCollection(ResultsCollectionBase):
 
         Arguments:
         ---------
-        filters : Iterable[TestDataFilter]
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
 
         """
         # Convert a value of list[StoredTestResult] to a single result
-        return {k: v[0] for k, v in self._get_all_tests(filters).items()}
+        return {k: v[0] for k, v in self._get_all_tests(test_filter).items()}
 
     def get_test(
-        self, name: TestName, filters: Iterable[TestDataFilter]
+        self,
+        name: TestName,
+        test_filter: Union[Iterable[TestDataFilter], TestDataFilter],
     ) -> Optional[StoredTestResult]:
         """
         Get the test result for the given test name, if any.
@@ -353,12 +369,12 @@ class ResultCollection(ResultsCollectionBase):
         ---------
         name : TestName
             The name of the test.
-        filters : Iterable[TestDataFilter]
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
 
         """
-        tests = self._get_tests(name, filters)
+        tests = self._get_tests(name, test_filter)
         if tests:
             assert len(tests) == 1
             return tests[0]
@@ -392,7 +408,7 @@ class ResultsCollection(ResultsCollectionBase):
         return self._results
 
     def get_all_tests(
-        self, filters: Iterable[TestDataFilter]
+        self, test_filter: Union[Iterable[TestDataFilter], TestDataFilter]
     ) -> dict[TestName, list[StoredTestResult]]:
         """
         Get all test results across all results in the collection.
@@ -402,15 +418,17 @@ class ResultsCollection(ResultsCollectionBase):
 
         Arguments:
         ---------
-        filters : Iterable[TestDataFilter]
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
 
         """
-        return self._get_all_tests(filters)
+        return self._get_all_tests(test_filter)
 
     def get_tests(
-        self, name: TestName, filters: Iterable[TestDataFilter]
+        self,
+        name: TestName,
+        test_filter: Union[Iterable[TestDataFilter], TestDataFilter],
     ) -> list[StoredTestResult]:
         """
         Get the test results for a test across all results in the collection.
@@ -419,9 +437,9 @@ class ResultsCollection(ResultsCollectionBase):
         ---------
         name : TestName
             The name of the test.
-        filters : Iterable[TestDataFilter]
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
 
         """
-        return self._get_tests(name, filters)
+        return self._get_tests(name, test_filter)

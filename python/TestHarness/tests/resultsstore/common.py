@@ -290,22 +290,26 @@ GOLD_RESULTS = [
         id=ObjectId("6857a572bbcb03d9dccfb1a8"),
         civet_version=0,
         event_sha="968f537a3c89ffb556fb7da18da28da52b592ee0",
+        test_id=ObjectId("6857a572bbcb03d9dccfb1a7"),
     ),
     GoldResult(
         id=ObjectId("685c623b4022db39df9590c4"),
         civet_version=0,
         event_sha="3d48fa82c081e141fd86390dfb9edd1f11c984ca",
+        test_id=ObjectId("685c623b4022db39df9590c3"),
     ),
     GoldResult(
         id=ObjectId("685b0fdf4110325560e2cc30"),
         civet_version=1,
         event_sha="45b8a536530388e7bb1ff563398b1e94f2d691fc",
+        test_id=ObjectId("685b0fdf4110325560e2cc2f"),
     ),
     # bump to civet_version=2
     GoldResult(
         id=ObjectId("68658fcbc8ec62f893b8e307"),
         civet_version=2,
         event_sha="1134c7e383972783be2ea702f2738ece79fe6a59",
+        test_id=ObjectId("68658fcac8ec62f893b8e306"),
     ),
     # bump to civet_version=3
     # - added event_id
@@ -314,6 +318,7 @@ GOLD_RESULTS = [
         civet_version=3,
         event_id=258481,
         event_sha="d64fb221531abf740a7917376216f4e03517fc80",
+        test_id=ObjectId("68dac86a57e68e67a2888a73"),
     ),
     # bump to civet_version=4
     # - remove indices from tests
@@ -322,6 +327,7 @@ GOLD_RESULTS = [
         civet_version=4,
         event_id=259309,
         event_sha="296c9e817d13b35624be2423775b309a34d9336c",
+        test_id=ObjectId("68dedf7cbe5697c197720bad"),
     ),
     # bump to civet_version=5
     GoldResult(
@@ -329,6 +335,7 @@ GOLD_RESULTS = [
         civet_version=5,
         event_id=260038,
         event_sha="810a5570266435660fedf3c207e5b5a640699187",
+        test_id=ObjectId("68e6141590b44073432086b8"),
     ),
     # bump to civet_version=6
     # - tests can be stored with results

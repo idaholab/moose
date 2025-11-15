@@ -10,7 +10,7 @@
 """Test TestHarness.resultsstore.resultcollection.ResultCollection."""
 
 import unittest
-from typing import Tuple
+from typing import Tuple, Union
 
 import pytest
 from mock import patch
@@ -44,6 +44,21 @@ HAS_READER_AUTH = READER_AUTH is not None
 
 # Fake test name for testing
 TEST_NAME = TestName("foo", "bar")
+
+
+def as_iterable_and_non_iterable(
+    test_filter: TestDataFilter,
+) -> list[Union[TestDataFilter, Tuple[TestDataFilter]]]:
+    """Get an iterable and non-iterable form of the given filter."""
+    return [(test_filter,), test_filter]
+
+
+def all_filters() -> list[Union[TestDataFilter, Tuple[TestDataFilter]]]:
+    """Get all possible filters, both in an iterable and non-iterable form."""
+    values = []
+    for test_filter in TestDataFilter:
+        values += as_iterable_and_non_iterable(test_filter)
+    return values
 
 
 class TestResultCollection(ResultsStoreTestCase):
@@ -103,8 +118,14 @@ class TestResultCollection(ResultsStoreTestCase):
             reader,
         )
 
-    def check_filter(self, test: StoredTestResult, test_filter: TestDataFilter):
+    def check_filter(
+        self,
+        test: StoredTestResult,
+        test_filter: Union[TestDataFilter, Tuple[TestDataFilter]],
+    ):
         """Test if the right data is loaded in a test given a filter."""
+        if isinstance(test_filter, tuple):
+            test_filter = test_filter[0]
         if test_filter != TestDataFilter.ALL:
             for other_filter in TestDataFilter:
                 if other_filter != test_filter:
@@ -120,8 +141,8 @@ class TestResultCollection(ResultsStoreTestCase):
             assert collection is not None
             self.assertEqual(len(collection.results), 2)
 
-            for test_filter in TestDataFilter:
-                all_tests = collection.get_all_tests((test_filter,))
+            for test_filter in all_filters():
+                all_tests = collection.get_all_tests(test_filter)
                 self.assertIn(TEST_DATABASE_TEST_NAME, all_tests)
                 for name, tests in all_tests.items():
                     if name == TEST_DATABASE_TEST_NAME:
@@ -132,8 +153,8 @@ class TestResultCollection(ResultsStoreTestCase):
 
         # Test the gold events
         collection, reader = self.get_gold_resultscollection()
-        for test_filter in TestDataFilter:
-            all_tests = collection.get_all_tests((test_filter,))
+        for test_filter in all_filters():
+            all_tests = collection.get_all_tests(test_filter)
             self.assertIn(GOLD_DATABASE_TEST_NAME, all_tests)
             for name, tests in all_tests.items():
                 if name == GOLD_DATABASE_TEST_NAME:
@@ -157,8 +178,8 @@ class TestResultCollection(ResultsStoreTestCase):
             assert collection is not None
             self.assertEqual(len(collection.results), 2)
 
-            for test_filter in TestDataFilter:
-                tests = collection.get_tests(TEST_DATABASE_TEST_NAME, (test_filter,))
+            for test_filter in all_filters():
+                tests = collection.get_tests(TEST_DATABASE_TEST_NAME, test_filter)
                 self.assertEqual(len(tests), 2)
                 for test in tests:
                     self.assertEqual(test.name, TEST_DATABASE_TEST_NAME)
@@ -167,8 +188,8 @@ class TestResultCollection(ResultsStoreTestCase):
 
         # Test the gold events
         collection, reader = self.get_gold_resultscollection()
-        for test_filter in TestDataFilter:
-            tests = collection.get_tests(GOLD_DATABASE_TEST_NAME, (test_filter,))
+        for test_filter in all_filters():
+            tests = collection.get_tests(GOLD_DATABASE_TEST_NAME, test_filter)
             self.assertEqual(len(tests), len(GOLD_RESULTS))
             for test in tests:
                 # Should be the test we expect
@@ -259,63 +280,69 @@ class TestResultCollection(ResultsStoreTestCase):
         result = StoredResult(self.get_result_data())
         collection = ResultCollection(result, lambda: None)
 
-        with patch.object(
-            collection,
-            "_get_all_tests",
-            return_value={"foo": ["bar"], "baz": ["bang"]},
-        ) as patch_get_all_tests:
-            tests = collection.get_all_tests([TestDataFilter.ALL])
-
-        patch_get_all_tests.assert_called_once_with([TestDataFilter.ALL])
-        self.assertEqual(tests, {"foo": "bar", "baz": "bang"})
+        # Filter as non-iterable and iterable
+        for test_filter in as_iterable_and_non_iterable(TestDataFilter.ALL):
+            with patch.object(
+                collection,
+                "_get_all_tests",
+                return_value={"foo": ["bar"], "baz": ["bang"]},
+            ) as patch_get_all_tests:
+                tests = collection.get_all_tests(test_filter)
+            patch_get_all_tests.assert_called_once_with(test_filter)
+            self.assertEqual(tests, {"foo": "bar", "baz": "bang"})
 
     def test_ResultCollection_get_test(self):
         """Test ResultCollection.get_test() calling the parent method."""
         result = StoredResult(self.get_result_data())
         collection = ResultCollection(result, lambda: None)
 
-        # No test
-        with patch.object(
-            collection,
-            "_get_tests",
-            return_value=None,
-        ) as patch_get_tests:
-            test = collection.get_test(TEST_NAME, [TestDataFilter.ALL])
-        patch_get_tests.assert_called_once_with(TEST_NAME, [TestDataFilter.ALL])
-        self.assertIsNone(test)
+        # Filter as non-iterable and iterable
+        for test_filter in as_iterable_and_non_iterable(TestDataFilter.ALL):
+            # No test
+            with patch.object(
+                collection,
+                "_get_tests",
+                return_value=None,
+            ) as patch_get_tests:
+                test = collection.get_test(TEST_NAME, test_filter)
+            patch_get_tests.assert_called_once_with(TEST_NAME, test_filter)
+            self.assertIsNone(test)
 
-        # One test
-        with patch.object(
-            collection,
-            "_get_tests",
-            return_value=["foo"],
-        ) as patch_get_tests:
-            test = collection.get_test(TEST_NAME, [TestDataFilter.ALL])
-        patch_get_tests.assert_called_once_with(TEST_NAME, [TestDataFilter.ALL])
-        self.assertEqual(test, "foo")
+            # One test
+            with patch.object(
+                collection,
+                "_get_tests",
+                return_value=["foo"],
+            ) as patch_get_tests:
+                test = collection.get_test(TEST_NAME, test_filter)
+            patch_get_tests.assert_called_once_with(TEST_NAME, test_filter)
+            self.assertEqual(test, "foo")
 
     def test_ResultsCollection_get_all_tests(self):
         """Test ResultsCollection.get_all_tests() calling the parent method."""
         result = StoredResult(self.get_result_data())
         collection = ResultsCollection([result], lambda: None)
 
-        with patch.object(
-            collection, "_get_all_tests", return_value="foo"
-        ) as patch_get_all_tests:
-            value = collection.get_all_tests([TestDataFilter.ALL])
-
-        patch_get_all_tests.assert_called_once_with([TestDataFilter.ALL])
-        self.assertEqual(value, "foo")
+        # Filter as non-iterable and iterable
+        for test_filter in as_iterable_and_non_iterable(TestDataFilter.ALL):
+            with patch.object(
+                collection, "_get_all_tests", return_value="foo"
+            ) as patch_get_all_tests:
+                value = collection.get_all_tests(test_filter)
+            patch_get_all_tests.assert_called_once_with(test_filter)
+            self.assertEqual(value, "foo")
 
     def test_ResultsCollection_get_tests(self):
         """Test ResultsCollection.get_all_tests() calling the parent method."""
         result = StoredResult(self.get_result_data())
         collection = ResultsCollection([result], lambda: None)
 
-        with patch.object(
-            collection, "_get_tests", return_value="foo"
-        ) as patch_get_all_tests:
-            value = collection.get_tests(TEST_NAME, [TestDataFilter.ALL])
+        # Filter as non-iterable and iterable
+        for test_filter in as_iterable_and_non_iterable(TestDataFilter.ALL):
+            with patch.object(
+                collection, "_get_tests", return_value="foo"
+            ) as patch_get_all_tests:
+                value = collection.get_tests(TEST_NAME, test_filter)
 
-        patch_get_all_tests.assert_called_once_with(TEST_NAME, [TestDataFilter.ALL])
-        self.assertEqual(value, "foo")
+            patch_get_all_tests.assert_called_once_with(TEST_NAME, test_filter)
+            self.assertEqual(value, "foo")

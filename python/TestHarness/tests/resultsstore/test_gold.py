@@ -45,21 +45,38 @@ class TestGold(ResultsStoreTestCase):
     @unittest.skipUnless(HAS_READER_AUTH, "Reader auth unavailable")
     def test_gold_live(self):
         """Test StoredResult and StoredTestResult for each gold."""
-        ids = [v.id for v in GOLD_RESULTS]
+        num_gold = len(GOLD_RESULTS)
 
         # Load results
         with ResultsReader(GOLD_DATABASE_NAME, authentication=READER_AUTH) as ctx:
             reader = ctx.reader
-            docs = reader._find_results({"_id": {"$in": ids}}, limit=None)
-            self.assertEqual(len(docs), len(ids))
+            docs = reader._find_results(
+                {"_id": {"$in": [v.id for v in GOLD_RESULTS]}}, limit=None
+            )
+            self.assertEqual(len(docs), num_gold)
 
             # Build each gold result
             results = [reader._build_result(doc) for doc in docs]
 
-            # Load target test from each result
+            # Collection with just these tests to parse
             collection = ResultsCollection(results, ctx.reader.get_database)
-            tests = collection.get_tests(GOLD_DATABASE_TEST_NAME, [TestDataFilter.ALL])
-            self.assertEqual(len(tests), len(GOLD_RESULTS))
+
+            # Test loading with all methods and all filters even though we won't use
+            for test_filter in [v for v in TestDataFilter if v != TestDataFilter.ALL]:
+                # Test get_tests()
+                tests = collection.get_tests(GOLD_DATABASE_TEST_NAME, test_filter)
+                self.assertEqual(len(tests), num_gold)
+
+                # Test get_all_tests()
+                all_tests = collection.get_all_tests(test_filter)
+                self.assertIn(GOLD_DATABASE_TEST_NAME, all_tests)
+                self.assertEqual(len(all_tests[GOLD_DATABASE_TEST_NAME]), num_gold)
+            # Test get_test_names()
+            self.assertIn(GOLD_DATABASE_TEST_NAME, collection.get_test_names())
+
+            # Load _all_ of the data for later use
+            tests = collection.get_tests(GOLD_DATABASE_TEST_NAME, TestDataFilter.ALL)
+            self.assertEqual(len(tests), num_gold)
 
         # Serialize the data to store in a gold
         results_serialized = {str(v.id): v.serialize() for v in results}
@@ -100,7 +117,20 @@ class TestGold(ResultsStoreTestCase):
             self.assertEqual(result.event_sha, gold_result.event_sha)
             if gold_result.event_id:
                 self.assertEqual(result.event_id, gold_result.event_id)
+            self.assertTrue(result.check)
 
             # Build StoredTestResult
             test_data = gold_test_data[result_id]
-            StoredTestResult.deserialize(test_data, result)
+            test = StoredTestResult.deserialize(test_data, result)
+
+            # Check StoredTestResult
+            self.assertEqual(test.name, GOLD_DATABASE_TEST_NAME)
+            if gold_result.test_id:
+                self.assertEqual(test.id, gold_result.test_id)
+            else:
+                self.assertIsNone(test.id)
+            self.assertIsNotNone(test.hpc)
+            self.assertIsNotNone(test.status)
+            self.assertIsNotNone(test.tester)
+            self.assertIsNotNone(test.timing)
+            self.assertIsNotNone(test.get_perf_graph())
