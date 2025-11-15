@@ -36,3 +36,9 @@ def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item
         for item in items:
             if "live_db" in item.keywords:
                 item.add_marker(marker)
+
+
+def pytest_configure(config: pytest.Config):
+    """Notify when tests are ran with --no-live-db."""
+    if config.getoption("--no-live-db"):
+        print("INFO: Not running tests that utilize a results database")
