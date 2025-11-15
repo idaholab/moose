@@ -283,7 +283,7 @@ WCNSFVTurbulencePhysicsBase::addInitialConditions()
 {
   if (_turbulence_model == "mixing-length" || _turbulence_model == "none")
     return;
-  const std::string ic_type = "FunctionIC";
+  const std::string ic_type = "FVFunctionIC";
   InputParameters params = getFactory().getValidParams(ic_type);
 
   // Parameter checking: error if initial conditions are provided but not going to be used
@@ -323,7 +323,7 @@ WCNSFVTurbulencePhysicsBase::addInitialConditions()
                        _blocks,
                        /*whether IC is a default*/ !isParamSetByUser("initial_mu_t"),
                        /*error if already an IC*/ isParamSetByUser("initial_mu_t")))
-      getProblem().addInitialCondition(ic_type, prefix() + "initial_mu_turb", params);
+      getProblem().addFVInitialCondition(ic_type, prefix() + "initial_mu_turb", params);
   }
   else if (isParamSetByUser("initial_mu_t"))
     paramError("initial_mu_t",
@@ -335,14 +335,14 @@ WCNSFVTurbulencePhysicsBase::addInitialConditions()
                      _blocks,
                      /*whether IC is a default*/ !isParamSetByUser("initial_tke"),
                      /*error if already an IC*/ isParamSetByUser("initial_tke")))
-    getProblem().addInitialCondition(ic_type, prefix() + "initial_tke", params);
+    getProblem().addFVInitialCondition(ic_type, prefix() + "initial_tke", params);
   params.set<VariableName>("variable") = _tked_name;
   params.set<FunctionName>("function") = getParam<FunctionName>("initial_tked");
   if (shouldCreateIC(_tked_name,
                      _blocks,
                      /*whether IC is a default*/ !isParamSetByUser("initial_tked"),
                      /*error if already an IC*/ isParamSetByUser("initial_tked")))
-    getProblem().addInitialCondition(ic_type, prefix() + "initial_tked", params);
+    getProblem().addFVInitialCondition(ic_type, prefix() + "initial_tked", params);
 }
 
 void

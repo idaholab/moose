@@ -327,6 +327,7 @@ WCNSLinearFVTurbulencePhysics::addFunctorMaterials()
   // Functor materials for the diffusion coefficients
   if (_turbulence_model == "k-epsilon")
   {
+    // Since sigma_k = 1 in the standard k-epsilon, this is often unnecessary
     const std::string mat_type = "FunctorEffectiveDynamicViscosity";
     InputParameters params = getFactory().getValidParams(mat_type);
     assignBlocks(params, _blocks);

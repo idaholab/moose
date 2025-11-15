@@ -394,7 +394,7 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
                "The number of velocity components in the " + type() + " initial condition is not " +
                    std::to_string(dimension()) + " or 3!");
 
-  InputParameters params = getFactory().getValidParams("FunctionIC");
+  InputParameters params = getFactory().getValidParams("FVFunctionIC");
   assignBlocks(params, _blocks);
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
@@ -407,7 +407,8 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
                        _blocks,
                        /*whether IC is a default*/ !isParamSetByUser("initial_velocity"),
                        /*error if already an IC*/ isParamSetByUser("initial_velocity")))
-      getProblem().addInitialCondition("FunctionIC", prefix() + _velocity_names[d] + "_ic", params);
+      getProblem().addFVInitialCondition(
+          "FVFunctionIC", prefix() + _velocity_names[d] + "_ic", params);
   }
 
   if (shouldCreateIC(_pressure_name,
@@ -418,7 +419,7 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
     params.set<VariableName>("variable") = _pressure_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
-    getProblem().addInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
+    getProblem().addFVInitialCondition("FVFunctionIC", prefix() + _pressure_name + "_ic", params);
   }
 }
 
