@@ -23,7 +23,6 @@ from TestHarness.tests.resultsstore.common import (
     GOLD_DATABASE_NAME,
     GOLD_DATABASE_TEST_NAME,
     GOLD_RESULTS,
-    FakeMongoClient,
     ResultsStoreTestCase,
 )
 
@@ -93,9 +92,7 @@ class TestGold(ResultsStoreTestCase):
 
             # Build StoredResult
             result_data = gold_result_data[result_id]
-            data = StoredResult.deserialize(result_data)
-            reader = ResultsReader("unused", FakeMongoClient())
-            result = reader._build_result(data)
+            result = StoredResult.deserialize(result_data)
 
             # Check StoredResult
             self.assertEqual(result.id, gold_result.id)

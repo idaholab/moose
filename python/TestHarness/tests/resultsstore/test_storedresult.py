@@ -267,5 +267,6 @@ class TestStoredResult(ResultsStoreTestCase):
         serialized = result.serialize()
         dumped = json.dumps(serialized)
         loaded = json.loads(dumped)
-        deserialized = StoredResult.deserialize(loaded)
-        self.assertEqual(result.data, deserialized)
+        new_result = StoredResult.deserialize(loaded)
+        self.assertEqual(result.data, new_result.data)
+        self.assertEqual(result.check, new_result.check)

@@ -72,7 +72,10 @@
       "event_id": 260206,
       "event_cause": "push",
       "pr_num": null,
-      "time": "2025-10-08 20:57:18.976000"
+      "time": "2025-10-08 20:57:18.976000",
+      "serialized": {
+        "check": true
+      }
     },
     "68e6141590b44073432086b9": {
       "_id": "68e6141590b44073432086b9",
@@ -147,7 +150,10 @@
       "event_id": 260038,
       "pr_num": null,
       "base_sha": "0d4abf2e847951e07f1000c85451192f0172456f",
-      "civet_version": 5
+      "civet_version": 5,
+      "serialized": {
+        "check": true
+      }
     },
     "68dedf7cbe5697c197720bae": {
       "_id": "68dedf7cbe5697c197720bae",
@@ -222,7 +228,10 @@
       "event_id": 259309,
       "pr_num": null,
       "base_sha": "e353a7cacb94c988483cfa0b1f074f4fb4edbec8",
-      "civet_version": 4
+      "civet_version": 4,
+      "serialized": {
+        "check": true
+      }
     },
     "68dac86a57e68e67a2888a74": {
       "_id": "68dac86a57e68e67a2888a74",
@@ -297,7 +306,10 @@
       "event_id": 258481,
       "pr_num": null,
       "base_sha": "683f2a61725790be34537345f8facfcb4ce77cbe",
-      "civet_version": 3
+      "civet_version": 3,
+      "serialized": {
+        "check": true
+      }
     },
     "68658fcbc8ec62f893b8e307": {
       "_id": "68658fcbc8ec62f893b8e307",
@@ -371,7 +383,10 @@
       "event_cause": "push",
       "pr_num": null,
       "base_sha": "c85466a90bec562091c9e8ad2606cee92273e182",
-      "civet_version": 2
+      "civet_version": 2,
+      "serialized": {
+        "check": true
+      }
     },
     "685c623b4022db39df9590c4": {
       "_id": "685c623b4022db39df9590c4",
@@ -443,7 +458,10 @@
       "event_sha": "3d48fa82c081e141fd86390dfb9edd1f11c984ca",
       "event_cause": "push",
       "pr_num": null,
-      "base_sha": "45b8a536530388e7bb1ff563398b1e94f2d691fc"
+      "base_sha": "45b8a536530388e7bb1ff563398b1e94f2d691fc",
+      "serialized": {
+        "check": true
+      }
     },
     "685b0fdf4110325560e2cc30": {
       "_id": "685b0fdf4110325560e2cc30",
@@ -515,7 +533,10 @@
       "time": "2025-06-24 14:51:43.888000",
       "event_sha": "45b8a536530388e7bb1ff563398b1e94f2d691fc",
       "event_cause": "push",
-      "pr_num": null
+      "pr_num": null,
+      "serialized": {
+        "check": true
+      }
     },
     "6857a572bbcb03d9dccfb1a8": {
       "_id": "6857a572bbcb03d9dccfb1a8",
@@ -586,7 +607,10 @@
       "time": "2025-06-22 00:40:50.747000",
       "event_sha": "968f537a3c89ffb556fb7da18da28da52b592ee0",
       "event_cause": "push",
-      "pr_num": null
+      "pr_num": null,
+      "serialized": {
+        "check": true
+      }
     }
   },
   "tests": {

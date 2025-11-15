@@ -189,6 +189,8 @@ class StoredResult:
         """Serialize the data into something that is JSON dumpable."""
         data = deepcopy(self.data)
 
+        data["serialized"] = {"check": self.check}
+
         # Convert datetime to str that can be converted back
         data["time"] = str(data["time"])
         # Convert ObjectID to string id
@@ -197,13 +199,19 @@ class StoredResult:
         return data
 
     @staticmethod
-    def deserialize(data: dict) -> dict:
-        """Deserialize the data serialized with serialize()."""
+    def deserialize(data: dict) -> "StoredResult":
+        """Deserialize data from serialize() into a result."""
+        assert isinstance(data, dict)
+
         data = deepcopy(data)
+
+        serialized = data["serialized"]
+        check = serialized["check"]
+        del data["serialized"]
 
         # Convert datetime str to datetime object
         data["time"] = datetime.fromisoformat(data["time"])
         # Convert string id to ObjectID
         data["_id"] = ObjectId(data["_id"])
 
-        return data
+        return StoredResult(data, check=check)

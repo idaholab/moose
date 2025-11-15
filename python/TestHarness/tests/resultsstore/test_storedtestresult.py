@@ -638,6 +638,9 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             loaded = json.loads(dumped)
             built = StoredTestResult.deserialize(loaded, test.result)
             self.assertEqual(built.data, test.data)
+            self.assertEqual(built.name, test.name)
+            self.assertEqual(built.result, test.result)
+            self.assertEqual(built._data_filters, test._data_filters)
 
     def test_serialize_deserialize_tests_within(self):
         """Test serialize() and deserialize() with tests stored within the result."""
