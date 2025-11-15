@@ -39,6 +39,8 @@
       momentum_two_term_bc_expansion = false
       momentum_advection_interpolation = ${advected_interp_method}
       system_names = 'u_system v_system pressure_system'
+      # consistency with kernel syntax input, allows to use the same executioner block
+      rhie_chow_uo_name = 'rc'
     []
     [TurbulenceSegregated/k-epsilon]
       # Model
@@ -94,60 +96,7 @@
   []
 []
 
-[AuxVariables]
-  [yplus]
-    type = MooseLinearVariableFVReal
-  []
-[]
+!include executioner_regular_channel.i
 
-[AuxKernels]
-  [compute_y_plus]
-    type = RANSYPlusAux
-    variable = yplus
-    tke = TKE
-    mu = ${mu}
-    rho = ${rho}
-    u = vel_x
-    v = vel_y
-    walls = ${walls}
-    wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
-  []
-[]
-
-[Executioner]
-  type = SIMPLE
-
-  rhie_chow_user_object = 'ins_rhie_chow_interpolator'
-  momentum_systems = 'u_system v_system'
-  pressure_system = 'pressure_system'
-  turbulence_systems = 'TKE_system TKED_system'
-
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  turbulence_l_abs_tol = 1e-14
-  momentum_l_tol = 1e-14
-  pressure_l_tol = 1e-14
-  turbulence_l_tol = 1e-14
-
-  momentum_equation_relaxation = 0.7
-  pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.2 0.2'
-  turbulence_field_relaxation = '0.2 0.2'
-  num_iterations = 1000
-  pressure_absolute_tolerance = 1e-12
-  momentum_absolute_tolerance = 1e-12
-  turbulence_absolute_tolerance = '1e-12 1e-12'
-  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg'
-  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
-  pressure_petsc_options_value = 'hypre boomeramg'
-  turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
-  turbulence_petsc_options_value = 'hypre boomeramg'
-
-  print_fields = false
-  continue_on_max_its = true
-[]
-
-variables_to_sample = 'vel_x vel_y pressure TKE TKED'
+variables_to_sample = 'vel_x vel_y pressure_over_density TKE TKED'
 !include postprocessing.i

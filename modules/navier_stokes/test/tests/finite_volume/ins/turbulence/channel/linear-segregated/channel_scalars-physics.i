@@ -108,27 +108,6 @@ qs = 5
   []
 []
 
-[AuxVariables]
-  [yplus]
-    type = MooseLinearVariableFVReal
-  []
-[]
-
-[AuxKernels]
-  [compute_y_plus]
-    type = RANSYPlusAux
-    variable = yplus
-    tke = TKE
-    mu = ${mu}
-    rho = ${rho}
-    u = vel_x
-    v = vel_y
-    walls = ${walls}
-    wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
-  []
-[]
-
 [Executioner]
   type = SIMPLE
 
