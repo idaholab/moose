@@ -83,8 +83,10 @@ protected:
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
   bool processThermalConductivity();
-  /// Define the k/cp diffusion coefficients when solving for enthalpy
-  void defineKOverCpFunctors(const bool use_ad);
+  /// Define the effective diffusion coefficient when:
+  /// - solving with a turbulence model: k <- k+kt
+  /// - solving for enthalpy: k / cp
+  void defineEffectiveThermalDiffusionCoeffFunctors(const bool use_ad);
 
   /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
   const bool _has_energy_equation;

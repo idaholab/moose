@@ -535,7 +535,8 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
   getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 
   if (_solve_for_enthalpy)
-    WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(/*use ad*/ true);
+    WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors(
+        /*use ad*/ true);
 }
 
 void
