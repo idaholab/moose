@@ -107,6 +107,17 @@ WCNSFVScalarTransportPhysicsBase::WCNSFVScalarTransportPhysicsBase(
 }
 
 void
+WCNSFVScalarTransportPhysicsBase::actOnAdditionalTasks()
+{
+  // Turbulence physics would not be initialized before this task
+  if (_current_task == "get_turbulence_physics")
+  {
+    _turbulence_physics = getCoupledTurbulencePhysics();
+    _has_turbulence_model = _turbulence_physics ? _turbulence_physics->hasTurbulenceModel() : false;
+  }
+}
+
+void
 WCNSFVScalarTransportPhysicsBase::addFVKernels()
 {
   // For compatibility with Modules/NavierStokesFV syntax

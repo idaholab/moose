@@ -43,6 +43,9 @@ protected:
   const WCNSFVFlowPhysicsBase * _flow_equations_physics;
   /// Turbulence
   const WCNSFVTurbulencePhysicsBase * _turbulence_physics;
+  /// Because of the Modules/navierStokesFV syntax, a turbulence physics often exists without a model
+  /// we save (_turbulence_physics && _turbulence_physics->hasTurbulenceModel()) in this attribute
+  bool _has_turbulence_model;
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;

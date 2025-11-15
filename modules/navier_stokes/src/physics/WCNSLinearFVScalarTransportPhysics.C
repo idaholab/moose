@@ -121,7 +121,7 @@ WCNSLinearFVScalarTransportPhysics::addScalarDiffusionKernels()
     {
       params.set<LinearVariableName>("variable") = _passive_scalar_names[name_i];
       params.set<MooseFunctorName>("diffusion_coeff") =
-          passive_scalar_diffusivities[name_i] + (_turbulence_physics ? "_plus_mut/Sc_t" : "");
+          passive_scalar_diffusivities[name_i] + (_has_turbulence_model ? "_plus_mut/Sc_t" : "");
       getProblem().addLinearFVKernel(
           kernel_type, prefix() + "ins_" + _passive_scalar_names[name_i] + "_diffusion", params);
     }

@@ -16,7 +16,8 @@
   registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
   registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
   registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
-  registerMooseAction(app_name, derived_name, "add_fv_bc")
+  registerMooseAction(app_name, derived_name, "add_fv_bc");                                        \
+  registerMooseAction(app_name, derived_name, "get_turbulence_physics")
 
 /**
  * Creates all the objects needed to solve the Navier Stokes scalar transport equations
@@ -39,6 +40,7 @@ public:
   bool hasScalarEquations() const { return _has_scalar_equation; }
 
 protected:
+  virtual void actOnAdditionalTasks() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
   virtual void setSlipVelocityParams(InputParameters & /* params */) const {}
