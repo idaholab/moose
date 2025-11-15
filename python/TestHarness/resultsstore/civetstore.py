@@ -15,6 +15,7 @@ import json
 import os
 import re
 from copy import deepcopy
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Sequence, Tuple
 
@@ -23,6 +24,8 @@ from bson.objectid import ObjectId
 from pymongo import MongoClient
 
 from TestHarness.resultsstore import auth
+from TestHarness.resultsstore.reader import ResultsReader
+from TestHarness.resultsstore.testdatafilters import TestDataFilter
 from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
@@ -120,6 +123,9 @@ class CIVETStore:
             type=float,
             default=MAX_RESULT_SIZE,
             help="Max size of a result for tests to be stored within it",
+        )
+        parser.add_argument(
+            "--no-check", action="store_true", help="Don't check loading after storing"
         )
         return parser.parse_args(args)
 
@@ -322,6 +328,17 @@ class CIVETStore:
             "time": datetime.now(),
         }
 
+    @dataclass
+    class BuiltEntry:
+        """Data class for an entry built with build()."""
+
+        # The event sha for the entry
+        event_sha: str
+        # The result data
+        result: dict
+        # The separate test data, if any
+        tests: Optional[dict[TestName, dict]] = None
+
     def build(
         self,
         results: dict,
@@ -329,7 +346,7 @@ class CIVETStore:
         env: dict = dict(os.environ),
         max_result_size: float = MAX_RESULT_SIZE,
         **kwargs,
-    ) -> Tuple[dict, Optional[dict[TestName, dict]]]:
+    ) -> BuiltEntry:
         """
         Build a result entry for storage in the database.
 
@@ -464,7 +481,9 @@ class CIVETStore:
         info += [", ".join(sizes)]
         print(" ".join(info))
 
-        return results, tests
+        return self.BuiltEntry(
+            event_sha=header["event_sha"], result=results, tests=tests
+        )
 
     @staticmethod
     def setup_client() -> MongoClient:
@@ -559,9 +578,20 @@ class CIVETStore:
                 assert inserted_tests.acknowledged
                 print(f"Inserted {len(tests)} tests into {database}")
 
+    @dataclass
+    class StoredEntry:
+        """Data class for an entry stored with store()."""
+
+        # The event sha for the entry
+        event_sha: str
+        # The result ID in the database
+        result_id: ObjectId
+        # The test IDs in the databse, if any
+        test_ids: Optional[list[ObjectId]] = None
+
     def store(
         self, database: str, results: dict, base_sha: str, **kwargs
-    ) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
+    ) -> StoredEntry:
         """
         Store the data in the database from a test harness result.
 
@@ -590,21 +620,52 @@ class CIVETStore:
 
         """
         # Get the data
-        result, tests = self.build(results, base_sha, **kwargs)
+        built_entry = self.build(results, base_sha, **kwargs)
 
         # Build for storage in the database
-        insert_result, insert_tests = self._build_database(result, tests)
+        insert_result, insert_tests = self._build_database(
+            built_entry.result, built_entry.tests
+        )
 
         # Do the insertion
         self._insert_database(database, insert_result, insert_tests)
 
-        return insert_result["_id"], (
-            [v["_id"] for v in insert_tests] if insert_tests else None
+        return self.StoredEntry(
+            event_sha=built_entry.event_sha,
+            result_id=insert_result["_id"],
+            test_ids=[v["_id"] for v in insert_tests] if insert_tests else None,
         )
+
+    def check(self, database: str, event_sha: str):
+        """
+        Check the full load of an entry that was stored.
+
+        Parameters
+        ----------
+        database : str
+            The name of the mongo database that was stored into
+        event_sha : str
+            The SHA of the event that was stored
+
+        """
+        with ResultsReader(
+            database, authentication=self.load_authentication(), check=True
+        ) as ctx:
+            reader = ctx.reader
+
+            # Make sure the result exists
+            collection = reader.get_commit_result(event_sha)
+            if collection is None:
+                raise SystemExit(
+                    f"Failed to load inserted result with commit {event_sha}"
+                )
+
+            # And that we can load all of the data
+            collection.get_all_tests(TestDataFilter.ALL)
 
     def main(
         self, result_path: str, database: str, base_sha: str, **kwargs
-    ) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
+    ) -> StoredEntry:
         """
         Entrypoint when executed from the command line.
 
@@ -638,13 +699,24 @@ class CIVETStore:
         assert isinstance(database, str)
         assert isinstance(base_sha, str)
 
+        # Whether or not to check after store
+        no_check = kwargs.pop("no_check", False)
+
+        # Load the result
         result_path = os.path.abspath(result_path)
         if not os.path.isfile(result_path):
             raise SystemExit(f"Result file {result_path} does not exist")
         with open(result_path, "r") as f:
             results = json.load(f)
 
-        return self.store(database, results, base_sha, **kwargs)
+        # Store the result
+        stored_entry = self.store(database, results, base_sha, **kwargs)
+
+        # Check if not requested to not do so
+        if not no_check:
+            self.check(database, stored_entry.event_sha)
+
+        return stored_entry
 
 
 if __name__ == "__main__":  # pragma: no cover

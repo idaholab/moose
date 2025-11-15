@@ -18,7 +18,7 @@ from typing import Optional, Tuple
 
 import pytest
 from bson.objectid import ObjectId
-from mock import patch
+from mock import MagicMock, patch
 from moosepytest.civet import is_civet_pull_request, is_civet_push
 from TestHarness.resultsstore.auth import Authentication
 from TestHarness.resultsstore.civetstore import (
@@ -28,6 +28,7 @@ from TestHarness.resultsstore.civetstore import (
     OversizedResultError,
     OversizedTestsError,
 )
+from TestHarness.resultsstore.testdatafilters import TestDataFilter
 from TestHarness.resultsstore.utils import (
     TestName,
     compress_dict,
@@ -43,7 +44,9 @@ from TestHarness.tests.resultsstore.common import (
     ResultsStoreTestCase,
     base_civet_env,
     build_civet_env,
+    random_git_sha,
 )
+from TestHarness.tests.resultsstore.test_auth import DEFAULT_AUTH
 
 # Dummy database name
 TEST_DATABASE = "test_database"
@@ -351,19 +354,17 @@ class TestCIVETStore(ResultsStoreTestCase):
             ),
         )
 
-        build_result, build_tests = CIVETStore().build(
-            results, base_sha=base_sha, env=env, **build_kwargs
-        )
-        self.assertIsInstance(build_result, dict)
+        entry = CIVETStore().build(results, base_sha=base_sha, env=env, **build_kwargs)
+        self.assertIsInstance(entry.result, dict)
         if separate_tests:
-            assert isinstance(build_tests, dict)
-            for k, v in build_tests.items():
+            assert isinstance(entry.tests, dict)
+            for k, v in entry.tests.items():
                 self.assertIsInstance(k, TestName)
                 self.assertIsInstance(v, dict)
         else:
-            self.assertIsNone(build_tests)
+            self.assertIsNone(entry.tests)
 
-        num_tests = results_num_tests(build_result)
+        num_tests = results_num_tests(entry.result)
 
         out_regex = rf"Storing {num_tests} tests"
         if build_kwargs.get("ignore_skipped"):
@@ -376,7 +377,7 @@ class TestCIVETStore(ResultsStoreTestCase):
         output = self.stdout_mock.getvalue()
         self.assertRegex(output, out_regex)
 
-        self._check_result(base_sha, env, results, build_result, build_tests, **kwargs)
+        self._check_result(base_sha, env, results, entry.result, entry.tests, **kwargs)
 
     def test_build(self):
         """Test build() with no additional arguments and contained tests."""
@@ -513,11 +514,9 @@ class TestCIVETStore(ResultsStoreTestCase):
         kwargs = {}
         if separate_tests:
             kwargs["max_result_size"] = 1e-6
-        built_result, built_tests = civetstore.build(
-            results, base_sha, env=env, **kwargs
-        )
+        entry = civetstore.build(results, base_sha, env=env, **kwargs)
 
-        db_result, db_tests = civetstore._build_database(built_result, built_tests)
+        db_result, db_tests = civetstore._build_database(entry.result, entry.tests)
         self.assertIsInstance(db_result, dict)
         self.assertIsInstance(db_tests, list)
         self.assertEqual(len(db_tests), num_tests if separate_tests else 0)
@@ -526,8 +525,8 @@ class TestCIVETStore(ResultsStoreTestCase):
 
         for test in results_test_iterator(results):
             if separate_tests:
-                assert built_tests is not None
-                built_test = built_tests[test.name]
+                assert entry.tests is not None
+                built_test = entry.tests[test.name]
                 assert isinstance(built_test, dict)
 
                 test_id = results_test_entry(db_result, test.name)
@@ -547,9 +546,9 @@ class TestCIVETStore(ResultsStoreTestCase):
                 del db_test_copy["result_id"]
                 self.assertEqual(db_test_copy, built_test)
             else:
-                self.assertIsNone(built_tests)
+                self.assertIsNone(entry.tests)
 
-                built_test = results_test_entry(built_result, test.name)
+                built_test = results_test_entry(entry.result, test.name)
                 db_test = results_test_entry(db_result, test.name)
                 self.assertEqual(built_test, db_test)
 
@@ -612,16 +611,13 @@ class TestCIVETStore(ResultsStoreTestCase):
         with patch.object(
             civetstore, "_insert_database", return_value=None
         ) as patch_insert_database:
-            result_id, test_ids = civetstore.store(
-                TEST_DATABASE, results, base_sha, **kwargs
-            )
+            entry = civetstore.store(TEST_DATABASE, results, base_sha, **kwargs)
 
-        self.assertIsInstance(result_id, ObjectId)
-        self.assertIsInstance(test_ids, list if separate_tests else type(None))
-        if test_ids:
-            self.assertEqual(len(test_ids), results_num_tests(results))
-            for test_id in test_ids:
-                self.assertIsInstance(test_id, ObjectId)
+        self.assertIsInstance(entry.result_id, ObjectId)
+        self.assertIsInstance(entry.test_ids, list if separate_tests else type(None))
+        if entry.test_ids:
+            self.assertEqual(len(entry.test_ids), results_num_tests(results))
+            self.assertTrue(all(isinstance(v, ObjectId) for v in entry.test_ids))
 
         patch_insert_database.assert_called_once()
         insert_database_args = patch_insert_database.call_args[0]
@@ -636,6 +632,51 @@ class TestCIVETStore(ResultsStoreTestCase):
     def test_store_separate_tests(self):
         """Test store() with separate tests."""
         self.run_test_store(False, separate_tests=True)
+
+    def test_check(self):
+        """Test check()."""
+        civetstore = CIVETStore()
+        collection = MagicMock()
+
+        event_sha = random_git_sha()
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch.object(
+                civetstore,
+                "load_authentication",
+                return_value=Authentication(**DEFAULT_AUTH),
+            ),
+            patch(
+                "TestHarness.resultsstore.reader.ResultsReader.get_commit_result",
+                return_value=collection,
+            ) as patch_get_commit_result,
+        ):
+            civetstore.check(TEST_DATABASE, event_sha)
+
+        patch_get_commit_result.assert_called_once_with(event_sha)
+        collection.get_all_tests.assert_called_once_with(TestDataFilter.ALL)
+
+    def test_check_fail_load(self):
+        """Test check() with a failed load."""
+        civetstore = CIVETStore()
+        event_sha = random_git_sha()
+
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch.object(
+                civetstore,
+                "load_authentication",
+                return_value=Authentication(**DEFAULT_AUTH),
+            ),
+            patch(
+                "TestHarness.resultsstore.reader.ResultsReader.get_commit_result",
+                return_value=None,
+            ),
+            self.assertRaisesRegex(
+                SystemExit, f"Failed to load inserted result with commit {event_sha}"
+            ),
+        ):
+            civetstore.check(TEST_DATABASE, event_sha)
 
     def test_parse_args(self):
         """Test parse_args()."""
@@ -663,6 +704,7 @@ class TestCIVETStore(ResultsStoreTestCase):
             "ignore_timing",
             "ignore_tester",
             "only_runtime",
+            "no_check",
         ]:
             args = base_args + [f"--{entry.replace('_', '-')}"]
             parsed = CIVETStore.parse_args(args)
@@ -693,18 +735,56 @@ class TestCIVETStore(ResultsStoreTestCase):
 
     def test_main(self):
         """Test main() loading a result and then calling store() on it."""
-        base_sha, env = build_civet_env()
+        base_sha, _ = build_civet_env()
         results = self.get_testharness_result()
 
         with NamedTemporaryFile() as result_file:
             with open(result_file.name, "w") as f:
                 json.dump(results, f)
 
-            civetstore = CIVETStore()
-            with patch.object(civetstore, "store", return_value=None) as patch_store:
-                civetstore.main(result_file.name, TEST_DATABASE, base_sha)
+            args = [result_file.name, base_sha, TEST_DATABASE]
+            parsed_args = vars(CIVETStore.parse_args(args))
 
-        patch_store.assert_called_once_with(TEST_DATABASE, results, base_sha)
+            civetstore = CIVETStore()
+            fake_entry = civetstore.StoredEntry(random_git_sha(), ObjectId())
+            with (
+                patch.object(
+                    civetstore, "store", return_value=fake_entry
+                ) as patch_store,
+                patch.object(civetstore, "check") as patch_check,
+            ):
+                civetstore.main(**parsed_args)
+
+        store_kwargs = {
+            k: v
+            for k, v in parsed_args.items()
+            if k not in ["database", "base_sha", "result_path", "no_check"]
+        }
+        patch_store.assert_called_once_with(
+            TEST_DATABASE, results, base_sha, **store_kwargs
+        )
+        patch_check.assert_called_once_with(TEST_DATABASE, fake_entry.event_sha)
+
+    def test_main_no_check(self):
+        """Test main() with --no-check."""
+        base_sha, _ = build_civet_env()
+        results = self.get_testharness_result()
+
+        with NamedTemporaryFile() as result_file:
+            args = [result_file.name, TEST_DATABASE, base_sha, "--no-check"]
+            parsed_args = vars(CIVETStore.parse_args(args))
+
+            with open(result_file.name, "w") as f:
+                json.dump(results, f)
+
+            civetstore = CIVETStore()
+            with (
+                patch.object(civetstore, "store"),
+                patch.object(civetstore, "check") as patch_check,
+            ):
+                civetstore.main(**parsed_args)
+
+        patch_check.assert_not_called()
 
     @pytest.mark.live_db
     @unittest.skipUnless(HAS_AUTH, "Storer auth unavailable")
@@ -715,25 +795,31 @@ class TestCIVETStore(ResultsStoreTestCase):
 
         civetstore = CIVETStore()
 
-        result_id = None
+        entry = CIVETStore.StoredEntry("unused", ObjectId())
 
         try:
             # Run the insert
             with NamedTemporaryFile() as result_file:
+
+                args = [result_file.name, base_sha, LIVE_DATABASE]
+                parsed_args = vars(CIVETStore.parse_args(args))
+
                 with open(result_file.name, "w") as f:
                     json.dump(data, f)
-                result_id, test_ids = civetstore.main(
-                    result_file.name, LIVE_DATABASE, base_sha, env=civet_env
-                )
+                entry = civetstore.main(**parsed_args, env=civet_env)
 
             # Should have one inserted ID and no tests (tests contained within)
-            self.assertIsInstance(result_id, ObjectId)
-            self.assertIsNone(test_ids)
+            self.assertIsInstance(entry.event_sha, str)
+            self.assertEqual(len(entry.event_sha), 40)
+            self.assertIsInstance(entry.result_id, ObjectId)
+            self.assertIsNone(entry.test_ids)
 
             # Make sure the data exists in the database
             with civetstore.setup_client() as client:
-                result = client[LIVE_DATABASE].results.find_one({"_id": result_id})
-            self.assertIsNotNone(result)
+                result = client[LIVE_DATABASE].results.find_one(
+                    {"_id": entry.result_id}
+                )
+            assert result is not None
 
             # Result should have contained tests
             self.assertIsNotNone(result)
@@ -743,9 +829,8 @@ class TestCIVETStore(ResultsStoreTestCase):
 
         # Delete the entry
         finally:
-            if result_id is not None:
-                with civetstore.setup_client() as client:
-                    client[LIVE_DATABASE].results.delete_one({"_id": result_id})
+            with civetstore.setup_client() as client:
+                client[LIVE_DATABASE].results.delete_one({"_id": entry.result_id})
 
     @pytest.mark.live_db
     @unittest.skipUnless(HAS_AUTH, "Storer auth unavailable")
@@ -756,15 +841,14 @@ class TestCIVETStore(ResultsStoreTestCase):
 
         civetstore = CIVETStore()
 
-        result_id = None
-        test_ids = None
+        entry = CIVETStore.StoredEntry("unused", ObjectId(), [])
 
         try:
             # Run the insert
             with NamedTemporaryFile() as result_file:
                 with open(result_file.name, "w") as f:
                     json.dump(data, f)
-                result_id, test_ids = civetstore.main(
+                entry = civetstore.main(
                     result_file.name,
                     LIVE_DATABASE,
                     base_sha,
@@ -773,15 +857,18 @@ class TestCIVETStore(ResultsStoreTestCase):
                 )
 
             # Should have one inserted ID and no tests (tests contained within)
-            self.assertIsInstance(result_id, ObjectId)
-            self.assertIsInstance(test_ids, list)
-            self.assertTrue(all(isinstance(v, ObjectId) for v in test_ids))
+            self.assertIsInstance(entry.event_sha, str)
+            self.assertEqual(len(entry.event_sha), 40)
+            self.assertIsInstance(entry.result_id, ObjectId)
+            assert isinstance(entry.test_ids, list)
+            self.assertTrue(all(isinstance(v, ObjectId) for v in entry.test_ids))
 
             # Get result and tests
             with civetstore.setup_client() as client:
                 db = client[LIVE_DATABASE]
-                result = db.results.find_one({"_id": result_id})
-                tests = [v for v in db.tests.find({"_id": {"$in": test_ids}})]
+                result = db.results.find_one({"_id": entry.result_id})
+                assert result is not None
+                tests = [v for v in db.tests.find({"_id": {"$in": entry.test_ids}})]
 
             # Result should have separate tests
             self.assertIsNotNone(result)
@@ -790,16 +877,14 @@ class TestCIVETStore(ResultsStoreTestCase):
                 self.assertIsInstance(result_data, ObjectId)
 
             # Test entries should link to the result
-            self.assertEqual(len(tests), len(test_ids))
+            self.assertEqual(len(tests), len(entry.test_ids))
             for test in tests:
-                self.assertEqual(test["result_id"], result_id)
-                self.assertIn(test["_id"], test_ids)
+                self.assertEqual(test["result_id"], entry.result_id)
+                self.assertIn(test["_id"], entry.test_ids)
 
         # Delete the entries
         finally:
-            if result_id is not None:
-                with civetstore.setup_client() as client:
-                    client[LIVE_DATABASE].results.delete_one({"_id": result_id})
-            if test_ids is not None:
-                with civetstore.setup_client() as client:
-                    client[LIVE_DATABASE].tests.delete_many({"_id": {"$in": test_ids}})
+            with civetstore.setup_client() as client:
+                db = client[LIVE_DATABASE]
+                db.results.delete_one({"_id": entry.result_id})
+                db.tests.delete_many({"_id": {"$in": entry.test_ids}})

@@ -39,6 +39,8 @@ HAS_READER_AUTH = READER_AUTH is not None
 # Default arguments for getting test results
 DEFAULT_TESTHARNESS_ARGS = ["--capture-perf-graph"]
 
+UNUSED_OBJECT_ID = ObjectId()
+
 
 class TestResultsStoreCombined(ResultsStoreTestCase):
     """
@@ -61,26 +63,24 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
     to the database to try to minimize contention.
     """
 
-    def delete_documents(
-        self, result_id: Optional[ObjectId], test_ids: Optional[list[ObjectId]] = None
-    ):
+    def delete_documents(self, entry: CIVETStore.StoredEntry):
         """Delete documents in a database after storing them."""
-        if result_id is None:
+        if entry.result_id == UNUSED_OBJECT_ID:
             return
 
         with CIVETStore.setup_client() as client:
             db = client[TEST_DATABASE]
 
-            result_filter = {"_id": {"$eq": result_id}}
+            result_filter = {"_id": {"$eq": entry.result_id}}
             result_deleted = db.results.delete_one(result_filter)
             self.assertTrue(result_deleted.acknowledged)
             self.assertEqual(result_deleted.deleted_count, 1)
 
-            if test_ids:
-                tests_filter = {"_id": {"$in": test_ids}}
+            if entry.test_ids:
+                tests_filter = {"_id": {"$in": entry.test_ids}}
                 tests_deleted = db.tests.delete_many(tests_filter)
                 self.assertTrue(tests_deleted.acknowledged)
-                self.assertEqual(tests_deleted.deleted_count, len(test_ids))
+                self.assertEqual(tests_deleted.deleted_count, len(entry.test_ids))
 
     def compare_result(self, result: StoredResult, env: dict, base_sha: str):
         """Compare a StoredResult with the civet environment."""
@@ -152,18 +152,16 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
         env = {"CIVET_EVENT_CAUSE": "Pull request", "CIVET_PR_NUM": str(pr_num)}
         env.update(base_env)
 
-        result_id = None
+        entry = CIVETStore.StoredEntry("unused", UNUSED_OBJECT_ID)
         try:
-            result_id, test_ids = CIVETStore().store(
-                TEST_DATABASE, data, base_sha, env=env
-            )
-            self.assertIsInstance(result_id, ObjectId)
-            self.assertIsNone(test_ids)
+            entry = CIVETStore().store(TEST_DATABASE, data, base_sha, env=env)
+            self.assertIsInstance(entry.result_id, ObjectId)
+            self.assertIsNone(entry.test_ids)
 
             # Test get_[event,pr,commit]_result()
-            self.run_get_cached_result_test(env, base_sha, result_id)
+            self.run_get_cached_result_test(env, base_sha, entry.result_id)
         finally:
-            self.delete_documents(result_id)
+            self.delete_documents(entry)
 
     @pytest.mark.live_db
     @unittest.skipUnless(HAS_STORE_AUTH, "Store auth unavailable")
@@ -176,17 +174,14 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
         env = {"CIVET_EVENT_CAUSE": "Push next", "CIVET_PR_NUM": "0"}
         env.update(base_env)
 
-        result_id = None
-        test_ids = None
+        entry = CIVETStore.StoredEntry("unused", UNUSED_OBJECT_ID)
         try:
-            result_id, test_ids = CIVETStore().store(
-                TEST_DATABASE, data, base_sha, env=env
-            )
-            self.assertIsInstance(result_id, ObjectId)
-            self.assertIsNone(test_ids)
+            entry = CIVETStore().store(TEST_DATABASE, data, base_sha, env=env)
+            self.assertIsInstance(entry.result_id, ObjectId)
+            self.assertIsNone(entry.test_ids)
 
             # Test get_[event,pr,commit]_result()
-            self.run_get_cached_result_test(env, base_sha, result_id)
+            self.run_get_cached_result_test(env, base_sha, entry.result_id)
 
             # Test get_latest_push_results(); python tests share
             # a database so we want to make sure that we have
@@ -196,13 +191,13 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
                 latest_collection = reader.get_latest_push_results(50)
                 assert latest_collection is not None
                 find_result = [
-                    r for r in latest_collection.results if r.id == result_id
+                    r for r in latest_collection.results if r.id == entry.result_id
                 ]
                 self.assertEqual(len(find_result), 1)
                 this_result = find_result[0]
                 self.compare_result(this_result, env, base_sha)
         finally:
-            self.delete_documents(result_id)
+            self.delete_documents(entry)
 
     @pytest.mark.live_db
     @unittest.skipUnless(HAS_STORE_AUTH, "Store auth unavailable")
@@ -217,14 +212,13 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
         env.update(base_env)
         event_sha = env["CIVET_HEAD_SHA"]
 
-        result_id = None
-        test_ids = None
+        entry = CIVETStore.StoredEntry("unused", UNUSED_OBJECT_ID)
         try:
-            result_id, test_ids = CIVETStore().store(
+            entry = CIVETStore().store(
                 TEST_DATABASE, data, base_sha, env=env, max_result_size=1e-6
             )
-            assert test_ids is not None
-            self.assertEqual(len(test_ids), len(TEST_NAMES))
+            assert entry.test_ids is not None
+            self.assertEqual(len(entry.test_ids), len(TEST_NAMES))
 
             with ResultsReader(TEST_DATABASE, authentication=READER_AUTH) as ctx:
                 reader = ctx.reader
@@ -232,4 +226,4 @@ class TestResultsStoreCombined(ResultsStoreTestCase):
                 assert collection is not None
                 self.compare_collection(collection, env, base_sha)
         finally:
-            self.delete_documents(result_id, test_ids)
+            self.delete_documents(entry)
