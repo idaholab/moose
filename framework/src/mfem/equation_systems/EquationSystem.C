@@ -207,7 +207,8 @@ EquationSystem::EliminateCoupledVariables()
     auto lf = _lfs.Get(test_var_name);
     for (const auto & eliminated_var_name : _eliminated_var_names)
     {
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name))
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name) &&
+          !VectorContainsName(_test_var_names, eliminated_var_name))
       {
         auto mblf = _mblfs.Get(test_var_name)->Get(eliminated_var_name);
         // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
@@ -563,8 +564,8 @@ TimeDependentEquationSystem::BuildBilinearForms()
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
     auto td_blf = _td_blfs.GetShared(test_var_name);
     td_blf->SetAssemblyLevel(_assembly_level);
-    ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
-        test_var_name, test_var_name, td_blf, _integrated_bc_map);
+    // ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
+    //     test_var_name, test_var_name, td_blf, _integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, td_blf, _td_kernels_map);
     // Assemble
@@ -575,7 +576,49 @@ TimeDependentEquationSystem::BuildBilinearForms()
 void
 TimeDependentEquationSystem::BuildMixedBilinearForms()
 {
-  EquationSystem::BuildMixedBilinearForms();
+  // Register mixed bilinear forms. Note that not all combinations may
+  // have a kernel.
+
+  // Create mblf for each test/coupled variable pair with an added kernel.
+  // Mixed bilinear forms with coupled variables that are not trial variables are
+  // associated with contributions from eliminated variables.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    for (const auto j : index_range(_coupled_var_names))
+    {
+      const auto & coupled_var_name = _coupled_var_names.at(j);
+      auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
+                                                               _test_pfespaces.at(i));
+      // Register MixedBilinearForm if kernels exist for it, and assemble
+      // kernels
+      if (test_var_name != coupled_var_name)
+      {
+        // Apply all mixed kernels with this test/trial pair
+        ApplyBoundaryBLFIntegrators<mfem::ParMixedBilinearForm>(
+            coupled_var_name, test_var_name, mblf, _integrated_bc_map, _dt_coef.constant);
+        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+            coupled_var_name, test_var_name, mblf, _kernels_map, _dt_coef.constant);
+        // Apply dt*du/dt contributions from the operator on the trial variable
+        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+            coupled_var_name, test_var_name, mblf, _td_kernels_map);
+        if (mblf->GetDBFI()->Size() || mblf->GetBBFI()->Size())
+        {
+          // Assemble mixed bilinear forms
+          mblf->SetAssemblyLevel(_assembly_level);
+          mblf->Assemble();
+          // Register mixed bilinear forms associated with a single trial variable
+          // for the current test variable
+          test_mblfs->Register(coupled_var_name, mblf);
+        }
+      }
+    }
+    // Register all mixed bilinear form sets associated with a single test
+    // variable
+    _mblfs.Register(test_var_name, test_mblfs);
+  }
+
   // Register mixed bilinear forms. Note that not all combinations may
   // have a kernel.
 
@@ -592,33 +635,20 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
                                                                   _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
-      if (_td_kernels_map.Has(test_var_name) &&
-          _td_kernels_map.Get(test_var_name)->Has(trial_var_name) &&
-          test_var_name != trial_var_name)
+      if (test_var_name != trial_var_name)
       {
         // Apply all mixed kernels with this test/trial pair
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
             trial_var_name, test_var_name, td_mblf, _td_kernels_map);
-      }
-      // Recover and scale integrators from the mblf acting on the time integral of the trial
-      // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
-      // from the operator on the trial variable in the implicit integration scheme
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
-      {
-        // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
-        // from the operator on the trial variable in the implicit integration scheme
-        auto mblf = _mblfs.Get(test_var_name)->GetShared(trial_var_name);
-        ScaleAndAddBLFIntegrators(mblf, td_mblf, _dt_coef.constant);
-      }
-      // If implicit contributions exist, scale them by timestep and add to td_mblf
-      if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
-      {
         // Assemble mixed bilinear form
-        td_mblf->SetAssemblyLevel(_assembly_level);
-        td_mblf->Assemble();
-        // Register mixed bilinear forms associated with a single trial variable
-        // for the current test variable
-        test_td_mblfs->Register(trial_var_name, td_mblf);
+        if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
+        {
+          td_mblf->SetAssemblyLevel(_assembly_level);
+          td_mblf->Assemble();
+          // Register mixed bilinear forms associated with a single trial variable
+          // for the current test variable
+          test_td_mblfs->Register(trial_var_name, td_mblf);
+        }
       }
     }
     // Register all mixed bilinear forms associated with a single test variable
@@ -635,10 +665,10 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
     auto & test_var_name = _test_var_names.at(i);
     auto td_blf = _td_blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
+    *lf *= _dt_coef.constant;
     // if implicit, add contribution to linear form from terms involving state
     // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
     mfem::Vector lf_prev(lf->Size());
-    lf_prev *= _dt_coef.constant;
     td_blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
     *lf += lf_prev;
   }

@@ -233,7 +233,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
       mfem::BilinearFormIntegrator * integ =
           scale_factor > 0.0 ? new ScaleIntegrator(kernel->createBFIntegrator(), scale_factor, true)
                              : kernel->createBFIntegrator();
-      if (integ != nullptr)
+      if (integ != nullptr && kernel->createBFIntegrator() != nullptr)
       {
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
@@ -284,7 +284,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
       mfem::BilinearFormIntegrator * integ =
           scale_factor > 0.0 ? new ScaleIntegrator(bc->createBFIntegrator(), scale_factor, true)
                              : bc->createBFIntegrator();
-      if (integ != nullptr)
+      if (integ != nullptr && bc->createBFIntegrator() != nullptr)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
@@ -333,28 +333,6 @@ public:
   virtual void BuildBilinearForms() override;
   virtual void BuildMixedBilinearForms() override;
   virtual void EliminateCoupledVariables() override;
-
-  /// Fetch all integrators on a source bilinear form, scale them by a real factor, and add to a second target bilienar form.
-  /// Useful for scaling bilinear form integrators by timesteps.
-  template <class FormType>
-  void ScaleAndAddBLFIntegrators(std::shared_ptr<FormType> source_blf,
-                                 std::shared_ptr<FormType> target_blf,
-                                 mfem::real_t scale_factor)
-  {
-    // Add and scale all domain integrators existing on source_blf to target_blf
-    auto domain_integrators = source_blf->GetDBFI();
-    auto domain_markers = source_blf->GetDBFI_Marker();
-    for (int i = 0; i < domain_integrators->Size(); ++i)
-      target_blf->AddDomainIntegrator(
-          new ScaleIntegrator(*domain_integrators[i], scale_factor, false), *(*domain_markers[i]));
-    // Add and scale all boundary integrators existing on source_blf to target_blf
-    auto boundary_integrators = source_blf->GetBBFI();
-    auto boundary_markers = source_blf->GetBBFI_Marker();
-    for (int i = 0; i < boundary_integrators->Size(); ++i)
-      target_blf->AddBoundaryIntegrator(
-          new ScaleIntegrator(*boundary_integrators[i], scale_factor, false),
-          *(*boundary_markers[i]));
-  }
 
 protected:
   /// Coefficient for timestep scaling
