@@ -19,7 +19,6 @@ The purpose of these lists is two fold:
 
 - [Aurora](https://aurora-multiphysics.github.io/aurora/) - Integration of OpenMC and MOOSE developed by the UKAEA
 - [Frog](https://github.com/idaholab/thermal_to_fusion_converter) - Integration of GEANT-4 for high-energy particle transport
-- [Gardensnake](https://github.com/friedmud/gardensnake) - Nodal neutron diffusion code developed at MIT
 - [Moltres](https://github.com/arfc/moltres) - Molten salt reactor simulation
 - [Squirrel](https://github.com/philipJFpfahl/Squirrel) - Point kinetics with delayed neutron precursor advection in molten salt reactors
 
@@ -30,7 +29,7 @@ The purpose of these lists is two fold:
 - [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
 - [hippo](https://github.com/aurora-multiphysics/hippo) - Integration of OpenFOAM and MOOSE to enable thermohydraulic simulations
 - [Saline](https://code.ornl.gov/neams/saline) - Molten salt fluid properties from MSTDB experimental data
-- [marlin](https://github.com/idaholab/marlin) - Spectral solver based on MOOSE and GPU-capable
+- [Marlin](https://github.com/idaholab/marlin) - Spectral PDE and Lattice Boltzmann solver based on MOOSE with GPU-acceleration
 
 
 ### Mechanics
@@ -64,7 +63,6 @@ The purpose of these lists is two fold:
 ### Chemistry & species transport
 
 - [DGOSPREY](https://github.com/aladshaw3/dgosprey) - Discontinuous Galerkin Off-gas SeParation and REcoverY model: joint development between INL and GIT
-- [MAMBA](https://github.com/shortlab/mamba) - CASL's code for boiling, heat transfer, and chemistry in porous media
 - [TMAP8](https://mooseframework.inl.gov/TMAP8/) - System-level mass and thermal transport calculations related to tritium migration.
 
 
@@ -90,19 +88,19 @@ These applications require a license. Many of them can be obtained through the [
 ### Nuclear Engineering Advanced Modeling and Simulation (NEAMS) tools
 
 - [BISON](https://inlsoftware.inl.gov/product/bison) - Flagship fuels performance code
-- Centipede - A tool to inform engineering scale simulations with atomistic data
+- [Centipede](https://www.sciencedirect.com/science/article/pii/S0022311520301884) - A tool to inform engineering scale simulations with atomistic data, developed at LANL
 - [GRIFFIN](https://inlsoftware.inl.gov/product/griffin) - Reactor physics code co-developed between Argonne and Idaho National Laboratory
 - [GRIZZLY](https://inlsoftware.inl.gov/product/grizzly) - Nuclear Plant System Degradation Modeling
 - [MARMOT](https://inlsoftware.inl.gov/product/marmot) - Nuclear materials phase field and mechanics application
 - [PRONGHORN](https://inlsoftware.inl.gov/product/pronghorn) - Transient prismatic and pebble bed reactor analysis code
 - [RELAP7](https://inlsoftware.inl.gov/product/relap7) - Next Generation nuclear reactor system safety analysis code (compressible flow)
-- SAM - Advanced nuclear reactor system analysis code (weakly-compressible flow)
+- [SAM](https://www.anl.gov/nse/system-analysis-module) - Advanced nuclear reactor system analysis code (weakly-compressible flow), developed at ANL
 - [Sockeye](https://inlsoftware.inl.gov/product/sockeye) - Multi-fidelity studies of heat pipes for nuclear applications
-- SWIFT - A thermo-chemistry tool for metal hydride moderators
+- SWIFT - A thermo-chemistry tool for metal hydride moderators, developed at LANL
 
 Combined applications
 
-- DIREWOLF - Advanced reactor multiphysics simulation suite including Griffin, Bison, Sockeye
+- [DIREWOLF](https://www.tandfonline.com/doi/full/10.1080/00295450.2021.1906474) - Advanced reactor multiphysics simulation suite including Griffin, Bison, Sockeye
 - BLUECRAB - Advanced reactor multiphysics simulation suite including Griffin, Bison, Pronghorn, SAM (and Sockeye for special builds)
 - SABERTOOTH - Advanced reactor multiphysics simulation suite
 
@@ -110,6 +108,7 @@ Combined applications
 
 - Great White - 3D discrete dislocation dynamic application using the Mechanics of Defects Library
 - Mixcoatl$^{TM}$ - Conjugate heat transfer in microreactors
+- MONARCH - Radiation damage modeling in semiconductors
 
 
 ## Legacy software
@@ -120,8 +119,10 @@ We list here older, unmaintained, projects for consideration when naming a new p
 
 - [Achlys](https://github.com/aurora-multiphysics/achlys) - Macroscopic tritium transport processes through fusion materials
 - [Dendragapus](https://github.com/jarons/dendragapus) - Application to explore modifications to Picard Iteration
+- [Gardensnake](https://github.com/friedmud/gardensnake) - Nodal neutron diffusion code developed at MIT
 - [Slug](https://github.com/adamLange/slug) - Hyperloop air bearing simulation tool
 - [MaCaw](https://github.com/idaholab/macaw) - Domain-decomposed unstructured mesh Monte Carlo particle transport using OpenMC as a collision physics library
+- [MAMBA](https://github.com/shortlab/mamba) - MOOSE port of the still maintained non-MOOSE MAMBA CASL code for boiling, heat transfer, and chemistry in porous media
 
 
 ### Closed source
