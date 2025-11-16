@@ -296,17 +296,19 @@ Output::onInterval()
                  "warehouse which determines its sync times at output construction time.");
   }
 
+  // We make sync times have precendence over the other criteria by convention, since they already
+  // take precedence of start/end step, start/end time, step frequency etc
+  // check if enough simulation time has passed between outputs
+  if (_time > _last_output_simulation_time &&
+      _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
+    output = false;
+
   // If sync times are not skipped, return true if the current time is a sync_time
   for (const auto _sync_time : _sync_times)
   {
     if (std::abs(_sync_time - _time) < _t_tol)
       output = true;
   }
-
-  // check if enough simulation time has passed between outputs
-  if (_time > _last_output_simulation_time &&
-      _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
-    output = false;
 
   // check if enough wall time has passed between outputs
   const auto now = std::chrono::steady_clock::now();
