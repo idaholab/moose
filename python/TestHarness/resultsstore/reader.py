@@ -10,7 +10,7 @@
 """Implements ResultsReader for reading results from a database."""
 
 from dataclasses import dataclass
-from typing import Iterator, Optional
+from typing import Any, Iterator, Optional
 
 import pymongo
 from bson.objectid import ObjectId
@@ -110,12 +110,13 @@ class ResultsReader:
 
         # Cached results, by ID
         self._results: dict[ObjectId, Optional[StoredResult]] = {}
-        # Cached results by PR number
-        self._pr_num_results: dict[int, Optional[StoredResult]] = {}
-        # Cached results by event ID
-        self._event_id_results: dict[int, Optional[StoredResult]] = {}
-        # Cached results by commit
-        self._event_sha_results: dict[str, Optional[StoredResult]] = {}
+        # Cached results by type
+        self._cached_results: dict[str, dict[Any, Optional[StoredResult]]] = {
+            "pr_num": {},
+            "event_id": {},
+            "event_sha": {},
+            "_id": {},
+        }
 
         # Cached StoredResult objects for push events, latest to oldest
         self._latest_push_results: list[StoredResult] = []
@@ -355,7 +356,7 @@ class ResultsReader:
 
     def get_cached_result(self, index: str, value) -> Optional[ResultCollection]:
         """Get a result given a filter and store it in the cache."""
-        cache = getattr(self, f"_{index}_results")
+        cache = self._cached_results[index]
 
         # Value exists in the cache
         cached_value = cache.get(value)
@@ -397,3 +398,8 @@ class ResultsReader:
         assert isinstance(commit_sha, str)
         assert len(commit_sha) == 40
         return self.get_cached_result("event_sha", commit_sha)
+
+    def get_id_result(self, result_id: ObjectId) -> Optional[ResultCollection]:
+        """Get the latest result for the given ID, if any."""
+        assert isinstance(result_id, ObjectId)
+        return self.get_cached_result("_id", result_id)

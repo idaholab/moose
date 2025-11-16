@@ -491,7 +491,7 @@ class TestResultsReader(ResultsStoreTestCase):
 
         # Check built state
         self.assertIsNotNone(collection)
-        cache = getattr(reader, f"_{index}_results")
+        cache = reader._cached_results[index]
         self.assertEqual(len(cache), 1)
         self.assertIn(value, cache)
 
@@ -516,6 +516,10 @@ class TestResultsReader(ResultsStoreTestCase):
         """Test get_commit_result()."""
         self.run_test_get_cached_result("commit", "event_sha", random_git_sha())
 
+    def test_get_id_result(self):
+        """Test get_id_result()."""
+        self.run_test_get_cached_result("id", "_id", ObjectId())
+
     def run_test_get_cached_result_none(self, method_index: str, value):
         """Test get_cached_result() for the given index when none found."""
         reader = ResultsReader(DATABASE_NAME, FakeMongoClient())
@@ -536,6 +540,10 @@ class TestResultsReader(ResultsStoreTestCase):
         """Test get_commit_result() when nothing is found."""
         self.run_test_get_cached_result_none("commit", random_git_sha())
 
+    def test_get_id_result_none(self):
+        """Test get_id_result() when nothing is found."""
+        self.run_test_get_cached_result_none("id", ObjectId())
+
     def run_test_get_cached_result_live(
         self, method_index: str, index: str, filter: dict
     ):
@@ -547,7 +555,7 @@ class TestResultsReader(ResultsStoreTestCase):
             # Find a valid value
             docs = reader._find_results(filter, limit=1)
             self.assertEqual(len(docs), 1)
-            value = docs[0][index]
+            value = docs[0]["_id" if index == "id" else index]
 
             collection = method(value)
             assert collection is not None
@@ -603,6 +611,12 @@ class TestResultsReader(ResultsStoreTestCase):
                 self.assertEqual(result.civet_version, gold_result.civet_version)
                 self.assertEqual(result.event_sha, event_sha)
 
+    @pytest.mark.live_db
+    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    def test_get_id_result_live(self):
+        """Test get_id_result() with a live database."""
+        self.run_test_get_cached_result_live("id", "id", {})
+
     def run_test_get_cached_result_none_live(
         self, method_index: str, value, filter: dict
     ):
@@ -643,4 +657,13 @@ class TestResultsReader(ResultsStoreTestCase):
         commit = random_git_sha()
         self.run_test_get_cached_result_none_live(
             "commit", commit, {"event_sha": {"$eq": commit}}
+        )
+
+    @pytest.mark.live_db
+    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    def test_get_id_none_live(self):
+        """Test get_id_result() with a live database and no such ID."""
+        result_id = ObjectId()
+        self.run_test_get_cached_result_none_live(
+            "id", result_id, {"_id": {"$eq": result_id}}
         )

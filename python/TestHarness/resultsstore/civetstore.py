@@ -332,8 +332,6 @@ class CIVETStore:
     class BuiltEntry:
         """Data class for an entry built with build()."""
 
-        # The event sha for the entry
-        event_sha: str
         # The result data
         result: dict
         # The separate test data, if any
@@ -481,9 +479,7 @@ class CIVETStore:
         info += [", ".join(sizes)]
         print(" ".join(info))
 
-        return self.BuiltEntry(
-            event_sha=header["event_sha"], result=results, tests=tests
-        )
+        return self.BuiltEntry(result=results, tests=tests)
 
     @staticmethod
     def setup_client() -> MongoClient:
@@ -582,8 +578,6 @@ class CIVETStore:
     class StoredEntry:
         """Data class for an entry stored with store()."""
 
-        # The event sha for the entry
-        event_sha: str
         # The result ID in the database
         result_id: ObjectId
         # The test IDs in the databse, if any
@@ -631,12 +625,11 @@ class CIVETStore:
         self._insert_database(database, insert_result, insert_tests)
 
         return self.StoredEntry(
-            event_sha=built_entry.event_sha,
             result_id=insert_result["_id"],
             test_ids=[v["_id"] for v in insert_tests] if insert_tests else None,
         )
 
-    def check(self, database: str, event_sha: str):
+    def check(self, database: str, result_id: ObjectId):
         """
         Check the full load of an entry that was stored.
 
@@ -644,8 +637,8 @@ class CIVETStore:
         ----------
         database : str
             The name of the mongo database that was stored into
-        event_sha : str
-            The SHA of the event that was stored
+        result_id : ObjectId
+            The ID of the inserted result
 
         """
         with ResultsReader(
@@ -653,14 +646,12 @@ class CIVETStore:
         ) as ctx:
             reader = ctx.reader
 
-            # Make sure the result exists
-            collection = reader.get_commit_result(event_sha)
+            # Load the result
+            collection = reader.get_id_result(result_id)
             if collection is None:
-                raise SystemExit(
-                    f"Failed to load inserted result with commit {event_sha}"
-                )
+                raise SystemExit(f"Failed to get inserted result with ID {result_id}")
 
-            # And that we can load all of the data
+            # And all of the data
             collection.get_all_tests(TestDataFilter.ALL)
 
     def main(
@@ -714,7 +705,7 @@ class CIVETStore:
 
         # Check if not requested to not do so
         if not no_check:
-            self.check(database, stored_entry.event_sha)
+            self.check(database, stored_entry.result_id)
 
         return stored_entry
 
