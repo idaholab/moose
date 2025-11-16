@@ -237,9 +237,6 @@ protected:
   /// Minimum simulation time between outputs
   const Real _min_simulation_time_interval;
 
-  /// Target simulation time between outputs
-  const Real _simulation_time_interval;
-
   /// Target wall time between outputs in seconds
   Real _wall_time_interval;
 
