@@ -672,6 +672,21 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
     td_blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
     *lf += lf_prev;
   }
+  for (const auto & test_var_name : _test_var_names)
+  {
+    auto lf = _lfs.Get(test_var_name);
+    for (const auto & eliminated_var_name : _eliminated_var_names)
+    {
+      if (_td_mblfs.Has(test_var_name) && _td_mblfs.Get(test_var_name)->Has(eliminated_var_name))
+      {
+        auto td_mblf = _td_mblfs.Get(test_var_name)->Get(eliminated_var_name);
+        // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+        mfem::Vector lf_prev(lf->Size());
+        td_mblf->Mult(*_eliminated_variables.Get(eliminated_var_name), lf_prev);
+        *lf += lf_prev;
+      }
+    }
+  }  
   // Eliminate contributions from other coupled variables.
   EquationSystem::EliminateCoupledVariables();
 }
