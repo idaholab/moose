@@ -34,7 +34,8 @@ InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & paramete
     _current_elem_volume(_assembly.elemVolume()),
     _current_node(nullptr),
     _qp(0),
-    _fe_type(_var.feType())
+    _fe_type(_var.feType()),
+    _dof_indices(_var.dofIndices())
 {
 }
 
@@ -51,6 +52,7 @@ InitialConditionTempl<T>::compute()
   // The following code is a copy from libMesh project_vector.C plus it adds some features, so we
   // can couple variable values
   // and we also do not call any callbacks, but we use our initial condition system directly.
+  // Eventually we should try to fix things so we're not duplicating code
   // ------------
 
   // The dimension of the current element
@@ -92,10 +94,12 @@ InitialConditionTempl<T>::compute()
 
   // Update the DOF indices for this element based on the current mesh
   _var.prepareIC();
-  _dof_indices = _var.dofIndices();
 
-  // The number of DOFs on the element
-  const unsigned int n_dofs = _dof_indices.size();
+  // The number of DOFs on the element for this finite element type
+  const unsigned int n_dofs = _dof_indices.size() / _var.count();
+  mooseAssert(_dof_indices.size() % _var.count() == 0,
+              "The number of degrees of freedom should be cleanly divisible by the variable count");
+
   if (n_dofs == 0)
     return;
 
@@ -148,8 +152,6 @@ InitialConditionTempl<T>::compute()
       continue;
     }
 
-    // FIXME: this should go through the DofMap,
-    // not duplicate _dof_indices code badly!
     if (!_current_elem->is_vertex(_n))
     {
       _current_dof += _nc;
@@ -251,13 +253,9 @@ InitialConditionTempl<T>::compute()
   for (unsigned int i = 0; i != n_dofs; ++i)
     libmesh_assert(_dof_is_fixed[i]);
 
-  // Lock the new_vector since it is shared among threads.
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (size_t i = 0; i < mask.size(); i++)
-      if (mask(i))
-        _var.setDofValue(_Ue(i), i);
-  }
+  for (size_t i = 0; i < mask.size(); i++)
+    if (mask(i))
+      _var.setDofValue(_Ue(i), i);
 }
 
 template <typename T>
@@ -439,7 +437,7 @@ InitialConditionTempl<T>::choleskyAssembly(bool is_volume)
     if (_cont == C_ONE)
       finegrad = gradient((*_xyz_values)[_qp]);
 
-    auto dofs_size = is_volume ? _dof_indices.size() : _side_dofs.size();
+    auto dofs_size = is_volume ? (_dof_indices.size() / _var.count()) : _side_dofs.size();
 
     // Form edge projection matrix
     for (decltype(dofs_size) geomi = 0, freei = 0; geomi != dofs_size; ++geomi)
@@ -476,7 +474,7 @@ InitialConditionTempl<T>::choleskyAssembly(bool is_volume)
 
 template <typename T>
 void
-InitialConditionTempl<T>::choleskySolve(bool is_volume)
+InitialConditionTempl<T>::choleskySolve(const bool is_volume)
 {
   _Ke.resize(_free_dofs, _free_dofs);
   _Ke.zero();
@@ -503,7 +501,7 @@ InitialConditionTempl<T>::choleskySolve(bool is_volume)
 
 template <>
 void
-InitialConditionTempl<RealEigenVector>::choleskySolve(bool is_volume)
+InitialConditionTempl<RealEigenVector>::choleskySolve(const bool is_volume)
 {
   _Ke.resize(_free_dofs, _free_dofs);
   _Ke.zero();
@@ -551,10 +549,7 @@ InitialConditionTempl<T>::computeNodal(const Point & p)
                                     // value is up-to-date
 
   // We are done, so update the solution vector
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _var.insert(_var.sys().solution());
-  }
+  _var.insert(_var.sys().solution());
 }
 
 template class InitialConditionTempl<Real>;

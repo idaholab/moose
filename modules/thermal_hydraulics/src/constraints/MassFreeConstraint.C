@@ -38,7 +38,7 @@ MassFreeConstraint::MassFreeConstraint(const InputParameters & parameters)
 }
 
 void
-MassFreeConstraint::computeResidual(NumericVector<Number> & /*residual*/)
+MassFreeConstraint::computeResidual(const NumericVector<Number> & /*residual*/)
 {
   const auto & dofs = _var.dofIndices();
   std::vector<Number> re(dofs.size());
@@ -49,10 +49,14 @@ MassFreeConstraint::computeResidual(NumericVector<Number> & /*residual*/)
   addResiduals(_assembly, re, dofs, _var.scalingFactor());
 }
 
-Real MassFreeConstraint::computeQpResidual(Moose::ConstraintType /*type*/) { return 0; }
+Real
+MassFreeConstraint::computeQpResidual(Moose::ConstraintType /*type*/)
+{
+  return 0;
+}
 
 void
-MassFreeConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
+MassFreeConstraint::computeJacobian(const SparseMatrix<Number> & /*jacobian*/)
 {
   const auto & dofs = _var.dofIndices();
 
@@ -69,4 +73,8 @@ MassFreeConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
   }
 }
 
-Real MassFreeConstraint::computeQpJacobian(Moose::ConstraintJacobianType /*type*/) { return 0; }
+Real
+MassFreeConstraint::computeQpJacobian(Moose::ConstraintJacobianType /*type*/)
+{
+  return 0;
+}

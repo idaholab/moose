@@ -73,10 +73,6 @@ InterfaceKernelBase::validParams()
   return params;
 }
 
-// Static mutex definitions
-Threads::spin_mutex InterfaceKernelBase::_resid_vars_mutex;
-Threads::spin_mutex InterfaceKernelBase::_jacoby_vars_mutex;
-
 InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
   : NeighborResidualObject(parameters),
     BoundaryRestrictable(this, false), // false for _not_ nodal

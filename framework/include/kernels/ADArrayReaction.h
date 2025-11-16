@@ -1,0 +1,33 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "ADArrayKernel.h"
+
+/**
+ * Array kernel for adding a reaction term
+ */
+class ADArrayReaction : public ADArrayKernel
+{
+public:
+  static InputParameters validParams();
+
+  ADArrayReaction(const InputParameters & parameters);
+
+protected:
+  virtual void computeQpResidual(ADRealEigenVector & residual) override;
+
+  /// scalar reaction coefficient
+  const ADMaterialProperty<Real> * _r;
+  /// array reaction coefficient
+  const ADMaterialProperty<RealEigenVector> * const _r_array;
+  /// matrix of reaction coefficients (for cross reaction terms between array variables)
+  const ADMaterialProperty<RealEigenMatrix> * const _r_2d_array;
+};

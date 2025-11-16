@@ -174,10 +174,7 @@ NonlinearThread::onBoundary(const Elem * const elem,
     computeOnBoundary(bnd_id, lower_d_elem);
 
     if (lower_d_elem)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       accumulateLower();
-    }
   }
 }
 
@@ -221,10 +218,7 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
 
       computeOnInterface(bnd_id);
 
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        accumulateNeighbor();
-      }
+      accumulateNeighbor();
     }
   }
 }
@@ -257,10 +251,7 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
 
     computeOnInternalFace(neighbor);
 
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      accumulateNeighborLower();
-    }
+    accumulateNeighborLower();
   }
   if (_subdomain_has_hdg)
   {

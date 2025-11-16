@@ -118,11 +118,8 @@ NodalKernel::computeJacobian()
     addJacobianElement(_assembly, cached_val, cached_row, cached_row, _var.scalingFactor());
 
     if (_has_diag_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (const auto & var : _diag_save_in)
         var->sys().solution().add(var->nodalDofIndex(), cached_val);
-    }
   }
 }
 

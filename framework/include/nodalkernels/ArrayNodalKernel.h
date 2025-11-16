@@ -90,14 +90,6 @@ protected:
   const unsigned int _count;
 
 private:
-  /**
-   * Prepare our array variable degrees of freedom
-   */
-  void prepareDofs();
-
   /// Work vector for residual
   RealEigenVector _work_vector;
-
-  /// Work vector for the degree of freedom indices
-  std::vector<dof_id_type> _work_dofs;
 };

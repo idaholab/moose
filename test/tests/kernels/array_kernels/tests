@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6881 #14057 #23123'
+  issues = '#6881 #14057 #23123 #31506'
   design = '/variables/ArrayMooseVariable.md'
   [test]
     type = 'Exodiff'
@@ -7,11 +7,35 @@
     exodiff = 'array_diffusion_test_out.e'
     requirement = 'The system shall provide array diffusion kernels on an array variable.'
   []
+  [test_ad]
+    type = 'Exodiff'
+    input = 'ad_array_diffusion_test.i'
+    exodiff = 'ad_array_diffusion_test_out.e'
+    requirement = 'The system shall provide an array diffusion automatic differentiation kernel for an array variable.'
+  []
+  [test_ad_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_array_diffusion_test.i'
+    run_sim = true
+    requirement = 'The system shall compute an exact Jacobian for an array diffusion kernel implemented with automatic differentiation.'
+  []
   [test_diffusion_reaction]
     type = 'Exodiff'
     input = 'array_diffusion_reaction.i'
     exodiff = 'array_diffusion_reaction_out.e'
     requirement = 'The system shall provide array reaction kernels on an array variable.'
+  []
+  [test_ad_diffusion_reaction]
+    type = 'Exodiff'
+    input = 'ad_array_diffusion_reaction.i'
+    exodiff = 'ad_array_diffusion_reaction_out.e'
+    requirement = 'The system shall provide an array reaction automatic differentiation kernel that operates on an array variable.'
+  []
+  [test_ad_diffusion_reaction_jac]
+    type = 'PetscJacobianTester'
+    input = 'ad_array_diffusion_reaction.i'
+    run_sim = True
+    requirement = 'The system shall compute an exact Jacobian for an array reaction kernel implemented with automatic differentiation.'
   []
   [test_diffusion_reaction_dg]
     type = 'Exodiff'

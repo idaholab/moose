@@ -29,7 +29,7 @@ using namespace libMesh;
 namespace MooseMeshElementConversionUtils
 {
 void
-hexElemSplitter(ReplicatedMesh & mesh,
+hexElemSplitter(MeshBase & mesh,
                 const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                 const dof_id_type elem_id,
                 std::vector<dof_id_type> & converted_elems_ids)
@@ -95,7 +95,7 @@ hexElemSplitter(ReplicatedMesh & mesh,
 }
 
 void
-prismElemSplitter(ReplicatedMesh & mesh,
+prismElemSplitter(MeshBase & mesh,
                   const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                   const dof_id_type elem_id,
                   std::vector<dof_id_type> & converted_elems_ids)
@@ -157,7 +157,7 @@ prismElemSplitter(ReplicatedMesh & mesh,
 }
 
 void
-pyramidElemSplitter(ReplicatedMesh & mesh,
+pyramidElemSplitter(MeshBase & mesh,
                     const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                     const dof_id_type elem_id,
                     std::vector<dof_id_type> & converted_elems_ids)
@@ -582,12 +582,15 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
 }
 
 void
-convert3DMeshToAllTet4(ReplicatedMesh & mesh,
+convert3DMeshToAllTet4(MeshBase & mesh,
                        const std::vector<std::pair<dof_id_type, bool>> & elems_to_process,
                        std::vector<dof_id_type> & converted_elems_ids_to_track,
                        const subdomain_id_type block_id_to_remove,
                        const bool delete_block_to_remove)
 {
+  mooseAssert(mesh.is_serial(),
+              "This method only supports serial meshes. If you are calling this method with a "
+              "distributed mesh, please serialize it first.");
   std::vector<dof_id_type> converted_elems_ids_to_retain;
   // Build boundary information of the mesh
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -644,8 +647,11 @@ convert3DMeshToAllTet4(ReplicatedMesh & mesh,
 }
 
 void
-convert3DMeshToAllTet4(ReplicatedMesh & mesh)
+convert3DMeshToAllTet4(MeshBase & mesh)
 {
+  mooseAssert(mesh.is_serial(),
+              "This method only supports serial meshes. If you are calling this method with a "
+              "distributed mesh, please serialize it first.");
   // Subdomain ID for new utility blocks must be new
   std::set<subdomain_id_type> subdomain_ids_set;
   mesh.subdomain_ids(subdomain_ids_set);
@@ -685,7 +691,7 @@ elementBoundaryInfoCollector(const std::vector<libMesh::BoundaryInfo::BCTuple> &
 }
 
 void
-convertElem(ReplicatedMesh & mesh,
+convertElem(MeshBase & mesh,
             const dof_id_type & elem_id,
             const std::vector<unsigned int> & side_indices,
             const std::vector<std::vector<boundary_id_type>> & elem_side_info,
@@ -717,7 +723,7 @@ convertElem(ReplicatedMesh & mesh,
 }
 
 void
-convertHex8Elem(ReplicatedMesh & mesh,
+convertHex8Elem(MeshBase & mesh,
                 const dof_id_type & elem_id,
                 const std::vector<unsigned int> & side_indices,
                 const std::vector<std::vector<boundary_id_type>> & elem_side_info,
@@ -741,7 +747,7 @@ convertHex8Elem(ReplicatedMesh & mesh,
 }
 
 void
-createUnitPyramid5FromHex8(ReplicatedMesh & mesh,
+createUnitPyramid5FromHex8(MeshBase & mesh,
                            const dof_id_type & elem_id,
                            const unsigned int & side_index,
                            const Node * new_node,
@@ -762,7 +768,7 @@ createUnitPyramid5FromHex8(ReplicatedMesh & mesh,
 }
 
 void
-createUnitTet4FromHex8(ReplicatedMesh & mesh,
+createUnitTet4FromHex8(MeshBase & mesh,
                        const dof_id_type & elem_id,
                        const unsigned int & side_index,
                        const Node * new_node,
@@ -823,7 +829,7 @@ createUnitTet4FromHex8(ReplicatedMesh & mesh,
 }
 
 void
-convertPrism6Elem(ReplicatedMesh & mesh,
+convertPrism6Elem(MeshBase & mesh,
                   const dof_id_type & elem_id,
                   const std::vector<unsigned int> & side_indices,
                   const std::vector<std::vector<boundary_id_type>> & elem_side_info,
@@ -847,7 +853,7 @@ convertPrism6Elem(ReplicatedMesh & mesh,
 }
 
 void
-createUnitTet4FromPrism6(ReplicatedMesh & mesh,
+createUnitTet4FromPrism6(MeshBase & mesh,
                          const dof_id_type & elem_id,
                          const unsigned int & side_index,
                          const Node * new_node,
@@ -917,7 +923,7 @@ createUnitTet4FromPrism6(ReplicatedMesh & mesh,
 }
 
 void
-createUnitPyramid5FromPrism6(ReplicatedMesh & mesh,
+createUnitPyramid5FromPrism6(MeshBase & mesh,
                              const dof_id_type & elem_id,
                              const unsigned int & side_index,
                              const Node * new_node,
@@ -930,7 +936,7 @@ createUnitPyramid5FromPrism6(ReplicatedMesh & mesh,
 }
 
 void
-convertPyramid5Elem(ReplicatedMesh & mesh,
+convertPyramid5Elem(MeshBase & mesh,
                     const dof_id_type & elem_id,
                     const std::vector<std::vector<boundary_id_type>> & elem_side_info,
                     const SubdomainID & subdomain_id_shift_base)
@@ -995,7 +1001,7 @@ convertPyramid5Elem(ReplicatedMesh & mesh,
 }
 
 void
-retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_elem_ptr)
+retainEEID(MeshBase & mesh, const dof_id_type & elem_id, Elem * new_elem_ptr)
 {
   const unsigned int n_eeid = mesh.n_elem_integers();
   for (const auto & i : make_range(n_eeid))
@@ -1003,11 +1009,14 @@ retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_elem_p
 }
 
 void
-transitionLayerGenerator(ReplicatedMesh & mesh,
+transitionLayerGenerator(MeshBase & mesh,
                          const std::vector<BoundaryName> & boundary_names,
                          const unsigned int conversion_element_layer_number,
                          const bool external_boundaries_checking)
 {
+  mooseAssert(mesh.is_serial(),
+              "This method only supports serial meshes. If you are calling this method with a "
+              "distributed mesh, please serialize it first.");
   // The base subdomain ID to shift the original elements because of the element type change
   const auto sid_shift_base = MooseMeshUtils::getNextFreeSubdomainID(mesh);
   // The maximum subdomain ID that would be involved is sid_shift_base * 3, we would like to make
@@ -1224,7 +1233,7 @@ transitionLayerGenerator(ReplicatedMesh & mesh,
 
 void
 assignConvertedElementsSubdomainNameSuffix(
-    ReplicatedMesh & mesh,
+    MeshBase & mesh,
     const std::set<subdomain_id_type> & original_subdomain_ids,
     const subdomain_id_type sid_shift_base,
     const SubdomainName & tet_suffix,

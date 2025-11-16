@@ -29,7 +29,7 @@
  *
  * Each variable can compute nodal or elemental (at QPs) values.
  *
- * OutputType          OutputShape           OutputData
+ * OutputType          OutputShape           DofValue
  * ----------------------------------------------------
  * Real                Real                  Real
  * RealVectorValue     RealVectorValue       Real
@@ -78,8 +78,10 @@ public:
   typedef MooseArray<std::vector<OutputShapeDivergence>> FieldVariableTestDivergence;
 
   // DoF value type for the template class OutputType
-  typedef typename Moose::DOFType<OutputType>::type OutputData;
-  typedef MooseArray<OutputData> DoFValue;
+  using DofValue = typename MooseVariableDataBase<OutputType>::DofValue;
+  using DofValues = typename MooseVariableDataBase<OutputType>::DofValues;
+  using ADDofValue = typename MooseVariableDataBase<OutputType>::ADDofValue;
+  using ADDofValues = typename MooseVariableDataBase<OutputType>::ADDofValues;
 
   MooseVariableField(const InputParameters & parameters);
 
@@ -95,7 +97,7 @@ public:
   /**
    * Degree of freedom value setters
    */
-  virtual void setDofValue(const OutputData & value, unsigned int index) = 0;
+  virtual void setDofValue(const DofValue & value, unsigned int index) = 0;
   ///@}
 
   /**
@@ -171,17 +173,17 @@ public:
   /**
    * Return the AD dof values
    */
-  virtual const MooseArray<ADReal> & adDofValues() const = 0;
+  virtual const ADDofValues & adDofValues() const = 0;
 
   /**
    * Return the AD neighbor dof values
    */
-  virtual const MooseArray<ADReal> & adDofValuesNeighbor() const = 0;
+  virtual const ADDofValues & adDofValuesNeighbor() const = 0;
 
   /**
    * Return the AD time derivatives at dofs
    */
-  virtual const MooseArray<ADReal> & adDofValuesDot() const = 0;
+  virtual const ADDofValues & adDofValuesDot() const = 0;
 
   ///@{
   /**
@@ -321,13 +323,13 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  virtual void setDofValues(const DenseVector<OutputData> & values) = 0;
+  virtual void setDofValues(const DenseVector<DofValue> & values) = 0;
 
   /**
    * Set local DOF values for a lower dimensional element and evaluate the values on quadrature
    * points
    */
-  virtual void setLowerDofValues(const DenseVector<OutputData> & values) = 0;
+  virtual void setLowerDofValues(const DenseVector<DofValue> & values) = 0;
 
   /**
    * Whether or not this variable is actually using the shape function value.
@@ -352,22 +354,22 @@ public:
   /**
    * dof values getters
    */
-  virtual const DoFValue & dofValues() const = 0;
-  virtual const DoFValue & dofValuesOld() const = 0;
-  virtual const DoFValue & dofValuesOlder() const = 0;
-  virtual const DoFValue & dofValuesPreviousNL() const = 0;
-  virtual const DoFValue & dofValuesNeighbor() const = 0;
-  virtual const DoFValue & dofValuesOldNeighbor() const = 0;
-  virtual const DoFValue & dofValuesOlderNeighbor() const = 0;
-  virtual const DoFValue & dofValuesPreviousNLNeighbor() const = 0;
-  virtual const DoFValue & dofValuesDot() const = 0;
-  virtual const DoFValue & dofValuesDotNeighbor() const = 0;
-  virtual const DoFValue & dofValuesDotOld() const = 0;
-  virtual const DoFValue & dofValuesDotOldNeighbor() const = 0;
-  virtual const DoFValue & dofValuesDotDot() const = 0;
-  virtual const DoFValue & dofValuesDotDotNeighbor() const = 0;
-  virtual const DoFValue & dofValuesDotDotOld() const = 0;
-  virtual const DoFValue & dofValuesDotDotOldNeighbor() const = 0;
+  virtual const DofValues & dofValues() const = 0;
+  virtual const DofValues & dofValuesOld() const = 0;
+  virtual const DofValues & dofValuesOlder() const = 0;
+  virtual const DofValues & dofValuesPreviousNL() const = 0;
+  virtual const DofValues & dofValuesNeighbor() const = 0;
+  virtual const DofValues & dofValuesOldNeighbor() const = 0;
+  virtual const DofValues & dofValuesOlderNeighbor() const = 0;
+  virtual const DofValues & dofValuesPreviousNLNeighbor() const = 0;
+  virtual const DofValues & dofValuesDot() const = 0;
+  virtual const DofValues & dofValuesDotNeighbor() const = 0;
+  virtual const DofValues & dofValuesDotOld() const = 0;
+  virtual const DofValues & dofValuesDotOldNeighbor() const = 0;
+  virtual const DofValues & dofValuesDotDot() const = 0;
+  virtual const DofValues & dofValuesDotDotNeighbor() const = 0;
+  virtual const DofValues & dofValuesDotDotOld() const = 0;
+  virtual const DofValues & dofValuesDotDotOldNeighbor() const = 0;
   virtual const MooseArray<libMesh::Number> & dofValuesDuDotDu() const = 0;
   virtual const MooseArray<libMesh::Number> & dofValuesDuDotDuNeighbor() const = 0;
   virtual const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const = 0;
@@ -380,9 +382,9 @@ public:
    * tag values getters
    */
   virtual const FieldVariableValue & vectorTagValue(TagID tag) const = 0;
-  virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
-  virtual const DoFValue & vectorTagDofValue(TagID tag) const = 0;
-  virtual const DoFValue & nodalMatrixTagValue(TagID tag) const = 0;
+  virtual const DofValues & nodalVectorTagValue(TagID tag) const = 0;
+  virtual const DofValues & vectorTagDofValue(TagID tag) const = 0;
+  virtual const DofValues & nodalMatrixTagValue(TagID tag) const = 0;
   virtual const FieldVariableValue & matrixTagValue(TagID tag) const = 0;
 
   virtual void residualSetup() override;

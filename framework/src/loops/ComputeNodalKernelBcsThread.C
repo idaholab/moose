@@ -91,7 +91,6 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   if (_num_cached == 20) // cache 20 nodes worth before adding into the residual
   {
     _num_cached = 0;
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     _fe_problem.addCachedResidual(_tid);
   }
 }

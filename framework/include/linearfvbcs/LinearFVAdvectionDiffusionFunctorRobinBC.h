@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "LinearFVAdvectionDiffusionBC.h"
+#include "LinearFVAdvectionDiffusionFunctorRobinBCBase.h"
 
 /**
  * Class implementing a Robin boundary condition for linear finite
  * volume variables. This is only applicable for advection-diffusion problems.
  * alpha, beta, gamma are provided as functors and may vary in space/time.
  */
-class LinearFVAdvectionDiffusionFunctorRobinBC : public LinearFVAdvectionDiffusionBC
+class LinearFVAdvectionDiffusionFunctorRobinBC : public LinearFVAdvectionDiffusionFunctorRobinBCBase
 {
 public:
   /**
@@ -27,23 +27,11 @@ public:
 
   static InputParameters validParams();
 
-  virtual Real computeBoundaryValue() const override;
-
-  virtual Real computeBoundaryNormalGradient() const override;
-
-  virtual Real computeBoundaryValueMatrixContribution() const override;
-
-  virtual Real computeBoundaryValueRHSContribution() const override;
-
-  virtual Real computeBoundaryGradientMatrixContribution() const override;
-
-  virtual Real computeBoundaryGradientRHSContribution() const override;
-
 protected:
   /// Getter functions (consistent entry point for all derived classes)
-  virtual Real getAlpha(Moose::FaceArg face, Moose::StateArg state) const;
-  virtual Real getBeta(Moose::FaceArg face, Moose::StateArg state) const;
-  virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const;
+  virtual Real getAlpha(Moose::FaceArg face, Moose::StateArg state) const override;
+  virtual Real getBeta(Moose::FaceArg face, Moose::StateArg state) const override;
+  virtual Real getGamma(Moose::FaceArg face, Moose::StateArg state) const override;
 
   /// Functor giving the alpha coefficient (multiplying normal gradient)
   const Moose::Functor<Real> & _alpha;

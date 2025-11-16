@@ -43,9 +43,9 @@ BuildArrayVariableAux::BuildArrayVariableAux(const InputParameters & parameters)
 void
 BuildArrayVariableAux::compute()
 {
-  const auto n_local_dofs = _var.numberOfDofs();
-  _local_sol.resize(n_local_dofs);
-  for (MooseIndex(n_local_dofs) j = 0; j < n_local_dofs; ++j)
+  const auto n_shapes = _var.numberOfDofs() / _var.count();
+  _local_sol.resize(n_shapes);
+  for (MooseIndex(n_shapes) j = 0; j < n_shapes; ++j)
   {
     _local_sol(j).resize(_var.count());
     for (MooseIndex(_var.count()) i = 0; i < _var.count(); ++i)

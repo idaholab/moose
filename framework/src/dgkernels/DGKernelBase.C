@@ -66,10 +66,6 @@ DGKernelBase::validParams()
   return params;
 }
 
-// Static mutex definitions
-Threads::spin_mutex DGKernelBase::_resid_vars_mutex;
-Threads::spin_mutex DGKernelBase::_jacoby_vars_mutex;
-
 DGKernelBase::DGKernelBase(const InputParameters & parameters)
   : NeighborResidualObject(parameters),
     BlockRestrictable(this),
