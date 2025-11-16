@@ -90,11 +90,12 @@ class ResultsCollectionBase:
         # Possibly convert single value to iterable
         test_filter = filter_as_iterable(test_filter)
 
-        # Whether or not all data was requested
-        all_data = has_all_filter(test_filter)
-
-        # Keys within the test data to get, if not all
-        keys = [v.value for v in test_filter]
+        # Keys to parse
+        keys = (
+            ALL_TEST_KEYS
+            if has_all_filter(test_filter)
+            else [v.value for v in test_filter]
+        )
 
         # Tests stored separately that we need to load later
         separate_tests: list[Tuple[ObjectId, StoredTestResult]] = []
@@ -121,8 +122,7 @@ class ResultsCollectionBase:
                     name = test.name
                     test_result = None
                     if isinstance(value, dict):
-                        if not all_data:
-                            value = {k: value[k] for k in keys if k in value}
+                        value = {k: value[k] for k in keys if k in value}
                         test_result = StoredTestResult(value, name, result, test_filter)
                     else:
                         test_result = StoredTestResult({}, name, result, test_filter)
@@ -140,18 +140,15 @@ class ResultsCollectionBase:
             pipeline = [
                 # Select only the needed tests
                 {"$match": {"_id": {"$in": [v[0] for v in separate_tests]}}},
+                # And just the data we need
+                {
+                    "$project": {
+                        **{key: 1 for key in keys},
+                    }
+                },
+                # And sort on ID (which was the sort test IDs were passed)
+                {"$sort": {"_id": -1}},
             ]
-            # If not getting all data, filter on just the data we need
-            if not all_data:
-                pipeline += [
-                    {
-                        "$project": {
-                            **{key: 1 for key in keys},
-                        }
-                    },
-                ]
-            # And sort on ID (which was the sort test_ids were passed)
-            pipeline += [{"$sort": {"_id": -1}}]
 
             # Update each previously-empty StoredTestResult with
             # the real test data
@@ -164,41 +161,24 @@ class ResultsCollectionBase:
 
         return tests
 
-    def _get_tests(
-        self,
+    @staticmethod
+    def _get_tests_pipeline(
+        result_ids: list[ObjectId],
         name: TestName,
-        test_filter: Union[Iterable[TestDataFilter], TestDataFilter],
-    ) -> list[StoredTestResult]:
-        """
-        Get the results for the test with the given name.
-
-        Used in derived classes.
-
-        Arguments:
-        ---------
-        name : TestName
-            The name of the test.
-        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
-            The TestDataFilter objects that represent which data
-            to obtain for the tests.
-
-        """
+        test_filter: Iterable[TestDataFilter],
+    ) -> list[dict]:
         # Path in the result doc for this test
         query_path = name.mongo_path.query_path
 
-        # Possibly convert single value to iterable
-        test_filter = filter_as_iterable(test_filter)
-
-        # Keys within test data to get
         keys = (
             ALL_TEST_KEYS
             if has_all_filter(test_filter)
             else [v.value for v in test_filter]
         )
 
-        pipeline = [
+        return [
             # Filter on results in the collection
-            {"$match": {"_id": {"$in": self.result_ids}}},
+            {"$match": {"_id": {"$in": result_ids}}},
             # Join tests that aren't stored within the result
             {
                 "$lookup": {
@@ -234,23 +214,54 @@ class ResultsCollectionBase:
             {"$sort": {"_id": -1}},
         ]
 
-        # Build test results from documents
-        tests = []
+    def _get_tests(
+        self,
+        name: TestName,
+        test_filter: Union[Iterable[TestDataFilter], TestDataFilter],
+    ) -> list[StoredTestResult]:
+        """
+        Get the results for the test with the given name.
+
+        Used in derived classes.
+
+        Arguments:
+        ---------
+        name : TestName
+            The name of the test.
+        test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
+            The TestDataFilter objects that represent which data
+            to obtain for the tests.
+
+        """
+        # Possibly convert single value to iterable
+        test_filter = filter_as_iterable(test_filter)
+
         result_it = iter(self._results)
+
+        def build_test(doc: dict) -> StoredTestResult:
+            # For looping through the results in order
+            nonlocal result_it
+
+            # _id here is the result ID, not the test ID
+            id = doc["_id"]
+            del doc["_id"]
+
+            # And test_id here is the test ID, so replace
+            if test_id := doc.get("test_id"):
+                doc["_id"] = test_id
+                del doc["test_id"]
+
+            # Get the next result; we should be receiving these
+            # in order
+            result = next(result_it)
+            assert result.id == id
+
+            return StoredTestResult(doc, name, result, test_filter)
+
+        # Build test results from documents
+        pipeline = self._get_tests_pipeline(self.result_ids, name, test_filter)
         with self.get_database().results.aggregate(pipeline) as cursor:
-            for doc in cursor:
-                id = doc["_id"]
-                del doc["_id"]
-
-                if test_id := doc.get("test_id"):
-                    doc["_id"] = test_id
-                    del doc["test_id"]
-
-                result = next(result_it)
-                assert result.id == id
-                tests.append(StoredTestResult(doc, name, result, test_filter))
-
-        return tests
+            return [build_test(doc) for doc in cursor]
 
     def get_test_names(self) -> set[TestName]:
         """Get all of the test names in the collection."""

@@ -13,6 +13,7 @@ import unittest
 from typing import Tuple, Union
 
 import pytest
+from bson.objectid import ObjectId
 from mock import patch
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultsstore.resultcollection import (
@@ -22,7 +23,12 @@ from TestHarness.resultsstore.resultcollection import (
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.storedtestresult import StoredTestResult
 from TestHarness.resultsstore.testdatafilters import TestDataFilter
-from TestHarness.resultsstore.utils import TestName
+from TestHarness.resultsstore.utils import (
+    TestName,
+    mutable_results_test_iterator,
+    results_num_tests,
+    results_test_iterator,
+)
 from TestHarness.tests.resultsstore.common import (
     GOLD_DATABASE_NAME,
     GOLD_DATABASE_TEST_NAME,
@@ -34,6 +40,7 @@ from TestHarness.tests.resultsstore.common import (
     FakeMongoFind,
     ResultsStoreTestCase,
 )
+from TestHarness.tests.resultsstore.test_storedresult import build_stored_result
 
 # Fake database name for testing
 FAKE_DATABASE_NAME = "foodb"
@@ -168,6 +175,145 @@ class TestResultCollection(ResultsStoreTestCase):
                     self.assertTrue(any(test.id is None for test in tests))
         reader.close()
 
+    def test_get_all_tests_with_separate(self):
+        """Test _get_all_tests() with separate tests."""
+        # Create the first result, where the tests are stored within
+        within_result_data = self.get_testharness_result()
+        within_result = build_stored_result(within_result_data)
+        within_data = [{"_id": within_result.id, "tests": within_result_data["tests"]}]
+
+        # Create the second result, where the tests are stored separately
+        separate_result_data = self.get_testharness_result()
+        separate_result = build_stored_result(separate_result_data)
+        separate_data = [
+            {"_id": separate_result.id, "tests": separate_result_data["tests"]}
+        ]
+        separate_test_data = []
+        separate_test_ids = {}
+        for test in mutable_results_test_iterator(separate_data[0]):
+            test_id = ObjectId()
+            separate_test_ids[test.name] = test_id
+            separate_test_data.append(
+                {"_id": test_id, "result_id": separate_result.id, **test.value}
+            )
+            test.set_value(test_id)
+        separate_test_data = list(reversed(separate_test_data))
+
+        results = [within_result, separate_result]
+
+        # Build a dummy database connection
+        db = FakeMongoDatabase()
+        test_filter = [TestDataFilter.ALL]
+        collection = ResultsCollection(results, lambda: db)
+
+        # Run the find and aggregation aggregation
+        with (
+            patch.object(
+                db.results,
+                "find",
+                return_value=FakeMongoFind(within_data + separate_data),
+            ),
+            patch.object(
+                db.tests, "aggregate", return_value=FakeMongoFind(separate_test_data)
+            ),
+        ):
+            all_tests = collection.get_all_tests(test_filter)
+
+        gold_result = self.get_testharness_result()
+        num_tests = results_num_tests(gold_result)
+        self.assertEqual(num_tests, len(all_tests))
+        for gold_test in results_test_iterator(gold_result):
+            tests = all_tests[gold_test.name]
+            self.assertEqual(len(tests), 2)
+            for i, test in enumerate(tests):
+                self.assertEqual(test.name, gold_test.name)
+                result = within_result if i == 0 else separate_result
+                self.assertEqual(id(result), id(test.result))
+                if i == 0:  # test within
+                    self.assertIsNone(test.id)
+                else:  # test separate
+                    self.assertEqual(test.id, separate_test_ids[test.name])
+
+    def test_get_all_tests_no_separate(self):
+        """Test _get_all_tests() without separate tests."""
+        result_data = self.get_testharness_result()
+        result = build_stored_result(result_data)
+        find_data = [{"_id": result.id, "tests": result_data["tests"]}]
+
+        results = [result]
+
+        # Build a dummy database connection
+        db = FakeMongoDatabase()
+        test_filter = [TestDataFilter.ALL]
+        collection = ResultsCollection(results, lambda: db)
+
+        # Run the find and aggregation aggregation
+        with (
+            patch.object(
+                db.results,
+                "find",
+                return_value=FakeMongoFind(find_data),
+            ),
+            patch.object(
+                db.tests,
+                "aggregate",
+            ) as patch_aggregate,
+        ):
+            all_tests = collection.get_all_tests(test_filter)
+
+        patch_aggregate.assert_not_called()
+        num_tests = results_num_tests(result_data)
+        self.assertEqual(num_tests, len(all_tests))
+        for gold_test in results_test_iterator(result_data):
+            tests = all_tests[gold_test.name]
+            self.assertEqual(len(tests), 1)
+            for test in tests:
+                self.assertEqual(test.name, gold_test.name)
+                self.assertIsNone(test.id)
+
+    def test_get_tests(self):
+        """Test _get_tests()."""
+        # Create two results, one of which will store tests separately
+        within_result = build_stored_result(self.get_testharness_result())
+        separate_result = build_stored_result(self.get_testharness_result())
+        results = [within_result, separate_result]
+
+        # Build the data we'd get from mongo; the first entry is the
+        # result without the separate test (no test_id) and th second
+        # is the result with the sparate test
+        separate_test_id = ObjectId()
+        aggregate_data = [
+            {"_id": within_result.id},
+            {"_id": separate_result.id, "test_id": separate_test_id},
+        ]
+
+        # Build a dummy database connection
+        db = FakeMongoDatabase()
+        test_filter = [TestDataFilter.ALL]
+        collection = ResultsCollection(results, lambda: db)
+        pipeline = ResultsCollection._get_tests_pipeline(
+            collection.result_ids, TEST_NAME, test_filter
+        )
+
+        # Run the aggregation
+        with patch.object(
+            db.results, "aggregate", return_value=FakeMongoFind(aggregate_data)
+        ) as patch_aggregate:
+            tests = collection.get_tests(TEST_NAME, test_filter)
+
+        patch_aggregate.assert_called_once_with(pipeline)
+        self.assertEqual(len(tests), 2)
+        for i, test in enumerate(tests):
+            self.assertIsInstance(test, StoredTestResult)
+            self.assertEqual(test.name, TEST_NAME)
+            self.assertEqual(id(test.result), id(results[i]))
+            if i == 0:  # test within
+                self.assertIsNone(test.id)
+            else:  # test separate
+                self.assertEqual(test.id, separate_test_id)
+            # Should be removed
+            self.assertNotIn("test_id", test.data)
+
     @pytest.mark.live_db
     @unittest.skipUnless(HAS_READER_AUTH, "Reader authentication unavailable")
     def test_get_tests_live(self):
@@ -183,7 +329,6 @@ class TestResultCollection(ResultsStoreTestCase):
                 self.assertEqual(len(tests), 2)
                 for test in tests:
                     self.assertEqual(test.name, TEST_DATABASE_TEST_NAME)
-
                     self.check_filter(test, test_filter)
 
         # Test the gold events
@@ -197,7 +342,7 @@ class TestResultCollection(ResultsStoreTestCase):
                 # Only has expected loaded data
                 self.check_filter(test, test_filter)
 
-            # Should have at least test with separate tests
+            # Should have at least one with separate tests
             self.assertTrue(any(test.id is not None for test in tests))
             # And one with combined tests
             self.assertTrue(any(test.id is None for test in tests))
