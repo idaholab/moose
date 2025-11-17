@@ -133,6 +133,7 @@ We list here older, unmaintained, projects for consideration when naming a new p
 - FENIX - Multiphysics simulation suite with Griffin and Pronghorn, including Xenon and Samarium effects
 - MAMMOTH - Reactor physics application
 - OSPREY - Off-gas SeParation and REcoverY for dispersed plug flow in a packed bed.
+- RAT - Reactive transport problems in subsurface porous media that involves coupled physical processes of fluid flow, solute transport, biogeochemical reactions and media-solution interactions.
 - RATTLESNAKE - FEM Diffusion, SN, and PN code
 - YAK - Common object library for INL particle transport codes
 - YellowJacket - Nuclear reactor coolant chemistry
