@@ -345,6 +345,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
+    _trueBlockSol.GetBlock(i).SyncAliasMemory(_trueBlockSol);
     _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
 
