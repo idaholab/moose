@@ -136,7 +136,7 @@ MooseMesh::validParams()
       "Whether or not to generate nodesets from the sidesets (currently often required).");
   params.addParam<bool>(
       "displace_node_list_by_side_list",
-      false,
+      true,
       "Whether to renumber existing nodesets with ids matching sidesets that "
       "lack names matching sidesets, when constructing nodesets from sidesets via the default "
       "'construct_node_list_from_side_list' option, rather than to merge them with the sideset.");
@@ -273,11 +273,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
                "only when 'iteration' patch update strategy is used.");
-
-  if (_displace_node_list_by_side_list && !_construct_node_list_from_side_list)
-    paramError("displace_node_list_by_side_list",
-               "'Mesh/displace_node_list_by_side_list' is true, but unused when "
-               "'Mesh/construct_node_list_from_side_list' is false");
 
   if (isParamValid("coord_block"))
   {
