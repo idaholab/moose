@@ -96,7 +96,8 @@ public:
    * @param index location
    * @return true if index is valid for the lattice
    */
-  virtual bool isValidIndex(const std::pair<int, int> index) const = 0; // Pure virtual function
+  virtual bool isValidIndex(
+      const std::pair<unsigned int, unsigned int> index) const = 0; // Pure virtual function
 
   /**
    * @brief Get the universe located at the given index
@@ -104,7 +105,7 @@ public:
    * @param index pair of ints that specify the location in lattice
    * @return universe at the specified location
    */
-  const CSGUniverse & getUniverseAtIndex(const std::pair<int, int> index);
+  const CSGUniverse & getUniverseAtIndex(const std::pair<unsigned int, unsigned int> index);
 
   /**
    * @brief get all locations in lattice where universe of the specified name exists
@@ -112,7 +113,8 @@ public:
    * @param univ_name name of universe
    * @return vector of locations (pairs of ints)
    */
-  const std::vector<std::pair<int, int>> getUniverseIndices(const std::string & univ_name) const;
+  const std::vector<std::pair<unsigned int, unsigned int>>
+  getUniverseIndices(const std::string & univ_name) const;
 
   /**
    * @brief check that any provided list of list of CSGUniverses are the correct dimensions for the
@@ -155,7 +157,8 @@ protected:
    * @param universe universe to add to the lattice at the location index
    * @param index location in lattice replace with provided universe
    */
-  void setUniverseAtIndex(const CSGUniverse & universe, const std::pair<int, int> index);
+  void setUniverseAtIndex(const CSGUniverse & universe,
+                          const std::pair<unsigned int, unsigned int> index);
 
   // helper function for comparing dimensions maps of various data types (data depends on lattice
   // type)

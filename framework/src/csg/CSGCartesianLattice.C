@@ -74,10 +74,10 @@ CSGCartesianLattice::setUniverses(
 }
 
 bool
-CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
+CSGCartesianLattice::isValidIndex(const std::pair<unsigned int, unsigned int> index) const
 {
-  auto x0 = index.first;  // must be (0 <= x0 < _nx0); rows
-  auto x1 = index.second; // must be (0 <= x1 < _nx1); cols
+  int x0 = index.first;  // must be (0 <= x0 < _nx0); rows
+  int x1 = index.second; // must be (0 <= x1 < _nx1); cols
   return ((0 <= x0 && x0 < _nx0) && (0 <= x1 && x1 < _nx1));
 }
 

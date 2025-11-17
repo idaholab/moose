@@ -370,7 +370,7 @@ public:
    */
   void addUniverseToLattice(const CSGLattice & lattice,
                             const CSGUniverse & universe,
-                            std::pair<int, int> index);
+                            std::pair<unsigned int, unsigned int> index);
 
   /**
    * @brief Set provided universes as the layout of the lattice.

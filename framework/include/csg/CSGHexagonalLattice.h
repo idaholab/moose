@@ -80,7 +80,7 @@ public:
    * @param index in row-element form
    * @return true if valid, otherwise false
    */
-  virtual bool isValidIndex(const std::pair<int, int> index) const override;
+  virtual bool isValidIndex(const std::pair<unsigned int, unsigned int> index) const override;
 
   /**
    * @brief check if the arrangement of the provided universes is valid for the hexagonal lattice
@@ -105,7 +105,7 @@ public:
    *
    * @return number of rings
    */
-  int getNRings() const;
+  int getNRings() const { return _nring; }
 
   /**
    * @brief Given an index in ring-element form, get the corresponding row-column index. The
@@ -132,7 +132,8 @@ public:
    * @param index in ring-element form
    * @return index in row-column form
    */
-  std::pair<int, int> getRowIndexFromRingIndex(const std::pair<int, int> & row_col_index) const;
+  std::pair<unsigned int, unsigned int>
+  getRowIndexFromRingIndex(const std::pair<unsigned int, unsigned int> & row_col_index) const;
 
   /**
    * @brief Given an index in row-column form, get the corresponding ring-element index. The
@@ -159,7 +160,8 @@ public:
    * @param index in row-column form
    * @return index in ring-element form
    */
-  std::pair<int, int> getRingIndexFromRowIndex(const std::pair<int, int> & row_col_index) const;
+  std::pair<unsigned int, unsigned int>
+  getRingIndexFromRowIndex(const std::pair<unsigned int, unsigned int> & row_col_index) const;
 
   /**
    * @brief get the pitch of the lattice
@@ -203,7 +205,8 @@ protected:
   int _nring;
 
   /// map of row-column indices to ring-element indices for quick conversion and look-up
-  std::map<std::pair<int, int>, std::pair<int, int>> _row_to_ring_map;
+  std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
+      _row_to_ring_map;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
