@@ -23,5 +23,7 @@ public:
 protected:
   Sampler & _sampler;
   const std::vector<Real> & _q_vector;
+  const bool & _classify;
+  const Real & _limiting_value;
   VectorPostprocessorValue & _values;
 };

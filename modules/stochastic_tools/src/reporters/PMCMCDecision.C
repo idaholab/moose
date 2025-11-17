@@ -20,8 +20,7 @@ PMCMCDecision::validParams()
   params += LikelihoodInterface::validParams();
   params.addClassDescription("Generic reporter which decides whether or not to accept a proposed "
                              "sample in parallel Markov chain Monte Carlo type of algorithms.");
-  params.addRequiredParam<ReporterName>("output_value",
-                                        "Value of the model output from the SubApp.");
+  params.addParam<ReporterName>("output_value", "Value of the model output from the SubApp.");
   params.addParam<ReporterValueName>(
       "outputs_required",
       "outputs_required",
@@ -39,8 +38,6 @@ PMCMCDecision::validParams()
 PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   : GeneralReporter(parameters),
     LikelihoodInterface(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
-    _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
     _variance(declareValue<std::vector<Real>>("variance")),
@@ -51,6 +48,13 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _new_var_samples(_pmcmc->getVarSamples()),
     _priors(_pmcmc->getPriors()),
     _var_prior(_pmcmc->getVarPrior()),
+    _outputs_required(
+        isParamValid("output_value")
+            ? &declareValue<std::vector<Real>>("outputs_required", REPORTER_MODE_DISTRIBUTED)
+            : nullptr),
+    _output_value(isParamValid("output_value") ? &getReporterValue<std::vector<Real>>(
+                                                     "output_value", REPORTER_MODE_DISTRIBUTED)
+                                               : nullptr),
     _local_comm(_sampler.getLocalComm()),
     _check_step(std::numeric_limits<int>::max())
 {
@@ -71,9 +75,17 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
   _inputs.resize(_props);
   for (unsigned int i = 0; i < _props; ++i)
     _inputs[i].resize(_sampler.getNumberOfCols() - _num_confg_params);
-  _outputs_required.resize(_sampler.getNumberOfRows());
+  if (_outputs_required)
+    _outputs_required->resize(_sampler.getNumberOfRows());
   _tpm.resize(_props);
   _variance.resize(_props);
+}
+
+void
+PMCMCDecision::initialize()
+{
+  if (!isParamValid("output_value") && !usingGP())
+    paramError("output_value", "Value of the model output from the SubApp should be specified.");
 }
 
 void
@@ -89,7 +101,7 @@ PMCMCDecision::computeEvidence(std::vector<Real> & evidence, const DenseMatrix<R
                       std::log(_priors[j]->pdf(_data_prev(i, j))));
     for (unsigned int j = 0; j < _num_confg_values; ++j)
     {
-      out1[j] = _outputs_required[j * _props + i];
+      out1[j] = (*_outputs_required)[j * _props + i];
       out2[j] = _outputs_prev[j * _props + i];
     }
     if (_var_prior)
@@ -138,7 +150,8 @@ PMCMCDecision::nextSamples(std::vector<Real> & req_inputs,
     if (_var_prior)
       _variance[parallel_index] = _var_prev[parallel_index];
     for (unsigned int k = 0; k < _num_confg_values; ++k)
-      _outputs_required[k * _props + parallel_index] = _outputs_prev[k * _props + parallel_index];
+      (*_outputs_required)[k * _props + parallel_index] =
+          _outputs_prev[k * _props + parallel_index];
   }
 }
 
@@ -160,10 +173,13 @@ PMCMCDecision::execute()
       data_in(ss, j) = data[j];
   }
   _local_comm.sum(data_in.get_values());
-  _outputs_required = _output_value;
-  _local_comm.allgather(_outputs_required);
+  if (!usingGP())
+  {
+    (*_outputs_required) = *_output_value;
+    _local_comm.allgather((*_outputs_required));
+  }
 
-  // Compute the evidence and transition vectors
+  // Compute the evidence and transitimkon vectors
   std::vector<Real> evidence(_props);
   if (_t_step > _pmcmc->decisionStep())
   {
@@ -186,8 +202,9 @@ PMCMCDecision::execute()
 
   // Store data from previous step
   _data_prev = data_in;
-  _outputs_prev = _outputs_required;
   _var_prev = _variance;
+  if (!usingGP())
+    _outputs_prev = (*_outputs_required);
 
   // Track the current step
   _check_step = _t_step;
