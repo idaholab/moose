@@ -1430,11 +1430,6 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
-  /// Set incomplete interface pairs flag
-  void setIncompleteInterfacePairs() { _has_incomplete_interface_pairs = true; };
-  /// Get incomplete interface pairs flag
-  bool hasIncompleteInterfacePairs() const { return _has_incomplete_interface_pairs; };
-
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
@@ -1847,14 +1842,6 @@ private:
   /// faces
   bool _has_lower_d;
 
-  /// Indicates whether any disconnected boundary pairs are incomplete,
-  /// i.e., only one side of an expected (blockA, blockB) / (blockB, blockA) pair exists.
-  /// This flag is primarily used to ensure compatibility with Cohesive Zone Models (CZM),
-  /// which require distinct boundary pairs on both sides of an interface. When true,
-  /// CZM-related actions or kernels should raise an error because the interface definition
-  /// is insufficient for cohesive zone modeling.
-  bool _has_incomplete_interface_pairs;
-
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
 
@@ -2145,9 +2132,9 @@ template <typename T>
 std::unique_ptr<T>
 MooseMesh::buildTypedMesh(unsigned int dim)
 {
-  // If the requested mesh type to build doesn't match our current value for
-  // _use_distributed_mesh, then we need to make sure to make our state consistent because other
-  // objects, like the periodic boundary condition action, will be querying isDistributedMesh()
+  // If the requested mesh type to build doesn't match our current value for _use_distributed_mesh,
+  // then we need to make sure to make our state consistent because other objects, like the periodic
+  // boundary condition action, will be querying isDistributedMesh()
   if (_use_distributed_mesh != std::is_same<T, libMesh::DistributedMesh>::value)
   {
     if (getMeshPtr())
