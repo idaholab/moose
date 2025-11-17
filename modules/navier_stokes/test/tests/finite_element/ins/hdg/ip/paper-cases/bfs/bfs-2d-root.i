@@ -32,11 +32,11 @@ rho = 1
     order = FIRST
   []
   [vel_bar_x]
-    family = SIDE_HIERARCHIC
+    family = LAGRANGE
     order = SECOND
   []
   [vel_bar_y]
-    family = SIDE_HIERARCHIC
+    family = LAGRANGE
     order = SECOND
   []
   [pressure_bar]
