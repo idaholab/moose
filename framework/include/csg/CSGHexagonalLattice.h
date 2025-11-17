@@ -69,7 +69,10 @@ public:
    *
    * @return std::unordered_map<std::string, std::any>
    */
-  virtual std::unordered_map<std::string, std::any> getDimensions() const override;
+  virtual std::unordered_map<std::string, std::any> getDimensions() const override
+  {
+    return {{"nrow", _nrow}, {"nring", _nring}, {"pitch", _pitch}};
+  }
 
   /**
    * @brief check if provided index in row-element form is valid for the given hexagonal lattice

@@ -73,16 +73,6 @@ CSGCartesianLattice::setUniverses(
   _universe_map = universes;
 }
 
-std::unordered_map<std::string, std::any>
-CSGCartesianLattice::getDimensions() const
-{
-  std::unordered_map<std::string, std::any> dims_map;
-  dims_map["nx0"] = _nx0;
-  dims_map["nx1"] = _nx1;
-  dims_map["pitch"] = _pitch;
-  return dims_map;
-}
-
 bool
 CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
 {

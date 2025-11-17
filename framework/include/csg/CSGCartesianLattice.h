@@ -68,7 +68,10 @@ public:
    *
    * @return map of string dimension name to value of that dimension
    */
-  virtual std::unordered_map<std::string, std::any> getDimensions() const override;
+  virtual std::unordered_map<std::string, std::any> getDimensions() const override
+  {
+    return {{"nx0", _nx0}, {"nx1", _nx1}, {"pitch", _pitch}};
+  }
 
   /**
    * @brief Checks if the given index location ((row, column) or (x0, x1)) is a valid index for the
