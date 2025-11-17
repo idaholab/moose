@@ -344,9 +344,9 @@ CSGBase::addLattice(std::unique_ptr<CSGLattice> lattice)
 }
 
 void
-CSGBase::addUniverseToLattice(const CSGLattice & lattice,
-                              const CSGUniverse & universe,
-                              std::pair<unsigned int, unsigned int> index)
+CSGBase::setUniverseAtLatticeIndex(const CSGLattice & lattice,
+                                   const CSGUniverse & universe,
+                                   std::pair<unsigned int, unsigned int> index)
 {
   if (!checkUniverseInBase(universe))
     mooseError("Cannot add universe " + universe.getName() + " to lattice " + lattice.getName() +
