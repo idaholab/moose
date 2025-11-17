@@ -38,6 +38,14 @@
     []
   []
 
+  [output_vpps]
+    type = CSVDiff
+    input = 'output_vpps.i'
+    csvdiff = 'output_vpps_out_pipe_vars_vpp_0002.csv output_vpps_out_pipe_flux_vpp_0002.csv'
+    rel_err = 1e-6
+    requirement = 'The system shall be able to simulate a single-phase flow channel and output quantities to a CSV file.'
+  []
+
   # error checking
   [err:wrong_fp]
     type = 'RunException'

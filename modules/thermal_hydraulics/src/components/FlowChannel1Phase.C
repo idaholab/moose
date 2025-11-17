@@ -10,6 +10,7 @@
 #include "FlowChannel1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "SinglePhaseFluidProperties.h"
+#include "THMNames.h"
 
 registerMooseObject("ThermalHydraulicsApp", FlowChannel1Phase);
 
@@ -27,6 +28,10 @@ FlowChannel1Phase::validParams()
       "scaling_factor_1phase",
       sf_1phase,
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
+  params.addParam<bool>(
+      "create_flux_vpp",
+      false,
+      "If true, create a VectorPostprocessor with the the mass, momentum, and energy side fluxes");
 
   params.addParamNamesToGroup("scaling_factor_1phase", "Numerical scheme");
   params.addClassDescription("1-phase 1D flow channel");
@@ -56,4 +61,26 @@ std::vector<std::string>
 FlowChannel1Phase::ICParameters() const
 {
   return {"initial_p", "initial_T", "initial_vel"};
+}
+
+void
+FlowChannel1Phase::addMooseObjects()
+{
+  FlowChannel1PhaseBase::addMooseObjects();
+
+  if (getParam<bool>("create_flux_vpp"))
+    addNumericalFluxVectorPostprocessor();
+}
+
+void
+FlowChannel1Phase::addNumericalFluxVectorPostprocessor()
+{
+  const std::string class_name = "NumericalFlux3EqnInternalValues";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+  params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
+  params.set<std::vector<VariableName>>("A_linear") = {THM::AREA_LINEAR};
+  params.set<MooseEnum>("sort_by") = sortBy();
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  getTHMProblem().addVectorPostprocessor(class_name, name() + "_flux_vpp", params);
 }

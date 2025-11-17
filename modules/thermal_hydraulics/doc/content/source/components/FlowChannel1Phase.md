@@ -24,6 +24,11 @@ the following parameters:
 - [!param](/Components/FlowChannel1Phase/initial_T)
 - [!param](/Components/FlowChannel1Phase/initial_vel)
 
+This component offers options to output quantities via vector post-processors:
+
+- [!param](/Components/FlowChannel1Phase/vpp_vars): Creates an [ElementValueSampler.md] with a vector for each of the listed variables (see below for a list of variables).
+- [!param](/Components/FlowChannel1Phase/create_flux_vpp): Creates a [NumericalFlux3EqnInternalValues.md], which creates a vector for each numerical flux component (mass, momentum, energy) at the internal sides.
+
 !syntax parameters /Components/FlowChannel1Phase
 
 ## Mesh id=mesh

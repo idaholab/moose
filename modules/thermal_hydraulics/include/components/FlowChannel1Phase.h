@@ -21,10 +21,12 @@ public:
 
   FlowChannel1Phase(const InputParameters & params);
 
+  virtual void addMooseObjects() override;
   virtual const THM::FlowModelID & getFlowModelID() const override { return THM::FM_SINGLE_PHASE; }
   virtual std::vector<std::string> ICParameters() const override;
 
 protected:
   virtual void checkFluidProperties() const override;
   virtual std::string flowModelClassName() const override;
+  void addNumericalFluxVectorPostprocessor();
 };
