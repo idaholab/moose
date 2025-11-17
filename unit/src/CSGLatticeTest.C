@@ -26,7 +26,7 @@ namespace CSG
 TEST(CSGLatticeTest, testCreateCartLatticeValid)
 {
   {
-    // initialize without universes: nx0=2, nx1=3, pitch=1.0
+    // initialize without universes: nrow=2, ncol=3, pitch=1.0
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
     // check dimensions
     ASSERT_EQ(cart_lattice.getNRows(), 0);
@@ -164,8 +164,8 @@ TEST(CSGLatticeTest, testGetDimensions)
         {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
     auto dims_map = cart_lattice.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
   }
   {
@@ -470,9 +470,9 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   auto l4 = CSGCartesianLattice("cartlat", 1.0, univ_map2);
   // lattice that differs by pitch
   auto l5 = CSGCartesianLattice("cartlat", 2.0, univ_map1);
-  // lattice that differs by nx0
+  // lattice that differs by nrow
   auto l6 = CSGCartesianLattice("cartlat", 1.0, univ_map3);
-  // lattice that differs by nx1
+  // lattice that differs by ncol
   auto l7 = CSGCartesianLattice("cartlat", 1.0, univ_map4);
 
   // check equality

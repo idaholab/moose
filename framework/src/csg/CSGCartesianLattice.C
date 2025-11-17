@@ -18,7 +18,7 @@ CSGCartesianLattice::CSGCartesianLattice(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
   : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()), _pitch(pitch)
 {
-  setUniverses(universes); // this will set _nx0 and _nx1
+  setUniverses(universes); // this will set _nrow and _ncol
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
@@ -26,8 +26,8 @@ CSGCartesianLattice::CSGCartesianLattice(
 CSGCartesianLattice::CSGCartesianLattice(const std::string & name, const Real pitch)
   : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
     _pitch(pitch),
-    _nx0(0),
-    _nx1(0)
+    _nrow(0),
+    _ncol(0)
 {
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");
@@ -68,17 +68,17 @@ CSGCartesianLattice::setUniverses(
     mooseError("Cannot set lattice " + getName() +
                " with universes. Does not have valid dimensions for lattice type " + getType());
   // set dimensions attributes based on universe map
-  _nx0 = universes.size();
-  _nx1 = universes[0].size();
+  _nrow = universes.size();
+  _ncol = universes[0].size();
   _universe_map = universes;
 }
 
 bool
 CSGCartesianLattice::isValidIndex(const std::pair<unsigned int, unsigned int> index) const
 {
-  int x0 = index.first;  // must be (0 <= x0 < _nx0); rows
-  int x1 = index.second; // must be (0 <= x1 < _nx1); cols
-  return ((0 <= x0 && x0 < _nx0) && (0 <= x1 && x1 < _nx1));
+  int row = index.first;  // must be (0 <= row < _nrow); rows
+  int col = index.second; // must be (0 <= col < _ncol); cols
+  return ((0 <= row && row < _nrow) && (0 <= col && col < _ncol));
 }
 
 bool
@@ -90,9 +90,9 @@ CSGCartesianLattice::compareDimensions(const CSGLattice & other) const
   auto this_dims = this->getDimensions();
   auto other_dims = other.getDimensions();
 
-  if (std::any_cast<int>(this_dims["nx0"]) != std::any_cast<int>(other_dims["nx0"]))
+  if (std::any_cast<int>(this_dims["nrow"]) != std::any_cast<int>(other_dims["nrow"]))
     return false;
-  if (std::any_cast<int>(this_dims["nx1"]) != std::any_cast<int>(other_dims["nx1"]))
+  if (std::any_cast<int>(this_dims["ncol"]) != std::any_cast<int>(other_dims["ncol"]))
     return false;
   if (std::any_cast<Real>(this_dims["pitch"]) != std::any_cast<Real>(other_dims["pitch"]))
     return false;

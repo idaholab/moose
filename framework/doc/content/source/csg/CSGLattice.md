@@ -29,7 +29,7 @@ A recommendation for this method is to check that the number of rows and the len
 
 To set the value of the `_universe_map`, which is a 2D vector of `CSGUniverse` references that defines the layout, the `setUniverses()` method must be defined.
 In this method, it is important to check the validity of the provided set of universes with the aforementioned `isValidUniverseMap()` method *and* set any necessary dimension attributes that could change with the setting of the universe layout.
-For example, in the [`CSGCartesianLattice` example](#example), the number of rows (`_nx0`) and columns (`_nx1`) need to be set in order to stay consistent with the lattice layout.
+For example, in the [`CSGCartesianLattice` example](#example), the number of rows (`_nrow`) and columns (`_ncol`) need to be set in order to stay consistent with the lattice layout.
 
 Each lattice should also have some sort of defined 2D indexing scheme that is used to define the layout and access items in the `_universe_map`.
 The method `isValidIndex()` is where these rules are defined.
@@ -39,7 +39,7 @@ The `isValidIndex()` method is called by `setUniverseAtIndex()` and `getUniverse
 
 The dimension attributes at a minimum are any pieces of data that are needed for a complete definition of the lattice for any downstream connected codes that cannot be derived from the `_universe_map` that defines the lattice layout.
 For example, the `pitch` (flat-to-flat distance of elements) for the `CSGCartesianLattice` is needed for a complete definition, but cannot be determined from the universe layout directly.
-These pieces of data can optionally be attributes that could be derived from the `_universe_map` but are just more convenient to have explicitly defined (e.g., for the [`CSGCartesianLattice` example](#example), the number of rows (`_nx0`) and columns (`_nx1`) can be derived from the universe layout, but they are included as attributes for convenience).
+These pieces of data can optionally be attributes that could be derived from the `_universe_map` but are just more convenient to have explicitly defined (e.g., for the [`CSGCartesianLattice` example](#example), the number of rows (`_nrow`) and columns (`_ncol`) can be derived from the universe layout, but they are included as attributes for convenience).
 These attributes are what get returned in a map using the `getDimensions()` method, which gets called when producing the [!ac](CSG) [!ac](JSON) object in [source/csg/CSGBase.md].
 
 !alert! note title=Dimension Data Type

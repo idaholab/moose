@@ -123,8 +123,8 @@ The additional attributes that are provided for each of these types are:
 
 - `CSGCartesianLattice`:
 
-  - `nx0`: the number of rows
-  - `nx1`: the number of columns
+  - `nrow`: the number of rows
+  - `ncol`: the number of columns
   - `pitch`: the flat-to-flat distance of a single lattice element
 
 - `CSGHexagonalLattice`:

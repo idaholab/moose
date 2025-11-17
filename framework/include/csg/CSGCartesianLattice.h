@@ -62,29 +62,29 @@ public:
 
   /**
    * @brief get the map of data that defines the geometric dimensions of the lattice:
-   *  - nx0: number of mesh elements in the first dimension (int); ie, rows
-   *  - nx1: number of mesh elements in the second dimension (int); ie, columns
+   *  - nrow: number of rows (int)
+   *  - ncol: number of columns (int)
    *  - pitch: pitch of the lattice element (Real)
    *
    * @return map of string dimension name to value of that dimension
    */
   virtual std::unordered_map<std::string, std::any> getDimensions() const override
   {
-    return {{"nx0", _nx0}, {"nx1", _nx1}, {"pitch", _pitch}};
+    return {{"nrow", _nrow}, {"ncol", _ncol}, {"pitch", _pitch}};
   }
 
   /**
-   * @brief Checks if the given index location ((row, column) or (x0, x1)) is a valid index for the
-   * lattice. Allowable indices are: 0 <= row < _nx0 and 0 <= column < _nx1.
+   * @brief Checks if the given index location (row, column) is a valid index for the
+   * lattice. Allowable indices are: 0 <= row < _nrow and 0 <= column < _ncol.
    *
-   * @param index location in (row, column) or (x0, x1) form
+   * @param index location in (row, column) form
    * @return true if index is valid for the lattice
    */
   virtual bool isValidIndex(const std::pair<unsigned int, unsigned int> index) const override;
 
   /**
    * @brief check that any provided list of list of CSGUniverses are the correct dimensions. Must
-   * have number of lists within universes equal to _nx0. And each sublist must be size _nx1.
+   * have number of lists within universes equal to _nrow. And each sublist must be size _ncol.
    *
    * @param universes list of list of universes to be used to define the lattice structure
    * @return true if universe dimensions are valid
@@ -97,14 +97,14 @@ public:
    *
    * @return number of rows
    */
-  int getNRows() const { return _nx0; }
+  int getNRows() const { return _nrow; }
 
   /**
    * @brief get number of columns
    *
    * @return number of columns
    */
-  int getNCols() const { return _nx1; }
+  int getNCols() const { return _ncol; }
 
   /**
    * @brief get lattice pitch
@@ -137,10 +137,10 @@ protected:
   Real _pitch;
 
   /// number of elements in the first dimension (rows)
-  int _nx0;
+  int _nrow;
 
   /// number of elements in the second direction (columns)
-  int _nx1;
+  int _ncol;
 
   friend class CSGBase;
 

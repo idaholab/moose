@@ -19,8 +19,8 @@
   },
   "lattices": {
     "cart_lat_lattice": {
-      "nx0": 2,
-      "nx1": 2,
+      "nrow": 2,
+      "ncol": 2,
       "pitch": 5.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
