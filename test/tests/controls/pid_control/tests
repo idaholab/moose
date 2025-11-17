@@ -1,7 +1,7 @@
 [Tests]
   [pid]
     requirement = "The Control system shall be able to control an input parameter to make a postprocessor match a target value,"
-    issues = '#17271'
+    issues = '#17271 #31842'
     design = 'syntax/Controls/index.md source/controls/PIDTransientControl.md'
     [basic]
       type = 'CSVDiff'
@@ -12,6 +12,13 @@
                   Executioner/nl_abs_tol=1e-14'
       detail = 'using the principle of Proportional Integral Derivative control,'
     []
+    [timestep_end]
+      type = 'CSVDiff'
+      input = 'pid_control.i'
+      csvdiff = 'pid_control_timestep_end_out.csv'
+      cli_args = 'Controls/integral_value/execute_on=timestep_end Outputs/file_base=pid_control_timestep_end_out Executioner/end_time=5'      
+      detail = 'using data at the timestep_end state to set the control for the next timestep,'
+    []    
     [min_max_limits]
       type = 'CSVDiff'
       input = 'pid_control.i'
