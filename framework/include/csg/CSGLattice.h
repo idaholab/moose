@@ -104,7 +104,7 @@ public:
    * @param index pair of ints that specify the location in lattice
    * @return universe at the specified location
    */
-  std::reference_wrapper<const CSGUniverse> getUniverseAtIndex(const std::pair<int, int> index);
+  const CSGUniverse & getUniverseAtIndex(const std::pair<int, int> index);
 
   /**
    * @brief get all locations in lattice where universe of the specified name exists
@@ -155,8 +155,7 @@ protected:
    * @param universe universe to add to the lattice at the location index
    * @param index location in lattice replace with provided universe
    */
-  void setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> universe,
-                          const std::pair<int, int> index);
+  void setUniverseAtIndex(const CSGUniverse & universe, const std::pair<int, int> index);
 
   // helper function for comparing dimensions maps of various data types (data depends on lattice
   // type)

@@ -353,7 +353,7 @@ CSGBase::addUniverseToLattice(const CSGLattice & lattice,
   if (!checkUniverseInBase(universe))
     mooseError("Cannot add universe " + universe.getName() + " to lattice " + lattice.getName() +
                ". Universe is not in the CSGBase instance.");
-  const_cast<CSGLattice &>(lattice).setUniverseAtIndex(std::cref(universe), index);
+  const_cast<CSGLattice &>(lattice).setUniverseAtIndex(universe, index);
 }
 
 void

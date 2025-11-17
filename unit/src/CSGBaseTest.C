@@ -556,7 +556,7 @@ TEST(CSGBaseTest, testCreateCartLattice)
     auto & univ1 = csg_obj->createUniverse("u1");
     auto & univ2 = csg_obj->createUniverse("u2");
     // create a 2x3 lattice of universes
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ2, univ1}, {univ2, univ1, univ2}};
     const CSGLattice & lat = csg_obj->createCartesianLattice("cart_lat", 1.0, univs);
     auto dims_map = lat.getDimensions();
@@ -575,8 +575,7 @@ TEST(CSGBaseTest, testCreateCartLattice)
     // make new CSGBase and add new universes to this
     auto csg_obj2 = std::make_unique<CSG::CSGBase>();
     auto & univ1 = csg_obj2->createUniverse("u1"); // same name as existing universe
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
-                                                                                      {univ1}};
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ1}, {univ1}};
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &univs]() { csg_obj->createCartesianLattice("harry", 1.0, univs); },
         "Cannot create Cartesian lattice harry. Universe u1 is not in the CSGBase instance.");
@@ -601,7 +600,7 @@ TEST(CSGBaseTest, testCreateHexLattice)
     auto & univ1 = csg_obj->createUniverse("u1");
     auto & univ2 = csg_obj->createUniverse("u2");
     // create a 3-ring hexagonal lattice of universes
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ1, univ1},
         {univ1, univ2, univ2, univ1},
         {univ1, univ2, univ1, univ2, univ1},
@@ -627,7 +626,7 @@ TEST(CSGBaseTest, testCreateHexLattice)
     // make new CSGBase and add new universes to this
     auto csg_obj2 = std::make_unique<CSG::CSGBase>();
     auto & univ1 = csg_obj2->createUniverse("u1"); // same name as existing universe
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &univs]() { csg_obj->createHexagonalLattice("mandark", 1.0, univs); },
@@ -643,7 +642,7 @@ TEST(CSGBaseTest, testAddLattice)
   {
     // create a lattice as a unique pointer and manually add it to the CSGBase (this is what would
     // be done for a custom lattice type defined outside of the main framework)
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ}};
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ}};
     std::unique_ptr<CSGCartesianLattice> custom_lat =
         std::make_unique<CSGCartesianLattice>("custom_lat", 1.0, univs);
     // add to CSGBase
@@ -657,7 +656,7 @@ TEST(CSGBaseTest, testAddLattice)
     // create a custom lattice containing a universe that was not in this base (raise error)
     auto csg_obj2 = std::make_unique<CSG::CSGBase>();
     auto & univ2 = csg_obj2->createUniverse("uni");
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs2 = {{univ2}};
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs2 = {{univ2}};
     std::unique_ptr<CSGCartesianLattice> custom_lat2 =
         std::make_unique<CSGCartesianLattice>("custom_lat2", 1.0, univs2);
     // try to add to first CSGBase - raises error because universe is not in this base
@@ -675,8 +674,7 @@ TEST(CSGBaseTest, testAddUniverseToLattice)
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto & univ1 = csg_obj->createUniverse("spidey");
   auto & univ2 = csg_obj->createUniverse("spin");
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
-                                                                                    {univ1}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ1}, {univ1}};
   const CSGLattice & lat = csg_obj->createCartesianLattice("spiderverse", 1.0, univs);
   {
     // test valid add new univ
@@ -703,13 +701,12 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto & univ1 = csg_obj->createUniverse("batman");
   auto & univ2 = csg_obj->createUniverse("robin");
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
-                                                                                    {univ1}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ1}, {univ1}};
   const CSGLattice & cartlat = csg_obj->createCartesianLattice("batverse", 1.0, univs);
   {
     // test valid set universes - overwrite old universes
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ2},
-                                                                                          {univ2}};
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univs = {{univ2},
+                                                                                     {univ2}};
     csg_obj->setLatticeUniverses(cartlat, new_univs);
     auto all_univs = cartlat.getUniverses();
     ASSERT_EQ(all_univs[0][0].get(), univ2);
@@ -719,8 +716,8 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
     // try to set universes with one that is not from this base
     auto csg_obj2 = std::make_unique<CSG::CSGBase>();
     auto & univ3 = csg_obj2->createUniverse("batman");
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ3},
-                                                                                          {univ2}};
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univs = {{univ3},
+                                                                                     {univ2}};
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &cartlat, &new_univs]() { csg_obj->setLatticeUniverses(cartlat, new_univs); },
         "Cannot set universes for lattice batverse. Universe batman is not in the CSGBase "
@@ -729,8 +726,8 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
   {
     // initialize a lattice without universes and then add universes with setLatticeUniverses
     const CSGLattice & lat = csg_obj->createCartesianLattice("new_lattice", 1.0);
-    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ1},
-                                                                                          {univ1}};
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univs = {{univ1},
+                                                                                     {univ1}};
     csg_obj->setLatticeUniverses(lat, new_univs);
     auto all_univs = lat.getUniverses();
     ASSERT_EQ(all_univs[0][0].get(), univ1);
@@ -805,7 +802,7 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   // create a lattice of one universe
   auto & univ_in_lat = base1->createUniverse("univ_in_lat");
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ_in_lat}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ_in_lat}};
   const CSGLattice & lat = base1->createCartesianLattice("lat1", 1.0, univs);
   // create cell containing lattice
   auto & c1 = base1->createCell("c1", lat, +surf1);
@@ -901,7 +898,7 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   // create a lattice of one universe
   auto & univ_in_lat = base1->createUniverse("univ_in_lat");
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ_in_lat}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ_in_lat}};
   const CSGLattice & lat = base1->createCartesianLattice("lat1", 1.0, univs);
   // create cell containing lattice
   auto & c1 = base1->createCell("c1", lat, +surf1);
@@ -966,7 +963,7 @@ TEST(CSGBaseTest, testUniverseLinking)
 
   // create a lattice of universes that is not linked to root, should raise warning when checked
   auto & univ2 = csg_obj->createUniverse("univ2");
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ2}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ2}};
   const CSGLattice & lat = csg_obj->createCartesianLattice("lat1", 1.0, univs);
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ2 is not linked to root universe.");
@@ -998,7 +995,7 @@ TEST(CSGBaseTest, testCSGBaseClone)
   csg_obj->createCell("cell_void", +csg_sphere_outer);
   // create lattice and cell with lattice fill
   auto & lat_univ = csg_obj->createUniverse("lat_univ");
-  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{lat_univ}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{lat_univ}};
   const CSGLattice & lat = csg_obj->createCartesianLattice("lat1", 2.0, univs);
   csg_obj->createCell("cell_lat_fill", lat, -csg_sphere_outer);
 
