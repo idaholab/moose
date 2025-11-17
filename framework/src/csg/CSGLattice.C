@@ -34,13 +34,9 @@ bool
 CSGLattice::hasUniverse(const std::string & name) const
 {
   for (auto list_univ : _universe_map)
-  {
     for (const CSGUniverse & univ : list_univ)
-    {
       if (univ.getName() == name)
         return true;
-    }
-  }
   return false; // no universe with matching name was found
 }
 
@@ -76,14 +72,12 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
 
   std::vector<std::pair<int, int>> indices;
   for (auto i : make_range(_universe_map.size()))
-  {
     for (auto j : make_range(_universe_map[i].size()))
     {
       const CSGUniverse & univ = _universe_map[i][j];
       if (univ.getName() == univ_name)
         indices.push_back(std::make_pair(i, j));
     }
-  }
   return indices;
 }
 
@@ -94,7 +88,6 @@ CSGLattice::getUniqueUniverses()
   auto all_univs = getUniverses();
 
   for (const auto & ulist : all_univs)
-  {
     for (const auto & u : ulist)
     {
       auto it = std::find_if(unique_univs.begin(),
@@ -103,7 +96,6 @@ CSGLattice::getUniqueUniverses()
       if (it == unique_univs.end())
         unique_univs.push_back(u);
     }
-  }
   return unique_univs;
 }
 

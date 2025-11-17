@@ -105,7 +105,7 @@ public:
   int getNRings() const;
 
   /**
-   * @brief Get given an index in ring-element form, get the corresponding row-column index. The
+   * @brief Given an index in ring-element form, get the corresponding row-column index. The
    * ring-element form assumes the outermost ring is the 0th ring and is indexed starting from the
    * rightmost element of the ring and proceeding counter-clockwise around the ring. The row-column
    * form assumes the top row is the 0th row and is indexed from left to right.
@@ -132,7 +132,7 @@ public:
   std::pair<int, int> getRowIndexFromRingIndex(const std::pair<int, int> & row_col_index) const;
 
   /**
-   * @brief Get given an index in row-column form, get the corresponding ring-element index. The
+   * @brief Given an index in row-column form, get the corresponding ring-element index. The
    * row-column form assumes the top row is the 0th row and is indexed from left to right. The
    * ring-element form assumes the outermost ring is the 0th ring and is indexed starting from the
    * rightmost element of the ring and proceeding counter-clockwise around the ring.

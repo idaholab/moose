@@ -88,9 +88,7 @@ CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
 {
   auto x0 = index.first;  // must be (0 <= x0 < _nx0); rows
   auto x1 = index.second; // must be (0 <= x1 < _nx1); cols
-  if ((0 <= x0 && x0 < _nx0) && (0 <= x1 && x1 < _nx1))
-    return true;
-  return false;
+  return ((0 <= x0 && x0 < _nx0) && (0 <= x1 && x1 < _nx1));
 }
 
 bool

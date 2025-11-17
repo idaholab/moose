@@ -292,7 +292,8 @@ public:
   }
 
   /**
-   * @brief Create a Cartesian Lattice from the provided universes
+   * @brief Create a 2D Cartesian Lattice from the provided universes. Each row in the lattice
+   * should be the same length.
    *
    * @param name unique name identifier for the lattice
    * @param pitch flat-to-flat size of the lattice elements
@@ -305,7 +306,7 @@ public:
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
-   * @brief Create an empty Cartesian lattice. NOTE: this will not create any universe mapping;
+   * @brief Create an empty 2D Cartesian lattice. NOTE: this will not create any universe mapping;
    * this must be done by using setLatticeUniverses.
    *
    * @param name unique name identifier for the lattice
@@ -318,7 +319,7 @@ public:
   }
 
   /**
-   * @brief Create an empty hexagonal lattice with x orientation.
+   * @brief Create an 2D empty hexagonal lattice with x orientation.
    * NOTE: this will not create any universe mapping; this must be done by using
    * setLatticeUniverses.
    *
@@ -332,8 +333,13 @@ public:
   }
 
   /**
-   * @brief Create a hexagonal Lattice from the provided universes. Universes should be arranged
-   * by rows and correspond to a hexagonal lattice with x-orientation.
+   * @brief Create a 2D hexagonal Lattice from the provided universes. Universes should be arranged
+   * by rows and correspond to a hexagonal lattice with x-orientation. For example, a 2-ring lattice
+   * would have the following layout:
+   *  {{u1, u2},
+   * {u3, u4, u5},
+   *  {u6, u7}}
+   *
    *
    * @param name unique name identifier for the lattice
    * @param pitch flat-to-flat size of the lattice elements
