@@ -121,18 +121,16 @@ CSGBase::addLatticeToList(const CSGLattice & lattice)
   // If lattice has associated universes, we need to add them to this CSGBase instance as well.
   // addUniverseToList is called recursively in case associated universes have not been added to
   // the universe list yet.
-  if (lattice.getUniverses().size() > 0)
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> current_univ_map;
+  for (const auto & univ_list : lattice.getUniverses())
   {
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> current_univ_map;
-    for (const auto & univ_list : lattice.getUniverses())
-    {
-      std::vector<std::reference_wrapper<const CSGUniverse>> current_univ_list;
-      for (const auto & univ_ref : univ_list)
-        current_univ_list.push_back(addUniverseToList(univ_ref.get()));
-      current_univ_map.push_back(current_univ_list);
-    }
-    cloned_lattice->setUniverses(current_univ_map);
+    std::vector<std::reference_wrapper<const CSGUniverse>> current_univ_list;
+    for (const auto & univ_ref : univ_list)
+      current_univ_list.push_back(addUniverseToList(univ_ref.get()));
+    current_univ_map.push_back(current_univ_list);
   }
+  if (current_univ_map.size() > 0)
+    cloned_lattice->setUniverses(current_univ_map);
   // Use addLattice to add the cloned lattice
   return addLattice(std::move(cloned_lattice));
 }
