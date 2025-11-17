@@ -106,7 +106,7 @@ CSGLattice::operator==(const CSGLattice & other) const
     return false;
   if (this->getType() != other.getType())
     return false;
-  if (!this->compareDimensions(other))
+  if (!this->compareAttributes(other))
     return false;
 
   const auto & this_univs = this->getUniverses();

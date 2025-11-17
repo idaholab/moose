@@ -37,8 +37,8 @@ public:
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
-   * @brief Construct a new CSGCartesianLattice object with specified dimensions. Note, this will
-   * NOT initialize a _universe_map of the specified size. That must be provided using setUniverses.
+   * @brief Construct a new empty CSGCartesianLattice object with specified pitch.
+   * NOTE: must call setLatticeUniverses to populate the universe map.
    *
    * @param name unique identifying name of lattice
    * @param pitch pitch of lattice elements
@@ -61,14 +61,14 @@ public:
   }
 
   /**
-   * @brief get the map of data that defines the geometric dimensions of the lattice:
+   * @brief Get attributes that define the lattice (excluding the universe map).
    *  - nrow: number of rows (int)
    *  - ncol: number of columns (int)
    *  - pitch: pitch of the lattice element (Real)
    *
    * @return map of string dimension name to value of that dimension
    */
-  virtual std::unordered_map<std::string, std::any> getDimensions() const override
+  virtual std::unordered_map<std::string, std::any> getAttributes() const override
   {
     return {{"nrow", _nrow}, {"ncol", _ncol}, {"pitch", _pitch}};
   }
@@ -121,9 +121,8 @@ public:
   void setPitch(Real pitch);
 
 protected:
-  // helper function for comparing dimensions maps of various data types (data depends on lattice
-  // type)
-  virtual bool compareDimensions(const CSGLattice & other) const override;
+  /// compare the attributes returned in getAttributes of this lattice to another lattice
+  virtual bool compareAttributes(const CSGLattice & other) const override;
 
   /**
    * @brief set the universes that define the lattice layout

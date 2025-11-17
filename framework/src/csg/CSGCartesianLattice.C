@@ -67,7 +67,7 @@ CSGCartesianLattice::setUniverses(
   if (!isValidUniverseMap(universes))
     mooseError("Cannot set lattice " + getName() +
                " with universes. Does not have valid dimensions for lattice type " + getType());
-  // set dimensions attributes based on universe map
+  // set attributes based on universe map
   _nrow = universes.size();
   _ncol = universes[0].size();
   _universe_map = universes;
@@ -82,13 +82,13 @@ CSGCartesianLattice::isValidIndex(const std::pair<unsigned int, unsigned int> in
 }
 
 bool
-CSGCartesianLattice::compareDimensions(const CSGLattice & other) const
+CSGCartesianLattice::compareAttributes(const CSGLattice & other) const
 {
   if (other.getType() != this->getType())
     return false;
 
-  auto this_dims = this->getDimensions();
-  auto other_dims = other.getDimensions();
+  auto this_dims = this->getAttributes();
+  auto other_dims = other.getAttributes();
 
   if (std::any_cast<int>(this_dims["nrow"]) != std::any_cast<int>(other_dims["nrow"]))
     return false;

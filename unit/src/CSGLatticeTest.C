@@ -28,7 +28,7 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
   {
     // initialize without universes: nrow=2, ncol=3, pitch=1.0
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
-    // check dimensions
+    // check dimensions/attributes
     ASSERT_EQ(cart_lattice.getNRows(), 0);
     ASSERT_EQ(cart_lattice.getNCols(), 0);
     ASSERT_EQ(cart_lattice.getPitch(), 1.0);
@@ -44,7 +44,7 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
         {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
-    // check dimensions
+    // check dimensions/attributes
     ASSERT_EQ(cart_lattice.getNRows(), 2);
     ASSERT_EQ(cart_lattice.getNCols(), 3);
     ASSERT_EQ(cart_lattice.getPitch(), 1.0);
@@ -154,8 +154,8 @@ TEST(CSGLatticeTest, testCreateHexLatticeInvalid)
   }
 }
 
-/// tests getDimensions function for both CSGCartesianLattice and CSGHexagonalLattice
-TEST(CSGLatticeTest, testGetDimensions)
+/// tests getAttributes function for both CSGCartesianLattice and CSGHexagonalLattice
+TEST(CSGLatticeTest, testGetAttributes)
 {
   const auto univ1 = CSGUniverse("univ1", false);
   {
@@ -163,7 +163,7 @@ TEST(CSGLatticeTest, testGetDimensions)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
         {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
-    auto dims_map = cart_lattice.getDimensions();
+    auto dims_map = cart_lattice.getAttributes();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 2);
     ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
@@ -173,7 +173,7 @@ TEST(CSGLatticeTest, testGetDimensions)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
         {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
     auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0, univ_map);
-    auto dims_map = hex_lattice.getDimensions();
+    auto dims_map = hex_lattice.getAttributes();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 3);
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nring"]), 2); // should be (nrow + 1)/2
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
