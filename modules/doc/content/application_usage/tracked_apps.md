@@ -123,6 +123,7 @@ We list here older, unmaintained, projects for consideration when naming a new p
 - [Slug](https://github.com/adamLange/slug) - Hyperloop air bearing simulation tool
 - [MaCaw](https://github.com/idaholab/macaw) - Domain-decomposed unstructured mesh Monte Carlo particle transport using OpenMC as a collision physics library
 - [MAMBA](https://github.com/shortlab/mamba) - MOOSE port of the still maintained non-MOOSE MAMBA CASL code for boiling, heat transfer, and chemistry in porous media
+- [Crow](https://github.com/SudiptaBiswas/Crow) - MOOSE-based mesoscale simulations for solid-state sintering.
 
 
 ### Closed source
