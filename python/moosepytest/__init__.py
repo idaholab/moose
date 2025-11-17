@@ -7,10 +7,4 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Configures pytest for the moosecontrol module."""
-
-pytest_plugins = (
-    # Configures pytest for finding and optionally
-    # skipping tests that depend on MOOSE.
-    "moosepytest.mooseexe_plugin",
-)
+"""Contains pytest plugins for testing MOOSE python packages."""
