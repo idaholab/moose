@@ -24,7 +24,10 @@ CSGHexagonalLattice::CSGHexagonalLattice(
 }
 
 CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name, Real pitch)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()), _pitch(pitch), _nrow(0)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()),
+    _pitch(pitch),
+    _nrow(0),
+    _nring(0)
 {
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");
@@ -45,8 +48,8 @@ CSGHexagonalLattice::isValidUniverseMap(
   int center_row = (num_row - 1) / 2;
   for (int row_i : index_range(universes))
   {
-    int n_ele = num_row - std::abs(static_cast<int>(row_i - center_row));
-    if (universes[row_i].size() != static_cast<size_t>(n_ele))
+    int n_ele = num_row - std::abs((int)(row_i - center_row));
+    if ((int)universes[row_i].size() != n_ele)
       return false;
   }
 
@@ -76,7 +79,7 @@ CSGHexagonalLattice::setPitch(const Real pitch)
 }
 
 bool
-CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
+CSGHexagonalLattice::isValidIndex(const std::pair<unsigned int, unsigned int> index) const
 {
   int row = index.first;  // row index
   int ele = index.second; // element index within the row
@@ -86,8 +89,8 @@ CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
     return false;
 
   // Calculate maximum number of elements in this specific row
-  int center_row = (_nrow - 1) / 2; // center row index
-  int max_ele = _nrow - std::abs(row - center_row);
+  auto center_row = (_nrow - 1) / 2; // center row index
+  auto max_ele = _nrow - std::abs(row - center_row);
 
   // Check if element index is valid for this row
   return !(ele < 0 || ele >= max_ele);
@@ -111,12 +114,6 @@ CSGHexagonalLattice::compareDimensions(const CSGLattice & other) const
   return true;
 }
 
-int
-CSGHexagonalLattice::getNRings() const
-{
-  return nRowToRing(_nrow);
-}
-
 void
 CSGHexagonalLattice::buildIndexMap()
 {
@@ -125,15 +122,16 @@ CSGHexagonalLattice::buildIndexMap()
     int num_elements = (ring == _nring - 1) ? 1 : 6 * (_nring - 1 - ring);
     for (int element = 0; element < num_elements; ++element)
     {
-      std::pair<int, int> ring_index = std::make_pair(ring, element);
-      std::pair<int, int> row_index = getRowIndexFromRingIndex(ring_index);
+      std::pair<unsigned int, unsigned int> ring_index = std::make_pair(ring, element);
+      std::pair<unsigned int, unsigned int> row_index = getRowIndexFromRingIndex(ring_index);
       _row_to_ring_map[row_index] = ring_index;
     }
   }
 }
 
-std::pair<int, int>
-CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_ele_index) const
+std::pair<unsigned int, unsigned int>
+CSGHexagonalLattice::getRowIndexFromRingIndex(
+    const std::pair<unsigned int, unsigned int> & ring_ele_index) const
 {
   int og_ring = ring_ele_index.first; // ring corresponds to the outermost ring as ring 0
   int ring = _nring - og_ring - 1;    // convert to internal indexing (0 as innermost ring)
@@ -212,8 +210,9 @@ CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_e
   return {row, col};
 }
 
-std::pair<int, int>
-CSGHexagonalLattice::getRingIndexFromRowIndex(const std::pair<int, int> & row_col_index) const
+std::pair<unsigned int, unsigned int>
+CSGHexagonalLattice::getRingIndexFromRowIndex(
+    const std::pair<unsigned int, unsigned int> & row_col_index) const
 {
   if (!isValidIndex(row_col_index))
     mooseError("Index (" + std::to_string(row_col_index.first) + ", " +
