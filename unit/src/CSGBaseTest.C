@@ -560,8 +560,8 @@ TEST(CSGBaseTest, testCreateCartLattice)
         {univ1, univ2, univ1}, {univ2, univ1, univ2}};
     const CSGLattice & lat = csg_obj->createCartesianLattice("cart_lat", 1.0, univs);
     auto dims_map = lat.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
     ASSERT_EQ(lat.getUniverses().size(), 2);
     ASSERT_EQ(lat.getUniverses()[0].size(), 3);
