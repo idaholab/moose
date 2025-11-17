@@ -259,6 +259,9 @@ class ResultsReader:
 
         i = 0
 
+        # TODO: Eventually this pipeline could become very large.
+        # We could update all old data to set event_id, or
+        # we could do multiple queries
         def get_pipeline(batch_size):
             return [
                 # Older than the last ID (if any) and only on push
@@ -272,6 +275,8 @@ class ResultsReader:
                         "event_cause": {"$ne": "pr"},
                     }
                 },
+                # Ignore tests entry
+                {"$project": {"tests": 0}},
                 # Separate results with and without event ID
                 {
                     "$facet": {
@@ -305,8 +310,6 @@ class ResultsReader:
                 {"$sort": {"_id": -1}},
                 # Limit to size
                 {"$limit": batch_size},
-                # Ignore tests entry
-                {"$project": {"tests": 0}},
             ]
 
         while True:
