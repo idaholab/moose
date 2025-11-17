@@ -1,3 +1,7 @@
+[submodule "libmesh"]
+    path = libmesh
+    url = ../../libMesh/libmesh
+    ignore = dirty
 [submodule "large_media"]
     path = large_media
     url = ../../idaholab/large_media
@@ -53,7 +57,3 @@
     path = framework/contrib/neml2
     url = ../../applied-material-modeling/neml2.git
     update = none
-[submodule "libmesh"]
-	path = libmesh
-	url = https://github.com/ChengHauYang/libmesh.git
-	branch = break_mesh_libmesh_pr
