@@ -402,6 +402,43 @@ p_ambient = 1e5
     equation = mass
     junction = turbine
   []
+
+  [compressor:isentropic_torque]
+    type = ElementAverageValue
+    block = 'compressor'
+    variable = 'isentropic_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compressor:dissipation_torque]
+    type = ElementAverageValue
+    block = 'compressor'
+    variable = 'dissipation_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compressor:friction_torque]
+    type = ElementAverageValue
+    block = 'compressor'
+    variable = 'friction_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [turbine:isentropic_torque]
+    type = ElementAverageValue
+    block = 'turbine'
+    variable = 'isentropic_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [turbine:dissipation_torque]
+    type = ElementAverageValue
+    block = 'turbine'
+    variable = 'dissipation_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [turbine:friction_torque]
+    type = ElementAverageValue
+    block = 'turbine'
+    variable = 'friction_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
 []
 
 [Preconditioning]
