@@ -462,6 +462,10 @@ SolutionUserObjectBase::timestepSetup()
   // Update time interpolation for ExodusII solution
   if (_file_type == 1 && _interpolate_times)
     updateExodusTimeInterpolation();
+
+  // Clear the caches
+  _cached_p(0) = std::numeric_limits<Real>::max();
+  _cached_p2(0) = std::numeric_limits<Real>::max();
 }
 
 void
