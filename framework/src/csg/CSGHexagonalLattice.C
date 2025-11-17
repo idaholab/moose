@@ -64,7 +64,7 @@ CSGHexagonalLattice::setUniverses(
   if (!isValidUniverseMap(universes))
     mooseError("Cannot set lattice " + getName() +
                " with universes. Does not have valid dimensions for lattice type " + getType());
-  // set dimensions attributes based on universe map (in case it differs from original dimensions)
+  // set attributes based on universe map (in case they differ from original values)
   _nrow = universes.size();
   _nring = nRowToRing(_nrow);
   _universe_map = universes;
@@ -97,13 +97,13 @@ CSGHexagonalLattice::isValidIndex(const std::pair<unsigned int, unsigned int> in
 }
 
 bool
-CSGHexagonalLattice::compareDimensions(const CSGLattice & other) const
+CSGHexagonalLattice::compareAttributes(const CSGLattice & other) const
 {
   if (other.getType() != this->getType())
     return false;
 
-  auto this_dims = this->getDimensions();
-  auto other_dims = other.getDimensions();
+  auto this_dims = this->getAttributes();
+  auto other_dims = other.getAttributes();
 
   if (std::any_cast<int>(this_dims["nrow"]) != std::any_cast<int>(other_dims["nrow"]))
     return false;

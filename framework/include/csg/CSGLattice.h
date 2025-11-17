@@ -83,12 +83,12 @@ public:
   bool hasUniverse(const std::string & name) const;
 
   /**
-   * @brief get the map of data that defines the geometric dimensions of the lattice
+   * @brief Get attributes that define the lattice (excluding the universe map).
    *
-   * @return map of string dimension name to value of that dimension
+   * @return map of string attribute name to value of that attribute
    */
   virtual std::unordered_map<std::string, std::any>
-  getDimensions() const = 0; // pure virtual function
+  getAttributes() const = 0; // pure virtual function
 
   /**
    * @brief Checks if the given index location is a valid index for the lattice
@@ -160,9 +160,8 @@ protected:
   void setUniverseAtIndex(const CSGUniverse & universe,
                           const std::pair<unsigned int, unsigned int> index);
 
-  // helper function for comparing dimensions maps of various data types (data depends on lattice
-  // type)
-  virtual bool compareDimensions(const CSGLattice & other) const = 0; // pure virtual
+  // helper function to compare the attributes of the lattice type
+  virtual bool compareAttributes(const CSGLattice & other) const = 0; // pure virtual
 
   /// Name of lattice
   std::string _name;

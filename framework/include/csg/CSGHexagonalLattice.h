@@ -40,7 +40,7 @@ public:
 
   /**
    * Construct a new empty CSGHexagonalLattice with the specified pitch.
-   * NOTE: must call setLatticeUniverses or addUniverseToLattice to populate.
+   * NOTE: must call setLatticeUniverses to populate universe map.
    *
    * @param name unique identifying name of lattice
    * @param pitch flat-to-flat distance for one hexagonal lattice element
@@ -63,13 +63,13 @@ public:
   }
 
   /**
-   * @brief Get the map of data that defines the geometric dimensions of the lattice:
+   * @brief Get attributes that define the lattice (excluding the universe map).
    *  - nrow: number of rows in the hex lattice (int)
    *  - pitch: pitch of the lattice element (Real)
    *
-   * @return std::unordered_map<std::string, std::any>
+   * @return map of string dimension name to value of that dimension
    */
-  virtual std::unordered_map<std::string, std::any> getDimensions() const override
+  virtual std::unordered_map<std::string, std::any> getAttributes() const override
   {
     return {{"nrow", _nrow}, {"nring", _nring}, {"pitch", _pitch}};
   }
@@ -178,8 +178,8 @@ public:
   void setPitch(Real pitch);
 
 protected:
-  /// compare the dimensions _nrow and _pitch of this lattice to another lattice
-  virtual bool compareDimensions(const CSGLattice & other) const override;
+  /// compare the attributes returned in getAttributes of this lattice to another lattice
+  virtual bool compareAttributes(const CSGLattice & other) const override;
 
   /**
    * @brief build a mapping of row-column indices to ring-element indices for quick conversion and

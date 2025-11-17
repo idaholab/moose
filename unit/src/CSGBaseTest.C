@@ -559,7 +559,7 @@ TEST(CSGBaseTest, testCreateCartLattice)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ2, univ1}, {univ2, univ1, univ2}};
     const CSGLattice & lat = csg_obj->createCartesianLattice("cart_lat", 1.0, univs);
-    auto dims_map = lat.getDimensions();
+    auto dims_map = lat.getAttributes();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 2);
     ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
@@ -607,7 +607,7 @@ TEST(CSGBaseTest, testCreateHexLattice)
         {univ1, univ2, univ2, univ1},
         {univ1, univ1, univ1}};
     const CSGLattice & lat = csg_obj->createHexagonalLattice("hex_lat", 1.0, univs);
-    auto dims_map = lat.getDimensions();
+    auto dims_map = lat.getAttributes();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 5);
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nring"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
