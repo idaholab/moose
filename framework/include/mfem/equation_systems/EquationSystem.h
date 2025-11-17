@@ -223,7 +223,7 @@ protected:
 
   mutable mfem::OperatorHandle _jacobian;
   mutable mfem::Vector _trueRHS;
-  mutable mfem::BlockVector _trueBlockRHS, _trueBlockSol, _BlockResidual;
+  mutable mfem::BlockVector _trueBlockSol, _BlockResidual;
 
   Moose::MFEM::GridFunctions * _gfuncs;
   mfem::Array<int> * _block_true_offsets;

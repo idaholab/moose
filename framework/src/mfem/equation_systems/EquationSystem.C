@@ -364,6 +364,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
       auto lf = _lfs.GetShared(test_var_name);
       lf->Assemble();
       lf->ParallelAssemble(b);
+      b.SyncAliasMemory(b);
 
       auto nlf = _nlfs.GetShared(test_var_name);
       nlf->Assemble();
@@ -373,13 +374,13 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
       _BlockResidual.GetBlock(i) *= -1;
 
       _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
+      _BlockResidual.GetBlock(i).SyncAliasMemory(_BlockResidual);
     }
 
     residual = static_cast<mfem::Vector &>(_BlockResidual);
     const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
+    residual *= -1.0;
   }
-
-  residual *= -1.0;
 
   if (!_non_linear)
   {
@@ -553,7 +554,6 @@ EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
 {
   _gfuncs = &gridfunctions;
   _block_true_offsets = &btoffsets;
-  _trueBlockRHS.Update(*_block_true_offsets);
   _trueBlockSol.Update(*_block_true_offsets);
   _BlockResidual.Update(*_block_true_offsets);
   BuildBilinearForms();
