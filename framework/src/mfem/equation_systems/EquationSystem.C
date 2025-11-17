@@ -659,10 +659,8 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
 void
 TimeDependentEquationSystem::EliminateCoupledVariables()
 {
-  // Eliminate contributions from variables at previous timestep.
-  for (const auto i : index_range(_test_var_names))
+  for (const auto & test_var_name : _test_var_names)
   {
-    auto & test_var_name = _test_var_names.at(i);
     auto td_blf = _td_blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
     *lf *= _dt_coef.constant;
@@ -671,10 +669,6 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
     mfem::Vector lf_prev(lf->Size());
     td_blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
     *lf += lf_prev;
-  }
-  for (const auto & test_var_name : _test_var_names)
-  {
-    auto lf = _lfs.Get(test_var_name);
     for (const auto & eliminated_var_name : _eliminated_var_names)
     {
       if (_td_mblfs.Has(test_var_name) && _td_mblfs.Get(test_var_name)->Has(eliminated_var_name))
@@ -686,7 +680,7 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
         *lf += lf_prev;
       }
     }
-  }  
+  }
   // Eliminate contributions from other coupled variables.
   EquationSystem::EliminateCoupledVariables();
 }
