@@ -800,7 +800,7 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
                                                 cut_line_params[2],
                                                 true);
     }
-    const auto num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+    const unsigned int num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
     if (num_nodes == node_side_rec.size() - n_points_on_line)
     {
       (*elem_it)->subdomain_id() = block_id_to_remove;
