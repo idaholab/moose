@@ -263,14 +263,14 @@ An example of the $(i, j)$ indices for a 3-ring hexagonal lattice is shown in FI
 
 ADD FIGURE (caption: Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(i, j)$ form)
 
-Convenience methods are provided for `CSGHexagonalLattice` objects to convert between the required $(i, j)$ indices and a ring-based $(r, i)$ indexing scheme.
-In the ring-based scheme, the outermost ring is the 0th ring, and the right-most element is the 0th item in the ring with indices increasing counter-clockwise around the ring.
-For the 3-ring lattice above in FIGURE, the corresponding $(r, i)$ indices would be as shown in FIGURE.
-For any lattice, the $(r, i)$ index of a universe in the lattice can be retrieved from the $(i, j)$ index by calling the `getRingIndexFromRowIndex` method.
-And similarly, if the $(r, i)$ index form is known, the corresponding $(i, j)$ index can be retrieved using the `getRowIndexFromRingIndex` method.
+Convenience methods are provided for `CSGHexagonalLattice` objects to convert between the required $(i, j)$ indices and a ring-based $(r, p)$ indexing scheme.
+In the ring-based scheme, the outermost ring is the 0th ring, and the right-most element in the ring is the 0th position of the ring with indices increasing counter-clockwise around the ring.
+For the 3-ring lattice above in FIGURE, the corresponding $(r, p)$ indices would be as shown in FIGURE.
+For any lattice, the $(r, p)$ index of a universe in the lattice can be retrieved from the $(i, j)$ index by calling the `getRingIndexFromRowIndex` method.
+And similarly, if the $(r, p)$ index form is known, the corresponding $(i, j)$ index can be retrieved using the `getRowIndexFromRingIndex` method.
 It is important to note that while these convenience methods exists to convert between the two indexing schemes, the `CSGUniverse` objects in the lattice can only be accessed using the $(i, j)$ index.
 
-ADD FIGURE (caption: Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(r, i)$ form)
+ADD FIGURE (caption: Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(r, p)$ form)
 
 #### Defining the Universe Layout
 
