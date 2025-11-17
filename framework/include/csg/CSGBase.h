@@ -362,15 +362,15 @@ public:
   const CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice);
 
   /**
-   * @brief add the universe to the lattice at the specified location
+   * @brief set location in the lattice to be the provided universe
    *
    * @param lattice lattice to update
    * @param universe universe to set at the location
    * @param index index of the lattice element (int, int)
    */
-  void addUniverseToLattice(const CSGLattice & lattice,
-                            const CSGUniverse & universe,
-                            std::pair<unsigned int, unsigned int> index);
+  void setUniverseAtLatticeIndex(const CSGLattice & lattice,
+                                 const CSGUniverse & universe,
+                                 std::pair<unsigned int, unsigned int> index);
 
   /**
    * @brief Set provided universes as the layout of the lattice.

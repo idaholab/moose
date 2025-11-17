@@ -242,7 +242,7 @@ The `CSGBase` class supports only the creation of 2D lattices. A "3D" lattice ca
 The `CSGLattice` objects can be accessed or updated with the following methods from `CSGBase`:
 
 - `setLatticeUniverses`: sets the vector of vectors of `CSGUniverse` objects as the lattice layout.
-- `addUniverseToLattice`: add a `CSGUniverse` to the lattice at the specified location index (replaces the existing universe).
+- `setUniverseAtLatticeIndex`: add a `CSGUniverse` to the lattice at the specified location index (replaces the existing universe).
 - `renameLattice`: change the name of the `CSGLattice` object.
 - `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
 - `getLatticeByName`: retrieve a const reference to the `CSGLattice` object of the specified name.
@@ -278,12 +278,18 @@ As mentioned above, the layout of the `CSGUniverse` objects of the lattice can b
 At the time that the universes are set, the dimensionality of the lattice is determined (i.e., the number of rows, columns, or rings for the lattice).
 If the dimensionality should need to be changed, a new complete universe arrangement can be set to overwrite the previous arrangement using `setLatticeUniverses`.
 Anytime the universe layout is set or changed, the dimensionality will be validated to ensure it compatible with the lattice type.
-To replace a single element of the lattice, the `addUniverseToLattice` method can be used by providing the element location in $(i, j)$ form.
+To replace a single element of the lattice, the `setUniverseAtLatticeIndex` method can be used by providing the element location in $(i, j)$ form.
 In order to use this method, the full set of universes must have already been defined, either during the lattice initialization or with `setLatticeUniverses`.
 
 !listing CSGBaseTest.C start=initialize a lattice without universes and then end=getUniverses
 
-!listing CSGBaseTest.C start=csg_obj->addUniverseToLattice(lat, end=csg_obj->addUniverseToLattice(lat, include-end=true
+!listing CSGBaseTest.C start=csg_obj->setUniverseAtLatticeIndex(lat, end=csg_obj->setUniverseAtLatticeIndex(lat, include-end=true
+
+!alert! note title=Building the Lattice Layout Incrementally
+
+The `setUniverseAtLatticeIndex` method is not meant to be used to change a lattice's dimensions by building the lattice element-by-element because the index supplied would be considered out of range in this context. The dimensionality of the lattice is determined when `setLatticeUniverses` is called. Therefore, to build a lattice incrementally, the recommendation is to build up a vector of vectors of universes incrementally and then call `setLatticeUniverses` one time. From there, `setUniverseAtLatticeIndex` can be called to replace an existing universe in the lattice.
+
+!alert-end!
 
 ## Updating Existing CSGBase Objects
 

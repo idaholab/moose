@@ -668,8 +668,8 @@ TEST(CSGBaseTest, testAddLattice)
   }
 }
 
-/// tests the CSGBase::addUniverseToLattice method
-TEST(CSGBaseTest, testAddUniverseToLattice)
+/// tests the CSGBase::setUniverseAtLatticeIndex method
+TEST(CSGBaseTest, testSetUniverseAtLatticeIndex)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto & univ1 = csg_obj->createUniverse("spidey");
@@ -678,7 +678,8 @@ TEST(CSGBaseTest, testAddUniverseToLattice)
   const CSGLattice & lat = csg_obj->createCartesianLattice("spiderverse", 1.0, univs);
   {
     // test valid add new univ
-    csg_obj->addUniverseToLattice(lat, univ2, std::make_pair<unsigned int, unsigned int>(1, 0));
+    csg_obj->setUniverseAtLatticeIndex(
+        lat, univ2, std::make_pair<unsigned int, unsigned int>(1, 0));
     auto all_univs = lat.getUniverses();
     ASSERT_EQ(all_univs[0][0].get(), univ1);
     ASSERT_EQ(all_univs[1][0].get(), univ2);
@@ -688,8 +689,9 @@ TEST(CSGBaseTest, testAddUniverseToLattice)
     auto csg_obj2 = std::make_unique<CSG::CSGBase>();
     auto & univ3 = csg_obj2->createUniverse("spidey");
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &lat, &univ3]() {
-          csg_obj->addUniverseToLattice(
+        [&csg_obj, &lat, &univ3]()
+        {
+          csg_obj->setUniverseAtLatticeIndex(
               lat, univ3, std::make_pair<unsigned int, unsigned int>(1, 0));
         },
         "Cannot add universe spidey to lattice spiderverse. Universe is not in the CSGBase "
