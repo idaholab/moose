@@ -96,10 +96,7 @@ CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
   int max_ele = _nrow - std::abs(row - center_row);
 
   // Check if element index is valid for this row
-  if (ele < 0 || ele >= max_ele)
-    return false;
-
-  return true;
+  return !(ele < 0 || ele >= max_ele);
 }
 
 bool

@@ -331,7 +331,6 @@ CSGBase::createHexagonalLattice(
 const CSGLattice &
 CSGBase::addLattice(std::unique_ptr<CSGLattice> lattice)
 {
-  auto latt = lattice.get();
   // make sure all universes are a part of this base instance
   auto universes = lattice->getUniverses();
   for (auto univ_list : universes)
@@ -339,7 +338,7 @@ CSGBase::addLattice(std::unique_ptr<CSGLattice> lattice)
     for (const CSGUniverse & univ : univ_list)
     {
       if (!checkUniverseInBase(univ))
-        mooseError("Cannot add lattice " + latt->getName() + " of type " + latt->getType() +
+        mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
                    ". Universe " + univ.getName() + " is not in the CSGBase instance.");
     }
   }

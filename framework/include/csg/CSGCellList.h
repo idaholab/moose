@@ -86,7 +86,7 @@ protected:
   bool hasCell(const std::string & name) const { return _cells.find(name) != _cells.end(); }
 
   /**
-   * @brief Get map of all names to cells in cell list
+   * @brief Get non-const map of all names to cells in cell list
    *
    * @return map of all names to CSGCell pointers
    */

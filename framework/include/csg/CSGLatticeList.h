@@ -31,14 +31,6 @@ protected:
    */
   virtual ~CSGLatticeList() = default;
 
-  // /**
-  //  * @brief create an empty lattice
-  //  *
-  //  * @param name unique name of universe
-  //  * @return reference to empty universe that is created
-  //  */
-  // CSGLattice & addLattice(const std::string & name);
-
   /**
    * @brief add a Cartesian lattice whose layout is defined by the set of universes
    *
