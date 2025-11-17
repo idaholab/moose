@@ -18,8 +18,7 @@ CSGLattice::CSGLattice(const std::string & name, const std::string & lattice_typ
 }
 
 void
-CSGLattice::setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> universe,
-                               const std::pair<int, int> index)
+CSGLattice::setUniverseAtIndex(const CSGUniverse & universe, const std::pair<int, int> index)
 {
   std::string base_msg = "Cannot set universe at location (" + std::to_string(index.first) + ", " +
                          std::to_string(index.second) + ") for lattice " + getName() + ". ";
@@ -54,7 +53,7 @@ CSGLattice::getUniverseNameMap() const
   return name_map;
 }
 
-std::reference_wrapper<const CSGUniverse>
+const CSGUniverse &
 CSGLattice::getUniverseAtIndex(const std::pair<int, int> index)
 {
   if (!isValidIndex(index))

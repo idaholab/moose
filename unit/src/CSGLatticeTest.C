@@ -42,8 +42,7 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
     // initialize with an array of universes, pitch=1.0
     const auto univ1 = CSGUniverse("univ1", false);
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
     // check dimensions
     ASSERT_EQ(cart_lattice.getNRows(), 2);
@@ -72,8 +71,7 @@ TEST(CSGLatticeTest, testCreateCartLatticeInvalid)
     // try to initialize with universe array of invalid dimensions (second row is different length)
     const auto univ1 = CSGUniverse("univ1", false);
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1}, {univ1, univ1}};
     std::string exp_msg = "Cannot set lattice cartlat with universes. Does not have valid "
                           "dimensions for lattice type CSG::CSGCartesianLattice";
     Moose::UnitUtils::assertThrows([&univ_map]() { CSGCartesianLattice("cartlat", 1.0, univ_map); },
@@ -99,11 +97,11 @@ TEST(CSGLatticeTest, testCreateHexLatticeValid)
     // initialize with universe map, pitch=1.0
     const auto univ1 = CSGUniverse("univ1", false);
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1}};
     auto hex_lat = CSGHexagonalLattice("hexlat", 1.0, univ_map);
     ASSERT_EQ(hex_lat.getNRings(), 3);
     ASSERT_EQ(hex_lat.getPitch(), 1.0);
@@ -132,10 +130,10 @@ TEST(CSGLatticeTest, testCreateHexLatticeInvalid)
   {
     // create universe map with invalid dimensions (even number of rows)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1}};
     std::string exp_msg = "Cannot set lattice hexlat with universes. Does not have valid "
                           "dimensions for lattice type CSG::CSGHexagonalLattice";
     Moose::UnitUtils::assertThrows([&univ_map]() { CSGHexagonalLattice("hexlat", 1.0, univ_map); },
@@ -144,14 +142,11 @@ TEST(CSGLatticeTest, testCreateHexLatticeInvalid)
   {
     // create universe map with invalid dimensions (one row has wrong number of elements)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1),
-         std::cref(univ1),
-         std::cref(univ1),
-         std::cref(univ1)}, // should have 5 elements
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1, univ1}, // should have 5 elements
+        {univ1, univ1, univ1, univ1},
+        {univ1, univ1, univ1}};
     std::string exp_msg = "Cannot set lattice hexlat with universes. Does not have valid "
                           "dimensions for lattice type CSG::CSGHexagonalLattice";
     Moose::UnitUtils::assertThrows([&univ_map]() { CSGHexagonalLattice("hexlat", 1.0, univ_map); },
@@ -166,8 +161,7 @@ TEST(CSGLatticeTest, testGetDimensions)
   {
     // cartesian lattice
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
     auto dims_map = cart_lattice.getDimensions();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
@@ -177,9 +171,7 @@ TEST(CSGLatticeTest, testGetDimensions)
   {
     // hexagonal lattice
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
     auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0, univ_map);
     auto dims_map = hex_lattice.getDimensions();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 3);
@@ -198,8 +190,7 @@ TEST(CSGLatticeTest, testCartSetUniverses)
   {
     // create universe map and set it on the initialized lattice
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     ASSERT_NO_THROW(cart_lattice.setUniverses(univ_map));
     // should have 1x4 map after being set
     ASSERT_EQ(cart_lattice.getUniverses().size(), 2);
@@ -212,7 +203,7 @@ TEST(CSGLatticeTest, testCartSetUniverses)
   {
     // overwrite w/ new universe map of different dimensions - valid
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univ_map = {
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)}};
+        {univ2, univ2, univ2, univ2}};
     ASSERT_NO_THROW(cart_lattice.setUniverses(new_univ_map));
     // expect map to contain all univ2
     for (auto univ_list : cart_lattice.getUniverses())
@@ -239,9 +230,7 @@ TEST(CSGLatticeTest, testHexSetUniverses)
   {
     // create universe map and then set it on the initialized lattice
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-        {std::cref(univ1), std::cref(univ1)}};
+        {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
     ASSERT_NO_THROW(lat.setUniverses(univ_map););
     // should have a 2-ring map (3 rows) after being set
     ASSERT_EQ(lat.getUniverses().size(), 3);
@@ -254,11 +243,11 @@ TEST(CSGLatticeTest, testHexSetUniverses)
   {
     // create new map with new dimensions and update lattice
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univ_map = {
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2)},
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)},
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)},
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)},
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2)}};
+        {univ2, univ2, univ2},
+        {univ2, univ2, univ2, univ2},
+        {univ2, univ2, univ2, univ2, univ2},
+        {univ2, univ2, univ2, univ2},
+        {univ2, univ2, univ2}};
     lat.setUniverses(new_univ_map);
     // expect map to contain all univ2
     for (auto univ_list : lat.getUniverses())
@@ -286,8 +275,8 @@ TEST(CSGLatticeTest, testGetUniverseNameMap)
   const auto univ1 = CSGUniverse(name1, false);
   const auto univ2 = CSGUniverse(name2, false);
   // create cartesian lattice with 2x2 universe map
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ2)}, {std::cref(univ2), std::cref(univ1)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {{univ1, univ2},
+                                                                                  {univ2, univ1}};
   auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
   auto name_map = cart_lattice.getUniverseNameMap();
   ASSERT_EQ(name_map.size(), 2);
@@ -304,8 +293,7 @@ TEST(CSGLatticeTest, testHasUniverse)
 {
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ2)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {{univ1, univ2}};
   auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
   // check for existing universes
   ASSERT_TRUE(cart_lattice.hasUniverse("univ1"));
@@ -320,8 +308,7 @@ TEST(CSGLatticeTest, testCartIsValidIndex)
   // create initial lattice of all univ1 elements
   const auto univ1 = CSGUniverse("univ1", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+      {univ1, univ1, univ1}, {univ1, univ1, univ1}};
   auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
   {
     // test valid index locations
@@ -343,9 +330,7 @@ TEST(CSGLatticeTest, testHexIsValidIndex)
   // create initial lattice of all univ1 elements
   const auto univ1 = CSGUniverse("univ1", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1)}};
+      {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
   auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0, univ_map);
   {
     // valid list of indices for 2-ring hex lattice:
@@ -377,8 +362,7 @@ TEST(CSGLatticeTest, testCartSetUniverseAtIndex)
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+      {univ1, univ1, univ1}, {univ1, univ1, univ1}};
   auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
   // initial map should contain structure matching univ_map (all univ1)
   for (auto univ_list : cart_lattice.getUniverses())
@@ -388,7 +372,7 @@ TEST(CSGLatticeTest, testCartSetUniverseAtIndex)
   }
   {
     // replace element in universe map with another using setUniverseAtIndex (valid index location)
-    cart_lattice.setUniverseAtIndex(std::cref(univ2), std::make_pair(1, 2));
+    cart_lattice.setUniverseAtIndex(univ2, std::make_pair(1, 2));
     auto univs = cart_lattice.getUniverses();
     for (auto i : index_range(univs))
     {
@@ -428,8 +412,7 @@ TEST(CSGLatticeTest, testGetMethods)
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
-      {std::cref(univ2), std::cref(univ1), std::cref(univ2)}};
+      {univ1, univ2, univ1}, {univ2, univ1, univ2}};
   auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
   {
     // get universe indices by name - valid name
@@ -471,14 +454,13 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   // universe maps to use for different lattice comparisons
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map1 = {
-      {std::cref(univ1), std::cref(univ1)}, {std::cref(univ1), std::cref(univ1)}};
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map2 = {
-      {std::cref(univ2), std::cref(univ2)}, {std::cref(univ2), std::cref(univ2)}};
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map3 = {
-      {std::cref(univ1), std::cref(univ1)}};
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map4 = {
-      {std::cref(univ1)}, {std::cref(univ1)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map1 = {{univ1, univ1},
+                                                                                   {univ1, univ1}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map2 = {{univ2, univ2},
+                                                                                   {univ2, univ2}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map3 = {{univ1, univ1}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map4 = {{univ1},
+                                                                                   {univ1}};
   // identical lattices
   auto l1 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
   auto l2 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
@@ -516,19 +498,15 @@ TEST(CSGLatticeTest, testHexLatticeEquality)
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map1 = {
-      {std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1)}};
+      {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map2 = {
-      {std::cref(univ2), std::cref(univ2)},
-      {std::cref(univ2), std::cref(univ2), std::cref(univ2)},
-      {std::cref(univ2), std::cref(univ2)}};
+      {univ2, univ2}, {univ2, univ2, univ2}, {univ2, univ2}};
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map3 = {
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
-      {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+      {univ1, univ1, univ1},
+      {univ1, univ1, univ1, univ1},
+      {univ1, univ1, univ1, univ1, univ1},
+      {univ1, univ1, univ1, univ1},
+      {univ1, univ1, univ1}};
   // identical lattices
   auto l1 = CSGHexagonalLattice("hexlat", 1.0, univ_map1);
   auto l2 = CSGHexagonalLattice("hexlat", 1.0, univ_map1);
@@ -562,8 +540,8 @@ TEST(CSGLatticeTest, testGetUniqueUniverses)
 {
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-      {std::cref(univ1), std::cref(univ1)}, {std::cref(univ2), std::cref(univ1)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {{univ1, univ1},
+                                                                                  {univ2, univ1}};
   auto lat = CSGCartesianLattice("cartlat", 1.0, univ_map);
   auto unique = lat.getUniqueUniverses();
   ASSERT_EQ(unique.size(), 2);
@@ -604,9 +582,7 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
   {
     // 2-ring lattice case
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> umap = {
-        {std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u)}};
+        {u, u}, {u, u, u}, {u, u}};
     auto lat = CSGHexagonalLattice("lat", 1.0, umap);
     std::map<std::pair<int, int>, std::pair<int, int>> exp_row_to_ring = {{{0, 0}, {0, 4}},
                                                                           {{0, 1}, {0, 5}},
@@ -634,11 +610,7 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
   {
     // 3-ring case
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> umap = {
-        {std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u)}};
+        {u, u, u}, {u, u, u, u}, {u, u, u, u, u}, {u, u, u, u}, {u, u, u}};
     auto lat = CSGHexagonalLattice("lat", 1.0, umap);
     std::map<std::pair<int, int>, std::pair<int, int>> exp_row_to_ring = {{{0, 0}, {0, 8}},
                                                                           {{0, 1}, {0, 9}},
@@ -670,19 +642,13 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
   {
     // 4-ring case
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> umap = {
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u),
-         std::cref(u),
-         std::cref(u),
-         std::cref(u),
-         std::cref(u),
-         std::cref(u),
-         std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u), std::cref(u)},
-        {std::cref(u), std::cref(u), std::cref(u), std::cref(u)}};
+        {u, u, u, u},
+        {u, u, u, u, u},
+        {u, u, u, u, u, u},
+        {u, u, u, u, u, u, u},
+        {u, u, u, u, u, u},
+        {u, u, u, u, u},
+        {u, u, u, u}};
     auto lat = CSGHexagonalLattice("lat", 1.0, umap);
     std::map<std::pair<int, int>, std::pair<int, int>> exp_row_to_ring = {
         {{0, 0}, {0, 12}}, {{0, 1}, {0, 13}}, {{0, 2}, {0, 14}}, {{0, 3}, {0, 15}},
