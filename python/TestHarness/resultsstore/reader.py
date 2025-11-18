@@ -370,14 +370,21 @@ class ResultsReader:
         )
         return doc["_id"] if doc is not None else None
 
+    # Used as the default for a dict.get() when values in
+    # the dictionary could be None
+    NOT_IN = object()
+
     def get_cached_result(self, index: str, value) -> Optional[ResultCollection]:
         """Get a result given a filter and store it in the cache."""
         cache = self._cached_results[index]
 
         # Value exists in the cache
-        cached_value = cache.get(value)
-        if cached_value is not None:
+        cached_value = cache.get(value, self.NOT_IN)
+        if isinstance(cached_value, StoredResult):
             return ResultCollection(cached_value, self.get_database)
+        # Was found in the cache but didn't exist
+        if cached_value is None:
+            return None
 
         # Search for the value
         docs = self._find_results({index: {"$eq": value}}, limit=1)

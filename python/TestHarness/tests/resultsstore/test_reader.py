@@ -564,29 +564,48 @@ class TestResultsReader(ResultsStoreTestCase):
         """Test get_id_result()."""
         self.run_test_get_cached_result("id", "_id", ObjectId())
 
-    def run_test_get_cached_result_none(self, method_index: str, value):
+    def run_test_get_cached_result_none(self, method_index: str, index: str, value):
         """Test get_cached_result() for the given index when none found."""
         reader = ResultsReader(DATABASE_NAME, FakeMongoClient())
+        cache = reader._cached_results[index]
         method = getattr(reader, f"get_{method_index}_result")
-        with patch.object(reader, "_find_results", return_value=[]):
+
+        # Doesn't exist in the cache
+        self.assertNotIn(value, cache)
+
+        # Find it the first time, as none
+        with patch.object(
+            reader, "_find_results", return_value=[]
+        ) as patch_find_results:
             collection = method(value)
+        self.assertIsNone(collection)
+        patch_find_results.assert_called_once()
+
+        # Should now exist in the cache as none
+        self.assertIn(value, cache)
+        self.assertIsNone(cache[value])
+
+        # Find it again, shouldn't search (is in cache)
+        with patch.object(reader, "_find_results") as patch_find_results:
+            collection = method(value)
+        patch_find_results.assert_not_called()
         self.assertIsNone(collection)
 
     def test_get_event_result_none(self):
         """Test get_event_result() when nothing is found."""
-        self.run_test_get_cached_result_none("event", 1234)
+        self.run_test_get_cached_result_none("event", "event_id", 1234)
 
     def test_get_pr_result_none(self):
         """Test get_pr_result() when nothing is found."""
-        self.run_test_get_cached_result_none("pr", 1234)
+        self.run_test_get_cached_result_none("pr", "pr_num", 1234)
 
     def test_get_commit_result_none(self):
         """Test get_commit_result() when nothing is found."""
-        self.run_test_get_cached_result_none("commit", random_git_sha())
+        self.run_test_get_cached_result_none("commit", "event_sha", random_git_sha())
 
     def test_get_id_result_none(self):
         """Test get_id_result() when nothing is found."""
-        self.run_test_get_cached_result_none("id", ObjectId())
+        self.run_test_get_cached_result_none("id", "_id", ObjectId())
 
     def run_test_get_cached_result_live(
         self, method_index: str, index: str, filter: dict
