@@ -23,7 +23,10 @@ VolumeJunctionCoupledFlux1Phase::validParams()
                                            "Direction vector pointing from the junction to the "
                                            "coupled volume. This vector will be normalized.");
   params.addRequiredParam<Real>("A_coupled", "Area of the coupled surface [m^2]");
-  params.addParam<MultiAppName>("multi_app", "MultiApp to transfer to and from");
+  params.addParam<MultiAppName>(
+      "multi_app",
+      "If provided, transfers occur with this MultiApp. The following would be transferred: mass "
+      "flow rate, energy flow rate, temperature, and pressure at the junction.");
   params.addRequiredParam<std::string>("pp_suffix", "Suffix to append to post-processor names");
 
   params.addClassDescription(
