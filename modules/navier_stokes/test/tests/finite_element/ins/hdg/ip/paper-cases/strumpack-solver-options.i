@@ -17,9 +17,9 @@
     []
     [p]
       vars = 'pressure_bar'
-      petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-pc_type -pc_jacobi_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -ksp_max_it -ksp_atol -ksp_norm_type'
-      petsc_options_value = 'jacobi   diagonal        fgmres    1e-2      300                right        300         1e-8      unpreconditioned'
+      petsc_options = '-ksp_ksp_converged_reason'
+      petsc_options_iname = '-pc_type -ksp_pc_type -ksp_pc_jacobi_type -ksp_type -ksp_ksp_rtol -ksp_ksp_gmres_restart -ksp_ksp_pc_side -ksp_ksp_max_it -ksp_ksp_atol -ksp_ksp_norm_type'
+      petsc_options_value = 'ksp      jacobi       diagonal            preonly   1e-2          300                    right            300             1e-8          unpreconditioned'
     []
   []
 []
