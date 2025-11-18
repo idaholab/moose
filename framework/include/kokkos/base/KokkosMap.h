@@ -14,9 +14,7 @@
 #include <memory>
 #include <map>
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -343,5 +341,4 @@ dataLoad(std::istream & stream, Map<T1, T2> & map, void * context)
 }
 #endif
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -11,9 +11,7 @@
 
 #include "KokkosIntegratedBCBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -313,5 +311,4 @@ IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, AssemblyDatum &
       });
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

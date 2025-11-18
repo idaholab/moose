@@ -16,9 +16,7 @@
   using MaterialPropertyValueBase<T, dimension>::_data;                                            \
   using MaterialPropertyValueBase<T, dimension>::_value
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 template <typename T, unsigned int dimension>
@@ -261,5 +259,4 @@ public:
 };
 ///@}
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
