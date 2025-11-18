@@ -261,6 +261,17 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
 }
 
 bool
+pointOnLine(const Real px,
+            const Real py,
+            const Real param_1,
+            const Real param_2,
+            const Real param_3,
+            const Real dis_tol)
+{
+  return std::abs(px * param_1 + py * param_2 + param_3) <= dis_tol;
+}
+
+bool
 lineSideDeterminator(const Real px,
                      const Real py,
                      const Real param_1,
@@ -710,15 +721,23 @@ quadToTriOnLine(ReplicatedMesh & mesh,
       for (unsigned int i = 0; i < 4; i++)
       {
         const Point v_point = (*elem_it)->point(i);
-        node_side_rec.push_back(lineSideDeterminator(v_point(0),
-                                                     v_point(1),
-                                                     cut_line_params[0],
-                                                     cut_line_params[1],
-                                                     cut_line_params[2],
-                                                     true));
+        if (!pointOnLine(
+                v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2]))
+          node_side_rec.push_back(lineSideDeterminator(v_point(0),
+                                                       v_point(1),
+                                                       cut_line_params[0],
+                                                       cut_line_params[1],
+                                                       cut_line_params[2],
+                                                       true));
       }
-      if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) != 4 &&
-          std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) > 0)
+      // This counts the booleans in node_side_rec, which does not include nodes
+      // that are exactly on the line (these nodes are excluded from the
+      // decision). In this case, num_nodes node lie on one side of the line and
+      // node_side_rec.size() - n_nodes lie on the other side. In the case that
+      // there are nodes on both sides of the line, we mark the element for
+      // conversion.
+      const auto num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+      if (num_nodes != (int)node_side_rec.size() && num_nodes > 0)
       {
         cross_elems_quad.push_back((*elem_it)->id());
         new_subdomain_ids.emplace((*elem_it)->subdomain_id() + tri_subdomain_id_shift);
@@ -766,9 +785,9 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
   for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
        elem_it++)
   {
-    std::vector<unsigned short> node_side_rec;
     const auto n_vertices = (*elem_it)->n_vertices();
-    node_side_rec.resize(n_vertices);
+    unsigned int n_points_on_line = 0;
+    std::vector<unsigned short> node_side_rec(n_vertices, 0);
     for (unsigned int i = 0; i < n_vertices; i++)
     {
       // First check if the vertex is in the XY Plane
@@ -776,14 +795,29 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
         mooseError("MooseMeshXYCuttingUtils::lineRemoverCutElemTri() only works for 2D meshes in "
                    "XY Plane.");
       const Point v_point = (*elem_it)->point(i);
-      node_side_rec[i] = lineSideDeterminator(
-          v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2], true);
+      if (pointOnLine(
+              v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2]))
+        ++n_points_on_line;
+      else
+        node_side_rec[i] = lineSideDeterminator(v_point(0),
+                                                v_point(1),
+                                                cut_line_params[0],
+                                                cut_line_params[1],
+                                                cut_line_params[2],
+                                                true);
     }
-    if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) == (int)node_side_rec.size())
+    // This counts the booleans in node_side_rec, which does not include nodes
+    // that are exactly on the line (these nodes are excluded from the
+    // decision). In this case, num_nodes node lie on one side of the line and
+    // node_side_rec.size() - n_nodes lie on the other side. In the case that
+    // there are nodes on both sides of the line, we mark the element for
+    // removal.
+    const unsigned int num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+    if (num_nodes == node_side_rec.size() - n_points_on_line)
     {
       (*elem_it)->subdomain_id() = block_id_to_remove;
     }
-    else if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) > 0)
+    else if (num_nodes > 0)
     {
       if ((*elem_it)->n_vertices() != 3 || (*elem_it)->n_nodes() != 3)
         mooseError("The element across the cutting line is not TRI3, which is not supported.");
