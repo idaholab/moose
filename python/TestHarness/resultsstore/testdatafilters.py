@@ -18,23 +18,23 @@ class TestDataFilter(Enum):
 
     __test__ = False  # prevents pytest collection
 
-    """Load all data in tests."""
     ALL = "all"
+    """Load all data in tests."""
 
-    """Load HPC data in tests."""
     HPC = "hpc"
+    """Load HPC data in tests."""
 
-    """Load the status entry in tests."""
     STATUS = "status"
+    """Load the status entry in tests."""
 
-    """Load the tester enter in tests."""
     TESTER = "tester"
+    """Load the tester enter in tests."""
 
-    """Load the timing entry in tests."""
     TIMING = "timing"
+    """Load the timing entry in tests."""
 
-    """Load the validation entry in tests."""
     VALIDATION = "validation"
+    """Load the validation entry in tests."""
 
 
 def filter_as_iterable(
