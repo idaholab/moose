@@ -45,7 +45,7 @@ The following table gives the post-processors created by this component, where `
 | `T_<suffix>` | $T_\text{ext}$ | [Receiver.md] | From other app |
 
 If this application is the main application, then the [!param](/Components/VolumeJunctionCoupledFlux1Phase/multi_app) parameter should be provided, which
-creates [MultiAppPostprocessorTransfer.md] objects; otherwise the other application is resonsible for creating the transfers.
+creates [MultiAppPostprocessorTransfer.md] objects; otherwise the other application is responsible for creating the transfers.
 
 !syntax parameters /Components/VolumeJunctionCoupledFlux1Phase
 

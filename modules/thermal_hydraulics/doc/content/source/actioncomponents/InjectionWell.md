@@ -14,7 +14,7 @@ then an optional end point with [!param](/ActionComponents/InjectionWell/end_poi
 (if omitted, there is no channel after the last junction).
 
 If [!param](/ActionComponents/InjectionWell/multi_app) is provided, it is passed
-to `VolumeJunctionCoupledFlux1Phase` (see its documentation for more information).
+to [VolumeJunctionCoupledFlux1Phase.md] (see its documentation for more information).
 
 The flow channels use [Closures1PhaseSimple.md] with the friction factor provided by
 [!param](/ActionComponents/InjectionWell/friction_factor).
