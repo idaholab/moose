@@ -45,7 +45,10 @@ def filter_as_iterable(
 
     Useful for methods that can take a single filter or muliple filters.
     """
-    return [test_filter] if isinstance(test_filter, TestDataFilter) else test_filter
+    if isinstance(test_filter, TestDataFilter):
+        return [test_filter]
+    assert isinstance(TestDataFilter, Iterable)
+    return test_filter
 
 
 def has_all_filter(test_filter: Iterable[TestDataFilter]) -> bool:
