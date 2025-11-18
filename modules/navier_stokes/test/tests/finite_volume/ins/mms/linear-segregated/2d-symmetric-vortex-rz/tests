@@ -1,6 +1,6 @@
 [Tests]
   issues = '#31862'
-  design = 'SIMPLE.md LinearFVRZViscousSource'
+  design = 'SIMPLE.md LinearFVRZViscousSource.md'
   [const_mat]
     type = PythonUnitTest
     input = test.py
