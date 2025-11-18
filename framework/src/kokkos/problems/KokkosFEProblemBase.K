@@ -407,7 +407,7 @@ FEProblemBase::computeKokkosUserObjectsInternal(const ExecFlagType & type,
 {
   try
   {
-    TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
+    TIME_SECTION("computeKokkosUserObjects", 1, "Computing Kokkos User Objects");
 
     // Add group to query
 

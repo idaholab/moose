@@ -22,6 +22,7 @@ public:
 
 protected:
   const Real _value;
+  // Enum stored as integer (0 : +, 1 : -, 2 : *, 3 : /)
   const int _operator;
 
   const unsigned int _coupled;

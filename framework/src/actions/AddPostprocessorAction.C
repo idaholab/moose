@@ -30,7 +30,7 @@ void
 AddPostprocessorAction::act()
 {
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isParamValid(MooseBase::kokkos_object_param))
+  if (_moose_object_pars.isKokkosObject())
     _problem->addKokkosPostprocessor(_type, _name, _moose_object_pars);
   else
 #endif

@@ -58,11 +58,9 @@ public:
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Get whether this object is a Kokkos functor
-   * The parameter is set by the Kokkos base classes:
-   * - Moose::Kokkos::ResidualObject in KokkosResidualObject.K
-   * - Moose::Kokkos::MaterialBase in KokkosMaterialBase.K
+   * The parameter MooseBase::kokkos_object_param is set by the Kokkos base classes
    */
-  bool isKokkosObject() const { return parameters().isParamValid(MooseBase::kokkos_object_param); }
+  bool isKokkosObject() const { return parameters().isKokkosObject(); }
 #endif
 
   // To get warnings tracked in the SolutionInvalidityOutput
