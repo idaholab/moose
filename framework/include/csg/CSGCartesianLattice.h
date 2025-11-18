@@ -148,6 +148,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGLatticeTest, testCartSetUniverses);
   FRIEND_TEST(CSGLatticeTest, testCartSetUniverseAtIndex);
+  FRIEND_TEST(CSGLatticeTest, testEmptyToFilled);
   ///@}
 #endif
 };
