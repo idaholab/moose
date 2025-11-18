@@ -3,19 +3,19 @@ moose_cmake:
   - cmake 3
 
 moose_cc:
-  - gcc 12.3.0 h915e2ae_13                                  # [linux]
+  - gcc 14.3.0                                              # [linux]
   - clang 19.1.7                                            # [not arm64 and osx]
   - clang 19.1.7 default_hf9bcbb7_5                         # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
-  - gxx 12.3.0 h915e2ae_13                                  # [linux]
+  - gxx 14.3.0                                              # [linux]
   - clangxx 19.1.7                                          # [not arm64 and osx]
   - clangxx 19.1.7 default_h36137df_5                       # [arm64]
 
 ### If you change these versions, change also conda/mpi/*
 moose_gfortran:
-  - gfortran 12.3.0 h915e2ae_13                             # [linux]
+  - gfortran 14.3.0                                         # [linux]
   - gfortran 14.3.0                                         # [not arm64 and osx]
   - gfortran 14.3.0 h3ef1dbf_0                              # [arm64]
 
