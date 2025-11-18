@@ -25,6 +25,7 @@
 class SinglePhaseFluidProperties;
 class SCMFrictionClosureBase;
 class SCMHTCClosureBase;
+class SCMMixingClosureBase;
 
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
@@ -102,8 +103,6 @@ protected:
   void computeMdot(int iblock);
   /// Computes turbulent crossflow per gap for block iblock
   void computeWijPrime(int iblock);
-  /// Computes turbulent mixing coefficient
-  virtual Real computeBeta(unsigned int i_gap, unsigned int iz, bool enthalpy) = 0;
   /// Computes Pressure Drop per channel for block iblock
   void computeDP(int iblock);
   /// Computes Pressure per channel for block iblock
@@ -244,6 +243,8 @@ protected:
   const SinglePhaseFluidProperties * _fp;
   /// Friction closure object
   const SCMFrictionClosureBase * _friction_closure;
+  /// Turbulent Mixing closure object
+  const SCMMixingClosureBase * _mixing_closure;
   /// HTC closure objects
   const SCMHTCClosureBase * _pin_HTC_closure;
   const SCMHTCClosureBase * _duct_HTC_closure;
