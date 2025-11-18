@@ -38,7 +38,7 @@ moose_libexpat:
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cmake:
-  - cmake 3
+  - cmake 4
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
