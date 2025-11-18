@@ -207,6 +207,10 @@ class FakeMongoCollection:
         """Mimic find."""
         pass
 
+    def find_one(self, *_, **__):
+        """Minic find_one."""
+        pass
+
     def aggregate(self, *_, **__):
         """Mimic aggregate."""
         pass

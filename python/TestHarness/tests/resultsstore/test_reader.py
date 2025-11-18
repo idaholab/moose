@@ -483,6 +483,41 @@ class TestResultsReader(ResultsStoreTestCase):
         for result in collection.results:
             self.assertNotEqual(result.event_cause, "pr")
 
+    def test_get_latest_push_result_id(self):
+        """Test get_latest_push_result_id()."""
+        client = FakeMongoClient()
+        reader = ResultsReader(DATABASE_NAME, client)
+        database = client.get_database(DATABASE_NAME)
+
+        # ID found
+        id = ObjectId()
+        with patch.object(
+            database.results, "find_one", return_value={"_id": id}
+        ) as patch_find_one:
+            found_id = reader.get_latest_push_result_id()
+        self.assertEqual(id, found_id)
+        patch_find_one.assert_called_once_with(
+            {"event_cause": {"$ne": "pr"}}, {"_id": 1}, sort=[("_id", -1)]
+        )
+
+        # ID not found
+        id = ObjectId()
+        with patch.object(database.results, "find_one", return_value=None):
+            found_id = reader.get_latest_push_result_id()
+        self.assertIsNone(found_id)
+
+    @pytest.mark.live_db
+    @unittest.skipUnless(HAS_AUTH, "Reader authentication unavailable")
+    def test_get_latest_push_result_id_live(self):
+        """Test get_latest_push_result_id() with a live database."""
+        with ResultsReader(TEST_DATABASE_NAME, authentication=AUTH) as ctx:
+            reader = ctx.reader
+
+            id = reader.get_latest_push_result_id()
+            collection = reader.get_latest_push_results(1)
+            self.assertEqual(len(collection.results), 1)
+            self.assertEqual(collection.results[0].id, id)
+
     def run_test_get_cached_result(self, method_index: str, index: str, value):
         """Test get_cached_result() for the given index."""
         reader = ResultsReader(DATABASE_NAME, FakeMongoClient())

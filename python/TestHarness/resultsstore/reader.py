@@ -362,6 +362,13 @@ class ResultsReader:
 
         return ResultsCollection(results, self.get_database)
 
+    def get_latest_push_result_id(self) -> Optional[ObjectId]:
+        """Get the ID of the latest push result, if any."""
+        doc = self.get_database().results.find_one(
+            {"event_cause": {"$ne": "pr"}}, {"_id": 1}, sort=[("_id", -1)]
+        )
+        return doc["_id"] if doc is not None else None
+
     def get_cached_result(self, index: str, value) -> Optional[ResultCollection]:
         """Get a result given a filter and store it in the cache."""
         cache = self._cached_results[index]
