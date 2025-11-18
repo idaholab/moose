@@ -37,11 +37,7 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
-  /// Function that computes the added heat coming from the fuel pins, for channel i_ch and cell iz
-  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
-  /// Function that computes the heat added by the duct, for channel i_ch and cell iz
-  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
-
+public:
   struct FrictionStruct
   {
     unsigned int i_ch;
@@ -64,6 +60,25 @@ public:
     {
     }
   };
+
+  /// Return the added heat coming from the fuel pins
+  Real getAddedHeatPin(unsigned int i_ch, unsigned int iz) const
+  {
+    return computeAddedHeatPin(i_ch, iz);
+  }
+
+  /// Return the added heat coming from the duct
+  Real getAddedHeatDuct(unsigned int i_ch, unsigned int iz) const
+  {
+    return computeAddedHeatDuct(i_ch, iz);
+  }
+
+protected:
+  /// Pure virtual: daughters provide different implementations
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const = 0;
+
+  /// Non-pure: implemented in the base (or override in a child if needed)
+  virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) const;
 
   /// The correlation used for computing the heat transfer correlation near the pin
   const MooseEnum _pin_htc_correlation;
@@ -97,7 +112,7 @@ public:
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
   void computeWijResidual(int iblock);
   /// Function that computes the width of the duct cell that the peripheral subchannel i_ch sees
-  virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) = 0;
+  virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) const = 0;
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
   libMesh::DenseVector<Real> residualFunction(int iblock, libMesh::DenseVector<Real> solution);
   /// Computes solution of nonlinear equation using snes and provided a residual in a formFunction

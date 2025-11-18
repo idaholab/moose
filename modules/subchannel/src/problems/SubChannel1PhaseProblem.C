@@ -1558,7 +1558,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
         auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * _Wij(i_gap, iz - 1);
         auto inertia_term = term_out - term_in;
-        auto pressure_term = 2 * Sij * Sij * DPij * rho_star;
+        auto pressure_term = 2 * Utility::pow<2>(Sij) * DPij * rho_star;
         auto time_term =
             _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
 
@@ -1708,7 +1708,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 
         if (!_staggered_pressure_bool)
         {
-          PetscScalar pressure_factor = Sij * Sij * rho_star;
+          PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
           PetscInt col_pf = i_ch + _n_channels * iz_ind;
           PetscScalar value_pf = -1.0 * alpha * pressure_factor;
@@ -1744,7 +1744,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         }
         else
         {
-          PetscScalar pressure_factor = Sij * Sij * rho_star;
+          PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
           PetscInt col_pf = i_ch + _n_channels * iz_ind;
           PetscScalar value_pf = -1.0 * pressure_factor;
@@ -2071,7 +2071,7 @@ SubChannel1PhaseProblem::solveAndPopulateEnthalpy(
 }
 
 Real
-SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
+SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) const
 {
   mooseAssert(iz > 0, "Trapezoidal rule requires starting at index 1 at least");
   if (_duct_mesh_exist)

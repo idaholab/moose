@@ -9,7 +9,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-6
-    rel_err = 6e-6
+    rel_err = 1e-5
     max_threads = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II case'
   []

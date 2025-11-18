@@ -267,7 +267,7 @@ QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bo
 }
 
 Real
-QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
+QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const
 {
   // Compute axial location of nodes.
   auto z2 = _z_grid[iz];
@@ -304,7 +304,7 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
 }
 
 Real
-QuadSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch)
+QuadSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch) const
 {
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
