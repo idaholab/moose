@@ -15,7 +15,6 @@ from dataclasses import dataclass
 from typing import Any, Iterator, Optional, Tuple, Type
 
 
-@dataclass
 class MongoPath:
     """Represents a path in a mongo database document."""
 
