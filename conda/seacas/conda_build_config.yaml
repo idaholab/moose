@@ -1,6 +1,6 @@
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cmake:
-  - cmake 3
+  - cmake 4
 
 moose_cc:
   - gcc 14.3.0 h76bdaa0_7                                   # [linux]
