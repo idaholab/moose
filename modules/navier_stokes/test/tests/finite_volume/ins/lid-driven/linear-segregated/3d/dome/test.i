@@ -13,24 +13,6 @@ mu = 1.846e-5
 k = .0262
 cp = 1006
 beta = 3.33e-3
-# # water
-# rho = 997
-# mu = 8.55e-4
-# k = .613
-# cp = 4182
-# beta = 2.57e-4
-# glycerol-water
-# rho = 1110
-# mu = 5e-3
-# k = .4
-# cp = 3500
-# beta = 3.8e-4
-# # glycerol
-# rho = 1260
-# mu = 1.41
-# k = .285
-# cp = 2410
-# beta = 5e-4
 
 T_0 = 300.0
 T_hot = 373
