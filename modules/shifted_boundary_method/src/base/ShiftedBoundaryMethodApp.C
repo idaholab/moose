@@ -7,11 +7,14 @@ InputParameters
 ShiftedBoundaryMethodApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
+  params.set<bool>("automatic_automatic_scaling") = true;
   params.set<bool>("use_legacy_material_output") = false;
+  params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
   return params;
 }
 
-ShiftedBoundaryMethodApp::ShiftedBoundaryMethodApp(const InputParameters & parameters) : MooseApp(parameters)
+ShiftedBoundaryMethodApp::ShiftedBoundaryMethodApp(const InputParameters & parameters)
+  : MooseApp(parameters)
 {
   ShiftedBoundaryMethodApp::registerAll(_factory, _action_factory, _syntax);
 }
