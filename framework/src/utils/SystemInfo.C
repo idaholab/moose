@@ -45,6 +45,9 @@ SystemInfo::getInfo() const
 #ifdef MOOSE_LIBTORCH_ENABLED
   oss << std::setw(25) << "Libtorch Version: " << TORCH_VERSION << '\n';
 #endif
+#ifdef MOOSE_MFEM_ENABLED
+  oss << std::setw(25) << "MFEM Version: " << MFEM_VERSION_STRING << '\n';
+#endif
 
   // Current Time
   oss << std::setw(25) << "Current Time: " << getTimeStamp() << "\n";
