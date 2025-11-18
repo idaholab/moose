@@ -12,6 +12,7 @@
 #include "CSGCartesianLattice.h"
 #include "CSGHexagonalLattice.h"
 #include "CSGUniverse.h"
+#include "CSGCell.h"
 
 #include "MooseUnitUtils.h"
 
@@ -671,6 +672,26 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
       auto ring_pair = lat.getRingIndexFromRowIndex(pair.first);
       ASSERT_EQ(ring_pair, pair.second);
     }
+  }
+}
+
+/// tests that a lattice initialized without a universe map can be filled later even after it is used to fill a cell
+TEST(CSGLatticeTest, testEmptyToFilled)
+{
+  const auto univ1 = CSGUniverse("univ1", false);
+  {
+    // create lattice without any universes
+    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
+    // create cell and fill with the empty lattice
+    auto cell = CSGCell("cell1", &cart_lattice, CSG::CSGRegion());
+    // now create universe map and set it on the lattice
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {{univ1, univ1},
+                                                                                    {univ1, univ1}};
+    ASSERT_NO_THROW(cart_lattice.setUniverses(univ_map));
+    // verify that the lattice in the cell has the correct universe map now
+    const auto & lat_in_cell = cell.getFillLattice();
+    ASSERT_EQ(lat_in_cell.getUniverses().size(), 2);
+    ASSERT_EQ(lat_in_cell.getUniverses()[0].size(), 2);
   }
 }
 }
