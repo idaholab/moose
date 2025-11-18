@@ -21,9 +21,13 @@ The kernel expects the same viscosity functor that is passed to
 [INSFVMomentumDiffusion](INSFVMomentumDiffusion.md), and it only needs to be added for the radial
 momentum equation. Axial components should not include this kernel.
 
-When using the Laplace form "complete expansion" for the diffusion term,
-[!param](/FVKernels/INSFVMomentumViscousSourceRZ/complete_expansion) should be activated so that the
-additional factor of two applied in that formulation is also captured in this elemental source.
+!alert note title=Use only for RZ viscous sources
+`INSFVMomentumViscousSourceRZ` complements the Laplacian viscous term implemented by
+[INSFVMomentumDiffusion](INSFVMomentumDiffusion.md). Do not add this kernel in Cartesian problems;
+only include it for the radial momentum equation of axisymmetric $RZ$ setups. When the diffusion
+kernel uses the complete-expansion form, set
+[!param](/FVKernels/INSFVMomentumViscousSourceRZ/complete_expansion) so the same factor of 2 is
+applied here.
 
 !syntax parameters /FVKernels/INSFVMomentumViscousSourceRZ
 
