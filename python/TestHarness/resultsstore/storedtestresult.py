@@ -62,8 +62,8 @@ class StoredTestResult:
         """
         Initialize the result.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         data : dict
             The underlying data for the test.
         name : TestName

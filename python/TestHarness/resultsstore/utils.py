@@ -23,8 +23,8 @@ class MongoPath:
         """
         Initialize state.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         *args : str
             The elements in the path.
 
@@ -52,8 +52,8 @@ class MongoPath:
         """
         Create a new MongoPath with this path extended.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         *args : str
             The elements in the path.
 
@@ -316,8 +316,8 @@ def get_typed(
     """
     Get a value from a container given a key, requiring a type.
 
-    Arguments:
-    ---------
+    Parameters
+    ----------
     container : dict
         The container to search in.
     key : Any
@@ -325,7 +325,7 @@ def get_typed(
     types : Type | Tuple[Type, ...]
         The valid types.
 
-    Optional arguments:
+    Optional Parameters
     ------------------
     default : Any
         The default value; defaults to None.

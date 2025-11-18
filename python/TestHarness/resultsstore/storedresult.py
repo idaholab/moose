@@ -41,12 +41,12 @@ class StoredResult:
         """
         Initialize a result.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         data : dict
             The underyling data.
 
-        Optional arguments:
+        Optional Parameters
         ------------------
         check : bool
             Whether or not to perform data type checking (default = True).

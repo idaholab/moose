@@ -44,8 +44,8 @@ class ResultsCollectionBase:
         """
         Initialize state.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         results : list[StoredResult]
             The results in the collection.
         database_getter : Callable[[], Database]
@@ -80,8 +80,8 @@ class ResultsCollectionBase:
 
         Used in derived classes.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
@@ -224,8 +224,8 @@ class ResultsCollectionBase:
 
         Used in derived classes.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         name : TestName
             The name of the test.
         test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
@@ -333,8 +333,8 @@ class ResultCollection(ResultsCollectionBase):
         """
         Initialize state.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         result : StoredResult
             The result in the collection.
         database_getter : Callable[[], Database]
@@ -358,8 +358,8 @@ class ResultCollection(ResultsCollectionBase):
         This can be particularly expensive! Best to do it on a
         per-test basis with get_test() if possible.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
@@ -376,8 +376,8 @@ class ResultCollection(ResultsCollectionBase):
         """
         Get the test result for the given test name, if any.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         name : TestName
             The name of the test.
         test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
@@ -403,8 +403,8 @@ class ResultsCollection(ResultsCollectionBase):
         """
         Initialize state.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         results : list[StoredResult]
             The results in the collection.
         database_getter : Callable[[], Database]
@@ -427,8 +427,8 @@ class ResultsCollection(ResultsCollectionBase):
         This can be particularly expensive! Best to do it on a
         per-test basis with get_tests() if possible.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
             The TestDataFilter objects that represent which data
             to obtain for the tests.
@@ -444,8 +444,8 @@ class ResultsCollection(ResultsCollectionBase):
         """
         Get the test results for a test across all results in the collection.
 
-        Arguments:
-        ---------
+        Parameters
+        ----------
         name : TestName
             The name of the test.
         test_filter : Union[Iterable[TestDataFilter], TestDataFilter]
