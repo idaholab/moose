@@ -54,7 +54,7 @@ def base_civet_env() -> Tuple[str, dict]:
     env = {
         "APPLICATION_REPO": APPLICATION_REPO,
         "CIVET_BASE_SHA": random_git_sha(),
-        "CIVET_BASE_SSH_URL": "git@github.com:idaholab/moose.git",
+        "CIVET_BASE_SSH_URL": f"{APPLICATION_REPO}.git",
         "CIVET_EVENT_ID": str(random_id()),
         "CIVET_HEAD_REF": "branchname",
         "CIVET_HEAD_SHA": random_git_sha(),
