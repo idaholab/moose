@@ -1,9 +1,11 @@
 ilet_width = 0.5472
 ilet_length = 0.4064
 ilet_area = '${fparse ilet_width * ilet_length}'
-volumetric_flow_rate = 0.31478894915 # m3/s
+# volumetric_flow_rate = 0.31478894915 # m3/s
+volumetric_flow_rate = 0.03
 # Make this negative so that it's the opposite direction of the normal vector
 velocity_diri_condition = '${fparse -volumetric_flow_rate / ilet_area}'
+# cl = 10e-2
 
 # air
 rho = 1.177
@@ -33,7 +35,8 @@ beta = 3.33e-3
 T_0 = 300.0
 T_hot = 373
 T_cold = ${T_0}
-initial_dt = .3
+# initial_dt = ${fparse cl / -velocity_diri_condition}
+initial_dt = 4
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
