@@ -11,4 +11,14 @@
     required_python_packages = 'pandas matplotlib'
     heavy = true
   []
+  [rz-viscous-source]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestRZViscousSource
+    capabilities = 'method!=dbg'
+    min_parallel = 2
+    requirement = 'The system shall recover the manufactured analytic solution for an axisymmetric Newton-based FV solve that combines INSFVMomentumDiffusion with the INSFVMomentumViscousSourceRZ kernel and demonstrates second-order convergence.'
+    required_python_packages = 'pandas matplotlib'
+    heavy = true
+  []
 []
