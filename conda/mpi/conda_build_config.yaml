@@ -34,7 +34,7 @@ moose_hdf5:
   - hdf5 1.14.6         # [osx]
 
 moose_libexpat:
-  - libexpat 2.7.0
+  - libexpat 2.7.1
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cmake:
