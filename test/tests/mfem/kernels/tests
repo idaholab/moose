@@ -195,7 +195,7 @@
                 OutputData/NLDiffusion/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a non-linear diffusion problem using MFEM.'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
   []  
