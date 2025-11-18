@@ -16,9 +16,7 @@
 
 #include "UserObjectBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class UserObject : public ::UserObjectBase,
@@ -67,5 +65,4 @@ protected:
   std::unique_ptr<DispatcherBase> _dispatcher;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

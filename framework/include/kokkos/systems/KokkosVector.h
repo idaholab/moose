@@ -14,9 +14,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/dof_map.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class System;
@@ -199,5 +197,4 @@ private:
   bool _is_alloc = false;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

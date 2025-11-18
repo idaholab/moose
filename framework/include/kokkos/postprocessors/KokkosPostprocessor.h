@@ -11,9 +11,7 @@
 
 #include "Postprocessor.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class Postprocessor : public ::Postprocessor
@@ -29,5 +27,4 @@ public:
   Postprocessor(const Postprocessor & object);
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -22,9 +22,7 @@ using ContiguousNodeID = dof_id_type;
 
 class MooseMesh;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -391,5 +389,4 @@ private:
   const Mesh _mesh_device;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

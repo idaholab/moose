@@ -12,9 +12,7 @@
 
 // #define DEVICE_ASSEMBLY
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 #ifdef DEVICE_ASSEMBLY
@@ -282,5 +280,4 @@ Vector::close()
 #endif
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

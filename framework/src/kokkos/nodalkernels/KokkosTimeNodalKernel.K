@@ -9,9 +9,7 @@
 
 #include "KokkosTimeNodalKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -32,5 +30,4 @@ TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

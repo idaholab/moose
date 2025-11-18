@@ -14,9 +14,7 @@
 #include "KokkosSystem.h"
 #include "KokkosVariable.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -374,8 +372,7 @@ protected:
   const unsigned int _n_idofs = 1, _n_jdofs = 1;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
 
 using Datum = Moose::Kokkos::Datum;
 using AssemblyDatum = Moose::Kokkos::AssemblyDatum;

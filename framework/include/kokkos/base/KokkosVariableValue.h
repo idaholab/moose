@@ -13,9 +13,7 @@
 
 #include "MooseVariableBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -291,5 +289,4 @@ VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) 
     return Real3(0);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

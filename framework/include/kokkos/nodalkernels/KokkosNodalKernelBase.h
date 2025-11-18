@@ -15,9 +15,7 @@
 #include "BoundaryRestrictable.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -42,5 +40,4 @@ public:
   NodalKernelBase(const NodalKernelBase & object);
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
