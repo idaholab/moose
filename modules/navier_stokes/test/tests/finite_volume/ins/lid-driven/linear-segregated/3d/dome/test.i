@@ -371,6 +371,11 @@ initial_dt = 4
     type = ElementExtremeValue
     variable = vel_mag
   []
+  [T_max]
+    type = ElementExtremeValue
+    variable = T_fluid
+    value_type = max
+  []
   [dt]
     type = TimestepSize
   []
