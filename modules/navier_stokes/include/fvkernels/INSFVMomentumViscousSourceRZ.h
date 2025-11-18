@@ -34,6 +34,8 @@ private:
   const Moose::CoordinateSystemType _coord_system;
   /// Index of the radial coordinate in an RZ system
   const unsigned int _rz_radial_coord;
+  /// Multiplier applied when the complete expansion form is requested
+  const Real _expansion_multiplier;
 
   ADReal computeCoefficient(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
 };
