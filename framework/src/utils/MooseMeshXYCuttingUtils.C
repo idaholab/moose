@@ -730,6 +730,12 @@ quadToTriOnLine(ReplicatedMesh & mesh,
                                                        cut_line_params[2],
                                                        true));
       }
+      // This counts the booleans in node_side_rec, which does not include nodes
+      // that are exactly on the line (these nodes are excluded from the
+      // decision). In this case, num_nodes node lie on one side of the line and
+      // node_side_rec.size() - n_nodes lie on the other side. In the case that
+      // there are nodes on both sides of the line, we mark the element for
+      // conversion.
       const auto num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
       if (num_nodes != (int)node_side_rec.size() && num_nodes > 0)
       {
@@ -800,6 +806,12 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
                                                 cut_line_params[2],
                                                 true);
     }
+    // This counts the booleans in node_side_rec, which does not include nodes
+    // that are exactly on the line (these nodes are excluded from the
+    // decision). In this case, num_nodes node lie on one side of the line and
+    // node_side_rec.size() - n_nodes lie on the other side. In the case that
+    // there are nodes on both sides of the line, we mark the element for
+    // removal.
     const unsigned int num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
     if (num_nodes == node_side_rec.size() - n_points_on_line)
     {
