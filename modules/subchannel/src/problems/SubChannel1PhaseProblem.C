@@ -19,6 +19,7 @@
 #include "SinglePhaseFluidProperties.h"
 #include "SCMFrictionClosureBase.h"
 #include "SCMHTCClosureBase.h"
+#include "SCMMixingClosureBase.h"
 
 struct Ctx
 {
@@ -104,6 +105,8 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   params.addRequiredParam<UserObjectName>("friction_closure",
                                           "Closure computing the friction factor");
+  params.addRequiredParam<UserObjectName>("mixing_closure",
+                                          "Closure computing the turbulent mixing parameter");
   // Make these OPTIONAL here; enforce them conditionally
   params.addParam<UserObjectName>(
       "pin_HTC_closure", "Closure computing HTC on fuel pin (required if pin mesh exists).");
@@ -259,6 +262,8 @@ SubChannel1PhaseProblem::initialSetup()
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
   _friction_closure =
       &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
+  _mixing_closure =
+      &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
 
   // Create variables for output and storage
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
@@ -1731,7 +1736,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto avg_massflux =
           0.5 * (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
                  ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out));
-      auto beta = computeBeta(i_gap, iz, /*enthalpy=*/false);
+      auto beta = _mixing_closure->computeMixingParameter(i_gap, iz);
 
       if (!_implicit_bool)
       {
