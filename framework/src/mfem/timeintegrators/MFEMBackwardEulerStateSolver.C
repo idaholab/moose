@@ -9,7 +9,6 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#pragma once
 #include "MFEMBackwardEulerStateSolver.h"
 
 namespace Moose::MFEM
