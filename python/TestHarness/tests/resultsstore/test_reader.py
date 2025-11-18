@@ -197,6 +197,14 @@ class TestResultsReader(ResultsStoreTestCase):
             reader.close()
         patch_close.assert_called_once()
 
+    def test_close_with_client_no_close(self):
+        """Test close() not closing the client of close_client=False."""
+        client = FakeMongoClient()
+        reader = ResultsReader(DATABASE_NAME, client, close_client=False)
+        with patch.object(client, "close") as patch_close:
+            reader.close()
+        patch_close.assert_not_called()
+
     def test_find_results_no_limit(self):
         """Test _find_results() without limit."""
         client = FakeMongoClient()

@@ -49,6 +49,7 @@ class ResultsReader:
         authentication: Optional[Authentication] = None,
         check: bool = True,
         timeout: float = 5.0,
+        close_client: bool = True,
     ):
         """
         Initialize the reader.
@@ -68,6 +69,8 @@ class ResultsReader:
             Whether or not to validate result data types (default = True).
         timeout : Number
             Timeout time in seconds for interacting with the database.
+        close_client : bool
+            Whether or not to close the client automatically.
 
         """
         assert isinstance(database_name, str)
@@ -79,6 +82,8 @@ class ResultsReader:
         self._check = check
         # Timeout time in seconds for database calls
         self._timeout = float(timeout)
+        # Whether or not to close the client automatically
+        self._close_client: bool = close_client
 
         # The mongo client, setup on first use
         self._client: Optional[pymongo.MongoClient] = None
@@ -185,8 +190,8 @@ class ResultsReader:
         return self._database
 
     def close(self):
-        """Close the database connection if it exists."""
-        if self._client is not None:
+        """Close the database connection if it exists and requested to close."""
+        if self._close_client and self._client is not None:
             self._client.close()
 
     def _find_results(self, filter: dict, limit: Optional[int]) -> list[dict]:
