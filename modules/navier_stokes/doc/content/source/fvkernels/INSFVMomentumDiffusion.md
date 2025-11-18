@@ -22,6 +22,13 @@ is activated, the following complete formulation is used for the momentum viscou
 The term $\nabla \cdot \mu (\nabla \bm{v})^T = 0$ for incompressible flow if a constant
 dynamic viscosity is used.
 
+!alert note title=Axisymmetric reminder
+In cylindrical $RZ$ coordinate systems (axisymmetric, no swirl) the radial momentum equation
+contains an additional $-\mu u_r / r^2$ source term that is not captured by the Laplacian form
+alone. When solving such problems, pair `INSFVMomentumDiffusion` with
+[INSFVMomentumViscousSourceRZ](INSFVMomentumViscousSourceRZ.md) so that this source is included in
+both the residual and Rhie–Chow coefficients.
+
 !syntax parameters /FVKernels/INSFVMomentumDiffusion
 
 !syntax inputs /FVKernels/INSFVMomentumDiffusion
