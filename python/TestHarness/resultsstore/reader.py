@@ -173,6 +173,7 @@ class ResultsReader:
                 auth.host,
                 username=auth.username,
                 password=auth.password,
+                port=auth.port,
                 timeoutMS=self._timeout * 1000,
             )
         return self._client

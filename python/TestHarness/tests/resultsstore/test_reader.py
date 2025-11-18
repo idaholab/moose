@@ -151,6 +151,7 @@ class TestResultsReader(ResultsStoreTestCase):
             DEFAULT_AUTH["host"],
             username=DEFAULT_AUTH["username"],
             password=DEFAULT_AUTH["password"],
+            port=None,
             timeoutMS=reader._timeout * 1000,
         )
 
