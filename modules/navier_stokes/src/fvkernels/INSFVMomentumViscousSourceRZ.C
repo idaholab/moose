@@ -23,6 +23,10 @@ INSFVMomentumViscousSourceRZ::validParams()
       "Navier-Stokes momentum equations (axisymmetric, no swirl).");
   params.addRequiredParam<MooseFunctorName>(
       NS::mu, "The dynamic viscosity that multiplies the viscous source term.");
+  params.addParam<bool>("complete_expansion",
+                        false,
+                        "Mirror of the INSFVMomentumDiffusion 'complete_expansion' switch. When "
+                        "true, the viscous contribution is multiplied by 2.");
   return params;
 }
 
@@ -30,7 +34,8 @@ INSFVMomentumViscousSourceRZ::INSFVMomentumViscousSourceRZ(const InputParameters
   : INSFVElementalKernel(params),
     _mu(getFunctor<ADReal>(NS::mu)),
     _coord_system(getBlockCoordSystem()),
-    _rz_radial_coord(_subproblem.getAxisymmetricRadialCoord())
+    _rz_radial_coord(_subproblem.getAxisymmetricRadialCoord()),
+    _expansion_multiplier(getParam<bool>("complete_expansion") ? 2.0 : 1.0)
 {
   if (_coord_system != Moose::COORD_RZ)
     mooseError(name(), " is only valid on blocks that use an RZ coordinate system.");
@@ -45,9 +50,10 @@ ADReal
 INSFVMomentumViscousSourceRZ::computeCoefficient(const Moose::ElemArg & elem_arg,
                                                  const Moose::StateArg & state) const
 {
-  const auto radius = _q_point[_qp](_rz_radial_coord);
+  mooseAssert(elem_arg.elem, "The element pointer must be valid for INSFVMomentumViscousSourceRZ.");
+  const auto radius = elem_arg.elem->vertex_average()(_rz_radial_coord);
   mooseAssert(radius > 0.0, "Axisymmetric radial coordinate should be positive inside a cell.");
-  return -_mu(elem_arg, state) / (radius * radius);
+  return -_expansion_multiplier * _mu(elem_arg, state) / (radius * radius);
 }
 
 ADReal
