@@ -33,15 +33,24 @@ protected:
   Real computeRightHandSideContribution() override;
 
 private:
+  /// Dynamic viscosity functor evaluated at each element
   const Moose::Functor<Real> & _mu;
+  /// Momentum component this source acts on (should equal the radial direction)
   const unsigned int _component;
+  /// Index of the radial coordinate for the current mesh (0 -> x, 1 -> y, ...)
   const unsigned int _rz_radial_coord;
+  /// Spatial dimension of the mesh
   const unsigned int _dim;
+  /// Whether the deviatoric correction (-2/3 div u) is requested
   const bool _use_deviatoric_terms;
+  /// Coordinate system of the active blocks (must be COORD_RZ)
   const Moose::CoordinateSystemType _coord_type;
+  /// Precomputed factor (1 or 2) multiplying the implicit hoop term
   const Real _stress_multiplier;
 
+  /// Cached pointers to the velocity components required to build divergence
   std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
 
+  /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
 };

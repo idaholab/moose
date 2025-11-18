@@ -137,5 +137,6 @@ protected:
   /// Axisymmetric radial coordinate index (only used when in RZ)
   const unsigned int _rz_radial_coord;
 
+  /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
 };
