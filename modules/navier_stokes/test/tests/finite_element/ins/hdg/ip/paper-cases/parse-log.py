@@ -56,7 +56,7 @@ def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
             return max(vals) if vals else 0
 
         max_outer = _find_max_iterations(block, "nl0_condensed_")
-        max_p     = _find_max_iterations(block, "nl0_condensed_fieldsplit_p_")
+        max_p     = _find_max_iterations(block, "nl0_condensed_fieldsplit_p_ksp_")
         max_u     = _find_max_iterations(block, "nl0_condensed_fieldsplit_u_")
 
         rows.append({
