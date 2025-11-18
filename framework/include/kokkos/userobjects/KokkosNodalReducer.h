@@ -12,9 +12,7 @@
 #include "KokkosReducerBase.h"
 #include "KokkosNodalUserObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class NodalReducer : public ReducerBase, public NodalUserObject
@@ -48,5 +46,4 @@ NodalReducer::operator()(DefaultLoop,
   reducer.executeShim(reducer, datum, result);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

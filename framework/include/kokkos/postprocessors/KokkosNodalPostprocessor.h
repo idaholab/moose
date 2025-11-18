@@ -12,9 +12,7 @@
 #include "KokkosPostprocessor.h"
 #include "KokkosNodalReducer.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class NodalPostprocessor : public NodalReducer, public Postprocessor
@@ -34,5 +32,4 @@ public:
   using NodalReducer::operator();
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

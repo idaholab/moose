@@ -17,9 +17,7 @@
 
 #include "libmesh/system.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 System::System(SystemBase & system)
@@ -568,5 +566,4 @@ System::operator()(const ThreadID tid) const
   getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

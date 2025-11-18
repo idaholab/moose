@@ -14,9 +14,7 @@
 
 #include <typeindex>
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 using Policy = ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>>;
@@ -359,8 +357,7 @@ private:
       _dispatchers;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
 
 // Kernel, NodalKernel, BC
 

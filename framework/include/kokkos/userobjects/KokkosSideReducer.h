@@ -12,9 +12,7 @@
 #include "KokkosReducerBase.h"
 #include "KokkosSideUserObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class SideReducer : public ReducerBase, public SideUserObject
@@ -48,5 +46,4 @@ SideReducer::operator()(DefaultLoop,
   reducer.executeShim(reducer, datum, result);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

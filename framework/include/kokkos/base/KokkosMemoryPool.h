@@ -14,9 +14,7 @@
 
 #include "MooseApp.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -144,5 +142,4 @@ private:
   MemoryPool _pool;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

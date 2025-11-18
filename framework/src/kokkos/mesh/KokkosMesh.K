@@ -13,9 +13,7 @@
 
 #include "libmesh/reference_elem.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 void
@@ -215,5 +213,4 @@ Mesh::getContiguousNodeID(const Node * node) const
   return _maps->_local_node_id_mapping.at(node);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -15,9 +15,7 @@
 
 #include "MaterialBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -209,5 +207,4 @@ MaterialBase::declareKokkosPropertyByName(const std::string & prop_name,
   return prop;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

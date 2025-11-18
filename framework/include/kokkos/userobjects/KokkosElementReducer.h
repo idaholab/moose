@@ -12,9 +12,7 @@
 #include "KokkosReducerBase.h"
 #include "KokkosElementUserObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class ElementReducer : public ReducerBase, public ElementUserObject
@@ -48,5 +46,4 @@ ElementReducer::operator()(DefaultLoop,
   reducer.executeShim(reducer, datum, result);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

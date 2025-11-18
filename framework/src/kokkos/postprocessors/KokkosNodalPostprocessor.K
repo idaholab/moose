@@ -9,9 +9,7 @@
 
 #include "KokkosNodalPostprocessor.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -27,5 +25,4 @@ NodalPostprocessor::NodalPostprocessor(const InputParameters & parameters)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

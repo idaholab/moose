@@ -9,9 +9,7 @@
 
 #include "KokkosNodalBC.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -62,5 +60,4 @@ NodalBC::computeJacobian()
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

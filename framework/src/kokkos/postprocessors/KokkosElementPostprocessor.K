@@ -9,9 +9,7 @@
 
 #include "KokkosElementPostprocessor.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -27,5 +25,4 @@ ElementPostprocessor::ElementPostprocessor(const InputParameters & parameters)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

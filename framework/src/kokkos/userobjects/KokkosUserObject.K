@@ -9,9 +9,7 @@
 
 #include "KokkosUserObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -39,5 +37,4 @@ UserObject::UserObject(const UserObject & object)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

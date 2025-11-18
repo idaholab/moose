@@ -12,9 +12,7 @@
 #include "KokkosPostprocessor.h"
 #include "KokkosSideReducer.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class SidePostprocessor : public SideReducer, public Postprocessor
@@ -34,5 +32,4 @@ public:
   using SideReducer::operator();
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

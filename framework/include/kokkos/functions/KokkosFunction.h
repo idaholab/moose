@@ -15,9 +15,7 @@
 
 #include "FunctionBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -193,5 +191,4 @@ private:
   FunctionWrapperDeviceBase * _wrapper_device = nullptr;
 };
 
-}
-}
+} // namespace Moose::Kokkos

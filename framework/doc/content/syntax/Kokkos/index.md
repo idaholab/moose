@@ -280,16 +280,13 @@ Namely, its copy constructor only performs a shallow copy and does not invoke th
 If it is required to explicitly invoke the copy constructor of each entry for a certain data type used in an array, you should define a specialization of the `Moose::Kokkos::ArrayDeepCopy` type trait template as follows:
 
 ```cpp
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 template <>
 struct ArrayDeepCopy<SomeType>
 {
   static constexpr bool value = true;
 };
-}
 }
 ```
 

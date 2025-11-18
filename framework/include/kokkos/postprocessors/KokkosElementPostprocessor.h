@@ -12,9 +12,7 @@
 #include "KokkosPostprocessor.h"
 #include "KokkosElementReducer.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class ElementPostprocessor : public ElementReducer, public Postprocessor
@@ -34,5 +32,4 @@ public:
   using ElementReducer::operator();
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

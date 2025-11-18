@@ -9,9 +9,7 @@
 
 #include "KokkosNodalBCBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -44,5 +42,4 @@ NodalBCBase::getContiguousNodes() const
   return nodes;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

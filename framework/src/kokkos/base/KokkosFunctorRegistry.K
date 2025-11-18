@@ -9,9 +9,7 @@
 
 #include "KokkosFunctorRegistry.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 FunctorRegistry &
@@ -23,5 +21,4 @@ FunctorRegistry::getRegistry()
   return *registry;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
