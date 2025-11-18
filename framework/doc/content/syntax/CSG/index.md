@@ -35,6 +35,11 @@ By default, every model will have a [root universe](source/csg/CSGBase.md#root-u
 [Lattices](source/csg/CSGBase.md#lattices) are another optional component.
 A lattice is the arrangement of repeated universes in a defined structure.
 Some common types are regular Cartesian or hexagonal lattices.
+Lattices will sometimes contain universes in the elements of the lattice that do not fill the full spatial domain of that element.
+Therefore, lattices also often rely on a definition of an "outer" fill, usually a single material or another universe, which fills the undefined spatial domain within the lattice.
+A visual depiction of a lattice with an outer fill is shown in FIGURE.
+
+(ADD FIGURE: a visual of a regular hexagonal lattice where the black lines represent the boundary of each of the lattice elements, the yellow circles are the spatial extent of the universe that fills each lattice element, and the blue is the outer that fills the remaining spatial domain around the lattice element universes.)
 
 For a more detailed description of how surfaces, cells, universes, and lattices are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
 
@@ -115,7 +120,9 @@ In this example, there is one universe, the default `"ROOT_UNIVERSE"`, which con
 Lattice output contains the following information:
 
 - `type`: the type of lattice as defined by the class name that was used to create the lattice
-- `universes`: the array of universe names that define the lattice arrangement.
+- `universes`: the array of universe names that define the lattice arrangement
+- `outertype`: the type of outer fill in the undefined space of the lattice elements (`"VOID"`, `"CSG_MATERIAL"`, or `"UNIVERSE"`)
+- `outer`: for `"CSG_MATERIAL"` or `"UNIVERSE"` `outertype`, the name of the outer fill object
 - any other attributes associated with the specific lattice type (e.g., pitch, number of rows, etc.)
 
 Two types of lattices are directly supported in the [source/csg/CSGBase.md] class: `CSG::CSGCartesianLattice` and `CSG::CSGHexagonalLattice`.

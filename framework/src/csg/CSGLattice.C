@@ -13,7 +13,28 @@ namespace CSG
 {
 
 CSGLattice::CSGLattice(const std::string & name, const std::string & lattice_type)
-  : _name(name), _lattice_type(lattice_type)
+  : _name(name), _lattice_type(lattice_type), _outer_type("VOID"), _outer_universe(nullptr)
+{
+}
+
+CSGLattice::CSGLattice(const std::string & name,
+                       const std::string & lattice_type,
+                       const std::string outer_name)
+  : _name(name),
+    _lattice_type(lattice_type),
+    _outer_type("CSG_MATERIAL"),
+    _outer_material(outer_name),
+    _outer_universe(nullptr)
+{
+}
+
+CSGLattice::CSGLattice(const std::string & name,
+                       const std::string & lattice_type,
+                       const CSGUniverse & outer_universe)
+  : _name(name),
+    _lattice_type(lattice_type),
+    _outer_type("UNIVERSE"),
+    _outer_universe(&outer_universe)
 {
 }
 
@@ -99,12 +120,62 @@ CSGLattice::getUniqueUniverses()
   return unique_univs;
 }
 
+const CSGUniverse &
+CSGLattice::getOuterUniverse() const
+{
+  if (getOuterType() != "UNIVERSE")
+    mooseError("Lattice '" + getName() + "' has " + getOuterType() + " outer, not UNIVERSE.");
+  else
+    return *_outer_universe;
+}
+
+const std::string &
+CSGLattice::getOuterMaterial() const
+{
+  if (getOuterType() != "CSG_MATERIAL")
+    mooseError("Lattice '" + getName() + "' has " + getOuterType() + " outer, not CSG_MATERIAL.");
+  else
+    return _outer_material;
+}
+
+void
+CSGLattice::updateOuter(const CSGUniverse & outer_universe)
+{
+  _outer_type = "UNIVERSE";
+  _outer_universe = &outer_universe;
+  _outer_material = "";
+}
+
+void
+CSGLattice::updateOuter(const std::string & outer_name)
+{
+  _outer_type = "CSG_MATERIAL";
+  _outer_material = outer_name;
+  _outer_universe = nullptr;
+}
+
+void
+CSGLattice::resetOuter()
+{
+  _outer_type = "VOID";
+  _outer_material = "";
+  _outer_universe = nullptr;
+}
+
 bool
 CSGLattice::operator==(const CSGLattice & other) const
 {
   if (this->getName() != other.getName())
     return false;
   if (this->getType() != other.getType())
+    return false;
+  if (this->getOuterType() != other.getOuterType())
+    return false;
+  if ((this->getOuterType() == "CSG_MATERIAL") &&
+      (this->getOuterMaterial() != other.getOuterMaterial()))
+    return false;
+  if ((this->getOuterType() == "UNIVERSE") &&
+      (this->getOuterUniverse() != other.getOuterUniverse()))
     return false;
   if (!this->compareAttributes(other))
     return false;

@@ -455,6 +455,8 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   // universe maps to use for different lattice comparisons
   const auto univ1 = CSGUniverse("univ1", false);
   const auto univ2 = CSGUniverse("univ2", false);
+  const auto out1 = CSGUniverse("outer1", false);
+  const auto out2 = CSGUniverse("outer2", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map1 = {{univ1, univ1},
                                                                                    {univ1, univ1}};
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map2 = {{univ2, univ2},
@@ -475,6 +477,18 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   auto l6 = CSGCartesianLattice("cartlat", 1.0, univ_map3);
   // lattice that differs by ncol
   auto l7 = CSGCartesianLattice("cartlat", 1.0, univ_map4);
+  // differs by outer type - material outer
+  auto l8 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  l8.updateOuter("outer1");
+  // differs by outer type - universe outer
+  auto l9 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  l9.updateOuter(out1);
+  // differs by outer object - universe outer
+  auto l10 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  l10.updateOuter(out2);
+  // differs by outer name - material outer
+  auto l11 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  l11.updateOuter("outer2");
 
   // check equality
   {
@@ -483,7 +497,7 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
   // check inequality
   {
     // all lattices 2-7 should differ from each other in some way
-    std::vector<CSGCartesianLattice> diff_compare = {l2, l3, l4, l5, l6, l7};
+    std::vector<CSGCartesianLattice> diff_compare = {l2, l3, l4, l5, l6, l7, l8, l9, l10, l11};
     for (std::size_t i = 0; i < diff_compare.size(); i++)
     {
       for (std::size_t j = i + 1; j < diff_compare.size(); ++j)
@@ -692,6 +706,44 @@ TEST(CSGLatticeTest, testEmptyToFilled)
     const auto & lat_in_cell = cell.getFillLattice();
     ASSERT_EQ(lat_in_cell.getUniverses().size(), 2);
     ASSERT_EQ(lat_in_cell.getUniverses()[0].size(), 2);
+  }
+}
+
+TEST(CSGLatticeTest, testUpdateOuter)
+{
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
+  {
+    // check outer universe type is set to VOID by default
+    ASSERT_EQ(cart_lattice.getOuterType(), "VOID");
+    // make sure trying to get material or universe outer raises error
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.getOuterMaterial(); },
+                                   "Lattice 'cartlat' has VOID outer, not CSG_MATERIAL.");
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.getOuterUniverse(); },
+                                   "Lattice 'cartlat' has VOID outer, not UNIVERSE.");
+  }
+  {
+    // update outer to universe
+    const auto univ = CSGUniverse("univ", false);
+    cart_lattice.updateOuter(univ);
+    ASSERT_EQ(cart_lattice.getOuterType(), "UNIVERSE");
+    ASSERT_EQ(cart_lattice.getOuterUniverse(), univ);
+    // try to get material outer - should raise error because type is UNIVERSE
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.getOuterMaterial(); },
+                                   "Lattice 'cartlat' has UNIVERSE outer, not CSG_MATERIAL.");
+  }
+  {
+    // change outer type to a material name
+    cart_lattice.updateOuter("material");
+    ASSERT_EQ(cart_lattice.getOuterType(), "CSG_MATERIAL");
+    ASSERT_EQ(cart_lattice.getOuterMaterial(), "material");
+    // try to get universe outer - should raise error because type is CSG_MATERIAL
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.getOuterUniverse(); },
+                                   "Lattice 'cartlat' has CSG_MATERIAL outer, not UNIVERSE.");
+  }
+  {
+    // reset outer type - should change it back to VOID
+    cart_lattice.resetOuter();
+    ASSERT_EQ(cart_lattice.getOuterType(), "VOID");
   }
 }
 }

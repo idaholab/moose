@@ -307,6 +307,94 @@ CSGBase::createCartesianLattice(
 }
 
 const CSGLattice &
+CSGBase::createCartesianLattice(
+    const std::string & name,
+    const Real pitch,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+    const std::string & outer_name)
+{
+  auto & lat = createCartesianLattice(name, pitch, universes);
+  setLatticeOuter(lat, outer_name);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createCartesianLattice(
+    const std::string & name,
+    const Real pitch,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+    const CSGUniverse & outer_univ)
+{
+  auto & lat = createCartesianLattice(name, pitch, universes);
+  setLatticeOuter(lat, outer_univ);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createCartesianLattice(const std::string & name,
+                                const Real pitch,
+                                const std::string & outer_name)
+{
+  auto & lat = createCartesianLattice(name, pitch);
+  setLatticeOuter(lat, outer_name);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createCartesianLattice(const std::string & name,
+                                const Real pitch,
+                                const CSGUniverse & outer_univ)
+{
+  auto & lat = createCartesianLattice(name, pitch);
+  setLatticeOuter(lat, outer_univ);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createHexagonalLattice(const std::string & name,
+                                Real pitch,
+                                const std::string & outer_name)
+{
+  auto & lat = createHexagonalLattice(name, pitch);
+  setLatticeOuter(lat, outer_name);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createHexagonalLattice(const std::string & name,
+                                Real pitch,
+                                const CSGUniverse & outer_univ)
+{
+  auto & lat = createHexagonalLattice(name, pitch);
+  setLatticeOuter(lat, outer_univ);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createHexagonalLattice(
+    const std::string & name,
+    const Real pitch,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+    const std::string & outer_name)
+{
+  auto & lat = createHexagonalLattice(name, pitch, universes);
+  setLatticeOuter(lat, outer_name);
+  return lat;
+}
+
+const CSGLattice &
+CSGBase::createHexagonalLattice(
+    const std::string & name,
+    const Real pitch,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+    const CSGUniverse & outer_univ)
+{
+  auto & lat = createHexagonalLattice(name, pitch, universes);
+  setLatticeOuter(lat, outer_univ);
+  return lat;
+}
+
+const CSGLattice &
 CSGBase::createHexagonalLattice(
     const std::string & name,
     const Real pitch,
@@ -324,6 +412,15 @@ CSGBase::createHexagonalLattice(
   }
   auto & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
   return lattice;
+}
+
+void
+CSGBase::setLatticeOuter(const CSGLattice & lattice, const CSGUniverse & outer_univ)
+{
+  if (!checkUniverseInBase(outer_univ))
+    mooseError("Cannot set outer universe for lattice " + lattice.getName() + ". Outer universe " +
+               outer_univ.getName() + " is not in the CSGBase instance.");
+  const_cast<CSGLattice &>(lattice).updateOuter(outer_univ);
 }
 
 const CSGLattice &
@@ -631,7 +728,13 @@ CSGBase::generateOutput() const
       const auto & lat_name = lat.getName();
       csg_json["lattices"][lat_name] = {};
       csg_json["lattices"][lat_name]["type"] = lat.getType();
-      // write out dimensions dictionary
+      const auto & outer_type = lat.getOuterType();
+      csg_json["lattices"][lat_name]["outertype"] = outer_type;
+      if (outer_type == "UNIVERSE")
+        csg_json["lattices"][lat_name]["outer"] = lat.getOuterUniverse().getName();
+      else if (outer_type == "CSG_MATERIAL")
+        csg_json["lattices"][lat_name]["outer"] = lat.getOuterMaterial();
+      // write out any additional attributes
       const auto & lat_dims = lat.getAttributes();
       for (const auto & dim : lat_dims)
         csg_json["lattices"][lat_name][dim.first] = CSGUtils::anyToJson(dim.second);

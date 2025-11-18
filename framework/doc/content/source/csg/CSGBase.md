@@ -214,11 +214,12 @@ When adding and removing cells to/from universes, it is important to maintain th
 
 ### Lattices
 
-A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects.
-The `CSGBase` class supports the creation of two types of lattices: Cartesian and regular hexagonal.
+A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects and an "outer" to fill the space around lattice elements.
+The `CSGBase` class supports the creation of two types of lattices: Cartesian and regular hexagonal; and three types of outer fill: void (default), material (an `std::string` name), and [`CSGUniverse`](#universes).
 To create either of these types of lattices, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the `CSGLattice` object (`const CSGLattice &`).
 For the Cartesian and hexagonal lattices, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
-Optionally, the pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
+The pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
+And similarly, the outer fill can be set at the time of initialization or set later with the `setLatticeOuter` method.
 Below are two examples of creating a `CSGCartesianLattice` and `CSGHexagonalLattice`, both initialized with the set of `CSGUniverse` objects that define the lattice layout.
 
 !listing CSGBaseTest.C start=create a 2x3 lattice of universes end=dims_map
@@ -243,6 +244,8 @@ The `CSGLattice` objects can be accessed or updated with the following methods f
 
 - `setLatticeUniverses`: sets the vector of vectors of `CSGUniverse` objects as the lattice layout.
 - `setUniverseAtLatticeIndex`: add a `CSGUniverse` to the lattice at the specified location index (replaces the existing universe).
+- `setLatticeOuter`: sets the `CSGUniverse` (for a `CSGUniverse` outer) or the `std::string` name (for a material outer) as the outer fill.
+- `resetLatticeOuter`: resets the outer fill to void for the lattice.
 - `renameLattice`: change the name of the `CSGLattice` object.
 - `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
 - `getLatticeByName`: retrieve a const reference to the `CSGLattice` object of the specified name.
@@ -283,7 +286,7 @@ In order to use this method, the full set of universes must have already been de
 
 !listing CSGBaseTest.C start=initialize a lattice without universes and then end=getUniverses
 
-!listing CSGBaseTest.C start=csg_obj->setUniverseAtLatticeIndex(lat, end=csg_obj->setUniverseAtLatticeIndex(lat, include-end=true
+!listing CSGBaseTest.C start=csg_obj->setUniverseAtLatticeIndex( end=all_univs
 
 !alert! note title=Building the Lattice Layout Incrementally
 

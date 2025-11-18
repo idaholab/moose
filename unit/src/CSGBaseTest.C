@@ -542,23 +542,48 @@ TEST(CSGBaseTest, testGetUniverse)
 TEST(CSGBaseTest, testCreateCartLattice)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  // create cartesian lattice w/out universes
+  auto & u_out = csg_obj->createUniverse("univ_outer"); // universe for lattice outer
+  auto & univ1 = csg_obj->createUniverse("u1");
+  auto & univ2 = csg_obj->createUniverse("u2");
+  auto csg_obj2 = std::make_unique<CSG::CSGBase>(); // second base for error tests
+
+  // create cartesian lattice w/out universes + void outer
   {
-    const CSGLattice & lat = csg_obj->createCartesianLattice("hermione", 1.0);
+    const CSGLattice & lat = csg_obj->createCartesianLattice("ron", 1.0);
     // expect no universe map to be present yet
+    auto dims_map = lat.getAttributes();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 0);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 0);
     ASSERT_EQ(lat.getUniverses().size(), 0);
     // check other attributes
-    ASSERT_TRUE(lat.getName() == "hermione");
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    ASSERT_TRUE(lat.getName() == "ron");
     ASSERT_TRUE(lat.getType() == "CSG::CSGCartesianLattice");
+    ASSERT_TRUE(lat.getOuterType() == "VOID");
   }
-  // create cartesian lattice w/ provided list of universes
+
+  // create cartesian lattice w/out universes + material outer
   {
-    auto & univ1 = csg_obj->createUniverse("u1");
-    auto & univ2 = csg_obj->createUniverse("u2");
+    const CSGLattice & lat = csg_obj->createCartesianLattice("hermione", 1.0, "mat_outer");
+    // just check outer, other attributes are set the same as previous test
+    ASSERT_TRUE(lat.getOuterType() == "CSG_MATERIAL");
+    ASSERT_TRUE(lat.getOuterMaterial() == "mat_outer");
+  }
+
+  // create cartesian lattice w/out universes + universe outer
+  {
+    const CSGLattice & lat = csg_obj->createCartesianLattice("harry", 1.0, u_out);
+    // just check outer, other attributes are set the same as previous test
+    ASSERT_TRUE(lat.getOuterType() == "UNIVERSE");
+    ASSERT_TRUE(lat.getOuterUniverse() == u_out);
+  }
+
+  // create cartesian lattice w/ provided list of universes + void outer
+  {
     // create a 2x3 lattice of universes
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ2, univ1}, {univ2, univ1, univ2}};
-    const CSGLattice & lat = csg_obj->createCartesianLattice("cart_lat", 1.0, univs);
+    const CSGLattice & lat = csg_obj->createCartesianLattice("alvin", 1.0, univs);
     auto dims_map = lat.getAttributes();
     ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 2);
     ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 3);
@@ -567,18 +592,49 @@ TEST(CSGBaseTest, testCreateCartLattice)
     ASSERT_EQ(lat.getUniverses()[0].size(), 3);
     ASSERT_EQ(lat.getUniverses()[1].size(), 3);
     // check other attributes
-    ASSERT_TRUE(lat.getName() == "cart_lat");
+    ASSERT_TRUE(lat.getName() == "alvin");
     ASSERT_TRUE(lat.getType() == "CSG::CSGCartesianLattice");
+    ASSERT_TRUE(lat.getOuterType() == "VOID");
   }
-  // create lattice trying to use universes from a different CSGBase instance
+
+  // create cartesian lattice w/ provided list of universes + material outer
+  {
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
+        {univ1, univ2, univ1}, {univ2, univ1, univ2}};
+    const CSGLattice & lat = csg_obj->createCartesianLattice("theo", 1.0, univs, "mat_outer");
+    // just check outer, other attributes are set the same as previous test
+    ASSERT_TRUE(lat.getOuterType() == "CSG_MATERIAL");
+    ASSERT_TRUE(lat.getOuterMaterial() == "mat_outer");
+  }
+
+  // create cartesian lattice w/ provided list of universes + universe outer
+  {
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
+        {univ1, univ2, univ1}, {univ2, univ1, univ2}};
+    const CSGLattice & lat = csg_obj->createCartesianLattice("simon", 1.0, univs, u_out);
+    // just check outer, other attributes are set the same as previous test
+    ASSERT_TRUE(lat.getOuterType() == "UNIVERSE");
+    ASSERT_TRUE(lat.getOuterUniverse() == u_out);
+  }
+
+  // create lattice trying to use universes from a different CSGBase instance - raise error
   {
     // make new CSGBase and add new universes to this
-    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
-    auto & univ1 = csg_obj2->createUniverse("u1"); // same name as existing universe
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ1}, {univ1}};
+    auto & other_univ = csg_obj2->createUniverse("u1"); // same name as existing universe
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{other_univ},
+                                                                                 {other_univ}};
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &univs]() { csg_obj->createCartesianLattice("harry", 1.0, univs); },
-        "Cannot create Cartesian lattice harry. Universe u1 is not in the CSGBase instance.");
+        [&csg_obj, &univs]() { csg_obj->createCartesianLattice("dumbledore", 1.0, univs); },
+        "Cannot create Cartesian lattice dumbledore. Universe u1 is not in the CSGBase instance.");
+  }
+
+  // create lattice w/ outer universe from different base instance - raise error
+  {
+    auto & other_univ = csg_obj2->createUniverse("univ_outer"); // same name but different instance
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &other_univ]()
+        { csg_obj->createCartesianLattice("voldemort", 1.0, other_univ); },
+        "Outer universe univ_outer is not in the CSGBase instance.");
   }
 }
 
@@ -586,19 +642,42 @@ TEST(CSGBaseTest, testCreateCartLattice)
 TEST(CSGBaseTest, testCreateHexLattice)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  // create hexagonal lattice w/out universes
+  auto & univ1 = csg_obj->createUniverse("u1");
+  auto & univ2 = csg_obj->createUniverse("u2");
+  auto & u_out = csg_obj->createUniverse("univ_outer"); // universe for lattice outer
+  auto csg_obj2 = std::make_unique<CSG::CSGBase>();     // second base obj for error tests
+
+  // create hexagonal lattice w/out universes + void outer
   {
     const CSGLattice & lat = csg_obj->createHexagonalLattice("dexter", 1.0);
     // expect no universe map to be present yet
+    auto dims_map = lat.getAttributes();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 0);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nring"]), 0);
     ASSERT_EQ(lat.getUniverses().size(), 0);
     // check other attributes
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
     ASSERT_TRUE(lat.getName() == "dexter");
     ASSERT_TRUE(lat.getType() == "CSG::CSGHexagonalLattice");
+    ASSERT_TRUE(lat.getOuterType() == "VOID");
   }
-  // create hexagonal lattice w/ provided list of universes
+
+  // create hexagonal lattice w/out universes + material outer
   {
-    auto & univ1 = csg_obj->createUniverse("u1");
-    auto & univ2 = csg_obj->createUniverse("u2");
+    const CSGLattice & lat = csg_obj->createHexagonalLattice("deedee", 1.0, "mat_outer");
+    ASSERT_TRUE(lat.getOuterType() == "CSG_MATERIAL");
+    ASSERT_TRUE(lat.getOuterMaterial() == "mat_outer");
+  }
+
+  // create hexagonal lattice w/out universes + universe outer
+  {
+    const CSGLattice & lat = csg_obj->createHexagonalLattice("mandark", 1.0, u_out);
+    ASSERT_TRUE(lat.getOuterType() == "UNIVERSE");
+    ASSERT_TRUE(lat.getOuterUniverse() == u_out);
+  }
+
+  // create hexagonal lattice w/ provided list of universes + void outer
+  {
     // create a 3-ring hexagonal lattice of universes
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ1, univ1},
@@ -620,17 +699,77 @@ TEST(CSGBaseTest, testCreateHexLattice)
     // check other attributes
     ASSERT_TRUE(lat.getName() == "hex_lat");
     ASSERT_TRUE(lat.getType() == "CSG::CSGHexagonalLattice");
+    ASSERT_TRUE(lat.getOuterType() == "VOID");
   }
+
+  // create hexagonal lattice w/ provided list of universes + material outer
+  {
+    // create a 3-ring hexagonal lattice of universes
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
+        {univ1, univ1, univ1},
+        {univ1, univ2, univ2, univ1},
+        {univ1, univ2, univ1, univ2, univ1},
+        {univ1, univ2, univ2, univ1},
+        {univ1, univ1, univ1}};
+    const CSGLattice & lat = csg_obj->createHexagonalLattice("hex_lat1", 1.0, univs, "mat_outer");
+    ASSERT_TRUE(lat.getOuterType() == "CSG_MATERIAL");
+    ASSERT_TRUE(lat.getOuterMaterial() == "mat_outer");
+  }
+
+  // create hexagonal lattice w/ provided list of universes + universe outer
+  {
+    // create a 3-ring hexagonal lattice of universes
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
+        {univ1, univ1, univ1},
+        {univ1, univ2, univ2, univ1},
+        {univ1, univ2, univ1, univ2, univ1},
+        {univ1, univ2, univ2, univ1},
+        {univ1, univ1, univ1}};
+    const CSGLattice & lat = csg_obj->createHexagonalLattice("hex_lat2", 1.0, univs, u_out);
+    ASSERT_TRUE(lat.getOuterType() == "UNIVERSE");
+    ASSERT_TRUE(lat.getOuterUniverse() == u_out);
+  }
+
   // create lattice trying to use universes from a different CSGBase instance
   {
-    // make new CSGBase and add new universes to this
-    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
     auto & univ1 = csg_obj2->createUniverse("u1"); // same name as existing universe
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {
         {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
     Moose::UnitUtils::assertThrows(
-        [&csg_obj, &univs]() { csg_obj->createHexagonalLattice("mandark", 1.0, univs); },
-        "Cannot create hexagonal lattice mandark. Universe u1 is not in the CSGBase instance.");
+        [&csg_obj, &univs]() { csg_obj->createHexagonalLattice("failure", 1.0, univs); },
+        "Cannot create hexagonal lattice failure. Universe u1 is not in the CSGBase instance.");
+  }
+
+  // create lattice w/ outer universe from different base instance - raise error
+  {
+    auto & other_univ = csg_obj2->createUniverse("univ_outer"); // same name but different instance
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &other_univ]() { csg_obj->createHexagonalLattice("lollipop", 1.0, other_univ); },
+        "Outer universe univ_outer is not in the CSGBase instance.");
+  }
+}
+
+/// tests the resetLatticeOuter method (setOuter methods tested inherently in the create tests)
+TEST(CSGBaseTest, testLatticeOuter)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+
+  {
+    // reset from CSG_MATERIAL type to VOID
+    const CSGLattice & lat1 = csg_obj->createCartesianLattice("lat1", 1.0, "mat_outer");
+    ASSERT_TRUE(lat1.getOuterType() == "CSG_MATERIAL");
+    ASSERT_TRUE(lat1.getOuterMaterial() == "mat_outer");
+    csg_obj->resetLatticeOuter(lat1);
+    ASSERT_TRUE(lat1.getOuterType() == "VOID");
+  }
+  {
+    // reset from UNIVERSE type to VOID
+    auto & u_out = csg_obj->createUniverse("univ_outer"); // universe for lattice outer
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("lat2", 1.0, u_out);
+    ASSERT_TRUE(lat2.getOuterType() == "UNIVERSE");
+    ASSERT_TRUE(lat2.getOuterUniverse() == u_out);
+    csg_obj->resetLatticeOuter(lat2);
+    ASSERT_TRUE(lat2.getOuterType() == "VOID");
   }
 }
 
