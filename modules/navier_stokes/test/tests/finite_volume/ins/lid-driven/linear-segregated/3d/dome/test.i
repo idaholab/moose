@@ -376,6 +376,12 @@ initial_dt = 4
     variable = T_fluid
     value_type = max
   []
+  [T_boundary_max]
+    type = SideExtremeValue
+    variable = T_fluid
+    value_type = max
+    boundary = 'air_wall_boundary'
+  []
   [dt]
     type = TimestepSize
   []
