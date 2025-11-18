@@ -27,12 +27,34 @@ class CSGLattice
 {
 public:
   /**
-   * @brief Construct a new CSGLattice of specific type without universes defined
+   * @brief Construct a new CSGLattice of specific type without an outer defined
    *
    * @param name unique name of lattice
    * @param lattice_type type of lattice
    */
   CSGLattice(const std::string & name, const std::string & lattice_type);
+
+  /**
+   * @brief Construct a new CSGLattice of specific type with material string outer
+   *
+   * @param name unique name of lattice
+   * @param lattice_type type of lattice
+   * @param outer_name name of outer material name that fills space around lattice elements
+   */
+  CSGLattice(const std::string & name,
+             const std::string & lattice_type,
+             const std::string outer_name);
+
+  /**
+   * @brief Construct a new CSGLattice of specific type with a universe outer
+   *
+   * @param name unique name of lattice
+   * @param lattice_type type of lattice
+   * @param outer_universe pointer to outer universe that fills space around lattice elements
+   */
+  CSGLattice(const std::string & name,
+             const std::string & lattice_type,
+             const CSGUniverse & outer_universe);
 
   /**
    * Destructor
@@ -55,6 +77,27 @@ public:
    * @return std::string type of lattice
    */
   const std::string & getType() const { return _lattice_type; }
+
+  /**
+   * @brief Get the type of outer that fills the space around the lattice elements
+   *
+   * @return string of outer type: CSG_MATERIAL, UNIVERSE, or VOID
+   */
+  const std::string getOuterType() const { return _outer_type; }
+
+  /**
+   * @brief Get the outer universe if outer type is UNIVERSE
+   *
+   * @return Reference to CSGUniverse
+   */
+  const CSGUniverse & getOuterUniverse() const;
+
+  /**
+   * @brief Get the outer material name if outer fype is CSG_MATERIAL
+   *
+   * @return name of the CSG material fill
+   */
+  const std::string & getOuterMaterial() const;
 
   /**
    * @brief Get the arrangement of CSGUniverses in the lattice
@@ -128,6 +171,11 @@ public:
       const = 0; // pure virtual function
 
   /**
+   * @brief reset the outer fill around the lattice elements to be VOID
+   */
+  void resetOuter();
+
+  /**
    * @brief Get the list of unique universe objects in the lattice
    *
    * @return list of references to unique CSGUniverse objects
@@ -160,8 +208,24 @@ protected:
   void setUniverseAtIndex(const CSGUniverse & universe,
                           const std::pair<unsigned int, unsigned int> index);
 
-  // helper function to compare the attributes of the lattice type
+  /// helper function to compare the attributes of the lattice type
   virtual bool compareAttributes(const CSGLattice & other) const = 0; // pure virtual
+
+  /**
+   * @brief Update the outer of the lattice to be the provided material name. This will change outer
+   * type to CSG_MATERIAL even if it was a different type previously.
+   *
+   * @param outer_name name of CSG material that will fill space around lattice elements
+   */
+  void updateOuter(const std::string & outer_name);
+
+  /**
+   * @brief Update the outer of the lattice to be the provided universe. This will change outer type
+   * to UNIVERSE even if it was a different type previously.
+   *
+   * @param outer_universe pointer to outer universe that will fill space around lattice elements
+   */
+  void updateOuter(const CSGUniverse & outer_universe);
 
   /// Name of lattice
   std::string _name;
@@ -172,15 +236,25 @@ protected:
   /// Universes in the arrangement of how they appear in the lattice; dimensions depends on lattice type
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> _universe_map;
 
+  /// An enum for type of outer fill for lattice
+  mutable std::string _outer_type;
+
+  /// name of the outer material
+  mutable std::string _outer_material;
+
+  /// outer object if fill is CSGUniverse
+  const CSGUniverse * _outer_universe;
+
   // CSGLatticeList needs to be friend to access setName()
   friend class CSGLatticeList;
-  // CSGBase needed for access updateDimension
+  // CSGBase needed for access updateAttributes()
   friend class CSGBase;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGLatticeTest, testSetName);
+  FRIEND_TEST(CSGLatticeTest, testUpdateOuter);
   ///@}
 #endif
 };
