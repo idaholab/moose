@@ -349,12 +349,11 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
 
-  UpdateJacobian();
-
-  _BlockResidual = 0.0;
-
   if (_non_linear)
   {
+    _BlockResidual = 0.0;
+    UpdateJacobian();
+
     for (unsigned int i = 0; i < _test_var_names.size(); i++)
     {
       auto & test_var_name = _test_var_names.at(i);
@@ -381,8 +380,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
     residual *= -1.0;
   }
-
-  if (!_non_linear)
+  else
   {
     residual = 0.0;
     _jacobian->Mult(sol, residual);
