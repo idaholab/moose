@@ -28,7 +28,6 @@ LinearFVRZViscousSource::validParams()
       "momentum_component", component, "Momentum component this kernel contributes to.");
   params.addParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addParam<SolverVariableName>("v", "The velocity in the y direction.");
-  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
   params.addParam<bool>(
       "use_deviatoric_terms",
       false,
@@ -45,7 +44,7 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
     _use_deviatoric_terms(getParam<bool>("use_deviatoric_terms")),
     _coord_type(getBlockCoordSystem()),
     _stress_multiplier(_use_deviatoric_terms ? 2.0 : 1.0),
-    _velocity_vars{nullptr, nullptr, nullptr}
+    _velocity_vars{nullptr, nullptr}
 {
   if (_coord_type != Moose::CoordinateSystemType::COORD_RZ)
     paramError("block", "LinearFVRZViscousSource is only valid on RZ coordinate systems.");
@@ -66,21 +65,17 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
     return ptr;
   };
 
-  if (isParamValid("u"))
-    _velocity_vars[0] = get_velocity_var("u");
-  if (isParamValid("v"))
-    _velocity_vars[1] = get_velocity_var("v");
-  if (isParamValid("w"))
-    _velocity_vars[2] = get_velocity_var("w");
-
   if (_use_deviatoric_terms)
   {
+    if (isParamValid("u"))
+      _velocity_vars[0] = get_velocity_var("u");
+    if (isParamValid("v"))
+      _velocity_vars[1] = get_velocity_var("v");
+
     if (!_velocity_vars[0])
       paramError("u", "The x-velocity must be provided when using deviatoric terms.");
-    if (_dim > 1 && !_velocity_vars[1])
+    if (!_velocity_vars[1])
       paramError("v", "The y-velocity must be provided when using deviatoric terms.");
-    if (_dim > 2 && !_velocity_vars[2])
-      paramError("w", "The z-velocity must be provided when using deviatoric terms.");
 
     for (const auto dir : make_range(_dim))
       const_cast<MooseLinearVariableFVReal *>(_velocity_vars[dir])->computeCellGradients();
@@ -90,39 +85,31 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
 Real
 LinearFVRZViscousSource::computeMatrixContribution()
 {
-  if (_coord_type != Moose::CoordinateSystemType::COORD_RZ)
-    return 0.0;
-
   const Real r = _current_elem_info->centroid()(_rz_radial_coord);
   mooseAssert(r > 0, "Axisymmetric control volumes should not sit on the axis (r = 0).");
 
-  const auto elem_arg = makeElemArg(_current_elem_info->elem());
-  const auto state = determineState();
-
-  const Real mu = _mu(elem_arg, state);
+  const Real mu = _mu(makeElemArg(_current_elem_info->elem()), determineState());
   return mu * _stress_multiplier * _current_elem_volume / (r * r);
 }
 
 Real
 LinearFVRZViscousSource::computeRightHandSideContribution()
 {
-  if (_coord_type != Moose::CoordinateSystemType::COORD_RZ || !_use_deviatoric_terms)
+  if (!_use_deviatoric_terms)
     return 0.0;
 
   Real divergence = 0.0;
-  const auto elem_info = _current_elem_info;
-
   for (const auto dir : make_range(_dim))
-    divergence += velocityVar(dir).gradSln(*elem_info)(dir);
+    divergence += velocityVar(dir).gradSln(*_current_elem_info)(dir);
 
-  const Real r = elem_info->centroid()(_rz_radial_coord);
+  const Real r = _current_elem_info->centroid()(_rz_radial_coord);
   mooseAssert(r > 0, "Axisymmetric control volumes should not sit on the axis (r = 0).");
 
   const auto state = determineState();
-  const Real radial_value = velocityVar(_rz_radial_coord).getElemValue(*elem_info, state);
+  const Real radial_value = velocityVar(_rz_radial_coord).getElemValue(*_current_elem_info, state);
   divergence += radial_value / r;
 
-  const auto elem_arg = makeElemArg(elem_info->elem());
+  const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const Real mu = _mu(elem_arg, state);
 
   return (2.0 / 3.0) * mu * divergence * _current_elem_volume / r;

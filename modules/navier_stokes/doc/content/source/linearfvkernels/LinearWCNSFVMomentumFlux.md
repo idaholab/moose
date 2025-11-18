@@ -55,8 +55,22 @@ for the first term using the [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/
 ## Axisymmetric (RZ) considerations
 
 When the kernel operates on blocks that use the `COORD_RZ` coordinate system, the stress term
-must incorporate the hoop contribution that arises from the cylindrical metric. In practice this
-means:
+must incorporate the hoop contribution that arises from the cylindrical metric. We assume axisymmetry
+and no swirl so that $\vec{u} = (u_r, u_z)$, $\partial/\partial\theta = 0$, and the velocity
+divergence becomes
+\begin{equation}
+\nabla \cdot \vec{u} = \frac{\partial u_r}{\partial r} + \frac{u_r}{r} + \frac{\partial u_z}{\partial z}.
+\end{equation}
+The Newtonian stress tensor with the Stokes approximation,
+\begin{equation}
+\boldsymbol{\tau} = \mu \nabla \vec{u} + \mu (\nabla \vec{u})^{\top} -
+\tfrac{2}{3} \mu (\nabla \cdot \vec{u}) \mathbf{I},
+\end{equation}
+therefore contains a hoop component $\tau_{\theta\theta} = 2 \mu u_r / r - \tfrac{2}{3}\mu\nabla\cdot\vec{u}$
+that produces a volumetric term $-(\tau_{\theta\theta}/r)\mathbf{e}_r$ when $\nabla \cdot \boldsymbol{\tau}$
+is taken.
+
+In practice this means:
 
 - The divergence $\nabla \cdot \vec{u}$ that appears in the explicit
   $\left(\nabla \vec{u}^T - \tfrac{2}{3} \nabla \cdot \vec{u} \mathbb{I}\right)$ term is
@@ -70,11 +84,13 @@ means:
   injects the $-\tfrac{2}{3} \mu \nabla \cdot \vec{u} / r$ correction so the combination of the
   two kernels reproduces the full cylindrical viscous operator.
 
-Therefore, for MMS problems or physics runs with space-dependent viscosities in RZ, enable
+Therefore, for problems with space-dependent viscosities or densities in RZ, enable
 [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms) together with
 [!param](/LinearFVKernels/LinearFVRZViscousSource/use_deviatoric_terms) so the explicit hoop stress
 matches the analytic forcing.
 
+For more information on the axisymmetric formulation we recommend visiting [!cite](peterson2018overview) and
+[!cite](hill2018note).
 
 !syntax parameters /LinearFVKernels/LinearWCNSFVMomentumFlux
 

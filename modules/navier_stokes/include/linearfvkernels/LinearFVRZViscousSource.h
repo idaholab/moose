@@ -10,10 +10,7 @@
 #pragma once
 
 #include "LinearFVElementalKernel.h"
-
 #include <array>
-
-class MooseLinearVariableFVReal;
 
 /**
  * Adds the axisymmetric viscous source term \f$\mu u_r / r^2\f$ that appears in the
@@ -49,7 +46,7 @@ private:
   const Real _stress_multiplier;
 
   /// Cached pointers to the velocity components required to build divergence
-  std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
+  std::array<const MooseLinearVariableFVReal *, 2> _velocity_vars;
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
