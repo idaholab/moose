@@ -109,6 +109,7 @@ Combined applications
 - Great White - 3D discrete dislocation dynamic application using the Mechanics of Defects Library
 - Mixcoatl$^{TM}$ - Conjugate heat transfer in microreactors
 - MONARCH - Radiation damage modeling in semiconductors
+- GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs.
 
 
 ## Legacy software
