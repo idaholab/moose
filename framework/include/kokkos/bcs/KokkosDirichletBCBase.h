@@ -11,9 +11,7 @@
 
 #include "KokkosNodalBC.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -119,8 +117,7 @@ DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, AssemblyDatum
   return _u(datum, qp) - bc->computeValue(qp, datum);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
 
 #define usingKokkosDirichletBCBaseMembers(T)                                                       \
 public:                                                                                            \

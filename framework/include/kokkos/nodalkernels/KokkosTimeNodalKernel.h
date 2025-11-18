@@ -11,9 +11,7 @@
 
 #include "KokkosNodalKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -40,5 +38,4 @@ protected:
   const Scalar<const Real> _du_dot_du;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

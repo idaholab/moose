@@ -9,9 +9,7 @@
 
 #include "KokkosSideUserObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -56,5 +54,4 @@ SideUserObject::compute()
   _dispatcher->parallelFor(policy);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

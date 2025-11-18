@@ -9,9 +9,7 @@
 
 #include "KokkosSidePostprocessor.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -27,5 +25,4 @@ SidePostprocessor::SidePostprocessor(const InputParameters & parameters)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

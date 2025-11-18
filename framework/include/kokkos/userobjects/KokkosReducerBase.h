@@ -12,9 +12,7 @@
 #include "KokkosHeader.h"
 #include "KokkosDatum.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class ReducerBase
@@ -43,5 +41,4 @@ protected:
   }
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

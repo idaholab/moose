@@ -17,9 +17,7 @@
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class SideUserObject : public UserObject,
@@ -42,5 +40,4 @@ public:
   virtual void compute() override;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

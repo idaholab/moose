@@ -9,9 +9,7 @@
 
 #include "KokkosNodalUserObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -67,5 +65,4 @@ NodalUserObject::compute()
   _dispatcher->parallelFor(policy);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

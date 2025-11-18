@@ -9,9 +9,7 @@
 
 #include "KokkosElementReducer.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -39,5 +37,4 @@ ElementReducer::compute()
   _dispatcher->parallelReduce(policy, _reduction_buffer);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

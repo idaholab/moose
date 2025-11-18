@@ -10,9 +10,7 @@
 #include "KokkosMatrix.h"
 #include "KokkosSystem.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 void
@@ -81,5 +79,4 @@ Matrix::close()
       MatSetValuesCOO(_matrix, _is_host ? _val.hostData() : _val.deviceData(), ADD_VALUES));
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

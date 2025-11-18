@@ -9,9 +9,7 @@
 
 #include "KokkosPostprocessor.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -26,5 +24,4 @@ Postprocessor::Postprocessor(const MooseObject * moose_object) : ::Postprocessor
 
 Postprocessor::Postprocessor(const Postprocessor & object) : ::Postprocessor(object, {}) {}
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

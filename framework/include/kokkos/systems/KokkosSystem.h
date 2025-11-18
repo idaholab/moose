@@ -21,9 +21,7 @@
 class MooseMesh;
 class SystemBase;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class NodalBCBase;
@@ -647,5 +645,4 @@ private:
   const Array<System> _systems_device;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

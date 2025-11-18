@@ -17,9 +17,7 @@
 #include "TransientInterface.h"
 #include "RandomInterface.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class NodalUserObject : public UserObject,
@@ -52,5 +50,4 @@ protected:
   const bool _unique_node_execute;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
