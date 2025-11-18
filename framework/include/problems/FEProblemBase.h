@@ -1329,7 +1329,7 @@ public:
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
-   * @return Const reference to the user object
+   * @return Reference to the user object
    */
   template <class T>
   T & getUserObject(const std::string & name, unsigned int tid = 0) const
@@ -1369,10 +1369,10 @@ public:
   /**
    * Get the Kokkos user object by its name
    * @param name The name of the Kokkos user object being retrieved
-   * @return Const reference to the Kokkos user object
+   * @return const reference to the Kokkos user object
    */
   template <class T>
-  T & getKokkosUserObject(const std::string & name) const
+  const T & getKokkosUserObject(const std::string & name) const
   {
     std::vector<T *> objs;
     theWarehouse()
