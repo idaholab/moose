@@ -28,7 +28,7 @@ void
 AddKernelAction::act()
 {
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_moose_object_pars.isParamValid(MooseBase::kokkos_object_param))
+  if (_moose_object_pars.isKokkosObject())
   {
     if (_current_task == "add_kernel")
       _problem->addKokkosKernel(_type, _name, _moose_object_pars);
