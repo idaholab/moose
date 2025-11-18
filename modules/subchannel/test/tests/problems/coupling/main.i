@@ -52,8 +52,6 @@ heated_length = 1.0
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-
-  # Heat Transfer Correlations
   pin_HTC_closure = 'dittus-boelter'
   friction_closure = 'MATRA'
 []
