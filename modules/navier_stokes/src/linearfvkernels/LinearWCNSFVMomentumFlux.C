@@ -70,13 +70,13 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
 
   Moose::FV::setInterpolationMethod(*this, _advected_interp_method, "advected_interp_method");
 
-  auto fetchVelocityVar = [&](const std::string & param_name)
+  auto get_velocity_var = [&](const std::string & param_name)
   {
     return dynamic_cast<const MooseLinearVariableFVReal *>(
         &_fe_problem.getVariable(_tid, getParam<SolverVariableName>(param_name)));
   };
 
-  _velocity_vars[0] = fetchVelocityVar("u");
+  _velocity_vars[0] = get_velocity_var("u");
   if (!_velocity_vars[0])
     paramError("u", "the u velocity must be a MooseLinearVariableFVReal.");
 
@@ -84,7 +84,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   {
     if (!params.isParamValid("v"))
       paramError("v", "In two or more dimensions, the v velocity must be supplied.");
-    _velocity_vars[1] = fetchVelocityVar("v");
+    _velocity_vars[1] = get_velocity_var("v");
     if (!_velocity_vars[1])
       paramError("v",
                  "In two or more dimensions, the v velocity must be supplied and it must be a "
@@ -95,7 +95,7 @@ LinearWCNSFVMomentumFlux::LinearWCNSFVMomentumFlux(const InputParameters & param
   {
     if (!params.isParamValid("w"))
       paramError("w", "In three-dimensions, the w velocity must be supplied.");
-    _velocity_vars[2] = fetchVelocityVar("w");
+    _velocity_vars[2] = get_velocity_var("w");
     if (!_velocity_vars[2])
       paramError("w",
                  "In three-dimensions, the w velocity must be supplied and it must be a "
@@ -352,8 +352,8 @@ LinearWCNSFVMomentumFlux::computeStressBoundaryRHSContribution(
     if (_coord_type == Moose::CoordinateSystemType::COORD_RZ)
     {
       const auto & radial_var = velocityVar(_rz_radial_coord);
-      const Real elem_value = radial_var.getElemValue(*elem_info, state_arg) /
-                             elem_info->centroid()(_rz_radial_coord);
+      const Real elem_value =
+          radial_var.getElemValue(*elem_info, state_arg) / elem_info->centroid()(_rz_radial_coord);
       trace_elem += elem_value;
     }
 
