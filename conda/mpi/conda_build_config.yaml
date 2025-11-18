@@ -43,19 +43,19 @@ moose_cmake:
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
   - gcc 14.3.0 h76bdaa0_7                                   # [linux]
-  - clang 19.1.7                                            # [not arm64 and osx]
+  - clang 19.1.7 default_h1323312_5                         # [not arm64 and osx]
   - clang 19.1.7 default_hf9bcbb7_5                         # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
   - gxx 14.3.0 he448592_7                                   # [linux]
-  - clangxx 19.1.7                                          # [not arm64 and osx]
+  - clangxx 19.1.7 default_h1c12a56_5                       # [not arm64 and osx]
   - clangxx 19.1.7 default_h36137df_5                       # [arm64]
 
 ### If you change these versions, change also conda/seacas/*
 moose_gfortran:
   - gfortran 14.3.0 he448592_7                              # [linux]
-  - gfortran 14.3.0                                         # [not arm64 and osx]
+  - gfortran 14.3.0 hcc3c99d_0                              # [not arm64 and osx]
   - gfortran 14.3.0 h3ef1dbf_0                              # [arm64]
 
 ### Cmake requires these be installed in order to "find" compilers
@@ -71,7 +71,7 @@ moose_cxxcompiler:
 
 moose_libgfortran5:
   - libgfortran5 15.2.0 hcd61629_7                          # [linux]
-  - libgfortran5 15.2.0                                     # [not arm64 and osx]
+  - libgfortran5 15.2.0 h336fb69_1                          # [not arm64 and osx]
   - libgfortran5 15.2.0 h742603c_1                          # [arm64]
 
 moose_gcc_impl:                                             # [linux]
@@ -96,36 +96,36 @@ moose_libcxx:
 
 moose_libzlib:
   - libzlib 1.3.1 hb9d3cd8_2                                # [linux]
-  - libzlib 1.3.1                                           # [not arm64 and osx]
+  - libzlib 1.3.1 hd23fc13_2                                # [not arm64 and osx]
   - libzlib 1.3.1 h8359307_2                                # [arm64]
 
 moose_icu:
   - icu 75.1 he02047a_0                                     # [linux]
-  - icu 75.1                                                # [not arm64 and osx]
+  - icu 75.1 h120a0e1_0                                     # [not arm64 and osx]
   - icu 75.1 hfee45f7_0                                     # [arm64]
 
 moose_cctools:                                              # [osx]
-  - cctools_osx-64 1024.3                                   # [not arm64 and osx]
+  - cctools_osx-64 1024.3 llvm19_1_h3b512aa_9               # [not arm64 and osx]
   - cctools_osx-arm64 1024.3 llvm19_1_h8c76c84_9            # [arm64]
 
 moose_compiler_rt:                                          # [osx]
-  - compiler-rt 19.1.7                                      # [not arm64 and osx]
+  - compiler-rt 19.1.7 he914875_1                           # [not arm64 and osx]
   - compiler-rt 19.1.7 h855ad52_1                           # [arm64]
 
 moose_clang_osx:                                            # [osx]
-  - clangxx_osx-64 19.1.7                                   # [not arm64 and osx]
-  - clang_osx-arm64 19.1.7                                  # [arm64]
+  - clangxx_osx-64 19.1.7 h7e5c614_25                       # [not arm64 and osx]
+  - clang_osx-arm64 19.1.7 h07b0088_25                      # [arm64]
 
 moose_llvm_openmp:                                          # [osx]
-  - llvm-openmp 21.1.5                                      # [not arm64 and osx]
+  - llvm-openmp 21.1.5 h472b3d1_2                           # [not arm64 and osx]
   - llvm-openmp 21.1.5 h4a912ad_2                           # [arm64]
 
 moose_llvm_tools:                                           # [osx]
-  - llvm-tools 19.1.7                                       # [not arm64 and osx]
+  - llvm-tools 19.1.7 hb0207f0_2                            # [not arm64 and osx]
   - llvm-tools 19.1.7 h855ad52_2                            # [arm64]
 
 moose_libclang:
-  - libclang-cpp19.1 19.1.7                                 # [not arm64 and osx]
+  - libclang-cpp19.1 19.1.7 default_hc369343_5              # [not arm64 and osx]
   - libclang-cpp19.1 19.1.7 default_h73dfc95_5              # [arm64]
 
 #### Darwin SDK SYSROOT
