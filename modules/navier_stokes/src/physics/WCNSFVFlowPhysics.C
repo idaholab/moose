@@ -480,8 +480,8 @@ WCNSFVFlowPhysics::addMomentumViscousDissipationKernels()
 }
 
 void
-WCNSFVFlowPhysics::addAxisymmetricViscousSourceKernel(
-    const std::vector<SubdomainName> & rz_blocks, const unsigned int radial_index)
+WCNSFVFlowPhysics::addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & rz_blocks,
+                                                      const unsigned int radial_index)
 {
   InputParameters params = getFactory().getValidParams("INSFVMomentumViscousSourceRZ");
   assignBlocks(params, rz_blocks);

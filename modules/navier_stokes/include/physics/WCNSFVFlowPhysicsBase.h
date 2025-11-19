@@ -111,10 +111,15 @@ protected:
   virtual void addMomentumGravityKernels() = 0;
   virtual void addMomentumFrictionKernels() = 0;
   virtual void addMomentumBoussinesqKernels() = 0;
+  /// Adds the cylindrical source kernel for the radial momentum equation when requested and valid
   void addAxisymmetricViscousSource();
-  virtual void
-  addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & /*rz_blocks*/,
-                                     unsigned int /*radial_index*/)
+  /**
+   * Derived classes must override this hook to add the actual object that implements the
+   * axisymmetric viscous source term for their formulation once the helper has determined the
+   * relevant blocks and radial component.
+   */
+  virtual void addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & /*rz_blocks*/,
+                                                  unsigned int /*radial_index*/)
   {
   }
 
