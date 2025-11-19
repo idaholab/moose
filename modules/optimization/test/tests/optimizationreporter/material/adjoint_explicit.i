@@ -136,7 +136,7 @@
 [Functions]
   [thermo_conduct]
     type = ParsedFunction
-    value = alpha
+    expression = alpha
     vars = 'alpha'
     vals = 'p1'
   []
