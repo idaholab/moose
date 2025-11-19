@@ -28,5 +28,6 @@ public:
   /// @param i_gap and @param iz
   /// @return the mixing parameter (beta)
   virtual Real computeMixingParameter(const unsigned int & i_gap,
-                                      const unsigned int & iz) const = 0;
+                                      const unsigned int & iz,
+                                      const bool & sweep_flow = false) const = 0;
 };
