@@ -332,12 +332,6 @@ advected_interp_method = 'average'
     symbol_values = 'Ap Rp R rho_fun ${rho_r}'
     expression='-(Ap*Rp)/rho_fun + (Ap*R*rho_r)/rho_fun^2'
   []
-  [theta]
-    type=ParsedFunction
-    symbol_names = 'A Ap Q R rho_fun rho_x rho_r'
-    symbol_values = 'A Ap Q R rho_fun ${rho_x} ${rho_r}'
-    expression='(-A*Q*rho_x + Ap*R*rho_r)/rho_fun^2'
-  []
   # --------------------------------------------------
   # Second derivatives
   # --------------------------------------------------
@@ -380,23 +374,23 @@ advected_interp_method = 'average'
   # --------------------------------------------------
   # Derivatives of theta
   # --------------------------------------------------
-  [T]
+  [theta]
     type = ParsedFunction
-    symbol_names  = 'rho_x rho_r A Q Ap R'
-    symbol_values = '${rho_x} ${rho_r} A Q Ap R'
-    expression = '-A*Q*rho_x + Ap*R*rho_r'
+    symbol_names = 'ux vr exact_v'
+    symbol_values = 'ux vr exact_v'
+    expression = 'ux + vr + (exact_v/y)'
   []
   [thetax]
     type = ParsedFunction
-    symbol_names  = 'rho_x rho_r Ap Q App R S2 T S3'
-    symbol_values = '${rho_x} ${rho_r} Ap Q App R S2 T S3'
-    expression = '(-Ap*Q*rho_x + App*R*rho_r)*S2 - 2*rho_x*T*S3'
+    symbol_names = 'uxx vxr vx'
+    symbol_values = 'uxx vxr vx'
+    expression = 'uxx + vxr + (vx/y)'
   []
   [thetar]
     type = ParsedFunction
-    symbol_names  = 'rho_x rho_r A Qp Ap Rp S2 S3 T'
-    symbol_values = '${rho_x} ${rho_r} A Qp Ap Rp S2 S3 T'
-    expression = '(-A*Qp*rho_x + Ap*Rp*rho_r)*S2 - 2*rho_r*T*S3'
+    symbol_names = 'uxr vrr vr exact_v'
+    symbol_values = 'uxr vrr vr exact_v'
+    expression = 'uxr + vrr + (vr/y) - (exact_v/(y^2))'
   []
   # --------------------------------------------------
   # Stress components
