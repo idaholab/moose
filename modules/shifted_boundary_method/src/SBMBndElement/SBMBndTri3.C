@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndTri3.h"
-#include "libmesh/utility.h" // optional, for future intersection tests
 
 SBMBndTri3::SBMBndTri3(const Elem * elem) : SBMBndElementBase(elem)
 {
@@ -78,21 +77,21 @@ SBMBndTri3::intercepted(const Point & a, const Point & b) const
 
   const Real inv_det = 1.0 / det;
 
-  // (c) Compute barycentric coordinate u and check 0 ≤ u ≤ 1
+  // (c) Compute barycentric coordinate u and check 0 <= u <= 1
   const Point tvec = a - v0;
   const Real u = (tvec * pvec) * inv_det;
   if (!MooseUtils::absoluteFuzzyGreaterEqual(u, 0.0, eps) ||
       !MooseUtils::absoluteFuzzyLessEqual(u, 1.0, eps))
     return false;
 
-  // (d) Compute barycentric coordinate v and check 0 ≤ v and u + v ≤ 1
+  // (d) Compute barycentric coordinate v and check 0 <= v and u + v <= 1
   const Point qvec = tvec.cross(edge1);
   const Real v = (dir * qvec) * inv_det;
   if (!MooseUtils::absoluteFuzzyGreaterEqual(v, 0.0, eps) ||
       !MooseUtils::absoluteFuzzyLessEqual(u + v, 1.0, eps))
     return false;
 
-  // (e) Locate intersection along line segment (0 ≤ t ≤ 1 constrains to a‑b)
+  // (e) Locate intersection along line segment (0 <= t <= 1 constrains to a--b)
   const Real t = (edge2 * qvec) * inv_det;
   if (!MooseUtils::absoluteFuzzyGreaterEqual(t, 0.0, eps) ||
       !MooseUtils::absoluteFuzzyLessEqual(t, 1.0, eps))
