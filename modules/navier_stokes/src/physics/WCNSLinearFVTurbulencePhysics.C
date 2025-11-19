@@ -302,15 +302,8 @@ WCNSLinearFVTurbulencePhysics::addFunctorMaterials()
     params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") =
         getParam<MooseFunctorName>("sigma_k");
     getProblem().addMaterial(mat_type, prefix() + "mu_eff_tke", params);
-  }
-  if (_turbulence_model == "k-epsilon")
-  {
-    const std::string mat_type = "FunctorEffectiveDynamicViscosity";
-    InputParameters params = getFactory().getValidParams(mat_type);
-    assignBlocks(params, _blocks);
+
     params.set<MooseFunctorName>("property_name") = "mu_eff_tked";
-    params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
-    params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") =
         getParam<MooseFunctorName>("sigma_eps");
     getProblem().addMaterial(mat_type, prefix() + "mu_eff_tked", params);
