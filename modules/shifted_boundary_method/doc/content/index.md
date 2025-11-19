@@ -1,3 +1,1 @@
-!config navigation breadcrumbs=False scrollspy=False
-
-# ShiftedBoundaryMethodApp
+[modules/shifted_boundary_method/index.md]

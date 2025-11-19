@@ -4,7 +4,7 @@
 distance to one or more implicit surfaces defined by MOOSE functions. It accepts both
 analytical level sets (via [`ParsedFunction`](syntax/Functions/index.md)) and
 mesh-based boundaries (via
-[`UnsignedDistanceToSurfaceMesh`](../functions/UnsignedDistanceToSurfaceMesh.md)),
+[`UnsignedDistanceToSurfaceMesh`](functions/UnsignedDistanceToSurfaceMesh.md)),
 aggregating them to identify the closest surface for any given element.
 
 !syntax description /UserObjects/ShortestDistanceToSurface
