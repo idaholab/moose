@@ -53,7 +53,7 @@ INSFVMomentumViscousSourceRZ::computeCoefficient(const Moose::ElemArg & elem_arg
   mooseAssert(elem_arg.elem, "The element pointer must be valid for INSFVMomentumViscousSourceRZ.");
   const auto radius = elem_arg.elem->vertex_average()(_rz_radial_coord);
   mooseAssert(radius > 0.0, "Axisymmetric radial coordinate should be positive inside a cell.");
-  return -_expansion_multiplier * _mu(elem_arg, state) / (radius * radius);
+  return _expansion_multiplier * _mu(elem_arg, state) / (radius * radius);
 }
 
 ADReal

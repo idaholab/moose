@@ -23,9 +23,11 @@ public:
   static InputParameters validParams();
   INSFVMomentumViscousSourceRZ(const InputParameters & params);
 
+  using INSFVElementalKernel::gatherRCData;
+  void gatherRCData(const Elem &) override;
+
 protected:
   ADReal computeSegregatedContribution() override;
-  void gatherRCData(const Elem & elem) override;
 
 private:
   /// Viscosity functor

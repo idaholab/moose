@@ -35,9 +35,6 @@ velocity_interp_method = 'rc'
     type = INSFVPressureVariable
     initial_condition = 0.0
   []
-[]
-
-[ScalarVariables]
   [lambda]
     family = SCALAR
     order = FIRST
@@ -57,22 +54,34 @@ velocity_interp_method = 'rc'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    rho = rho
+    rho = rho_fun
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
   []
-  [mean_zero_pressure]
-    type = FVIntegralValueConstraint
-    variable = pressure
+  [pressure_pin]
+    type = FVPointValueConstraint
     lambda = lambda
-    phi0 = 0.0
+    phi0 = 0.125
+    point = '0.5 0.5 0'
+    variable = pressure
   []
 
+  [u_advection]
+    type = INSFVMomentumAdvection
+    variable = vel_x
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = rho_fun
+    momentum_component = 'x'
+  []
   [u_diffusion]
     type = INSFVMomentumDiffusion
     variable = vel_x
-    mu = mu
+    mu = mu_fun
     momentum_component = 'x'
+    complete_expansion = true
+    u = vel_x
+    v = vel_y
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -90,13 +99,25 @@ velocity_interp_method = 'rc'
   [v_diffusion]
     type = INSFVMomentumDiffusion
     variable = vel_y
-    mu = mu
+    mu = mu_fun
     momentum_component = 'y'
+    complete_expansion = true
+    u = vel_x
+    v = vel_y
   []
   [v_viscous_source]
     type = INSFVMomentumViscousSourceRZ
     variable = vel_y
-    mu = mu
+    mu = mu_fun
+    momentum_component = 'y'
+    complete_expansion = true
+  []
+  [v_advection]
+    type = INSFVMomentumAdvection
+    variable = vel_y
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = rho_fun
     momentum_component = 'y'
   []
   [v_pressure]
@@ -120,7 +141,7 @@ velocity_interp_method = 'rc'
     variable = vel_x
     u = vel_x
     v = vel_y
-    mu = mu
+    mu = mu_fun
     momentum_component = x
   []
   [axis_v]
@@ -129,7 +150,7 @@ velocity_interp_method = 'rc'
     variable = vel_y
     u = vel_x
     v = vel_y
-    mu = mu
+    mu = mu_fun
     momentum_component = y
   []
   [axis_p]
@@ -137,70 +158,17 @@ velocity_interp_method = 'rc'
     boundary = 'bottom'
     variable = pressure
   []
-
-  [dirichlet_u_left]
+  [dirichlet_u_wall]
     type = INSFVNoSlipWallBC
-    boundary = 'left'
+    boundary = 'left right top'
     variable = vel_x
     function = exact_u
   []
-  [dirichlet_u_right]
+  [dirichlet_v_wall]
     type = INSFVNoSlipWallBC
-    boundary = 'right'
-    variable = vel_x
-    function = exact_u
-  []
-  [dirichlet_u_top]
-    type = INSFVNoSlipWallBC
-    boundary = 'top'
-    variable = vel_x
-    function = exact_u
-  []
-
-  [dirichlet_v_left]
-    type = INSFVNoSlipWallBC
-    boundary = 'left'
+    boundary = 'left right top'
     variable = vel_y
     function = exact_v
-  []
-  [dirichlet_v_right]
-    type = INSFVNoSlipWallBC
-    boundary = 'right'
-    variable = vel_y
-    function = exact_v
-  []
-  [dirichlet_v_top]
-    type = INSFVNoSlipWallBC
-    boundary = 'top'
-    variable = vel_y
-    function = exact_v
-  []
-
-  [pressure_left]
-    type = INSFVOutletPressureBC
-    boundary = 'left'
-    variable = pressure
-    function = exact_p
-  []
-  [pressure_right]
-    type = INSFVOutletPressureBC
-    boundary = 'right'
-    variable = pressure
-    function = exact_p
-  []
-  [pressure_top]
-    type = INSFVOutletPressureBC
-    boundary = 'top'
-    variable = pressure
-    function = exact_p
-  []
-[]
-
-[FunctorMaterials]
-  [constants]
-    type = ADGenericFunctorMaterial
-    prop_names = 'mu rho'
-    prop_values = '${mu_ref} ${rho_ref}'
   []
 []
 
@@ -392,8 +360,8 @@ velocity_interp_method = 'rc'
   []
   [vrr]
     type=ParsedFunction
-    symbol_names = 'Ap Rpp Rp rho_r S S2 S3'
-    symbol_values = 'Ap Rpp Rp ${rho_r} S S2 S3'
+    symbol_names = 'Ap Rpp R Rp rho_r S S2 S3'
+    symbol_values = 'Ap Rpp R Rp ${rho_r} S S2 S3'
     expression='( -Ap*Rpp*S + 2*Ap*Rp*rho_r*S2 - 2*Ap*R*(rho_r^2)*S3 )/y + 2*(Ap*Rp*S - Ap*R*rho_r*S2)/y^2 - 2*(Ap*R*S)/y^3'
   []
 
@@ -426,6 +394,37 @@ velocity_interp_method = 'rc'
   []
 
   # --------------------------------------------------
+  # Stress derivatives (for symmetric-only stress)
+  # --------------------------------------------------
+  [tau_xx_x]
+    type = ParsedFunction
+    symbol_names  = 'mu_fun ux uxx mu_x'
+    symbol_values = 'mu_fun ux uxx ${mu_x}'
+    expression = '2*(mu_x*ux + mu_fun*uxx)'
+  []
+
+  [tau_xr_x]
+    type = ParsedFunction
+    symbol_names  = 'mu_fun ur vx uxr vxx mu_x'
+    symbol_values = 'mu_fun ur vx uxr vxx ${mu_x}'
+    expression = 'mu_x*(ur + vx) + mu_fun*(uxr + vxx)'
+  []
+
+  [tau_xr_r]
+    type = ParsedFunction
+    symbol_names  = 'mu_fun ur vx urr vxr mu_r'
+    symbol_values = 'mu_fun ur vx urr vxr ${mu_r}'
+    expression = 'mu_r*(ur + vx) + mu_fun*(urr + vxr)'
+  []
+
+  [tau_rr_r]
+    type = ParsedFunction
+    symbol_names  = 'mu_fun vr vrr mu_r'
+    symbol_values = 'mu_fun vr vrr ${mu_r}'
+    expression = '2*(mu_r*vr + mu_fun*vrr)'
+  []
+
+  # --------------------------------------------------
   # Convective fluxes
   # --------------------------------------------------
   [Fxx]
@@ -454,6 +453,37 @@ velocity_interp_method = 'rc'
   []
 
   # --------------------------------------------------
+  # Conservative flux derivatives (product rule)
+  # --------------------------------------------------
+  [Fxx_x]
+    type = ParsedFunction
+    symbol_names  = 'rho_fun exact_u ux rho_x'
+    symbol_values = 'rho_fun exact_u ux ${rho_x}'
+    expression = 'rho_x*exact_u*exact_u + rho_fun*(2*exact_u*ux)'
+  []
+
+  [Frx_r]
+    type = ParsedFunction
+    symbol_names  = 'rho_fun exact_u exact_v ur vr rho_r'
+    symbol_values = 'rho_fun exact_u exact_v ur vr ${rho_r}'
+    expression = 'rho_r*exact_v*exact_u + rho_fun*(vr*exact_u + exact_v*ur)'
+  []
+
+  [Fxr_x]
+    type = ParsedFunction
+    symbol_names  = 'rho_fun exact_u exact_v ux vx rho_x'
+    symbol_values = 'rho_fun exact_u exact_v ux vx ${rho_x}'
+    expression = 'rho_x*exact_u*exact_v + rho_fun*(ux*exact_v + exact_u*vx)'
+  []
+
+  [Frr_r]
+    type = ParsedFunction
+    symbol_names  = 'rho_fun exact_v vr rho_r'
+    symbol_values = 'rho_fun exact_v vr ${rho_r}'
+    expression = 'rho_r*exact_v*exact_v + rho_fun*(2*exact_v*vr)'
+  []
+
+  # --------------------------------------------------
   # Pressure gradients
   # --------------------------------------------------
   [px]
@@ -479,6 +509,42 @@ velocity_interp_method = 'rc'
     symbol_names = 'Fxr_x Frr Frr_r pr tau_xr_x tau_rr tau_rr_r tau_tt'
     symbol_values = 'Fxr_x Frr Frr_r pr tau_xr_x tau_rr tau_rr_r tau_tt'
     expression='Fxr_x + (Frr/y) + Frr_r + pr - ( tau_xr_x + (tau_rr/y) + tau_rr_r - (tau_tt)/y )'
+  []
+[]
+
+[AuxVariables]
+  [vel_x_aux]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0.0
+  []
+  [vel_y_aux]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0.0
+  []
+  [pressure_aux]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0.0
+  []
+[]
+
+[AuxKernels]
+  [vel_x_function_aux]
+    type = FunctionAux
+    variable = vel_x_aux
+    function = exact_u
+    execute_on = TIMESTEP_END
+  []
+  [vel_y_function_aux]
+    type = FunctionAux
+    variable = vel_y_aux
+    function = exact_v
+    execute_on = TIMESTEP_END
+  []
+  [pressure_function_aux]
+    type = FunctionAux
+    variable = pressure_aux
+    function = exact_p
+    execute_on = TIMESTEP_END
   []
 []
 
@@ -518,4 +584,6 @@ velocity_interp_method = 'rc'
 
 [Outputs]
   csv = true
+  exodus = true
+  execute_on = timestep_end
 []
