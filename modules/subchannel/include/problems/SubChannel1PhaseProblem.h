@@ -88,6 +88,11 @@ public:
     return computeAddedHeatDuct(i_ch, iz);
   }
 
+  /// Outlet Pressure
+  const PostprocessorValue & _P_out;
+  /// Fluid properties object
+  const SinglePhaseFluidProperties * _fp;
+
 protected:
   /// Pure virtual: daughters provide different implementations
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const = 0;
@@ -205,8 +210,6 @@ protected:
   bool _converged;
   /// Time step
   Real _dt;
-  /// Outlet Pressure
-  const PostprocessorValue & _P_out;
   /// Turbulent modeling parameter used in axial momentum equation
   const Real & _CT;
   /// Convergence tolerance for the pressure loop in external solve
@@ -238,9 +241,6 @@ protected:
   const bool _verbose_subchannel;
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin
   const bool _deformation;
-
-  /// Fluid properties object
-  const SinglePhaseFluidProperties * _fp;
   /// Friction closure object
   const SCMFrictionClosureBase * _friction_closure;
   /// Turbulent Mixing closure object

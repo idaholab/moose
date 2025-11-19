@@ -17,7 +17,7 @@ SCMMixingKimAndChung::validParams()
 {
   InputParameters params = SCMMixingClosureBase::validParams();
   params.addClassDescription(
-      "Class that models the mixing parameter beta using the Kim and Chung correlations.");
+      "Class that models the turbulent mixing coefficient using the Kim and Chung correlations.");
   return params;
 }
 
