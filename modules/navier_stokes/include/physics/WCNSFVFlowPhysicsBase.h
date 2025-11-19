@@ -111,6 +111,12 @@ protected:
   virtual void addMomentumGravityKernels() = 0;
   virtual void addMomentumFrictionKernels() = 0;
   virtual void addMomentumBoussinesqKernels() = 0;
+  void addAxisymmetricViscousSource();
+  virtual void
+  addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & /*rz_blocks*/,
+                                     unsigned int /*radial_index*/)
+  {
+  }
 
   /// Functions adding boundary conditions for the flow simulation.
   /// These are used for weakly-compressible simulations as well.
@@ -146,6 +152,9 @@ protected:
 
   /// Find the turbulence physics
   const WCNSFVTurbulencePhysicsBase * getCoupledTurbulencePhysics() const;
+
+  /// Return the set of blocks restricted to an RZ coordinate system
+  std::vector<SubdomainName> getAxisymmetricRZBlocks() const;
 
   /// Name of the vector to hold pressure momentum equation contributions
   const TagName _pressure_tag = "p_tag";

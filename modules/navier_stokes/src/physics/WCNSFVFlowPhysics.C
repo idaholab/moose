@@ -288,6 +288,7 @@ WCNSFVFlowPhysics::addFVKernels()
 
   // Momentum equation: momentum viscous stress
   addMomentumViscousDissipationKernels();
+  addAxisymmetricViscousSource();
 
   // Momentum equation: pressure term
   addMomentumPressureKernels();
@@ -476,6 +477,24 @@ WCNSFVFlowPhysics::addMomentumViscousDissipationKernels()
 
     getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
   }
+}
+
+void
+WCNSFVFlowPhysics::addAxisymmetricViscousSourceKernel(
+    const std::vector<SubdomainName> & rz_blocks, const unsigned int radial_index)
+{
+  InputParameters params = getFactory().getValidParams("INSFVMomentumViscousSourceRZ");
+  assignBlocks(params, rz_blocks);
+  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
+  params.set<MooseEnum>("momentum_component") = NS::directions[radial_index];
+  params.set<bool>("complete_expansion") = getParam<bool>("include_deviatoric_stress");
+  params.set<NonlinearVariableName>("variable") = _velocity_names[radial_index];
+
+  getProblem().addFVKernel("INSFVMomentumViscousSourceRZ",
+                           prefix() + "ins_momentum_viscous_source_rz_" +
+                               NS::directions[radial_index],
+                           params);
 }
 
 void

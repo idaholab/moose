@@ -13,6 +13,7 @@
 #include "NSFVBase.h"
 #include "MapConversionUtils.h"
 #include "NS.h"
+#include "MooseMesh.h"
 
 InputParameters
 WCNSFVFlowPhysicsBase::validParams()
@@ -38,6 +39,10 @@ WCNSFVFlowPhysicsBase::validParams()
       "include_deviatoric_stress",
       false,
       "Whether to include the full expansion (the transposed term as well) of the stress tensor");
+  params.addParam<bool>("add_rz_viscous_source",
+                        true,
+                        "When true, automatically adds INSFVMomentumViscousSourceRZ to the radial "
+                        "momentum equation on RZ blocks. Disable if this term should be omitted.");
 
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
@@ -510,4 +515,49 @@ WCNSFVFlowPhysicsBase::rhieChowUOName() const
 {
   mooseAssert(!_rc_uo_name.empty(), "The Rhie-Chow user-object name should be set!");
   return _rc_uo_name;
+}
+
+std::vector<SubdomainName>
+WCNSFVFlowPhysicsBase::getAxisymmetricRZBlocks() const
+{
+  std::vector<SubdomainName> rz_blocks;
+  const auto & mesh = getProblem().mesh();
+
+  const bool use_all_blocks =
+      _blocks.empty() || allMeshBlocks(_blocks) ||
+      std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end();
+
+  std::vector<SubdomainID> block_ids;
+  if (use_all_blocks)
+  {
+    const auto & mesh_blocks = mesh.meshSubdomains();
+    block_ids.insert(block_ids.end(), mesh_blocks.begin(), mesh_blocks.end());
+  }
+  else
+    block_ids = mesh.getSubdomainIDs(_blocks);
+
+  for (const auto subdomain_id : block_ids)
+    if (mesh.getCoordSystem(subdomain_id) == Moose::COORD_RZ)
+    {
+      auto name = mesh.getSubdomainName(subdomain_id);
+      if (name.empty())
+        name = Moose::stringify(subdomain_id);
+      rz_blocks.push_back(name);
+    }
+
+  return rz_blocks;
+}
+
+void
+WCNSFVFlowPhysicsBase::addAxisymmetricViscousSource()
+{
+  if (!_has_flow_equations || !getParam<bool>("add_rz_viscous_source"))
+    return;
+
+  const auto rz_blocks = getAxisymmetricRZBlocks();
+  if (rz_blocks.empty())
+    return;
+
+  const auto radial_index = getProblem().mesh().getAxisymmetricRadialCoord();
+  addAxisymmetricViscousSourceKernel(rz_blocks, radial_index);
 }
