@@ -11,23 +11,25 @@
 
 #include "SCMMixingClosureBase.h"
 #include "TriSubChannelMesh.h"
-#include "QuadSubChannelMesh.h"
 
 /**
- * Class that sets a constant turbulent mixing parameter beta.
+ * Class that calculates the mixing parameter based on the Cheng & Todreas correlations
+ * (Cheng & Todreas 1986). It is used only for wire-wrapped tri lattices. Also, takes care of
+ * sweep_flow.
  */
-class SCMMixingConstantBeta : public SCMMixingClosureBase
+class SCMMixingChengTodreas : public SCMMixingClosureBase
 {
 public:
   static InputParameters validParams();
 
-  SCMMixingConstantBeta(const InputParameters & parameters);
+  SCMMixingChengTodreas(const InputParameters & parameters);
 
   virtual Real computeMixingParameter(const unsigned int & i_gap,
                                       const unsigned int & iz,
                                       const bool & sweep_flow) const override;
 
-protected:
-  /// Turbulent mixing parameter
-  const Real & _beta;
+  /// Keep track of the lattice type
+  bool _is_tri_lattice;
+  /// Pointer to the tri lattice mesh
+  const TriSubChannelMesh * const _tri_sch_mesh;
 };

@@ -53,11 +53,11 @@ num_cells = 40
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
-  # Heat Transfer Correlation
   pin_HTC_closure = 'gnielinski'
-  # friction model
   friction_closure = 'cheng'
   full_output = true
+  mixing_closure = 'cheng_todreas'
+
 []
 
 [SCMClosures]
@@ -66,6 +66,9 @@ num_cells = 40
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 

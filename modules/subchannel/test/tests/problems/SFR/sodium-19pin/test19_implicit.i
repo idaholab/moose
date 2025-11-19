@@ -46,6 +46,8 @@ P_out = 2.0e5 # Pa
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
   full_output = true
+  mixing_closure = 'cheng_todreas'
+
 []
 
 [SCMClosures]
@@ -54,6 +56,9 @@ P_out = 2.0e5 # Pa
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 

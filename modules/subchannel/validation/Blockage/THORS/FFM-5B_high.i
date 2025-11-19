@@ -58,14 +58,18 @@ P_out = 2.0e5 # Pa
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = exponential
-  # friction model
   friction_closure = 'cheng'
   full_output = true
+  mixing_closure = 'cheng_todreas'
+
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 
