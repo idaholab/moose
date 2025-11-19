@@ -11,6 +11,7 @@
 #include "Function.h"
 #include "Transient.h"
 #include "FEProblemBase.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", PIDTransientControl);
 
@@ -183,7 +184,7 @@ PIDTransientControl::execute()
     // Compute the value, within the bounds
     _value = std::min(std::max(_minimum_output_value, _value), _maximum_output_value);
 
-    // Set the new value of the postprocessor
+    // Set the new value of the parameter or postprocessor
     if (isParamValid("parameter"))
       setControllableValue<Real>("parameter", _value);
     else
@@ -192,5 +193,17 @@ PIDTransientControl::execute()
     // Keep track of the previous delta for integral windup control
     // and for time derivative calculation
     _old_delta = delta;
+  }
+}
+
+void
+PIDTransientControl::initialSetup()
+{
+  if (_app.isRecovering())
+  {
+    if (isParamValid("parameter"))
+      setControllableValue<Real>("parameter", _value);
+    else
+      _fe_problem.setPostprocessorValueByName(getParam<std::string>("parameter_pp"), _value);
   }
 }
