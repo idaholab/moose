@@ -782,6 +782,11 @@ class RenderParameterToken(components.RenderComponent):
             else:
                 html.String(p, content='(no unit assumed)')
 
+        if param['doc_range']:
+            p = html.Tag(body, 'p', class_='moose-parameter-description-doc-range')
+            html.Tag(p, 'span', string='Range:')
+            html.String(p, content=param['doc_range'])
+
         if param['options']:
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')
             html.Tag(p, 'span', string='Options:')

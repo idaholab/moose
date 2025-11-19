@@ -146,6 +146,8 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
     param_json["description"] = doc;
 
     param_json["doc_unit"] = params->getDocUnit(iter.first);
+    param_json["doc_range"] =
+        params->isRangeChecked(iter.first) ? params->rangeCheckedFunction(iter.first) : "";
 
     param_json["controllable"] = params->isControllable(iter.first);
     param_json["deprecated"] = params->isParamDeprecated(iter.first);
