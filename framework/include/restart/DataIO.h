@@ -446,9 +446,9 @@ void dataStore(std::ostream & stream,
                std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
                void * context);
 
-template <std::size_t N>
+template <typename T, std::size_t N>
 inline void
-dataStore(std::ostream & stream, std::array<ADReal, N> & dn, void * context)
+dataStore(std::ostream & stream, std::array<T, N> & dn, void * context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataStore(stream, dn[i], context);
@@ -813,9 +813,9 @@ void dataLoad(std::istream & stream,
               std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
               void * context);
 
-template <std::size_t N>
+template <typename T, std::size_t N>
 inline void
-dataLoad(std::istream & stream, std::array<ADReal, N> & dn, void * context)
+dataLoad(std::istream & stream, std::array<T, N> & dn, void * context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataLoad(stream, dn[i], context);

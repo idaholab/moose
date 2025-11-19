@@ -352,4 +352,10 @@
     requirement = 'The system shall provide a system that summaries the changes in tests within a pull request event`
     issues = '#31645'
   []
+  [parameter_propagation]
+    type = PythonUnitTest
+    input = test_ParameterPropagation.py
+    requirement = 'The system shall propagate parameters specified at higher levels as default into lower level blocks.'
+    issues = '#31322'
+  []
 []

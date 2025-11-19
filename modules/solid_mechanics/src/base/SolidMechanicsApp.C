@@ -38,6 +38,8 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   Registry::registerActionsTo(af, {"SolidMechanicsApp"});
   registerAppDataFilePath("solid_mechanics");
 
+  registerSyntax("AddUELBCs", "BCs/Abaqus");
+
   registerSyntax("EmptyAction", "BCs/CavityPressure");
   registerSyntax("CavityPressureAction", "BCs/CavityPressure/*");
   registerSyntax("CavityPressurePPAction", "BCs/CavityPressure/*");
@@ -61,6 +63,8 @@ SolidMechanicsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
                            "The 'Kernels/DynamicSolidMechanics' syntax is deprecated. Please use "
                            "'Physics/SolidMechanics/Dynamic' instead.");
   registerSyntax("PoroMechanicsAction", "Kernels/PoroMechanics");
+
+  registerSyntax("AddUELVariables", "Variables/AddUELVariables");
 
   registerSyntax("EmptyAction", "BCs/Pressure");
   registerSyntax("PressureAction", "BCs/Pressure/*");
