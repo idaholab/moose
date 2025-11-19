@@ -249,7 +249,6 @@ velocity_interp_method = 'rc'
 
   # --------------------------------------------------
   # Exact solutions (from mass streamfunction)
-  # Satisfies (ρu)_x + (ρv)_r + (ρv)/y = 0
   # --------------------------------------------------
   [exact_u]
     type=ParsedFunction
@@ -366,7 +365,7 @@ velocity_interp_method = 'rc'
   []
 
   # --------------------------------------------------
-  # Stresses (θ retained, but no -2/3 μ θ term if desired)
+  # Stresses
   # --------------------------------------------------
   [tau_xx]
     type=ParsedFunction
