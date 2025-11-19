@@ -1,6 +1,6 @@
 [Tests]
   issues = '#15640'
-  design = 'navier_stokes/insfv.md'
+  design = 'navier_stokes/insfv.md INSFVMomentumViscousSourceRZ.md'
   [2d-rc-diri]
     type = PythonUnitTest
     input = test.py
@@ -17,8 +17,7 @@
     test_case = TestRZViscousSource
     capabilities = 'method!=dbg'
     min_parallel = 2
-    requirement = 'The system shall recover the manufactured analytic solution for an axisymmetric Newton-based FV solve that combines INSFVMomentumDiffusion with the INSFVMomentumViscousSourceRZ kernel and demonstrates second-order convergence.'
+    requirement = 'The system shall recover the manufactured analytic solution for an axisymmetric FV solve of the Navier Stokes equations with space-dependent material properties and the symmetric stress tensor without the bulk term.'
     required_python_packages = 'pandas matplotlib'
-    heavy = true
   []
 []
