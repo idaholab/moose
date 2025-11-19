@@ -1,6 +1,6 @@
 [Tests]
-  issues = ''
-  design = ''
+  issues = '#31937'
+  design = 'UnsignedDistanceToSurfaceMesh.md ShortestDistanceToSurface.md'
 
   [distance_test]
     requirement = 'The system shall compute '
