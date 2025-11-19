@@ -15,7 +15,7 @@
  * Adds the axisymmetric viscous source term (-mu * u_r / r^2) that appears in the Laplacian of the
  * radial momentum equation in cylindrical coordinates (no swirl). This contribution needs to be
  * handled with an elemental kernel so that its diagonal contribution is available to the
- * Rhie–Chow interpolator.
+ * Rhie-Chow interpolator.
  */
 class INSFVMomentumViscousSourceRZ : public INSFVElementalKernel
 {
@@ -39,5 +39,8 @@ private:
   /// Multiplier applied when the complete expansion form is requested
   const Real _expansion_multiplier;
 
+  /// Compute the diagonal multiplier for this dof
+  /// @param elem_arg The elem argument
+  /// @param state The state argument
   ADReal computeCoefficient(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
 };
