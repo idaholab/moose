@@ -7,19 +7,15 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-import signal
 
-def _preexec_detach():
-    # Start a new session (like setsid) and ignore SIGHUP so the process
-    # survives terminal logout/disconnects.
-    os.setsid()
-    signal.signal(signal.SIGHUP, signal.SIG_IGN)
-
-def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, detach):
+def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc):
     input_base = input_file[:-2]
     tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre"
-    if not detach:
-      print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
+    print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
+    if disc == "edghdg":
+        vel_face_fe_type = "LAGRANGE"
+    else:
+        vel_face_fe_type = "SIDE_HIERARCHIC"
 
     # Build command (mirrors the bash command)
     cmd = [
@@ -29,6 +25,8 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, det
         f"Mesh/uniform_refine={refine}",
         f"Outputs/file_base={tag}",
         f"Problem/set_schur_pre={set_schur_pre}",
+        f"Variables/vel_bar_x/family={vel_face_fe_type}",
+        f"Variables/vel_bar_y/family={vel_face_fe_type}",
         "--color", "off",
     ]
     if num_steps is not None:
@@ -39,46 +37,30 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, det
     env["MOOSE_PROFILE_BASE"] = tag
 
     log_path = Path(f"{tag}.log")
-    if detach:
-        with log_path.open("w", encoding="utf-8") as logfile:
-            logfile.write(f"## COMMAND: {' '.join(map(str, cmd))}\n\n")
-            logfile.flush()
-            proc = subprocess.Popen(
-                cmd,
-                stdout=logfile,
-                stderr=subprocess.STDOUT,
-                stdin=subprocess.DEVNULL,
-                env=env,
-                text=True,
-                close_fds=True,
-                preexec_fn=_preexec_detach,
-            )
-        print(f"=== Launched detached case with PID={proc.pid}: {tag} ===\n", flush=True)
-        return
-    else:
-        with log_path.open("w", encoding="utf-8") as logfile:
-            logfile.write(f"## COMMAND: {' '.join(map(str, cmd))}\n\n")
-            logfile.flush()
-            proc = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                env=env,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-            )
-            assert proc.stdout is not None
-            for line in proc.stdout:
-                sys.stdout.write(line)
-                logfile.write(line)
-            ret = proc.wait()
 
-        if ret != 0:
-            print(f"\nCommand failed for tag '{tag}' with exit code {ret}", file=sys.stderr)
-            sys.exit(ret)
+    with log_path.open("w", encoding="utf-8") as logfile:
+        logfile.write(f"## COMMAND: {' '.join(map(str, cmd))}\n\n")
+        logfile.flush()
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=env,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+        )
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            sys.stdout.write(line)
+            logfile.write(line)
+        ret = proc.wait()
 
-        print(f"\n=== Finished case: {tag} ===\n", flush=True)
+    if ret != 0:
+        print(f"\nCommand failed for tag '{tag}' with exit code {ret}", file=sys.stderr)
+        sys.exit(ret)
+
+    print(f"\n=== Finished case: {tag} ===\n", flush=True)
 
 def require_i_suffix(value: str) -> str:
     if not value.endswith(".i"):
@@ -122,8 +104,10 @@ def main():
         help="Number of executioner steps to run (default: %(default)s)"
     )
     parser.add_argument(
-        "--detach", action="store_true",
-        help="Run each case detached (new session, ignores SIGHUP; logs only to <tag>.log)."
+        "--disc",
+        choices=["edghdg", "hdg"],
+        required=True,
+        help="Discretization type (choose 'edghdg' or 'hdg')"
     )
 
     args = parser.parse_args()
@@ -143,7 +127,7 @@ def main():
                  refine,
                  args.set_schur_pre,
                  args.num_steps,
-                 args.detach)
+                 args.disc)
 
         if _case < args.num_cases:
             procs *= args.proc_multiplier
