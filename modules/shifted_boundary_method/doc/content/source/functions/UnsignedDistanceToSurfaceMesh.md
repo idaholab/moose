@@ -1,7 +1,7 @@
 # UnsignedDistanceToSurfaceMesh
 
 `UnsignedDistanceToSurfaceMesh` is a `Function` that queries the KDTree and boundary
-element database produced by [`SBMSurfaceMeshBuilder`](../userobjects/SBMSurfaceMeshBuilder.md)
+element database produced by [`SBMSurfaceMeshBuilder`](userobjects/SBMSurfaceMeshBuilder.md)
 to provide distance information relative to an arbitrary surface mesh. The function
 locates the nearest boundary element via a nearest-neighbor search in the KDTree,
 computes the distance vector using the element-specific `distanceFrom` method, and

@@ -25,11 +25,3 @@ and **normal direction** information.
 For mesh-based boundaries, `SBMUtils` includes simple checks to confirm that the
 surface mesh is well-connected and watertight before being used for spatial queries.
 This supports tools like `SBMSurfaceMeshBuilder` by ensuring reliable boundary quality.
-
-!syntax description utils/SBMUtils
-
-!syntax parameters utils/SBMUtils
-
-!syntax inputs utils/SBMUtils
-
-!syntax children utils/SBMUtils
