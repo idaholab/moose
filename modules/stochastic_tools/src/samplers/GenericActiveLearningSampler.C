@@ -46,6 +46,7 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
     TransientInterface(this),
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
+    _check_step(0),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
     _num_tries(getParam<unsigned int>("num_tries"))
 {
