@@ -50,10 +50,10 @@ CSGCartesianLattice::isValidUniverseMap(
     return false;
 
   // check that each row is same size
-  int row_size = universes[0].size();
+  auto row_size = universes[0].size();
   for (auto univ_list : universes)
   {
-    if (univ_list.size() != static_cast<size_t>(row_size))
+    if (univ_list.size() != row_size)
       return false;
   }
   return true;
@@ -74,11 +74,11 @@ CSGCartesianLattice::setUniverses(
 }
 
 bool
-CSGCartesianLattice::isValidIndex(const std::pair<unsigned int, unsigned int> index) const
+CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
 {
-  int row = index.first;  // must be (0 <= row < _nrow); rows
-  int col = index.second; // must be (0 <= col < _ncol); cols
-  return ((0 <= row && row < _nrow) && (0 <= col && col < _ncol));
+  auto row = index.first;  // must be (0 <= row < _nrow); rows
+  auto col = index.second; // must be (0 <= col < _ncol); cols
+  return ((0 <= row && row < (int)_nrow) && (0 <= col && col < (int)_ncol));
 }
 
 bool
@@ -90,9 +90,11 @@ CSGCartesianLattice::compareAttributes(const CSGLattice & other) const
   auto this_dims = this->getAttributes();
   auto other_dims = other.getAttributes();
 
-  if (std::any_cast<int>(this_dims["nrow"]) != std::any_cast<int>(other_dims["nrow"]))
+  if (std::any_cast<unsigned int>(this_dims["nrow"]) !=
+      std::any_cast<unsigned int>(other_dims["nrow"]))
     return false;
-  if (std::any_cast<int>(this_dims["ncol"]) != std::any_cast<int>(other_dims["ncol"]))
+  if (std::any_cast<unsigned int>(this_dims["ncol"]) !=
+      std::any_cast<unsigned int>(other_dims["ncol"]))
     return false;
   if (std::any_cast<Real>(this_dims["pitch"]) != std::any_cast<Real>(other_dims["pitch"]))
     return false;

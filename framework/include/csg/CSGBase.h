@@ -505,7 +505,7 @@ public:
    */
   void setUniverseAtLatticeIndex(const CSGLattice & lattice,
                                  const CSGUniverse & universe,
-                                 std::pair<unsigned int, unsigned int> index);
+                                 std::pair<int, int> index);
 
   /**
    * @brief Set provided universes as the layout of the lattice.

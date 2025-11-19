@@ -552,8 +552,8 @@ TEST(CSGBaseTest, testCreateCartLattice)
     const CSGLattice & lat = csg_obj->createCartesianLattice("ron", 1.0);
     // expect no universe map to be present yet
     auto dims_map = lat.getAttributes();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 0);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 0);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nrow"]), 0);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["ncol"]), 0);
     ASSERT_EQ(lat.getUniverses().size(), 0);
     // check other attributes
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
@@ -585,8 +585,8 @@ TEST(CSGBaseTest, testCreateCartLattice)
         {univ1, univ2, univ1}, {univ2, univ1, univ2}};
     const CSGLattice & lat = csg_obj->createCartesianLattice("alvin", 1.0, univs);
     auto dims_map = lat.getAttributes();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["ncol"]), 3);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nrow"]), 2);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["ncol"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
     ASSERT_EQ(lat.getUniverses().size(), 2);
     ASSERT_EQ(lat.getUniverses()[0].size(), 3);
@@ -652,8 +652,8 @@ TEST(CSGBaseTest, testCreateHexLattice)
     const CSGLattice & lat = csg_obj->createHexagonalLattice("dexter", 1.0);
     // expect no universe map to be present yet
     auto dims_map = lat.getAttributes();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 0);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nring"]), 0);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nrow"]), 0);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nring"]), 0);
     ASSERT_EQ(lat.getUniverses().size(), 0);
     // check other attributes
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
@@ -687,8 +687,8 @@ TEST(CSGBaseTest, testCreateHexLattice)
         {univ1, univ1, univ1}};
     const CSGLattice & lat = csg_obj->createHexagonalLattice("hex_lat", 1.0, univs);
     auto dims_map = lat.getAttributes();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 5);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nring"]), 3);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nrow"]), 5);
+    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nring"]), 3);
     ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
     ASSERT_EQ(lat.getUniverses().size(), 5);
     ASSERT_EQ(lat.getUniverses()[0].size(), 3);
@@ -817,8 +817,7 @@ TEST(CSGBaseTest, testSetUniverseAtLatticeIndex)
   const CSGLattice & lat = csg_obj->createCartesianLattice("spiderverse", 1.0, univs);
   {
     // test valid add new univ
-    csg_obj->setUniverseAtLatticeIndex(
-        lat, univ2, std::make_pair<unsigned int, unsigned int>(1, 0));
+    csg_obj->setUniverseAtLatticeIndex(lat, univ2, std::make_pair<int, int>(1, 0));
     auto all_univs = lat.getUniverses();
     ASSERT_EQ(all_univs[0][0].get(), univ1);
     ASSERT_EQ(all_univs[1][0].get(), univ2);
@@ -829,10 +828,7 @@ TEST(CSGBaseTest, testSetUniverseAtLatticeIndex)
     auto & univ3 = csg_obj2->createUniverse("spidey");
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &lat, &univ3]()
-        {
-          csg_obj->setUniverseAtLatticeIndex(
-              lat, univ3, std::make_pair<unsigned int, unsigned int>(1, 0));
-        },
+        { csg_obj->setUniverseAtLatticeIndex(lat, univ3, std::make_pair<int, int>(1, 0)); },
         "Cannot add universe spidey to lattice spiderverse. Universe is not in the CSGBase "
         "instance.");
   }

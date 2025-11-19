@@ -79,18 +79,18 @@ CSGHexagonalLattice::setPitch(const Real pitch)
 }
 
 bool
-CSGHexagonalLattice::isValidIndex(const std::pair<unsigned int, unsigned int> index) const
+CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
 {
-  int row = index.first;  // row index
-  int ele = index.second; // element index within the row
+  auto row = index.first;  // row index
+  auto ele = index.second; // element index within the row
 
   // Check if row is valid (0 <= row < _nrow)
-  if (row < 0 || row >= _nrow)
+  if (row < 0 || row >= (int)_nrow)
     return false;
 
   // Calculate maximum number of elements in this specific row
   auto center_row = (_nrow - 1) / 2; // center row index
-  auto max_ele = _nrow - std::abs(row - center_row);
+  int max_ele = _nrow - std::abs((int)(row - center_row));
 
   // Check if element index is valid for this row
   return !(ele < 0 || ele >= max_ele);
@@ -105,9 +105,11 @@ CSGHexagonalLattice::compareAttributes(const CSGLattice & other) const
   auto this_dims = this->getAttributes();
   auto other_dims = other.getAttributes();
 
-  if (std::any_cast<int>(this_dims["nrow"]) != std::any_cast<int>(other_dims["nrow"]))
+  if (std::any_cast<unsigned int>(this_dims["nrow"]) !=
+      std::any_cast<unsigned int>(other_dims["nrow"]))
     return false;
-  if (std::any_cast<int>(this_dims["nring"]) != std::any_cast<int>(other_dims["nring"]))
+  if (std::any_cast<unsigned int>(this_dims["nring"]) !=
+      std::any_cast<unsigned int>(other_dims["nring"]))
     return false;
   if (std::any_cast<Real>(this_dims["pitch"]) != std::any_cast<Real>(other_dims["pitch"]))
     return false;
@@ -117,27 +119,26 @@ CSGHexagonalLattice::compareAttributes(const CSGLattice & other) const
 void
 CSGHexagonalLattice::buildIndexMap()
 {
-  for (int ring = 0; ring < _nring; ++ring)
+  for (auto ring = 0; ring < (int)_nring; ++ring)
   {
-    int num_elements = (ring == _nring - 1) ? 1 : 6 * (_nring - 1 - ring);
-    for (int element = 0; element < num_elements; ++element)
+    auto num_elements = (ring == (int)_nring - 1) ? 1 : 6 * (_nring - 1 - ring);
+    for (auto element = 0; element < (int)num_elements; ++element)
     {
-      std::pair<unsigned int, unsigned int> ring_index = std::make_pair(ring, element);
-      std::pair<unsigned int, unsigned int> row_index = getRowIndexFromRingIndex(ring_index);
+      std::pair<int, int> ring_index = std::make_pair(ring, element);
+      std::pair<int, int> row_index = getRowIndexFromRingIndex(ring_index);
       _row_to_ring_map[row_index] = ring_index;
     }
   }
 }
 
-std::pair<unsigned int, unsigned int>
-CSGHexagonalLattice::getRowIndexFromRingIndex(
-    const std::pair<unsigned int, unsigned int> & ring_ele_index) const
+std::pair<int, int>
+CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_ele_index) const
 {
-  int og_ring = ring_ele_index.first; // ring corresponds to the outermost ring as ring 0
+  auto og_ring = ring_ele_index.first; // ring corresponds to the outermost ring as ring 0
   int ring = _nring - og_ring - 1;    // convert to internal indexing (0 as innermost ring)
-  int element = ring_ele_index.second;
+  auto element = ring_ele_index.second;
 
-  if (og_ring < 0 || og_ring >= _nring)
+  if (og_ring < 0 || og_ring >= (int)_nring)
     mooseError("Ring " + std::to_string(og_ring) + " is not valid for hexagonal lattice " +
                getName());
   if (element < 0 || element >= (ring == 0 ? 1 : 6 * ring))
@@ -210,9 +211,8 @@ CSGHexagonalLattice::getRowIndexFromRingIndex(
   return {row, col};
 }
 
-std::pair<unsigned int, unsigned int>
-CSGHexagonalLattice::getRingIndexFromRowIndex(
-    const std::pair<unsigned int, unsigned int> & row_col_index) const
+std::pair<int, int>
+CSGHexagonalLattice::getRingIndexFromRowIndex(const std::pair<int, int> & row_col_index) const
 {
   if (!isValidIndex(row_col_index))
     mooseError("Index (" + std::to_string(row_col_index.first) + ", " +
@@ -226,8 +226,8 @@ CSGHexagonalLattice::getRingIndexFromRowIndex(
 
 /// convenience functions for converting between number of rows and number of rings
 
-int
-nRowToRing(int nrow)
+unsigned int
+nRowToRing(unsigned int nrow)
 {
   if (nrow == 0) // special case
     return 0;
@@ -240,8 +240,8 @@ nRowToRing(int nrow)
   return (nrow + 1) / 2;
 }
 
-int
-nRingToRow(int nring)
+unsigned int
+nRingToRow(unsigned int nring)
 {
   if (nring == 0) // special case
     return 0;
