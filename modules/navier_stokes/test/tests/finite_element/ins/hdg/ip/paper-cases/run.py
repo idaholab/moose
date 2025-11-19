@@ -10,7 +10,7 @@ from pathlib import Path
 
 def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, disc):
     input_base = input_file[:-2]
-    tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre"
+    tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre-{disc}"
     print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
     if disc == "edghdg":
         vel_face_fe_type = "LAGRANGE"
