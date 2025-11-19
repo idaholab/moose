@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "MooseApp.h"
-
 #include "CSGUniverse.h"
 
 #ifdef MOOSE_UNIT_TEST

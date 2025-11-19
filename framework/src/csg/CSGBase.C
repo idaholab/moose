@@ -286,7 +286,7 @@ CSGBase::removeCellsFromUniverse(const CSGUniverse & universe,
     removeCellFromUniverse(universe, c);
 }
 
-const CSGLattice &
+const CSGCartesianLattice &
 CSGBase::createCartesianLattice(
     const std::string & name,
     const Real pitch,
@@ -302,11 +302,11 @@ CSGBase::createCartesianLattice(
                    " is not in the CSGBase instance.");
     }
   }
-  auto & lattice = _lattice_list.addCartesianLattice(name, pitch, universes);
-  return lattice;
+  const CSGLattice & lattice = _lattice_list.addCartesianLattice(name, pitch, universes);
+  return static_cast<const CSGCartesianLattice &>(lattice);
 }
 
-const CSGLattice &
+const CSGCartesianLattice &
 CSGBase::createCartesianLattice(
     const std::string & name,
     const Real pitch,
@@ -318,7 +318,7 @@ CSGBase::createCartesianLattice(
   return lat;
 }
 
-const CSGLattice &
+const CSGCartesianLattice &
 CSGBase::createCartesianLattice(
     const std::string & name,
     const Real pitch,
@@ -330,7 +330,7 @@ CSGBase::createCartesianLattice(
   return lat;
 }
 
-const CSGLattice &
+const CSGCartesianLattice &
 CSGBase::createCartesianLattice(const std::string & name,
                                 const Real pitch,
                                 const std::string & outer_name)
@@ -340,7 +340,7 @@ CSGBase::createCartesianLattice(const std::string & name,
   return lat;
 }
 
-const CSGLattice &
+const CSGCartesianLattice &
 CSGBase::createCartesianLattice(const std::string & name,
                                 const Real pitch,
                                 const CSGUniverse & outer_univ)
@@ -350,7 +350,7 @@ CSGBase::createCartesianLattice(const std::string & name,
   return lat;
 }
 
-const CSGLattice &
+const CSGHexagonalLattice &
 CSGBase::createHexagonalLattice(const std::string & name,
                                 Real pitch,
                                 const std::string & outer_name)
@@ -360,7 +360,7 @@ CSGBase::createHexagonalLattice(const std::string & name,
   return lat;
 }
 
-const CSGLattice &
+const CSGHexagonalLattice &
 CSGBase::createHexagonalLattice(const std::string & name,
                                 Real pitch,
                                 const CSGUniverse & outer_univ)
@@ -370,7 +370,7 @@ CSGBase::createHexagonalLattice(const std::string & name,
   return lat;
 }
 
-const CSGLattice &
+const CSGHexagonalLattice &
 CSGBase::createHexagonalLattice(
     const std::string & name,
     const Real pitch,
@@ -382,7 +382,7 @@ CSGBase::createHexagonalLattice(
   return lat;
 }
 
-const CSGLattice &
+const CSGHexagonalLattice &
 CSGBase::createHexagonalLattice(
     const std::string & name,
     const Real pitch,
@@ -394,7 +394,7 @@ CSGBase::createHexagonalLattice(
   return lat;
 }
 
-const CSGLattice &
+const CSGHexagonalLattice &
 CSGBase::createHexagonalLattice(
     const std::string & name,
     const Real pitch,
@@ -410,8 +410,8 @@ CSGBase::createHexagonalLattice(
                    " is not in the CSGBase instance.");
     }
   }
-  auto & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
-  return lattice;
+  const CSGLattice & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
+  return static_cast<const CSGHexagonalLattice &>(lattice);
 }
 
 void

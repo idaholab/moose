@@ -11,6 +11,7 @@
 
 #include "CSGLattice.h"
 #include "CSGCartesianLattice.h"
+#include "CSGHexagonalLattice.h"
 
 namespace CSG
 {

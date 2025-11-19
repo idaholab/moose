@@ -14,7 +14,6 @@
 #endif
 
 #include "MooseApp.h"
-#include "MooseEnum.h"
 
 namespace CSG
 {

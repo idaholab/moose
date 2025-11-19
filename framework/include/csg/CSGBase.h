@@ -301,7 +301,7 @@ public:
    *
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice & createCartesianLattice(
+  const CSGCartesianLattice & createCartesianLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
@@ -317,7 +317,7 @@ public:
    *
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice & createCartesianLattice(
+  const CSGCartesianLattice & createCartesianLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
@@ -334,7 +334,7 @@ public:
    *
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice & createCartesianLattice(
+  const CSGCartesianLattice & createCartesianLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
@@ -350,9 +350,10 @@ public:
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice & createCartesianLattice(const std::string & name, const Real pitch)
+  const CSGCartesianLattice & createCartesianLattice(const std::string & name, const Real pitch)
   {
-    return _lattice_list.addCartesianLattice(name, pitch);
+    const CSGLattice & lattice = _lattice_list.addCartesianLattice(name, pitch);
+    return static_cast<const CSGCartesianLattice &>(lattice);
   }
 
   /**
@@ -366,9 +367,9 @@ public:
    *
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice & createCartesianLattice(const std::string & name,
-                                            const Real pitch,
-                                            const std::string & outer_name);
+  const CSGCartesianLattice & createCartesianLattice(const std::string & name,
+                                                     const Real pitch,
+                                                     const std::string & outer_name);
 
   /**
    * @brief Create an empty 2D Cartesian lattice with an outer universe fill.
@@ -379,9 +380,9 @@ public:
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice & createCartesianLattice(const std::string & name,
-                                            const Real pitch,
-                                            const CSGUniverse & outer_univ);
+  const CSGCartesianLattice & createCartesianLattice(const std::string & name,
+                                                     const Real pitch,
+                                                     const CSGUniverse & outer_univ);
 
   /**
    * @brief Create an 2D empty hexagonal lattice with x orientation. This version does not set an
@@ -393,9 +394,10 @@ public:
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice & createHexagonalLattice(const std::string & name, Real pitch)
+  const CSGHexagonalLattice & createHexagonalLattice(const std::string & name, Real pitch)
   {
-    return _lattice_list.addHexagonalLattice(name, pitch);
+    const CSGLattice & lattice = _lattice_list.addHexagonalLattice(name, pitch);
+    return static_cast<const CSGHexagonalLattice &>(lattice);
   }
 
   /**
@@ -408,7 +410,7 @@ public:
    * @param outer_name name of material to use as outer fill between lattice elements
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice &
+  const CSGHexagonalLattice &
   createHexagonalLattice(const std::string & name, Real pitch, const std::string & outer_name);
 
   /**
@@ -422,7 +424,7 @@ public:
    *
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice &
+  const CSGHexagonalLattice &
   createHexagonalLattice(const std::string & name, Real pitch, const CSGUniverse & outer_univ);
 
   /**
@@ -440,7 +442,7 @@ public:
    * @param universes list of list of universes that define the layout of the lattice
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice & createHexagonalLattice(
+  const CSGHexagonalLattice & createHexagonalLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
@@ -459,7 +461,7 @@ public:
    * @param outer_name name of material to use as outer fill between lattice elements
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice & createHexagonalLattice(
+  const CSGHexagonalLattice & createHexagonalLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
@@ -480,7 +482,7 @@ public:
    *
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice & createHexagonalLattice(
+  const CSGHexagonalLattice & createHexagonalLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
@@ -571,14 +573,24 @@ public:
   }
 
   /**
-   * @brief Get a lattice object by name
+   * @brief Get a lattice object of the specified type by name
+   * This is a templated method, so the type of lattice must be specified when calling. If the
+   * type is unknown, call with CSGLattice to get the base class reference.
+   * NOTE: if CSGLattice is used as the template type, any lattice type-specific attributes or
+   * methods may not be accessible.
    *
    * @param name lattice name
    * @return reference to CSGLattice object
    */
-  const CSGLattice & getLatticeByName(const std::string & name)
+  template <typename LatticeType>
+  const LatticeType & getLatticeByName(const std::string & name)
   {
-    return _lattice_list.getLattice(name);
+    const CSGLattice & lattice = _lattice_list.getLattice(name);
+    const LatticeType * typed_lattice = dynamic_cast<const LatticeType *>(&lattice);
+    if (!typed_lattice)
+      mooseError("Cannot get lattice " + name + ". Lattice is not of specified type " +
+                 MooseUtils::prettyCppType<LatticeType>());
+    return *typed_lattice;
   }
 
   /**
