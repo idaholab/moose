@@ -39,7 +39,7 @@
   [ht_pipe1]
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe1
-    T_wall = 300
+    T_wall = T_wall_fn
     Hw = 0
   []
 
@@ -97,19 +97,10 @@
   []
 []
 
-[ControlLogic]
-  [pipe_T_wall_ctrl]
-    type = TimeFunctionComponentControl
-    component = ht_pipe1
-    parameter = T_wall
-    function = T_wall_fn
-  []
-[]
-
 [Postprocessors]
   [T_wall]
-    type = RealComponentParameterValuePostprocessor
-    component = ht_pipe1
-    parameter = T_wall
+    type = ElementAverageValue
+    block = 'pipe1'
+    variable = T_wall
   []
 []

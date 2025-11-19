@@ -148,18 +148,34 @@ public:
   bool hasComponentByName(const std::string & cname) const;
 
   /**
-   * Connect with control logic
+   * Connects a controllable parameter of the component to a controllable parameter of
+   * a constituent object.
+   *
+   * This version assumes that the component and object have the same control parameter name.
+   *
+   * @param[in] obj_params  Constituent object input parameters object
+   * @param[in] obj_name    Constituent object name
+   * @param[in] param       Controllable parameter name (same in both component and constituent
+   * object)
    */
-  void connectObject(const InputParameters & params,
-                     const std::string & mooseName,
-                     const std::string & name) const;
+  void connectObject(const InputParameters & obj_params,
+                     const std::string & obj_name,
+                     const std::string & param) const;
   /**
-   * Connect with control logic
+   * Connects a controllable parameter of the component to a controllable parameter of
+   * a constituent object.
+   *
+   * This is achieved by creating a "controllable parameter alias".
+   *
+   * @param[in] obj_params  Constituent object input parameters object
+   * @param[in] obj_name    Constituent object name
+   * @param[in] comp_param  Controllable component parameter
+   * @param[in] obj_param   Constituent object parameter
    */
-  void connectObject(const InputParameters & params,
-                     const std::string & mooseName,
-                     const std::string & name,
-                     const std::string & par_name) const;
+  void connectObject(const InputParameters & obj_params,
+                     const std::string & obj_name,
+                     const std::string & comp_param,
+                     const std::string & obj_param) const;
 
   /**
    * Makes a function controllable if it is constant

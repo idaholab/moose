@@ -45,13 +45,6 @@ As mentioned previously, when starting up, a motor is needed, so we use
          block=Components/motor
          link=False
 
-The `torque` parameter is set to an arbitrary value, since this parameter is controlled
-using the control logic system:
-
-!listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
-         block=ControlLogic
-         link=False
-
 The function chosen here is a linear ramp up from zero and back down to zero,
 
 !equation
@@ -64,7 +57,19 @@ The function chosen here is a linear ramp up from zero and back down to zero,
 This is accomplished with a [PiecewiseLinear.md] function:
 
 !listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
+         block=Functions/motor_torque_time_fn
+         link=False
+
+However, we cannot use this function directly because [ShaftConnectedMotor.md] treats
+the time coordinate in its functions as the shaft speed. Therefore we use control
+logic as follows, which controls a constant-value function to drop the time coordinate:
+
+!listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
          block=Functions/motor_torque_fn
+         link=False
+
+!listing thermal_hydraulics/test/tests/problems/brayton_cycle/open_brayton_cycle.i
+         block=ControlLogic
          link=False
 
 The compressor and turbine components are modeled using [ShaftConnectedCompressor1Phase.md]:
@@ -223,11 +228,7 @@ transient for the open and closed cycles, respectively. Recall that this example
 starts with everything at rest, i.e., there is initially no flow or shaft speed.
 The motor ramps up the shaft speed to get the compressor working, but only
 around $t = 80$ s does the pressure ratio of the compressor and turbine start
-to exceed 1, which is the point at which flow can start to develop. In this case,
-the pressure ratio in the compressor exceeds the turbine pressure ratio for the
-majority of the transient, as the flow and shaft conditions seek to find an
-equilibrium state, at which the pressure ratios of the compressor and turbine
-are nearly equal.
+to exceed 1, which is the point at which flow can start to develop.
 
 !col! small=6 medium=6 large=6
 

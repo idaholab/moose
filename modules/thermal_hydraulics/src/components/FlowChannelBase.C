@@ -107,7 +107,6 @@ FlowChannelBase::validParams()
       "curved flow channels, it is the (tangent) direction at the start position.");
 
   params.addPrivateParam<std::string>("component_type", "pipe");
-  params.declareControllable("A f");
 
   return params;
 }
@@ -261,7 +260,6 @@ FlowChannelBase::addCommonObjects()
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       const std::string aux_kernel_name = genName(name(), "area_linear_aux");
       getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
-      makeFunctionControllableIfConstant(_area_function, "Area");
     }
     {
       const std::string class_name = "ProjectionAux";
@@ -272,7 +270,6 @@ FlowChannelBase::addCommonObjects()
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       const std::string aux_kernel_name = genName(name(), "area_aux");
       getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
-      makeFunctionControllableIfConstant(_area_function, "Area");
     }
   }
 }

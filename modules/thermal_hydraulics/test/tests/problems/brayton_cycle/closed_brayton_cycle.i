@@ -121,10 +121,14 @@ p_ambient = 1e5
 []
 
 [Functions]
-  [motor_torque_fn]
+  [motor_torque_time_fn]
     type = PiecewiseLinear
     x = '0 ${t1} ${t2}'
     y = '0 ${motor_torque_max} 0'
+  []
+  [motor_torque_fn]
+    type = ConstantFunction
+    value = 0 # controlled
   []
   [motor_power_fn]
     type = ParsedFunction
@@ -174,7 +178,7 @@ p_ambient = 1e5
   [motor]
     type = ShaftConnectedMotor
     inertia = ${I_motor}
-    torque = 0 # controlled
+    torque = motor_torque_fn
   []
   [generator]
     type = ShaftConnectedMotor
@@ -314,11 +318,14 @@ p_ambient = 1e5
 []
 
 [ControlLogic]
-  [motor_ctrl]
-    type = TimeFunctionComponentControl
-    component = motor
-    parameter = torque
-    function = motor_torque_fn
+  [get_motor_torque_control]
+    type = GetFunctionValueControl
+    function = motor_torque_time_fn
+  []
+  [set_motor_torque_control]
+    type = SetRealValueControl
+    parameter = Functions/motor_torque_fn/value
+    value = get_motor_torque_control:value
   []
 []
 
@@ -343,9 +350,9 @@ p_ambient = 1e5
   []
 
   [motor_torque]
-    type = RealComponentParameterValuePostprocessor
-    component = motor
-    parameter = torque
+    type = ShaftConnectedComponentPostprocessor
+    quantity = torque
+    shaft_connected_component_uo = motor:shaftconnected_uo
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [motor_power]
@@ -426,6 +433,43 @@ p_ambient = 1e5
     equation = mass
     junction = turbine
   []
+
+  [compressor:isentropic_torque]
+    type = ElementAverageValue
+    block = 'compressor'
+    variable = 'isentropic_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compressor:dissipation_torque]
+    type = ElementAverageValue
+    block = 'compressor'
+    variable = 'dissipation_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [compressor:friction_torque]
+    type = ElementAverageValue
+    block = 'compressor'
+    variable = 'friction_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [turbine:isentropic_torque]
+    type = ElementAverageValue
+    block = 'turbine'
+    variable = 'isentropic_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [turbine:dissipation_torque]
+    type = ElementAverageValue
+    block = 'turbine'
+    variable = 'dissipation_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [turbine:friction_torque]
+    type = ElementAverageValue
+    block = 'turbine'
+    variable = 'friction_torque'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
 []
 
 [Preconditioning]
@@ -440,7 +484,16 @@ p_ambient = 1e5
   scheme = 'bdf2'
 
   end_time = ${t3}
-  dt = 0.1
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    optimal_iterations = 5
+    iteration_window = 0
+    dt = 0.1
+    growth_factor = 1.2
+    cutback_factor = 0.8
+  []
+  dtmin = 1e-3
+  dtmax = 10
 
   solve_type = NEWTON
   nl_rel_tol = 1e-50
