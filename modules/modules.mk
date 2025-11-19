@@ -92,6 +92,10 @@ ifeq ($(POROUS_FLOW),yes)
         SOLID_MECHANICS             := yes
 endif
 
+ifeq ($(SOLID_MECHANICS),yes)
+        SHIFTED_BOUNDARY_METHOD     := yes
+endif
+
 ifeq ($(SOLID_PROPERTIES),yes)
         HEAT_TRANSFER               := yes
 endif
