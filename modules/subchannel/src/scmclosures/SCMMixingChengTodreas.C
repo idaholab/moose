@@ -15,7 +15,7 @@ InputParameters
 SCMMixingChengTodreas::validParams()
 {
   InputParameters params = SCMMixingClosureBase::validParams();
-  params.addClassDescription("Class that models the turbulent mixing parameter for wire-wrapped "
+  params.addClassDescription("Class that models the turbulent mixing coefficient for wire-wrapped "
                              "trianguar assemblies using the Cheng Todreas correlations.");
   return params;
 }

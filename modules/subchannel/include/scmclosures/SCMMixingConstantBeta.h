@@ -14,7 +14,7 @@
 #include "QuadSubChannelMesh.h"
 
 /**
- * Class that sets a constant turbulent mixing parameter beta.
+ * Class that models the turbulent mixing coefficient $\beta$ as a user-defined constant.
  */
 class SCMMixingConstantBeta : public SCMMixingClosureBase
 {

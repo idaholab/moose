@@ -121,6 +121,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _friction_args(/*i_ch=*/0, /*Re=*/1.0, /*S=*/0.0, /*w_perim=*/0.0),
     _nusselt_args(
         /*Re=*/1.0, /*Pr=*/1.0, std::numeric_limits<unsigned int>::max(), /*iz=*/0, /*i_ch=*/0),
+    _P_out(getPostprocessorValue("P_out")),
+    _fp(nullptr),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -132,7 +134,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_power(getParam<bool>("compute_power")),
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
-    _P_out(getPostprocessorValue("P_out")),
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
@@ -149,7 +150,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _segregated_bool(getParam<bool>("segregated")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
     _deformation(getParam<bool>("deformation")),
-    _fp(nullptr),
     _Tpin_soln(nullptr),
     _duct_heat_flux_soln(nullptr),
     _Tduct_soln(nullptr)
