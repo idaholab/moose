@@ -53,6 +53,7 @@ The kernels created for the momentum equation for free flow:
 - [INSFVMomentumTimeDerivative.md] for the time derivative incompressible flow in a transient case
 - [INSFVMomentumAdvection.md] for the momentum advection term
 - [INSFVMomentumDiffusion.md] for the momentum diffusion term
+- [INSFVMomentumViscousSourceRZ.md] for the cylindrical viscous source term that appears in the radial momentum equation on RZ blocks (controlled by [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/add_rz_viscous_source))
 - [INSFVMomentumPressure.md] for the pressure gradient term
 - [PINSFVMomentumFriction.md] for the friction term if specified
 - [INSFVMomentumGravity.md] for the gravity term if specified
@@ -116,6 +117,14 @@ advected quantities (e.g. upwind, average) can be controlled through the
 #### Bernoulli pressure jump treatment
 
 Please see [the Bernoulli pressure variable documentation](BernoulliPressureVariable.md) for more information.
+
+#### Axisymmetric viscous source term
+
+When the mesh contains blocks using an RZ coordinate system, the
+[INSFVMomentumViscousSourceRZ.md] kernel is created automatically so the $-\mu u_r / r^2$ source
+term is part of the radial momentum equations. This behavior can be disabled with
+[!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/add_rz_viscous_source) if another component
+should provide that source term instead.
 
 !syntax parameters /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
