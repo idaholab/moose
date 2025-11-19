@@ -1,11 +1,11 @@
 [run]
 concurrency = thread
 branch = True
+source =
+    resultsstore/*
+    resultssummary/*
 omit =
-    conftest.py
-    */init_moose_python.py
-    requests_unixsocket/*
-    tests/*
+    resultsstore/*/tests
 parallel = False
 
 [report]

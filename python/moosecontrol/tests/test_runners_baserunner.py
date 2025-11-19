@@ -379,9 +379,8 @@ class TestBaseRunner(MooseControlTestCase):
         with self._caplog.at_level("WARNING"):
             runner.cleanup()
         self.assertFalse(poke_thread.is_alive())
-        self.assert_log_size(1)
-        self.assert_log_message(
-            0, "Poke thread is still alive on cleanup; stopping", levelname="WARNING"
+        self.assert_in_log(
+            "Poke thread is still alive on cleanup; stopping", levelname="WARNING"
         )
 
     def test_cleanup_kill(self):

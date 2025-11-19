@@ -65,14 +65,15 @@ def load_authentication(var_prefix: str) -> Optional[Authentication]:
             auth[key] = v
     # Have all three set
     if len(auth) == 3:
-        auth["port"] = get_var("port")
+        port = get_var("port")
+        auth["port"] = int(port) if port is not None else None
         return Authentication(**auth)
     # Have one or two but not all three set
     if len(auth) != 0:
         all_auth_vars = " ".join(map(var_name, all_auth_keys))
         raise ValueError(
             f'All environment variables "{all_auth_vars}"'
-            "must be set for authentication"
+            " must be set for authentication"
         )
 
     # Try to get authentication from file
@@ -85,8 +86,3 @@ def load_authentication(var_prefix: str) -> Optional[Authentication]:
         return Authentication(**values)
     except Exception as e:
         raise Exception(f"Failed to load credentials from '{auth_file}'") from e
-
-
-def has_authentication(var_prefix: str) -> bool:
-    """Check whether or not environment authentication is available."""
-    return load_authentication(var_prefix) is not None
