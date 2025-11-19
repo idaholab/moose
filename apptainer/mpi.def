@@ -123,7 +123,7 @@ EOF
 {%- if ALTERNATE_FROM == "clang" %}
     # Installing system Clang, and its GCC GNU dependencies
     dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
-                   git-clang-format.x86_64 python3.12-clang.x86_64 clang-analyzer.noarch \
+                   git-clang-format.x86_64 python3.12-clang.x86_64 clang-analyzer.x86_64 \
                    libomp.x86_64 lldb
 
     # Clang will install a newer gcc, and we need to make sure that the version
