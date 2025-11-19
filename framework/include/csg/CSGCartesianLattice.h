@@ -80,7 +80,7 @@ public:
    * @param index location in (row, column) form
    * @return true if index is valid for the lattice
    */
-  virtual bool isValidIndex(const std::pair<unsigned int, unsigned int> index) const override;
+  virtual bool isValidIndex(const std::pair<int, int> index) const override;
 
   /**
    * @brief check that any provided list of list of CSGUniverses are the correct dimensions. Must
@@ -97,14 +97,14 @@ public:
    *
    * @return number of rows
    */
-  int getNRows() const { return _nrow; }
+  unsigned int getNRows() const { return _nrow; }
 
   /**
    * @brief get number of columns
    *
    * @return number of columns
    */
-  int getNCols() const { return _ncol; }
+  unsigned int getNCols() const { return _ncol; }
 
   /**
    * @brief get lattice pitch
@@ -136,10 +136,10 @@ protected:
   Real _pitch;
 
   /// number of elements in the first dimension (rows)
-  int _nrow;
+  unsigned int _nrow;
 
   /// number of elements in the second direction (columns)
-  int _ncol;
+  unsigned int _ncol;
 
   friend class CSGBase;
 

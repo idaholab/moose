@@ -80,7 +80,7 @@ public:
    * @param index in row-element form
    * @return true if valid, otherwise false
    */
-  virtual bool isValidIndex(const std::pair<unsigned int, unsigned int> index) const override;
+  virtual bool isValidIndex(const std::pair<int, int> index) const override;
 
   /**
    * @brief check if the arrangement of the provided universes is valid for the hexagonal lattice
@@ -98,14 +98,14 @@ public:
    *
    * @return number of rows
    */
-  int getNRows() const { return _nrow; }
+  unsigned int getNRows() const { return _nrow; }
 
   /**
    * @brief get number of rings in the lattice
    *
    * @return number of rings
    */
-  int getNRings() const { return _nring; }
+  unsigned int getNRings() const { return _nring; }
 
   /**
    * @brief Given an index in ring-element form, get the corresponding row-column index. The
@@ -132,8 +132,7 @@ public:
    * @param index in ring-element form
    * @return index in row-column form
    */
-  std::pair<unsigned int, unsigned int>
-  getRowIndexFromRingIndex(const std::pair<unsigned int, unsigned int> & row_col_index) const;
+  std::pair<int, int> getRowIndexFromRingIndex(const std::pair<int, int> & row_col_index) const;
 
   /**
    * @brief Given an index in row-column form, get the corresponding ring-element index. The
@@ -160,8 +159,7 @@ public:
    * @param index in row-column form
    * @return index in ring-element form
    */
-  std::pair<unsigned int, unsigned int>
-  getRingIndexFromRowIndex(const std::pair<unsigned int, unsigned int> & row_col_index) const;
+  std::pair<int, int> getRingIndexFromRowIndex(const std::pair<int, int> & row_col_index) const;
 
   /**
    * @brief get the pitch of the lattice
@@ -199,14 +197,13 @@ protected:
   Real _pitch;
 
   /// number of rows in the hexagonal lattice (must be odd), should be consistent with the number of rings
-  int _nrow;
+  unsigned int _nrow;
 
   /// number of rings in the hexagonal lattice, should be consistent with the number of rows
-  int _nring;
+  unsigned int _nring;
 
   /// map of row-column indices to ring-element indices for quick conversion and look-up
-  std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
-      _row_to_ring_map;
+  std::map<std::pair<int, int>, std::pair<int, int>> _row_to_ring_map;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
@@ -219,9 +216,9 @@ protected:
 
 /// methods to help convert between number of rows and rings
 // get the total number of rings from the number of rows
-int nRowToRing(int nrow);
+unsigned int nRowToRing(unsigned int nrow);
 
 // get the total number of rows from the number of rings
-int nRingToRow(int nring);
+unsigned int nRingToRow(unsigned int nring);
 
 } // namespace CSG
