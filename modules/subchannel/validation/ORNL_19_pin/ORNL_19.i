@@ -1,27 +1,23 @@
-T_in = 660
-mass_flux_in = '${fparse 1e+6 * 300.00 / 36000.*0.5}'
+# M. Fontana, et All,
+# "Temperature distribution in the duct wall and at the exit of a 19-pin simulated lmfbr fuel assembly (ffm bundle 2a),
+# "Nuclear Technology, vol. 24, no. 2, pp. 176-200, 1974.
+T_in = 588.5
+flow_area = 0.0004980799633447909 #m2
+mass_flux_in = '${fparse 55*3.78541/10/60/flow_area}'
 P_out = 2.0e5 # Pa
-
-[GlobalParams]
-  nrings = 3
-  n_cells = 5
-  flat_to_flat = 0.056
-  heated_length = 0.5
-  pitch = 0.012
-[]
-
 [TriSubChannelMesh]
   [subchannel]
     type = SCMTriSubChannelMeshGenerator
-    pin_diameter = 0.01
-    dwire = 0.002
-    hwire = 0.0833
-    spacer_z = '0'
-    spacer_k = '5.0'
-  []
-  [duct]
-    type = SCMTriDuctMeshGenerator
-    input = subchannel
+    nrings = 3
+    n_cells = 40
+    flat_to_flat = 3.41e-2
+    heated_length = 0.5334
+    unheated_length_entry = 0.4064
+    unheated_length_exit = 0.0762
+    pin_diameter = 5.84e-3
+    pitch = 7.26e-3
+    dwire = 1.42e-3
+    hwire = 0.3048
   []
 []
 
@@ -36,15 +32,16 @@ P_out = 2.0e5 # Pa
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 1.0
+  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  T_tol = 1.0e-6
-  P_tol = 1.0e-6
   implicit = true
   segregated = false
-  duct_HTC_closure = 'gnielinski'
+  staggered_pressure = false
+  verbose_multiapps = true
+  verbose_subchannel = true
+  interpolation_scheme = upwind
   friction_closure = 'cheng'
   mixing_closure = 'cheng_todreas'
 []
@@ -52,9 +49,6 @@ P_out = 2.0e5 # Pa
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
-  []
-  [gnielinski]
-    type = SCMHTCGnielinski
   []
   [cheng_todreas]
     type = SCMMixingChengTodreas
@@ -75,7 +69,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 1000.0 # W
+    power = 16975 # W
     filename = "pin_power_profile19.txt"
   []
 
@@ -151,89 +145,67 @@ P_out = 2.0e5 # Pa
   csv = true
 []
 
+[Executioner]
+  type = Steady
+[]
+
 [Postprocessors]
-  [T1]
-    type = SubChannelPointValue
-    variable = T
-    index = 37
-    execute_on = "timestep_end"
-    height = 0.5
-  []
-  [T2]
+  [T]
     type = SubChannelPointValue
     variable = T
     index = 36
     execute_on = "timestep_end"
-    height = 0.5
+    height = 0.7
   []
-  [T3]
-    type = SubChannelPointValue
-    variable = T
-    index = 20
-    execute_on = "timestep_end"
-    height = 0.5
+
+  [Pin_Planar_Mean]
+    type = SCMPlanarMean
+    variable = P
+    execute_on = 'TIMESTEP_END'
+    height = 0.0
   []
-  [T4]
-    type = SubChannelPointValue
-    variable = T
-    index = 10
-    execute_on = "timestep_end"
-    height = 0.5
+
+  [Pout_Planar_Mean]
+    type = SCMPlanarMean
+    variable = P
+    execute_on = 'TIMESTEP_END'
+    height = 1.2
   []
-  [T5]
-    type = SubChannelPointValue
-    variable = T
-    index = 4
-    execute_on = "timestep_end"
-    height = 0.5
+
+  [Pout_user_provided]
+    type = Receiver
+    default = ${P_out}
+    execute_on = 'TIMESTEP_END'
   []
-  [T6]
-    type = SubChannelPointValue
-    variable = T
-    index = 1
-    execute_on = "timestep_end"
-    height = 0.5
-  []
-  [T7]
-    type = SubChannelPointValue
-    variable = T
-    index = 14
-    execute_on = "timestep_end"
-    height = 0.5
-  []
-  [T8]
-    type = SubChannelPointValue
-    variable = T
-    index = 28
-    execute_on = "timestep_end"
-    height = 0.5
-  []
+
   ####### Assembly pressure drop
+  [DP_Planar_mean]
+    type = ParsedPostprocessor
+    pp_names = 'Pin_Planar_Mean Pout_Planar_Mean'
+    expression = 'Pin_Planar_Mean - Pout_Planar_Mean'
+  []
   [DP_SubchannelDelta]
     type = SubChannelDelta
     variable = P
     execute_on = 'TIMESTEP_END'
   []
-  #####
-  [Mean_Temp]
-    type = SCMPlanarMean
-    variable = T
-    height = 2
-  []
-  [Total_power]
-    type = ElementIntegralVariablePostprocessor
-    variable = q_prime
-    block = subchannel
-  []
-  [mdot-8]
-    type = SubChannelPointValue
-    variable = mdot
-    index = 28
-    execute_on = 'TIMESTEP_END'
-    height = 0.5
+[]
+################################################################################
+# A multiapp that projects data to a detailed mesh
+################################################################################
+
+[MultiApps]
+  [viz]
+    type = FullSolveMultiApp
+    input_files = "3d_ORNL_19.i"
+    execute_on = "timestep_end"
   []
 []
 
-[Executioner]
-  type = Steady
+[Transfers]
+  [xfer]
+    type = SCMSolutionTransfer
+    to_multi_app = viz
+    variable = 'mdot SumWij P DP h T rho mu q_prime S'
+  []
 []

@@ -164,6 +164,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   # HTC
   pin_HTC_closure = Dittus-Boelter
   duct_HTC_closure = Dittus-Boelter
+
+  # mixing model (beta)
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
@@ -172,6 +175,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 

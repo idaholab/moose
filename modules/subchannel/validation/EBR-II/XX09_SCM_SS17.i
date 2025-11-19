@@ -144,11 +144,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
-  # Heat Transfer Correlations
   pin_HTC_closure = 'gnielinski'
   duct_HTC_closure = 'gnielinski'
-  # friction model
   friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
@@ -157,6 +156,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 

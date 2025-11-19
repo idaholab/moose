@@ -31,18 +31,21 @@ SCMMixingKimAndChung::SCMMixingKimAndChung(const InputParameters & parameters)
 
 Real
 SCMMixingKimAndChung::computeMixingParameter(const unsigned int & i_gap,
-                                             const unsigned int & iz) const
+                                             const unsigned int & iz,
+                                             const bool & sweep_flow) const
 {
   if (_is_tri_lattice)
-    return computeTriLatticeMixingParameter(i_gap, iz);
+    return computeTriLatticeMixingParameter(i_gap, iz, sweep_flow);
   else
-    return computeQuadLatticeMixingParameter(i_gap, iz);
+    return computeQuadLatticeMixingParameter(i_gap, iz, sweep_flow);
 }
 
 Real
 SCMMixingKimAndChung::computeTriLatticeMixingParameter(const unsigned int & i_gap,
-                                                       const unsigned int & iz) const
+                                                       const unsigned int & iz,
+                                                       const bool & sweep_flow) const
 {
+  (void)sweep_flow;
   auto S_soln = SolutionHandle(_subproblem.getVariable(0, "S"));
   auto mdot_soln = SolutionHandle(_subproblem.getVariable(0, "mdot"));
   auto w_perim_soln = SolutionHandle(_subproblem.getVariable(0, "w_perim"));
@@ -82,8 +85,9 @@ SCMMixingKimAndChung::computeTriLatticeMixingParameter(const unsigned int & i_ga
   Real sf = 2.0 / 3.0; // shape factor
   Real a = 0.18;
   Real b = 0.2;
+  // To:Do Should I use the friction model the user defines or the default one in the corelation?
   // _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
-  // Real f_darcy = _scm_problem->_friction_closure->computeFrictionFactor(friction_args) / 8.0;
+  // Real f_darcy = _scm_problem->_friction_closure->computeFrictionFactor(friction_args);
   auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
   auto k =
       (1 / S_total) * (fp->k_from_p_T((P_soln)(node_out_i) + P_out, (T_soln)(node_out_i)) * Si_out +
@@ -113,8 +117,10 @@ SCMMixingKimAndChung::computeTriLatticeMixingParameter(const unsigned int & i_ga
 
 Real
 SCMMixingKimAndChung::computeQuadLatticeMixingParameter(const unsigned int & i_gap,
-                                                        const unsigned int & iz) const
+                                                        const unsigned int & iz,
+                                                        const bool & sweep_flow) const
 {
+  (void)sweep_flow;
   auto S_soln = SolutionHandle(_subproblem.getVariable(0, "S"));
   auto mdot_soln = SolutionHandle(_subproblem.getVariable(0, "mdot"));
   auto w_perim_soln = SolutionHandle(_subproblem.getVariable(0, "w_perim"));
@@ -155,7 +161,7 @@ SCMMixingKimAndChung::computeQuadLatticeMixingParameter(const unsigned int & i_g
   Real a = 0.18;
   Real b = 0.2;
   // _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
-  // Real f_darcy = _scm_problem->_friction_closure->computeFrictionFactor(friction_args) / 8.0;
+  // Real f_darcy = _scm_problem->_friction_closure->computeFrictionFactor(friction_args);
   auto f = a * std::pow(Re, -b); // Rehme 1992 circular tube friction factor
   auto k =
       (1 / S_total) * (fp->k_from_p_T((P_soln)(node_out_i) + P_out, (T_soln)(node_out_i)) * Si_out +
