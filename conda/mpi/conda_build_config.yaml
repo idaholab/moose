@@ -4,7 +4,7 @@ mpi:
 
 mpi_version:
   # MPICH versions
-  - 4.3.2    # [linux]
+  - 4.2.1    # [linux]
   - 4.3.2    # [osx]
   # OpenMPI versions
   - 5.0.8    # [linux]
