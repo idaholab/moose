@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "RealFunctionControl.h"
 #include "Function.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", RealFunctionControl);
 

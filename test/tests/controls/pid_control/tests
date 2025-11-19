@@ -16,7 +16,7 @@
       type = 'CSVDiff'
       input = 'pid_control.i'
       csvdiff = 'pid_control_timestep_end_out.csv'
-      cli_args = 'Controls/integral_value/execute_on=timestep_end Outputs/file_base=pid_control_timestep_end_out Executioner/end_time=5'      
+      cli_args = 'Controls/integral_value/execute_on=timestep_end Outputs/file_base=pid_control_timestep_end_out Executioner/end_time=5 Executioner/nl_abs_tol=1e-14'
       detail = 'using data at the timestep_end state to set the control for the next timestep,'
     []    
     [min_max_limits]

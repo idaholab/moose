@@ -9,6 +9,7 @@
 
 #include "SetValueChainControl.h"
 #include "MooseUtils.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", SetRealValueChainControl);
 registerMooseObject("MooseApp", SetBoolValueChainControl);
