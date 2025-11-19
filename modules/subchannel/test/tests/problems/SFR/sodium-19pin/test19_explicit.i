@@ -45,6 +45,7 @@ P_out = 2.0e5 # Pa
   verbose_subchannel = true
   duct_HTC_closure = 'gnielinski'
   friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
@@ -53,6 +54,9 @@ P_out = 2.0e5 # Pa
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
   []
 []
 

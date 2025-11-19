@@ -152,6 +152,8 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   duct_HTC_closure = 'gnielinski'
   # Friction Correlation
   friction_closure = 'Cheng'
+  # Mixing Correlation
+  mixing_closure = 'Kim'
 []
 
 [SCMClosures]
@@ -160,6 +162,9 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [Kim]
+    type = SCMMixingKimAndChung
   []
 []
 

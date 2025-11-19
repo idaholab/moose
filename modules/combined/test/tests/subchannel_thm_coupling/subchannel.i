@@ -110,6 +110,7 @@ heated_length = 1.0
   interpolation_scheme = 'upwind'
   pin_HTC_closure = 'gnielinski'
   friction_closure = 'Cheng'
+  mixing_closure = 'Cheng_Todreas'
 []
 
 [SCMClosures]
@@ -118,6 +119,9 @@ heated_length = 1.0
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [Cheng_Todreas]
+    type = SCMMixingChengTodreas
   []
 []
 
