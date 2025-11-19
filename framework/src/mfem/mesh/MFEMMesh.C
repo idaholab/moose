@@ -29,9 +29,11 @@ MFEMMesh::validParams()
   params.addParam<unsigned int>(
       "parallel_refine", 0, "Number of parallel refinements to perform on the mesh.");
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
+
   params.addParam<bool>("periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
-  params.addParam<std::string>("boundary1", "Optional variable to use for mesh displacement.");
-  params.addParam<std::string>("boundary2", "Optional variable to use for mesh displacement.");
+  params.addParam<MFEMVectorCoefficientName>("translation_x", "0. 0. 0.", "Vector specifying translation in x direction.");
+  params.addParam<MFEMVectorCoefficientName>("translation_y", "0. 0. 0.", "Vector specifying translation in y direction.");
+  params.addParam<MFEMVectorCoefficientName>("translation_z", "0. 0. 0.", "Vector specifying translation in z direction.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -42,9 +44,7 @@ MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters),
   _periodic(getParam<bool>("periodic"))
 {
   if (_periodic) {
-    // fetch the boundaries we want to glue together
-    _bdryAttr1 = std::stoi( getParam<std::string>("boundary1") );
-    _bdryAttr2 = std::stoi( getParam<std::string>("boundary2") );
+    // placeholder for fetching the translation vector in future commits
   }
 }
 
@@ -61,25 +61,8 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh(getFileName());
 
-  for (int be = 0; be < mfem_ser_mesh.GetNBE(); be++)
-  {
-    int attr = mfem_ser_mesh.GetBdrAttribute(be);
-    if (attr==1 or attr==4) {
-      mfem::Element* el = mfem_ser_mesh.GetBdrElement(be);
-      mfem::Array<int> vertices;
-      el->GetVertices(vertices);
-      std::cout << "Boundary element " << be << " has vertices ";
-      for(int i=0; i<vertices.Size(); i++) std::cout << vertices[i] << " ";
-      std::cout << "\n";
-    }
-    // std::cout << "Boundary element " << be
-    //           << " has boundary attribute " << attr 
-    //           << ", mfem_ser_mesh.GetBdrElement(be)->attribute=" << mfem_ser_mesh.GetBdrElement(be)->GetAttribute()
-    //           << std::endl;
-  }
-
   if (_periodic) {
-    mfem_ser_mesh = applyPeriodicBoundary(mfem_ser_mesh);
+    mfem_ser_mesh = applyPeriodicBoundaryByTranslation(mfem_ser_mesh);
   }
 
   if (isParamSetByUser("serial_refine") && isParamSetByUser("uniform_refine"))
@@ -104,46 +87,18 @@ MFEMMesh::buildMesh()
   }
 }
 
-/*
-  This function is very ugly - its intention is to read all the vertices
-  on the boundaries you wanna pin together and create the v2v mapping manually
-*/
 mfem::Mesh
-MFEMMesh::applyPeriodicBoundary(mfem::Mesh& input) {
-  // create the mfem vertex-vertex mapping
-  // almost every vertex should be mapped to itself
-  std::vector<int> v2v(input.GetNV());
-  for (auto i=0; i<v2v.size(); i++) v2v[i]=i;
+MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh& input) {
+  std::vector<mfem::Vector> translations(input.SpaceDimension());
 
-  std::vector<int> boundary1_elems;
-  std::vector<int> boundary2_elems;
+  // start by manually defining the translation
+  mfem::Vector x({1.0, 0.0, 0.0});
+  mfem::Vector y({0.0, 0.0, 0.0});
+  mfem::Vector z({0.0, 0.0, 0.0});
 
-  // gather the elements for attr1 and attr2
-  for (int be=0; be<input.GetNBE(); be++)
-  {
-    if ( input.GetBdrAttribute(be) == _bdryAttr1 ) boundary1_elems.push_back( be );
-    if ( input.GetBdrAttribute(be) == _bdryAttr2 ) boundary2_elems.push_back( be );
-  }
-
-  // loop again. this time, fetch all the vertices
-  for (auto be=0; be<boundary1_elems.size(); be++) {
-    mfem::Element* el1 = input.GetBdrElement( boundary1_elems[be] );
-    int* v1 = el1->GetVertices();
-    mfem::Element* el2 = input.GetBdrElement( boundary2_elems[be] );
-    int* v2 = el2->GetVertices();
-    // assert( el1->GetNVertices() == el2->GetNVertices() );
-
-    int nv = el1->GetNVertices();
-    for (int v=0; v<nv; v++)     {
-      v2v[ v1[v] ] = v2[v];
-    }
-  }
-  
-  // finally, make the mesh periodic
-  return mfem::Mesh::MakePeriodic(input, v2v);
+  translations[0] = x; translations[1] = y; translations[2] = z;
+  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(translations));
 }
-
-
 
 void
 MFEMMesh::displace(mfem::GridFunction const & displacement)
