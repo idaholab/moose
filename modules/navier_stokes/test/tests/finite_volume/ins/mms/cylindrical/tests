@@ -21,4 +21,14 @@
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
   []
+  [rz-viscous-source-physics]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestRZViscousSourcePhysics
+    capabilities = 'method!=dbg'
+    min_parallel = 2
+    requirement = 'The WCNSFVFlowPhysics object shall recover the manufactured axisymmetric solution when the automatic RZ viscous source term is enabled.'
+    required_python_packages = 'pandas matplotlib'
+    installation_type = in_tree
+  []
 []

@@ -77,8 +77,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
         pin_pressure = true
         pinned_pressure_type = point-value
-        pinned_pressure_value = 0
-        pinned_pressure_point = '0.01 0.099 0.0'
+        pinned_pressure_value = 0.125
+        pinned_pressure_point = '0.5 0.5 0.0'
 
         momentum_two_term_bc_expansion = false
         pressure_two_term_bc_expansion = false
