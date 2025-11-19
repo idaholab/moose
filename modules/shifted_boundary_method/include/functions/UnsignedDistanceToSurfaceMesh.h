@@ -24,6 +24,8 @@ class SBMBndElementBase;
 class UnsignedDistanceToSurfaceMesh : public Function
 {
 public:
+  using Function::value;
+
   static InputParameters validParams();
 
   virtual void initialSetup() override;
