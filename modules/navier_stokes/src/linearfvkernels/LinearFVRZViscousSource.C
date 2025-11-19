@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVRZViscousSource.h"
-
+#include "FEProblemBase.h"
 #include "MooseLinearVariableFV.h"
 #include "NS.h"
 
