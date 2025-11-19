@@ -8,7 +8,7 @@ clang_tools:
   - clang-tools 19
 
 ruff:
-  - ruff 0.14.1
+  - ruff 0.14.5
 
 moose_python:
   - python 3.13
