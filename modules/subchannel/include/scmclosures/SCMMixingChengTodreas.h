@@ -13,7 +13,7 @@
 #include "TriSubChannelMesh.h"
 
 /**
- * Class that calculates the mixing parameter based on the Cheng & Todreas correlations
+ * Class that calculates the turbulent mixing coefficient based on the Cheng & Todreas correlations
  * (Cheng & Todreas 1986). It is used only for wire-wrapped tri lattices. Also, takes care of
  * sweep_flow.
  */

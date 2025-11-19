@@ -24,9 +24,9 @@ public:
 
   typedef SubChannel1PhaseProblem::FrictionStruct FrictionStruct;
 
-  /// @brief Computes the mixing parameters for the local conditions around gap(i_gap) and axial level(iz)
+  /// @brief Computes the turbulent mixing coefficient for the local conditions around gap(i_gap) and axial level(iz)
   /// @param i_gap and @param iz
-  /// @return the mixing parameter (beta)
+  /// @return the mixing coefficient (beta)
   virtual Real computeMixingParameter(const unsigned int & i_gap,
                                       const unsigned int & iz,
                                       const bool & sweep_flow = false) const = 0;

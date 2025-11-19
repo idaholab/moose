@@ -14,8 +14,8 @@
 #include "QuadSubChannelMesh.h"
 
 /**
- * Class that calculates the mixing parameter based on the Kim and Chung (2001) corellation (eq 25)
- * It is used for both quad and tri lattices with bare fuel pins.
+ * Class that calculates the turbulent mixing coefficient based on the Kim and Chung (2001)
+ * corellation (eq 25) It is used for both quad and tri lattices with bare fuel pins.
  */
 class SCMMixingKimAndChung : public SCMMixingClosureBase
 {
