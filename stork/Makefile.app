@@ -46,6 +46,7 @@ RAY_TRACING                 := no
 REACTOR                     := no
 RDG                         := no
 RICHARDS                    := no
+SHIFTED_BOUNDARY_METHOD     := no
 SOLID_MECHANICS             := no
 STOCHASTIC_TOOLS            := no
 THERMAL_HYDRAULICS          := no

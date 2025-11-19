@@ -92,10 +92,6 @@ ifeq ($(POROUS_FLOW),yes)
         SOLID_MECHANICS             := yes
 endif
 
-ifeq ($(SOLID_MECHANICS),yes)
-        SHIFTED_BOUNDARY_METHOD     := yes
-endif
-
 ifeq ($(SOLID_PROPERTIES),yes)
         HEAT_TRANSFER               := yes
 endif
@@ -134,6 +130,10 @@ endif
 
 ifeq ($(FLUID_PROPERTIES),yes)
         MISC                        := yes
+endif
+
+ifeq ($(SOLID_MECHANICS),yes)
+        SHIFTED_BOUNDARY_METHOD     := yes
 endif
 
 # The complete list of all moose modules
@@ -263,6 +263,14 @@ ifeq ($(SOLID_PROPERTIES),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+# Depended on by solid_mechanics
+ifeq ($(SHIFTED_BOUNDARY_METHOD),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/shifted_boundary_method
+  APPLICATION_NAME   := shifted_boundary_method
+  SUFFIX             := sbm
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 # Depended on by contact, fsi, misc, peridynamics, phase_field, porous_flow, xfem
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
@@ -344,13 +352,6 @@ ifeq ($(SCALAR_TRANSPORT),yes)
   APPLICATION_NAME   := scalar_transport
   DEPEND_MODULES     := chemical_reactions navier_stokes thermal_hydraulics fluid_properties heat_transfer rdg ray_tracing solid_properties misc
   SUFFIX             := st
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(SHIFTED_BOUNDARY_METHOD),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/shifted_boundary_method
-  APPLICATION_NAME   := shifted_boundary_method
-  SUFFIX             := sbm
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
