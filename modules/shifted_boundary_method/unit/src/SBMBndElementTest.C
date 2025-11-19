@@ -36,8 +36,8 @@ TEST(SBMBndElementTest, Edge2Normal)
 {
   std::unique_ptr<Edge2> edge(new Edge2());
 
-  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0)));
-  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0)));
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
 
   edge->set_node(0) = n0.get();
   edge->set_node(1) = n1.get();
@@ -69,9 +69,9 @@ TEST(SBMBndElementTest, Tri3Normal)
 {
   std::unique_ptr<Tri3> tri(new Tri3());
 
-  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0)));
-  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0)));
-  std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 0.0)));
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 0.0), 1));
+  std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 0.0), 2));
 
   tri->set_node(0) = n0.get();
   tri->set_node(1) = n1.get();
@@ -104,8 +104,8 @@ TEST(SBMBndElementTest, Edge2NormalTilted)
 {
   std::unique_ptr<Edge2> edge(new Edge2());
 
-  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0)));
-  std::unique_ptr<Node> n1(new Node(Point(1.0, 1.0, 0.0)));
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 1.0, 0.0), 1));
 
   edge->set_node(0) = n0.get();
   edge->set_node(1) = n1.get();
@@ -141,9 +141,9 @@ TEST(SBMBndElementTest, Tri3NormalTilted)
 {
   std::unique_ptr<Tri3> tri(new Tri3());
 
-  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0)));
-  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 1.0)));
-  std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 1.0)));
+  std::unique_ptr<Node> n0(new Node(Point(0.0, 0.0, 0.0), 0));
+  std::unique_ptr<Node> n1(new Node(Point(1.0, 0.0, 1.0), 1));
+  std::unique_ptr<Node> n2(new Node(Point(0.0, 1.0, 1.0), 2));
 
   tri->set_node(0) = n0.get();
   tri->set_node(1) = n1.get();
