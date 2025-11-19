@@ -495,9 +495,9 @@ WCNSFVFlowPhysicsBase::getAxisymmetricRZBlocks() const
   std::vector<SubdomainName> rz_blocks;
   const auto & mesh = getProblem().mesh();
 
-  const bool use_all_blocks = _blocks.empty() || allMeshBlocks(_blocks) ||
-                              std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") !=
-                                  _blocks.end();
+  const bool use_all_blocks =
+      _blocks.empty() || allMeshBlocks(_blocks) ||
+      std::find(_blocks.begin(), _blocks.end(), "ANY_BLOCK_ID") != _blocks.end();
 
   std::vector<SubdomainID> block_ids;
   if (use_all_blocks)
