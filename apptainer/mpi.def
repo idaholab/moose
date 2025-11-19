@@ -175,7 +175,7 @@ EOF
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Build and install MPICH
-    MPICH_VERSION=4.3.1
+    MPICH_VERSION=4.3.2
     mkdir ${ROOT_BUILD_DIR}/mpich
     cd ${ROOT_BUILD_DIR}/mpich
     curl -L -O http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz
