@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGLatticeList.h"
-#include "CSGHexagonalLattice.h"
 
 namespace CSG
 {
