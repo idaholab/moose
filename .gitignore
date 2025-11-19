@@ -136,6 +136,7 @@ modules/rdg/rdg.yaml
 modules/reactor/reactor.yaml
 modules/richards/richards.yaml
 modules/scalar_transport/scalar_transport.yaml
+modules/shifted_boundary_method/shifted_boundary_method.yaml
 modules/solid_mechanics/solid_mechanics.yaml
 modules/solid_properties/solid_properties.yaml
 modules/stochastic_tools/stochastic_tools.yaml
