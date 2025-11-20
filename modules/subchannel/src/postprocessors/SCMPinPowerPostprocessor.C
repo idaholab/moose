@@ -43,7 +43,7 @@ SCMPinPowerPostprocessor::execute()
   auto power = 0.0;
   for (unsigned int iz = 1; iz < nz + 1; iz++)
     for (unsigned int i_ch = 0; i_ch < n_channels; i_ch++)
-      power += scm_problem->computeAddedHeatPin(i_ch, iz);
+      power += scm_problem->getAddedHeatPin(i_ch, iz);
   _value = power;
 }
 

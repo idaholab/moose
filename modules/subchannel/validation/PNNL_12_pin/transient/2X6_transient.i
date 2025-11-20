@@ -35,6 +35,13 @@ P_out = 101325 # Pa
   compute_viscosity = true
   compute_power = false
   P_out = ${P_out}
+  friction_closure = 'MATRA'
+[]
+
+[SCMClosures]
+  [MATRA]
+    type = SCMFrictionMATRA
+  []
 []
 
 [ICs]

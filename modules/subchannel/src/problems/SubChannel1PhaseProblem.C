@@ -16,6 +16,8 @@
 #include <cmath>
 #include "AuxiliarySystem.h"
 #include "SCM.h"
+#include "SinglePhaseFluidProperties.h"
+#include "SCMFrictionClosureBase.h"
 
 struct Ctx
 {
@@ -58,7 +60,7 @@ SubChannel1PhaseProblem::validParams()
   // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
-  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli hausen", "dittus-boelter");
+  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli", "dittus-boelter");
 
   // Inputs
   InputParameters params = ExternalProblem::validParams();
@@ -105,6 +107,8 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<PostprocessorName>(
       "P_out", "The postprocessor (or scalar) that provides the value of outlet pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
+  params.addRequiredParam<UserObjectName>("friction_closure",
+                                          "Closure computing the friction factor");
   return params;
 }
 
@@ -255,6 +259,10 @@ SubChannel1PhaseProblem::initialSetup()
   ExternalProblem::initialSetup();
 
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
+  _friction_closure =
+      &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
+
+  // Create variables for output and storage
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
   _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
   _P_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PRESSURE));
@@ -273,6 +281,7 @@ SubChannel1PhaseProblem::initialSetup()
   _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
   _displacement_soln =
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
+  _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =
@@ -468,7 +477,7 @@ SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args
       const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
       friction_args.S = (*_S_flow_soln)(node);
       friction_args.w_perim = (*_w_perim_soln)(node);
-      Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
+      Real f_darcy = _friction_closure->computeFrictionFactor(friction_args) / 8.0;
 
       /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
       /// which is what we should see in practice, i.e., for very low Pr numbers the heat exchange
@@ -732,7 +741,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
                          dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
                              rho_in / _dt;
         auto mass_term1 =
-            std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
+            Utility::pow<2>((*_mdot_soln)(node_out)) * (1.0 / S / rho_out - 1.0 / S / rho_in);
         auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
         auto crossflow_term = 0.0;
         auto turbulent_term = 0.0;
@@ -771,19 +780,20 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
-        auto fi = computeFrictionFactor(_friction_args);
+        Real ff = _friction_closure->computeFrictionFactor(_friction_args);
+        _ff_soln->set(node_out, ff);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
+        auto friction_term = (ff * dz / Dh_i + ki) * 0.5 *
                              (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
-        auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
-                                       turbulent_term + friction_term + gravity_term); // Pa
+        auto DP = (1 / S) * (time_term + mass_term1 + mass_term2 + crossflow_term + turbulent_term +
+                             friction_term + gravity_term); // Pa
         _DP_soln->set(node_out, DP);
       }
     }
@@ -829,20 +839,21 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto mu_out = (*_mu_soln)(node_out);
           auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, 0.5);
           auto Dh_i = 4.0 * S_interp / w_perim_interp;
-          // Compute friction
+          // Compute friction factor
           auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
           _friction_args.Re = Re;
           _friction_args.i_ch = i_ch;
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
-          auto fi = computeFrictionFactor(_friction_args);
+          Real ff = _friction_closure->computeFrictionFactor(_friction_args);
+          _ff_soln->set(node_out, ff);
           /// Upwind local form loss
           auto ki = 0.0;
           if ((*_mdot_soln)(node_out) >= 0)
             ki = k_grid[i_ch][iz - 1];
           else
             ki = k_grid[i_ch][iz];
-          Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+          Pe = 1.0 / ((ff * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
 
@@ -904,7 +915,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         /// Advective derivative term
         if (iz == first_node)
         {
-          PetscScalar value_vec_at = std::pow((*_mdot_soln)(node_in), 2.0) / (S_in * rho_in);
+          PetscScalar value_vec_at = Utility::pow<2>((*_mdot_soln)(node_in)) / (S_in * rho_in);
           PetscInt row_vec_at = i_ch + _n_channels * iz_ind;
           LibmeshPetscCall(VecSetValues(
               _amc_advective_derivative_rhs, 1, &row_vec_at, &value_vec_at, ADD_VALUES));
@@ -1073,14 +1084,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
-        auto fi = computeFrictionFactor(_friction_args);
+        Real ff = _friction_closure->computeFrictionFactor(_friction_args);
+        _ff_soln->set(node_out, ff);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
+        auto coef = (ff * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
         {
@@ -1192,7 +1204,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           // Setting solutions
           if (S_interp != 0)
           {
-            auto DP = std::pow(S_interp, -1.0) * xx[iz_ind * _n_channels + i_ch];
+            auto DP = (1 / S_interp) * xx[iz_ind * _n_channels + i_ch];
             _DP_soln->set(node_out, DP);
           }
           else
@@ -1546,7 +1558,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
         auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * _Wij(i_gap, iz - 1);
         auto inertia_term = term_out - term_in;
-        auto pressure_term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
+        auto pressure_term = 2 * Utility::pow<2>(Sij) * DPij * rho_star;
         auto time_term =
             _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
 
@@ -1696,7 +1708,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 
         if (!_staggered_pressure_bool)
         {
-          PetscScalar pressure_factor = std::pow(Sij, 2.0) * rho_star;
+          PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
           PetscInt col_pf = i_ch + _n_channels * iz_ind;
           PetscScalar value_pf = -1.0 * alpha * pressure_factor;
@@ -1732,7 +1744,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         }
         else
         {
-          PetscScalar pressure_factor = std::pow(Sij, 2.0) * rho_star;
+          PetscScalar pressure_factor = Utility::pow<2>(Sij) * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
           PetscInt col_pf = i_ch + _n_channels * iz_ind;
           PetscScalar value_pf = -1.0 * pressure_factor;
@@ -2059,7 +2071,7 @@ SubChannel1PhaseProblem::solveAndPopulateEnthalpy(
 }
 
 Real
-SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
+SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) const
 {
   mooseAssert(iz > 0, "Trapezoidal rule requires starting at index 1 at least");
   if (_duct_mesh_exist)
