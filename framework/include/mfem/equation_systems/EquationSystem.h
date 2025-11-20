@@ -32,7 +32,6 @@ class EquationSystem : public mfem::Operator
 
 public:
   friend class EquationSystemProblemOperator;
-  friend class TimeDomainEquationSystemProblemOperator;
 
   EquationSystem() = default;
   ~EquationSystem() override;
@@ -63,6 +62,8 @@ public:
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
 
+  virtual void BuildNonLinearActions();
+
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
 
@@ -71,7 +72,8 @@ public:
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem();
+  virtual void BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                   mfem::Array<int> & btoffsets);
 
   /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
   /// solution and RHS vectors of true DoFs, and apply constraints
@@ -96,6 +98,8 @@ public:
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+
+  void UpdateJacobian() const;
 
   /// Build linear system, with essential boundary conditions accounted for
   virtual void BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
@@ -155,7 +159,7 @@ protected:
   // Components of weak form. // Named according to test variable
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  Moose::MFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> _nlfs;
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
 
@@ -172,6 +176,12 @@ protected:
           Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
   void ApplyDomainLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+
+  void ApplyDomainNLActionIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       Moose::MFEM::NamedFieldsMap<
@@ -212,8 +222,16 @@ protected:
   Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
   mutable mfem::OperatorHandle _jacobian;
+  mutable mfem::Vector _trueRHS;
+  mutable mfem::BlockVector _trueBlockSol, _BlockResidual;
+
+  Moose::MFEM::GridFunctions * _gfuncs;
+  mfem::Array<int> * _block_true_offsets;
+  mfem::Array<int> empty_tdof;
 
   mfem::AssemblyLevel _assembly_level;
+
+  bool _non_linear = false;
 };
 
 template <class FormType>
@@ -256,6 +274,30 @@ EquationSystem::ApplyDomainLFIntegrators(
       mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
       if (integ != nullptr)
       {
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+inline void
+EquationSystem::ApplyDomainNLActionIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    Moose::MFEM::NamedFieldsMap<
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+{
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::LinearFormIntegrator * integ = kernel->createNLActionIntegrator();
+      if (integ != nullptr)
+      {
+        _non_linear = true;
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
@@ -322,6 +364,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
+  friend class TimeDomainEquationSystemProblemOperator;
   TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
   /// Initialise
@@ -329,7 +372,8 @@ public:
                     mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem();
+  virtual void UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                    mfem::Array<int> & btoffsets);
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;

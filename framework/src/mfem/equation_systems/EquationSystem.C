@@ -339,11 +339,84 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 }
 
 void
-EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  _jacobian->Mult(x, residual);
-  x.HostRead();
+  static_cast<mfem::Vector &>(_trueBlockSol) = sol;
+  for (unsigned int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    _trueBlockSol.GetBlock(i).SyncAliasMemory(_trueBlockSol);
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
+  }
+
+  if (_non_linear)
+  {
+    _BlockResidual = 0.0;
+    UpdateJacobian();
+
+    for (unsigned int i = 0; i < _test_var_names.size(); i++)
+    {
+      auto & test_var_name = _test_var_names.at(i);
+      int offset = _BlockResidual.GetBlock(i).Size();
+      mfem::Vector b(offset);
+
+      auto lf = _lfs.GetShared(test_var_name);
+      lf->Assemble();
+      lf->ParallelAssemble(b);
+      b.SyncAliasMemory(b);
+
+      auto nlf = _nlfs.GetShared(test_var_name);
+      nlf->Assemble();
+      nlf->ParallelAssemble(_BlockResidual.GetBlock(i));
+
+      _BlockResidual.GetBlock(i) -= b;
+      _BlockResidual.GetBlock(i) *= -1;
+
+      _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
+      _BlockResidual.GetBlock(i).SyncAliasMemory(_BlockResidual);
+    }
+
+    residual = static_cast<mfem::Vector &>(_BlockResidual);
+    const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
+    residual *= -1.0;
+  }
+  else
+  {
+    residual = 0.0;
+    _jacobian->Mult(sol, residual);
+  }
+
+  sol.HostRead();
   residual.HostRead();
+}
+
+void
+EquationSystem::UpdateJacobian() const
+{
+
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto blf = _blfs.Get(test_var_name);
+    blf->Update();
+    blf->Assemble();
+  }
+
+  // Form off-diagonal blocks
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto test_var_name = _test_var_names.at(i);
+    for (unsigned int j = 0; j < _test_var_names.size(); j++)
+    {
+      auto trial_var_name = _test_var_names.at(j);
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        mblf->Update();
+        mblf->Assemble();
+      }
+    }
+  }
 }
 
 mfem::Operator &
@@ -389,6 +462,26 @@ EquationSystem::BuildLinearForms()
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
+}
+
+void
+EquationSystem::BuildNonLinearActions()
+{
+  // Register linear forms
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    _nlfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
+    _nlfs.GetRef(test_var_name) = 0.0;
+  }
+
+  for (auto & test_var_name : _test_var_names)
+  {
+    // Apply kernels
+    auto nlf = _nlfs.GetShared(test_var_name);
+    ApplyDomainNLActionIntegrators(test_var_name, nlf, _kernels_map);
+    nlf->Assemble();
+  }
 }
 
 void
@@ -454,11 +547,17 @@ EquationSystem::BuildMixedBilinearForms()
 }
 
 void
-EquationSystem::BuildEquationSystem()
+EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                    mfem::Array<int> & btoffsets)
 {
+  _gfuncs = &gridfunctions;
+  _block_true_offsets = &btoffsets;
+  _trueBlockSol.Update(*_block_true_offsets);
+  _BlockResidual.Update(*_block_true_offsets);
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
+  BuildNonLinearActions();
 }
 
 TimeDependentEquationSystem::TimeDependentEquationSystem(
@@ -724,9 +823,10 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-TimeDependentEquationSystem::UpdateEquationSystem()
+TimeDependentEquationSystem::UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                                  mfem::Array<int> & btoffsets)
 {
-  EquationSystem::BuildEquationSystem();
+  EquationSystem::BuildEquationSystem(gridfunctions, btoffsets);
 }
 
 } // namespace Moose::MFEM
