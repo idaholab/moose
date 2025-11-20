@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 from requests import Session
 from requests.exceptions import ConnectionError
 
-from moosecontrol.exceptions import InitializeTimeout
+from moosecontrol.exceptions import InitializeTimeout, WebServerControlError
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import (
     DEFAULT_INITIALIZE_TIMEOUT,
@@ -108,6 +108,36 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertFalse(runner.is_listening())
 
         runner._session.get.assert_called_once_with(f"{runner.url}/check")
+        runner._session = None
+
+    def test_is_listening_no_longer_available(self):
+        """Test is_listening() with a no-longer available error returning False."""
+        runner = BaseRunnerTest()
+        runner._session = runner.build_session()
+
+        runner._session.get = MagicMock(
+            side_effect=WebServerControlError(
+                fake_response(), "Control is no longer available"
+            )
+        )
+
+        self.assertFalse(runner.is_listening())
+
+        runner._session.get.assert_called_once_with(f"{runner.url}/check")
+        runner._session = None
+
+    def test_is_listening_webservercontrolerror(self):
+        """Test is_listening() with WebServerControlError still raising."""
+        runner = BaseRunnerTest()
+        runner._session = runner.build_session()
+
+        runner._session.get = MagicMock(
+            side_effect=WebServerControlError(fake_response(), "Foo")
+        )
+
+        with self.assertRaises(WebServerControlError):
+            self.assertFalse(runner.is_listening())
+
         runner._session = None
 
     def test_is_listening_true(self):

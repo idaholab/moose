@@ -19,7 +19,7 @@ from typing import Callable, Optional
 from requests import Session
 from requests.exceptions import ConnectionError
 
-from moosecontrol.exceptions import InitializeTimeout
+from moosecontrol.exceptions import InitializeTimeout, WebServerControlError
 from moosecontrol.validation import WebServerControlResponse, process_response
 
 from .utils import Poker, TimedPoller
@@ -158,6 +158,10 @@ class BaseRunner(ABC):
             response = self.get("check")
         except ConnectionError:
             return False
+        except WebServerControlError as e:
+            if e.error == "Control is no longer available":
+                return False
+            raise
         return response.response.status_code == 200
 
     def initialize_start(self):
