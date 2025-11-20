@@ -100,6 +100,21 @@ The following material properties are created on the flow channel:
 
 See [!cite](relap7theory) for a description of the single-phase flow formulation.
 
+## Convergence
+
+If using [ComponentsConvergence.md], a Convergence object of type [FlowChannel1PhaseConvergence.md]
+is used. The following parameters apply:
+
+- [!param](/Components/FlowChannel1Phase/p_ref): The reference pressure $p_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/T_ref): The reference pressure $T_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/vel_ref): The reference pressure $u_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/p_rel_step_tol): The relative step tolerance for pressure $\tau_p$,
+- [!param](/Components/FlowChannel1Phase/T_rel_step_tol): The relative step tolerance for temperature $\tau_T$,
+- [!param](/Components/FlowChannel1Phase/vel_rel_step_tol): The relative step tolerance for velocity $\tau_u$,
+- [!param](/Components/FlowChannel1Phase/mass_res_tol): The mass residual tolerance $\tau_\text{mass}$,
+- [!param](/Components/FlowChannel1Phase/momentum_res_tol): The momentum residual tolerance $\tau_\text{momentum}$,
+- [!param](/Components/FlowChannel1Phase/energy_res_tol): The energy residual tolerance $\tau_\text{energy}$,
+
 !syntax inputs /Components/FlowChannel1Phase
 
 !syntax children /Components/FlowChannel1Phase

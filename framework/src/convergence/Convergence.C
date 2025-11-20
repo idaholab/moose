@@ -56,5 +56,5 @@ Convergence::verboseOutput(std::ostringstream & oss)
     return;
 
   if (verbose())
-    _console << name() << ": " << MooseUtils::trim(str) << std::endl;
+    _console << name() << ": " << str << std::endl;
 }

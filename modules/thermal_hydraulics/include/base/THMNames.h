@@ -45,4 +45,14 @@ static const std::string VELOCITY_X = "vel_x";
 static const std::string VELOCITY_Y = "vel_y";
 static const std::string VELOCITY_Z = "vel_z";
 static const std::string XIRHOA = "xirhoA";
+
+template <bool is_ad>
+std::string
+functorMaterialPropertyName(const std::string & base)
+{
+  if constexpr (is_ad)
+    return base + "_ad";
+  else
+    return base + "_nonad";
+}
 }
