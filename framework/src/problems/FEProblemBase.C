@@ -1601,6 +1601,7 @@ FEProblemBase::timestepSetup()
     es().reinit_systems();
   }
 
+  _control_warehouse.timestepSetup();
   if (_line_search)
     _line_search->timestepSetup();
 

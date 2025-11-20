@@ -9,7 +9,8 @@
 
 #include "PIDTransientControl.h"
 #include "Function.h"
-#include "Transient.h"
+#include "TransientBase.h"
+#include "TimeStepper.h"
 #include "FEProblemBase.h"
 #include "MooseApp.h"
 
@@ -201,6 +202,24 @@ PIDTransientControl::initialSetup()
 {
   if (_app.isRecovering())
   {
+    if (isParamValid("parameter"))
+      setControllableValue<Real>("parameter", _value);
+    else
+      _fe_problem.setPostprocessorValueByName(getParam<std::string>("parameter_pp"), _value);
+  }
+}
+
+void
+PIDTransientControl::timestepSetup()
+{
+  const auto * t_ex = dynamic_cast<const TransientBase *>(_app.getExecutioner());
+  if (t_ex && t_ex->getTimeStepper()->justFailedTimeStep() &&
+      getExecuteOnEnum().contains(EXEC_TIMESTEP_END))
+  {
+    // We need to revert to the timestep begin state
+    _integral = _integral_old;
+    _value = _value_old;
+    _old_delta = _old_delta_prev_tstep;
     if (isParamValid("parameter"))
       setControllableValue<Real>("parameter", _value);
     else
