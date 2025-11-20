@@ -16,7 +16,6 @@ namespace Moose::MFEM
 void
 TimeDomainEquationSystemProblemOperator::SetGridFunctions()
 {
-  _test_var_names = GetEquationSystem()->TestVarNames();
   _trial_var_names = GetEquationSystem()->TrialVarNames();
   TimeDomainProblemOperator::SetGridFunctions();
 }
@@ -52,7 +51,7 @@ TimeDomainEquationSystemProblemOperator::Solve()
   // update the time used by time dependent (function) coefficients.
   _problem_data.ode_solver->Step(_problem_data.f, _problem.time(), _problem.dt());
   // Synchonise time dependent GridFunctions with updated DoF data.
-  SetTestVariablesFromTrueVectors();
+  SetTrialVariablesFromTrueVectors();
 
   // Set time derivatives
   for (const auto i : index_range(_trial_var_names))
@@ -74,12 +73,8 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
                                                        mfem::Vector & X_new)
 {
   X_new = X_old;
-  SetTestVariablesFromTrueVectors();
-  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
-  {
-    _trial_variables.at(ind)->MakeTRef(
-        _trial_variables.at(ind)->ParFESpace(), X_new, _block_true_offsets[ind]);
-  }
+  SetTrialVariablesFromTrueVectors();
+
   _problem_data.coefficients.setTime(GetTime());
   BuildEquationSystemOperator(dt);
 
