@@ -121,9 +121,15 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level)
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                     Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions,
+                     mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
+
+  if (cmplx_gridfunctions.size())
+    mooseError("Complex variables have been created but the executioner numeric type has not been "
+               "set to complex. Please set Executioner/numeric_type = complex.");
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -354,7 +360,8 @@ EquationSystem::GetGradient(const mfem::Vector &) const
 
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                   Moose::MFEM::GridFunctions & gridfunctions)
+                                   Moose::MFEM::GridFunctions & gridfunctions,
+                                   Moose::MFEM::ComplexGridFunctions & /*cmplx_gridfunctions*/)
 {
   for (const auto i : index_range(_trial_var_names))
   {
@@ -469,9 +476,10 @@ TimeDependentEquationSystem::TimeDependentEquationSystem(
 
 void
 TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                                  ComplexGridFunctions & cmplx_gridfunctions,
                                   mfem::AssemblyLevel assembly_level)
 {
-  EquationSystem::Init(gridfunctions, assembly_level);
+  EquationSystem::Init(gridfunctions, cmplx_gridfunctions, assembly_level);
   for (auto & test_var_name : _test_var_names)
     _td_var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));

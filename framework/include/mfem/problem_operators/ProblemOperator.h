@@ -21,7 +21,7 @@ class ProblemOperator : public mfem::Operator, public ProblemOperatorBase
 public:
   ProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
 
-  void SetGridFunctions() override;
+  virtual void SetGridFunctions() override;
 
   virtual void Solve() override {}
   void Mult(const mfem::Vector &, mfem::Vector &) const override {}

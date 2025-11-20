@@ -19,7 +19,8 @@ MFEMVectorFEInnerProductIntegralPostprocessor::validParams()
 {
   InputParameters params = MFEMPostprocessor::validParams();
   params += MFEMBlockRestrictable::validParams();
-  params.addClassDescription("Calculates the total flux of a vector field through an interface");
+  params.addClassDescription(
+      "Calculates the integral of the inner product of two vector variables within a subdomain.");
   params.addParam<MFEMScalarCoefficientName>(
       "coefficient", "1.", "Name of optional scalar coefficient to scale integrand by.");
   params.addRequiredParam<VariableName>("primal_variable",
