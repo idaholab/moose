@@ -15,7 +15,7 @@
 #include "MFEMContainers.h"
 
 /**
- * Class to construct an auxiliary solver used to update an auxvariable.
+ * Class to construct an auxiliary solver used to update a real auxvariable.
  */
 class MFEMAuxKernel : public MFEMGeneralUserObject
 {
