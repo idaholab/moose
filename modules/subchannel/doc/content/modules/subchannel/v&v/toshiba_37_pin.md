@@ -39,7 +39,6 @@ The characteristics of Toshiba's benchmark are provided in [parameters].
 Three flow configurations with reducing axial mass flow rate are selected for the validation exercise. These configurations are presented in [cases].
 
 !table id=cases caption=Validation cases selected in the Toshiba benchmark
-
 | Naming | Run ID | Pin Power (W/cm) | Inlet temperature ($K$) | Flow rate (m$^3$/s) | Reynolds number |
 | :- | :- | :- | :- | :- | :- |
 | High flow rate | $B37P02$ | $15.57$ | $484.3$ | $1.48*10^{-3}$ | $1.12*10^4$ |
