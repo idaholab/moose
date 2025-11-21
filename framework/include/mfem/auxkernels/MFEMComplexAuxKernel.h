@@ -28,12 +28,19 @@ public:
   /// Method called to update any owned objects upon a mesh update.
   virtual void update(){};
 
+  /// Method to add a scaled complex variable to another complex variable.
+  void complexAdd(mfem::ParComplexGridFunction & a, const mfem::ParComplexGridFunction & b, const std::complex<mfem::real_t> scale);
+
+  /// Method to scale a complex variable by a complex constant.
+  void complexScale(mfem::ParComplexGridFunction & a, const std::complex<mfem::real_t> scale);
+
 protected:
   /// Name of complex auxvariable to store the result of the auxkernel in.
   const AuxVariableName _result_var_name;
 
   /// Reference to result complex gridfunction.
   mfem::ParComplexGridFunction & _result_var;
+
 };
 
 #endif

@@ -47,10 +47,11 @@ MFEMComplexDivAux::execute()
 {
   _result_var.real() = 0.0;
   _result_var.imag() = 0.0;
-  _div.AddMult(_source_var.real(), _result_var.real(), _scale_factor_real);
-  _div.AddMult(_source_var.imag(), _result_var.real(), -_scale_factor_imag);
-  _div.AddMult(_source_var.real(), _result_var.imag(), _scale_factor_imag);
-  _div.AddMult(_source_var.imag(), _result_var.imag(), _scale_factor_real);
+  _div.AddMult(_source_var.real(), _result_var.real());
+  _div.AddMult(_source_var.imag(), _result_var.imag());
+
+  std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
+  complexScale(_result_var, scale_complex);
 
 }
 
