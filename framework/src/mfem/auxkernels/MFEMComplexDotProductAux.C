@@ -50,8 +50,8 @@ MFEMComplexDotProductAux::MFEMComplexDotProductAux(const InputParameters & param
     _dot_ur_vi(_u_coef_real, _v_coef_imag),
     _dot_ui_vr(_u_coef_imag, _v_coef_real),
     _dot_ui_vi(_u_coef_imag, _v_coef_imag),
-    _final_coef_real(_dot_ur_vr, _dot_ui_vi, 1.0, -1.0),
-    _final_coef_imag(_dot_ur_vi, _dot_ui_vr, 1.0, 1.0)
+    _final_coef_real(_dot_ur_vr, _dot_ui_vi, 1.0, 1.0), // Taking into account hermitian conjugation
+    _final_coef_imag(_dot_ur_vi, _dot_ui_vr, -1.0, 1.0)
 {
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
