@@ -3050,7 +3050,12 @@ MooseMesh::buildNodeListFromSideList()
       if (!side_bcids.empty())
         next_bcid = std::max(next_bcid, cast_int<boundary_id_type>(*side_bcids.rbegin() + 1));
 
-      // If we've got an unreasonable largest BC id, we should
+      // We need all processors to agree on the id to use, even when
+      // each only sees the bcids on their own portions of a
+      // distributed mesh.
+      _communicator.max(next_bcid);
+
+      // If we've got an unreasonably high largest BC id, we should
       // probably just search for unused ones with moderate values, so we
       // don't risk wrapping.
       if (next_bcid > 1000 || next_bcid <= 0)
@@ -3071,10 +3076,12 @@ MooseMesh::buildNodeListFromSideList()
         }
     }
 
-    // If any side bcid isn't already a node bcid, we should make
-    // sure that our new node bcid is given the same name.
-    for (auto bcid : side_bcids)
-      boundary_info.nodeset_name(bcid) = boundary_info.get_sideset_name(bcid);
+    // For any side bcid that has a name, make sure that our new node
+    // bcid is given the same name.  We need to iterate over the
+    // actual name map (which is global) here, not over side_bcids
+    // (which only includes local ids on a distributed mesh).
+    for (auto & [id, name] : boundary_info.get_sideset_name_map())
+      boundary_info.nodeset_name(id) = name;
 
     boundary_info.build_node_list_from_side_list();
   }
