@@ -17,16 +17,19 @@ InputParameters
 MFEMComplexScalarProjectionAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription("Projects a real and imaginary scalar coefficient onto a complex scalar MFEM auxvariable");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient_real",
-                                                     "Name of the real part of the scalar coefficient to project.");
-  params.addRequiredParam<MFEMScalarCoefficientName>("coefficient_imag",
-                                                     "Name of the imaginary part of the scalar coefficient to project.");
+  params.addClassDescription(
+      "Projects a real and imaginary scalar coefficient onto a complex scalar MFEM auxvariable");
+  params.addRequiredParam<MFEMScalarCoefficientName>(
+      "coefficient_real", "Name of the real part of the scalar coefficient to project.");
+  params.addRequiredParam<MFEMScalarCoefficientName>(
+      "coefficient_imag", "Name of the imaginary part of the scalar coefficient to project.");
   return params;
 }
 
 MFEMComplexScalarProjectionAux::MFEMComplexScalarProjectionAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters), _coef_real(getScalarCoefficient("coefficient_real")), _coef_imag(getScalarCoefficient("coefficient_imag"))
+  : MFEMComplexAuxKernel(parameters),
+    _coef_real(getScalarCoefficient("coefficient_real")),
+    _coef_imag(getScalarCoefficient("coefficient_imag"))
 {
 }
 

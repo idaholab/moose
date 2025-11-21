@@ -23,8 +23,10 @@ MFEMComplexGradAux::validParams()
       " on an H(curl) conforming ND result auxvariable");
   params.addRequiredParam<VariableName>("source",
                                         "Scalar H1 MFEMVariable to take the gradient of.");
-  params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
-  params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of the factor to scale result auxvariable by.");
+  params.addParam<mfem::real_t>(
+      "scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
+  params.addParam<mfem::real_t>(
+      "scale_factor_imag", 0.0, "Imaginary part of the factor to scale result auxvariable by.");
   return params;
 }
 

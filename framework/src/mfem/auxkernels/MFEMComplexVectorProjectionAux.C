@@ -17,16 +17,20 @@ InputParameters
 MFEMComplexVectorProjectionAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription("Projects a a real and imaginary vector coefficient onto a complex vector MFEM auxvariable.");
-  params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient_real",
-                                                     "Name of the real part of the vector coefficient to project.");
-  params.addRequiredParam<MFEMVectorCoefficientName>("vector_coefficient_imag",
-                                                     "Name of the imaginary part of the vector coefficient to project.");
+  params.addClassDescription(
+      "Projects a a real and imaginary vector coefficient onto a complex vector MFEM auxvariable.");
+  params.addRequiredParam<MFEMVectorCoefficientName>(
+      "vector_coefficient_real", "Name of the real part of the vector coefficient to project.");
+  params.addRequiredParam<MFEMVectorCoefficientName>(
+      "vector_coefficient_imag",
+      "Name of the imaginary part of the vector coefficient to project.");
   return params;
 }
 
 MFEMComplexVectorProjectionAux::MFEMComplexVectorProjectionAux(const InputParameters & parameters)
-  : MFEMComplexAuxKernel(parameters), _vec_coef_real(getVectorCoefficient("vector_coefficient_real")), _vec_coef_imag(getVectorCoefficient("vector_coefficient_imag"))
+  : MFEMComplexAuxKernel(parameters),
+    _vec_coef_real(getVectorCoefficient("vector_coefficient_real")),
+    _vec_coef_imag(getVectorCoefficient("vector_coefficient_imag"))
 {
 }
 

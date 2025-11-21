@@ -20,12 +20,16 @@ MFEMComplexDotProductAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
   params.addClassDescription("Projects s(x) * (U x V) onto a complex vector MFEM auxvariable");
-  params.addRequiredParam<VariableName>("first_source_vec", "Complex vector MFEMVariable U (vdim=3)");
-  params.addRequiredParam<VariableName>("second_source_vec", "Complex vector MFEMVariable V (vdim=3)");
+  params.addRequiredParam<VariableName>("first_source_vec",
+                                        "Complex vector MFEMVariable U (vdim=3)");
+  params.addRequiredParam<VariableName>("second_source_vec",
+                                        "Complex vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
       "scale_factor_real", 1.0, "Real part of the constant multiplier applied to the dot product");
   params.addParam<mfem::real_t>(
-      "scale_factor_imag", 0.0, "Imaginary part of the constant multiplier applied to the dot product");
+      "scale_factor_imag",
+      0.0,
+      "Imaginary part of the constant multiplier applied to the dot product");
 
   return params;
 }

@@ -18,13 +18,15 @@ InputParameters
 MFEMComplexDivAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription(
-      "Calculates the divergence of a complex H(div) conforming RT source variable and stores the result"
-      " on an L2 conforming result complex auxvariable");
-  params.addRequiredParam<VariableName>("source",
-                                        "Vector H(div) MFEMComplexVariable to take the divergence of.");
-  params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
-  params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of the factor to scale result auxvariable by.");
+  params.addClassDescription("Calculates the divergence of a complex H(div) conforming RT source "
+                             "variable and stores the result"
+                             " on an L2 conforming result complex auxvariable");
+  params.addRequiredParam<VariableName>(
+      "source", "Vector H(div) MFEMComplexVariable to take the divergence of.");
+  params.addParam<mfem::real_t>(
+      "scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
+  params.addParam<mfem::real_t>(
+      "scale_factor_imag", 0.0, "Imaginary part of the factor to scale result auxvariable by.");
 
   return params;
 }
@@ -52,7 +54,6 @@ MFEMComplexDivAux::execute()
 
   std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
   complexScale(_result_var, scale_complex);
-
 }
 
 #endif
