@@ -110,20 +110,20 @@
     variable = mode_mixity_ratio
     property = mode_mixity_ratio
     execute_on = timestep_end
-    boundary = interface
+    boundary = block1_block2
   []
   [damage]
     type = MaterialRealAux
     variable = damage
     property = damage
     execute_on = timestep_end
-    boundary = interface
+    boundary = block1_block2
   []
 []
 
 [Physics/SolidMechanics/CohesiveZone]
   [czm_ik]
-    boundary = 'interface'
+    boundary = 'block1_block2'
   []
 []
 
@@ -143,7 +143,7 @@
   []
   [czm]
     type = BiLinearMixedModeTraction
-    boundary = 'interface'
+    boundary = 'block1_block2'
     penalty_stiffness = 1e6
     GI_c = 1e3
     GII_c = 1e2
