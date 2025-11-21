@@ -574,15 +574,16 @@ public:
 
   /**
    * @brief Get a lattice object of the specified type by name
-   * This is a templated method, so the type of lattice must be specified when calling. If the
-   * type is unknown, call with CSGLattice to get the base class reference.
+   * This is a templated method with a default type of CSGLattice. If a specific lattice type
+   * is needed, it can be specified when calling. If the type is unknown or not specified,
+   * it will default to CSGLattice to get the base class reference.
    * NOTE: if CSGLattice is used as the template type, any lattice type-specific attributes or
    * methods may not be accessible.
    *
    * @param name lattice name
    * @return reference to CSGLattice object
    */
-  template <typename LatticeType>
+  template <typename LatticeType = CSGLattice>
   const LatticeType & getLatticeByName(const std::string & name)
   {
     const CSGLattice & lattice = _lattice_list.getLattice(name);
