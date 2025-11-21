@@ -914,6 +914,12 @@ TEST(CSGBaseTest, testGetLatticeMethods)
     ASSERT_EQ(typeid(lat_get), typeid(CSGCartesianLattice));
   }
   {
+    // get lattice by name without specifying type, assumes default CSGLattice
+    const auto & lat_get = csg_obj->getLatticeByName("lattice1");
+    ASSERT_EQ(lat, lat_get);
+    static_assert(std::is_same<decltype(lat_get), const CSGLattice &>::value);
+  }
+  {
     // try to get lattice by name that does not exist
     Moose::UnitUtils::assertThrows([&csg_obj]()
                                    { csg_obj->getLatticeByName<CSGCartesianLattice>("fake_name"); },
