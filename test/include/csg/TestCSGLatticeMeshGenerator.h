@@ -30,10 +30,10 @@ protected:
   /// pitch of the lattice
   Real _pitch;
   const std::vector<MeshGeneratorName> _input_names;
-  /// input pattern of universes
-  std::vector<std::vector<unsigned int>> _pattern;
   /// Pointers to the input mesh
   std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
   /// Holds the input CSGBase objects
   std::vector<std::unique_ptr<CSG::CSGBase> *> _input_csgs;
+  /// input pattern of universes
+  std::vector<std::vector<unsigned int>> _pattern;
 };

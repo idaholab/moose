@@ -18,4 +18,9 @@
                 0 0 0'
     pitch = 5
   []
+  [sq3]
+      type = ExampleCSGInfiniteSquareMeshGenerator
+      side_length = 30
+      fill = 'hex_lat'
+  []
 []

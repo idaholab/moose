@@ -1,11 +1,5 @@
 {
   "cells": {
-    "hex_lat_lattice_cell": {
-      "fill": "hex_lat_lattice",
-      "filltype": "LATTICE",
-      "region":
-          "(-hex_lat_surf_plus_x & +hex_lat_surf_minus_x & -hex_lat_surf_plus_y & +hex_lat_surf_minus_y)"
-    },
     "sq1_square_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
@@ -15,12 +9,18 @@
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
       "region": "(+sq2_surf_plus_x & -sq2_surf_minus_x & -sq2_surf_plus_y & +sq2_surf_minus_y)"
+    },
+    "sq3_square_cell": {
+      "fill": "hex_lat_lattice",
+      "filltype": "LATTICE",
+      "region": "(+sq3_surf_plus_x & -sq3_surf_minus_x & -sq3_surf_plus_y & +sq3_surf_minus_y)"
     }
   },
   "lattices": {
     "hex_lat_lattice": {
       "nring": 3,
       "nrow": 5,
+      "outertype": "VOID",
       "pitch": 5.0,
       "type": "CSG::CSGHexagonalLattice",
       "universes": [
@@ -57,42 +57,6 @@
     }
   },
   "surfaces": {
-    "hex_lat_surf_minus_x": {
-      "coefficients": {
-        "a": 1.0,
-        "b": 0.0,
-        "c": 0.0,
-        "d": -12.5
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "hex_lat_surf_minus_y": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 1.0,
-        "c": 0.0,
-        "d": -12.5
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "hex_lat_surf_plus_x": {
-      "coefficients": {
-        "a": 1.0,
-        "b": 0.0,
-        "c": 0.0,
-        "d": 12.5
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "hex_lat_surf_plus_y": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 1.0,
-        "c": 0.0,
-        "d": 12.5
-      },
-      "type": "CSG::CSGPlane"
-    },
     "sq1_surf_minus_x": {
       "coefficients": {
         "a": -1.0,
@@ -164,12 +128,48 @@
         "d": 1.5
       },
       "type": "CSG::CSGPlane"
+    },
+    "sq3_surf_minus_x": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 15.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq3_surf_minus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": -15.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq3_surf_plus_x": {
+      "coefficients": {
+        "a": -1.0,
+        "b": 0.0,
+        "c": 0.0,
+        "d": -15.0
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "sq3_surf_plus_y": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 1.0,
+        "c": 0.0,
+        "d": 15.0
+      },
+      "type": "CSG::CSGPlane"
     }
   },
   "universes": {
     "ROOT_UNIVERSE": {
       "cells": [
-        "hex_lat_lattice_cell"
+        "sq3_square_cell"
       ],
       "root": true
     },
