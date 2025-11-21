@@ -44,12 +44,13 @@ CSGHexagonalLattice::isValidUniverseMap(
     return false;
 
   // each row differs in how many elements are required depending on size of lattice
-  int num_row = universes.size();
-  int center_row = (num_row - 1) / 2;
-  for (int row_i : index_range(universes))
+  unsigned int num_row = universes.size();
+  unsigned int center_row = (num_row - 1) / 2;
+  for (unsigned int row_i : index_range(universes))
   {
-    int n_ele = num_row - std::abs((int)(row_i - center_row));
-    if ((int)universes[row_i].size() != n_ele)
+    unsigned int n_ele =
+        num_row - ((row_i > center_row) ? (row_i - center_row) : (center_row - row_i));
+    if (universes[row_i].size() != n_ele)
       return false;
   }
 
@@ -119,13 +120,13 @@ CSGHexagonalLattice::compareAttributes(const CSGLattice & other) const
 void
 CSGHexagonalLattice::buildIndexMap()
 {
-  for (auto ring = 0; ring < (int)_nring; ++ring)
+  for (unsigned int ring = 0; ring < _nring; ++ring)
   {
-    auto num_elements = (ring == (int)_nring - 1) ? 1 : 6 * (_nring - 1 - ring);
-    for (auto element = 0; element < (int)num_elements; ++element)
+    unsigned int num_elements = (ring == _nring - 1) ? 1 : 6 * (_nring - 1 - ring);
+    for (unsigned int element = 0; element < num_elements; ++element)
     {
-      std::pair<int, int> ring_index = std::make_pair(ring, element);
-      std::pair<int, int> row_index = getRowIndexFromRingIndex(ring_index);
+      std::pair<unsigned int, unsigned int> ring_index = std::make_pair(ring, element);
+      std::pair<unsigned int, unsigned int> row_index = getRowIndexFromRingIndex(ring_index);
       _row_to_ring_map[row_index] = ring_index;
     }
   }

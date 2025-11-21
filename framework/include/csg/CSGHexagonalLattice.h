@@ -203,7 +203,8 @@ protected:
   unsigned int _nring;
 
   /// map of row-column indices to ring-element indices for quick conversion and look-up
-  std::map<std::pair<int, int>, std::pair<int, int>> _row_to_ring_map;
+  std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
+      _row_to_ring_map;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing

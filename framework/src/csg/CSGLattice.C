@@ -84,13 +84,13 @@ CSGLattice::getUniverseAtIndex(const std::pair<int, int> index)
     return _universe_map[index.first][index.second];
 }
 
-const std::vector<std::pair<int, int>>
+const std::vector<std::pair<unsigned int, unsigned int>>
 CSGLattice::getUniverseIndices(const std::string & univ_name) const
 {
   if (!hasUniverse(univ_name))
     mooseError("Universe " + univ_name + " does not exist in lattice " + getName());
 
-  std::vector<std::pair<int, int>> indices;
+  std::vector<std::pair<unsigned int, unsigned int>> indices;
   for (auto i : make_range(_universe_map.size()))
     for (auto j : make_range(_universe_map[i].size()))
     {
