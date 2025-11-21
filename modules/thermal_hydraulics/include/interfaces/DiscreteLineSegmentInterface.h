@@ -110,9 +110,9 @@ protected:
   const Point _end_point;
 
   /// Number of elements in each axial section
-  const std::vector<unsigned int> & _n_elems;
+  std::vector<unsigned int> _n_elems;
   /// Total number of axial elements
-  const unsigned int _n_elem;
+  unsigned int _n_elem;
 
   /// Number of axial sections
   const unsigned int _n_sections;
