@@ -23,7 +23,8 @@ MFEMComplexGradAux::validParams()
       " on an H(curl) conforming ND result auxvariable");
   params.addRequiredParam<VariableName>("source",
                                         "Scalar H1 MFEMVariable to take the gradient of.");
-  params.addParam<mfem::real_t>("scale_factor", 1.0, "Factor to scale result auxvariable by.");
+  params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
+  params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of the factor to scale result auxvariable by.");
   return params;
 }
 
@@ -31,7 +32,8 @@ MFEMComplexGradAux::MFEMComplexGradAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_source_var_name)),
-    _scale_factor(getParam<mfem::real_t>("scale_factor")),
+    _scale_factor_real(getParam<mfem::real_t>("scale_factor_real")),
+    _scale_factor_imag(getParam<mfem::real_t>("scale_factor_imag")),
     _grad(_source_var.real().ParFESpace(), _result_var.real().ParFESpace())
 {
   _grad.Assemble();
@@ -44,8 +46,11 @@ MFEMComplexGradAux::execute()
 {
   _result_var.real() = 0;
   _result_var.imag() = 0;
-  _grad.AddMult(_source_var.real(), _result_var.real(), _scale_factor);
-  _grad.AddMult(_source_var.imag(), _result_var.imag(), _scale_factor);
+  _grad.AddMult(_source_var.real(), _result_var.real());
+  _grad.AddMult(_source_var.imag(), _result_var.imag());
+
+  std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
+  complexScale(_result_var, scale_complex);
 }
 
 #endif

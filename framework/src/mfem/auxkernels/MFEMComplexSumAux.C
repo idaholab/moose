@@ -73,10 +73,8 @@ MFEMComplexSumAux::execute()
   _result_var.imag() = 0.0;
   for (const auto i : index_range(_summed_vars))
   {
-    _result_var.real().Add(_scale_factors_real[i], _summed_vars[i]->real());
-    _result_var.real().Add(-_scale_factors_imag[i], _summed_vars[i]->imag());
-    _result_var.imag().Add(_scale_factors_real[i], _summed_vars[i]->imag());
-    _result_var.imag().Add(_scale_factors_imag[i], _summed_vars[i]->real());
+    std::complex<mfem::real_t> scale(_scale_factors_real[i], _scale_factors_imag[i]);
+    complexAdd(_result_var, *_summed_vars[i], scale);
   }
     
 
