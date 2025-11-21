@@ -31,7 +31,6 @@ protected:
   /// Reference to source coefficient.
   mfem::VectorCoefficient & _vec_coef_real;
   mfem::VectorCoefficient & _vec_coef_imag;
-
 };
 
 #endif

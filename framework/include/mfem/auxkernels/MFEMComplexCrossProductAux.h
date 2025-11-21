@@ -43,7 +43,6 @@ protected:
   /// Imaginary part of the scaling factor applied on the resulting field
   const mfem::real_t _scale_factor_imag;
 
-
   /// Coefficient wrappers
   mfem::VectorGridFunctionCoefficient _u_coef_real;
   mfem::VectorGridFunctionCoefficient _u_coef_imag;
@@ -58,7 +57,6 @@ protected:
   ///Final coefficient that sums the crossproduct terms
   mfem::VectorSumCoefficient _final_coef_real;
   mfem::VectorSumCoefficient _final_coef_imag;
-
 };
 
 #endif // MOOSE_MFEM_ENABLED

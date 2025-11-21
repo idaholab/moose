@@ -23,9 +23,13 @@ MFEMComplexCrossProductAux::validParams()
   params.addRequiredParam<VariableName>("first_source_vec", "Vector MFEMVariable U (vdim=3)");
   params.addRequiredParam<VariableName>("second_source_vec", "Vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
-      "scale_factor_real", 1.0, "Real part of the constant multiplier applied to the cross product");
+      "scale_factor_real",
+      1.0,
+      "Real part of the constant multiplier applied to the cross product");
   params.addParam<mfem::real_t>(
-      "scale_factor_imag", 0.0, "Imaginary part of the constant multiplier applied to the cross product");
+      "scale_factor_imag",
+      0.0,
+      "Imaginary part of the constant multiplier applied to the cross product");
 
   return params;
 }
