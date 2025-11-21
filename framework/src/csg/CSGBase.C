@@ -415,12 +415,39 @@ CSGBase::createHexagonalLattice(
 }
 
 void
+CSGBase::setLatticeOuter(const CSGLattice & lattice, const std::string & outer_name)
+{
+  auto name = lattice.getName();
+  if (!checkLatticeInBase(lattice))
+    mooseError("Cannot set outer for lattice " + name +
+               ". Lattice is different from the lattice of the same name in the "
+               "CSGBase instance.");
+  _lattice_list.getLattice(name).updateOuter(outer_name);
+}
+
+void
 CSGBase::setLatticeOuter(const CSGLattice & lattice, const CSGUniverse & outer_univ)
 {
+  auto name = lattice.getName();
+  if (!checkLatticeInBase(lattice))
+    mooseError("Cannot set outer universe for lattice " + name +
+               ". Lattice is different from the lattice of the same name in the "
+               "CSGBase instance.");
   if (!checkUniverseInBase(outer_univ))
-    mooseError("Cannot set outer universe for lattice " + lattice.getName() + ". Outer universe " +
+    mooseError("Cannot set outer universe for lattice " + name + ". Outer universe " +
                outer_univ.getName() + " is not in the CSGBase instance.");
-  const_cast<CSGLattice &>(lattice).updateOuter(outer_univ);
+  _lattice_list.getLattice(name).updateOuter(outer_univ);
+}
+
+void
+CSGBase::resetLatticeOuter(const CSGLattice & lattice)
+{
+  auto name = lattice.getName();
+  if (!checkLatticeInBase(lattice))
+    mooseError("Cannot reset outer for lattice " + name +
+               ". Lattice is different from the lattice of the same name in the "
+               "CSGBase instance.");
+  _lattice_list.getLattice(name).resetOuter();
 }
 
 const CSGLattice &
@@ -452,10 +479,15 @@ CSGBase::setUniverseAtLatticeIndex(const CSGLattice & lattice,
                                    const CSGUniverse & universe,
                                    std::pair<int, int> index)
 {
+  auto name = lattice.getName();
+  if (!checkLatticeInBase(lattice))
+    mooseError("Cannot set universe at index for lattice " + name +
+               ". Lattice is different from the lattice of the same name in the "
+               "CSGBase instance.");
   if (!checkUniverseInBase(universe))
     mooseError("Cannot add universe " + universe.getName() + " to lattice " + lattice.getName() +
                ". Universe is not in the CSGBase instance.");
-  const_cast<CSGLattice &>(lattice).setUniverseAtIndex(universe, index);
+  _lattice_list.getLattice(name).setUniverseAtIndex(universe, index);
 }
 
 void
@@ -463,17 +495,18 @@ CSGBase::setLatticeUniverses(
     const CSGLattice & lattice,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & universes)
 {
+  auto name = lattice.getName();
+  if (!checkLatticeInBase(lattice))
+    mooseError("Cannot set universes for lattice " + name +
+               ". Lattice is different from the lattice of the same name in the "
+               "CSGBase instance.");
   // make sure all universes are a part of this base instance
   for (auto univ_list : universes)
-  {
     for (const CSGUniverse & univ : univ_list)
-    {
       if (!checkUniverseInBase(univ))
-        mooseError("Cannot set universes for lattice " + lattice.getName() + ". Universe " +
-                   univ.getName() + " is not in the CSGBase instance.");
-    }
-  }
-  const_cast<CSGLattice &>(lattice).setUniverses(universes);
+        mooseError("Cannot set universes for lattice " + name + ". Universe " + univ.getName() +
+                   " is not in the CSGBase instance.");
+  _lattice_list.getLattice(name).setUniverses(universes);
 }
 
 void
@@ -633,8 +666,18 @@ CSGBase::checkUniverseInBase(const CSGUniverse & universe) const
   auto name = universe.getName();
   // if no universe by this name exists, an error will be produced by getUniverse
   auto & list_univ = _universe_list.getUniverse(name);
-  // return whether that the cell in the list is the same as the cell provided (in memory)
+  // return whether that the universe in the list is the same as the universe provided (in memory)
   return &universe == &list_univ;
+}
+
+bool
+CSGBase::checkLatticeInBase(const CSGLattice & lattice) const
+{
+  auto name = lattice.getName();
+  // if no lattice by this name exists, an error will be produced by getLattice
+  auto & list_lattice = _lattice_list.getLattice(name);
+  // return whether that the lattice in the list is the same as the lattice provided (in memory)
+  return &lattice == &list_lattice;
 }
 
 void
