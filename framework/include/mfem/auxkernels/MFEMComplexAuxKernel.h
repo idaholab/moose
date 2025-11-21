@@ -15,7 +15,7 @@
 #include "MFEMContainers.h"
 
 /**
- * Class to construct an auxiliary solver used to update an auxvariable.
+ * Class to construct an auxiliary solver used to update a complex auxvariable.
  */
 class MFEMComplexAuxKernel : public MFEMGeneralUserObject
 {
@@ -29,10 +29,10 @@ public:
   virtual void update(){};
 
 protected:
-  /// Name of auxvariable to store the result of the auxkernel in.
+  /// Name of complex auxvariable to store the result of the auxkernel in.
   const AuxVariableName _result_var_name;
 
-  /// Reference to result gridfunction.
+  /// Reference to result complex gridfunction.
   mfem::ParComplexGridFunction & _result_var;
 };
 
