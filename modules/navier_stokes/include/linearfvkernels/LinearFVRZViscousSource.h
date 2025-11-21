@@ -46,7 +46,7 @@ private:
   const Real _stress_multiplier;
 
   /// Cached pointers to the velocity components required to build divergence
-  std::array<const MooseLinearVariableFVReal *, 2> _velocity_vars;
+  std::array<MooseLinearVariableFVReal *, 2> _velocity_vars;
 
   /// Helper to access the velocity variable for a given direction
   const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;

@@ -78,15 +78,15 @@ In practice this means:
   every face.
 - The implicit part of $\mu \nabla \vec{u}$ still handles only the normal-gradient piece. The
   remaining volumetric contribution $2 \mu u_r / r^2$ is supplied by
-  [LinearFVRZViscousSource.md]. When [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms)
+  [LinearFVRZViscousSource.md]. When this kernels's [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms)
   is enabled (and likewise
-  [!param](/LinearFVKernels/LinearFVRZViscousSource/use_deviatoric_terms)), the source kernel also
+  [!param](/LinearFVKernels/LinearFVRZViscousSource/use_deviatoric_terms) in [LinearFVRZViscousSource.md] ), the source kernel also
   injects the $-\tfrac{2}{3} \mu \nabla \cdot \vec{u} / r$ correction so the combination of the
   two kernels reproduces the full cylindrical viscous operator.
 
-Therefore, for problems with space-dependent viscosities or densities in RZ, enable
+Therefore, for problems with space-dependent viscosities or densities in RZ, enable this kernel's
 [!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms) together with
-[!param](/LinearFVKernels/LinearFVRZViscousSource/use_deviatoric_terms) so the explicit hoop stress
+[!param](/LinearFVKernels/LinearFVRZViscousSource/use_deviatoric_terms) in [LinearFVRZViscousSource.md] so the explicit hoop stress
 matches the analytic forcing.
 
 For more information on the axisymmetric formulation we recommend visiting [!cite](peterson2018overview) and
