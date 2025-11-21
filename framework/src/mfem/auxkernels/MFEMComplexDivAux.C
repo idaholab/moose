@@ -9,47 +9,49 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexCurlAux.h"
+#include "MFEMComplexDivAux.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexCurlAux);
+registerMooseObject("MooseApp", MFEMComplexDivAux);
 
 InputParameters
-MFEMComplexCurlAux::validParams()
+MFEMComplexDivAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
   params.addClassDescription(
-      "Calculates the curl of a complex H(curl) conforming ND source variable and stores the result"
-      " on an H(div) conforming RT result complex auxvariable");
+      "Calculates the divergence of a complex H(div) conforming RT source variable and stores the result"
+      " on an L2 conforming result complex auxvariable");
   params.addRequiredParam<VariableName>("source",
-                                        "Vector H(curl) MFEMComplexVariable to take the curl of.");
+                                        "Vector H(div) MFEMComplexVariable to take the divergence of.");
   params.addParam<mfem::real_t>("scale_factor_real", 1.0, "Real part of the factor to scale result auxvariable by.");
   params.addParam<mfem::real_t>("scale_factor_imag", 0.0, "Imaginary part of the factor to scale result auxvariable by.");
+
   return params;
 }
 
-MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
+MFEMComplexDivAux::MFEMComplexDivAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_source_var_name)),
     _scale_factor_real(getParam<mfem::real_t>("scale_factor_real")),
     _scale_factor_imag(getParam<mfem::real_t>("scale_factor_imag")),
-    _curl(_source_var.real().ParFESpace(), _result_var.real().ParFESpace())
+    _div(_source_var.real().ParFESpace(), _result_var.real().ParFESpace())
 {
-  _curl.Assemble();
-  _curl.Finalize();
+  _div.Assemble();
+  _div.Finalize();
 }
 
 // Computes the auxvariable.
 void
-MFEMComplexCurlAux::execute()
+MFEMComplexDivAux::execute()
 {
   _result_var.real() = 0.0;
   _result_var.imag() = 0.0;
-  _curl.AddMult(_source_var.real(), _result_var.real(), _scale_factor_real);
-  _curl.AddMult(_source_var.imag(), _result_var.real(), -_scale_factor_imag);
-  _curl.AddMult(_source_var.real(), _result_var.imag(), _scale_factor_imag);
-  _curl.AddMult(_source_var.imag(), _result_var.imag(), _scale_factor_real);
+  _div.AddMult(_source_var.real(), _result_var.real(), _scale_factor_real);
+  _div.AddMult(_source_var.imag(), _result_var.real(), -_scale_factor_imag);
+  _div.AddMult(_source_var.real(), _result_var.imag(), _scale_factor_imag);
+  _div.AddMult(_source_var.imag(), _result_var.imag(), _scale_factor_real);
+
 }
 
 #endif
