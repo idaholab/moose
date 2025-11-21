@@ -15,10 +15,10 @@ each velocity component through the [!param](/LinearFVKernels/LinearFVRZViscousS
 requested.
 
 This kernel must operate on the radial velocity component only; attempting to apply it to a
-non-radial component results in a parameter error. In coupled RZ simulations, enable
+non-radial component results in a parameter error. In coupled RZ simulations, enable this kernel's
 [!param](/LinearFVKernels/LinearFVRZViscousSource/use_deviatoric_terms) together with
-[!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms) so that the combination of
-`LinearFVRZViscousSource` and `LinearWCNSFVMomentumFlux` reproduces the full cylindrical viscous
+[!param](/LinearFVKernels/LinearWCNSFVMomentumFlux/use_deviatoric_terms) in [LinearWCNSFVMomentumFlux.md] so that the combination of
+these kernels reproduces the full cylindrical viscous
 operator (including the explicit hoop-stress contribution discussed in the latter's documentation).
 
 ## RZ coordinate system

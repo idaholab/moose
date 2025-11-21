@@ -56,10 +56,10 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
     _var.computeCellGradients();
 
   const auto get_velocity_var =
-      [this](const std::string & param_name) -> const MooseLinearVariableFVReal *
+      [this](const std::string & param_name) -> MooseLinearVariableFVReal *
   {
     auto & var = _fe_problem.getVariable(_tid, getParam<SolverVariableName>(param_name));
-    auto ptr = dynamic_cast<const MooseLinearVariableFVReal *>(&var);
+    auto ptr = dynamic_cast<MooseLinearVariableFVReal *>(&var);
     if (!ptr)
       paramError(param_name, "The supplied variable must be a MooseLinearVariableFVReal.");
     return ptr;
@@ -78,7 +78,7 @@ LinearFVRZViscousSource::LinearFVRZViscousSource(const InputParameters & params)
       paramError("v", "The y-velocity must be provided when using deviatoric terms.");
 
     for (const auto dir : make_range(_dim))
-      const_cast<MooseLinearVariableFVReal *>(_velocity_vars[dir])->computeCellGradients();
+      _velocity_vars[dir]->computeCellGradients();
   }
 }
 
