@@ -15,4 +15,9 @@
                0 1'
     pitch = 5
   []
+  [sq3]
+      type = ExampleCSGInfiniteSquareMeshGenerator
+      side_length = 15
+      fill = 'cart_lat'
+  []
 []

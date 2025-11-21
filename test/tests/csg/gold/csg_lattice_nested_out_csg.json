@@ -6,22 +6,22 @@
       "region": "(+sq1_surf_plus_x & -sq1_surf_minus_x & -sq1_surf_plus_y & +sq1_surf_minus_y)"
     },
     "sq2_square_cell": {
-      "fill": "square_material",
-      "filltype": "CSG_MATERIAL",
+      "fill": "lat1_lattice",
+      "filltype": "LATTICE",
       "region": "(+sq2_surf_plus_x & -sq2_surf_minus_x & -sq2_surf_plus_y & +sq2_surf_minus_y)"
     },
     "sq3_square_cell": {
-      "fill": "cart_lat_lattice",
+      "fill": "lat2_lattice",
       "filltype": "LATTICE",
       "region": "(+sq3_surf_plus_x & -sq3_surf_minus_x & -sq3_surf_plus_y & +sq3_surf_minus_y)"
     }
   },
   "lattices": {
-    "cart_lat_lattice": {
+    "lat1_lattice": {
       "ncol": 2,
       "nrow": 2,
       "outertype": "VOID",
-      "pitch": 5.0,
+      "pitch": 3.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
         [
@@ -30,6 +30,30 @@
         ],
         [
           "sq1_univ",
+          "sq1_univ"
+        ]
+      ]
+    },
+    "lat2_lattice": {
+      "ncol": 3,
+      "nrow": 3,
+      "outertype": "VOID",
+      "pitch": 10.0,
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "sq2_univ",
+          "sq2_univ",
+          "sq2_univ"
+        ],
+        [
+          "sq2_univ",
+          "sq2_univ",
+          "sq2_univ"
+        ],
+        [
+          "sq2_univ",
+          "sq2_univ",
           "sq2_univ"
         ]
       ]
@@ -41,7 +65,7 @@
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": 2.0
+        "d": 1.0
       },
       "type": "CSG::CSGPlane"
     },
@@ -50,7 +74,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": -2.0
+        "d": -1.0
       },
       "type": "CSG::CSGPlane"
     },
@@ -59,7 +83,7 @@
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": -2.0
+        "d": -1.0
       },
       "type": "CSG::CSGPlane"
     },
@@ -68,7 +92,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": 2.0
+        "d": 1.0
       },
       "type": "CSG::CSGPlane"
     },
@@ -77,7 +101,7 @@
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": 1.5
+        "d": 3.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -86,7 +110,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": -1.5
+        "d": -3.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -95,7 +119,7 @@
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": -1.5
+        "d": -3.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -104,7 +128,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": 1.5
+        "d": 3.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -113,7 +137,7 @@
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": 7.5
+        "d": 17.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -122,7 +146,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": -7.5
+        "d": -17.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -131,7 +155,7 @@
         "a": -1.0,
         "b": 0.0,
         "c": 0.0,
-        "d": -7.5
+        "d": -17.5
       },
       "type": "CSG::CSGPlane"
     },
@@ -140,7 +164,7 @@
         "a": 0.0,
         "b": 1.0,
         "c": 0.0,
-        "d": 7.5
+        "d": 17.5
       },
       "type": "CSG::CSGPlane"
     }

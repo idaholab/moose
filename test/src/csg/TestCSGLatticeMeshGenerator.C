@@ -41,13 +41,11 @@ TestCSGLatticeMeshGenerator::TestCSGLatticeMeshGenerator(const InputParameters &
     _lattice_type(getParam<std::string>("lattice_type")),
     _pitch(getParam<Real>("pitch")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
+    _mesh_ptrs(getMeshes("inputs")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern"))
 {
   for (auto inp : _input_names)
-  {
     _input_csgs.push_back(&getCSGBaseByName(inp));
-    _mesh_ptrs.push_back(&getMeshByName(inp));
-  }
 }
 
 std::unique_ptr<MeshBase>
@@ -94,36 +92,9 @@ TestCSGLatticeMeshGenerator::generateCSG()
   // create the lattice based on the specified type
   std::string lat_name = mg_name + "_lattice";
   if (_lattice_type == "cartesian")
-  {
     csg_obj->createCartesianLattice(lat_name, _pitch, universe_pattern);
-  }
   else if (_lattice_type == "hexagonal")
-  {
     csg_obj->createHexagonalLattice(lat_name, _pitch, universe_pattern);
-  }
-
-  // create a cell and insert lattice as the fill
-  // make the cell a cube region where x dimension is pitch * max number of elements in a row
-  // and y dimension is pitch * number of rows
-  Real x_size = _pitch * max_row_size;
-  Real y_size = _pitch * _pattern.size();
-  // surfaces for regions for cell
-  std::unique_ptr<CSG::CSGSurface> surf_xmax =
-      std::make_unique<CSG::CSGPlane>(mg_name + "_surf_plus_x", 1.0, 0.0, 0.0, x_size / 2.0);
-  std::unique_ptr<CSG::CSGSurface> surf_xmin =
-      std::make_unique<CSG::CSGPlane>(mg_name + "_surf_minus_x", 1.0, 0.0, 0.0, -x_size / 2.0);
-  std::unique_ptr<CSG::CSGSurface> surf_ymax =
-      std::make_unique<CSG::CSGPlane>(mg_name + "_surf_plus_y", 0.0, 1.0, 0.0, y_size / 2.0);
-  std::unique_ptr<CSG::CSGSurface> surf_ymin =
-      std::make_unique<CSG::CSGPlane>(mg_name + "_surf_minus_y", 0.0, 1.0, 0.0, -y_size / 2.0);
-  auto & xmax = csg_obj->addSurface(std::move(surf_xmax));
-  auto & xmin = csg_obj->addSurface(std::move(surf_xmin));
-  auto & ymax = csg_obj->addSurface(std::move(surf_ymax));
-  auto & ymin = csg_obj->addSurface(std::move(surf_ymin));
-  // cell region
-  auto region = (-xmax & +xmin & -ymax & +ymin);
-  // create the cell with the lattice as the fill
-  csg_obj->createCell(mg_name + "_lattice_cell", csg_obj->getLatticeByName(lat_name), region);
 
   return csg_obj;
 }
