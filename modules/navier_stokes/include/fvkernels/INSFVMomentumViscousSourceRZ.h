@@ -13,9 +13,8 @@
 
 /**
  * Adds the axisymmetric viscous source term (-mu * u_r / r^2) that appears in the Laplacian of the
- * radial momentum equation in cylindrical coordinates (no swirl). This contribution needs to be
- * handled with an elemental kernel so that its diagonal contribution is available to the
- * Rhie-Chow interpolator.
+ * radial momentum equation in cylindrical coordinates (no swirl). This contribution
+ * is added to the Rhie-Chow interpolator as well.
  */
 class INSFVMomentumViscousSourceRZ : public INSFVElementalKernel
 {

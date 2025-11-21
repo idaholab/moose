@@ -19,8 +19,7 @@ index).
 !alert note title=Automatically added for WCNSFVFlowPhysics
 When using [WCNSFVFlowPhysics.md], this kernel is added automatically on blocks that use an RZ
 coordinate system. Set [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/add_rz_viscous_source)
-to `false` if the default behavior needs to be disabled (for instance when another object replaces
-this source term).
+to `false` if the default behavior needs to be disabled.
 
 !alert note
 The kernel expects the same viscosity functor that is passed to
