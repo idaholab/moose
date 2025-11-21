@@ -538,10 +538,7 @@ public:
    * @param lattice lattice to update
    * @param outer_name name of material to use as outer fill between lattice elements
    */
-  void setLatticeOuter(const CSGLattice & lattice, const std::string & outer_name)
-  {
-    const_cast<CSGLattice &>(lattice).updateOuter(outer_name);
-  }
+  void setLatticeOuter(const CSGLattice & lattice, const std::string & outer_name);
 
   /**
    * @brief Set the outer fill for the lattice to the universe provided. This will set the outer
@@ -557,10 +554,7 @@ public:
    *
    * @param lattice lattice to update
    */
-  void resetLatticeOuter(const CSGLattice & lattice)
-  {
-    const_cast<CSGLattice &>(lattice).resetOuter();
-  }
+  void resetLatticeOuter(const CSGLattice & lattice);
 
   /**
    * @brief Get all lattice objects
@@ -787,6 +781,9 @@ private:
 
   // check that universe being accessed is a part of this CSGBase instance
   bool checkUniverseInBase(const CSGUniverse & universe) const;
+
+  // check that lattice being accessed is a part of this CSGBase instance
+  bool checkLatticeInBase(const CSGLattice & lattice) const;
 
   /**
    * @brief Add a new cell to the cell list based on a cell reference.

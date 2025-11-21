@@ -126,7 +126,7 @@ protected:
   std::vector<std::reference_wrapper<const CSGLattice>> getAllLattices() const;
 
   /**
-   * @brief Get a Universe from the list by its name
+   * @brief Get a Lattice from the list by its name
    *
    * @param name name of universe
    * @return reference to CSGUniverse of the specified name
@@ -134,9 +134,9 @@ protected:
   CSGLattice & getLattice(const std::string & name) const;
 
   /**
-   * @brief rename the specified universe
+   * @brief rename the specified lattice
    *
-   * @param universe reference to universe whose name should be renamed
+   * @param lattice reference to lattice whose name should be renamed
    * @param name new name
    */
   void renameLattice(const CSGLattice & lattice, const std::string & name);
