@@ -13,7 +13,7 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
-#include "MFEMAuxKernel.h"
+#include "MFEMComplexAuxKernel.h"
 
 /**
  * Class to set an H(curl) auxvariable to be the gradient of a complex H1 scalar variable.
