@@ -24,7 +24,4 @@ public:
 
   virtual Real computeNusseltNumber(const FrictionStruct & friction_info,
                                     const NusseltStruct & nusselt_info) const override;
-  virtual Real computeHTC(const FrictionStruct & friction_info,
-                          const NusseltStruct & nusselt_info,
-                          const Real & conduction_k) const override;
 };

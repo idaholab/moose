@@ -26,11 +26,9 @@ SCMHTCKazimiCarelli::SCMHTCKazimiCarelli(const InputParameters & parameters)
 }
 
 Real
-SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & friction_args,
+SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args*/,
                                           const NusseltStruct & nusselt_args) const
 {
-  (void)friction_args; // silence unused parameter
-
   // Check that kazimi-carelli is not used for the duct (not supported yet)
   if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
     mooseError("'kazimi-carelli' is not yet supported for the 'duct_htc_correlation'.");
@@ -39,9 +37,9 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & friction_args,
 
   const auto Pe = pre.Re * pre.Pr;
 
-  if (Pe < 1.5 || Pe > 1e4)
-    mooseDoOnce(mooseWarning("Pr number out of range in the Kazimi Carelli correlation for "
-                             "pin or duct surface temperture calculation."));
+  if (Pe < 10 || Pe > 5000)
+    flagSolutionWarning("Pe number out of range in the Kazimi Carelli correlation for "
+                        "pin or duct surface temperture calculation.");
 
   // Laminar regime
   if (pre.Re <= pre.ReL)
@@ -61,15 +59,4 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & friction_args,
   const auto NuT = 4.0 + 0.33 * std::pow(pre.poD, 3.8) * std::pow((Pe / 1e2), 0.86) +
                    0.16 * std::pow(pre.poD, 5);
   return blended_Nu(NuT);
-}
-
-Real
-SCMHTCKazimiCarelli::computeHTC(const FrictionStruct & friction_args,
-                                const NusseltStruct & nusselt_args,
-                                const Real & k) const
-{
-  // Compute HTC
-  auto Nu = computeNusseltNumber(friction_args, nusselt_args);
-  auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
-  return Nu * k / Dh_i;
 }

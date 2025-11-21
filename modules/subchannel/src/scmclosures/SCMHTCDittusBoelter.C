@@ -26,16 +26,14 @@ SCMHTCDittusBoelter::SCMHTCDittusBoelter(const InputParameters & parameters)
 }
 
 Real
-SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & friction_args,
+SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & /*friction_args*/,
                                           const NusseltStruct & nusselt_args) const
 {
-  (void)friction_args; // silence unused parameter
-
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
 
   if (pre.Pr < 0.7 || pre.Pr > 1.6e2)
-    mooseDoOnce(mooseWarning("Pr number out of range in the Dittus-Boelter correlation for "
-                             "pin or duct surface temperature calculation."));
+    flagSolutionWarning("Prandtl number out of range in the Dittus-Boelter correlation for "
+                        "pin or duct surface temperature calculation.");
 
   // Laminar regime
   if (pre.Re <= pre.ReL)
@@ -54,15 +52,4 @@ SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & friction_args,
 
   const auto NuT = 0.023 * std::pow(pre.Re, 0.8) * std::pow(pre.Pr, 0.4);
   return blended_Nu(NuT);
-}
-
-Real
-SCMHTCDittusBoelter::computeHTC(const FrictionStruct & friction_args,
-                                const NusseltStruct & nusselt_args,
-                                const Real & k) const
-{
-  // Compute HTC
-  auto Nu = computeNusseltNumber(friction_args, nusselt_args);
-  auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
-  return Nu * k / Dh_i;
 }

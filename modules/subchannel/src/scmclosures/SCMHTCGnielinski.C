@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SCMHTCGnielinski.h"
+#include "SCMFrictionClosureBase.h"
 
 registerMooseObject("SubChannelApp", SCMHTCGnielinski);
 
@@ -32,8 +33,8 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
 
   if (pre.Pr < 1e-5 || pre.Pr > 2e3)
-    mooseDoOnce(mooseWarning("Pr number out of range in the Gnielinski correlation for "
-                             "pin or duct surface temperature calculation."));
+    flagSolutionWarning("Prandtl number out of range in the Gnielinski correlation for "
+                        "pin or duct surface temperature calculation.");
 
   // Laminar regime
   if (pre.Re <= pre.ReL)
@@ -58,15 +59,4 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
   const auto NuT = f_darcy * (pre.Re - 1e3) * (pre.Pr + 0.01) /
                    (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(pre.Pr + 0.01, 2. / 3.) - 1.));
   return blended_Nu(NuT);
-}
-
-Real
-SCMHTCGnielinski::computeHTC(const FrictionStruct & friction_args,
-                             const NusseltStruct & nusselt_args,
-                             const Real & k) const
-{
-  // Compute HTC
-  auto Nu = computeNusseltNumber(friction_args, nusselt_args);
-  auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
-  return Nu * k / Dh_i;
 }

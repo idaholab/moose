@@ -53,8 +53,19 @@ SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_arg
                         ? 4.0
                         : (info.subch_type == EChannelType::EDGE ? 3.7 : 3.3);
 
-  info.ReL = 300 * std::pow(10.0, 1.7 * (info.poD - 1.0));
-  info.ReT = 1e4 * std::pow(10.0, 1.7 * (info.poD - 1.0));
+  info.ReL = 320 * std::pow(10.0, 1.7 * (info.poD - 1.0));
+  info.ReT = 1e4 * std::pow(10.0, 0.7 * (info.poD - 1.0));
 
   return info;
+}
+
+Real
+SCMHTCClosureBase::computeHTC(const FrictionStruct & friction_args,
+                              const NusseltStruct & nusselt_args,
+                              const Real k) const
+{
+  // Compute HTC
+  auto Nu = computeNusseltNumber(friction_args, nusselt_args);
+  auto Dh_i = 4.0 * friction_args.S / friction_args.w_perim;
+  return Nu * k / Dh_i;
 }

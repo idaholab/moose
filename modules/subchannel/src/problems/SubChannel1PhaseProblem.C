@@ -115,6 +115,9 @@ SubChannel1PhaseProblem::validParams()
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     PostprocessorInterface(this),
+    _friction_args(/*i_ch=*/0, /*Re=*/1.0, /*S=*/0.0, /*w_perim=*/0.0),
+    _nusselt_args(
+        /*Re=*/1.0, /*Pr=*/1.0, std::numeric_limits<unsigned int>::max(), /*iz=*/0, /*i_ch=*/0),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -149,9 +152,9 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _Tduct_soln(nullptr)
 {
   if (_pin_mesh_exist && !isParamValid("pin_HTC_closure"))
-    mooseError(name(), ": pin_HTC_closure is required when a pin mesh exists.");
+    paramError("pin_HTC_closure", "required when a pin mesh exists.");
   if (_duct_mesh_exist && !isParamValid("duct_HTC_closure"))
-    mooseError(name(), ": duct_HTC_closure is required when a duct mesh exists.");
+    paramError("duct_HTC_closure", "required when a duct mesh exists.");
   // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();

@@ -43,6 +43,7 @@ public:
   const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
   const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
 
+  /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
   {
     unsigned int i_ch = 0;
@@ -50,13 +51,14 @@ public:
     Real S = 0.0;
     Real w_perim = 0.0;
 
-    FrictionStruct() = default;
+    FrictionStruct() = delete;
     FrictionStruct(unsigned int i_ch_, Real Re_, Real S_, Real w_perim_)
       : i_ch(i_ch_), Re(Re_), S(S_), w_perim(w_perim_)
     {
     }
   } _friction_args;
 
+  /// structure with the needed information to compute the Nusselt number at a specific subchannel cell and heated surface
   struct NusseltStruct
   {
     Real Re = 1.0;
@@ -65,7 +67,7 @@ public:
     unsigned int iz = 0;
     unsigned int i_ch = 0;
 
-    NusseltStruct() = default;
+    NusseltStruct() = delete;
     NusseltStruct(Real Re_, Real Pr_, unsigned int i_pin_, unsigned int iz_, unsigned int i_ch_)
       : Re(Re_), Pr(Pr_), i_pin(i_pin_), iz(iz_), i_ch(i_ch_)
     {

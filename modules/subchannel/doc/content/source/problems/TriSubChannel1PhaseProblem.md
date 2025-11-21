@@ -9,7 +9,7 @@
 This class solves for the subchannel flow variables in the case of subchannels/pins arranged in a triangular lattice.
 It inherits from the base class : `SubChannel1PhaseProblem`. Information regarding the solver can be found in [subchannel_theory.md].
 
-Pin surface temperature is calculated at the end of the solve using a user defined correlation.
+Pin surface temperature is calculated at the end of the solve using a user-selected correlation.
 
 ## Channel-to-Pin and Channel-to-Duct Heat Transfer Modeling
 
@@ -22,12 +22,11 @@ T_{s,\text{pin}}(z) = \frac{1}{N} \sum_{sc=1}^N T_{bulk,sc}(z) + \frac{q'_{\text
 where:
 
 - $T_{s,\text{pin}}(z)$ is the surface temperature for the pin at a height $z$
-- $N$ is the number of subchannel neighboring the pin
+- $N$ is the number of subchannels neighboring the pin
 - $T_{bulk,sc}(z)$ is the bulk temperature for a subchannel $sc$ neighboring the pin at a height $z$
 - $q'_{\text{pin}}(z)$ is the linear heat generation rate for the pin at a height $z$
 - $D_{\text{pin}}(z)$ is the pin diameter at a height $z$
-- $h_{sc}(z)$ is the heat exchange coefficient for a subchannel $sc$ neighboring the pin at a height $z$
-
+- $h_{sc}(z)$ is the heat exchange coefficient for a subchannel $sc$ neighboring the pin at a height $z$.
 
 For the duct, the duct surface temperature is defined as follows:
 
@@ -52,11 +51,13 @@ where:
 - $k$ is the thermal conductivity of the subchannel neighboring the structure
 - $D_h$ is the hydraulics diameter of the subchannel neighboring the structure
 
-The modeling of the Nusselt number and consecuently of the heat transfer coefficient `h` is defined by the user. The closure models available to the user that are implemented in SCM are the following:
+The modeling of the Nusselt number and consequently of the heat transfer coefficient `h` is selected by the user through a closure. The closure models available to the user that are implemented in SCM are the following:
 
-- [Dittus-Boelter](SCMHTCDittusBoelter.md)
-- [Gnielinski](SCMHTCGnielinski.md)
-- [Kazimi-Carelli](SCMHTCKazimiCarelli.md)
+- [Dittus-Boelter](SCMHTCDittusBoelter.md) (recommended for water coolants)
+- [Gnielinski](SCMHTCGnielinski.md) (recommended for liquid metals)
+- [Kazimi-Carelli](SCMHTCKazimiCarelli.md) (recommended for liquid metals)
+
+All these models inherit from the base class: [SCMHTCClosureBase](SCMHTCClosureBase.md)
 
 ## Example Input File Syntax
 
