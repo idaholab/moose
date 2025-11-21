@@ -153,7 +153,8 @@ public:
    * @param univ_name name of universe
    * @return vector of locations (pairs of ints)
    */
-  const std::vector<std::pair<int, int>> getUniverseIndices(const std::string & univ_name) const;
+  const std::vector<std::pair<unsigned int, unsigned int>>
+  getUniverseIndices(const std::string & univ_name) const;
 
   /**
    * @brief check that any provided list of list of CSGUniverses are the correct dimensions for the
