@@ -13,7 +13,7 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
-#include "MFEMAuxKernel.h"
+#include "MFEMComplexAuxKernel.h"
 
 /*
  * Class to scale and sum an arbitrary number of MFEM complex variables into an auxiliary variable.
