@@ -1121,8 +1121,14 @@ TEST(CSGBaseTest, testUniverseLinking)
   Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
                                  "Universe with name univ2 is not linked to root universe.");
 
+  // set the outer to a universe, universe should also not be linked
+  auto & univ_out = csg_obj->createUniverse("univ_out");
+  csg_obj->setLatticeOuter(lat, univ_out);
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
+                                 "Universe with name univ_out is not linked to root universe.");
+
   // fill a new cell with the lattice, linking it to root, confirm no warning is raised when checked
-  // linking tree: ROOT_UNIVERSE -> c2 -> lat1 -> univ2
+  // linking tree: ROOT_UNIVERSE -> c2 -> lat1 -> univ2 + univ_out
   csg_obj->createCell("c2", lat, +s1);
   ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
 }

@@ -666,6 +666,11 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
           getLinkedUniverses(lattice_univ, linked_universe_names);
         }
       }
+      if (lattice.getOuterType() == "UNIVERSE")
+      {
+        const CSGUniverse & outer_univ = lattice.getOuterUniverse();
+        getLinkedUniverses(outer_univ, linked_universe_names);
+      }
     }
 }
 
