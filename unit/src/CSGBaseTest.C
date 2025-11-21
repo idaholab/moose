@@ -778,6 +778,9 @@ TEST(CSGBaseTest, testAddLattice)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   auto & univ = csg_obj->createUniverse("uni");
+  auto csg_obj2 = std::make_unique<CSG::CSGBase>(); // used for error checking
+  auto & univ2 = csg_obj2->createUniverse("uni");   // universe of same name from different base
+
   {
     // create a lattice as a unique pointer and manually add it to the CSGBase (this is what would
     // be done for a custom lattice type defined outside of the main framework)
@@ -793,8 +796,6 @@ TEST(CSGBaseTest, testAddLattice)
   }
   {
     // create a custom lattice containing a universe that was not in this base (raise error)
-    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
-    auto & univ2 = csg_obj2->createUniverse("uni");
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs2 = {{univ2}};
     std::unique_ptr<CSGCartesianLattice> custom_lat2 =
         std::make_unique<CSGCartesianLattice>("custom_lat2", 1.0, univs2);
@@ -804,6 +805,20 @@ TEST(CSGBaseTest, testAddLattice)
                                    "Cannot add lattice custom_lat2 of type "
                                    "CSG::CSGCartesianLattice. Universe uni is not in the CSGBase "
                                    "instance.");
+  }
+  {
+    // create a custom lattice with a universe outer that is not a part of this base
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{univ}};
+    std::unique_ptr<CSGCartesianLattice> custom_lat3 =
+        std::make_unique<CSGCartesianLattice>("custom_lat3", 1.0, univs);
+    // set outer universe to one from different base
+    custom_lat3->updateOuter(univ2);
+    // try to add to first CSGBase - raises error because outer universe is not in this base
+    Moose::UnitUtils::assertThrows([&csg_obj, &custom_lat3]()
+                                   { csg_obj->addLattice(std::move(custom_lat3)); },
+                                   "Cannot add lattice custom_lat3 of type "
+                                   "CSG::CSGCartesianLattice. Outer universe uni is not in the "
+                                   "CSGBase instance.");
   }
 }
 

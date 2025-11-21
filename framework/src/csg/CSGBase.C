@@ -437,6 +437,13 @@ CSGBase::addLattice(std::unique_ptr<CSGLattice> lattice)
                    ". Universe " + univ.getName() + " is not in the CSGBase instance.");
     }
   }
+  if (lattice->getOuterType() == "UNIVERSE")
+  {
+    const CSGUniverse & outer_univ = lattice->getOuterUniverse();
+    if (!checkUniverseInBase(outer_univ))
+      mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
+                 ". Outer universe " + outer_univ.getName() + " is not in the CSGBase instance.");
+  }
   return _lattice_list.addLattice(std::move(lattice));
 }
 

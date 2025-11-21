@@ -250,6 +250,7 @@ protected:
   ///@{
   FRIEND_TEST(CSGLatticeTest, testSetName);
   FRIEND_TEST(CSGLatticeTest, testUpdateOuter);
+  FRIEND_TEST(CSGBaseTest, testAddLattice);
   ///@}
 #endif
 };
