@@ -90,7 +90,7 @@ These applications require a license. Many of them can be obtained through the [
 - [BISON](https://inlsoftware.inl.gov/product/bison) - Flagship fuels performance code
 - [Centipede](https://www.sciencedirect.com/science/article/pii/S0022311520301884) - A tool to inform engineering scale simulations with atomistic data, developed at LANL
 - [GRIFFIN](https://inlsoftware.inl.gov/product/griffin) - Reactor physics code co-developed between Argonne and Idaho National Laboratory
-- [GRIZZLY](https://inlsoftware.inl.gov/product/grizzly) - Nuclear Plant System Degradation Modeling
+- [Grizzly](https://inlsoftware.inl.gov/product/grizzly) - Nuclear Plant Component Degradation Modeling
 - [MARMOT](https://inlsoftware.inl.gov/product/marmot) - Nuclear materials phase field and mechanics application
 - [PRONGHORN](https://inlsoftware.inl.gov/product/pronghorn) - Transient prismatic and pebble bed reactor analysis code
 - [RELAP7](https://inlsoftware.inl.gov/product/relap7) - Next Generation nuclear reactor system safety analysis code (compressible flow)
