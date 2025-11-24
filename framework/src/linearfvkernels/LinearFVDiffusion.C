@@ -25,7 +25,7 @@ LinearFVDiffusion::validParams()
       true,
       "If the nonorthogonal correction should be used when computing the normal gradient.");
   params.addParam<MooseFunctorName>("diffusion_coeff", 1.0, "The diffusion coefficient.");
-  params.addParam<InterpolationMethodName>(
+  params.addParam<UserObjectName>(
       "coeff_interp_method",
       "Optional finite volume interpolation method used to compute a face-centered diffusion "
       "coefficient. If omitted, the functor is evaluated directly on the face.");
