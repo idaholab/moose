@@ -128,8 +128,6 @@ do
       -DCMAKE_CXX_FLAGS_PROFILE="-O2 -g -DNDEBUG -fno-omit-frame-pointer" \
       -DCMAKE_CUDA_FLAGS_PROFILE="-O2 -g -DNDEBUG -fno-omit-frame-pointer" \
       \
-      -DMFEM_ENABLE_MINIAPPS=YES \
-      \
       -DMFEM_USE_CEED=YES \
       -DMFEM_USE_CONDUIT=YES \
       -DMFEM_USE_MPI=YES \
@@ -156,7 +154,8 @@ do
   cd "$MFEM_BUILD_DIR_BASE-$METHOD" ||
   { echo "Error: Need to run this script without --fast at least once."; exit 1; }
 
-  make -j ${MOOSE_JOBS:-4}
+  make -j ${MOOSE_JOBS:-4} install
+  cd miniapps/common
   make -j ${MOOSE_JOBS:-4} install
 
   # Save the configuration file for this build method
