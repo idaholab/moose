@@ -27,7 +27,7 @@ if "MooseFMU.test" not in sys.modules:
     assert _TEST_SPEC.loader is not None
     _TEST_SPEC.loader.exec_module(_package_module)
 
-from MooseFMU import fmu_utils
+from moosefmu import fmu_utils
 
 
 class TestConfigureFmuLogging(unittest.TestCase):
