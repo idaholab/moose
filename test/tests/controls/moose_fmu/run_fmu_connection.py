@@ -1,23 +1,23 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://mooseframework.inl.gov
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
 import time
 import matplotlib.pyplot as plt
 from fmpy import extract, instantiate_fmu
 from fmpy.simulation import apply_start_values
-from MooseFMU import (
+from moosefmu import (
     fmu_info,
     get_real,
     set_real,
     set_string,
 )
-from MooseFMU import configure_fmu_logging
+from moosefmu import configure_fmu_logging
 import math
 import pandas as pd
 import moose_fmu_tester
@@ -51,11 +51,11 @@ Notes
   mapping by name in production code to avoid brittle indexing.
 """
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logger = configure_fmu_logging(logger_name=__name__)
     # Filenames and simulation parameters
-    fmu_filename = 'Dahlquist.fmu'
-    moose_filename = 'MooseTest.fmu'
+    fmu_filename = "Dahlquist.fmu"
+    moose_filename = "MooseTest.fmu"
 
     start_time = 0.0
     stop_time = 2.0
@@ -80,19 +80,19 @@ if __name__ == '__main__':
     moose_instance.setupExperiment()
     moose_instance.enterInitializationMode()
 
-   # Provide your own MOOSE command for non testing senarios
+    # Provide your own MOOSE command for non testing senarios
     moose_command = moose_fmu_tester.test_controller()
 
     apply_start_values(
-            fmu=moose_instance,
-            model_description=moose_description,
-            start_values={
-                "flag":             flag,
-                'moose_command':    moose_command,
-                "server_name":      "web_server",
-                "max_retries":      10,
-            },
-        )
+        fmu=moose_instance,
+        model_description=moose_description,
+        start_values={
+            "flag": flag,
+            "moose_command": moose_command,
+            "server_name": "web_server",
+            "max_retries": 10,
+        },
+    )
 
     moose_instance.exitInitializationMode()
 
@@ -107,10 +107,11 @@ if __name__ == '__main__':
     moose_times_ref, diffused_ref = [], []
     t = start_time
     while t <= stop_time:
-        moose_instance.doStep(currentCommunicationPoint=t,
-                              communicationStepSize=step_size)
-        moose_times_ref.append(get_real(moose_instance, vr_map, 'moose_time'))
-        diffused_ref.append(get_real(moose_instance, vr_map, 'diffused'))
+        moose_instance.doStep(
+            currentCommunicationPoint=t, communicationStepSize=step_size
+        )
+        moose_times_ref.append(get_real(moose_instance, vr_map, "moose_time"))
+        diffused_ref.append(get_real(moose_instance, vr_map, "diffused"))
         t += step_size
 
     moose_instance.terminate()
@@ -127,15 +128,15 @@ if __name__ == '__main__':
     moose_instance.enterInitializationMode()
 
     apply_start_values(
-            fmu=moose_instance,
-            model_description=moose_description,
-            start_values={
-                "flag":             flag,
-                'moose_command': "../../../moose_test-opt -i fmu_diffusion.i",
-                "server_name":      "web_server",
-                "max_retries":      10,
-            },
-        )
+        fmu=moose_instance,
+        model_description=moose_description,
+        start_values={
+            "flag": flag,
+            "moose_command": "../../../moose_test-opt -i fmu_diffusion.i",
+            "server_name": "web_server",
+            "max_retries": 10,
+        },
+    )
 
     moose_instance.exitInitializationMode()
 
@@ -144,24 +145,28 @@ if __name__ == '__main__':
     t = start_time
     while t <= stop_time:
         # Step FMU
-        fmu_instance.doStep(currentCommunicationPoint=t,
-                             communicationStepSize=step_size)
-        val = fmu_instance.getReal([fmu_description.modelVariables[1].valueReference])[0]
+        fmu_instance.doStep(
+            currentCommunicationPoint=t, communicationStepSize=step_size
+        )
+        val = fmu_instance.getReal([fmu_description.modelVariables[1].valueReference])[
+            0
+        ]
         times.append(t)
 
         # Change boundary condition at specified time
         if math.isclose(t, change_time, rel_tol=1e-5, abs_tol=1e-9):
             newBC = val * 10
-            set_string(moose_instance, vr_map, 'BC_info', "BCs/left/value")
-            set_real(moose_instance, vr_map, 'BC_value', newBC)
+            set_string(moose_instance, vr_map, "BC_info", "BCs/left/value")
+            set_real(moose_instance, vr_map, "BC_value", newBC)
             logger.info("Wait 2s to get the boundary condition set")
             time.sleep(2)
 
         # Step Moose
-        moose_instance.doStep(currentCommunicationPoint=t,
-                               communicationStepSize=step_size)
-        moose_times.append(get_real(moose_instance, vr_map, 'moose_time'))
-        diffused.append(get_real(moose_instance, vr_map, 'diffused'))
+        moose_instance.doStep(
+            currentCommunicationPoint=t, communicationStepSize=step_size
+        )
+        moose_times.append(get_real(moose_instance, vr_map, "moose_time"))
+        diffused.append(get_real(moose_instance, vr_map, "diffused"))
 
         t += step_size
 
@@ -184,13 +189,12 @@ if __name__ == '__main__':
 
     # Plot comparison
     plt.figure()
-    plt.plot(moose_times_ref, diffused_ref, label='Reference', linewidth=2)
-    plt.plot(moose_times, diffused, label='Coupled', linestyle='--', linewidth=2)
-    plt.xlabel('time')
-    plt.ylabel('Averaged Temperature in 2D Diffusion Channel')
-    plt.title('Reference vs. Coupled FMUs Temperature Over time')
+    plt.plot(moose_times_ref, diffused_ref, label="Reference", linewidth=2)
+    plt.plot(moose_times, diffused, label="Coupled", linestyle="--", linewidth=2)
+    plt.xlabel("time")
+    plt.ylabel("Averaged Temperature in 2D Diffusion Channel")
+    plt.title("Reference vs. Coupled FMUs Temperature Over time")
     plt.legend()
     plt.grid(True)
-    plt.savefig('temp_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig("temp_comparison.png", dpi=300, bbox_inches="tight")
     plt.close()
-

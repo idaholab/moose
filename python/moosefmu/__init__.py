@@ -8,7 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """MOOSE FMU interface base classes and helper utilities."""
-from .MOOSE2FMU import Moose2FMU
+from .moose2fmu import Moose2FMU
 from .fmu_utils import (
     configure_fmu_logging,
     fmu_info,

@@ -1,21 +1,21 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from pythonfmu.enums import Fmi2Causality, Fmi2Variability
 from pythonfmu.variables import Real, String
 from pythonfmu.default_experiment import DefaultExperiment
-from MooseFMU import Moose2FMU
+from moosefmu import Moose2FMU
+
 
 class MooseTest(Moose2FMU):
-    """Example FMU demonstrating the typical Moose2FMU integration flow.
+    """Example FMU demonstrating the typical Moose2FMU integration flow."""
 
-    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -67,9 +67,7 @@ class MooseTest(Moose2FMU):
 
         self.logger.info("MooseTest instance created.")
 
-    def do_step(self,
-                current_time: float,
-                step_size:    float) -> bool:
+    def do_step(self, current_time: float, step_size: float) -> bool:
         """Advance the FMU by a single macro step.
 
         The body of ``do_step`` showcases the canonical Moose2FMU workflow:
@@ -88,7 +86,8 @@ class MooseTest(Moose2FMU):
         if self.BC_info:
             if self.set_controllable_real(self.BC_info, self.BC_value):
                 self.logger.info(
-                    f"Change boundary condition {self.BC_info} to {self.BC_value}")
+                    f"Change boundary condition {self.BC_info} to {self.BC_value}"
+                )
 
         # Synchronize MOOSE simulation time with the FMU (supports MOOSE
         # simulation time stepping mechanism).
@@ -131,7 +130,4 @@ class MooseTest(Moose2FMU):
             # resume MOOSE simulation after sync
             self.control.setContinue()
 
-
-
         return True
-

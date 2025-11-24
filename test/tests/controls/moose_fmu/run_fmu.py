@@ -1,13 +1,13 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseFMU import configure_fmu_logging
+from moosefmu import configure_fmu_logging
 import moose_fmu_tester
 
 """
@@ -37,15 +37,13 @@ if __name__ == "__main__":
     logger = configure_fmu_logging(debug=FMU_DEBUG_LOGGING, logger_name=__name__)
 
     # Provide your own MOOSE command for non testing senarios
-    cmd = moose_fmu_tester.test_controller()
+    cmd = "/home/lim2/rod_data/projects/worktrees/moose-fmi/test/moose_test-opt -i fum_diffusion.i"  # moose_fmu_tester.test_controller()
 
     t0, t1, dt = 0, 1, 0.5
-    moose_filename = 'MooseTest.fmu'
+    moose_filename = "MooseTest.fmu"
     flag = "MULTIAPP_FIXED_POINT_END"
-    result1 = moose_fmu_tester.simulate_moose_fmu(moose_filename, t0, t1, dt, flag, cmd, debug_logging=FMU_DEBUG_LOGGING)
+    result1 = moose_fmu_tester.simulate_moose_fmu(
+        moose_filename, t0, t1, dt, flag, cmd, debug_logging=FMU_DEBUG_LOGGING
+    )
     logger.info("Results from simulate_fmu:")
     moose_fmu_tester.print_result(result1)
-
-
-
-
