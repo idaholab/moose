@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NestedCellUniverseMeshGenerator.h"
+#include "NestedLatticeCellUniverseMeshGenerator.h"
 #include "CSGBase.h"
 #include "CSGSphere.h"
 
-registerMooseObject("MooseTestApp", NestedCellUniverseMeshGenerator);
+registerMooseObject("MooseTestApp", NestedLatticeCellUniverseMeshGenerator);
 
 InputParameters
-NestedCellUniverseMeshGenerator::validParams()
+NestedLatticeCellUniverseMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -26,7 +26,8 @@ NestedCellUniverseMeshGenerator::validParams()
   return params;
 }
 
-NestedCellUniverseMeshGenerator::NestedCellUniverseMeshGenerator(const InputParameters & params)
+NestedLatticeCellUniverseMeshGenerator::NestedLatticeCellUniverseMeshGenerator(
+    const InputParameters & params)
   : MeshGenerator(params),
     _inner_rad(getParam<Real>("inner_radius")),
     _outer_rad(getParam<Real>("outer_radius")),
@@ -35,14 +36,14 @@ NestedCellUniverseMeshGenerator::NestedCellUniverseMeshGenerator(const InputPara
 }
 
 std::unique_ptr<MeshBase>
-NestedCellUniverseMeshGenerator::generate()
+NestedLatticeCellUniverseMeshGenerator::generate()
 {
   auto null_mesh = nullptr;
   return null_mesh;
 }
 
 std::unique_ptr<CSG::CSGBase>
-NestedCellUniverseMeshGenerator::generateCSG()
+NestedLatticeCellUniverseMeshGenerator::generateCSG()
 {
   // initialize a CSGBase object
   auto csg_obj = std::make_unique<CSG::CSGBase>();
