@@ -129,8 +129,18 @@ CSGBase::addLatticeToList(const CSGLattice & lattice)
       current_univ_list.push_back(addUniverseToList(univ_ref.get()));
     current_univ_map.push_back(current_univ_list);
   }
+
+  // Set universes only if lattice has universes defined
   if (current_univ_map.size() > 0)
     cloned_lattice->setUniverses(current_univ_map);
+
+  // Update reference to outer universe if it exists
+  if (lattice.getOuterType() == "UNIVERSE")
+  {
+    const auto & outer_univ_ref = addUniverseToList(lattice.getOuterUniverse());
+    cloned_lattice->updateOuter(outer_univ_ref);
+  }
+
   // Use addLattice to add the cloned lattice
   return addLattice(std::move(cloned_lattice));
 }
