@@ -1,22 +1,27 @@
 # MOOSE FMU Interface
 
-The `MOOSEFMU` defines the `Moose2FMU` base class which contains the boilerplate needed to wrap a MOOSE simulation as a Functional Mock-up Unit (FMU). Users only need to implement their own `__init__` and `do_step` methods when deriving from `Moose2FMU`.
+The `MOOSEFMU` defines the `Moose2FMU` Python base class which contains the boilerplate needed to wrap a MOOSE simulation as a Functional Mock-up Unit (FMU) using the FMI 2.0 standard. Users only need to implement their own `__init__` and `do_step` methods when deriving from `Moose2FMU`.
 
 ### Initialization Parameters
 
-`Moose2FMU` accepts a number of keyword arguments that configure how the
-underlying MOOSE simulation is launched and interacted with:
+`Moose2FMU` accepts a handful of keyword arguments that configure how the
+underlying MOOSE simulation is launched and synchronized. The example FMU tests
+in `test/tests/controls/moose_fmu` pass these parameters as FMI start values, so
+you can see them in action in `run_fmu.py` and the `simulate_moose_fmu` helper
+inside `moose_fmu_tester.py`:
 
-- `flag`: Optional flag that is forwarded to the MOOSE input deck.
-- `moose_mpi` / `mpi_num`: Configure MPI launching when running distributed
-  MOOSE executables.
-- `moose_executable` / `moose_inputfile`: Path to the simulation binary and the
-  input file that should be executed inside the FMU.
+- `flag`: Optional user-defined synchronization flag that supplements the
+  default `INITIAL`, `MULTIAPP_FIXED_POINT_BEGIN`, and `MULTIAPP_FIXED_POINT_END`
+  signals.
+- `moose_command`: Full command string used to launch the MOOSE executable and
+  input file (for example, including MPI launchers when needed).
 - `server_name`: Name of the `MooseControl` server block to connect to.
 - `max_retries`: Number of times helper utilities will poll the control server
   before aborting.
 - `dt_tolerance`: Permitted synchronization tolerance between FMU time and the
   MOOSE simulation clock.
+
+!listing python/MooseFMU/MOOSE2FMU.py start=def __init__ end=# Default synchronization and data retrieval flags
 
 The class also exposes a ``default_experiment`` that can be customized if the
 FMU should advertise a different start/stop time or nominal step size.
@@ -67,7 +72,7 @@ into these defaults, and the higher-level helpers such as
 `get_postprocessor_value` also accept per-call `flag` arguments. Passing custom
 flags in these locations allows FMUs to react to user-defined synchronization
 points while still benefiting from the built-in defaults. Refer to
-[SetupInterface.md]for additional details on
+[SetupInterface.md] for additional details on
 MOOSE execute flags.
 
 ### Creating a Custom FMU
@@ -115,20 +120,24 @@ utilities described above:
 Save the custom class in a Python file and use [`pythonfmu`](https://github.com/NTNU-IHB/PythonFMU) to build the FMU:
 
 ```bash
-pythonfmu build custom_moose.py
+pythonfmu build MooseTest.py
 ```
 
-The resulting `.fmu` file can then be imported into any compliant co-simulation environment.
+The resulting `.fmu` file can then be imported into any standard-compliant co-simulation environment.
 
 ### Testing the FMU
 
 Sample helper scripts in `test/tests/controls/moose_fmu` demonstrate how to exercise a
-generated FMU with [`fmpy`](https://github.com/CATIA-Systems/FMPy):
+generated FMU with [`fmpy`](https://github.com/CATIA-Systems/FMPy)and show the
+initialization parameters in context:
 
 - `run_fmu.py` runs `MooseTest.fmu` in a stand-alone mode using `simulate_fmu` and
   prints the time, `moose_time` and `diffused` outputs.
 - `run_fmu_connection.py` shows how to couple `MooseTest.fmu` with another FMU (e.g.,
   `Dahlquist.fmu`) and change boundary conditions during the simulation.
+- `run_fmu_step_by_step.py` walks through the FMU initialization sequence
+  (`instantiate → setupExperiment → enterInitializationMode → apply_start_values →
+  exitInitializationMode`), making it clear where each start value is applied.
 
 To try the examples:
 
@@ -138,8 +147,3 @@ python run_fmu.py               # stand‑alone Moose FMU
 python run_fmu_connection.py    # coupled FMUs example
 ```
 
-!syntax parameters /Controls/MOOSEFMU
-
-!syntax inputs /Controls/MOOSEFMU
-
-!syntax children /Controls/MOOSEFMU
