@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMComplexIntegratedBC.h"
 
 class MFEMRWTE10IntegratedBC : public MFEMComplexIntegratedBC

@@ -8,5 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "Moose.h"
 extern const ExecFlagType EXEC_JUST_GO;

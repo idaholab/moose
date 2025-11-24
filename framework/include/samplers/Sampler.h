@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "Shuffle.h"
 #include "DenseMatrix.h"
 #include "MooseObject.h"

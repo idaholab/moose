@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "MooseRandom.h"
 #include "libmesh/communicator.h"
 #include "libmesh/parallel.h"

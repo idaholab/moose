@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_MFEM_ENABLED
+
 #include "CoefficientMap.h"
 
 namespace Moose::MFEM

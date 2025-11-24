@@ -10,11 +10,9 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "Postprocessor.h"
 #include "MFEMGeneralUserObject.h"
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
 
 /**
  * Postprocessor for MFEM results. Must inherit from Postprocessor in

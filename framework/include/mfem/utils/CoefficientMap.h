@@ -10,8 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include <map>
-#include <memory>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -21,9 +21,6 @@
 #include "MooseException.h"
 #include "MooseError.h"
 
-#include "libmesh/ignore_warnings.h"
-#include <mfem.hpp>
-#include "libmesh/restore_warnings.h"
 #include "libmesh/utility.h"
 
 namespace Moose::MFEM

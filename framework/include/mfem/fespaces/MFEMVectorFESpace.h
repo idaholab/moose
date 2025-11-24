@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMSimplifiedFESpace.h"
 
 class MFEMVectorFESpace : public MFEMSimplifiedFESpace

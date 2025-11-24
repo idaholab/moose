@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 /**
  * Generates the necessary kernels for the Grand Potential Function for any number
  * of order parameters and chemical potentials. Can do so with two sets of order

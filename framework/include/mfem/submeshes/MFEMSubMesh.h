@@ -10,10 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMGeneralUserObject.h"
-#include "libmesh/ignore_warnings.h"
-#include <mfem.hpp>
-#include "libmesh/restore_warnings.h"
 
 /**
  * Base class for construction of a mfem::ParSubMesh object. Access using the

@@ -11,7 +11,6 @@
 #pragma once
 
 #include "MFEMAuxKernel.h"
-#include "mfem.hpp"
 
 /**
  * Project s(x) * (U x V) onto a vector MFEM auxvariable.
