@@ -297,8 +297,9 @@ Output::onInterval()
   }
 
   // We make sync times have precendence over the other criteria by convention, since they already
-  // take precedence of start/end step, start/end time, step frequency etc
-  // check if enough simulation time has passed between outputs
+  // take precedence over start/end step, start/end time, step frequency etc.
+  //
+  // Check if enough simulation time has passed between outputs
   if (_time > _last_output_simulation_time &&
       _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
     output = false;
