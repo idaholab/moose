@@ -11,7 +11,6 @@
 
 #include "MFEMCrossProductAux.h"
 #include "MFEMProblem.h"
-#include "mfem.hpp"
 
 registerMooseObject("MooseApp", MFEMCrossProductAux);
 

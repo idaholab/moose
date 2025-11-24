@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 // infix_iterator.h
 
 // Lifted from Jerry Coffin's 's prefix_ostream_iterator, no copyright or license

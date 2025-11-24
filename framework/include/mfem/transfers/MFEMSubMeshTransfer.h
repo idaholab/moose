@@ -12,9 +12,6 @@
 #pragma once
 
 #include "MFEMGeneralUserObject.h"
-#include "libmesh/ignore_warnings.h"
-#include <mfem.hpp>
-#include "libmesh/restore_warnings.h"
 
 /**
  * Class to transfer MFEM variable data to or from a restricted copy of the variable defined on an a

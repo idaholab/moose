@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "Cartesian.h"
 #include "CylindricalDuo.h"
 #include "Legendre.h"

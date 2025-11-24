@@ -5,10 +5,6 @@
 #include "gtest/gtest.h"
 #include "CoefficientManager.h"
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 class CheckCoefficientManager : public testing::Test
 {
 protected:

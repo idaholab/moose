@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMFESpace.h"
 
 /// Class with common parameters for MFEMVectorFESpace and

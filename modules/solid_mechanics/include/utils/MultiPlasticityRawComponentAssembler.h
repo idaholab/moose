@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
 /*          All contents are licensed under LGPL V2.1           */

@@ -17,12 +17,6 @@
 #include <c10/core/DeviceType.h>
 #endif
 
-#ifdef MOOSE_MFEM_ENABLED
-#include "libmesh/ignore_warnings.h"
-#include <mfem.hpp>
-#include "libmesh/restore_warnings.h"
-#endif
-
 // MOOSE includes
 #include "Moose.h"
 #include "Builder.h"

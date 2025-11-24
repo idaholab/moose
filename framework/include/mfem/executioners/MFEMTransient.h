@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
 #include "TimeDomainProblemOperator.h"
