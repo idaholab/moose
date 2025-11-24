@@ -7,30 +7,21 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Unit tests for helpers that expose FMU utilities."""
 
-import importlib.util
 import logging
-import sys
 import unittest
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-
-_TEST_DIR = Path(__file__).resolve().parent
-_TEST_SPEC = importlib.util.spec_from_file_location(
-    "MooseFMU.test", _TEST_DIR / "__init__.py"
-)
-if "MooseFMU.test" not in sys.modules:
-    _package_module = importlib.util.module_from_spec(_TEST_SPEC)
-    sys.modules["MooseFMU.test"] = _package_module
-    assert _TEST_SPEC.loader is not None
-    _TEST_SPEC.loader.exec_module(_package_module)
 
 from moosefmu import fmu_utils
 
 
 class TestConfigureFmuLogging(unittest.TestCase):
+    """Validate configuration of FMU-specific logging helpers."""
+
     def setUp(self):
+        """Capture existing logger configuration for restoration."""
         self._root_logger = logging.getLogger()
         self._root_level = self._root_logger.level
         self._root_handlers = list(self._root_logger.handlers)
@@ -48,6 +39,7 @@ class TestConfigureFmuLogging(unittest.TestCase):
         self._urllib_handlers = list(self._urllib_logger.handlers)
 
     def tearDown(self):
+        """Restore logger state after each test."""
         for handler in list(self._root_logger.handlers):
             self._root_logger.removeHandler(handler)
         for handler in self._root_handlers:
@@ -69,6 +61,7 @@ class TestConfigureFmuLogging(unittest.TestCase):
         self._urllib_logger.propagate = self._urllib_propagate
 
     def test_configure_sets_info_levels_and_disables_urllib3(self):
+        """INFO configuration should propagate and disable urllib noise."""
         logger = fmu_utils.configure_fmu_logging(logger_name="test.logger.info")
 
         self.assertEqual(logger.name, "test.logger.info")
@@ -81,6 +74,7 @@ class TestConfigureFmuLogging(unittest.TestCase):
         self.assertFalse(urllib_logger.propagate)
 
     def test_configure_sets_debug_levels_and_logs_message(self):
+        """DEBUG configuration should log a helpful message."""
         with self.assertLogs("test.logger.debug", level="DEBUG") as captured:
             logger = fmu_utils.configure_fmu_logging(
                 debug=True, logger_name="test.logger.debug"
@@ -97,7 +91,10 @@ class TestConfigureFmuLogging(unittest.TestCase):
 
 
 class TestFmuUtils(unittest.TestCase):
+    """Check the higher-level FMU utility functions."""
+
     def test_fmu_info_logs_model_variables(self):
+        """``fmu_info`` should log details about model variables."""
         variables = [
             SimpleNamespace(
                 name="temp",
@@ -125,9 +122,12 @@ class TestFmuUtils(unittest.TestCase):
             calls["path"] = path
             return description
 
-        with patch.object(
-            fmu_utils, "read_model_description", new=fake_read_model_description
-        ), self.assertLogs(fmu_utils.logger, level=logging.INFO) as logs:
+        with (
+            patch.object(
+                fmu_utils, "read_model_description", new=fake_read_model_description
+            ),
+            self.assertLogs(fmu_utils.logger, level=logging.INFO) as logs,
+        ):
             result = fmu_utils.fmu_info("model.fmu", "model.fmu")
 
         self.assertIs(result, description)
@@ -140,6 +140,8 @@ class TestFmuUtils(unittest.TestCase):
 
 
 class _DummyFmu:
+    """Simple FMU stand-in used to verify accessor helpers."""
+
     def __init__(self):
         self.calls = {
             "getReal": [],
@@ -178,7 +180,10 @@ class _DummyFmu:
 
 
 class TestFmuAccessorHelpers(unittest.TestCase):
+    """Confirm helper functions map names to value references."""
+
     def test_get_and_set_helpers_use_value_references(self):
+        """Helper functions should call the appropriate FMU getters/setters."""
         fmu = _DummyFmu()
         vr_map = {"temperature": 1, "mode": 2, "enabled": 3}
 
