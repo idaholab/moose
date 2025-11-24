@@ -3,6 +3,7 @@
     type = NestedCellUniverseMeshGenerator
     inner_radius = 3
     outer_radius = 4
+    lattice_radius = 10
   []
   [copy_1]
     type = TestOneToManyDependencyMeshGenerator

@@ -1170,7 +1170,8 @@ TEST(CSGBaseTest, testCSGBaseClone)
   // create lattice and cell with lattice fill
   auto & lat_univ = csg_obj->createUniverse("lat_univ");
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univs = {{lat_univ}};
-  const auto & lat = csg_obj->createCartesianLattice("lat1", 2.0, univs);
+  auto & outer_univ = csg_obj->createUniverse("outer_univ");
+  const auto & lat = csg_obj->createCartesianLattice("lat1", 2.0, univs, outer_univ);
   csg_obj->createCell("cell_lat_fill", lat, -csg_sphere_outer);
 
   auto csg_obj_clone = csg_obj->clone();
@@ -1180,6 +1181,15 @@ TEST(CSGBaseTest, testCSGBaseClone)
   std::unique_ptr<CSG::CSGSurface> sphere_ptr_new =
       std::make_unique<CSG::CSGSphere>("new_surf", 6.0);
   csg_obj->addSurface(std::move(sphere_ptr_new));
+  ASSERT_TRUE(*csg_obj != *csg_obj_clone);
+
+  // Add same surface to cloned csg_obj, so that csg_obj and csg_obj_clone are equal again
+  sphere_ptr_new = std::make_unique<CSG::CSGSphere>("new_surf", 6.0);
+  csg_obj_clone->addSurface(std::move(sphere_ptr_new));
+  ASSERT_TRUE(*csg_obj == *csg_obj_clone);
+
+  // Reset outer universe in csg_obj and test equality of csg_obj and csg_obj_clone
+  csg_obj->resetLatticeOuter(lat);
   ASSERT_TRUE(*csg_obj != *csg_obj_clone);
 }
 }
