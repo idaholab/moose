@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import importlib.util
 import logging
@@ -90,7 +90,6 @@ class TestMoose2FMU(unittest.TestCase):
         def fake_skip(self, flag):
             calls["skip"].append(flag)
 
-
         slave._skip_flag = MethodType(fake_skip, slave)
 
         result = slave.get_flag_with_retries({"READY"}, max_retries=3, wait_seconds=0)
@@ -170,9 +169,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(slave.control.set_calls, [("alpha", 1.0)])
 
         self.assertTrue(slave.set_controllable_real("alpha", 1.0, force=True))
-        self.assertEqual(
-            slave.control.set_calls, [("alpha", 1.0), ("alpha", 1.0)]
-        )
+        self.assertEqual(slave.control.set_calls, [("alpha", 1.0), ("alpha", 1.0)])
 
     def test_set_controllable_vector_infers_and_caches(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
@@ -211,7 +208,9 @@ class TestMoose2FMU(unittest.TestCase):
         )
 
         # Changing type should trigger new setter and cache entry
-        self.assertTrue(slave.set_controllable_vector("vec", [1, 2, 3], value_type="int"))
+        self.assertTrue(
+            slave.set_controllable_vector("vec", [1, 2, 3], value_type="int")
+        )
         self.assertEqual(
             slave.control.calls,
             [
@@ -361,14 +360,11 @@ class TestMoose2FMU(unittest.TestCase):
             {"MULTIAPP_FIXED_POINT_END", "CUSTOM", "ADDITIONAL"},
         )
 
-
     def test_parse_flags_handles_strings_and_iterables(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         parsed = slave._parse_flags("initial, timestep_begin;custom | Another")
-        self.assertEqual(
-            parsed, {"INITIAL", "TIMESTEP_BEGIN", "CUSTOM", "ANOTHER"}
-        )
+        self.assertEqual(parsed, {"INITIAL", "TIMESTEP_BEGIN", "CUSTOM", "ANOTHER"})
 
         parsed_iterable = slave._parse_flags(["Ready", " done ", ""])
         self.assertEqual(parsed_iterable, {"READY", "DONE"})
@@ -439,7 +435,6 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertAlmostEqual(moose_time, 1.0005, delta=1e-3)
         self.assertEqual(slave.control.wait_calls, ["INITIAL"])
         self.assertEqual(slave.control.continue_calls, 1)
-
 
     def test_ensure_control_listening(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
@@ -560,12 +555,11 @@ class TestMoose2FMU(unittest.TestCase):
 
         value = slave.get_reporter_value("flux", 2.0, flag="READY")
 
-
-
         self.assertEqual(value, 3.14)
         self.assertEqual(slave.control.waited, ["READY"])
         self.assertEqual(slave.control.continue_calls, 0)
         self.assertFalse(slave.control.finalized)
+
 
 if __name__ == "__main__":
     unittest.main()

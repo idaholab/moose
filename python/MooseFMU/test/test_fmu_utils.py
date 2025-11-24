@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 
 import importlib.util
@@ -140,6 +140,7 @@ class TestFmuUtils(unittest.TestCase):
         self.assertIn("temp", log_messages)
         self.assertIn("status", log_messages)
 
+
 class _DummyFmu:
     def __init__(self):
         self.calls = {
@@ -201,6 +202,7 @@ class TestFmuAccessorHelpers(unittest.TestCase):
         self.assertEqual(fmu.calls["setString"], [((2,), ("active",))])
         self.assertEqual(fmu.calls["setBoolean"], [((3,), (False,))])
         self.assertEqual(fmu.set_values, {1: 98.6, 2: "active", 3: False})
+
 
 if __name__ == "__main__":
     unittest.main()

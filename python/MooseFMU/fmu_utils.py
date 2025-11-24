@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Helper utilities shared by FMU integration tooling and the Moose2FMU base class."""
 
@@ -74,6 +74,7 @@ def configure_fmu_logging(
         script_logger.debug("FMU debug logging is enabled")
 
     return script_logger
+
 
 def fmu_info(fmu_model: str, filename: str):
     """Read and log the FMI model description for the given FMU archive."""
