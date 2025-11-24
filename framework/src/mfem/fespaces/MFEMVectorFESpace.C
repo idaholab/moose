@@ -44,11 +44,6 @@ MFEMVectorFESpace::validParams()
                        "(the default) means it will be the same as the problem dimension. "
                        "Note that MFEM does not currently support 2D vectors in 1D space "
                        "for ND and RT elements.");
-  MooseEnum fec_maps("VALUE INTEGRAL", "VALUE", true);
-  params.addParam<MooseEnum>(
-      "fec_map",
-      fec_maps,
-      "Specify the FE map type used VALUE or INTEGRAL (meaningful for L2 only)");
 
   return params;
 }
@@ -93,11 +88,6 @@ MFEMVectorFESpace::getFECName() const
 
   // This is to get around an MFEM bug (to be removed in #31525)
   basis = (basis == "@Gg" || basis == "@G" || basis == "_T0") ? "" : basis;
-
-  if (_fec_map == "INTEGRAL" && _fec_type == "L2")
-  {
-    return "L2Int" + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
-  }
 
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
