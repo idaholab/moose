@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""FMU base class integration helpers for MOOSE simulations."""
+
 try:
     from pythonfmu import Fmi2Slave
     from pythonfmu.enums import Fmi2Causality, Fmi2Variability
@@ -30,8 +32,10 @@ from MooseControl import MooseControl
 
 class Moose2FMU(Fmi2Slave):
     """
-    Base FMU slave for MOOSE simulations. Handles registration of FMU variables,
-    control setup, and stepping logic stub to be implemented by subclasses.
+    Base FMU slave for MOOSE simulations.
+
+    Handles registration of FMU variables, control setup, and stepping logic stub
+    to be implemented by subclasses.
     """
 
     def __init__(
@@ -44,6 +48,7 @@ class Moose2FMU(Fmi2Slave):
         dt_tolerance: Real = 1e-3,
         **kwargs,
     ):
+        """Initialize the base Moose2FMU wrapper and default configuration."""
         super().__init__(*args, **kwargs, logging_add_standard_categories=True)
 
         base_logger = logging.getLogger(self.__class__.__module__)
@@ -111,14 +116,15 @@ class Moose2FMU(Fmi2Slave):
             )
         )
 
-        # Track previously applied controllable values so repeated requests can be skipped
+        # Track previously applied controllable values so repeated requests can
+        # be skipped
         self._controllable_real_cache: Dict[str, float] = {}
         self._controllable_vector_cache: Dict[
             Tuple[str, str], Tuple[Union[float, int, str], ...]
         ] = {}
 
     def exit_initialization_mode(self) -> bool:
-
+        """Initialize MooseControl after the FMU enters simulation mode."""
         # Setup MooseControl
         cmd = shlex.split(self.moose_command)
         self.control = MooseControl(
@@ -131,9 +137,7 @@ class Moose2FMU(Fmi2Slave):
     def setup_experiment(
         self, start_time: float, stop_time: Optional[float], tolerance: Optional[float]
     ) -> bool:
-        """
-        Save an local copy of start_time, stop_time and tolerance.
-        """
+        """Save a local copy of ``start_time``, ``stop_time`` and ``tolerance``."""
         self.start_time = start_time
         self.stop_time = stop_time
         self.tolerance = tolerance
@@ -145,9 +149,7 @@ class Moose2FMU(Fmi2Slave):
         step_size: float,
         no_set_fmu_state_prior: bool = False,
     ) -> bool:
-        """
-        FMU stepping logic must be implemented by subclasses.
-        """
+        """FMU stepping logic must be implemented by subclasses."""
         raise NotImplementedError("Subclasses must implement do_step()")
 
     def sync_with_moose(
@@ -163,6 +165,8 @@ class Moose2FMU(Fmi2Slave):
         ----------
         current_time
             Target FMU time to synchronize with.
+        step_size
+            Time interval requested by the FMU.
         allowed_flags
             Subset of flags that require additional handling. Defaults to
             synchronizing on the ``INITIAL`` and ``MULTIAPP_FIXED_POINT_BEGIN`` signals
@@ -201,14 +205,16 @@ class Moose2FMU(Fmi2Slave):
             if flag in parsed_allowed_flags:
                 signal = flag
 
-                # set next time in MOOSE, ensure MOOSE has data avaiable for all FMU times (Optional)
-                # To-do: need MooseControl create a time object and a postprocessor backend,
-                # then we don't need users adding extra blocks in their input files
+                # Set next time in MOOSE, ensuring MOOSE has data available for all
+                # FMU times (optional). To-do: need MooseControl to create a time
+                # object and a postprocessor backend so users do not need extra
+                # blocks in their input files.
                 if signal in ["INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"]:
                     moose_dt = self.control.getDT()
 
                     self.logger.debug(
-                        "moose_time=%.6f -> current_time=%.6f -> moose_dt=%.6f -> step_size=%.6f",
+                        "moose_time=%.6f -> current_time=%.6f -> "
+                        "moose_dt=%.6f -> step_size=%.6f",
                         moose_time,
                         current_time,
                         moose_dt,
@@ -226,7 +232,9 @@ class Moose2FMU(Fmi2Slave):
             if abs(moose_time - current_time) < self.dt_tolerance:
                 self.logger.debug("Captured synchronization flag '%s'", flag)
                 self.logger.debug(
-                    f"The current time is {current_time}, the moose time is {moose_time}"
+                    "The current time is %s, the moose time is %s",
+                    current_time,
+                    moose_time,
                 )
                 self.logger.info("Successfully sync MOOSE time with FMU step")
 
@@ -353,10 +361,7 @@ class Moose2FMU(Fmi2Slave):
         if isinstance(value, (str, bytes)):
             raise TypeError("'value' must be an iterable of scalar entries")
 
-        if hasattr(value, "tolist"):
-            raw_values = value.tolist()
-        else:
-            raw_values = list(value)
+        raw_values = value.tolist() if hasattr(value, "tolist") else list(value)
 
         if not raw_values and value_type is None:
             raise ValueError(
@@ -389,7 +394,8 @@ class Moose2FMU(Fmi2Slave):
                 normalized_type = "real"
             else:
                 raise TypeError(
-                    "Unable to infer vector type from heterogeneous values; provide value_type"
+                    "Unable to infer vector type from heterogeneous values; "
+                    "provide value_type"
                 )
 
         assert normalized_type is not None
@@ -408,7 +414,8 @@ class Moose2FMU(Fmi2Slave):
         cached = self._controllable_vector_cache.get(cache_key)
         if not force and cached == converted:
             self.logger.debug(
-                "Skipping controllable vector update for '%s'; value %s already applied",
+                "Skipping controllable vector update for '%s'; "
+                "value %s already applied",
                 path,
                 list(converted),
             )
@@ -533,7 +540,9 @@ class Moose2FMU(Fmi2Slave):
 
         postprocessor_value = self.control.getPostprocessor(postprocessor_name)
         self.logger.debug(
-            f"Retrieved Postprocessor value {postprocessor_value} from MOOSE at flag {flag_value}"
+            "Retrieved Postprocessor value %s from MOOSE at flag %s",
+            postprocessor_value,
+            flag_value,
         )
 
         return postprocessor_value
@@ -577,6 +586,7 @@ class Moose2FMU(Fmi2Slave):
     def _parse_flags(self, flags: Union[str, Iterable[str]]) -> Set[str]:
         """
         Normalize flags to an uppercase set.
+
         Accepts a space/comma/semicolon/pipe-separated string or an iterable.
         """
         if isinstance(flags, str):

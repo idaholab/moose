@@ -7,23 +7,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import importlib.util
+"""Unit tests covering the Moose2FMU base class behavior."""
+
 import logging
-import sys
 import unittest
-from pathlib import Path
 from types import MethodType
 from unittest import mock
-
-_TEST_DIR = Path(__file__).resolve().parent
-_SPEC = importlib.util.spec_from_file_location(
-    "MooseFMU.test", _TEST_DIR / "__init__.py"
-)
-if "MooseFMU.test" not in sys.modules:
-    _package_module = importlib.util.module_from_spec(_SPEC)
-    sys.modules["MooseFMU.test"] = _package_module
-    assert _SPEC.loader is not None
-    _SPEC.loader.exec_module(_package_module)
 
 from moosefmu import Moose2FMU
 
@@ -41,13 +30,16 @@ class _DummyMoose(Moose2FMU):
 
 
 class TestMoose2FMU(unittest.TestCase):
+    """Validate Moose2FMU behavior through a lightweight subclass."""
 
     def test_logger_uses_module_hierarchy(self):
+        """Logger name should reflect the module hierarchy."""
         slave = _DummyMoose(instance_name="test", guid="1234")
         expected = f"{_DummyMoose.__module__}.{_DummyMoose.__name__}"
         self.assertEqual(slave.logger.name, expected)
 
     def test_get_flag_with_retries_success(self):
+        """Flag retrieval should succeed when available within retries."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -73,6 +65,7 @@ class TestMoose2FMU(unittest.TestCase):
         )
 
     def test_get_flag_with_retries_skips_unexpected_flags(self):
+        """Unexpected flags should be skipped until an allowed value arrives."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         calls = {"skip": [], "waiting": 0}
@@ -99,6 +92,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(calls["skip"], ["foo"])
 
     def test_get_flag_with_retries_failure(self):
+        """Retry loop should fail gracefully when no flag is received."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -124,6 +118,7 @@ class TestMoose2FMU(unittest.TestCase):
         )
 
     def test_get_flag_with_retries_handles_exception(self):
+        """Transient exceptions should be logged and retried."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -146,6 +141,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertIn("Attempt 1/4 failed", "\n".join(logs.output))
 
     def test_set_controllable_real_caches_values(self):
+        """Real controllables should cache values and honor force flag."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -172,6 +168,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(slave.control.set_calls, [("alpha", 1.0), ("alpha", 1.0)])
 
     def test_set_controllable_vector_infers_and_caches(self):
+        """Vector controllables should infer types and avoid repeats."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -227,6 +224,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(slave.control.continue_calls, 3)
 
     def test_set_controllable_vector_validation(self):
+        """Invalid inputs should raise helpful exceptions."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -260,6 +258,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertTrue(slave.set_controllable_vector("empty", [], value_type="real"))
 
     def test_set_controllable_real_waits_for_flag(self):
+        """Real updates should wait for synchronization flags when requested."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -294,6 +293,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(captured["allowed"], {"CUSTOM"})
 
     def test_set_controllable_real_uses_user_defined_flag(self):
+        """User-defined flags should be honored when sending real values."""
         slave = _DummyMoose(instance_name="test", guid="1234")
         slave.flag = "user_flag"
 
@@ -325,6 +325,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(slave.control.set_calls, [("beta", 5.0)])
 
     def test_get_postprocessor_value_merges_flags(self):
+        """Flag sets from defaults and user input should merge before waiting."""
         slave = _DummyMoose(instance_name="test", guid="1234")
         slave.flag = "additional"
 
@@ -361,6 +362,7 @@ class TestMoose2FMU(unittest.TestCase):
         )
 
     def test_parse_flags_handles_strings_and_iterables(self):
+        """Flag parsing should support delimited strings and iterables."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         parsed = slave._parse_flags("initial, timestep_begin;custom | Another")
@@ -371,6 +373,7 @@ class TestMoose2FMU(unittest.TestCase):
 
     @mock.patch("MooseFMU.MOOSE2FMU.MooseControl")
     def test_exit_initialization_mode_rebuilds_command(self, mock_control):
+        """exit_initialization_mode should rebuild the configured command."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         slave.moose_command = "mpiexec -n 4 /custom/moose-opt -i custom_input.i"
@@ -393,6 +396,7 @@ class TestMoose2FMU(unittest.TestCase):
         mock_control.return_value.initialize.assert_called_once_with()
 
     def test_sync_with_moose_success(self):
+        """sync_with_moose should align times and return the trigger flag."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -437,6 +441,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(slave.control.continue_calls, 1)
 
     def test_ensure_control_listening(self):
+        """Control listening status should be checked before continuing."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -459,6 +464,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertTrue(slave.control.finalized)
 
     def test_setup_experiment_saves_parameters(self):
+        """setup_experiment should store inputs and report success."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         result = slave.setup_experiment(start_time=0.5, stop_time=10.0, tolerance=1e-4)
@@ -469,6 +475,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertEqual(slave.tolerance, 1e-4)
 
     def test_get_postprocessor_value(self):
+        """Postprocessors should be retrievable when flags are received."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -504,6 +511,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertFalse(slave.control.finalized)
 
     def test_get_postprocessor_value_failure(self):
+        """Failed flag waits should finalize control and return None."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
@@ -526,6 +534,7 @@ class TestMoose2FMU(unittest.TestCase):
         self.assertTrue(slave.control.finalized)
 
     def test_get_reporter_value(self):
+        """Reporter values should be fetched after synchronization."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
