@@ -60,16 +60,13 @@ uel_(double RHS[],
   if (*NPROPS != 2)
     mooseError("Wrong number of properties passed in.");
 
-  // solution at the beginning of the increment
+  // solution at the end of the increment
   Eigen::Matrix<Real, 6, 1> u;
   u << U_[0], U_[1], U_[2], U_[3], U_[4], U_[5];
 
   // current solution increment
   Eigen::Matrix<Real, 6, 1> du;
   du << DU_[0], DU_[1], DU_[2], DU_[3], DU_[4], DU_[5];
-
-  // current solution
-  u += du;
 
   const auto & x1 = COORDS[0];
   const auto & y1 = COORDS[1];
@@ -143,6 +140,6 @@ uel_(double RHS[],
   {
     RHS[i] = -re(i);
     for (const auto j : make_range(6))
-      AMATRX[i * 6 + j] = -ke(i, j);
+      AMATRX[i * 6 + j] = ke(i, j);
   }
 }

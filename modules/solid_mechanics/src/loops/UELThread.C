@@ -82,12 +82,12 @@ UELThread::onElement(const Elem * elem)
   _all_dof_values.resize(ndofel);
   _all_dof_increments.resize(ndofel);
 
-  _sys.currentSolution()->get(_all_dof_indices, _all_dof_increments);
-  _sys.solutionOld().get(_all_dof_indices, _all_dof_values);
+  _sys.currentSolution()->get(_all_dof_indices, _all_dof_values);
+  _sys.solutionOld().get(_all_dof_indices, _all_dof_increments);
 
   mooseAssert(_all_dof_values.size() == _all_dof_increments.size(), "Inconsistent solution size.");
   for (const auto i : index_range(_all_dof_values))
-    _all_dof_increments[i] -= _all_dof_values[i];
+    _all_dof_increments[i] = _all_dof_values[i] - _all_dof_increments[i];
 
   _all_udot_dof_values.resize(ndofel);
   _all_udotdot_dof_values.resize(ndofel);
@@ -235,11 +235,22 @@ UELThread::onElement(const Elem * elem)
 
   // write to the Jacobian (hope we don't have to transpose...)
   if (do_jacobian)
+  {
+    // sign of residual and jacobian contribution differ in abaqus uel
+    _local_ke_T.resize(ndofel, ndofel);
+    for (const auto i : index_range(_local_re))
+    {
+      for (const auto j : index_range(_local_re))
+      {
+        _local_ke_T(i, j) = -1.0 * _local_ke(j, i);
+      }
+    }
     _uel_uo.addJacobian(_fe_problem.assembly(_tid, _sys.number()),
-                        _local_ke,
+                        _local_ke_T,
                         _all_dof_indices,
                         _all_dof_indices,
                         -1.0);
+  }
 }
 
 void
