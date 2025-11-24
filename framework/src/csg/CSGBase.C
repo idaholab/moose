@@ -203,9 +203,7 @@ CSGBase::createCell(const std::string & name,
 
   // check that cell is not being added to a universe that exists in the lattice itself
   if (add_to_univ)
-  {
     for (auto univ_list : fill_lattice.getUniverses())
-    {
       for (const auto & univ_ref : univ_list)
       {
         const CSGUniverse & univ_in_lattice = univ_ref.get();
@@ -214,8 +212,6 @@ CSGBase::createCell(const std::string & name,
                      " cannot be filled with a lattice containing the same universe to which it is "
                      "being added.");
       }
-    }
-  }
 
   auto & cell = _cell_list.addLatticeCell(name, fill_lattice, region);
   if (add_to_univ)
@@ -304,14 +300,11 @@ CSGBase::createCartesianLattice(
 {
   // make sure all universes are a part of this base instance
   for (auto univ_list : universes)
-  {
     for (const CSGUniverse & univ : univ_list)
-    {
       if (!checkUniverseInBase(univ))
         mooseError("Cannot create Cartesian lattice " + name + ". Universe " + univ.getName() +
                    " is not in the CSGBase instance.");
-    }
-  }
+
   const CSGLattice & lattice = _lattice_list.addCartesianLattice(name, pitch, universes);
   return static_cast<const CSGCartesianLattice &>(lattice);
 }
@@ -412,14 +405,11 @@ CSGBase::createHexagonalLattice(
 {
   // make sure all universes are a part of this base instance
   for (auto univ_list : universes)
-  {
     for (const CSGUniverse & univ : univ_list)
-    {
       if (!checkUniverseInBase(univ))
         mooseError("Cannot create hexagonal lattice " + name + ". Universe " + univ.getName() +
                    " is not in the CSGBase instance.");
-    }
-  }
+
   const CSGLattice & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
   return static_cast<const CSGHexagonalLattice &>(lattice);
 }
@@ -466,14 +456,11 @@ CSGBase::addLattice(std::unique_ptr<CSGLattice> lattice)
   // make sure all universes are a part of this base instance
   auto universes = lattice->getUniverses();
   for (auto univ_list : universes)
-  {
     for (const CSGUniverse & univ : univ_list)
-    {
       if (!checkUniverseInBase(univ))
         mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
                    ". Universe " + univ.getName() + " is not in the CSGBase instance.");
-    }
-  }
+
   if (lattice->getOuterType() == "UNIVERSE")
   {
     const CSGUniverse & outer_univ = lattice->getOuterUniverse();
@@ -719,13 +706,12 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
     {
       const auto & lattice = cell.getFillLattice();
       for (const auto & univ_list : lattice.getUniverses())
-      {
         for (const auto & univ_ref : univ_list)
         {
           const CSGUniverse & lattice_univ = univ_ref.get();
           getLinkedUniverses(lattice_univ, linked_universe_names);
         }
-      }
+
       if (lattice.getOuterType() == "UNIVERSE")
       {
         const CSGUniverse & outer_univ = lattice.getOuterUniverse();
