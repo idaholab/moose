@@ -93,21 +93,6 @@ using namespace libMesh;
 
 #define QUOTE(macro) stringifyName(macro)
 
-void
-MooseApp::addAppParam(InputParameters & params)
-{
-  params.addCommandLineParam<std::string>(
-      "type", "--app <type>", "Specify the application type to run (case-sensitive)");
-  params.enableInputCommandLineParam("type");
-}
-
-void
-MooseApp::addInputParam(InputParameters & params)
-{
-  params.addCommandLineParam<std::vector<std::string>>(
-      "input_file", "-i <input file(s)>", "Specify input file(s); multiple files are merged");
-}
-
 InputParameters
 MooseApp::validParams()
 {
@@ -836,19 +821,13 @@ MooseApp::MooseApp(const InputParameters & parameters)
     const auto debugger = MooseUtils::toLower(getParam<MooseEnum>("start_in_debugger"));
     Moose::out << "Starting in debugger using: " << debugger << std::endl;
 
-    // This will start XTerm and print out some info first... then run the debugger
-    command_stream << "xterm -e \"echo 'Rank: " << processor_id() << "  Hostname: " << hostname
-                   << "  PID: " << getpid() << "'; echo ''; ";
-
-    // Figure out how to run the debugger
-    if (command.find("lldb") != std::string::npos || command.find("gdb") != std::string::npos)
-      command_stream << command << " -p " << getpid();
-    else
-      paramError("start_in_debugger", "Unknown debugger '" + command + "'");
-
-    // Finish up the command
-    command_stream << "\"" << " & ";
-    std::string command_string = command_stream.str();
+    // Setup external xterm command to run; this will start XTerm and print out some
+    // info and then run the debuggger
+    std::ostringstream command_stream;
+    command_stream << "xterm -e \"echo 'Rank: " << processor_id()
+                   << "  Hostname: " << MooseUtils::hostname() << "  PID: " << getpid()
+                   << "'; echo ''; " << debugger << " -p " << getpid() << "\" &";
+    const auto command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
     int ret = std::system(command_string.c_str());
