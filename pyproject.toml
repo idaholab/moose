@@ -3,6 +3,7 @@ target-version = ['py310', 'py311', 'py312', 'py313']
 required-version = '25.1.0'
 include = '''
 (
+  ^\/python\/MooseFMU\/.*.py$ |
   ^\/python\/moosecontrol\/.*.py$ |
   ^\/python\/moosepy\/.*.py$ |
   ^\/python\/TestHarness\/resultsstore\/.*.py$ |
