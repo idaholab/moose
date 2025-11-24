@@ -7,9 +7,17 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from pythonfmu import Fmi2Slave
-from pythonfmu.enums import Fmi2Causality, Fmi2Variability
-from pythonfmu.variables import Integer, Real, String
+try:
+    from pythonfmu import Fmi2Slave
+    from pythonfmu.enums import Fmi2Causality, Fmi2Variability
+    from pythonfmu.variables import Integer, Real, String
+except ModuleNotFoundError as exc:
+    raise ModuleNotFoundError(
+        "pythonfmu is required to build and run FMUs. Install it in the same Python "
+        "environment used to execute MooseFMU tests (e.g., `pip install pythonfmu`) "
+        "or add that environment to PYTHONPATH."
+    ) from exc
+
 from MooseControl import MooseControl
 from typing import List, Dict, Optional
 import logging
