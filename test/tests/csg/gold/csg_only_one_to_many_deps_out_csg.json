@@ -21,12 +21,12 @@
       "region": "+inner_surf"
     },
     "cell_lat_fill_copy_1": {
-      "fill": "cartesian_lat",
+      "fill": "cartesian_lat_copy_1",
       "filltype": "LATTICE",
       "region": "-lattice_surf"
     },
     "cell_lat_fill_copy_2": {
-      "fill": "cartesian_lat",
+      "fill": "cartesian_lat_copy_2",
       "filltype": "LATTICE",
       "region": "-lattice_surf"
     },
@@ -41,12 +41,12 @@
       "region": "+outer_surf"
     },
     "cell_univ_fill_copy_1": {
-      "fill": "nested_inner_univ",
+      "fill": "nested_inner_univ_copy_1",
       "filltype": "UNIVERSE",
       "region": "-outer_surf"
     },
     "cell_univ_fill_copy_2": {
-      "fill": "nested_inner_univ",
+      "fill": "nested_inner_univ_copy_2",
       "filltype": "UNIVERSE",
       "region": "-outer_surf"
     },
