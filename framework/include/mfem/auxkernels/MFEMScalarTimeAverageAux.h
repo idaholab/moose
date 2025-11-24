@@ -14,7 +14,7 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * AuxKernel to compute a running time average of an MFEMVariable
+ * AuxKernel to compute a running time average of a scalar coefficient
  * using a linear blend.
  *
  * avg_new(x) = (1 - w) * avg_old(x) + w * src(x), w = dt / (t - s), t > s
@@ -32,12 +32,10 @@ public:
   virtual void execute() override;
 
 protected:
-  /// Name of source MFEMVariable to take the time average of.
-  const VariableName _source_var_name;
-  /// Reference to source gridfunction coefficient.
-  mfem::Coefficient & _source_var_coefficient;
+  /// Reference to source coefficient.
+  mfem::Coefficient & _source_coefficient;
   /// Reference to result gridfunction coefficient.
-  mfem::Coefficient & _result_var_coefficient;
+  mfem::Coefficient & _result_coefficient;
   /// Placeholder gridfunction to avoid read/write aliasing during projection.
   mfem::ParGridFunction _average_var;
   /// Time before the averaging starts.
