@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 try:
     from pythonfmu import Fmi2Slave
@@ -33,6 +33,7 @@ class Moose2FMU(Fmi2Slave):
     Base FMU slave for MOOSE simulations. Handles registration of FMU variables,
     control setup, and stepping logic stub to be implemented by subclasses.
     """
+
     def __init__(
         self,
         *args,
@@ -56,40 +57,80 @@ class Moose2FMU(Fmi2Slave):
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
         self.moose_time: Real = 0.0
-        self.start_time: Real = 0.0,
-        self.stop_time: Real = 0.0,
-        self.tolerance: Real = 1.0e-3,
+        self.start_time: Real = (0.0,)
+        self.stop_time: Real = (0.0,)
+        self.tolerance: Real = (1.0e-3,)
 
         # Default synchronization and data retrieval flags
         self._default_sync_flags: Set[str] = {"INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"}
         self._default_data_flags: Set[str] = {"MULTIAPP_FIXED_POINT_END"}
 
         # Register a default set of parameters
-        self.register_variable(String("flag", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(String("moose_command", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(String("server_name", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(Integer("max_retries", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(Real("dt_tolerance", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(
+            String(
+                "flag",
+                causality=Fmi2Causality.parameter,
+                variability=Fmi2Variability.tunable,
+            )
+        )
+        self.register_variable(
+            String(
+                "moose_command",
+                causality=Fmi2Causality.parameter,
+                variability=Fmi2Variability.tunable,
+            )
+        )
+        self.register_variable(
+            String(
+                "server_name",
+                causality=Fmi2Causality.parameter,
+                variability=Fmi2Variability.tunable,
+            )
+        )
+        self.register_variable(
+            Integer(
+                "max_retries",
+                causality=Fmi2Causality.parameter,
+                variability=Fmi2Variability.tunable,
+            )
+        )
+        self.register_variable(
+            Real(
+                "dt_tolerance",
+                causality=Fmi2Causality.parameter,
+                variability=Fmi2Variability.tunable,
+            )
+        )
 
         # Register outputs
-        self.register_variable(Real("moose_time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
+        self.register_variable(
+            Real(
+                "moose_time",
+                causality=Fmi2Causality.output,
+                variability=Fmi2Variability.continuous,
+            )
+        )
 
         # Track previously applied controllable values so repeated requests can be skipped
         self._controllable_real_cache: Dict[str, float] = {}
-        self._controllable_vector_cache: Dict[Tuple[str, str], Tuple[Union[float, int, str], ...]] = {}
+        self._controllable_vector_cache: Dict[
+            Tuple[str, str], Tuple[Union[float, int, str], ...]
+        ] = {}
 
     def exit_initialization_mode(self) -> bool:
 
         # Setup MooseControl
         cmd = shlex.split(self.moose_command)
-        self.control = MooseControl(moose_command=cmd, moose_control_name=self.server_name)
+        self.control = MooseControl(
+            moose_command=cmd, moose_control_name=self.server_name
+        )
         self.control.initialize()
 
         return True
 
-    def setup_experiment(self, start_time: float,
-                         stop_time: Optional[float],
-                         tolerance: Optional[float]) -> bool:
+    def setup_experiment(
+        self, start_time: float, stop_time: Optional[float], tolerance: Optional[float]
+    ) -> bool:
         """
         Save an local copy of start_time, stop_time and tolerance.
         """
@@ -108,7 +149,6 @@ class Moose2FMU(Fmi2Slave):
         FMU stepping logic must be implemented by subclasses.
         """
         raise NotImplementedError("Subclasses must implement do_step()")
-
 
     def sync_with_moose(
         self,
@@ -154,12 +194,10 @@ class Moose2FMU(Fmi2Slave):
                 self.control.finalize()
                 return None, None
 
-
             moose_time = self.control.getTime()
 
             if flag in parsed_allowed_flags:
                 signal = flag
-
 
                 # set next time in MOOSE, ensure MOOSE has data avaiable for all FMU times (Optional)
                 # To-do: need MooseControl create a time object and a postprocessor backend,
@@ -176,12 +214,18 @@ class Moose2FMU(Fmi2Slave):
                     )
 
                     if moose_dt > step_size:
-                        logging.info("moose_dt (%s) must be <= step_size (%s).", moose_dt, step_size)
+                        logging.info(
+                            "moose_dt (%s) must be <= step_size (%s).",
+                            moose_dt,
+                            step_size,
+                        )
                         return None, None
 
             if abs(moose_time - current_time) < self.dt_tolerance:
                 self.logger.debug("Captured synchronization flag '%s'", flag)
-                self.logger.debug(f"The current time is {current_time}, the moose time is {moose_time}")
+                self.logger.debug(
+                    f"The current time is {current_time}, the moose time is {moose_time}"
+                )
                 self.logger.info("Successfully sync MOOSE time with FMU step")
 
                 self.moose_time = moose_time
@@ -189,7 +233,6 @@ class Moose2FMU(Fmi2Slave):
                 return moose_time, signal
 
             self._skip_flag(flag)
-
 
     def ensure_control_listening(self) -> bool:
         """Verify the MooseControl server is listening before proceeding."""
@@ -254,9 +297,7 @@ class Moose2FMU(Fmi2Slave):
         self.control.setControllableReal(path, value)
         self.control.setContinue()
         self._controllable_real_cache[path] = value
-        self.logger.info(
-            "Set controllable real '%s' to %s", path, value
-        )
+        self.logger.info("Set controllable real '%s' to %s", path, value)
         return True
 
     def set_controllable_vector(
@@ -315,7 +356,9 @@ class Moose2FMU(Fmi2Slave):
             raw_values = list(value)
 
         if not raw_values and value_type is None:
-            raise ValueError("value_type must be provided when assigning an empty vector")
+            raise ValueError(
+                "value_type must be provided when assigning an empty vector"
+            )
 
         def _is_integral(entry: object) -> bool:
             return isinstance(entry, numbers.Integral) and not isinstance(entry, bool)
@@ -444,9 +487,7 @@ class Moose2FMU(Fmi2Slave):
                 )
 
             retries += 1
-            self.logger.info(
-                f"Waiting {wait_seconds} seconds before retrying..."
-            )
+            self.logger.info(f"Waiting {wait_seconds} seconds before retrying...")
             time.sleep(wait_seconds)
 
         allowed_desc = (
@@ -491,7 +532,6 @@ class Moose2FMU(Fmi2Slave):
         )
 
         return postprocessor_value
-
 
     def get_reporter_value(
         self,
@@ -588,7 +628,6 @@ class Moose2FMU(Fmi2Slave):
         normalized_flag = flag_value.strip().upper()
         self.logger.debug("Received flag '%s'", normalized_flag or flag_value)
         return normalized_flag or flag_value
-
 
     def _schedule_next_time(self, next_time: float) -> bool:
         """Request MOOSE to insert an additional time point if needed.
