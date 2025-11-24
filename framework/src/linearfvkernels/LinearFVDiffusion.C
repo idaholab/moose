@@ -164,9 +164,10 @@ LinearFVDiffusion::computeFluxRHSContribution()
         1 / (_current_face_info->normal() * _current_face_info->eCN()) * _current_face_info->eCN();
 
     // Cache the matrix contribution
-    _flux_rhs_contribution = faceDiffusivity() *
-                             (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
-                             correction_vector * _current_face_area;
+    _flux_rhs_contribution =
+        faceDiffusivity() *
+        (interp_coeffs.first * grad_elem + interp_coeffs.second * grad_neighbor) *
+        correction_vector * _current_face_area;
     _cached_rhs_contribution = true;
   }
 

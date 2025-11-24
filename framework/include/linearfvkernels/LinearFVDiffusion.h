@@ -10,7 +10,7 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "FVInterpolationMethod.h"
+#include "fvinterpolationmethods/FVInterpolationMethod.h"
 
 /**
  * Kernel that adds contributions from a diffusion term discretized using the finite volume method
