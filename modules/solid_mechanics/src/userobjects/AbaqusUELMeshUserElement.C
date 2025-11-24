@@ -266,12 +266,12 @@ AbaqusUELMeshUserElement::execute()
     all_dof_values.resize(ndofel);
     all_dof_increments.resize(ndofel);
 
-    _sys.currentSolution()->get(all_dof_indices, all_dof_increments);
-    _sys.solutionOld().get(all_dof_indices, all_dof_values);
+    _sys.currentSolution()->get(all_dof_indices, all_dof_values);
+    _sys.solutionOld().get(all_dof_indices, all_dof_increments);
 
     mooseAssert(all_dof_values.size() == all_dof_increments.size(), "Inconsistent solution size.");
     for (const auto i : index_range(all_dof_values))
-      all_dof_increments[i] -= all_dof_values[i];
+      all_dof_increments[i] = all_dof_values[i] - all_dof_increments[i];
 
     all_udot_dof_values.resize(ndofel);
     all_udotdot_dof_values.resize(ndofel);
@@ -358,7 +358,7 @@ AbaqusUELMeshUserElement::execute()
          &ndofel,
          &nrhs,
          &_nstatev,
-         uel_elem._properties.first, // fortran forces us to do terrible things
+         uel_elem._properties.first, // fortran forces us to do terrible things :)
          const_cast<int *>(&_uel_definition._n_properties),
          coords.data(),
          &dim,
@@ -395,14 +395,22 @@ AbaqusUELMeshUserElement::execute()
     // write to the residual vector
     // sign of 'residuals' has been tested with external loading and matches that of moose-umat
     // setups.
-    if (do_residual)
-      addResiduals(_fe_problem.assembly(_tid, _sys.number()), _local_re, all_dof_indices, -1.0);
+
+    if (do_residual){
+       addResiduals(_fe_problem.assembly(_tid, _sys.number()), _local_re, all_dof_indices, -1.0);
+	}
 
     // write to the Jacobian (unfortunately we have to transpose first)
     if (do_jacobian)
     {
+	  // sign of residual and jacobian contribution differ in abaqus uel
       _local_ke_T.resize(ndofel, ndofel);
-      _local_ke.get_transpose(_local_ke_T);
+	  for (const auto i : index_range(_local_re)){
+		for (const auto j : index_range(_local_re)){
+              _local_ke_T(i,j) = -1.0*_local_ke(j,i);
+		}
+	  }
+      //_local_ke.get_transpose(_local_ke_T);
       addJacobian(_fe_problem.assembly(_tid, _sys.number()),
                   _local_ke_T,
                   all_dof_indices,
