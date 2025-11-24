@@ -8,7 +8,6 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """MOOSE FMU interface base classes and helper utilities."""
-from .moose2fmu import Moose2FMU
 from .fmu_utils import (
     configure_fmu_logging,
     fmu_info,
@@ -19,6 +18,7 @@ from .fmu_utils import (
     set_real,
     set_string,
 )
+from .moose2fmu import Moose2FMU
 
 __all__ = [
     "Moose2FMU",

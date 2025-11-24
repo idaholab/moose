@@ -14,7 +14,6 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 _TEST_DIR = Path(__file__).resolve().parent
@@ -128,9 +127,8 @@ class TestFmuUtils(unittest.TestCase):
 
         with patch.object(
             fmu_utils, "read_model_description", new=fake_read_model_description
-        ):
-            with self.assertLogs(fmu_utils.logger, level=logging.INFO) as logs:
-                result = fmu_utils.fmu_info("model.fmu", "model.fmu")
+        ), self.assertLogs(fmu_utils.logger, level=logging.INFO) as logs:
+            result = fmu_utils.fmu_info("model.fmu", "model.fmu")
 
         self.assertIs(result, description)
         self.assertEqual(calls["path"], "model.fmu")
