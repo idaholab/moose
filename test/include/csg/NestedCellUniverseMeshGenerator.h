@@ -29,4 +29,6 @@ protected:
   const Real _inner_rad;
   /// radius of outer sphere surface
   const Real _outer_rad;
+  /// radius of lattice sphere surface
+  const Real _lattice_rad;
 };
