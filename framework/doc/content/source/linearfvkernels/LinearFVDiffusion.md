@@ -50,6 +50,30 @@ MOOSE, see [Functors/index.md].
 !alert warning
 When using non-zero flux boundary condition, only a single `LinearFVFluxKernel` may be used, as otherwise
 the boundary conditions may be applied multiple times. This warning applies to all `LinearFVFluxKernel`-derived classes.
+### Interpolating material coefficients
+
+By default the diffusion coefficient functor is evaluated directly on each face. You can instead
+select a runtime interpolation policy through the [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method)
+parameter and an object declared in the [FVInterpolationMethod.md]
+block. This is useful when you want the face value to depend on both adjacent cell-centered
+quantities without incurring the cost of virtual dispatch inside the kernel loop.
+
+```
+[InterpolationMethods]
+  [face_k]
+    type = harmonicAverage
+  []
+[]
+
+[LinearFVKernels]
+  [diff]
+    type = LinearFVDiffusion
+    variable = u
+    diffusion_coeff = k
+    coeff_interp_method = face_k
+  []
+[]
+```
 
 ## Example input syntax
 
