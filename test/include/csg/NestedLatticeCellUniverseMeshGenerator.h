@@ -11,12 +11,12 @@
 
 #include "MeshGenerator.h"
 
-class NestedCellUniverseMeshGenerator : public MeshGenerator
+class NestedLatticeCellUniverseMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  NestedCellUniverseMeshGenerator(const InputParameters & parameters);
+  NestedLatticeCellUniverseMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
