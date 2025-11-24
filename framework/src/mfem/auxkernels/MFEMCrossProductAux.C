@@ -18,37 +18,25 @@ InputParameters
 MFEMCrossProductAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects s(x) * (U x V) onto a vector MFEM auxvariable");
-  params.addRequiredParam<VariableName>("first_source_vec", "Vector MFEMVariable U (vdim=3)");
-  params.addRequiredParam<VariableName>("second_source_vec", "Vector MFEMVariable V (vdim=3)");
-  params.addParam<mfem::real_t>(
-      "scale_factor", 1.0, "Constant multiplier applied to the cross product");
+  params.addClassDescription("Projects $s \\vec u \\times \\vec v$ onto a vector MFEM auxvariable");
+  params.addRequiredParam<MFEMVectorCoefficientName>("first_source_vec", "Vector coeff (vdim=3)");
+  params.addRequiredParam<MFEMVectorCoefficientName>("second_source_vec", "Vector coeff (vdim=3)");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "Name of scalar coefficient s to scale the cross product by");
   return params;
 }
 
 MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _u_var_name(getParam<VariableName>("first_source_vec")),
-    _v_var_name(getParam<VariableName>("second_source_vec")),
-    _u_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_u_var_name)),
-    _v_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v_var_name)),
-    _scale_factor(getParam<mfem::real_t>("scale_factor")),
-    _u_coef(&_u_var),
-    _v_coef(&_v_var),
-    _cross_uv(_u_coef, _v_coef),
-    _scale_c(_scale_factor),
-    _final_coef(_scale_c, _cross_uv)
+    _cross(getVectorCoefficient("first_source_vec"), getVectorCoefficient("second_source_vec")),
+    _scaled_cross(getScalarCoefficient("coefficient"), _cross)
 {
-  // Check the target variable type and dimensions
+  // The target variable's finite element space
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
-  const int mesh_dim = fes->GetMesh()->Dimension();
 
-  // Enforce 3D cross product
-  if (mesh_dim != 3)
-    mooseError("MFEMCrossProductAux requires a 3D mesh (Dimension == 3).");
-
+  // Must be 3D
   if (fes->GetVDim() != 3)
-    mooseError("MFEMCrossProductAux requires AuxVariable to have vdim == 3.");
+    mooseError("MFEMCrossProductAux requires the target variable to have vdim == 3.");
 
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
@@ -63,10 +51,7 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
 void
 MFEMCrossProductAux::execute()
 {
-
-  // MFEM element projection for L2
-  _result_var = 0.0;
-  _result_var.ProjectCoefficient(_final_coef);
+  _result_var.ProjectCoefficient(_scaled_cross);
 }
 
 #endif // MOOSE_MFEM_ENABLED

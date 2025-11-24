@@ -8,12 +8,14 @@
 
 ## Overview
 
-AuxKernel for calculating the cross product of two vector fields and projecting onto an L2 vector finite element space mfem auxvariable.
+AuxKernel for calculating the cross product of two vector fields and projecting
+the result onto an MFEM auxiliary variable in an L2 vector finite element space.
 
 !equation
-s(x)(u\times v), \,\,\,
+s \vec u \times \vec v
 
-where $u$ and $v$ are the two vector fields and $s(x)$ is an optional scaling.
+where $\vec u$ and $\vec v$ are the two vector fields and $s$ is an optional
+scaling coefficient.
 
 ## Example Input File Syntax
 

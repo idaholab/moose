@@ -79,7 +79,6 @@
     variable = lorentz_force
     first_source_vec = e_field
     second_source_vec = b_field
-    scale_factor = 1
     execute_on = TIMESTEP_END
   []
 []
