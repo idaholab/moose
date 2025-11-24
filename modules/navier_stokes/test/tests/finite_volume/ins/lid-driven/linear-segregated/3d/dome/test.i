@@ -1,11 +1,10 @@
 ilet_width = 0.5472
 ilet_length = 0.4064
 ilet_area = '${fparse ilet_width * ilet_length}'
-# volumetric_flow_rate = 0.31478894915 # m3/s
-volumetric_flow_rate = 0.03
+volumetric_flow_rate = 0.31478894915 # m3/s
+velocity_inlet_magnitude = ${fparse volumetric_flow_rate / ilet_area}
 # Make this negative so that it's the opposite direction of the normal vector
-velocity_diri_condition = '${fparse -volumetric_flow_rate / ilet_area}'
-# cl = 10e-2
+velocity_diri_condition = '${fparse -velocity_inlet_magnitude}'
 
 # air
 rho = 1.177
@@ -13,12 +12,23 @@ mu = 1.846e-5
 k = .0262
 cp = 1006
 beta = 3.33e-3
+alpha = ${fparse k / (cp * rho)}
+nu = ${fparse mu / rho}
+
+# Dimensionless numbers
+L = 10
+Re = ${fparse L * velocity_inlet_magnitude / nu}
+Pr = ${fparse cp * mu / k}
+
+# mixed laminar-turbulent forced convection flat plate correlation
+Re_crit = 5e5
+Nu = ${fparse (.037 * Re^(4/5) - .664 * Re_crit^(1/2)) * Pr^(1/3)}
+h = ${fparse Nu * k / L}
 
 T_0 = 300.0
 T_hot = 373
 T_cold = ${T_0}
-# initial_dt = ${fparse cl / -velocity_diri_condition}
-initial_dt = 4
+initial_dt = .4
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -225,6 +235,12 @@ initial_dt = 4
     variable = vel_z
     normal_component = 'z'
   []
+  [inlet_T]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'inlet'
+    functor = ${T_cold}
+    variable = T_fluid
+  []
 
   [outlet_p]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -289,16 +305,20 @@ initial_dt = 4
     variable = T_fluid
   []
   [T_hot]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    type = LinearFVConvectiveHeatTransferBC
     boundary = 'air_box_boundary'
-    functor = ${T_hot}
     variable = T_fluid
+    h = ${h}
+    T_fluid = T_fluid
+    T_solid = ${T_hot}
   []
   [T_cold]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'air_wall_boundary inlet'
-    functor = ${T_cold}
+    type = LinearFVConvectiveHeatTransferBC
+    boundary = 'air_wall_boundary'
+    T_solid = ${T_cold}
+    T_fluid = T_fluid
     variable = T_fluid
+    h = ${h}
   []
 []
 
@@ -328,10 +348,8 @@ initial_dt = 4
   energy_petsc_options_value = 'hypre boomeramg 4 1 0.1 0.6 HMIS ext+i'
   print_fields = false
 
-  num_steps = 15000
+  num_steps = 30000
   num_piso_iterations = 0
-
-  # dtmax = ${initial_dt}
 
   [TimeStepper]
     type = PostprocessorDT
@@ -339,6 +357,8 @@ initial_dt = 4
     dt = ${initial_dt}
     scale = 1
   []
+
+  scheme = bdf2
 []
 
 [Outputs]
@@ -371,10 +391,18 @@ initial_dt = 4
     type = ElementExtremeValue
     variable = vel_mag
   []
+  [vel_avg]
+    type = ElementAverageValue
+    variable = vel_mag
+  []
   [T_max]
     type = ElementExtremeValue
     variable = T_fluid
     value_type = max
+  []
+  [T_avg]
+    type = ElementAverageValue
+    variable = T_fluid
   []
   [T_boundary_max]
     type = SideExtremeValue
@@ -397,5 +425,17 @@ initial_dt = 4
     type = ParsedPostprocessor
     expression = 'dt / cfl'
     pp_names = 'dt cfl'
+  []
+  [h]
+    type = AverageElementSize
+    execute_on = 'initial'
+  []
+  [t_diff]
+    type = ParsedPostprocessor
+    expression = 'h^2 / alpha'
+    pp_names = 'h'
+    constant_names = 'alpha'
+    constant_expressions = '${alpha}'
+    execute_on = 'initial'
   []
 []
