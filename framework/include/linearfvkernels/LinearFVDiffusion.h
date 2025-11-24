@@ -10,6 +10,7 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
+#include "FVInterpolationMethod.h"
 
 /**
  * Kernel that adds contributions from a diffusion term discretized using the finite volume method
@@ -25,6 +26,8 @@ public:
    * @param params The InputParameters for the kernel.
    */
   LinearFVDiffusion(const InputParameters & params);
+
+  virtual void setupFaceData(const FaceInfo * face_info) override;
 
   virtual void initialSetup() override;
 
@@ -57,8 +60,19 @@ protected:
    */
   Real computeFluxRHSContribution();
 
+  /**
+   * Returns the diffusion coefficient interpolated to the current face.
+   */
+  Real faceDiffusivity() const;
+
   /// The functor for the diffusion coefficient
   const Moose::Functor<Real> & _diffusion_coeff;
+
+  /// Optional interpolation method for the diffusion coefficient
+  const FVInterpolationMethod * _coeff_interp_method;
+
+  /// Cached handle used to evaluate the interpolation method without virtual dispatch
+  FVInterpolationMethod::FaceInterpolator _coeff_interp_handle;
 
   /// Switch to enable/disable nonorthogonal correction
   const bool _use_nonorthogonal_correction;
@@ -68,4 +82,8 @@ protected:
 
   /// The cached right hand side contribution
   Real _flux_rhs_contribution;
+
+  /// Cache for interpolated diffusion coefficient
+  mutable bool _cached_face_diffusivity;
+  mutable Real _face_diffusivity;
 };
