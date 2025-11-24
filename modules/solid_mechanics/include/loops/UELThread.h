@@ -54,6 +54,7 @@ private:
 
   DenseVector<Real> _local_re;
   DenseMatrix<Real> _local_ke;
+  DenseMatrix<Real> _local_ke_T;
 
   const std::vector<const MooseVariableFieldBase *> & _variables;
 
