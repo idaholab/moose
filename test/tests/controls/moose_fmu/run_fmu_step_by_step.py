@@ -1,13 +1,13 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from MooseFMU import configure_fmu_logging
+from moosefmu import configure_fmu_logging
 import moose_fmu_tester
 
 """
@@ -36,12 +36,11 @@ if __name__ == "__main__":
     cmd = moose_fmu_tester.test_controller()
 
     t0, t1, dt = 0, 1, 0.5
-    moose_filename = 'MooseTest.fmu'
+    moose_filename = "MooseTest.fmu"
     flag = "MULTIAPP_FIXED_POINT_END"
 
-    result2 = moose_fmu_tester.moose_fmu_step_by_step(moose_filename, t0, t1, dt, flag, cmd)
+    result2 = moose_fmu_tester.moose_fmu_step_by_step(
+        moose_filename, t0, t1, dt, flag, cmd
+    )
     logger.info("Results from fmu step by step:")
     moose_fmu_tester.print_result(result2)
-
-
-

@@ -25,7 +25,7 @@ if "MooseFMU.test" not in sys.modules:
     assert _SPEC.loader is not None
     _SPEC.loader.exec_module(_package_module)
 
-from MooseFMU import Moose2FMU
+from moosefmu import Moose2FMU
 
 
 class _DummyMoose(Moose2FMU):

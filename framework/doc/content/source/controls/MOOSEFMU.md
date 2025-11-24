@@ -78,7 +78,7 @@ MOOSE execute flags.
 ### Creating a Custom FMU
 
 ```python
-from MooseFMU import Moose2FMU
+from moosefmu import Moose2FMU
 
 
 class CustomMoose(Moose2FMU):
