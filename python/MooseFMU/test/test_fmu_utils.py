@@ -1,3 +1,13 @@
+#* This file is part of the MOOSE framework
+#* https://mooseframework.inl.gov
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+
 import importlib.util
 import logging
 import sys
@@ -173,8 +183,11 @@ class TestFmuAccessorHelpers(unittest.TestCase):
         fmu = _DummyFmu()
         vr_map = {"temperature": 1, "mode": 2, "enabled": 3}
 
+        # Set real value for the FMU variable referenced by "temperature"
         self.assertEqual(fmu_utils.get_real(fmu, vr_map, "temperature"), 12.5)
+        # Set string value for the FMU variable referenced by "mode"
         self.assertEqual(fmu_utils.get_string(fmu, vr_map, "mode"), "ready")
+        # Set bool value for the FMU variable referenced by "enabled"
         self.assertTrue(fmu_utils.get_bool(fmu, vr_map, "enabled"))
 
         fmu_utils.set_real(fmu, vr_map, "temperature", 98.6)
