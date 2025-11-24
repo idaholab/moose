@@ -18,14 +18,14 @@ except ModuleNotFoundError as exc:
         "or add that environment to PYTHONPATH."
     ) from exc
 
-from MooseControl import MooseControl
-from typing import List, Dict, Optional
 import logging
-import time
-from typing import Iterable, Union, Set, Tuple
-import re
 import numbers
+import re
 import shlex
+import time
+from typing import Dict, Iterable, Optional, Set, Tuple, Union
+
+from MooseControl import MooseControl
 
 
 class Moose2FMU(Fmi2Slave):
@@ -156,7 +156,8 @@ class Moose2FMU(Fmi2Slave):
         step_size: float,
         allowed_flags: Optional[Union[str, Iterable[str]]] = None,
     ) -> Tuple[Optional[float], Optional[str]]:
-        """Synchronize with the running MOOSE simulation.
+        """
+        Synchronize with the running MOOSE simulation.
 
         Parameters
         ----------
@@ -166,13 +167,14 @@ class Moose2FMU(Fmi2Slave):
             Subset of flags that require additional handling. Defaults to
             synchronizing on the ``INITIAL`` and ``MULTIAPP_FIXED_POINT_BEGIN`` signals
             when omitted.
+
         Returns
         -------
         tuple
             A pair containing the synchronized MOOSE time and the flag that
             triggered the synchronization (if any).
-        """
 
+        """
         parsed_allowed_flags = self._combine_flags(
             self._default_sync_flags,
             self._default_data_flags,
@@ -236,7 +238,6 @@ class Moose2FMU(Fmi2Slave):
 
     def ensure_control_listening(self) -> bool:
         """Verify the MooseControl server is listening before proceeding."""
-
         if self.control.isListening():
             return True
 
@@ -252,7 +253,8 @@ class Moose2FMU(Fmi2Slave):
         force: bool = False,
         flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> bool:
-        """Set a controllable ``Real`` parameter, skipping redundant updates.
+        """
+        Set a controllable ``Real`` parameter, skipping redundant updates.
 
         Parameters
         ----------
@@ -274,8 +276,8 @@ class Moose2FMU(Fmi2Slave):
         bool
             ``True`` if a new value was sent to MOOSE, ``False`` when the
             request was skipped because it matches the previously applied value.
-        """
 
+        """
         cached = self._controllable_real_cache.get(path)
         if not force and cached == value:
             self.logger.debug(
@@ -309,7 +311,8 @@ class Moose2FMU(Fmi2Slave):
         force: bool = False,
         flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> bool:
-        """Set a controllable vector parameter using the appropriate MooseControl API.
+        """
+        Set a controllable vector parameter using the appropriate MooseControl API.
 
         Parameters
         ----------
@@ -345,8 +348,8 @@ class Moose2FMU(Fmi2Slave):
         ValueError
             When attempting to set an empty vector without specifying a
             ``value_type``.
-        """
 
+        """
         if isinstance(value, (str, bytes)):
             raise TypeError("'value' must be an iterable of scalar entries")
 
@@ -437,7 +440,8 @@ class Moose2FMU(Fmi2Slave):
         max_retries: int,
         wait_seconds: float = 0.5,
     ) -> Optional[str]:
-        """Poll ``getWaitingFlag`` and retry before giving up.
+        """
+        Poll ``getWaitingFlag`` and retry before giving up.
 
         Parameters
         ----------
@@ -448,8 +452,8 @@ class Moose2FMU(Fmi2Slave):
             Number of times to attempt retrieving the flag.
         wait_seconds
             Delay between retries in seconds.
-        """
 
+        """
         normalized_allowed: Optional[Set[str]] = None
         if allowed_flags:
             normalized_allowed = self._parse_flags(allowed_flags)
@@ -504,15 +508,16 @@ class Moose2FMU(Fmi2Slave):
         current_time: float,
         flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> Optional[float]:
-        """Wait for a synchronization flag and fetch a postprocessor value.
+        """
+        Wait for a synchronization flag and fetch a postprocessor value.
 
         Returns
         -------
         Optional[float]
             ``None`` when the flag retrieval fails; otherwise the fetched postprocessor
             value.
-        """
 
+        """
         wait_flags = self._combine_flags(
             self._default_data_flags,
             flag,
@@ -539,15 +544,16 @@ class Moose2FMU(Fmi2Slave):
         current_time: float,
         flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> Optional[float]:
-        """Wait for a synchronization flag and fetch a reporter value.
+        """
+        Wait for a synchronization flag and fetch a reporter value.
 
         Returns
         -------
         Optional[float]
             ``None`` when the flag retrieval fails; otherwise the fetched reporter
             value.
-        """
 
+        """
         wait_flags = self._combine_flags(
             self._default_data_flags,
             flag,
@@ -581,7 +587,6 @@ class Moose2FMU(Fmi2Slave):
 
     def _skip_flag(self, flag: str):
         """Acknowledge a flag and allow the MOOSE execution to continue."""
-
         self.control.wait(flag)
         self.control.setContinue()
 
@@ -630,7 +635,8 @@ class Moose2FMU(Fmi2Slave):
         return normalized_flag or flag_value
 
     def _schedule_next_time(self, next_time: float) -> bool:
-        """Request MOOSE to insert an additional time point if needed.
+        """
+        Request MOOSE to insert an additional time point if needed.
 
         Parameters
         ----------
@@ -642,8 +648,8 @@ class Moose2FMU(Fmi2Slave):
         bool
             ``True`` when a new request was sent to MOOSE, ``False`` if it was
             skipped because the same value was already applied.
-        """
 
+        """
         path = "Times/external_input/next_time"
         cached = self._controllable_real_cache.get(path)
         if cached == next_time:

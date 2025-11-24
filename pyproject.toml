@@ -16,6 +16,7 @@ include = '''
 [tool.ruff]
 include = [
   "python/moosecontrol/**/*.py",
+  "python/moosefmu/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",
