@@ -11,9 +11,9 @@ import importlib.util
 import logging
 import sys
 import unittest
-from unittest import mock
 from pathlib import Path
 from types import MethodType
+from unittest import mock
 
 _TEST_DIR = Path(__file__).resolve().parent
 _SPEC = importlib.util.spec_from_file_location(

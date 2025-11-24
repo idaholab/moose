@@ -18,6 +18,7 @@ include = '''
 include = [
   "python/moosecontrol/**/*.py",
   "python/moosepy/**/*.py",
+  "python/moosefmu/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",
