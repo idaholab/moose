@@ -19,18 +19,17 @@ MFEMScalarTimeAverageAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Calculates a running time average of a scalar MFEM variable projected onto an auxvariable");
-  params.addRequiredParam<VariableName>("source", "Scalar MFEMVariable to take the average of.");
-  params.addParam<mfem::real_t>("time_skip", 0.0, "Time to skip before beginning the average.");
+      "Calculates a running time average of a scalar coefficient projected onto an auxvariable");
+  params.addRequiredParam<MFEMScalarCoefficientName>("source", "Scalar coefficient to average");
+  params.addParam<mfem::real_t>("time_skip", 0.0, "Time to skip before beginning the average");
 
   return params;
 }
 
 MFEMScalarTimeAverageAux::MFEMScalarTimeAverageAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _source_var_name(getParam<VariableName>("source")),
-    _source_var_coefficient(getScalarCoefficientByName(_source_var_name)),
-    _result_var_coefficient(getScalarCoefficientByName(_result_var_name)),
+    _source_coefficient(getScalarCoefficient("source")),
+    _result_coefficient(getScalarCoefficientByName(_result_var_name)),
     _average_var(_result_var.ParFESpace()),
     _skip(getParam<Real>("time_skip")),
     _time(getMFEMProblem().time()),
@@ -46,7 +45,7 @@ MFEMScalarTimeAverageAux::execute()
 
   // Linear blend: (1 - w) * avg_old + w * src
   const mfem::real_t w = _dt / (_time - _skip);
-  mfem::SumCoefficient blend(_result_var_coefficient, _source_var_coefficient, 1.0 - w, w);
+  mfem::SumCoefficient blend(_result_coefficient, _source_coefficient, 1.0 - w, w);
   _average_var.ProjectCoefficient(blend);
 
   _result_var = _average_var;
