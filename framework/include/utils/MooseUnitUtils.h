@@ -14,6 +14,52 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 
+namespace Moose::UnitUtils::detail
+{
+template <typename T>
+inline std::string
+argToString(const T val)
+{
+  return std::to_string(val);
+}
+inline std::string
+argToString(const char * val)
+{
+  return std::string(val);
+}
+inline std::string
+argToString(const std::string & val)
+{
+  return val;
+}
+}
+
+#define MOOSE_ASSERT_THROWS(exception_type, action, ...)                                           \
+  do                                                                                               \
+  {                                                                                                \
+    static_assert(std::is_base_of_v<std::exception, exception_type>, "Not an exception");          \
+    try                                                                                            \
+    {                                                                                              \
+      action;                                                                                      \
+      FAIL() << "Expected " << MooseUtils::prettyCppType<exception_type>() << " not thrown";       \
+    }                                                                                              \
+    catch (std::exception const & e)                                                               \
+    {                                                                                              \
+      if constexpr (!std::is_same_v<std::exception, exception_type>)                               \
+        if (!dynamic_cast<const exception_type *>(&e))                                             \
+          FAIL() << "Threw " << MooseUtils::prettyCppType(&e) << " instead of "                    \
+                 << MooseUtils::prettyCppType(&e) << "\n  Message: \"" << e.what() << "\"";        \
+      if constexpr (sizeof(#__VA_ARGS__) > 1)                                                      \
+      {                                                                                            \
+        const auto contains_string = Moose::UnitUtils::detail::argToString(__VA_ARGS__);           \
+        if (std::string(e.what()).find(contains_string) == std::string::npos)                      \
+          FAIL() << "Exception " << MooseUtils::prettyCppType<exception_type>() << ":\n"           \
+                 << "  Message: \"" << e.what() << "\"\n  Does not contain: \"" << contains_string \
+                 << "\"";                                                                          \
+      }                                                                                            \
+    }                                                                                              \
+  } while (0)
+
 namespace Moose::UnitUtils
 {
 /**
@@ -21,19 +67,12 @@ namespace Moose::UnitUtils
  *
  * @param action A function that calls the thing that should throw
  * @param contains Optional argument to check that the assertion message contains this sub string
- * @param set_throw_on_error Set to true to set moose to throw on error
  */
 template <class ExceptionType = std::exception, class Action = bool>
 void
-assertThrows(const Action & action,
-             const std::optional<std::string> & contains = {},
-             const bool set_throw_on_error = false)
+assertThrows(const Action & action, const std::optional<std::string> & contains = {})
 {
   static_assert(std::is_base_of_v<std::exception, ExceptionType>, "Not an exception");
-
-  std::unique_ptr<Moose::ScopedThrowOnError> scoped_throw_on_error;
-  if (set_throw_on_error)
-    scoped_throw_on_error = std::make_unique<Moose::ScopedThrowOnError>();
 
   try
   {

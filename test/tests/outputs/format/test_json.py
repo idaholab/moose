@@ -108,6 +108,25 @@ class TestJSONBase(unittest.TestCase):
         self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
         self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
 
+        # Applications
+        def test_app(name):
+            app = data['Application']['types'][name]
+            params = app['parameters']
+            input = params['input_file']
+            input_cli = input['command_line']
+            self.assertIn('-i', input_cli['syntax'])
+            self.assertFalse(input_cli['global'])
+            self.assertFalse(input_cli['input_enabled'])
+            error = params['error']
+            error_cli = error['command_line']
+            self.assertIn('-e', error_cli['syntax'])
+            self.assertTrue(error_cli['global'])
+            self.assertTrue(error_cli['input_enabled'])
+            if name != 'MooseApp':
+                self.assertIn(f'{name}.C', app['register_file'])
+        test_app('MooseTestApp')
+        test_app('MooseApp')
+
 class TestFull(TestJSONBase):
     def testFullJson(self):
          """

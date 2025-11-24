@@ -24,27 +24,32 @@ class GTEST_TEST_CLASS_NAME_(AppFactoryTest, createNotRegistered);
 /**
  * Macros
  */
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
+#define registerApp(name) AppFactory::instance().reg<name>(#name, __FILE__, __LINE__)
 
 /**
  * Polymorphic data structure with parameter and object build access.
  */
 struct AppFactoryBuildInfoBase
 {
-  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) = 0;
-  virtual InputParameters buildParameters() = 0;
+  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) const = 0;
+  virtual InputParameters buildParameters() const = 0;
   virtual ~AppFactoryBuildInfoBase() = default;
 
-  std::size_t _app_creation_count = 0;
+  /// C++ type of the app
+  std::string type;
+  /// File that registered this app
+  std::string file;
+  /// Line number in \p file that this app was registered
+  int line;
 };
 template <typename T>
 struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
 {
-  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) override
+  std::unique_ptr<MooseApp> build(const InputParameters & params) const override final
   {
     return std::make_unique<T>(params);
   }
-  virtual InputParameters buildParameters() override { return T::validParams(); }
+  InputParameters buildParameters() const override final { return T::validParams(); }
 };
 
 using AppFactoryBuildInfoMap = std::map<std::string, std::unique_ptr<AppFactoryBuildInfoBase>>;
@@ -91,13 +96,16 @@ public:
    * @param app_type Type of the application being constructed
    * @param name Name for the object
    * @param parameters Parameters this object should have
+   * @param throw_on_extract_error Whether or not to throw a ParseError instead of using mooseError
+   * when [Application] block param extraction fails
    * @return The created object
    */
   ///@{
   std::unique_ptr<MooseApp> create(const std::string & app_type,
                                    const std::string & name,
                                    InputParameters parameters,
-                                   MPI_Comm COMM_WORLD_IN);
+                                   MPI_Comm COMM_WORLD_IN,
+                                   const bool throw_on_extract_error = false);
   std::shared_ptr<MooseApp> createShared(const std::string & app_type,
                                          const std::string & name,
                                          InputParameters parameters,
@@ -118,7 +126,7 @@ public:
    * @param name Name of the object to register
    */
   template <typename T>
-  void reg(const std::string & name);
+  void reg(const std::string & name, const std::string & file, const int line);
 
   /**
    * Get valid parameters for the object
@@ -143,6 +151,7 @@ public:
    */
   class ClearAppParamsKey
   {
+    friend class AppFactory;
     friend class MooseApp;
 #ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(::AppFactoryTest, manageAppParams);
@@ -170,11 +179,6 @@ public:
   {
     return _name_to_build_info.count(app_name);
   }
-
-  /**
-   * @returns the amount of times the AppFactory created the named App-type
-   */
-  std::size_t createdAppCount(const std::string & app_type) const;
 
   /**
    * Returns the map of object name to a function pointer for building said object's
@@ -225,16 +229,24 @@ private:
 
   /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)
   std::map<std::size_t, std::unique_ptr<InputParameters>> _input_parameters;
+
+  std::size_t _next_input_parameters_id = 0;
 };
 
 template <typename T>
 void
-AppFactory::reg(const std::string & name)
+AppFactory::reg(const std::string & name, const std::string & file, const int line)
 {
   if (isRegistered(name))
     return;
 
-  _name_to_build_info[name] = std::make_unique<AppFactoryBuildInfo<T>>();
+  auto it_inserted_pair =
+      _name_to_build_info.emplace(name, std::make_unique<AppFactoryBuildInfo<T>>());
+  auto & info = *it_inserted_pair.first->second;
+  info.type = name;
+  info.file = file;
+  info.line = line;
+
   Moose::Capabilities::getCapabilityRegistry().add(
       name, true, "MOOSE application " + name + " is available.");
 }

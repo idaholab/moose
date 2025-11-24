@@ -64,12 +64,12 @@ public:
    */
   FileLineInfo getLineInfo(const std::string & name, const std::string & task) const;
 
-  std::string getTaskName(const std::string & action);
+  const std::string & getTaskName(const std::string & action) const;
 
   std::shared_ptr<Action>
   create(const std::string & action, const std::string & action_name, InputParameters & parameters);
 
-  InputParameters getValidParams(const std::string & name);
+  InputParameters getValidParams(const std::string & name) const;
 
   struct BuildInfo
   {

@@ -201,8 +201,7 @@ Factory::deprecatedMessage(const std::string obj_name) const
   _deprecated_types.emplace(obj_name);
 
   // We dont need a backtrace on this, this is user-facing
-  const auto current_show_trace = Moose::show_trace;
-  Moose::show_trace = false;
+  Moose::ScopedHideTrace scoped_hide_trace;
 
   // Get the current time
   std::time_t now;
@@ -244,7 +243,6 @@ Factory::deprecatedMessage(const std::string obj_name) const
     // Produce the error message
     mooseDeprecated(msg.str());
   }
-  Moose::show_trace = current_show_trace;
 }
 
 void
@@ -297,14 +295,13 @@ Factory::associateNameToClass(const std::string & name, const std::string & clas
   _name_to_class[name] = class_name;
 }
 
-std::string
+const std::string &
 Factory::associatedClassName(const std::string & name) const
 {
-  auto it = _name_to_class.find(name);
-  if (it == _name_to_class.end())
-    return "";
-  else
+  if (const auto it = _name_to_class.find(name); it != _name_to_class.end())
     return it->second;
+  static const std::string empty;
+  return empty;
 }
 
 InputParameters &

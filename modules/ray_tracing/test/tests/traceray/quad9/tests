@@ -11,7 +11,6 @@
       cli_args = 'Mesh/gmg/elem_type=quad9
                   UserObjects/lots/vertex_to_vertex=true
                   Outputs/file_base=vtv_out'
-      allow_test_objects = true
       abs_zero = 1e-8
       capabilities = 'method!=dbg'
 
@@ -25,7 +24,6 @@
       cli_args = 'Mesh/gmg/elem_type=quad9
                   UserObjects/lots/centroid_to_vertex=true
                   Outputs/file_base=ctv_out'
-      allow_test_objects = true
       abs_zero = 1e-8
       capabilities = 'method!=dbg'
 
@@ -39,7 +37,6 @@
       cli_args = 'Mesh/gmg/elem_type=quad9
                   UserObjects/lots/centroid_to_centroid=true
                   Outputs/file_base=ctc_out'
-      allow_test_objects = true
       abs_zero = 1e-8
       capabilities = 'method!=dbg'
 
@@ -53,7 +50,6 @@
       cli_args = 'Mesh/gmg/elem_type=quad9
                   UserObjects/lots/side_aq=true
                   Outputs/file_base=side_aq_out'
-      allow_test_objects = true
       abs_zero = 1e-8
       capabilities = 'method!=dbg'
 
@@ -67,7 +63,6 @@
       cli_args = 'Mesh/gmg/elem_type=quad9
                   UserObjects/lots/centroid_aq=true
                   Outputs/file_base=centroid_aq_out'
-      allow_test_objects = true
       abs_zero = 1e-8
       capabilities = 'method!=dbg'
 

@@ -24,9 +24,7 @@
 
 // Forward declarations
 class ActionWarehouse;
-class SyntaxTree;
 class MooseApp;
-class Factory;
 class ActionFactory;
 class JsonSyntaxTree;
 class Parser;
@@ -35,6 +33,10 @@ class Syntax;
 namespace Moose
 {
 class Builder;
+namespace ParameterExtraction
+{
+struct ExtractionInfo;
+}
 
 class UnusedWalker : public hit::Walker
 {
@@ -56,12 +58,6 @@ private:
 class Builder : public ConsoleStreamInterface, public hit::Walker
 {
 public:
-  enum SyntaxFormatterType
-  {
-    INPUT_FILE,
-    YAML
-  };
-
   Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser);
   virtual ~Builder();
 
@@ -94,21 +90,6 @@ public:
    */
   void extractParams(const std::string & prefix, InputParameters & p);
 
-  /**
-   * Creates a syntax formatter for printing
-   */
-  void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode);
-
-  /**
-   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input.
-   */
-  void buildFullTree(const std::string & search_string);
-
-  /**
-   * Use MOOSE Factories to construct a parameter tree for documentation or echoing input.
-   */
-  void buildJsonSyntaxTree(JsonSyntaxTree & tree) const;
-
   void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n);
 
   void errorCheck(const libMesh::Parallel::Communicator & comm, bool warn_unused, bool err_unused);
@@ -117,22 +98,13 @@ public:
 
 private:
   /**
-   * @return Whether or not the given node \p node exists within the [GlobalParams] block
+   * Appends the context from the ExtractionInfo objects (errors, deprecated params, used variables)
+   * collected during extractParams and from the [Application] block extraction
    */
-  bool isGlobal(const hit::Node & node) const;
-
-  /**
-   * Get the [GlobalParams] section node if it exists
-   *
-   * We need to separate this so that we can call extractParams()
-   * before calling build()
-   */
-  const hit::Node * queryGlobalParamsNode() const;
+  void appendExtractionInfo(const ParameterExtraction::ExtractionInfo & info);
 
   /// The MooseApp this Parser is part of
   MooseApp & _app;
-  /// The Factory associated with that MooseApp
-  Factory & _factory;
   /// Action warehouse that will be filled by actions
   ActionWarehouse & _action_wh;
   /// The Factory that builds actions
@@ -143,9 +115,6 @@ private:
   Parser & _parser;
   /// The root node from the Parser
   hit::Node & _root;
-
-  /// Object for holding the syntax parse tree
-  std::unique_ptr<SyntaxTree> _syntax_formatter;
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;

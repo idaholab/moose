@@ -41,7 +41,8 @@ InputParameters::InputParameters()
     _show_deprecated_message(true),
     _allow_copy(true),
     _hit_node(nullptr),
-    _finalized(false)
+    _finalized(false),
+    _allow_command_line_params(false)
 {
 }
 
@@ -75,6 +76,7 @@ InputParameters::clear()
   _new_to_old_names.clear();
   _hit_node = nullptr;
   _finalized = false;
+  _allow_command_line_params = false;
 }
 
 void
@@ -160,18 +162,20 @@ InputParameters::operator=(const InputParameters & rhs)
   Parameters::operator=(rhs);
 
   _params = rhs._params;
-
+  _coupled_vars = rhs._coupled_vars;
+  _class_description = rhs._class_description;
   _buildable_types = rhs._buildable_types;
   _buildable_rm_types = rhs._buildable_rm_types;
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
-  _coupled_vars = rhs._coupled_vars;
-  _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
+  _show_deprecated_message = rhs._show_deprecated_message;
   _allow_copy = rhs._allow_copy;
+  _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
   _finalized = false;
+  _allow_command_line_params = rhs._allow_command_line_params;
 
   return *this;
 }
@@ -750,15 +754,15 @@ InputParameters::getFileBase(const std::optional<std::string> & param_name) cons
   // Context from the individual parameter
   if (param_name)
     hit_node = getHitNode(*param_name);
-  // Context from the parameters
-  if (!hit_node)
+  // Context from the parameters (and not a command line parameter)
+  if (!hit_node || hit_node->filename() == Moose::hit_command_line_filename)
     hit_node = getHitNode();
   // No hit node, so use the cwd (no input files)
   if (!hit_node)
     return std::filesystem::current_path();
 
   // Find any context that isn't command line arguments
-  while (hit_node && hit_node->filename() == "CLI_ARGS")
+  while (hit_node && hit_node->filename() == Moose::hit_command_line_filename)
     hit_node = hit_node->parent();
 
   // Failed to find a node up the tree that isn't a command line argument
@@ -978,34 +982,34 @@ InputParameters::getObjectName() const
 }
 
 void
-InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
-                                      const std::string group_name)
+InputParameters::addParamNamesToGroup(const std::vector<std::string> & names,
+                                      const std::string & group_name)
 {
-  std::vector<std::string> elements;
-  MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r"); // tokenize on whitespace
-
-  // Since we don't require types (templates) for this method, we need
-  // to get a raw list of parameter names to compare against.
-  std::set<std::string> param_names;
-  for (const auto & it : *this)
-    param_names.insert(it.first);
-
-  for (const auto & param_name : elements)
-    if (_params.count(param_name) > 0)
-      _params[param_name]._group = group_name;
+  for (const auto & name : names)
+    if (const auto it = _params.find(name); it != _params.end())
+      it->second._group = group_name;
     else
       mooseError("Unable to find a parameter with name: ",
-                 param_name,
+                 name,
                  " when adding to group ",
                  group_name,
                  '.');
 }
 
 void
+InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
+                                      const std::string & group_name)
+{
+  std::vector<std::string> elements;
+  MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r"); // tokenize on whitespace
+  addParamNamesToGroup(elements, group_name);
+}
+
+void
 InputParameters::renameParameterGroup(const std::string & old_name, const std::string & new_name)
 {
   for (auto & param : _params)
-    if (param.second._group == old_name)
+    if (param.second._group && *param.second._group == old_name)
       param.second._group = new_name;
 }
 
@@ -1020,51 +1024,55 @@ InputParameters::setGlobalCommandLineParam(const std::string & name)
   cl_data->global = true;
 }
 
+void
+InputParameters::enableInputCommandLineParam(const std::string & name)
+{
+  auto & cl_data = at(checkForRename(name))._cl_data;
+  if (!cl_data)
+    mooseError("InputParameters::enableInputCommandLineParam: The parameter '",
+               name,
+               "' is not a command line parameter");
+  cl_data->input_enabled = true;
+}
+
 bool
 InputParameters::isCommandLineParameter(const std::string & name) const
 {
   return at(checkForRename(name))._cl_data.has_value();
 }
 
-std::optional<InputParameters::CommandLineMetadata>
+const InputParameters::CommandLineMetadata *
 InputParameters::queryCommandLineMetadata(const std::string & name) const
 {
-  const auto & cl_data = at(checkForRename(name))._cl_data;
-  if (!cl_data)
-    return {};
-  return *cl_data;
+  if (const auto & cl_data = at(checkForRename(name))._cl_data)
+    return &*cl_data;
+  return nullptr;
 }
 
 const InputParameters::CommandLineMetadata &
 InputParameters::getCommandLineMetadata(const std::string & name) const
 {
-  const auto & cl_data = at(checkForRename(name))._cl_data;
-  if (!cl_data)
-    mooseError("InputParameters::getCommandLineMetadata: The parameter '",
-               name,
-               "' is not a command line parameter");
-  return *cl_data;
+  if (const auto cl_data = queryCommandLineMetadata(name))
+    return *cl_data;
+  mooseError("InputParameters::getCommandLineMetadata: The parameter '",
+             name,
+             "' is not a command line parameter");
 }
 
 void
-InputParameters::commandLineParamSet(const std::string & name, const CommandLineParamSetKey)
+InputParameters::commandLineParamSet(const std::string & name,
+                                     const std::string & cl_switch,
+                                     const hit::Node * const command_line_node,
+                                     const CommandLineParamSetKey)
 {
   auto & cl_data = at(checkForRename(name))._cl_data;
   if (!cl_data)
     mooseError("InputParameters::commandLineParamSet: The parameter '",
                name,
                "' is not a command line parameter");
-  cl_data->set_by_command_line = true;
-}
-
-std::string
-InputParameters::getGroupName(const std::string & param_name_in) const
-{
-  const auto param_name = checkForRename(param_name_in);
-  auto it = _params.find(param_name);
-  if (it != _params.end())
-    return it->second._group;
-  return std::string();
+  if (command_line_node)
+    setHitNode(name, *command_line_node, {});
+  cl_data->set_switch = cl_switch;
 }
 
 void
@@ -1236,7 +1244,7 @@ InputParameters::isParamSetByUser(const std::string & name_in) const
     return false;
   // Special case for a command line option, which is a private parameter
   if (const auto cl_data = queryCommandLineMetadata(name))
-    return cl_data->set_by_command_line;
+    return cl_data->set_switch.has_value();
   // Not a command line option, not set by addParam and not private
   return !_params.at(name)._set_by_add_param && !_params.at(name)._is_private;
 }
@@ -1569,8 +1577,8 @@ InputParameters::setHitNode(const std::string & param,
                             const hit::Node & node,
                             const InputParameters::SetParamHitNodeKey)
 {
-  mooseAssert(node.type() == hit::NodeType::Field, "Must be a field");
-  at(param)._hit_node = &node;
+  mooseAssert(node.isRoot() || node.type() == hit::NodeType::Field, "Must be a field or the root");
+  at(checkForRename(param))._hit_node = &node;
 }
 
 std::string
@@ -1584,6 +1592,11 @@ InputParameters::inputLocation(const std::string & param) const
 std::string
 InputParameters::paramFullpath(const std::string & param) const
 {
+  // A command line parameter could be set via a switch
+  // (--mesh-only, for example), or a hit parameter
+  // (Application/mesh_only); this captures that
+  if (const auto cl_data = queryCommandLineMetadata(param); cl_data && cl_data->set_switch)
+    return *cl_data->set_switch;
   if (const auto hit_node = getHitNode(param))
     return hit_node->fullpath();
   return "";
@@ -1607,14 +1620,17 @@ InputParameters::shouldIgnore(const std::string & name_in)
   mooseError("Parameter ", name, " does not exist");
 }
 
-std::set<std::string>
-InputParameters::getGroupParameters(const std::string & group) const
+const std::string *
+InputParameters::queryParameterGroup(const std::string & name) const
 {
-  std::set<std::string> names;
-  for (auto it = _params.begin(); it != _params.end(); ++it)
-    if (it->second._group == group)
-      names.emplace(it->first);
-  return names;
+  if (const auto it = _params.find(checkForRename(name)); it != _params.end())
+  {
+    if (const auto & group = it->second._group)
+      return &*group;
+    return nullptr;
+  }
+
+  mooseError("InputParameters::getParameterGroup: Parameter ", name, " does not exist");
 }
 
 std::set<std::string>
@@ -1799,7 +1815,7 @@ InputParameters::queryDataFileNamePath(const std::string & name) const
 std::optional<std::string>
 InputParameters::setupVariableNames(std::vector<VariableName> & names,
                                     const hit::Node & node,
-                                    const Moose::PassKey<Moose::Builder>)
+                                    const SetupVariableNamesKey)
 {
   // Whether or not a name was found
   bool has_name = false;
@@ -1837,12 +1853,41 @@ InputParameters::setupVariableNames(std::vector<VariableName> & names,
   return {};
 }
 
+void
+InputParameters::requireExclusive(const std::vector<std::string> & params,
+                                  const std::optional<std::string> & context /* = {} */) const
+{
+  std::optional<std::string> found_param;
+  for (const auto & param : params)
+  {
+    if (isParamSetByUser(param))
+    {
+      if (found_param)
+      {
+        std::string message = "Cannot be used with parameter '" + paramFullpath(param) + "'";
+        if (context)
+          message += "; " + *context;
+        paramError(*found_param, message);
+      }
+      found_param = param;
+    }
+  }
+}
+
+void
+InputParameters::requireExclusive(const std::string & param1,
+                                  const std::string & param2,
+                                  const std::optional<std::string> & context /* = {} */) const
+{
+  requireExclusive({param1, param2}, context);
+}
+
 std::pair<std::string, const hit::Node *>
 InputParameters::paramMessageContext(const std::string & param) const
 {
   const hit::Node * node = nullptr;
-
   std::string fullpath;
+
   // First try to find the parameter
   if (const hit::Node * param_node = getHitNode(param))
   {
@@ -1859,15 +1904,22 @@ InputParameters::paramMessageContext(const std::string & param) const
   else
     fullpath = param;
 
+  if (const auto cl_data = queryCommandLineMetadata(param);
+      cl_data && cl_data->set_switch.has_value())
+  {
+    fullpath = *cl_data->set_switch;
+  }
+
   return {fullpath + ": ", node};
 }
 
 std::string
 InputParameters::paramMessagePrefix(const std::string & param) const
 {
-  auto [prefix, node] = paramMessageContext(param);
+  const auto [prefix, node] = paramMessageContext(param);
   if (node)
-    prefix = Moose::hitMessagePrefix(*node) + prefix;
+    if (const auto hit_prefix = Moose::hitMessagePrefix(*node, false))
+      return *hit_prefix + "\n" + prefix;
   return prefix;
 }
 

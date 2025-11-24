@@ -12,6 +12,7 @@
 #include "AppFactory.h"
 #include "CommandLine.h"
 #include "Parser.h"
+#include "MooseUnitUtils.h"
 
 TEST(AppFactoryTest, manageAppParams)
 {
@@ -41,17 +42,10 @@ TEST(AppFactoryTest, manageAppParams)
   {
     AppFactory af;
     InputParameters params = emptyInputParameters();
-    try
-    {
-      af.getAppParamsID(params);
-    }
-    catch (const std::exception & e)
-    {
-      std::string msg(e.what());
-      ASSERT_TRUE(msg.find("AppFactory::getAppParamsID(): Invalid application parameters (missing "
-                           "'_app_params_id')") != std::string::npos)
-          << msg;
-    }
+    MOOSE_ASSERT_THROWS(
+        MooseRuntimeError,
+        af.getAppParamsID(params),
+        "AppFactory::getAppParamsID(): Invalid application parameters (missing '_app_params_id')");
   }
 
   // Getting/clearing parameters that no longer exist
@@ -60,68 +54,31 @@ TEST(AppFactoryTest, manageAppParams)
     InputParameters params = emptyInputParameters();
     af.storeAppParams(params);
     af.clearAppParams(params, {});
-
-    try
-    {
-      af.getAppParamsID(params);
-    }
-    catch (const std::exception & e)
-    {
-      std::string msg(e.what());
-      ASSERT_TRUE(
-          msg.find("AppFactory::getAppParams(): Parameters for application with ID 0 not found") !=
-          std::string::npos)
-          << msg;
-    }
-
-    try
-    {
-      af.clearAppParams(params, {});
-    }
-    catch (const std::exception & e)
-    {
-      std::string msg(e.what());
-      ASSERT_TRUE(
-          msg.find(
-              "AppFactory::clearAppParams(): Parameters for application with ID 0 not found") !=
-          std::string::npos)
-          << msg;
-    }
+    MOOSE_ASSERT_THROWS(
+        MooseRuntimeError,
+        af.getAppParams(params),
+        "AppFactory::getAppParams(): Parameters for application with ID 0 not found");
+    MOOSE_ASSERT_THROWS(
+        MooseRuntimeError,
+        af.clearAppParams(params, {}),
+        "AppFactory::clearAppParams(): Parameters for application with ID 0 not found");
   }
 }
 
 class CopyConstructParamsApp : public MooseApp
 {
 public:
-  CopyConstructParamsApp(InputParameters parameters);
-
-  static InputParameters validParams();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+  CopyConstructParamsApp(InputParameters parameters) : MooseApp(parameters) {}
+  static InputParameters validParams() { return MooseApp::validParams(); }
+  static void registerAll(Factory &, ActionFactory &, Syntax &) {}
 };
-
-InputParameters
-CopyConstructParamsApp::validParams()
-{
-  return MooseApp::validParams();
-}
-
-CopyConstructParamsApp::CopyConstructParamsApp(InputParameters parameters) : MooseApp(parameters)
-{
-  CopyConstructParamsApp::registerAll(_factory, _action_factory, _syntax);
-}
-
-void
-CopyConstructParamsApp::registerAll(Factory & f, ActionFactory &, Syntax &)
-{
-  Registry::registerObjectsTo(f, {"CopyConstructParamsApp"});
-}
 
 TEST(AppFactoryTest, appCopyConstructParams)
 {
   const std::string app_type = "CopyConstructParamsApp";
 
   auto & af = AppFactory::instance();
-  af.reg<CopyConstructParamsApp>(app_type);
+  af.reg<CopyConstructParamsApp>(app_type, "", 0);
   auto params = af.getValidParams(app_type);
 
   auto command_line = std::make_shared<CommandLine>();
@@ -133,51 +90,24 @@ TEST(AppFactoryTest, appCopyConstructParams)
   parser->parse();
   params.set<std::shared_ptr<Parser>>("_parser") = parser;
 
+  ASSERT_EQ(af._input_parameters.size(), 0);
+
   const auto deprecated_is_error = Moose::_deprecated_is_error;
   Moose::_deprecated_is_error = true;
-
-  EXPECT_THROW(
-      {
-        try
-        {
-          af.create(app_type, "test", params, MPI_COMM_WORLD);
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_NE(std::string(e.what()).rfind(
-                        "CopyConstructParamsApp copy-constructs its input parameters"),
-                    std::string::npos)
-              << e.what();
-          throw;
-        }
-      },
-      std::exception);
-
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      af.create(app_type, "test", params, MPI_COMM_WORLD),
+                      "CopyConstructParamsApp copy-constructs its input parameters");
   Moose::_deprecated_is_error = deprecated_is_error;
 
-  const auto it = af._name_to_build_info.find(app_type);
-  EXPECT_NE(it, af._name_to_build_info.end());
-  af._name_to_build_info.erase(it);
-
-  EXPECT_EQ(af._input_parameters.size(), 1);
-  af._input_parameters.clear();
+  ASSERT_EQ(af._input_parameters.size(), 0);
 }
 
 TEST(AppFactoryTest, createNotRegistered)
 {
   AppFactory af;
-
-  try
-  {
-    af.create("fooapp", "unused", emptyInputParameters(), MPI_COMM_WORLD);
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("AppFactory::Create(): Application 'fooapp' was not registered") !=
-                std::string::npos)
-        << msg;
-  }
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      af.create("fooapp", "unused", emptyInputParameters(), MPI_COMM_WORLD),
+                      "AppFactory::Create(): Application 'fooapp' was not registered");
 }
 
 TEST(AppFactoryTest, createForUnit)

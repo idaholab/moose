@@ -17,7 +17,7 @@
 #include "ExecFlagEnum.h"
 #include "Conversion.h"
 #include "DataFileUtils.h"
-#include "MoosePassKey.h"
+#include "ParameterExtraction.h"
 
 #include "libmesh/parameters.h"
 
@@ -37,7 +37,9 @@ class FunctionParserBase
 #include <filesystem>
 #include <regex>
 
+#ifdef MOOSE_UNIT_TEST
 #include <gtest/gtest.h>
+#endif
 
 // Forward declarations
 class Action;
@@ -49,6 +51,7 @@ class MooseEnum;
 class MooseObject;
 class MultiMooseEnum;
 class Problem;
+class MooseApp;
 namespace hit
 {
 class Node;
@@ -93,10 +96,12 @@ public:
     ArgumentType argument_type;
     /// Whether or not the argument is required
     bool required;
-    /// Whether or not the parameter was set by the CommandLine
-    bool set_by_command_line = false;
+    /// If this parameter was set by the CommandLine, the switch that set it
+    std::optional<std::string> set_switch;
     /// Whether or not the parameter is global (passed to MultiApps)
     bool global = false;
+    /// Whether or not the parameter can be set in input
+    bool input_enabled = false;
   };
 
   /**
@@ -111,7 +116,11 @@ public:
     friend class Factory;
     friend class FEProblemBase;
     friend class InputParameters;
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+#ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(InputParametersTest, fileNames);
+#endif
     SetHitNodeKey() {}
     SetHitNodeKey(const SetHitNodeKey &) {}
   };
@@ -122,10 +131,26 @@ public:
    */
   class SetParamHitNodeKey
   {
-    friend class Moose::Builder;
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+    friend class InputParameters;
+#ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(InputParametersTest, fileNames);
+#endif
     SetParamHitNodeKey() {}
     SetParamHitNodeKey(const SetParamHitNodeKey &) {}
+  };
+
+  /**
+   * Class that is used as a parameter to setHitNode(param) that allows only
+   * relevant classes to set the hit node
+   */
+  class SetupVariableNamesKey
+  {
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+    SetupVariableNamesKey() {}
+    SetupVariableNamesKey(const SetupVariableNamesKey &) {}
   };
 
   /**
@@ -387,6 +412,12 @@ public:
   void setGlobalCommandLineParam(const std::string & name);
 
   /**
+   * Allows the command line parameter with \p name to be set in input
+   * or as a HIT CLI argument.
+   */
+  void enableInputCommandLineParam(const std::string & name);
+
+  /**
    * @param name The name of the parameter
    * @param value The default value of this parameter if it requires one
    * @param doc_string Documentation.  This will be shown for --help
@@ -426,7 +457,7 @@ public:
    *
    * Will return an empty optional if the parameter is not a command line param.
    */
-  std::optional<InputParameters::CommandLineMetadata>
+  const InputParameters::CommandLineMetadata *
   queryCommandLineMetadata(const std::string & name) const;
 
   /**
@@ -442,7 +473,12 @@ public:
   class CommandLineParamSetKey
   {
     friend class CommandLine;
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+#ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(InputParametersTest, commandLineParamSetNotCLParam);
+    FRIEND_TEST(InputParametersTest, commandLineParamFullpath);
+#endif
     CommandLineParamSetKey() {}
     CommandLineParamSetKey(const CommandLineParamSetKey &) {}
   };
@@ -450,8 +486,19 @@ public:
    * Marks the command line parameter \p name as set by the CommandLine.
    *
    * Protected by the CommandLineParamSetKey so that only the CommandLine can call this.
+   *
+   * In the case of non-hit command line parameters (--mesh-only, for example),
+   * \p command_line_node can be set to the root hit node so that it can be
+   * attributed to command line arguments during errors
+   *
+   * @param name The name of the parameter
+   * @param cl_switch The switch that was used to set the parameter
+   * @param command_line_node Optionally the hit node associated with the parameter
    */
-  void commandLineParamSet(const std::string & name, const CommandLineParamSetKey);
+  void commandLineParamSet(const std::string & name,
+                           const std::string & cl_switch,
+                           const hit::Node * const command_line_node,
+                           const CommandLineParamSetKey);
 
   /**
    * Get the documentation string for a parameter
@@ -459,11 +506,19 @@ public:
   const std::string & getDescription(const std::string & name) const;
 
   /**
-   * This method takes a space delimited list of parameter names and adds them to the specified
-   * group name.
-   * This information is used in the GUI to group parameters into logical sections.
+   * Take the parameter names in \p names and add them to the parameter group \p group_name
+   *
+   * This information is used in documentation to group parameters into logical sections.
    */
-  void addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name);
+  void addParamNamesToGroup(const std::vector<std::string> & names, const std::string & group_name);
+
+  /**
+   * Take the space delimited parameter names in \p space_delim_names and add them to
+   * the parameter group \p group_name
+   *
+   * This information is used in documentation to group parameters into logical sections.
+   */
+  void addParamNamesToGroup(const std::string & space_delim_names, const std::string & group_name);
 
   /**
    * This method renames a parameter group
@@ -471,12 +526,6 @@ public:
    * @param new_name new name of the parameter group
    */
   void renameParameterGroup(const std::string & old_name, const std::string & new_name);
-
-  /**
-   * This method retrieves the group name for the passed parameter name if one exists.  Otherwise an
-   * empty string is returned.
-   */
-  std::string getGroupName(const std::string & param_name) const;
 
   /**
    * This method suppresses an inherited parameter so that it isn't required or valid
@@ -1069,9 +1118,9 @@ public:
   std::set<std::string> getControllableParameters() const;
 
   /**
-   * Return names of parameters within a group.
+   * Gets the group a parameter is in, if any
    */
-  std::set<std::string> getGroupParameters(const std::string & group) const;
+  const std::string * queryParameterGroup(const std::string & name) const;
 
   /**
    * Provide a set of reserved values for a parameter. These are values that are in addition
@@ -1104,7 +1153,7 @@ public:
   /**
    * Sets the hit node associated with the parameter \p param to \p node
    *
-   * Is protected to be called by only the Builder via the SetParamHitNodeKey.
+   * Is protected to be called by ParameterExtraction::extract via the SetParamHitNodeKey.
    */
   void setHitNode(const std::string & param, const hit::Node & node, const SetParamHitNodeKey);
 
@@ -1275,8 +1324,8 @@ public:
    * Sets the hit node that represents the syntax responsible for creating
    * these parameters
    *
-   * Is protected to be called by only the ActionFactory, Builder, and Factory
-   * via the SetHitNodeKey.
+   * Is protected to be called by only the ActionFactory, ParameterExtraction::extract,
+   * and Factory via the SetHitNodeKey.
    */
   void setHitNode(const hit::Node & node, const SetHitNodeKey) { _hit_node = &node; }
 
@@ -1291,8 +1340,8 @@ public:
   std::optional<Moose::DataFileUtils::Path> queryDataFileNamePath(const std::string & name) const;
 
   /**
-   * Entrypoint for the Builder to setup a std::vector<VariableName> parameter,
-   * which will setup the default variable names if appropriate
+   * Entrypoint for ParameterExtraction::extract to setup a std::vector<VariableName>
+   * parameter, which will setup the default variable names if appropriate
    *
    * @param names The variable names
    * @param node The hit node that produced this parameter
@@ -1300,7 +1349,73 @@ public:
    */
   std::optional<std::string> setupVariableNames(std::vector<VariableName> & names,
                                                 const hit::Node & node,
-                                                const Moose::PassKey<Moose::Builder>);
+                                                const SetupVariableNamesKey);
+
+  /**
+   * Class that is used as a parameter to commandLineParamSet() that allows only
+   * the CommandLine to set that a parmeter is set by the command line
+   */
+  class AllowCommandLineParamsKey
+  {
+    friend class MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    FRIEND_TEST(CommandLineTest, populate);
+    FRIEND_TEST(CommandLineTest, populateBadInterpret);
+    FRIEND_TEST(CommandLineTest, populateSameSwitch);
+    FRIEND_TEST(CommandLineTest, populateMooseEnum);
+    FRIEND_TEST(CommandLineTest, populateSetByUser);
+    FRIEND_TEST(CommandLineTest, initSubAppCommandLine);
+    FRIEND_TEST(CommandLineTest, globalCommandLineParamSubapp);
+    FRIEND_TEST(CommandLineTest, requiredParameter);
+    FRIEND_TEST(CommandLineTest, requiredParameterArgument);
+    FRIEND_TEST(CommandLineTest, duplicateOptions);
+    FRIEND_TEST(CommandLineTest, boolParamWithValue);
+    FRIEND_TEST(CommandLineTest, negativeScalarParam);
+    FRIEND_TEST(CommandLineTest, mergeArgsForParam);
+    FRIEND_TEST(CommandLineTest, findCommandLineParam);
+    FRIEND_TEST(CommandLineTest, optionalValuedParam);
+    FRIEND_TEST(CommandLineTest, mergeHIT);
+    FRIEND_TEST(CommandLineTest, combinedKeyValueParamKnownArg);
+    FRIEND_TEST(CommandLineTest, populateFiltered);
+    FRIEND_TEST(InputParametersTest, alphaCommandLineParamSwitch);
+    FRIEND_TEST(InputParametersTest, commandLineParamFullpath);
+    FRIEND_TEST(InputParametersTest, isCommandLineParameter);
+    FRIEND_TEST(InputParametersTest, commandLineParamKnownArg);
+    FRIEND_TEST(ParameterExtractionTest, extractCommandLineParam);
+#endif
+    AllowCommandLineParamsKey() {}
+    AllowCommandLineParamsKey(const AllowCommandLineParamsKey &) {}
+  };
+
+  /**
+   * Protected method that allows InputParameters to take command line parameters.
+   *
+   * Command line parameters are only parsed in MooseApp, thus they can only be added
+   * from there (and unit tests)
+   */
+  void allowCommandLineParams(const AllowCommandLineParamsKey)
+  {
+    _allow_command_line_params = true;
+  }
+
+  /**
+   * Require that none or one of the given parameters must be set and no more,
+   * otherwise report a paramError
+   * @param params The parameter names
+   * @param context Optional context to be added to an error
+   */
+  void requireExclusive(const std::vector<std::string> & params,
+                        const std::optional<std::string> & context = {}) const;
+  /**
+   * Require that the two parameters can not be set together, otherwise report
+   * a paramError
+   * @param param1 The name of the first parameter
+   * @param param2 The name of the second parameter
+   * @param context Optional context to be added to an error
+   */
+  void requireExclusive(const std::string & param1,
+                        const std::string & param2,
+                        const std::optional<std::string> & context = {}) const;
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -1360,8 +1475,8 @@ private:
     std::optional<CommandLineMetadata> _cl_data;
     /// The searched path information pertaining to a DataFileName parameter
     std::optional<Moose::DataFileUtils::Path> _data_file_name_path;
-    /// The names of the parameters organized into groups
-    std::string _group;
+    /// The names of the parameters organized into groups, if any
+    std::optional<std::string> _group;
     /// The map of functions used for range checked parameters
     std::string _range_function;
     /// directions for auto build vectors (base_, 5) -> "base_0 base_1 base_2 base_3 base_4")
@@ -1512,10 +1627,12 @@ private:
   /// Whether or not we've called finalize() on these parameters yet
   bool _finalized;
 
+  /// Whether or not command line parameters are allowed
+  bool _allow_command_line_params = false;
+
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
   friend class InputParameterWarehouse;
-  friend class Parser;
   // for the printInputFile function in the action warehouse
   friend class ActionWarehouse;
 };
@@ -1817,6 +1934,11 @@ InputParameters::addCommandLineParamHelper(const std::string & name,
   static_assert(isValidCommandLineType<T>::value,
                 "This type is not a supported command line parameter type. See "
                 "CommandLine::populateCommandLineParams to add it as a supported type.");
+
+  if (!_allow_command_line_params)
+    mooseError("While adding command line parameter '",
+               name,
+               "': Command line parameters are not enabled for this object.");
 
   auto & cl_data = at(name)._cl_data;
   cl_data = CommandLineMetadata();
@@ -2440,9 +2562,8 @@ InputParameters::paramError(const std::string & param, Args... args) const
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
   const auto [prefix, node] = paramMessageContext(param);
 
-  Moose::show_trace = false;
+  Moose::ScopedHideTrace scoped_hide_trace;
   callMooseError(prefix + oss.str(), false, node);
-  Moose::show_trace = true;
 }
 
 namespace Moose

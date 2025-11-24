@@ -164,11 +164,14 @@ class ObjectNodeBase(NodeBase):
         NodeBase.__init__(self, parent, name, **kwargs)
 
         if self.source == '':
-            LOG.critical("MooseDocs requires the %s object to use the registerMooseObject or " \
-                         "registerMooseAction macro within the source (.C) file, this object " \
-                         "is being removed from the available syntax.", self.name)
             self.source = None
-            self.removed = True
+            # MooseApp is a special case; we want to parse its parameters
+            # even though it isn't a registered application
+            if self.classname != 'MooseApp':
+                LOG.critical("MooseDocs requires the %s object to use the registerMooseObject or " \
+                            "registerMooseAction macro within the source (.C) file, this object " \
+                            "is being removed from the available syntax.", self.name)
+                self.removed = True
 
         if (self.source is not None) and (not os.path.isfile(self.source)):
             LOG.critical("The supplied 'source' file does not exist: %s\n This object is being " \

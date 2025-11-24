@@ -1196,23 +1196,28 @@ MultiApp::createApp(unsigned int i, Real start_time)
   parser->parse();
 
   // Checks on app type
-  const auto & app_type = parser->getAppType();
-  if (app_type.empty() && _app_type.empty())
+  const auto & app_type_node_pair_ptr = parser->getAppType();
+  if (!app_type_node_pair_ptr && _app_type.empty())
     mooseWarning("The application type is not specified for ",
                  full_name,
                  ". Please use [Application] block to specify the application type.");
-  if (!app_type.empty() && app_type != _app_type && !AppFactory::instance().isRegistered(app_type))
-    mooseError("In the ",
-               full_name,
-               ", '",
-               app_type,
-               "' is not a registered application. The registered application is named: '",
-               _app_type,
-               "'. Please double check the [Application] block to make sure the correct "
-               "application is provided. \n");
 
-  if (parser->getAppType().empty())
-    parser->setAppType(_app_type);
+  if (app_type_node_pair_ptr)
+  {
+    const auto app_type = app_type_node_pair_ptr->first;
+    if (app_type != _app_type && !AppFactory::instance().isRegistered(app_type))
+      mooseError("In the ",
+                 full_name,
+                 ", '",
+                 app_type,
+                 "' is not a registered application. The registered application is named: '",
+                 _app_type,
+                 "'. Please double check the [Application] block to make sure the correct "
+                 "application is provided. \n");
+  }
+
+  if (!parser->getAppType())
+    parser->setAppType(_app_type, _pars.getHitNode("app_type"));
 
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(app_cli);
