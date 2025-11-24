@@ -16,7 +16,6 @@ To print out the available command-line options use `--help`.  An example from M
 Options:
   --app <type>                        Specify the application type to run (case-sensitive)
   --copy-inputs <dir>                 Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>
-  --definition                        Shows a SON style input definition dump for input validation
   --disallow-test-objects             Don't register test objects and syntax
   -v --version                        Print application version
   --dump                              Shows a dump of available input file syntax
