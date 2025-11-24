@@ -1,3 +1,12 @@
+#* This file is part of the MOOSE framework
+#* https://mooseframework.inl.gov
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 from pythonfmu import Fmi2Slave
 from pythonfmu.enums import Fmi2Causality, Fmi2Variability
 from pythonfmu.variables import Integer, Real, String
@@ -47,7 +56,7 @@ class Moose2FMU(Fmi2Slave):
         self._default_sync_flags: Set[str] = {"INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"}
         self._default_data_flags: Set[str] = {"MULTIAPP_FIXED_POINT_END"}
 
-        # Register tunable parameters
+        # Register a default set of parameters
         self.register_variable(String("flag", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(String("moose_command", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(String("server_name", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
