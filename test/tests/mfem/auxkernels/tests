@@ -30,7 +30,7 @@
     recover = false
     restep = false
   []
-  [MFEMDotProductAux]
+  [MFEMInnerProductAux]
     type = XMLDiff
     input = ../kernels/curlcurl.i
     cli_args = 'FESpaces/inactive="" '
@@ -40,7 +40,7 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/InnerProduct'
     xmldiff = 'OutputData/InnerProduct/Run0/Run0.pvd
                 OutputData/InnerProduct/Run0/Cycle000001/proc000000.vtu'
-    design = 'MFEMDotProductAux.md'
+    design = 'MFEMInnerProductAux.md'
     issues = '#31613'
     requirement = 'The system shall have the ability to project the inner product of two gridfunctions onto an MFEM auxvariable'
     capabilities = 'mfem'
