@@ -39,9 +39,9 @@ protected:
   const bool _loop;
 
   /// Subdomain name to assign to the polyline edge elements
-  const SubdomainName _line_subdomain;
+  const SubdomainName & _line_subdomain;
   /// Boundary names to assign to (non-looped) polyline start and end
-  const BoundaryName _start_boundary, _end_boundary;
+  const BoundaryName &_start_boundary, &_end_boundary;
 
   /// Approximate spacing between nodes
   const Real _dx;
