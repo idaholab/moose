@@ -209,8 +209,8 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
       velocity(2) = (_dim >= 3 && _w_var) ? (*_w_var)(face, state) : ADReal(0);
 
       const auto coord_sys = _subproblem.getCoordSystem(_face_info->elem().subdomain_id());
-      const auto rz_radial_coord =
-          coord_sys == Moose::COORD_RZ ? _subproblem.getAxisymmetricRadialCoord() : 0u;
+      unsigned int rz_radial_coord =
+          coord_sys == Moose::COORD_RZ ? _subproblem.getAxisymmetricRadialCoord() : 0;
       divergence_term =
           NS::divergence(gradient, velocity, face.getPoint(), coord_sys, rz_radial_coord);
     }

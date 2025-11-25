@@ -132,8 +132,8 @@ Two optional parameters are provided to control how the viscous stress tensor is
 
 - [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/include_symmetrized_viscous_stress) sets
   `complete_expansion=true` on [INSFVMomentumDiffusion.md], which adds the transpose term
-  $\nabla \bm{v}^T$ to the Laplacian form. This is useful when the deviatoric viscous stress
-  should be represented explicitly.
+  $\nabla \bm{v}^T$ to the Laplacian form. This option is ignored when the porous-medium treatment
+  is active.
 - [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/include_isotropic_viscous_stress) also adds
   the isotropic contribution $-(2/3)\mu \nabla \cdot \bm{v}\; \mathbb{I}$. This option is intended
   for weakly-compressible problems and is ignored when the porous-medium formulation is active.
