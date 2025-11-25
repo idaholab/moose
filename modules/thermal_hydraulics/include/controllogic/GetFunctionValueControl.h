@@ -26,6 +26,8 @@ public:
 protected:
   /// The stored function value
   Real & _value;
+  /// Point at which to evaluate function
+  const Point & _point;
   /// Function that is sampled
   const Function & _function;
 

@@ -39,12 +39,13 @@ The following table gives the post-processors created by this component, where `
 
 | Name | Description | Type | Transfer Direction |
 | :- | :- | :- | :- |
-| `mass_rate_<suffix>` | $F_\text{mass}$ | [VolumeJunctionCoupledFlux1PhasePostprocessor.md] | To child app |
-| `energy_rate_<suffix>` | $F_\text{energy}$ | [VolumeJunctionCoupledFlux1PhasePostprocessor.md] | To child app |
-| `p_<suffix>` | $p_\text{ext}$ | [Receiver.md] | From child app |
-| `T_<suffix>` | $T_\text{ext}$ | [Receiver.md] | From child app |
+| `mass_rate_<suffix>` | $F_\text{mass}$ | [VolumeJunctionCoupledFlux1PhasePostprocessor.md] | To other app |
+| `energy_rate_<suffix>` | $F_\text{energy}$ | [VolumeJunctionCoupledFlux1PhasePostprocessor.md] | To other app |
+| `p_<suffix>` | $p_\text{ext}$ | [Receiver.md] | From other app |
+| `T_<suffix>` | $T_\text{ext}$ | [Receiver.md] | From other app |
 
-[MultiAppPostprocessorTransfer.md] objects are used to transfer the post-processor values in both directions.
+If this application is the main application, then the [!param](/Components/VolumeJunctionCoupledFlux1Phase/multi_app) parameter should be provided, which
+creates [MultiAppPostprocessorTransfer.md] objects; otherwise the other application is responsible for creating the transfers.
 
 !syntax parameters /Components/VolumeJunctionCoupledFlux1Phase
 

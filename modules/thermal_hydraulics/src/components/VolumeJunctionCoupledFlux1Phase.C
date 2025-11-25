@@ -23,7 +23,10 @@ VolumeJunctionCoupledFlux1Phase::validParams()
                                            "Direction vector pointing from the junction to the "
                                            "coupled volume. This vector will be normalized.");
   params.addRequiredParam<Real>("A_coupled", "Area of the coupled surface [m^2]");
-  params.addRequiredParam<MultiAppName>("multi_app", "MultiApp to transfer to and from");
+  params.addParam<MultiAppName>(
+      "multi_app",
+      "If provided, transfers occur with this MultiApp. The following would be transferred: mass "
+      "flow rate, energy flow rate, temperature, and pressure at the junction.");
   params.addRequiredParam<std::string>("pp_suffix", "Suffix to append to post-processor names");
 
   params.addClassDescription(
@@ -37,7 +40,6 @@ VolumeJunctionCoupledFlux1Phase::VolumeJunctionCoupledFlux1Phase(const InputPara
     _volume_junction_name(getParam<std::string>("volume_junction")),
     _normal_from_junction_unnormalized(getParam<RealVectorValue>("normal_from_junction")),
     _normal_from_junction(_normal_from_junction_unnormalized.unit()),
-    _multi_app_name(getParam<MultiAppName>("multi_app")),
     _pp_suffix(getParam<std::string>("pp_suffix"))
 {
 }
@@ -59,14 +61,16 @@ VolumeJunctionCoupledFlux1Phase::addMooseObjects()
   for (const auto i : index_range(equations))
   {
     addFluxPostprocessor(equations[i]);
-    addFluxTransfer(equations[i]);
+    if (isParamValid("multi_app"))
+      addFluxTransfer(equations[i]);
   }
 
   const std::vector<std::string> properties = {"p", "T"};
   for (const auto i : index_range(properties))
   {
     addPropertyPostprocessor(properties[i]);
-    addPropertyTransfer(properties[i]);
+    if (isParamValid("multi_app"))
+      addPropertyTransfer(properties[i]);
   }
 }
 
@@ -130,7 +134,7 @@ VolumeJunctionCoupledFlux1Phase::addFluxTransfer(const std::string & equation)
   const std::string quantity = equation + "_rate";
   const std::string class_name = "MultiAppPostprocessorTransfer";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<MultiAppName>("to_multi_app") = _multi_app_name;
+  params.set<MultiAppName>("to_multi_app") = getParam<MultiAppName>("multi_app");
   params.set<PostprocessorName>("from_postprocessor") = addPostprocessorSuffix(quantity);
   params.set<PostprocessorName>("to_postprocessor") = addPostprocessorSuffix(quantity);
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -143,7 +147,7 @@ VolumeJunctionCoupledFlux1Phase::addPropertyTransfer(const std::string & propert
 {
   const std::string class_name = "MultiAppPostprocessorTransfer";
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<MultiAppName>("from_multi_app") = _multi_app_name;
+  params.set<MultiAppName>("from_multi_app") = getParam<MultiAppName>("multi_app");
   params.set<PostprocessorName>("from_postprocessor") = addPostprocessorSuffix(property);
   params.set<PostprocessorName>("to_postprocessor") = addPostprocessorSuffix(property);
   params.set<MooseEnum>("reduction_type") = "average";
