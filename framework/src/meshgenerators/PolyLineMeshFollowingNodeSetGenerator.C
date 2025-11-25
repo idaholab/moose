@@ -40,7 +40,11 @@ PolyLineMeshFollowingNodeSetGenerator::validParams()
 
   // Discretization parameters
   // NOTE: we could have another dx as a path search parameter, and decouple the two options
-  params.addRequiredRangeCheckedParam<Real>("dx", "dx>0", "Approximate size of the edge elements");
+  params.addRequiredRangeCheckedParam<Real>(
+      "dx",
+      "dx>0",
+      "Approximate size of the edge elements (before any refinement with num_edges_between_points) "
+      "and approximate step to advance by to search for the next point in the polyline");
   params.addParam<unsigned int>(
       "max_edges", 1000, "Maximum number of edges. Serves as a stopping criterion");
   params.addParam<unsigned int>(
@@ -98,7 +102,7 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
   const auto nodeset_id =
       MooseMeshUtils::getBoundaryID(getParam<BoundaryName>("nodeset"), *base_mesh);
 
-  const auto search_radius_sq = std::pow(getParam<Real>("search_radius"), 2);
+  const auto search_radius_sq = libMesh::Utility::pow<2>(getParam<Real>("search_radius"));
   const auto n_points = getParam<unsigned int>("max_edges");
   Point current_point = _starting_point;
   Point previous_direction = _starting_direction;
@@ -119,7 +123,7 @@ PolyLineMeshFollowingNodeSetGenerator::generate()
              << nodeset_nodes.size() << std::endl;
 
   unsigned int n_segments = 0;
-  for (auto i : make_range(n_points))
+  for (const auto i : make_range(n_points))
   {
     // Move the point forward in the search direction
     const auto previous_point = current_point;
