@@ -35,6 +35,10 @@ public:
 
   /// Whether the physics is actually creating the flow equations
   bool hasFlowEquations() const { return _has_flow_equations; }
+  /// Whether the cylindrical viscous source helper is enabled
+  bool addAxisymmetricViscousSourceEnabled() const { return _add_rz_viscous_source; }
+  /// Whether to include the deviatoric contribution in the viscous stress
+  bool includeDeviatoricStress() const { return _include_deviatoric_stress; }
 
   /// To interface with other Physics
   const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
@@ -166,6 +170,8 @@ protected:
 
   /// Boolean to keep track of whether the flow equations should be created
   const bool _has_flow_equations;
+  /// Whether to automatically add the cylindrical viscous source term
+  const bool _add_rz_viscous_source;
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
@@ -192,6 +198,8 @@ protected:
   const MooseFunctorName _density_gravity_name;
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
+  /// Whether to include the deviatoric stress contribution
+  const bool _include_deviatoric_stress;
 
   /// name of the Rhie Chow user object
   UserObjectName _rc_uo_name;
@@ -239,4 +247,6 @@ protected:
   std::map<BoundaryName, MooseFunctorName> _pressure_functors;
   /// Functors describing the momentum for each wall boundary
   std::map<BoundaryName, std::vector<MooseFunctorName>> _momentum_wall_functors;
+
+  friend class WCNSFVTurbulencePhysics;
 };
