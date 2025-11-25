@@ -466,7 +466,14 @@ WCNSFVFlowPhysics::addMomentumViscousDissipationKernels()
   params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
   params.set<MooseEnum>("variable_interp_method") =
       getParam<MooseEnum>("momentum_face_interpolation");
-  const bool include_symmetric = includeSymmetrizedViscousStress();
+  bool include_symmetric = includeSymmetrizedViscousStress();
+  if (include_symmetric && _porous_medium_treatment)
+  {
+    paramWarning("include_symmetrized_viscous_stress",
+                 "Including the symmetrized viscous stress is not supported with the porous "
+                 "medium treatment. Ignoring the request.");
+    include_symmetric = false;
+  }
   if (include_symmetric || include_isotropic)
   {
     params.set<bool>("complete_expansion") = true;

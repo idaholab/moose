@@ -39,11 +39,8 @@ WCNSFVFlowPhysicsBase::validParams()
                         false,
                         "Whether to include the symmetrized viscous stress contribution "
                         "(grad(u)+grad(u)^T).");
-  params.addParam<bool>(
-      "include_deviatoric_stress",
-      false,
-      "Deprecated. Use 'include_symmetrized_viscous_stress' instead to include the "
-      "symmetrized viscous stress contribution.");
+  params.deprecateParam(
+      "include_deviatoric_stress", "include_symmetrized_viscous_stress", "12/31/2025");
   params.addParam<bool>("include_isotropic_viscous_stress",
                         false,
                         "Whether to add the isotropic -(2/3) mu div(u) I contribution to the "
@@ -150,8 +147,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                     ? getParam<UserObjectName>("rhie_chow_uo_name")
                     : (_porous_medium_treatment ? "pins_rhie_chow_interpolator"
                                                 : "ins_rhie_chow_interpolator")),
-    _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress") ||
-                                        getParam<bool>("include_deviatoric_stress")),
+    _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress")),
     _include_isotropic_viscous_stress(getParam<bool>("include_isotropic_viscous_stress")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
@@ -195,11 +191,6 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
 
   // Porous media parameters
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
-
-  if (isParamSetByUser("include_deviatoric_stress"))
-    paramWarning("include_deviatoric_stress",
-                 "The 'include_deviatoric_stress' parameter is deprecated. "
-                 "Use 'include_symmetrized_viscous_stress' instead.");
 
   if (_define_variables && _porous_medium_treatment)
     for (const auto & name : NS::velocity_vector)
