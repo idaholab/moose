@@ -279,7 +279,8 @@ WCNSFVTurbulencePhysics::addAxisymmetricTurbulentViscousSource()
   params.set<MooseFunctorName>(NS::mu) = _turbulent_viscosity_name;
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
   params.set<MooseEnum>("momentum_component") = NS::directions[radial_index];
-  params.set<bool>("complete_expansion") = _flow_equations_physics->includeDeviatoricStress();
+  params.set<bool>("complete_expansion") =
+      _flow_equations_physics->includeSymmetrizedViscousStress();
   params.set<NonlinearVariableName>("variable") =
       _flow_equations_physics->getVelocityNames()[radial_index];
 

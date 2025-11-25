@@ -35,10 +35,19 @@ WCNSFVFlowPhysicsBase::validParams()
   // We mostly pull the boundary parameters from NSFV Action
 
   params += NSFVBase::commonNavierStokesFlowParams();
+  params.addParam<bool>("include_symmetrized_viscous_stress",
+                        false,
+                        "Whether to include the symmetrized viscous stress contribution "
+                        "(grad(u)+grad(u)^T).");
   params.addParam<bool>(
       "include_deviatoric_stress",
       false,
-      "Whether to include the full expansion (the transposed term as well) of the stress tensor");
+      "Deprecated. Use 'include_symmetrized_viscous_stress' instead to include the "
+      "symmetrized viscous stress contribution.");
+  params.addParam<bool>("include_isotropic_viscous_stress",
+                        false,
+                        "Whether to add the isotropic -(2/3) mu div(u) I contribution to the "
+                        "viscous stress (requires complete expansion of the velocity gradient).");
   params.addParam<bool>("add_rz_viscous_source",
                         true,
                         "When true, automatically adds INSFVMomentumViscousSourceRZ to the radial "
@@ -101,9 +110,9 @@ WCNSFVFlowPhysicsBase::validParams()
   params.addParamNamesToGroup("wall_boundaries momentum_wall_types momentum_wall_functors",
                               "Wall boundary conditions");
   params.addParamNamesToGroup(
-      "include_deviatoric_stress velocity_interpolation momentum_advection_interpolation "
-      "momentum_two_term_bc_expansion pressure_two_term_bc_expansion mu_interp_method "
-      "momentum_face_interpolation",
+      "include_symmetrized_viscous_stress include_isotropic_viscous_stress velocity_interpolation "
+      "momentum_advection_interpolation momentum_two_term_bc_expansion "
+      "pressure_two_term_bc_expansion mu_interp_method momentum_face_interpolation",
       "Numerical scheme");
   params.addParamNamesToGroup("thermal_expansion", "Gravity treatment");
 
@@ -141,7 +150,9 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                     ? getParam<UserObjectName>("rhie_chow_uo_name")
                     : (_porous_medium_treatment ? "pins_rhie_chow_interpolator"
                                                 : "ins_rhie_chow_interpolator")),
-    _include_deviatoric_stress(getParam<bool>("include_deviatoric_stress")),
+    _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress") ||
+                                        getParam<bool>("include_deviatoric_stress")),
+    _include_isotropic_stress(getParam<bool>("include_isotropic_viscous_stress")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
@@ -184,6 +195,11 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
 
   // Porous media parameters
   checkSecondParamSetOnlyIfFirstOneTrue("porous_medium_treatment", "porosity");
+
+  if (isParamSetByUser("include_deviatoric_stress"))
+    paramWarning("include_deviatoric_stress",
+                 "The 'include_deviatoric_stress' parameter is deprecated. "
+                 "Use 'include_symmetrized_viscous_stress' instead.");
 
   if (_define_variables && _porous_medium_treatment)
     for (const auto & name : NS::velocity_vector)

@@ -37,8 +37,10 @@ public:
   bool hasFlowEquations() const { return _has_flow_equations; }
   /// Whether the cylindrical viscous source helper is enabled
   bool addAxisymmetricViscousSourceEnabled() const { return _add_rz_viscous_source; }
-  /// Whether to include the deviatoric contribution in the viscous stress
-  bool includeDeviatoricStress() const { return _include_deviatoric_stress; }
+  /// Whether to include the symmetrized contribution in the viscous stress
+  bool includeSymmetrizedViscousStress() const { return _include_symmetrized_viscous_stress; }
+  /// Whether to include the isotropic viscous stress contribution
+  bool includeIsotropicStress() const { return _include_isotropic_stress; }
 
   /// To interface with other Physics
   const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
@@ -198,8 +200,10 @@ protected:
   const MooseFunctorName _density_gravity_name;
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
-  /// Whether to include the deviatoric stress contribution
-  const bool _include_deviatoric_stress;
+  /// Whether to include the symmetrized viscous stress contribution
+  const bool _include_symmetrized_viscous_stress;
+  /// Whether to include the isotropic viscous stress contribution
+  const bool _include_isotropic_stress;
 
   /// name of the Rhie Chow user object
   UserObjectName _rc_uo_name;

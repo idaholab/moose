@@ -257,7 +257,7 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
-  params.set<bool>("use_deviatoric_terms") = getParam<bool>("include_deviatoric_stress");
+  params.set<bool>("use_deviatoric_terms") = includeSymmetrizedViscousStress();
 
   for (unsigned int i = 0; i < dimension(); ++i)
     params.set<SolverVariableName>(u_names[i]) = _velocity_names[i];
