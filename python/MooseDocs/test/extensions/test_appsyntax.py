@@ -43,6 +43,7 @@ class TestDescription(AppSyntaxTestCase):
 
 class TestParameters(AppSyntaxTestCase):
     TEXT = "!syntax parameters /Kernels/Diffusion"
+    TEXT_RANGE = "!syntax parameters /Functions/PeriodicFunction"
 
     def testAST(self):
         ast = self.tokenize(self.TEXT)
@@ -150,6 +151,20 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(7).text(), 'Advanced Parameters')
 
         self.assertHTMLTag(res(8), 'ul', size=8, class_='collapsible')
+
+    def testMaterializeRange(self):
+        _, res = self.execute(self.TEXT_RANGE, renderer=base.MaterializeRenderer())
+        # Much of this is tested in the other methods in this class. This is meant to check
+        # specifically for range checked param output in the documentation.
+        self.assertSize(res, 7)
+        self.assertHTMLTag(res(0), 'h2', id_='input-parameters', size=3)
+        self.assertEqual(res(0).text(), 'Input Parameters')
+
+        self.assertHTMLTag(res(4), 'ul', size=4, class_='collapsible')
+        self.assertHTMLTag(res(4,0,0,0), 'span', class_='moose-parameter-name', string='period_time')
+        self.assertHTMLTag(res(4,0,1,3), 'p', size=2, class_='moose-parameter-description-doc-range')
+        self.assertEqual(res(4,0,1,3,0).text(), 'Range:')
+        self.assertEqual(res(4,0,1,3,1)['content'], 'period_time>0')
 
     def testLatex(self):
         _, res = self.execute(self.TEXT, renderer=base.LatexRenderer())
