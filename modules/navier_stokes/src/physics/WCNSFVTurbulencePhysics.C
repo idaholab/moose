@@ -271,7 +271,8 @@ WCNSFVTurbulencePhysics::addAxisymmetricTurbulentViscousSource()
   if (rz_blocks.empty())
     return;
 
-  const auto radial_index = _flow_equations_physics->getProblem().mesh().getAxisymmetricRadialCoord();
+  const auto radial_index =
+      _flow_equations_physics->getProblem().mesh().getAxisymmetricRadialCoord();
 
   InputParameters params = getFactory().getValidParams("INSFVMomentumViscousSourceRZ");
   assignBlocks(params, rz_blocks);
