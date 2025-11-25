@@ -34,6 +34,7 @@ requirements:
     - {{ clang_tools }}
     - coverage
     - deepdiff
+    - fmpy                           # [linux]
     - git-lfs <3.5.1
     - gitpython
     - graphviz
@@ -71,8 +72,6 @@ requirements:
     - uncertainties
     - xmltodict <0.14
     - yaml
-    - pythonfmu
-    - fmpy
 test:
   commands:
     - black --version
@@ -83,8 +82,8 @@ test:
     - ruff --version
   imports:
     - bs4
-    - deepdiff
     - coverage
+    - deepdiff
     - git
     - jinja2
     - livereload
@@ -108,8 +107,6 @@ test:
     - tabulate
     - xmltodict
     - yaml
-    - pythonfmu
-    - fmpy
 
 about:
   home: https://mooseframework.inl.gov/
