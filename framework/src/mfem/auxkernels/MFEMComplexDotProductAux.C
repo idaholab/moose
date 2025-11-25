@@ -57,7 +57,7 @@ MFEMComplexDotProductAux::MFEMComplexDotProductAux(const InputParameters & param
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   if (fes->GetVDim() != 1)
     mooseError("MFEMComplexDotProductAux requires the target variable to be a scalar (vdim=1).");
-    
+
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
     mooseError("MFEMComplexDotProductAux requires the target variable to use L2_FECollection.");
