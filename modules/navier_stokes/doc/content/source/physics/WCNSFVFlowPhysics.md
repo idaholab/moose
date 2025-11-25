@@ -126,6 +126,21 @@ term is part of the radial momentum equations. This behavior can be disabled wit
 [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/add_rz_viscous_source) if another component
 should provide that source term instead.
 
+#### Viscous stress formulation controls
+
+Two optional parameters are provided to control how the viscous stress tensor is assembled:
+
+- [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/include_symmetrized_viscous_stress) sets
+  `complete_expansion=true` on [INSFVMomentumDiffusion.md], which adds the transpose term
+  $\nabla \bm{v}^T$ to the Laplacian form. This is useful when the deviatoric viscous stress
+  should be represented explicitly.
+- [!param](/Physics/NavierStokes/Flow/WCNSFVFlowPhysics/include_isotropic_viscous_stress) also adds
+  the isotropic contribution $-(2/3)\mu \nabla \cdot \bm{v}\; \mathbb{I}$. This option is intended
+  for weakly-compressible problems and is ignored when the porous-medium formulation is active.
+
+Both parameters are `false` by default so that incompressible simulations retain their historical
+behavior.
+
 !syntax parameters /Physics/NavierStokes/Flow/WCNSFVFlowPhysics
 
 !syntax inputs /Physics/NavierStokes/Flow/WCNSFVFlowPhysics

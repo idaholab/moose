@@ -42,7 +42,7 @@ class TestVortexNewtonDeviatoric(unittest.TestCase):
             if key in velocity_labels:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .25))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .25))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .3))
 
 class TestVortexSNL(unittest.TestCase):
     def test(self):

@@ -49,8 +49,9 @@ INSFVMomentumDiffusion::validParams()
       "Boolean parameter to use complete momentum expansion is the diffusion term.");
   params.addParam<bool>("include_isotropic_stress",
                         false,
-                        "When 'complete_expansion=true', also add the -(2/3) mu div(u) I term. "
-                        "Only meaningful for weakly-compressible formulations.");
+                        "Add the -(2/3) mu div(u) I term (requires specifying the velocity "
+                        "components via 'u', 'v', 'w'). Only meaningful for "
+                        "weakly-compressible formulations.");
   params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -89,9 +90,20 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
                "The w velocity must be defined when 'complete_expansion=true'"
                "and problem dimension is larger or equal to three.");
 
-  if (_include_isotropic_stress && !_complete_expansion)
-    paramError("include_isotropic_stress",
-               "'include_isotropic_stress' can only be used when 'complete_expansion=true'.");
+  if (_include_isotropic_stress)
+  {
+    if (!_u_var)
+      paramError("include_isotropic_stress", "Velocity components must be provided to use the "
+                                             "'include_isotropic_stress' option.");
+    if (_dim >= 2 && !_v_var)
+      paramError("include_isotropic_stress",
+                 "Velocity components must be provided to use the 'include_isotropic_stress' "
+                 "option in dimensions >= 2.");
+    if (_dim >= 3 && !_w_var)
+      paramError("include_isotropic_stress",
+                 "Velocity components must be provided to use the 'include_isotropic_stress' "
+                 "option in 3D.");
+  }
 }
 
 ADReal
