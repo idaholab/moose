@@ -130,7 +130,9 @@ T computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
                                     const Moose::Functor<T> * v,
                                     const Moose::Functor<T> * w,
                                     const Moose::ElemArg & elem_arg,
-                                    const Moose::StateArg & state);
+                                    const Moose::StateArg & state,
+                                    const Moose::CoordinateSystemType coord_sys = Moose::COORD_XYZ,
+                                    const unsigned int rz_radial_coord = 0);
 
 /**
  * Map marking wall bounded elements
@@ -215,10 +217,14 @@ extern template Real computeShearStrainRateNormSquared<Real>(const Moose::Functo
                                                              const Moose::Functor<Real> * v,
                                                              const Moose::Functor<Real> * w,
                                                              const Moose::ElemArg & elem_arg,
-                                                             const Moose::StateArg & state);
+                                                             const Moose::StateArg & state,
+                                                             const Moose::CoordinateSystemType coord_sys,
+                                                             const unsigned int rz_radial_coord);
 extern template ADReal computeShearStrainRateNormSquared<ADReal>(const Moose::Functor<ADReal> & u,
                                                                  const Moose::Functor<ADReal> * v,
                                                                  const Moose::Functor<ADReal> * w,
                                                                  const Moose::ElemArg & elem_arg,
-                                                                 const Moose::StateArg & state);
+                                                                 const Moose::StateArg & state,
+                                                                 const Moose::CoordinateSystemType coord_sys,
+                                                                 const unsigned int rz_radial_coord);
 }

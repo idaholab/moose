@@ -174,7 +174,9 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
                                   const Moose::Functor<T> * v,
                                   const Moose::Functor<T> * w,
                                   const Moose::ElemArg & elem_arg,
-                                  const Moose::StateArg & state)
+                                  const Moose::StateArg & state,
+                                  const Moose::CoordinateSystemType coord_sys,
+                                  const unsigned int rz_radial_coord)
 {
   const auto & grad_u = u.gradient(elem_arg, state);
   const T Sij_xx = 2.0 * grad_u(0);
@@ -226,6 +228,35 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
     }
   }
 
+  if (coord_sys == Moose::COORD_RZ)
+  {
+    mooseAssert(elem_arg.elem, "ElemArg must reference an element for cylindrical calculations.");
+    const auto radius = elem_arg.elem->vertex_average()(rz_radial_coord);
+    mooseAssert(radius > 0.0, "Axisymmetric radial coordinate should be positive.");
+
+    const Moose::Functor<T> * radial_functor = nullptr;
+    switch (rz_radial_coord)
+    {
+      case 0:
+        radial_functor = &u;
+        break;
+      case 1:
+        radial_functor = v;
+        break;
+      default:
+        mooseError("Unsupported axisymmetric radial coordinate index: ", rz_radial_coord);
+    }
+
+    mooseAssert(radial_functor,
+                "The functor corresponding to the axisymmetric radial velocity must be provided.");
+    const T radial_velocity = (*radial_functor)(elem_arg, state);
+    Sij_zz = 2.0 * radial_velocity / radius;
+    grad_zz = radial_velocity / radius;
+    trace += Sij_zz / 3.0;
+  }
+
+  // Note that in RZ we can only do X or Y axis. However, due to the hoop stress the
+  // Z direction tensors are not 0 in this case.
   return (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
          (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
          (Sij_zz - trace) * grad_zz;
@@ -234,12 +265,17 @@ template Real computeShearStrainRateNormSquared<Real>(const Moose::Functor<Real>
                                                       const Moose::Functor<Real> * v,
                                                       const Moose::Functor<Real> * w,
                                                       const Moose::ElemArg & elem_arg,
-                                                      const Moose::StateArg & state);
-template ADReal computeShearStrainRateNormSquared<ADReal>(const Moose::Functor<ADReal> & u,
-                                                          const Moose::Functor<ADReal> * v,
-                                                          const Moose::Functor<ADReal> * w,
-                                                          const Moose::ElemArg & elem_arg,
-                                                          const Moose::StateArg & state);
+                                                      const Moose::StateArg & state,
+                                                      const Moose::CoordinateSystemType coord_sys,
+                                                      const unsigned int rz_radial_coord);
+template ADReal
+computeShearStrainRateNormSquared<ADReal>(const Moose::Functor<ADReal> & u,
+                                          const Moose::Functor<ADReal> * v,
+                                          const Moose::Functor<ADReal> * w,
+                                          const Moose::ElemArg & elem_arg,
+                                          const Moose::StateArg & state,
+                                          const Moose::CoordinateSystemType coord_sys,
+                                          const unsigned int rz_radial_coord);
 
 /// Bounded element maps for wall treatment
 void

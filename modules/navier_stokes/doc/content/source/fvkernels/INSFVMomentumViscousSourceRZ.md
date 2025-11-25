@@ -23,13 +23,18 @@ to `false` if the default behavior needs to be disabled.
 
 !alert note
 The kernel expects the same viscosity functor that is passed to
-[INSFVMomentumDiffusion](INSFVMomentumDiffusion.md), and it only needs to be added for the radial
+[INSFVMomentumDiffusion.md], and it only needs to be added for the radial
 momentum equation. Axial components should not include this kernel.
+
+!alert note
+When the user enables turbulence, in some cases, kernels can be split into contributions
+from the modlecular and trubulent viscosity. In these cases, the user has to make sure
+to include one of these kernels for each [INSFVMomentumDiffusion.md]!
 
 !alert note title=Use only for RZ viscous sources
 `INSFVMomentumViscousSourceRZ` complements the Laplacian viscous term implemented by
-[INSFVMomentumDiffusion](INSFVMomentumDiffusion.md). Do not add this kernel in Cartesian problems;
-only include it for the radial momentum equation of axisymmetric $RZ$ setups. When the diffusion
+[INSFVMomentumDiffusion.md]. Do not add this kernel in Cartesian problems;
+only include it for the radial momentum equation of axisymmetric $RZ$ setups. When the [INSFVMomentumDiffusion.md]
 kernel uses the complete-expansion form, set
 [!param](/FVKernels/INSFVMomentumViscousSourceRZ/complete_expansion) so the same factor of 2 is
 applied here.

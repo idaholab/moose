@@ -106,6 +106,7 @@ WCNSFVFlowPhysicsBase::validParams()
 WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
   : NavierStokesPhysicsBase(parameters),
     _has_flow_equations(getParam<bool>("add_flow_equations")),
+    _add_rz_viscous_source(getParam<bool>("add_rz_viscous_source")),
     _compressibility(getParam<MooseEnum>("compressibility")),
     _solve_for_dynamic_pressure(getParam<bool>("solve_for_dynamic_pressure")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
@@ -129,6 +130,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                               ? getParam<MooseFunctorName>("density_gravity")
                               : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
+    _include_deviatoric_stress(getParam<bool>("include_deviatoric_stress")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
@@ -523,7 +525,7 @@ WCNSFVFlowPhysicsBase::getAxisymmetricRZBlocks() const
 void
 WCNSFVFlowPhysicsBase::addAxisymmetricViscousSource()
 {
-  if (!_has_flow_equations || !getParam<bool>("add_rz_viscous_source"))
+  if (!_has_flow_equations || !_add_rz_viscous_source)
     return;
 
   const auto rz_blocks = getAxisymmetricRZBlocks();

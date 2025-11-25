@@ -31,8 +31,6 @@ protected:
 private:
   /// Viscosity functor
   const Moose::Functor<ADReal> & _mu;
-  /// Coordinate system on the restricted blocks
-  const Moose::CoordinateSystemType _coord_system;
   /// Index of the radial coordinate in an RZ system
   const unsigned int _rz_radial_coord;
   /// Multiplier applied when the complete expansion form is requested

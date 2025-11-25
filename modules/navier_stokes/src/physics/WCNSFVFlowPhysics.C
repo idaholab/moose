@@ -488,7 +488,7 @@ WCNSFVFlowPhysics::addAxisymmetricViscousSourceKernel(const std::vector<Subdomai
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("momentum_component") = NS::directions[radial_index];
-  params.set<bool>("complete_expansion") = getParam<bool>("include_deviatoric_stress");
+  params.set<bool>("complete_expansion") = includeDeviatoricStress();
   params.set<NonlinearVariableName>("variable") = _velocity_names[radial_index];
 
   getProblem().addFVKernel("INSFVMomentumViscousSourceRZ",

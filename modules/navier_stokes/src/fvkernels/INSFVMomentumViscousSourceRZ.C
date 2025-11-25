@@ -18,9 +18,9 @@ InputParameters
 INSFVMomentumViscousSourceRZ::validParams()
 {
   InputParameters params = INSFVElementalKernel::validParams();
-  params.addClassDescription(
-      "Adds the -\\mu u_r / r^2 viscous source term that appears in the cylindrical form of the "
-      "Navier-Stokes momentum equations (axisymmetric, no swirl).");
+  params.addClassDescription("Adds the -\\mu u_r / r^2 viscous source term (sign for RHS) that "
+                             "appears in the cylindrical form of the "
+                             "Navier-Stokes momentum equations (axisymmetric, no swirl).");
   params.addRequiredParam<MooseFunctorName>(
       NS::mu, "The dynamic viscosity that multiplies the viscous source term.");
   params.addParam<bool>("complete_expansion",
@@ -33,11 +33,10 @@ INSFVMomentumViscousSourceRZ::validParams()
 INSFVMomentumViscousSourceRZ::INSFVMomentumViscousSourceRZ(const InputParameters & params)
   : INSFVElementalKernel(params),
     _mu(getFunctor<ADReal>(NS::mu)),
-    _coord_system(getBlockCoordSystem()),
     _rz_radial_coord(_subproblem.getAxisymmetricRadialCoord()),
     _expansion_multiplier(getParam<bool>("complete_expansion") ? 2.0 : 1.0)
 {
-  if (_coord_system != Moose::COORD_RZ)
+  if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError(name(), " is only valid on blocks that use an RZ coordinate system.");
 
   if (_index != _rz_radial_coord)
