@@ -77,8 +77,8 @@ test:
     - ruff --version
   imports:
     - bs4
-    - deepdiff
     - coverage
+    - deepdiff
     - git
     - jinja2
     - livereload
