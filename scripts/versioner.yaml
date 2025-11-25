@@ -148,3 +148,24 @@ packages:
       - moose-dev
     apptainer:
       from: moose-dev
+  python:
+    version: 2025.10.02
+    conda: conda/python
+    dependencies:
+      - wasp
+      - tools
+    templates:
+      conda/python/conda_build_config.yaml.template: conda/python/conda_build_config.yaml
+      conda/python/meta.yaml.template: conda/python/meta.yaml
+      conda/python/pyproject.toml.template: conda/python/pyproject.toml
+    influential:
+      - conda/python/pyproject.toml
+      - python/mooseutils
+      - python/MooseControl
+      - python/mms
+      - modules/geochemistry/python
+      - modules/level_set/python
+      - modules/navier_stokes/python
+      - modules/stochastic_tools/python
+      - modules/thermal_hydraulics/python/moose_thm/__init__.py
+      - modules/thermal_hydraulics/python/moose_thm/thm_utilities.py
