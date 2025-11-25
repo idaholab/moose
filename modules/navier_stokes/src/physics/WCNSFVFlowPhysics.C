@@ -455,6 +455,8 @@ WCNSFVFlowPhysics::addMomentumViscousDissipationKernels()
   assignBlocks(params, _blocks);
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  if (!_porous_medium_treatment)
+    params.set<bool>("include_isotropic_stress") = (_compressibility == "weakly-compressible");
   params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
   params.set<MooseEnum>("variable_interp_method") =
       getParam<MooseEnum>("momentum_face_interpolation");
