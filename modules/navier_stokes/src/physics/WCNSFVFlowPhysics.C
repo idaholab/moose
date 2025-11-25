@@ -462,7 +462,7 @@ WCNSFVFlowPhysics::addMomentumViscousDissipationKernels()
                  "treatment. Ignoring the request.");
   const bool include_isotropic = (!_porous_medium_treatment) && user_include_iso;
   if (include_isotropic)
-    params.set<bool>("include_isotropic_stress") = true;
+    params.set<bool>("include_isotropic_viscous_stress") = true;
   params.set<MooseEnum>("mu_interp_method") = getParam<MooseEnum>("mu_interp_method");
   params.set<MooseEnum>("variable_interp_method") =
       getParam<MooseEnum>("momentum_face_interpolation");

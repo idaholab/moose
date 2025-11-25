@@ -22,11 +22,11 @@ is activated, the following complete formulation is used for the momentum viscou
 The term $\nabla \cdot \mu (\nabla \bm{v})^T = 0$ for incompressible flow if a constant
 dynamic viscosity is used.
 
-The optional parameter [!param](/FVKernels/INSFVMomentumDiffusion/include_isotropic_stress) makes
+The optional parameter [!param](/FVKernels/INSFVMomentumDiffusion/include_isotropic_viscous_stress) makes
 it possible to add the isotropic contribution $-(2/3)\mu \nabla \cdot \bm{v}\; \mathbb{I}$ that
 appears in the weakly-compressible form of the viscous stress. Because this term requires the full
 velocity gradient, the corresponding velocity functors (`u`, `v`, `w`) must be provided whenever
-[!param](/FVKernels/INSFVMomentumDiffusion/include_isotropic_stress) is enabled.
+[!param](/FVKernels/INSFVMomentumDiffusion/include_isotropic_viscous_stress) is enabled.
 
 !alert note title=Axisymmetric reminder
 In cylindrical $RZ$ coordinate systems (axisymmetric, no swirl) the radial momentum equation
