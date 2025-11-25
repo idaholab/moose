@@ -235,6 +235,8 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     params.set<MooseEnum>("variable_interp_method") =
         _flow_equations_physics->getMomentumFaceInterpolationMethod();
     params.set<bool>("complete_expansion") = true;
+    if (_flow_equations_physics->includeIsotropicStress())
+      params.set<bool>("include_isotropic_viscous_stress") = true;
 
     std::string kernel_name = prefix() + "ins_momentum_k_epsilon_reynolds_stress_";
     if (_porous_medium_treatment)

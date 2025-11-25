@@ -47,7 +47,7 @@ INSFVMomentumDiffusion::validParams()
       "complete_expansion",
       false,
       "Boolean parameter to use complete momentum expansion is the diffusion term.");
-  params.addParam<bool>("include_isotropic_stress",
+  params.addParam<bool>("include_isotropic_viscous_stress",
                         false,
                         "Add the -(2/3) mu div(u) I term (requires specifying the velocity "
                         "components via 'u', 'v', 'w'). Only meaningful for "
@@ -72,7 +72,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _complete_expansion(getParam<bool>("complete_expansion")),
-    _include_isotropic_stress(getParam<bool>("include_isotropic_stress")),
+    _include_isotropic_viscous_stress(getParam<bool>("include_isotropic_viscous_stress")),
     _limit_interpolation(getParam<bool>("limit_interpolation")),
     _dim(_subproblem.mesh().dimension()),
     _newton_solve(getParam<bool>("newton_solve"))
@@ -90,19 +90,20 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
                "The w velocity must be defined when 'complete_expansion=true'"
                "and problem dimension is larger or equal to three.");
 
-  if (_include_isotropic_stress)
+  if (_include_isotropic_viscous_stress)
   {
     if (!_u_var)
-      paramError("include_isotropic_stress", "Velocity components must be provided to use the "
-                                             "'include_isotropic_stress' option.");
+      paramError("include_isotropic_viscous_stress",
+                 "Velocity components must be provided to use the "
+                 "'include_isotropic_viscous_stress' option.");
     if (_dim >= 2 && !_v_var)
-      paramError("include_isotropic_stress",
-                 "Velocity components must be provided to use the 'include_isotropic_stress' "
-                 "option in dimensions >= 2.");
+      paramError("include_isotropic_viscous_stress",
+                 "Velocity components must be provided to use the "
+                 "'include_isotropic_viscous_stress' option in dimensions >= 2.");
     if (_dim >= 3 && !_w_var)
-      paramError("include_isotropic_stress",
-                 "Velocity components must be provided to use the 'include_isotropic_stress' "
-                 "option in 3D.");
+      paramError("include_isotropic_viscous_stress",
+                 "Velocity components must be provided to use the "
+                 "'include_isotropic_viscous_stress' option in 3D.");
   }
 }
 
@@ -200,7 +201,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
 
     dudn_transpose += gradient_transpose.row(_index) * _face_info->normal();
 
-    if (_include_isotropic_stress)
+    if (_include_isotropic_viscous_stress)
     {
       libMesh::VectorValue<ADReal> velocity;
       velocity(0) = _u_var ? (*_u_var)(face, state) : ADReal(0);
@@ -216,7 +217,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   }
 
   ADReal residual = -face_mu * (dudn + dudn_transpose);
-  if (_complete_expansion && _include_isotropic_stress)
+  if (_complete_expansion && _include_isotropic_viscous_stress)
     residual += (2.0 / 3.0) * face_mu * divergence_term * _face_info->normal()(_index);
 
   return residual;

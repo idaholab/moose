@@ -59,7 +59,7 @@ protected:
   const bool _complete_expansion;
 
   /// Whether to add the -(2/3) mu div(u) I contribution
-  const bool _include_isotropic_stress;
+  const bool _include_isotropic_viscous_stress;
 
   /// Boolean parameter to limit interpolation
   const bool _limit_interpolation;

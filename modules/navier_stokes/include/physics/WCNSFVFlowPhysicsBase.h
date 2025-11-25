@@ -40,7 +40,7 @@ public:
   /// Whether to include the symmetrized contribution in the viscous stress
   bool includeSymmetrizedViscousStress() const { return _include_symmetrized_viscous_stress; }
   /// Whether to include the isotropic viscous stress contribution
-  bool includeIsotropicStress() const { return _include_isotropic_stress; }
+  bool includeIsotropicStress() const { return _include_isotropic_viscous_stress; }
 
   /// To interface with other Physics
   const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
@@ -203,7 +203,7 @@ protected:
   /// Whether to include the symmetrized viscous stress contribution
   const bool _include_symmetrized_viscous_stress;
   /// Whether to include the isotropic viscous stress contribution
-  const bool _include_isotropic_stress;
+  const bool _include_isotropic_viscous_stress;
 
   /// name of the Rhie Chow user object
   UserObjectName _rc_uo_name;

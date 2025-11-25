@@ -152,7 +152,7 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                                                 : "ins_rhie_chow_interpolator")),
     _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress") ||
                                         getParam<bool>("include_deviatoric_stress")),
-    _include_isotropic_stress(getParam<bool>("include_isotropic_viscous_stress")),
+    _include_isotropic_viscous_stress(getParam<bool>("include_isotropic_viscous_stress")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
