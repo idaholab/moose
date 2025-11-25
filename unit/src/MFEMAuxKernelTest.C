@@ -26,26 +26,30 @@ public:
   MFEMAuxKernelTest() : MFEMObjectUnitTest("MooseUnitApp") {}
 };
 
-double slope_real(const mfem::Vector &x)
+double
+slope_real(const mfem::Vector & x)
 {
   return x(0);
 }
 
-double slope_imag(const mfem::Vector &x)
+double
+slope_imag(const mfem::Vector & x)
 {
   return x(1);
 }
 
-void vec_real(const mfem::Vector &x, mfem::Vector &v)
+void
+vec_real(const mfem::Vector & x, mfem::Vector & v)
 {
-  for (int i=0; i<3; ++i)
-    v(i) = i*x(i);
+  for (int i = 0; i < 3; ++i)
+    v(i) = i * x(i);
 }
 
-void vec_imag(const mfem::Vector &x, mfem::Vector &v)
+void
+vec_imag(const mfem::Vector & x, mfem::Vector & v)
 {
-  for (int i=0; i<3; ++i)
-    v(i) = (i+1)*x(i);
+  for (int i = 0; i < 3; ++i)
+    v(i) = (i + 1) * x(i);
 }
 
 /**
@@ -113,13 +117,11 @@ TEST_F(MFEMAuxKernelTest, MFEMSumAux)
   }
 }
 
-
 /**
  * Test MFEMComplexSumAux sums input ComplexGridFunctions successfully.
  */
 TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
 {
-  // Register dummy (Par)GridFunctions to test MFEMComplexSumAux against
   auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
   mfem::common::H1_ParFESpace fe(pm, 1);
   mfem::common::H1_ParFESpace different_fe(pm, 2);
@@ -153,7 +155,8 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_real") = {1.0, 2.0, 5.0};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_imag") = {0.0, 2.0, -1.0};
 
-    MFEMComplexSumAux & auxkernel = addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "auxkernel1", auxkernel_params);
+    MFEMComplexSumAux & auxkernel =
+        addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "auxkernel1", auxkernel_params);
     auxkernel.execute();
 
     // Check the value of the output gridfunction is the scaled sum of the components
@@ -168,8 +171,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
         "source_variable_1", "source_ho_variable", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_real") = {1.0, 2.0, 5.0};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_imag") = {0.0, 2.0, -1.0};
-    EXPECT_THROW(addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "failed_auxkernel", auxkernel_params),
-                 std::runtime_error);
+    EXPECT_THROW(
+        addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "failed_auxkernel", auxkernel_params),
+        std::runtime_error);
   }
   {
     // Check for failure if an inconsistent number of scale factors are provided
@@ -179,46 +183,31 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexSumAux)
         "source_variable_1", "source_variable_2", "source_variable_3"};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_real") = {1.0, 2.0};
     auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors_imag") = {0.0, 2.0};
-    EXPECT_THROW(addObject<MFEMComplexSumAux>("MFEMComplexSumAux", "failed_scaled_auxkernel", auxkernel_params),
+    EXPECT_THROW(addObject<MFEMComplexSumAux>(
+                     "MFEMComplexSumAux", "failed_scaled_auxkernel", auxkernel_params),
                  std::runtime_error);
   }
 }
 
-
 /**
- * Test the differential operator auxkernels work on ComplexGridFunctions.
+ * Test the Grad operator auxkernel works on ComplexGridFunctions.
  */
-TEST_F(MFEMAuxKernelTest, MFEMComplexGradCurlDivAux)
+TEST_F(MFEMAuxKernelTest, MFEMComplexGradAux)
 {
-  // Register dummy (Par)GridFunctions to test MFEMComplexGradAux against
   auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
   mfem::common::H1_ParFESpace fe_h1(pm, 2);
-  mfem::common::ND_ParFESpace fe_hcurl(pm, 2, 3, mfem::Ordering::byVDIM);
-  mfem::common::RT_ParFESpace fe_hdiv(pm, 2, 3, mfem::Ordering::byVDIM);
-  mfem::common::L2_ParFESpace fe_l2(pm, 2, 3);
+  mfem::common::L2_ParFESpace fe_l2(pm, 2, 3, 3, mfem::Ordering::byVDIM);
 
   auto pgf_in = std::make_shared<mfem::ParComplexGridFunction>(&fe_h1);
-  auto pgf_in_vec = std::make_shared<mfem::ParComplexGridFunction>(&fe_hdiv);
-
-  auto pgf_grad = std::make_shared<mfem::ParComplexGridFunction>(&fe_hcurl);
-  auto pgf_curl = std::make_shared<mfem::ParComplexGridFunction>(&fe_hdiv);
-  auto pgf_div = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2);
+  auto pgf_grad = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2);
 
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable", pgf_in);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_vec", pgf_in_vec);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_grad", pgf_grad);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_curl", pgf_curl);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_div", pgf_div);
 
   // Initialise scalar variable to take the grad of
   mfem::FunctionCoefficient coef_real(slope_real);
   mfem::FunctionCoefficient coef_imag(slope_imag);
   pgf_in->ProjectCoefficient(coef_real, coef_imag);
-
-  // Initialise a vector variable to take the div of
-  mfem::VectorFunctionCoefficient vec_coef_real(3, vec_real);
-  mfem::VectorFunctionCoefficient vec_coef_imag(3, vec_imag);
-  pgf_in_vec->ProjectCoefficient(vec_coef_real, vec_coef_imag);
 
   {
     // Construct grad auxkernel
@@ -228,23 +217,50 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexGradCurlDivAux)
     auxkernel_grad_params.set<mfem::real_t>("scale_factor_real") = 1.0;
     auxkernel_grad_params.set<mfem::real_t>("scale_factor_imag") = 1.0;
 
-    MFEMComplexGradAux & auxkernel_grad = addObject<MFEMComplexGradAux>("MFEMComplexGradAux", "auxkernel1", auxkernel_grad_params);
+    MFEMComplexGradAux & auxkernel_grad =
+        addObject<MFEMComplexGradAux>("MFEMComplexGradAux", "auxkernel", auxkernel_grad_params);
     auxkernel_grad.execute();
 
     // Check we get the right grad
-    ASSERT_LE(abs(pgf_grad->real().GetData()[0] - 0.0), 1e-8);
-    ASSERT_LE(abs(pgf_grad->real().GetData()[1] - 0.0), 1e-8);
-    ASSERT_LE(abs(pgf_grad->real().GetData()[2] + 1.0), 1e-8);
-    ASSERT_LE(abs(pgf_grad->imag().GetData()[0] - 2.0), 1e-8);
-    ASSERT_LE(abs(pgf_grad->imag().GetData()[1] - 2.0), 1e-8);
-    ASSERT_LE(abs(pgf_grad->imag().GetData()[2] - 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_grad->real().GetData()[0] - 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_grad->real().GetData()[1] + 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_grad->real().GetData()[2] - 0.0), 1e-8);
+    ASSERT_LE(abs(pgf_grad->imag().GetData()[0] - 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_grad->imag().GetData()[1] - 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_grad->imag().GetData()[2] - 0.0), 1e-8);
+  }
+}
 
+/**
+ * Test the Curl operator auxkernel works on ComplexGridFunctions.
+ */
+TEST_F(MFEMAuxKernelTest, MFEMComplexCurlAux)
+{
+  auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+  mfem::common::RT_ParFESpace fe_hdiv(pm, 2, 3, mfem::Ordering::byVDIM);
+  mfem::common::ND_ParFESpace fe_hcurl(pm, 2, 3, mfem::Ordering::byVDIM);
+
+  auto pgf_in = std::make_shared<mfem::ParComplexGridFunction>(&fe_hcurl);
+  auto pgf_curl = std::make_shared<mfem::ParComplexGridFunction>(&fe_hdiv);
+
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable", pgf_in);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_curl", pgf_curl);
+
+  // Initialise scalar variable to take the grad of
+  mfem::Vector real_vec{0, 1, 2};
+  mfem::Vector imag_vec{1, 2, 3};
+  mfem::VectorConstantCoefficient vec_coef_real(real_vec);
+  mfem::VectorConstantCoefficient vec_coef_imag(imag_vec);
+  pgf_in->ProjectCoefficient(vec_coef_real, vec_coef_imag);
+
+  {
     // Construct curl auxkernel
     InputParameters auxkernel_curl_params = _factory.getValidParams("MFEMComplexCurlAux");
     auxkernel_curl_params.set<AuxVariableName>("variable") = "output_variable_curl";
-    auxkernel_curl_params.set<VariableName>("source") = "output_variable_grad";
+    auxkernel_curl_params.set<VariableName>("source") = "source_variable";
 
-    MFEMComplexCurlAux & auxkernel_curl = addObject<MFEMComplexCurlAux>("MFEMComplexCurlAux", "auxkernel2", auxkernel_curl_params);
+    MFEMComplexCurlAux & auxkernel_curl =
+        addObject<MFEMComplexCurlAux>("MFEMComplexCurlAux", "auxkernel", auxkernel_curl_params);
     auxkernel_curl.execute();
 
     // Check we get the right curl (should be zero since curl of a grad = 0)
@@ -254,13 +270,37 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexGradCurlDivAux)
     ASSERT_LE(abs(pgf_curl->imag().GetData()[0]), 1e-8);
     ASSERT_LE(abs(pgf_curl->imag().GetData()[1]), 1e-8);
     ASSERT_LE(abs(pgf_curl->imag().GetData()[2]), 1e-8);
+  }
+}
 
+/**
+ * Test the Div operator auxkernel works on ComplexGridFunctions.
+ */
+TEST_F(MFEMAuxKernelTest, MFEMComplexDivAux)
+{
+  auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+  mfem::common::RT_ParFESpace fe_hdiv(pm, 2, 3, mfem::Ordering::byVDIM);
+  mfem::common::L2_ParFESpace fe_l2(pm, 2, 3);
+
+  auto pgf_in_vec = std::make_shared<mfem::ParComplexGridFunction>(&fe_hdiv);
+  auto pgf_div = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2);
+
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_vec", pgf_in_vec);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_div", pgf_div);
+
+  // Initialise a vector variable to take the div of
+  mfem::VectorFunctionCoefficient vec_coef_real(3, vec_real);
+  mfem::VectorFunctionCoefficient vec_coef_imag(3, vec_imag);
+  pgf_in_vec->ProjectCoefficient(vec_coef_real, vec_coef_imag);
+
+  {
     // Construct div auxkernel
     InputParameters auxkernel_div_params = _factory.getValidParams("MFEMComplexDivAux");
     auxkernel_div_params.set<AuxVariableName>("variable") = "output_variable_div";
     auxkernel_div_params.set<VariableName>("source") = "source_variable_vec";
 
-    MFEMComplexDivAux & auxkernel_div = addObject<MFEMComplexDivAux>("MFEMComplexDivAux", "auxkernel3", auxkernel_div_params);
+    MFEMComplexDivAux & auxkernel_div =
+        addObject<MFEMComplexDivAux>("MFEMComplexDivAux", "auxkernel", auxkernel_div_params);
     auxkernel_div.execute();
 
     // Check the value of the output gridfunction is the correct div
@@ -270,26 +310,21 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexGradCurlDivAux)
 }
 
 /**
- * Test the complex dot and cross product auxkernels work on ComplexGridFunctions.
+ * Test the complex dot product auxkernel works on ComplexGridFunctions.
  */
-TEST_F(MFEMAuxKernelTest, MFEMComplexDotCrossAux)
+TEST_F(MFEMAuxKernelTest, MFEMComplexDotAux)
 {
-  // Register dummy (Par)GridFunctions to test MFEMComplexGradAux against
   auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
   mfem::common::L2_ParFESpace fe_l2(pm, 2, 3);
   mfem::common::ND_ParFESpace fe_hcurl(pm, 2, 3, mfem::Ordering::byVDIM);
-  mfem::common::L2_ParFESpace fe_l2_vec(pm, 2, 3, 3, mfem::Ordering::byVDIM);
-
 
   auto pgf_in_1 = std::make_shared<mfem::ParComplexGridFunction>(&fe_hcurl);
   auto pgf_in_2 = std::make_shared<mfem::ParComplexGridFunction>(&fe_hcurl);
-  auto pgf_out_1 = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2);
-  auto pgf_out_2 = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2_vec);
+  auto pgf_out = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2);
 
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_1", pgf_in_1);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_2", pgf_in_2);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_inner", pgf_out_1);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_cross", pgf_out_2);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_inner", pgf_out);
 
   // Initialise vector variables to take dot and cross products of
   mfem::Vector real_vec{0, 1, 2};
@@ -306,93 +341,143 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexDotCrossAux)
     auxkernel_inner_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_inner_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexDotProductAux & auxkernel_inner = addObject<MFEMComplexDotProductAux>("MFEMComplexDotProductAux", "auxkernel1", auxkernel_inner_params);
+    MFEMComplexDotProductAux & auxkernel_inner = addObject<MFEMComplexDotProductAux>(
+        "MFEMComplexDotProductAux", "auxkernel", auxkernel_inner_params);
     auxkernel_inner.execute();
 
     // Check we get the right inner product
-    ASSERT_LE(abs(pgf_out_1->real().GetData()[5] - 19.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_1->imag().GetData()[5] - 0.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->real().GetData()[5] - 19.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[5] - 0.0), 1e-8);
+  }
+}
 
+/**
+ * Test the complex cross product auxkernel works on ComplexGridFunctions.
+ */
+TEST_F(MFEMAuxKernelTest, MFEMComplexCrossAux)
+{
+  auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+  mfem::common::ND_ParFESpace fe_hcurl(pm, 2, 3, mfem::Ordering::byVDIM);
+  mfem::common::L2_ParFESpace fe_l2_vec(pm, 2, 3, 3, mfem::Ordering::byVDIM);
+
+  auto pgf_in_1 = std::make_shared<mfem::ParComplexGridFunction>(&fe_hcurl);
+  auto pgf_in_2 = std::make_shared<mfem::ParComplexGridFunction>(&fe_hcurl);
+  auto pgf_out = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2_vec);
+
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_1", pgf_in_1);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_2", pgf_in_2);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_cross", pgf_out);
+
+  // Initialise vector variables to take dot and cross products of
+  mfem::Vector real_vec{0, 1, 2};
+  mfem::Vector imag_vec{1, 2, 3};
+  mfem::VectorConstantCoefficient vec_coef_real(real_vec);
+  mfem::VectorConstantCoefficient vec_coef_imag(imag_vec);
+  pgf_in_1->ProjectCoefficient(vec_coef_real, vec_coef_imag);
+  pgf_in_2->ProjectCoefficient(vec_coef_real, vec_coef_imag);
+
+  {
     // Construct cross product auxkernel
     InputParameters auxkernel_cross_params = _factory.getValidParams("MFEMComplexCrossProductAux");
     auxkernel_cross_params.set<AuxVariableName>("variable") = "output_variable_cross";
     auxkernel_cross_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_cross_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexCrossProductAux & auxkernel_cross = addObject<MFEMComplexCrossProductAux>("MFEMComplexCrossProductAux", "auxkernel2", auxkernel_cross_params);
+    MFEMComplexCrossProductAux & auxkernel_cross = addObject<MFEMComplexCrossProductAux>(
+        "MFEMComplexCrossProductAux", "auxkernel", auxkernel_cross_params);
     auxkernel_cross.execute();
 
     // Check we get the right cross product
-    ASSERT_LE(abs(pgf_out_2->real().GetData()[0]), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->real().GetData()[1]), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->real().GetData()[2]), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->imag().GetData()[0]-2.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->imag().GetData()[1]+4.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->imag().GetData()[2]-2.0), 1e-8);
-
+    ASSERT_LE(abs(pgf_out->real().GetData()[0]), 1e-8);
+    ASSERT_LE(abs(pgf_out->real().GetData()[1]), 1e-8);
+    ASSERT_LE(abs(pgf_out->real().GetData()[2]), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[0] - 2.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[1] + 4.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[2] - 2.0), 1e-8);
   }
 }
 
 /**
- * Test the complex scalar and vector projection auxkernels on ComplexGridFunctions.
+ * Test the complex scalar projection auxkernels on ComplexGridFunctions.
  */
-TEST_F(MFEMAuxKernelTest, MFEMComplexScalarVectorProjectionAux)
+TEST_F(MFEMAuxKernelTest, MFEMComplexScalarProjectionAux)
 {
-  // Register dummy (Par)GridFunctions to test MFEMComplexGradAux against
   auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
   mfem::common::H1_ParFESpace fe_h1(pm, 2, 3);
-  mfem::common::L2_ParFESpace fe_l2_vec(pm, 2, 3, 3, mfem::Ordering::byVDIM);
 
-  auto pgf_out_1 = std::make_shared<mfem::ParComplexGridFunction>(&fe_h1);
-  auto pgf_out_2 = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2_vec);
-
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_scalar", pgf_out_1);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_vector", pgf_out_2);
+  auto pgf_out = std::make_shared<mfem::ParComplexGridFunction>(&fe_h1);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_scalar", pgf_out);
 
   // Initialise coefficients to project
   mfem::ConstantCoefficient coef_real(2.0);
   mfem::ConstantCoefficient coef_imag(3.0);
+
+  _mfem_problem->getProblemData().coefficients.declareScalar<mfem::ConstantCoefficient>("coef_real",
+                                                                                        coef_real);
+  _mfem_problem->getProblemData().coefficients.declareScalar<mfem::ConstantCoefficient>("coef_imag",
+                                                                                        coef_imag);
+
+  {
+    // Construct scalar projection auxkernel
+    InputParameters auxkernel_scalar_params =
+        _factory.getValidParams("MFEMComplexScalarProjectionAux");
+    auxkernel_scalar_params.set<AuxVariableName>("variable") = "output_variable_scalar";
+    auxkernel_scalar_params.set<MFEMScalarCoefficientName>("coefficient_real") = "coef_real";
+    auxkernel_scalar_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "coef_imag";
+
+    MFEMComplexScalarProjectionAux & auxkernel_scalar = addObject<MFEMComplexScalarProjectionAux>(
+        "MFEMComplexScalarProjectionAux", "auxkernel", auxkernel_scalar_params);
+    auxkernel_scalar.execute();
+
+    // Check we get the right projection
+    ASSERT_LE(abs(pgf_out->real().GetData()[5] - 2.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[5] - 3.0), 1e-8);
+  }
+}
+
+/**
+ * Test the complex vector projection auxkernels on ComplexGridFunctions.
+ */
+TEST_F(MFEMAuxKernelTest, MFEMComplexVectorProjectionAux)
+{
+  auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+  mfem::common::L2_ParFESpace fe_l2_vec(pm, 2, 3, 3, mfem::Ordering::byVDIM);
+
+  auto pgf_out = std::make_shared<mfem::ParComplexGridFunction>(&fe_l2_vec);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_vector", pgf_out);
+
+  // Initialise coefficients to project
   mfem::Vector real_vec{0, 1, 2};
   mfem::Vector imag_vec{1, 2, 3};
   mfem::VectorConstantCoefficient vec_coef_real(real_vec);
   mfem::VectorConstantCoefficient vec_coef_imag(imag_vec);
 
-  _mfem_problem->getProblemData().coefficients.declareScalar<mfem::ConstantCoefficient>("coef_real", coef_real);
-  _mfem_problem->getProblemData().coefficients.declareScalar<mfem::ConstantCoefficient>("coef_imag", coef_imag);
-  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorConstantCoefficient>("vec_coef_real", vec_coef_real);
-  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorConstantCoefficient>("vec_coef_imag", vec_coef_imag);
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorConstantCoefficient>(
+      "vec_coef_real", vec_coef_real);
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorConstantCoefficient>(
+      "vec_coef_imag", vec_coef_imag);
 
   {
-    // Construct scalar projection auxkernel
-    InputParameters auxkernel_scalar_params = _factory.getValidParams("MFEMComplexScalarProjectionAux");
-    auxkernel_scalar_params.set<AuxVariableName>("variable") = "output_variable_scalar";
-    auxkernel_scalar_params.set<MFEMScalarCoefficientName>("coefficient_real") = "coef_real";
-    auxkernel_scalar_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "coef_imag";
-
-    MFEMComplexScalarProjectionAux & auxkernel_scalar = addObject<MFEMComplexScalarProjectionAux>("MFEMComplexScalarProjectionAux", "auxkernel1", auxkernel_scalar_params);
-    auxkernel_scalar.execute();
-
-    // Check we get the right projection
-    ASSERT_LE(abs(pgf_out_1->real().GetData()[5] - 2.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_1->imag().GetData()[5] - 3.0), 1e-8);
-
     // Construct vector projection auxkernel
-    InputParameters auxkernel_vector_params = _factory.getValidParams("MFEMComplexVectorProjectionAux");
+    InputParameters auxkernel_vector_params =
+        _factory.getValidParams("MFEMComplexVectorProjectionAux");
     auxkernel_vector_params.set<AuxVariableName>("variable") = "output_variable_vector";
-    auxkernel_vector_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "vec_coef_real";
-    auxkernel_vector_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "vec_coef_imag";
+    auxkernel_vector_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") =
+        "vec_coef_real";
+    auxkernel_vector_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") =
+        "vec_coef_imag";
 
-    MFEMComplexVectorProjectionAux & auxkernel_vector = addObject<MFEMComplexVectorProjectionAux>("MFEMComplexVectorProjectionAux", "auxkernel2", auxkernel_vector_params);
+    MFEMComplexVectorProjectionAux & auxkernel_vector = addObject<MFEMComplexVectorProjectionAux>(
+        "MFEMComplexVectorProjectionAux", "auxkernel", auxkernel_vector_params);
     auxkernel_vector.execute();
 
     // Check we get the right projection
-    ASSERT_LE(abs(pgf_out_2->real().GetData()[0] - 0.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->real().GetData()[1] - 1.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->real().GetData()[2] - 2.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->imag().GetData()[0] - 1.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->imag().GetData()[1] - 2.0), 1e-8);
-    ASSERT_LE(abs(pgf_out_2->imag().GetData()[2] - 3.0), 1e-8);
-
+    ASSERT_LE(abs(pgf_out->real().GetData()[0] - 0.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->real().GetData()[1] - 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->real().GetData()[2] - 2.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[0] - 1.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[1] - 2.0), 1e-8);
+    ASSERT_LE(abs(pgf_out->imag().GetData()[2] - 3.0), 1e-8);
   }
 }
 
