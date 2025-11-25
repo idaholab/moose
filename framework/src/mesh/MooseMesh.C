@@ -3779,6 +3779,10 @@ void
 MooseMesh::setCustomPartitioner(Partitioner * partitioner)
 {
   _custom_partitioner = partitioner->clone();
+  setIsCustomPartitionerRequested(true);
+  if (_mesh)
+    _mesh->partitioner() = _custom_partitioner->clone();
+  _partitioner_name = "custom";
 }
 
 bool
@@ -3977,8 +3981,8 @@ MooseMesh::computeFiniteVolumeCoords() const
 MooseEnum
 MooseMesh::partitioning()
 {
-  MooseEnum partitioning("default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc",
-                         "default");
+  MooseEnum partitioning(
+      "default=-3 metis=-2 parmetis=-1 linear=0 centroid hilbert_sfc morton_sfc custom", "default");
   return partitioning;
 }
 
