@@ -306,7 +306,7 @@ CSGBase::createCartesianLattice(
                    " is not in the CSGBase instance.");
 
   const CSGLattice & lattice = _lattice_list.addCartesianLattice(name, pitch, universes);
-  return static_cast<const CSGCartesianLattice &>(lattice);
+  return dynamic_cast<const CSGCartesianLattice &>(lattice);
 }
 
 const CSGCartesianLattice &
@@ -411,7 +411,7 @@ CSGBase::createHexagonalLattice(
                    " is not in the CSGBase instance.");
 
   const CSGLattice & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
-  return static_cast<const CSGHexagonalLattice &>(lattice);
+  return dynamic_cast<const CSGHexagonalLattice &>(lattice);
 }
 
 void
