@@ -40,7 +40,7 @@
     type = HeatTransferFromSpecifiedTemperature1Phase
     flow_channel = pipe1
     T_wall = 310
-    Hw = 0
+    Hw = Hw_fn
   []
 
   [inlet1]
@@ -95,19 +95,10 @@
   []
 []
 
-[ControlLogic]
-  [pipe_Hw_ctrl]
-    type = TimeFunctionComponentControl
-    component = ht_pipe1
-    parameter = Hw
-    function = Hw_fn
-  []
-[]
-
 [Postprocessors]
   [Hw]
-    type = RealComponentParameterValuePostprocessor
-    component = ht_pipe1
-    parameter = Hw
+    type = ADElementAverageMaterialProperty
+    block = 'pipe1'
+    mat_prop = Hw
   []
 []

@@ -26,7 +26,11 @@ FlowChannel1PhaseBase::validParams()
       SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
       "Slope reconstruction type for rDG spatial discretization");
 
-  params.declareControllable("initial_p initial_T initial_vel D_h");
+  params.addParam<Real>("p_ref", 101.325e3, "Reference pressure [Pa]");
+  params.addParam<Real>("T_ref", 273.15, "Reference temperature [K]");
+  params.addParam<Real>("vel_ref", 1.0, "Reference velocity [m/s]");
+
+  params.declareControllable("initial_p initial_T initial_vel");
   params.addParamNamesToGroup("initial_p initial_T initial_vel", "Variable initialization");
   params.addParamNamesToGroup("rdg_slope_reconstruction", "Numerical scheme");
 
@@ -118,8 +122,6 @@ FlowChannel1PhaseBase::addHydraulicDiameterMaterial()
     params.set<std::vector<std::string>>("prop_names") = {THM::HYDRAULIC_DIAMETER};
     params.set<std::vector<FunctionName>>("prop_values") = {D_h_fn_name};
     getTHMProblem().addMaterial(class_name, mat_name, params);
-
-    makeFunctionControllableIfConstant(D_h_fn_name, "D_h");
   }
   else
   {

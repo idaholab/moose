@@ -1,12 +1,19 @@
 [Tests]
   design = 'SetValueChainControl.md'
-  issues = '#28948'
+  issues = '#28948 #31842'
   [real]
     type = CSVDiff
     input = 'set_real_value_chain_control.i'
     csvdiff = 'set_real_value_chain_control_out.csv'
     requirement = 'The system shall be able to set a floating point parameter to the value of a floating point control data.'
   []
+  [time_step_end]
+    type = CSVDiff
+    input = 'set_real_value_chain_control.i'
+    cli_args = 'ChainControls/set_value_ctrl/execute_on=timestep_end Outputs/file_base=set_real_value_chain_control_td_end_out'   
+    csvdiff = 'set_real_value_chain_control_td_end_out.csv'
+    requirement = 'The system shall be able to set a floating point parameter to the value of a floating point control data based on the data at the timestep_end state.'
+  []  
   [bool]
     type = CSVDiff
     input = 'set_bool_value_chain_control.i'

@@ -70,13 +70,6 @@ For more information about the mesh generator, pelase consult the website docume
 
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=TriSubChannelMesh language=moose
 
-### Variables
-
-This block defines the subchannel variables for the SCM solve.
-All variables must be present at every input for the SCM solver to run.
-
-!listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=AuxVariables language=moose
-
 ### FluidProperties
 
 The FluidProperties block specifies the thermophysical properties used in the SCM solve.
@@ -84,16 +77,16 @@ Sodium properties are used in this case.
 
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=FluidProperties language=moose
 
-### Problem
+### SubChannel
 
-The problem type specifies the solver to be used in the SCM solve.
+The SubChannel type specifies the solver to be used in the SCM solve.
 The type of problem used in this case is a liquid metal SCM problem that uses sodium fluid properties.
 The parameters *beta* and *C_T* are used are used to model the crossflow and cross enthalpy-fluxes.
 Different solve procedures can be applied.
 In this case, we use an implicit, non-segragated solve.
 For more information about the mesh generator, pelase consult the website documentation on SCM.
 
-!listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=Problem language=moose
+!listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=SubChannel language=moose
 
 ### Initial Conditions
 

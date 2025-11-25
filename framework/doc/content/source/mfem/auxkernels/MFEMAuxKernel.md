@@ -4,11 +4,11 @@
 
 ## Summary
 
-Base class for MFEM auxkernels used to evaluate auxiliary variables to the main solve.
+Base class for MFEM auxkernels used to evaluate real auxiliary variables to the main solve.
 
 ## Overview
 
-MFEM auxkernels are responsible for updating auxiliary variables in the system, during pre- or
+MFEM auxkernels are responsible for updating real auxiliary variables in the system, during pre- or
 post-processing steps.
 
 An `MFEMAuxKernel` is derived from `MFEMGeneralUserObject`, and thus the order of their execution

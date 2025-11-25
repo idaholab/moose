@@ -2,21 +2,21 @@
   issues = '#7244'
   design = 'SolutionUserObject.md'
 
-  [./discontinuous_value_solution_uo_p1]
+  [discontinuous_value_solution_uo_p1]
     type = 'Exodiff'
     input = 'discontinuous_value_solution_uo_p1.i'
     exodiff = 'discontinuous_value_solution_uo_p1.e'
 
     requirement = 'The system shall be capable of writing out a solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
-  [../]
-  [./discontinuous_value_solution_uo_p2]
+  []
+  [discontinuous_value_solution_uo_p2]
     type = 'CSVDiff'
     input = 'discontinuous_value_solution_uo_p2.i'
     csvdiff = 'discontinuous_value_solution_uo_p2.csv'
     prereq = discontinuous_value_solution_uo_p1
 
     requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
-  [../]
+  []
   [test_scalar]
     type = RunApp
     cli_args = 'UserObjects/soln/mesh=gold/testscalarrename.e UserObjects/soln/system_variables=""'
@@ -53,5 +53,26 @@
     prereq = "write_exodus_initial"
     issues = "#31238"
     requirement = "The system shall be able to read in a variable from a previous exodus file that only has fiels at time 0."
+  []
+
+  [write_exodus_multiple_vars]
+    type = RunApp
+    prereq = 'read_exodus_initial'
+    input = "write_exodus_initial.i"
+    # Create more than 1 timestep and more than 1 variable
+    cli_args = "AuxVariables/var1/initial_condition=2 AuxVariables/var2/initial_condition=1
+                AuxKernels/v1/type=FunctionAux AuxKernels/v1/variable=var1 AuxKernels/v1/function='2+t'
+                AuxKernels/v2/type=FunctionAux AuxKernels/v2/variable=var2 AuxKernels/v2/function='1+t'
+                Executioner/type=Transient Executioner/num_steps=10"
+    issues = "#31238"
+    requirement = "The system shall be capable of writing out an exodus file with multiple variables."
+  []
+  [read_exodus_multiple_vars]
+    type = Exodiff
+    input = "read_exodus_multiple_vars.i"
+    exodiff = "read_exodus_multiple_vars_out.e"
+    prereq = "write_exodus_multiple_vars"
+    issues = "#31238 #31747 #31767"
+    requirement = "The system shall be able to read in multiple variables from a previous exodus file, loaded separately from the mesh file, leveraging caching and time step interpolation."
   []
 []

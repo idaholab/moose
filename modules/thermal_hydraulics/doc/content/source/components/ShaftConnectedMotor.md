@@ -15,9 +15,10 @@ the time variable $t$ in these functions (and the space variables are
 discarded); therefore, the user is actually specifying the functions
 $\tau(\omega)$ and $I(\omega)$, not $\tau(t,x,y,z)$ and $I(t,x,y,z)$.
 
-If dependence on time is desired, the [ControlLogic/index.md] can be used. To
-do this, supply an arbitrary constant value instead of a function name. Then
-use a [TimeFunctionComponentControl.md]. See the `motor` component in
+If dependence on time is desired, [ControlLogic](ControlLogic/index.md) can be used. To
+do this, supply the name of a [ConstantFunction.md] and then control that function
+using the value of the time function ([GetFunctionValueControl.md] followed by [SetRealValueControl.md]).
+See the `motor` component in
 [open_brayton_cycle.i](test/tests/problems/brayton_cycle/open_brayton_cycle.i)
 for an example.
 

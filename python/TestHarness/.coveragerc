@@ -1,0 +1,13 @@
+[run]
+concurrency = thread
+branch = True
+source =
+    resultsstore/*
+    resultssummary/*
+omit =
+    resultsstore/*/tests
+parallel = False
+
+[report]
+show_missing = True
+fail_under = 100

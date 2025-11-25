@@ -10,6 +10,7 @@
 #include "QuadSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 #include "SCM.h"
+#include "SinglePhaseFluidProperties.h"
 
 registerMooseObject("SubChannelApp", QuadSubChannel1PhaseProblem);
 
@@ -22,11 +23,6 @@ QuadSubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow.");
   params.addParam<bool>(
-      "default_friction_model",
-      true,
-      "Boolean to define which friction model to use (default: Pang, B. et al. "
-      "KIT, 2013. / non-default: Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011)");
-  params.addParam<bool>(
       "constant_beta",
       true,
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)");
@@ -37,7 +33,6 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
   : SubChannel1PhaseProblem(params),
     _subchannel_mesh(SCM::getMesh<QuadSubChannelMesh>(_mesh)),
     _beta(getParam<Real>("beta")),
-    _default_friction_model(getParam<bool>("default_friction_model")),
     _constant_beta(getParam<bool>("constant_beta"))
 {
 }
@@ -205,158 +200,6 @@ QuadSubChannel1PhaseProblem::initializeSolution()
 }
 
 Real
-QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
-{
-  auto Re = friction_args.Re;
-  auto i_ch = friction_args.i_ch;
-  /// Pang, B. et al. KIT, 2013
-  if (_default_friction_model)
-  {
-    Real a, b;
-    if (Re < 1)
-    {
-      return 64.0;
-    }
-    else if (Re >= 1 and Re < 5000)
-    {
-      a = 64.0;
-      b = -1.0;
-    }
-    else if (Re >= 5000 and Re < 30000)
-    {
-      a = 0.316;
-      b = -0.25;
-    }
-    else
-    {
-      a = 0.184;
-      b = -0.20;
-    }
-    return a * std::pow(Re, b);
-  }
-  /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
-  else
-  {
-    Real aL, b1L, b2L, cL;
-    Real aT, b1T, b2T, cT;
-    auto pitch = _subchannel_mesh.getPitch();
-    auto pin_diameter = _subchannel_mesh.getPinDiameter();
-    // This gap is a constant value for the whole assembly. Might want to make it
-    // subchannel specific in the future if we have duct deformation.
-    auto side_gap = _subchannel_mesh.getSideGap();
-    auto w = (pin_diameter / 2.0) + (pitch / 2.0) + side_gap;
-    auto p_over_d = pitch / pin_diameter;
-    auto w_over_d = w / pin_diameter;
-    auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
-    auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
-    auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
-    auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    const Real lambda = 7.0;
-
-    // Find the coefficients of bare Pin bundle friction factor
-    // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume
-    // 1
-    if (subch_type == EChannelType::CENTER)
-    {
-      if (p_over_d < 1.1)
-      {
-        aL = 26.37;
-        b1L = 374.2;
-        b2L = -493.9;
-        aT = 0.09423;
-        b1T = 0.5806;
-        b2T = -1.239;
-      }
-      else
-      {
-        aL = 35.55;
-        b1L = 263.7;
-        b2L = -190.2;
-        aT = 0.1339;
-        b1T = 0.09059;
-        b2T = -0.09926;
-      }
-      // laminar flow friction factor for bare Pin bundle - Center subchannel
-      cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2);
-      // turbulent flow friction factor for bare Pin bundle - Center subchannel
-      cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2);
-    }
-    else if (subch_type == EChannelType::EDGE)
-    {
-      if (p_over_d < 1.1)
-      {
-        aL = 26.18;
-        b1L = 554.5;
-        b2L = -1480;
-        aT = 0.09377;
-        b1T = 0.8732;
-        b2T = -3.341;
-      }
-      else
-      {
-        aL = 44.40;
-        b1L = 256.7;
-        b2L = -267.6;
-        aT = 0.1430;
-        b1T = 0.04199;
-        b2T = -0.04428;
-      }
-      // laminar flow friction factor for bare Pin bundle - Edge subchannel
-      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
-      // turbulent flow friction factor for bare Pin bundle - Edge subchannel
-      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
-    }
-    else
-    {
-      if (p_over_d < 1.1)
-      {
-        aL = 28.62;
-        b1L = 715.9;
-        b2L = -2807;
-        aT = 0.09755;
-        b1T = 1.127;
-        b2T = -6.304;
-      }
-      else
-      {
-        aL = 58.83;
-        b1L = 160.7;
-        b2L = -203.5;
-        aT = 0.1452;
-        b1T = 0.02681;
-        b2T = -0.03411;
-      }
-      // laminar flow friction factor for bare Pin bundle - Corner subchannel
-      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
-      // turbulent flow friction factor for bare Pin bundle - Corner subchannel
-      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
-    }
-
-    // laminar friction factor
-    auto fL = cL / Re;
-    // turbulent friction factor
-    auto fT = cT / std::pow(Re, 0.18);
-
-    if (Re < ReL)
-    {
-      // laminar flow
-      return fL;
-    }
-    else if (Re > ReT)
-    {
-      // turbulent flow
-      return fT;
-    }
-    else
-    {
-      // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
-      return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-             fT * std::pow(psi, 1.0 / 3.0);
-    }
-  }
-}
-
-Real
 QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bool /*enthalpy*/)
 {
   auto beta = _beta;
@@ -413,7 +256,7 @@ QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bo
     auto z_FP_over_D = (2.0 * L_x / pin_diameter) *
                        (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
     auto Str = 1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
-    auto freq_factor = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+    auto freq_factor = 2.0 / Utility::pow<2>(gamma) * std::sqrt(a / 8.0) * (avg_hD / gap);
     auto rod_mixing = (1 / Pr_t) * lamda;
     auto axial_mixing = a_x * z_FP_over_D * Str;
     // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
@@ -424,7 +267,7 @@ QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bo
 }
 
 Real
-QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
+QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz) const
 {
   // Compute axial location of nodes.
   auto z2 = _z_grid[iz];
@@ -461,7 +304,7 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
 }
 
 Real
-QuadSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch)
+QuadSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch) const
 {
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)

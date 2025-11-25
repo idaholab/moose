@@ -19,8 +19,6 @@ HSBoundarySpecifiedTemperature::validParams()
 
   params.addRequiredParam<FunctionName>("T", "Prescribed temperature [K]");
 
-  params.declareControllable("T");
-
   params.addClassDescription("Applies Dirichlet boundary conditions on a heat structure");
 
   return params;
@@ -43,6 +41,5 @@ HSBoundarySpecifiedTemperature::addMooseObjects()
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<FunctionName>("function") = _T_func;
     getTHMProblem().addBoundaryCondition(class_name, genName(name(), "bc"), pars);
-    makeFunctionControllableIfConstant(_T_func, "T");
   }
 }

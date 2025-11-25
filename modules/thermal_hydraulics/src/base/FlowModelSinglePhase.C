@@ -140,6 +140,24 @@ FlowModelSinglePhase::addTemperatureAux()
 }
 
 void
+FlowModelSinglePhase::addFunctorMaterials()
+{
+  {
+    const std::string class_name = "FlowModel1PhaseFunctorMaterial";
+    const std::string obj_name = genName(_comp_name, "fm1phase_fmat");
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
+    _sim.addFunctorMaterial(class_name, obj_name, params);
+  }
+
+  // nonlinear step functor materials for p, T, vel (for convergence checking)
+  const std::vector<std::string> vars{THM::PRESSURE, THM::TEMPERATURE, THM::VELOCITY};
+  for (const auto & var : vars)
+    addVariableStepFunctorMaterial(var);
+}
+
+void
 FlowModelSinglePhase::addFluidPropertiesMaterials()
 {
   {
@@ -218,4 +236,18 @@ FlowModelSinglePhase::addRDGAdvectionDGKernels()
   // energy
   params.set<NonlinearVariableName>("variable") = RHOEA;
   _sim.addDGKernel(class_name, genName(_comp_name, "energy_advection"), params);
+}
+
+void
+FlowModelSinglePhase::addPostprocessors()
+{
+  const std::vector<std::pair<std::string, Real>> var_norm_pairs{
+      {THM::PRESSURE, _p_ref}, {THM::TEMPERATURE, _T_ref}, {THM::VELOCITY, _vel_ref}};
+  for (const auto & var_norm_pair : var_norm_pairs)
+    addNormalizedVariableStepPP(var_norm_pair.first, var_norm_pair.second);
+
+  const std::vector<std::pair<std::string, std::string>> var_eq_pairs{
+      {THM::RHOA, "mass"}, {THM::RHOUA, "momentum"}, {THM::RHOEA, "energy"}};
+  for (const auto & var_eq_pair : var_eq_pairs)
+    addNormalized1PhaseResidualNorm(var_eq_pair.first, var_eq_pair.second);
 }

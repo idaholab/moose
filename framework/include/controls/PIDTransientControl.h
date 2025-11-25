@@ -28,6 +28,17 @@ public:
 
   virtual void execute() override;
 
+  /**
+   * Called once at the beginning of the simulation, used to initialize
+   * recovered control values
+   */
+  virtual void initialSetup() override;
+
+  /**
+   * Used to reset the PID when failing a timestep and the control is executed on timestep_end.
+   */
+  virtual void timestepSetup() override;
+
 private:
   /// The current value of the target postprocessor
   const PostprocessorValue & _current;

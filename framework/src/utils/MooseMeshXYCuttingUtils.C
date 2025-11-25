@@ -39,7 +39,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   auto bdry_side_list = boundary_info.build_side_list();
   // Only select the boundaries_to_conform
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> slc_bdry_side_list;
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
     if (std::get<2>(bdry_side_list[i]) == external_boundary_id ||
         std::find(other_boundaries_to_conform.begin(),
                   other_boundaries_to_conform.end(),
@@ -54,7 +54,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   {
     // Check all the vertices of the element
     unsigned short removal_side_count = 0;
-    for (unsigned int i = 0; i < (*elem_it)->n_vertices(); i++)
+    for (const auto i : make_range((*elem_it)->n_vertices()))
     {
       // First check if the vertex is on the XY-Plane
       if (!MooseUtils::absoluteFuzzyEqual((*elem_it)->point(i)(2), 0.0))
@@ -86,7 +86,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   for (const auto & elem_id : crossed_elems_to_remove)
   {
     bool remove_flag = true;
-    for (unsigned int i = 0; i < mesh.elem_ptr(elem_id)->n_sides(); i++)
+    for (const auto i : make_range(mesh.elem_ptr(elem_id)->n_sides()))
     {
       if (mesh.elem_ptr(elem_id)->neighbor_ptr(i) != nullptr)
         if (mesh.elem_ptr(elem_id)->neighbor_ptr(i)->subdomain_id() != block_id_to_remove &&
@@ -115,7 +115,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
        elem_it != mesh.active_subdomain_set_elements_end(subdomain_ids_set);
        elem_it++)
   {
-    for (unsigned int i = 0; i < (*elem_it)->n_sides(); i++)
+    for (const auto i : make_range((*elem_it)->n_sides()))
     {
       if ((*elem_it)->neighbor_ptr(i) != nullptr)
         if ((*elem_it)->neighbor_ptr(i)->subdomain_id() == block_id_to_remove)
@@ -136,7 +136,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   std::vector<bool> node_list_flag(node_list.size(), false);
   std::vector<Point> node_list_point(node_list.size(), Point(0.0, 0.0, 0.0));
   // Loop over all the selected sides
-  for (unsigned int i = 0; i < slc_bdry_side_list.size(); i++)
+  for (const auto i : index_range(slc_bdry_side_list))
   {
     // Get the two node ids of the side
     dof_id_type side_id_0 = mesh.elem_ptr(std::get<0>(slc_bdry_side_list[i]))
@@ -202,7 +202,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   }
 
   // move nodes
-  for (unsigned int i = 0; i < node_list.size(); i++)
+  for (const auto i : index_range(node_list))
   {
     // This means the node is on both the trimming boundary and the original external
     // boundary/selected interface boundaries. In order to keep the shape of the original external
@@ -237,7 +237,7 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   {
     if (MooseUtils::absoluteFuzzyEqual((*elem_it)->volume(), 0.0))
     {
-      for (unsigned int i = 0; i < (*elem_it)->n_sides(); i++)
+      for (const auto i : make_range((*elem_it)->n_sides()))
       {
         if ((*elem_it)->neighbor_ptr(i) != nullptr)
         {
@@ -258,6 +258,17 @@ lineRemoverMoveNode(ReplicatedMesh & mesh,
   // As we modified the side_list, it is safer to clear the node_list
   boundary_info.clear_boundary_node_ids();
   mesh.prepare_for_use();
+}
+
+bool
+pointOnLine(const Real px,
+            const Real py,
+            const Real param_1,
+            const Real param_2,
+            const Real param_3,
+            const Real dis_tol)
+{
+  return std::abs(px * param_1 + py * param_2 + param_3) <= dis_tol;
 }
 
 bool
@@ -375,7 +386,7 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
     auto pt1 = elem_0->node_ptr((std::get<1>(bad_elem) + 2) % elem_0->n_vertices());
     auto pt2 = elem_0->node_ptr((std::get<1>(bad_elem) + 3) % elem_0->n_vertices());
     // Record all the element extra integers of the degenerate element
-    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    for (const auto j : make_range(n_elem_extra_ids))
       exist_extra_ids[j] = elem_0->get_extra_integer(j);
     // Delete the degenerate QUAD element
     mesh.delete_elem(elem_0);
@@ -395,7 +406,7 @@ quasiTriElementsFixer(ReplicatedMesh & mesh,
     elem_Tri3->subdomain_id() = elem_block_id + tri_subdomain_id_shift;
     new_subdomain_ids.emplace(elem_block_id + tri_subdomain_id_shift);
     // Retain element extra integers
-    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    for (const auto j : make_range(n_elem_extra_ids))
       elem_Tri3->set_extra_integer(j, exist_extra_ids[j]);
   }
   // Assign subdomain names for the new TRI elements
@@ -425,7 +436,7 @@ vertex_angles(const Elem & elem)
   std::vector<std::pair<Real, unsigned int>> angles;
   const unsigned int n_vertices = elem.n_vertices();
 
-  for (unsigned int i = 0; i < n_vertices; i++)
+  for (const auto i : make_range(n_vertices))
   {
     Point v1 = (*elem.node_ptr((i - 1) % n_vertices) - *elem.node_ptr(i % n_vertices));
     Point v2 = (*elem.node_ptr((i + 1) % n_vertices) - *elem.node_ptr(i % n_vertices));
@@ -446,7 +457,7 @@ vertex_distances(const Elem & elem)
   std::vector<std::pair<Real, unsigned int>> distances;
   const unsigned int n_vertices = elem.n_vertices();
 
-  for (unsigned int i = 0; i < n_vertices; i++)
+  for (const auto i : make_range(n_vertices))
   {
     Point v1 = (*elem.node_ptr((i + 1) % n_vertices) - *elem.node_ptr(i % n_vertices));
     distances.push_back(std::make_pair(v1.norm(), i));
@@ -482,7 +493,7 @@ triElemSplitter(ReplicatedMesh & mesh,
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(3);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -494,7 +505,7 @@ triElemSplitter(ReplicatedMesh & mesh,
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
   // Record all the element extra integers of the original element
-  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  for (const auto j : make_range(n_elem_extra_ids))
     exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
 
   Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
@@ -513,7 +524,7 @@ triElemSplitter(ReplicatedMesh & mesh,
   elem_Tri3_2->set_node(2, mesh.node_ptr(nid_1));
   elem_Tri3_2->subdomain_id() = double_elem_side_id;
   // Retain element extra integers
-  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  for (const auto j : make_range(n_elem_extra_ids))
   {
     elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
     elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
@@ -553,7 +564,7 @@ triElemSplitter(ReplicatedMesh & mesh,
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(3);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -565,7 +576,7 @@ triElemSplitter(ReplicatedMesh & mesh,
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
   // Record all the element extra integers of the original element
-  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  for (const auto j : make_range(n_elem_extra_ids))
     exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
 
   Elem * elem_Tri3_0 = mesh.add_elem(new Tri3);
@@ -579,7 +590,7 @@ triElemSplitter(ReplicatedMesh & mesh,
   elem_Tri3_1->set_node(2, mesh.node_ptr(nid_2));
   elem_Tri3_1->subdomain_id() = second_elem_side_id;
   // Retain element extra integers
-  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  for (const auto j : make_range(n_elem_extra_ids))
   {
     elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
     elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
@@ -608,7 +619,7 @@ quadElemSplitter(ReplicatedMesh & mesh,
   // Create a list of sidesets involving the element to be split
   std::vector<std::vector<boundary_id_type>> elem_side_list;
   elem_side_list.resize(4);
-  for (unsigned int i = 0; i < bdry_side_list.size(); i++)
+  for (const auto i : index_range(bdry_side_list))
   {
     if (std::get<0>(bdry_side_list[i]) == elem_id)
     {
@@ -624,7 +635,7 @@ quadElemSplitter(ReplicatedMesh & mesh,
   const unsigned int n_elem_extra_ids = mesh.n_elem_integers();
   std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
   // Record all the element extra integers of the original quad element
-  for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+  for (const auto j : make_range(n_elem_extra_ids))
     exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
 
   // There are two trivial ways to split a quad element
@@ -645,7 +656,7 @@ quadElemSplitter(ReplicatedMesh & mesh,
     elem_Tri3_1->set_node(2, node_3);
     elem_Tri3_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
     // Retain element extra integers
-    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    for (const auto j : make_range(n_elem_extra_ids))
     {
       elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
       elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
@@ -674,7 +685,7 @@ quadElemSplitter(ReplicatedMesh & mesh,
     elem_Tri3_1->set_node(2, node_3);
     elem_Tri3_1->subdomain_id() = mesh.elem_ptr(elem_id)->subdomain_id() + tri_elem_subdomain_shift;
     // Retain element extra integers
-    for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+    for (const auto j : make_range(n_elem_extra_ids))
     {
       elem_Tri3_0->set_extra_integer(j, exist_extra_ids[j]);
       elem_Tri3_1->set_extra_integer(j, exist_extra_ids[j]);
@@ -707,18 +718,26 @@ quadToTriOnLine(ReplicatedMesh & mesh,
     if ((*elem_it)->n_vertices() == 4)
     {
       std::vector<unsigned short> node_side_rec;
-      for (unsigned int i = 0; i < 4; i++)
+      for (const auto i : make_range(4))
       {
         const Point v_point = (*elem_it)->point(i);
-        node_side_rec.push_back(lineSideDeterminator(v_point(0),
-                                                     v_point(1),
-                                                     cut_line_params[0],
-                                                     cut_line_params[1],
-                                                     cut_line_params[2],
-                                                     true));
+        if (!pointOnLine(
+                v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2]))
+          node_side_rec.push_back(lineSideDeterminator(v_point(0),
+                                                       v_point(1),
+                                                       cut_line_params[0],
+                                                       cut_line_params[1],
+                                                       cut_line_params[2],
+                                                       true));
       }
-      if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) != 4 &&
-          std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) > 0)
+      // This counts the booleans in node_side_rec, which does not include nodes
+      // that are exactly on the line (these nodes are excluded from the
+      // decision). In this case, num_nodes node lie on one side of the line and
+      // node_side_rec.size() - n_nodes lie on the other side. In the case that
+      // there are nodes on both sides of the line, we mark the element for
+      // conversion.
+      const auto num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+      if (num_nodes != (int)node_side_rec.size() && num_nodes > 0)
       {
         cross_elems_quad.push_back((*elem_it)->id());
         new_subdomain_ids.emplace((*elem_it)->subdomain_id() + tri_subdomain_id_shift);
@@ -766,31 +785,46 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
   for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
        elem_it++)
   {
-    std::vector<unsigned short> node_side_rec;
     const auto n_vertices = (*elem_it)->n_vertices();
-    node_side_rec.resize(n_vertices);
-    for (unsigned int i = 0; i < n_vertices; i++)
+    unsigned int n_points_on_line = 0;
+    std::vector<unsigned short> node_side_rec(n_vertices, 0);
+    for (const auto i : make_range(n_vertices))
     {
       // First check if the vertex is in the XY Plane
       if (!MooseUtils::absoluteFuzzyEqual((*elem_it)->point(i)(2), 0.0))
         mooseError("MooseMeshXYCuttingUtils::lineRemoverCutElemTri() only works for 2D meshes in "
                    "XY Plane.");
       const Point v_point = (*elem_it)->point(i);
-      node_side_rec[i] = lineSideDeterminator(
-          v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2], true);
+      if (pointOnLine(
+              v_point(0), v_point(1), cut_line_params[0], cut_line_params[1], cut_line_params[2]))
+        ++n_points_on_line;
+      else
+        node_side_rec[i] = lineSideDeterminator(v_point(0),
+                                                v_point(1),
+                                                cut_line_params[0],
+                                                cut_line_params[1],
+                                                cut_line_params[2],
+                                                true);
     }
-    if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) == (int)node_side_rec.size())
+    // This counts the booleans in node_side_rec, which does not include nodes
+    // that are exactly on the line (these nodes are excluded from the
+    // decision). In this case, num_nodes node lie on one side of the line and
+    // node_side_rec.size() - n_nodes lie on the other side. In the case that
+    // there are nodes on both sides of the line, we mark the element for
+    // removal.
+    const unsigned int num_nodes = std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0);
+    if (num_nodes == node_side_rec.size() - n_points_on_line)
     {
       (*elem_it)->subdomain_id() = block_id_to_remove;
     }
-    else if (std::accumulate(node_side_rec.begin(), node_side_rec.end(), 0) > 0)
+    else if (num_nodes > 0)
     {
       if ((*elem_it)->n_vertices() != 3 || (*elem_it)->n_nodes() != 3)
         mooseError("The element across the cutting line is not TRI3, which is not supported.");
       cross_elems.push_back((*elem_it)->id());
       // Then we need to check pairs of nodes that are on the different side
       std::vector<std::pair<dof_id_type, dof_id_type>> node_pairs;
-      for (unsigned int i = 0; i < node_side_rec.size(); i++)
+      for (const auto i : index_range(node_side_rec))
       {
         // first node on removal side and second node on retaining side
         if (node_side_rec[i] > 0 && node_side_rec[(i + 1) % node_side_rec.size()] == 0)
@@ -845,7 +879,7 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
   }
 
   // make new elements
-  for (unsigned int i = 0; i < cross_elems.size(); i++)
+  for (const auto i : index_range(cross_elems))
   {
     // Only TRI elements are involved after preprocessing
     auto cross_elem = mesh.elem_ptr(cross_elems[i]);
@@ -941,7 +975,7 @@ lineRemoverCutElemTri(ReplicatedMesh & mesh,
   {
     if ((*elem_it)->subdomain_id() != block_id_to_remove)
     {
-      for (unsigned int j = 0; j < (*elem_it)->n_sides(); j++)
+      for (const auto j : make_range((*elem_it)->n_sides()))
       {
         if ((*elem_it)->neighbor_ptr(j) != nullptr)
           if ((*elem_it)->neighbor_ptr(j)->subdomain_id() == block_id_to_remove)
@@ -1039,7 +1073,7 @@ boundaryTriElemImprover(ReplicatedMesh & mesh, const boundary_id_type boundary_t
     {
       std::vector<dof_id_type> exist_extra_ids(n_elem_extra_ids);
       // Record all the element extra integers of the original quad element
-      for (unsigned int j = 0; j < n_elem_extra_ids; j++)
+      for (const auto j : make_range(n_elem_extra_ids))
         exist_extra_ids[j] = mesh.elem_ptr(elem_id)->get_extra_integer(j);
       if (!blocks_info.empty())
       {
@@ -1205,7 +1239,7 @@ makeImprovedTriElement(ReplicatedMesh & mesh,
     boundary_info.add_side(elem_Tri3_new, 2, boundary_id_for_side_2);
   elem_Tri3_new->subdomain_id() = subdomain_id;
   // Retain element extra integers
-  for (unsigned int j = 0; j < extra_elem_ids.size(); j++)
+  for (const auto j : index_range(extra_elem_ids))
   {
     elem_Tri3_new->set_extra_integer(j, extra_elem_ids[j]);
   }

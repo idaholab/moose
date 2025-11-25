@@ -99,6 +99,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [displacement]
     block = subchannel
   []
+  [ff]
+    block = subchannel
+  []
 []
 
 [FluidProperties]
@@ -124,6 +127,14 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
   # Heat Transfer Correlations
   pin_htc_correlation = 'gnielinski'
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

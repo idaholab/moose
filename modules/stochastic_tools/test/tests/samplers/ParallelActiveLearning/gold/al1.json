@@ -1,0 +1,233 @@
+{
+    "reporters": {
+        "conditional": {
+            "type": "GenericActiveLearner",
+            "values": {
+                "acquisition_function": {
+                    "type": "std::vector<double>"
+                },
+                "convergence_value": {
+                    "type": "double"
+                },
+                "inputs": {
+                    "type": "std::vector<std::vector<double>>"
+                },
+                "outputs_required": {
+                    "type": "std::vector<double>"
+                },
+                "sorted_indices": {
+                    "type": "std::vector<unsigned int>"
+                }
+            }
+        },
+        "constant": {
+            "type": "StochasticReporter",
+            "values": {
+                "reporter_transfer:average:value": {
+                    "row_begin": 0,
+                    "row_end": 5,
+                    "type": "std::vector<double>"
+                },
+                "reporter_transfer:converged": {
+                    "row_begin": 0,
+                    "row_end": 5,
+                    "type": "std::vector<bool>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "conditional": {
+                "acquisition_function": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "convergence_value": 0.0,
+                "inputs": [
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "outputs_required": [],
+                "sorted_indices": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "reporter_transfer:converged": [
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "conditional": {
+                "acquisition_function": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "convergence_value": 0.0,
+                "inputs": [
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "outputs_required": [
+                    0.09743591614083164,
+                    0.09743591614083164,
+                    0.09743591614083164,
+                    0.09743591614083164,
+                    0.09743591614083164
+                ],
+                "sorted_indices": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.09743591614083164,
+                    0.09743591614083164,
+                    0.09743591614083164,
+                    0.09743591614083164,
+                    0.09743591614083164
+                ],
+                "reporter_transfer:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "conditional": {
+                "acquisition_function": [
+                    0.880003453689369,
+                    0.06877714352653368,
+                    0.004879013283779068,
+                    0.00019856986260207598,
+                    7.714849959128395e-06
+                ],
+                "convergence_value": 0.0,
+                "inputs": [
+                    [
+                        -0.1728951952590474,
+                        -1.4827864696269715
+                    ],
+                    [
+                        1.505430405644662,
+                        -0.34138959298799554
+                    ],
+                    [
+                        -0.5407859557813479,
+                        -0.007195484352319648
+                    ],
+                    [
+                        1.1523452319961422,
+                        0.8726250563958882
+                    ],
+                    [
+                        0.19342047606068702,
+                        0.1385140924194408
+                    ]
+                ],
+                "outputs_required": [
+                    -0.8066142992798495,
+                    0.567096915033261,
+                    -0.26696536823823575,
+                    0.9865241760366078,
+                    0.16171174389327628
+                ],
+                "sorted_indices": [
+                    69,
+                    316,
+                    435,
+                    190,
+                    553
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    -0.8066142992798495,
+                    0.567096915033261,
+                    -0.26696536823823575,
+                    0.9865241760366078,
+                    0.16171174389327628
+                ],
+                "reporter_transfer:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

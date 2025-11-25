@@ -24,6 +24,11 @@ the following parameters:
 - [!param](/Components/FlowChannel1Phase/initial_T)
 - [!param](/Components/FlowChannel1Phase/initial_vel)
 
+This component offers options to output quantities via vector post-processors:
+
+- [!param](/Components/FlowChannel1Phase/vpp_vars): Creates an [ElementValueSampler.md] with a vector for each of the listed variables (see below for a list of variables).
+- [!param](/Components/FlowChannel1Phase/create_flux_vpp): Creates a [NumericalFlux3EqnInternalValues.md], which creates a vector for each numerical flux component (mass, momentum, energy) at the internal sides.
+
 !syntax parameters /Components/FlowChannel1Phase
 
 ## Mesh id=mesh
@@ -94,6 +99,21 @@ The following material properties are created on the flow channel:
 ## Formulation
 
 See [!cite](relap7theory) for a description of the single-phase flow formulation.
+
+## Convergence
+
+If using [ComponentsConvergence.md], a Convergence object of type [FlowChannel1PhaseConvergence.md]
+is used. The following parameters apply:
+
+- [!param](/Components/FlowChannel1Phase/p_ref): The reference pressure $p_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/T_ref): The reference pressure $T_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/vel_ref): The reference pressure $u_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/p_rel_step_tol): The relative step tolerance for pressure $\tau_p$,
+- [!param](/Components/FlowChannel1Phase/T_rel_step_tol): The relative step tolerance for temperature $\tau_T$,
+- [!param](/Components/FlowChannel1Phase/vel_rel_step_tol): The relative step tolerance for velocity $\tau_u$,
+- [!param](/Components/FlowChannel1Phase/mass_res_tol): The mass residual tolerance $\tau_\text{mass}$,
+- [!param](/Components/FlowChannel1Phase/momentum_res_tol): The momentum residual tolerance $\tau_\text{momentum}$,
+- [!param](/Components/FlowChannel1Phase/energy_res_tol): The energy residual tolerance $\tau_\text{energy}$,
 
 !syntax inputs /Components/FlowChannel1Phase
 

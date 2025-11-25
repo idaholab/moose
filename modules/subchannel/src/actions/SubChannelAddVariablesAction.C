@@ -12,6 +12,7 @@
 #include "ActionFactory.h"
 #include "AddAuxVariableAction.h"
 #include "SubChannelApp.h"
+#include <string_view>
 
 registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "meta_action");
 
@@ -48,7 +49,8 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::DUCT_TEMPERATURE,
                                         SubChannelApp::DENSITY,
                                         SubChannelApp::VISCOSITY,
-                                        SubChannelApp::DISPLACEMENT};
+                                        SubChannelApp::DISPLACEMENT,
+                                        SubChannelApp::FRICTION_FACTOR};
 
   // Get a list of the already existing AddAuxVariableAction
   const auto & aux_actions = _awh.getActions<AddAuxVariableAction>();

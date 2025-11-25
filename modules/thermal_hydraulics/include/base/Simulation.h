@@ -114,7 +114,7 @@ public:
   /**
    * Return list of components available in the simulation
    */
-  const std::vector<std::shared_ptr<Component>> & getComponents() { return _components; }
+  const std::vector<std::shared_ptr<Component>> & getComponents() const { return _components; }
 
   /**
    * Add a closures object into this simulation

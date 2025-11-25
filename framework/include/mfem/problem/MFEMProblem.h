@@ -115,6 +115,34 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Adds a real component kernel to the parent MFEMComplexKernel.
+   */
+  void addRealComponentToKernel(const std::string & kernel_name,
+                                const std::string & name,
+                                InputParameters & parameters);
+
+  /**
+   * Adds an imaginary component kernel to the parent MFEMComplexKernel.
+   */
+  void addImagComponentToKernel(const std::string & kernel_name,
+                                const std::string & name,
+                                InputParameters & parameters);
+
+  /**
+   * Adds a real component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addRealComponentToBC(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters);
+
+  /**
+   * Adds an imaginary component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addImagComponentToBC(const std::string & kernel_name,
+                            const std::string & name,
+                            InputParameters & parameters);
+
+  /**
    * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
@@ -192,6 +220,20 @@ public:
   MPI_Comm getComm() { return getProblemData().comm; }
 
   /**
+   * Return the ParMesh associated with a particular variable.
+   */
+  const mfem::ParMesh & getMFEMVariableMesh(std::string var_name)
+  {
+    if (_problem_data.gridfunctions.Has(var_name))
+      return *_problem_data.gridfunctions.Get(var_name)->ParFESpace()->GetParMesh();
+    else if (_problem_data.cmplx_gridfunctions.Has(var_name))
+      return *_problem_data.cmplx_gridfunctions.Get(var_name)->ParFESpace()->GetParMesh();
+    else
+      mooseError("Variable " + var_name +
+                 " not found in MFEMProblem real or complex gridfunctions.");
+  }
+
+  /**
    * Displace the mesh, if mesh displacement is enabled.
    */
   void displaceMesh();
@@ -210,6 +252,14 @@ public:
    * @returns a shared pointer to an MFEM parallel grid function
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
+
+  enum class NumericType
+  {
+    REAL,
+    COMPLEX
+  };
+
+  NumericType num_type;
 
 protected:
   MFEMProblemData _problem_data;

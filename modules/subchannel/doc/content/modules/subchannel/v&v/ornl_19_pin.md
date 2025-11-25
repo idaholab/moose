@@ -81,12 +81,6 @@ For more information about the mesh generator, pelase consult the website docume
 
 !listing /validation/ORNL_19_pin/ORNL_19.i block=TriSubChannelMesh language=moose
 
-### Variables
-
-This block defines the subchannel variables for the SCM solve. This block is not necessary for the solver to run.
-
-!listing /validation/ORNL_19_pin/ORNL_19.i block=AuxVariables language=moose
-
 ### FluidProperties
 
 The FluidProperties block specifies the thermophysical properties used in the SCM solve.
@@ -94,16 +88,16 @@ Sodium properties are used in this case.
 
 !listing /validation/ORNL_19_pin/ORNL_19.i block=FluidProperties language=moose
 
-### Problem
+### Problem / SubChannel
 
-The problem type specifies the solver to be used in the SCM solve.
+The Problem/SubChannel type specifies the solver to be used in the SCM solve.
 The type of problem used in this case is a liquid metal subchannel problem that uses sodium fluid properties.
 The parameters *beta* and *C_T* are used are used to model the crossflow and cross enthalpy-fluxes.
 Different solve procedures can be applied.
 In this case, we use an explicit, segragated solve.
-For more information about the mesh generator, pelase consult the website documentation on SCM.
+For more information about the mesh generator, please consult the website documentation on SCM. With Problem the user must input the variables in the AuxVariables block, with SubChannel the AuxVariables are defined automatically.
 
-!listing /validation/ORNL_19_pin/ORNL_19.i block=Problem language=moose
+!listing /validation/ORNL_19_pin/ORNL_19.i block=SubChannel language=moose
 
 ### Initial Conditions
 

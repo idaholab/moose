@@ -38,12 +38,33 @@
     []
   []
 
+  [output_vpps]
+    type = CSVDiff
+    input = 'output_vpps.i'
+    csvdiff = 'output_vpps_out_pipe_vars_vpp_0002.csv output_vpps_out_pipe_flux_vpp_0002.csv'
+    rel_err = 1e-6
+    requirement = 'The system shall be able to simulate a single-phase flow channel and output quantities to a CSV file.'
+  []
+
+  [components_convergence]
+    type = RunApp
+    input = 'components_convergence.i'
+    requirement = 'The system shall allow component-wise convergence criteria to be used.'
+  []
+
   # error checking
   [err:wrong_fp]
     type = 'RunException'
     input = 'err.wrong_fp.i'
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
     requirement = 'The system shall report an error if fluid properties are not single-phase.'
+  []
+  [err:components_convergence_scaling]
+    type = RunException
+    input = 'components_convergence.i'
+    cli_args = "Components/pipe/scaling_factor_1phase='1 1 1e-5'"
+    expect_err = "pipe: When using ComponentsConvergence, 'scaling_factor_1phase' must be set to '1 1 1'"
+    requirement = 'The system shall report an error if non-unity scaling factors are used with the component convergence object.'
   []
 
   [jacobian]

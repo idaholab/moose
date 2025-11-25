@@ -18,7 +18,7 @@ import getpass
 import argparse
 import typing
 from collections import defaultdict, namedtuple, OrderedDict
-from typing import Any, Tuple
+from typing import Tuple, Optional
 
 from socket import gethostname
 
@@ -224,9 +224,11 @@ class TestHarness:
     # 2 - Added 'abs_zero' key to ValidationNumericData
     VALIDATION_VERSION = 2
 
+    __test__ = False  # prevents pytest collection
+
     @staticmethod
-    def build(argv: list, app_name: str, moose_dir: str, moose_python: str = None,
-              skip_testroot: bool = False) -> None:
+    def build(argv: list, app_name: str, moose_dir: str, moose_python: Optional[str] = None,
+              skip_testroot: bool = False) -> "TestHarness":
         # Cannot skip the testroot if we don't have an application name
         if skip_testroot and not app_name:
             raise ValueError(f'Must provide "app_name" when skip_testroot=True')

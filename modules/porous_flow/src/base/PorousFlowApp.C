@@ -55,6 +55,8 @@ PorousFlowApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   Registry::registerObjectsTo(f, {"PorousFlowApp"});
   Registry::registerActionsTo(af, {"PorousFlowApp"});
 
+  registerSyntax("CoupledInjectionProductionPhysics", "Physics/CoupledInjectionProduction/*");
+
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_user_object");
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_kernel");
   registerSyntaxTask("PorousFlowUnsaturated", "PorousFlowUnsaturated", "add_material");

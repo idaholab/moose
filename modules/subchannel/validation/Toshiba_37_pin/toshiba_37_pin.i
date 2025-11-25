@@ -18,40 +18,13 @@ P_out = 2.0e5 # Pa
   []
 []
 
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-  [mu]
-  []
-  [displacement]
-  []
-[]
-
 [FluidProperties]
   [sodium]
     type = PBSodiumFluidProperties
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
@@ -67,6 +40,14 @@ P_out = 2.0e5 # Pa
   staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

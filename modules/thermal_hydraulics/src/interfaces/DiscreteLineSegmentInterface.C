@@ -37,6 +37,7 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
     _rotation(moose_object->parameters().get<Real>("rotation")),
     _lengths(moose_object->parameters().get<std::vector<Real>>("length")),
     _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
+    _end_point(_position + _dir * _length),
     _n_elems(moose_object->parameters().get<std::vector<unsigned int>>("n_elems")),
     _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
     _n_sections(_lengths.size()),
@@ -56,9 +57,11 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
   // Compute the axial coordinates of the centers of each element
   unsigned int k_section_begin = 0;
   Real x_begin = 0.0;
+  _dx_min = std::numeric_limits<Real>::max();
   for (unsigned int j = 0; j < _n_sections; j++)
   {
     const Real dx = _lengths[j] / _n_elems[j];
+    _dx_min = std::min(dx, _dx_min);
     for (unsigned int i = 0; i < _n_elems[j]; i++)
     {
       const unsigned int k = k_section_begin + i;

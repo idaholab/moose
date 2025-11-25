@@ -72,6 +72,10 @@ protected:
   virtual void addSpecificInternalEnergyAux();
   virtual void addSpecificTotalEnthalpyAux();
 
+  /// Adds the functor materials
+  virtual void addFunctorMaterials() {}
+  void addVariableStepFunctorMaterial(const std::string & variable);
+
   /// Adds materials to compute fluid properties
   virtual void addFluidPropertiesMaterials() = 0;
 
@@ -84,9 +88,24 @@ protected:
   /// Adds DG kernels
   virtual void addRDGAdvectionDGKernels() = 0;
 
+  /// Adds post-processors
+  virtual void addPostprocessors() {}
+  void addNormalizedVariableStepPP(const std::string & variable, Real normalization);
+  void addNormalized1PhaseResidualNorm(const VariableName & variable, const std::string & equation);
+
   /// Slope reconstruction type for rDG
   const MooseEnum _rdg_slope_reconstruction;
 
   /// Numerical flux user object name
   const UserObjectName _numerical_flux_name;
+
+  // Reference quantities for normalization
+  const Real _p_ref;
+  const Real _T_ref;
+  const Real _vel_ref;
+
+  // Flow channel start, end, and mid points
+  const Point _start_point;
+  const Point _end_point;
+  const Point _mid_point;
 };

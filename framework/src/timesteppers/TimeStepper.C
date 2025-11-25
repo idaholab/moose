@@ -54,6 +54,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _cutback_factor_at_failure(getParam<Real>("cutback_factor_at_failure")),
     _reset_dt(getParam<bool>("reset_dt")),
     _has_reset_dt(false),
+    _currently_restepping(false),
     _failure_count(0),
     _current_dt(declareRestartableData<Real>("current_dt", 1.0))
 {
@@ -179,11 +180,14 @@ TimeStepper::acceptStep()
   {
     _sync_times.erase(_sync_times.begin());
   }
+  // If we accept a step, we are no longer taking a failed step again
+  _currently_restepping = false;
 }
 
 void
 TimeStepper::rejectStep()
 {
+  _currently_restepping = true;
   _fe_problem.restoreSolutions();
 }
 

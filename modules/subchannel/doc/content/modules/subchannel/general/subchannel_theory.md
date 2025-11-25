@@ -76,15 +76,15 @@ where $K_{ij}$ is an overall loss coefficient encompassing lateral concentrated 
 
 ### Friction factor
 
-The default friction factor for assemblies with bare pins in a quadrilateral lattice [!cite](KIT) is presented below.
+The MATRA based friction factor for assemblies with bare pins in a quadrilateral lattice [!cite](KIT) is presented below.
 
 \begin{equation}
 f_w \rightarrow
 \begin{cases}
-\frac{1}{64} , & Re < 1\\
+64, & Re < 1\\
 \frac{64}{Re}, &1 \leq Re<5000\\
 0.316 Re^{-0.25}, &5000 \leq Re < 30000\\
-0.184 Re^{-0.20}, &30000 \leq Re
+0.184 Re^{-0.20}, &30000 \leq Re < 1e6
 \end{cases}
 \end{equation}
 

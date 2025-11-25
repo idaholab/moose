@@ -9,160 +9,242 @@
 
 """Implements ResultsReader for reading results from a database."""
 
-from typing import Iterator, Optional
+from dataclasses import dataclass
+from typing import Any, Iterator, Optional
 
 import pymongo
 from bson.objectid import ObjectId
+from pymongo.database import Database
 
 from TestHarness.resultsstore.auth import (
     Authentication,
-    has_authentication,
     load_authentication,
 )
-from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
+from TestHarness.resultsstore.resultcollection import (
+    ResultCollection,
+    ResultsCollection,
+)
+from TestHarness.resultsstore.storedresult import StoredResult
 
 NoneType = type(None)
+
+
+@dataclass(frozen=True)
+class ResultsReaderContextManager:
+    """Storage for the ResultsReader context manager."""
+
+    reader: "ResultsReader"
 
 
 class ResultsReader:
     """Utility for reading test harness results stored in a mongodb database."""
 
     # Default sort ID from mongo
-    mongo_sort_id = sort = [("_id", pymongo.DESCENDING)]
+    mongo_sort_id = [("_id", pymongo.DESCENDING)]
 
     def __init__(
         self,
-        database: str,
-        client: Optional[pymongo.MongoClient | Authentication] = None,
+        database_name: str,
+        client: Optional[pymongo.MongoClient] = None,
+        authentication: Optional[Authentication] = None,
+        check: bool = True,
+        timeout: float = 5.0,
+        close_client: bool = True,
     ):
         """
         Initialize the reader.
 
         Parameters
         ----------
-        database : str
+        database_name : str
             The name of the database to connect to.
 
         Optional parameters
         -------------------
-        client : Optional[pymongo.MongoClient | Authentication]
+        client : Optional[pymongo.MongoClient]
             The client to use or authentication to connect with.
+        authentication : Optional[Authentication]
+            Authentication to use to create a client; otherwise search the env.
+        check : bool
+            Whether or not to validate result data types (default = True).
+        timeout : Number
+            Timeout time in seconds for interacting with the database.
+        close_client : bool
+            Whether or not to close the client automatically.
 
         """
-        assert isinstance(database, str)
+        assert isinstance(database_name, str)
+        assert isinstance(authentication, (type(None), Authentication))
 
-        # No client; test the environment
+        # The name of the database
+        self._database_name: str = database_name
+        # Whether or not to validate result data types on build
+        self._check = check
+        # Timeout time in seconds for database calls
+        self._timeout = float(timeout)
+        # Whether or not to close the client automatically
+        self._close_client: bool = close_client
+
+        # The mongo client, setup on first use
+        self._client: Optional[pymongo.MongoClient] = None
+        # The mongo database, setup on first use
+        self._database: Optional[Database] = None
+        # The authentication for when we don't have a client
+        self._authentication: Optional[Authentication] = authentication
+
+        # No client, load from the environment
         if client is None:
-            client = self.loadEnvironmentAuthentication()
-            if client is None:
-                raise ValueError(
-                    "Must specify either 'client' or set RESULTS_READER_AUTH_FILE "
-                    "with credentials"
-                )
-        if isinstance(client, pymongo.MongoClient):
-            self._client = client
-        elif isinstance(client, Authentication):
-            self._client = pymongo.MongoClient(
-                client.host, username=client.username, password=client.password
+            auth = (
+                authentication
+                if authentication is not None
+                else self.load_authentication()
             )
+            if auth is None:
+                raise ValueError(
+                    "Must specify either 'client', 'authentication' or set "
+                    "environment authentication with the RESULTS_READER_ prefix"
+                )
+            self._authentication = auth
+        # Passed an authentication, use it intead
+        # Passed a client directly
+        elif isinstance(client, pymongo.MongoClient):
+            self._client = client
+        # Unknown type
         else:
             raise TypeError("Invalid type for 'client'")
 
-        # Get the database
-        if database not in self._client.list_database_names():
-            raise ValueError(f"Database {database} not found")
-        self._db = self._client.get_database(database)
-
         # Cached results, by ID
         self._results: dict[ObjectId, Optional[StoredResult]] = {}
-        # Cached results by PR number
-        self._pr_num_results: dict[int, Optional[StoredResult]] = {}
-        # Cached results by event ID
-        self._event_id_results: dict[int, Optional[StoredResult]] = {}
-        # Cached results by commit
-        self._event_sha_results: dict[str, Optional[StoredResult]] = {}
+        # Cached results by type
+        self._cached_results: dict[str, dict[Any, Optional[StoredResult]]] = {
+            "pr_num": {},
+            "event_id": {},
+            "event_sha": {},
+            "_id": {},
+        }
 
         # Cached StoredResult objects for push events, latest to oldest
         self._latest_push_results: list[StoredResult] = []
         # The last push event that we searched
         self._last_latest_push_event_id: Optional[ObjectId] = None
+        # The final push event that was found
+        self._found_final_push_event: bool = False
 
     def __del__(self):
         """Clean up the client if it is loaded."""
-        if self._client is not None:
-            self._client.close()
+        self.close()
+
+    def __enter__(self) -> ResultsReaderContextManager:
+        """
+        Enter a context manager for the ResultsReader.
+
+        Will cleanup the client on exit.
+        """
+        return ResultsReaderContextManager(reader=self)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        """
+        Exit for the context manager.
+
+        Will cleanup the client if it exists.
+        """
+        self.close()
 
     @staticmethod
-    def loadEnvironmentAuthentication() -> Optional[Authentication]:
+    def load_authentication() -> Optional[Authentication]:
         """Attempt to load the authentication environment."""
         return load_authentication("RESULTS_READER")
 
-    @staticmethod
-    def hasEnvironmentAuthentication() -> bool:
-        """Check whether or not environment authentication is available."""
-        return has_authentication("RESULTS_READER")
+    @property
+    def check(self) -> bool:
+        """Whether or not to validate data types on build."""
+        return self._check
 
-    def getTestResults(
-        self,
-        folder_name: str,
-        test_name: str,
-        limit: int = 50,
-        pr_num: Optional[int] = None,
-    ) -> list[StoredTestResult]:
+    def get_client(self) -> pymongo.MongoClient:
         """
-        Get the StoredTestResults given a specific test.
+        Get the pymongo client.
 
-        Args:
-            folder_name: The folder name for the test
-            test_name: The test name for the test
-        Optional args:
-            limit: The limit in the number of results to get
-            pr_num: A pull request to also pull from
-
+        On first call this will setup the client if not already.
         """
-        test_results: list[StoredTestResult] = []
+        if self._client is None:
+            auth = self._authentication
+            assert isinstance(auth, Authentication)
+            self._client = pymongo.MongoClient(
+                auth.host,
+                username=auth.username,
+                password=auth.password,
+                port=auth.port,
+                timeoutMS=self._timeout * 1000,
+            )
+        return self._client
 
-        # Append the PR result at the top, if any
-        if pr_num is not None:
-            pr_result = self.getPRResults(pr_num)
-            if pr_result is not None and pr_result.has_test(folder_name, test_name):
-                test_results.append(pr_result.get_test(folder_name, test_name))
-
-        # Get the event results, limited to limit or
-        # (limit - 1) if we have a PR
-        num = limit - len(test_results)
-        for result in self.iterateLatestPushResults(num):
-            if result.has_test(folder_name, test_name):
-                test_result = result.get_test(folder_name, test_name)
-                test_results.append(test_result)
-            if len(test_results) == limit:
-                break
-
-        return test_results
-
-    def _findResults(self, *args, **kwargs) -> list[dict]:
+    def get_database(self) -> Database:
         """
-        Query the results database collection.
+        Get the pymongo database.
 
-        Used so that it can be easily mocked in unit tests.
+        On first call this will query the database from the client
+        and start the connection.
         """
-        kwargs["sort"] = self.mongo_sort_id
-        with self._db.results.find(*args, **kwargs) as cursor:
+        if self._database is None:
+            self._database = self.get_client().get_database(self._database_name)
+        assert isinstance(self._database, Database)
+        return self._database
+
+    def close(self):
+        """Close the database connection if it exists and requested to close."""
+        if self._close_client and self._client is not None:
+            self._client.close()
+
+    def _find_results(self, filter: dict, limit: Optional[int]) -> list[dict]:
+        """
+        Perform a find in the results collection, without the tests key.
+
+        Does not get data in the "tests" key.
+        """
+        assert isinstance(filter, dict)
+        assert isinstance(limit, (type(None), int))
+
+        kwargs = {}
+        if limit is not None:
+            kwargs["limit"] = limit
+
+        with self.get_database().results.find(
+            filter, {"tests": 0}, sort=self.mongo_sort_id, **kwargs
+        ) as cursor:
             return [d for d in cursor]
 
-    def getLatestPushResults(self, num: int) -> list[StoredResult]:
-        """Get the latest results from push events, newest to oldest."""
-        assert isinstance(num, int)
-        assert num > 0
+    def _aggregate_results(self, pipeline: list[dict]) -> list[dict]:
+        """
+        Perform an aggregation in the results collection.
 
-        results = []
-        for result in self.iterateLatestPushResults(num=num):
-            results.append(result)
-            if len(results) == num:
-                break
-        return results
+        Does not get data in the "tests" key.
+        """
+        assert isinstance(pipeline, list)
 
-    def iterateLatestPushResults(
+        with self.get_database().results.aggregate(pipeline) as cursor:
+            return [d for d in cursor]
+
+    def _build_result(self, data: dict) -> StoredResult:
+        """Build a result given its data and store in the cache."""
+        assert isinstance(data, dict)
+
+        id = data.get("_id")
+        assert isinstance(id, ObjectId)
+
+        result = self._results.get(id)
+        if result is None:
+            try:
+                result = StoredResult(
+                    data,
+                    check=self.check,
+                )
+            except Exception as e:
+                raise ValueError(f"Failed to build result _id={id}") from e
+            self._results[id] = result
+
+        return result
+
+    def latest_push_results_iterator(
         self, num: Optional[int] = None
     ) -> Iterator[StoredResult]:
         """
@@ -183,16 +265,63 @@ class ResultsReader:
 
         i = 0
 
+        # TODO: Eventually this pipeline could become very large.
+        # We could update all old data to set event_id, or
+        # we could do multiple queries
+        def get_pipeline(batch_size):
+            return [
+                # Older than the last ID (if any) and only on push
+                {
+                    "$match": {
+                        **(
+                            {"_id": {"$lt": self._last_latest_push_event_id}}
+                            if self._last_latest_push_event_id is not None
+                            else {}
+                        ),
+                        "event_cause": {"$ne": "pr"},
+                    }
+                },
+                # Ignore tests entry
+                {"$project": {"tests": 0}},
+                # Separate results with and without event ID
+                {
+                    "$facet": {
+                        # Only allow one (latest) result per event ID
+                        "with_event_id": [
+                            {"$match": {"event_id": {"$exists": True}}},
+                            {"$sort": {"_id": -1}},
+                            {
+                                "$group": {
+                                    "_id": "$event_id",
+                                    "doc": {"$first": "$$ROOT"},
+                                }
+                            },
+                            {"$replaceRoot": {"newRoot": "$doc"}},
+                        ],
+                        "no_event_id": [
+                            {"$match": {"event_id": {"$exists": False}}},
+                            {"$sort": {"_id": -1}},
+                        ],
+                    },
+                },
+                # Combine results with and without ID
+                {
+                    "$project": {
+                        "docs": {"$concatArrays": ["$with_event_id", "$no_event_id"]}
+                    }
+                },
+                {"$unwind": "$docs"},
+                {"$replaceRoot": {"newRoot": "$docs"}},
+                # Final sort on latest
+                {"$sort": {"_id": -1}},
+                # Limit to size
+                {"$limit": batch_size},
+            ]
+
         while True:
             # At end of cache, pull more results
-            if i == len(self._latest_push_results):
-                # Searching for only events
-                filter = {"event_cause": {"$ne": "pr"}}
-                # Only search past what we've searched so far
-                if self._last_latest_push_event_id is not None:
-                    filter["_id"] = {"$lt": self._last_latest_push_event_id}
-
-                cursor = self._findResults(filter, limit=batch_size)
+            if i == len(self._latest_push_results) and not self._found_final_push_event:
+                docs = self._aggregate_results(get_pipeline(batch_size))
 
                 # After the first batch size (could be set by num),
                 # only pull one at a time. We should only ever
@@ -201,85 +330,99 @@ class ResultsReader:
                 if isinstance(num, int):
                     batch_size = 1
 
-                for data in cursor:
-                    id = data.get("_id")
-                    assert isinstance(id, ObjectId)
+                built_results = [self._build_result(doc) for doc in docs]
+                self._latest_push_results += built_results
+                if built_results:
+                    self._last_latest_push_event_id = built_results[-1].id
 
-                    # So that we know where to search next time
-                    self._last_latest_push_event_id = id
-
-                    # Due to invalidation, we could have multiple results
-                    # from the same event. If we already have this event
-                    # (the latest version of it), skip this one
-                    event_id = data.get("event_id")
-                    if event_id is not None and any(
-                        r.event_id == event_id for r in self._latest_push_results
-                    ):
-                        continue
-
-                    # Build/get the result and store it for future use
-                    result = self._buildResults(data)
-                    self._latest_push_results.append(result)
-
+            # Have a shared result to yield
             if i < len(self._latest_push_results):
-                yield self._latest_push_results[i]
+                result = self._latest_push_results[i]
+
+                # Make sure IDs are decreasing
+                if i > 1:
+                    assert result.id < self._latest_push_results[i - 1].id
+
+                yield result
                 i += 1
+            # No more results, and we didn't find any more
             else:
+                self._found_final_push_event = True
                 return
 
-    def _getCachedResults(self, index: str, value) -> Optional[StoredResult]:
+    def get_latest_push_results(self, num: int) -> ResultsCollection:
+        """Get the latest results from push events, newest to oldest."""
+        assert isinstance(num, int)
+        assert num > 0
+
+        results = []
+        for result in self.latest_push_results_iterator(num=num):
+            results.append(result)
+            if len(results) == num:
+                break
+
+        return ResultsCollection(results, self.get_database)
+
+    def get_latest_push_result_id(self) -> Optional[ObjectId]:
+        """Get the ID of the latest push result, if any."""
+        doc = self.get_database().results.find_one(
+            {"event_cause": {"$ne": "pr"}}, {"_id": 1}, sort=[("_id", -1)]
+        )
+        return doc["_id"] if doc is not None else None
+
+    # Used as the default for a dict.get() when values in
+    # the dictionary could be None
+    NOT_IN = object()
+
+    def get_cached_result(self, index: str, value) -> Optional[ResultCollection]:
         """Get a result given a filter and store it in the cache."""
-        cache = getattr(self, f"_{index}_results")
+        cache = self._cached_results[index]
 
         # Value exists in the cache
-        cached_value = cache.get(value)
-        if cached_value is not None:
-            return cached_value
+        cached_value = cache.get(value, self.NOT_IN)
+        if isinstance(cached_value, StoredResult):
+            return ResultCollection(cached_value, self.get_database)
+        # Was found in the cache but didn't exist
+        if cached_value is None:
+            return None
 
         # Search for the value
-        filter = {index: {"$eq": value}}
-        data = self._db.results.find_one(filter, sort=self.mongo_sort_id)
+        docs = self._find_results({index: {"$eq": value}}, limit=1)
 
         # No such thing
-        if data is None:
+        if not docs:
             cache[value] = None
             return None
 
         # Has an entry, so build it
-        result = self._buildResults(data)
+        assert len(docs) == 1
+        data = docs[0]
+
+        # Should be the proper event
+        assert data[index] == value
+
+        # Build it and return
+        result = self._build_result(data)
         cache[value] = result
-        return result
+        return ResultCollection(result, self.get_database)
 
-    def getEventResults(self, event_id: int) -> Optional[StoredResult]:
-        """Get the StoredResult for a given event, if any."""
+    def get_event_result(self, event_id: int) -> Optional[ResultCollection]:
+        """Get the latest result for the given event, if any."""
         assert isinstance(event_id, int)
-        return self._getCachedResults("event_id", event_id)
+        return self.get_cached_result("event_id", event_id)
 
-    def getPRResults(self, pr_num: int) -> Optional[StoredResult]:
-        """Get the StoredResult for a given PR, if any."""
+    def get_pr_result(self, pr_num: int) -> Optional[ResultCollection]:
+        """Get the latest result for the given PR, if any."""
         assert isinstance(pr_num, int)
-        return self._getCachedResults("pr_num", pr_num)
+        return self.get_cached_result("pr_num", pr_num)
 
-    def getCommitResults(self, commit_sha: str) -> Optional[StoredResult]:
-        """Get the StoredResult for a given commit, if any."""
+    def get_commit_result(self, commit_sha: str) -> Optional[ResultCollection]:
+        """Get the latest result for the given commit, if any."""
         assert isinstance(commit_sha, str)
         assert len(commit_sha) == 40
-        return self._getCachedResults("event_sha", commit_sha)
+        return self.get_cached_result("event_sha", commit_sha)
 
-    def _buildResults(self, data: dict) -> StoredResult:
-        """Build a StoredTestResult given its data and store in the cache."""
-        assert isinstance(data, dict)
-        assert "_id" in data
-
-        id = data["_id"]
-        assert isinstance(id, ObjectId)
-
-        result = self._results.get(id)
-        if result is None:
-            try:
-                result = StoredResult(data, self._db)
-            except Exception as e:
-                raise ValueError(f"Failed to build result _id={id}") from e
-            self._results[id] = result
-
-        return result
+    def get_id_result(self, result_id: ObjectId) -> Optional[ResultCollection]:
+        """Get the latest result for the given ID, if any."""
+        assert isinstance(result_id, ObjectId)
+        return self.get_cached_result("_id", result_id)

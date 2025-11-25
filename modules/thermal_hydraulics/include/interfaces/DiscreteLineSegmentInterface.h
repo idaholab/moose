@@ -24,12 +24,17 @@ class DiscreteLineSegmentInterface
 public:
   DiscreteLineSegmentInterface(const MooseObject * moose_object);
 
-  virtual Point getPosition() const { return _position; }
+  virtual Point getPosition() const { return getStartPoint(); }
+  Point getStartPoint() const { return _position; }
+  Point getEndPoint() const { return _end_point; }
   virtual RealVectorValue getDirection() const { return _dir; }
   virtual Real getRotation() const { return _rotation; }
 
   virtual Real getNumElems() const { return _n_elem; }
   virtual Real getLength() const { return _length; }
+
+  /// Gets the minimum element size
+  Real getMinimumElemSize() const { return _dx_min; }
 
   /*
    * Computes the axial coordinate for a given point in 3-D space.
@@ -101,10 +106,13 @@ protected:
   /// Total axial length
   Real _length;
 
+  /// End point of line segment
+  const Point _end_point;
+
   /// Number of elements in each axial section
-  const std::vector<unsigned int> & _n_elems;
+  std::vector<unsigned int> _n_elems;
   /// Total number of axial elements
-  const unsigned int _n_elem;
+  unsigned int _n_elem;
 
   /// Number of axial sections
   const unsigned int _n_sections;
@@ -194,4 +202,7 @@ public:
                                                          const Real & rotation,
                                                          const std::vector<Real> & lengths,
                                                          const std::vector<unsigned int> & n_elems);
+
+  /// Minimum element size
+  Real _dx_min;
 };

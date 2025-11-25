@@ -23,6 +23,7 @@ public:
 
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
+  virtual Convergence * getNonlinearConvergence() const override { return nullptr; }
 
   /**
    * Returns heated perimeter name

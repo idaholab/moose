@@ -1,7 +1,7 @@
 [Tests]
   [pid]
     requirement = "The Control system shall be able to control an input parameter to make a postprocessor match a target value,"
-    issues = '#17271'
+    issues = '#17271 #31842'
     design = 'syntax/Controls/index.md source/controls/PIDTransientControl.md'
     [basic]
       type = 'CSVDiff'
@@ -12,11 +12,22 @@
                   Executioner/nl_abs_tol=1e-14'
       detail = 'using the principle of Proportional Integral Derivative control,'
     []
+    [timestep_end]
+      type = 'CSVDiff'
+      input = 'pid_control.i'
+      csvdiff = 'pid_control_timestep_end_out.csv'
+      cli_args = "Controls/integral_value/execute_on=timestep_end
+                  Outputs/file_base=pid_control_timestep_end_out
+                  Executioner/end_time=5 Executioner/nl_abs_tol=1e-14"
+      detail = 'using data at the timestep_end state to set the control for the next timestep,'
+    []
     [min_max_limits]
       type = 'CSVDiff'
       input = 'pid_control.i'
       csvdiff = 'min_max_limits.csv'
-      cli_args = 'Outputs/file_base=min_max_limits Controls/integral_value/maximum_output_value=4.0 Controls/integral_value/minimum_output_value=2.0 Executioner/nl_abs_tol=1e-14 Executioner/end_time=10'
+      cli_args = "Outputs/file_base=min_max_limits
+                  Controls/integral_value/maximum_output_value=4.0 Controls/integral_value/minimum_output_value=2.0
+                  Executioner/nl_abs_tol=1e-14 Executioner/end_time=10"
       detail = 'allowing the Proportional Integral Derivative control to have limits for its maximum and minimum output,'
     []
     [abs_max_rate_change]
@@ -51,14 +62,18 @@
       type = 'CSVDiff'
       input = 'pid_pp_control.i'
       csvdiff = 'picard_out.csv'
-      cli_args = "Outputs/file_base=picard_out Controls/integral_value/reset_every_timestep=true MultiApps/inactive=''"
+      cli_args = "Outputs/file_base=picard_out
+                  Controls/integral_value/reset_every_timestep=true
+                  MultiApps/inactive=''"
       detail = 'keeping the PID process within a single timestep,'
     []
     [resistance_to_solver_fails]
       type = 'CSVDiff'
       input = 'pid_pp_control.i'
       csvdiff = 'picard_resets_out.csv'
-      cli_args = "--no-trap-fpe Outputs/file_base=picard_resets_out MultiApps/inactive='' Controls/inactive='' Kernels/inactive='' Controls/integral_value/execute_on=timestep_begin"
+      cli_args = "--no-trap-fpe Outputs/file_base=picard_resets_out
+                  MultiApps/inactive='' Controls/inactive='' Kernels/inactive=''
+                  Controls/integral_value/execute_on=timestep_begin"
       detail = 'and resetting the PID process correctly if the solver fails during a Picard/coupling iteration.'
     []
   []

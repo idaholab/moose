@@ -166,7 +166,7 @@ which is defined with the chosen correlation for the pin or duct, as follows:
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/Lead-LBE-19pin/test_LEAD-19pin.i block=Problem language=moose
+!listing /test/tests/problems/Lead-LBE-19pin/test_LEAD-19pin.i block=SubChannel language=moose
 
 !syntax parameters /Problem/TriSubChannel1PhaseProblem
 

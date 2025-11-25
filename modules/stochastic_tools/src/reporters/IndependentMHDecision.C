@@ -46,7 +46,7 @@ IndependentMHDecision::computeEvidence(std::vector<Real> & evidence,
       evidence[i] += (std::log(_priors[j]->pdf(input_matrix(i, j))) -
                       std::log(_priors[j]->pdf(_seed_input[j])));
     for (unsigned int j = 0; j < _num_confg_values; ++j)
-      out[j] = _outputs_required[j * _props + i];
+      out[j] = (*_outputs_required)[j * _props + i];
     for (unsigned int j = 0; j < _likelihoods.size(); ++j)
       evidence[i] += (_likelihoods[j]->function(out) - _likelihoods[j]->function(_seed_outputs));
   }
@@ -60,7 +60,7 @@ IndependentMHDecision::computeTransitionVector(std::vector<Real> & tv,
     tv[i] = (1.0 / tv.size()) * std::exp(std::min(evidence[i], 0.0));
   _tpm_modified = tv;
   _tpm_modified.push_back((1.0 - std::accumulate(tv.begin(), tv.end(), 0.0)));
-  _outputs_sto = _outputs_required;
+  _outputs_sto = (*_outputs_required);
 }
 
 void
@@ -79,13 +79,13 @@ IndependentMHDecision::nextSamples(std::vector<Real> & req_inputs,
       for (unsigned int k = 0; k < _sampler.getNumberOfCols() - _num_confg_params; ++k)
         req_inputs[k] = input_matrix(index, k);
       for (unsigned int k = 0; k < _num_confg_values; ++k)
-        _outputs_required[k * _props + parallel_index] = _outputs_sto[k * _props + index];
+        (*_outputs_required)[k * _props + parallel_index] = _outputs_sto[k * _props + index];
     }
     else
     {
       req_inputs = _seed_input;
       for (unsigned int k = 0; k < _num_confg_values; ++k)
-        _outputs_required[k * _props + parallel_index] = _seed_outputs[k];
+        (*_outputs_required)[k * _props + parallel_index] = _seed_outputs[k];
     }
   }
   else
@@ -101,5 +101,5 @@ IndependentMHDecision::nextSeeds()
 {
   _seed_input = _inputs[_props - 1];
   for (unsigned int k = 0; k < _num_confg_values; ++k)
-    _seed_outputs[k] = _outputs_required[(k + 1) * _props - 1];
+    _seed_outputs[k] = (*_outputs_required)[(k + 1) * _props - 1];
 }

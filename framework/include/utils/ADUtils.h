@@ -152,4 +152,17 @@ globalDofIndexToDerivative(const T & ad_real_container,
  * @returns whether we should be doing derivatives
  */
 bool doDerivatives(const SubProblem & subproblem, const SystemBase & sys);
+
+/**
+ * Converts an ADReal to a GenericReal<is_ad>
+ */
+template <bool is_ad>
+GenericReal<is_ad>
+ADRealToGenericReal(const ADReal & u_ad)
+{
+  if constexpr (is_ad)
+    return u_ad;
+  else
+    return u_ad.value();
+}
 }
