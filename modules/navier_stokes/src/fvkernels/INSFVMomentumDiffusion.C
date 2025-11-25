@@ -47,6 +47,10 @@ INSFVMomentumDiffusion::validParams()
       "complete_expansion",
       false,
       "Boolean parameter to use complete momentum expansion is the diffusion term.");
+  params.addParam<bool>("include_isotropic_stress",
+                        false,
+                        "When 'complete_expansion=true', also add the -(2/3) mu div(u) I term. "
+                        "Only meaningful for weakly-compressible formulations.");
   params.addParam<MooseFunctorName>("u", "The velocity in the x direction.");
   params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
   params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
@@ -67,6 +71,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     _v_var(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
     _w_var(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _complete_expansion(getParam<bool>("complete_expansion")),
+    _include_isotropic_stress(getParam<bool>("include_isotropic_stress")),
     _limit_interpolation(getParam<bool>("limit_interpolation")),
     _dim(_subproblem.mesh().dimension()),
     _newton_solve(getParam<bool>("newton_solve"))
@@ -83,6 +88,10 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
     paramError("w",
                "The w velocity must be defined when 'complete_expansion=true'"
                "and problem dimension is larger or equal to three.");
+
+  if (_include_isotropic_stress && !_complete_expansion)
+    paramError("include_isotropic_stress",
+               "'include_isotropic_stress' can only be used when 'complete_expansion=true'.");
 }
 
 ADReal
@@ -142,6 +151,7 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
   }
 
   ADReal dudn_transpose = 0.0;
+  ADReal divergence_term = 0.0;
   if (_complete_expansion)
   {
     // Computing the gradient from coupled variables
@@ -177,9 +187,27 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     const auto gradient_transpose = gradient.transpose();
 
     dudn_transpose += gradient_transpose.row(_index) * _face_info->normal();
+
+    if (_include_isotropic_stress)
+    {
+      libMesh::VectorValue<ADReal> velocity;
+      velocity(0) = _u_var ? (*_u_var)(face, state) : ADReal(0);
+      velocity(1) = (_dim >= 2 && _v_var) ? (*_v_var)(face, state) : ADReal(0);
+      velocity(2) = (_dim >= 3 && _w_var) ? (*_w_var)(face, state) : ADReal(0);
+
+      const auto coord_sys = _subproblem.getCoordSystem(_face_info->elem().subdomain_id());
+      const auto rz_radial_coord =
+          coord_sys == Moose::COORD_RZ ? _subproblem.getAxisymmetricRadialCoord() : 0u;
+      divergence_term =
+          NS::divergence(gradient, velocity, face.getPoint(), coord_sys, rz_radial_coord);
+    }
   }
 
-  return -face_mu * (dudn + dudn_transpose);
+  ADReal residual = -face_mu * (dudn + dudn_transpose);
+  if (_complete_expansion && _include_isotropic_stress)
+    residual += (2.0 / 3.0) * face_mu * divergence_term * _face_info->normal()(_index);
+
+  return residual;
 }
 
 void

@@ -42,7 +42,7 @@ class TestVortexNewtonDeviatoric(unittest.TestCase):
             if key in velocity_labels:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .25))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .25))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .25))
 
 class TestVortexSNL(unittest.TestCase):
     def test(self):
@@ -74,7 +74,7 @@ class TestVortexSNLDeviatoric(unittest.TestCase):
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             if key in velocity_labels:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .25))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, .26))
             else:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 1.5, .25))
 

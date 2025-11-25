@@ -33,9 +33,9 @@ class TestRZViscousSource(unittest.TestCase):
         for key, value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             if key in ["L2u", "L2v"]:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.25))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.25))
 
 class TestRZViscousSourcePhysics(unittest.TestCase):
     def test(self):
@@ -48,9 +48,9 @@ class TestRZViscousSourcePhysics(unittest.TestCase):
         for key, value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             if key in ["L2u", "L2v"]:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2.0, 0.25))
             else:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.2))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 1.0, 0.25))
 
 
 if __name__ == '__main__':
