@@ -36,10 +36,12 @@
 {#- The install location for openmpi                                                          -#}
 {%- set OPENMPI_DIR = '/opt/openmpi' -%}
 
-Bootstrap: oras
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-From: harbor.hpc.inl.gov/moose-base/rocky-x86_64:8.10-5
-{%- elif ALTERNATE_FROM == "cuda" %}
+Bootstrap: docker
+From: mooseharbor.hpc.inl.gov/base-docker/rocky-x86_64:8.10_0
+{%- else %}
+Bootstrap: oras
+{%- if ALTERNATE_FROM == "cuda" %}
 From: harbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.9-0
 {%- elif ALTERNATE_FROM == "intel" %}
 From: harbor.hpc.inl.gov/moose-hpcbase/rocky-intel-x86_64:8.10_0
@@ -48,6 +50,7 @@ From: harbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-4
 {%- endif %}
 # Logan Harbour
 Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
+{%- endif %}
 
 %environment
     # Fix locale warnings
@@ -75,21 +78,6 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
 
     # Setup the build directory
     mkdir ${ROOT_BUILD_DIR}
-
-    # Setup the custom prompt. The apptainer generator script will append
-    # extra variables to the %environment step that identify what container
-    # is currently being used
-    # Eventually, this will go in the base container as far down as
-    # we can. But we don't want to do a full rebuild at the moment,
-    # so this is good for now.
-    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
-source {{ SET_PROMPT_SCRIPT }}
-set_prompt
-EOF
-    chmod 755 ${SINGULARITY_ROOTFS}{{ SET_PROMPT_SCRIPT }}
-
-    # insure all profiles are read/executable by everyone
-    chmod +rx ${SINGULARITY_ROOTFS}/.singularity.d/env/*.sh
 
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
@@ -242,8 +230,3 @@ EOF
         {{ OPENMPI_DIR }}/bin/mpiexec --version
         {{ OPENMPI_DIR }}/bin/ompi_info
     fi
-
-%files
-    {{ MOOSE_DIR }}/apptainer/set_prompt.bash {{ SET_PROMPT_SCRIPT }}
-    {{ FILES_DIR }}/.singularity.d/env/01-fix-exec.sh /.singularity.d/env/01-fix-exec.sh
-    {{ FILES_DIR }}/.singularity.d/env/89-user-overrides.sh /.singularity.d/env/89-user-overrides.sh
