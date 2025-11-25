@@ -55,15 +55,9 @@ MFEMComplexDotProductAux::MFEMComplexDotProductAux(const InputParameters & param
 {
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
-  const int mesh_dim = fes->GetMesh()->Dimension();
-
-  // Enforce 3D dot product
-  if (mesh_dim != 3)
-    mooseError("MFEMComplexDotProductAux requires a 3D mesh (Dimension == 3).");
-
-  if (fes->GetVDim() != 3)
-    mooseError("MFEMComplexDotProductAux requires AuxVariable to have vdim == 3.");
-
+  if (fes->GetVDim() != 1)
+    mooseError("MFEMComplexDotProductAux requires the target variable to be a scalar (vdim=1).");
+    
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
     mooseError("MFEMComplexDotProductAux requires the target variable to use L2_FECollection.");

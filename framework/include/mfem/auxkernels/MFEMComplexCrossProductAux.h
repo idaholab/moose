@@ -14,11 +14,12 @@
 #include "mfem.hpp"
 
 /**
- * Project s(x) * (U x V) onto a vector MFEM auxvariable.
+ * Project s(x) * (U x V*) onto a vector MFEM auxvariable.
  *
  * Notes:
  *   - Currently supports only interior DOFs (no shared/constrained DOFs).
  *   - Enforces 3D: mesh dimension and all involved vdim must be 3.
+ *   - Takes into account Hermitian conjugation when computing the cross product.
  */
 class MFEMComplexCrossProductAux : public MFEMComplexAuxKernel
 {
