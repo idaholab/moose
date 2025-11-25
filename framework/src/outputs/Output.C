@@ -49,9 +49,6 @@ Output::validParams()
       "to infinity if the wall_time_interval is explicitly set.");
   params.addParam<Real>(
       "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
-  params.addParam<Real>("simulation_time_interval",
-                        std::numeric_limits<Real>::max(),
-                        "The target simulation time interval (in seconds) at which to output");
   params.addRangeCheckedParam<Real>(
       "wall_time_interval",
       std::numeric_limits<Real>::max(),
@@ -89,7 +86,7 @@ Output::validParams()
   params.addParamNamesToGroup("time_tolerance time_step_interval sync_times sync_times_object "
                               "sync_only start_time end_time "
                               "start_step end_step min_simulation_time_interval "
-                              "simulation_time_interval wall_time_interval",
+                              "wall_time_interval",
                               "Timing and frequency of output");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
@@ -142,7 +139,6 @@ Output::Output(const InputParameters & parameters)
             ? std::numeric_limits<unsigned int>::max()
             : getParam<unsigned int>("time_step_interval")),
     _min_simulation_time_interval(getParam<Real>("min_simulation_time_interval")),
-    _simulation_time_interval(getParam<Real>("simulation_time_interval")),
     _wall_time_interval(getParam<Real>("wall_time_interval")),
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
@@ -300,17 +296,20 @@ Output::onInterval()
                  "warehouse which determines its sync times at output construction time.");
   }
 
+  // We make sync times have precendence over the other criteria by convention, since they already
+  // take precedence over start/end step, start/end time, step frequency etc.
+  //
+  // Check if enough simulation time has passed between outputs
+  if (_time > _last_output_simulation_time &&
+      _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
+    output = false;
+
   // If sync times are not skipped, return true if the current time is a sync_time
   for (const auto _sync_time : _sync_times)
   {
     if (std::abs(_sync_time - _time) < _t_tol)
       output = true;
   }
-
-  // check if enough simulation time has passed between outputs
-  if (_time > _last_output_simulation_time &&
-      _last_output_simulation_time + _min_simulation_time_interval > _time + _t_tol)
-    output = false;
 
   // check if enough wall time has passed between outputs
   const auto now = std::chrono::steady_clock::now();
