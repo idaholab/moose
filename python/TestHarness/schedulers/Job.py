@@ -907,10 +907,13 @@ class Job(OutputInterface):
                   'caveats': list(self.getCaveats())}
 
         # Base job data
-        job_data = {'status': status,
-                    'timing': self.timer.totalTimes(),
-                    'tester': self.getTester().getResults(self.options),
-                    'output_files': self.getOutputFiles(self.options)}
+        job_data = {
+            "status": status,
+            "timing": self.timer.totalTimes(),
+            "max_memory": self.getMaxMemory(),
+            "tester": self.getTester().getResults(self.options),
+            "output_files": self.getOutputFiles(self.options),
+        }
         if self.hasSeperateOutput():
             job_data['output'] = self.getCombinedSeparateOutputPaths()
         else:
