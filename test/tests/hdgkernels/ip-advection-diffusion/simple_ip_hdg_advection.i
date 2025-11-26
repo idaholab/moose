@@ -2,6 +2,7 @@
   variable = u
   face_variable = side_u
   velocity = vel
+  coeff = 1
 []
 
 [Mesh]

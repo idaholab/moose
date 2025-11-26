@@ -24,6 +24,7 @@
   [advection]
     type = AdvectionIPHDGKernel
     velocity = vel
+    coeff = 1
   []
 []
 
@@ -33,12 +34,14 @@
     functor = 1
     boundary = 'left'
     velocity = vel
+    coeff = 1
   []
   [outflow]
     type = AdvectionIPHDGOutflowBC
     boundary = 'right'
     velocity = vel
     constrain_lm = true
+    coeff = 1
   []
 []
 
