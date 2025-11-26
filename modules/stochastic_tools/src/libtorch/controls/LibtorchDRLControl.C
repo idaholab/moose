@@ -36,9 +36,6 @@ LibtorchDRLControl::validParams()
 
   params.addParam<bool>("stochastic", true, "Blabla");
 
-  params.addParam<std::vector<Real>>(
-    "action_standard_deviations", {}, "Standard deviation value used while sampling the actions.");
-
   params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
   params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
 
@@ -82,10 +79,9 @@ LibtorchDRLControl::loadControlNeuralNetFromFile(const InputParameters & paramet
 
     const std::vector<Real> & minimum_values = getParam<std::vector<Real>>("min_control_value");
     const std::vector<Real> & maximum_values = getParam<std::vector<Real>>("max_control_value");
-    const std::vector<Real> & action_std = getParam<std::vector<Real>>("action_standard_deviations");
 
     auto nn = std::make_shared<Moose::LibtorchActorNeuralNet>(
-        filename, num_inputs, num_outputs, num_neurons_per_layer, action_std, activation_functions, minimum_values, maximum_values);
+        filename, num_inputs, num_outputs, num_neurons_per_layer, activation_functions, minimum_values, maximum_values);
 
     try
     {
@@ -213,7 +209,7 @@ LibtorchDRLControl::execute()
         // for (const auto i : index_range(_current_control_signals))
         //   _current_control_signals[i] = std::min(std::max(_current_control_signals[i], _minimum_actions[i]), _maximum_actions[i]);
 
-        if (!_stochastic)
+        if (_stochastic)
         {
           torch::Tensor log_probability = _actor_nn->logProbability(action);
 

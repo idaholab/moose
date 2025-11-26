@@ -13,7 +13,7 @@
     type = SamplerFullSolveMultiApp
     sampler = dummy
     input_files = 'libtorch_drl_control_sub.i'
-    # mode = batch-reset
+    mode = batch-reset
   []
 []
 
@@ -42,27 +42,38 @@
     log_probability = 'storage/r_transfer:T_reporter:log_prob_top_flux:value'
     reward = 'storage/r_transfer:T_reporter:reward:value'
 
-    num_epochs = 120
-    update_frequency = 2
+    num_epochs = 50
+    update_frequency = 1
     decay_factor = 0.8
+    lambda_factor = 1.0
 
     loss_print_frequency = 10
 
-    critic_learning_rate = 0.005
+    critic_learning_rate = 0.001
     num_critic_neurons_per_layer = '32 16'
+    critic_activation_functions = 'relu relu'
 
-    control_learning_rate = 0.005
+    control_learning_rate = 0.001
     num_control_neurons_per_layer = '32 16'
+    control_activation_functions = 'relu relu'
+
 
     # keep consistent with LibtorchNeuralNetControl
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '3e-2'
 
     standardize_advantage = true
 
+    batch_size = 80
+
     read_from_file = false
+
+    entropy_coeff = 0.0
+
+    # min_control_value = ${fparse -0.1}
+    # max_control_value = ${fparse 0.1}
+
   []
 []
 
@@ -70,6 +81,7 @@
   [storage]
     type = StochasticReporter
     parallel_type = ROOT
+    outputs = none
   []
   [reward]
     type = DRLRewardReporter
@@ -79,13 +91,12 @@
 
 [Executioner]
   type = Transient
-  num_steps = 4
+  num_steps = 200
 []
 
 [Outputs]
   file_base = output/train_out
-  # json = true
-  csv = true
+  json = true
   time_step_interval = 1
   execute_on = TIMESTEP_END
 []

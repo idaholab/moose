@@ -32,7 +32,6 @@ public:
                          const unsigned int num_inputs,
                          const unsigned int num_outputs,
                          const std::vector<unsigned int> & num_neurons_per_layer,
-                         const std::vector<Real> & std,
                          const std::vector<std::string> & activation_function = {"relu"},
                          const std::vector<Real> & minimum_values = {},
                          const std::vector<Real> & maximum_values = {},
@@ -61,8 +60,6 @@ public:
   /// Construct the neural network
   virtual void constructNeuralNetwork() override;
 
-  const std::vector<Real> & std() const {return _std;}
-
   const torch::Tensor & stdTensor() const {return  _std_tensor;}
 
   const torch::Tensor & alphaTensor() const {return  _alpha_tensor;}
@@ -78,9 +75,8 @@ public:
   virtual void initializeNeuralNetwork() override;
 
 protected:
-  const std::vector<Real> & _std;
-
-  torch::Tensor _std_tensor;
+  std::vector<torch::nn::Linear> _log_std_module;
+  std::vector<torch::nn::Linear> _mean_module;
 
   std::vector<torch::nn::Linear> _alpha_module;
   std::vector<torch::nn::Linear> _beta_module;
@@ -89,6 +85,10 @@ protected:
   torch::Tensor _beta_tensor;
   torch::Tensor _alpha_beta_tensor;
   torch::Tensor _log_norm;
+
+  torch::Tensor _mean_tensor;
+  torch::Tensor _std_tensor;
+  torch::Tensor _log_std_tensor;
 
   torch::Tensor _mean;
 };
