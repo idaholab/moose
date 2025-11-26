@@ -218,7 +218,7 @@ kEpsilonViscosityAux::computeValue()
   if (_relaminarization)
   {
     const auto Re_d =
-        std::sqrt(_k(current_argument, state)) * (*_wall_distance)(current_argument, state) / (nu);
+        std::sqrt(_k(elem_arg, state)) * (*_wall_distance)(elem_arg, state) / (nu);
 
     const auto T1 = _Cd0 * std::sqrt(Re_d);
     const auto T2 = _Cd1 * Re_d;
@@ -226,7 +226,7 @@ kEpsilonViscosityAux::computeValue()
 
     const auto f_mu = 1.0 - std::exp(-(T1 + T2 + T3));
 
-    mu_t *= raw_value(f_mu);
+    mu_t *= MetaPhysicL::raw_value(f_mu);
   }
 
   // Turbulent viscosity limiter
