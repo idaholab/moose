@@ -40,6 +40,7 @@ public:
    */
   const neml2::Tensor & JxWxT() const { return _neml2_JxWxT; }
 
+  /// Whether the current assembly cache is up to date
   bool upToDate() const { return _up_to_date; }
 
   /// Invalidate the cached assembly information
