@@ -1,6 +1,8 @@
 [GlobalParams]
   variable = u
   face_variable = side_u
+  alpha = 1
+  coeff = 1
 []
 
 [Mesh]

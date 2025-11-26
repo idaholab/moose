@@ -42,6 +42,7 @@ a = 2
   []
   [adv]
     type = AdvectionIPHDGKernel
+    coeff = 1
   []
 []
 
@@ -55,6 +56,7 @@ a = 2
     type = AdvectionIPHDGDirichletBC
     functor = exact
     boundary = 'left right top bottom'
+    coeff = 1
   []
 []
 
