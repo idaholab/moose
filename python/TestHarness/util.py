@@ -170,6 +170,7 @@ def formatJobResult(
     status_message: bool = True,
     timing: Optional[bool] = None,
     memory: Optional[bool] = None,
+    memory_per_slot: bool = False,
     caveats: bool = False,
 ) -> str:
     name = job.getTestName()
@@ -198,10 +199,13 @@ def formatJobResult(
         suffix = name.replace(first_directory, '', 1)
         name = prefix + suffix
 
+    memory = job.getMaxMemory()
+    if memory_per_slot and memory is not None:
+        memory = int(memory / job.getSlots())
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
-        memory=job.getMaxMemory(),
+        memory=memory,
         joint_status=job.getJointStatus(),
         status_message=status_message,
         caveats=job.getCaveats() if caveats else [],
