@@ -795,7 +795,11 @@ class TestHarness:
             j for j in self.finished_jobs
             if (not j.isSkip() and j.getMaxMemory())
         ]
-        jobs = sorted(jobs, key=lambda job: job.getMaxMemory(), reverse=True)
+        jobs = sorted(
+            jobs,
+            key=lambda job: job.getMaxMemory() / job.getTester().getProcs(self.options),
+            reverse=True
+        )
         return jobs[0:num]
 
     def getLongestFolders(self, num: int) -> list[typing.Tuple[str, float]]:
@@ -869,14 +873,14 @@ class TestHarness:
 
             heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
             if heaviest_jobs:
-                print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/slot)'))
+                print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/proc)'))
                 for job in heaviest_jobs:
                     print(util.formatJobResult(
                         job,
                         self.options,
                         caveats=True,
                         timing=True,
-                        memory_per_slot=True,
+                        memory_per_proc=True,
                     ))
 
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
