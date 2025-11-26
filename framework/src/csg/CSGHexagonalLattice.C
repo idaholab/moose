@@ -168,9 +168,9 @@ CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_e
   // diagram of side numbers:
   //            4
   //         _______
-  //       /         \
+  //       /         \*
   //    3 /           \ 5
-  //     /             \
+  //     /             \*
   //     \             /
   //    2 \           / 0
   //       \ _______ /
