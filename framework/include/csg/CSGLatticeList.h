@@ -59,7 +59,7 @@ protected:
    * @brief Add an empty hexagonal lattice
    *
    * @param name unique lattice name
-   * @param pitch  flat‐to‐flat distance between adjacent centers
+   * @param pitch  flat-to-flat distance between adjacent centers
    * @return reference to new hexagonal lattice
    */
   CSGLattice & addHexagonalLattice(const std::string & name, Real pitch);
