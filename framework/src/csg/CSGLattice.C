@@ -60,13 +60,13 @@ CSGLattice::hasUniverse(const std::string & name) const
   return false; // no universe with matching name was found
 }
 
-const std::vector<std::vector<const std::string>>
+const std::vector<std::vector<std::string>>
 CSGLattice::getUniverseNameMap() const
 {
-  std::vector<std::vector<const std::string>> name_map;
+  std::vector<std::vector<std::string>> name_map;
   for (auto univ_list : _universe_map)
   {
-    std::vector<const std::string> name_list;
+    std::vector<std::string> name_list;
     for (const CSGUniverse & univ : univ_list)
       name_list.push_back(univ.getName());
     name_map.push_back(name_list);
