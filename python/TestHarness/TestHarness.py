@@ -1268,6 +1268,7 @@ class TestHarness:
         failgroup = parser.add_argument_group('Failure Criteria', 'Control the failure criteria')
         failgroup.add_argument('--max-fails', nargs=1, type=int, default=50, help='The number of tests allowed to fail before any additional tests will run')
         failgroup.add_argument('--valgrind-max-fails', nargs=1, type=int, default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
+        failgroup.add_argument('--max-memory', nargs=1, type=float, help='The maximum memory to allow for a job in MB, per slot')
 
         hpcgroup = parser.add_argument_group('HPC', 'Enable and control HPC execution')
         hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
