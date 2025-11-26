@@ -121,7 +121,7 @@ def formatResult(
             and memory is not False
         ):
             if entry.memory is not None:
-                value = int(entry.memory * 1.024e-6) if entry.memory else 0
+                value = int(entry.memory * 1e-6) if entry.memory else 0
                 message = f"[{value:>4}MB]"
             else:
                 message = "[   ?MB]"
