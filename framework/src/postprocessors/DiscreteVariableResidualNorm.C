@@ -33,6 +33,10 @@ DiscreteVariableResidualNorm::validParams()
       "If set to true, correct the mesh size bias associated with the selected norm. For l-1, "
       "divide by N, the number of block-restricted DoFs for the variable. For l-2, divide by "
       "sqrt(N). For l-infinity, no correction needs to be made.");
+  params.addParam<bool>("include_scaling_factor",
+                        false,
+                        "If set to true, include the residual scaling factor in the norm; "
+                        "otherwise, divide by the scaling factor");
 
   params.addClassDescription("Computes a discrete norm for a block-restricted variable residual.");
 
@@ -47,6 +51,7 @@ DiscreteVariableResidualNorm::DiscreteVariableResidualNorm(const InputParameters
                                  Moose::VarFieldType::VAR_FIELD_STANDARD)),
     _norm_type(getParam<MooseEnum>("norm_type").getEnum<NormType>()),
     _correct_mesh_bias(getParam<bool>("correct_mesh_bias")),
+    _include_scaling_factor(getParam<bool>("include_scaling_factor")),
     _nl_residual_vector(_fe_problem.getNonlinearSystemBase(_sys.number()).RHS())
 {
 }
@@ -115,6 +120,9 @@ DiscreteVariableResidualNorm::finalize()
 
   if (_correct_mesh_bias)
     _norm /= bias;
+
+  if (!_include_scaling_factor)
+    _norm /= _var.scalingFactor();
 }
 
 PostprocessorValue

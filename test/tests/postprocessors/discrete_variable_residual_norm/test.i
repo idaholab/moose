@@ -51,11 +51,16 @@ source_coef_B = 1e4
   nonlinear_convergence = nl_conv
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  automatic_scaling = true
 []
 
 [Outputs]
   [out]
     type = CSV
+    execute_postprocessors_on = 'FINAL'
+  []
+  [console]
+    type = Console
     execute_postprocessors_on = 'FINAL'
   []
 []
