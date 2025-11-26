@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMCrossProductAux
-
 ## Overview
 
 AuxKernel for calculating the cross product of two vector fields and projecting

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Outputs/MFEMParaViewDataCollection
-
 ## Overview
 
 `MFEMDataCollection` controlling output of data to an `mfem::ParaViewDataCollection` for

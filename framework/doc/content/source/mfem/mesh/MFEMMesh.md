@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Mesh/MFEMMesh
-
 ## Overview
 
 `MFEMMesh` is responsible for building an `mfem::ParMesh` object from the provided mesh input file

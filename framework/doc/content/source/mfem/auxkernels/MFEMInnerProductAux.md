@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMInnerProductAux
-
 ## Overview
 
 AuxKernel for calculating the inner product of two vector fields and projecting

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /SubMeshes/MFEMCutTransitionSubMesh
-
 ## Overview
 
 An `MFEMCutTransitionSubMesh` specifies and builds an `mfem::ParSubMesh` object from a

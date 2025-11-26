@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Kernels/MFEMDivDivKernel
-
 ## Overview
 
 Adds the domain integrator for integrating the bilinear form

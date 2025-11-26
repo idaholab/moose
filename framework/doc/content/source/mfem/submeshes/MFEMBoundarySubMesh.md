@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /SubMeshes/MFEMBoundarySubMesh
-
 ## Overview
 
 `MFEMBoundarySubMesh` specifies and builds an `mfem::ParSubMesh` object from a surface subspace of

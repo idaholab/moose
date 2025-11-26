@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Transfers/MFEMSubMeshTransfer
-
 ## Overview
 
 `MFEMSubMeshTransfer` transfers data between [MFEM variables](MFEMVariable.md) sharing a common

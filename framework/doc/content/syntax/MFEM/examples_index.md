@@ -1,9 +1,9 @@
 # Examples that use MFEM capabilities
 
-## Description
+## Summary
 
 As part of the MOOSE test suite, we solve a number of sample problems using MFEM
-that may serve as a useful starting point for users to adapt:
+that may serve as a useful starting point for users to adapt.
 
 ## Thermal Problems
 

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMDivAux
-
 ## Overview
 
 AuxKernel for calculating the divegence of an $H(\mathrm{div})$ conforming source variable defined

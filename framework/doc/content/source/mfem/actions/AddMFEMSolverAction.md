@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Solver/AddMFEMSolverAction
-
 ## Overview
 
 Action called to add a linear solver to an MFEM problem, parsing content inside a

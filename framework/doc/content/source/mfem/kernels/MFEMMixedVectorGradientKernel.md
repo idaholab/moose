@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Kernels/MFEMMixedVectorGradientKernel
-
 ## Overview
 
 Adds the domain integrator for integrating the mixed bilinear form
