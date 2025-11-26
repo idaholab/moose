@@ -84,25 +84,52 @@ class SubprocessRunner(Runner):
         assert self.process is not None
         psutil_process = psutil.Process(self.process.pid)
 
+        # Get max memory requirement and optionally slots
+        # in case we need to check memory/proc
+        max_memory = self.options.max_memory
+        procs = self.job.getTester().getProcs(self.options)
+
+        # Start with zero memory as a base
         max_rss = 0
         self.setMaxMemory(0)
 
+        # Wait for the process to finish, checking memory per step
         while self.process.poll() is None:
+            # Collect this process + children processes
             psutil_processes = []
             with suppress(psutil.NoSuchProcess):
                 psutil_processes = [psutil_process] + psutil_process.children(
                     recursive=True
                 )
 
+            # Accumulate total RSS for parent + children
             total = 0
             for p in psutil_processes:
                 with suppress(psutil.NoSuchProcess):
                     total += p.memory_info().rss
 
+            # If memory has increased, set it so that it can be
+            # reported live during a long-running job
             if total > max_rss:
                 self.setMaxMemory(total)
                 max_rss = total
 
+            # If --max-memory is set, make sure we're not over
+            if max_memory is not None:
+                per_slot = float(total / procs) * 1.0e-6
+
+                # Over; kill the process, fail, and report
+                if per_slot > max_memory:
+                    self.kill()
+                    message = (
+                        f"Job killed: memory/slot {int(per_slot)}MB "
+                        f"> max {int(max_memory)}MB"
+                    )
+                    self.appendOutput("\n" + util.outputHeader(message, False))
+                    self.job.setStatus(self.job.error, "OVER MEMORY")
+                    break
+
+            # Poll
             time.sleep(0.01)
 
         self.process.wait()
