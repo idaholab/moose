@@ -9,7 +9,7 @@
 
 import copy, itertools, os, time, threading, traceback, typing
 from io import StringIO
-from contextlib import nullcontext, redirect_stdout
+from contextlib import nullcontext, redirect_stdout, suppress
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.FileChecker import FileChecker
 from TestHarness.runners.Runner import Runner
@@ -263,10 +263,8 @@ class Job(OutputInterface):
         """
         if self.tmp_dir is not None:
             # Don't let this fail
-            try:
+            with suppress():
                 self.tmp_dir.cleanup()
-            except:
-                pass
             self.tmp_dir = None
 
     def getUpstreams(self):
@@ -407,10 +405,22 @@ class Job(OutputInterface):
         time the process was active. When the process exits, read the output and close the file.
         """
         tester = self.__tester
+        runner = self._runner
+        assert runner is not None
+
+        # Whether or not we've ran spawn() on the runner yet;
+        # used to determine if we should call cleanup() on the runner
+        runner_spawned = False
 
         # Helper for exiting
         def finalize():
+            # Use the variable from the outer scope
+            nonlocal runner_spawned
+
             # Run cleanup
+            if runner_spawned:
+                with self.timer.time("runner_cleanup"):
+                    runner.cleanup()
             with self.timer.time('job_cleanup'):
                 self.cleanup()
             # Sanitize the output from all objects
@@ -435,18 +445,19 @@ class Job(OutputInterface):
         # Helper for trying and catching
         def try_catch(do, exception_name, timer_name, output=self):
             with self.timer.time(timer_name):
-                failed = False
                 try:
                     do()
                 except:
                     trace = traceback.format_exc()
                     self.setStatus(self.error, f'{exception_name} EXCEPTION')
-                    output.appendOutput(util.outputHeader('Python exception encountered') + trace)
-                    failed = True
+                    output.appendOutput(
+                        util.outputHeader("Python exception encountered") + trace
+                    )
 
-            if failed:
-                finalize()
-            return not failed
+                    finalize()
+
+                    return False
+                return True
 
         # Do not execute app, but still run the tester
         # This is truly awful and I really hate that it got put in here,
@@ -478,17 +489,18 @@ class Job(OutputInterface):
             return
 
         # Spawn the process
-        spawn = lambda: self._runner.spawn(self.timer)
+        runner_spawned = True
+        spawn = lambda: runner.spawn(self.timer)
         if not try_catch(spawn, 'RUNNER SPAWN', 'runner_spawn'):
             return
 
         # Entry point for testers to do other things
-        post_spawn = lambda: tester.postSpawn(self._runner)
+        post_spawn = lambda: tester.postSpawn(runner)
         if not try_catch(post_spawn, 'TESTER POST SPAWN', 'tester_post_spawn'):
             return
 
         # And wait for it to complete
-        wait = lambda: self._runner.wait(self.timer)
+        wait = lambda: runner.wait(self.timer)
         if not try_catch(wait, 'RUNNER WAIT', 'runner_wait'):
             return
 
@@ -499,7 +511,7 @@ class Job(OutputInterface):
             return
 
         # And do finalize (really just cleans up output)
-        runner_finalize = lambda: self._runner.finalize()
+        runner_finalize = lambda: runner.finalize()
         if not try_catch(runner_finalize, 'RUNNER FINALIZE', 'runner_finalize'):
             finalize()
             return
@@ -518,8 +530,8 @@ class Job(OutputInterface):
                                                                     self.fileChecker.getNewTimes())
 
         # Allow derived processResults to process the output and set a failing status (if it failed)
-        runner_output = self._runner.getRunOutput().getOutput()
-        exit_code = self._runner.getExitCode()
+        runner_output = runner.getRunOutput().getOutput()
+        exit_code = runner.getExitCode()
         run_tester = lambda: tester.run(self.options, exit_code, runner_output)
         try_catch(run_tester, 'TESTER RUN', 'tester_run')
 
