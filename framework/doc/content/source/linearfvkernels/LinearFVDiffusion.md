@@ -47,6 +47,31 @@ The diffusion coefficient parameter ([!param](/LinearFVKernels/LinearFVDiffusion
 accepts anything that supports functor-based evaluations. For more information on functors in
 MOOSE, see [Functors/index.md].
 
+### Interpolating material coefficients
+
+By default the diffusion coefficient functor is evaluated directly on each face. You can instead
+select a runtime interpolation policy through the [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method)
+parameter and an object declared in the [FVInterpolationMethod.md]
+block. This is useful when you want the face value to depend on both adjacent cell-centered
+quantities without incurring the cost of virtual dispatch inside the kernel loop.
+
+```
+[InterpolationMethods]
+  [face_k]
+    type = harmonicAverage
+  []
+[]
+
+[LinearFVKernels]
+  [diff]
+    type = LinearFVDiffusion
+    variable = u
+    diffusion_coeff = k
+    coeff_interp_method = face_k
+  []
+[]
+```
+
 ## Example input syntax
 
 The input file below shows a pure diffusion problem on a two-dimensional domain.
