@@ -99,6 +99,9 @@ SampledOutput::outputStep(const ExecFlagType & type)
   // store current simulation time
   _last_output_simulation_time = _time;
 
+  // store current wall time of output
+  _last_output_wall_time = std::chrono::steady_clock::now();
+
   // set current type
   _current_execute_flag = type;
 
