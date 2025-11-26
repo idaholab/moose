@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /FESpaces/MFEMGenericFESpace
-
 ## Overview
 
 This is a low-level routine which allows the user maximum control over

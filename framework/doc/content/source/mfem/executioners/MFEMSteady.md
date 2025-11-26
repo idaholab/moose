@@ -2,8 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-!syntax description /Executioner/MFEMSteady
-
 ## Overview
 
 `MFEMSteady` is the `Executioner` class used to solve time independent MFEM finite element problems,

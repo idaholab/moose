@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMScalarTimeAverageAux
-
 ## Overview
 
 AuxKernel for calculating the running time average of a scalar coefficient

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /SubMeshes/MFEMDomainSubMesh
-
 ## Overview
 
 `MFEMDomainSubMesh` specifies and builds an `mfem::ParSubMesh` object from a volumetric subspace of

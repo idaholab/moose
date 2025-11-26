@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Executioner/MFEMTransient
-
 ## Overview
 
 `MFEMTransient` is the `Executioner` class used to solve time dependent MFEM finite element

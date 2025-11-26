@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /FunctorMaterials/MFEMGenericFunctorVectorMaterial
-
 ## Overview
 
 `MFEMGenericFunctorVectorMaterial` defines one or more vector material properties with values

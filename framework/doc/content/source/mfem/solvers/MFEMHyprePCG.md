@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Solver/MFEMHyprePCG
-
 ## Overview
 
 Defines and builds an `mfem::HyprePCG` solver to use as an iterative solver to solve the MFEM equation system.

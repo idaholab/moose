@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Solver/MFEMOperatorJacobiSmoother
-
 ## Overview
 
 Defines and builds an `mfem::OperatorJacobiSmoother` solver to use to perform Jacobi iterations on

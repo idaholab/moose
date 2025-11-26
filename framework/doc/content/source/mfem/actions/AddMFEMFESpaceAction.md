@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /FESpaces/AddMFEMFESpaceAction
-
 ## Overview
 
 Action called to add an MFEM finite element space to the problem, parsing content inside an

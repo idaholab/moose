@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Functions/MFEMParsedFunction
-
 ## Overview
 
 `MFEMParsedFunction` is responsible for parsing expressions that, in addition

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Postprocessors/MFEMVectorFEInnerProductIntegralPostprocessor
-
 ## Overview
 
 Postprocessor for calculating the integral of the dot product between two vector variables over a

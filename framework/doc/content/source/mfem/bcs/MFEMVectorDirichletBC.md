@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /BCs/MFEMVectorDirichletBC
-
 ## Overview
 
 Boundary condition for enforcing an essential (Dirichlet) boundary condition on all components of a

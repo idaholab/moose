@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Variables/MFEMComplexVariable
-
 ## Overview
 
 `MFEMComplexVariable` defines a complex-valued finite element variable (`mfem::ParComplexGridFunction`) with respect to a finite
