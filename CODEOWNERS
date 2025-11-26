@@ -25,6 +25,7 @@
 /framework/src @lindsayad
 /framework/*/base @roystgnr @lindsayad
 /framework/*/base/MeshGeneratorSystem* @loganharbour @lindsayad
+/framework/*/csg @GiudGiud @lindsayad
 /framework/*/dampers @GiudGiud @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud @lindsayad
 /framework/*/materials/Derivative* @dschwen @lindsayad
