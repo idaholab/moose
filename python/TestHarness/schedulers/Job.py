@@ -19,6 +19,7 @@ from TestHarness import OutputInterface, util
 from tempfile import TemporaryDirectory
 from collections import namedtuple
 from dataclasses import asdict, dataclass
+from typing import Optional
 
 from TestHarness import util
 
@@ -806,6 +807,12 @@ class Job(OutputInterface):
         if self.timer.hasTime('main'):
             return self.timer.totalTime()
         return 0.0
+
+    def getMaxMemory(self) -> Optional[int]:
+        """Get the Job's estimated max memory usage in bytes, if any."""
+        if self._runner is not None and (value := self._runner.max_memory) is not None:
+            return value
+        return None
 
     def getStatus(self):
         return self.job_status.getStatus()

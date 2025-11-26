@@ -8,7 +8,10 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, platform, subprocess, shlex, time
+import psutil
+from contextlib import suppress
 from tempfile import SpooledTemporaryFile
+from typing import Optional, Tuple
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
@@ -25,7 +28,7 @@ class SubprocessRunner(Runner):
         # The error file handler
         self.errfile = None
         # The underlying subprocess
-        self.process = None
+        self.process: Optional[subprocess.Popen] = None
 
     def spawn(self, timer):
         tester = self.job.getTester()
@@ -72,12 +75,45 @@ class SubprocessRunner(Runner):
 
         timer.start('runner_run')
 
-    def wait(self, timer):
+    def _waitProcess(self):
+        """
+        Wait for a process to complete.
+
+        Sets the max memory while running and the exit code on completion.
+        """
+        assert self.process is not None
+        psutil_process = psutil.Process(self.process.pid)
+
+        max_rss = 0
+        self.setMaxMemory(0)
+
+        while self.process.poll() is None:
+            psutil_processes = []
+            with suppress(psutil.NoSuchProcess):
+                psutil_processes = [psutil_process] + psutil_process.children(
+                    recursive=True
+                )
+
+            total = 0
+            for p in psutil_processes:
+                with suppress(psutil.NoSuchProcess):
+                    total += p.memory_info().rss
+
+            if total > max_rss:
+                self.setMaxMemory(total)
+                max_rss = total
+
+            time.sleep(0.01)
+
         self.process.wait()
+        self.exit_code = self.process.poll()
+
+    def wait(self, timer):
+        self._waitProcess()
+        assert self.exit_code is not None
+        assert self.max_memory is not None
 
         timer.stop('runner_run')
-
-        self.exit_code = self.process.poll()
 
         # This should have been cleared before the job started
         if self.getRunOutput().hasOutput():
