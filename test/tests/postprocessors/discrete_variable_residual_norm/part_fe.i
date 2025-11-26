@@ -122,4 +122,12 @@
     norm_type = l_inf
     execute_on = 'FINAL'
   []
+  [fe_A_linf_scaled]
+    type = DiscreteVariableResidualNorm
+    variable = T_fe
+    block = 'blockA'
+    norm_type = l_inf
+    include_scaling_factor = true
+    execute_on = 'FINAL'
+  []
 []

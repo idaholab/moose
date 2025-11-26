@@ -37,6 +37,11 @@ where $N$ is the size of the set $\mathcal{I}_{u,\Omega}$.
 The parameter [!param](/Postprocessors/DiscreteVariableResidualNorm/correct_mesh_bias)
 can be specified to divide the norm by the respective $N$ bias ($N$, $\sqrt{N}$, and $1$
 for $\ell_1$, $\ell_2$, and $\ell_\infty$, respectively).
+The parameter [!param](/Postprocessors/DiscreteVariableResidualNorm/include_scaling_factor)
+controls whether the residual scaling factor (associated with the selected solution variable)
+should be included in the norm. For the purposes of convergence monitoring, it is usually
+recommended to keep this as `false`, as residual scaling factors are intended to improve
+numerical conditioning of the system rather than convergence criteria.
 
 Note the related post-processors:
 
