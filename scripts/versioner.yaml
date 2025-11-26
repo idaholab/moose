@@ -37,8 +37,8 @@ packages:
       - conda/libmesh-vtk/build.sh
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.24.0
-    build_number: 1
+    version: 3.24.2
+    build_number: 0
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -56,8 +56,8 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2025.10.15
-    build_number: 1
+    version: 2025.11.25_c144a6e
+    build_number: 0
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -93,7 +93,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.11.24
+    version: 2025.12.08
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
