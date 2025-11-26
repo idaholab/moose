@@ -902,9 +902,9 @@ TEST(CSGBaseTest, testRenameLattice)
   {
     // try to rename to existing name
     const auto & lat2 = csg_obj->createCartesianLattice("another_lattice", 1.0);
-    Moose::UnitUtils::assertThrows(
-        [&csg_obj, &lat2]() { csg_obj->renameLattice(lat2, "new_name"); },
-        "Lattice with name new_name already exists in geometry.");
+    Moose::UnitUtils::assertThrows([&csg_obj, &lat2]()
+                                   { csg_obj->renameLattice(lat2, "new_name"); },
+                                   "Lattice with name new_name already exists in geometry.");
   }
   {
     // try to rename lattice that does not exist in this base
