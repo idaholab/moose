@@ -44,6 +44,7 @@
       recover = false
       max_parallel = 1
       detail = 'fifth step,'
+      capabilities = 'method!=dbg'
     []
     [06]
       type = CSVDiff

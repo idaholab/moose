@@ -110,6 +110,7 @@
     absent_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [3-9]'
     cli_args = "final_re=200 starting_re=200 num_steps=1 Outputs/out/output_material_properties=false  Materials/mu/output_properties='' Outputs/out/hide='vel_average vel_mag pressure_average vel_bar_x vel_bar_y pressure_bar'"
     max_threads = 1 # static condensation doesn't currently support threading
+    capabilities = 'method!=dbg'
   []
   [block_restriction]
     requirement = 'The system shall produce equivalent output when using field split preconditoning and static condensation'
