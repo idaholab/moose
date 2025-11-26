@@ -69,7 +69,7 @@ def require_i_suffix(value: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run Navier–Stokes cases with scaling refine/procs and logging."
+        description="Run Navier-Stokes cases with scaling refine/procs and logging."
     )
     parser.add_argument(
         "--exec", default="/data/lindad/projects/moose4/modules/navier_stokes/navier_stokes-oprof",

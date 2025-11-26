@@ -169,7 +169,7 @@ def main():
     solve_avg /= num_dofs / (num_procs * 1e5)
 
     if args.csv:
-        # Keep CSV clean; write summary to stderr so CSV parsers aren’t confused
+        # Keep CSV clean; write summary to stderr so CSV parsers aren't confused
         if num_elems is not None:
             sys.stderr.write(f"Num Elems: {num_elems}\n")
         if num_dofs is not None:
