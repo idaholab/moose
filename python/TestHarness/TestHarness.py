@@ -787,6 +787,17 @@ class TestHarness:
         jobs = sorted(jobs, key=lambda job: job.getTiming(), reverse=True)
         return jobs[0:num]
 
+    def getHeaviestJobs(self, num: int) -> list:
+        """
+        Get the heaviest jobs by memory, if available
+        """
+        jobs = [
+            j for j in self.finished_jobs
+            if (not j.isSkip() and j.getMaxMemory())
+        ]
+        jobs = sorted(jobs, key=lambda job: job.getMaxMemory(), reverse=True)
+        return jobs[0:num]
+
     def getLongestFolders(self, num: int) -> list[typing.Tuple[str, float]]:
         """
         Get the longest running folders after running all jobs
@@ -856,6 +867,12 @@ class TestHarness:
                 for job in longest_jobs:
                     print(util.formatJobResult(job, self.options, caveats=True, timing=True))
 
+            heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
+            if heaviest_jobs:
+                print(header(f'{self.options.longest_jobs} Heaviest Jobs'))
+                for job in heaviest_jobs:
+                    print(util.formatJobResult(job, self.options, caveats=True, timing=True))
+
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
             if longest_folders:
                 print(header(f'{self.options.longest_jobs} Longest Running Folders'))
@@ -866,7 +883,7 @@ class TestHarness:
                         suffix = folder.replace(first_directory, '', 1)
                         folder = prefix + suffix
                     entry = util.FormatResultEntry(name=folder, timing=time)
-                    print(util.formatResult(entry, self.options, timing=True))
+                    print(util.formatResult(entry, self.options, timing=True, memory=False))
 
         # Parser errors, near the bottom
         if self.parse_errors:
@@ -1154,7 +1171,7 @@ class TestHarness:
             term_cols = 110
             pass
         term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
-        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
+        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcstm')
 
         parser = argparse.ArgumentParser(description='A tool used to test MOOSE-based applications')
 

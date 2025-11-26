@@ -8,6 +8,8 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, json
+from threading import Lock
+from typing import Optional
 from TestHarness import OutputInterface, util
 
 class Runner(OutputInterface):
@@ -27,11 +29,39 @@ class Runner(OutputInterface):
         self.options = options
         # The job's exit code, should be set after wait()
         self.exit_code = None
+        # The job's estimated max memory in bytes, if any
+        self._max_memory: Optional[int] = None
+        # Thread lock for max_memory
+        self._max_memory_lock = Lock()
+
         # The output for the actual run of the job. We keep this
         # separate from self.output in this Runner because HPC
         # jobs always have a file output, so we want to store
         # their output separately
         self.run_output = OutputInterface()
+
+    @property
+    def max_memory(self) -> Optional[int]:
+        """
+        Get the estimated max memory in bytes for the job.
+
+        Is thread safe: can be used while the job is running.
+        """
+        with self._max_memory_lock:
+            return self._max_memory
+
+    def setMaxMemory(self, value: int):
+        """
+        Set the max memory in bytes for the process.
+
+        Should be used by derived runners to set the memory
+        as it is running if available.
+
+        Is thread safe so that a running job can update its memory
+        usage while being read by the long running job printer.
+        """
+        with self._max_memory_lock:
+            self._max_memory = value
 
     def getRunOutput(self):
         """ Get the OutputInterface object for the actual run """
