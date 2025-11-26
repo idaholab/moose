@@ -75,9 +75,9 @@ public:
   }
 
   /**
-   * @brief check if provided index in row-element form is valid for the given hexagonal lattice
+   * @brief check if provided index in row-column form is valid for the given hexagonal lattice
    *
-   * @param index in row-element form
+   * @param index in row-column form
    * @return true if valid, otherwise false
    */
   virtual bool isValidIndex(const std::pair<int, int> index) const override;
@@ -108,9 +108,9 @@ public:
   unsigned int getNRings() const { return _nring; }
 
   /**
-   * @brief Given an index in ring-element form, get the corresponding row-column index. The
-   * ring-element form assumes the outermost ring is the 0th ring and is indexed starting from the
-   * rightmost element of the ring and proceeding counter-clockwise around the ring. The row-column
+   * @brief Given an index in ring-position form, get the corresponding row-column index. The
+   * ring-position form assumes the outermost ring is the 0th ring and is indexed starting from the
+   * rightmost position of the ring and proceeding counter-clockwise around the ring. The row-column
    * form assumes the top row is the 0th row and is indexed from left to right.
    *
    * Example of corresponding indices for a hexagonal lattice with 3 rings (5 rows):
@@ -122,23 +122,23 @@ public:
    *     (3,0)  (3,1)  (3,2)  (3,3)
    *        (4,0)  (4,1)  (4,2)
    *
-   * Ring-Element Form:
+   * Ring-Position Form:
    *       (0,8)  (0,9)  (0,10)
    *    (0,7)  (1,4)  (1,5)  (0,11)
    * (0,6)  (1,3)  (2,0)  (1,0)  (0,0)
    *    (0,5)  (1,2)  (1,1)  (0,1)
    *       (0,4)  (0,3)  (0,2)
    *
-   * @param index in ring-element form
+   * @param index in ring-position form
    * @return index in row-column form
    */
   std::pair<int, int> getRowIndexFromRingIndex(const std::pair<int, int> & row_col_index) const;
 
   /**
-   * @brief Given an index in row-column form, get the corresponding ring-element index. The
+   * @brief Given an index in row-column form, get the corresponding ring-position index. The
    * row-column form assumes the top row is the 0th row and is indexed from left to right. The
-   * ring-element form assumes the outermost ring is the 0th ring and is indexed starting from the
-   * rightmost element of the ring and proceeding counter-clockwise around the ring.
+   * ring-position form assumes the outermost ring is the 0th ring and is indexed starting from the
+   * rightmost position of the ring and proceeding counter-clockwise around the ring.
    *
    * Example of corresponding indices for a hexagonal lattice with 3 rings (5 rows):
    *
@@ -149,7 +149,7 @@ public:
    *     (3,0)  (3,1)  (3,2)  (3,3)
    *        (4,0)  (4,1)  (4,2)
    *
-   * Ring-Element Form:
+   * Ring-Position Form:
    *       (0,8)  (0,9)  (0,10)
    *    (0,7)  (1,4)  (1,5)  (0,11)
    * (0,6)  (1,3)  (2,0)  (1,0)  (0,0)
@@ -157,7 +157,7 @@ public:
    *       (0,4)  (0,3)  (0,2)
    *
    * @param index in row-column form
-   * @return index in ring-element form
+   * @return index in ring-position form
    */
   std::pair<int, int> getRingIndexFromRowIndex(const std::pair<int, int> & row_col_index) const;
 
@@ -180,7 +180,7 @@ protected:
   virtual bool compareAttributes(const CSGLattice & other) const override;
 
   /**
-   * @brief build a mapping of row-column indices to ring-element indices for quick conversion and
+   * @brief build a mapping of row-column indices to ring-position indices for quick conversion and
    * look-up. Sets the _row_to_ring_map variable.
    */
   void buildIndexMap();
@@ -202,7 +202,7 @@ protected:
   /// number of rings in the hexagonal lattice, should be consistent with the number of rows
   unsigned int _nring;
 
-  /// map of row-column indices to ring-element indices for quick conversion and look-up
+  /// map of row-column indices to ring-position indices for quick conversion and look-up
   std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
       _row_to_ring_map;
 

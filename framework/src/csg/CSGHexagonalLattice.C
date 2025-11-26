@@ -83,7 +83,7 @@ bool
 CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
 {
   auto row = index.first;  // row index
-  auto ele = index.second; // element index within the row
+  auto ele = index.second; // column index within the row
 
   // Check if row is valid (0 <= row < _nrow)
   if (row < 0 || row >= (int)_nrow)
@@ -93,7 +93,7 @@ CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
   auto center_row = (_nrow - 1) / 2; // center row index
   int max_ele = _nrow - std::abs((int)(row - center_row));
 
-  // Check if element index is valid for this row
+  // Check if column index is valid for this row
   return !(ele < 0 || ele >= max_ele);
 }
 
@@ -143,7 +143,7 @@ CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_e
     mooseError("Ring " + std::to_string(og_ring) + " is not valid for hexagonal lattice " +
                getName());
   if (element < 0 || element >= (ring == 0 ? 1 : 6 * ring))
-    mooseError("Element " + std::to_string(element) + " is not valid for ring " +
+    mooseError("Position " + std::to_string(element) + " is not valid for ring " +
                std::to_string(og_ring) + " in hexagonal lattice " + getName());
 
   // Calculate the center row and column indices
@@ -177,7 +177,7 @@ CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_e
   //            1
   switch (side)
   {
-    case 0: // bottom right (contains starting element of the ring)
+    case 0: // bottom right (contains starting position of the ring)
       row = center_row + offset;
       col = calc_num_cols_in_row(row) - og_ring - 1;
       break;
