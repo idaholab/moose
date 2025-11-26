@@ -538,10 +538,10 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(app_KOKKOS_LIB_COMBINED)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(app_KOKKOS_LIB_COMBINED) $(ADDITIONAL_EXEC_OBJECTS)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(app_KOKKOS_LIB_COMBINED) ${SILENCE_SOME_WARNINGS}'
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(ADDITIONAL_EXEC_OBJECTS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(app_KOKKOS_LIB_COMBINED) ${SILENCE_SOME_WARNINGS}'
 	@$(codesign)
 
 ###### install stuff #############
