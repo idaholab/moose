@@ -38,10 +38,10 @@ The parameter [!param](/Postprocessors/DiscreteVariableResidualNorm/correct_mesh
 can be specified to divide the norm by the respective $N$ bias ($N$, $\sqrt{N}$, and $1$
 for $\ell_1$, $\ell_2$, and $\ell_\infty$, respectively).
 The parameter [!param](/Postprocessors/DiscreteVariableResidualNorm/include_scaling_factor)
-controls whether the residual scaling factor (associated with the selected solution variable)
+controls whether the residual/Jacobian scaling factor (associated with the selected solution variable)
 should be included in the norm. For the purposes of convergence monitoring, it is usually
-recommended to keep this as `false`, as residual scaling factors are intended to improve
-numerical conditioning of the system rather than convergence criteria.
+recommended to keep this as `false`, as residual/Jacobian scaling factors are usually intended to improve
+numerical conditioning of the system rather than convergence criteria, although in some instances a user may deliberately be selecting scaling factors to influence residual-based convergence using the `Executioner/resid_vs_jac_scaling_param`; in this case the user likely wishes to set `include_scaling_factor = true`.
 
 Note the related post-processors:
 
