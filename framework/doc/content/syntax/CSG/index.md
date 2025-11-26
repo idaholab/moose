@@ -37,9 +37,11 @@ A lattice is the arrangement of repeated universes in a defined structure.
 Some common types are regular Cartesian or hexagonal lattices (examples can be seen [here](source/csg/CSGBase.md#lattice-indexing)).
 Lattices will sometimes contain universes in the elements of the lattice that do not fill the full spatial domain of that element.
 Therefore, lattices also often rely on a definition of an "outer" fill, usually a single material or another universe, which fills the undefined spatial domain within the lattice.
-A visual depiction of a lattice with an outer fill is shown in FIGURE.
+A visual depiction of a lattice with an outer fill is shown in [!ref](fig:lat_outer).
 
-(ADD FIGURE: a visual of a regular hexagonal lattice where the red lines represent the boundary of each of the lattice elements, the yellow circles are the spatial extent of the universe that fills each lattice element, and the blue is the "outer" that fills the remaining spatial domain around the lattice element universes.)
+!media large_media/csg/hex_lat_outer.png
+       id=fig:lat_outer
+       caption=A visual of a regular hexagonal lattice where the red lines represent the boundary of each of the lattice elements, the yellow circles are the spatial extent of the universe that fills each lattice element, and the blue is the "outer" that fills the remaining spatial domain around the lattice element universes.
 
 For a more detailed description of how surfaces, cells, universes, and lattices are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
 
