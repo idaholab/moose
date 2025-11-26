@@ -80,6 +80,9 @@ def parse_header_for_key(key: str, text: str) -> Optional[int]:
 def parse_num_dofs(text: str) -> Optional[int]:
     return parse_header_for_key("Num DOFs", text)
 
+def parse_num_procs(text: str) -> Optional[int]:
+    return parse_header_for_key("Num Processors", text)
+
 def parse_num_elems(text: str) -> Optional[int]:
     # Match either "Elems: <num>" or "Elems:" followed by "Total: <num>"
     pattern = (
@@ -162,6 +165,8 @@ def main():
     num_condensed_p_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_p_", text)
     num_condensed_dofs = num_condensed_u_dofs + num_condensed_p_dofs
     solve_avg = parse_perf_solve_avg(text)
+    num_procs = parse_num_procs(text)
+    solve_avg /= num_dofs / (num_procs * 1e5)
 
     if args.csv:
         # Keep CSV clean; write summary to stderr so CSV parsers aren’t confused
