@@ -869,9 +869,15 @@ class TestHarness:
 
             heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
             if heaviest_jobs:
-                print(header(f'{self.options.longest_jobs} Heaviest Jobs'))
+                print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/slot)'))
                 for job in heaviest_jobs:
-                    print(util.formatJobResult(job, self.options, caveats=True, timing=True))
+                    print(util.formatJobResult(
+                        job,
+                        self.options,
+                        caveats=True,
+                        timing=True,
+                        memory_per_slot=True,
+                    ))
 
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
             if longest_folders:
