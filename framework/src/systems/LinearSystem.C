@@ -367,7 +367,12 @@ LinearSystem::containsTimeKernel()
 }
 
 void
-LinearSystem::compute(ExecFlagType)
+LinearSystem::compute(const ExecFlagType type)
 {
-  // Linear systems have their own time derivative computation machinery
+  // - Linear system assembly is associated with EXEC_NONLINEAR
+  // - Avoid division by 0 dt
+  if (type == EXEC_NONLINEAR && _fe_problem.dt() > 0.)
+    for (auto & ti : _time_integrators)
+      // Do things like compute integration weights
+      ti->preStep();
 }

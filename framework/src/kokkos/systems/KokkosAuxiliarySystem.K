@@ -29,7 +29,7 @@ AuxiliarySystem::addKokkosKernel(const std::string & kernel_name,
 void
 AuxiliarySystem::kokkosCompute(ExecFlagType type)
 {
-  TIME_SECTION("computeKokkosAuxKernel", 1);
+  TIME_SECTION("computeKokkosAuxKernel", 3);
 
   if (!_kokkos_elemental_aux_storage[type].size() && !_kokkos_nodal_aux_storage[type].size())
     return;
