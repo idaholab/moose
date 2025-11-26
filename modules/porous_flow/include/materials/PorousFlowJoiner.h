@@ -77,7 +77,7 @@ protected:
   std::vector<const MaterialProperty<Real> *> _dphase_property_dt;
 
   /// d(property of each phase)/d(mass fraction)
-  std::vector<const MaterialProperty<Real> *> _dphase_property_dX;
+  std::vector<const MaterialProperty<std::vector<Real>> *> _dphase_property_dX;
 };
 
 typedef PorousFlowJoinerTempl<false> PorousFlowJoiner;
