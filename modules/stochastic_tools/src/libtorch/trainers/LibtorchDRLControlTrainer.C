@@ -89,9 +89,6 @@ LibtorchDRLControlTrainer::validParams()
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
 
-  params.addRequiredParam<std::vector<Real>>(
-      "action_standard_deviations", "Standard deviation value used while sampling the actions.");
-
   params.addParam<Real>(
       "clip_parameter", 0.2, "Clip parameter used while clamping the advantage value.");
   params.addRangeCheckedParam<unsigned int>(
@@ -131,6 +128,8 @@ LibtorchDRLControlTrainer::validParams()
   params.addParam<std::vector<Real>>("min_control_value", {}, "The minimum values of the control signal.");
   params.addParam<std::vector<Real>>("max_control_value", {}, "The maximum calue of the control signal.");
 
+  params.addParam<Real>("entropy_coeff", 0.01, "ASDASD");
+
   params.addParam<unsigned int>("timestep_window", 1, "Data acquisition timesteps (every nth)");
 
   return params;
@@ -167,7 +166,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _clip_param(getParam<Real>("clip_parameter")),
     _decay_factor(getParam<Real>("decay_factor")),
     _lambda_factor(getParam<Real>("lambda_factor")),
-    _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
     _filename_base(isParamValid("filename_base") ? getParam<std::string>("filename_base") : ""),
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
@@ -177,6 +175,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _min_values(getParam<std::vector<Real>>("min_control_value")),
     _max_values(getParam<std::vector<Real>>("max_control_value")),
     _highest_reward(-1e8),
+    _entropy_coeff(getParam<Real>("entropy_coeff")),
     _update_counter(_update_frequency),
     _timestep_window(getParam<unsigned int>("timestep_window"))
 {
@@ -206,7 +205,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       _num_inputs,
       _num_outputs,
       _num_control_neurons_per_layer,
-      _action_std,
       getParam<std::vector<std::string>>("control_activation_functions"),
       _min_values,
       _max_values);
@@ -403,7 +401,10 @@ LibtorchDRLControlTrainer::execute()
     computeEpisodeRewardStatistics();
 
     if(_average_episode_reward > _highest_reward)
+    {
       torch::save(_control_nn, _control_nn->name()+"_best");
+      _highest_reward = _average_episode_reward;
+    }
 
     normalizeResponseData(_state_data, _input_timesteps);
     normalizeResponseData(_next_state_data, _input_timesteps);
@@ -630,7 +631,7 @@ LibtorchDRLControlTrainer::trainController()
         auto surr2 = torch::clamp(ratio, 1.0 - _clip_param, 1.0 + _clip_param) * advantage_batch;
 
         // Compute loss values for the critic and the control neural net
-        auto actor_loss = -(torch::min(surr1, surr2) + 0.01*_control_nn->entropy()).mean();
+        auto actor_loss = -(torch::min(surr1, surr2) + _entropy_coeff*_control_nn->entropy()).mean();
         auto critic_loss = torch::mse_loss(value, return_batch);
 
         // Update the weights in the neural nets
@@ -674,8 +675,11 @@ LibtorchDRLControlTrainer::trainController()
         batch_begin = batch_end;
       }
       // std::cout << _control_nn->stdTensor() << std::endl;
-      std::cout << _control_nn->alphaTensor().mean() << std::endl;
-      std::cout << _control_nn->betaTensor().mean() << std::endl;
+      if (_min_values.size())
+      {
+        std::cout << _control_nn->alphaTensor().mean() << std::endl;
+        std::cout << _control_nn->betaTensor().mean() << std::endl;
+      }
       _console << "Best model so far: " << _highest_reward << std::endl;
     }
   }

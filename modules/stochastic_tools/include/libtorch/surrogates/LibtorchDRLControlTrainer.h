@@ -231,6 +231,7 @@ protected:
   torch::Tensor _log_probability_tensor;
 
   Real _highest_reward;
+  Real _entropy_coeff;
 
   std::unique_ptr<torch::optim::Adam> _actor_optimizer;
   std::unique_ptr<torch::optim::Adam> _critic_optimizer;

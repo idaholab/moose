@@ -10,8 +10,8 @@ air_effective_k = 0.5 # W/(m K)
     xmax = 7.0
     ymin = 0.0
     ymax = 5.0
-    nx = 10
-    ny = 10
+    nx = 20
+    ny = 20
   []
 []
 
@@ -127,30 +127,11 @@ air_effective_k = 0.5 # W/(m K)
     input_timesteps = 1
     response_scaling_factors = '0.03'
     response_shift_factors = '290'
-    action_standard_deviations = '3e-2'
     action_scaling_factors = 20
+    stochastic = true
 
     execute_on = 'TIMESTEP_BEGIN'
   []
-  # [src_control_final]
-  #   type = LibtorchNeuralNetControl
-
-  #   filename = 'mynet_control.net'
-  #   num_neurons_per_layer = '16 6'
-  #   activation_function = 'relu'
-
-  #   parameters = "BCs/top_flux/value"
-  #   responses = 'center_temp_tend'
-
-  #   # keep consistent with LibtorchDRLControlTrainer
-  #   input_timesteps = 1
-  #   response_scaling_factors = '0.03'
-  #   response_shift_factors = '290'
-  #   action_standard_deviations = '5e-5'
-  #   action_scaling_factors = 20
-
-  #   execute_on = 'TIMESTEP_BEGIN'
-  # []
 []
 
 [Executioner]
@@ -165,13 +146,9 @@ air_effective_k = 0.5 # W/(m K)
 
   start_time = 0.0
   end_time = 86400
-  dt = ${fparse 86400/40}
+  dt = ${fparse 86400/80}
 []
 
 [Outputs]
   console = false
-  [c]
-    type = JSON
-    execute_on = FINAL
-  []
 []

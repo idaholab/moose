@@ -340,45 +340,50 @@
     value = 0.0
     execute_on = TIMESTEP_BEGIN
   []
-  [Q]
-    type = LibtorchControlValuePostprocessor
-    control_name = src_control
-  []
-  [log_prob_Q]
-    type = LibtorchDRLLogProbabilityPostprocessor
-    control_name = src_control
-  []
+  # [Q]
+  #   type = LibtorchControlValuePostprocessor
+  #   control_name = src_control
+  # []
+  # [log_prob_Q]
+  #   type = LibtorchDRLLogProbabilityPostprocessor
+  #   control_name = src_control
+  # []
 []
 
-[Reporters]
-  [results]
-    type = AccumulateReporter
-    reporters = 'p1x/value p2x/value p3x/value p4x/value p5x/value p1y/value p2y/value p3y/value p4y/value p5y/value reward/value Q/value log_prob_Q/value'
-  []
-[]
+# [Reporters]
+#   [results]
+#     type = AccumulateReporter
+#     reporters = 'p1x/value p2x/value p3x/value p4x/value p5x/value p1y/value p2y/value p3y/value p4y/value p5y/value reward/value Q/value log_prob_Q/value'
+#   []
+# []
 
-[Controls]
-  [src_control]
-    type = LibtorchDRLControl
-    parameters = "Postprocessors/Q_signal/value"
-    responses = 'p1x p2x p3x p4x p5x p1y p2y p3y p4y p5y'
+# [Controls]
+#   [src_control]
+#     type = LibtorchDRLControl
+#     parameters = "Postprocessors/Q_signal/value"
+#     responses = 'p1x p2x p3x p4x p5x p1y p2y p3y p4y p5y'
 
-    # keep consistent with LibtorchDRLControlTrainer
-    input_timesteps = 1
-    response_shift_factors = '1.98 1.825 2.015 0.03 1.9 0.58 -0.425 0.06 0.12 -0.02'
-    response_scaling_factors = '1.47 1.03 2.60 3.45 2.0 1.19 1.6 2.7 1.47 2.08'
-    action_scaling_factors = 1.0
+#     # keep consistent with LibtorchDRLControlTrainer
+#     input_timesteps = 1
+#     response_shift_factors = '1.98 1.825 2.015 0.03 1.9 0.58 -0.425 0.06 0.12 -0.02'
+#     response_scaling_factors = '1.47 1.03 2.60 3.45 2.0 1.19 1.6 2.7 1.47 2.08'
+#     action_scaling_factors = 1.0
 
-    # response_scaling_factors = '1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0'
-    # response_shift_factors = '0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0'
-    # action_scaling_factors = 1.0
+#     filename = "control.net_best"
 
-    execute_on = 'TIMESTEP_BEGIN'
-    smoother = 0.1
-    num_stems_in_period = 50
-    stochastic = true
-  []
-[]
+#     num_neurons_per_layer = '512 512'
+#     activation_function = 'tanh tanh'
+
+#     min_control_value = ${fparse -0.108}
+#     max_control_value = ${fparse 0.108}
+
+#     execute_on = 'TIMESTEP_BEGIN'
+#     smoother = 0.1
+#     num_stems_in_period = 50
+
+#     stochastic = false
+#   []
+# []
 
 [Executioner]
   type = PIMPLE
@@ -401,7 +406,7 @@
   print_fields = false
   continue_on_max_its = true
   dt = 0.0005
-  num_steps = 2000
+  num_steps = 4000
 []
 
 [Outputs]
@@ -410,6 +415,6 @@
     type = JSON
     execute_on = final
   []
-  console = false
+  # console = false
   # execute_on = FINAL
 []
