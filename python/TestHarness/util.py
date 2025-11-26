@@ -170,7 +170,7 @@ def formatJobResult(
     status_message: bool = True,
     timing: Optional[bool] = None,
     memory: Optional[bool] = None,
-    memory_per_slot: bool = False,
+    memory_per_proc: bool = False,
     caveats: bool = False,
 ) -> str:
     name = job.getTestName()
@@ -200,8 +200,8 @@ def formatJobResult(
         name = prefix + suffix
 
     memory = job.getMaxMemory()
-    if memory_per_slot and memory is not None:
-        memory = int(memory / job.getSlots())
+    if memory_per_proc and memory is not None:
+        memory = int(memory / job.getTester().getProcs(options))
     entry = FormatResultEntry(
         name=name,
         timing=job.getTiming(),
