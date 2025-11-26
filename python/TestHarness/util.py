@@ -120,7 +120,7 @@ def formatResult(
             and (options.timing or timing)
             and memory is not False
         ):
-            if entry.memory is not None:
+            if entry.memory is not None or entry.timing == 0:
                 value = int(entry.memory * 1e-6) if entry.memory else 0
                 message = f"[{value:>4}MB]"
             else:
