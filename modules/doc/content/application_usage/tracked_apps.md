@@ -11,7 +11,7 @@ The purpose of these lists is two fold:
 
 ### Multiphysics frameworks
 
-- [Cardinal](https://github.com/neams-th-coe/cardinal) - Integration of NekRS \& OpenMC with MOOSE for fusion and fission systems high-fidelity simulation
+- [Cardinal](https://github.com/neams-th-coe/cardinal) - Integration of NekRS & OpenMC with MOOSE for fusion and fission systems high-fidelity simulation
 - [SALAMANDER](https://github.com/idaholab/salamander) - Integration of Cardinal with TMAP8 for fusion blanket multiphysics simulations
 
 
@@ -26,7 +26,6 @@ The purpose of these lists is two fold:
 ### Thermal hydraulics and fluid dynamics
 
 - [OpenPronghorn](https://mooseframework.inl.gov/open_pronghorn/) - Coarse mesh computational fluid dynamics
-- [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
 - [hippo](https://github.com/aurora-multiphysics/hippo) - Integration of OpenFOAM and MOOSE to enable thermohydraulic simulations
 - [Saline](https://code.ornl.gov/neams/saline) - Molten salt fluid properties from MSTDB experimental data
 - [Marlin](https://github.com/idaholab/marlin) - Spectral PDE and Lattice Boltzmann solver based on MOOSE with GPU-acceleration
@@ -38,13 +37,10 @@ The purpose of these lists is two fold:
 - [Deer](https://github.com/Argonne-National-Laboratory/deer) - Various mechanics modules for MOOSE
 - [MASTODON](https://github.com/idaholab/mastodon) - Structural dynamics, seismic analysis, and risk assessment
 - [RACCOON](https://github.com/hugary1995/raccoon) - Massively parallel FEM code for phase-field for fracture
-- [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
 
 ### Materials
 
 - [GRIME](https://github.com/shortlab/grime) - The Grand Radiation Informed Microstructural Evolver: Coupled, spatially dependent radiation damage and microstructural evolution
-- [HOGNOSE](https://github.com/shortlab/hognose) - CASL's mesoscale corrosion/oxidation code
-- [Hyrax](https://github.com/UMThorntonGroup/Hyrax) - Zirconium hydride precipitation and growth in LWR nuclear fuel cladding
 - [Magpie](https://github.com/idaholab/magpie) - Mesoscale Atomistic Glue Program for Integrated Execution
 - [Pika](https://github.com/idaholab/pika) - Phase-field model for micro-structure evolution of ice
 
@@ -62,7 +58,7 @@ The purpose of these lists is two fold:
 
 ### Chemistry & species transport
 
-- [DGOSPREY](https://github.com/aladshaw3/dgosprey) - Discontinuous Galerkin Off-gas SeParation and REcoverY model: joint development between INL and GIT
+- [cats](https://github.com/aladshaw3/cats) - Catalysis And Treatment Simulations (CATS) library for MOOSE
 - [TMAP8](https://mooseframework.inl.gov/TMAP8/) - System-level mass and thermal transport calculations related to tritium migration.
 
 
@@ -107,9 +103,10 @@ Combined applications
 ### Others
 
 - Great White - 3D discrete dislocation dynamic application using the Mechanics of Defects Library
-- Mixcoatl$^{TM}$ - Conjugate heat transfer in microreactors
-- MONARCH - Radiation damage modeling in semiconductors
-- GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs.
+- Mixcoatl$^{TM}$ - Conjugate heat transfer in microreactors, developed at BWXT
+- MONARCH - Radiation damage modeling in semiconductors, developed at LANL
+- GOLEM - Numerical simulator for modelling coupled Thermo-Hydro-Mechanical processes in faulted geothermal reservoirs, developed at GFZ Postdam
+- [Okami](https://hpcgitlab.hpc.inl.gov/idaholab/okami/) - Mixed Oxide fuel studies
 
 
 ## Legacy software
@@ -118,13 +115,31 @@ We list here older, unmaintained, projects for consideration when naming a new p
 
 ### Open source
 
-- [Achlys](https://github.com/aurora-multiphysics/achlys) - Macroscopic tritium transport processes through fusion materials
-- [Dendragapus](https://github.com/jarons/dendragapus) - Application to explore modifications to Picard Iteration
+Reactor Physics
+
 - [Gardensnake](https://github.com/friedmud/gardensnake) - Nodal neutron diffusion code developed at MIT
-- [Slug](https://github.com/adamLange/slug) - Hyperloop air bearing simulation tool
 - [MaCaw](https://github.com/idaholab/macaw) - Domain-decomposed unstructured mesh Monte Carlo particle transport using OpenMC as a collision physics library
-- [MAMBA](https://github.com/shortlab/mamba) - MOOSE port of the still maintained non-MOOSE MAMBA CASL code for boiling, heat transfer, and chemistry in porous media
+
+Materials, solid mechanics and fuel performance
+
 - [Crow](https://github.com/SudiptaBiswas/Crow) - MOOSE-based mesoscale simulations for solid-state sintering.
+- [DGOSPREY](https://github.com/aladshaw3/dgosprey) - Discontinuous Galerkin Off-gas SeParation and REcoverY model: joint development between INL and GIT
+- [HOGNOSE](https://github.com/shortlab/hognose) - CASL's mesoscale corrosion/oxidation code
+- [Hyrax](https://github.com/UMThorntonGroup/Hyrax) - Zirconium hydride precipitation and growth in LWR nuclear fuel cladding
+- [Slug](https://github.com/adamLange/slug) - Hyperloop air bearing simulation tool
+
+Plasma and fusion sciences
+
+- [Achlys](https://github.com/aurora-multiphysics/achlys) - Macroscopic tritium transport processes through fusion materials
+
+Fluid dynamics and Thermal hydraulics
+
+- [barnacle](https://github.com/idaholab/barnacle) - Shallow water equations in MOOSE
+- [MAMBA](https://github.com/shortlab/mamba) - MOOSE port of the still maintained non-MOOSE MAMBA CASL code for boiling, heat transfer, and chemistry in porous media
+
+Miscellaneous
+
+- [Dendragapus](https://github.com/jarons/dendragapus) - Application to explore modifications to Picard Iteration
 
 
 ### Closed source
