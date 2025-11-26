@@ -1,0 +1,12 @@
+[run]
+concurrency = thread
+branch = True
+omit =
+    conftest.py
+    */init_moose_python.py
+    tests/*
+parallel = False
+
+[report]
+show_missing = True
+fail_under = 100
