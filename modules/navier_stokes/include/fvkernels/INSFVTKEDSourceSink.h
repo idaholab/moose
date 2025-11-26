@@ -112,7 +112,7 @@ protected:
 
   /// Wall distance
   const Moose::Functor<Real> * _wall_distance;
-  
+
   /// Closure numbers for production damping in relaminarization
   static constexpr Real _D = 1.0;
   static constexpr Real _E = 0.00375;

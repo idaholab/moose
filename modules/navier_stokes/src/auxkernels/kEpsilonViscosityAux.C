@@ -70,10 +70,12 @@ kEpsilonViscosityAux::kEpsilonViscosityAux(const InputParameters & params)
     _scale_limiter(getParam<MooseEnum>("scale_limiter")),
     _newton_solve(getParam<bool>("newton_solve")),
     _relaminarization(getParam<bool>("relaminarization")),
-    _wall_distance(params.isParamValid("wall_distance") ? &getFunctor<Real>("wall_distance") : nullptr)
+    _wall_distance(params.isParamValid("wall_distance") ? &getFunctor<Real>("wall_distance")
+                                                        : nullptr)
 {
   if (_relaminarization && !_wall_distance)
-      paramError("wall_distance", "Wall distance shouold be provided when relaminarization is activated.");
+    paramError("wall_distance",
+               "Wall distance shouold be provided when relaminarization is activated.");
 }
 
 void
@@ -213,11 +215,10 @@ kEpsilonViscosityAux::computeValue()
       mu_t = std::max(mu_t, NS::mu_t_low_limit);
   }
 
-  if(_relaminarization)
+  if (_relaminarization)
   {
-    const auto Re_d = std::sqrt(_k(current_argument, state))
-                      * (*_wall_distance)(current_argument, state)
-                      / (nu);
+    const auto Re_d =
+        std::sqrt(_k(current_argument, state)) * (*_wall_distance)(current_argument, state) / (nu);
 
     const auto T1 = _Cd0 * std::sqrt(Re_d);
     const auto T2 = _Cd1 * Re_d;
