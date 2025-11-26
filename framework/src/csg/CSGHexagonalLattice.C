@@ -228,21 +228,21 @@ CSGHexagonalLattice::getRingIndexFromRowIndex(const std::pair<int, int> & row_co
 /// convenience functions for converting between number of rows and number of rings
 
 unsigned int
-nRowToRing(unsigned int nrow)
+nRowToRing(int nrow)
 {
   if (nrow == 0) // special case
     return 0;
   std::string base_msg = "Cannot convert number of rows " + std::to_string(nrow) +
                          " to number of rings in hexagonal lattice. ";
-  if (nrow % 2 == 0)
-    mooseError(base_msg + "Number of rows must be odd.");
   if (nrow < 0)
     mooseError(base_msg + "Number of rows must be >= 0.");
+  if (nrow % 2 == 0)
+    mooseError(base_msg + "Number of rows must be odd.");
   return (nrow + 1) / 2;
 }
 
 unsigned int
-nRingToRow(unsigned int nring)
+nRingToRow(int nring)
 {
   if (nring == 0) // special case
     return 0;
