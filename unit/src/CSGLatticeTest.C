@@ -599,14 +599,13 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> umap = {
         {u, u}, {u, u, u}, {u, u}};
     auto lat = CSGHexagonalLattice("lat", 1.0, umap);
-    std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
-        exp_row_to_ring = {{{0, 0}, {0, 4}},
-                           {{0, 1}, {0, 5}},
-                           {{1, 0}, {0, 3}},
-                           {{1, 1}, {1, 0}},
-                           {{1, 2}, {0, 0}},
-                           {{2, 0}, {0, 2}},
-                           {{2, 1}, {0, 1}}};
+    std::map<std::pair<int, int>, std::pair<int, int>> exp_row_to_ring = {{{0, 0}, {0, 4}},
+                                                                          {{0, 1}, {0, 5}},
+                                                                          {{1, 0}, {0, 3}},
+                                                                          {{1, 1}, {1, 0}},
+                                                                          {{1, 2}, {0, 0}},
+                                                                          {{2, 0}, {0, 2}},
+                                                                          {{2, 1}, {0, 1}}};
     for (const auto & pair : exp_row_to_ring)
     {
       auto row_pair = lat.getRowIndexFromRingIndex(pair.second);
@@ -628,26 +627,25 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> umap = {
         {u, u, u}, {u, u, u, u}, {u, u, u, u, u}, {u, u, u, u}, {u, u, u}};
     auto lat = CSGHexagonalLattice("lat", 1.0, umap);
-    std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
-        exp_row_to_ring = {{{0, 0}, {0, 8}},
-                           {{0, 1}, {0, 9}},
-                           {{0, 2}, {0, 10}},
-                           {{1, 0}, {0, 7}},
-                           {{1, 1}, {1, 4}},
-                           {{1, 2}, {1, 5}},
-                           {{1, 3}, {0, 11}},
-                           {{2, 0}, {0, 6}},
-                           {{2, 1}, {1, 3}},
-                           {{2, 2}, {2, 0}},
-                           {{2, 3}, {1, 0}},
-                           {{2, 4}, {0, 0}},
-                           {{3, 0}, {0, 5}},
-                           {{3, 1}, {1, 2}},
-                           {{3, 2}, {1, 1}},
-                           {{3, 3}, {0, 1}},
-                           {{4, 0}, {0, 4}},
-                           {{4, 1}, {0, 3}},
-                           {{4, 2}, {0, 2}}};
+    std::map<std::pair<int, int>, std::pair<int, int>> exp_row_to_ring = {{{0, 0}, {0, 8}},
+                                                                          {{0, 1}, {0, 9}},
+                                                                          {{0, 2}, {0, 10}},
+                                                                          {{1, 0}, {0, 7}},
+                                                                          {{1, 1}, {1, 4}},
+                                                                          {{1, 2}, {1, 5}},
+                                                                          {{1, 3}, {0, 11}},
+                                                                          {{2, 0}, {0, 6}},
+                                                                          {{2, 1}, {1, 3}},
+                                                                          {{2, 2}, {2, 0}},
+                                                                          {{2, 3}, {1, 0}},
+                                                                          {{2, 4}, {0, 0}},
+                                                                          {{3, 0}, {0, 5}},
+                                                                          {{3, 1}, {1, 2}},
+                                                                          {{3, 2}, {1, 1}},
+                                                                          {{3, 3}, {0, 1}},
+                                                                          {{4, 0}, {0, 4}},
+                                                                          {{4, 1}, {0, 3}},
+                                                                          {{4, 2}, {0, 2}}};
     for (const auto & pair : exp_row_to_ring)
     {
       auto row_pair = lat.getRowIndexFromRingIndex(pair.second);
@@ -667,18 +665,17 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
         {u, u, u, u, u},
         {u, u, u, u}};
     auto lat = CSGHexagonalLattice("lat", 1.0, umap);
-    std::map<std::pair<unsigned int, unsigned int>, std::pair<unsigned int, unsigned int>>
-        exp_row_to_ring = {
-            {{0, 0}, {0, 12}}, {{0, 1}, {0, 13}}, {{0, 2}, {0, 14}}, {{0, 3}, {0, 15}},
-            {{1, 0}, {0, 11}}, {{1, 1}, {1, 8}},  {{1, 2}, {1, 9}},  {{1, 3}, {1, 10}},
-            {{1, 4}, {0, 16}}, {{2, 0}, {0, 10}}, {{2, 1}, {1, 7}},  {{2, 2}, {2, 4}},
-            {{2, 3}, {2, 5}},  {{2, 4}, {1, 11}}, {{2, 5}, {0, 17}}, {{3, 0}, {0, 9}},
-            {{3, 1}, {1, 6}},  {{3, 2}, {2, 3}},  {{3, 3}, {3, 0}},  {{3, 4}, {2, 0}},
-            {{3, 5}, {1, 0}},  {{3, 6}, {0, 0}},  {{4, 0}, {0, 8}},  {{4, 1}, {1, 5}},
-            {{4, 2}, {2, 2}},  {{4, 3}, {2, 1}},  {{4, 4}, {1, 1}},  {{4, 5}, {0, 1}},
-            {{5, 0}, {0, 7}},  {{5, 1}, {1, 4}},  {{5, 2}, {1, 3}},  {{5, 3}, {1, 2}},
-            {{5, 4}, {0, 2}},  {{6, 0}, {0, 6}},  {{6, 1}, {0, 5}},  {{6, 2}, {0, 4}},
-            {{6, 3}, {0, 3}}};
+    std::map<std::pair<int, int>, std::pair<int, int>> exp_row_to_ring = {
+        {{0, 0}, {0, 12}}, {{0, 1}, {0, 13}}, {{0, 2}, {0, 14}}, {{0, 3}, {0, 15}},
+        {{1, 0}, {0, 11}}, {{1, 1}, {1, 8}},  {{1, 2}, {1, 9}},  {{1, 3}, {1, 10}},
+        {{1, 4}, {0, 16}}, {{2, 0}, {0, 10}}, {{2, 1}, {1, 7}},  {{2, 2}, {2, 4}},
+        {{2, 3}, {2, 5}},  {{2, 4}, {1, 11}}, {{2, 5}, {0, 17}}, {{3, 0}, {0, 9}},
+        {{3, 1}, {1, 6}},  {{3, 2}, {2, 3}},  {{3, 3}, {3, 0}},  {{3, 4}, {2, 0}},
+        {{3, 5}, {1, 0}},  {{3, 6}, {0, 0}},  {{4, 0}, {0, 8}},  {{4, 1}, {1, 5}},
+        {{4, 2}, {2, 2}},  {{4, 3}, {2, 1}},  {{4, 4}, {1, 1}},  {{4, 5}, {0, 1}},
+        {{5, 0}, {0, 7}},  {{5, 1}, {1, 4}},  {{5, 2}, {1, 3}},  {{5, 3}, {1, 2}},
+        {{5, 4}, {0, 2}},  {{6, 0}, {0, 6}},  {{6, 1}, {0, 5}},  {{6, 2}, {0, 4}},
+        {{6, 3}, {0, 3}}};
     for (const auto & pair : exp_row_to_ring)
     {
       auto row_pair = lat.getRowIndexFromRingIndex(pair.second);
