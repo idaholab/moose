@@ -384,11 +384,9 @@ rho = 1
     type = FunctionValuePostprocessor
     function = reynolds
   []
-  [dofs]
-    type = NumDOFs
-  []
-  [elems]
-    type = NumElements
+  [vel_mag_avg]
+    type = ElementAverageValue
+    variable = vel_mag
   []
 []
 
@@ -412,4 +410,21 @@ rho = 1
   exodus = false
   checkpoint = true
   perf_graph = true
+  csv = true
+[]
+
+[AuxVariables]
+  [vel_mag]
+    family = L2_LAGRANGE
+    order = SECOND
+  []
+[]
+
+[AuxKernels]
+  [vel_mag]
+    type = VectorMagnitudeAux
+    variable = vel_mag
+    x = vel_x
+    y = vel_y
+  []
 []

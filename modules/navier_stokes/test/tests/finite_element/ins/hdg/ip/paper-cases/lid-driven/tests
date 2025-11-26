@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#31399'
+  design = 'AdvectionIPHDGKernel.md NavierStokesStressIPHDGKernel.md MassContinuityIPHDGKernel.md MassFluxPenaltyIPHDG.md MassMatrixHDG.md'
+  [csv]
+    type = CSVDiff
+    input = lid-driven-strumpack.i
+    csvdiff = lid-driven-strumpack_csv.csv
+    requirement = 'The system shall be able to solve a lid driven Navier-Stokes problem, discretized with HDG and with a flux jump augmentation, using a triangular Schur complement preconditioner and a multifrontal sparse LU solver with butterfly compression for the augmented and condensed velocity block.'
+    capabilities = 'method!=dbg'
+    cli_args = 'Executioner/num_steps=1'
+  []
+[]

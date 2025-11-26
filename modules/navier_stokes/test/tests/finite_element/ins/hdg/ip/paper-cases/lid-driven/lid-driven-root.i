@@ -305,6 +305,10 @@ alpha = '${fparse 10 * degree^2}'
   exodus = false
   checkpoint = true
   perf_graph = true
+  [csv]
+    type = CSV
+    hide = 'pressure_average'
+  []
 []
 
 [Postprocessors]
@@ -315,6 +319,26 @@ alpha = '${fparse 10 * degree^2}'
   [pressure_average]
     type = ElementAverageValue
     variable = pressure
+  []
+  [vel_mag_avg]
+    type = ElementAverageValue
+    variable = vel_mag
+  []
+[]
+
+[AuxVariables]
+  [vel_mag]
+    family = L2_LAGRANGE
+    order = SECOND
+  []
+[]
+
+[AuxKernels]
+  [vel_mag]
+    type = VectorMagnitudeAux
+    variable = vel_mag
+    x = vel_x
+    y = vel_y
   []
 []
 
