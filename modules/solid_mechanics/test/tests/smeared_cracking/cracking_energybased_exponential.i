@@ -1,5 +1,5 @@
 #
-# Test to exercise the exponential stress release
+# Test to exercise the exponential energy-based stress release
 #
 # Stress vs. strain should show a linear relationship until cracking,
 #   an exponential stress release, a linear relationship back to zero
