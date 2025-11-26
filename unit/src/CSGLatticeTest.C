@@ -617,7 +617,7 @@ TEST(CSGLatticeTest, testHexConvertRowsRings)
     Moose::UnitUtils::assertThrows([&lat]() { lat.getRowIndexFromRingIndex(std::make_pair(2, 0)); },
                                    "Ring 2 is not valid for hexagonal lattice lat");
     Moose::UnitUtils::assertThrows([&lat]() { lat.getRowIndexFromRingIndex(std::make_pair(1, 7)); },
-                                   "Element 7 is not valid for ring 1 in hexagonal lattice lat");
+                                   "Position 7 is not valid for ring 1 in hexagonal lattice lat");
     // check that invalid row-column index raises error
     Moose::UnitUtils::assertThrows([&lat]() { lat.getRingIndexFromRowIndex(std::make_pair(3, 0)); },
                                    "Index (3, 0) is not a valid index for hexagonal lattice lat");
