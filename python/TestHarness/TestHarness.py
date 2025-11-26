@@ -1172,6 +1172,10 @@ class TestHarness:
             pass
         term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
         term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcstm')
+        # tpnsc is the custom format that civet jobs use; this lets us
+        # add in memory while moose updates across the apps
+        if term_format == 'tpnsc':
+            term_format = 'tmpnsc'
 
         parser = argparse.ArgumentParser(description='A tool used to test MOOSE-based applications')
 
