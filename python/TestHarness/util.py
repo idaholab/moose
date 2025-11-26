@@ -117,7 +117,7 @@ def formatResult(
         elif (
             key_lower == "m"
             and entry.timing is not None
-            and (options.timing or timing)
+            and options.timing
             and memory is not False
         ):
             if entry.memory is not None or entry.timing == 0:

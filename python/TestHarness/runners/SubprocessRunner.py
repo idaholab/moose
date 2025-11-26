@@ -11,7 +11,8 @@ import os, platform, subprocess, shlex, time
 import psutil
 from contextlib import suppress
 from tempfile import SpooledTemporaryFile
-from typing import Optional, Tuple
+from threading import Thread
+from typing import Optional
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
@@ -29,6 +30,8 @@ class SubprocessRunner(Runner):
         self.errfile = None
         # The underlying subprocess
         self.process: Optional[subprocess.Popen] = None
+        # The memory checking thread, created during spawn() when -t/--timing
+        self.memory_thread: Optional[Thread] = None
 
     def spawn(self, timer):
         tester = self.job.getTester()
@@ -75,26 +78,33 @@ class SubprocessRunner(Runner):
 
         timer.start('runner_run')
 
-    def _waitProcess(self):
-        """
-        Wait for a process to complete.
+        # Setup the memory checking thread if timing enabled; joined in cleanup()
+        if self.options.timing:
+            self.setMaxMemory(0)
+            self.memory_thread = Thread(target=self._runMemoryThread)
+            self.memory_thread.start()
 
-        Sets the max memory while running and the exit code on completion.
-        """
-        assert self.process is not None
-        psutil_process = psutil.Process(self.process.pid)
+    def _runMemoryThread(self):
+        process = self.process
+        assert process is not None
 
-        # Get max memory requirement and optionally slots
-        # in case we need to check memory/proc
+        # Get the --max-memory option if set, and if so,
+        # the number of procs (so that we can scale
+        # memory used to per process)
         max_memory = self.options.max_memory
-        procs = self.job.getTester().getProcs(self.options)
+        procs = self.job.getTester().getProcs(self.options) if max_memory else None
 
-        # Start with zero memory as a base
-        max_rss = 0
-        self.setMaxMemory(0)
+        # Capture the psutil wrapper around the running process
+        # so that we can query its memory usage; if this raises
+        # NoSuchProcess the thread started after the process finished
+        try:
+            psutil_process = psutil.Process(process.pid)
+        except psutil.NoSuchProcess:
+            return
 
         # Wait for the process to finish, checking memory per step
-        while self.process.poll() is None:
+        max_rss = 0
+        while process.poll() is None:
             # Collect this process + children processes
             psutil_processes = []
             with suppress(psutil.NoSuchProcess):
@@ -102,44 +112,44 @@ class SubprocessRunner(Runner):
                     recursive=True
                 )
 
-            # Accumulate total RSS for parent + children
-            total = 0
+            # Accumulate total resident set size for parent + children
+            total_rss = 0
             for p in psutil_processes:
                 with suppress(psutil.NoSuchProcess):
-                    total += p.memory_info().rss
+                    total_rss += p.memory_info().rss
+            # If we have a zero value and the parent isn't
+            # running anymore, we can exit
+            if total_rss == 0 and not psutil_process.is_running():
+                return
 
             # If memory has increased, set it so that it can be
             # reported live during a long-running job
-            if total > max_rss:
-                self.setMaxMemory(total)
-                max_rss = total
+            if total_rss > max_rss:
+                self.setMaxMemory(total_rss)
+                max_rss = total_rss
 
-            # If --max-memory is set, make sure we're not over
-            if max_memory is not None:
-                per_slot = float(total / procs) * 1.0e-6
+                # If --max-memory is set, make sure we're not over
+                if max_memory is not None:
+                    rss_per_proc = float(max_rss / procs) * 1.0e-6
 
-                # Over; kill the process, fail, and report
-                if per_slot > max_memory:
-                    self.kill()
-                    message = (
-                        f"Job killed: memory/slot {int(per_slot)}MB "
-                        f"> max {int(max_memory)}MB"
-                    )
-                    self.appendOutput("\n" + util.outputHeader(message, False))
-                    self.job.setStatus(self.job.error, "OVER MEMORY")
-                    break
+                    # Over; kill the process, fail, and report
+                    if rss_per_proc > max_memory:
+                        self.kill()
+                        message = (
+                            f"Job killed: memory/slot {int(rss_per_proc)}MB "
+                            f"> max {int(max_memory)}MB"
+                        )
+                        self.appendOutput("\n" + util.outputHeader(message, False))
+                        self.job.setStatus(self.job.error, "OVER MEMORY")
+                        break
 
             # Poll
-            time.sleep(0.01)
-
-        self.process.wait()
-        self.exit_code = self.process.poll()
+            time.sleep(0.05)
 
     def wait(self, timer):
-        self._waitProcess()
-        assert self.exit_code is not None
-        assert self.max_memory is not None
+        assert self.process is not None
 
+        self.exit_code = self.process.wait()
         timer.stop('runner_run')
 
         # This should have been cleared before the job started
@@ -176,6 +186,13 @@ class SubprocessRunner(Runner):
                     os.killpg(pgid, SIGTERM)
             except OSError: # Process already terminated
                 pass
+
+    def cleanup(self):
+        """Cleanup; cleanup the parent and join the memory thread if running."""
+        super().cleanup()
+
+        if self.memory_thread is not None:
+            self.memory_thread.join()
 
     def sendSignal(self, signal):
         # process.poll() returns the process's exit code if it has completed,

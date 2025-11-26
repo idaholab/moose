@@ -109,6 +109,15 @@ class Runner(OutputInterface):
                 self.appendOutput(f'File {file_path} unavailable')
             run_output.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
 
+    def cleanup(self):
+        """
+        Cleanup; called at the very end of the job exceution.
+
+        Can be used to cleanup threads well after we've done
+        more work (run the tester, etc).
+        """
+        pass
+
     def getExitCode(self):
         """
         Gets the error code of the process.
