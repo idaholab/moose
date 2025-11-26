@@ -27,13 +27,10 @@ public:
   virtual Convergence * getNonlinearConvergence() const override;
 
 protected:
-  virtual void check() const override;
   virtual void checkFluidProperties() const override;
   virtual std::string flowModelClassName() const override;
   void addNumericalFluxVectorPostprocessor();
 
-  /// Checks the residual scaling factors
-  void checkScalingFactors() const;
   /// Adds the nonlinear convergence object
   void addNonlinearConvergence();
 

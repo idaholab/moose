@@ -59,13 +59,6 @@
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
     requirement = 'The system shall report an error if fluid properties are not single-phase.'
   []
-  [err:components_convergence_scaling]
-    type = RunException
-    input = 'components_convergence.i'
-    cli_args = "Components/pipe/scaling_factor_1phase='1 1 1e-5'"
-    expect_err = "pipe: When using ComponentsConvergence, 'scaling_factor_1phase' must be set to '1 1 1'"
-    requirement = 'The system shall report an error if non-unity scaling factors are used with the component convergence object.'
-  []
 
   [jacobian]
     type = 'PetscJacobianTester'
