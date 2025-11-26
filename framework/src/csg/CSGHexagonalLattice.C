@@ -136,7 +136,7 @@ std::pair<int, int>
 CSGHexagonalLattice::getRowIndexFromRingIndex(const std::pair<int, int> & ring_ele_index) const
 {
   auto og_ring = ring_ele_index.first; // ring corresponds to the outermost ring as ring 0
-  int ring = _nring - og_ring - 1;    // convert to internal indexing (0 as innermost ring)
+  int ring = _nring - og_ring - 1;     // convert to internal indexing (0 as innermost ring)
   auto element = ring_ele_index.second;
 
   if (og_ring < 0 || og_ring >= (int)_nring)
