@@ -1,5 +1,3 @@
-!description navier_stokes/design/porous_linear_simple
-
 # Porous SIMPLE Formulation
 
 `PorousRhieChowMassFlux` and `LinearPNSFVMomentumPressure` extend the
