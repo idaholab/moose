@@ -329,7 +329,7 @@ class PerfGraphReader:
         return self._root_node
 
     def recurse(self, act: Callable, *args, **kwargs):
-        r"""
+        """
         Recursively do an action through the graph starting with the root node.
 
         Inputs:
