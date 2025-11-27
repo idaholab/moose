@@ -3,6 +3,12 @@ rho = 1
 l = 1
 U = 100
 n = 8
+degree = 2
+alpha = '${fparse 10 * degree^2}'
+
+[GlobalParams]
+  alpha = ${alpha}
+[]
 
 [Mesh]
   [gen]
@@ -62,7 +68,6 @@ n = 8
     variable = vel_x
     face_variable = vel_bar_x
     diffusivity = 'mu'
-    alpha = 6
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 0
@@ -79,7 +84,6 @@ n = 8
     variable = vel_y
     face_variable = vel_bar_y
     diffusivity = 'mu'
-    alpha = 6
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 1
@@ -118,7 +122,6 @@ n = 8
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = '0'
     diffusivity = 'mu'
     component = 0
@@ -130,7 +133,6 @@ n = 8
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = '${U}'
     diffusivity = 'mu'
     component = 0
@@ -142,7 +144,6 @@ n = 8
     face_variable = vel_bar_y
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = '0'
     diffusivity = 'mu'
     component = 1

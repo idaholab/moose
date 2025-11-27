@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual, fuzzyAbsoluteEqual
 
 class TestLid(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-lid-driven.i', 6, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=4)
+        df1 = mms.run_spatial('mms-lid-driven.i', 7, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -18,7 +18,7 @@ class TestLid(unittest.TestCase):
 
 class TestLidSecond(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('mms-second-lid-driven.i', 5, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=4)
+        df1 = mms.run_spatial('mms-second-lid-driven.i', 6, "--error", "--error-unused", y_pp=['L2u', 'L2v', 'L2p'], mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2v', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
