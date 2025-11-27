@@ -28,7 +28,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   type = NavierStokesProblem
   extra_tag_matrices = 'mass'
   mass_matrix = 'mass'
-  use_pressure_mass_matrix = true
+  set_schur_pre = 'mass'
 []
 
 [AuxVariables]
@@ -268,17 +268,17 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
 
 [FunctorMaterials]
   [top]
-    type = GenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = top_vel
     prop_values = '${U} 0 0'
   []
   [walls]
-    type = GenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = walls
     prop_values = '0 0 0'
   []
   [vel]
-    type = GenericVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = face_velocity
     prop_values = 'vel_bar_x vel_bar_y 0'
   []
