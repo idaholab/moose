@@ -44,7 +44,7 @@ public:
   Real getMassFlux(const FaceInfo & fi) const;
 
   /// Get the volumetric face flux (used in advection terms)
-  Real getVolumetricFaceFlux(const FaceInfo & fi) const;
+  virtual Real getVolumetricFaceFlux(const FaceInfo & fi) const;
 
   virtual Real getVolumetricFaceFlux(const Moose::FV::InterpMethod m,
                                      const FaceInfo & fi,
@@ -53,11 +53,11 @@ public:
                                      bool subtract_mesh_velocity) const override;
 
   /// Initialize the container for face velocities
-  void initFaceMassFlux();
+  virtual void initFaceMassFlux();
   /// Initialize the coupling fields (HbyA and Ainv)
   void initCouplingField();
   /// Update the values of the face velocities in the containers
-  void computeFaceMassFlux();
+  virtual void computeFaceMassFlux();
   /// Update the cell values of the velocity variables
   void computeCellVelocity();
 
@@ -93,7 +93,7 @@ protected:
   void setupMeshInformation();
 
   /// Populate the face values of the H/A and 1/A fields
-  void
+  virtual void
   populateCouplingFunctors(const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_hbya,
                            const std::vector<std::unique_ptr<NumericVector<Number>>> & raw_Ainv);
 
@@ -104,6 +104,9 @@ protected:
   void checkBlocks(const VarType & var) const;
 
   virtual bool supportMeshVelocity() const override { return false; }
+
+  /// Accessor for cached face info (to be used by derived classes)
+  const std::vector<const FaceInfo *> & flowFaceInfo() const { return _flow_face_info; }
 
   /// The \p MooseMesh that this user object operates on
   const MooseMesh & _moose_mesh;
