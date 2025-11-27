@@ -80,13 +80,46 @@ class SubprocessRunner(Runner):
 
         # Setup the memory checking thread if timing enabled; joined in cleanup()
         if self.options.timing:
-            self.setMaxMemory(0)
             self.memory_thread = Thread(target=self._runMemoryThread)
             self.memory_thread.start()
 
+    @staticmethod
+    def getProcessMemory(pid: int) -> Optional[int]:
+        """Get an approximation for a process' total memory in bytes if possible."""
+        assert isinstance(pid, int)
+
+        # Use proportional set size (PSS) for linux
+        if sys.platform.startswith("linux"):
+            try:
+                with open(f"/proc/{pid}/smaps_rollup", "r") as f:
+                    for line in f:
+                        if line.startswith("Pss:"):  # in kB
+                            return int(line.split()[1]) * 1000
+            except FileNotFoundError:
+                pass
+            except ProcessLookupError:
+                pass
+
+        return None
+
     def _runMemoryThread(self):
+        """Run the thread that tracks memory usage."""
         process = self.process
         assert process is not None
+
+        # See if we can track memory by checking with the main
+        # process once; if we can't, there's nothing to do here
+        # or the process has already finished
+        if self.getProcessMemory(process.pid) is None:
+            return
+
+        # Capture the psutul.Process around the main process
+        # so that we can recursively get all children pids
+        # for getting their memory usage too
+        try:
+            psutil_process = psutil.Process(process.pid)
+        except psutil.NoSuchProcess:
+            return
 
         # Get the --max-memory option if set, and if so,
         # the number of procs (so that we can scale
@@ -94,43 +127,34 @@ class SubprocessRunner(Runner):
         max_memory = self.options.max_memory
         procs = self.job.getTester().getProcs(self.options) if max_memory else None
 
-        # Capture the psutil wrapper around the running process
-        # so that we can query its memory usage; if this raises
-        # NoSuchProcess the thread started after the process finished
-        try:
-            psutil_process = psutil.Process(process.pid)
-        except psutil.NoSuchProcess:
-            return
-
         # Wait for the process to finish, checking memory per step
-        max_rss = 0
+        max_found = 0
         while process.poll() is None:
-            # Collect this process + children processes
-            psutil_processes = []
+            # Collect the parent + children processes so that
+            # we can inspect memory for each
+            psutil_processes = [psutil_process]
             with suppress(psutil.NoSuchProcess):
-                psutil_processes = [psutil_process] + psutil_process.children(
-                    recursive=True
-                )
+                psutil_processes += psutil_process.children(recursive=True)
 
-            # Accumulate total resident set size for parent + children
-            total_rss = 0
-            for p in psutil_processes:
-                with suppress(psutil.NoSuchProcess):
-                    total_rss += p.memory_info().rss
-            # If we have a zero value and the parent isn't
-            # running anymore, we can exit
-            if total_rss == 0 and not psutil_process.is_running():
+            # Accumulate total across all ranks
+            all_memory = [self.getProcessMemory(p.pid) for p in psutil_processes]
+            total = sum(v for v in all_memory if v is not None)
+
+            # If have a zero value and the main process isn't running,
+            # we're done here
+            if total == 0 and not process.poll():
                 return
 
             # If memory has increased, set it so that it can be
             # reported live during a long-running job
-            if total_rss > max_rss:
-                self.setMaxMemory(total_rss)
-                max_rss = total_rss
+            if total > max_found:
+                self.setMaxMemory(total)
+                max_found = total
 
                 # If --max-memory is set, make sure we're not over
                 if max_memory is not None:
-                    rss_per_proc = float(max_rss / procs) * 1.0e-6
+                    assert isinstance(procs, int)
+                    rss_per_proc = float(max_found / procs) * 1.0e-6
 
                     # Over; kill the process, fail, and report
                     if rss_per_proc > max_memory:
