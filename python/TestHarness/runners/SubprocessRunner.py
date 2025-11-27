@@ -84,34 +84,33 @@ class SubprocessRunner(Runner):
             self.memory_thread.start()
 
     @staticmethod
-    def getProcessMemory(pid: int) -> Optional[int]:
+    def getProcessMemory(process: psutil.Process) -> Optional[int]:
         """Get an approximation for a process' total memory in bytes if possible."""
-        assert isinstance(pid, int)
+        assert isinstance(process, psutil.Process)
 
-        # Use proportional set size (PSS) for linux
+        # Use proportional set size (PSS) for linux, which is
+        # a better approximation for MPI processes
         if sys.platform.startswith("linux"):
             try:
-                with open(f"/proc/{pid}/smaps_rollup", "r") as f:
+                with open(f"/proc/{process.pid}/smaps_rollup", "r") as f:
                     for line in f:
                         if line.startswith("Pss:"):  # in kB
                             return int(line.split()[1]) * 1000
             except FileNotFoundError:
-                pass
+                return None
             except ProcessLookupError:
-                pass
-
-        return None
+                return None
+        # Otherwise, use RSS (will double count shared memory)
+        else:
+            try:
+                return process.memory_info().rss
+            except psutil.Error:
+                return None
 
     def _runMemoryThread(self):
         """Run the thread that tracks memory usage."""
         process = self.process
         assert process is not None
-
-        # See if we can track memory by checking with the main
-        # process once; if we can't, there's nothing to do here
-        # or the process has already finished
-        if self.getProcessMemory(process.pid) is None:
-            return
 
         # Capture the psutul.Process around the main process
         # so that we can recursively get all children pids
@@ -119,6 +118,12 @@ class SubprocessRunner(Runner):
         try:
             psutil_process = psutil.Process(process.pid)
         except psutil.NoSuchProcess:
+            return
+
+        # See if we can track memory by checking with the main
+        # process once; if we can't, there's nothing to do here
+        # or the process has already finished
+        if self.getProcessMemory(psutil_process) is None:
             return
 
         # Get the --max-memory option if set, and if so,
@@ -137,7 +142,7 @@ class SubprocessRunner(Runner):
                 psutil_processes += psutil_process.children(recursive=True)
 
             # Accumulate total across all ranks
-            all_memory = [self.getProcessMemory(p.pid) for p in psutil_processes]
+            all_memory = [self.getProcessMemory(p) for p in psutil_processes]
             total = sum(v for v in all_memory if v is not None)
 
             # If have a zero value and the main process isn't running,
