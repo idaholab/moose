@@ -1367,6 +1367,14 @@ class TestHarness:
             print('INFO: Setting --no-capabilities because there is not an application')
             self.options.no_capabilities = True
 
+        # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set
+        if (
+            self.options.max_memory is None
+            and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
+        ):
+            value = float(MOOSE_MAX_MEMORY)
+            print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
+            self.options.max_memory = value
 
     def preRun(self):
         if self.options.json:

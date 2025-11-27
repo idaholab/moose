@@ -261,6 +261,10 @@ Ran 2 tests in 2.9 seconds.
 
 Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
 
+#### MOOSE_MAX_MEMORY
+
+Set `MOOSE_MAX_MEMORY` to a float or integer to influence the `--max-memory` command line option, limiting the amount of estimated memory per process each job can use in MB. If the `--max-memory` command line option is set, it will take precident over this variable.
+
 # Validation
 
 The TestHarness can also be utilized for performing validation. The results of the validation checks are stored within the JSON  output that each test harness execution produces, providing a method to store the validation results in a database.
