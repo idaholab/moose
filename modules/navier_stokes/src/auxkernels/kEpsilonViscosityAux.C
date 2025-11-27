@@ -217,8 +217,7 @@ kEpsilonViscosityAux::computeValue()
 
   if (_relaminarization)
   {
-    const auto Re_d =
-        std::sqrt(_k(elem_arg, state)) * (*_wall_distance)(elem_arg, state) / (nu);
+    const auto Re_d = std::sqrt(_k(elem_arg, state)) * (*_wall_distance)(elem_arg, state) / (nu);
 
     const auto T1 = _Cd0 * std::sqrt(Re_d);
     const auto T2 = _Cd1 * Re_d;
