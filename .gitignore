@@ -83,6 +83,7 @@ temp_print_trace.*
 *.net
 .depend
 *.png
+*.avi
 *.svg
 *.gif
 *.tif

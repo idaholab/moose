@@ -21,4 +21,24 @@
       detail = "without mesh adaptivity."
     [../]
   []
+
+  [fv]
+    requirement = 'The system shall be able to show second order temporal accuracy using the BDF2 time integration scheme with a finite volume'
+    [nonlinear]
+      detail = 'nonlinear implementation, and'
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestNonlinearFV
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree # see #26480
+    []
+    [linear]
+      detail = 'linear implementation.'
+      type = PythonUnitTest
+      input = test.py
+      test_case = TestLinearFV
+      required_python_packages = 'pandas matplotlib'
+      installation_type = in_tree # see #26480
+    []
+  []
 []
