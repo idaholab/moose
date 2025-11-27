@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, platform, subprocess, shlex, time
+import os, platform, subprocess, shlex, sys, time
 import psutil
 from contextlib import suppress
 from tempfile import SpooledTemporaryFile
