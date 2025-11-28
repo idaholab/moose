@@ -120,7 +120,7 @@ protected:
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
-      mfem::real_t scale_factor = -1.0);
+      std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   void ApplyDomainLFIntegrators(
       const std::string & test_var_name,
@@ -134,7 +134,7 @@ protected:
       std::shared_ptr<FormType> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map,
-      mfem::real_t scale_factor = -1.0);
+      std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   void ApplyBoundaryLFIntegrators(
       const std::string & test_var_name,
@@ -198,7 +198,7 @@ EquationSystem::ApplyDomainBLFIntegrators(
     const std::string & test_var_name,
     std::shared_ptr<FormType> form,
     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map,
-    mfem::real_t scale_factor)
+    std::optional<mfem::real_t> scale_factor)
 {
   if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
@@ -206,8 +206,9 @@ EquationSystem::ApplyDomainBLFIntegrators(
     for (auto & kernel : kernels)
     {
       mfem::BilinearFormIntegrator * integ =
-          scale_factor > 0.0 ? new ScaleIntegrator(kernel->createBFIntegrator(), scale_factor, true)
-                             : kernel->createBFIntegrator();
+          scale_factor.has_value()
+              ? new ScaleIntegrator(kernel->createBFIntegrator(), scale_factor.value(), true)
+              : kernel->createBFIntegrator();
       if (integ != nullptr && kernel->createBFIntegrator() != nullptr)
       {
         kernel->isSubdomainRestricted()
@@ -248,7 +249,7 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     std::shared_ptr<FormType> form,
     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
         integrated_bc_map,
-    mfem::real_t scale_factor)
+    std::optional<mfem::real_t> scale_factor)
 {
   if (integrated_bc_map.Has(test_var_name) &&
       integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
@@ -257,8 +258,9 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     for (auto & bc : bcs)
     {
       mfem::BilinearFormIntegrator * integ =
-          scale_factor > 0.0 ? new ScaleIntegrator(bc->createBFIntegrator(), scale_factor, true)
-                             : bc->createBFIntegrator();
+          scale_factor.has_value()
+              ? new ScaleIntegrator(bc->createBFIntegrator(), scale_factor.value(), true)
+              : bc->createBFIntegrator();
       if (integ != nullptr && bc->createBFIntegrator() != nullptr)
       {
         bc->isBoundaryRestricted()
