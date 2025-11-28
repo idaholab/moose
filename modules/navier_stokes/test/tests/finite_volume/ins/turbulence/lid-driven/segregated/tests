@@ -314,8 +314,6 @@
       abs_zero = 1e-6
       cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-capped_short'
     []
-<<<<<<< HEAD:modules/navier_stokes/test/tests/finite_volume/ins/turbulence/lid-driven/segregated/tests
-=======
     [result_physics]
       type = 'Exodiff'
       input = 'lid-driven-turb-capped-physics.i'
@@ -335,7 +333,6 @@
     cli_args = 'Executioner/num_iterations=10 Outputs/file_base=lid-driven-turb-bouyant_short'
   []
   [lid_driven_turb_std_wall_nonlinear]
-
     requirement = 'The system shall be able to run fluid flow with k-epsilon turbulence model in enclosures with standard wall functions, '
     [result]
       type = 'Exodiff'
@@ -367,6 +364,5 @@
       custom_cmp = 'ignore_lambda.cmp'
       heavy = true
     []
->>>>>>> a65eb80399 (adding buoyancy production to nonlinear k-epsilon model Refs #31000):modules/navier_stokes/test/tests/finite_volume/ins/turbulence/lid-driven/tests
   []
 []
