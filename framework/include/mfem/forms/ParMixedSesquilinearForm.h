@@ -5,7 +5,7 @@
 #include "MFEMGeneralUserObject.h"
 
 
-class ParMixedSesquilinearForm: public MFEMGeneralUserObject
+class ParMixedSesquilinearForm
 {
 private:
    mfem::ComplexOperator::Convention conv;
