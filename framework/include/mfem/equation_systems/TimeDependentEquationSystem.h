@@ -23,8 +23,7 @@ public:
   friend class TimeDomainEquationSystemProblemOperator;
   TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
-  virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem();
+  virtual void SetTimeStep(mfem::real_t dt) { _dt_coef.constant = dt; };
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
 
 protected:

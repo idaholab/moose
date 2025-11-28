@@ -95,7 +95,7 @@ void
 TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::real_t dt)
 {
   GetEquationSystem()->SetTimeStep(dt);
-  GetEquationSystem()->UpdateEquationSystem();
+  GetEquationSystem()->BuildEquationSystem();
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 }
 

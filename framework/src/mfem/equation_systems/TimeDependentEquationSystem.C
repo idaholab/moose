@@ -20,21 +20,6 @@ TimeDependentEquationSystem::TimeDependentEquationSystem(
 }
 
 void
-TimeDependentEquationSystem::SetTimeStep(mfem::real_t dt)
-{
-  if (fabs(dt - _dt_coef.constant) > 1.0e-12 * dt)
-  {
-    _dt_coef.constant = dt;
-    for (auto test_var_name : _test_var_names)
-    {
-      auto blf = _blfs.Get(test_var_name);
-      blf->Update();
-      blf->Assemble();
-    }
-  }
-}
-
-void
 TimeDependentEquationSystem::SetTrialVariableNames()
 {
   EquationSystem::SetTrialVariableNames();
@@ -108,8 +93,6 @@ TimeDependentEquationSystem::BuildBilinearForms()
                       std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
     auto td_blf = _td_blfs.GetShared(test_var_name);
     td_blf->SetAssemblyLevel(_assembly_level);
-    // ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
-    //     test_var_name, test_var_name, td_blf, _integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, td_blf, _td_kernels_map);
     // Assemble
@@ -227,12 +210,6 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
   }
   // Eliminate contributions from other coupled variables.
   EquationSystem::EliminateCoupledVariables();
-}
-
-void
-TimeDependentEquationSystem::UpdateEquationSystem()
-{
-  EquationSystem::BuildEquationSystem();
 }
 
 } // namespace Moose::MFEM
