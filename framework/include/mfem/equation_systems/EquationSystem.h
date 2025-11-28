@@ -33,20 +33,13 @@ class EquationSystem : public mfem::Operator
 
 public:
   friend class EquationSystemProblemOperator;
-  friend class TimeDomainEquationSystemProblemOperator;
 
   EquationSystem() = default;
   ~EquationSystem() override;
 
-  /// Add test variable to EquationSystem.
-  virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
-  /// Add coupled variable to EquationSystem.
-  virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
-
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
-
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
@@ -54,58 +47,10 @@ public:
   virtual void Init(GridFunctions & gridfunctions,
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level);
-
-  /// Build linear forms and eliminate constrained DoFs
-  virtual void BuildLinearForms();
-
-  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
-  /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & test_var_name,
-                                mfem::ParGridFunction & trial_gf,
-                                mfem::Array<int> & global_ess_markers);
-  /// Update all essentially constrained true DoF markers and values on boundaries
-  virtual void ApplyEssentialBCs();
-
-  /// Perform trivial eliminations of coupled variables lacking corresponding test variables
-  virtual void EliminateCoupledVariables();
-
-  /// Build bilinear forms (diagonal Jacobian contributions)
-  virtual void BuildBilinearForms();
-  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
-  virtual void BuildMixedBilinearForms();
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem();
-
-  /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
-  /// solution and RHS vectors of true DoFs, and apply constraints
-  void AssembleJacobian(
-      Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
-      Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
-          jac_mblfs,
-      Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
-      std::vector<mfem::Array<int>> & ess_tdof_lists,
-      std::vector<std::unique_ptr<mfem::ParGridFunction>> & var_ess_constraints,
-      mfem::OperatorHandle & op,
-      mfem::BlockVector & trueX,
-      mfem::BlockVector & trueRHS);
-
-  /// Form linear system, with essential boundary conditions accounted for
-  virtual void FormLinearSystem(mfem::OperatorHandle & op,
-                                mfem::BlockVector & trueX,
-                                mfem::BlockVector & trueRHS);
-
-  virtual void
-  FormSystem(mfem::OperatorHandle & op, mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
-  virtual void FormLegacySystem(mfem::OperatorHandle & op,
-                                mfem::BlockVector & trueX,
-                                mfem::BlockVector & trueRHS);
-
   /// Build linear system, with essential boundary conditions accounted for
   virtual void BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
-
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
-
   /// Compute J = M + grad_H(u)
   mfem::Operator & GetGradient(const mfem::Vector & u) const override;
 
@@ -114,17 +59,16 @@ public:
                                   GridFunctions & gridfunctions,
                                   ComplexGridFunctions & cmplx_gridfunctions);
 
-  std::vector<mfem::Array<int>> _ess_tdof_lists;
-
+  // Test variables are associated with linear forms,
+  // whereas trial variables are associated with gridfunctions.
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
 
-private:
-  /// Disallowed inherited method
-  using mfem::Operator::RecoverFEMSolution;
-
 protected:
-protected:
+  /// Add test variable to EquationSystem.
+  virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
+  /// Add coupled variable to EquationSystem.
+  virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
@@ -136,33 +80,35 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  // Test variables are associated with LinearForms,
-  // whereas trial variables are associated with gridfunctions.
+  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
+  virtual void ApplyEssentialBC(const std::string & test_var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
+  /// Update all essentially constrained true DoF markers and values on boundaries
+  virtual void ApplyEssentialBCs();
 
-  /// Names of all trial variables of kernels and boundary conditions
-  /// added to this EquationSystem.
-  std::vector<std::string> _coupled_var_names;
-  /// Subset of _coupled_var_names of all variables corresponding to gridfunctions with degrees of
-  /// freedom that comprise the state vector of this EquationSystem. This will differ from
-  /// _coupled_var_names when time derivatives or other eliminated variables are present.
-  std::vector<std::string> _trial_var_names;
-  /// Names of all coupled variables without a corresponding test variable.
-  std::vector<std::string> _eliminated_var_names;
-  /// Pointers to coupled variables not part of the reduced EquationSystem.
-  Moose::MFEM::GridFunctions _eliminated_variables;
-  /// Names of all test variables corresponding to linear forms in this equation system
-  std::vector<std::string> _test_var_names;
-  /// Pointers to finite element spaces associated with test variables.
-  std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
-  /// Pointers to finite element spaces associated with coupled variables.
-  std::vector<mfem::ParFiniteElementSpace *> _coupled_pfespaces;
+  /// Perform trivial eliminations of coupled variables lacking corresponding test variables
+  virtual void EliminateCoupledVariables();
+  /// Build linear forms and eliminate constrained DoFs
+  virtual void BuildLinearForms();
+  /// Build bilinear forms (diagonal Jacobian contributions)
+  virtual void BuildBilinearForms();
+  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
+  virtual void BuildMixedBilinearForms();
+  /// Build all forms comprising this EquationSystem
+  virtual void BuildEquationSystem();
 
-  // Components of weak form. // Named according to test variable
-  NamedFieldsMap<mfem::ParBilinearForm> _blfs;
-  NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
-      _mblfs; // named according to trial variable
+  /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
+  /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints
+  virtual void FormLinearSystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & trueX,
+                                mfem::BlockVector & trueRHS);
+  virtual void
+  FormSystem(mfem::OperatorHandle & op, mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
+  virtual void FormLegacySystem(mfem::OperatorHandle & op,
+                                mfem::BlockVector & trueX,
+                                mfem::BlockVector & trueRHS);
 
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
@@ -196,11 +142,36 @@ protected:
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
           integrated_bc_map);
 
+  /// Names of all trial variables of kernels and boundary conditions
+  /// added to this EquationSystem.
+  std::vector<std::string> _coupled_var_names;
+  /// Subset of _coupled_var_names of all variables corresponding to gridfunctions with degrees of
+  /// freedom that comprise the state vector of this EquationSystem. This will differ from
+  /// _coupled_var_names when time derivatives or other eliminated variables are present.
+  std::vector<std::string> _trial_var_names;
+  /// Names of all coupled variables without a corresponding test variable.
+  std::vector<std::string> _eliminated_var_names;
+  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  Moose::MFEM::GridFunctions _eliminated_variables;
+  /// Names of all test variables corresponding to linear forms in this equation system
+  std::vector<std::string> _test_var_names;
+  /// Pointers to finite element spaces associated with test variables.
+  std::vector<mfem::ParFiniteElementSpace *> _test_pfespaces;
+  /// Pointers to finite element spaces associated with coupled variables.
+  std::vector<mfem::ParFiniteElementSpace *> _coupled_pfespaces;
+
+  // Components of weak form. // Named according to test variable
+  NamedFieldsMap<mfem::ParBilinearForm> _blfs;
+  NamedFieldsMap<mfem::ParLinearForm> _lfs;
+  NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
+      _mblfs; // named according to trial variable
+
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
+  std::vector<mfem::Array<int>> _ess_tdof_lists;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
-
   /// Arrays to store kernels to act on each component of weak form.
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
@@ -214,6 +185,10 @@ protected:
   mutable mfem::OperatorHandle _jacobian;
 
   mfem::AssemblyLevel _assembly_level;
+
+private:
+  /// Disallowed inherited method
+  using mfem::Operator::RecoverFEMSolution;
 };
 
 template <class FormType>
@@ -317,40 +292,6 @@ EquationSystem::ApplyBoundaryLFIntegrators(
     }
   }
 }
-
-/**
- * Class to store weak form components for time dependent PDEs
- */
-class TimeDependentEquationSystem : public EquationSystem
-{
-public:
-  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
-
-  virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem();
-
-  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
-  virtual void BuildBilinearForms() override;
-  virtual void BuildMixedBilinearForms() override;
-  virtual void EliminateCoupledVariables() override;
-
-protected:
-  /// Coefficient for timestep scaling
-  mfem::ConstantCoefficient _dt_coef;
-
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
-      _td_kernels_map;
-  /// Containers to store contributions to weak form of the form (F du/dt, v)
-  Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
-  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
-      _td_mblfs; // named according to trial variable
-
-  /// Map between variable names and their time derivatives
-  const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
-
-  /// Set trial variable names from subset of coupled variables that have an associated test variable.
-  virtual void SetTrialVariableNames() override;
-};
 
 } // namespace Moose::MFEM
 
