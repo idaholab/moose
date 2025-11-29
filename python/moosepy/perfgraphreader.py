@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Implements PerfGraphReader for reading performance results from a database."""
+
 from typing import Any, Callable, Iterable, Optional
 
 
@@ -61,7 +63,10 @@ class PerfGraphObject:
     #     info_str = f"Num calls: {self.num_calls}"
     #     info_str += f"\nLevel: {self.level}"
     #     info_str += (
-    #         "\nTime ({:.2f}%): Self {:.2f} s, Children {:.2f} s, Total {:.2f} s".format(
+    #         "\nTime ({:.2f}%): "
+    #         "Self {:.2f} s, "
+    #         "Children {:.2f} s, "
+    #         "Total {:.2f} s".format(
     #             self.percentTime(),
     #             self.selfTime(),
     #             self.childrenTime(),
@@ -329,7 +334,7 @@ class PerfGraphReader:
         return self._root_node
 
     def recurse(self, act: Callable, *args, **kwargs):
-        """
+        r"""
         Recursively do an action through the graph starting with the root node.
 
         Inputs:
