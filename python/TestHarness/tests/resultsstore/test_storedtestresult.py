@@ -611,7 +611,14 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             orig_tester = data["tester"]
             orig_perf_graph = orig_tester.get("json_metadata", {}).get("perf_graph")
             perf_graph = test.get_perf_graph()
-            if orig_perf_graph:
+            expected_has_graph = False
+            if orig_perf_graph is not None:
+                time_steps = orig_perf_graph.get("time_steps") or []
+                if time_steps:
+                    last_step = time_steps[-1]
+                    graph_data = last_step.get("perf_graph_json", {}).get("graph")
+                    expected_has_graph = graph_data is not None
+            if expected_has_graph:
                 self.assertIsInstance(perf_graph, PerfGraphReader)
             else:
                 self.assertIsNone(perf_graph)
@@ -619,6 +626,26 @@ class TestResultsStoredResults(ResultsStoreTestCase):
         # Make sure at least one test has json metadata and one doesn't
         self.assertTrue(any(v[0].get_perf_graph() is not None for v in tests))
         self.assertTrue(any(v[0].get_perf_graph() is None for v in tests))
+
+    def test_get_perf_graph_no_data(self):
+        """Test get_perf_graph() when graph has no data."""
+        test, _ = self.get_stored_test_result(TestDataFilter.TESTER)
+        with patch(
+            "TestHarness.resultsstore.storedtestresult.StoredTestResult.get_json_metadata",
+            return_value={
+                "perf_graph": {
+                    "time_steps": [
+                        {
+                            "perf_graph_json": {
+                                "graph": None,
+                            }
+                        }
+                    ]
+                }
+            },
+        ):
+            no_perf_graph = test.get_perf_graph()
+        self.assertIsNone(no_perf_graph)
 
     def test_get_perf_graph_no_filter(self):
         """Test get_perf_graph() without the TESTER filter."""
