@@ -7,9 +7,6 @@ from a local traction vector that is calculated from a bilinear mixed mode cohes
 zone model. Theoretical equations and their application to particle fuel is described
 and discussed in [!cite](jiang2021efficient).
 
-This object inherits from [PenaltySimpleCohesiveZoneModel](/PenaltySimpleCohesiveZoneModel.md)
-and can include penalty mortar mechanical contact.
-
 This object implements the bilinear mixed mode traction separation law using the nodal-based mortar quantities
 that are employed in the MOOSE formulation. Such quantities are identified with a tilde
 at a secondary surface node $j$. The definitions of mortar surfaces and mortar quantities are identical to
@@ -142,6 +139,13 @@ Sudden degradation of stiffness may be give rise to the appearance of large disp
 \dot{\omega}_{v} = \frac{1}{\mu} \left( \omega - \omega_v\right).
 \end{equation}
 
+### Use standard Mortar contact to enforce interpenetratation
+
+The standard cohesive zone model uses a penalty method to prevent penetration in compression. Alternatively, users may choose to use Mortar contact to enforce the normal constraint. To do this, set `set_compressive_traction_to_zero = true` to remove the compressive traction from the cohesive zone model, and then add the appropriate Mortar contact blocks to handle normal enforcement.
+
+### Couple cohesive and frictional behaviors
+
+Under combined compressive and shear loading, the coupling between cohesive and frictional behavior, governed by the interface damage level, produces a progressive increase in frictional stress that accompanies the softening of the cohesive response [!cite](VENZAL202017). Because the `BilinearMixedModeCohesiveZoneModel` object inherits from [PenaltyWeightedGapUserObject](/PenaltyWeightedGapUserObject.md) and it can compute frictional forces based on the damage variable, which are then used by [TangentialMortarMechanicalContact](/TangentialMortarMechanicalContact.md).
 
 Example of usage:
 
