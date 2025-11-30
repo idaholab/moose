@@ -46,9 +46,11 @@ BilinearMixedModeCohesiveZoneModel::validParams()
       "lag_displacement_jump",
       false,
       "Whether to use old displacement jumps to compute the effective displacement jump.");
-  params.addParam<bool>("zero_compressive_traction",
-                        false,
-                        "Zero compressive traction (Allow it to use Mortar contact).");
+  params.addParam<bool>(
+      "set_compressive_traction_to_zero",
+      false,
+      "Zero compressive traction (set to true, allowing the use of Mortar contact in "
+      "the normal direction).");
   params.addParam<Real>(
       "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
   params.addRangeCheckedParam<Real>(
@@ -69,7 +71,7 @@ BilinearMixedModeCohesiveZoneModel::BilinearMixedModeCohesiveZoneModel(
     PenaltyWeightedGapUserObject(parameters),
     WeightedVelocitiesUserObject(parameters),
     CohesiveZoneModelBase(parameters),
-    _zero_compressive_traction(getParam<bool>("zero_compressive_traction")),
+    _set_compressive_traction_to_zero(getParam<bool>("set_compressive_traction_to_zero")),
     _normal_strength(getMaterialProperty<Real>("normal_strength")),
     _shear_strength(getMaterialProperty<Real>("shear_strength")),
     _GI_c(getMaterialProperty<Real>("GI_c")),
@@ -147,68 +149,7 @@ BilinearMixedModeCohesiveZoneModel::initialize()
 }
 
 void
-BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
-{
-  // Compute rotation matrix from secondary surface
-  // Rotation matrices and local interface displacement jump.
-  for (const auto i : make_range(_test->size()))
-  {
-    const Node * const node = _lower_secondary_elem->node_ptr(i);
-
-    // First call does not have maps available
-    const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
-    if (return_boolean)
-      return;
-
-    _dof_to_rotation_matrix[node] = CohesiveZoneModelTools::computeReferenceRotation<true>(
-        _normals[i], _subproblem.mesh().dimension());
-
-    // Every time we used quantities from a map we "denormalize" it from the mortar integral.
-    // See normalizing member functions.
-    if (_dof_to_weighted_displacements.find(node) != _dof_to_weighted_displacements.end())
-      _dof_to_interface_displacement_jump[node] =
-          (libmesh_map_find(_dof_to_weighted_displacements, node));
-  }
-}
-
-void
-BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
-{
-  using std::isfinite;
-
-  // First call does not have maps available
-  const bool return_boolean = _dof_to_F.find(node) == _dof_to_F.end();
-  if (return_boolean)
-    return;
-
-  const auto normalized_F = normalizeQuantity(_dof_to_F, node);
-  const auto normalized_F_neighbor = normalizeQuantity(_dof_to_F_neighbor, node);
-
-  // This 'averaging' assumption below can probably be improved upon.
-  _dof_to_interface_F[node] = 0.5 * (normalized_F + normalized_F_neighbor);
-
-  for (const auto i : make_range(3))
-    for (const auto j : make_range(3))
-      if (!isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
-        throw MooseException(
-            "The deformation gradient on the secondary surface is not finite in "
-            "PenaltySimpleCohesiveZoneModel. MOOSE needs to cut the time step size.");
-
-  const auto dof_to_interface_F_node = libmesh_map_find(_dof_to_interface_F, node);
-
-  const ADFactorizedRankTwoTensor C = dof_to_interface_F_node.transpose() * dof_to_interface_F_node;
-  const auto Uinv = MathUtils::sqrt(C).inverse().get();
-  _dof_to_interface_R[node] = dof_to_interface_F_node * Uinv;
-
-  // Transform interface jump according to two rotation matrices
-  const auto global_interface_displacement = _dof_to_interface_displacement_jump[node];
-  _dof_to_interface_displacement_jump[node] =
-      (_dof_to_interface_R[node] * _dof_to_rotation_matrix[node]).transpose() *
-      global_interface_displacement;
-}
-
-void
-BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node * const node)
+BilinearMixedModeCohesiveZoneModel::computeCZMTraction(const Node * const node)
 {
   using std::max, std::min;
 
@@ -235,7 +176,7 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   // This traction vector is local at this point.
   _dof_to_czm_traction[node] =
       -(1.0 - _dof_to_damage[node].first) * _penalty_stiffness_czm * delta_active -
-      _penalty_stiffness_czm * (_zero_compressive_traction ? 0.0 : delta_inactive);
+      _penalty_stiffness_czm * (_set_compressive_traction_to_zero ? 0.0 : delta_inactive);
 }
 
 void

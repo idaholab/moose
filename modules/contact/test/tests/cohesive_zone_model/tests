@@ -40,6 +40,13 @@
                   'Exodus mesh.'
     map = false
   []
+  [mortar_czm_friction]
+    type = Exodiff
+    input = cohesive_friction.i
+    exodiff = cohesive_friction_out.e
+    requirement = 'The system shall be able to apply mortar frictional contact to the damaged interface.'
+    map = false
+  []
   [bilinear_mixed]
     type = CSVDiff
     input = bilinear_mixed.i

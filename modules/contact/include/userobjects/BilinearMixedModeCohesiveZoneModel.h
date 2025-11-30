@@ -53,7 +53,7 @@ protected:
   virtual void computeCZMTraction(const Node * const node) override;
 
   /// Zero compressive traction
-  const bool _zero_compressive_traction;
+  const bool _set_compressive_traction_to_zero;
 
   /// Map from degree of freedom to mode mixity ratio (AD needed?)
   std::unordered_map<const DofObject *, ADReal> _dof_to_mode_mixity_ratio;

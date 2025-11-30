@@ -5,8 +5,8 @@
     xmax = 1.1
     ymax = 1
     xmin = -0.1
-    nx = 20
-    ny = 20
+    nx = 2
+    ny = 2
   []
   [rename_base]
     type = RenameBoundaryGenerator
@@ -26,8 +26,8 @@
     xmax = 1
     ymin = 1
     ymax = 2
-    nx = 20
-    ny = 20
+    nx = 1
+    ny = 1
   []
   [rename_top]
     type = RenameBoundaryGenerator
@@ -166,8 +166,7 @@
     type = FunctionDirichletBC
     boundary = 100
     variable = disp_y
-    #function = 'if(t<=0.3,t,if(t<=0.6,0.3-(t-0.3),if(t<0.8,0.6-t,-0.2)))'
-    function = -0.2
+    function = 'if(t<=0.3,t,if(t<=0.6,0.3-(t-0.3),if(t<0.8,0.6-t,-0.2)))'
     preset = false
   []
 
@@ -189,7 +188,7 @@
   [shear_strength]
     type = GenericConstantMaterial
     prop_names = 'shear_strength'
-    prop_values = '7.5e5' #'7.5e2'
+    prop_values = '7.5e5 ' #7.5e2'
   []
   [stress]
     type = ADComputeFiniteStrainElasticStress
@@ -231,8 +230,8 @@
   start_time = 0.0
   dt = 0.1
   end_time = 2
-  nl_forced_its = 2
   #dtmin = 0.1
+  nl_forced_its = 2
 []
 
 [Outputs]
@@ -247,18 +246,15 @@
     primary_subdomain = 10000
     secondary_subdomain = 10001
 
-    #correct_edge_dropping = true
-
     disp_x = disp_x
     disp_y = disp_y
     secondary_variable = disp_x
 
-    use_physical_gap = true
+    set_compressive_traction_to_zero = true
 
-    zero_compressive_traction = true
-    # penalty_friction = 0
-    # penalty = 0
-    # friction_coefficient = 0.0
+    penalty_friction = 5e6
+    penalty = 1e8
+    friction_coefficient = 0.1
 
     # bilinear model parameters
     normal_strength = 'normal_strength'
@@ -268,31 +264,6 @@
     GI_c = 123
     GII_c = 54
     displacements = 'disp_x disp_y'
-  []
-  # [mortar_uo]
-  #   type = PenaltyWeightedGapUserObject
-  #   primary_boundary = 101
-  #   secondary_boundary = 'top_base'
-  #   primary_subdomain = 10000
-  #   secondary_subdomain = 10001
-  #   disp_x = disp_x
-  #   disp_y = disp_y
-  #   penalty = 1e8
-  #   use_physical_gap = true
-  # []
-  [mortar_uo]
-    type = PenaltyFrictionUserObject
-    primary_boundary = 101
-    secondary_boundary = 'top_base'
-    primary_subdomain = 10000
-    secondary_subdomain = 10001
-    disp_x = disp_x
-    disp_y = disp_y
-    friction_coefficient = 0.1
-    secondary_variable = disp_x
-    penalty = 1e8
-    penalty_friction = 5e6
-    #use_physical_gap = true
   []
 []
 
@@ -307,7 +278,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_gap_uo = mortar_uo
+    weighted_gap_uo = czm_uo
   []
   [y]
     type = NormalMortarMechanicalContact
@@ -319,7 +290,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_gap_uo = mortar_uo
+    weighted_gap_uo = czm_uo
   []
 
   [t_x]
@@ -332,7 +303,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_velocities_uo = mortar_uo
+    weighted_velocities_uo = czm_uo
   []
   [t_y]
     type = TangentialMortarMechanicalContact
@@ -344,7 +315,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    weighted_velocities_uo = mortar_uo
+    weighted_velocities_uo = czm_uo
   []
 
   [c_x]
