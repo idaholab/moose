@@ -65,6 +65,12 @@ echo "Beginning TestHarness {{ SCHEDULER_NAME }} test execution"
 # Move into the test directory
 cd {{ CWD }}
 
+# Make sure that the time command is available
+if ! which time &> /dev/null; then
+    echo "ERROR: time command not available"
+    exit 1
+fi
+
 # Make a temp file to store the time
 time_output=$(mktemp)
 
