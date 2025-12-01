@@ -1495,7 +1495,8 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
     // format keyed value with indentation and calling reusable hit methods
     else if (child.type() == wasp::KEYED_VALUE || child.type() == wasp::ARRAY)
     {
-      const std::string prefix = newline_indent + decl + " = ";
+      const std::string assign = wasp::is_override(child) ? child.child_at(1).data() : "=";
+      const std::string prefix = newline_indent + decl + " " + assign + " ";
 
       const std::string render_val = hit::extractValue(child.data());
       std::size_t val_column = child.child_count() > 2 ? child.child_at(2).column() : 0;

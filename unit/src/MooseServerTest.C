@@ -1717,19 +1717,19 @@ xy_data = "0 0.0
 [../]
 [./multi_line_indent_increase_02]
 type = PiecewiseConstant
-xy_data = " 0 0.0
-            1 11.0
-           10 33.0
-          100 22.30
-         1000 42.210"
+xy_data := " 0 0.0
+             1 11.0
+            10 33.0
+           100 22.30
+          1000 42.210"
 [../]
 [./multi_line_indent_decrease_01]
             type = PiecewiseConstant
-            xy_data = "100 1.0
-                       200 12.0
-                       300 313.0
-                       400 4514.0
-                       500 45615.0"
+            xy_data :override= "100 1.0
+                                200 12.0
+                                300 313.0
+                                400 4514.0
+                                500 45615.0"
 [../]
 [./multi_line_indent_decrease_02]
             type = PiecewiseConstant
@@ -1840,19 +1840,19 @@ num_dim = 2
     []
     [multi_line_indent_increase_02]
         type = PiecewiseConstant
-        xy_data = " 0 0.0
-                    1 11.0
-                   10 33.0
-                  100 22.30
-                 1000 42.210"
+        xy_data := " 0 0.0
+                     1 11.0
+                    10 33.0
+                   100 22.30
+                  1000 42.210"
     []
     [multi_line_indent_decrease_01]
         type = PiecewiseConstant
-        xy_data = "100 1.0
-                   200 12.0
-                   300 313.0
-                   400 4514.0
-                   500 45615.0"
+        xy_data :override= "100 1.0
+                            200 12.0
+                            300 313.0
+                            400 4514.0
+                            500 45615.0"
     []
     [multi_line_indent_decrease_02]
         type = PiecewiseConstant
