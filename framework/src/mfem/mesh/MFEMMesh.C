@@ -31,9 +31,12 @@ MFEMMesh::validParams()
   params.addParam<std::string>("displacement", "Optional variable to use for mesh displacement.");
 
   params.addParam<bool>("periodic", false, "Optional variable to indicate whether we make the mesh periodic.");
-  params.addParam<MFEMVectorCoefficientName>("translation_x", "0. 0. 0.", "Vector specifying translation in x direction.");
-  params.addParam<MFEMVectorCoefficientName>("translation_y", "0. 0. 0.", "Vector specifying translation in y direction.");
-  params.addParam<MFEMVectorCoefficientName>("translation_z", "0. 0. 0.", "Vector specifying translation in z direction.");
+  params.addParam<std::vector<Real>>("translation_x",
+                                     "Vector specifying translation in x direction.");
+  params.addParam<std::vector<Real>>("translation_y",
+                                     "Vector specifying translation in y direction.");
+  params.addParam<std::vector<Real>>("translation_z",
+                                     "Vector specifying translation in z direction.");
 
   params.addClassDescription("Class to read in and store an mfem::ParMesh from file.");
 
@@ -44,7 +47,11 @@ MFEMMesh::MFEMMesh(const InputParameters & parameters) : FileMesh(parameters),
   _periodic(getParam<bool>("periodic"))
 {
   if (_periodic) {
-    // placeholder for fetching the translation vector in future commits
+    // hardcode to fetch x and y
+    _translation_x = getParam<std::vector<Real>>("translation_x");
+    _translation_y = getParam<std::vector<Real>>("translation_y");
+    if (isParamSetByUser("translation_z"))
+      _translation_z = getParam<std::vector<Real>>("translation_z");
   }
 }
 
@@ -91,13 +98,39 @@ mfem::Mesh
 MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh& input) {
   std::vector<mfem::Vector> translations(input.SpaceDimension());
 
-  // start by manually defining the translation
-  mfem::Vector x({1.0, 0.0, 0.0});
-  mfem::Vector y({0.0, 0.0, 0.0});
-  mfem::Vector z({0.0, 0.0, 0.0});
+  // error checking. Demand that the z array is set by the user
+  mooseAssert((_translation_x.size() == input.SpaceDimension()) and
+                  (_translation_y.size() == input.SpaceDimension()),
+              "The translation vectors must be all set by user if using periodic BCs");
+  mooseAssert((input.SpaceDimension() == _translation_z.size()) or (_translation_z.size() == 0),
+              "Asked for 3D but didn't set the z vector");
 
-  translations[0] = x; translations[1] = y; translations[2] = z;
-  return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(translations));
+  if (input.SpaceDimension() == 2)
+  {
+    mfem::Vector x(_translation_x.data(), 2);
+    mfem::Vector y(_translation_y.data(), 2);
+
+    translations[0] = x;
+    translations[1] = y;
+    return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(translations));
+  }
+
+  else if (input.SpaceDimension() == 3)
+  {
+    mfem::Vector x(_translation_x.data(), 3);
+    mfem::Vector y(_translation_y.data(), 3);
+    mfem::Vector z(_translation_z.data(), 3);
+
+    translations[0] = x;
+    translations[1] = y;
+    translations[2] = z;
+    return mfem::Mesh::MakePeriodic(input, input.CreatePeriodicVertexMapping(translations));
+  }
+
+  else
+  {
+    mooseError("Bad value for dimension!");
+  }
 }
 
 void
