@@ -63,6 +63,7 @@ private:
   void addFlowTurbulenceKernels();
   void addFluidEnergyTurbulenceKernels();
   void addScalarAdvectionTurbulenceKernels();
+  void addAxisymmetricTurbulentViscousSource();
 
   /**
    * Functions adding kernels for the k-epsilon to the k-epsilon equations

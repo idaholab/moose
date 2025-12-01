@@ -65,6 +65,12 @@ velocity_interp_method = 'rc'
     mu = ${mu}
     momentum_component = 'x'
   []
+  [u_viscous_source]
+    type = INSFVMomentumViscousSourceRZ
+    variable = vel_x
+    mu = ${mu}
+    momentum_component = 'x'
+  []
   [u_pressure]
     type = INSFVMomentumPressure
     variable = vel_x
