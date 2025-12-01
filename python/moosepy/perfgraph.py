@@ -371,3 +371,43 @@ class PerfGraph:
         """Get a named PerfGraphSection if it exists."""
         assert isinstance(name, str)
         return self._sections.get(name)
+
+    def get_heaviest_nodes(self, num: int) -> list[PerfGraphNode]:
+        """
+        Get the heaviest nodes in the graph.
+
+        Parameters
+        ----------
+        num : int
+            The number of nodes to return.
+
+        """
+        assert isinstance(num, int)
+        assert num > 0
+
+        nodes = []
+        self.recurse(lambda n: nodes.append(n))
+        return sorted(
+            nodes,
+            key=lambda n: n.self_time,
+            reverse=True,
+        )[0:num]
+
+    def get_heaviest_sections(self, num: int) -> list[PerfGraphSection]:
+        """
+        Get the heaviest sections in the graph.
+
+        Parameters
+        ----------
+        num : int
+            The number of sections to return.
+
+        """
+        assert isinstance(num, int)
+        assert num > 0
+
+        return sorted(
+            self.sections,
+            key=lambda s: s.self_time,
+            reverse=True,
+        )[0:num]
