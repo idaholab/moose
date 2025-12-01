@@ -1,22 +1,11 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/square.e
-  dim = 2
-  periodic = true
-  translation_x = "1. 0."
-  translation_y = "0. 0."
+  file = ../mesh/cube.e
+  dim = 3
 []
 
 [Problem]
   type = MFEMProblem
-[]
-
-[Functions]
-  [HeatSourceFcn]
-    type = ParsedVectorFunction
-    expression_x = if(x>=0.75,10.0,0.0)
-    expression_y = if(y>=0.75,1.0,0.0)
-  []
 []
 
 [FESpaces]
@@ -56,17 +45,17 @@
 []
 
 [BCs]
+
   [top]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = 'top'
-    coefficient = 0.0
+    boundary = 'bottom'
   []
   [bottom]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = 'bottom'
-    coefficient = 0.0
+    boundary = 'top'
+    coefficient = 1.0
   []
 []
 
@@ -74,16 +63,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
-  []
-  [source]
-    type = MFEMDomainLFKernel
-    variable = concentration
-    coefficient = 1.0
-  []
-  [HeatSource]
-    type = MFEMVectorDomainLFKernel
-    variable = concentration
-    vector_coefficient = HeatSourceFcn
   []
 []
 
@@ -112,7 +91,7 @@
   active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/poisson
+    file_base = OutputData/Diffusion
     vtk_format = ASCII
   []
   [VisItDataCollection]
