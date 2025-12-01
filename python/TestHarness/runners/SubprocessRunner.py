@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, platform, subprocess, shlex, sys, time
-import psutil
 from contextlib import suppress
 from tempfile import SpooledTemporaryFile
 from threading import Thread
@@ -16,6 +15,13 @@ from typing import Optional
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
+
+# Try to load psutil; not a strict requirement but
+# enables tracking memory
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 class SubprocessRunner(Runner):
     """
@@ -78,14 +84,15 @@ class SubprocessRunner(Runner):
 
         timer.start('runner_run')
 
-        # Setup the memory checking thread if timing enabled; joined in cleanup()
-        if self.options.timing:
+        # Setup the memory checking thread if psutil is available
+        if psutil is not None:
             self.memory_thread = Thread(target=self._runMemoryThread)
             self.memory_thread.start()
 
     @staticmethod
-    def getProcessMemory(process: psutil.Process) -> Optional[int]:
+    def getProcessMemory(process) -> Optional[int]:
         """Get an approximation for a process' total memory in bytes if possible."""
+        assert psutil is not None
         assert isinstance(process, psutil.Process)
 
         # Use proportional set size (PSS) for linux, which is
@@ -108,6 +115,7 @@ class SubprocessRunner(Runner):
 
     def _runMemoryThread(self):
         """Run the thread that tracks memory usage."""
+        assert psutil is not None
         process = self.process
         assert process is not None
 
