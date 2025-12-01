@@ -226,14 +226,18 @@ PerfGraphLivePrint::inSamePlace()
 
     for (unsigned int s = 0; s < _stack_level; s++)
       _print_thread_stack[s]._state = PerfGraph::IncrementState::PRINTED;
+
+    return;
   }
+
   // Only print if there is something to print!
-  else if (_stack_level > 0)
+  if (_stack_level > 0)
   {
     _stack_top_print_dots =
         _perf_graph_registry.sectionInfo(_print_thread_stack[_stack_level - 1]._id)._print_dots;
 
     printStackUpToLast();
+
     printLiveMessage(_print_thread_stack[_stack_level - 1]);
 
     // Reset this each time
@@ -286,6 +290,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
           memory_increment > _mem_limit.load(std::memory_order_relaxed))
       {
         printStackUpToLast();
+
         printStats(section_increment_start, section_increment);
       }
 
