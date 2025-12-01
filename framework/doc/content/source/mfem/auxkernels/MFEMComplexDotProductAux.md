@@ -1,10 +1,10 @@
-# MFEMComplexDotProductAux
+# MFEMHermitianInnerProductAux
 
 !if! function=hasCapability('mfem')
 
 ## Summary
 
-!syntax description /AuxKernels/MFEMComplexDotProductAux
+!syntax description /AuxKernels/MFEMHermitianInnerProductAux
 
 ## Overview
 
@@ -17,11 +17,11 @@ where $u$ and $v$ are the two fields and $s$ is an optional complex scaling. Her
 
 ## Input File Syntax
 
-!syntax parameters /AuxKernels/MFEMComplexDotProductAux
+!syntax parameters /AuxKernels/MFEMHermitianInnerProductAux
 
-!syntax inputs /AuxKernels/MFEMComplexDotProductAux
+!syntax inputs /AuxKernels/MFEMHermitianInnerProductAux
 
-!syntax children /AuxKernels/MFEMComplexDotProductAux
+!syntax children /AuxKernels/MFEMHermitianInnerProductAux
 
 !if-end!
 

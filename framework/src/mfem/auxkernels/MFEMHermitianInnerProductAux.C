@@ -9,32 +9,32 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexDotProductAux.h"
+#include "MFEMHermitianInnerProductAux.h"
 #include "MFEMProblem.h"
 #include "mfem.hpp"
 
-registerMooseObject("MooseApp", MFEMComplexDotProductAux);
+registerMooseObject("MooseApp", MFEMHermitianInnerProductAux);
 
 InputParameters
-MFEMComplexDotProductAux::validParams()
+MFEMHermitianInnerProductAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription("Projects s(x) * (U x V) onto a complex vector MFEM auxvariable");
+  params.addClassDescription("Projects s * (U x V*) onto a complex vector MFEM auxvariable");
   params.addRequiredParam<VariableName>("first_source_vec",
                                         "Complex vector MFEMVariable U (vdim=3)");
   params.addRequiredParam<VariableName>("second_source_vec",
                                         "Complex vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
-      "scale_factor_real", 1.0, "Real part of the constant multiplier applied to the dot product");
+      "scale_factor_real", 1.0, "Real part of the constant multiplier applied to the inner product");
   params.addParam<mfem::real_t>(
       "scale_factor_imag",
       0.0,
-      "Imaginary part of the constant multiplier applied to the dot product");
+      "Imaginary part of the constant multiplier applied to the inner product");
 
   return params;
 }
 
-MFEMComplexDotProductAux::MFEMComplexDotProductAux(const InputParameters & parameters)
+MFEMHermitianInnerProductAux::MFEMHermitianInnerProductAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
     _u_var_name(getParam<VariableName>("first_source_vec")),
     _v_var_name(getParam<VariableName>("second_source_vec")),
@@ -56,20 +56,20 @@ MFEMComplexDotProductAux::MFEMComplexDotProductAux(const InputParameters & param
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   if (fes->GetVDim() != 1)
-    mooseError("MFEMComplexDotProductAux requires the target variable to be a scalar (vdim=1).");
+    mooseError("MFEMHermitianInnerProductAux requires the target variable to be a scalar (vdim=1).");
 
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
-    mooseError("MFEMComplexDotProductAux requires the target variable to use L2_FECollection.");
+    mooseError("MFEMHermitianInnerProductAux requires the target variable to use L2_FECollection.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMComplexDotProductAux currently supports only L2 spaces with interior DOFs "
+    mooseError("MFEMHermitianInnerProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");
 }
 
 void
-MFEMComplexDotProductAux::execute()
+MFEMHermitianInnerProductAux::execute()
 {
 
   // MFEM element projection for L2
