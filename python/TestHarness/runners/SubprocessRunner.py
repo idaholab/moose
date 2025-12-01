@@ -188,8 +188,11 @@ class SubprocessRunner(Runner):
     def wait(self, timer):
         assert self.process is not None
 
-        self.exit_code = self.process.wait()
+        self.process.wait()
+
         timer.stop('runner_run')
+
+        self.exit_code = self.process.poll()
 
         # This should have been cleared before the job started
         if self.getRunOutput().hasOutput():
