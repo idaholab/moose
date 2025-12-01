@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Iterable, Optional, Tuple
 
 from bson.objectid import ObjectId
-from moosepy.perfgraphreader import PerfGraphReader
+from moosepy.perfgraph import PerfGraph
 
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.testdatafilters import (
@@ -373,9 +373,9 @@ class StoredTestResult:
 
         return values
 
-    def get_perf_graph(self) -> Optional[PerfGraphReader]:
+    def get_perf_graph(self) -> Optional[PerfGraph]:
         """
-        Get the perf_graph entry in PerfGraphReader Obj, if any.
+        Get the perf_graph entry in PerfGraph Obj, if any.
 
         Requires filter TestDataFilter.TESTER when loading tests.
         """
@@ -386,7 +386,7 @@ class StoredTestResult:
             return None
         data = reporter_data["time_steps"][-1]["perf_graph_json"]["graph"]
         assert isinstance(data, dict)
-        return PerfGraphReader(data)
+        return PerfGraph(data)
 
     @property
     def max_memory(self) -> Optional[int]:

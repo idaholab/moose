@@ -17,7 +17,7 @@ from typing import Optional, Tuple
 
 from bson.objectid import ObjectId
 from mock import patch
-from moosepy.perfgraphreader import PerfGraphReader
+from moosepy.perfgraph import PerfGraph
 from TestHarness.resultsstore.civetstore import CIVETStore
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.storedtestresult import (
@@ -612,7 +612,7 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             orig_perf_graph = orig_tester.get("json_metadata", {}).get("perf_graph")
             perf_graph = test.get_perf_graph()
             if orig_perf_graph:
-                self.assertIsInstance(perf_graph, PerfGraphReader)
+                self.assertIsInstance(perf_graph, PerfGraph)
             else:
                 self.assertIsNone(perf_graph)
 

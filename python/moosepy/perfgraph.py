@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Implements PerfGraphReader for reading performance results from a database."""
+"""Implements PerfGraph for reading performance results from a database."""
 
 from typing import Any, Callable, Iterable, Optional
 
@@ -121,7 +121,7 @@ class PerfGraphObject:
 
 class PerfGraphSection(PerfGraphObject):
     """
-    A section in the graph for the PerfGraphReader.
+    A section in the graph for the PerfGraph.
 
     These should really only be constructed internally within
     the PerfGraphReporterReader.
@@ -177,7 +177,7 @@ class PerfGraphSection(PerfGraphObject):
 
 class PerfGraphNode(PerfGraphObject):
     """
-    A node in the graph for the PerfGraphReader.
+    A node in the graph for the PerfGraph.
 
     These should really only be constructed internally within
     the PerfGraphReporterReader.
@@ -292,8 +292,8 @@ class PerfGraphNode(PerfGraphObject):
     #     return info_str
 
 
-class PerfGraphReader:
-    """A Reader for MOOSE PerfGraphReporter data."""
+class PerfGraph:
+    """A Reader for MOOSE PerfGraph reporter data."""
 
     def __init__(self, data: dict):
         """
