@@ -9,23 +9,23 @@
 
 #pragma once
 
-#include "Convergence.h"
+#include "MultiPostprocessorConvergence.h"
 
 /**
  * Assesses convergence of a FlowChannel1Phase component.
  */
-class FlowChannel1PhaseConvergence : public Convergence
+class FlowChannel1PhaseConvergence : public MultiPostprocessorConvergence
 {
 public:
   static InputParameters validParams();
 
   FlowChannel1PhaseConvergence(const InputParameters & parameters);
 
-  virtual MooseConvergenceStatus checkConvergence(unsigned int iter) override;
-
 protected:
-  /// Generates a colored line for a tolerance comparison
-  std::string comparisonLine(const std::string & description, Real err, Real tol) const;
+  virtual std::vector<std::tuple<std::string, Real, Real>>
+  getDescriptionErrorToleranceTuples() const override;
+
+  virtual unsigned int getMinimumIterations() const override { return 1; }
 
   // step errors
   const PostprocessorValue & _p_rel_step;

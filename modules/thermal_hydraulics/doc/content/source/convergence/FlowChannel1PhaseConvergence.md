@@ -1,6 +1,6 @@
 # FlowChannel1PhaseConvergence
 
-This [Convergence/index.md] is built by [FlowChannel1Phase.md] for use by
+This class derives from [MultiPostprocessorConvergence.md] and is built by [FlowChannel1Phase.md] for use by
 [ComponentsConvergence.md]. It returns `CONVERGED` if all of the following are `true`
 and returns `ITERATING` otherwise:
 
@@ -32,6 +32,7 @@ where
 - $u_\text{ref}$ is a reference velocity,
 - $\rho_\text{ref} = \rho(p_\text{ref}, T_\text{ref})$ is a reference density,
 - $E_\text{ref} = e(p_\text{ref}, T_\text{ref}) + \frac{1}{2} u_\text{ref}^2$ is a reference specific total energy,
+- $A_\text{ref} = A(\mathbf{x}_\text{mid})$ is a reference cross-sectional area, evaluated at the midpoint $\mathbf{x}_\text{mid}$ of the channel,
 - $h_\text{min}$ is the minimum element size on the channel,
 - $\tau_p$ is a tolerance for the pressure step,
 - $\tau_T$ is a tolerance for the temperature step,
@@ -39,7 +40,13 @@ where
 - $R_\text{mass}$ is the mass equation residual,
 - $R_\text{momentum}$ is the momentum equation residual,
 - $R_\text{energy}$ is the energy equation residual,
+- $\tau_\text{mass}$ is the mass equation tolerance,
+- $\tau_\text{momentum}$ is the mass equation tolerance,
+- $\tau_\text{energy}$ is the mass equation tolerance, and
 - $\|\cdot\|_\infty$ is the $\ell_\infty$ norm over the channel.
+
+!alert note title=One iteration required
+This object always returns `ITERATING` for the first iteration due to the usage of step criteria.
 
 !syntax parameters /Convergence/FlowChannel1PhaseConvergence
 
