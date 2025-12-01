@@ -100,6 +100,9 @@ private:
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
 
   bool _periodic = false;
+  std::vector<Real> _translation_x;
+  std::vector<Real> _translation_y;
+  std::vector<Real> _translation_z;
 };
 
 inline const mfem::ParMesh &
