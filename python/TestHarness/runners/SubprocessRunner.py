@@ -91,21 +91,20 @@ class SubprocessRunner(Runner):
         # Use proportional set size (PSS) for linux, which is
         # a better approximation for MPI processes
         if sys.platform.startswith("linux"):
-            try:
-                with open(f"/proc/{process.pid}/smaps_rollup", "r") as f:
-                    for line in f:
-                        if line.startswith("Pss:"):  # in kB
-                            return int(line.split()[1]) * 1000
-            except FileNotFoundError:
-                return None
-            except ProcessLookupError:
-                return None
+            with (
+                suppress(FileNotFoundError),
+                suppress(ProcessLookupError),
+                open(f"/proc/{process.pid}/smaps_rollup", "r") as f,
+            ):
+                for line in f:
+                    if line.startswith("Pss:"):  # in kB
+                        return int(line.split()[1]) * 1000
         # Otherwise, use RSS (will double count shared memory)
         else:
-            try:
+            with suppress(psutil.Error):
                 return process.memory_info().rss
-            except psutil.Error:
-                return None
+
+        return None
 
     def _runMemoryThread(self):
         """Run the thread that tracks memory usage."""
