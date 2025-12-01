@@ -25,6 +25,7 @@
 /framework/src @lindsayad
 /framework/*/base @roystgnr @lindsayad
 /framework/*/base/MeshGeneratorSystem* @loganharbour @lindsayad
+/framework/*/csg @GiudGiud @lindsayad
 /framework/*/dampers @GiudGiud @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud @lindsayad
 /framework/*/materials/Derivative* @dschwen @lindsayad
@@ -32,6 +33,7 @@
 /framework/*/materials/Parsed* @dschwen @lindsayad
 /framework/*/mesh @roystgnr @GiudGiud @lindsayad
 /framework/*/meshgenerators @roystgnr @GiudGiud @lindsayad
+/framework/*/mfem @nmnobre @alexanderianblair @lindsayad
 /framework/*/multiapps @GiudGiud @lindsayad
 /framework/*/loops @GiudGiud @lindsayad
 /framework/*/outputs @roystgnr @lindsayad
