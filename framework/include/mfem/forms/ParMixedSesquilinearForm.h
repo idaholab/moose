@@ -8,10 +8,10 @@
 class ParMixedSesquilinearForm
 {
 private:
-   mfem::ComplexOperator::Convention conv;
+   mfem::ComplexOperator::Convention _conv;
 
-   mfem::ParBilinearForm *pblfr;
-   mfem::ParBilinearForm *pblfi;
+   mfem::ParMixedBilinearForm *_pmblfr;
+   mfem::ParMixedBilinearForm *_pmblfi;
 
    /* These methods check if the real/imag parts of the sesqulinear form are not
       empty */
@@ -19,25 +19,26 @@ private:
    bool ImagInteg();
 
 public:
-   ParMixedSesquilinearForm(mfem::ParFiniteElementSpace *pf,
+   ParMixedSesquilinearForm(mfem::ParFiniteElementSpace *trial_fes, mfem::ParFiniteElementSpace *test_fes,
                        mfem::ComplexOperator::Convention
                        convention = mfem::ComplexOperator::HERMITIAN);
 
    /** @brief Create a ParMixedSesquilinearForm on the mfem::ParFiniteElementSpace @a pf,
-       using the same integrators as the mfem::ParBilinearForms @a pbfr and @a pbfi .
+       using the same integrators as the mfem::ParMixedBilinearForms @a pbfr and @a pbfi .
 
        The pointer @a pf is not owned by the newly constructed object.
 
        The integrators are copied as pointers and they are not owned by the
        newly constructed ParMixedSesquilinearForm. */
-   ParMixedSesquilinearForm(mfem::ParFiniteElementSpace *pf, mfem::ParBilinearForm *pbfr,
-                       mfem::ParBilinearForm *pbfi,
+   ParMixedSesquilinearForm(mfem::ParFiniteElementSpace *trial_fes, mfem::ParFiniteElementSpace *test_fes,
+                       mfem::ParMixedBilinearForm *pbfr,
+                       mfem::ParMixedBilinearForm *pbfi,
                        mfem::ComplexOperator::Convention
                        convention = mfem::ComplexOperator::HERMITIAN);
 
-   mfem::ComplexOperator::Convention GetConvention() const { return conv; }
+   mfem::ComplexOperator::Convention GetConvention() const { return _conv; }
    void SetConvention(const mfem::ComplexOperator::Convention &
-                      convention) { conv = convention; }
+                      convention) { _conv = convention; }
 
    /// Set the desired assembly level.
    /** Valid choices are:
@@ -51,14 +52,14 @@ public:
        This method must be called before assembly. */
    void SetAssemblyLevel(mfem::AssemblyLevel assembly_level)
    {
-      pblfr->SetAssemblyLevel(assembly_level);
-      pblfi->SetAssemblyLevel(assembly_level);
+      _pmblfr->SetAssemblyLevel(assembly_level);
+      _pmblfi->SetAssemblyLevel(assembly_level);
    }
 
-   mfem::ParBilinearForm & real() { return *pblfr; }
-   mfem::ParBilinearForm & imag() { return *pblfi; }
-   const mfem::ParBilinearForm & real() const { return *pblfr; }
-   const mfem::ParBilinearForm & imag() const { return *pblfi; }
+   mfem::ParMixedBilinearForm & real() { return *_pmblfr; }
+   mfem::ParMixedBilinearForm & imag() { return *_pmblfi; }
+   const mfem::ParMixedBilinearForm & real() const { return *_pmblfr; }
+   const mfem::ParMixedBilinearForm & imag() const { return *_pmblfi; }
 
    /// Adds new Domain Integrator.
    void AddDomainIntegrator(mfem::BilinearFormIntegrator *bfi_real,
@@ -113,22 +114,12 @@ public:
    /** The returned matrix has to be deleted by the caller. */
    mfem::ComplexHypreParMatrix *ParallelAssemble();
 
-   /// Return the parallel FE space associated with the mfem::ParBilinearForm.
-   mfem::ParFiniteElementSpace *ParFESpace() const { return pblfr->ParFESpace(); }
-
-   void FormLinearSystem(const mfem::Array<int> &ess_tdof_list, mfem::Vector &x, mfem::Vector &b,
+   void FormRectangularLinearSystem(const mfem::Array<int> &ess_trial_tdof_list, const mfem::Array<int> &ess_test_tdof_list, mfem::Vector &x, mfem::Vector &b,
                          mfem::OperatorHandle &A, mfem::Vector &X, mfem::Vector &B,
                          int copy_interior = 0);
 
-   void FormSystemMatrix(const mfem::Array<int> &ess_tdof_list,
+   void FormRectangularSystemMatrix(const mfem::Array<int> &ess_trial_tdof_list, const mfem::Array<int> &ess_test_tdof_list,
                          mfem::OperatorHandle &A);
-
-   /** Call this method after solving a linear system constructed using the
-       FormLinearSystem method to recover the solution as a ParGridFunction-size
-       mfem::vector in x. Use the same arguments as in the FormLinearSystem call. */
-   virtual void RecoverFEMSolution(const mfem::Vector &X, const mfem::Vector &b, mfem::Vector &x);
-
-   virtual void Update(mfem::FiniteElementSpace *nfes = NULL);
 
    virtual ~ParMixedSesquilinearForm();
 };
