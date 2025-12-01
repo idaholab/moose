@@ -25,10 +25,10 @@ For transient simulations, you may use the [PIMPLE.md] executioner which impleme
 ### General
 
 We use the linear finite volume discretization, a face-centered finite volume discretization. We have implemented orthogonal
-gradient correction and skewness correction for face values, and thus can reach second-order accuracy in many cases.
+gradient correction for face values, and thus can reach second-order accuracy in many cases.
 
 !alert note
-Triangular and tetrahedral meshes currently only achieve first order convergence rates at the moment.
+Triangular and tetrahedral meshes currently only achieve first order convergence rates in most cases at the moment, notably for the pressure variable.
 
 !alert note
 This implementation does not require forming a Jacobian because it is solving using the SIMPLE/PIMPLE algorithm, which
@@ -38,7 +38,7 @@ Additional details about the linear finite volume discretization can be found on
 
 ### Advection term
 
-The advection term is discretized using the Rhie Chow interpolation for the face velocities. Additional details may be found in the documentation
+The advection term is discretized using the Rhie Chow interpolation for the face fluxes. Additional details may be found in the documentation
 for the object handling the computation of the Rhie Chow velocities: the [RhieChowMassFlux.md].
 
 ## Syntax id=syntax
