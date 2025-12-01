@@ -56,12 +56,9 @@
   start_time = 0
   dt = 2
   num_steps = 10
-  abort_on_solve_fail = true
 
   solve_type = 'NEWTON'
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-6
-  nl_max_its = 30
+  nonlinear_convergence = nl_conv
 
   l_tol = 1e-4
   l_max_its = 300
