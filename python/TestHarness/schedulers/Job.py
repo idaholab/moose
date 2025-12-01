@@ -922,7 +922,6 @@ class Job(OutputInterface):
         job_data = {
             "status": status,
             "timing": self.timer.totalTimes(),
-            "max_memory": self.getMaxMemory(),
             "tester": self.getTester().getResults(self.options),
             "output_files": self.getOutputFiles(self.options),
         }
@@ -930,6 +929,8 @@ class Job(OutputInterface):
             job_data['output'] = self.getCombinedSeparateOutputPaths()
         else:
             job_data['output'] = self.getAllOutput()
+        if (max_memory := self.getMaxMemory()) is not None:
+            job_data["max_memory"] = max_memory
 
         unique_test_id = self.getTester().getUniqueTestID()
         if unique_test_id is not None:
