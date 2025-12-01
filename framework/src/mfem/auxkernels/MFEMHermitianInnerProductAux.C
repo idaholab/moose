@@ -25,7 +25,9 @@ MFEMHermitianInnerProductAux::validParams()
   params.addRequiredParam<VariableName>("second_source_vec",
                                         "Complex vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
-      "scale_factor_real", 1.0, "Real part of the constant multiplier applied to the inner product");
+      "scale_factor_real",
+      1.0,
+      "Real part of the constant multiplier applied to the inner product");
   params.addParam<mfem::real_t>(
       "scale_factor_imag",
       0.0,
@@ -56,7 +58,8 @@ MFEMHermitianInnerProductAux::MFEMHermitianInnerProductAux(const InputParameters
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   if (fes->GetVDim() != 1)
-    mooseError("MFEMHermitianInnerProductAux requires the target variable to be a scalar (vdim=1).");
+    mooseError(
+        "MFEMHermitianInnerProductAux requires the target variable to be a scalar (vdim=1).");
 
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
