@@ -198,18 +198,20 @@ PerfGraphLivePrint::printStackUpToLast()
 {
   mooseAssert(_console_lock, "Console not locked");
 
+  if (_stack_level < 1)
+    return;
+
   // Print out everything on the stack before this that hasn't already been printed
-  if (_stack_level >= 1)
-    for (unsigned int s = 0; s < _stack_level - 1; s++)
-    {
-      auto & section = _print_thread_stack[s];
+  for (unsigned int s = 0; s < _stack_level - 1; s++)
+  {
+    auto & section = _print_thread_stack[s];
 
-      // Hasn't been printed at all and nothing else has been printed since this started
-      if (section._state == PerfGraph::IncrementState::STARTED)
-        printLiveMessage(section);
+    // Hasn't been printed at all and nothing else has been printed since this started
+    if (section._state == PerfGraph::IncrementState::STARTED)
+      printLiveMessage(section);
 
-      section._state = PerfGraph::IncrementState::PRINTED;
-    }
+    section._state = PerfGraph::IncrementState::PRINTED;
+  }
 }
 
 void
