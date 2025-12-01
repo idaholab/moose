@@ -43,6 +43,8 @@ protected:
   const NormType _norm_type;
   /// If true, correct mesh-size bias in norm
   const bool _correct_mesh_bias;
+  /// If false, divide by residual scaling factor
+  const bool _include_scaling_factor;
   /// Nonlinear residual vector
   NumericVector<Number> & _nl_residual_vector;
   /// Local DoF indices for the variable, block-restricted
