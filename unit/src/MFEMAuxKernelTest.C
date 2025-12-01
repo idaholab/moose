@@ -16,7 +16,7 @@
 #include "MFEMComplexCurlAux.h"
 #include "MFEMComplexDivAux.h"
 #include "MFEMHermitianInnerProductAux.h"
-#include "MFEMComplexCrossProductAux.h"
+#include "MFEMComplexExteriorProductAux.h"
 #include "MFEMComplexScalarProjectionAux.h"
 #include "MFEMComplexVectorProjectionAux.h"
 
@@ -336,7 +336,8 @@ TEST_F(MFEMAuxKernelTest, MFEMHermitianInnerProductAux)
 
   {
     // Construct inner product auxkernel
-    InputParameters auxkernel_inner_params = _factory.getValidParams("MFEMHermitianInnerProductAux");
+    InputParameters auxkernel_inner_params =
+        _factory.getValidParams("MFEMHermitianInnerProductAux");
     auxkernel_inner_params.set<AuxVariableName>("variable") = "output_variable_inner";
     auxkernel_inner_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_inner_params.set<VariableName>("second_source_vec") = "source_variable_2";
@@ -378,13 +379,14 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexCrossAux)
 
   {
     // Construct cross product auxkernel
-    InputParameters auxkernel_cross_params = _factory.getValidParams("MFEMComplexCrossProductAux");
+    InputParameters auxkernel_cross_params =
+        _factory.getValidParams("MFEMComplexExteriorProductAux");
     auxkernel_cross_params.set<AuxVariableName>("variable") = "output_variable_cross";
     auxkernel_cross_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_cross_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexCrossProductAux & auxkernel_cross = addObject<MFEMComplexCrossProductAux>(
-        "MFEMComplexCrossProductAux", "auxkernel", auxkernel_cross_params);
+    MFEMComplexExteriorProductAux & auxkernel_cross = addObject<MFEMComplexExteriorProductAux>(
+        "MFEMComplexExteriorProductAux", "auxkernel", auxkernel_cross_params);
     auxkernel_cross.execute();
 
     // Check we get the right cross product

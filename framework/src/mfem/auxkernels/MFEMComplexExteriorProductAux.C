@@ -9,17 +9,17 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexCrossProductAux.h"
+#include "MFEMComplexExteriorProductAux.h"
 #include "MFEMProblem.h"
 #include "mfem.hpp"
 
-registerMooseObject("MooseApp", MFEMComplexCrossProductAux);
+registerMooseObject("MooseApp", MFEMComplexExteriorProductAux);
 
 InputParameters
-MFEMComplexCrossProductAux::validParams()
+MFEMComplexExteriorProductAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription("Projects s(x) * (U x V) onto a vector MFEM auxvariable");
+  params.addClassDescription("Projects s * (U ^ V*) onto a vector MFEM auxvariable");
   params.addRequiredParam<VariableName>("first_source_vec", "Vector MFEMVariable U (vdim=3)");
   params.addRequiredParam<VariableName>("second_source_vec", "Vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
@@ -34,7 +34,7 @@ MFEMComplexCrossProductAux::validParams()
   return params;
 }
 
-MFEMComplexCrossProductAux::MFEMComplexCrossProductAux(const InputParameters & parameters)
+MFEMComplexExteriorProductAux::MFEMComplexExteriorProductAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
     _u_var_name(getParam<VariableName>("first_source_vec")),
     _v_var_name(getParam<VariableName>("second_source_vec")),
@@ -60,23 +60,24 @@ MFEMComplexCrossProductAux::MFEMComplexCrossProductAux(const InputParameters & p
 
   // Enforce 3D cross product
   if (mesh_dim != 3)
-    mooseError("MFEMComplexCrossProductAux requires a 3D mesh (Dimension == 3).");
+    mooseError("MFEMComplexExteriorProductAux requires a 3D mesh (Dimension == 3).");
 
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
-    mooseError("MFEMComplexCrossProductAux requires the target variable to use L2_FECollection.");
+    mooseError(
+        "MFEMComplexExteriorProductAux requires the target variable to use L2_FECollection.");
 
   if (fes->GetVDim() != 3)
-    mooseError("MFEMComplexCrossProductAux requires AuxVariable to have vdim == 3.");
+    mooseError("MFEMComplexExteriorProductAux requires AuxVariable to have vdim == 3.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMComplexCrossProductAux currently supports only L2 spaces with interior DOFs "
+    mooseError("MFEMComplexExteriorProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");
 }
 
 void
-MFEMComplexCrossProductAux::execute()
+MFEMComplexExteriorProductAux::execute()
 {
 
   // MFEM element projection for L2
