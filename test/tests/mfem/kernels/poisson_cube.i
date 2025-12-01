@@ -3,7 +3,7 @@
   file = ../mesh/cube.e
   dim = 3
   periodic = true
-  translation_x = "0. 0. 0."
+  translation_x = "1. 0. 0."
   translation_y = "0. 0. 0."
   translation_z = "0. 0. 0."
 []
