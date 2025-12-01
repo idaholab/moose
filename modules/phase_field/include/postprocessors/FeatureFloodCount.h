@@ -326,6 +326,17 @@ public:
 
   /// Return a constant reference to the vector of all discovered features
   const std::vector<FeatureData> & getFeatures() const { return _feature_sets; }
+  /**
+   * Return the starting comparison threshold to use when inspecting an entity during the flood
+   * stage.
+   */
+  virtual Real getThreshold(std::size_t current_index) const;
+  /**
+   * This method is used to determine whether the current entity value is part of a feature or not.
+   * Comparisons can either be greater than or less than the threshold which is controlled via
+   * input parameter.
+   */
+  bool compareValueWithThreshold(Real entity_value, Real threshold) const;
 
 protected:
   /**
@@ -351,23 +362,10 @@ protected:
   bool flood(const DofObject * dof_object, std::size_t current_index);
 
   /**
-   * Return the starting comparison threshold to use when inspecting an entity during the flood
-   * stage.
-   */
-  virtual Real getThreshold(std::size_t current_index) const;
-
-  /**
    * Return the "connecting" comparison threshold to use when inspecting an entity during the flood
    * stage.
    */
   virtual Real getConnectingThreshold(std::size_t current_index) const;
-
-  /**
-   * This method is used to determine whether the current entity value is part of a feature or not.
-   * Comparisons can either be greater than or less than the threshold which is controlled via
-   * input parameter.
-   */
-  bool compareValueWithThreshold(Real entity_value, Real threshold) const;
 
   /**
    * Method called during the recursive flood routine that should return whether or not the current
