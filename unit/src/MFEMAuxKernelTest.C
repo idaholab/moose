@@ -15,7 +15,7 @@
 #include "MFEMComplexGradAux.h"
 #include "MFEMComplexCurlAux.h"
 #include "MFEMComplexDivAux.h"
-#include "MFEMComplexDotProductAux.h"
+#include "MFEMHermitianInnerProductAux.h"
 #include "MFEMComplexCrossProductAux.h"
 #include "MFEMComplexScalarProjectionAux.h"
 #include "MFEMComplexVectorProjectionAux.h"
@@ -310,9 +310,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexDivAux)
 }
 
 /**
- * Test the complex dot product auxkernel works on ComplexGridFunctions.
+ * Test the inner product auxkernel works on ComplexGridFunctions.
  */
-TEST_F(MFEMAuxKernelTest, MFEMComplexDotAux)
+TEST_F(MFEMAuxKernelTest, MFEMHermitianInnerProductAux)
 {
   auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
   mfem::common::L2_ParFESpace fe_l2(pm, 2, 3);
@@ -336,13 +336,13 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexDotAux)
 
   {
     // Construct inner product auxkernel
-    InputParameters auxkernel_inner_params = _factory.getValidParams("MFEMComplexDotProductAux");
+    InputParameters auxkernel_inner_params = _factory.getValidParams("MFEMHermitianInnerProductAux");
     auxkernel_inner_params.set<AuxVariableName>("variable") = "output_variable_inner";
     auxkernel_inner_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_inner_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexDotProductAux & auxkernel_inner = addObject<MFEMComplexDotProductAux>(
-        "MFEMComplexDotProductAux", "auxkernel", auxkernel_inner_params);
+    MFEMHermitianInnerProductAux & auxkernel_inner = addObject<MFEMHermitianInnerProductAux>(
+        "MFEMHermitianInnerProductAux", "auxkernel", auxkernel_inner_params);
     auxkernel_inner.execute();
 
     // Check we get the right inner product
