@@ -381,6 +381,11 @@ class StoredTestResult:
         """
         return get_typed(self.get_json_metadata(), "perf_graph", (NoneType, dict))
 
+    @property
+    def max_memory(self) -> Optional[int]:
+        """Get the estimated max memory usage for the test in bytes, if available."""
+        return get_typed(self.data, "max_memory", (NoneType, int))
+
     def serialize(self) -> dict:
         """
         Serialize the data so that it is JSON dumpable.
