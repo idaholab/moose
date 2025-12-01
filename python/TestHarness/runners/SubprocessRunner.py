@@ -7,21 +7,24 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, platform, subprocess, shlex, sys, time
+import os, importlib, platform, subprocess, shlex, sys, time
 from contextlib import suppress
 from tempfile import SpooledTemporaryFile
 from threading import Thread
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
 
 # Try to load psutil; not a strict requirement but
 # enables tracking memory
-try:
+if TYPE_CHECKING:
     import psutil
-except ImportError:
-    psutil = None
+else:
+    if importlib.util.find_spec("psutil") is not None:
+        import psutil
+    else:
+        psutil = None
 
 class SubprocessRunner(Runner):
     """
@@ -90,7 +93,7 @@ class SubprocessRunner(Runner):
             self.memory_thread.start()
 
     @staticmethod
-    def getProcessMemory(process) -> Optional[int]:
+    def getProcessMemory(process: psutil.Process) -> Optional[int]:
         """Get an approximation for a process' total memory in bytes if possible."""
         assert psutil is not None
         assert isinstance(process, psutil.Process)
