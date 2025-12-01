@@ -30,7 +30,7 @@ class SubprocessRunner(Runner):
         self.errfile = None
         # The underlying subprocess
         self.process: Optional[subprocess.Popen] = None
-        # The memory checking thread, created during spawn() when -t/--timing
+        # The memory checking thread, created during spawn()
         self.memory_thread: Optional[Thread] = None
 
     def spawn(self, timer):
