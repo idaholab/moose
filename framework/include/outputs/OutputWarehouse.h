@@ -186,12 +186,32 @@ public:
   bool isReservedName(const std::string & name);
 
   /**
-   * Send current output buffer to Console output objects
+   * Send the current output buffer to Console output objects.
+   *
+   * @param console_lock A lock to the Moose::moose_console_lock
+   */
+  std::unique_lock<std::mutex> mooseConsole(std::unique_lock<std::mutex> console_lock);
+  /**
+   * Send the current output buffer to Console output objects.
+   *
+   * Is thread safe, locked from Moose::moose_console_lock.
    */
   void mooseConsole();
 
   /**
-   * Send a buffer to Console output objects
+   * Send a buffer to Console output objects.
+   *
+   * @param buffer The buffer to send
+   * @param console_lock A lock to the Moose::moose_console_lock
+   */
+  std::unique_lock<std::mutex> mooseConsole(std::ostringstream & buffer,
+                                            std::unique_lock<std::mutex> console_lock);
+  /**
+   * Send a buffer to Console output objects.
+   *
+   * Is thread safe, locked from Moose::moose_console_lock.
+   *
+   * @param buffer The buffer to send
    */
   void mooseConsole(std::ostringstream & buffer);
 

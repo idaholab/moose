@@ -17,6 +17,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <mutex>
 
 #define QUOTE(macro) stringifyName(macro)
 #define stringifyName(name) #name
@@ -150,6 +151,7 @@ extern const ExecFlagType EXEC_POST_ADAPTIVITY;
 namespace Moose
 {
 // MOOSE is not tested with LIBMESH_DIM != 3
+
 static_assert(LIBMESH_DIM == 3,
               "MOOSE must be built with a libmesh library compiled without --enable-1D-only "
               "or --enable-2D-only");
@@ -222,6 +224,11 @@ extern bool _throw_on_warning;
  * should be used by application developers.
  */
 extern ExecFlagEnum execute_flags;
+
+/**
+ * Global mutex for outputting to console from the OutputWarehouse
+ */
+extern std::mutex moose_console_mutex;
 
 /**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)

@@ -193,19 +193,25 @@ OutputWarehouse::meshChanged()
     obj->meshChanged();
 }
 
-static std::mutex moose_console_mutex;
+std::unique_lock<std::mutex>
+OutputWarehouse::mooseConsole(std::unique_lock<std::mutex> console_lock)
+{
+  return mooseConsole(_console_buffer, std::move(console_lock));
+}
 
 void
 OutputWarehouse::mooseConsole()
 {
-  mooseConsole(_console_buffer);
+  std::unique_lock console_lock(Moose::moose_console_mutex);
+  mooseConsole(_console_buffer, std::move(console_lock));
 }
 
-void
-OutputWarehouse::mooseConsole(std::ostringstream & buffer)
+std::unique_lock<std::mutex>
+OutputWarehouse::mooseConsole(std::ostringstream & buffer,
+                              std::unique_lock<std::mutex> console_lock)
 {
-  std::lock_guard<std::mutex> lock(moose_console_mutex);
-
+  mooseAssert(console_lock.mutex() == &Moose::moose_console_mutex,
+              "Not a lock to the console mutex");
   std::string message = buffer.str();
 
   // If someone else is writing - then we may need a newline
@@ -246,6 +252,14 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer)
   _last_buffer = &buffer;
 
   _num_printed++;
+  return console_lock;
+}
+
+void
+OutputWarehouse::mooseConsole(std::ostringstream & buffer)
+{
+  std::unique_lock console_lock(Moose::moose_console_mutex);
+  mooseConsole(buffer, std::move(console_lock));
 }
 
 void
