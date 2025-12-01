@@ -5,8 +5,8 @@
     xmax = 1.1
     ymax = 1
     xmin = -0.1
-    nx = 2
-    ny = 2
+    nx = 1
+    ny = 1
   []
   [rename_base]
     type = RenameBoundaryGenerator
@@ -98,7 +98,7 @@
 
 [AuxKernels]
   [penalty_normal_pressure_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = czm_uo
     contact_quantity = normal_pressure
@@ -213,7 +213,6 @@
   type = Transient
 
   solve_type = 'PJFNK'
-  line_search = 'none'
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
@@ -225,13 +224,11 @@
   l_max_its = 2
   l_tol = 1e-14
   nl_max_its = 20
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
   start_time = 0.0
   dt = 0.1
-  end_time = 2
-  #dtmin = 0.1
-  nl_forced_its = 2
+  end_time = 0.5
 []
 
 [Outputs]
