@@ -46,9 +46,9 @@ protected:
   virtual void computeFandR(const Node * const node);
 
   /// Encapsulate the CZM constitutive behavior.
-  virtual void computeCZMTraction(const Node * const /*node*/) {}
+  virtual void computeCZMTraction(const Node * const /*node*/) = 0;
 
-  virtual void computeDamage(const Node * const /*node*/) {}
+  virtual void computeDamage(const Node * const /*node*/) = 0;
 
   /// Compute global traction for mortar application.
   virtual void computeGlobalTraction(const Node * const node);

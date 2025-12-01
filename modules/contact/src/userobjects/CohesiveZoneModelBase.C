@@ -23,8 +23,6 @@
 
 #include <Eigen/Core>
 
-registerMooseObject("ContactApp", CohesiveZoneModelBase);
-
 InputParameters
 CohesiveZoneModelBase::validParams()
 {
@@ -314,13 +312,13 @@ CohesiveZoneModelBase::reinit()
                                std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
 
       if (slip_metric > _epsilon_tolerance &&
-          penalty_friction * slip_distance.norm() >
+          penalty_friction * (MetaPhysicL::raw_value(slip_distance)).norm() >
               0.4 * _friction_coefficient * damage * std::abs(normal_pressure))
       {
         inner_iteration_penalty_friction =
-            MetaPhysicL::raw_value(0.4 * _friction_coefficient * damage *
-                                   std::abs(normal_pressure) /
-                                   (penalty_friction * slip_distance.norm())) *
+            MetaPhysicL::raw_value(
+                0.4 * _friction_coefficient * damage * std::abs(normal_pressure) /
+                (penalty_friction * (MetaPhysicL::raw_value(slip_distance)).norm())) *
             penalty_friction * slip_distance;
       }
 
@@ -328,7 +326,8 @@ CohesiveZoneModelBase::reinit()
           old_tangential_traction + tangential_lm + inner_iteration_penalty_friction;
 
       // Nonlinearity below
-      ADReal tangential_trial_traction_norm = tangential_trial_traction.norm();
+      ADReal tangential_trial_traction_norm =
+          (MetaPhysicL::raw_value(tangential_trial_traction)).norm();
       ADReal phi_trial = tangential_trial_traction_norm - _friction_coefficient * normal_pressure;
       tangential_traction = tangential_trial_traction;
 
