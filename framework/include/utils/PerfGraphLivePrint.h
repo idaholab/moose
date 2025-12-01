@@ -37,48 +37,32 @@ private:
    * Print the live message for a single section
    *
    * @param section_increment The section increment to print
-   * @param console_lock Lock to Moose::moose_console_mutex
-   * @return Released lock to Moose::moose_console_mutex
    */
-  std::unique_lock<std::mutex> printLiveMessage(PerfGraph::SectionIncrement & section_increment,
-                                                std::unique_lock<std::mutex> console_lock);
+  void printLiveMessage(PerfGraph::SectionIncrement & section_increment);
 
   /**
    * Print the stats for a range of sections
    *
    * @param section_increment_start The section increment to start from
    * @param section_increment_finish The section increment to finish with
-   * @param console_lock Lock to Moose::moose_console_mutex
-   * @return Released lock to Moose::moose_console_mutex
    */
-  std::unique_lock<std::mutex> printStats(PerfGraph::SectionIncrement & section_increment_start,
-                                          PerfGraph::SectionIncrement & section_increment_finish,
-                                          std::unique_lock<std::mutex> console_lock);
+  void printStats(PerfGraph::SectionIncrement & section_increment_start,
+                  PerfGraph::SectionIncrement & section_increment_finish);
 
   /**
    * Print everything underneath the current top of the stack
-   *
-   * @param console_lock Lock to Moose::moose_console_mutex
-   * @return Released lock to Moose::moose_console_mutex
    */
-  std::unique_lock<std::mutex> printStackUpToLast(std::unique_lock<std::mutex> console_lock);
+  void printStackUpToLast();
 
   /**
    * What to do if we're still in the same spot
-   *
-   * @param console_lock Lock to Moose::moose_console_mutex
-   * @return Released lock to Moose::moose_console_mutex
    */
-  std::unique_lock<std::mutex> inSamePlace(std::unique_lock<std::mutex> console_lock);
+  void inSamePlace();
 
   /**
    * What to do if there are new things in the execution list
-   *
-   * @param console_lock Lock to Moose::moose_console_mutex
-   * @return Released lock to Moose::moose_console_mutex
    */
-  std::unique_lock<std::mutex>
-  iterateThroughExecutionList(std::unique_lock<std::mutex> console_lock);
+  void iterateThroughExecutionList();
 
   /// Number of columns before wrapping
   const unsigned int WRAP_LENGTH = 90;
@@ -135,6 +119,12 @@ private:
   /// The output count from the console the last time we printed
   unsigned long long int _last_num_printed;
 
+  /// The current output count from the console
+  unsigned long long int _console_num_printed;
+
   /// Whether or not the top thing on the stack is set to print dots
   bool _stack_top_print_dots;
+
+  /// Lock for locking console output
+  std::unique_lock<std::mutex> _console_lock;
 };
