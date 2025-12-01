@@ -20,6 +20,7 @@ MFEMMUMPS::validParams()
   InputParameters params = MFEMSolverBase::validParams();
   params.addClassDescription("MFEM solver for performing direct solves of sparse systems in "
                              "parallel using the MUMPS library.");
+  params.addParam<int>("print_level", 2, "Set the solver verbosity.");
 
   return params;
 }
@@ -32,7 +33,9 @@ MFEMMUMPS::MFEMMUMPS(const InputParameters & parameters) : MFEMSolverBase(parame
 void
 MFEMMUMPS::constructSolver(const InputParameters &)
 {
-  _solver = std::make_unique<mfem::MUMPSSolver>(getMFEMProblem().getComm());
+  auto solver = std::make_unique<mfem::MUMPSSolver>(getMFEMProblem().getComm());
+  solver->SetPrintLevel(getParam<int>("print_level"));
+  _solver = std::move(solver);
 }
 
 void
