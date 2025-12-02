@@ -96,6 +96,12 @@ l = 1
     interior_velocity_vars = 'vel_x vel_y'
     face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
+
+  [pb_mass]
+    type = MassMatrixHDG
+    variable = pressure_bar
+    matrix_tags = 'mass'
+  []
 []
 
 [Kernels]
@@ -153,12 +159,6 @@ l = 1
 []
 
 [DGKernels]
-  [pb_mass]
-    type = MassMatrixDGKernel
-    variable = pressure_bar
-    matrix_tags = 'mass'
-  []
-
   [u_jump]
     type = MassFluxPenalty
     matrix_only = true
@@ -317,12 +317,12 @@ l = 1
 
 [FunctorMaterials]
   [top]
-    type = GenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = top
     prop_values = '${U} 0 0'
   []
   [walls]
-    type = GenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = walls
     prop_values = '0 0 0'
   []
