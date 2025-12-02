@@ -115,8 +115,7 @@ public:
    mfem::ComplexHypreParMatrix *ParallelAssemble();
 
    void FormRectangularLinearSystem(const mfem::Array<int> &ess_trial_tdof_list, const mfem::Array<int> &ess_test_tdof_list, mfem::Vector &x, mfem::Vector &b,
-                         mfem::OperatorHandle &A, mfem::Vector &X, mfem::Vector &B,
-                         int copy_interior = 0);
+                         mfem::OperatorHandle &A, mfem::Vector &X, mfem::Vector &B);
 
    void FormRectangularSystemMatrix(const mfem::Array<int> &ess_trial_tdof_list, const mfem::Array<int> &ess_test_tdof_list,
                          mfem::OperatorHandle &A);
