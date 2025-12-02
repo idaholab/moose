@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Variables/MFEMVariable
-
 ## Overview
 
 `MFEMVariable` defines a finite element variable (`mfem::ParGridFunction`) with respect to a finite

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /BCs/MFEMComplexVectorNormalDirichletBC
-
 ## Overview
 
 Boundary condition for enforcing an essential (Dirichlet) boundary condition on the normal

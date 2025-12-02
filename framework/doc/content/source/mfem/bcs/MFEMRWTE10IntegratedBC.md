@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /BCs/MFEMRWTE10IntegratedBC
-
 ## Overview
 
 Adds the frequency space integrator corresponding to the value upon a cross-sectional boundary of the TE10 mode of an electromagnetic wave traveling through an infinite rectangular waveguide. The physical system in question is explained in more detail [here](https://phys.libretexts.org/Bookshelves/Electricity_and_Magnetism/Electromagnetics_II_(Ellingson)/06%3A_Waveguides/6.09%3A_Rectangular_Waveguide-_TE_Modes). 

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 /**
  * A node in the PerfGraph.  Stores the timing for a particular section of code.
  *

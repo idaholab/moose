@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Solver/MFEMHypreAMS
-
 ## Overview
 
 Defines and builds an `mfem::HypreAMS` solver to use as a preconditioner or solver to solve the

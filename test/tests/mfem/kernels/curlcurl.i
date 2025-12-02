@@ -27,7 +27,6 @@
     type = MFEMScalarFESpace
     fec_type = L2
     fec_order = CONSTANT
-    fec_map =   VALUE
   []
 []
 
@@ -60,11 +59,10 @@
     execute_on = TIMESTEP_END
   []
   [joule_Q_aux]
-    type = MFEMDotProductAux
+    type = MFEMInnerProductAux
     variable = joule_heating
     first_source_vec = e_field
     second_source_vec = e_field
-    scale_factor = 1.0
     execute_on = TIMESTEP_END
   []
 []

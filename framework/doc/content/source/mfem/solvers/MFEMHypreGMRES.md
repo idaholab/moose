@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Solver/MFEMHypreGMRES
-
 ## Overview
 
 Defines and builds an `mfem::HypreGMRES` solver to use as an iterative solver to solve the MFEM

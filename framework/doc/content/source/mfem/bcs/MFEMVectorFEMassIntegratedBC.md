@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /BCs/MFEMVectorFEMassIntegratedBC
-
 ## Overview
 
 Adds the boundary integrator for integrating the bilinear form

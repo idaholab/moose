@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMBoundaryCondition.h"
 
 class MFEMComplexEssentialBC : public MFEMBoundaryCondition

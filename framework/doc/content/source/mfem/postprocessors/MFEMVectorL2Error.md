@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Postprocessors/MFEMVectorL2Error
-
 ## Overview
 
 Postprocessor for calculating the L2 error of a vector $H^{1,d}$,

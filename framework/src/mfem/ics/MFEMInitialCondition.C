@@ -10,7 +10,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMInitialCondition.h"
-#include <mfem.hpp>
 
 InputParameters
 MFEMInitialCondition::validParams()

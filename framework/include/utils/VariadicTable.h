@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 /**
  * Note!  This class comes from https://github.com/friedmud/variadic_table
  *

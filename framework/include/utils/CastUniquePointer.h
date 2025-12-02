@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 /**
  * These are reworked from https://stackoverflow.com/a/11003103
  *

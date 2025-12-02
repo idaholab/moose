@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "FileOutput.h"
 #include "MFEMProblem.h"
 

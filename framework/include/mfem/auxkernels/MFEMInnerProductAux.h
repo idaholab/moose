@@ -14,29 +14,28 @@
 #include "MFEMAuxKernel.h"
 
 /**
- * Project \f$ s \vec u \times \vec v \f$ onto a vector MFEM auxvariable.
+ * Project \f$ s \vec u \cdot \vec v \f$ onto a scalar MFEM auxvariable.
  *
  * Notes:
- *  - Enforces 3D: all involved vdim must be 3.
  *  - The target variable's FE Space must be L2.
  *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
-class MFEMCrossProductAux : public MFEMAuxKernel
+class MFEMInnerProductAux : public MFEMAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMCrossProductAux(const InputParameters & parameters);
-  ~MFEMCrossProductAux() override = default;
+  MFEMInnerProductAux(const InputParameters & parameters);
+  ~MFEMInnerProductAux() override = default;
 
   void execute() override;
 
 protected:
-  /// Cross product coefficient
-  mfem::VectorCrossProductCoefficient _cross;
+  /// Inner product coefficient
+  mfem::InnerProductCoefficient _inner;
 
-  /// Final coefficient that applies a scaling factor to the cross product
-  mfem::ScalarVectorProductCoefficient _scaled_cross;
+  /// Final coefficient that applies a scaling factor to the inner product
+  mfem::ProductCoefficient _scaled_inner;
 };
 
 #endif // MOOSE_MFEM_ENABLED

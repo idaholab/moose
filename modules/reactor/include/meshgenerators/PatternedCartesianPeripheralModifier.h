@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "PatternedPolygonPeripheralModifierBase.h"
 #include "MooseEnum.h"
 #include "MeshMetaDataInterface.h"

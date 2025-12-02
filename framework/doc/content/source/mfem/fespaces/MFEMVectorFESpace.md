@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /FESpaces/MFEMVectorFESpace
-
 ## Overview
 
 This is a convenience class for building finite element spaces to

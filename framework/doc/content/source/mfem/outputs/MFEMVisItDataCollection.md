@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Outputs/MFEMVisItDataCollection
-
 ## Overview
 
 `MFEMDataCollection` controlling output of data to an `mfem::VisItDataCollection` for visualisation

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /BCs/MFEMComplexScalarDirichletBC
-
 ## Overview
 
 Boundary condition for enforcing an essential (Dirichlet) condition on

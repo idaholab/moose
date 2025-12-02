@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "Material.h"
 
 /// Tries to retrieve non-existing old/older versions of a material property.

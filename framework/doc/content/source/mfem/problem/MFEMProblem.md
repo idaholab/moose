@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Problem/MFEMProblem
-
 ## Overview
 
 `MFEMProblem` is derived from MOOSE's `ExternalProblem` Problem type, customized to set up the
