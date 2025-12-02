@@ -4,6 +4,8 @@
 
 #include "MFEMGeneralUserObject.h"
 
+namespace Moose::MFEM
+{
 
 class ParMixedSesquilinearForm
 {
@@ -122,5 +124,7 @@ public:
 
    virtual ~ParMixedSesquilinearForm();
 };
+
+}
 
 #endif
