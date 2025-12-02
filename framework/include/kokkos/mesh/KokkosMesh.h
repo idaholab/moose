@@ -340,7 +340,7 @@ class MeshHolder
 public:
   /**
    * Constructor
-   * @param assembly The Kokkos mesh
+   * @param mesh The Kokkos mesh
    */
   MeshHolder(const Mesh & mesh) : _mesh_host(mesh), _mesh_device(mesh) {}
   /**
