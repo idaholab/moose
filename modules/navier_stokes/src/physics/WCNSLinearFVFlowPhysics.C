@@ -58,6 +58,9 @@ WCNSLinearFVFlowPhysics::validParams()
   params.set<MooseEnum>("velocity_interpolation") = "rc";
   params.suppressParameter<MooseEnum>("velocity_interpolation");
 
+  // Rhie-Chow
+  params.transferParam<MooseEnum>(RhieChowMassFlux::validParams(), "pressure_projection_method");
+
   return params;
 }
 
@@ -613,6 +616,8 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<VariableName>("pressure") = _pressure_name;
   params.set<std::string>("p_diffusion_kernel") = prefix() + "p_diffusion";
   params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseEnum>("pressure_projection_method") =
+      getParam<MooseEnum>("pressure_projection_method");
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }
