@@ -56,11 +56,11 @@ The laminar, turbulent and transition regimes use different coefficients for the
 The bounding laminar and turbulent Reynolds numbers for the turbulent transition are defined as follows:
 
 \begin{equation}
-Re_L = 300 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
+Re_L = 320 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
 \end{equation}
 
 \begin{equation}
-Re_T = 10^4 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
+Re_T = 10^4 \times 10^{0.7 \times (P/D_{\text{pin}} - 1.0)}
 \end{equation}
 
 where:
@@ -73,16 +73,18 @@ The modeling of each regime is explained below.
 
 #### Laminar Nusselt Number
 
-The following relation is used depending on the subchannel type [!cite](Todreas):
+The following relation is used depending on the subchannel:
 
 \begin{equation}
 \text{Nu}_{\text{laminar}} =
 \begin{cases}
-4.0 & \text{if subchannel is CENTER} \\
-3.7 & \text{if subchannel is EDGE} \\
-3.3 & \text{if subchannel is CORNER}
+3.73 & \text{if subchannel is CENTER} \\
+3.59 & \text{if subchannel is EDGE} \\
+3.52 & \text{if subchannel is CORNER}
 \end{cases}
 \end{equation}
+
+The values defined here are chosen based on engineering judgement and the values for  laminar flow in a circular/square tube with constant surface temperature (3.66,3.091) and laminar flow in a circular/square tube subjected to constant surface heat flux (4.36,3.54). For a center subchannel that has approximately half contact with circular fuel pins and half flat interface the laminar Nusselt number is chosen to be the average of the two: $\text{Nu}_{\text{laminar}} = (4.36 + 3.091)/2 = 3.73$. Similar logic has been applied for the edge and corner subchannels. For the edge: $\text{Nu}_{\text{laminar}} = (3.54 + 2*4.36 + 3 * 3.091)/6 = 3.59$. For the corner: $\text{Nu}_{\text{laminar}} = (2*3.54 + 4.36 + 2*3.091)/5 = 3.52$
 
 ### Correlation for Turbulent Nusselt Number
 

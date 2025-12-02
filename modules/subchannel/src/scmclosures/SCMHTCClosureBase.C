@@ -50,10 +50,10 @@ SCMHTCClosureBase::computeNusseltNumberPreInfo(const NusseltStruct & nusselt_arg
   info.subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
 
   info.laminar_Nu = (info.subch_type == EChannelType::CENTER)
-                        ? 4.0
-                        : (info.subch_type == EChannelType::EDGE ? 3.7 : 3.3);
+                        ? 3.73
+                        : (info.subch_type == EChannelType::EDGE ? 3.59 : 3.52);
 
-  info.ReL = 320 * std::pow(10.0, 1.7 * (info.poD - 1.0));
+  info.ReL = 320 * std::pow(10.0, (info.poD - 1.0));
   info.ReT = 1e4 * std::pow(10.0, 0.7 * (info.poD - 1.0));
 
   return info;
