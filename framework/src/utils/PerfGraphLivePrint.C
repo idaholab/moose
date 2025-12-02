@@ -385,28 +385,28 @@ PerfGraphLivePrint::start()
       return;
 
     // Only happens if nothing has been added
-    if (_current_execution_list_end != 0 && _last_execution_list_end != _current_execution_list_end)
-    {
-      // Lock the console so that nothing can write while we're writing
-      _console_lock.lock();
-      // Keep track of the print counter at the beginning
-      _console_num_printed = _console.numPrinted();
+    if (_current_execution_list_end == 0 && _last_execution_list_end == _current_execution_list_end)
+      continue;
 
-      // Are we still sitting in the same place as the last iteration? If so, we need to print
-      // progress and exit
-      if (_last_execution_list_end == _current_execution_list_end)
-        inSamePlace();
+    // Lock the console so that nothing can write while we're writing
+    _console_lock.lock();
+    // Keep track of the print counter at the beginning
+    _console_num_printed = _console.numPrinted();
 
-      // New stuff has been added to the execution list. Iterate through
-      // it, modifying the stack and printing anything that needs printing
-      iterateThroughExecutionList();
+    // Are we still sitting in the same place as the last iteration? If so, we need to print
+    // progress and exit
+    if (_last_execution_list_end == _current_execution_list_end)
+      inSamePlace();
 
-      // Store ending state
-      _last_num_printed = _console.numPrinted();
-      _last_execution_list_end = _current_execution_list_end;
+    // New stuff has been added to the execution list. Iterate through
+    // it, modifying the stack and printing anything that needs printing
+    iterateThroughExecutionList();
 
-      // Release access to the console
-      _console_lock.unlock();
-    }
+    // Store ending state
+    _last_num_printed = _console.numPrinted();
+    _last_execution_list_end = _current_execution_list_end;
+
+    // Release access to the console
+    _console_lock.unlock();
   }
 }
