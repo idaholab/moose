@@ -9,6 +9,7 @@
 #include "MFEMComplexKernel.h"
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
+#include "ParMixedSesquilinearForm.h"
 
 namespace Moose::MFEM
 {
@@ -100,6 +101,7 @@ public:
 
   // Complex Linear and Bilinear Forms
   NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
+  NamedFieldsMap<ParMixedSesquilinearForm> _mslfs;
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
 
   // Complex kernels and integrated BCs
