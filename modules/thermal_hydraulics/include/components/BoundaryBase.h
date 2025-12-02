@@ -20,6 +20,9 @@ class BoundaryBase : public Component
 public:
   BoundaryBase(const InputParameters & params);
 
+protected:
+  virtual Convergence * getNonlinearConvergence() const override { return nullptr; }
+
 public:
   static InputParameters validParams();
 };

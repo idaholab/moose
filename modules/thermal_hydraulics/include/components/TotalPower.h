@@ -23,6 +23,8 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual Convergence * getNonlinearConvergence() const override { return nullptr; }
+
   /// The value of power
   const Real & _power;
 
