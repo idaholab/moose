@@ -184,12 +184,6 @@
     variable = disp_y
     function = bc_pull_mid
   []
-  # [top_middle]
-  #   type = NeumannBC
-  #   boundary = 'top_mid_left_ss top_mid_ss top_mid_right_ss'
-  #   variable = disp_y
-  #   value = -2000
-  # []
   [top_middle]
     type = DirichletBC
     boundary = 'top_mid_left_ss top_mid_ss top_mid_right_ss'
@@ -223,31 +217,10 @@
 
 [Executioner]
   type = Transient
-
   solve_type = 'NEWTON'
-  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'gmres lu superlu_dist'
-
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
   line_search = 'none'
-
-  [Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  []
-
-  reuse_preconditioner = true
-  reuse_preconditioner_max_linear_its = 25
-
-  # controls for linear iterations
-  l_max_its = 100
-  l_tol = 1e-2
-
-  # controls for nonlinear iterations
-  nl_max_its = 15
-  nl_rel_tol = 1e-8
-  nl_abs_tol = 1e-9
-
-  # time control
   start_time = 0.0
   dt = 1.0
   end_time = 10
@@ -257,11 +230,6 @@
 [Outputs]
   csv = true
   execute_on = FINAL
-  # exodus = true
-  # [xfemcutter]
-  #   type = XFEMCutMeshOutput
-  #   xfem_cutter_uo = cut_mesh2
-  # []
   [console]
     type = Console
     output_linear = false

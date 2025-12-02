@@ -1,3 +1,4 @@
+# both crack tips grow and then stop when the vpp samples a high fracture toughness.
 [VectorPostprocessors]
   [CrackFrontNonlocalScalarVpp]
     type = CrackFrontNonlocalScalarMaterial

@@ -1,3 +1,4 @@
+# both crack tips grow.  The right crack tip is arrested by the q-integral intersecting the boundary
 [UserObjects]
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
