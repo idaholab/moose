@@ -75,32 +75,6 @@ FlowChannel1Phase::ICParameters() const
 }
 
 void
-FlowChannel1Phase::check() const
-{
-  FlowChannel1PhaseBase::check();
-  checkScalingFactors();
-}
-
-void
-FlowChannel1Phase::checkScalingFactors() const
-{
-  // If using ComponentsConvergence, make sure that all residual scaling factors
-  // are set to one, since a normalized residual norm is used.
-  const auto & conv_names = getTHMProblem().getNonlinearConvergenceNames();
-  mooseAssert(conv_names.size() == 1, "There must be exactly one nonlinear convergence object.");
-  if (dynamic_cast<ComponentsConvergence *>(&getTHMProblem().getConvergence(conv_names[0])))
-  {
-    const auto & scaling_factors = getParam<std::vector<Real>>("scaling_factor_1phase");
-    bool all_are_one = true;
-    for (const auto factor : scaling_factors)
-      if (!MooseUtils::absoluteFuzzyEqual(factor, 1.0))
-        all_are_one = false;
-    if (!all_are_one)
-      logError("When using ComponentsConvergence, 'scaling_factor_1phase' must be set to '1 1 1'.");
-  }
-}
-
-void
 FlowChannel1Phase::addMooseObjects()
 {
   FlowChannel1PhaseBase::addMooseObjects();
