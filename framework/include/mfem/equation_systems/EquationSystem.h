@@ -160,7 +160,7 @@ protected:
   /// Pointers to finite element spaces associated with coupled variables.
   std::vector<mfem::ParFiniteElementSpace *> _coupled_pfespaces;
 
-  // Components of weak form. // Named according to test variable
+  // Components of weak form, named according to test variable
   NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   NamedFieldsMap<mfem::ParLinearForm> _lfs;
   NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;

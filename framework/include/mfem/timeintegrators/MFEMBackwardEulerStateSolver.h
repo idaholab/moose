@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "libmesh/ignore_warnings.h"
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
@@ -20,6 +21,7 @@ namespace Moose::MFEM
 /// Modified version of the MFEM backward Euler solver solving for the state of
 /// the time dependent variable at the next timestep directly, instead of the
 /// time derivative.
+///
 /// To be replaced if/when https://github.com/mfem/mfem/pull/5079 is merged.
 class MFEMBackwardEulerStateSolver : public mfem::ODESolver
 {

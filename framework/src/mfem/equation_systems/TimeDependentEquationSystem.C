@@ -61,9 +61,7 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
         ->push_back(std::move(kernel));
   }
   else
-  {
     EquationSystem::AddKernel(kernel);
-  }
 }
 
 void
@@ -72,7 +70,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
   // Register bilinear forms
   for (const auto i : index_range(_test_var_names))
   {
-    auto test_var_name = _test_var_names.at(i);
+    const auto & test_var_name = _test_var_names.at(i);
 
     // Apply kernels to blf
     _blfs.Register(test_var_name, std::make_shared<mfem::ParBilinearForm>(_test_pfespaces.at(i)));
@@ -111,7 +109,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
   // associated with contributions from eliminated variables.
   for (const auto i : index_range(_test_var_names))
   {
-    auto test_var_name = _test_var_names.at(i);
+    const auto & test_var_name = _test_var_names.at(i);
     auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
