@@ -32,8 +32,6 @@ class EquationSystem : public mfem::Operator
 {
 
 public:
-  friend class EquationSystemProblemOperator;
-
   EquationSystem() = default;
   ~EquationSystem() override;
 
@@ -187,6 +185,7 @@ protected:
   mfem::AssemblyLevel _assembly_level;
 
 private:
+  friend class EquationSystemProblemOperator;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };

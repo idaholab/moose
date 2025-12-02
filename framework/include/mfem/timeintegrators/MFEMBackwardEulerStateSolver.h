@@ -25,15 +25,13 @@ namespace Moose::MFEM
 /// To be replaced if/when https://github.com/mfem/mfem/pull/5079 is merged.
 class MFEMBackwardEulerStateSolver : public mfem::ODESolver
 {
-protected:
-  mfem::Vector k;
-
 public:
   void Init(mfem::TimeDependentOperator & f_) override;
-
   void Step(mfem::Vector & x, mfem::real_t & t, mfem::real_t & dt) override;
-};
 
+protected:
+  mfem::Vector k;
+};
 }
 
 #endif

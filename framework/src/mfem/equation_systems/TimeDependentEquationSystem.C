@@ -15,7 +15,7 @@ namespace Moose::MFEM
 {
 TimeDependentEquationSystem::TimeDependentEquationSystem(
     const Moose::MFEM::TimeDerivativeMap & time_derivative_map)
-  : _dt_coef(1.0), _time_derivative_map(time_derivative_map)
+  : _dt(1.0), _time_derivative_map(time_derivative_map)
 {
 }
 
@@ -77,9 +77,9 @@ TimeDependentEquationSystem::BuildBilinearForms()
     auto blf = _blfs.GetShared(test_var_name);
     blf->SetAssemblyLevel(_assembly_level);
     ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
-        test_var_name, test_var_name, blf, _integrated_bc_map, _dt_coef.constant);
+        test_var_name, test_var_name, blf, _integrated_bc_map, _dt);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
-        test_var_name, test_var_name, blf, _kernels_map, _dt_coef.constant);
+        test_var_name, test_var_name, blf, _kernels_map, _dt);
     // Apply dt*du/dt contributions from the operator on the trial variable
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, blf, _td_kernels_map);
@@ -122,9 +122,9 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       {
         // Apply all mixed kernels with this test/trial pair
         ApplyBoundaryBLFIntegrators<mfem::ParMixedBilinearForm>(
-            coupled_var_name, test_var_name, mblf, _integrated_bc_map, _dt_coef.constant);
+            coupled_var_name, test_var_name, mblf, _integrated_bc_map, _dt);
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
-            coupled_var_name, test_var_name, mblf, _kernels_map, _dt_coef.constant);
+            coupled_var_name, test_var_name, mblf, _kernels_map, _dt);
         // Apply dt*du/dt contributions from the operator on the trial variable
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
             coupled_var_name, test_var_name, mblf, _td_kernels_map);
@@ -188,7 +188,7 @@ TimeDependentEquationSystem::EliminateCoupledVariables()
   {
     auto td_blf = _td_blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
-    *lf *= _dt_coef.constant;
+    *lf *= _dt;
     // if implicit, add contribution to linear form from terms involving state
     // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
     mfem::Vector lf_prev(lf->Size());

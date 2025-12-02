@@ -21,10 +21,9 @@ namespace Moose::MFEM
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  friend class TimeDomainEquationSystemProblemOperator;
   TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
-  virtual void SetTimeStep(mfem::real_t dt) { _dt_coef.constant = dt; };
+  virtual void SetTimeStep(mfem::real_t & dt) { _dt = dt; };
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
 
 protected:
@@ -34,8 +33,8 @@ protected:
   virtual void BuildMixedBilinearForms() override;
   virtual void EliminateCoupledVariables() override;
 
-  /// Coefficient for timestep scaling
-  mfem::ConstantCoefficient _dt_coef;
+  /// Timestep size
+  mfem::real_t _dt;
 
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _td_kernels_map;
@@ -46,6 +45,9 @@ protected:
 
   /// Map between variable names and their time derivatives
   const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
+
+private:
+  friend class TimeDomainEquationSystemProblemOperator;
 };
 
 } // namespace Moose::MFEM
