@@ -3,9 +3,10 @@ rho = 1
 U = 1
 n = 5
 l = 1
+gamma = 2
 
 [GlobalParams]
-  gamma = 1
+  gamma = ${gamma}
 []
 
 [Mesh]
@@ -101,6 +102,7 @@ l = 1
     type = MassMatrixHDG
     variable = pressure_bar
     matrix_tags = 'mass'
+    density = '${fparse 1/gamma}'
   []
 []
 
@@ -115,16 +117,19 @@ l = 1
     type = MassMatrix
     variable = vel_x
     matrix_tags = 'mass'
+    density = '${fparse 1/gamma}'
   []
   [mass_matrix_vel_y]
     type = MassMatrix
     variable = vel_y
     matrix_tags = 'mass'
+    density = '${fparse 1/gamma}'
   []
   [mass_matrix_pressure]
     type = MassMatrix
     variable = pressure
     matrix_tags = 'mass'
+    density = '${fparse 1/gamma}'
   []
 
   [u_jump]
@@ -241,6 +246,7 @@ l = 1
     variable = pressure_bar
     matrix_tags = 'mass'
     boundary = 'left right bottom top'
+    density = '${fparse 1/gamma}'
   []
 
   [u_jump_walls]
