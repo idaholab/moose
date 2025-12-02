@@ -72,10 +72,10 @@ private:
   void outputNow(const std::ostringstream & out);
 
   /**
-   * Build a formatted message for the given section
+   * Format a section message for output
    */
-  static std::string formattedMessage(const PerfGraph::SectionIncrement & section_increment,
-                                      const std::string & message);
+  static std::string formatMessage(const PerfGraph::SectionIncrement & section_increment,
+                                   const std::string & message);
 
   /// Number of columns before wrapping
   const unsigned int WRAP_LENGTH = 90;

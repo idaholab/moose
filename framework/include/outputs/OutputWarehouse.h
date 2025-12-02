@@ -222,12 +222,14 @@ public:
   std::ostringstream & consoleBuffer() { return _console_buffer; }
 
   /**
-   * Set if the outputs to Console before its construction are to be buffered or to screen directly
-   * @param buffer Ture to buffer
+   * Deprecated method for setting if outputs before Console are to be buffered directly.
+   *
+   * Now defaults to false and is not able to be changed.
    */
-  void bufferConsoleOutputsBeforeConstruction(bool buffer)
+  void bufferConsoleOutputsBeforeConstruction(bool)
   {
-    _buffer_action_console_outputs = buffer;
+    mooseDeprecated(
+        "Output::bufferConsoleOutputsBeforeConstruction is deprecated and now may only be false");
   }
 
   /// Reset the output system
@@ -361,9 +363,6 @@ private:
 
   /// All instances of objects (raw pointers)
   std::vector<Output *> _all_objects;
-
-  /// True to buffer console outputs in actions
-  bool _buffer_action_console_outputs;
 
   /// A map of the output pointers
   std::map<OutputName, Output *> _object_map;

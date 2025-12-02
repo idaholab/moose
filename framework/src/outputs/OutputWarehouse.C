@@ -25,7 +25,6 @@
 OutputWarehouse::OutputWarehouse(MooseApp & app)
   : PerfGraphInterface(app, "OutputWarehouse"),
     _app(app),
-    _buffer_action_console_outputs(false),
     _common_params_ptr(NULL),
     _output_exec_flag(EXEC_CUSTOM),
     _force_output(false),
@@ -230,9 +229,9 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer,
     for (const auto & obj : objects)
       obj->mooseConsole(message);
   }
-  // Otherwise output directly to the buffer
+  // Otherwise output directly to the buffer if the output task is not complete
   else if (_app.actionWarehouse().hasTask("add_output") &&
-           !_app.actionWarehouse().isTaskComplete("add_output") && !_buffer_action_console_outputs)
+           !_app.actionWarehouse().isTaskComplete("add_output"))
   {
     // If that last message ended in newline then this one may need
     // to start with indenting; we only indent the first line if the
@@ -245,22 +244,24 @@ OutputWarehouse::mooseConsole(std::ostringstream & buffer,
   else
     did_output = false;
 
-  // Clear the buffer, which triggers that we did a write
   if (did_output)
   {
+    // Clear the buffer, which triggers that we did a write
     buffer.clear();
     buffer.str("");
+
+    // Keep track of the newline state
     _last_message_ended_in_newline = has_newline;
+
+    // Keep track of the last buffer that wrote, as it allows us to
+    // know if the writer changed, and thus if we need to forcefully
+    // insert new lines or not
+    _last_buffer = &buffer;
+
+    // Increment the number of prints; this lets writers know after writing
+    // if something else wrote after them
+    _num_printed++;
   }
-
-  // Keep track of the last buffer that wrote, as it allows us to
-  // know if the writer changed, and thus if we need to forcefully
-  // insert new lines or not
-  _last_buffer = &buffer;
-
-  // Increment the number of prints; this lets writers know after writing
-  // if something else wrote after them
-  _num_printed++;
 
   // Return access to the lock
   return console_lock;

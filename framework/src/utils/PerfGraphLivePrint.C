@@ -72,37 +72,38 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
       _last_printed_increment != &section_increment &&
       _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
       section_info._print_dots)
-    out << std::endl;
-
+    out << "\n";
+  // Faint coloring
+  out << COLOR_FAINT;
   // Do we need to print dots?
   if (_last_printed_increment && _last_printed_increment == &section_increment &&
       section_increment._state == PerfGraph::IncrementState::PRINTED)
   {
     if (section_info._print_dots)
     {
-      out << ".";
+      out << COLOR_FAINT << "." << COLOR_RESET;
       section_increment._num_dots++;
     }
   }
   // Printed before so print "Still"
   else if (section_increment._state == PerfGraph::IncrementState::PRINTED)
   {
-    out << formattedMessage(section_increment, "Still " + message);
+    out << formatMessage(section_increment, "Still " + message);
 
     // If we're not printing dots - just finish the line
     if (!section_info._print_dots)
-      out << std::endl;
+      out << "\n";
 
     // The 6 is for "Still "
     section_increment._num_dots = 6;
   }
   else // Just print the message
   {
-    out << formattedMessage(section_increment, message);
+    out << formatMessage(section_increment, message);
 
     // If we're not printing dots - just finish the line
     if (!section_info._print_dots)
-      out << std::endl;
+      out << "\n";
 
     // Reset the dots since we're printing, except in the "Currently" case
     if (section_increment._state != PerfGraph::IncrementState::STARTED ||
@@ -167,24 +168,28 @@ PerfGraphLivePrint::printStats(const PerfGraph::SectionIncrement & section_incre
         _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
         _last_printed_increment->_id != 0 &&
         _perf_graph_registry.sectionInfo(_last_printed_increment->_id)._print_dots)
-      out << std::endl;
+      out << "\n";
 
     constexpr std::string_view prefix = "Finished ";
-    out << formattedMessage(section_increment_start, std::string(prefix) + message);
+    out << formatMessage(section_increment_start, std::string(prefix) + message);
     num_horizontal_chars += prefix.size();
   }
   else
     num_horizontal_chars += section_increment_start._num_dots;
   // Force character wrapping
   out << std::setw(WRAP_LENGTH - num_horizontal_chars);
+  // Faint coloring
+  out << COLOR_FAINT;
   // Time
   out << "[" << COLOR_YELLOW << std::setw(6) << std::fixed << std::setprecision(2) << time_increment
       << " s" << COLOR_DEFAULT << ']';
   // Memory
   out << " [" << COLOR_YELLOW << std::setw(5) << std::fixed << memory_total << " MB"
       << COLOR_DEFAULT << ']';
+  // Remove faint coloring
+  out << COLOR_RESET;
   // New line
-  out << std::endl;
+  out << "\n";
 
   // Output, all together and now
   outputNow(out);
@@ -317,21 +322,21 @@ PerfGraphLivePrint::outputNow(const std::ostringstream & out)
   mooseAssert(_console_lock, "Should have the console lock");
   mooseAssert(_out.str().empty(), "Should be empty");
 
-  if (const auto out_str = out.str(); out_str.size())
-  {
-    _out << COLOR_FAINT;
-    _out << out_str;
-    _out << COLOR_RESET;
-    _console_lock = _console.outputGuarded(_out, std::move(_console_lock));
-    mooseAssert(_out.str().empty(), "Should have output");
-  }
+  const auto out_str = out.str();
+  mooseAssert(out_str.size(), "Should not output empty message");
+
+  _out << out_str;
+  _console_lock = _console.outputGuarded(_out, std::move(_console_lock));
+
+  mooseAssert(_out.str().empty(), "Should have output");
 }
 
 std::string
-PerfGraphLivePrint::formattedMessage(const PerfGraph::SectionIncrement & section_increment,
-                                     const std::string & message)
+PerfGraphLivePrint::formatMessage(const PerfGraph::SectionIncrement & section_increment,
+                                  const std::string & message)
 {
-  return std::string(section_increment._print_stack_level, ' ') + message;
+  return COLOR_FAINT + std::string(section_increment._print_stack_level, ' ') + message +
+         COLOR_RESET;
 }
 
 void
