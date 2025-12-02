@@ -10,7 +10,7 @@
 #include "NavierStokesStressIPHDGAssemblyHelper.h"
 #include "NavierStokesStressIPHDGPrescribedFluxBC.h"
 
-registerMooseObject("MooseApp", NavierStokesStressIPHDGPrescribedFluxBC);
+registerMooseObject("NavierStokesApp", NavierStokesStressIPHDGPrescribedFluxBC);
 
 InputParameters
 NavierStokesStressIPHDGPrescribedFluxBC::validParams()
