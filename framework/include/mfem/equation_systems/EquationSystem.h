@@ -98,13 +98,18 @@ protected:
   virtual void BuildEquationSystem();
 
   /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
-  /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints
+  /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
-  virtual void
-  FormSystem(mfem::OperatorHandle & op, mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
-  virtual void FormLegacySystem(mfem::OperatorHandle & op,
+  /// Form matrix-free representation of system operator.
+  /// Used when EquationSystem assembly level is set to 'FULL', 'ELEMENT', 'PARTIAL', or 'NONE'.
+  virtual void FormSystemOperator(mfem::OperatorHandle & op,
+                                  mfem::BlockVector & trueX,
+                                  mfem::BlockVector & trueRHS);
+  /// Form matrix representation of system operator as a HypreParMatrix.
+  /// Used when EquationSystem assembly level is set to 'LEGACY'.
+  virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
 

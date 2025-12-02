@@ -229,7 +229,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   switch (_assembly_level)
   {
     case mfem::AssemblyLevel::LEGACY:
-      FormLegacySystem(op, trueX, trueRHS);
+      FormSystemMatrix(op, trueX, trueRHS);
       break;
     default:
       mooseAssert(_test_var_names.size() == 1,
@@ -237,14 +237,14 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
       mooseAssert(
           _test_var_names.size() == _trial_var_names.size(),
           "Non-legacy assembly is only supported for single test and trial variable systems");
-      FormSystem(op, trueX, trueRHS);
+      FormSystemOperator(op, trueX, trueRHS);
   }
 }
 
 void
-EquationSystem::FormSystem(mfem::OperatorHandle & op,
-                           mfem::BlockVector & trueX,
-                           mfem::BlockVector & trueRHS)
+EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
+                                   mfem::BlockVector & trueX,
+                                   mfem::BlockVector & trueRHS)
 {
   auto & test_var_name = _test_var_names.at(0);
   auto blf = _blfs.Get(test_var_name);
@@ -265,7 +265,7 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
+EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueX,
                                  mfem::BlockVector & trueRHS)
 {

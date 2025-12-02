@@ -210,9 +210,9 @@ ComplexEquationSystem::AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssenti
 }
 
 void
-ComplexEquationSystem::FormSystem(mfem::OperatorHandle & op,
-                                  mfem::BlockVector & trueX,
-                                  mfem::BlockVector & trueRHS)
+ComplexEquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
+                                          mfem::BlockVector & trueX,
+                                          mfem::BlockVector & trueRHS)
 {
   auto & test_var_name = _test_var_names.at(0);
   auto slf = _slfs.Get(test_var_name);
@@ -233,7 +233,7 @@ ComplexEquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
+ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                         mfem::BlockVector & trueX,
                                         mfem::BlockVector & trueRHS)
 {
