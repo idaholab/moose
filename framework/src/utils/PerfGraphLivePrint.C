@@ -87,7 +87,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   // Printed before so print "Still"
   else if (section_increment._state == PerfGraph::IncrementState::PRINTED)
   {
-    out << messagePrefix(section_increment) << "Still " << message;
+    out << formattedMessage(section_increment, "Still " + message);
 
     // If we're not printing dots - just finish the line
     if (!section_info._print_dots)
@@ -98,7 +98,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   }
   else // Just print the message
   {
-    out << messagePrefix(section_increment) << message;
+    out << formattedMessage(section_increment, message);
 
     // If we're not printing dots - just finish the line
     if (!section_info._print_dots)
@@ -170,7 +170,7 @@ PerfGraphLivePrint::printStats(const PerfGraph::SectionIncrement & section_incre
       out << std::endl;
 
     constexpr std::string_view prefix = "Finished ";
-    out << messagePrefix(section_increment_start) << std::string(prefix) << message;
+    out << formattedMessage(section_increment_start, std::string(prefix) + message);
     num_horizontal_chars += prefix.size();
   }
   else
@@ -317,16 +317,21 @@ PerfGraphLivePrint::outputNow(const std::ostringstream & out)
   mooseAssert(_console_lock, "Should have the console lock");
   mooseAssert(_out.str().empty(), "Should be empty");
 
-  _out << out.str();
-  _console_lock = _console.outputGuarded(_out, std::move(_console_lock));
-
-  mooseAssert(_out.str().empty(), "Should have output");
+  if (const auto out_str = out.str(); out_str.size())
+  {
+    _out << COLOR_FAINT;
+    _out << out_str;
+    _out << COLOR_RESET;
+    _console_lock = _console.outputGuarded(_out, std::move(_console_lock));
+    mooseAssert(_out.str().empty(), "Should have output");
+  }
 }
 
 std::string
-PerfGraphLivePrint::messagePrefix(const PerfGraph::SectionIncrement & section_increment)
+PerfGraphLivePrint::formattedMessage(const PerfGraph::SectionIncrement & section_increment,
+                                     const std::string & message)
 {
-  return std::string(section_increment._print_stack_level, ' ');
+  return std::string(section_increment._print_stack_level, ' ') + message;
 }
 
 void

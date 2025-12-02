@@ -242,6 +242,8 @@ extern std::mutex moose_console_mutex;
 #define COLOR_CYAN (Moose::colorConsole() ? XTERM_CYAN : "")
 #define COLOR_WHITE (Moose::colorConsole() ? XTERM_WHITE : "")
 #define COLOR_DEFAULT (Moose::colorConsole() ? XTERM_DEFAULT : "")
+#define COLOR_FAINT (Moose::colorConsole() ? XTERM_FAINT : "")
+#define COLOR_RESET (Moose::colorConsole() ? XTERM_RESET : "")
 
 /// Returns whether Console coloring is turned on (default: true).
 bool colorConsole();
