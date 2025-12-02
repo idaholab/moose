@@ -73,11 +73,44 @@ MultiAppMFEMCopyTransfer::transfer(MFEMProblem & to_problem, MFEMProblem & from_
     mooseError("Number of variables transferred must be same in both systems.");
   for (unsigned v = 0; v < numToVar(); ++v)
   {
-    auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getToVarName(v));
-    auto & from_var = from_problem.getProblemData().gridfunctions.GetRef(getFromVarName(v));
+    const auto & name_from = getFromVarName(v);
+    const auto & name_to   = getToVarName(v);
     // TODO: Probably need more checking here to make sure the variables are
     // copyable - as per the MultiAppDofCopyTransfer
-    to_var = from_var;
+    auto & from_data = from_problem.getProblemData();
+    auto & to_data   = to_problem.getProblemData();
+    // ===== REAL to REAL ==================================================
+    if (from_data.gridfunctions.Has(name_from))
+    {
+      if (!to_data.gridfunctions.Has(name_to))
+        mooseError("MultiAppMFEMCopyTransfer: trying to copy real field '",
+                   name_from, "' into non-real target field '", name_to, "'");
+
+      auto & from_var = from_data.gridfunctions.GetRef(name_from);
+      auto & to_var   = to_data.gridfunctions.GetRef(name_to);
+
+      to_var = from_var;
+      continue;
+    }
+    // ===== COMPLEX to COMPLEX =============================================
+    if (from_data.cmplx_gridfunctions.Has(name_from))
+    {
+      if (!to_data.cmplx_gridfunctions.Has(name_to))
+        mooseError("MultiAppMFEMCopyTransfer: trying to copy complex field '",
+                   name_from, "' into non-complex target field '", name_to, "'");
+
+      auto & from_c = from_data.cmplx_gridfunctions.GetRef(name_from);
+      auto & to_c   = to_data.cmplx_gridfunctions.GetRef(name_to);
+
+      // Copy real part
+      to_c.real() = from_c.real();
+      // Copy imaginary part
+      to_c.imag() = from_c.imag();
+
+      continue;
+    }
+    mooseError("MultiAppMFEMCopyTransfer: field '", name_from,
+               "' not found as real or complex in source problem.");
   }
 }
 
