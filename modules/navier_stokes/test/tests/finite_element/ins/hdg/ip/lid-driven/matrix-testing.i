@@ -102,7 +102,7 @@ gamma = 2
     type = MassMatrixHDG
     variable = pressure_bar
     matrix_tags = 'mass'
-    density = '${fparse 1/gamma}'
+    density = '${fparse -1/gamma}'
   []
 []
 
@@ -117,19 +117,19 @@ gamma = 2
     type = MassMatrix
     variable = vel_x
     matrix_tags = 'mass'
-    density = '${fparse 1/gamma}'
+    density = '${fparse -1/gamma}'
   []
   [mass_matrix_vel_y]
     type = MassMatrix
     variable = vel_y
     matrix_tags = 'mass'
-    density = '${fparse 1/gamma}'
+    density = '${fparse -1/gamma}'
   []
   [mass_matrix_pressure]
     type = MassMatrix
     variable = pressure
     matrix_tags = 'mass'
-    density = '${fparse 1/gamma}'
+    density = '${fparse -1/gamma}'
   []
 
   [u_jump]
@@ -246,7 +246,7 @@ gamma = 2
     variable = pressure_bar
     matrix_tags = 'mass'
     boundary = 'left right bottom top'
-    density = '${fparse 1/gamma}'
+    density = '${fparse -1/gamma}'
   []
 
   [u_jump_walls]
