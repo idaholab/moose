@@ -83,7 +83,7 @@ provided since it cannot be formed from system matrix data. Similarly,
 
 ## Preconditioning using the pressure mass matrix
 
-A final option available to users is the [!param](/Problem/NavierStokesProblem/use_pressure_mass_matrix) parameter. For Stokes flow (no advective term in the momentum equation) it is known that the pressure mass matrix is spectrally equivalent to the Schur complement, in which case the pressure mass matrix is an ideal choice for forming a preconditioner. If the user sets this option to `true`, then
+A final option available to users is the [!param](/Problem/NavierStokesProblem/set_schur_pre) parameter. For Stokes flow (no advective term in the momentum equation) it is known that the pressure mass matrix is spectrally equivalent to the Schur complement, in which case the pressure mass matrix is an ideal choice for forming a preconditioner. If the user sets this option to `mass`, then
 
 \begin{equation}
 \hat{S}^{-1} := \hat{M}_p^{-1}
