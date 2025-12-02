@@ -626,6 +626,17 @@ class TestResultsStoredResults(ResultsStoreTestCase):
         with self.assertRaisesRegex(ValueError, "TESTER"):
             test.get_perf_graph()
 
+    def test_get_max_memory(self):
+        """Test get_max_memory()."""
+        tests = self.get_stored_test_results()
+        max_memory = 1234
+        for test, data in tests:
+            test.data["max_memory"] = max_memory
+            self.assertEqual(test.max_memory, max_memory)
+
+            del test.data["max_memory"]
+            self.assertIsNone(test.max_memory)
+
     def run_test_serialize_deserialize(self, **kwargs):
         """
         Run a test for serialize() and deserialize().
