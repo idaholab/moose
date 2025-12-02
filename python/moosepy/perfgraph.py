@@ -333,6 +333,11 @@ class PerfGraph:
         """Get the root PerfGraphNode."""
         return self._root_node
 
+    @property
+    def total_time(self) -> float:
+        """Get the total time."""
+        return self.root_node.total_time
+
     def recurse(self, act: Callable, *args, **kwargs):
         r"""
         Recursively do an action through the graph starting with the root node.
