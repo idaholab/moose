@@ -10,7 +10,7 @@
 #include "MassContinuityAssemblyHelper.h"
 #include "MassContinuityIPHDGKernel.h"
 
-registerMooseObject("MooseApp", MassContinuityIPHDGKernel);
+registerMooseObject("NavierStokesApp", MassContinuityIPHDGKernel);
 
 InputParameters
 MassContinuityIPHDGKernel::validParams()
