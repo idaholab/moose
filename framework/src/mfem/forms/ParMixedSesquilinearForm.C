@@ -2,6 +2,9 @@
 
 #include "ParMixedSesquilinearForm.h"
 
+namespace Moose::MFEM
+{
+
 bool ParMixedSesquilinearForm::RealInteg()
 {
    int nint = _pmblfr->GetFBFI()->Size() + _pmblfr->GetDBFI()->Size() +
@@ -330,6 +333,6 @@ ParMixedSesquilinearForm::FormRectangularSystemMatrix(const mfem::Array<int> &es
    A_i.SetOperatorOwner(false);
 }
 
-
+}
 
 #endif
