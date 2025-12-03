@@ -159,14 +159,14 @@
     preset = false
     boundary = 100
     variable = disp_x
-    function = 'if(t<1.0,0,t-1.0)'
+    function = 0.2*t
   []
 
   [top]
     type = FunctionDirichletBC
     boundary = 100
     variable = disp_y
-    function = 'if(t<=0.3,t,if(t<=0.6,0.3-(t-0.3),if(t<0.8,0.6-t,-0.2)))'
+    function = -0.01
     preset = false
   []
 
@@ -188,7 +188,7 @@
   [shear_strength]
     type = GenericConstantMaterial
     prop_names = 'shear_strength'
-    prop_values = '7.5e5 ' #7.5e2'
+    prop_values = '100'
   []
   [stress]
     type = ADComputeFiniteStrainElasticStress
@@ -196,9 +196,15 @@
   []
   [elasticity_tensor]
     type = ADComputeElasticityTensor
-    fill_method = symmetric9
-    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
-    block = '1 2'
+    fill_method = symmetric_isotropic_E_nu
+    C_ijkl = '1e6 0.3'
+    block = '1'
+  []
+  [elasticity_tensor2]
+    type = ADComputeElasticityTensor
+    fill_method = symmetric_isotropic_E_nu
+    C_ijkl = '1e5 0.3'
+    block = '2'
   []
 []
 
@@ -213,7 +219,6 @@
   type = Transient
 
   solve_type = 'PJFNK'
-
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
@@ -225,10 +230,10 @@
   l_tol = 1e-14
   nl_max_its = 20
   nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-12
+  nl_abs_tol = 1e-9
   start_time = 0.0
   dt = 0.1
-  end_time = 0.5
+  end_time = 1.6
 []
 
 [Outputs]
@@ -246,17 +251,19 @@
     disp_x = disp_x
     disp_y = disp_y
     secondary_variable = disp_x
+    use_physical_gap = true
 
     set_compressive_traction_to_zero = true
+    correct_edge_dropping = true
 
     penalty_friction = 5e6
-    penalty = 1e8
+    penalty = 1e5
     friction_coefficient = 0.1
 
     # bilinear model parameters
     normal_strength = 'normal_strength'
     shear_strength = 'shear_strength'
-    penalty_stiffness = 1e8
+    penalty_stiffness = 1e6
     power_law_parameter = 2
     GI_c = 123
     GII_c = 54
