@@ -22,6 +22,17 @@ public:
 
   SCMHTCDittusBoelter(const InputParameters & parameters);
 
+  struct CorrectionResult
+  {
+    Real psi; // correction factor for pin-bundle
+    Real b;   // exponent in Dittus-Boelter formula
+  };
+
   virtual Real computeNusseltNumber(const FrictionStruct & friction_info,
                                     const NusseltStruct & nusselt_info) const override;
+  CorrectionResult computeCorrectionFactor(const Real poD) const;
+  /// Keep track of the lattice type
+  bool _is_tri_lattice;
+  /// The correction factor applied to the Dittus-Boelter correlation
+  const MooseEnum _correction_factor;
 };
