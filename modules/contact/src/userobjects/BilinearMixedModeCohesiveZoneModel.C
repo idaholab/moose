@@ -121,16 +121,6 @@ BilinearMixedModeCohesiveZoneModel::computeQpIProperties()
 }
 
 void
-BilinearMixedModeCohesiveZoneModel::timestepSetup()
-{
-  // instead we call it explicitly here
-  CohesiveZoneModelBase::timestepSetup();
-
-  // for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
-  //   delta_tangential_lm.setZero();
-}
-
-void
 BilinearMixedModeCohesiveZoneModel::initialize()
 {
   // instead we call it explicitly here

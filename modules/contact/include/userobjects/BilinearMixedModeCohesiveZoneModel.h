@@ -24,7 +24,6 @@ public:
 
   virtual void initialize() override;
   virtual void finalize() override;
-  virtual void timestepSetup() override;
 
   // Getters for analysis output
   Real getModeMixityRatio(const Node * const node) const;

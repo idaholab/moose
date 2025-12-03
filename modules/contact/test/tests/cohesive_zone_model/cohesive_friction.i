@@ -71,10 +71,6 @@
     new_block_name = 'primary_lower'
     input = secondary
   []
-
-  patch_update_strategy = auto
-  patch_size = 20
-  allow_renumbering = false
 []
 
 [GlobalParams]
