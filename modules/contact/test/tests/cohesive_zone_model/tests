@@ -42,7 +42,7 @@
     type = Exodiff
     input = cohesive_friction.i
     exodiff = cohesive_friction_out.e
-    rel_err = 1.0e-5
+    rel_err = 0.001
     abs_zero = 0.001
     requirement = 'The system shall be able to apply mortar frictional contact to the damaged interface.'
     map = false

@@ -159,14 +159,6 @@ CohesiveZoneModelBase::computeFandR(const Node * const node)
       global_interface_displacement;
 }
 
-template <class T>
-T
-CohesiveZoneModelBase::normalizeQuantity(const std::unordered_map<const DofObject *, T> & map,
-                                         const Node * const node)
-{
-  return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
-}
-
 void
 CohesiveZoneModelBase::timestepSetup()
 {
@@ -372,7 +364,8 @@ CohesiveZoneModelBase::reinit()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     // End of CZM bilinear computations
-    if (_dof_to_czm_traction.find(node) == _dof_to_czm_traction.end())
+    const auto it = _dof_to_czm_traction.find(node);
+    if (it == _dof_to_czm_traction.end())
       return;
 
     const auto & test_i = (*_test)[i];
@@ -401,7 +394,8 @@ CohesiveZoneModelBase::prepareJumpKinematicQuantities()
 
     // Every time we used quantities from a map we "denormalize" it from the mortar integral.
     // See normalizing member functions.
-    if (auto it = _dof_to_weighted_displacements.find(node); it != _dof_to_weighted_displacements.end())
+    if (auto it = _dof_to_weighted_displacements.find(node);
+        it != _dof_to_weighted_displacements.end())
       _dof_to_interface_displacement_jump[node] = it->second;
   }
 }
@@ -440,11 +434,11 @@ void
 CohesiveZoneModelBase::computeGlobalTraction(const Node * const node)
 {
   // First call does not have maps available
-  const bool return_boolean = _dof_to_czm_traction.find(node) == _dof_to_czm_traction.end();
-  if (return_boolean)
+  const auto it = _dof_to_czm_traction.find(node);
+  if (it == _dof_to_czm_traction.end())
     return;
 
-  const auto local_traction_vector = libmesh_map_find(_dof_to_czm_traction, node);
+  const auto local_traction_vector = it->second;
   const auto rotation_matrix = libmesh_map_find(_dof_to_rotation_matrix, node);
 
   _dof_to_czm_traction[node] = rotation_matrix * local_traction_vector;

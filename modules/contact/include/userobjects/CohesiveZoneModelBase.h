@@ -55,8 +55,10 @@ protected:
 
   /// Normalize mortar quantities (remove mortar integral scaling)
   template <class T>
-  T normalizeQuantity(const std::unordered_map<const DofObject *, T> & map,
-                      const Node * const node);
+  T normalizeQuantity(const std::unordered_map<const DofObject *, T> & map, const Node * const node)
+  {
+    return libmesh_map_find(map, node) / _dof_to_weighted_gap[node].second;
+  }
 
   /// Number of displacement components
   const unsigned int _ndisp;

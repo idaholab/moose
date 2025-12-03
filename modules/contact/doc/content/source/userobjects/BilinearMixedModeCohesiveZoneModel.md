@@ -141,11 +141,11 @@ Sudden degradation of stiffness may be give rise to the appearance of large disp
 
 ### Use standard mortar contact to enforce interpenetratation
 
-The standard cohesive zone model uses a penalty method to prevent penetration in compression. Alternatively, users may choose to use Mortar contact to enforce the normal constraint. To do this, set `set_compressive_traction_to_zero = true` to remove the compressive traction from the cohesive zone model, and then add the appropriate Mortar contact blocks to handle normal enforcement.
+The standard cohesive zone model uses a penalty method to prevent penetration in compression. Alternatively, users may choose to use Mortar contact to enforce the normal constraint. To do this, set `set_compressive_traction_to_zero = true` to remove the compressive traction from the cohesive zone model, and then add the appropriate mortar contact blocks (e.g., [NormalMortarMechanicalContact](/NormalMortarMechanicalContact.md)) to handle normal enforcement.
 
 ### Couple cohesive and frictional behaviors
 
-Under combined compressive and shear loading, the coupling between cohesive and frictional behavior, governed by the interface damage level, produces a progressive increase in frictional stress that accompanies the softening of the cohesive response [!cite](VENZAL202017). Because the `BilinearMixedModeCohesiveZoneModel` object inherits from [PenaltyWeightedGapUserObject](/PenaltyWeightedGapUserObject.md) and it can compute frictional forces based on the damage variable, which are then used by [TangentialMortarMechanicalContact](/TangentialMortarMechanicalContact.md).
+Under combined compressive and shear loading, the coupling between cohesive and frictional behavior, controlled by the interface damage variable, induces a progressive increase in frictional stress that accompanies the softening of the cohesive response [!cite](VENZAL202017). Because the `BilinearMixedModeCohesiveZoneModel` object inherits from [PenaltyWeightedGapUserObject](/PenaltyWeightedGapUserObject.md), it can compute frictional forces based on the damage variable. These frictional froces can then be used by [TangentialMortarMechanicalContact](/TangentialMortarMechanicalContact.md).
 
 Example of usage:
 
