@@ -46,10 +46,8 @@ MFEMComplexGradAux::MFEMComplexGradAux(const InputParameters & parameters)
 void
 MFEMComplexGradAux::execute()
 {
-  _result_var.real() = 0;
-  _result_var.imag() = 0;
-  _grad.AddMult(_source_var.real(), _result_var.real());
-  _grad.AddMult(_source_var.imag(), _result_var.imag());
+  _grad.AddMult(_source_var.real(), _result_var.real() = 0);
+  _grad.AddMult(_source_var.imag(), _result_var.imag() = 0);
 
   std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
   complexScale(_result_var, scale_complex);

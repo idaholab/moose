@@ -34,7 +34,7 @@ MFEMComplexAuxKernel::MFEMComplexAuxKernel(const InputParameters & parameters)
 void
 MFEMComplexAuxKernel::complexAdd(mfem::ParComplexGridFunction & a,
                                  const mfem::ParComplexGridFunction & b,
-                                 const std::complex<mfem::real_t> scale = {1.0, 0.0})
+                                 const std::complex<mfem::real_t> scale)
 {
   // a += scale * b
 
@@ -50,7 +50,7 @@ MFEMComplexAuxKernel::complexAdd(mfem::ParComplexGridFunction & a,
 
 void
 MFEMComplexAuxKernel::complexScale(mfem::ParComplexGridFunction & a,
-                                   const std::complex<mfem::real_t> scale = {1.0, 0.0})
+                                   const std::complex<mfem::real_t> scale)
 {
   // a *= scale
 
