@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "Calculators.h"
 #include "NormalDistribution.h"
 #include "StochasticToolsUtils.h"

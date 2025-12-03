@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMEssentialBC.h"
 
 class MFEMScalarDirichletBC : public MFEMEssentialBC

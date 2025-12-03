@@ -8,17 +8,18 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMAuxKernel.h"
-#include "mfem.hpp"
 
 /**
- * Project s(x) * (U x V) onto a vector MFEM auxvariable.
+ * Project \f$ s \vec u \times \vec v \f$ onto a vector MFEM auxvariable.
  *
  * Notes:
- *   - Currently supports only interior DOFs (no shared/constrained DOFs).
- *   - Enforces 3D: mesh dimension and all involved vdim must be 3.
+ *  - Enforces 3D: all involved vdim must be 3.
+ *  - The target variable's FE Space must be L2.
+ *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
 class MFEMCrossProductAux : public MFEMAuxKernel
 {
@@ -31,24 +32,11 @@ public:
   void execute() override;
 
 protected:
-  /// Names of vector sources
-  const VariableName _u_var_name;
-  const VariableName _v_var_name;
+  /// Cross product coefficient
+  mfem::VectorCrossProductCoefficient _cross;
 
-  /// References to the vector ParGridFunctions
-  const mfem::ParGridFunction & _u_var;
-  const mfem::ParGridFunction & _v_var;
-  /// Scaling factor applied on the resulting field
-  const mfem::real_t _scale_factor;
-
-  /// Coefficient wrappers
-  mfem::VectorGridFunctionCoefficient _u_coef;
-  mfem::VectorGridFunctionCoefficient _v_coef;
-  mfem::VectorCrossProductCoefficient _cross_uv;
-  mfem::ConstantCoefficient _scale_c;
-
-  ///Final coefficient that applies the scale factor to the crossproduct
-  mfem::ScalarVectorProductCoefficient _final_coef;
+  /// Final coefficient that applies a scaling factor to the cross product
+  mfem::ScalarVectorProductCoefficient _scaled_cross;
 };
 
 #endif // MOOSE_MFEM_ENABLED

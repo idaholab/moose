@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /FunctorMaterials/MFEMGenericFunctorMaterial
-
 ## Overview
 
 `MFEMGenericFunctorMaterial` defines one or more scalar material properties with values obtained from a coefficient on

@@ -10,11 +10,8 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "MFEMSolverBase.h"
-#include "libmesh/ignore_warnings.h"
-#include <mfem.hpp>
-#include "libmesh/restore_warnings.h"
-#include <memory>
 
 /**
  * Wrapper for mfem::OperatorJacobiSmoother solver.

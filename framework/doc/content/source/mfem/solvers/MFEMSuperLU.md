@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Solver/MFEMSuperLU
-
 ## Overview
 
 Defines and builds an `mfem::SuperLUSolver` to use as a direct solver to solve the MFEM equation system.

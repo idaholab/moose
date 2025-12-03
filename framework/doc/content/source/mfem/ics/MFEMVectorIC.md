@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /ICs/MFEMVectorIC
-
 ## Overview
 
 `MFEMVectorIC` is used to set initial conditions of vector valued MFEM variables from an

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Postprocessors/MFEMComplexVectorPeriodAveragedPostprocessor
-
 ## Overview
 
 Postprocessor for calculating the integral of the period-averaged dot product between two complex vector variables over a

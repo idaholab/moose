@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Preconditioner/AddMFEMPreconditionerAction
-
 ## Overview
 
 Action called to add a linear preconditioner to an MFEM problem, parsing content inside a

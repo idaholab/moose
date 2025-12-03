@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMScalarProjectionAux
-
 ## Overview
 
 AuxKernel for projecting a scalar coefficient onto a scalar auxiliary variable

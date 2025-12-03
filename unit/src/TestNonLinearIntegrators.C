@@ -1,9 +1,6 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "gtest/gtest.h"
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
 #include "Moose.h"
 #include "MFEMHyprePatch.h"
 

@@ -1,4 +1,3 @@
-
 # Linear Finite Volume Design Decisions in MOOSE
 
 The main motivation for introducing a new approach for finite volume system

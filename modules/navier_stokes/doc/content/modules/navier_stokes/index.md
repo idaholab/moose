@@ -3,16 +3,15 @@
 The MOOSE Navier-Stokes module is a library for the implementation of simulation tools that solve the
 Navier-Stokes equations using either the continuous Galerkin finite element
 (CGFE) or finite volume (FV) methods. The Navier-Stokes
-equations are usually solved using either the pressure-based, incompressible formulation (assuming a
-constant fluid density), or a density-based, compressible formulation, although
-there are plans to add a finite volume weakly-compressible pressured-based implementation in
-the not-too-distant future.
+equations are usually solved using either the pressure-based, incompressible or weakly-compressible formulation (assuming a
+constant or pressure-independent fluid density), or a density-based, compressible formulation.
 
 For documentation specific to finite element or finite volume implementations,
 please refer to the below pages:
 
 - [Incompressible Finite Volume](insfv.md)
 - [Weakly Compressible Finite Volume](wcnsfv.md)
+- [Weakly compressible finite volume using a linear discretization and a segregated solvealgorithm (SIMPLE/PIMPLE)](linear_wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
 - [Hybridized Discontinous Galerkin (HDG) Finite Element](NavierStokesLHDGKernel.md)
@@ -25,21 +24,23 @@ please refer to the below pages:
 Here we give a brief tabular summary of the Navier-Stokes implementations:
 
 !table id=navier_stokes_summary caption=Summary of Navier-Stokes implementations
-| prefix     | Jacobian   | compressibility               | turbulence support          | friction support  | method | advection strategy                |
-| ------     | --------   | ----------------------------- | --------------------------- | ----------------  | ------ | --------------------------------- |
-| INS        | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | SUPG                              |
-| INSAD      | AD         | incompressible                | Smagorinsky                 | Not porous        | CGFE   | SUPG                              |
-| INSFE      | Hand-coded | incompressible                | mixing length               | Not porous        | CGFE   | SUPG                              |
-| PINSFE     | Hand-coded | incompressible                | mixing length               | porous            | CGFE   | SUPG                              |
-| NS         | Hand-coded | compressible                  | None                        | Not porous        | CGFE   | SUPG                              |
-| INSChorin  | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | Chorin predictor-corrector        |
-| INSFV      | AD         | incompressible                | mixing length; $k-\epsilon$ | Not porous        | FV     | RC, CD velocity; limited advected |
-| WCNSFV     | AD         | weakly compressible           | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
-| WCNSFV2P   | AD         | weakly compressible; 2-phase  | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
-| PINSFV     | AD         | incompressible                | mixing length               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
-| CNSFVHLLC  | AD         | compressible                  | None                        | Not porous        | FV     | HLLC, piecewise constant data     |
-| PCNSFVHLLC | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
-| PCNSFVKT   | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
+| prefix     | Solve method |Jacobian   | compressibility                | turbulence support          | friction support  | discretiz. | advection strategy      |
+| ------     | -----------  | --------- | ------------------------------ | --------------------------- | ----------------  | ------ | --------------------------------- |
+| INS        | Newton/PJFNK | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | SUPG                              |
+| INSAD      | Newton/PJFNK | AD         | incompressible                | Smagorinsky                 | Not porous        | CGFE   | SUPG                              |
+| INSFE      | Newton/PJFNK | Hand-coded | incompressible                | mixing length               | Not porous        | CGFE   | SUPG                              |
+| PINSFE     | Newton/PJFNK | Hand-coded | incompressible                | mixing length               | porous            | CGFE   | SUPG                              |
+| NS         | Newton/PJFNK | Hand-coded | compressible                  | None                        | Not porous        | CGFE   | SUPG                              |
+| INSChorin  | Newton/PJFNK | Hand-coded | incompressible                | None                        | Not porous        | CGFE   | Chorin predictor-corrector        |
+| INSFV      | Newton/PJFNK | AD         | incompressible                | mixing length; $k-\epsilon$ | Not porous        | FV     | RC, CD velocity; limited advected |
+| WCNSFV     | Newton/PJFNK | AD         | weakly compressible           | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
+| Linear(WCNS)FV | SIMPLE   | N/A        | weakly compressible           | $k-\epsilon$                | Not porous        | FV     | RC velocity; limited advected   |
+| WCNSFV2P   | Newton/PJFNK | AD         | weakly compressible; 2-phase  | mixing length               | Not porous        | FV     | RC, CD velocity; limited advected |
+| LinearWCNSFV2P | SIMPLE   | N/A        | weakly compressible; 2-phase  | None                        | Not porous        | FV     | RC velocity; limited advected   |
+| PINSFV     | Newton/PJFNK | AD         | incompressible                | mixing length               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
+| CNSFVHLLC  | Newton/PJFNK | AD         | compressible                  | None                        | Not porous        | FV     | HLLC, piecewise constant data     |
+| PCNSFVHLLC | Newton/PJFNK | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
+| PCNSFVKT   | Newton/PJFNK | AD         | compressible                  | None                        | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
 
 Table definitions:
 
@@ -49,6 +50,7 @@ Table definitions:
 - WCNS2P: weakly-compressible Navier-Stokes 2-phase
 - CNS: compressible Navier-Stokes
 - PINS or PCNS: porous incompressible Navier-Stokes or porous compressible Navier-Stokes
+- LinearFV: the [linear finite volume discretization](linear_fv_design.md)
 - SUPG: Streamline-Upwind Petrov-Galerkin
 - RC: Rhie-Chow interpolation
 - CD: central differencing interpolation; equivalent to average interpolation
@@ -78,7 +80,7 @@ As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new sol
 | Turbulence         | Mixing length             | Yes        | Yes                                                          | Yes                                                          |                        |
 |                    | $k-\epsilon$              |            | Yes                                                          | Yes                                                          | Yes                    |
 |                    | $k-\omega$ SST            |            |                                                              | in [PR #28151](https://github.com/idaholab/moose/pull/28151) |                        |
-| Two-phase          | Mixture model             | Yes        | Yes                                                          | Yes                                                          | in [PR #29614](https://github.com/idaholab/moose/pull/29614) |
+| Two-phase          | Mixture model             | Yes        | Yes                                                          | Yes                                                          | Yes |
 |                    | Eulerian-Eulerian         |            |                                                              | Yes                                                          |                        |
 | Porous Flow        |       --                  | Yes        | Yes                                                          | Yes                                                          |                        |
 | Compressibility    | Incompressible            | Yes        | Yes                                                          | Yes                                                          | Yes                    |
@@ -91,7 +93,7 @@ As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new sol
 | Physics Syntax     | Flow                      |            | Yes                                                          |                                                              | Yes                    |
 |                    | Fluid heat transfer       |            | Yes                                                          |                                                              | Yes                    |
 |                    | Solid phase heat transfer |            | Yes                                                          |                                                              |                        |
-|                    | Two phase                 |            | Yes                                                          |                                                              | in [PR #29614](https://github.com/idaholab/moose/pull/29614) |
+|                    | Two phase                 |            | Yes                                                          |                                                              | Yes |
 |                    | Turbulence                |            | Yes                                                          |                                                              |                        |
 |                    | Scalar transport          |            | Yes                                                          |                                                              | Yes                    |
 

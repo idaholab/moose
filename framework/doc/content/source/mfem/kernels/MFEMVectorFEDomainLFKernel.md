@@ -2,8 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-!syntax description /Kernels/MFEMVectorFEDomainLFKernel
-
 ## Overview
 
 Adds the domain integrator for integrating the linear form

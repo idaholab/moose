@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /ICs/MFEMScalarBoundaryIC
-
 ## Overview
 
 `MFEMScalarBoundaryIC` is used to set initial conditions of scalar valued MFEM variables from an

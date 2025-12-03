@@ -10,6 +10,7 @@
 #ifdef MOOSE_LIBTORCH_ENABLED
 
 #pragma once
+
 #include <torch/types.h>
 #include "GeneralVectorPostprocessor.h"
 

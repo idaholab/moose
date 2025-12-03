@@ -217,7 +217,8 @@ class TestHarness:
     # 7 - Moved test output files from test/*/tests/*/tester/output_files to
     #     job output in test/*/tests/*/output_files
     # 8 - Store tests/*/tests/*/tester/json_metadata values a dict instead of a file path
-    RESULTS_VERSION = 8
+    # 9 - Store tests/*/tests/*/max_memory if available
+    RESULTS_VERSION = 9
 
     # Validation version history:
     # 1 - Initial tracking of version
@@ -787,6 +788,21 @@ class TestHarness:
         jobs = sorted(jobs, key=lambda job: job.getTiming(), reverse=True)
         return jobs[0:num]
 
+    def getHeaviestJobs(self, num: int) -> list:
+        """
+        Get the heaviest jobs by memory, if available
+        """
+        jobs = [
+            j for j in self.finished_jobs
+            if (not j.isSkip() and j.getMaxMemory())
+        ]
+        jobs = sorted(
+            jobs,
+            key=lambda job: job.getMaxMemory() / job.getTester().getProcs(self.options),
+            reverse=True
+        )
+        return jobs[0:num]
+
     def getLongestFolders(self, num: int) -> list[typing.Tuple[str, float]]:
         """
         Get the longest running folders after running all jobs
@@ -856,6 +872,18 @@ class TestHarness:
                 for job in longest_jobs:
                     print(util.formatJobResult(job, self.options, caveats=True, timing=True))
 
+            heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
+            if heaviest_jobs:
+                print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/proc)'))
+                for job in heaviest_jobs:
+                    print(util.formatJobResult(
+                        job,
+                        self.options,
+                        caveats=True,
+                        timing=True,
+                        memory_per_proc=True,
+                    ))
+
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
             if longest_folders:
                 print(header(f'{self.options.longest_jobs} Longest Running Folders'))
@@ -866,7 +894,7 @@ class TestHarness:
                         suffix = folder.replace(first_directory, '', 1)
                         folder = prefix + suffix
                     entry = util.FormatResultEntry(name=folder, timing=time)
-                    print(util.formatResult(entry, self.options, timing=True))
+                    print(util.formatResult(entry, self.options, timing=True, memory=False))
 
         # Parser errors, near the bottom
         if self.parse_errors:
@@ -1154,7 +1182,11 @@ class TestHarness:
             term_cols = 110
             pass
         term_cols = int(os.getenv('MOOSE_TERM_COLS', term_cols))
-        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
+        term_format = os.getenv('MOOSE_TERM_FORMAT', 'njcstm')
+        # tpnsc is the custom format that civet jobs use; this lets us
+        # add in memory while moose updates across the apps
+        if term_format == 'tpnsc':
+            term_format = 'tmpnsc'
 
         parser = argparse.ArgumentParser(description='A tool used to test MOOSE-based applications')
 
@@ -1237,6 +1269,7 @@ class TestHarness:
         failgroup = parser.add_argument_group('Failure Criteria', 'Control the failure criteria')
         failgroup.add_argument('--max-fails', nargs=1, type=int, default=50, help='The number of tests allowed to fail before any additional tests will run')
         failgroup.add_argument('--valgrind-max-fails', nargs=1, type=int, default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
+        failgroup.add_argument('--max-memory', nargs=1, type=float, help='The maximum memory to allow for a job in MB, per slot')
 
         hpcgroup = parser.add_argument_group('HPC', 'Enable and control HPC execution')
         hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
@@ -1335,6 +1368,14 @@ class TestHarness:
             print('INFO: Setting --no-capabilities because there is not an application')
             self.options.no_capabilities = True
 
+        # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set
+        if (
+            self.options.max_memory is None
+            and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
+        ):
+            value = float(MOOSE_MAX_MEMORY)
+            print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
+            self.options.max_memory = value
 
     def preRun(self):
         if self.options.json:

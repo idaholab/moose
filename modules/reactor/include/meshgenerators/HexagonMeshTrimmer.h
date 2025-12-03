@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "PolygonMeshTrimmerBase.h"
 #include "MooseEnum.h"
 

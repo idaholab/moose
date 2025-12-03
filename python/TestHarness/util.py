@@ -42,18 +42,26 @@ class FormatResultEntry:
     """
     # Name of the entry
     name: str
-    # Timing for the entry
-    timing: float = None
+    # Timing for the entry, optional
+    timing: Optional[float] = None
+    # Memory for the entry, optional
+    memory: Optional[int] = None
     # JointStatus object for the entry, optional
-    joint_status: str = None
+    joint_status: Optional[str] = None
     # Detailed status message for the entry, optional
-    status_message: str = None
+    status_message: Optional[str] = None
     # Caveats for the entry, optional
     caveats: Optional[list[str]] = None
     # Coloring for the caveats, optional
     caveat_color: Optional[str] = None
 
-def formatResult(entry: FormatResultEntry, options, timing: Optional[bool] = None) -> str:
+
+def formatResult(
+    entry: FormatResultEntry,
+    options,
+    timing: Optional[bool] = None,
+    memory: Optional[bool] = None,
+) -> str:
     """
     Helper for prenting a one-line result for something.
 
@@ -105,6 +113,18 @@ def formatResult(entry: FormatResultEntry, options, timing: Optional[bool] = Non
             int_len = len(str(int(actual)))
             precision = min(3, max(0,(4-int_len)))
             message = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
+        # Memory
+        elif (
+            key_lower == "m"
+            and entry.timing is not None
+            and options.timing
+            and memory is not False
+        ):
+            if entry.memory is not None or entry.timing == 0:
+                value = int(entry.memory * 1e-6) if entry.memory else 0
+                message = f"[{value:>4}MB]"
+            else:
+                message = "[   ?MB]"
 
         add(key, message, color)
 
@@ -143,8 +163,16 @@ def formatResult(entry: FormatResultEntry, options, timing: Optional[bool] = Non
             values.append(message)
     return ' '.join(values)
 
-def formatJobResult(job, options, status_message: bool = True, timing: Optional[bool] = None,
-                    caveats: bool = False) -> str:
+
+def formatJobResult(
+    job,
+    options,
+    status_message: bool = True,
+    timing: Optional[bool] = None,
+    memory: Optional[bool] = None,
+    memory_per_proc: bool = False,
+    caveats: bool = False,
+) -> str:
     name = job.getTestName()
     joint_status = job.getJointStatus()
 
@@ -171,13 +199,20 @@ def formatJobResult(job, options, status_message: bool = True, timing: Optional[
         suffix = name.replace(first_directory, '', 1)
         name = prefix + suffix
 
-    entry = FormatResultEntry(name=name,
-                              timing=job.getTiming(),
-                              joint_status=job.getJointStatus(),
-                              status_message=status_message,
-                              caveats=job.getCaveats() if caveats else [],
-                              caveat_color=joint_status.color if job.isFail() else 'CYAN')
-    return formatResult(entry, options, timing=timing)
+    memory = job.getMaxMemory()
+    if memory_per_proc and memory is not None:
+        memory = int(memory / job.getTester().getProcs(options))
+    entry = FormatResultEntry(
+        name=name,
+        timing=job.getTiming(),
+        memory=memory,
+        joint_status=job.getJointStatus(),
+        status_message=status_message,
+        caveats=job.getCaveats() if caveats else [],
+        caveat_color=joint_status.color if job.isFail() else "CYAN",
+    )
+    return formatResult(entry, options, timing=timing, memory=memory)
+
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.

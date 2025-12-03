@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "EquationSystem.h"
 #include "ComplexEquationSystem.h"
 #include "MFEMContainers.h"
@@ -17,7 +18,6 @@
 #include "MFEMSolverBase.h"
 #include <fstream>
 #include <iostream>
-#include <memory>
 
 /// Base problem data struct.
 struct MFEMProblemData

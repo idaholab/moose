@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMVectorProjectionAux
-
 ## Overview
 
 AuxKernel for projecting a vector coefficient onto a vector auxiliary variable

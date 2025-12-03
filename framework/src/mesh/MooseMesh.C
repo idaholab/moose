@@ -136,7 +136,7 @@ MooseMesh::validParams()
       "Whether or not to generate nodesets from the sidesets (currently often required).");
   params.addParam<bool>(
       "displace_node_list_by_side_list",
-      false,
+      true,
       "Whether to renumber existing nodesets with ids matching sidesets that "
       "lack names matching sidesets, when constructing nodesets from sidesets via the default "
       "'construct_node_list_from_side_list' option, rather than to merge them with the sideset.");
@@ -273,11 +273,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
                "only when 'iteration' patch update strategy is used.");
-
-  if (_displace_node_list_by_side_list && !_construct_node_list_from_side_list)
-    paramError("displace_node_list_by_side_list",
-               "'Mesh/displace_node_list_by_side_list' is true, but unused when "
-               "'Mesh/construct_node_list_from_side_list' is false");
 
   if (isParamValid("coord_block"))
   {
@@ -3055,7 +3050,12 @@ MooseMesh::buildNodeListFromSideList()
       if (!side_bcids.empty())
         next_bcid = std::max(next_bcid, cast_int<boundary_id_type>(*side_bcids.rbegin() + 1));
 
-      // If we've got an unreasonable largest BC id, we should
+      // We need all processors to agree on the id to use, even when
+      // each only sees the bcids on their own portions of a
+      // distributed mesh.
+      _communicator.max(next_bcid);
+
+      // If we've got an unreasonably high largest BC id, we should
       // probably just search for unused ones with moderate values, so we
       // don't risk wrapping.
       if (next_bcid > 1000 || next_bcid <= 0)
@@ -3076,10 +3076,12 @@ MooseMesh::buildNodeListFromSideList()
         }
     }
 
-    // If any side bcid isn't already a node bcid, we should make
-    // sure that our new node bcid is given the same name.
-    for (auto bcid : side_bcids)
-      boundary_info.nodeset_name(bcid) = boundary_info.get_sideset_name(bcid);
+    // For any side bcid that has a name, make sure that our new node
+    // bcid is given the same name.  We need to iterate over the
+    // actual name map (which is global) here, not over side_bcids
+    // (which only includes local ids on a distributed mesh).
+    for (auto & [id, name] : boundary_info.get_sideset_name_map())
+      boundary_info.nodeset_name(id) = name;
 
     boundary_info.build_node_list_from_side_list();
   }

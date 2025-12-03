@@ -2,8 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-!syntax description /UserObjects/MFEMGeneralUserObject
-
 ## Overview
 
 `MFEMGeneralUserObject` is a base class for general MFEM user objects, derived from

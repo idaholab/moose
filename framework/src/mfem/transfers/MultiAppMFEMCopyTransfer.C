@@ -13,7 +13,6 @@
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
-#include <memory>
 #include "MFEMProblem.h"
 #include "MFEMMesh.h"
 
