@@ -30,7 +30,7 @@
     variable = u
     boundary = 2
     coefficient_real = 1
-    coefficient_imag = 2
+    coefficient_imag = 1
   []
   [top]
     type = MFEMComplexScalarDirichletBC
@@ -73,7 +73,7 @@
   active = ''
   [subapp]
     type = FullSolveMultiApp
-    input_files = parent.i
+    input_files = parent_complex.i
     execute_on = FINAL
   []
 []
