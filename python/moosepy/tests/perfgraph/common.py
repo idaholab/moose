@@ -9,15 +9,60 @@
 
 """Common testing utilities for testing moosepy.prefgraph."""
 
-from moosepy.perfgraph import PerfGraphNode
+from copy import deepcopy
+from typing import Optional
+
+from moosepy.perfgraph.perfgraphnode import PerfGraphNode
+from moosepy.perfgraph.perfgraphsection import PerfGraphSection
+
+SECTION_KWARGS = {"name": "dummy_section", "level": 1}
+"""Default keyword arguments for building a test section."""
 
 
-class DummyNode(PerfGraphNode):
-    """Dummy PerfGraphNode for testing."""
+def build_test_section(
+    nodes: Optional[list[PerfGraphNode]] = None, **kwargs
+) -> PerfGraphSection:
+    """
+    Build a PerfGraphSection for testing.
 
-    def __init__(self, **kwargs):
-        """Fake init; does nothing."""
-        self.__dict__["_name"] = "dummy_node"
-        self.__dict__["_nodes"] = [self]
-        for k, v in kwargs.items():
-            self.__dict__[k] = v
+    Optional Parameters
+    -------------------
+    nodes : Optional[list[PerfGraphNode]]
+        List of nodes to add to the section.
+    **kwargs :
+        Keyword arguments that will override init arguments for the section.
+
+    """
+    section_kwargs = deepcopy(SECTION_KWARGS)
+    section_kwargs.update(kwargs)
+    section = PerfGraphSection(**section_kwargs)
+    if nodes:
+        [section._add_node(n) for n in nodes]
+    return section
+
+
+NODE_KWARGS = {
+    "id": 0,
+    "name": "dummy_node",
+    "self_time": 1.234,
+    "num_calls": 5,
+    "section": build_test_section(),
+    "parent": None,
+}
+"""Default keyword arguments for building a test node."""
+
+
+def build_test_node(**kwargs) -> PerfGraphNode:
+    """
+    Build a PerfGraphNode for testing.
+
+    Optional Parameters
+    -------------------
+    **kwargs :
+        Keyword arguments that will override init arguments for the section.
+
+    """
+    node_kwargs = deepcopy(NODE_KWARGS)
+    node_kwargs.update(kwargs)
+    node = PerfGraphNode(**node_kwargs)
+    return node
