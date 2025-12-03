@@ -15,7 +15,7 @@
 #include "AugmentedLagrangeInterface.h"
 
 /**
- * User object that interface pressure resulting from a simple traction separation law.
+ * Base class for mortar-based cohesive zone model.
  */
 class CohesiveZoneModelBase : virtual public PenaltyWeightedGapUserObject,
                               virtual public WeightedVelocitiesUserObject
@@ -104,10 +104,10 @@ protected:
   const Real _friction_coefficient;
 
   /// Map from degree of freedom to current and old step slip
-  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_step_slip;
+  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>> _dof_to_step_slip;
 
   /// Map from degree of freedom to current and old accumulated slip
-  std::unordered_map<const DofObject *, std::pair<TwoVector, TwoVector>> _dof_to_accumulated_slip;
+  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>> _dof_to_accumulated_slip;
 
   // Map from degree of freedom to current and old tangential traction
   std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
@@ -131,7 +131,9 @@ protected:
   /// Total Lagrangian stress to be applied on CZM interface
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_czm_traction;
 
+  /// Displacement jump on CZM interface
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_displacement_jump;
 
+  /// Damage values (pair of current and old) on CZM interface
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_damage;
 };

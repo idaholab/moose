@@ -31,13 +31,15 @@ CohesiveZoneModelBase::validParams()
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
   params.addClassDescription(
-      "Computes the mortar frictional contact force via a penalty approach.");
-  // Suppress augmented Lagrange parameters. AL implementation for CZM remains to be done.
-  params.addParam<Real>("penalty_friction",
-                        "The penalty factor for frictional interaction. If not provided, the normal "
-                        "penalty factor is also used for the frictional problem.");
+      "Base class for mortar-based cohesive zone model. To handle frictional cohesive interfaces, "
+      "it computes the mortar frictional contact forces using a penalty approach.");
+  params.addParam<Real>(
+      "penalty_friction",
+      "The penalty factor for frictional interaction. If not provided, the normal "
+      "penalty factor is also used for the frictional problem.");
   params.addParam<Real>(
       "friction_coefficient", 0.0, "The friction coefficient ruling Coulomb friction equations.");
+  // Suppress augmented Lagrange parameters. AL implementation for CZM remains to be done.
   params.suppressParameter<Real>("max_penalty_multiplier");
   params.suppressParameter<Real>("penalty_multiplier");
   params.suppressParameter<Real>("penetration_tolerance");
@@ -77,7 +79,7 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
   }
 
   // Set non-intervening components to zero
-  for (unsigned int i = _ndisp; i < 3; i++)
+  for ([[maybe_unused]] const auto i : make_range(_ndisp))
   {
     _grad_disp.push_back(&_ad_grad_zero);
     _grad_disp_neighbor.push_back(&_ad_grad_zero);
@@ -180,7 +182,7 @@ CohesiveZoneModelBase::timestepSetup()
   for (auto & map_pr : _dof_to_accumulated_slip)
   {
     auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
-    old_accumulated_slip = accumulated_slip;
+    old_accumulated_slip = {MetaPhysicL::raw_value(accumulated_slip)};
   }
 
   for (auto & dof_lp : _dof_to_local_penalty_friction)
@@ -198,7 +200,7 @@ CohesiveZoneModelBase::timestepSetup()
   for (auto & [dof_object, delta_tangential_lm] : _dof_to_frictional_lagrange_multipliers)
     delta_tangential_lm.setZero();
 
-  // save off tangential traction from the last timestep
+  // save off damage from the last timestep
   for (auto & map_pr : _dof_to_damage)
   {
     auto & [damage, old_damage] = map_pr.second;
@@ -302,14 +304,13 @@ CohesiveZoneModelBase::reinit()
       const auto slip_metric = std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(0)) +
                                std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
 
-      if (slip_metric > _epsilon_tolerance &&
-          penalty_friction * (MetaPhysicL::raw_value(slip_distance)).norm() >
-              0.4 * _friction_coefficient * damage * std::abs(normal_pressure))
+      const auto slip_norm = (MetaPhysicL::raw_value(slip_distance)).norm();
+      const auto friction_limit = 0.4 * _friction_coefficient * damage * std::abs(normal_pressure);
+
+      if (slip_metric > _epsilon_tolerance && penalty_friction * slip_norm > friction_limit)
       {
         inner_iteration_penalty_friction =
-            MetaPhysicL::raw_value(
-                0.4 * _friction_coefficient * damage * std::abs(normal_pressure) /
-                (penalty_friction * (MetaPhysicL::raw_value(slip_distance)).norm())) *
+            MetaPhysicL::raw_value(friction_limit / (penalty_friction * slip_norm)) *
             penalty_friction * slip_distance;
       }
 
@@ -329,7 +330,7 @@ CohesiveZoneModelBase::reinit()
             phi_trial * tangential_trial_traction / tangential_trial_traction_norm;
 
       // track accumulated slip for output purposes
-      accumulated_slip = old_accumulated_slip + MetaPhysicL::raw_value(slip_distance).cwiseAbs();
+      accumulated_slip = old_accumulated_slip + slip_distance.cwiseAbs();
     }
     else
     {
@@ -363,8 +364,7 @@ CohesiveZoneModelBase::reinit()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     // End of CZM bilinear computations
-    const auto it = _dof_to_czm_traction.find(node);
-    if (it == _dof_to_czm_traction.end())
+    if (auto it = _dof_to_czm_traction.find(node); it != _dof_to_czm_traction.end())
       return;
 
     const auto test_i = (*_test)[i];
