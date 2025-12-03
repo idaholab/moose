@@ -11,10 +11,6 @@
 
 #pragma once
 
-#include "libmesh/ignore_warnings.h"
-#include "mfem.hpp"
-#include "libmesh/restore_warnings.h"
-
 namespace Moose::MFEM
 {
 
@@ -23,14 +19,16 @@ namespace Moose::MFEM
 /// time derivative.
 ///
 /// To be replaced if/when https://github.com/mfem/mfem/pull/5079 is merged.
-class MFEMBackwardEulerStateSolver : public mfem::ODESolver
+class MFEMBackwardEulerStateSolver : public mfem::BackwardEulerSolver
 {
 public:
-  void Init(mfem::TimeDependentOperator & f_) override;
-  void Step(mfem::Vector & x, mfem::real_t & t, mfem::real_t & dt) override;
-
-protected:
-  mfem::Vector k;
+  void Step(mfem::Vector & x, mfem::real_t & t, mfem::real_t & dt) override
+  {
+    f->SetTime(t + dt);
+    f->ImplicitSolve(dt, x, k); // solve for k = x(t + dt)
+    x = k;
+    t += dt;
+  }
 };
 }
 
