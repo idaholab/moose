@@ -49,7 +49,7 @@ TimeDomainEquationSystemProblemOperator::Solve()
   // Advance time step of the MFEM problem. Time is also updated here, and
   // _problem_operator->SetTime is called inside the ode_solver->Step method to
   // update the time used by time dependent (function) coefficients.
-  _problem_data.ode_solver->Step(_problem_data.f, _problem.time(), _problem.dt());
+  _problem_data.ode_solver->Step(*_trial_true_vector, _problem.time(), _problem.dt());
   // Synchonise time dependent GridFunctions with updated DoF data.
   SetTrialVariablesFromTrueVectors();
 

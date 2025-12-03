@@ -40,7 +40,7 @@ protected:
   /// vector during solve.
   std::vector<std::string> _trial_var_names;
   std::vector<mfem::ParGridFunction *> _trial_variables;
-  const mfem::Vector * _trial_true_vector = nullptr;
+  mfem::Vector * _trial_true_vector = nullptr;
 };
 }
 
