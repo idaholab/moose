@@ -209,12 +209,11 @@ EquationSystem::ApplyDomainBLFIntegrators(
     auto kernels = kernels_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & kernel : kernels)
     {
-      mfem::BilinearFormIntegrator * integ =
-          scale_factor.has_value()
-              ? new ScaleIntegrator(kernel->createBFIntegrator(), scale_factor.value(), true)
-              : kernel->createBFIntegrator();
-      if (integ != nullptr && kernel->createBFIntegrator() != nullptr)
+      mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
+      if (integ != nullptr)
       {
+        if (scale_factor.has_value())
+          integ = new ScaleIntegrator(integ, scale_factor.value(), true);
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
@@ -261,12 +260,11 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(trial_var_name);
     for (auto & bc : bcs)
     {
-      mfem::BilinearFormIntegrator * integ =
-          scale_factor.has_value()
-              ? new ScaleIntegrator(bc->createBFIntegrator(), scale_factor.value(), true)
-              : bc->createBFIntegrator();
-      if (integ != nullptr && bc->createBFIntegrator() != nullptr)
+      mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
+      if (integ != nullptr)
       {
+        if (scale_factor.has_value())
+          integ = new ScaleIntegrator(integ, scale_factor.value(), true);
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
