@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMComplexCurlAux
-
 ## Overview
 
 AuxKernel for calculating the curl of a complex $H(\mathrm{curl})$ conforming source variable defined on a 3D Nédélec finite element

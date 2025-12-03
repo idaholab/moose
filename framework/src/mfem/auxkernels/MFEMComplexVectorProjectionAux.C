@@ -37,8 +37,7 @@ MFEMComplexVectorProjectionAux::MFEMComplexVectorProjectionAux(const InputParame
 void
 MFEMComplexVectorProjectionAux::execute()
 {
-  _result_var.real().ProjectCoefficient(_vec_coef_real);
-  _result_var.imag().ProjectCoefficient(_vec_coef_imag);
+  _result_var.ProjectCoefficient(_vec_coef_real, _vec_coef_imag);
 }
 
 #endif

@@ -36,7 +36,7 @@ MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
     _source_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_source_var_name)),
     _scale_factor_real(getParam<mfem::real_t>("scale_factor_real")),
     _scale_factor_imag(getParam<mfem::real_t>("scale_factor_imag")),
-    _curl(_source_var.real().ParFESpace(), _result_var.real().ParFESpace())
+    _curl(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _curl.Assemble();
   _curl.Finalize();
@@ -46,10 +46,8 @@ MFEMComplexCurlAux::MFEMComplexCurlAux(const InputParameters & parameters)
 void
 MFEMComplexCurlAux::execute()
 {
-  _result_var.real() = 0.0;
-  _result_var.imag() = 0.0;
-  _curl.AddMult(_source_var.real(), _result_var.real());
-  _curl.AddMult(_source_var.imag(), _result_var.imag());
+  _curl.AddMult(_source_var.real(), _result_var.real() = 0);
+  _curl.AddMult(_source_var.imag(), _result_var.imag() = 0);
 
   std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
   complexScale(_result_var, scale_complex);

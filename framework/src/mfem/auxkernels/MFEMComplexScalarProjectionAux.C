@@ -36,8 +36,7 @@ MFEMComplexScalarProjectionAux::MFEMComplexScalarProjectionAux(const InputParame
 void
 MFEMComplexScalarProjectionAux::execute()
 {
-  _result_var.real().ProjectCoefficient(_coef_real);
-  _result_var.imag().ProjectCoefficient(_coef_imag);
+  _result_var.ProjectCoefficient(_coef_real, _coef_imag);
 }
 
 #endif
