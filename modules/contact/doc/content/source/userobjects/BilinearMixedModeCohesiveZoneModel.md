@@ -139,7 +139,7 @@ Sudden degradation of stiffness may be give rise to the appearance of large disp
 \dot{\omega}_{v} = \frac{1}{\mu} \left( \omega - \omega_v\right).
 \end{equation}
 
-### Use standard Mortar contact to enforce interpenetratation
+### Use standard mortar contact to enforce interpenetratation
 
 The standard cohesive zone model uses a penalty method to prevent penetration in compression. Alternatively, users may choose to use Mortar contact to enforce the normal constraint. To do this, set `set_compressive_traction_to_zero = true` to remove the compressive traction from the cohesive zone model, and then add the appropriate Mortar contact blocks to handle normal enforcement.
 
