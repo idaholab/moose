@@ -401,9 +401,8 @@ CohesiveZoneModelBase::prepareJumpKinematicQuantities()
 
     // Every time we used quantities from a map we "denormalize" it from the mortar integral.
     // See normalizing member functions.
-    if (_dof_to_weighted_displacements.find(node) != _dof_to_weighted_displacements.end())
-      _dof_to_interface_displacement_jump[node] =
-          (libmesh_map_find(_dof_to_weighted_displacements, node));
+    if (auto it = _dof_to_weighted_displacements.find(node); it != _dof_to_weighted_displacements.end())
+      _dof_to_interface_displacement_jump[node] = it->second;
   }
 }
 
