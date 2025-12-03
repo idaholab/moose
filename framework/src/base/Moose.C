@@ -545,6 +545,14 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
+  registerTask("add_mfem_periodic_bcs", true);
+  addTaskDependency("add_mfem_periodic_bcs", "init_mesh");
+
+  // add preconditioning.
+  registerMooseObjectTask("add_mfem_preconditioner", Moose::MFEM::SolverBase, false);
+  addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_operator");
+  addTaskDependency("add_mfem_preconditioner", "add_variable");
+
   // add solver objects.
   registerMooseObjectTask("add_mfem_solver", Moose::MFEM::SolverBase, true);
   addTaskDependency("add_mfem_solver", "add_mfem_fespace_hierarchies");

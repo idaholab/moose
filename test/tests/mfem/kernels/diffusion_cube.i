@@ -45,7 +45,6 @@
 []
 
 [BCs]
-
   [top]
     type = MFEMScalarDirichletBC
     variable = concentration
