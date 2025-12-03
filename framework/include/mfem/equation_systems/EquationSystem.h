@@ -73,7 +73,7 @@ public:
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
-  /// Build all forms comprising this EquationSystem
+  virtual void UpdateEquationSystem();
   virtual void BuildEquationSystem();
 
   /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
@@ -322,8 +322,8 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
-  virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem();
+  virtual void SetTimeStep(double dt);
+  virtual void RebuildEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
