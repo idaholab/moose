@@ -537,6 +537,9 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
+  registerTask("add_mfem_periodic_bcs", true);
+  addTaskDependency("add_mfem_periodic_bcs", "init_mesh");
+
   // add user-specified weak forms to build equation systems used in this problem
   registerMooseObjectTask("add_mfem_weak_forms", MFEMWeakFormBase, false);
   addTaskDependency("add_mfem_weak_forms", "init_mesh");
