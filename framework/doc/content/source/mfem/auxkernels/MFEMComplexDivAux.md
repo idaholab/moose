@@ -19,7 +19,7 @@ v =  \lambda \vec\nabla \cdot \vec u
 
 where $\vec u \in H(\mathrm{div})$, $v \in L^2$ and $\lambda$ is a complex scalar constant.
 
-## Example Input File Syntax
+## Input File Syntax
 
 !syntax parameters /AuxKernels/MFEMComplexDivAux
 

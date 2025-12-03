@@ -54,17 +54,10 @@ MFEMComplexAuxKernel::complexScale(mfem::ParComplexGridFunction & a,
 {
   // a *= scale
 
-  // Ownership of buf_var data will pass to a
-  mfem::ParComplexGridFunction * buf_var = new mfem::ParComplexGridFunction(a.ParFESpace());
-  buf_var->real() = 0.0;
-  buf_var->imag() = 0.0;
+  mfem::ParComplexGridFunction b(a.ParFESpace());
+  static_cast<mfem::Vector &>(b) = a;
 
-  buf_var->real().Add(scale.real(), a.real());
-  buf_var->real().Add(-scale.imag(), a.imag());
-  buf_var->imag().Add(scale.imag(), a.real());
-  buf_var->imag().Add(scale.real(), a.imag());
-
-  a = *buf_var;
+  complexAdd(a, b, scale - 1);
 }
 
 #endif
