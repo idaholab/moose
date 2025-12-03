@@ -182,16 +182,32 @@ class TestPerfGraphNode(TestCase):
         root._add_child(node)
         self.assertEqual(root.children, [node])
 
+    def test_query_child(self):
+        """Test query_child()."""
+        root = build_test_node()
+
+        self.assertIsNone(root.query_child("foo"))
+
+        child1 = build_test_node(name="child1", parent=root)
+        child2 = build_test_node(name="child2", parent=root)
+        self.assertEqual(id(root.query_child("child1")), id(child1))
+        self.assertEqual(id(root.query_child("child2")), id(child2))
+
+    def test_has_child(self):
+        """Test has_child()."""
+        root = build_test_node()
+
+        self.assertFalse(root.has_child("foo"))
+
+        build_test_node(name="foo", parent=root)
+        self.assertTrue(root.has_child("foo"))
+
     def test_get_child(self):
         """Test get_child()."""
         root = build_test_node()
-        child1 = build_test_node(name="child1", parent=root)
-        child2 = build_test_node(name="child2", parent=root)
-        self.assertEqual(id(root.get_child("child1")), id(child1))
-        self.assertEqual(id(root.get_child("child2")), id(child2))
 
-    def test_get_child_no_exist(self):
-        """Test get_child() when the child doesn't exist."""
-        root = build_test_node()
         with self.assertRaisesRegex(KeyError, "Child with name 'foo' does not exist"):
             root.get_child("foo")
+
+        child = build_test_node(name="foo", parent=root)
+        self.assertEqual(id(root.get_child("foo")), id(child))

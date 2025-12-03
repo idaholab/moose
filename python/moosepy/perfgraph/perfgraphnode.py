@@ -175,10 +175,20 @@ class PerfGraphNode:
         assert node.parent == self
         self._children.append(node)
 
-    def get_child(self, name: str) -> "PerfGraphNode":
-        """Get the child with the given name if it exists."""
+    def query_child(self, name: str) -> Optional["PerfGraphNode"]:
+        """Query a child by name."""
         assert isinstance(name, str)
         for child in self.children:
             if child.name == name:
                 return child
+        return None
+
+    def has_child(self, name: str) -> bool:
+        """Whether or not a child exists with the given name."""
+        return self.query_child(name) is not None
+
+    def get_child(self, name: str) -> "PerfGraphNode":
+        """Get the child with the given name if it exists."""
+        if (child := self.query_child(name)) is not None:
+            return child
         raise KeyError(f"Child with name '{name}' does not exist")
