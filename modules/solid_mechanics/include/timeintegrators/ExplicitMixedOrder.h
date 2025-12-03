@@ -70,7 +70,10 @@ protected:
   const bool & _constant_mass;
 
   /// Mass matrix name
-  const TagName & _mass_matrix;
+  const TagName & _mass_matrix_name;
+
+  /// Lumped mass matrix
+  NumericVector<Real> * _mass_matrix_lumped;
 
   /// The older solution
   const NumericVector<Number> & _solution_older;
