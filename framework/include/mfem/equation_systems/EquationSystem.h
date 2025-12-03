@@ -59,8 +59,8 @@ public:
 
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
-  const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
-  const std::vector<std::string> & TestVarNames() const { return _test_var_names; }
+  const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
+  const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
 protected:
   /// Add test variable to EquationSystem.
