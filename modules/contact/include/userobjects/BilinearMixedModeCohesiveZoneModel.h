@@ -13,7 +13,7 @@
 #include "TwoVector.h"
 
 /**
- * User object that interface pressure resulting from a simple traction separation law.
+ * User object that computes interface pressure from a simple traction separation law.
  */
 class BilinearMixedModeCohesiveZoneModel : virtual public PenaltyWeightedGapUserObject,
                                            virtual public WeightedVelocitiesUserObject,
