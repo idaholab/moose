@@ -470,6 +470,9 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
+  registerTask("add_mfem_periodic_bcs", true);
+  addTaskDependency("add_mfem_periodic_bcs", "init_mesh");
+
   // add preconditioning.
   registerMooseObjectTask("add_mfem_preconditioner", MFEMSolverBase, false);
   addTaskDependency("add_mfem_preconditioner", "add_mfem_problem_operator");
