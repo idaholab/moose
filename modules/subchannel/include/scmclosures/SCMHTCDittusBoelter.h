@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SCMHTCClosureBase.h"
+#include "TriSubChannelMesh.h"
 
 /**
  * Class that calculates the HTC based on the Dittus Boelter correlation
