@@ -58,31 +58,6 @@ class PerfGraphObject:
         """Sum an action across all nodes."""
         return sum([do(node) for node in self._nodes])
 
-    # def info(self):
-    #     """Get the number of calls, time, and memory in human readable form."""
-    #     info_str = f"Num calls: {self.num_calls}"
-    #     info_str += f"\nLevel: {self.level}"
-    #     info_str += (
-    #         "\nTime ({:.2f}%): "
-    #         "Self {:.2f} s, "
-    #         "Children {:.2f} s, "
-    #         "Total {:.2f} s".format(
-    #             self.percentTime(),
-    #             self.selfTime(),
-    #             self.childrenTime(),
-    #             self.totalTime(),
-    #         )
-    #     )
-    #     info_str += (
-    #         "\nMemory ({:.2f}%): Self {} MB, Children {} MB, Total {} MB".format(
-    #             self.percentMemory(),
-    #             self.selfMemory(),
-    #             self.childrenMemory(),
-    #             self.totalMemory(),
-    #         )
-    #     )
-    #     return info_str
-
     @property
     def num_calls(self) -> int:
         """Get the number of times this was called."""
@@ -97,7 +72,7 @@ class PerfGraphObject:
     def children_time(self) -> float:
         """Get the time the children took in seconds."""
         return self._sum_all_nodes(
-            lambda node: sum([child.total_time for child in node.children.values()])
+            lambda node: sum([child.total_time for child in node.children])
         )
 
     @property
@@ -145,20 +120,6 @@ class PerfGraphSection(PerfGraphObject):
         """Human-readable name for this section."""
         return 'PerfGraphSection "' + self.name + '"'
 
-    # def info(self):
-    #     info_str = 'PerfGraphSection "' + self.name() + '":'
-    #     info_str += "\n  " + super().info().replace("\n", "\n  ")
-    #     info_str += "\n  Nodes:"
-    #     for node in self.nodes():
-    #         for i in range(len(node.path())):
-    #             info_str += "\n    " + ("- " if i == 0 else "  ")
-    #             info_str += " " * i + node.path()[i]
-    #             if i == len(node.path()) - 1:
-    #                 info_str += " ({} call(s), {:.1f}% time, {:.1f}% memory)".format(
-    #                     node.numCalls(), node.percentTime(), node.percentMemory()
-    #                 )
-    #     return info_str
-
     @property
     def nodes(self) -> list["PerfGraphNode"]:
         """Get the nodes in this section."""
@@ -197,6 +158,8 @@ class PerfGraphNode(PerfGraphObject):
             The parent node, if any.
 
         """
+        # A unique ID for this node
+        self._id: Optional[int] = None
         # Current memory usage for the node
         self._memory: float = node_data.pop("memory")
         # Number of calls for the node
@@ -217,13 +180,19 @@ class PerfGraphNode(PerfGraphObject):
         # Section that this node is in
         self._section: Optional["PerfGraphSection"] = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Human-readable name for this node."""
-        return 'PerfGraphNode "' + "/".join(self.path) + '"'
+        return f"PerfGraphNode {self.name}"
 
-    def __getitem__(self, name: str) -> Optional["PerfGraphNode"]:
-        """Get a child node by name, if it exists."""
-        return self.child(name)
+    def __getitem__(self, name: str) -> "PerfGraphNode":
+        """Get a child node by name."""
+        return self.get_child(name)
+
+    @property
+    def id(self) -> int:
+        """Get a unique ID for this node."""
+        assert isinstance(self._id, int)
+        return self._id
 
     @property
     def memory(self) -> float:
@@ -250,9 +219,9 @@ class PerfGraphNode(PerfGraphObject):
         return self._section
 
     @property
-    def children(self) -> dict[str, "PerfGraphNode"]:
-        """Get the name, node pairs for the immediate children."""
-        return self._children
+    def children(self) -> Iterable["PerfGraphNode"]:
+        """Get the children of this node."""
+        return self._children.values()
 
     @property
     def path(self) -> list[str]:
@@ -264,32 +233,12 @@ class PerfGraphNode(PerfGraphObject):
             parent = parent.parent
         return names[::-1]
 
-    def child(self, name: str) -> Optional["PerfGraphNode"]:
+    def get_child(self, name: str) -> "PerfGraphNode":
         """Get the child with the given name if it exists."""
         assert isinstance(name, str)
-        return self._children.get(name)
-
-    # def info(self):
-    #     """
-    #     Returns the number of calls, the time, memory,
-    #     and children in a human readable form.
-    #     """
-    #     info_str = "PerfGraphNode\n"
-    #     info_str += "  Path:\n"
-    #     for i in range(0, len(self.path())):
-    #         info_str += "    " + " " * i + self.path()[i] + "\n"
-    #     info_str += "  " + super().info().replace("\n", "\n  ")
-    #     if self.children():
-    #         info_str += "\n  Children:"
-    #         for child in self.children():
-    #             info_str += (
-    #                 "\n    "
-    #                 + child.name()
-    #                 + " ({} call(s), {:.1f}% time, {:.1f}% memory)".format(
-    #                     child.numCalls(), child.percentTime(), child.percentMemory()
-    #                 )
-    #             )
-    #     return info_str
+        if (child := self._children.get(name)) is not None:
+            return child
+        raise KeyError(f"Child with name '{name}' does not exist")
 
 
 class PerfGraph:
@@ -314,19 +263,65 @@ class PerfGraph:
             root_node_name, root_node_data, None
         )
 
-        # Setup all of the sections
-        self._sections: dict[str, PerfGraphSection] = {}
+        # Setup the node IDs and the ID -> node cache
+        nodes = self._setup_nodes(self.root_node)
+        # Setup the sections in each node and the section name -> section cache
+        sections = self._setup_sections(nodes.values())
 
-        # Recursively setup all of the sections
-        def add_section(node: PerfGraphNode):
-            section = self._sections.get(node.name)
+        # Cache for node ID -> node
+        self._nodes: dict[int, PerfGraphNode] = nodes
+
+        # Cache for section name -> section
+        self._sections: dict[str, PerfGraphSection] = sections
+
+    @staticmethod
+    def recurse(node: PerfGraphNode, act: Callable[[PerfGraphNode], None]):
+        """
+        Recursively perform an action on each node.
+
+        Parameters
+        ----------
+        node : PerfGraphNode
+            The node to start recursively with.
+        act : Callable[[PerfGraphNode], None]
+            The action to perform on each node.
+
+        """
+
+        def _recurse(node: PerfGraphNode, aact: Callable[[PerfGraphNode], None]):
+            act(node)
+            [_recurse(child, act) for child in node.children]
+
+        _recurse(node, act)
+
+    @staticmethod
+    def _setup_nodes(root_node: PerfGraphNode) -> dict[int, PerfGraphNode]:
+        """Set an ID for each node and setup the ID to node map."""
+        next_id = 0
+        cache: dict[int, PerfGraphNode] = {}
+
+        def process_node(node: PerfGraphNode):
+            nonlocal next_id
+            node._id = next_id
+            next_id += 1
+            cache[node.id] = node
+
+        PerfGraph.recurse(root_node, process_node)
+
+        return cache
+
+    @staticmethod
+    def _setup_sections(nodes: Iterable[PerfGraphNode]) -> dict[str, PerfGraphSection]:
+        """Build sections, setup node sections, and setup the name to section map."""
+        sections = {}
+        for node in nodes:
+            section = sections.get(node.name)
             if section is None:
                 section = PerfGraphSection(node.name, node.level)
-                self._sections[node.name] = section
+                sections[node.name] = section
             node._section = section
             section._nodes.append(node)
-
-        self.recurse(add_section)
+        return sections
 
     @property
     def root_node(self) -> PerfGraphNode:
@@ -334,48 +329,36 @@ class PerfGraph:
         return self._root_node
 
     @property
-    def total_time(self) -> float:
-        """Get the total time."""
-        return self.root_node.total_time
-
-    def recurse(self, act: Callable, *args, **kwargs):
-        r"""
-        Recursively do an action through the graph starting with the root node.
-
-        Inputs:
-
-        - act\[function\]: Action to perform on each node (input: a PerfGraphNode)
-        """
-
-        def _recurse(node: PerfGraphNode, act: Callable, *args, **kwargs):
-            act(node, *args, **kwargs)
-            for child in node.children.values():
-                _recurse(child, act, *args, **kwargs)
-
-        _recurse(self.root_node, act, *args, **kwargs)
-
-    def node(self, path: list[str]):
-        """Get the node with the given path if one exists, otherwise None."""
-        assert isinstance(list, str)
-        assert all(isinstance(v, str) for v in path)
-
-        if len(path) == 0 or path[0] != self.root_node.name:
-            return None
-        node = self.root_node
-        for name in path[1:]:
-            if node:
-                node = node[name]
-        return node
+    def nodes(self) -> Iterable[PerfGraphNode]:
+        """Get all of the nodes."""
+        return self._nodes.values()
 
     @property
     def sections(self) -> Iterable[PerfGraphSection]:
         """Get all of the named sections."""
         return self._sections.values()
 
-    def section(self, name: str) -> Optional[PerfGraphSection]:
-        """Get a named PerfGraphSection if it exists."""
+    @property
+    def total_time(self) -> float:
+        """Get the total time."""
+        return self.root_node.total_time
+
+    def get_node_by_id(self, id: int) -> PerfGraphNode:
+        """Get the PerfGraphNode with the given ID."""
+        if (node := self._nodes.get(id)) is not None:
+            return node
+        raise KeyError(f"Node does not exist with ID {id}")
+
+    def has_section(self, name: str) -> bool:
+        """Whether or not a section with the given name exists."""
+        return name in self._sections
+
+    def get_section(self, name: str) -> PerfGraphSection:
+        """Get a named PerfGraphSection."""
         assert isinstance(name, str)
-        return self._sections.get(name)
+        if (section := self._sections.get(name)) is not None:
+            return section
+        raise KeyError(f"Section does not exist with name '{name}'")
 
     def get_heaviest_nodes(self, num: int) -> list[PerfGraphNode]:
         """
@@ -389,14 +372,7 @@ class PerfGraph:
         """
         assert isinstance(num, int)
         assert num > 0
-
-        nodes = []
-        self.recurse(lambda n: nodes.append(n))
-        return sorted(
-            nodes,
-            key=lambda n: n.self_time,
-            reverse=True,
-        )[0:num]
+        return sorted(self.nodes, key=lambda n: n.self_time, reverse=True)[0:num]
 
     def get_heaviest_sections(self, num: int) -> list[PerfGraphSection]:
         """
