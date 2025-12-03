@@ -72,14 +72,12 @@ class PerfGraphObject:
     def self_time(self) -> float:
         """Get the time only this (not including children) tool in seconds."""
         value = self._sum_all_nodes(lambda n: n.time)
-        assert isinstance(value, float)
         return value
 
     @property
     def children_time(self) -> float:
         """Get the time the children took in seconds."""
         value = self._sum_all_nodes(lambda n: sum([c.total_time for c in n.children]))
-        assert isinstance(value, float)
         return value
 
     @property
