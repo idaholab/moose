@@ -18,7 +18,7 @@ MFEMScalarFESpace::validParams()
 {
   InputParameters params = MFEMSimplifiedFESpace::validParams();
   params.addClassDescription("Convenience class to construct scalar finite element spaces.");
-  MooseEnum fec_types("H1 L2", "H1");
+  MooseEnum fec_types("H1 L2 L2Int", "H1");
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
   MooseEnum basis_types("GaussLegendre GaussLobatto Positive OpenUniform ClosedUniform "
                         "OpenHalfUniform Serendipity ClosedGL IntegratedGLL",
@@ -41,7 +41,7 @@ std::string
 MFEMScalarFESpace::getFECName() const
 {
   std::string basis =
-      _fec_type == "L2"
+      _fec_type == "L2" || _fec_type == "L2Int"
           ? "_T" + std::to_string(getParam<MooseEnum>("basis"))
           : "@" + std::string({mfem::BasisType::GetChar(getParam<MooseEnum>("basis"))});
 
