@@ -44,7 +44,7 @@ def build_test_section(
 NODE_KWARGS = {
     "id": 0,
     "name": "dummy_node",
-    "self_time": 1.234,
+    "time": 1.234,
     "num_calls": 5,
     "section": build_test_section(),
     "parent": None,

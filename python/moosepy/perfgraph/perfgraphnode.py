@@ -25,7 +25,7 @@ class PerfGraphNode:
         self,
         id: int,
         name: str,
-        self_time: float,
+        time: float,
         num_calls: int,
         section: PerfGraphSection,
         parent: Optional["PerfGraphNode"],
@@ -39,8 +39,8 @@ class PerfGraphNode:
             Unique ID for the node.
         name : str
             Name of the node.
-        self_time : float
-            The total self time spent in the node across all calls.
+        time : float
+            The time spent in the node across all calls.
         num_calls : int
             The number of calls to the node.
         section : PerfGraphSection
@@ -54,7 +54,7 @@ class PerfGraphNode:
         # The name for this node
         self._name: str = name
         # Self time for this node in seconds
-        self._self_time: float = self_time
+        self._self_time: float = time
         # The number of calls to this node
         self._num_calls: int = num_calls
         # Section that this node is in

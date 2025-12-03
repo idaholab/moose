@@ -30,7 +30,7 @@ class TestPerfGraphNode(TestCase):
         # Variables that get set directly from input
         self.assertEqual(node._id, NODE_KWARGS["id"])
         self.assertEqual(node._name, NODE_KWARGS["name"])
-        self.assertEqual(node._self_time, NODE_KWARGS["self_time"])
+        self.assertEqual(node._self_time, NODE_KWARGS["time"])
         self.assertEqual(node._section, section)
         self.assertEqual(node._parent, parent)
 
@@ -59,7 +59,7 @@ class TestPerfGraphNode(TestCase):
 
     def test_self_time(self):
         """Test property self_time."""
-        self.assertEqual(build_test_node().self_time, NODE_KWARGS["self_time"])
+        self.assertEqual(build_test_node().self_time, NODE_KWARGS["time"])
 
     def test_num_calls(self):
         """Test property num_calls."""
@@ -100,17 +100,17 @@ class TestPerfGraphNode(TestCase):
         self.assertEqual(node.children_time, 0.0)
 
         times = [1.0, 2.0]
-        [build_test_node(self_time=v, parent=node) for v in times]
+        [build_test_node(time=v, parent=node) for v in times]
         self.assertEqual(node.children_time, sum(times))
 
     def test_total_time(self):
         """Test property total_time."""
         self_time = 1.1
-        node = build_test_node(self_time=1.1)
+        node = build_test_node(time=1.1)
         self.assertEqual(node.total_time, self_time)
 
         child_time = 1.2
-        build_test_node(self_time=1.2, parent=node)
+        build_test_node(time=1.2, parent=node)
         self.assertEqual(node.total_time, self_time + child_time)
 
     def test_self_percent_time(self):
@@ -118,8 +118,8 @@ class TestPerfGraphNode(TestCase):
         self_time = 1.2
         root_time = 0.1
 
-        root_node = build_test_node(self_time=root_time)
-        node = build_test_node(self_time=self_time, parent=root_node)
+        root_node = build_test_node(time=root_time)
+        node = build_test_node(time=self_time, parent=root_node)
         self.assertAlmostEqual(
             node.self_percent_time, self_time * 100 / (self_time + root_time)
         )
@@ -130,9 +130,9 @@ class TestPerfGraphNode(TestCase):
         child_time = 1.2
         root_time = 1.3
 
-        root_node = build_test_node(self_time=root_time)
-        node = build_test_node(self_time=self_time, parent=root_node)
-        build_test_node(self_time=child_time, parent=node)
+        root_node = build_test_node(time=root_time)
+        node = build_test_node(time=self_time, parent=root_node)
+        build_test_node(time=child_time, parent=node)
         self.assertAlmostEqual(
             node.children_percent_time,
             child_time * 100 / (root_time + self_time + child_time),
@@ -144,9 +144,9 @@ class TestPerfGraphNode(TestCase):
         root_time = 1.2
         child_time = 1.3
 
-        root_node = build_test_node(self_time=root_time)
-        node = build_test_node(self_time=self_time, parent=root_node)
-        build_test_node(self_time=child_time, parent=node)
+        root_node = build_test_node(time=root_time)
+        node = build_test_node(time=self_time, parent=root_node)
+        build_test_node(time=child_time, parent=node)
         self.assertAlmostEqual(
             node.total_percent_time,
             (self_time + child_time) * 100 / (root_time + self_time + child_time),

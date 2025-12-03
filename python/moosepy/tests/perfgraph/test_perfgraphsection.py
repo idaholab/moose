@@ -64,7 +64,7 @@ class TestPerfGraphSection(TestCase):
     def test_self_time(self):
         """Test property self_time."""
         self_time = [1.23, 4.56]
-        nodes = [build_test_node(self_time=v) for v in self_time]
+        nodes = [build_test_node(time=v) for v in self_time]
         section = build_test_section(nodes)
         self.assertEqual(section.self_time, sum(self_time))
 
