@@ -4,11 +4,11 @@
 
 !! Intentional comment to provide extra spacing
 
-This is the base class from which all the heat transfer coefficient closure models inherit. It provides the toolset for the calculation of the Nusselt number and finally the heat transfer coefficient.
+This is the base class from which all the convective heat transfer coefficient closure models inherit. It provides the toolset for the calculation of the Nusselt number and finally the heat transfer coefficient.
 
 ## Channel-to-Pin and Channel-to-Duct Heat Transfer Modeling
 
-The pin/duct surface temperature are computed via the heat transfer coefficient as follows:
+The pin/duct surface temperature are computed via the convective heat transfer coefficient as follows:
 
 \begin{equation}
 T_{s,\text{pin}}(z) = \frac{1}{N} \sum_{sc=1}^N T_{bulk,sc}(z) + \frac{q'_{\text{pin}}(z)}{\pi D_{\text{pin}}(z) h_{sc}(z)},
@@ -21,7 +21,7 @@ where:
 - $T_{bulk,sc}(z)$ is the bulk temperature for a subchannel $sc$ neighboring the pin at a height $z$
 - $q'_{\text{pin}}(z)$ is the linear heat generation rate for the pin at a height $z$
 - $D_{\text{pin}}(z)$ is the pin diameter at a height $z$
-- $h_{sc}(z)$ is the heat exchange coefficient for a subchannel $sc$ neighboring the pin at a height $z$.
+- $h_{sc}(z)$ is the convective heat transfer coefficient for a subchannel $sc$ neighboring the pin at a height $z$.
 
 For the duct, the duct surface temperature is defined as follows:
 
@@ -33,7 +33,7 @@ where:
 - $T_{s,d}(z)$ is the duct surface temperature at a height $z$
 - $T_{bulk,d}(z)$ is the bulk temperature of the subchannel next to the duct node $d$
 - $q''_d(z)$ is the heat flux at the duct at a height $z$
-- $h_d(z)$ is the heat exchange coefficient for the subchannel next to the duct node at a height $z$
+- $h_d(z)$ is the convective heat transfer coefficient for the subchannel next to the duct node at a height $z$
 
 In both cases, the heat exchange coefficients are computed using the Nusselt number (Nu) as follows:
 
@@ -53,10 +53,10 @@ Currently there is no subchannel-to-duct heat transfer model implemented for squ
 
 The laminar, turbulent and transition regimes use different coefficients for the Nusselt number.
 
-The bounding laminar and turbulent Reynolds numbers for the turbulent transition are defined as follows:
+The bounding laminar and turbulent Reynolds numbers for the turbulent transition are defined as follows [!cite](chen2018upgraded):
 
 \begin{equation}
-Re_L = 320 \times 10^{1.7 \times (P/D_{\text{pin}} - 1.0)}
+Re_L = 320 \times 10^{(P/D_{\text{pin}} - 1.0)}
 \end{equation}
 
 \begin{equation}
@@ -88,7 +88,7 @@ The values defined here are chosen based on engineering judgement and the values
 
 ### Correlation for Turbulent Nusselt Number
 
-The modeling of the Turbulent Nusselt number and consequently of the heat transfer coefficient `h` is defined by the user. The closure models available to the user that are implemented in SCM are the following:
+The modeling of the Turbulent Nusselt number and consequently of the convective heat transfer coefficient `h` is defined by the user. The closure models available to the user that are implemented in SCM are the following:
 
 - [Dittus-Boelter](SCMHTCDittusBoelter.md) (recommended for water coolant)
 - [Gnielinski](SCMHTCGnielinski.md) (recommended for liquid metals)

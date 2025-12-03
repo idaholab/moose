@@ -15,8 +15,8 @@ InputParameters
 SCMHTCDittusBoelter::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
-  params.addClassDescription(
-      "Class that models the heat transfer coefficient using the Dittus Boelter correlation.");
+  params.addClassDescription("Class that models the convective heat transfer coefficient using the "
+                             "Dittus Boelter correlation.");
   return params;
 }
 

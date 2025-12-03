@@ -15,7 +15,7 @@ InputParameters
 SCMHTCKazimiCarelli::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
-  params.addClassDescription("Class that models the heat transfer coefficient using the "
+  params.addClassDescription("Class that models the convective heat transfer coefficient using the "
                              "Kazimi-Carelli correlation. Only use for fuel-pins.");
   return params;
 }

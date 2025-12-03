@@ -25,7 +25,7 @@ struct NusseltPreInfo
 };
 
 /**
- * Base class for heat transfer coefficients (HTC) closures used in SCM
+ * Base class for the convective heat transfer coefficients (HTC) closures used in SCM
  */
 class SCMHTCClosureBase : public SCMClosureBase
 {
@@ -47,10 +47,10 @@ public:
   /// Computes all the data needed before computing the nusselt number. It's used by all closure models.
   NusseltPreInfo computeNusseltNumberPreInfo(const NusseltStruct & nusselt_info) const;
 
-  /// @brief Computes the heat transfer coefficient for the local conditions
+  /// @brief Computes the convective heat transfer coefficient for the local conditions
   /// @param friction_info geometrical information about the cell in the channel
   /// @param nusselt_info  flow/coolant information about the cell in the channel
-  /// @return the heat transfer coefficient (HTC)
+  /// @return the convective heat transfer coefficient(HTC)
   Real computeHTC(const FrictionStruct & friction_info,
                   const NusseltStruct & nusselt_info,
                   const Real conduction_k) const;
