@@ -9,7 +9,7 @@
 
 """Implements PerfGraph for representing MOOSE PerfGraphReporter data."""
 
-from typing import Callable, Iterable
+from typing import Iterable, Optional, Tuple
 
 from moosepy.perfgraph.perfgraphnode import PerfGraphNode
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
@@ -28,74 +28,68 @@ class PerfGraph:
             The data from the JSON output.
 
         """
+        # Build the nodes and sections from the data
+        nodes, sections = self._setup_nodes(data)
+
+        # The nodes in the graph; node id -> node
+        self._nodes: dict[int, PerfGraphNode] = nodes
+        # The sections in the graph; section name -> section
+        self._sections: dict[str, PerfGraphSection] = sections
+        # The root node in the graph
+        self._root_node: PerfGraphNode = self._nodes[0]
+
+    @staticmethod
+    def _setup_nodes(
+        data: dict,
+    ) -> Tuple[dict[int, PerfGraphNode], dict[str, PerfGraphSection]]:
+        """Build the nodes and sections from the data."""
         # Find the root node
         root_node_name = list(data.keys())[0]
         root_node_data = data[root_node_name]
 
-        # Setup the root node
-        self._root_node: PerfGraphNode = PerfGraphNode(
-            root_node_name, root_node_data, None
-        )
+        next_id: int = 0
+        nodes: dict[int, PerfGraphNode] = {}
+        sections: dict[str, PerfGraphSection] = {}
 
-        # Setup the node IDs and the ID -> node cache
-        nodes = self._setup_nodes(self.root_node)
-        # Setup the sections in each node and the section name -> section cache
-        sections = self._setup_sections(nodes.values())
-
-        # Cache for node ID -> node
-        self._nodes: dict[int, PerfGraphNode] = nodes
-
-        # Cache for section name -> section
-        self._sections: dict[str, PerfGraphSection] = sections
-
-    @staticmethod
-    def recurse(node: PerfGraphNode, act: Callable[[PerfGraphNode], None]):
-        """
-        Recursively perform an action on each node.
-
-        Parameters
-        ----------
-        node : PerfGraphNode
-            The node to start recursively with.
-        act : Callable[[PerfGraphNode], None]
-            The action to perform on each node.
-
-        """
-
-        def _recurse(node: PerfGraphNode, aact: Callable[[PerfGraphNode], None]):
-            act(node)
-            [_recurse(child, act) for child in node.children]
-
-        _recurse(node, act)
-
-    @staticmethod
-    def _setup_nodes(root_node: PerfGraphNode) -> dict[int, PerfGraphNode]:
-        """Set an ID for each node and setup the ID to node map."""
-        next_id = 0
-        cache: dict[int, PerfGraphNode] = {}
-
-        def process_node(node: PerfGraphNode):
+        # Recursive function for processing a single node
+        def process_data(name: str, data: dict, parent: Optional[PerfGraphNode]):
+            # Determine ID for the node
             nonlocal next_id
-            node._id = next_id
+            id = next_id
             next_id += 1
-            cache[node.id] = node
 
-        PerfGraph.recurse(root_node, process_node)
+            # Pull data that pertains to the node
+            self_time = data.pop("time")
+            num_calls = data.pop("num_calls")
+            level = data.pop("level")
+            # Currently unused
+            data.pop("memory")
 
-        return cache
-
-    @staticmethod
-    def _setup_sections(nodes: Iterable[PerfGraphNode]) -> dict[str, PerfGraphSection]:
-        """Build sections, setup node sections, and setup the name to section map."""
-        sections = {}
-        for node in nodes:
-            section = sections.get(node.name)
+            # Get the node section or build it if needed
+            section = sections.get(name)
             if section is None:
-                section = PerfGraphSection(node.name, node.level)
-                sections[node.name] = section
-            node._section = section
-            section._nodes.append(node)
-        return sections
+                section = PerfGraphSection(name, level)
+                sections[name] = section
+
+            # Build the node
+            node = PerfGraphNode(
+                id=id,
+                name=name,
+                self_time=self_time,
+                num_calls=num_calls,
+                section=section,
+                parent=parent,
+            )
+            nodes[node.id] = node
+
+            # Recursively add children nodes
+            for child_name, child_data in data.items():
+                process_data(child_name, child_data, node)
+
+        # Recursively add all nodes
+        process_data(root_node_name, root_node_data, None)
+
+        return nodes, sections
 
     @property
     def root_node(self) -> PerfGraphNode:
@@ -118,7 +112,7 @@ class PerfGraph:
         return self.root_node.total_time
 
     def get_node_by_id(self, id: int) -> PerfGraphNode:
-        """Get the PerfGraphNode with the given ID."""
+        """Get the node with the given ID."""
         if (node := self._nodes.get(id)) is not None:
             return node
         raise KeyError(f"Node does not exist with ID {id}")

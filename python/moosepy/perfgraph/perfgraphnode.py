@@ -9,69 +9,70 @@
 
 """Implements PerfGraphNode, which represents a node in the MOOSE PerfGraph."""
 
-from typing import Iterable, Optional
+from typing import Optional
 
-from moosepy.perfgraph.perfgraphobject import PerfGraphObject
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
 
 
-class PerfGraphNode(PerfGraphObject):
+class PerfGraphNode:
     """
     A node in the graph for the MOOSE PerfGraph.
 
     Should be constructed internally in the PerfGraph object.
     """
 
-    def __init__(self, name: str, data: dict, parent: Optional["PerfGraphNode"]):
+    def __init__(
+        self,
+        id: int,
+        name: str,
+        self_time: float,
+        num_calls: int,
+        section: PerfGraphSection,
+        parent: Optional["PerfGraphNode"],
+    ):
         """
         Initialize state.
 
         Arguments:
         ---------
+        id : int
+            Unique ID for the node.
         name : str
             Name of the node.
-        data : dict
-            Data for the node.
+        self_time : float
+            The total self time spent in the node across all calls.
+        num_calls : int
+            The number of calls to the node.
+        section : PerfGraphSection
+            The section the node is in.
         parent : Optional[PerfGraphNode]
             The parent node, if any.
 
         """
         # A unique ID for this node
-        self._id: Optional[int] = None
-        # The data for this node
-        self._data: dict = data
+        self._id: int = id
+        # The name for this node
+        self._name: str = name
+        # Self time for this node in seconds
+        self._self_time: float = self_time
+        # The number of calls to this node
+        self._num_calls: int = num_calls
+        # Section that this node is in
+        self._section: PerfGraphSection = section
         # Parent node, if any
         self._parent: Optional[PerfGraphNode] = parent
+        # The children to this node
+        self._children: list[PerfGraphNode] = []
 
-        # Initialize the PerfGraphObject
-        super().__init__(name, data["level"])
-
-        # Setup the nodes for the PerfGraphObject, which, for
-        # a single node is just this node
-        self._nodes.append(self)
-
-        # Separate out data for children
-        child_data = {
-            k: v
-            for k, v in data.items()
-            if k not in ["memory", "time", "num_calls", "level"]
-        }
-
-        # Recursively add all of the children
-        self._children: dict[str, PerfGraphNode] = {
-            key: PerfGraphNode(key, val, self) for key, val in child_data.items()
-        }
-
-        # Section that this node is in
-        self._section: Optional[PerfGraphSection] = None
+        # Add to the parent
+        if self._parent is not None:
+            self._parent._add_child(self)
+        # Add to the section
+        self._section._add_node(self)
 
     def __str__(self) -> str:
         """Human-readable name for this node."""
         return f"PerfGraphNode {self.name}"
-
-    def __getitem__(self, name: str) -> "PerfGraphNode":
-        """Get a child node by name."""
-        return self.get_child(name)
 
     @property
     def id(self) -> int:
@@ -80,9 +81,28 @@ class PerfGraphNode(PerfGraphObject):
         return self._id
 
     @property
-    def data(self) -> dict:
-        """Get the underlying data for the node."""
-        return self._data
+    def name(self) -> str:
+        """Get the name of this node."""
+        assert isinstance(self._name, str)
+        return self._name
+
+    @property
+    def self_time(self) -> float:
+        """Get the self time for this node in seconds."""
+        assert isinstance(self._self_time, float)
+        return self._self_time
+
+    @property
+    def num_calls(self) -> int:
+        """Get the number of calls to the node."""
+        assert isinstance(self._num_calls, int)
+        return self._num_calls
+
+    @property
+    def section(self) -> PerfGraphSection:
+        """Get the section this node is in."""
+        assert isinstance(self._section, PerfGraphSection)
+        return self._section
 
     @property
     def parent(self) -> Optional["PerfGraphNode"]:
@@ -91,29 +111,49 @@ class PerfGraphNode(PerfGraphObject):
         return self._parent
 
     @property
-    def memory(self) -> float:
-        """Get the memory usage for this node."""
-        value = self.data["memory"]
-        assert isinstance(value, float)
-        return value
-
-    @property
-    def time(self) -> float:
-        """Get the run time for this node."""
-        value = self.data["time"]
-        assert isinstance(value, float)
-        return value
-
-    @property
-    def section(self) -> PerfGraphSection:
-        """Get the section this node is in."""
-        assert self._section is not None
-        return self._section
-
-    @property
-    def children(self) -> Iterable["PerfGraphNode"]:
+    def children(self) -> list["PerfGraphNode"]:
         """Get the children of this node."""
-        return self._children.values()
+        return self._children
+
+    @property
+    def level(self) -> int:
+        """Get the level of the section the node is in."""
+        return self.section.level
+
+    @property
+    def children_time(self) -> float:
+        """Get the total children time for this node in seconds."""
+        return sum([c.total_time for c in self.children], 0.0)
+
+    @property
+    def total_time(self) -> float:
+        """Get the total time (self + children) for this node in seconds."""
+        return self.self_time + self.children_time
+
+    @property
+    def self_percent_time(self) -> float:
+        """Get the percentage of self time for this node relative to the total."""
+        return self.self_time * 100 / self.root_node.total_time
+
+    @property
+    def children_percent_time(self) -> float:
+        """Get the percentage of children time for this node relative to the total."""
+        return self.children_time * 100 / self.root_node.total_time
+
+    @property
+    def total_percent_time(self) -> float:
+        """Get the percentage of children time for this node relative to the total."""
+        return self.total_time * 100 / self.root_node.total_time
+
+    @property
+    def root_node(self) -> "PerfGraphNode":
+        """Get the root node (the top node in the graph)."""
+        parent = self.parent
+        if parent is None:
+            return self
+        while parent.parent is not None:
+            parent = parent.parent
+        return parent
 
     @property
     def path(self) -> list[str]:
@@ -125,9 +165,20 @@ class PerfGraphNode(PerfGraphObject):
             parent = parent.parent
         return names[::-1]
 
+    def _add_child(self, node: "PerfGraphNode"):
+        """
+        Add a child.
+
+        Used internally within PerfGraphNode.__init__().
+        """
+        assert node not in self._children
+        assert node.parent == self
+        self._children.append(node)
+
     def get_child(self, name: str) -> "PerfGraphNode":
         """Get the child with the given name if it exists."""
         assert isinstance(name, str)
-        if (child := self._children.get(name)) is not None:
-            return child
+        for child in self.children:
+            if child.name == name:
+                return child
         raise KeyError(f"Child with name '{name}' does not exist")

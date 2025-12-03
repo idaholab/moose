@@ -11,18 +11,14 @@
 
 from unittest import TestCase
 
+from mock import patch
+from moosepy.perfgraph.perfgraphnode import PerfGraphNode
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
-from moosepy.tests.perfgraph.common import DummyNode
-
-
-class DummyPerfGraphSection(PerfGraphSection):
-    """Dummy PerfGraphSection for testing."""
-
-    def __init__(self, nodes=None):
-        """Fake init; sets the nodes and a dummy name and level."""
-        super().__init__("dummy_name", 1)
-        if nodes is not None:
-            self._nodes = nodes
+from moosepy.tests.perfgraph.common import (
+    SECTION_KWARGS,
+    build_test_node,
+    build_test_section,
+)
 
 
 class TestPerfGraphSection(TestCase):
@@ -30,20 +26,92 @@ class TestPerfGraphSection(TestCase):
 
     def test_init(self):
         """Test __init__()."""
-        name = "dummy_name"
-        level = 1
-        section = PerfGraphSection(name, level)
-        self.assertEqual(section._name, name)
-        self.assertEqual(section._level, level)
+        section = build_test_section()
+        self.assertEqual(section._name, SECTION_KWARGS["name"])
+        self.assertEqual(section._level, SECTION_KWARGS["level"])
 
     def test_str(self):
         """Test __str__()."""
         name = "dummy_name"
-        section = PerfGraphSection(name, 0)
+        section = build_test_section(name=name)
         self.assertEqual(str(section), f'PerfGraphSection "{name}"')
+
+    def test_name(self):
+        """Test property name."""
+        name = "foo"
+        section = build_test_section(name=name)
+        self.assertEqual(section.name, name)
+
+    def test_level(self):
+        """Test property level."""
+        level = 2
+        section = build_test_section(level=2)
+        self.assertEqual(section.level, level)
 
     def test_nodes(self):
         """Test property nodes."""
-        nodes = [DummyNode()]
-        section = DummyPerfGraphSection(nodes)
+        nodes = [build_test_node()]
+        section = build_test_section(nodes)
         self.assertEqual(section.nodes, nodes)
+
+    def test_num_calls(self):
+        """Test property num_calls."""
+        num_calls = [5, 6]
+        nodes = [build_test_node(num_calls=v) for v in num_calls]
+        section = build_test_section(nodes)
+        self.assertEqual(section.num_calls, sum(num_calls))
+
+    def test_self_time(self):
+        """Test property self_time."""
+        self_time = [1.23, 4.56]
+        nodes = [build_test_node(self_time=v) for v in self_time]
+        section = build_test_section(nodes)
+        self.assertEqual(section.self_time, sum(self_time))
+
+    def run_mocked_property_test(self, method_name: str):
+        """Test mocking node properties and calling the equivalent section property."""
+        values = [1.1, 2.2, 3.3]
+        nodes = [build_test_node() for _ in values]
+        section = build_test_section(nodes)
+        with patch.object(PerfGraphNode, method_name):
+            for i, time in enumerate(values):
+                setattr(nodes[i], method_name, time)
+            self.assertEqual(getattr(section, method_name), sum(values))
+
+    def test_children_time(self):
+        """Test property children_time."""
+        self.run_mocked_property_test("children_time")
+
+    def test_total_time(self):
+        """Test property total_time."""
+        self_time = 0.5
+        children_time = 1.5
+
+        obj = build_test_section()
+        with (
+            patch.object(PerfGraphSection, "self_time"),
+            patch.object(PerfGraphSection, "children_time"),
+        ):
+            obj.self_time = self_time
+            obj.children_time = children_time
+            self.assertEqual(obj.total_time, self_time + children_time)
+
+    def test_self_percent_time(self):
+        """Test property self_percent_time."""
+        self.run_mocked_property_test("self_percent_time")
+
+    def test_children_percent_time(self):
+        """Test property children_percent_time."""
+        self.run_mocked_property_test("children_percent_time")
+
+    def test_total_percent_time(self):
+        """Test property total_percent_time."""
+        self.run_mocked_property_test("total_percent_time")
+
+    def test_add_node(self):
+        """Test _add_node()."""
+        section = build_test_section()
+        node = build_test_node()
+        section._add_node(node)
+        self.assertEqual(len(section.nodes), 1)
+        self.assertEqual(id(section.nodes[0]), id(node))
