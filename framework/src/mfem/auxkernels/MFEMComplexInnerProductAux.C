@@ -9,14 +9,14 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMHermitianInnerProductAux.h"
+#include "MFEMComplexInnerProductAux.h"
 #include "MFEMProblem.h"
 #include "mfem.hpp"
 
-registerMooseObject("MooseApp", MFEMHermitianInnerProductAux);
+registerMooseObject("MooseApp", MFEMComplexInnerProductAux);
 
 InputParameters
-MFEMHermitianInnerProductAux::validParams()
+MFEMComplexInnerProductAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
   params.addClassDescription("Projects s * (U x V*) onto a complex vector MFEM auxvariable");
@@ -36,7 +36,7 @@ MFEMHermitianInnerProductAux::validParams()
   return params;
 }
 
-MFEMHermitianInnerProductAux::MFEMHermitianInnerProductAux(const InputParameters & parameters)
+MFEMComplexInnerProductAux::MFEMComplexInnerProductAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
     _u_var_name(getParam<VariableName>("first_source_vec")),
     _v_var_name(getParam<VariableName>("second_source_vec")),
@@ -58,21 +58,20 @@ MFEMHermitianInnerProductAux::MFEMHermitianInnerProductAux(const InputParameters
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   if (fes->GetVDim() != 1)
-    mooseError(
-        "MFEMHermitianInnerProductAux requires the target variable to be a scalar (vdim=1).");
+    mooseError("MFEMComplexInnerProductAux requires the target variable to be a scalar (vdim=1).");
 
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
-    mooseError("MFEMHermitianInnerProductAux requires the target variable to use L2_FECollection.");
+    mooseError("MFEMComplexInnerProductAux requires the target variable to use L2_FECollection.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMHermitianInnerProductAux currently supports only L2 spaces with interior DOFs "
+    mooseError("MFEMComplexInnerProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");
 }
 
 void
-MFEMHermitianInnerProductAux::execute()
+MFEMComplexInnerProductAux::execute()
 {
 
   // MFEM element projection for L2

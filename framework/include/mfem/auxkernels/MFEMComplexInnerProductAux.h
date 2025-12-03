@@ -21,13 +21,13 @@
  *   - Enforces 3D: mesh dimension and all involved vdim must be 3.
  *   - Takes into account Hermitian conjugation when computing the dot product.
  */
-class MFEMHermitianInnerProductAux : public MFEMComplexAuxKernel
+class MFEMComplexInnerProductAux : public MFEMComplexAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMHermitianInnerProductAux(const InputParameters & parameters);
-  ~MFEMHermitianInnerProductAux() override = default;
+  MFEMComplexInnerProductAux(const InputParameters & parameters);
+  ~MFEMComplexInnerProductAux() override = default;
 
   void execute() override;
 

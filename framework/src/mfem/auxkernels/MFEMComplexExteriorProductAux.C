@@ -81,8 +81,6 @@ MFEMComplexExteriorProductAux::execute()
 {
 
   // MFEM element projection for L2
-  _result_var.real() = 0.0;
-  _result_var.imag() = 0.0;
   _result_var.real().ProjectCoefficient(_final_coef_real);
   _result_var.imag().ProjectCoefficient(_final_coef_imag);
 
