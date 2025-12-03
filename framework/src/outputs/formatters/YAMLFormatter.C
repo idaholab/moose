@@ -108,6 +108,14 @@ YAMLFormatter::printParams(const std::string & prefix,
       oss << "'" << doc_unit << "'";
     oss << "\n";
 
+    oss << indent << "    doc_range: ";
+    std::string doc_range;
+    if (params.isRangeChecked(iter.first))
+      doc_range = params.rangeCheckedFunction(iter.first);
+    if (!doc_range.empty())
+      oss << "'" << doc_range << "'";
+    oss << "\n";
+
     if (params.have_parameter<MooseEnum>(name))
       addEnumOptionsAndDocs(oss, params.get<MooseEnum>(name), indent);
     if (params.have_parameter<MultiMooseEnum>(name))
