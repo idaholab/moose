@@ -11,7 +11,7 @@ present in the weak form.
 
 Contributions to $\left(\mathcal{T}(\phi_j), \varphi_i\right)_{\Omega}$ are given by
 time derivative kernels such as
- [MFEMTimeDerivativeMassKernel](source/mfem/kernels/MFEMTimeDerivativeMassKernel.md)
+ [MFEMTimeDerivativeMassKernel.md].
 
 Currently, transient problems in MOOSE's wrapping of MFEM are solved using an implicit backwards
 Euler method.
