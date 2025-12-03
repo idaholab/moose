@@ -47,7 +47,7 @@ protected:
   const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
 
 private:
-  friend class TimeDomainEquationSystemProblemOperator;
+  friend class TimeDependentEquationSystemProblemOperator;
 };
 
 } // namespace Moose::MFEM

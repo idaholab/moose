@@ -15,7 +15,7 @@
 
 namespace Moose::MFEM
 {
-/// Interface inherited by ProblemOperator and TimeDomainProblemOperator. Removes duplicated code in both classes.
+/// Interface inherited by ProblemOperator and TimeDependentProblemOperator. Removes duplicated code in both classes.
 class ProblemOperatorBase
 {
 public:

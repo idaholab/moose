@@ -9,21 +9,21 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "TimeDomainEquationSystemProblemOperator.h"
+#include "TimeDependentEquationSystemProblemOperator.h"
 
 namespace Moose::MFEM
 {
 void
-TimeDomainEquationSystemProblemOperator::SetGridFunctions()
+TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->GetTrialVarNames();
-  TimeDomainProblemOperator::SetGridFunctions();
+  TimeDependentProblemOperator::SetGridFunctions();
 }
 
 void
-TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
+TimeDependentEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
-  TimeDomainProblemOperator::Init(X);
+  TimeDependentProblemOperator::Init(X);
   GetEquationSystem()->BuildEquationSystem();
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
@@ -33,7 +33,7 @@ TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 }
 
 void
-TimeDomainEquationSystemProblemOperator::Solve()
+TimeDependentEquationSystemProblemOperator::Solve()
 {
   // Initialise time derivative
   for (const auto i : index_range(_trial_var_names))
@@ -68,9 +68,9 @@ TimeDomainEquationSystemProblemOperator::Solve()
 }
 
 void
-TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
-                                                       const mfem::Vector & X_old,
-                                                       mfem::Vector & X_new)
+TimeDependentEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
+                                                          const mfem::Vector & X_old,
+                                                          mfem::Vector & X_new)
 {
   X_new = X_old;
   SetTrialVariablesFromTrueVectors();
@@ -91,7 +91,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
 }
 
 void
-TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::real_t dt)
+TimeDependentEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::real_t dt)
 {
   GetEquationSystem()->SetTimeStep(dt);
   GetEquationSystem()->BuildEquationSystem();

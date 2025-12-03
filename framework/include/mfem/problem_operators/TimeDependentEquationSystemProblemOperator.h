@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "TimeDomainProblemOperator.h"
+#include "TimeDependentProblemOperator.h"
 #include "EquationSystemInterface.h"
 #include "TimeDependentEquationSystem.h"
 #include "MFEMBackwardEulerStateSolver.h"
@@ -20,12 +20,12 @@ namespace Moose::MFEM
 {
 
 /// Problem operator for time-dependent problems with an equation system.
-class TimeDomainEquationSystemProblemOperator : public TimeDomainProblemOperator,
-                                                public EquationSystemInterface
+class TimeDependentEquationSystemProblemOperator : public TimeDependentProblemOperator,
+                                                   public EquationSystemInterface
 {
 public:
-  TimeDomainEquationSystemProblemOperator(MFEMProblem & problem)
-    : TimeDomainProblemOperator(problem),
+  TimeDependentEquationSystemProblemOperator(MFEMProblem & problem)
+    : TimeDependentProblemOperator(problem),
       _equation_system(
           std::dynamic_pointer_cast<TimeDependentEquationSystem>(_problem_data.eqn_system))
   {

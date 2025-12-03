@@ -9,12 +9,12 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "TimeDomainProblemOperator.h"
+#include "TimeDependentProblemOperator.h"
 
 namespace Moose::MFEM
 {
 void
-TimeDomainProblemOperator::SetGridFunctions()
+TimeDependentProblemOperator::SetGridFunctions()
 {
   ProblemOperatorBase::SetGridFunctions();
   width = height = _block_true_offsets[_trial_variables.size()];

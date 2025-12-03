@@ -13,7 +13,7 @@
 
 #include "ProblemOperatorInterface.h"
 #include "MFEMProblemSolve.h"
-#include "TimeDomainProblemOperator.h"
+#include "TimeDependentProblemOperator.h"
 #include "TransientBase.h"
 
 class MFEMTransient : public TransientBase, public Moose::MFEM::ProblemOperatorInterface

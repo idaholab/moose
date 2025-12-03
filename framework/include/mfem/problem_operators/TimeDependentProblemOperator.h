@@ -18,10 +18,10 @@ namespace Moose::MFEM
 {
 /// Problem operator for time-dependent problems with no equation system. The user will need to subclass this since the solve is not
 /// implemented.
-class TimeDomainProblemOperator : public mfem::TimeDependentOperator, public ProblemOperatorBase
+class TimeDependentProblemOperator : public mfem::TimeDependentOperator, public ProblemOperatorBase
 {
 public:
-  TimeDomainProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
+  TimeDependentProblemOperator(MFEMProblem & problem) : ProblemOperatorBase(problem) {}
 
   void SetGridFunctions() override;
   void Solve() override {}
