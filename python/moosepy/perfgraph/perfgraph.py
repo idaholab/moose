@@ -9,6 +9,7 @@
 
 """Implements PerfGraph for representing MOOSE PerfGraphReporter data."""
 
+from dataclasses import dataclass, field
 from typing import Callable, Iterable, Optional, Tuple
 
 from moosepy.perfgraph.perfgraphnode import PerfGraphNode
@@ -44,8 +45,19 @@ class PerfGraph:
         self._root_node: PerfGraphNode = self._nodes[0]
         assert self._root_node.parent is None
 
+    @dataclass
+    class NodeData:
+        """Helper dataclass for parsing node data."""
+
+        # The data for this node.
+        data: dict = field(default_factory=dict)
+        # The level for this node's section.
+        level: int = 0
+        # Children in this node (if any); name -> data.
+        children: dict[str, dict] = field(default_factory=dict)
+
     @staticmethod
-    def _parse_node_data(data: dict, version: int) -> Tuple[dict, int, dict[str, dict]]:
+    def _parse_node_data(data: dict, version: int) -> NodeData:
         """
         Parse the data for a single node.
 
@@ -56,46 +68,38 @@ class PerfGraph:
         version : int
             The PerfGraphReporter version.
 
-        Returns
-        -------
-        dict :
-            The data for this node.
-        int :
-            The node section level.
-        dict[str, dict] :
-            The child data.
-
         """
         assert isinstance(data, dict)
         assert isinstance(version, int)
+
+        node_data = PerfGraph.NodeData()
 
         # Remove the memory entry; not used
         if version == 0:
             data.pop("memory")
 
         # Pull out data specific to the node
-        node_data = {k: data.pop(k) for k in ["time", "num_calls"]}
+        node_data.data = {k: data.pop(k) for k in ["time", "num_calls"]}
 
         # Section data
-        level = data.pop("level")
+        node_data.level = data.pop("level")
 
         # Children in version 0, contained within the root
         # (the rest of the keys)
-        children = {}
         if version == 0:
-            children = data
+            node_data.children = data
         # After version 0, stored separately in "children" key
         else:
             if "children" in data:
-                children = data.pop("children")
-                assert children
+                node_data.children = data.pop("children")
+                assert node_data.children
             assert not data
 
-        assert isinstance(children, dict)
-        assert all(isinstance(v, str) for v in children)
-        assert all(isinstance(v, dict) for v in children.values())
+        assert isinstance(node_data.children, dict)
+        assert all(isinstance(v, str) for v in node_data.children)
+        assert all(isinstance(v, dict) for v in node_data.children.values())
 
-        return node_data, level, children
+        return node_data
 
     @staticmethod
     def _setup(
@@ -143,28 +147,28 @@ class PerfGraph:
             id = next_id
             next_id += 1
 
-            node_data, level, children = PerfGraph._parse_node_data(data, version)
+            node_data = PerfGraph._parse_node_data(data, version)
 
             # Get the node section or build it if needed
             section = sections.get(name)
             if section is None:
-                section = PerfGraphSection(name, level)
+                section = PerfGraphSection(name, node_data.level)
                 sections[name] = section
             else:
-                assert section.level == level
+                assert section.level == node_data.level
 
             # Build the node
             node = PerfGraphNode(
                 id=id,
                 name=name,
-                **node_data,
+                **node_data.data,
                 section=section,
                 parent=parent,
             )
             nodes[node.id] = node
 
             # Recursively add children nodes
-            for child_name, child_data in children.items():
+            for child_name, child_data in node_data.children.items():
                 process_data(child_name, child_data, node)
 
         # Recursively add all nodes
