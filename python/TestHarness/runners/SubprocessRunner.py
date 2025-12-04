@@ -10,7 +10,7 @@
 import os, importlib, platform, subprocess, shlex, sys, time
 from contextlib import suppress
 from tempfile import SpooledTemporaryFile
-from threading import Thread
+from threading import Lock, Thread
 from typing import Optional, TYPE_CHECKING
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
@@ -41,6 +41,10 @@ class SubprocessRunner(Runner):
         self.process: Optional[subprocess.Popen] = None
         # The memory checking thread, created during spawn()
         self.memory_thread: Optional[Thread] = None
+        # Average job CPU percentage, set by memory_thread on exit
+        self.cpu_percent = None
+        # Lock for cpu_percent
+        self.cpu_percent_lock = Lock()
 
     def spawn(self, timer):
         tester = self.job.getTester()
@@ -146,8 +150,13 @@ class SubprocessRunner(Runner):
         max_memory = self.options.max_memory
         procs = self.job.getTester().getProcs(self.options) if max_memory else None
 
+        # Total observed CPU time for each process
+        cpu_times: dict[int, float] = {}
+        # Wall time counter for computing CPU percent
+        start_wall_time = time.perf_counter()
+
         # Wait for the process to finish, checking memory per step
-        max_found = 0
+        max_memory_found = 0
         while process.poll() is None:
             # Collect the parent + children processes so that
             # we can inspect memory for each
@@ -155,25 +164,31 @@ class SubprocessRunner(Runner):
             with suppress(psutil.NoSuchProcess):
                 psutil_processes += psutil_process.children(recursive=True)
 
-            # Accumulate total across all ranks
+            # Accumulate total memory across all ranks
             all_memory = [self.getProcessMemory(p) for p in psutil_processes]
-            total = sum(v for v in all_memory if v is not None)
+            total_memory = sum(v for v in all_memory if v is not None)
 
             # If have a zero value and the main process isn't running,
             # we're done here
-            if total == 0 and not process.poll():
-                return
+            if total_memory == 0 and not process.poll():
+                break
+
+            # Update CPU times
+            for p in psutil_processes:
+                with suppress(psutil.NoSuchProcess):
+                    times = p.cpu_times()
+                    cpu_times[p.pid] = times.user + times.system
 
             # If memory has increased, set it so that it can be
             # reported live during a long-running job
-            if total > max_found:
-                self.setMaxMemory(total)
-                max_found = total
+            if total_memory > max_memory_found:
+                self.setMaxMemory(total_memory)
+                max_memory_found = total_memory
 
                 # If --max-memory is set, make sure we're not over
                 if max_memory is not None:
                     assert isinstance(procs, int)
-                    rss_per_proc = float(max_found / procs) * 1.0e-6
+                    rss_per_proc = float(max_memory_found / procs) * 1.0e-6
 
                     # Over; kill the process, fail, and report
                     if rss_per_proc > max_memory:
@@ -188,6 +203,12 @@ class SubprocessRunner(Runner):
 
             # Poll
             time.sleep(0.05)
+
+        # Update CPU percent now that we're done (average for whole job)
+        total_cpu_time = sum(v for v in cpu_times.values())
+        cpu_percent = 100.0 * total_cpu_time / (time.perf_counter() - start_wall_time)
+        with self.cpu_percent_lock:
+            self.cpu_percent = cpu_percent
 
     def wait(self, timer):
         assert self.process is not None
@@ -237,8 +258,21 @@ class SubprocessRunner(Runner):
         """Cleanup; cleanup the parent and join the memory thread if running."""
         super().cleanup()
 
+        # Wait for the memory thread to finish up and check CPU usage
         if self.memory_thread is not None:
             self.memory_thread.join()
+
+            with self.cpu_percent_lock:
+                cpu_percent = self.cpu_percent
+            factor = 1.1
+            allowed_percent = 100.0 * factor * self.job.getSlots()
+            if cpu_percent > allowed_percent:
+                message = (
+                    f"FAIL: Job average CPU {cpu_percent:.2f}% "
+                    f"over allowed {allowed_percent:.2f}%."
+                )
+                self.appendOutput("\n" + util.outputHeader(message, False))
+                self.job.setStatus(self.job.error, "OVER CPU")
 
     def sendSignal(self, signal):
         # process.poll() returns the process's exit code if it has completed,
