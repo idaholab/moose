@@ -283,7 +283,7 @@ CohesiveZoneModelBase::reinit()
     // Keep active set fixed from second Uzawa loop
     if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
     {
-      using namespace std;
+      using std::abs;
 
       auto damage = _dof_to_damage[node].first;
 
@@ -305,7 +305,7 @@ CohesiveZoneModelBase::reinit()
                                std::abs(MetaPhysicL::raw_value(slip_distance).cwiseAbs()(1));
 
       const auto slip_norm = (MetaPhysicL::raw_value(slip_distance)).norm();
-      const auto friction_limit = 0.4 * _friction_coefficient * damage * std::abs(normal_pressure);
+      const auto friction_limit = 0.4 * _friction_coefficient * damage * abs(normal_pressure);
 
       if (slip_metric > _epsilon_tolerance && penalty_friction * slip_norm > friction_limit)
       {
