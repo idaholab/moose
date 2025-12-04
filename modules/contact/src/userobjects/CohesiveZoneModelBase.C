@@ -139,8 +139,8 @@ CohesiveZoneModelBase::computeFandR(const Node * const node)
   // This 'averaging' assumption below can probably be improved upon.
   _dof_to_interface_F[node] = 0.5 * (normalized_F + normalized_F_neighbor);
 
-  for (const auto i : make_range(3))
-    for (const auto j : make_range(3))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       if (!std::isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
         throw MooseException("The deformation gradient on the secondary surface is not finite in "
                              "CohesiveZoneModelBase. MOOSE needs to cut the time step size.");
