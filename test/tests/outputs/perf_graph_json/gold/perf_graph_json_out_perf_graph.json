@@ -4,7 +4,13 @@
             "type": "PerfGraphReporter",
             "values": {
                 "graph": {
-                    "type": "PerfGraph const*"
+                    "type": "PerfGraphReporter::PerfGraphJSON"
+                },
+                "max_memory_per_rank": {
+                    "type": "std::vector<unsigned long>"
+                },
+                "max_memory_this_rank": {
+                    "type": "unsigned long"
                 },
                 "version": {
                     "type": "unsigned int"
@@ -16,6 +22,10 @@
         {
             "perf_graph_json": {
                 "graph": "removed",
+                "max_memory_per_rank": [
+                    146
+                ],
+                "max_memory_this_rank": 146,
                 "version": 1
             },
             "time": 2.0,
