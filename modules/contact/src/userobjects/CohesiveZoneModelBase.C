@@ -192,7 +192,7 @@ CohesiveZoneModelBase::timestepSetup()
   for (auto & map_pr : _dof_to_accumulated_slip)
   {
     auto & [accumulated_slip, old_accumulated_slip] = map_pr.second;
-    old_accumulated_slip = {MetaPhysicL::raw_value(accumulated_slip)};
+    old_accumulated_slip = MetaPhysicL::raw_value(accumulated_slip);
   }
 
   for (auto & dof_lp : _dof_to_local_penalty_friction)
@@ -374,10 +374,11 @@ CohesiveZoneModelBase::reinit()
     const Node * const node = _lower_secondary_elem->node_ptr(i);
 
     // End of CZM bilinear computations
-    if (auto it = _dof_to_czm_traction.find(node); it != _dof_to_czm_traction.end())
+    auto it = _dof_to_czm_traction.find(node);
+    if (it == _dof_to_czm_traction.end())
       return;
 
-    const auto test_i = (*_test)[i];
+    const auto & test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
       for (const auto idx : index_range(_czm_interpolated_traction))
         _czm_interpolated_traction[idx][qp] += test_i[qp] * (it->second)(idx);
