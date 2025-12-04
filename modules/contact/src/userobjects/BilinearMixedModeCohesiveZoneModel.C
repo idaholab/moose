@@ -145,7 +145,6 @@ BilinearMixedModeCohesiveZoneModel::initialize()
   _dof_to_delta_initial.clear();
   _dof_to_delta_final.clear();
   _dof_to_delta_max.clear();
-  // _dof_to_czm_normal_traction.clear();
 }
 
 void
