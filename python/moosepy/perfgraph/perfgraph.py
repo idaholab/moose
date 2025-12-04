@@ -10,7 +10,7 @@
 """Implements PerfGraph for representing MOOSE PerfGraphReporter data."""
 
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, Optional, Tuple
+from typing import Callable, Iterable, Optional
 
 from moosepy.perfgraph.perfgraphnode import PerfGraphNode
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
@@ -34,13 +34,19 @@ class PerfGraph:
 
         # Setup the data
         setup_data = self._setup(data)
+        root_data = setup_data.root_data
 
         # The nodes in the graph; node id -> node
         self._nodes: dict[int, PerfGraphNode] = setup_data.nodes
         # The sections in the graph; section name -> section
         self._sections: dict[str, PerfGraphSection] = setup_data.sections
         # The PerfGraphReporter version
-        self._version: int = setup_data.version
+        self._version: int = root_data.version
+        # Maximum memory in MB for this rank, if available
+        self._max_memory_this_rank: Optional[int] = root_data.max_memory_this_rank
+        # Maximum memory per rank in MB, if available
+        self._max_memory_per_rank: Optional[list[int]] = root_data.max_memory_per_rank
+
         # The root node in the graph
         self._root_node: PerfGraphNode = self._nodes[0]
         assert self._root_node.parent is None
@@ -49,12 +55,16 @@ class PerfGraph:
     class RootData:
         """Helper dataclass for parsing the root data."""
 
-        # "version" entry in the json output
+        # PerfGraphReporter schema version; from "version" key.
         version: int = 0
         # Name of the root node
         root_node_name: str = ""
         # Data for the root node
         root_node_data: dict = field(default_factory=dict)
+        # Max memory for this rank; from "max_memory_this_rank" key.
+        max_memory_this_rank: Optional[int] = None
+        # Max memory for all ranks; from "max_memory_per_rank" key.
+        max_memory_per_rank: Optional[list[int]] = None
 
     @staticmethod
     def _parse_root_data(data: dict) -> RootData:
@@ -64,13 +74,28 @@ class PerfGraph:
         root_data = PerfGraph.RootData()
 
         # Graph entry
-        graph: dict = data["graph"]
+        graph: dict = data.pop("graph")
         assert isinstance(graph, dict)
         assert len(graph) > 0
 
         # Version, which is 0 if version doesn't exist
-        root_data.version = data.get("version", 0)
+        root_data.version = data.pop("version", 0)
         assert isinstance(root_data.version, int)
+
+        # Max memory options added in version 1
+        if root_data.version > 0:
+            # Will exist on every rank
+            root_data.max_memory_this_rank = data.pop("max_memory_this_rank")
+            assert isinstance(root_data.max_memory_this_rank, int)
+
+            # Will only exist if we have data from rank 0
+            if "max_memory_per_rank" in data:
+                root_data.max_memory_per_rank = data.pop("max_memory_per_rank")
+                assert isinstance(root_data.max_memory_per_rank, list)
+                assert all(isinstance(v, int) for v in root_data.max_memory_per_rank)
+
+        # Should have no data left
+        assert not data
 
         # Root node
         root_data.root_node_name = next(iter(graph))
@@ -138,8 +163,8 @@ class PerfGraph:
     class SetupData:
         """Helper dataclass for the data that is setup."""
 
-        # PerfGraphReporter schema version.
-        version: int
+        # The root data.
+        root_data: "PerfGraph.RootData"
         # Mapping of node ID to node.
         nodes: dict[int, PerfGraphNode] = field(default_factory=dict)
         # Mapping of section name to section.
@@ -159,7 +184,7 @@ class PerfGraph:
 
         """
         root_data = PerfGraph._parse_root_data(data)
-        setup_data = PerfGraph.SetupData(root_data.version)
+        setup_data = PerfGraph.SetupData(root_data)
 
         # For setting node IDs
         next_id: int = 0
@@ -223,8 +248,23 @@ class PerfGraph:
     @property
     def version(self) -> int:
         """Get the PerfGraphReporter version for this data."""
-        assert isinstance(self._version, int)
         return self._version
+
+    @property
+    def max_memory(self) -> Optional[int]:
+        """Get the max memory for this rank, if available."""
+        return (
+            self._max_memory_this_rank
+            if self._max_memory_this_rank is not None
+            else None
+        )
+
+    @property
+    def max_memory_per_rank(self) -> Optional[list[int]]:
+        """Get the max memory per rank, if available."""
+        return (
+            self._max_memory_per_rank if self._max_memory_per_rank is not None else None
+        )
 
     @property
     def total_time(self) -> float:

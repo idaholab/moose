@@ -13,70 +13,91 @@
 
 registerMooseObject("MooseApp", PerfGraphReporter);
 
-const std::vector<std::string> PerfGraphReporter::value_names{"graph", "version"};
+const std::vector<std::string> PerfGraphReporter::value_names{
+    "graph", "max_memory_this_rank", "max_memory_per_rank", "version"};
 
 InputParameters
 PerfGraphReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Reports the full performance graph from the PerfGraph.");
-
-  // Because the PerfGraphReporter does all of its execution within the
-  // to_json specialization (does not fill the structure within execute()),
-  // this allows us to obey the user's request for execute_on
-  params.set<bool>("_always_store") = false;
-
   return params;
 }
 
 PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _graph(declareValueByName<const PerfGraph *>("graph", REPORTER_MODE_DISTRIBUTED, &perfGraph()))
+    _graph(declareValueByName<PerfGraphJSON>("graph", REPORTER_MODE_DISTRIBUTED)),
+    _max_memory_this_rank(
+        declareValueByName<std::size_t>("max_memory_this_rank", REPORTER_MODE_DISTRIBUTED, 0)),
+    _max_memory_per_rank(declareValueByName<std::vector<std::size_t>>(
+        "max_memory_per_rank", REPORTER_MODE_ROOT, std::vector<std::size_t>()))
 {
+  // Store the version schema so at a later date we can use this version
+  // to know what data we should expect. This value is never changed during
+  // execute() as it is static and is saved as distributed so that we can
+  // store off each processor's data individually and know of the version
+  // without needing the context of the root process output.
+  //
   // Version 0:
   // - Initial version when version wasn't set
   // Version 1:
   // - Store children in separate "children" key per node
+  // - Add "max_memory_this_rank" top-level key
+  // - Add "max_memory_per_rank" top-level key
   declareValueByName<unsigned int>("version", REPORTER_MODE_DISTRIBUTED, 1);
 }
 
 void
-to_json(nlohmann::json & json, const PerfGraph * const & perf_graph)
+PerfGraphReporter::execute()
 {
-  mooseAssert(perf_graph, "perf_graph is not set");
+  auto & perf_graph = perfGraph();
 
-  // Update the timings in each node before we output them
-  const_cast<PerfGraph *>(perf_graph)->update();
-
-  // Recurse through the nodes starting with the root to fill the graph
-  to_json(json, perf_graph->rootNode());
-}
-
-void
-to_json(nlohmann::json & json, const PerfNode & node)
-{
-  const auto & info = moose::internal::getPerfGraphRegistry().sectionInfo(node.id());
-
-  auto & node_json = json[info._name];
-  node_json["level"] = info._level;
-  node_json["num_calls"] = node.numCalls();
-  node_json["time"] = node.selfTimeSec();
-
-  // Recursively add the children
-  if (node.children().size())
+  // Build the graph
+  _graph.value.clear();
+  // Function for recursing through nodes
+  std::function<void(nlohmann::json & json, const PerfNode &)> recurse_node;
+  recurse_node = [this, &recurse_node](nlohmann::json & json, const PerfNode & node)
   {
-    auto & children = node_json["children"];
-    for (const auto & id_child_pair : node.children())
-      to_json(children, *id_child_pair.second);
-  }
+    const auto & info = moose::internal::getPerfGraphRegistry().sectionInfo(node.id());
+
+    auto & node_json = json[info._name];
+    node_json["level"] = info._level;
+    node_json["num_calls"] = node.numCalls();
+    node_json["time"] = node.selfTimeSec();
+
+    // Recursively add the children
+    if (node.children().size())
+    {
+      auto & children = node_json["children"];
+      for (const auto & id_child_pair : node.children())
+        recurse_node(children, *id_child_pair.second);
+    }
+  };
+  // Update the timings in each node before we output them
+  perf_graph.update();
+  // Recurse through the nodes to add
+  recurse_node(_graph.value, perf_graph.rootNode());
+
+  // Memory on this rank
+  _max_memory_this_rank = perf_graph.getMaxMemory();
+  // Memory across all ranks on rank 0; we keep this separate so
+  // that we can store data for rank 0 in a database but still
+  // have a general idea of memory usage across all ranks
+  comm().gather(0, _max_memory_this_rank, _max_memory_per_rank);
 }
 
 void
-dataStore(std::ostream &, const PerfGraph *&, void *)
+to_json(nlohmann::json & json, const PerfGraphReporter::PerfGraphJSON & perf_graph_json)
+{
+  json = perf_graph_json.value;
+}
+
+void
+dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, void *)
 {
 }
 
 void
-dataLoad(std::istream &, const PerfGraph *&, void *)
+dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, void *)
 {
 }
