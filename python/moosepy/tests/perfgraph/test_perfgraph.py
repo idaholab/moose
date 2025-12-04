@@ -190,6 +190,12 @@ class TestPerfGraph(TestCase):
         pg = build_perf_graph()
         self.assertEqual(list(pg.nodes), list(pg._nodes.values()))
 
+    def test_num_nodes(self):
+        """Test property nodes."""
+        pg = build_perf_graph()
+        pg._nodes = {0: build_test_node(), 1: build_test_node()}
+        self.assertEqual(pg.num_nodes, 2)
+
     def test_sections(self):
         """Test property sections."""
         pg = build_perf_graph()
@@ -242,6 +248,33 @@ class TestPerfGraph(TestCase):
 
         with self.assertRaisesRegex(KeyError, "Section does not exist with name 'foo'"):
             pg.get_section("foo")
+
+    def test_recurse(self):
+        """Test recurse()."""
+        data = {
+            "root": {
+                **build_node_data(),
+                "child": {**build_node_data(), "childchild": build_node_data()},
+            }
+        }
+
+        num_nodes = 0
+
+        def action(node: PerfGraphNode):
+            nonlocal num_nodes
+            num_nodes += 1
+
+        pg = PerfGraph(data)
+        self.assertEqual(pg.num_nodes, 3)
+
+        # Start with root node
+        pg.recurse(action)
+        self.assertEqual(num_nodes, 3)
+
+        # Start with first child
+        num_nodes = 0
+        pg.recurse(action, pg.root_node.children[0])
+        self.assertEqual(num_nodes, 2)
 
     def test_get_heaviest_nodes(self):
         """Test get_heaviest_nodes()."""

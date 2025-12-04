@@ -9,7 +9,7 @@
 
 """Implements PerfGraph for representing MOOSE PerfGraphReporter data."""
 
-from typing import Iterable, Optional, Tuple
+from typing import Callable, Iterable, Optional, Tuple
 
 from moosepy.perfgraph.perfgraphnode import PerfGraphNode
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
@@ -132,6 +132,11 @@ class PerfGraph:
         return self._nodes.values()
 
     @property
+    def num_nodes(self) -> int:
+        """Get the number of nodes."""
+        return len(self._nodes)
+
+    @property
     def sections(self) -> Iterable[PerfGraphSection]:
         """Get all of the named sections."""
         return self._sections.values()
@@ -164,6 +169,33 @@ class PerfGraph:
         if (section := self.query_section(name)) is not None:
             return section
         raise KeyError(f"Section does not exist with name '{name}'")
+
+    def recurse(
+        self, act: Callable[[PerfGraphNode], None], node: Optional[PerfGraphNode] = None
+    ):
+        """
+        Recursively perform on action on the whole tree.
+
+        Parameters
+        ----------
+        act : Callable[[PerfGraphNode], None]
+            The action to perform on a single node.
+
+        Additional Parameters
+        ---------------------
+        node : Optional[PerfGraphNode]
+            The node to start with; defaults to the root if None.
+
+        """
+        assert isinstance(act, Callable)
+        assert isinstance(node, (type(None), PerfGraphNode))
+
+        def recurse(node: PerfGraphNode):
+            act(node)
+            for child in node.children:
+                recurse(child)
+
+        recurse(node if node is not None else self.root_node)
 
     def get_heaviest_nodes(self, num: int) -> list[PerfGraphNode]:
         """
