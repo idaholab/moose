@@ -103,15 +103,14 @@ protected:
   /// The friction coefficient
   const Real _friction_coefficient;
 
-  /// Map from degree of freedom to current and old step slip
+  /// Map from degree of freedom to current and old AD iteration step slip
   std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>> _dof_to_step_slip;
 
   /// Map from degree of freedom to current and old accumulated slip
-  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>> _dof_to_accumulated_slip;
+  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> & _dof_to_accumulated_slip;
 
   // Map from degree of freedom to current and old tangential traction
-  std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
-      _dof_to_tangential_traction;
+  std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>> & _dof_to_tangential_traction;
 
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_one;
@@ -135,5 +134,5 @@ protected:
   std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_displacement_jump;
 
   /// Damage values (pair of current and old) on CZM interface
-  std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_damage;
+  std::unordered_map<dof_id_type, std::pair<ADReal, Real>> & _dof_to_damage;
 };

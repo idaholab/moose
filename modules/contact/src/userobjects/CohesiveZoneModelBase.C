@@ -68,7 +68,17 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
     _penalty_friction(isParamValid("penalty_friction") ? getParam<Real>("penalty_friction")
                                                        : getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
-    _epsilon_tolerance(1.0e-40)
+    _dof_to_accumulated_slip(
+        declareRestartableData<std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>>(
+            "dof_to_accumulated_slip",
+            std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>{})),
+    _dof_to_tangential_traction(
+        declareRestartableData<std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>>(
+            "dof_to_tangential_traction",
+            std::unordered_map<dof_id_type, std::pair<ADTwoVector, TwoVector>>{})),
+    _epsilon_tolerance(1.0e-40),
+    _dof_to_damage(declareRestartableData<std::unordered_map<dof_id_type, std::pair<ADReal, Real>>>(
+        "dof_do_damage", std::unordered_map<dof_id_type, std::pair<ADReal, Real>>{}))
 {
   _czm_interpolated_traction.resize(_ndisp);
 
@@ -273,8 +283,8 @@ CohesiveZoneModelBase::reinit()
     const auto & normal_pressure = _dof_to_normal_pressure[node];
 
     // map the tangential traction and accumulated slip
-    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node];
-    auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node];
+    auto & [tangential_traction, old_tangential_traction] = _dof_to_tangential_traction[node->id()];
+    auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node->id()];
 
     Real normal_lm = -1;
     if (auto it = _dof_to_lagrange_multiplier.find(node); it != _dof_to_lagrange_multiplier.end())
@@ -285,7 +295,7 @@ CohesiveZoneModelBase::reinit()
     {
       using std::abs;
 
-      auto damage = _dof_to_damage[node].first;
+      const auto & damage = _dof_to_damage[node->id()].first;
 
       const auto & real_tangential_velocity =
           libmesh_map_find(_dof_to_real_tangential_velocity, node);
