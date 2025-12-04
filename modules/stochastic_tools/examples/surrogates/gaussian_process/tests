@@ -55,6 +55,7 @@
       input = GP_normal.i
       csvdiff = 'GP_normal_out_GP_avg_hyperparams_0001.csv'
       heavy = true
+      min_parallel = 4
       allow_test_objects = true
       capabilities = 'method=opt'
       prereq = 4D_HC_avg/train
