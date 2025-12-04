@@ -8,8 +8,6 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 !! Intentional comment to provide extra spacing
 
-!! Intentional comment to provide extra spacing
-
 The Dittus-Boelter equation [!cite](dittus1930heat) is implemented as proposed by McAdams [!cite](mcadams1954heat) as follows:
 
 \begin{equation}
