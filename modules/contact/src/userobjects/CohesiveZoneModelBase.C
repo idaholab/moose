@@ -67,7 +67,6 @@ CohesiveZoneModelBase::CohesiveZoneModelBase(const InputParameters & parameters)
                                                        : getParam<Real>("penalty")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _epsilon_tolerance(1.0e-40)
-
 {
   _czm_interpolated_traction.resize(_ndisp);
 
