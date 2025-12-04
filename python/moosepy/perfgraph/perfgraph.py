@@ -32,15 +32,15 @@ class PerfGraph:
         assert isinstance(data, dict)
         assert all(isinstance(v, str) for v in data)
 
-        # Build the nodes and sections from the data
-        nodes, sections, version = self._setup(data)
+        # Setup the data
+        setup_data = self._setup(data)
 
         # The nodes in the graph; node id -> node
-        self._nodes: dict[int, PerfGraphNode] = nodes
+        self._nodes: dict[int, PerfGraphNode] = setup_data.nodes
         # The sections in the graph; section name -> section
-        self._sections: dict[str, PerfGraphSection] = sections
+        self._sections: dict[str, PerfGraphSection] = setup_data.sections
         # The PerfGraphReporter version
-        self._version: int = version
+        self._version: int = setup_data.version
         # The root node in the graph
         self._root_node: PerfGraphNode = self._nodes[0]
         assert self._root_node.parent is None
@@ -134,10 +134,21 @@ class PerfGraph:
 
         return node_data
 
+    @dataclass
+    class SetupData:
+        """Helper dataclass for the data that is setup."""
+
+        # PerfGraphReporter schema version.
+        version: int
+        # Mapping of node ID to node.
+        nodes: dict[int, PerfGraphNode] = field(default_factory=dict)
+        # Mapping of section name to section.
+        sections: dict[str, PerfGraphSection] = field(default_factory=dict)
+
     @staticmethod
     def _setup(
         data: dict,
-    ) -> Tuple[dict[int, PerfGraphNode], dict[str, PerfGraphSection], int]:
+    ) -> SetupData:
         """
         Build the nodes and sections from the data.
 
@@ -146,21 +157,12 @@ class PerfGraph:
         data : dict
             The data from the PerfGraphReporter for the desired timestep.
 
-        Returns
-        -------
-        dict[int, PerfGraphNode] :
-            Mapping of node ID to node.
-        dict[str, PerfGraphSection] :
-            Mapping of section name to section.
-        int :
-            The PerfGraphReporter version.
-
         """
         root_data = PerfGraph._parse_root_data(data)
+        setup_data = PerfGraph.SetupData(root_data.version)
 
+        # For setting node IDs
         next_id: int = 0
-        nodes: dict[int, PerfGraphNode] = {}
-        sections: dict[str, PerfGraphSection] = {}
 
         # Recursive function for processing a single node
         def process_data(name: str, data: dict, parent: Optional[PerfGraphNode]):
@@ -172,10 +174,10 @@ class PerfGraph:
             node_data = PerfGraph._parse_node_data(data, root_data.version)
 
             # Get the node section or build it if needed
-            section = sections.get(name)
+            section = setup_data.sections.get(name)
             if section is None:
                 section = PerfGraphSection(name, node_data.level)
-                sections[name] = section
+                setup_data.sections[name] = section
             else:
                 assert section.level == node_data.level
 
@@ -187,7 +189,7 @@ class PerfGraph:
                 section=section,
                 parent=parent,
             )
-            nodes[node.id] = node
+            setup_data.nodes[node.id] = node
 
             # Recursively add children nodes
             for child_name, child_data in node_data.children.items():
@@ -196,7 +198,7 @@ class PerfGraph:
         # Recursively add all nodes
         process_data(root_data.root_node_name, root_data.root_node_data, None)
 
-        return nodes, sections, root_data.version
+        return setup_data
 
     @property
     def root_node(self) -> PerfGraphNode:

@@ -183,7 +183,9 @@ class TestPerfGraph(TestCase):
             }
         }
         data = {"graph": graph, "version": PERFGRAPHREPORTER_VERSION}
-        nodes, sections, version = PerfGraph._setup(deepcopy(data))
+        setup_data = PerfGraph._setup(deepcopy(data))
+        nodes = setup_data.nodes
+        sections = setup_data.sections
 
         self.assertIsInstance(nodes, dict)
         for k, v in nodes.items():
@@ -197,7 +199,7 @@ class TestPerfGraph(TestCase):
             self.assertIsInstance(v, PerfGraphSection)
         self.assertEqual(len(sections), 5)
 
-        self.assertEqual(version, PERFGRAPHREPORTER_VERSION)
+        self.assertEqual(setup_data.version, PERFGRAPHREPORTER_VERSION)
 
         def check_node(name, i, num_children):
             node = nodes[i]
