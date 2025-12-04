@@ -76,7 +76,7 @@ class PerfGraph:
         # Graph entry
         graph: dict = data.pop("graph")
         assert isinstance(graph, dict)
-        assert len(graph) > 0
+        assert len(graph) == 1
 
         # Version, which is 0 if version doesn't exist
         root_data.version = data.pop("version", 0)
