@@ -47,13 +47,6 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
 }
 
 void
-ComplexEquationSystem::BuildEquationSystem()
-{
-  BuildBilinearForms();
-  BuildLinearForms();
-}
-
-void
 ComplexEquationSystem::BuildLinearForms()
 {
   // Register linear forms
@@ -96,6 +89,46 @@ ComplexEquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, slf, _cmplx_kernels_map);
     // Assemble
     slf->Assemble();
+  }
+}
+
+ComplexEquationSystem::BuildMixedBilinearForms()
+{
+  // Register mixed sesquilinear forms. Note that not all combinations may
+  // have a kernel.
+
+  // Create mslf for each test/coupled variable pair with an added kernel.
+  // Mixed sesquilinear forms with coupled variables that are not trial variables are
+  // associated with contributions from eliminated variables.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    auto test_mslfs = std::make_shared<Moose::MFEM::NamedFieldsMap<ParMixedSesquilinearForm>>();
+    for (const auto j : index_range(_coupled_var_names))
+    {
+      const auto & coupled_var_name = _coupled_var_names.at(j);
+      auto mslf = std::make_shared<ParMixedSesquilinearForm>(_coupled_pfespaces.at(j),
+                                                               _test_pfespaces.at(i));
+      // Register MixedSesquilinearForm if kernels exist for it, and assemble
+      // kernels
+      if (_cmplx_kernels_map.Has(test_var_name) &&
+          _cmplx_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
+          test_var_name != coupled_var_name)
+      {
+        mslf->SetAssemblyLevel(_assembly_level);
+        // Apply all mixed kernels with this test/trial pair
+        ApplyDomainBLFIntegrators<ParMixedSesquilinearForm>(
+            coupled_var_name, test_var_name, mslf, _cmplx_kernels_map);
+        // Assemble mixed bilinear forms
+        mslf->Assemble();
+        // Register mixed bilinear forms associated with a single trial variable
+        // for the current test variable
+        test_mslfs->Register(coupled_var_name, mslf);
+      }
+    }
+    // Register all mixed bilinear form sets associated with a single test
+    // variable
+    _mslfs.Register(test_var_name, test_mslfs);
   }
 }
 

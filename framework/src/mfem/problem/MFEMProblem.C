@@ -320,7 +320,11 @@ MFEMProblem::addRealComponentToKernel(const std::string & kernel_name,
 {
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
       getUserObject<MFEMComplexKernel>(name).getSharedPtr());
+
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  if (parent_ptr->queryParam<VariableName>("trial_variable"))
+    parameters.set<VariableName>("trial_variable") = parent_ptr->getParam<VariableName>("trial_variable");
+
   FEProblemBase::addUserObject(kernel_name, name + "_real", parameters);
   auto kernel_ptr = std::dynamic_pointer_cast<MFEMKernel>(
       getUserObject<MFEMKernel>(name + "_real").getSharedPtr());
@@ -335,6 +339,9 @@ MFEMProblem::addImagComponentToKernel(const std::string & kernel_name,
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
       getUserObject<MFEMComplexKernel>(name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  if (parent_ptr->queryParam<VariableName>("trial_variable"))
+    parameters.set<VariableName>("trial_variable") = parent_ptr->getParam<VariableName>("trial_variable");
+
   FEProblemBase::addUserObject(kernel_name, name + "_imag", parameters);
   auto kernel_ptr = std::dynamic_pointer_cast<MFEMKernel>(
       getUserObject<MFEMKernel>(name + "_imag").getSharedPtr());
