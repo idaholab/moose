@@ -340,7 +340,7 @@ CohesiveZoneModelBase::reinit()
 
     // Now that we have consistent nodal frictional values, create an interpolated frictional
     // pressure variable.
-    const auto & test_i = (*_test)[i];
+    const auto test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
     {
       _frictional_contact_traction_one[qp] += test_i[qp] * tangential_traction(0);
