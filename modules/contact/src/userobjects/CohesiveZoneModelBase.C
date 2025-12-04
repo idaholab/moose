@@ -367,7 +367,7 @@ CohesiveZoneModelBase::reinit()
     if (it == _dof_to_czm_traction.end())
       return;
 
-    const auto & test_i = (*_test)[i];
+    const auto test_i = (*_test)[i];
     for (const auto qp : make_range(_qrule_msm->n_points()))
       for (const auto idx : index_range(_czm_interpolated_traction))
         _czm_interpolated_traction[idx][qp] += test_i[qp] * (it->second)(idx);
