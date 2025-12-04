@@ -1,3 +1,5 @@
+# This is combined with different MeshCut2DFractureUserObject input files.
+# see those input for what this is testing in case these need reGolded
 [GlobalParams]
   displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
@@ -20,7 +22,7 @@
   [move_cutter_mesh]
     type = TransformGenerator
     transform = TRANSLATE
-    vector_value = '0 0.5 0'
+    vector_value = '0 0.51 0'
     input = cutter_mesh
     save_with_name = mesh_cutter
   []
@@ -28,7 +30,7 @@
     type = GeneratedMeshGenerator
     dim = 2
     nx = 45
-    ny = 15
+    ny = 30
     xmin = -1
     xmax = 0.49
     ymin = 0.0
@@ -52,8 +54,8 @@
   2d = true
   number_points_from_provider = 2
   crack_direction_method = CurvedCrackFront
-  radius_inner = '0.15'
-  radius_outer = '0.45'
+  radius_inner = '0.06'
+  radius_outer = '0.15'
   poissons_ratio = 0.3
   youngs_modulus = 207000
   block = 0
@@ -66,7 +68,6 @@
     incremental = true
     planar_formulation = plane_strain
     add_variables = true
-    generate_output = 'stress_xx stress_yy'
   []
 []
 
@@ -112,15 +113,9 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = ' lu       superlu_dist                 NONZERO               1e-20'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
   line_search = 'none'
-  nl_abs_tol = 1e-7
-  [Predictor]
-    type = SimplePredictor
-    scale = 1.0
-  []
-  # time control
   start_time = 0.0
   dt = 1.0
   end_time = 3

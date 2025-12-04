@@ -1,6 +1,6 @@
-# This will first use the nonlocal stress to drive the
-# right cracktip through the boundary.
-# Next, the left crack will grow from kcrit
+# both crack tips grow.
+# The crack tips first grow from fracture integrals
+# The right crack tip is driven through the boundary with stress based growth
 [VectorPostprocessors]
   [CrackFrontNonlocalStressVpp]
     type = CrackFrontNonlocalStress
@@ -20,6 +20,6 @@
     k_critical = 100
     stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
     stress_vector_name = "crack_tip_stress"
-    stress_threshold = 120
+    stress_threshold = 140
   []
 []
