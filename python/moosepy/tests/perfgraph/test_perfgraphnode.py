@@ -211,3 +211,23 @@ class TestPerfGraphNode(TestCase):
 
         child = build_test_node(name="foo", parent=root)
         self.assertEqual(id(root.get_child("foo")), id(child))
+
+    def test_get_path_to_root(self):
+        """Test get_path_to_root."""
+        foo = build_test_node(name="foo", id=0)
+        foo_edge, foo_node = foo.get_path_to_root()
+        self.assertEqual(foo_edge, set())
+        self.assertEqual(len(foo_node), 1)
+        self.assertEqual(foo_node, {foo})
+
+        bar = build_test_node(name="bar", id=1, parent=foo)
+        bar_to_foo_edge, bar_to_foo_node = bar.get_path_to_root()
+        self.assertEqual(bar_to_foo_edge, {(0, 1)})
+        self.assertEqual(len(bar_to_foo_node), 2)
+        self.assertEqual(bar_to_foo_node, {bar, foo})
+
+        baz = build_test_node(name="baz", id=2, parent=bar)
+        baz_to_foo_edge, baz_to_foo_node = baz.get_path_to_root()
+        self.assertEqual(baz_to_foo_edge, {(0, 1), (1, 2)})
+        self.assertEqual(len(baz_to_foo_node), 3)
+        self.assertEqual(baz_to_foo_node, {bar, foo, baz})
