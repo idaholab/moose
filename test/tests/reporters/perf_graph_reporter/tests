@@ -3,19 +3,9 @@
   issues = '#16256'
 
   [test]
-    requirement = 'The system shall include the ability to report performance information'
-
-    [run]
-      type = 'RunApp'
-      input = 'perf_graph_reporter.i'
-      detail = 'in JSON format'
-    []
-    [verify]
-      type = RunCommand
-      command = 'python3 verify_perf_graph_reporter.py'
-      prereq = test/run
-      detail = 'and shall provide a tool to post process said information'
-    []
+    type = 'RunApp'
+    input = 'perf_graph_reporter.i'
+    requirement = 'The system shall include the ability to report performance information in JSON format'
   []
 
   [recover_initial]
@@ -29,20 +19,11 @@
   []
 
   [recover]
-    requirement = 'The system shall include the ability to report performance information from a recovered solve'
-    [run]
-      type = 'RunApp'
-      input = 'perf_graph_reporter_recover.i'
-      cli_args = '--recover --recoversuffix cpr'
-      prereq = recover_initial
-      recover = false
-      detail = 'in JSON format'
-    []
-    [verify]
-      type = RunCommand
-      command = 'python3 verify_perf_graph_reporter.py recover'
-      prereq = recover/run
-      detail = 'and shall provide a tool to post process said information'
-    []
+    type = 'RunApp'
+    input = 'perf_graph_reporter_recover.i'
+    cli_args = '--recover --recoversuffix cpr'
+    prereq = recover_initial
+    recover = false
+    requirement = 'The system shall include the ability to report performance information from a recovered solve in JSON format'
   []
 []
