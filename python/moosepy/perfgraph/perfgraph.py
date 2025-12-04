@@ -39,6 +39,39 @@ class PerfGraph:
         self._root_node: PerfGraphNode = self._nodes[0]
 
     @staticmethod
+    def _parse_node_data(data: dict) -> Tuple[dict, int, list[Tuple[str, dict]]]:
+        """
+        Parse the data for a single node.
+
+        Parameters
+        ----------
+        data : dict
+            The node data.
+
+        Returns
+        -------
+        dict :
+            The data for this node.
+        int :
+            The node section level.
+        list[Tuple[str, dict]]] :
+            The child data.
+
+        """
+        # Pull out data specific to the node
+        node_data = {k: data.pop(k) for k in ["time", "num_calls", "memory"]}
+
+        # Section data
+        level = data.pop("level")
+
+        # And children (the rest of the keys)
+        children_data = [
+            (child_name, child_data) for child_name, child_data in data.items()
+        ]
+
+        return node_data, level, children_data
+
+    @staticmethod
     def _setup_nodes(
         data: dict,
     ) -> Tuple[dict[int, PerfGraphNode], dict[str, PerfGraphSection]]:
@@ -58,12 +91,10 @@ class PerfGraph:
             id = next_id
             next_id += 1
 
-            # Pull data that pertains to the node
-            self_time = data.pop("time")
-            num_calls = data.pop("num_calls")
-            level = data.pop("level")
-            # Currently unused
-            data.pop("memory")
+            node_data, level, child_data = PerfGraph._parse_node_data(data)
+
+            # Memory currently unused
+            node_data.pop("memory")
 
             # Get the node section or build it if needed
             section = sections.get(name)
@@ -75,8 +106,7 @@ class PerfGraph:
             node = PerfGraphNode(
                 id=id,
                 name=name,
-                self_time=self_time,
-                num_calls=num_calls,
+                **node_data,
                 section=section,
                 parent=parent,
             )
@@ -117,14 +147,21 @@ class PerfGraph:
             return node
         raise KeyError(f"Node does not exist with ID {id}")
 
-    def has_section(self, name: str) -> bool:
-        """Whether or not a section with the given name exists."""
-        return name in self._sections
-
-    def get_section(self, name: str) -> PerfGraphSection:
-        """Get a named PerfGraphSection."""
+    def query_section(self, name: str) -> Optional[PerfGraphSection]:
+        """Query a section by name."""
         assert isinstance(name, str)
         if (section := self._sections.get(name)) is not None:
+            return section
+        return None
+
+    def has_section(self, name: str) -> bool:
+        """Whether or not a section with the given name exists."""
+        return self.query_section(name) is not None
+
+    def get_section(self, name: str) -> PerfGraphSection:
+        """Get a section by name."""
+        assert isinstance(name, str)
+        if (section := self.query_section(name)) is not None:
             return section
         raise KeyError(f"Section does not exist with name '{name}'")
 
