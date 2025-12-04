@@ -33,6 +33,10 @@ PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _graph(declareValueByName<const PerfGraph *>("graph", REPORTER_MODE_DISTRIBUTED, &perfGraph()))
 {
+  // Version 0:
+  // - Initial version when version wasn't set
+  // Version 1:
+  // - Store children in separate "children" key per node
   declareValueByName<unsigned int>("version", REPORTER_MODE_DISTRIBUTED, 1);
 }
 
