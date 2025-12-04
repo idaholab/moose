@@ -189,3 +189,17 @@ class PerfGraphNode:
         if (child := self.query_child(name)) is not None:
             return child
         raise KeyError(f"Child with name '{name}' does not exist")
+
+    def get_path_to_root(self) -> tuple[set, set]:
+        """Get set of edges and nodes along the path for given node to root."""
+        path_edges = set()
+        nodes_to_include = set()
+
+        current = self
+        while current:
+            nodes_to_include.add(current)
+            if current.parent:
+                path_edges.add((current.parent.id, current.id))
+                nodes_to_include.add(current.parent)
+            current = current.parent
+        return path_edges, nodes_to_include
