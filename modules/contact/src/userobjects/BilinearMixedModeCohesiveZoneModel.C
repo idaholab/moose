@@ -49,7 +49,7 @@ BilinearMixedModeCohesiveZoneModel::validParams()
   params.addParam<bool>(
       "set_compressive_traction_to_zero",
       false,
-      "Zero compressive traction (set to true, allowing the use of Mortar contact in "
+      "Zero compressive traction (set to true, allowing the use of standard zero-penetration mortar contact constraints in "
       "the normal direction).");
   params.addParam<Real>(
       "regularization_alpha", 1e-10, "Regularization parameter for the Macaulay bracket.");
