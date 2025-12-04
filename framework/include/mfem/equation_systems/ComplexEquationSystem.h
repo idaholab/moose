@@ -28,14 +28,14 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem() override;
-
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms() override;
 
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms() override;
+
+  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
+  virtual void BuildMixedBilinearForms() override;
 
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs() override;
@@ -98,8 +98,8 @@ public:
 
   // Complex Linear and Bilinear Forms
   NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
-  NamedFieldsMap<ParMixedSesquilinearForm> _mslfs;
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
+  NamedFieldsMap<NamedFieldsMap<ParMixedSesquilinearForm>> _mslfs;
 
   // Complex kernels and integrated BCs
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
