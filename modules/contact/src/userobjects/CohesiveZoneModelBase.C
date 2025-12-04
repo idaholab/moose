@@ -34,7 +34,7 @@ CohesiveZoneModelBase::validParams()
       "Computes the mortar frictional contact force via a penalty approach.");
   // Suppress augmented Lagrange parameters. AL implementation for CZM remains to be done.
   params.addParam<Real>("penalty_friction",
-                        "The penalty factor for frictional interaction. If not provide, the normal "
+                        "The penalty factor for frictional interaction. If not provided, the normal "
                         "penalty factor is also used for the frictional problem.");
   params.addParam<Real>(
       "friction_coefficient", 0.0, "The friction coefficient ruling Coulomb friction equations.");
