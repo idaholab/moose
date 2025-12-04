@@ -164,7 +164,8 @@ BilinearMixedModeCohesiveZoneModel::computeCZMTraction(const Node * const node)
 
   // This traction vector is local at this point.
   _dof_to_czm_traction[node] =
-      -(1.0 - _dof_to_damage[node].first) * _penalty_stiffness_czm * delta_active -
+      -(1.0 - libmesh_map_find(_dof_to_damage, node->id()).first) * _penalty_stiffness_czm *
+          delta_active -
       _penalty_stiffness_czm * (_set_compressive_traction_to_zero ? 0.0 : delta_inactive);
 }
 
@@ -279,22 +280,20 @@ BilinearMixedModeCohesiveZoneModel::computeDamage(const Node * const node)
   const auto delta_initial = libmesh_map_find(_dof_to_delta_initial, node);
   const auto delta_final = libmesh_map_find(_dof_to_delta_final, node);
 
+  auto & [damage, damage_old] = _dof_to_damage[node->id()];
   if (delta_max < delta_initial)
-    _dof_to_damage[node].first = 0;
+    damage = 0;
   else if (delta_max > delta_final)
-    _dof_to_damage[node].first = 1.0;
+    damage = 1.0;
   else
-    _dof_to_damage[node].first =
-        delta_final * (delta_max - delta_initial) / delta_max / (delta_final - delta_initial);
+    damage = delta_final * (delta_max - delta_initial) / delta_max / (delta_final - delta_initial);
 
-  if (_dof_to_damage[node].first < _dof_to_damage[node].second)
+  if (damage < damage_old)
     // Irreversibility
-    _dof_to_damage[node].first = _dof_to_damage[node].second;
+    damage = damage_old;
 
   // Viscous regularization
-  _dof_to_damage[node].first =
-      (_dof_to_damage[node].first + _viscosity * _dof_to_damage[node].second / _dt) /
-      (_viscosity / _dt + 1.0);
+  damage = (damage + _viscosity * damage_old / _dt) / (_viscosity / _dt + 1.0);
 }
 
 void
@@ -331,7 +330,7 @@ BilinearMixedModeCohesiveZoneModel::getModeMixityRatio(const Node * const node) 
 Real
 BilinearMixedModeCohesiveZoneModel::getCohesiveDamage(const Node * const node) const
 {
-  const auto it = _dof_to_damage.find(_subproblem.mesh().nodePtr(node->id()));
+  const auto it = _dof_to_damage.find(node->id());
 
   if (it != _dof_to_damage.end())
     return MetaPhysicL::raw_value(it->second.first);
