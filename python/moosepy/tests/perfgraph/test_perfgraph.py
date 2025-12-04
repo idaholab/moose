@@ -68,6 +68,7 @@ class TestPerfGraph(TestCase):
         """Test _parse_root_data()."""
         data = build_perfgraph_data()
         root_data = PerfGraph._parse_root_data(deepcopy(data))
+        self.assertIsInstance(root_data, PerfGraph.RootData)
         self.assertEqual(root_data.version, PERFGRAPHREPORTER_VERSION)
         self.assertEqual(root_data.root_node_name, "root")
         self.assertEqual(root_data.root_node_data, data["graph"]["root"])
@@ -98,6 +99,7 @@ class TestPerfGraph(TestCase):
         node_data = PerfGraph._parse_node_data(
             deepcopy(data), PERFGRAPHREPORTER_VERSION
         )
+        self.assertIsInstance(node_data, PerfGraph.NodeData)
         check_common(data, node_data.data, node_data.level)
         self.assertIsInstance(node_data.children, dict)
         self.assertFalse(node_data.children)
@@ -116,6 +118,7 @@ class TestPerfGraph(TestCase):
         node_data = PerfGraph._parse_node_data(
             deepcopy(data), PERFGRAPHREPORTER_VERSION
         )
+        self.assertIsInstance(node_data, PerfGraph.NodeData)
         check_common(data, node_data.data, node_data.level)
         self.assertEqual(len(node_data.children), 1)
         child_name, child_data = next(iter(node_data.children.items()))
@@ -131,6 +134,7 @@ class TestPerfGraph(TestCase):
             "memory": 1.234,
         }
         node_data = PerfGraph._parse_node_data(deepcopy(data), 0)
+        self.assertIsInstance(node_data, PerfGraph.NodeData)
         modified_data = deepcopy(data)
         modified_data.pop("level")
         modified_data.pop("memory")
@@ -142,6 +146,7 @@ class TestPerfGraph(TestCase):
         # Single child
         data["child"] = {**build_node_data(), "memory": "2.345"}
         node_data = PerfGraph._parse_node_data(deepcopy(data), 0)
+        self.assertIsInstance(node_data, PerfGraph.NodeData)
         self.assertIsInstance(node_data.children, dict)
         self.assertEqual(len(node_data.children), 1)
         child_name, child_data = next(iter(node_data.children.items()))
@@ -184,6 +189,7 @@ class TestPerfGraph(TestCase):
         }
         data = {"graph": graph, "version": PERFGRAPHREPORTER_VERSION}
         setup_data = PerfGraph._setup(deepcopy(data))
+        self.assertIsInstance(setup_data, PerfGraph.SetupData)
         nodes = setup_data.nodes
         sections = setup_data.sections
 
