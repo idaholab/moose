@@ -97,9 +97,6 @@ protected:
   /// The global traction
   std::vector<ADVariableValue> _czm_interpolated_traction;
 
-  // /// The normal penalty factor
-  // const Real _penalty;
-
   /// The penalty factor for the frictional constraints
   const Real _penalty_friction;
 
