@@ -375,7 +375,7 @@ class StoredTestResult:
 
     def get_perf_graph(self) -> Optional[PerfGraph]:
         """
-        Get the perf_graph entry in PerfGraph Obj, if any.
+        Get the PerfGraph from the JSON perf_graph entry, if available.
 
         Requires filter TestDataFilter.TESTER when loading tests.
         """
