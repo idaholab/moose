@@ -42,6 +42,7 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _stack(),
     _execution_list_begin(0),
     _execution_list_end(0),
+    _max_memory(0),
     _active(true),
     _destructing(false),
     _live_print_time_limit(5.0),
@@ -200,10 +201,14 @@ PerfGraph::push(const PerfID id)
   long int start_memory = 0;
 
   if (memory_success)
-    start_memory =
+  {
+    const auto memory_mb =
         MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
-  else if (_current_position !=
-           -1) // If we weren't able to get the memory stats, let's just use the parent's
+    start_memory = memory_mb;
+    updateMaxMemory(memory_mb);
+  }
+  // If we weren't able to get the memory stats, let's just use the parent's
+  else if (_current_position != -1)
     start_memory = _stack[_current_position]->startMemory();
 
   // Set the start time
@@ -243,8 +248,13 @@ PerfGraph::pop()
   long int current_memory = 0;
 
   if (memory_success)
-    current_memory =
+  {
+    const auto memory_mb =
         MemoryUtils::convertBytes(stats._physical_memory, MemoryUtils::MemUnits::Megabytes);
+    current_memory = memory_mb;
+    updateMaxMemory(memory_mb);
+  }
+  // If we weren't able to get the memory stats, let's just use the start memory
   else if (_current_position !=
            -1) // If we weren't able to get the memory stats, let's just use the start memory
     current_memory = _stack[_current_position]->startMemory();
@@ -484,6 +494,17 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   }
 
   vtable.print(console);
+}
+
+void
+PerfGraph::updateMaxMemory(const std::size_t current_memory)
+{
+  // We shouldn't need to lock _max_memory in-between getting
+  // it and setting it as this should only ever be set outside
+  // of threads. _max_memory is an atomic so that getting it
+  // is thread safe.
+  if (current_memory > getMaxMemory())
+    _max_memory = current_memory;
 }
 
 void
