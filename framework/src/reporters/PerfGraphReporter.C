@@ -42,6 +42,7 @@ PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
   // - Initial version when version wasn't set
   // Version 1:
   // - Store children in separate "children" key per node
+  // - Removed "memory" key for each node
   // - Add "max_memory_this_rank" top-level key
   // - Add "max_memory_per_rank" top-level key
   declareValueByName<unsigned int>("version", REPORTER_MODE_DISTRIBUTED, 1);
