@@ -19,6 +19,7 @@
 #include "RankFourTensor.h"
 #include "ColumnMajorMatrix.h"
 #include "UniqueStorage.h"
+#include "TwoVector.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
@@ -401,6 +402,13 @@ dataStore(std::ostream & stream, Eigen::Matrix<T, Rows, Cols> & v, void * contex
     }
 }
 
+template <typename T>
+void
+dataStore(std::ostream & stream, GenericTwoVector<T> & v, void * context)
+{
+  dataStore(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
+}
+
 // Specializations (defined in .C)
 template <>
 void dataStore(std::ostream & stream, Real & v, void * context);
@@ -760,6 +768,13 @@ dataLoad(std::istream & stream, Eigen::Matrix<T, Rows, Cols> & v, void * context
       dataLoad(stream, r, context);
       v(i, j) = r;
     }
+}
+
+template <typename T>
+void
+dataLoad(std::istream & stream, GenericTwoVector<T> & v, void * context)
+{
+  dataLoad(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)
