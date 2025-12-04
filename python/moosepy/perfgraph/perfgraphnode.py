@@ -178,10 +178,7 @@ class PerfGraphNode:
     def query_child(self, name: str) -> Optional["PerfGraphNode"]:
         """Query a child by name."""
         assert isinstance(name, str)
-        for child in self.children:
-            if child.name == name:
-                return child
-        return None
+        return next((c for c in self.children if c.name == name), None)
 
     def has_child(self, name: str) -> bool:
         """Whether or not a child exists with the given name."""

@@ -111,7 +111,7 @@ class PerfGraphSection:
         """Query a node in the section by path."""
         assert isinstance(path, list)
         assert all(isinstance(v, str) for v in path)
-        return next((node for node in self.nodes if node.path == path), None)
+        return next((n for n in self.nodes if n.path == path), None)
 
     def has_node(self, path: list[str]) -> bool:
         """Whether or not the section has the node by path."""
