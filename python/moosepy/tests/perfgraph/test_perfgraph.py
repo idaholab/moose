@@ -82,12 +82,12 @@ class TestPerfGraph(TestCase):
 
         # Just the root node, no children
         data = build_node_data(**root_args)
-        node_data, level, children = PerfGraph._parse_node_data(
+        node_data = PerfGraph._parse_node_data(
             deepcopy(data), PERFGRAPHREPORTER_VERSION
         )
-        check_common(data, node_data, level)
-        self.assertIsInstance(children, dict)
-        self.assertFalse(children)
+        check_common(data, node_data.data, node_data.level)
+        self.assertIsInstance(node_data.children, dict)
+        self.assertFalse(node_data.children)
 
         # Single child
         child_level = 2
@@ -100,12 +100,12 @@ class TestPerfGraph(TestCase):
             **build_node_data(),
             "children": {"child": build_node_data(**child_args)},
         }
-        node_data, level, children = PerfGraph._parse_node_data(
+        node_data = PerfGraph._parse_node_data(
             deepcopy(data), PERFGRAPHREPORTER_VERSION
         )
-        check_common(data, node_data, level)
-        self.assertEqual(len(children), 1)
-        child_name, child_data = next(iter(children.items()))
+        check_common(data, node_data.data, node_data.level)
+        self.assertEqual(len(node_data.children), 1)
+        child_name, child_data = next(iter(node_data.children.items()))
         self.assertEqual(child_name, "child")
         self.assertEqual(child_data.pop("level"), child_level)
         check_common(child_args, child_data, child_level)
@@ -117,21 +117,21 @@ class TestPerfGraph(TestCase):
             **build_node_data(),
             "memory": 1.234,
         }
-        node_data, level, children = PerfGraph._parse_node_data(deepcopy(data), 0)
+        node_data = PerfGraph._parse_node_data(deepcopy(data), 0)
         modified_data = deepcopy(data)
         modified_data.pop("level")
         modified_data.pop("memory")
-        self.assertEqual(node_data, modified_data)
-        self.assertEqual(level, data["level"])
-        self.assertIsInstance(children, dict)
-        self.assertFalse(children)
+        self.assertEqual(node_data.data, modified_data)
+        self.assertEqual(node_data.level, data["level"])
+        self.assertIsInstance(node_data.children, dict)
+        self.assertFalse(node_data.children)
 
         # Single child
         data["child"] = {**build_node_data(), "memory": "2.345"}
-        node_data, _, children = PerfGraph._parse_node_data(deepcopy(data), 0)
-        self.assertIsInstance(children, dict)
-        self.assertEqual(len(children), 1)
-        child_name, child_data = next(iter(children.items()))
+        node_data = PerfGraph._parse_node_data(deepcopy(data), 0)
+        self.assertIsInstance(node_data.children, dict)
+        self.assertEqual(len(node_data.children), 1)
+        child_name, child_data = next(iter(node_data.children.items()))
         self.assertEqual(child_name, "child")
         self.assertEqual(child_data, data["child"])
 
