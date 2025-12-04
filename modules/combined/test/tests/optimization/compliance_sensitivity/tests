@@ -2,13 +2,14 @@
   issues = '#25602'
   design = 'DensityUpdate.md DensityUpdateTwoConstraints.md'
   [compliance_sensitivity]
-    requirement = 'The system shall be able to compute the compliance sensitivty correctly for a '
+    requirement = 'The system shall be able to compute the compliance sensitivity correctly for a '
     [2d_mbb]
       type = 'CSVDiff'
       input = '2d_mbb.i'
       csvdiff = '2d_mbb_out.csv'
       detail = '2D topology optimization problem.'
       heavy = true
+      min_parallel = 4
     []
     [3d_mbb]
       type = 'CSVDiff'
@@ -17,6 +18,7 @@
       detail = '3D topology optimization problem.'
       valgrind = 'none'
       capabilities = 'method=opt'
+      heavy = true
     []
     [2d_mbb_pde]
       type = 'CSVDiff'
@@ -24,6 +26,7 @@
       csvdiff = '2d_mbb_pde_out.csv'
       detail = '2D topology optimization problem with a PDE filter.'
       heavy = true
+      min_parallel = 4
     []
     [2d_mbb_pde_amr]
       type = 'CSVDiff'
@@ -31,6 +34,7 @@
       csvdiff = '2d_mbb_pde_amr_out.csv'
       detail = '2D topology optimization problem with AMR.'
       heavy = true
+      min_parallel = 2
     []
   []
   [2d_mmb_2material_cost_initial]
@@ -40,6 +44,7 @@
     requirement = 'The system shall be able to compute a multi-material topology optimization '
                   'problem.'
     heavy = true
+    min_parallel = 4
   []
   [paper_three_materials_test]
     type = 'CSVDiff'
@@ -49,6 +54,7 @@
                   'mechanical complianceproblem and reproduce approximate results from the '
                   'literature.'
     heavy = true
+    min_parallel = 4
     capabilities = 'method=opt'
     valgrind = 'none'
   []
@@ -60,6 +66,7 @@
                   'thermal complianceproblem and qualitatively reproduce results from the '
                   'literature.'
     heavy = true
+    min_parallel = 4
     capabilities = 'method=opt'
     valgrind = 'none'
   []
