@@ -113,9 +113,6 @@ protected:
   std::unordered_map<const DofObject *, std::pair<ADTwoVector, TwoVector>>
       _dof_to_tangential_traction;
 
-  // /// Map from degree of freedom to czm normal traction
-  // std::unordered_map<const DofObject *, ADReal> _dof_to_czm_normal_traction;
-
   /// The first frictional contact pressure on the mortar segment quadrature points
   ADVariableValue _frictional_contact_traction_one;
 
