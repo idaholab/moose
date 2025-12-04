@@ -11,7 +11,7 @@
 
 #include "MFEMTransient.h"
 #include "MFEMProblem.h"
-#include "TimeDomainEquationSystemProblemOperator.h"
+#include "TimeDependentEquationSystemProblemOperator.h"
 #include "TimeStepper.h"
 
 registerMooseObject("MooseApp", MFEMTransient);
@@ -37,7 +37,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
     _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(
         _mfem_problem_data.time_derivative_map);
     auto problem_operator =
-        std::make_shared<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(_mfem_problem);
+        std::make_shared<Moose::MFEM::TimeDependentEquationSystemProblemOperator>(_mfem_problem);
     addProblemOperator(std::move(problem_operator));
   }
 }

@@ -70,7 +70,7 @@
   []
   [topbottom]
     type = MFEMVectorDirichletBC
-    variable = heat_flux
+    variable = time_integrated_heat_flux
     vector_coefficient = '0.0 0.0'
     boundary = '1 3'
   []
