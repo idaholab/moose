@@ -64,6 +64,19 @@ class TestPerfGraph(TestCase):
         self.assertEqual(pg._version, PERFGRAPHREPORTER_VERSION)
         self.assertIsInstance(pg._root_node, PerfGraphNode)
 
+    def test_parse_root_data(self):
+        """Test _parse_root_data()."""
+        data = build_perfgraph_data()
+        root_data = PerfGraph._parse_root_data(deepcopy(data))
+        self.assertEqual(root_data.version, PERFGRAPHREPORTER_VERSION)
+        self.assertEqual(root_data.root_node_name, "root")
+        self.assertEqual(root_data.root_node_data, data["graph"]["root"])
+
+        # No version (version 0)
+        data.pop("version")
+        root_data = PerfGraph._parse_root_data(deepcopy(data))
+        self.assertEqual(root_data.version, 0)
+
     def test_parse_node_data(self):
         """Test _parse_node_data()."""
 

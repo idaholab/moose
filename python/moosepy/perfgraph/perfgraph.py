@@ -46,6 +46,39 @@ class PerfGraph:
         assert self._root_node.parent is None
 
     @dataclass
+    class RootData:
+        """Helper dataclass for parsing the root data."""
+
+        # "version" entry in the json output
+        version: int = 0
+        # Name of the root node
+        root_node_name: str = ""
+        # Data for the root node
+        root_node_data: dict = field(default_factory=dict)
+
+    @staticmethod
+    def _parse_root_data(data: dict) -> RootData:
+        """Parse the root data (the main data structure)."""
+        assert isinstance(data, dict)
+
+        root_data = PerfGraph.RootData()
+
+        # Graph entry
+        graph: dict = data["graph"]
+        assert isinstance(graph, dict)
+        assert len(graph) > 0
+
+        # Version, which is 0 if version doesn't exist
+        root_data.version = data.get("version", 0)
+        assert isinstance(root_data.version, int)
+
+        # Root node
+        root_data.root_node_name = next(iter(graph))
+        root_data.root_node_data = graph[root_data.root_node_name]
+
+        return root_data
+
+    @dataclass
     class NodeData:
         """Helper dataclass for parsing node data."""
 
@@ -123,18 +156,7 @@ class PerfGraph:
             The PerfGraphReporter version.
 
         """
-        assert isinstance(data, dict)
-
-        graph: dict = data["graph"]
-        assert isinstance(graph, dict)
-        assert len(graph) > 0
-
-        version: int = data.get("version", 0)
-        assert isinstance(version, int)
-
-        # Find the root node
-        root_node_name = next(iter(graph))
-        root_node_data = graph[root_node_name]
+        root_data = PerfGraph._parse_root_data(data)
 
         next_id: int = 0
         nodes: dict[int, PerfGraphNode] = {}
@@ -147,7 +169,7 @@ class PerfGraph:
             id = next_id
             next_id += 1
 
-            node_data = PerfGraph._parse_node_data(data, version)
+            node_data = PerfGraph._parse_node_data(data, root_data.version)
 
             # Get the node section or build it if needed
             section = sections.get(name)
@@ -172,9 +194,9 @@ class PerfGraph:
                 process_data(child_name, child_data, node)
 
         # Recursively add all nodes
-        process_data(root_node_name, root_node_data, None)
+        process_data(root_data.root_node_name, root_data.root_node_data, None)
 
-        return nodes, sections, version
+        return nodes, sections, root_data.version
 
     @property
     def root_node(self) -> PerfGraphNode:
