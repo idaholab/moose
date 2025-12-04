@@ -275,8 +275,8 @@ CohesiveZoneModelBase::reinit()
     auto & [accumulated_slip, old_accumulated_slip] = _dof_to_accumulated_slip[node];
 
     Real normal_lm = -1;
-    if (_dof_to_lagrange_multiplier.find(node) != _dof_to_lagrange_multiplier.end())
-      normal_lm = libmesh_map_find(_dof_to_lagrange_multiplier, node);
+    if (auto it = _dof_to_lagrange_multiplier.find(node); it != _dof_to_lagrange_multiplier.end())
+      normal_lm = it->second;
 
     // Keep active set fixed from second Uzawa loop
     if (normal_lm < -TOLERANCE && normal_pressure > TOLERANCE)
