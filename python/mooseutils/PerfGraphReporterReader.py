@@ -44,5 +44,4 @@ class PerfGraphReporterReader(PerfGraph):
             raise ValueError("Failed to find PerfGraphReporter in output")
 
         data = {var[1]: reader[var] for var in reporter_vars}
-        assert isinstance(data, dict)
         PerfGraph.__init__(self, data)
