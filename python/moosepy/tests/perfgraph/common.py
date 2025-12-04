@@ -41,6 +41,20 @@ def build_test_section(
     return section
 
 
+def build_node_data(**kwargs) -> dict:
+    """
+    Build node data for testing.
+
+    Optional Parameters
+    -------------------
+    **kwargs :
+        Keyword arguments that will override the data.
+    """
+    data = {"time": 1.234, "num_calls": 5, "level": 1, "memory": 5.678}
+    data.update(kwargs)
+    return data
+
+
 NODE_KWARGS = {
     "id": 0,
     "name": "dummy_node",
