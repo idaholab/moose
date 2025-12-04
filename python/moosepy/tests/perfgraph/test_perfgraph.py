@@ -9,9 +9,15 @@
 
 """Tests moosepy.perfgraph.perfgraph.TestPerfGraph."""
 
+import json
+import os
+import subprocess
 from copy import deepcopy
+from tempfile import TemporaryDirectory
+from typing import Optional
 from unittest import TestCase
 
+import pytest
 from moosepy.perfgraph.perfgraph import PerfGraph
 from moosepy.perfgraph.perfgraphnode import PerfGraphNode
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
@@ -31,6 +37,12 @@ def build_perf_graph() -> PerfGraph:
 
 class TestPerfGraph(TestCase):
     """Tests moosepy.perfgraph.perfgraph.TestPerfGraph."""
+
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, moose_exe):
+        """Inject pytest fixtures."""
+        # Get the found moose executable during init, if any
+        self.moose_exe: Optional[str] = moose_exe
 
     def test_init(self):
         """Test __init__()."""
@@ -264,3 +276,44 @@ class TestPerfGraph(TestCase):
         self.assertEqual(id(heaviest[0]), id(sections[1]))
         self.assertEqual(id(heaviest[1]), id(sections[3]))
         self.assertEqual(id(heaviest[2]), id(sections[2]))
+
+    @pytest.mark.moose
+    def test_live(self):
+        """Test building the PerfGraph with live PerfGraphReporter output."""
+        input_contents = """
+[Mesh/gmg]
+    type = GeneratedMeshGenerator
+    dim = 1
+[]
+
+[Problem]
+    solve = false
+[]
+
+[Executioner]
+    type = Steady
+[]
+"""
+
+        with TemporaryDirectory() as tmp_dir:
+            input_file = os.path.join(tmp_dir, "input.i")
+            with open(input_file, "w") as f:
+                f.write(input_contents)
+
+            perf_graph_file = os.path.join(tmp_dir, "perf_graph.json")
+
+            cmd = [
+                self.moose_exe,
+                "-i",
+                "input.i",
+                f"Outputs/perf_graph_json_file={perf_graph_file}",
+            ]
+            subprocess.run(cmd, cwd=tmp_dir, check=True)
+
+            with open(perf_graph_file, "r") as f:
+                reporter_data = json.load(f)
+
+        data = reporter_data["time_steps"][-1]["perf_graph_json"]["graph"]
+        pg = PerfGraph(data)
+        self.assertIn(" (main)", pg.root_node.name)
+        self.assertTrue(pg.root_node.has_child("MooseApp::run"))
