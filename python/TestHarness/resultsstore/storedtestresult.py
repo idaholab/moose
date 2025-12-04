@@ -384,7 +384,7 @@ class StoredTestResult:
         )
         if reporter_data is None:
             return None
-        data = reporter_data["time_steps"][-1]["perf_graph_json"]["graph"]
+        data = reporter_data["time_steps"][-1]["perf_graph_json"]
         assert isinstance(data, dict)
         return PerfGraph(data)
 
