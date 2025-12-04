@@ -16,6 +16,8 @@
       installation_type = in_tree # see #26480
       hpc = false # see #26480
       capture_perf_graph = false
+      min_parallel = 4
+      max_parallel = 4
     []
     [plot]
       type = CheckFiles

@@ -11,6 +11,7 @@
       detail = "within an input boundary mesh containing volume elements"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [basic_2d]
       type = 'CSVDiff'
@@ -20,6 +21,7 @@
       detail = "within an input boundary mesh containing surface elements"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [with_3d_holes]
       type = 'CSVDiff'
@@ -29,6 +31,7 @@
       detail = "respecting any specified interior 'hole' meshes that contain volume elements"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [with_2d_holes]
       type = 'CSVDiff'
@@ -38,6 +41,7 @@
       detail = "respecting any specified interior 'hole' meshes that contain surface elements"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [stitching]
       type = 'CSVDiff'
@@ -48,6 +52,7 @@
       detail = "selectively stitching 'hole' meshes into the final mesh"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [stitching_combined]
       type = 'CSVDiff'
@@ -61,6 +66,7 @@
       detail = "stitching 'hole' meshes into the final mesh by combining all the applicable hole meshes first"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [convert_and_stitch]
       type = 'CSVDiff'
@@ -73,6 +79,7 @@
       detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes into a pure TET4 mesh"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [surface_convert_and_stitch]
       type = 'CSVDiff'
@@ -89,6 +96,7 @@
       detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes using boundary element conversion"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [nested]
       type = 'CSVDiff'
@@ -99,6 +107,7 @@
       # see 29718
       valgrind = none
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [smoothed]
       type = 'CSVDiff'
@@ -109,6 +118,7 @@
       # see 29718
       valgrind = none
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [bcid_no_stitch]
       type = 'CSVDiff'
@@ -118,6 +128,7 @@
       detail = "with specified boundary names assigned without stitching the hole meshes."
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [bcid_stitch]
       type = 'CSVDiff'
@@ -129,6 +140,7 @@
       detail = "with specified boundary names assigned with the hole meshes stitched."
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [bcid_numeric]
       type = 'CSVDiff'
@@ -144,6 +156,7 @@
       detail = "with specified boundary ids assigned."
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
   []
   [errors]
@@ -159,6 +172,7 @@
       # see 29718
       valgrind = none
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [1d_holes]
       type = RunException
@@ -168,6 +182,7 @@
       detail = "if a hole mesh contains elements that are neither 2D nor 3D"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [stitch_2d_holes]
       type = RunException
@@ -178,6 +193,7 @@
       detail = "if a 2D hole mesh is specified to be stitched"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [inconsistent_stitch_num]
       type = RunException
@@ -188,6 +204,7 @@
       detail = "if the number of hole meshes does not match the number of hole stitching flags"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [inconsistent_bdry_num]
       type = RunException
@@ -197,6 +214,7 @@
       detail = "if the number of hole meshes does not match the number of assigned boundary names"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [hole_mesh_mixed_dim]
       type = RunException
@@ -206,6 +224,7 @@
       detail = "if a hole mesh contains elements of mixed dimensions"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
     [convert_not_allowed]
       type = RunException
@@ -216,6 +235,7 @@
       detail = "if a hole mesh to be stitched contains non-TRI3 surface elements but is not allowed to be converted"
       valgrind = none # see #31360
       capabilities = 'netgen'
+      min_threads_per_rank = 4 # netgen forces 4 threads; #32136
     []
   []
 []
