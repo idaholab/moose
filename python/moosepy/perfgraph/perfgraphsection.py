@@ -9,7 +9,7 @@
 
 """Implements PerfGraphSection, which represents a section in the MOOSE PerfGraph."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from moosepy.perfgraph.perfgraphnode import PerfGraphNode
@@ -106,3 +106,19 @@ class PerfGraphSection:
         """
         assert node not in self._nodes
         self._nodes.append(node)
+
+    def query_node(self, path: list[str]) -> Optional["PerfGraphNode"]:
+        """Query a node in the section by path."""
+        assert isinstance(path, list)
+        assert all(isinstance(v, str) for v in path)
+        return next((node for node in self.nodes if node.path == path), None)
+
+    def has_node(self, path: list[str]) -> bool:
+        """Whether or not the section has the node by path."""
+        return self.query_node(path) is not None
+
+    def get_node(self, path: list[str]) -> "PerfGraphNode":
+        """Get a node in the section by path."""
+        if (node := self.query_node(path)) is not None:
+            return node
+        raise KeyError(f"Node with path {path} does not exist")
