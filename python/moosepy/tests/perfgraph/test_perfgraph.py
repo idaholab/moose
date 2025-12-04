@@ -34,6 +34,8 @@ def build_perfgraph_data(children: Optional[list[Tuple[str, dict]]] = None, **kw
     """Build dummy PerfGraphReporter data for testing."""
     data = {
         "graph": {"root": build_node_data()},
+        "max_memory_this_rank": 1234,
+        "max_memory_per_rank": [1234, 5678],
         "version": PERFGRAPHREPORTER_VERSION,
     }
     if children:
@@ -73,10 +75,18 @@ class TestPerfGraph(TestCase):
         self.assertEqual(root_data.root_node_name, "root")
         self.assertEqual(root_data.root_node_data, data["graph"]["root"])
 
+        # Missing max_memory_per_rank, allowed
+        data.pop("max_memory_per_rank")
+        root_data = PerfGraph._parse_root_data(deepcopy(data))
+        self.assertIsNone(root_data.max_memory_per_rank)
+
         # No version (version 0)
         data.pop("version")
+        data.pop("max_memory_this_rank")
         root_data = PerfGraph._parse_root_data(deepcopy(data))
         self.assertEqual(root_data.version, 0)
+        self.assertIsNone(root_data.max_memory_this_rank)
+        self.assertIsNone(root_data.max_memory_per_rank)
 
     def test_parse_node_data(self):
         """Test _parse_node_data()."""
@@ -187,11 +197,13 @@ class TestPerfGraph(TestCase):
                 },
             }
         }
-        data = {"graph": graph, "version": PERFGRAPHREPORTER_VERSION}
+        data = build_perfgraph_data(graph=graph)
         setup_data = PerfGraph._setup(deepcopy(data))
         self.assertIsInstance(setup_data, PerfGraph.SetupData)
         nodes = setup_data.nodes
         sections = setup_data.sections
+
+        self.assertIsInstance(setup_data.root_data, PerfGraph.RootData)
 
         self.assertIsInstance(nodes, dict)
         for k, v in nodes.items():
@@ -204,8 +216,6 @@ class TestPerfGraph(TestCase):
             self.assertIsInstance(k, str)
             self.assertIsInstance(v, PerfGraphSection)
         self.assertEqual(len(sections), 5)
-
-        self.assertEqual(setup_data.version, PERFGRAPHREPORTER_VERSION)
 
         def check_node(name, i, num_children):
             node = nodes[i]
@@ -275,7 +285,24 @@ class TestPerfGraph(TestCase):
     def test_version(self):
         """Test property version."""
         pg = build_perf_graph()
+        self.assertIsNotNone(pg.version)
         self.assertEqual(pg._version, pg.version)
+
+    def test_max_memory(self):
+        """Test property max_memory."""
+        pg = build_perf_graph()
+        self.assertIsNotNone(pg.max_memory)
+        self.assertEqual(pg._max_memory_this_rank, pg.max_memory)
+        pg._max_memory_this_rank = None
+        self.assertIsNone(pg.max_memory)
+
+    def test_max_memory_per_rank(self):
+        """Test property max_memory_per_rank."""
+        pg = build_perf_graph()
+        self.assertIsNotNone(pg.max_memory_per_rank)
+        self.assertEqual(pg._max_memory_per_rank, pg.max_memory_per_rank)
+        pg._max_memory_per_rank = None
+        self.assertIsNone(pg.max_memory_per_rank)
 
     def test_total_time(self):
         """Test property total_time."""
