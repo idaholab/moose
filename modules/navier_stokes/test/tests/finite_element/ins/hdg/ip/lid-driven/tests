@@ -41,7 +41,7 @@
     input = test.py
     test_case = TestLid
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce second order convergence for velocity variables and first order convergence for the pressure variable when using first and zeroth order polynomials respectively.'
-    min_parallel = 4
+    min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     installation_type = 'in_tree'
@@ -53,7 +53,7 @@
     input = test.py
     test_case = TestLidSecond
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a cavity using a interior penalty hybridizable discontinuous Galerkin scheme and produce third order convergence for velocity variables and second order convergence for the pressure variable when using second and first order polynomials respectively.'
-    min_parallel = 4
+    min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     capabilities = 'method!=dbg'

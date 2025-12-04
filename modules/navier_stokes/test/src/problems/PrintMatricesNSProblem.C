@@ -176,6 +176,7 @@ PrintMatricesNSProblem::onTimestepEnd()
       Mat triple_product_mat;
       LibmeshPetscCall(MatMatMatMult(
           lhs.mat(), Minv, rhs.mat(), MAT_INITIAL_MATRIX, PETSC_DEFAULT, &triple_product_mat));
+      LibmeshPetscCall(MatScale(triple_product_mat, -1));
 
       PetscMatrix<Number> triple_product(triple_product_mat, _communicator);
       if (print)

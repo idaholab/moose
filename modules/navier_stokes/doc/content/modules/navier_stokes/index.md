@@ -14,7 +14,7 @@ please refer to the below pages:
 - [Weakly compressible finite volume using a linear discretization and a segregated solvealgorithm (SIMPLE/PIMPLE)](linear_wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
-- [Hybridized Discontinous Galerkin (HDG) Finite Element](NavierStokesLHDGKernel.md)
+- [Hybridized Discontinous Galerkin (HDG) Finite Element](inshdg.md)
 - [Hybrid Continuous/Discontinuous Galerkin Finite Element](navier_stokes/hcgdgfe.md)
 - [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
 - [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
