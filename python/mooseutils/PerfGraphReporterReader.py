@@ -36,14 +36,13 @@ class PerfGraphReporterReader(PerfGraph):
         reader.update(part=part)
 
         # Find the Reporter variable that contains the PerfGraph graph
-        perf_graph_var = None
+        reporter_vars = []
         for var in reader.variables():
-            if reader.info(var[0])["type"] == "PerfGraphReporter" and var[1] == "graph":
-                perf_graph_var = var
-
-        if perf_graph_var is None:
+            if reader.info(var[0])["type"] == "PerfGraphReporter":
+                reporter_vars.append(var)
+        if not reporter_vars:
             raise ValueError("Failed to find PerfGraphReporter in output")
 
-        data = reader[perf_graph_var]
+        data = {var[1]: reader[var] for var in reporter_vars}
         assert isinstance(data, dict)
         PerfGraph.__init__(self, data)

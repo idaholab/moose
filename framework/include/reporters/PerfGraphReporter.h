@@ -28,6 +28,10 @@ public:
   void finalize() override {}
   void execute() override {}
 
+  /// The reporter values that this object declares; used within the
+  /// CommonOutputAction to single out values from this reporter
+  static const std::vector<std::string> value_names;
+
 private:
   const PerfGraph * const & _graph;
 };
@@ -37,19 +41,13 @@ void to_json(nlohmann::json & json, const PerfNode & node);
 
 /**
  * Store and load methods for const PerfGraph *, used in the PerfGraphReporter,
- * which does nothing.
+ * which do nothing.
  *
  * They do nothing because the recover capability is retained in the
  * PerfGraph itself, which will recover and append a previously ran
  * graph to the current PerfGraph.
  */
 ///@{
-void
-dataStore(std::ostream &, const PerfGraph *&, void *)
-{
-}
-void
-dataLoad(std::istream &, const PerfGraph *&, void *)
-{
-}
+void dataStore(std::ostream &, const PerfGraph *&, void *);
+void dataLoad(std::istream &, const PerfGraph *&, void *);
 ///@}

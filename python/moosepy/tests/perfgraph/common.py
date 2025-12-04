@@ -50,7 +50,7 @@ def build_node_data(**kwargs) -> dict:
     **kwargs :
         Keyword arguments that will override the data.
     """
-    data = {"time": 1.234, "num_calls": 5, "level": 1, "memory": 5.678}
+    data = {"time": 1.234, "num_calls": 5, "level": 1}
     data.update(kwargs)
     return data
 

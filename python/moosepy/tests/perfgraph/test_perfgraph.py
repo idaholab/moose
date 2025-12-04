@@ -14,7 +14,7 @@ import os
 import subprocess
 from copy import deepcopy
 from tempfile import TemporaryDirectory
-from typing import Optional
+from typing import Optional, Tuple
 from unittest import TestCase
 
 import pytest
@@ -27,12 +27,24 @@ from moosepy.tests.perfgraph.common import (
     build_test_section,
 )
 
-NO_NODE_DATA = {"root": build_node_data()}
+PERFGRAPHREPORTER_VERSION = 1
 
 
-def build_perf_graph() -> PerfGraph:
+def build_perfgraph_data(children: Optional[list[Tuple[str, dict]]] = None, **kwargs):
+    """Build dummy PerfGraphReporter data for testing."""
+    data = {
+        "graph": {"root": build_node_data()},
+        "version": PERFGRAPHREPORTER_VERSION,
+    }
+    if children:
+        data["graph"]["root"]["children"] = {k: v for k, v in children}
+    data.update(kwargs)
+    return data
+
+
+def build_perf_graph(**kwargs) -> PerfGraph:
     """Build a PerfGraph with dummpy data for testing."""
-    return PerfGraph(deepcopy(NO_NODE_DATA))
+    return PerfGraph(build_perfgraph_data(**kwargs))
 
 
 class TestPerfGraph(TestCase):
@@ -49,6 +61,7 @@ class TestPerfGraph(TestCase):
         pg = build_perf_graph()
         self.assertIsInstance(pg._nodes, dict)
         self.assertIsInstance(pg._sections, dict)
+        self.assertEqual(pg._version, PERFGRAPHREPORTER_VERSION)
         self.assertIsInstance(pg._root_node, PerfGraphNode)
 
     def test_parse_node_data(self):
@@ -60,41 +73,70 @@ class TestPerfGraph(TestCase):
                 {
                     "time": data["time"],
                     "num_calls": data["num_calls"],
-                    "memory": data["memory"],
                 },
             )
             self.assertIsInstance(level, int)
             self.assertEqual(level, data["level"])
-            self.assertIsInstance(children_data, list)
 
-        root_args = {"time": 1.234, "num_calls": 100, "memory": 55.0, "level": 1}
+        root_args = {"time": 1.234, "num_calls": 100, "level": 1}
+
+        # Just the root node, no children
+        data = build_node_data(**root_args)
+        node_data, level, children = PerfGraph._parse_node_data(
+            deepcopy(data), PERFGRAPHREPORTER_VERSION
+        )
+        check_common(data, node_data, level)
+        self.assertIsInstance(children, dict)
+        self.assertFalse(children)
+
+        # Single child
         child_level = 2
         child_args = {
             "time": 5.678,
             "num_calls": 2,
-            "memory": 100.2,
             "level": child_level,
         }
-
-        # Just the root node, no children
-        data = build_node_data(**root_args)
-        node_data, level, children_data = PerfGraph._parse_node_data(deepcopy(data))
+        data = {
+            **build_node_data(),
+            "children": {"child": build_node_data(**child_args)},
+        }
+        node_data, level, children = PerfGraph._parse_node_data(
+            deepcopy(data), PERFGRAPHREPORTER_VERSION
+        )
         check_common(data, node_data, level)
-        self.assertIsInstance(children_data, list)
-        self.assertFalse(children_data)
+        self.assertEqual(len(children), 1)
+        child_name, child_data = next(iter(children.items()))
+        self.assertEqual(child_name, "child")
+        self.assertEqual(child_data.pop("level"), child_level)
+        check_common(child_args, child_data, child_level)
+
+    def test_parse_node_data_version_0(self):
+        """Test _parse_node_data() with version 0 when children were not separate."""
+        # No children
+        data = {
+            **build_node_data(),
+            "memory": 1.234,
+        }
+        node_data, level, children = PerfGraph._parse_node_data(deepcopy(data), 0)
+        modified_data = deepcopy(data)
+        modified_data.pop("level")
+        modified_data.pop("memory")
+        self.assertEqual(node_data, modified_data)
+        self.assertEqual(level, data["level"])
+        self.assertIsInstance(children, dict)
+        self.assertFalse(children)
 
         # Single child
-        data = {**build_node_data(), "child": build_node_data(**child_args)}
-        node_data, level, children_data = PerfGraph._parse_node_data(deepcopy(data))
-        check_common(data, node_data, level)
-        self.assertEqual(len(children_data), 1)
-        child_name, child_data = children_data[0]
+        data["child"] = {**build_node_data(), "memory": "2.345"}
+        node_data, _, children = PerfGraph._parse_node_data(deepcopy(data), 0)
+        self.assertIsInstance(children, dict)
+        self.assertEqual(len(children), 1)
+        child_name, child_data = next(iter(children.items()))
         self.assertEqual(child_name, "child")
-        child_data.pop("level")
-        check_common(data["child"], child_data, child_level)
+        self.assertEqual(child_data, data["child"])
 
-    def test_setup_nodes(self):
-        """Test _setup_nodes()."""
+    def test_setup(self):
+        """Test _setup()."""
         node_data = [
             build_node_data(time=float(i + 1), num_calls=i + 2) for i in range(7)
         ]
@@ -106,23 +148,29 @@ class TestPerfGraph(TestCase):
         node_data[5]["level"] = 2
         node_data[6]["level"] = 2
 
-        data = {
+        graph = {
             "root": {
                 **node_data[0],
-                "node0": {
-                    **node_data[1],
-                    "section0": node_data[2],
-                    "section1": node_data[3],
-                },
-                "node1": {
-                    **node_data[4],
-                    "section0": node_data[5],
-                    "section1": node_data[6],
+                "children": {
+                    "node0": {
+                        **node_data[1],
+                        "children": {
+                            "section0": node_data[2],
+                            "section1": node_data[3],
+                        },
+                    },
+                    "node1": {
+                        **node_data[4],
+                        "children": {
+                            "section0": node_data[5],
+                            "section1": node_data[6],
+                        },
+                    },
                 },
             }
         }
-
-        nodes, sections = PerfGraph._setup_nodes(deepcopy(data))
+        data = {"graph": graph, "version": PERFGRAPHREPORTER_VERSION}
+        nodes, sections, version = PerfGraph._setup(deepcopy(data))
 
         self.assertIsInstance(nodes, dict)
         for k, v in nodes.items():
@@ -135,6 +183,8 @@ class TestPerfGraph(TestCase):
             self.assertIsInstance(k, str)
             self.assertIsInstance(v, PerfGraphSection)
         self.assertEqual(len(sections), 5)
+
+        self.assertEqual(version, PERFGRAPHREPORTER_VERSION)
 
         def check_node(name, i, num_children):
             node = nodes[i]
@@ -201,6 +251,11 @@ class TestPerfGraph(TestCase):
         pg = build_perf_graph()
         self.assertEqual(list(pg.sections), list(pg._sections.values()))
 
+    def test_version(self):
+        """Test property version."""
+        pg = build_perf_graph()
+        self.assertEqual(pg._version, pg.version)
+
     def test_total_time(self):
         """Test property total_time."""
         pg = build_perf_graph()
@@ -208,7 +263,7 @@ class TestPerfGraph(TestCase):
 
     def test_get_node_by_id(self):
         """Test get_node_by_id()."""
-        data = {"root": {**build_node_data(), "child": build_node_data()}}
+        data = build_perfgraph_data(children=[("child", build_node_data())])
         pg = PerfGraph(data)
 
         root = pg.get_node_by_id(0)
@@ -251,12 +306,17 @@ class TestPerfGraph(TestCase):
 
     def test_recurse(self):
         """Test recurse()."""
-        data = {
-            "root": {
-                **build_node_data(),
-                "child": {**build_node_data(), "childchild": build_node_data()},
-            }
-        }
+        data = build_perfgraph_data(
+            children=[
+                (
+                    "child",
+                    {
+                        **build_node_data(),
+                        "children": {"childchild": build_node_data()},
+                    },
+                )
+            ]
+        )
 
         num_nodes = 0
 
@@ -346,7 +406,8 @@ class TestPerfGraph(TestCase):
             with open(perf_graph_file, "r") as f:
                 reporter_data = json.load(f)
 
-        data = reporter_data["time_steps"][-1]["perf_graph_json"]["graph"]
+        data = reporter_data["time_steps"][-1]["perf_graph_json"]
         pg = PerfGraph(data)
+        self.assertEqual(pg.version, PERFGRAPHREPORTER_VERSION)
         self.assertIn(" (main)", pg.root_node.name)
         self.assertTrue(pg.root_node.has_child("MooseApp::run"))

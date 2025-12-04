@@ -28,18 +28,24 @@ class PerfGraph:
             The data from the JSON output.
 
         """
+        assert isinstance(data, dict)
+        assert all(isinstance(v, str) for v in data)
+
         # Build the nodes and sections from the data
-        nodes, sections = self._setup_nodes(data)
+        nodes, sections, version = self._setup(data)
 
         # The nodes in the graph; node id -> node
         self._nodes: dict[int, PerfGraphNode] = nodes
         # The sections in the graph; section name -> section
         self._sections: dict[str, PerfGraphSection] = sections
+        # The PerfGraphReporter version
+        self._version: int = version
         # The root node in the graph
         self._root_node: PerfGraphNode = self._nodes[0]
+        assert self._root_node.parent is None
 
     @staticmethod
-    def _parse_node_data(data: dict) -> Tuple[dict, int, list[Tuple[str, dict]]]:
+    def _parse_node_data(data: dict, version: int) -> Tuple[dict, int, dict[str, dict]]:
         """
         Parse the data for a single node.
 
@@ -47,6 +53,8 @@ class PerfGraph:
         ----------
         data : dict
             The node data.
+        version : int
+            The PerfGraphReporter version.
 
         Returns
         -------
@@ -54,31 +62,75 @@ class PerfGraph:
             The data for this node.
         int :
             The node section level.
-        list[Tuple[str, dict]]] :
+        dict[str, dict] :
             The child data.
 
         """
+        assert isinstance(data, dict)
+        assert isinstance(version, int)
+
+        # Remove the memory entry; not used
+        if version == 0:
+            data.pop("memory")
+
         # Pull out data specific to the node
-        node_data = {k: data.pop(k) for k in ["time", "num_calls", "memory"]}
+        node_data = {k: data.pop(k) for k in ["time", "num_calls"]}
 
         # Section data
         level = data.pop("level")
 
-        # And children (the rest of the keys)
-        children_data = [
-            (child_name, child_data) for child_name, child_data in data.items()
-        ]
+        # Children in version 0, contained within the root
+        # (the rest of the keys)
+        children = {}
+        if version == 0:
+            children = data
+        # After version 0, stored separately in "children" key
+        else:
+            if "children" in data:
+                children = data.pop("children")
+                assert children
+            assert not data
 
-        return node_data, level, children_data
+        assert isinstance(children, dict)
+        assert all(isinstance(v, str) for v in children)
+        assert all(isinstance(v, dict) for v in children.values())
+
+        return node_data, level, children
 
     @staticmethod
-    def _setup_nodes(
+    def _setup(
         data: dict,
-    ) -> Tuple[dict[int, PerfGraphNode], dict[str, PerfGraphSection]]:
-        """Build the nodes and sections from the data."""
+    ) -> Tuple[dict[int, PerfGraphNode], dict[str, PerfGraphSection], int]:
+        """
+        Build the nodes and sections from the data.
+
+        Parameters
+        ----------
+        data : dict
+            The data from the PerfGraphReporter for the desired timestep.
+
+        Returns
+        -------
+        dict[int, PerfGraphNode] :
+            Mapping of node ID to node.
+        dict[str, PerfGraphSection] :
+            Mapping of section name to section.
+        int :
+            The PerfGraphReporter version.
+
+        """
+        assert isinstance(data, dict)
+
+        graph: dict = data["graph"]
+        assert isinstance(graph, dict)
+        assert len(graph) > 0
+
+        version: int = data.get("version", 0)
+        assert isinstance(version, int)
+
         # Find the root node
-        root_node_name = list(data.keys())[0]
-        root_node_data = data[root_node_name]
+        root_node_name = next(iter(graph))
+        root_node_data = graph[root_node_name]
 
         next_id: int = 0
         nodes: dict[int, PerfGraphNode] = {}
@@ -91,16 +143,15 @@ class PerfGraph:
             id = next_id
             next_id += 1
 
-            node_data, level, child_data = PerfGraph._parse_node_data(data)
-
-            # Memory currently unused
-            node_data.pop("memory")
+            node_data, level, children = PerfGraph._parse_node_data(data, version)
 
             # Get the node section or build it if needed
             section = sections.get(name)
             if section is None:
                 section = PerfGraphSection(name, level)
                 sections[name] = section
+            else:
+                assert section.level == level
 
             # Build the node
             node = PerfGraphNode(
@@ -113,13 +164,13 @@ class PerfGraph:
             nodes[node.id] = node
 
             # Recursively add children nodes
-            for child_name, child_data in data.items():
+            for child_name, child_data in children.items():
                 process_data(child_name, child_data, node)
 
         # Recursively add all nodes
         process_data(root_node_name, root_node_data, None)
 
-        return nodes, sections
+        return nodes, sections, version
 
     @property
     def root_node(self) -> PerfGraphNode:
@@ -140,6 +191,12 @@ class PerfGraph:
     def sections(self) -> Iterable[PerfGraphSection]:
         """Get all of the named sections."""
         return self._sections.values()
+
+    @property
+    def version(self) -> int:
+        """Get the PerfGraphReporter version for this data."""
+        assert isinstance(self._version, int)
+        return self._version
 
     @property
     def total_time(self) -> float:

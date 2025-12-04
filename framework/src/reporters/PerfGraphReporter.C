@@ -13,6 +13,8 @@
 
 registerMooseObject("MooseApp", PerfGraphReporter);
 
+const std::vector<std::string> PerfGraphReporter::value_names{"graph", "version"};
+
 InputParameters
 PerfGraphReporter::validParams()
 {
@@ -31,6 +33,7 @@ PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _graph(declareValueByName<const PerfGraph *>("graph", REPORTER_MODE_DISTRIBUTED, &perfGraph()))
 {
+  declareValueByName<unsigned int>("version", REPORTER_MODE_DISTRIBUTED, 1);
 }
 
 void
@@ -53,10 +56,23 @@ to_json(nlohmann::json & json, const PerfNode & node)
   auto & node_json = json[info._name];
   node_json["level"] = info._level;
   node_json["num_calls"] = node.numCalls();
-  node_json["memory"] = node.selfMemory();
   node_json["time"] = node.selfTimeSec();
 
   // Recursively add the children
-  for (const auto & id_child_pair : node.children())
-    to_json(node_json, *id_child_pair.second);
+  if (node.children().size())
+  {
+    auto & children = node_json["children"];
+    for (const auto & id_child_pair : node.children())
+      to_json(children, *id_child_pair.second);
+  }
+}
+
+void
+dataStore(std::ostream &, const PerfGraph *&, void *)
+{
+}
+
+void
+dataLoad(std::istream &, const PerfGraph *&, void *)
+{
 }
