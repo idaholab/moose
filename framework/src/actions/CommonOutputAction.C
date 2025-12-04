@@ -169,8 +169,10 @@ CommonOutputAction::CommonOutputAction(const InputParameters & params)
 void
 CommonOutputAction::act()
 {
-  // Name of the PerfGraphReporter that could be created
+  // Name of the PerfGraphReporter that could be created for the perf graph output
   static const std::string perf_graph_reporter_name = "perf_graph_json";
+  // Name of the JSON output that could be created for the perf graph output
+  static const std::string perf_graph_json_output_name = "auto_perf_graph_json";
 
   if (_current_task == "common_output")
   {
@@ -296,7 +298,7 @@ CommonOutputAction::act()
         params.set<bool>("distributed") = false;
         if (set_param_name == "file_base")
           params.set<bool>("append_date") = false;
-        create("JSON", from_param_name, &parameters(), &params, from_param_name);
+        create("JSON", from_param_name, &parameters(), &params, perf_graph_json_output_name);
       };
 
       if (getParam<bool>("perf_graph_json"))
@@ -354,6 +356,8 @@ CommonOutputAction::act()
     {
       auto params = _factory.getValidParams("PerfGraphReporter");
       params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
+      params.set<std::vector<OutputName>>("outputs") =
+          std::vector<OutputName>{perf_graph_json_output_name};
       _problem->addReporter("PerfGraphReporter", perf_graph_reporter_name, params);
     }
   }
