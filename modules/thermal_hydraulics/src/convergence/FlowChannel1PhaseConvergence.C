@@ -14,7 +14,7 @@ registerMooseObject("ThermalHydraulicsApp", FlowChannel1PhaseConvergence);
 InputParameters
 FlowChannel1PhaseConvergence::validParams()
 {
-  InputParameters params = Convergence::validParams();
+  InputParameters params = MultiPostprocessorConvergence::validParams();
 
   params.addClassDescription("Assesses convergence of a FlowChannel1Phase component.");
 
@@ -46,7 +46,7 @@ FlowChannel1PhaseConvergence::validParams()
 }
 
 FlowChannel1PhaseConvergence::FlowChannel1PhaseConvergence(const InputParameters & parameters)
-  : Convergence(parameters),
+  : MultiPostprocessorConvergence(parameters),
     _p_rel_step(getPostprocessorValue("p_rel_step")),
     _T_rel_step(getPostprocessorValue("T_rel_step")),
     _vel_rel_step(getPostprocessorValue("vel_rel_step")),
@@ -62,72 +62,13 @@ FlowChannel1PhaseConvergence::FlowChannel1PhaseConvergence(const InputParameters
 {
 }
 
-Convergence::MooseConvergenceStatus
-FlowChannel1PhaseConvergence::checkConvergence(unsigned int /*iter*/)
+std::vector<std::tuple<std::string, Real, Real>>
+FlowChannel1PhaseConvergence::getDescriptionErrorToleranceTuples() const
 {
-  bool all_converged = true;
-  std::ostringstream oss;
-  oss << "\n";
-
-  std::vector<std::tuple<std::string, Real, Real>> step_err_tol_tuples{
-      {"p  ", _p_rel_step, _p_rel_step_tol},
-      {"T  ", _T_rel_step, _T_rel_step_tol},
-      {"vel", _vel_rel_step, _vel_rel_step_tol}};
-  oss << "  Step errors:\n";
-  for (const auto & err_tol_tuple : step_err_tol_tuples)
-  {
-    const Real err = std::get<1>(err_tol_tuple);
-    const Real tol = std::get<2>(err_tol_tuple);
-    if (std::abs(err) > tol)
-      all_converged = false;
-
-    const std::string desc = std::get<0>(err_tol_tuple);
-    oss << comparisonLine(desc, err, tol);
-  }
-
-  const std::vector<std::tuple<std::string, Real, Real>> res_err_tol_tuples{
-      {"mass    ", _mass_res, _mass_res_tol},
-      {"momentum", _momentum_res, _momentum_res_tol},
-      {"energy  ", _energy_res, _energy_res_tol}};
-  oss << "  Residual errors:\n";
-  for (const auto & err_tol_tuple : res_err_tol_tuples)
-  {
-    const Real err = std::get<1>(err_tol_tuple);
-    const Real tol = std::get<2>(err_tol_tuple);
-    if (std::abs(err) > tol)
-      all_converged = false;
-
-    const std::string desc = std::get<0>(err_tol_tuple);
-    oss << comparisonLine(desc, err, tol);
-  }
-
-  verboseOutput(oss);
-
-  if (all_converged)
-    return Convergence::MooseConvergenceStatus::CONVERGED;
-  else
-    return Convergence::MooseConvergenceStatus::ITERATING;
-}
-
-std::string
-FlowChannel1PhaseConvergence::comparisonLine(const std::string & description,
-                                             Real err,
-                                             Real tol) const
-{
-  std::string color, compare_str;
-  if (std::abs(err) > tol)
-  {
-    color = COLOR_RED;
-    compare_str = ">";
-  }
-  else
-  {
-    color = COLOR_GREEN;
-    compare_str = "<";
-  }
-
-  std::ostringstream oss;
-  oss << "    " << description << ": " << color << std::abs(err) << " " << compare_str << " " << tol
-      << COLOR_DEFAULT << "\n";
-  return oss.str();
+  return {{"step: p      ", _p_rel_step, _p_rel_step_tol},
+          {"step: T      ", _T_rel_step, _T_rel_step_tol},
+          {"step: vel    ", _vel_rel_step, _vel_rel_step_tol},
+          {"res: mass    ", _mass_res, _mass_res_tol},
+          {"res: momentum", _momentum_res, _momentum_res_tol},
+          {"res: energy  ", _energy_res, _energy_res_tol}};
 }

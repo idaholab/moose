@@ -106,8 +106,8 @@ If using [ComponentsConvergence.md], a Convergence object of type [FlowChannel1P
 is used. The following parameters apply:
 
 - [!param](/Components/FlowChannel1Phase/p_ref): The reference pressure $p_\text{ref}$,
-- [!param](/Components/FlowChannel1Phase/T_ref): The reference pressure $T_\text{ref}$,
-- [!param](/Components/FlowChannel1Phase/vel_ref): The reference pressure $u_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/T_ref): The reference temperature $T_\text{ref}$,
+- [!param](/Components/FlowChannel1Phase/vel_ref): The reference velocity $u_\text{ref}$,
 - [!param](/Components/FlowChannel1Phase/p_rel_step_tol): The relative step tolerance for pressure $\tau_p$,
 - [!param](/Components/FlowChannel1Phase/T_rel_step_tol): The relative step tolerance for temperature $\tau_T$,
 - [!param](/Components/FlowChannel1Phase/vel_rel_step_tol): The relative step tolerance for velocity $\tau_u$,

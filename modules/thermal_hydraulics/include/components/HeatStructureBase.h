@@ -51,9 +51,23 @@ protected:
   virtual void init() override;
   virtual void check() const override;
   virtual bool usingSecondOrderMesh() const override;
+  virtual Convergence * getNonlinearConvergence() const override;
 
   void
   loadMaterial(InputParameters & pars, const std::string & par, const std::string & material_name);
+
+  /// Adds a PP for the average element size on a block
+  void addAverageElementSizePostprocessor(const SubdomainName & block);
+  ///
+  void addTemperatureStepFunctorMaterial();
+  ///
+  void addTemperatureStepPostprocessor(const SubdomainName & block, Real T_ref);
+  ///
+  void addResidualNormPostprocessor(const SubdomainName & block,
+                                    const UserObjectName & sp_name,
+                                    Real T_ref);
+  /// Adds the nonlinear convergence object
+  void addNonlinearConvergence();
 
   /**
    * Adds a ADConstantDensityThermalSolidPropertiesMaterial for a heat structure region
@@ -75,6 +89,9 @@ protected:
 
   // This reference should be deleted after applications start using _n_regions:
   unsigned int & _number_of_hs;
+
+  /// Nonlinear convergence name
+  const std::string _nl_conv_name;
 
 public:
   static InputParameters validParams();
