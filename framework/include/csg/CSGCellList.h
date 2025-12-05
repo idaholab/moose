@@ -65,7 +65,6 @@ protected:
   addUniverseCell(const std::string & name, const CSGUniverse & univ, const CSGRegion & region);
 
   /**
-   * @brief Get non-const map of all names to cells in cell list
    * @brief Add a Lattice Cell object to cell list
    *
    * @param name unique cell name

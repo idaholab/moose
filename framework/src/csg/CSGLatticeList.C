@@ -95,7 +95,7 @@ CSGLatticeList::operator==(const CSGLatticeList & other) const
   const auto all_lats = this->getAllLattices();
   const auto other_lats = other.getAllLattices();
 
-  // Check that same number of cells are defined in both lists
+  // Check that same number of lattices are defined in both lists
   if (all_lats.size() != other_lats.size())
     return false;
 
