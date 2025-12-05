@@ -84,7 +84,6 @@ SBMSurfaceMeshBuilder::initialSetup()
   const std::size_t num_elems = _mesh->n_elem();
 
   _centroids.resize(num_elems);
-  _elem_id_map.resize(num_elems);
   _boundary_elements.resize(num_elems);
 
   int i = 0;
@@ -96,8 +95,6 @@ SBMSurfaceMeshBuilder::initialSetup()
     const auto centroid = elem->vertex_average();
     if (_build_kd_tree)
       _centroids[i] = centroid;
-
-    _elem_id_map[i] = elem->id();
 
     if (elem->type() == EDGE2)
       _boundary_elements[i] = std::make_unique<SBMBndEdge2>(elem);

@@ -50,6 +50,5 @@ public:
 protected:
   /// Cached pointers for speed
   KDTree * _kd_tree;
-  const std::vector<dof_id_type> * _elem_id_map;
   const std::vector<std::unique_ptr<SBMBndElementBase>> * _boundary_elements;
 };

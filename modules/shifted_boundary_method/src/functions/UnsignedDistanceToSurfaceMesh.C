@@ -37,11 +37,9 @@ UnsignedDistanceToSurfaceMesh::initialSetup()
   const auto builder = &getUserObject<SBMSurfaceMeshBuilder>("builder");
 
   _kd_tree = const_cast<KDTree *>(&builder->getKDTree());
-  _elem_id_map = &builder->getElemIdMap();
   _boundary_elements = &builder->getBoundaryElements();
 
   mooseAssert(_kd_tree, "UnsignedDistanceToSurfaceMesh: KDTree is null");
-  mooseAssert(_elem_id_map, "UnsignedDistanceToSurfaceMesh: elem_id_map is null");
   mooseAssert(_boundary_elements, "UnsignedDistanceToSurfaceMesh: boundary_elements is null");
 }
 
@@ -52,7 +50,7 @@ UnsignedDistanceToSurfaceMesh::closestBoundaryElem(const Point & p) const
   std::vector<std::size_t> ret_index(1);
   _kd_tree->neighborSearch(p, 1, ret_index);
 
-  return *_boundary_elements->at(_elem_id_map->at(ret_index[0])).get();
+  return *_boundary_elements->at(ret_index.front()).get();
 }
 
 RealVectorValue
