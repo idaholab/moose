@@ -54,6 +54,7 @@
     type = CSVDiff
     input = explicit.i
     csvdiff = explicit_out.csv
+    restep = false # Currently, ExplicitMixedOrder assumes the time step will never be cut
 
     requirement = "Rayleigh mass damping shall be available when using explicit time"
                   "integration in solid-mechanics problems."
