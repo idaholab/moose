@@ -4,16 +4,19 @@ required-version = '25.1.0'
 include = '''
 (
   ^\/python\/moosecontrol\/.*.py$ |
+  ^\/python\/moosefmu\/.*.py$ |
   ^\/python\/TestHarness\/resultsstore\/.*.py$ |
   ^\/python\/TestHarness\/resultssummary\/.*.py$ |
   ^\/python\/TestHarness/tests/resultsstore\/.*.py$ |
-  ^\/python\/TestHarness/tests/resultssummary\/.*.py$
+  ^\/python\/TestHarness/tests/resultssummary\/.*.py$ |
+  ^\/test\/tests\/controls\/moose_fmu\/.*.py$
 )
 '''
 
 [tool.ruff]
 include = [
   "python/moosecontrol/**/*.py",
+  "python/moosefmu/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",
