@@ -46,7 +46,7 @@ These attributes are what get returned in a map using the `getAttributes()` meth
 
 The `getAttributes()` method returns a map of `std::any` data types (`std::unordered_map<std::string, std::any>`) to support flexibility in the type of data that might need to be defined.
 However, this also means that to convert the information to the proper [!ac](JSON) data form, the data type needs to be explicitly determined.
-Because of this, only certain data types are supported: `int`, `unsigned int`, `Real`, `std::string`, and `bool`.
+Because of this, only certain data types are supported at this time: `int`, `unsigned int`, `Real`, `std::string`, and `bool`.
 
 !alert-end!
 

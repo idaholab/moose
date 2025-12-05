@@ -30,7 +30,7 @@ TestCSGLatticeMeshGenerator::validParams()
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
       "pattern",
       "A double-indexed array starting with the upper-left corner where the index"
-      "represents the layout of inputs in the lattice.");
+      "represents the index of the mesh/CSG generator in the 'inputs' vector");
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;

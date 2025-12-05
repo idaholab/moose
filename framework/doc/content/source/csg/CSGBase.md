@@ -216,7 +216,7 @@ When adding and removing cells to/from universes, it is important to maintain th
 
 A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects and an "outer" to fill the space around lattice elements.
 The `CSGBase` class provides support for two types of 2D lattice types: Cartesian and regular hexagonal.
-It is assumed that these two types are in the $x-y$ plane (having a $+z$ norm).
+It is assumed that these two types are in the $x-y$ plane (having a $+z$ normal).
 Three types of outer fill are supported: void (default), material (an `std::string` name), and [`CSGUniverse`](#universes).
 To create either of these types of lattices, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the specific lattice type object (`const CSGCartesianLattice &` or `const CSGHexagonalLattice &`).
 For both lattice types, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).

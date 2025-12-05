@@ -104,7 +104,7 @@ ExampleCSGInfiniteSquareMeshGenerator::generateCSG()
   // determine fill: either from input fill mesh generator or default material
   if (_has_fill)
   {
-    // join the fill CSGBase into the current CSGBase & use the lattice as the fille
+    // join the fill CSGBase into the current CSGBase & use the lattice as the fill
     csg_obj->joinOtherBase(std::move(*_input_fill_csg));
     // assume input MG is a lattice type for sake of this example/test
     const CSG::CSGLattice & lattice = csg_obj->getLatticeByName(_input_fill_name + "_lattice");
