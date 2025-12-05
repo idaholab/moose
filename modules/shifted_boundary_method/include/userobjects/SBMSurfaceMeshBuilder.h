@@ -37,8 +37,6 @@ public:
 
   const std::vector<Point> & getCentroids() const { return _centroids; }
 
-  const std::vector<dof_id_type> & getElemIdMap() const { return _elem_id_map; }
-
   /**
    * @brief Checks whether the boundary mesh is watertight.
    *
@@ -60,9 +58,6 @@ protected:
 
   /// The KDTree is constructed using the centroids of the elements in the boundary mesh.
   std::unique_ptr<KDTree> _kd_tree;
-
-  /// Maps the order of elements in the KDTree and boundary_elements to their corresponding element IDs.
-  std::vector<dof_id_type> _elem_id_map;
 
   /// The boundary elements are stored in a vector of unique pointers to SBMBndElementBase.
   std::vector<std::unique_ptr<SBMBndElementBase>> _boundary_elements;
