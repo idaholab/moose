@@ -36,6 +36,17 @@ dt = 0.1
 #   vel += accel * dt = -0.094
 #   disp += vel * dt = -0.0144
 
+############
+# Setting implicit = false in an object means:
+#  - Jacobian terms will not be calculated
+#  - old values will be used (for instance, old displacement,
+#    not displacement that is being calculated at current time step)
+# So, implicit = false is the standard in most objects in ExplicitMixedOrder
+# Exceptions:
+#  - MassMatrix (because MOOSE treats the mass matrix as a Jacobian)
+#  - AuxKernels and Postprocessors (want to use most recent variables)
+# It is irrelevant for some things, such as ComputeIsotropicElasticityTensor
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -75,6 +86,7 @@ dt = 0.1
     use_displaced_mesh = false
     variable = disp_x
     zeta = ${zeta}
+    implicit = false
   []
   [TM_DynamicSolidMechanics1]
     type = DynamicStressDivergenceTensors
@@ -83,6 +95,7 @@ dt = 0.1
     use_displaced_mesh = false
     variable = disp_y
     zeta = ${zeta}
+    implicit = false
   []
   [TM_DynamicSolidMechanics2]
     type = DynamicStressDivergenceTensors
@@ -91,6 +104,7 @@ dt = 0.1
     use_displaced_mesh = false
     variable = disp_z
     zeta = ${zeta}
+    implicit = false
   []
   [massmatrix_x]
     type = MassMatrix
@@ -117,16 +131,19 @@ dt = 0.1
     type = ExplicitMassDamping
     variable = disp_x
     eta = ${eta}
+    implicit = false
   []
   [damping_y]
     type = ExplicitMassDamping
     variable = disp_y
     eta = ${eta}
+    implicit = false
   []
   [damping_z]
     type = ExplicitMassDamping
     variable = disp_z
     eta = ${eta}
+    implicit = false
   []
 []
 
@@ -143,18 +160,21 @@ dt = 0.1
     variable = disp_y
     boundary = top
     value = 0.0
+    implicit = false
   []
   [zero_x]
     type = ExplicitDirichletBC
     variable = disp_x
     boundary = 'top bottom'
     value = 0.0
+    implicit = false
   []
   [zero_z]
     type = ExplicitDirichletBC
     variable = disp_z
     boundary = 'top bottom'
     value = 0.0
+    implicit = false
   []
 []
 
@@ -163,6 +183,7 @@ dt = 0.1
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = ${young}
     poissons_ratio = ${poisson}
+    implicit = false
   []
 
   [strain]
@@ -179,6 +200,7 @@ dt = 0.1
     type = GenericConstantMaterial
     prop_names = density
     prop_values = ${density}
+    implicit = false
   []
 []
 
