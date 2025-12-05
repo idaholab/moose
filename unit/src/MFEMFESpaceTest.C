@@ -142,7 +142,7 @@ class ScalarFESpaceTest : public MFEMFESpaceUnitTest<MFEMScalarFESpace, std::str
     InputParameters params = _factory.getValidParams("MFEMScalarFESpace");
     params.set<MooseEnum>("fec_type") = std::get<0>(raw_params);
     params.set<MooseEnum>("fec_order") = std::get<1>(raw_params);
-    if (params.set<MooseEnum>("fec_type") == "L2")
+    if (params.set<MooseEnum>("fec_type") == "L2" || params.set<MooseEnum>("fec_type") == "L2Int")
       params.set<MooseEnum>("basis") = "GaussLegendre";
     return params;
   }
@@ -157,18 +157,25 @@ TEST_P(ScalarFESpaceTest, TestExpectedScalarFESpace)
 INSTANTIATE_TEST_SUITE_P(
     ScalarFESpaces,
     ScalarFESpaceTest,
-    testing::Values(ScalarFESpaceTest::makeParam("ref-segment.mesh", "H1", 1, "H1_1D_P1", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-square.mesh", "H1", 1, "H1_2D_P1", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-cube.mesh", "H1", 1, "H1_3D_P1", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-segment.mesh", "H1", 2, "H1_1D_P2", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-square.mesh", "H1", 3, "H1_2D_P3", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-cube.mesh", "H1", 4, "H1_3D_P4", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-segment.mesh", "L2", 1, "L2_1D_P1", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-square.mesh", "L2", 1, "L2_2D_P1", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2", 1, "L2_3D_P1", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-segment.mesh", "L2", 2, "L2_1D_P2", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-square.mesh", "L2", 3, "L2_2D_P3", 1, true),
-                    ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2", 4, "L2_3D_P4", 1, true)));
+    testing::Values(
+        ScalarFESpaceTest::makeParam("ref-segment.mesh", "H1", 1, "H1_1D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-square.mesh", "H1", 1, "H1_2D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-cube.mesh", "H1", 1, "H1_3D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-segment.mesh", "H1", 2, "H1_1D_P2", 1, true),
+        ScalarFESpaceTest::makeParam("ref-square.mesh", "H1", 3, "H1_2D_P3", 1, true),
+        ScalarFESpaceTest::makeParam("ref-cube.mesh", "H1", 4, "H1_3D_P4", 1, true),
+        ScalarFESpaceTest::makeParam("ref-segment.mesh", "L2", 1, "L2_1D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-square.mesh", "L2", 1, "L2_2D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2", 1, "L2_3D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-segment.mesh", "L2", 2, "L2_1D_P2", 1, true),
+        ScalarFESpaceTest::makeParam("ref-square.mesh", "L2", 3, "L2_2D_P3", 1, true),
+        ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2", 4, "L2_3D_P4", 1, true),
+        ScalarFESpaceTest::makeParam("ref-segment.mesh", "L2Int", 1, "L2Int_1D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-square.mesh", "L2Int", 1, "L2Int_2D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 1, "L2Int_3D_P1", 1, true),
+        ScalarFESpaceTest::makeParam("ref-segment.mesh", "L2Int", 2, "L2Int_1D_P2", 1, true),
+        ScalarFESpaceTest::makeParam("ref-square.mesh", "L2Int", 3, "L2Int_2D_P3", 1, true),
+        ScalarFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 4, "L2Int_3D_P4", 1, true)));
 
 class VectorFESpaceTest : public MFEMFESpaceUnitTest<MFEMVectorFESpace, std::string, int, int>
 {
@@ -181,7 +188,7 @@ class VectorFESpaceTest : public MFEMFESpaceUnitTest<MFEMVectorFESpace, std::str
     params.set<MooseEnum>("fec_type") = std::get<0>(raw_params);
     params.set<MooseEnum>("fec_order") = std::get<1>(raw_params);
     params.set<int>("range_dim") = std::get<2>(raw_params);
-    if (params.set<MooseEnum>("fec_type") == "L2")
+    if (params.set<MooseEnum>("fec_type") == "L2" || params.set<MooseEnum>("fec_type") == "L2Int")
       params.set<MooseEnum>("basis") = "GaussLegendre";
     return params;
   }
@@ -221,6 +228,18 @@ INSTANTIATE_TEST_SUITE_P(
         VectorFESpaceTest::makeParam("ref-cube.mesh", "L2", 3, 1, "L2_3D_P3", 1, false),
         VectorFESpaceTest::makeParam("ref-cube.mesh", "L2", 4, 2, "L2_3D_P4", 2, false),
         VectorFESpaceTest::makeParam("ref-cube.mesh", "L2", 3, 3, "L2_3D_P3", 3, false),
+        VectorFESpaceTest::makeParam("ref-segment.mesh", "L2Int", 1, 0, "L2Int_1D_P1", 1, false),
+        VectorFESpaceTest::makeParam("ref-segment.mesh", "L2Int", 2, 1, "L2Int_1D_P2", 1, false),
+        VectorFESpaceTest::makeParam("ref-segment.mesh", "L2Int", 1, 2, "L2Int_1D_P1", 2, false),
+        VectorFESpaceTest::makeParam("ref-segment.mesh", "L2Int", 2, 3, "L2Int_1D_P2", 3, false),
+        VectorFESpaceTest::makeParam("ref-square.mesh", "L2Int", 4, 0, "L2Int_2D_P4", 2, false),
+        VectorFESpaceTest::makeParam("ref-square.mesh", "L2Int", 3, 1, "L2Int_2D_P3", 1, false),
+        VectorFESpaceTest::makeParam("ref-square.mesh", "L2Int", 2, 2, "L2Int_2D_P2", 2, false),
+        VectorFESpaceTest::makeParam("ref-square.mesh", "L2Int", 1, 3, "L2Int_2D_P1", 3, false),
+        VectorFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 1, 0, "L2Int_3D_P1", 3, false),
+        VectorFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 3, 1, "L2Int_3D_P3", 1, false),
+        VectorFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 4, 2, "L2Int_3D_P4", 2, false),
+        VectorFESpaceTest::makeParam("ref-cube.mesh", "L2Int", 3, 3, "L2Int_3D_P3", 3, false),
         VectorFESpaceTest::makeParam("ref-square.mesh", "RT", 2, 0, "RT_2D_P2", 1, false),
         VectorFESpaceTest::makeParam("ref-cube.mesh", "RT", 1, 0, "RT_3D_P1", 1, false),
         VectorFESpaceTest::makeParam("ref-square.mesh", "RT", 2, 2, "RT_2D_P2", 1, false),
@@ -234,9 +253,7 @@ INSTANTIATE_TEST_SUITE_P(
         VectorFESpaceTest::makeParam("ref-segment.mesh", "RT", 2, 3, "RT_R1D_1D_P2", 1, false),
         VectorFESpaceTest::makeParam("ref-square.mesh", "RT", 3, 3, "RT_R2D_2D_P3", 1, false),
         VectorFESpaceTest::makeParam("ref-segment.mesh", "ND", 5, 3, "ND_R1D_1D_P5", 1, false),
-        VectorFESpaceTest::makeParam("ref-square.mesh", "ND", 1, 3, "ND_R2D_2D_P1", 1, false)
-
-            ));
+        VectorFESpaceTest::makeParam("ref-square.mesh", "ND", 1, 3, "ND_R2D_2D_P1", 1, false)));
 
 class InvalidVectorFESpaceTest : public VectorFESpaceTest
 {

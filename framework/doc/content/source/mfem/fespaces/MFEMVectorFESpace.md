@@ -17,7 +17,7 @@ The dimension of the resulting finite element collection/space will be
 the same as the dimension of the mesh. The value of `vdim` (the number
 of degrees of freedom per basis function) will depend on `fec_type`.
 
-- `H1` and `L2` spaces will have `vdim` set to `range_dim`
+- `H1` and `L2(Int)` spaces will have `vdim` set to `range_dim`
 - `ND` and `RT` spaces will always have `vdim` set to 1
 
 Note that Nédélec and Raviart-Thomas shape functions do not support
