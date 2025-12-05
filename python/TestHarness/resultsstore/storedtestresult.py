@@ -15,6 +15,7 @@ from datetime import datetime
 from typing import Iterable, Optional, Tuple
 
 from bson.objectid import ObjectId
+from moosepy.perfgraph import PerfGraph
 
 from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.testdatafilters import (
@@ -366,20 +367,26 @@ class StoredTestResult:
                     loaded = decompress_dict(v)
                 except Exception as e:
                     raise ValueError(
-                        f"Failed to decompress json_metadata {k} "
-                        f"in test {self.name}"
+                        f"Failed to decompress json_metadata {k} in test {self.name}"
                     ) from e
                 values[k] = loaded
 
         return values
 
-    def get_perf_graph(self) -> Optional[dict]:
+    def get_perf_graph(self) -> Optional[PerfGraph]:
         """
-        Get the perf_graph entry in the JSON metadata, if any.
+        Get the PerfGraph from the JSON perf_graph entry, if available.
 
         Requires filter TestDataFilter.TESTER when loading tests.
         """
-        return get_typed(self.get_json_metadata(), "perf_graph", (NoneType, dict))
+        reporter_data = get_typed(
+            self.get_json_metadata(), "perf_graph", (NoneType, dict)
+        )
+        if reporter_data is None:
+            return None
+        data = reporter_data["time_steps"][-1]["perf_graph_json"]
+        assert isinstance(data, dict)
+        return PerfGraph(data)
 
     @property
     def max_memory(self) -> Optional[int]:

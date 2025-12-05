@@ -4,6 +4,7 @@ required-version = '25.1.0'
 include = '''
 (
   ^\/python\/moosecontrol\/.*.py$ |
+  ^\/python\/moosepy\/.*.py$ |
   ^\/python\/TestHarness\/resultsstore\/.*.py$ |
   ^\/python\/TestHarness\/resultssummary\/.*.py$ |
   ^\/python\/TestHarness/tests/resultsstore\/.*.py$ |
@@ -14,6 +15,7 @@ include = '''
 [tool.ruff]
 include = [
   "python/moosecontrol/**/*.py",
+  "python/moosepy/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",
