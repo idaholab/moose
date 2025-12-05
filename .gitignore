@@ -297,6 +297,7 @@ share/
 /modules/tensor_mechanics/tensor_mechanics.yaml
 /modules/richards/richards.yaml
 /modules/solid_mechanics/solid_mechanics.yaml
+/modules/shifted_boundary_method/shifted_boundary_method.yaml
 /modules/level_set/level_set.yaml
 /modules/combined/combined.yaml
 /modules/fluid_properties/fluid_properties.yaml
@@ -324,6 +325,7 @@ share/
 /modules/phase_field/unit/phase_field-unit.yaml
 /modules/heat_transfer/unit/heat_transfer-unit.yaml
 /modules/solid_mechanics/unit/solid_mechanics-unit.yaml
+/modules/shifted_boundary_method/unit/shifted_boundary_method-unit.yaml
 /modules/tensor_mechanics/unit/tensor_mechanics-unit.yaml
 /modules/richards/unit/richards-unit.yaml
 /modules/level_set/unit/level_set-unit.yaml

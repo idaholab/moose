@@ -35,6 +35,7 @@
 #include "ReactorApp.h"
 #include "RichardsApp.h"
 #include "ScalarTransportApp.h"
+#include "ShiftedBoundaryMethodApp.h"
 #include "SolidMechanicsApp.h"
 #include "SolidPropertiesApp.h"
 #include "StochasticToolsApp.h"
@@ -90,6 +91,7 @@ CombinedApp::registerApps()
   ReactorApp::registerApps();
   RichardsApp::registerApps();
   ScalarTransportApp::registerApps();
+  ShiftedBoundaryMethodApp::registerApps();
   SolidMechanicsApp::registerApps();
   SolidPropertiesApp::registerApps();
   StochasticToolsApp::registerApps();
@@ -125,6 +127,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ReactorApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
   ScalarTransportApp::registerAll(f, af, s);
+  ShiftedBoundaryMethodApp::registerAll(f, af, s);
   SolidMechanicsApp::registerAll(f, af, s);
   SolidPropertiesApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
