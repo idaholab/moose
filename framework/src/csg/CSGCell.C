@@ -9,6 +9,7 @@
 
 #include "CSGCell.h"
 #include "CSGUniverse.h"
+#include "CSGLattice.h"
 
 namespace CSG
 {
