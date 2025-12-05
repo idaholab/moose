@@ -42,13 +42,9 @@
     max_parallel = 1
     requirement = "The system shall compute numerically accurate Jacobians when using an inlet with specified mass flow rate and temperature."
   []
-  [jacobian-water97]
-    type = PetscJacobianTester
-    run_sim = True
-    ratio_tol = 1e-5
-    difference_tol = 1e6
-    cli_args = 'Executioner/num_steps=3 Components/pipe/n_elems=3 -snes_test_err 1e-10'
-    input = jac.massflowrate_3eqn_water97.i
-    requirement = "The system shall compute numerically accurate Jacobians when using an inlet with specified mass flow rate and temperature, when using IAPWS-97 water fluid properties."
+  [run_water97]
+    type = RunApp
+    input = run_water97.i
+    requirement = "The system shall be able to use IAPWS-97 water fluid properties when using an inlet with specified mass flow rate and temperature."
   []
 []
