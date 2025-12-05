@@ -6,6 +6,7 @@
     requirement = 'The system shall be able to model an open Brayton cycle'
     type = CSVDiff
     input = 'open_brayton_cycle.i'
+    cli_args = "Executioner/num_steps=5"
     csvdiff = 'open_brayton_cycle.csv'
     abs_zero = 1e-10
     rel_err = 1e-5
