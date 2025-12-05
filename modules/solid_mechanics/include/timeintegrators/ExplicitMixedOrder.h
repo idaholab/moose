@@ -13,7 +13,6 @@
 #include "MeshChangedInterface.h"
 #include "FEProblemBase.h"
 #include <memory>
-#define UNUSED(x) (void)(x)
 
 // Forward declarations
 namespace libMesh
@@ -135,16 +134,6 @@ protected:
   // local dofs that will have central difference time integration
   std::vector<dof_id_type> & _local_second_order_indices;
 
-  /// Helper functions for phase-field
-  virtual void initPF() {}
-  virtual void upperboundCheck() {}
-  virtual void irreversibilityCheck(NumericVector<Number> * acceleration,
-                                    NumericVector<Number> * velocity)
-  {
-    UNUSED(acceleration);
-    UNUSED(velocity);
-  }
-
   /**
    * Helper function that actually does the math for computing the time derivative
    */
@@ -162,16 +151,14 @@ ExplicitMixedOrder::computeTimeDerivativeHelper(T & u_dot,
                                                 const T3 & u_old,
                                                 const T4 & u_older) const
 {
-  // computing first derivative
-  // using the Central Difference method
+  // Computing first derivative using the Central Difference method
   // u_dot_old = (first_term - second_term) / 2 / dt
   //       first_term = u
   //      second_term = u_older
   u_dot -= u_older; // 'older than older' solution
   u_dot *= 1.0 / (2.0 * _dt);
 
-  // computing second derivative
-  // using the Central Difference method
+  // Computing second derivative using the Central Difference method
   // u_dotdot_old = (first_term - second_term + third_term) / dt / dt
   //       first_term = u
   //      second_term = 2 * u_old

@@ -64,12 +64,6 @@ ExplicitMixedOrder::validParams()
       "A subset of variables that require first-order integration (velocity only) to be applied by "
       "this time integrator.");
 
-  params.addParam<std::vector<VariableName>>(
-      "phase_field",
-      {},
-      "A subset of variables that require phase field to be applied by "
-      "this time integrator.");
-
   // Prevent users from using variables option by accident.
   params.suppressParameter<std::vector<VariableName>>("variables");
 
@@ -105,10 +99,6 @@ ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   if (_nl)
     _fe_problem.solverParams(_nl->number())._type = Moose::ST_LINEAR;
 
-  // _M1 = NumericVector<Number>::build(_communicator);
-  // _M2 = NumericVector<Number>::build(_communicator);
-  // _M1_old = NumericVector<Number>::build(_communicator);
-  // _M2_old = NumericVector<Number>::build(_communicator);
   _ones = addVector("ones", true, PARALLEL);
 
   // don't set any of the common SNES-related petsc options to prevent unused option warnings
@@ -196,9 +186,6 @@ ExplicitMixedOrder::init()
                var_dof_indices.end(),
                std::back_inserter(_local_second_order_indices));
   }
-
-  // For phase-field initialization
-  initPF();
 }
 
 void
@@ -327,8 +314,8 @@ ExplicitMixedOrder::solve()
   *_nonlinear_implicit_system->solution = _nl->solutionOld();
   *_nonlinear_implicit_system->solution += *_solution_update;
 
-  // For phase-field, clip the solution to be <=1
-  upperboundCheck();
+  // // For phase-field, clip the solution to be <=1
+  // upperboundCheck();
 
   _nonlinear_implicit_system->update();
   _nl->setSolution(*_nonlinear_implicit_system->current_local_solution);
@@ -367,10 +354,6 @@ ExplicitMixedOrder::discretize()
   auto vel = _sys.solutionUDot();
 
   // First-order variables
-  // // mass matrix
-  // auto M1 = NumericVector<Number>::build(_communicator);
-  // _mass_matrix_lumped->create_subvector(*M1, _local_first_order_indices, false);
-  // M1->reciprocal();
   // residual vector
   const auto r1 = NumericVector<Number>::build(_communicator);
   _explicit_residual->create_subvector(*r1, _local_first_order_indices, false);
@@ -382,9 +365,6 @@ ExplicitMixedOrder::discretize()
   vel->restore_subvector(std::move(v1), _local_first_order_indices);
 
   // Second-order variables
-  // // mass matrix
-  // auto M2 = NumericVector<Number>::build(_communicator);
-  // _mass_matrix_lumped->create_subvector(*M2, _local_second_order_indices, false);
   // residual vector
   const auto r2 = NumericVector<Number>::build(_communicator);
   _explicit_residual->create_subvector(*r2, _local_second_order_indices, false);
@@ -400,19 +380,7 @@ ExplicitMixedOrder::discretize()
     auto rc = C->clone();
     rc->pointwise_mult(*rc, *v2);
     r2->add(-1.0, *rc);
-
-    // auto coef = C->clone();
-    // coef->scale(_dt / 2);
-    // coef->add(*M2);
-    // coef->reciprocal();
-    // a->pointwise_mult(*coef, *r2);
   }
-  // else
-  // {
-  //   auto coef = M2->clone();
-  //   coef->reciprocal();
-  //   a->pointwise_mult(*coef, *r2);
-  // }
   a->pointwise_mult(*_M2, *r2);
   // velocity
   auto delta_v = a->clone();
@@ -421,9 +389,6 @@ ExplicitMixedOrder::discretize()
   // restore the vectors
   accel->restore_subvector(std::move(a), _local_second_order_indices);
   vel->restore_subvector(std::move(v2), _local_second_order_indices);
-
-  // For phase-field, ensure the irreversibility
-  irreversibilityCheck(accel, vel);
 
   // close the vectors
   accel->close();
