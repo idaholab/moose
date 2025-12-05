@@ -19,6 +19,7 @@ namespace CSG
 {
 
 class CSGUniverse;
+class CSGLattice;
 
 /**
  * CSGCell creates an internal representation of a Constructive Solid Geometry (CSG)
@@ -54,6 +55,15 @@ public:
   CSGCell(const std::string & name, const CSGUniverse * univ, const CSGRegion & region);
 
   /**
+   * @brief Constructor for a Lattice Cell
+   *
+   * @param name name of cell
+   * @param lattice lattice to be the fill
+   * @param region cell region
+   */
+  CSGCell(const std::string & name, const CSGLattice * lattice, const CSGRegion & region);
+
+  /**
    * Destructor
    */
   virtual ~CSGCell() = default;
@@ -80,11 +90,18 @@ public:
   const std::string & getFillMaterial() const;
 
   /**
+   * @brief Get the cell fill if fill type is LATTICE
+   *
+   * @return Reference to CSGLattice fill
+   */
+  const CSGLattice & getFillLattice() const;
+
+  /**
    * @brief Get the name of the fill, regardless of its type
    *
    * @return std::string fill name
    */
-  const std::string & getFillName() const { return _fill_name; }
+  const std::string & getFillName() const;
 
   /**
    * @brief Get the cell name
@@ -126,10 +143,9 @@ protected:
   std::string _name;
 
   /// An enum for type of fill for cell region
-  // TODO: add support for lattice fill
-  MooseEnum _fill_type{"VOID CSG_MATERIAL UNIVERSE"};
+  MooseEnum _fill_type{"VOID CSG_MATERIAL UNIVERSE LATTICE"};
 
-  /// name of the fill object
+  /// name of the fill object for CSG_MATERIAL fills
   std::string _fill_name;
 
   /// Cell region, represented as a CSGRegion object
@@ -137,6 +153,9 @@ protected:
 
   /// Fill object if fill is CSGUniverse
   const CSGUniverse * _fill_universe;
+
+  /// Fill object if fill is CSGLattice
+  const CSGLattice * _fill_lattice;
 
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access

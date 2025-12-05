@@ -123,10 +123,11 @@ A cell is an object defined by a region and a fill.
 To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a const reference to the `CSGCell` object that is created (`const CSGCell &`).
 At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
 The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
-Three types of cell fills are currently supported: void, material, and universe.
+Three types of cell fills are currently supported: void, material, universe, and lattice.
 If creating a void cell, no fill has to be passed to the creation method.
 To create a cell with a material fill, simply provide it with a name of a material as a string.
-For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
+For a cell with a `CSGUniverse` fill, pass it a reference to the `CSGUniverse`.
+And for a `CSGLattice` fill, pass a reference to the `CSGLattice`.
 Some examples of creating the different types of cells are shown below:
 
 !listing CSGBaseTest.C start=create a void cell with name cname1 and defined by region reg1 end=csg_obj include-end=true
@@ -134,6 +135,8 @@ Some examples of creating the different types of cells are shown below:
 !listing CSGBaseTest.C start=create a material-filled cell end=csg_obj include-end=true
 
 !listing CSGBaseTest.C start=create a universe-filled cell end=csg_obj include-end=true
+
+!listing CSGBaseTest.C start=create a lattice-filled cell end=csg_obj include-end=true
 
 !alert! note title=Materials as Placeholders
 
@@ -206,6 +209,103 @@ Doing this in multiple steps has the same outcome as that of method 2 for adding
 !alert! note title=Maintaining Connectivity
 
 When adding and removing cells to/from universes, it is important to maintain the connectivity of all universes meaning all universes should be nested under the root universe at the end of the generation process, in order to have a consistent model.
+
+!alert-end!
+
+### Lattices
+
+A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects and an "outer" to fill the space around lattice elements.
+The `CSGBase` class provides support for two types of 2D lattice types: Cartesian and regular hexagonal.
+It is assumed that these two types are in the $x-y$ plane (having a $+z$ normal).
+Three types of outer fill are supported: void (default), material (an `std::string` name), and [`CSGUniverse`](#universes).
+To create either of these types of lattices, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the specific lattice type object (`const CSGCartesianLattice &` or `const CSGHexagonalLattice &`).
+For both lattice types, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
+The pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
+And similarly, the outer fill can be set at the time of initialization or set later with the `setLatticeOuter` method.
+Below are two examples of creating a `CSGCartesianLattice` and `CSGHexagonalLattice`, both initialized with the set of `CSGUniverse` objects that define the lattice layout.
+
+!listing CSGBaseTest.C start=create a 2x3 lattice of universes end=dims_map
+
+!listing CSGBaseTest.C start=create a 3-ring hexagonal lattice of universes end=dims_map
+
+Custom lattice types can also be defined to be used with the `CSGBase` class.
+Information about how to define custom types of lattices can be found in [source/csg/CSGLattice.md].
+If using a custom type, the lattice can be created as a unique pointer and added to the base with `addLattice`.
+If there are `CSGUniverse` objects in the lattice at the time of adding it to the base, the `CSGUniverse` objects must already exist in the `CSGBase` instance.
+An example of using `addLattice` is shown below (`CSGCartesianLattice` would be replaced with the custom type).
+
+!listing CSGBaseTest.C start=create a lattice as a unique pointer end=check that it exists
+
+!alert! note title=2D vs. 3D Lattices
+
+The `CSGBase` class supports only the creation of 2D lattices. A "3D" lattice can be created by filling multiple 3D cells with 2D lattices and arranging them in layers to form the desired 3D structure.
+
+!alert-end!
+
+The `CSGLattice` objects can be accessed or updated with the following methods from `CSGBase`:
+
+- `setLatticeUniverses`: sets the vector of vectors of `CSGUniverse` objects as the lattice layout.
+- `setUniverseAtLatticeIndex`: add a `CSGUniverse` to the lattice at the specified location index (replaces the existing universe).
+- `setLatticeOuter`: sets the `CSGUniverse` (for a `CSGUniverse` outer) or the `std::string` name (for a material outer) as the outer fill.
+- `resetLatticeOuter`: resets the outer fill to void for the lattice.
+- `renameLattice`: change the name of the `CSGLattice` object.
+- `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
+- `getLatticeByName`: retrieve a const reference to the lattice object of the specified name.
+
+!alert! note title=Using `getLatticeByName`
+
+`getLatticeByName` is a templated function which will return an object of type `CSGLattice` by default if no type is specified when calling. If the type of lattice is known, it is recommended to call it using that type (e.g., `csg_obj->getLatticeByName<LatticeType>(lattice_name)`), so that any lattice type-specific methods or attributes can be called on the returned object. If type `CSGLattice` is used, *only* methods and attributes that are available in the abstract `CSGLattice` class can be used.
+
+!alert-end!
+
+#### Lattice Indexing
+
+Both the Cartesian and hexagonal lattice types follow a row-column $(i, j)$ indexing scheme for the location of universes in the lattice.
+
+For Cartesian lattices, there can be any number of rows and columns, but each row must be the same length.
+The indexing starts at the top left corner of the lattice with element $(0, 0)$.
+An example of the indices for a $2 \times 3$ Cartesian lattice is shown in [!ref](fig:cart_lat).
+
+!media large_media/csg/cart_lat.png
+       id=fig:cart_lat
+       caption=Example of a $2 \times 3$ Cartesian lattice and the corresponding location indices.
+
+For hexagonal lattices, the lattice is assumed to be x-oriented and also uses the row-column $(i, j)$ indexing scheme, with element $(0, 0)$ being the top row, leftmost element.
+The length of the rows is expected to be consistent with the size of the lattice (i.e., the number of rings), which is verified when the universes are set.
+An example of the $(i, j)$ indices for a 3-ring hexagonal lattice is shown in [!ref](fig:hex_lat_row).
+
+!media large_media/csg/hex_lat_row.png
+       id=fig:hex_lat_row
+       caption=Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(i, j)$ form.
+
+Convenience methods are provided for `CSGHexagonalLattice` objects to convert between the required $(i, j)$ indices and a ring-based $(r, p)$ indexing scheme.
+In the ring-based scheme, the outermost ring is the 0th ring, and the right-most element in the ring is the 0th position of the ring with indices increasing counter-clockwise around the ring.
+For the 3-ring lattice above in [!ref](fig:hex_lat_row), the corresponding $(r, p)$ indices would be as shown in [!ref](fig:hex_lat_ring).
+
+!media large_media/csg/hex_lat_ring.png
+       id=fig:hex_lat_ring
+       caption=Example of a 3-ring hexagonal lattice that has the location indices labeled in the $(r, p)$ form.
+
+For any lattice, the $(r, p)$ index of a universe in the lattice can be retrieved from the $(i, j)$ index by calling the `getRingIndexFromRowIndex` method.
+And similarly, if the $(r, p)$ index form is known, the corresponding $(i, j)$ index can be retrieved using the `getRowIndexFromRingIndex` method.
+It is important to note that while these convenience methods exists to convert between the two indexing schemes, the `CSGUniverse` objects in the lattice can only be accessed using the $(i, j)$ index.
+
+#### Defining the Universe Layout
+
+As mentioned above, the layout of the `CSGUniverse` objects of the lattice can be set at the time of initialization or set/updated later.
+At the time that the universes are set, the dimensionality of the lattice is determined (i.e., the number of rows, columns, or rings for the lattice).
+If the dimensionality should need to be changed, a new complete universe arrangement can be set to overwrite the previous arrangement using `setLatticeUniverses`.
+Anytime the universe layout is set or changed, the dimensionality will be validated to ensure it compatible with the lattice type.
+To replace a single element of the lattice, the `setUniverseAtLatticeIndex` method can be used by providing the element location in $(i, j)$ form.
+In order to use this method, the full set of universes must have already been defined, either during the lattice initialization or with `setLatticeUniverses`.
+
+!listing CSGBaseTest.C start=initialize a lattice without universes and then end=getUniverses
+
+!listing CSGBaseTest.C start=csg_obj->setUniverseAtLatticeIndex( end=all_univs
+
+!alert! note title=Building the Lattice Layout Incrementally
+
+The `setUniverseAtLatticeIndex` method is not meant to be used to change a lattice's dimensions by building the lattice element-by-element because the index supplied would be considered out of range in this context. The dimensionality of the lattice is determined when `setLatticeUniverses` is called. Therefore, to build a lattice incrementally, the recommendation is to build up a vector of vectors of universes incrementally and then call `setLatticeUniverses` one time. From there, `setUniverseAtLatticeIndex` can be called to replace an existing universe in the lattice.
 
 !alert-end!
 
@@ -286,19 +386,20 @@ Consult the Doxygen documentation for information on all object-specific methods
 
 ## Object Naming Recommendations
 
-For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, and `CSGUniverse`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
+For each new [!ac](CSG) element (`CSGSurface`, `CSGCell`, `CSGUniverse`, and `CSGLattice`) that is created, a unique name identifier (of type `std::string`) must be provided (`name` parameter for all creation methods).
 A recommended best practice is to include the mesh generator name (which can be accessed with `this->getName()` in any MeshGenerator class) as a part of that object name.
 This `name` is used as the unique identifier within the `CSGBase` instance.
 Methods for renaming objects are available as described in the above sections to help prevent issues and errors.
 
-## Example Implementation
+## Example Implementations
 
-Provided here is an example implementation of the `generateCSG` method for a simple example [source/meshgenerators/MeshGenerator.md] that creates an infinite rectangular prism given an input parameter for `side_length`.
+Provided here are example implementations of the `generateCSG` method for three simple [source/meshgenerators/MeshGenerator.md] types.
+The first mesh generator creates an infinite rectangular prism given an input parameter for `side_length`.
 The code snippets provided here correspond to the `.C` file.
 
 !listing ExampleCSGInfiniteSquareMeshGenerator.C start=InputParameters
 
-The following example builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adding planes to create a finite rectangular prism.
+The next example mesh generator builds on the infinite prism example above by taking a `MeshGeneratorName` for an existing `ExampleCSGInfiniteSquareMeshGenerator` as input and adds planes to create a finite rectangular prism.
 
 !listing TestCSGAxialSurfaceMeshGenerator.C start=InputParameters
 
@@ -312,8 +413,30 @@ Example Output:
 
 !listing csg_only_chained_out_csg.json
 
-To run the above example, use `--allow-test-objects`:
+A third example implementation shows the construction of a 2D lattice of universes, using the `ExampleCSGInfiniteSquareMeshGenerator` as input.
+
+!listing TestCSGLatticeMeshGenerator.C start=InputParameters
+
+For this example, the following input would generate the corresponding [!ac](JSON) output below.
+
+Example Input:
+
+!listing csg_lattice_cart.i
+
+Example Output:
+
+!listing csg_lattice_cart_out_csg.json
+
+!alert! note title=Running the Examples
+
+To run either of the above examples, use `--allow-test-objects`:
 
 ```shell
 ./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_only_chained.i
 ```
+
+```shell
+./moose_test-opt --allow-test-objects --csg-only -i tests/csg/csg_lattice_cart.i
+```
+
+!alert-end!
