@@ -68,7 +68,8 @@ This is the resulting "region_id" extra element integer layout, which was chosen
        style=width:40%;
        alt=Region IDs for the pin mesh.
 
-## Constructive Solid Geometry (CSG) 
+## Constructive Solid Geometry (CSG)
+
 `PinMeshGenerator` can generate a [constructive solid geometry (CSG)](syntax/CSG/index.md), meaning that `--csg-only` can be called on a mesh input file that contains PinMeshGenerator to represent the pin structure as a CSG object. Radially, a separate CSG surface is created for each entry in [!param](/Mesh/PinMeshGenerator/ring_radii) and [!param](/Mesh/PinMeshGenerator/duct_halfpitch), where the outer hexagonal / Cartesian boundary defines the outermost radial surface. Each of these radial and axial surfaces are then used to define a separate CSG cell of the geometry. All CSG cells are added to the root universe that is part of the output CSG object. Each cell is filled with a material named `"rgmb_region_[REGION_ID]"`, where `[REGION_ID]` refers to the region ID of that particular radial and axial region of the pincell. Currently, sector-wise generation of CSG regions are not currently supported by `PinMeshGenerator`.
 
 !syntax parameters /Mesh/PinMeshGenerator
