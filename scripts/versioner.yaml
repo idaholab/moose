@@ -7,26 +7,24 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.10.21
+    version: 2025.11.25
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.09.18
+    version: 2025.11.25
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
     influential:
-      - apptainer/set_prompt.bash
       - apptainer/mpi.def
-      - apptainer/files/mpi
       - conda/mpi/base_build.sh
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.4.2
-    build_number: 6
+    version: 9.5.2
+    build_number: 0
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -38,7 +36,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.24.0
-    build_number: 1
+    build_number: 2
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -56,8 +54,8 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2025.10.15
-    build_number: 1
+    version: 2025.10.15_910736a
+    build_number: 0
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -76,7 +74,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.09.19_02960f1
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -93,7 +91,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.11.24
+    version: 2025.11.25
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -136,7 +134,7 @@ packages:
   # dependers: none
   seacas:
     version: 2025.05.22
-    build_number: 0
+    build_number: 1
     conda: conda/seacas
     templates:
       conda/seacas/meta.yaml.template: conda/seacas/meta.yaml

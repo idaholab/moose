@@ -2,13 +2,13 @@ black:
   - black 25.1.0
 
 clang_format:
-  - clang-format 18
+  - clang-format 19
 
 clang_tools:
-  - clang-tools 18
+  - clang-tools 19
 
 ruff:
-  - ruff 0.14.1
+  - ruff 0.14.5
 
 moose_python:
   - python 3.13
