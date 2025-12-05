@@ -11,9 +11,7 @@
 
 #include "KokkosKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -160,5 +158,4 @@ KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datu
       });
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

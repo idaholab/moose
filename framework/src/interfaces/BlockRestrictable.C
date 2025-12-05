@@ -188,7 +188,8 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (moose_object->isKokkosObject())
-    initializeKokkosBlockRestrictable(_blk_mesh->getKokkosMesh());
+    _blk_feproblem->addKokkosMeshInitializationHook(
+        std::bind(&BlockRestrictable::initializeKokkosBlockRestrictable, this));
 #endif
 }
 

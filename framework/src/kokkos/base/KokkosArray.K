@@ -12,9 +12,7 @@
 #include "KokkosArray.h"
 #include "KokkosThread.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 void
@@ -150,5 +148,4 @@ Array<Real, 1>::nrm2<Real>()
 
 template class Array<Real, 1>;
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

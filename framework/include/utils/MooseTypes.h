@@ -1326,10 +1326,17 @@ class FunctorCopy
   friend class Material;
   friend class AuxKernel;
   friend class FunctionBase;
+  friend class UserObject;
+  friend class ElementUserObject;
+  friend class NodalUserObject;
+  friend class SideUserObject;
+  friend class GeneralUserObject;
+  friend class Postprocessor;
+  friend class VectorPostprocessor;
+  friend class Reporter;
 
-  FunctorCopy() = default;
-  FunctorCopy(const FunctorCopy &) = delete;
-  FunctorCopy(FunctorCopy &&) = delete;
+  FunctorCopy() {}
+  FunctorCopy(const FunctorCopy &) {}
 };
 }
 #endif

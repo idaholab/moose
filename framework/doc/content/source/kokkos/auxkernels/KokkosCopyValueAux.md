@@ -6,7 +6,7 @@ This is the Kokkos version of [CopyValueAux](CopyValueAux.md). See the original 
 
 ## Example Syntax
 
-!listing test/tests/kokkos/auxkernels/copy_value_aux/kokkos_copy_old_aux.i start=[T_older] end=[] include-end=true
+!listing test/tests/kokkos/auxkernels/copy_value_aux/kokkos_copy_old_aux.i block=AuxKernels
 
 !syntax parameters /AuxKernels/KokkosCopyValueAux
 
