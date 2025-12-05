@@ -979,8 +979,8 @@ ConcentricCircleMeshGenerator::generate()
     mesh->prepare_for_use();
 
   // Laplace smoothing
-  libMesh::LaplaceMeshSmoother lms(*mesh);
-  lms.smooth(_smoothing_max_it);
+  libMesh::LaplaceMeshSmoother lms(*mesh, _smoothing_max_it);
+  lms.smooth();
 
   mesh->prepare_for_use();
   return dynamic_pointer_cast<MeshBase>(mesh);

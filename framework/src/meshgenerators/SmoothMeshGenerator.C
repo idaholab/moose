@@ -49,9 +49,9 @@ SmoothMeshGenerator::generate()
 
   auto mesh = dynamic_pointer_cast<ReplicatedMesh>(old_mesh);
 
-  libMesh::LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh));
+  libMesh::LaplaceMeshSmoother lms(static_cast<UnstructuredMesh &>(*mesh), _iterations);
 
-  lms.smooth(_iterations);
+  lms.smooth();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

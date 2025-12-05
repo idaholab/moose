@@ -3,8 +3,8 @@ mpi:
   - openmpi
 
 moose_petsc:
-  - moose-petsc 3.24.0 mpich_1
-  - moose-petsc 3.24.0 openmpi_1
+  - moose-petsc 3.24.2 mpich_0
+  - moose-petsc 3.24.2 openmpi_0
 
 moose_libmesh_vtk:
   - moose-libmesh-vtk 9.4.2 mpich_6

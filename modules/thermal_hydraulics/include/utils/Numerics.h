@@ -182,7 +182,8 @@ Grashof(const T1 & beta,
         const T5 & mu_liquid,
         const Real & gravity_magnitude)
 {
-  return gravity_magnitude * beta * dT * std::pow(D_h, 3) * (rho_liquid * rho_liquid) /
+  using std::pow;
+  return gravity_magnitude * beta * dT * pow(D_h, 3) * (rho_liquid * rho_liquid) /
          (mu_liquid * mu_liquid);
 }
 
@@ -199,7 +200,8 @@ template <typename T1, typename T2>
 auto
 Laplace(const T1 & surf_tension, const T2 & delta_rho, const Real & gravity_magnitude)
 {
-  return std::sqrt(surf_tension / (gravity_magnitude * delta_rho));
+  using std::sqrt;
+  return sqrt(surf_tension / (gravity_magnitude * delta_rho));
 }
 
 /**
@@ -221,8 +223,9 @@ viscosityNumber(const T1 & viscosity,
                 const T4 & delta_rho,
                 const Real & gravity_magnitude)
 {
+  using std::sqrt;
   return viscosity /
-         std::sqrt(rho_k * surf_tension * std::sqrt(surf_tension / gravity_magnitude / delta_rho));
+         sqrt(rho_k * surf_tension * sqrt(surf_tension / gravity_magnitude / delta_rho));
 }
 
 using NS::wallHeatTransferCoefficient;
@@ -238,7 +241,8 @@ template <typename T1, typename T2>
 auto
 Dean(const T1 & Re, const T2 & doD)
 {
-  return Re * std::sqrt(doD);
+  using std::sqrt;
+  return Re * sqrt(doD);
 }
 
 /**

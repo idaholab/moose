@@ -38,10 +38,16 @@ We must then build MFEM itself by running its script:
 Here, in `[options]`, you may wish to include MFEM's CMake options, which are detailed [in this page](https://github.com/mfem/mfem/blob/master/INSTALL). Notably, like with the PETSc install, if you intend to use GPU offloading capabilities, here your flags should include `-DMFEM_USE_CUDA=YES` or `-DMFEM_USE_HIP=YES`. For the GPU architecture specification, use `-DCUDA_ARCH=[arch]` or `-DHIP_ARCH=[arch]`.
 
 !alert note
-The MFEM GPU architecture specification takes in the entire label, for instance `-DCUDA_ARCH=sm_80` for CUDA, or for a HIP build, you may use `-DHIP_ARCH=gfx908`.
+The MFEM GPU architecture specification takes in the entire label, for instance, for CUDA use
+`-DCUDA_ARCH=sm_80` (A100), or for a HIP build, you may use `-DHIP_ARCH=gfx908` (MI100).
 
 !alert note
-When building MFEM with GPU support, there is a known bug whereby CMake's configure step may return an error claiming not to have been able to find a valid version of SuperLU_DIST, despite the user (or in this case the install script) providing one. If you encounter this error, you can bypass it by passing the MFEM flag `-DSuperLUDist_VERSION_OK=YES` to the build script.
+When building MFEM with GPU support, there is a common issue whereby CMake's configure step may
+return an error claiming not to have been able to find a valid version of SuperLU_DIST, despite the
+user (or in this case the install script) providing one. If you encounter this error, it is most
+likely because the compiler failed to find some CUDA or HIP include files. In this case, adding the
+appropriate directory to the `CPATH` environment variable will fix the issue. Otherwise, you can
+bypass the error altogether by passing the flag `-DSuperLUDist_VERSION_OK=YES` to the script.
 
 !alert tip
 Alternatively, if you already have a working MFEM build in a separate directory, you may set the variable `MFEM_DIR` to its install path instead of running the MFEM install script.

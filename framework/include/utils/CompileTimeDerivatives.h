@@ -827,7 +827,11 @@ CT_OPERATOR_BINARY(!=, CTCompareUnequal)
   {                                                                                                \
   public:                                                                                          \
     CTF##name(T arg) : CTUnary<T>(arg) {}                                                          \
-    auto operator()() const { return std::name(_arg()); }                                          \
+    auto operator()() const                                                                        \
+    {                                                                                              \
+      using std::name;                                                                             \
+      return name(_arg());                                                                         \
+    }                                                                                              \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
@@ -872,7 +876,11 @@ CT_SIMPLE_UNARY_FUNCTION(atan, 1.0 / (pow<2>(_arg) + 1.0) * _arg.template D<dtag
   {                                                                                                \
   public:                                                                                          \
     CTF##name(L left, R right) : CTBinary<L, R>(left, right) {}                                    \
-    auto operator()() const { return std::name(_left(), _right()); }                               \
+    auto operator()() const                                                                        \
+    {                                                                                              \
+      using std::name;                                                                             \
+      return name(_left(), _right());                                                              \
+    }                                                                                              \
     template <CTTag dtag>                                                                          \
     auto D() const                                                                                 \
     {                                                                                              \
