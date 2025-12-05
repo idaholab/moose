@@ -15,9 +15,8 @@ InputParameters
 ADTimeDerivative::validParams()
 {
   InputParameters params = ADTimeKernelValue::validParams();
-  params.addClassDescription(
-      "The time derivative operator with the weak form of $(\\psi_i, "
-      "\\alpha \\dot \\frac{\\partial u_h}{\\partial t})$, where \\alpha is the coefficient.");
+  params.addClassDescription("The time derivative operator with the weak form of $(\\psi_i, "
+                             "\\frac{\\partial u_h}{\\partial t})$.");
   return params;
 }
 
