@@ -8,8 +8,8 @@ PNL's $7 \times 7$ sleeve blockage facility was designed to investigate the turb
 | Experiment Parameter (unit) | Value |
 | :- | :- |
 | Number of pins (---) | $7 \times 7$ |
-| Rod pitch (cm) | $1.36906$ |
-| Rod diameter (cm) | $0.99568$ |
+| Pin pitch (cm) | $1.36906$ |
+| Pin diameter (cm) | $0.99568$ |
 | Length (cm) | $144.78$ |
 | Outlet pressure (Pa) | $101325$ |
 | Inlet temperature (K) | $302.594$ |
