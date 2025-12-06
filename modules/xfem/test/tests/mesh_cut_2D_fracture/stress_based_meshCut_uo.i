@@ -1,3 +1,4 @@
+# both crack tips grow straight.  Right crack tip intersects the boundary
 [VectorPostprocessors]
   [CrackFrontNonlocalStressVpp]
     type = CrackFrontNonlocalStress
@@ -14,6 +15,6 @@
     growth_increment = 0.05
     stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
     stress_vector_name = "crack_tip_stress"
-    stress_threshold = 120
+    stress_threshold = 140
   []
 []

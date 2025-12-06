@@ -38,6 +38,7 @@
     type = SamplerFullSolveMultiApp
     input_files = sub.i
     sampler = sample
+    mode = batch-reset
   []
 []
 

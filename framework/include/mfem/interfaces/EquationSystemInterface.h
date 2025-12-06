@@ -18,7 +18,7 @@ namespace Moose::MFEM
 /**
  * Interface required for:
  * - EquationSystemProblemOperator
- * - TimeDomainEquationSystemProblemOperator
+ * - TimeDependentEquationSystemProblemOperator
  */
 class EquationSystemInterface
 {

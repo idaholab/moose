@@ -16,7 +16,7 @@ namespace Moose::MFEM
 void
 ComplexEquationSystemProblemOperator::SetGridFunctions()
 {
-  _trial_var_names = GetEquationSystem()->TrialVarNames();
+  _trial_var_names = GetEquationSystem()->GetTrialVarNames();
 
   _cmplx_trial_variables = _problem_data.cmplx_gridfunctions.Get(_trial_var_names);
 
@@ -55,7 +55,7 @@ ComplexEquationSystemProblemOperator::Solve()
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
-  _equation_system->RecoverComplexFEMSolution(
+  GetEquationSystem()->RecoverComplexFEMSolution(
       _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 }
 

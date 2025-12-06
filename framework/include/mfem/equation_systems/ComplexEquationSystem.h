@@ -49,13 +49,15 @@ public:
   /// Add complex essential BCs
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
-  /// Form linear system, with essential boundary conditions accounted for
-  virtual void FormSystem(mfem::OperatorHandle & op,
-                          mfem::BlockVector & trueX,
-                          mfem::BlockVector & trueRHS) override;
+  /// Form matrix-free representation of system operator.
+  /// Used when EquationSystem assembly level is set to 'FULL', 'ELEMENT', 'PARTIAL', or 'NONE'.
+  virtual void FormSystemOperator(mfem::OperatorHandle & op,
+                                  mfem::BlockVector & trueX,
+                                  mfem::BlockVector & trueRHS) override;
 
-  /// Form linear system with legacy assembly
-  virtual void FormLegacySystem(mfem::OperatorHandle & op,
+  /// Form matrix representation of system operator as a HypreParMatrix.
+  /// Used when EquationSystem assembly level is set to 'LEGACY'.
+  virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS) override;
 
