@@ -36,7 +36,7 @@ public:
   inline std::shared_ptr<mfem::ParFiniteElementSpace> getFESpace() const
   {
     if (!_fespace)
-      buildFESpace(getVDim());
+      buildFESpace();
     return _fespace;
   }
 
@@ -44,7 +44,7 @@ public:
   inline std::shared_ptr<mfem::FiniteElementCollection> getFEC() const
   {
     if (!_fec)
-      buildFEC(getFECName());
+      buildFEC();
     return _fec;
   }
 
@@ -65,13 +65,12 @@ protected:
 
 private:
   /// Constructs the fec from the fec name.
-  void buildFEC(const std::string & fec_name) const;
-
+  void buildFEC() const;
   /// Stores the constructed fecollection
   mutable std::shared_ptr<mfem::FiniteElementCollection> _fec{nullptr};
 
   /// Constructs the fespace.
-  void buildFESpace(const int vdim) const;
+  void buildFESpace() const;
   /// Stores the constructed fespace.
   mutable std::shared_ptr<mfem::ParFiniteElementSpace> _fespace{nullptr};
 
