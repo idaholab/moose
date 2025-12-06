@@ -139,13 +139,15 @@ WCNSLinearFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
     if (!_solve_for_enthalpy)
     {
       params.set<LinearVariableName>("variable") = _fluid_temperature_name;
-      params.set<MooseFunctorName>("diffusion_coeff") = _thermal_conductivity_name[block_i];
+      params.set<MooseFunctorName>("diffusion_coeff") =
+          _thermal_conductivity_name[block_i] + (_has_turbulence_model ? "_plus_kt" : "");
     }
     else
     {
       params.set<LinearVariableName>("variable") = _fluid_enthalpy_name;
-      params.set<MooseFunctorName>("diffusion_coeff") =
-          _thermal_conductivity_name[block_i] + "_by_cp";
+      const auto th_cond_name =
+          _thermal_conductivity_name[block_i] + (_has_turbulence_model ? "_plus_kt" : "");
+      params.set<MooseFunctorName>("diffusion_coeff") = th_cond_name + "_by_cp";
     }
     std::vector<SubdomainName> block_names =
         num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
@@ -418,12 +420,12 @@ WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
   params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
   params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
   params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+  if (isParamValid(NS::fluid))
+    params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
 
   if (_solve_for_enthalpy)
   {
-    if (isParamValid(NS::fluid))
-      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
-    else
+    if (!isParamValid(NS::fluid))
     {
       if (!getProblem().hasFunctor("h_from_p_T_functor", 0) ||
           !getProblem().hasFunctor("T_from_p_h_functor", 0))
@@ -435,11 +437,12 @@ WCNSLinearFVFluidHeatTransferPhysics::addMaterials()
       params.set<MooseFunctorName>("T_from_p_h_functor") = "T_from_p_h_functor";
     }
   }
-
-  // We don't need it so far otherwise
+  // If we are solving for enthalpy, we need this to compute temperature from p & h
+  // Else we don't really need it
   if (_solve_for_enthalpy)
     getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 
-  if (_solve_for_enthalpy)
-    WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(/*use ad*/ false);
+  if (_solve_for_enthalpy || _has_turbulence_model)
+    WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors(
+        /*use ad*/ false);
 }

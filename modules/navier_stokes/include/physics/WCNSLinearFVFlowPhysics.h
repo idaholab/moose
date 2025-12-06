@@ -66,8 +66,6 @@ private:
     mooseError("Not implemented");
   }
 
-  UserObjectName rhieChowUOName() const override;
-
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
   /// Whether to use the correction term for non-orthogonality

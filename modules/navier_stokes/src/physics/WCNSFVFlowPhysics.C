@@ -1183,13 +1183,6 @@ WCNSFVFlowPhysics::checkRhieChowFunctorsDefined() const
     mooseError("Rhie Chow coefficient az must be provided for advection by auxiliary velocities");
 }
 
-UserObjectName
-WCNSFVFlowPhysics::rhieChowUOName() const
-{
-  mooseAssert(!_rc_uo_name.empty(), "The Rhie-Chow user-object name should be set!");
-  return _rc_uo_name;
-}
-
 MooseFunctorName
 WCNSFVFlowPhysics::getLinearFrictionCoefName() const
 {

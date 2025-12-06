@@ -69,6 +69,12 @@ public:
                                       const std::vector<SubdomainName> & blocks,
                                       const bool error_if_not_identical = true) const;
 
+  /**
+   * Whether the Physics is defined on those blocks
+   * @param blocks the blocks to check
+   */
+  bool hasBlocks(const std::vector<SubdomainName> & blocks) const;
+
   // Coupling with Physics //
   /**
    * @brief Get a Physics from the ActionWarehouse with the requested type and name
@@ -244,6 +250,9 @@ protected:
   void reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
                                          const std::string & object_type) const;
 
+  /// Additional checks performed near the end of the setup phase
+  virtual void checkIntegrity() const {}
+
   /// System names for the system(s) owning the solver variables
   std::vector<SolverSystemName> _system_names;
 
@@ -272,11 +281,11 @@ private:
   virtual void initializePhysicsAdditional() {}
   /// Additional checks performed once the executioner / executor has been created
   virtual void checkIntegrityEarly() const;
-  /// Additional checks performed near the end of the setup phase
-  virtual void checkIntegrity() const {}
 
   /// The default implementation of these routines will do nothing as we do not expect all Physics
   /// to be defining an object of every type
+  /// We keep these private as we don't want a derived class to call a do-nothing implementation
+  /// If they call a parent class implementation, it must have been re-defined as protected
   virtual void addSolverVariables() {}
   virtual void addAuxiliaryVariables() {}
   virtual void addInitialConditions() {}

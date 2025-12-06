@@ -11,10 +11,10 @@
 #include "MooseVariableBase.h"
 
 // Register the actions for the objects actually used
+registerDiffusionPhysicsBaseTasks("MooseApp", DiffusionCG);
 registerMooseAction("MooseApp", DiffusionCG, "add_kernel");
 registerMooseAction("MooseApp", DiffusionCG, "add_bc");
-registerMooseAction("MooseApp", DiffusionCG, "add_variable");
-registerDiffusionPhysicsBaseTasks("MooseApp", DiffusionCG);
+registerMooseAction("MooseApp", DiffusionCG, "add_variables_physics");
 
 InputParameters
 DiffusionCG::validParams()

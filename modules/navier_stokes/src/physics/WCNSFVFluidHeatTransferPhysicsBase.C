@@ -23,6 +23,7 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params += NSFVBase::commonFluidEnergyEquationParams();
   params.transferParam<bool>(PINSFVEnergyAnisotropicDiffusion::validParams(),
                              "effective_conductivity");
+  params.addParamNamesToGroup("effective_conductivity", "Material properties");
 
   // TODO Remove the parameter once NavierStokesFV syntax has been removed
   params.addParam<bool>("add_energy_equation",
@@ -55,7 +56,8 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
                               "Numerical scheme");
   params.addParamNamesToGroup("energy_inlet_types energy_inlet_functors",
                               "Inlet boundary conditions");
-  params.addParamNamesToGroup("energy_wall_types energy_wall_functors", "Wall boundary conditions");
+  params.addParamNamesToGroup("energy_wall_boundaries energy_wall_types energy_wall_functors",
+                              "Wall boundary conditions");
 
   return params;
 }
@@ -118,6 +120,13 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
   if (isParamValid("energy_wall_types"))
     checkVectorParamAndMultiMooseEnumLength<MooseFunctorName>("energy_wall_functors",
                                                               "energy_wall_types");
+
+  addRequiredPhysicsTask("get_turbulence_physics");
+  addRequiredPhysicsTask("add_variables_physics");
+  addRequiredPhysicsTask("add_ics_physics");
+  addRequiredPhysicsTask("add_fv_kernel");
+  addRequiredPhysicsTask("add_fv_bc");
+  addRequiredPhysicsTask("add_materials_physics");
 }
 
 void
@@ -159,7 +168,10 @@ WCNSFVFluidHeatTransferPhysicsBase::actOnAdditionalTasks()
 {
   // Turbulence physics would not be initialized before this task
   if (_current_task == "get_turbulence_physics")
+  {
     _turbulence_physics = getCoupledTurbulencePhysics();
+    _has_turbulence_model = _turbulence_physics ? _turbulence_physics->hasTurbulenceModel() : false;
+  }
 }
 
 bool
@@ -213,7 +225,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
   // For compatibility with Modules/NavierStokesFV syntax
   if (!_has_energy_equation)
     return;
-  if (!_define_variables && parameters().isParamSetByUser("initial_temperature"))
+  if (!_define_variables && isParamSetByUser("initial_temperature"))
     paramError(
         "initial_temperature",
         "T_fluid is defined externally of WCNSFVFluidHeatTransferPhysicsBase, so should the inital "
@@ -290,7 +302,7 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
 }
 
 void
-WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(const bool use_ad)
+WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors(const bool use_ad)
 {
   // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
   for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
@@ -301,12 +313,23 @@ WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(const bool use_ad)
     std::vector<std::string> f_names;
     if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
       f_names.push_back(_thermal_conductivity_name[i]);
-    if (!MooseUtils::parsesToReal(getSpecificHeatName()))
+    if (_solve_for_enthalpy && !MooseUtils::parsesToReal(getSpecificHeatName()))
       f_names.push_back(getSpecificHeatName());
+    const auto th_cond_name =
+        _thermal_conductivity_name[i] + (_has_turbulence_model ? "_plus_kt" : "");
+    if (!_has_turbulence_model)
+      params.set<std::string>("expression") =
+          _thermal_conductivity_name[i] +
+          (_solve_for_enthalpy ? ("/" + getSpecificHeatName()) : "");
+    else
+    {
+      f_names.push_back("k_t");
+      params.set<std::string>("expression") =
+          "(" + _thermal_conductivity_name[i] + " + k_t) " +
+          (_solve_for_enthalpy ? ("/" + getSpecificHeatName()) : "");
+    }
     params.set<std::vector<std::string>>("functor_names") = f_names;
-    params.set<std::string>("expression") =
-        _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
-    params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
+    params.set<std::string>("property_name") = th_cond_name + (_solve_for_enthalpy ? "_by_cp" : "");
     getProblem().addMaterial(
         object_type, prefix() + "rho_alpha_from_" + _thermal_conductivity_name[i], params);
   }

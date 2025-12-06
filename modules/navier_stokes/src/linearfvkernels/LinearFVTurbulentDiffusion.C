@@ -89,7 +89,8 @@ LinearFVTurbulentDiffusion::computeBoundaryMatrixContribution(const LinearFVBoun
   if (!diff_bc->includesMaterialPropertyMultiplier())
   {
     const auto face_arg = singleSidedFaceArg(_current_face_info);
-    grad_contrib *= _diffusion_coeff(face_arg, determineState());
+    grad_contrib *=
+        _diffusion_coeff(face_arg, determineState()) / _scaling_coeff(face_arg, determineState());
   }
 
   return grad_contrib;
@@ -107,7 +108,8 @@ LinearFVTurbulentDiffusion::computeBoundaryRHSContribution(const LinearFVBoundar
   // If the boundary condition does not include the diffusivity contribution then
   // add it here.
   if (!diff_bc->includesMaterialPropertyMultiplier())
-    grad_contrib *= _diffusion_coeff(face_arg, determineState());
+    grad_contrib *=
+        _diffusion_coeff(face_arg, determineState()) / _scaling_coeff(face_arg, determineState());
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.

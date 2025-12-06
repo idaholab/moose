@@ -1,64 +1,5 @@
-H = 1 #halfwidth of the channel
-L = 100
 
-Re = 13700
-
-rho = 1
-bulk_u = 1
-mu = '${fparse rho * bulk_u * 2 * H / Re}'
-
-advected_interp_method = 'upwind'
-
-### k-epsilon Closure Parameters ###
-sigma_k = 1.0
-sigma_eps = 1.3
-C1_eps = 1.44
-C2_eps = 1.92
-C_mu = 0.09
-
-### Initial and Boundary Conditions ###
-intensity = '${fparse 0.16*Re^(-1./8.)}'
-k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
-
-### Modeling parameters ###
-bulk_wall_treatment = false
-walls = 'top bottom'
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
-
-[Mesh]
-  [block_1]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = ${L}
-    ymin = 0
-    ymax = ${H}
-    nx = 4
-    ny = 4
-    bias_y = 0.7
-  []
-  [block_2]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = ${L}
-    ymin = '${fparse -H}'
-    ymax = 0
-    nx = 4
-    ny = 4
-    bias_y = '${fparse 1/0.7}'
-  []
-  [smg]
-    type = StitchedMeshGenerator
-    inputs = 'block_1 block_2'
-    clear_stitched_boundary_ids = true
-    stitch_boundaries_pairs = 'bottom top'
-    merge_boundaries_with_same_name = true
-  []
-  # Prevent test diffing on distributed parallel element numbering
-  allow_renumbering = false
-[]
+!include header_and_mesh.i
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
@@ -114,19 +55,14 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    # we use mu_eff directly here to be able to have deviatoric term for both mu and mu_t
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
     use_deviatoric_terms = yes
-  []
-  [u_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_x
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -138,19 +74,13 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
     use_deviatoric_terms = yes
-  []
-  [v_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_y
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -326,9 +256,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = MooseLinearVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
   []
-  [yplus]
-    type = MooseLinearVariableFVReal
-  []
 []
 
 [AuxKernels]
@@ -348,106 +275,20 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     execute_on = 'NONLINEAR'
     mu_t_ratio_max = 1e20
   []
-  [compute_y_plus]
-    type = RANSYPlusAux
-    variable = yplus
-    tke = TKE
+[]
+
+[FunctorMaterials]
+  [compute_mu_eff]
+    type = FunctorEffectiveDynamicViscosity
+    property_name = mu_eff
     mu = ${mu}
-    rho = ${rho}
-    u = vel_x
-    v = vel_y
-    walls = ${walls}
-    wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
+    mu_t = mu_t
+    mu_t_inverse_factor = 1
+    execute_on = 'ALWAYS'
   []
 []
 
-[Executioner]
-  type = SIMPLE
+!include executioner_regular_channel.i
 
-  rhie_chow_user_object = 'rc'
-  momentum_systems = 'u_system v_system'
-  pressure_system = 'pressure_system'
-  turbulence_systems = 'TKE_system TKED_system'
-
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  turbulence_l_abs_tol = 1e-14
-  momentum_l_tol = 1e-14
-  pressure_l_tol = 1e-14
-  turbulence_l_tol = 1e-14
-
-  momentum_equation_relaxation = 0.7
-  pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.2 0.2'
-  turbulence_field_relaxation = '0.2 0.2'
-  num_iterations = 1000
-  pressure_absolute_tolerance = 1e-12
-  momentum_absolute_tolerance = 1e-12
-  turbulence_absolute_tolerance = '1e-12 1e-12'
-  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg'
-  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
-  pressure_petsc_options_value = 'hypre boomeramg'
-  turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
-  turbulence_petsc_options_value = 'hypre boomeramg'
-
-  print_fields = false
-  continue_on_max_its = true
-[]
-
-[Outputs]
-  csv = true
-[]
-
-[AuxVariables]
-  [pressure_over_density]
-    type = MooseLinearVariableFVReal
-    solver_sys = TKE_system
-    initial_condition = ${k_init}
-  []
-[]
-
-[AuxKernels]
-  [compute_pressure_over_density]
-    type = ParsedAux
-    variable = pressure_over_density
-    coupled_variables = 'pressure'
-    expression = 'pressure/${rho}'
-  []
-[]
-
-[VectorPostprocessors]
-  [side_bottom]
-    type = SideValueSampler
-    boundary = 'bottom'
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
-    sort_by = 'x'
-    execute_on = 'timestep_end'
-  []
-  [side_top]
-    type = SideValueSampler
-    boundary = 'top'
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
-    sort_by = 'x'
-    execute_on = 'timestep_end'
-  []
-  [line_center_channel]
-    type = LineValueSampler
-    start_point = '${fparse 0.125 * L} ${fparse 0.0001} 0'
-    end_point = '${fparse 0.875 * L} ${fparse 0.0001} 0'
-    num_points = ${Mesh/block_1/nx}
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
-    sort_by = 'x'
-    execute_on = 'timestep_end'
-  []
-  [line_quarter_radius_channel]
-    type = LineValueSampler
-    start_point = '${fparse 0.125 * L} ${fparse 0.5 * H} 0'
-    end_point = '${fparse 0.875 * L} ${fparse 0.5 * H} 0'
-    num_points = ${Mesh/block_1/nx}
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
-    sort_by = 'x'
-    execute_on = 'timestep_end'
-  []
-[]
+variables_to_sample = 'vel_x vel_y pressure_over_density TKE TKED'
+!include postprocessing.i

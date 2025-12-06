@@ -15,8 +15,8 @@
 registerPhysicsBaseTasks("HeatTransferApp", HeatConductionCG);
 registerMooseAction("HeatTransferApp", HeatConductionCG, "add_kernel");
 registerMooseAction("HeatTransferApp", HeatConductionCG, "add_bc");
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_variable");
-registerMooseAction("HeatTransferApp", HeatConductionCG, "add_ic");
+registerMooseAction("HeatTransferApp", HeatConductionCG, "add_variables_physics");
+registerMooseAction("HeatTransferApp", HeatConductionCG, "add_ics_physics");
 registerMooseAction("HeatTransferApp", HeatConductionCG, "add_preconditioning");
 
 InputParameters
