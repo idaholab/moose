@@ -375,6 +375,9 @@ ComputeSmearedCrackingStress::updateCrackingStateAndStress()
   const Real youngs_modulus =
       ElasticityTensorTools::getIsotropicYoungsModulus(_elasticity_tensor[_qp]);
 
+  const Real poissons_ratio =
+      ElasticityTensorTools::getIsotropicPoissonsRatio(_elasticity_tensor[_qp]);
+
   Real cracking_stress = _cracking_stress[_qp];
 
   if (cracking_stress > 0)
@@ -453,7 +456,8 @@ ComputeSmearedCrackingStress::updateCrackingStateAndStress()
                                                      _crack_initiation_strain[_qp](i),
                                                      _crack_max_strain[_qp](i),
                                                      cracking_stress,
-                                                     youngs_modulus);
+                                                     youngs_modulus,
+                                                     poissons_ratio);
         _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
       }
 

@@ -33,6 +33,15 @@
     requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress release using AD and match non-AD methods.'
     capabilities = 'method!=dbg'
   []
+  [energybased_exponential]
+    type = Exodiff
+    input = cracking_energybased_exponential.i
+    exodiff = cracking_energybased_exponential_out.e
+    custom_cmp = cracking_exponential.cmp
+    use_old_floor = true
+    requirement = 'The MOOSE SolidMechanics module shall simulate exponential stress release with a prescribed fracture toughness using AD and match non-AD methods.'
+    capabilities = 'method!=dbg'
+  []
   [rz_exponential]
     type = Exodiff
     input = cracking_rz_exponential.i

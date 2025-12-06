@@ -40,7 +40,8 @@ ADPowerLawSoftening::computeCrackingRelease(ADReal & stress,
                                             const ADReal & /*crack_initiation_strain*/,
                                             const ADReal & /*crack_max_strain*/,
                                             const ADReal & cracking_stress,
-                                            const ADReal & youngs_modulus)
+                                            const ADReal & youngs_modulus,
+                                            const ADReal & /*poissons_ratio*/)
 {
   if (stress > cracking_stress)
   {
