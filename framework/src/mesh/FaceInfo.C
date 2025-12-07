@@ -16,7 +16,10 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/remote_elem.h"
 
-FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_type id)
+FaceInfo::FaceInfo(const ElemInfo * elem_info,
+                   unsigned int side,
+                   const dof_id_type id,
+                   libMesh::ElemSideBuilder & side_builder)
   : _elem_info(elem_info),
     _neighbor_info(nullptr),
     _id(id),
@@ -26,19 +29,17 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_t
     _gc(0.5)
 {
   // Compute face-related quantities
-  unsigned int dim = _elem_info->elem()->dim();
-  const std::unique_ptr<const Elem> face = _elem_info->elem()->build_side_ptr(_elem_side_id);
-  std::unique_ptr<libMesh::FEBase> fe(
-      libMesh::FEBase::build(dim, libMesh::FEType(_elem_info->elem()->default_order())));
-  libMesh::QGauss qface(dim - 1, libMesh::CONSTANT);
-  fe->attach_quadrature_rule(&qface);
-  const std::vector<Point> & normals = fe->get_normals();
-  fe->reinit(_elem_info->elem(), _elem_side_id);
-  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
-  _normal = normals[0];
-
-  _face_area = face->volume();
-  _face_centroid = face->vertex_average();
+  auto & face = side_builder(*_elem_info->elem(), side);
+  _face_area = face.volume();
+  _face_centroid = face.vertex_average();
+  // Workaround until libMesh PR#4292 is available
+  if (_elem_info->elem()->first_order_equivalent_type(_elem_info->elem()->type()) != EDGE2)
+    _normal = _elem_info->elem()->side_vertex_average_normal(side);
+  else
+  {
+    const auto v = (_elem_info->elem()->point(0) - _elem_info->elem()->point(1)).unit();
+    _normal = (side == 0) ? v : -v;
+  }
 }
 
 void
