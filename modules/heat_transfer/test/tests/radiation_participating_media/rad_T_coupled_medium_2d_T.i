@@ -7,24 +7,26 @@
 # -theta = sqrt(absorption_coeff/diffusion_coef)
 # G_bc = (4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta)))
 
-k = 1.0
+#k = 0.0000002268148
 b_eps = 1.0
-sigma_a = 0.33333
-diffusion_coef = ${fparse 1/(3*sigma_a)}
-temperature_radiation = 100.0
-wall_temperature = 100.0
-theta = ${fparse sqrt(sigma_a/diffusion_coef)}
-G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta))}
+sigma_a = 1.0
+# diffusion_coef = ${fparse 1/(3*sigma_a)}
 sigma = 5.670374419e-8
 
+N = 0.01 # Stark number N = k sigma_a / (4*sigma*pow(T_w,3))
+T_w = 100.
+k = ${fparse N*4*sigma*pow(T_w,3)/sigma_a}
 
 [Mesh]
-  [salt_mesh]
+  [mesh]
     type = GeneratedMeshGenerator
-    dim = 1
-    nx = 100
-    xmin = -0.5
-    xmax = 0.5
+    dim = 2
+    nx = 50
+    ny = 50
+    xmin = 0
+    xmax = 1
+    ymin = 0
+    ymax = 1
   []
 []
 
@@ -37,25 +39,14 @@ sigma = 5.670374419e-8
   [T]
     type = MooseLinearVariableFVReal
     solver_sys = 'energy_system'
-    initial_condition = 350
+    initial_condition = 1
   []
 []
 
 [AuxVariables]
-  [G_analytic]
-    type = MooseLinearVariableFVReal
-  []
   [G]
     type = MooseLinearVariableFVReal
-    initial_condition = 3400 #22.6815
-  []
-[]
-
-[AuxKernels]
-  [populate_analytical]
-    type = FunctorAux
-    functor = analytical_sol
-    variable = G_analytic
+    initial_condition = 1 #22.6815
   []
 []
 
@@ -74,23 +65,23 @@ sigma = 5.670374419e-8
 []
 
 [LinearFVBCs]
-  [left_bc_T]
+  [other_bc_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
-    boundary = 'left'
-    functor = 300.
+    boundary = 'right left top'
+    functor = ${fparse 0.5*T_w}
   []
-  [right_bc_T]
+  [bottom_bc_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
-    boundary = 'right'
-    functor = 400.
+    boundary = 'bottom'
+    functor = ${T_w}
   []
   # [left_bc_T]
   #   type = LinearFVP1TemperatureMarshakBC
   #   variable = T
-  #   temperature_radiation = 300.0
-  #   boundary = 'left'
+  #   temperature_radiation = ${fparse 0.5*T_w}
+  #   boundary = 'right left top'
   #   G = 'G'
   #   coeff_diffusion = ${k}
   #   boundary_emissivity = ${b_eps}
@@ -98,21 +89,12 @@ sigma = 5.670374419e-8
   # [right_bc_T]
   #   type = LinearFVP1TemperatureMarshakBC
   #   variable = T
-  #   temperature_radiation = 400.0
-  #   boundary = 'right'
+  #   temperature_radiation = ${T_w}
+  #   boundary = 'bottom'
   #   G = 'G'
   #   coeff_diffusion = ${k}
   #   boundary_emissivity = ${b_eps}
   # []
-[]
-
-[Functions]
-  [analytical_sol]
-    type = ParsedFunction
-    symbol_names = 'a'
-    symbol_values = '${fparse sqrt(sigma_a / diffusion_coef)}'
-    expression = '${G_bc} * cosh(${theta}*x) + 4* ${sigma} * ${temperature_radiation}^4'
-  []
 []
 
 [Postprocessors]
@@ -164,7 +146,8 @@ sigma = 5.670374419e-8
   nl_abs_tol = 1e-14
   fixed_point_min_its = 2
   fixed_point_max_its = 500
-  relaxation_factor = 0.9
+  relaxation_factor = 0.8
+  transformed_variables = 'T'
   fixed_point_rel_tol = 1e-12
   fixed_point_abs_tol = 1e-12
   # multiapp_fixed_point_convergence = fp_conv
@@ -182,9 +165,9 @@ sigma = 5.670374419e-8
 [MultiApps]
   [sub_app]
     type = FullSolveMultiApp
-    input_files = 'rad_T_coupled_medium_1d_G.i'
+    input_files = 'rad_T_coupled_medium_2d_G.i'
     #execute_on = timestep_end
-    relaxation_factor = 0.9
+    relaxation_factor = 0.8
   []
 []
 
