@@ -49,20 +49,20 @@ class PerfGraphNode:
             The parent node, if any.
 
         """
-        # A unique ID for this node
         self._id: int = id
-        # The name for this node
+        """A unique ID for this node."""
         self._name: str = name
-        # Self time for this node in seconds
+        """The name for this node."""
         self._self_time: float = time
-        # The number of calls to this node
+        """Self time for this node in seconds."""
         self._num_calls: int = num_calls
-        # Section that this node is in
+        """The number of calls to this node."""
         self._section: PerfGraphSection = section
-        # Parent node, if any
+        """Section that this node is in."""
         self._parent: Optional[PerfGraphNode] = parent
-        # The children to this node
+        """Parent node, if any."""
         self._children: list[PerfGraphNode] = []
+        """The children to this node."""
 
         # Add to the parent
         if self._parent is not None:

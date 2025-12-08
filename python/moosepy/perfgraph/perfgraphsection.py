@@ -34,12 +34,12 @@ class PerfGraphSection:
             The level for this section.
 
         """
-        # The name for this section
         self._name: str = name
-        # The level for this section
+        """The name for this section."""
         self._level: int = level
-        # The nodes in this section
+        """The level for this section."""
         self._nodes: list["PerfGraphNode"] = []
+        """The nodes in this section."""
 
     def __str__(self):
         """Human-readable name for this section."""
