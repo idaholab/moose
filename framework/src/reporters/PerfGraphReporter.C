@@ -49,7 +49,7 @@ PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
 }
 
 void
-PerfGraphReporter::execute()
+PerfGraphReporter::finalize()
 {
   auto & perf_graph = perfGraph();
 

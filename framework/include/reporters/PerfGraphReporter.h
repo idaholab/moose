@@ -25,8 +25,8 @@ public:
   PerfGraphReporter(const InputParameters & parameters);
 
   void initialize() override {}
-  void finalize() override {}
-  void execute() override;
+  void finalize() override;
+  void execute() override {}
 
   /// The reporter values that this object declares; used within the
   /// CommonOutputAction to single out values from this reporter
