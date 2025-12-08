@@ -74,14 +74,8 @@
   l_tol = 1e-3
   l_max_its = 100
 
-  abort_on_solve_fail = true
-
   [Quadrature]
     type = GAUSS
     order = SECOND
   []
-[]
-
-[Outputs]
-  exodus = true
 []

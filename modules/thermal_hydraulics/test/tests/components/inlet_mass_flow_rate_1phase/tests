@@ -45,6 +45,7 @@
   [run_water97]
     type = RunApp
     input = run_water97.i
+    capabilities = 'method!=dbg'
     requirement = "The system shall be able to use IAPWS-97 water fluid properties when using an inlet with specified mass flow rate and temperature."
   []
 []
