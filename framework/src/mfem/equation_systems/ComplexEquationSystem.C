@@ -275,6 +275,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   // Allocate block operator
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
+  ClearAllBlocks();
 
   // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
