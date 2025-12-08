@@ -66,10 +66,10 @@ class TestPerfGraph(TestCase):
         self.assertEqual(pg._version, PERFGRAPHREPORTER_VERSION)
         self.assertIsInstance(pg._root_node, PerfGraphNode)
 
-    def test_parse_root_data(self):
-        """Test _parse_root_data()."""
+    def test_root_data_parse(self):
+        """Test RootData.parse()."""
         data = build_perfgraph_data()
-        root_data = PerfGraph._parse_root_data(deepcopy(data))
+        root_data = PerfGraph.RootData.parse(deepcopy(data))
         self.assertIsInstance(root_data, PerfGraph.RootData)
         self.assertEqual(root_data.version, PERFGRAPHREPORTER_VERSION)
         self.assertEqual(root_data.root_node_name, "root")
@@ -77,19 +77,19 @@ class TestPerfGraph(TestCase):
 
         # Missing max_memory_per_rank, allowed
         data.pop("max_memory_per_rank")
-        root_data = PerfGraph._parse_root_data(deepcopy(data))
+        root_data = PerfGraph.RootData.parse(deepcopy(data))
         self.assertIsNone(root_data.max_memory_per_rank)
 
         # No version (version 0)
         data.pop("version")
         data.pop("max_memory_this_rank")
-        root_data = PerfGraph._parse_root_data(deepcopy(data))
+        root_data = PerfGraph.RootData.parse(deepcopy(data))
         self.assertEqual(root_data.version, 0)
         self.assertIsNone(root_data.max_memory_this_rank)
         self.assertIsNone(root_data.max_memory_per_rank)
 
-    def test_parse_node_data(self):
-        """Test _parse_node_data()."""
+    def test_node_data_parse(self):
+        """Test NodeData.parse()."""
 
         def check_common(data, node_data, level):
             self.assertEqual(
@@ -106,9 +106,7 @@ class TestPerfGraph(TestCase):
 
         # Just the root node, no children
         data = build_node_data(**root_args)
-        node_data = PerfGraph._parse_node_data(
-            deepcopy(data), PERFGRAPHREPORTER_VERSION
-        )
+        node_data = PerfGraph.NodeData.parse(deepcopy(data), PERFGRAPHREPORTER_VERSION)
         self.assertIsInstance(node_data, PerfGraph.NodeData)
         check_common(data, node_data.data, node_data.level)
         self.assertIsInstance(node_data.children, dict)
@@ -125,9 +123,7 @@ class TestPerfGraph(TestCase):
             **build_node_data(),
             "children": {"child": build_node_data(**child_args)},
         }
-        node_data = PerfGraph._parse_node_data(
-            deepcopy(data), PERFGRAPHREPORTER_VERSION
-        )
+        node_data = PerfGraph.NodeData.parse(deepcopy(data), PERFGRAPHREPORTER_VERSION)
         self.assertIsInstance(node_data, PerfGraph.NodeData)
         check_common(data, node_data.data, node_data.level)
         self.assertEqual(len(node_data.children), 1)
@@ -136,14 +132,14 @@ class TestPerfGraph(TestCase):
         self.assertEqual(child_data.pop("level"), child_level)
         check_common(child_args, child_data, child_level)
 
-    def test_parse_node_data_version_0(self):
-        """Test _parse_node_data() with version 0 when children were not separate."""
+    def test_node_data_parse_version_0(self):
+        """Test NodeData.parse() with version 0 when children were not separate."""
         # No children
         data = {
             **build_node_data(),
             "memory": 1.234,
         }
-        node_data = PerfGraph._parse_node_data(deepcopy(data), 0)
+        node_data = PerfGraph.NodeData.parse(deepcopy(data), 0)
         self.assertIsInstance(node_data, PerfGraph.NodeData)
         modified_data = deepcopy(data)
         modified_data.pop("level")
@@ -155,7 +151,7 @@ class TestPerfGraph(TestCase):
 
         # Single child
         data["child"] = {**build_node_data(), "memory": "2.345"}
-        node_data = PerfGraph._parse_node_data(deepcopy(data), 0)
+        node_data = PerfGraph.NodeData.parse(deepcopy(data), 0)
         self.assertIsInstance(node_data, PerfGraph.NodeData)
         self.assertIsInstance(node_data.children, dict)
         self.assertEqual(len(node_data.children), 1)
@@ -163,8 +159,8 @@ class TestPerfGraph(TestCase):
         self.assertEqual(child_name, "child")
         self.assertEqual(child_data, data["child"])
 
-    def test_setup(self):
-        """Test _setup()."""
+    def test_setupdata_setup(self):
+        """Test SetupData.setup()."""
         node_data = [
             build_node_data(time=float(i + 1), num_calls=i + 2) for i in range(7)
         ]
@@ -198,7 +194,7 @@ class TestPerfGraph(TestCase):
             }
         }
         data = build_perfgraph_data(graph=graph)
-        setup_data = PerfGraph._setup(deepcopy(data))
+        setup_data = PerfGraph.SetupData.setup(deepcopy(data))
         self.assertIsInstance(setup_data, PerfGraph.SetupData)
         nodes = setup_data.nodes
         sections = setup_data.sections
