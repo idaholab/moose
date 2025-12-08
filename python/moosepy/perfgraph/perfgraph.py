@@ -10,7 +10,9 @@
 """Implements PerfGraph for representing MOOSE PerfGraphReporter data."""
 
 from dataclasses import dataclass, field
-from typing import Callable, Iterable, Optional, Self
+from typing import Callable, Iterable, Optional
+
+from typing_extensions import Self
 
 from moosepy.perfgraph.perfgraphnode import PerfGraphNode
 from moosepy.perfgraph.perfgraphsection import PerfGraphSection
