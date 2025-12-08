@@ -44,7 +44,7 @@ class TestCIVETStore(TestCase):
         # Doesn't do a conversion
         as_set = set([test_filter])
         same = filter_as_iterable(as_set)
-        self.assertEqual(id(as_set), id(same))
+        self.assertIs(as_set, same)
 
     def test_has_all_filter(self):
         """Test has_all_filter()."""

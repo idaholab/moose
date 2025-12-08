@@ -87,7 +87,7 @@ class TestResultCollection(ResultsStoreTestCase):
 
         self.assertEqual(collection.results, results)
         self.assertEqual(collection.result_ids, [v.id for v in results])
-        self.assertEqual(id(collection.get_database()), id(database))
+        self.assertIs(collection.get_database(), database)
 
     def test_ResultCollection_init(self):
         """Test ResultCollection.__init__() for and basic properties/getters."""
@@ -106,7 +106,7 @@ class TestResultCollection(ResultsStoreTestCase):
 
         self.assertEqual(collection.result, result)
         self.assertEqual(collection.result_ids, [result.id])
-        self.assertEqual(id(collection.get_database()), id(database))
+        self.assertIs(collection.get_database(), database)
 
     def get_gold_resultscollection(self) -> Tuple[ResultsCollection, ResultsReader]:
         """Get a ResultCollection for the gold tests."""
@@ -228,7 +228,7 @@ class TestResultCollection(ResultsStoreTestCase):
             for i, test in enumerate(tests):
                 self.assertEqual(test.name, gold_test.name)
                 result = within_result if i == 0 else separate_result
-                self.assertEqual(id(result), id(test.result))
+                self.assertIs(result, test.result)
                 if i == 0:  # test within
                     self.assertIsNone(test.id)
                 else:  # test separate
@@ -306,7 +306,7 @@ class TestResultCollection(ResultsStoreTestCase):
         for i, test in enumerate(tests):
             self.assertIsInstance(test, StoredTestResult)
             self.assertEqual(test.name, TEST_NAME)
-            self.assertEqual(id(test.result), id(results[i]))
+            self.assertIs(test.result, results[i])
             if i == 0:  # test within
                 self.assertIsNone(test.id)
             else:  # test separate

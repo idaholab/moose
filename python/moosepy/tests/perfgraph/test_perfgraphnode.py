@@ -85,7 +85,7 @@ class TestPerfGraphNode(TestCase):
         child._parent = node
         node._add_child(child)
         self.assertEqual(len(node.children), 1)
-        self.assertEqual(id(child), id(node.children[0]))
+        self.assertIs(child, node.children[0])
 
     def test_level(self):
         """Test property level."""
@@ -190,8 +190,8 @@ class TestPerfGraphNode(TestCase):
 
         child1 = build_test_node(name="child1", parent=root)
         child2 = build_test_node(name="child2", parent=root)
-        self.assertEqual(id(root.query_child("child1")), id(child1))
-        self.assertEqual(id(root.query_child("child2")), id(child2))
+        self.assertIs(root.query_child("child1"), child1)
+        self.assertIs(root.query_child("child2"), child2)
 
     def test_has_child(self):
         """Test has_child()."""
@@ -210,7 +210,7 @@ class TestPerfGraphNode(TestCase):
             root.get_child("foo")
 
         child = build_test_node(name="foo", parent=root)
-        self.assertEqual(id(root.get_child("foo")), id(child))
+        self.assertIs(root.get_child("foo"), child)
 
     def test_get_path_to_root(self):
         """Test get_path_to_root."""

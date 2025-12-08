@@ -234,20 +234,20 @@ class TestPerfGraph(TestCase):
         node0 = check_node("node0", 1, 2)
         node0_section0 = check_node("section0", 2, 0)
         node0_section1 = check_node("section1", 3, 0)
-        self.assertEqual(id(node0), id(node0_section0.parent))
-        self.assertEqual(id(node0), id(node0_section1.parent))
+        self.assertIs(node0, node0_section0.parent)
+        self.assertIs(node0, node0_section1.parent)
         # node1 and children
         node1 = check_node("node1", 4, 2)
         node1_section0 = check_node("section0", 5, 0)
         node1_section1 = check_node("section1", 6, 0)
-        self.assertEqual(id(node1), id(node1_section0.parent))
-        self.assertEqual(id(node1), id(node1_section1.parent))
+        self.assertIs(node1, node1_section0.parent)
+        self.assertIs(node1, node1_section1.parent)
 
         def check_section(name, nodes):
             section = sections[name]
             self.assertEqual(len(section.nodes), len(nodes))
             for i, node in enumerate(nodes):
-                self.assertEqual(id(section.nodes[i]), id(node))
+                self.assertIs(section.nodes[i], node)
 
         # root section
         check_section("root", [root])
@@ -264,7 +264,7 @@ class TestPerfGraph(TestCase):
         """Test property root_node."""
         pg = build_perf_graph()
         self.assertIsNotNone(pg._root_node)
-        self.assertEqual(id(pg._root_node), id(pg.root_node))
+        self.assertIs(pg._root_node, pg.root_node)
 
     def test_nodes(self):
         """Test property nodes."""
@@ -397,9 +397,9 @@ class TestPerfGraph(TestCase):
         heaviest = pg.get_heaviest_nodes(3)
         self.assertIsInstance(heaviest, list)
         self.assertEqual(len(heaviest), 3)
-        self.assertEqual(id(heaviest[0]), id(nodes[3]))
-        self.assertEqual(id(heaviest[1]), id(nodes[1]))
-        self.assertEqual(id(heaviest[2]), id(nodes[0]))
+        self.assertIs(heaviest[0], nodes[3])
+        self.assertIs(heaviest[1], nodes[1])
+        self.assertIs(heaviest[2], nodes[0])
 
     def test_get_heaviest_sections(self):
         """Test get_heaviest_sections()."""
@@ -414,9 +414,9 @@ class TestPerfGraph(TestCase):
         heaviest = pg.get_heaviest_sections(3)
         self.assertIsInstance(heaviest, list)
         self.assertEqual(len(heaviest), 3)
-        self.assertEqual(id(heaviest[0]), id(sections[1]))
-        self.assertEqual(id(heaviest[1]), id(sections[3]))
-        self.assertEqual(id(heaviest[2]), id(sections[2]))
+        self.assertIs(heaviest[0], sections[1])
+        self.assertIs(heaviest[1], sections[3])
+        self.assertIs(heaviest[2], sections[2])
 
     @pytest.mark.moose
     def test_live(self):

@@ -114,7 +114,7 @@ class TestPerfGraphSection(TestCase):
         node = build_test_node()
         section._add_node(node)
         self.assertEqual(len(section.nodes), 1)
-        self.assertEqual(id(section.nodes[0]), id(node))
+        self.assertIs(section.nodes[0], node)
 
     def test_query_node(self):
         """Test query_node()."""
@@ -122,7 +122,7 @@ class TestPerfGraphSection(TestCase):
         section = build_test_section()
         child = build_test_node(parent=root, section=section)
         self.assertIsNone(section.query_node(["foo"]))
-        self.assertEqual(id(child), id(section.query_node(child.path)))
+        self.assertIs(child, section.query_node(child.path))
 
     def test_has_node(self):
         """Test has_node()."""
@@ -137,7 +137,7 @@ class TestPerfGraphSection(TestCase):
         root = build_test_node()
         section = build_test_section()
         child = build_test_node(parent=root, section=section)
-        self.assertEqual(id(child), id(section.get_node(child.path)))
+        self.assertIs(child, section.get_node(child.path))
         with self.assertRaisesRegex(
             KeyError, r"Node with path \['foo'\] does not exist"
         ):
