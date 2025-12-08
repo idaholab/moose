@@ -57,7 +57,7 @@ PerfGraphReporter::execute()
   _graph.value.clear();
   // Function for recursing through nodes
   std::function<void(nlohmann::json & json, const PerfNode &)> recurse_node;
-  recurse_node = [this, &recurse_node](nlohmann::json & json, const PerfNode & node)
+  recurse_node = [&recurse_node](nlohmann::json & json, const PerfNode & node)
   {
     const auto & info = moose::internal::getPerfGraphRegistry().sectionInfo(node.id());
 
