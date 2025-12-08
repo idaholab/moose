@@ -549,6 +549,8 @@ TransientBase::endStep(Real input_time)
       // Compute the Error Indicators and Markers
       _problem.computeIndicators();
       _problem.computeMarkers();
+      // Compute the aux variables to prepare for output
+      _problem.computeAuxSystem(EXEC_TIMESTEP_END);
 
       // Perform the output of the current time step
       _problem.outputStep(EXEC_TIMESTEP_END);

@@ -9726,6 +9726,12 @@ FEProblemBase::computeSystems(const ExecFlagType & type)
   _aux->compute(type);
 }
 
+void
+FEProblemBase::computeAuxSystem(const ExecFlagType & type)
+{
+  _aux->compute(type);
+}
+
 const ConstElemRange &
 FEProblemBase::getCurrentAlgebraicElementRange()
 {
