@@ -1765,6 +1765,7 @@ public:
   virtual void computeIndicatorsAndMarkers();
   virtual void computeIndicators();
   virtual void computeMarkers();
+  virtual void computeAuxSystem(const ExecFlagType & type);
 
   virtual void addResidual(const THREAD_ID tid) override;
   virtual void addResidualNeighbor(const THREAD_ID tid) override;
