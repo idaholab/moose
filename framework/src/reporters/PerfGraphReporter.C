@@ -13,7 +13,7 @@
 
 registerMooseObject("MooseApp", PerfGraphReporter);
 
-const std::vector<std::string> PerfGraphReporter::value_names{
+const std::vector<ReporterValueName> PerfGraphReporter::value_names{
     "graph", "max_memory_this_rank", "max_memory_per_rank", "version"};
 
 InputParameters

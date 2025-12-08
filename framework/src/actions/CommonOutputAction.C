@@ -172,7 +172,7 @@ CommonOutputAction::act()
   // Name of the PerfGraphReporter that could be created for the perf graph output
   static const std::string perf_graph_reporter_name = "perf_graph_json";
   // Name of the JSON output that could be created for the perf graph output
-  static const std::string perf_graph_json_output_name = "auto_perf_graph_json";
+  static const OutputName perf_graph_json_output_name = "auto_perf_graph_json";
 
   if (_current_task == "common_output")
   {

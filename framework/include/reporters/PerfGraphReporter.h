@@ -30,7 +30,7 @@ public:
 
   /// The reporter values that this object declares; used within the
   /// CommonOutputAction to single out values from this reporter
-  static const std::vector<std::string> value_names;
+  static const std::vector<ReporterValueName> value_names;
 
   /**
    * Structure that holds the PerfGraph in JSON.
