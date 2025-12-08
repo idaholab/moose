@@ -159,7 +159,7 @@ ComplexEquationSystem::ApplyDomainLFIntegrators(
       mfem::LinearFormIntegrator * integ_real = kernel->getRealLFIntegrator();
       mfem::LinearFormIntegrator * integ_imag = kernel->getImagLFIntegrator();
 
-      if (integ_real && integ_imag)
+      if (integ_real || integ_imag)
       {
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(
@@ -214,7 +214,7 @@ ComplexEquationSystem::ApplyBoundaryLFIntegrators(
       mfem::LinearFormIntegrator * integ_real = bc->getRealLFIntegrator();
       mfem::LinearFormIntegrator * integ_imag = bc->getImagLFIntegrator();
 
-      if (integ_real && integ_imag)
+      if (integ_real || integ_imag)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(
