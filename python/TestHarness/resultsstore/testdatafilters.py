@@ -24,6 +24,9 @@ class TestDataFilter(Enum):
     HPC = "hpc"
     """Load HPC data in tests."""
 
+    MAX_MEMORY = "max_memory"
+    """Load max_memory in tests."""
+
     STATUS = "status"
     """Load the status entry in tests."""
 
