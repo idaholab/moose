@@ -10,6 +10,8 @@
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
 #include "ParMixedSesquilinearForm.h"
+#include "MFEMMixedBilinearFormKernel.h"
+
 
 namespace Moose::MFEM
 {
@@ -118,7 +120,7 @@ public:
   // Complex essential BCs
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cmplx_essential_bc_map;
 
-  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  /// Pointers to coupled variables not part of the reduced ComplexEquationSystem.
   ComplexGridFunctions _cmplx_eliminated_variables;
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
