@@ -118,6 +118,10 @@ class SubprocessRunner(Runner):
 
     def _runMemoryThread(self):
         """Run the thread that tracks memory usage."""
+        # Set to zero so that we can show that it is possible
+        # to track memory even if the process is too short
+        self.setMaxMemory(0)
+
         assert psutil is not None
         process = self.process
         assert process is not None
