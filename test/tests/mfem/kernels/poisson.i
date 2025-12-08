@@ -2,11 +2,12 @@
   type = MFEMMesh
   file = ../mesh/square.e
   dim = 2
-  [MFEMPeriodic]
-    periodic = true
-    translation_x = "1. 0."
-    translation_y = "0. 0."
-  []
+[]
+
+[MFEMPeriodic]
+  type = MFEMPeriodicByVector
+  #translation_x = "1. 0."
+  #translation_y = "0. 0."
 []
 
 [Problem]

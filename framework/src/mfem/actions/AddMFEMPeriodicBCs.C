@@ -10,26 +10,45 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "AddMFEMPeriodicBCs.h"
+#include "MFEMMesh.h"
 
 registerMooseAction("MooseApp", AddMFEMPeriodicBCs, "add_mfem_periodic_bcs");
+registerMooseObject("MooseApp", MFEMPeriodicByVector);
+
+InputParameters
+MFEMPeriodicByVector::validParams()
+{
+  InputParameters params = MooseObject::validParams();
+  params.addParam<std::string>("type", "MFEMPeriodicByVector", "dummy string");
+  return params;
+}
+
+MFEMPeriodicByVector::MFEMPeriodicByVector(const InputParameters& parameters)
+  : MooseObject(parameters) {}
+
+
+/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 InputParameters
 AddMFEMPeriodicBCs::validParams()
 {
   InputParameters params = Action::validParams();
-  // params.addClassDescription("Add a MFEM FESpace object to the simulation.");
+  params.addParam<std::string>("type", "MFEMPeriodicByVector", "dummy string");
   return params;
 }
 
 AddMFEMPeriodicBCs::AddMFEMPeriodicBCs(const InputParameters & parameters)
-  : Action(parameters)
+  : MooseObjectAction(parameters)
 {
 }
 
 void
 AddMFEMPeriodicBCs::act()
 {
-  std::cout << "We are acting!!\n";
+  // can we convert the moose mesh into mfemmesh?
+  bool success = ( dynamic_cast<MFEMMesh*>(_mesh.get()) != nullptr );
+
+  if (success) std::cout << "Got a successful cast!\n";
 }
 
 #endif
