@@ -80,7 +80,9 @@ class TestHarnessResultsSummary:
 
         return parser.parse_args(args)
 
-    def pr_tests(self, event_id: int, out_file: str) -> Tuple[
+    def pr_tests(
+        self, event_id: int, out_file: str
+    ) -> Tuple[
         Optional[ResultCollection],
         ResultCollection,
     ]:
@@ -139,9 +141,17 @@ class TestHarnessResultsSummary:
         return base_collection, head_collection
 
     @staticmethod
-    def _format_test_name(test_name):
+    def _format_test_name(test_name) -> str:
         """Format a test name for display, wrapped in backticks."""
         return f"`{str(test_name)}`"
+
+    @staticmethod
+    def _format_max_memory(max_memory) -> str:
+        """Convert max memory of test to Megabyte and 2 dec place."""
+        assert isinstance(max_memory, (NoneType, int))
+        max_memory_mb = max_memory / 1000000 if max_memory else 0
+        max_memory_str = f"{max_memory_mb:.2f}"
+        return max_memory_str
 
     @staticmethod
     def _sort_test_times_key(
@@ -241,7 +251,12 @@ class TestHarnessResultsSummary:
         test_table = []
         for test_name in test_names:
             test = collection.get_test(
-                test_name, (TestDataFilter.TIMING, TestDataFilter.STATUS)
+                test_name,
+                (
+                    TestDataFilter.TIMING,
+                    TestDataFilter.STATUS,
+                    TestDataFilter.MAX_MEMORY,
+                ),
             )
             assert test is not None
             # Test is skipped, so show time as SKIP
@@ -253,10 +268,12 @@ class TestHarnessResultsSummary:
             # Test does not have a run time
             else:
                 run_time = ""
+
             test_table.append(
                 [
                     TestHarnessResultsSummary._format_test_name(test_name),
                     run_time,
+                    TestHarnessResultsSummary._format_max_memory(test.max_memory),
                 ]
             )
 
@@ -312,12 +329,22 @@ class TestHarnessResultsSummary:
         same_table = []
         for test_name in same_names:
             base_result = base_collection.get_test(
-                test_name, (TestDataFilter.TIMING, TestDataFilter.STATUS)
+                test_name,
+                (
+                    TestDataFilter.TIMING,
+                    TestDataFilter.STATUS,
+                    TestDataFilter.MAX_MEMORY,
+                ),
             )
             assert base_result is not None
 
             head_result = head_collection.get_test(
-                test_name, (TestDataFilter.TIMING, TestDataFilter.STATUS)
+                test_name,
+                (
+                    TestDataFilter.TIMING,
+                    TestDataFilter.STATUS,
+                    TestDataFilter.MAX_MEMORY,
+                ),
             )
             assert head_result is not None
 
@@ -345,6 +372,12 @@ class TestHarnessResultsSummary:
                         f"{base_result.run_time:.2f}",
                         f"{head_result.run_time:.2f}",
                         f"{relative_runtime:+.2%}",
+                        TestHarnessResultsSummary._format_max_memory(
+                            base_result.max_memory
+                        ),
+                        TestHarnessResultsSummary._format_max_memory(
+                            head_result.max_memory
+                        ),
                     ]
                 )
         if not same_table:
@@ -553,14 +586,20 @@ class TestHarnessResultsSummary:
             if removed_table:
                 summary.append(
                     TestHarnessResultsSummary._format_table(
-                        "\n### Removed tests\n", removed_table, ["Test", "Time (s)"], ""
+                        "\n### Removed tests\n",
+                        removed_table,
+                        ["Test", "Time (s)", "MEM (MB)"],
+                        "",
                     )
                 )
             # Format added table
             if added_table:
                 summary.append(
                     TestHarnessResultsSummary._format_table(
-                        "\n### Added tests\n", added_table, ["Test", "Time (s)"], ""
+                        "\n### Added tests\n",
+                        added_table,
+                        ["Test", "Time (s)", "MEM (MB)"],
+                        "",
                     )
                 )
             else:
@@ -571,7 +610,14 @@ class TestHarnessResultsSummary:
                     TestHarnessResultsSummary._format_table(
                         "\n### Run time changes\n",
                         same_table,
-                        ["Test", "Base (s)", "Head (s)", "+/-"],
+                        [
+                            "Test",
+                            "Base (s)",
+                            "Head (s)",
+                            "+/-",
+                            "Base (MB)",
+                            "Head (MB)",
+                        ],
                         "",
                     )
                 )
