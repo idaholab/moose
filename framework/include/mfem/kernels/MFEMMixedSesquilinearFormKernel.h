@@ -28,6 +28,9 @@ public:
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const override;
 
+  virtual mfem::LinearFormIntegrator * getRealLFIntegrator() override {return nullptr;}
+  virtual mfem::LinearFormIntegrator * getImagLFIntegrator() override {return nullptr;}
+
   virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() override
   {
     if (_real_kernel)
@@ -35,6 +38,7 @@ public:
     else
       return nullptr;
   }
+
   virtual mfem::BilinearFormIntegrator * getImagBFIntegrator() override
   {
     if (_imag_kernel)

@@ -11,6 +11,8 @@
 
 #include "MFEMMixedSesquilinearFormKernel.h"
 
+registerMooseObject("MooseApp", MFEMMixedSesquilinearFormKernel);
+
 InputParameters
 MFEMMixedSesquilinearFormKernel::validParams()
 {
