@@ -132,6 +132,6 @@
   [out]
     type = CSV
     execute_on = FINAL
-    file_base = 'gpgoldadam'
+    file_base = 'gpmcgold'
   []
 []

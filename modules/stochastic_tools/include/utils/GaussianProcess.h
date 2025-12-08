@@ -149,21 +149,22 @@ public:
 
   /**
    * Parameter setting for MCMC sampling.
-   * @param l Constant parameter from the paper.
-   * @param u Constant parameter from the paper.
-   * @param noise Noise level.
-   * @param lengthscale Lengthscale.
-   * @param alpha Parameter for gamma distribution.
-   * @param beta Parameter for gamma distribution.
    */
   struct Settings {
+    /// Lower constants controlling the proposal range.
     Real l;
+    /// Upper constants controlling the proposal range.
     Real u;
+
+    /// Parameters used by the gamma distribution.
     struct {
+      /// Noise level.
       Real noise;
+      /// Lengthscale.
       Real lengthscale;
     } alpha, beta;
   };
+
 
   /**
    * Initialzed value for GP hyperparameters.
@@ -212,7 +213,7 @@ public:
   /**
    * Computes multivariate normal marginal log likelihood and scale.
    * @param outvec Observed outputs (response values).
-   * @param x1 Input data 1.
+   * @param x1 Input data.
    * @param noise Noise level.
    * @param lengthscale Lengthscale.
    * @param result Return value.
@@ -225,20 +226,20 @@ public:
   /**
    * Samples noise level using MH algorithm.
    * @param outvec Observed outputs (response values).
-   * @param x1 Input data 1.
+   * @param x1 Input data.
    * @param noise_t Noise level.
    * @param lengthscale Lengthscale.
    * @param settings parameter setting
    * @param ll_prev Log likelihood from the previous MCMC round.
    * @param result Return value.
    */
-  void sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, Real noise_t, const RealEigenMatrix lengthscale, 
+  void sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const Real noise_t, const RealEigenMatrix lengthscale, 
               Settings & settings, Real ll_prev, SampleNoiseResult & result);
 
   /**
    * Samples lengthscale theta using MH algorithm.
    * @param outvec Observed outputs (response values).
-   * @param x1 Input data 1.
+   * @param x1 Input data.
    * @param lengthscale_t Lengthscale.
    * @param i index for input data dimension.
    * @param settings parameter setting

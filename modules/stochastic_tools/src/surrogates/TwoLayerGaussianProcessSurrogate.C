@@ -18,7 +18,7 @@ InputParameters
 TwoLayerGaussianProcessSurrogate::validParams()
 {
   InputParameters params = SurrogateModel::validParams();
-  params.addClassDescription("Computes and evaluates Gaussian Process surrogate model.");
+  params.addClassDescription("Computes and evaluates a deep Gaussian Process surrogate model.");
   return params;
 }
 

@@ -184,20 +184,19 @@ GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x
 
   _covariance_function->computeCovarianceMatrix(_K, x1, x1, true);
 
-  RealEigenMatrix Mi = _K.llt().solve(RealEigenMatrix::Identity(_K.rows(), _K.cols()));
-  Real ldet = std::log(_K.determinant());
+  const RealEigenMatrix Mi = _K.llt().solve(RealEigenMatrix::Identity(_K.rows(), _K.cols()));
 
-  RealEigenMatrix diff = out_vec;
-  Real quadterm = (diff.transpose() * Mi * diff)(0,0);
+  const Real ldet = std::log(_K.determinant());
+  const RealEigenMatrix diff = out_vec;
+  const Real quadterm = (diff.transpose() * Mi * diff)(0,0);
 
-  Real logl_val;
-  logl_val = -0.5 * quadterm - 0.5 * ldet;
+  const Real logl_val = -0.5 * quadterm - 0.5 * ldet;
   
   Real scale_val;
   if (scale) {
       scale_val = quadterm / n;
   } else {
-      scale_val = -999;
+      scale_val = NAN;
   }
 
   result.logl = logl_val;
@@ -205,17 +204,17 @@ GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x
 }
 
 void
-GaussianProcess::sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, Real noise_t, const RealEigenMatrix lengthscale, 
+GaussianProcess::sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const Real noise_t, const RealEigenMatrix lengthscale, 
               Settings & settings, Real ll_prev, SampleNoiseResult & result) {
-  Real alpha = settings.alpha.noise;
-  Real beta = settings.beta.noise;
-  Real l = settings.l;
-  Real u = settings.u;
-  Real ru1 = MooseRandom::rand();
-  Real ru = MooseRandom::rand();
-  Real noise_star = Uniform::quantile(ru1, l * noise_t / u, u * noise_t / l);
+  const Real alpha = settings.alpha.noise;
+  const Real beta = settings.beta.noise;
+  const Real l = settings.l;
+  const Real u = settings.u;
+  const Real ru1 = MooseRandom::rand();
+  const Real ru = MooseRandom::rand();
+  const Real noise_star = Uniform::quantile(ru1, l * noise_t / u, u * noise_t / l);
 
-  if (ll_prev == -999) {
+  if (std::isnan(ll_prev)) {
     LogLResult ll_result;
     logl(out_vec, x1, lengthscale, ll_result, false);
     ll_prev = ll_result.logl;
@@ -242,16 +241,16 @@ GaussianProcess::sampleNoise(const RealEigenMatrix & out_vec, const RealEigenMat
 void
 GaussianProcess::sampleLengthscale(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & lengthscale_t,
               unsigned int i, Settings & settings, SampleLengthscaleResult & result, Real ll_prev) {
-    Real alpha = settings.alpha.noise;
-    Real beta = settings.beta.noise;
-    Real l = settings.l;
-    Real u = settings.u;
+    const Real alpha = settings.alpha.noise;
+    const Real beta = settings.beta.noise;
+    const Real l = settings.l;
+    const Real u = settings.u;
     RealEigenMatrix lengthscale_star = lengthscale_t;
-    Real ru1 = MooseRandom::rand();
-    Real ru = MooseRandom::rand();
+    const Real ru1 = MooseRandom::rand();
+    const Real ru = MooseRandom::rand();
     lengthscale_star(0, i) = Uniform::quantile(ru1, l * lengthscale_t(0,i) / u, u * lengthscale_t(0,i) / l);
 
-    if (ll_prev == -999) {
+    if (std::isnan(ll_prev)) {
       LogLResult ll_result;
       logl(out_vec, x1, lengthscale_t, ll_result, true);
       ll_prev = ll_result.logl;
@@ -275,7 +274,7 @@ GaussianProcess::sampleLengthscale(const RealEigenMatrix & out_vec, const RealEi
     } else {
       result.lengthscale = lengthscale_t(0,i);
       result.ll = ll_prev;
-      result.scale = -999;
+      result.scale = NAN;
     }
 }
 
@@ -327,9 +326,9 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
   scale(0,0) = initial.scale;
   RealEigenMatrix ll_store(nmcmc, x.cols());
   for (unsigned int j = 0; j < x.cols(); j++) {
-    lengthscale_0(0, j) = -999;
+    lengthscale_0(0, j) = NAN;
   }
-  Real ll = -999;
+  Real ll = NAN;
   
   for (unsigned int j = 1; j < nmcmc; ++j) {
     SampleNoiseResult sample_noise_result;
@@ -344,7 +343,7 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
       lengthscale(j,i) = sample_lengthscale_result.lengthscale;
       ll = sample_lengthscale_result.ll;
       ll_store(j,i) = ll;
-      if (sample_lengthscale_result.scale == -999) {
+      if (std::isnan(sample_lengthscale_result.scale)) {
         scale(j,0) = scale(j-1,0);
       }
       else {
