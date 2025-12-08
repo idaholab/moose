@@ -43,6 +43,12 @@ EquationSystem::DeleteJacobianBlocks()
       if (!_h_blocks.NumRows() || _jacobian_blocks(i, j) != _h_blocks(i, j))
         delete _jacobian_blocks(i, j);
   _jacobian_blocks.DeleteAll();
+  
+void EquationSystem::ClearAllBlocks()
+{
+  for (const auto i : make_range(_h_blocks.NumRows()))
+    for (const auto j : make_range(_h_blocks.NumCols()))
+      _h_blocks(i, j) = nullptr;
 }
 
 bool
