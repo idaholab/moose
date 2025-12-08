@@ -27,7 +27,7 @@ from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.storedtestresult import StoredTestResult
 from TestHarness.resultsstore.utils import TestName
 from TestHarness.resultssummary.summary import TestHarnessResultsSummary
-from TestHarness.tests.resultsstore.common import random_git_sha
+from TestHarness.tests.resultsstore.common import random_git_sha, random_version
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = ResultsReader.load_authentication() is not None
@@ -52,11 +52,13 @@ class FakeStoredTestResult(StoredTestResult):
         name: TestName,
         run_time: Optional[float] = 2.0,
         status: Optional[str] = "OK",
+        max_memory: Optional[int] = 1234567,
     ):
         """Initialize faked state."""
         self._name = name
         self._run_time: Optional[float] = run_time
         self._status = {"status": status} if status is not None else None
+        self._max_memory: Optional[int] = max_memory
 
     @property
     def run_time(self) -> Optional[float]:
@@ -73,16 +75,25 @@ class FakeStoredTestResult(StoredTestResult):
         """Fake status value for a test."""
         return self.status["status"] if self.status is not None else None
 
+    @property
+    def max_memory(self) -> Optional[int]:
+        """Fake max memory for a test."""
+        return self._max_memory
+
 
 class FakeStoredResult(StoredResult):
     """Fake StoredResult for unit testing."""
 
     def __init__(
-        self, run_time: float = float(random.random()), status: Optional[str] = "OK"
+        self,
+        run_time: float = float(random.random()),
+        status: Optional[str] = "OK",
+        max_memory: int = int(random.random()),
     ):
         """Initialize fake state."""
         self._base_sha: str = random_git_sha()
         self._event_sha: str = random_git_sha()
+        self._version: int = random_version()
 
     @property
     def civet_job_url(self) -> str:
@@ -98,6 +109,11 @@ class FakeStoredResult(StoredResult):
     def event_sha(self) -> str:
         """Fake event sha for a result."""
         return self._event_sha
+
+    @property
+    def version(self) -> str:
+        """Fake event sha for a result."""
+        return self._version
 
 
 class FakeResultCollection(ResultCollection):
@@ -324,6 +340,18 @@ class TestResultsSummary(TestCase):
         with self.assertRaisesRegex(SystemExit, "Results do not exist for event"):
             summary.pr_tests(EVENT_ID, self.tmp_file.name)
 
+    def test_format_max_memory_None(self):
+        """Test _format_max_memory when max_memory is None."""
+        test = get_fake_test(max_memory=None)
+        max_memory = TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        self.assertEqual(max_memory, "0.00")
+
+    def test_format_max_memory(self):
+        """Test _format_max_memory when max_memory is None."""
+        test = get_fake_test(max_memory=1234567)
+        max_memory = TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        self.assertEqual(max_memory, "1.23")
+
     def test_sort_test_time_key_numeric(self):
         """Test that _sort_test_time_key() returns correct key for numeric value."""
         test_table_row = ["`testa.test1`", "4.20"]
@@ -387,8 +415,12 @@ class TestResultsSummary(TestCase):
         )
         self.assertEqual(len(table), 1)
         self.assertIsInstance(table[0], list)
+        self.assertEqual(len(table[0]), 3)
         self.assertIn(str(test.name), table[0][0])
         self.assertEqual(table[0][1], f"{test.run_time:.2f}")
+        self.assertEqual(
+            table[0][2], TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        )
 
     def test_build_diff_table_no_runtime(self):
         """Test _build_diff_table() with a test without a runtime."""
@@ -399,9 +431,12 @@ class TestResultsSummary(TestCase):
             collection,
         )
         self.assertEqual(len(table), 1)
-        self.assertEqual(len(table[0]), 2)
+        self.assertEqual(len(table[0]), 3)
         self.assertIn(str(test.name), table[0][0])
         self.assertEqual(table[0][1], "")
+        self.assertEqual(
+            table[0][2], TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        )
 
     def test_build_diff_table_skip(self):
         """Test _build_diff_table() when the status is SKIP."""
@@ -412,9 +447,26 @@ class TestResultsSummary(TestCase):
             collection,
         )
         self.assertEqual(len(table), 1)
-        self.assertEqual(len(table[0]), 2)
+        self.assertEqual(len(table[0]), 3)
         self.assertIn(str(test.name), table[0][0])
         self.assertEqual(table[0][1], "SKIP")
+        self.assertEqual(
+            table[0][2], TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        )
+
+    def test_build_diff_table_no_maxMemory(self):
+        """Test _build_diff_table() with a test without a runtime."""
+        test = get_fake_test(max_memory=None)
+        collection = FakeResultCollection(test)
+        table = TestHarnessResultsSummary._build_diff_table(
+            collection.get_test_names(),
+            collection,
+        )
+        self.assertEqual(len(table), 1)
+        self.assertEqual(len(table[0]), 3)
+        self.assertIn(str(test.name), table[0][0])
+        self.assertEqual(table[0][1], f"{test.run_time:.2f}")
+        self.assertEqual(table[0][2], "0.00")
 
     def test_build_same(self):
         """
@@ -429,8 +481,8 @@ class TestResultsSummary(TestCase):
 
         # Absolute relative run time rate is higher than
         # the run time floor
-        base_test = get_fake_test(run_time=10.0)
-        head_test = get_fake_test(run_time=4.0)
+        base_test = get_fake_test(run_time=10.0, max_memory=4567890)
+        head_test = get_fake_test(run_time=4.0, max_memory=1234567)
         base_collection = FakeResultCollection(base_test)
         head_collection = FakeResultCollection(head_test)
 
@@ -441,10 +493,9 @@ class TestResultsSummary(TestCase):
             run_time_floor=fake_run_time_floor,
             run_time_rate_floor=fake_run_time_rate_floor,
         )
-
         assert table is not None
         self.assertEqual(len(table), 1)
-        self.assertEqual(len(table[0]), 4)
+        self.assertEqual(len(table[0]), 6)
         self.assertIn(str(base_test.name), table[0][0])
         self.assertEqual(table[0][1], f"{base_test.run_time:.2f}")
         self.assertEqual(table[0][2], f"{head_test.run_time:.2f}")
@@ -452,6 +503,14 @@ class TestResultsSummary(TestCase):
         # Compare absolute relative run time rate is higher than floor rate
         self.assertGreater(
             abs(float(table[0][3].strip("%"))), fake_run_time_rate_floor * 100
+        )
+        self.assertEqual(
+            table[0][4],
+            TestHarnessResultsSummary._format_max_memory(base_test.max_memory),
+        )
+        self.assertEqual(
+            table[0][5],
+            TestHarnessResultsSummary._format_max_memory(head_test.max_memory),
         )
 
     def test_build_same_zero_base_runtime(self):
@@ -646,19 +705,23 @@ class TestResultsSummary(TestCase):
 
         assert added is not None
         self.assertEqual(len(added), 1)
-        self.assertEqual(len(added[0]), 2)
+        self.assertEqual(len(added[0]), 3)
         self.assertIn(str(added_test.name), added[0][0])
         self.assertEqual(added[0][1], f"{added_test.run_time:.2f}")
         self.assertIsNone(removed)
         self.assertIsNone(same)
+        self.assertEqual(
+            added[0][2],
+            TestHarnessResultsSummary._format_max_memory(added_test.max_memory),
+        )
 
     def test_diff_table_same_tests(self):
         """Test diff_table() with the same tests that will be reported."""
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
 
-        base_test = get_fake_test(run_time=10.0)
-        head_test = get_fake_test(run_time=17.0)
+        base_test = get_fake_test(run_time=10.0, max_memory=1234567)
+        head_test = get_fake_test(run_time=17.0, max_memory=4567890)
         base_collection = FakeResultCollection(base_test)
         head_collection = FakeResultCollection(head_test)
 
@@ -672,7 +735,7 @@ class TestResultsSummary(TestCase):
 
         assert same is not None
         self.assertEqual(len(same), 1)
-        self.assertEqual(len(same[0]), 4)
+        self.assertEqual(len(same[0]), 6)
         self.assertIn(str(base_test.name), same[0][0])
         self.assertEqual(same[0][1], f"{base_test.run_time:.2f}")
         self.assertEqual(same[0][2], f"{head_test.run_time:.2f}")
@@ -680,6 +743,14 @@ class TestResultsSummary(TestCase):
         # Compare absolute relative run time is higher than floor rate
         self.assertGreater(
             abs(float(same[0][3].strip("%"))), fake_run_time_rate_floor * 100
+        )
+        self.assertEqual(
+            same[0][4],
+            TestHarnessResultsSummary._format_max_memory(base_test.max_memory),
+        )
+        self.assertEqual(
+            same[0][5],
+            TestHarnessResultsSummary._format_max_memory(head_test.max_memory),
         )
         self.assertIsNone(removed)
         self.assertIsNone(added)
