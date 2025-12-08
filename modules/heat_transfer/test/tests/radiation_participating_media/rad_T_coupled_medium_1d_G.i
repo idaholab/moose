@@ -7,20 +7,16 @@
 # -theta = sqrt(absorption_coeff/diffusion_coef)
 # G_bc = (4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta)))
 
-# High-Order Spherical Harmonics Methods for Radiative Heat
-#Transfer and Applications in Combustion Simulations
-#by
-#Wenjun Ge
-
-sigma = 5.670374419e-8
-sigma_a = 1.0 #10.0 #0.33333
+k = 1.0
+sigma_a = 0.33333
 diffusion_coef = ${fparse 1/(3*sigma_a)}
-temperature_radiation = ${fparse pow(1/(4*sigma),0.25) } #350.0
-wall_temperature = 0.0
-eps_w = 1.0
+b_eps = 1.0
+
+temperature_radiation = 100.0
+wall_temperature = 100.0
 theta = ${fparse sqrt(sigma_a/diffusion_coef)}
-G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
-(2*(2-eps_w)/eps_w*diffusion_coef*theta*sinh(theta)+cosh(theta))}
+G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta))}
+sigma = 5.670374419e-8
 
 
 [Mesh]
@@ -28,8 +24,8 @@ G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
     type = GeneratedMeshGenerator
     dim = 1
     nx = 100
-    xmin = 0
-    xmax = 1
+    xmin = -0.5
+    xmax = 0.5
   []
 []
 
@@ -42,13 +38,17 @@ G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
   [G]
     type = MooseLinearVariableFVReal
     solver_sys = 'radiation_system'
-    initial_condition = 1
+    initial_condition = 3400 #22.6815
   []
 []
 
 [AuxVariables]
   [G_analytic]
     type = MooseLinearVariableFVReal
+  []
+  [T]
+    type = MooseLinearVariableFVReal
+    initial_condition = 350
   []
 []
 
@@ -69,28 +69,58 @@ G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
   [source_and_sink]
     type = LinearFVP1RadiationSourceSink
     variable = G
-    temperature_radiation = ${temperature_radiation}
+    temperature_radiation = 'T'
     absorption_coeff = ${sigma_a}
   []
 []
 
 [LinearFVBCs]
-  [right_bc]
+  [right_bc_G]
     type = LinearFVP1RadiationMarshakBC
     boundary = 'right'
     variable = G
-    temperature_radiation = ${wall_temperature}
+    temperature_radiation = 400.0#'T'
     coeff_diffusion = ${diffusion_coef}
-    boundary_emissivity = ${eps_w}
+    boundary_emissivity = ${b_eps}
   []
-  [left_bc]
+  [left_bc_G]
     type = LinearFVP1RadiationMarshakBC
     boundary = 'left'
     variable = G
-    temperature_radiation = ${wall_temperature}
+    temperature_radiation = 300.0 #'T'
     coeff_diffusion = ${diffusion_coef}
-    boundary_emissivity = 1.0
+    boundary_emissivity = ${b_eps}
   []
+  # [left_bc_T]
+  #   type = LinearFVP1TemperatureMarshakBC
+  #   variable = T
+  #   temperature_radiation = 300.0
+  #   boundary = 'left'
+  #   G = 'G'
+  #   coeff_diffusion = ${k}
+  #   boundary_emissivity = ${b_eps}
+  # []
+  # [right_bc_T]
+  #   type = LinearFVP1TemperatureMarshakBC
+  #   variable = T
+  #   temperature_radiation = 400.0
+  #   boundary = 'right'
+  #   G = 'G'
+  #   coeff_diffusion = ${k}
+  #   boundary_emissivity = ${b_eps}
+  # []
+  # [left_bc_T]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   variable = T
+  #   boundary = 'left'
+  #   functor = 300.
+  # []
+  # [right_bc_T]
+  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
+  #   variable = T
+  #   boundary = 'right'
+  #   functor = 400.
+  # []
 []
 
 [Functions]
@@ -103,36 +133,48 @@ G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
 []
 
 [Postprocessors]
-  [mean_value]
+  [mean_value_G]
     type = ElementIntegralFunctorPostprocessor
     functor = G
   []
-  [max_value]
+  [max_value_G]
     type = ElementExtremeFunctorValue
     functor = G
   []
-  [mean_value_analytic]
+  [mean_value_T]
     type = ElementIntegralFunctorPostprocessor
-    functor = analytical_sol
+    functor = T
   []
-  [relative_difference]
-    type = RelativeDifferencePostprocessor
-    value1 = mean_value
-    value2 = mean_value_analytic
+  [max_value_T]
+    type = ElementExtremeFunctorValue
+    functor = T
   []
 []
+
+# [Convergence]
+#   [linear]
+#     type = IterationCountConvergence
+#     max_iterations = 2000
+#     converge_at_max_iterations = true
+#   []
+# []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
-  nl_abs_tol = 1e-12
+  # petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  # petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  l_abs_tol = 1e-16
+  l_tol = 1e-16
+  nl_abs_tol = 1e-16
+  relaxation_factor = 0.9
 []
 
-[Outputs]
-  file_base = rad_isothermal_medium_1d_adiabatic
-  csv = true
-  exodus = true
-  execute_on = timestep_end
-[]
+# [Outputs]
+#   #file_base = rad_isothermal_medium_1d_adiabatic
+#   csv = true
+#   exodus = true
+#   execute_on = timestep_end
+# []
