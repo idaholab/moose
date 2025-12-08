@@ -537,7 +537,8 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "add_variable");
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
-  registerTask("add_mfem_periodic_bcs", true);
+  // add periodic BCs to an mfem mesh, if needed
+  registerTask("add_mfem_periodic_bcs", false);
   addTaskDependency("add_mfem_periodic_bcs", "init_mesh");
 
   // add preconditioning.
@@ -833,6 +834,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
+  registerSyntaxTask("AddMFEMPeriodicBCs", "MFEMPeriodic", "add_mfem_periodic_bcs");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");
