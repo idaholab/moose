@@ -32,9 +32,11 @@ DeleteElementsNearMeshGenerator::validParams()
       "distance>0",
       "The distance from the centroid of elements in the 'input' mesh to elements in the "
       "'proximity_mesh' under which they are marked for deletion");
-  params.addRequiredParam<MooseEnum>(
+  auto options_order = SetupQuadratureAction::getQuadratureOrderEnum();
+  options_order.assign(CONSTANT);
+  params.addParam<MooseEnum>(
       "side_order",
-      SetupQuadratureAction::getQuadratureOrderEnum(),
+      options_order,
       "Order of the face quadrature used to find the nearest face in the 'proximity_mesh'");
 
   return params;
@@ -82,7 +84,6 @@ DeleteElementsNearMeshGenerator::generate()
   }
   mooseAssert(!all_side_qps.empty(), "Should have found side Qps");
   _kd_tree = std::make_unique<KDTree>(all_side_qps, /*max leaf size*/ 1);
-  std::cout << "Num side qps " << all_side_qps.size() << std::endl;
 
   // Abide by the rules
   // NOTE: don't use _proximity_mesh in shouldDelete()! It won't work, it's gone
@@ -95,20 +96,31 @@ DeleteElementsNearMeshGenerator::generate()
 bool
 DeleteElementsNearMeshGenerator::shouldDelete(const Elem * elem)
 {
-  // NOTE: we use the element centroid to make the decision. The exact same code could be used
-  // for nodes, side centroids, side Qps to make a more & more robust centroid. If you need this,
-  // you create these additional heuristics and turn them on using boolean parameters.
-  const auto centroid = elem->vertex_average();
+  const auto delete_due_to_point = [this](const Point & pt) -> bool
+  {
+    // Proximity mesh contains the point, distance is zero
+    if ((*_pl)(pt))
+      return true;
 
-  // Proximity mesh contains the element centroid, distance is zero
-  if ((*_pl)(centroid))
+    // Use the KNN to get the distance
+    std::vector<Real> distance_sqr(2);
+    std::vector<std::size_t> return_indices(2);
+    _kd_tree->neighborSearch(pt, /*num_search*/ 1, return_indices, distance_sqr);
+    const auto distance =
+        distance_sqr.empty() ? std::numeric_limits<Real>::max() : std::sqrt(distance_sqr[0]);
+
+    return distance < _distance;
+  };
+
+  // Check element centroid
+  const auto centroid = elem->vertex_average();
+  if (delete_due_to_point(centroid))
     return true;
 
-  // Use the KNN to get the distance
-  std::vector<Real> distance_sqr(2);
-  std::vector<std::size_t> return_indices(2);
-  _kd_tree->neighborSearch(centroid, /*num_search*/1, return_indices, distance_sqr);
-  const auto distance = distance_sqr.empty() ? std::numeric_limits<Real>::max() : std::sqrt(distance_sqr[0]);
+  // Then its nodes. For convex elements, this should be enough
+  for (const auto & node : elem->node_ref_range())
+    if (delete_due_to_point(node))
+      return true;
 
-  return distance < _distance;
+  return false;
 }
