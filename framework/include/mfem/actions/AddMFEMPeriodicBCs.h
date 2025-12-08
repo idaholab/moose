@@ -12,8 +12,17 @@
 #pragma once
 
 #include "Action.h"
+#include "MooseObject.h"
 
-class AddMFEMPeriodicBCs : public Action
+// add a struct to serve as the type for the input file parsing
+class MFEMPeriodicByVector : public MooseObject
+{
+public:
+  static InputParameters validParams();
+  MFEMPeriodicByVector(const InputParameters& parameters);
+};
+
+class AddMFEMPeriodicBCs : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
