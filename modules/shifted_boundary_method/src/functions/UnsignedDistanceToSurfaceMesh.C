@@ -75,7 +75,10 @@ UnsignedDistanceToSurfaceMesh::gradient(Real /*t*/, const Point & p) const
   if (dist <= libMesh::TOLERANCE)
     return RealGradient(0, 0, 0);
 
-  return dv / dist;
+  // dv points from the query point toward the nearest surface.
+  // The distance gradient must point in the direction of decreasing distance,
+  // hence the negative normalization: gradient = - (distance_vector) / |distance_vector|
+  return -dv / dist;
 }
 
 RealVectorValue
