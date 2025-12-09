@@ -50,12 +50,12 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
     return w * NuT + (1.0 - w) * pre.laminar_Nu;
   };
 
-  Real f_darcy = _scm_problem->getFrictionClosure()->computeFrictionFactor(friction_args) / 8.0;
+  Real f_turb = _scm_problem->getFrictionClosure()->computeFrictionFactor(friction_args) / 8.0;
 
   /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
   /// which is what we should see in practice, i.e., for very low Pr numbers the heat exchange
   /// will be dominated by conduction and Nu profile should be flat.
-  const auto NuT = f_darcy * (pre.Re - 1e3) * (pre.Pr + 0.01) /
-                   (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(pre.Pr + 0.01, 2. / 3.) - 1.));
+  const auto NuT = f_turb * (pre.Re - 1e3) * (pre.Pr + 0.01) /
+                   (1 + 12.7 * std::sqrt(f_turb) * (std::pow(pre.Pr + 0.01, 2. / 3.) - 1.));
   return blended_Nu(NuT);
 }

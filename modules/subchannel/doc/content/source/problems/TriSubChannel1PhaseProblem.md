@@ -13,6 +13,8 @@ Pin surface temperature is calculated at the end of the solve using a user-selec
 
 ## Channel-to-Pin and Channel-to-Duct Heat Transfer Modeling
 
+!! Intentional comment to provide extra spacing
+
 The pin/duct surface temperature are computed via the convective heat transfer coefficient as follows:
 
 \begin{equation}
@@ -35,6 +37,7 @@ T_{s,d}(z) = T_{bulk,d}(z) + \frac{q''_d(z)}{h_d(z)},
 \end{equation}
 
 where:
+
 - $T_{s,d}(z)$ is the duct surface temperature at a height $z$
 - $T_{bulk,d}(z)$ is the bulk temperature of the subchannel next to the duct node $d$
 - $q''_d(z)$ is the heat flux at the duct at a height $z$

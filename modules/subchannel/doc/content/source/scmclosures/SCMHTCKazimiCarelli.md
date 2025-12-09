@@ -4,20 +4,22 @@
 
 The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
-### Kazimi-Carelli Correlation for Turbulent Nusselt Number
+## Kazimi-Carelli Correlation for Turbulent Nusselt Number
+
+!! Intentional comment to provide extra spacing
 
 The Kazimi-Carelli correlation [!cite](kazimi1976) is used for calculating the Nusselt number in fuel-pin bundles, considering the geometry of the bundle.
 
 \begin{equation}
-\text{Nu}_{\text{turbulent}} = 4.0 + 0.33 \times \left( \frac{p}{D} \right)^{3.8} \times \left( \frac{Pe}{100} \right)^{0.86} + 0.16 \times \left( \frac{p}{D} \right)^{5},
+Nu = 4.0 + 0.33 \left( P/D \right)^{3.8} \left( Pe/100 \right)^{0.86} + 0.16 \left( P/D \right)^{5.0},
 \end{equation}
 
 where:
 
 - $Nu$: Nusselt number
-- $p$: Pitch, the center-to-center distance between neighboring fuel-pins
+- $P$: Pitch, the center-to-center distance between neighboring fuel-pins
 - $D$: Diameter of the fuel-pin
-- $\frac{p}{D}$: Pitch-to-diameter ratio
+- $\frac{P}{D}$: Pitch-to-diameter ratio
 - $Pe$: Peclet number ($Pe = Re \times Pr$)
 - $Re$: Reynolds number
 - $Pr$: Prandtl number

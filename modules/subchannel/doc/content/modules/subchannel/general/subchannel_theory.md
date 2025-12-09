@@ -10,7 +10,9 @@ Subchannel codes are thermal-hydraulic codes that offer an efficient compromise 
 
 ## Governing Equations
 
-The subchannel thermal-hydraulic analysis is based on the conservation equations of mass, linear momentum and energy on the specified control volumes. The control volumes are connected in both axial and radial directions to capture the three dimensional effects of the flow geometry. The subchannel control volumes are shown in [ControlVolume] from [!cite](Todreas).
+!! Intentional comment to provide extra spacing
+
+The subchannel thermal-hydraulic analysis is based on the conservation equations of mass, linear momentum and energy on the specified control volumes. The control volumes are connected in both axial and radial directions to capture the three dimensional effects of the flow geometry. The subchannel control volumes are shown in [ControlVolume] from [!cite](todreas2021nuclear2).
 
 !media subchannel/getting_started/ControlVolume.png
     style=width:90%;margin-bottom:2%;margin:auto;
@@ -58,6 +60,8 @@ For a single-phase fluid, dissipation due to viscous stresses can be neglected a
 
 ## Closure Models
 
+!! Intentional comment to provide extra spacing
+
 ### Axial direction friction term
 
 \begin{equation}
@@ -90,9 +94,9 @@ f_w \rightarrow
 
 Additional friction factor models are implemented as follows:
 
-- Quadrilateral assembly with bare pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear).
-- Triangular assembly with bare pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear), The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles [!cite](chen2018upgraded).
-- Triangular assembly with wire-wrapped pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear), The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles [!cite](chen2018upgraded).
+- Quadrilateral assembly with bare pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear1).
+- Triangular assembly with bare pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear1), The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles [!cite](chen2018upgraded).
+- Triangular assembly with wire-wrapped pins: Chapter 9.6 Pressure drop in rod bundles [!cite](todreas2021nuclear1), The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod bundles [!cite](chen2018upgraded).
 
 ### Turbulent momentum transfer
 
@@ -118,7 +122,7 @@ h_{ij}' = \sum_{j} w_{ij}'\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=\beta g_{ij} \bar{G}.
 \end{equation}
 
-where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](TODREAS), for enthalpy and momentum respectively. The approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
+where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](todreas2021nuclear2), for enthalpy and momentum respectively. The approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
 
  Additional turbulent mixing parameters are implemented as follows:
 
@@ -137,6 +141,8 @@ After calibrating the turbulent diffusion coefficient $\beta$ we turned our atte
 For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoulos2022development).
 
 ## Discretization
+
+!! Intentional comment to provide extra spacing
 
 The collocated discretization of the variables is presented in [fig:dis] . $i,j$ are the subchannel indexes. $ij$ is the name of the gap between subchannels $i,j$. $k$ is the index in the axial direction.
 
@@ -240,6 +246,8 @@ The above equation can be written in matrix form as follows:
 where the matrix $\boldsymbol{M_{hh}}$ is calculated using the lagged values of the unknown variables $\vec{w}, \vec{\dot{m}}$.
 
 ## Algorithm
+
+!! Intentional comment to provide extra spacing
 
 A hybrid numerical method of solving the subchannel equations was developed. Hybrid in this context means that the user has the option of solving each portion of the problem at a time, by dividing the domain into blocks. Each block is solved sequentially from inlet to outlet. The mass flow at the outlet of the previous block and the pressure at the inlet of the next block provide the needed boundary conditions. The essence of the algorithm hinges on the construction of a combined residual function based on the lateral momentum equation. To solve this equation a Jacobian Free Newton-Krylov type Method (JFNKM) was used. The workhorse of the code is the non linear equation solvers (SNES) found in the Portable, Extensible Toolkit for Scientific Computation [PETSc](https://petsc.org/release/).
 

@@ -4,6 +4,8 @@
 
 ## Benchmark description
 
+!! Intentional comment to provide extra spacing
+
 The ORNL 19-pin experiment was built at Oak Ridge National Laboratory for studying the thermal-hydraulic flow characterisitics in SFRs assemblies as described in [!citep](fontana74).
 The cross section of the experimental facility is depicted in [configuration].
 The validation exercise was done for test series 2 of this experiment.
@@ -134,6 +136,8 @@ The detailed mesh uses a *SCMDetailedTriSubChannelMeshGenerator* and the solutio
 !listing /validation/ORNL_19_pin/ORNL_19.i language=moose
 
 ## Results
+
+!! Intentional comment to provide extra spacing
 
 The key factor dominating the temperature profile in the outlet of the domain is the competing effect between heat convection and heat conduction in the coolant.
 An example of the axial and lateral mass flow rates and the temperature and viscosity fields obtained for a high-flow-rate configuration in the ORNL 19-pin benchmark is presented in [3dres].

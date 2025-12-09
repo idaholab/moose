@@ -2,6 +2,8 @@
 
 ## Running an Input File and Viewing Results
 
+!! Intentional comment to provide extra spacing
+
 !style halign=left
 After SCM is installed and tested, you should now be able to run input files
 using the `subchannel-opt` executable located at `~/projects/subchannel`. Input files
@@ -31,6 +33,8 @@ selected for output. These results are best viewed using a visualization tool
 like [Paraview](http://www.paraview.org/download/).
 
 ## SCM Examples and Tests
+
+!! Intentional comment to provide extra spacing
 
 !style halign=left
 In general the validation examples located within the `test/tests` directory or the `examples` directory and are meant to be a showcase of "production" SCM capability. Users are encouraged to start there

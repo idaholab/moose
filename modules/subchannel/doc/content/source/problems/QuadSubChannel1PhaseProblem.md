@@ -13,6 +13,8 @@ Pin surface temperature is calculated at the end of the solve using a user-selec
 
 ## Channel-to-Pin Heat Transfer Modeling
 
+!! Intentional comment to provide extra spacing
+
 The pin surface temperature are computed via the convective heat transfer coefficient as follows:
 
 \begin{equation}

@@ -2,6 +2,8 @@
 
 ## Related articles/papers
 
+!! Intentional comment to provide extra spacing
+
 Development of a Single-Phase, Transient, Subchannel Code, within the MOOSE Multi-Physics Computational Framework [!cite](kyriakopoulos2022development)
 
 Demonstration of Pronghorn’s Subchannel Code Modeling of Liquid-Metal Reactors and Validation in Normal Operation Conditions and Blockage Scenarios [!cite](kyriakopoulos2023demonstration)

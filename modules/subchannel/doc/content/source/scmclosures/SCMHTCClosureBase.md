@@ -8,6 +8,8 @@ This is the base class from which all the convective heat transfer coefficient c
 
 ## Channel-to-Pin and Channel-to-Duct Heat Transfer Modeling
 
+!! Intentional comment to provide extra spacing
+
 The pin/duct surface temperature are computed via the convective heat transfer coefficient as follows:
 
 \begin{equation}
@@ -30,6 +32,7 @@ T_{s,d}(z) = T_{bulk,d}(z) + \frac{q''_d(z)}{h_d(z)},
 \end{equation}
 
 where:
+
 - $T_{s,d}(z)$ is the duct surface temperature at a height $z$
 - $T_{bulk,d}(z)$ is the bulk temperature of the subchannel next to the duct node $d$
 - $q''_d(z)$ is the heat flux at the duct at a height $z$
@@ -93,6 +96,11 @@ The modeling of the Turbulent Nusselt number and consequently of the convective 
 - [Dittus-Boelter](SCMHTCDittusBoelter.md) (recommended for water coolant)
 - [Gnielinski](SCMHTCGnielinski.md) (recommended for liquid metals)
 - [Kazimi-Carelli](SCMHTCKazimiCarelli.md) (recommended for liquid metals)
+- [Schad-Modified](SCMHTCSchadModified.md) (recommended for liquid metals)
+- [Graber-Rieger](SCMHTCGraberRieger.md) (recommended for liquid metals)
+- [Borishanskii](SCMHTCBorishanskii.md) (recommended for liquid metals)
+
+The correlations of Borishanskii and Schad-modified yield the best agreement over the entire range of P/D values. The Graber and Rieger correlation appears to significantly overpredict the heat transfer coefficient if extended beyond the published range of applicability P/D ≤ 1.15. The Kazimi and Carelli correlation underestimates Nu at high values of P/D [!cite](todreas2021nuclear1).
 
 ### Transition Regime
 

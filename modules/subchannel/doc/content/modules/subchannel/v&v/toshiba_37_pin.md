@@ -4,6 +4,8 @@
 
 ## Benchmark Description
 
+!! Intentional comment to provide extra spacing
+
 The Toshiba 37-pin benchmark is based on liquid sodium experiments conducted by the Toshiba Corporation Nuclear Engineering Laboratory in Japan [!citep](namekawa1984buoyancy).
 Its assembly consists of four outer rings of electrically heated pins.
 However, the resistances in the electrically heated pins are adapted to reproduce a chopped cosine power distribution in the axial direction.
@@ -124,6 +126,8 @@ The detailed mesh uses a *SCMDetailedTriSubChannelMeshGenerator* and the solutio
 !listing /validation/Toshiba_37_pin/toshiba_37_pin.i block=viz language=moose
 
 ## Results
+
+!! Intentional comment to provide extra spacing
 
 An example flow distribution for the high flow-rate case is depicted in [3Dres].
 As graphically observed, a flat temperature profile is obtained in the bulk of the fuel assembly.
