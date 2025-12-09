@@ -966,3 +966,7 @@ class Tester(MooseObject, OutputInterface):
             if procs > 1 and procs <= options.hpc_scatter_procs:
                 return 'scatter'
         return 'free'
+
+    def augmentEnvironment(self, options) -> dict:
+        """Get environment variables that should be augmented."""
+        return {}

@@ -73,3 +73,12 @@ class PythonUnitTest(RunApp):
             self.addCaveats('hpc apptainer max_cpus=1')
             return 1
         return procs
+
+    def augmentEnvironment(self, options) -> dict:
+        value = super().augmentEnvironment(options)
+
+        # Allow only one openmp thread; packages like pandas
+        # will use the total number of cores and we don't want that
+        value.update({"OMP_NUM_THREADS": "1"})
+
+        return value
