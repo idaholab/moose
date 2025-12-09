@@ -339,16 +339,16 @@ class TestResultsSummary(TestCase):
         with self.assertRaisesRegex(SystemExit, "Results do not exist for event"):
             summary.pr_tests(EVENT_ID, self.tmp_file.name)
 
-    def test_format_max_memory_None(self):
-        """Test _format_max_memory when max_memory is None."""
+    def test_format_memory_none(self):
+        """Test _format_memory when max_memory is None."""
         test = get_fake_test(max_memory=None)
-        max_memory = TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        max_memory = TestHarnessResultsSummary._format_memory(test.max_memory)
         self.assertEqual(max_memory, "0.00")
 
-    def test_format_max_memory(self):
-        """Test _format_max_memory when max_memory is None."""
+    def test_format_memory(self):
+        """Test _format_memory when max_memory is None."""
         test = get_fake_test(max_memory=1234567)
-        max_memory = TestHarnessResultsSummary._format_max_memory(test.max_memory)
+        max_memory = TestHarnessResultsSummary._format_memory(test.max_memory)
         self.assertEqual(max_memory, "1.23")
 
     def test_sort_test_time_key_numeric(self):
@@ -418,7 +418,7 @@ class TestResultsSummary(TestCase):
         self.assertIn(str(test.name), table[0][0])
         self.assertEqual(table[0][1], f"{test.run_time:.2f}")
         self.assertEqual(
-            table[0][2], TestHarnessResultsSummary._format_max_memory(test.max_memory)
+            table[0][2], TestHarnessResultsSummary._format_memory(test.max_memory)
         )
 
     def test_build_diff_table_no_runtime(self):
@@ -434,7 +434,7 @@ class TestResultsSummary(TestCase):
         self.assertIn(str(test.name), table[0][0])
         self.assertEqual(table[0][1], "")
         self.assertEqual(
-            table[0][2], TestHarnessResultsSummary._format_max_memory(test.max_memory)
+            table[0][2], TestHarnessResultsSummary._format_memory(test.max_memory)
         )
 
     def test_build_diff_table_skip(self):
@@ -450,7 +450,7 @@ class TestResultsSummary(TestCase):
         self.assertIn(str(test.name), table[0][0])
         self.assertEqual(table[0][1], "SKIP")
         self.assertEqual(
-            table[0][2], TestHarnessResultsSummary._format_max_memory(test.max_memory)
+            table[0][2], TestHarnessResultsSummary._format_memory(test.max_memory)
         )
 
     def test_build_diff_table_no_maxMemory(self):
@@ -505,11 +505,11 @@ class TestResultsSummary(TestCase):
         )
         self.assertEqual(
             table[0][4],
-            TestHarnessResultsSummary._format_max_memory(base_test.max_memory),
+            TestHarnessResultsSummary._format_memory(base_test.max_memory),
         )
         self.assertEqual(
             table[0][5],
-            TestHarnessResultsSummary._format_max_memory(head_test.max_memory),
+            TestHarnessResultsSummary._format_memory(head_test.max_memory),
         )
 
     def test_build_same_zero_base_runtime(self):
@@ -711,7 +711,7 @@ class TestResultsSummary(TestCase):
         self.assertIsNone(same)
         self.assertEqual(
             added[0][2],
-            TestHarnessResultsSummary._format_max_memory(added_test.max_memory),
+            TestHarnessResultsSummary._format_memory(added_test.max_memory),
         )
 
     def test_diff_table_same_tests(self):
@@ -745,11 +745,11 @@ class TestResultsSummary(TestCase):
         )
         self.assertEqual(
             same[0][4],
-            TestHarnessResultsSummary._format_max_memory(base_test.max_memory),
+            TestHarnessResultsSummary._format_memory(base_test.max_memory),
         )
         self.assertEqual(
             same[0][5],
-            TestHarnessResultsSummary._format_max_memory(head_test.max_memory),
+            TestHarnessResultsSummary._format_memory(head_test.max_memory),
         )
         self.assertIsNone(removed)
         self.assertIsNone(added)
@@ -776,6 +776,8 @@ class TestResultsSummary(TestCase):
         # Mock the table title, data, header, no_data_message
         base_run_time = 10.0
         head_run_time = 17.0
+        base_memory = 1.23
+        head_memory = 4.56
         test_title = "### Tests with Data:"
         test_table_data = [
             [
@@ -783,9 +785,11 @@ class TestResultsSummary(TestCase):
                 f"{base_run_time:.2f}",
                 f"{head_run_time:.2f}",
                 "+70.00%",
+                f"{base_memory:.2f}",
+                f"{head_memory:.2f}",
             ]
         ]
-        test_headers = ["Test", "Base (s)", "Head (s)", "+/-"]
+        test_headers = ["Test", "Base (s)", "Head (s)", "+/-", "Base (MB)", "Head (MB)"]
         test_no_data_message = "Nome"
         # Expected format table with data
         expected_table = tabulate(
