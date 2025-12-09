@@ -13,9 +13,10 @@ The Borishanskii correlation [!cite](borishanskii1969heat) is used for calculati
 For $(1.1 \le P/D \le 1.5)$ and $(200 \le \mathrm{Pe} \le 2200)$, the Nusselt number is:
 
 \begin{equation}
-Nu = 24.15 \log\left[
--8.12 + 12.76\left(P/D\right) - 3.65\left(P/D\right)^2
-\right] + 0.0174 \left[1 - \exp\left(6 - 6P/D\right)
+\mathrm{Nu}
+= 24.15 \log\left[
+-8.12 + 12.76\left(\frac{P}{D}\right) - 3.65\left(\frac{P}{D}\right)^2
+\right] + 0.0174 \left[1 - \exp\left(6 - 6\frac{P}{D}\right)
 \right]
 (\mathrm{Pe} - 200)^{0.9}
 \end{equation}
@@ -23,7 +24,8 @@ Nu = 24.15 \log\left[
 For $(1.1 \le P/D \le 1.5)$ and $(\mathrm{Pe} \le 200)$, the correlation reduces to:
 
 \begin{equation}
-Nu = 24.15 \log\left[-8.12 + 12.76\left(P/D\right) - 3.65\left(P/D\right)^2
+\mathrm{Nu}
+= 24.15 \log\left[-8.12 + 12.76\left(\frac{P}{D}\right) - 3.65\left(\frac{P}{D}\right)^2
 \right]
 \end{equation}
 
