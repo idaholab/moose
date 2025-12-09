@@ -38,7 +38,7 @@
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
-From: mooseharbor.hpc.inl.gov/base-docker/rocky-x86_64:8.10_0
+From: ghcr.io/idaholab/moose-base/rocky-x86_64:8.10-0
 {%- else %}
 Bootstrap: oras
 {%- if ALTERNATE_FROM == "cuda" %}
