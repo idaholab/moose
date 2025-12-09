@@ -80,9 +80,7 @@ class TestHarnessResultsSummary:
 
         return parser.parse_args(args)
 
-    def pr_tests(
-        self, event_id: int, out_file: str
-    ) -> Tuple[
+    def pr_tests(self, event_id: int, out_file: str) -> Tuple[
         Optional[ResultCollection],
         ResultCollection,
     ]:
