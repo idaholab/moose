@@ -46,11 +46,6 @@ def random_id() -> int:
     return random.randint(1, 1000000)
 
 
-def random_version() -> str:
-    """Generate a random version."""
-    return random.randint(1, 9)
-
-
 def base_civet_env() -> Tuple[str, dict]:
     """Build a random base CIVET environment for testing."""
     # Dummy sha to use for the base commit

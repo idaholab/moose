@@ -27,7 +27,7 @@ from TestHarness.resultsstore.storedresult import StoredResult
 from TestHarness.resultsstore.storedtestresult import StoredTestResult
 from TestHarness.resultsstore.utils import TestName
 from TestHarness.resultssummary.summary import TestHarnessResultsSummary
-from TestHarness.tests.resultsstore.common import random_git_sha, random_version
+from TestHarness.tests.resultsstore.common import random_git_sha
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = ResultsReader.load_authentication() is not None
@@ -93,7 +93,6 @@ class FakeStoredResult(StoredResult):
         """Initialize fake state."""
         self._base_sha: str = random_git_sha()
         self._event_sha: str = random_git_sha()
-        self._version: int = random_version()
 
     @property
     def civet_job_url(self) -> str:
