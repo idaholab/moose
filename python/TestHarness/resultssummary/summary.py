@@ -80,7 +80,9 @@ class TestHarnessResultsSummary:
 
         return parser.parse_args(args)
 
-    def pr_tests(self, event_id: int, out_file: str) -> Tuple[
+    def pr_tests(
+        self, event_id: int, out_file: str
+    ) -> Tuple[
         Optional[ResultCollection],
         ResultCollection,
     ]:
@@ -271,7 +273,7 @@ class TestHarnessResultsSummary:
                 [
                     TestHarnessResultsSummary._format_test_name(test_name),
                     run_time,
-                    TestHarnessResultsSummary._format_max_memory(test.max_memory),
+                    TestHarnessResultsSummary._format_memory(test.max_memory),
                 ]
             )
 
@@ -370,10 +372,10 @@ class TestHarnessResultsSummary:
                         f"{base_result.run_time:.2f}",
                         f"{head_result.run_time:.2f}",
                         f"{relative_runtime:+.2%}",
-                        TestHarnessResultsSummary._format_max_memory(
+                        TestHarnessResultsSummary._format_memory(
                             base_result.max_memory
                         ),
-                        TestHarnessResultsSummary._format_max_memory(
+                        TestHarnessResultsSummary._format_memory(
                             head_result.max_memory
                         ),
                     ]
