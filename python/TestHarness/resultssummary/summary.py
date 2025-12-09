@@ -588,7 +588,7 @@ class TestHarnessResultsSummary:
                     TestHarnessResultsSummary._format_table(
                         "\n### Removed tests\n",
                         removed_table,
-                        ["Test", "Time (s)", "MEM (MB)"],
+                        ["Test", "Time (s)", "Memory (MB)"],
                         "",
                     )
                 )
@@ -598,7 +598,7 @@ class TestHarnessResultsSummary:
                     TestHarnessResultsSummary._format_table(
                         "\n### Added tests\n",
                         added_table,
-                        ["Test", "Time (s)", "MEM (MB)"],
+                        ["Test", "Time (s)", "Memory (MB)"],
                         "",
                     )
                 )
