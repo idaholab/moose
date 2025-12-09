@@ -60,8 +60,44 @@
       valgrind = NONE
       recover = false
       max_parallel = 1
-      detail = 'using the Kazimi Carelli correlation.'
+      detail = 'using the Kazimi-Carelli correlation.'
       cli_args = 'SubChannel/pin_HTC_closure=kazimi-carelli SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=kazimi-carelli'
+    []
+    [schad_modified]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'schad-modified.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Schad-Modified correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=schad-modified SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=schad-modified'
+    []
+    [graber_rieger]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'graber-rieger.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Graber-Rieger correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=graber-rieger SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=graber-rieger'
+    []
+    [borishanskii]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'borishanskii.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Borishanskii correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=borishanskii SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=borishanskii'
     []
   []
 []

@@ -107,6 +107,15 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [kazimi-carelli]
     type = SCMHTCKazimiCarelli
   []
+  [schad-modified]
+    type = SCMHTCSchadModified
+  []
+  [graber-rieger]
+    type = SCMHTCGraberRieger
+  []
+  [borishanskii]
+    type = SCMHTCBorishanskii
+  []
 []
 
 [ICs]
