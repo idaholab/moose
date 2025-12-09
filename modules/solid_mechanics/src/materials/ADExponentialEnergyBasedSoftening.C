@@ -53,19 +53,16 @@ ADExponentialEnergyBasedSoftening::computeCrackingRelease(ADReal & stress,
 {
   mooseAssert(crack_max_strain >= crack_initiation_strain,
               "crack_max_strain must be >= crack_initiation_strain");
+  using std::cbrt, std::sqrt, std::exp;
 
   unsigned int dim = _current_elem->dim();
 
   // Get estimate of element size
   ADReal ele_len = 0.0;
   if (dim == 3)
-  {
-    ele_len = std::cbrt(_current_elem->volume());
-  }
+    ele_len = cbrt(_current_elem->volume());
   else
-  {
-    ele_len = std::sqrt(_current_elem->volume());
-  }
+    ele_len = sqrt(_current_elem->volume());
 
   // Calculate initial slope of exponential curve
   const ADReal energy_release_rate = (_fracture_toughness * _fracture_toughness) *
@@ -81,10 +78,10 @@ ADExponentialEnergyBasedSoftening::computeCrackingRelease(ADReal & stress,
         -frac_stress_sqr / (energy_release_rate / ele_len - frac_stress_sqr / (2 * youngs_modulus));
 
   // Compute stress that follows exponental curve
-  stress = cracking_stress *
-           (_residual_stress +
-            (1.0 - _residual_stress) * std::exp(initial_slope / cracking_stress *
-                                                (crack_max_strain - crack_initiation_strain)));
+  stress =
+      cracking_stress * (_residual_stress + (1.0 - _residual_stress) *
+                                                exp(initial_slope / cracking_stress *
+                                                    (crack_max_strain - crack_initiation_strain)));
   // Compute ratio of current stiffness to original stiffness
   stiffness_ratio = stress * crack_initiation_strain / (crack_max_strain * cracking_stress);
 }
