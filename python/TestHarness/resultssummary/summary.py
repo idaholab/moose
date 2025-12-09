@@ -80,7 +80,9 @@ class TestHarnessResultsSummary:
 
         return parser.parse_args(args)
 
-    def pr_tests(self, event_id: int, out_file: str) -> Tuple[
+    def pr_tests(
+        self, event_id: int, out_file: str
+    ) -> Tuple[
         Optional[ResultCollection],
         ResultCollection,
     ]:
@@ -139,12 +141,12 @@ class TestHarnessResultsSummary:
         return base_collection, head_collection
 
     @staticmethod
-    def _format_test_name(test_name) -> str:
+    def _format_test_name(test_name: str) -> str:
         """Format a test name for display, wrapped in backticks."""
         return f"`{str(test_name)}`"
 
     @staticmethod
-    def _format_max_memory(max_memory) -> str:
+    def _format_memory(max_memory: int) -> str:
         """Convert max memory of test to Megabyte and 2 dec place."""
         assert isinstance(max_memory, (NoneType, int))
         max_memory_mb = max_memory / 1000000 if max_memory else 0
