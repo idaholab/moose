@@ -383,8 +383,8 @@ class StoredTestResult:
     @property
     def max_memory(self) -> Optional[int]:
         """Get the estimated max memory usage for the test in bytes, if available."""
+        self._require_filter(TestDataFilter.MAX_MEMORY)
         if self.result.version > 8:
-            self._require_filter(TestDataFilter.MAX_MEMORY)
             return get_typed(self.data, "max_memory", (NoneType, int))
         else:
             return None
