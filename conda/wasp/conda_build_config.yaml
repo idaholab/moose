@@ -1,4 +1,7 @@
+### If you change these versions also update conda/mpi/meta.yaml
+### and conda/tools/conda_build_config.yaml
 moose_python:
+  - python 3.14
   - python 3.13
   - python 3.12
   - python 3.11
