@@ -15,6 +15,10 @@
 #include "MooseMain.h"
 #include "AppFactory.h"
 #include "MooseUtils.h"
+#include "Factory.h"
+#include "ActionWarehouse.h"
+#include "FEProblemBase.h"
+#include "InputParameters.h"
 #include "pcrecpp.h"
 #include "waspcore/Object.h"
 #include "wasplsp/LSP.h"
@@ -302,7 +306,8 @@ protected:
     // check that each line exists to allow syntax be added without failing
     for (const auto & line : MooseUtils::split(expect_collapsed, "label:"))
       EXPECT_NE(actual_items.str().find(line), std::string::npos)
-          << "did not find: \"" << line << "\"";
+          << "did not find:\nlabel:" << line << "\nin:\n"
+          << actual_items.str();
   }
 
   // build hover request, handle request with moose_server, check response
@@ -1932,9 +1937,10 @@ TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
   format_diagnostics(diagnostics_array, diagnostics_list_actual);
 
   // check that diagnostics array size and message contents are as expected
-  std::size_t diagnostics_size_expect = 1;
+  std::size_t diagnostics_size_expect = 2;
   std::string diagnostics_list_expect = R"INPUT(
 line:11 column:2 - no variable 'undefined' found for use in function parser expression in 'globalvar'
+line:11 column:2 - unused parameter 'globalvar'
 )INPUT";
 
   EXPECT_EQ(diagnostics_size_expect, diagnostics_array.size());
@@ -2399,6 +2405,239 @@ In csv_rows: Lengths of x and y data do not match.
   std::remove("csv_rows.csv");
 }
 
+TEST_F(MooseServerTest, CompletionVariousWarehouses)
+{
+  // didchange test parameters - update input to check warehouse completion
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
+  int doc_version = 10;
+  std::string doc_text_change = R"INPUT(
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+[]
+[Variables]
+  [inp_reg_var]
+  []
+[]
+[AuxVariables]
+  [inp_aux_var]
+  []
+[]
+[Physics/Diffusion/ContinuousGalerkin]
+  [diff]
+    variable_name = act_reg_var
+  []
+[]
+[BCs]
+  [all]
+    type = VacuumBC
+    boundary = 'left right top bottom'
+    variable      =  # NonlinearVariableName - inp_reg_var + act_reg_var + tst_reg_var
+    save_in       =  # AuxVariableName       - inp_aux_var + tst_aux_var
+    displacements =  # VariableName          - inp_reg_var + act_reg_var + tst_reg_var + inp_aux_var + tst_aux_var
+  []
+[]
+[Materials]
+  [inp_matl_01]
+    type = GenericConstantMaterial
+    prop_names  = 'act_prop_11 act_prop_12'
+    prop_values = '11 12'
+  []
+  [inp_matl_02]
+    type = GenericConstantMaterial
+    prop_names  = 'act_prop_21 act_prop_22'
+    prop_values = '21 22'
+  []
+[]
+[VectorPostprocessors]
+  [vpp]
+    type = ElementMaterialSampler
+    material =  # MaterialName         - inp_matl_01 + inp_matl_02 + tst_matl_03
+    property =  # MaterialPropertyName - act_prop_11 + act_prop_12 + act_prop_21 + act_prop_22 + tst_prop_31 + tst_prop_32
+  []
+[]
+[Functions]
+  [inp_pwl_fcn]
+    type = PiecewiseLinear
+    json_uo =  # UserObjectName - inp_usr_obj + tst_usr_obj
+  []
+[]
+[Postprocessors]
+  [avg_pp]
+    type = FunctionElementAverage
+    function =  # FunctionName - inp_pwl_fcn + tst_con_fcn
+  []
+[]
+[Outputs]
+  solution_invalidity_history = false
+  [inp_outs_01]
+    type = JSON
+  []
+  [inp_outs_02]
+    type = CSV
+  []
+[]
+[Reporters]
+  [rep]
+    type = ConstantReporter
+    outputs =  # OutputName - inp_outs_01 + inp_outs_02 + tst_outs_03 + all + none + checkpoint + console
+  []
+[]
+[UserObjects]
+  [inp_usr_obj]
+    type = VerifyElementUniqueID
+  []
+[]
+[Executioner]
+  type = Steady
+[]
+[Problem]
+  solve = false
+[]
+)INPUT";
+
+  // build didchange notification from parameters and handle it with server
+  wasp::DataObject didchange_notification;
+  std::stringstream errors;
+  wasp::DataObject diagnostics_notification;
+  EXPECT_TRUE(wasp::lsp::buildDidChangeNotification(
+      didchange_notification, errors, doc_uri, doc_version, -1, -1, -1, -1, -1, doc_text_change));
+  EXPECT_TRUE(
+      moose_server->handleDidChangeNotification(didchange_notification, diagnostics_notification));
+
+  // get Factory and Problem from server app in order to add direct objects
+  MooseApp & server_app = moose_server->getCheckApp();
+  Factory & factory = server_app.getFactory();
+  std::shared_ptr<FEProblemBase> & problem = server_app.actionWarehouse().problemBase();
+  EXPECT_TRUE(problem);
+
+  // add NonlinearVariable and AuxVariable into Problem without using input
+  InputParameters var_params = factory.getValidParams("MooseVariable");
+  problem->addVariable("MooseVariable", "tst_reg_var", var_params);
+  problem->addAuxVariable("MooseVariable", "tst_aux_var", var_params);
+
+  // add Material with Property names and values into Problem without input
+  InputParameters mat_params = factory.getValidParams("GenericConstantMaterial");
+  mat_params.set<std::vector<std::string>>("prop_names") = {"tst_prop_31", "tst_prop_32"};
+  mat_params.set<std::vector<Real>>("prop_values") = {31, 32};
+  problem->addMaterial("GenericConstantMaterial", "tst_matl_03", mat_params);
+
+  // add Function of type ConstantFunction into Problem without using input
+  InputParameters fcn_params = factory.getValidParams("ConstantFunction");
+  problem->addFunction("ConstantFunction", "tst_con_fcn", fcn_params);
+
+  // add Output object of type ReporterDebugOutput to Problem without input
+  InputParameters out_params = factory.getValidParams("ReporterDebugOutput");
+  problem->addOutput("ReporterDebugOutput", "tst_outs_03", out_params);
+
+  // add UserObject type VerifyNodalUniqueID to Problem without using input
+  InputParameters usr_params = factory.getValidParams("VerifyNodalUniqueID");
+  problem->addUserObject("VerifyNodalUniqueID", "tst_usr_obj", usr_params);
+
+  // check warehouse completion 01 - NonlinearVariableName type in VacuumBC
+  int request_id = 33;
+  int request_line = 22;
+  int request_char = 20;
+  std::size_t expect_count = 3;
+  std::string expect_items = R"INPUT(
+label: act_reg_var text: act_reg_var desc: from NonlinearSys... pos: [22.20]-[22.20] kind: 18 format: snippet
+label: inp_reg_var text: inp_reg_var desc: from NonlinearSys... pos: [22.20]-[22.20] kind: 18 format: snippet
+label: tst_reg_var text: tst_reg_var desc: from NonlinearSys... pos: [22.20]-[22.20] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 02 - AuxVariableName type param in VacuumBC
+  request_id = 34;
+  request_line = 23;
+  request_char = 20;
+  expect_count = 2;
+  expect_items = R"INPUT(
+label: inp_aux_var text: inp_aux_var desc: from AuxiliarySys... pos: [23.20]-[23.20] kind: 18 format: snippet
+label: tst_aux_var text: tst_aux_var desc: from AuxiliarySys... pos: [23.20]-[23.20] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 03 - VariableName displacements in VacuumBC
+  request_id = 35;
+  request_line = 24;
+  request_char = 20;
+  expect_count = 5;
+  expect_items = R"INPUT(
+label: act_reg_var text: act_reg_var desc: from NonlinearSys... pos: [24.20]-[24.20] kind: 18 format: snippet
+label: inp_aux_var text: inp_aux_var desc: from AuxiliarySys... pos: [24.20]-[24.20] kind: 18 format: snippet
+label: inp_reg_var text: inp_reg_var desc: from NonlinearSys... pos: [24.20]-[24.20] kind: 18 format: snippet
+label: tst_aux_var text: tst_aux_var desc: from AuxiliarySys... pos: [24.20]-[24.20] kind: 18 format: snippet
+label: tst_reg_var text: tst_reg_var desc: from NonlinearSys... pos: [24.20]-[24.20] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 04 - MaterialName in ElementMaterialSampler
+  request_id = 36;
+  request_line = 42;
+  request_char = 15;
+  expect_count = 3;
+  expect_items = R"INPUT(
+label: inp_matl_01 text: inp_matl_01 desc: from MaterialWare... pos: [42.15]-[42.15] kind: 18 format: snippet
+label: inp_matl_02 text: inp_matl_02 desc: from MaterialWare... pos: [42.15]-[42.15] kind: 18 format: snippet
+label: tst_matl_03 text: tst_matl_03 desc: from MaterialWare... pos: [42.15]-[42.15] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 05 - MaterialPropertyName type param in vpp
+  request_id = 37;
+  request_line = 43;
+  request_char = 15;
+  expect_count = 6;
+  expect_items = R"INPUT(
+label: act_prop_11 text: act_prop_11 desc: from MaterialProp... pos: [43.15]-[43.15] kind: 12 format: snippet
+label: act_prop_12 text: act_prop_12 desc: from MaterialProp... pos: [43.15]-[43.15] kind: 12 format: snippet
+label: act_prop_21 text: act_prop_21 desc: from MaterialProp... pos: [43.15]-[43.15] kind: 12 format: snippet
+label: act_prop_22 text: act_prop_22 desc: from MaterialProp... pos: [43.15]-[43.15] kind: 12 format: snippet
+label: tst_prop_31 text: tst_prop_31 desc: from MaterialProp... pos: [43.15]-[43.15] kind: 12 format: snippet
+label: tst_prop_32 text: tst_prop_32 desc: from MaterialProp... pos: [43.15]-[43.15] kind: 12 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 06 - FunctionName in FunctionElementAverage
+  request_id = 38;
+  request_line = 55;
+  request_char = 15;
+  expect_count = 2;
+  expect_items = R"INPUT(
+label: inp_pwl_fcn text: inp_pwl_fcn desc: from FunctionWare... pos: [55.15]-[55.15] kind: 18 format: snippet
+label: tst_con_fcn text: tst_con_fcn desc: from FunctionWare... pos: [55.15]-[55.15] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 07 - OutputName outputs in ConstantReporter
+  // AutoCheckpointAction adds checkpoint / CommonOutputAction adds console
+  request_id = 39;
+  request_line = 70;
+  request_char = 14;
+  expect_count = 7;
+  expect_items = R"INPUT(
+label: all         text: all         desc: from reserved nam... pos: [70.14]-[70.14] kind: 18 format: snippet
+label: checkpoint  text: checkpoint  desc: from OutputWarehouse pos: [70.14]-[70.14] kind: 18 format: snippet
+label: console     text: console     desc: from OutputWarehouse pos: [70.14]-[70.14] kind: 18 format: snippet
+label: inp_outs_01 text: inp_outs_01 desc: from OutputWarehouse pos: [70.14]-[70.14] kind: 18 format: snippet
+label: inp_outs_02 text: inp_outs_02 desc: from OutputWarehouse pos: [70.14]-[70.14] kind: 18 format: snippet
+label: none        text: none        desc: from reserved nam... pos: [70.14]-[70.14] kind: 18 format: snippet
+label: tst_outs_03 text: tst_outs_03 desc: from OutputWarehouse pos: [70.14]-[70.14] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+
+  // check warehouse completion 08 - UserObjectName type in PiecewiseLinear
+  request_id = 40;
+  request_line = 49;
+  request_char = 14;
+  expect_count = 2;
+  expect_items = R"INPUT(
+label: inp_usr_obj text: inp_usr_obj desc: from UserObjectWa... pos: [49.14]-[49.14] kind: 18 format: snippet
+label: tst_usr_obj text: tst_usr_obj desc: from UserObjectWa... pos: [49.14]-[49.14] kind: 18 format: snippet
+)INPUT";
+  check_completions(request_id, doc_uri, request_line, request_char, expect_count, expect_items);
+}
+
 TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 {
   // check moose_server can share connection it will use to read and write
@@ -2427,7 +2666,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // shutdown test parameter
 
-  int request_id = 33;
+  int request_id = 41;
 
   // build shutdown request with the test parameters
 

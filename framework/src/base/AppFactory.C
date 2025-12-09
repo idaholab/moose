@@ -157,7 +157,7 @@ AppFactory::create(const std::string & app_type,
 
   auto parser = parameters.get<std::shared_ptr<Parser>>("_parser");
   mooseAssert(parser, "Parser not valid");
-  mooseAssert(parser->queryRoot() && parser->queryCommandLineRoot(), "Parser has not parsed");
+  mooseAssert(parser->queryRoot(), "Parser has not parsed");
 
   auto command_line = parameters.get<std::shared_ptr<CommandLine>>("_command_line");
   mooseAssert(command_line, "Command line not valid");
