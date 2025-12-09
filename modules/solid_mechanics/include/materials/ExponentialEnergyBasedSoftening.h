@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -12,16 +12,16 @@
 #include "SmearedCrackSofteningBase.h"
 
 /**
- * ExponentialSoftening is a smeared crack softening model that
- * uses an exponential softening curve. It is for use with
- * ComputeSmearedCrackingStress.
+ * ExponentialEnergyBasedSoftening is a smeared crack softening model that
+ * uses an exponential softening curve where the softening slope is
+ * dependent on each element size and the fracture toughness.
  */
-class ExponentialSoftening : public SmearedCrackSofteningBase
+class ExponentialEnergyBasedSoftening : public SmearedCrackSofteningBase
 {
 public:
   static InputParameters validParams();
 
-  ExponentialSoftening(const InputParameters & parameters);
+  ExponentialEnergyBasedSoftening(const InputParameters & parameters);
 
   virtual void computeCrackingRelease(Real & stress,
                                       Real & stiffness_ratio,
@@ -36,12 +36,6 @@ protected:
   /// Residual stress after full softening
   const Real & _residual_stress;
 
-  /// Initial slope of the softening curve
-  const Real & _alpha;
-
-  /// Variable to track whether _alpha was set by the user
-  const bool _alpha_set_by_user;
-
-  /// Multiplier on alpha to determine the initial softening slope
-  const Real & _beta;
+  /// Fracture toughness
+  const Real & _fracture_toughness;
 };

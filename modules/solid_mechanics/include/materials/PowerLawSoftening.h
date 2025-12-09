@@ -29,7 +29,8 @@ public:
                                       const Real crack_initiation_strain,
                                       const Real crack_max_strain,
                                       const Real cracking_stress,
-                                      const Real youngs_modulus) override;
+                                      const Real youngs_modulus,
+                                      const Real poissons_ratio) override;
 
 protected:
   /// Reduction factor applied to the initial stiffness each time a new crack initiates
