@@ -47,6 +47,11 @@ ExplicitDynamicsContactAction::validParams()
       "primary", "The list of boundary IDs referring to primary sidesets");
   params.addParam<std::vector<BoundaryName>>(
       "secondary", "The list of boundary IDs referring to secondary sidesets");
+  params.addParam<std::vector<SubdomainName>>(
+      "block",
+      {},
+      "Optional list of subdomain names on which to create the contact MooseObjects.  If omitted, "
+      "MooseObjects will be created on all subdomains");
   params.addParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -79,7 +84,8 @@ ExplicitDynamicsContactAction::ExplicitDynamicsContactAction(const InputParamete
   : Action(params),
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
     _model(getParam<MooseEnum>("model").getEnum<ExplicitDynamicsContactModel>()),
-    _verbose(getParam<bool>("verbose"))
+    _verbose(getParam<bool>("verbose")),
+    _blocks(getParam<std::vector<SubdomainName>>("block"))
 {
   // The resulting velocity of the contact algorithm is applied, as the code stands, by modifying
   // the old position. This causes artifacts in the internal forces as old position, new position,
@@ -166,6 +172,8 @@ ExplicitDynamicsContactAction::act()
       auto var_params = _factory.getValidParams("MooseVariable");
       var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       var_params.set<MooseEnum>("family") = "LAGRANGE";
+      if (!_blocks.empty())
+        var_params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addAuxVariable("MooseVariable", "gap_rate", var_params);
     }
     if (_verbose)
@@ -175,6 +183,8 @@ ExplicitDynamicsContactAction::act()
         auto var_params = _factory.getValidParams("MooseVariable");
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
+        if (!_blocks.empty())
+          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
 
         _problem->addAuxVariable("MooseVariable", "penetration", var_params);
       }
@@ -182,6 +192,8 @@ ExplicitDynamicsContactAction::act()
         auto var_params = _factory.getValidParams("MooseVariable");
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
+        if (!_blocks.empty())
+          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
 
         _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
       }
@@ -190,6 +202,8 @@ ExplicitDynamicsContactAction::act()
         auto var_params = _factory.getValidParams("MooseVariable");
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
+        if (!_blocks.empty())
+          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
 
         _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
       }
@@ -198,6 +212,8 @@ ExplicitDynamicsContactAction::act()
         auto var_params = _factory.getValidParams("MooseVariable");
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
+        if (!_blocks.empty())
+          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
 
         _problem->addAuxVariable("MooseVariable", "nodal_density", var_params);
       }
@@ -206,6 +222,8 @@ ExplicitDynamicsContactAction::act()
         auto var_params = _factory.getValidParams("MooseVariable");
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
+        if (!_blocks.empty())
+          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
 
         _problem->addAuxVariable("MooseVariable", "nodal_wave_speed", var_params);
       }

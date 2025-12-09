@@ -58,6 +58,9 @@ protected:
   /// Verbose output, may increase runtime
   const bool _verbose;
 
+  /// Restrict AuxVariables to these subdomains
+  const std::vector<SubdomainName> _blocks;
+
 private:
   /**
    * Generate constraints for node to face contact
