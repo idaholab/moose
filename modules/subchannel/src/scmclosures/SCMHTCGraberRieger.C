@@ -7,42 +7,42 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMHTCKazimiCarelli.h"
+#include "SCMHTCGraberRieger.h"
 
-registerMooseObject("SubChannelApp", SCMHTCKazimiCarelli);
+registerMooseObject("SubChannelApp", SCMHTCGraberRieger);
 
 InputParameters
-SCMHTCKazimiCarelli::validParams()
+SCMHTCGraberRieger::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
   params.addClassDescription("Class that models the convective heat transfer coefficient using the "
-                             "Kazimi-Carelli correlation. Only use for fuel-pins.");
+                             "Graber-Rieger correlation. Only use for fuel-pins.");
   return params;
 }
 
-SCMHTCKazimiCarelli::SCMHTCKazimiCarelli(const InputParameters & parameters)
+SCMHTCGraberRieger::SCMHTCGraberRieger(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
 {
 }
 
 Real
-SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args*/,
-                                          const NusseltStruct & nusselt_args) const
+SCMHTCGraberRieger::computeNusseltNumber(const FrictionStruct & /*friction_args*/,
+                                         const NusseltStruct & nusselt_args) const
 {
-  // Check that kazimi-carelli is not used for the duct (not supported yet)
+  // Check that Graber-Rieger is not used for the duct (not supported yet)
   if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
-    mooseError("'Kazimi-Carelli' is not yet supported for the 'duct_htc_correlation'.");
+    mooseError("'Graber-Rieger' is not yet supported for the 'duct_htc_correlation'.");
 
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
 
   const auto Pe = pre.Re * pre.Pr;
 
-  if (Pe < 10 || Pe > 5000)
-    flagSolutionWarning("Peclet number (Pe) out of range for the Kazimi-Carelli correlation.");
+  if (Pe < 150 || Pe > 3000)
+    flagSolutionWarning("Pe number out of range for the Graber-Rieger correlation.");
 
-  if (pre.poD < 1.1 || pre.poD > 1.4)
+  if (pre.poD < 1.25 || pre.poD > 1.95)
     flagSolutionWarning(
-        "Pitch over pin diameter ratio out of range for the Kazimi-Carelli correlation.");
+        "Pitch over pin diameter ratio out of range for the Graber-Rieger correlation.");
 
   // Laminar regime
   if (pre.Re <= pre.ReL)
@@ -59,7 +59,7 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args
     return w * NuT + (1.0 - w) * pre.laminar_Nu;
   };
 
-  const auto NuT = 4.0 + 0.33 * std::pow(pre.poD, 3.8) * std::pow((Pe / 1e2), 0.86) +
-                   0.16 * std::pow(pre.poD, 5);
+  const auto NuT =
+      0.25 + 6.2 * pre.poD + (-0.007 + 0.032 * pre.poD) * std::pow(Pe, 0.8 - 0.024 * pre.poD);
   return blended_Nu(NuT);
 }

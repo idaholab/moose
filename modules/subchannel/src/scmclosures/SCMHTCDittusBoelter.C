@@ -40,8 +40,7 @@ SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & /*friction_args
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
 
   if (pre.Pr < 0.7 || pre.Pr > 1.6e2)
-    flagSolutionWarning("Prandtl number out of range in the Dittus-Boelter correlation for "
-                        "pin or duct surface temperature calculation.");
+    flagSolutionWarning("Prandtl number (Pr) out of range for the Dittus-Boelter correlation.");
 
   // Laminar regime
   if (pre.Re <= pre.ReL)

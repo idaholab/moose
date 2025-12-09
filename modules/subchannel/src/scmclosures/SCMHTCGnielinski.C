@@ -33,8 +33,7 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
 
   if (pre.Pr < 1e-5 || pre.Pr > 2e3)
-    flagSolutionWarning("Prandtl number out of range in the Gnielinski correlation for "
-                        "pin or duct surface temperature calculation.");
+    flagSolutionWarning("Prandtl number (Pr) out of range for the Gnielinski correlation.");
 
   // Laminar regime
   if (pre.Re <= pre.ReL)
