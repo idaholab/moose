@@ -7,25 +7,22 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, importlib, platform, subprocess, shlex, sys, time
+import os, platform, subprocess, shlex, time
+from importlib.util import find_spec
 from contextlib import suppress
 from tempfile import SpooledTemporaryFile
-from threading import Lock, Thread
-from typing import Optional, TYPE_CHECKING
+from threading import Thread
+from typing import Optional
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
 
-# Try to load psutil; not a strict requirement but
-# enables tracking memory
-if TYPE_CHECKING:
-    import psutil
-else:
-    if importlib.util.find_spec("psutil") is not None:
-        import psutil
-    else:
-        psutil = None
+process_stats = None
+with suppress(ImportError):
+    from TestHarness.utils.process_stats import process_stats
 
+HAS_PSUTIL = find_spec("psutil") is not None
+"""Whether or not psutil is available; needed for the stats thread."""
 class SubprocessRunner(Runner):
     """
     Runner that spawns a local subprocess.
@@ -39,12 +36,8 @@ class SubprocessRunner(Runner):
         self.errfile = None
         # The underlying subprocess
         self.process: Optional[subprocess.Popen] = None
-        # The memory checking thread, created during spawn()
-        self.memory_thread: Optional[Thread] = None
-        # Average job CPU percentage, set by memory_thread on exit
-        self.cpu_percent = None
-        # Lock for cpu_percent
-        self.cpu_percent_lock = Lock()
+        # The stats thread, created during spawn()
+        self.stats_thread: Optional[Thread] = None
 
     def spawn(self, timer):
         tester = self.job.getTester()
@@ -95,124 +88,68 @@ class SubprocessRunner(Runner):
 
         timer.start('runner_run')
 
-        # Setup the memory checking thread if psutil is available
-        if psutil is not None:
-            self.memory_thread = Thread(target=self._runMemoryThread)
-            self.memory_thread.start()
+        # Setup the memory checking thread if process_stats is available
+        if process_stats is not None:
+            self.stats_thread = Thread(target=self._runStatThread)
+            self.stats_thread.start()
 
-    @staticmethod
-    def getProcessMemory(process: psutil.Process) -> Optional[int]:
-        """Get an approximation for a process' total memory in bytes if possible."""
-        assert psutil is not None
-        assert isinstance(process, psutil.Process)
-
-        # Use proportional set size (PSS) for linux, which is
-        # a better approximation for MPI processes
-        if sys.platform.startswith("linux"):
-            with (
-                suppress(FileNotFoundError),
-                suppress(ProcessLookupError),
-                open(f"/proc/{process.pid}/smaps_rollup", "r") as f,
-            ):
-                for line in f:
-                    if line.startswith("Pss:"):  # in kB
-                        return int(line.split()[1]) * 1000
-        # Otherwise, use RSS (will double count shared memory)
-        else:
-            with suppress(psutil.Error):
-                return process.memory_info().rss
-
-        return None
-
-    def _runMemoryThread(self):
+    def _runStatThread(self):
         """Run the thread that tracks memory usage."""
+        assert process_stats is not None
+        process = self.process
+        assert process is not None
+
         # Set to zero so that we can show that it is possible
         # to track memory even if the process is too short
         self.setMaxMemory(0)
 
-        assert psutil is not None
-        process = self.process
-        assert process is not None
+        # Max CPU percent allowed; scale by slots and allow a
+        # 25% buffer for each slot
+        max_cpu_percent = 100.0 * self.job.getSlots() * 1.25
 
-        # Capture the psutul.Process around the main process
-        # so that we can recursively get all children pids
-        # for getting their memory usage too
-        try:
-            psutil_process = psutil.Process(process.pid)
-        except psutil.NoSuchProcess:
-            return
+        # Max memory allowed in bytes, if a memory max is set
+        # in the options; if so, scale by number of processors
+        max_memory_option = self.options.max_memory
+        allowed_max_memory = None
+        if max_memory_option:
+            procs = self.job.getTester().getProcs(self.options)
+            allowed_max_memory = int(max_memory_option * procs * 1e6)
 
-        # See if we can track memory by checking with the main
-        # process once; if we can't, there's nothing to do here
-        # or the process has already finished
-        if self.getProcessMemory(psutil_process) is None:
-            return
+        # Helper for killing the underlying process
+        def kill(message, status):
+            self.kill()
+            self.appendOutput("\n" + util.outputHeader(message, False))
+            self.job.setStatus(self.job.error, status)
 
-        # Get the --max-memory option if set, and if so,
-        # the number of procs (so that we can scale
-        # memory used to per process)
-        max_memory = self.options.max_memory
-        procs = self.job.getTester().getProcs(self.options) if max_memory else None
+        current_max_memory = 0
 
-        # Total observed CPU time for each process
-        cpu_times: dict[int, float] = {}
-        # Wall time counter for computing CPU percent
-        start_wall_time = time.perf_counter()
+        # Work through the updates
+        for stats in process_stats(pid=process.pid, poll_time=0.05, update_interval=2):
+            # Check max CPU
+            if stats.cpu_percent > max_cpu_percent:
+                kill(
+                    (
+                        f"Job killed: CPU {stats.cpu_percent:.2f}% "
+                        f"> allowed {max_cpu_percent:.2f}%"
+                    ),
+                    "EXCEEDED CPU",
+                )
 
-        # Wait for the process to finish, checking memory per step
-        max_memory_found = 0
-        while process.poll() is None:
-            # Collect the parent + children processes so that
-            # we can inspect memory for each
-            psutil_processes = [psutil_process]
-            with suppress(psutil.NoSuchProcess):
-                psutil_processes += psutil_process.children(recursive=True)
+            # Max memory increased
+            if stats.max_memory > current_max_memory:
+                # Update so that it shows up in tester status
+                self.setMaxMemory(stats.max_memory)
+                current_max_memory = stats.max_memory
 
-            # Accumulate total memory across all ranks
-            all_memory = [self.getProcessMemory(p) for p in psutil_processes]
-            total_memory = sum(v for v in all_memory if v is not None)
-
-            # If have a zero value and the main process isn't running,
-            # we're done here
-            if total_memory == 0 and not process.poll():
-                break
-
-            # Update CPU times
-            for p in psutil_processes:
-                with suppress(psutil.NoSuchProcess):
-                    times = p.cpu_times()
-                    cpu_times[p.pid] = times.user + times.system
-
-            # If memory has increased, set it so that it can be
-            # reported live during a long-running job
-            if total_memory > max_memory_found:
-                self.setMaxMemory(total_memory)
-                max_memory_found = total_memory
-
-                # If --max-memory is set, make sure we're not over
-                if max_memory is not None:
-                    assert isinstance(procs, int)
-                    rss_per_proc = float(max_memory_found / procs) * 1.0e-6
-
-                    # Over; kill the process, fail, and report
-                    if rss_per_proc > max_memory:
-                        self.kill()
-                        message = (
-                            f"Job killed: memory/slot {int(rss_per_proc)}MB "
-                            f"> max {int(max_memory)}MB"
-                        )
-                        self.appendOutput("\n" + util.outputHeader(message, False))
-                        self.job.setStatus(self.job.error, "OVER MEMORY")
-                        break
-
-            # Poll
-            time.sleep(0.05)
-
-        # Update CPU percent now that we're done (average for whole job)
-        total_cpu_time = sum(v for v in cpu_times.values())
-        cpu_percent = 100.0 * total_cpu_time / (time.perf_counter() - start_wall_time)
-        with self.cpu_percent_lock:
-            self.cpu_percent = cpu_percent
+                # Check max memory if limited
+                if allowed_max_memory and stats.max_memory > allowed_max_memory:
+                    kill(
+                        (
+                            f"Job killed: memory/slot {int(stats.max_memory / 1e6)}MB "
+                            f"> max {int(allowed_max_memory / 1e6)}MB"
+                        ),
+                        "EXCEEDED MEMORY",
+                    )
 
     def wait(self, timer):
         assert self.process is not None
@@ -262,21 +199,9 @@ class SubprocessRunner(Runner):
         """Cleanup; cleanup the parent and join the memory thread if running."""
         super().cleanup()
 
-        # Wait for the memory thread to finish up and check CPU usage
-        if self.memory_thread is not None:
-            self.memory_thread.join()
-
-            with self.cpu_percent_lock:
-                cpu_percent = self.cpu_percent
-            factor = 1.1
-            allowed_percent = 100.0 * factor * self.job.getSlots()
-            if cpu_percent > allowed_percent:
-                message = (
-                    f"FAIL: Job average CPU {cpu_percent:.2f}% "
-                    f"over allowed {allowed_percent:.2f}%."
-                )
-                self.appendOutput("\n" + util.outputHeader(message, False))
-                self.job.setStatus(self.job.error, "OVER CPU")
+        # Wait for the stats thread to finish up
+        if self.stats_thread is not None:
+            self.stats_thread.join()
 
     def sendSignal(self, signal):
         # process.poll() returns the process's exit code if it has completed,
