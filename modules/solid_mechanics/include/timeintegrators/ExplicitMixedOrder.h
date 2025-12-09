@@ -10,6 +10,8 @@
 #pragma once
 
 #include "ExplicitTimeIntegrator.h"
+#include "libmesh/stored_range.h"
+#include <memory>
 
 // Forward declarations
 namespace libMesh
@@ -49,6 +51,7 @@ public:
   {
     mooseError("NOT SUPPORTED");
   }
+  virtual void initialSetup() override;
   virtual void init() override;
 
   virtual void meshChanged() override;
@@ -109,6 +112,24 @@ protected:
   // local dofs that will have central difference time integration
   std::vector<dof_id_type> & _local_second_order_indices;
 
+  // mesh blocks over which the first and second order variables are defined
+  std::set<SubdomainID> _relevant_blocks;
+
+  // whether _relevant_blocks is equal to all the blocks in the mesh
+  bool _all_mesh_is_relevant;
+
+  // whether to constructRanges and then setCurrentAlgebraic{Element,Node}Range
+  const bool & _restrict_to_active_blocks;
+
+  // Union element range over all _relevant_blocks
+  std::unique_ptr<libMesh::ConstElemRange> _elem_range;
+  // Node range derived from _elem_range
+  std::unique_ptr<libMesh::ConstNodeRange> _node_range;
+
+  // Backing buffers when constructing StoredRange from packed vectors
+  std::vector<const libMesh::Elem *> _elem_buffer;
+  std::vector<const libMesh::Node *> _node_buffer;
+
   /**
    * Helper function that actually does the math for computing the time derivative
    */
@@ -117,6 +138,43 @@ protected:
   computeTimeDerivativeHelper(T & u_dot, T2 & u_dotdot, const T3 & u_old, const T4 & u_older) const;
 
   void computeICs();
+
+  /**
+   * Using _relevant_blocks, construct _elem_buffer, _elem_range, _node_buffer, _node_range
+   */
+  virtual void constructRanges();
+
+  /*
+   * If _restrict_to_active_blocks and !_all_mesh_is_relevant, then using _relevant_blocks, do the
+   * following:
+   * - calculate and apply appropriate elemental and nodal ranges
+   * - update the _nonlinear_implicit_system
+   * - apply appropriate ghosting
+   */
+  virtual void computeAndApplyRanges();
+
+private:
+  /**
+   * Use _elem_range and _node_range to setcurrentAlgebraicElementRange and
+   * setCurrentAlgebraicNodeRange
+   */
+  void setCurrentAlgebraicRanges();
+
+  /**
+   * if _restrict_to_active_blocks, then constructs _relevant_blocks and _all_mesh_is_relevant
+   */
+  void buildRelevantBlocks(const std::vector<VariableName> & var_names_first,
+                           const std::vector<VariableName> & var_names_second);
+
+  // Collects all off-rank DOF indices present in the given element range for use as ghost IDs
+  void buildGhostIDs(const libMesh::ConstElemRange & elems,
+                     std::vector<dof_id_type> & ghost_ids) const;
+
+  /**
+   * Rebuild ghost IDs from the current algebraic element range and re-init ghosted vectors
+   * _mass_matrix_diag_inverted and _mass_matrix_lumped
+   */
+  void reinitGhostedVectorsForCurrentAlgebraicRange();
 };
 
 template <typename T, typename T2, typename T3, typename T4>
