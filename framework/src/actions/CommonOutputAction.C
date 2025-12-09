@@ -16,6 +16,7 @@
 #include "Output.h"
 #include "OutputWarehouse.h"
 #include "MooseUtils.h"
+#include "PerfGraphReporter.h"
 
 // Extrnal includes
 #include "tinydir.h"
@@ -28,8 +29,6 @@
 registerMooseAction("MooseApp", CommonOutputAction, "common_output");
 registerMooseAction("MooseApp", CommonOutputAction, "add_output");
 registerMooseAction("MooseApp", CommonOutputAction, "add_reporter");
-
-const ReporterName CommonOutputAction::perf_graph_json_reporter("perf_graph_json", "graph");
 
 InputParameters
 CommonOutputAction::validParams()
@@ -170,6 +169,11 @@ CommonOutputAction::CommonOutputAction(const InputParameters & params)
 void
 CommonOutputAction::act()
 {
+  // Name of the PerfGraphReporter that could be created for the perf graph output
+  static const std::string perf_graph_reporter_name = "perf_graph_json";
+  // Name of the JSON output that could be created for the perf graph output
+  static const OutputName perf_graph_json_output_name = "auto_perf_graph_json";
+
   if (_current_task == "common_output")
   {
     // Store the common output parameters in the OutputWarehouse
@@ -273,18 +277,28 @@ CommonOutputAction::act()
                                               const std::string & set_param_name,
                                               const std::string & set_param_value)
       {
-        // To avoid this reporter value appearing in all other JSON output
-        _common_reporter_names.push_back(perf_graph_json_reporter);
+        const auto & value_names = PerfGraphReporter::value_names;
+        std::vector<ReporterName> reporters;
+        reporters.reserve(value_names.size());
+        for (const auto & value_name : value_names)
+        {
+          const ReporterName name(perf_graph_reporter_name, value_name);
+
+          // To avoid this reporter value appearing in all other JSON output
+          _common_reporter_names.push_back(name);
+
+          reporters.push_back(name);
+        }
 
         auto params = _factory.getValidParams("JSON");
-        params.set<std::vector<ReporterName>>("reporters") = {perf_graph_json_reporter};
+        params.set<std::vector<ReporterName>>("reporters") = reporters;
         params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
         params.set<ExecFlagEnum>("execute_system_information_on") = {EXEC_NONE};
         params.set<std::string>(set_param_name) = set_param_value;
         params.set<bool>("distributed") = false;
         if (set_param_name == "file_base")
           params.set<bool>("append_date") = false;
-        create("JSON", from_param_name, &parameters(), &params, from_param_name);
+        create("JSON", from_param_name, &parameters(), &params, perf_graph_json_output_name);
       };
 
       if (getParam<bool>("perf_graph_json"))
@@ -342,7 +356,9 @@ CommonOutputAction::act()
     {
       auto params = _factory.getValidParams("PerfGraphReporter");
       params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
-      _problem->addReporter("PerfGraphReporter", perf_graph_json_reporter.getObjectName(), params);
+      params.set<std::vector<OutputName>>("outputs") =
+          std::vector<OutputName>{perf_graph_json_output_name};
+      _problem->addReporter("PerfGraphReporter", perf_graph_reporter_name, params);
     }
   }
   else
