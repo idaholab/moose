@@ -7,13 +7,13 @@
 packages:
   # dependers: moose-dev
   tools:
-    version: 2025.10.21
+    version: 2026.01.27
     conda: conda/tools
     templates:
       conda/tools/meta.yaml.template: conda/tools/meta.yaml
   # dependers: libmesh-vtk, petsc, libmesh, moose-dev
   mpi:
-    version: 2025.09.18
+    version: 2026.01.27
     conda: conda/mpi
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
@@ -24,8 +24,8 @@ packages:
     apptainer:
   # dependers: libmesh, moose-dev
   libmesh-vtk:
-    version: 9.4.2
-    build_number: 6
+    version: 9.5.2
+    build_number: 0
     conda: conda/libmesh-vtk
     templates:
       conda/libmesh-vtk/conda_build_config.yaml.template: conda/libmesh-vtk/conda_build_config.yaml
@@ -36,7 +36,7 @@ packages:
       - conda/libmesh-vtk/build.sh
   # dependers: libmesh, moose-dev
   petsc:
-    version: 3.24.2
+    version: 3.24.3
     build_number: 0
     conda: conda/petsc
     templates:
@@ -55,7 +55,7 @@ packages:
       - scripts/apple-silicon-hdf5-autogen.patch
   # dependers: moose-dev
   libmesh:
-    version: 2025.11.25_c144a6e
+    version: 2026.01.27_502d428
     build_number: 0
     conda: conda/libmesh
     templates:
@@ -75,7 +75,7 @@ packages:
   # dependers: moose-dev
   wasp:
     version: 2025.09.19_02960f1
-    build_number: 0
+    build_number: 1
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -92,7 +92,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.12.08
+    version: 2026.01.27
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
@@ -126,7 +126,7 @@ packages:
       - framework/contrib/mfem
   # dependers: none
   pprof:
-    version: 2025.06.13
+    version: 2026.01.11_71be6bf
     conda: conda/pprof
     templates:
       conda/pprof/meta.yaml.template: conda/pprof/meta.yaml
@@ -134,7 +134,7 @@ packages:
       - conda/pprof/build.sh
   # dependers: none
   seacas:
-    version: 2025.05.22
+    version: 2025.10.14
     build_number: 0
     conda: conda/seacas
     templates:
