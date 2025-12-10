@@ -306,8 +306,7 @@ CSGBase::createCartesianLattice(
         mooseError("Cannot create Cartesian lattice " + name + ". Universe " + univ.getName() +
                    " is not in the CSGBase instance.");
 
-  const CSGLattice & lattice = _lattice_list.addCartesianLattice(name, pitch, universes);
-  return dynamic_cast<const CSGCartesianLattice &>(lattice);
+  return _lattice_list.addLattice<CSGCartesianLattice>(name, pitch, universes);
 }
 
 const CSGCartesianLattice &
@@ -411,8 +410,7 @@ CSGBase::createHexagonalLattice(
         mooseError("Cannot create hexagonal lattice " + name + ". Universe " + univ.getName() +
                    " is not in the CSGBase instance.");
 
-  const CSGLattice & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
-  return dynamic_cast<const CSGHexagonalLattice &>(lattice);
+  return _lattice_list.addLattice<CSGHexagonalLattice>(name, pitch, universes);
 }
 
 void

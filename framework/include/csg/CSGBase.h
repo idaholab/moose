@@ -352,8 +352,7 @@ public:
    */
   const CSGCartesianLattice & createCartesianLattice(const std::string & name, const Real pitch)
   {
-    const CSGLattice & lattice = _lattice_list.addCartesianLattice(name, pitch);
-    return dynamic_cast<const CSGCartesianLattice &>(lattice);
+    return _lattice_list.addLattice<CSGCartesianLattice>(name, pitch);
   }
 
   /**
@@ -396,8 +395,7 @@ public:
    */
   const CSGHexagonalLattice & createHexagonalLattice(const std::string & name, Real pitch)
   {
-    const CSGLattice & lattice = _lattice_list.addHexagonalLattice(name, pitch);
-    return dynamic_cast<const CSGHexagonalLattice &>(lattice);
+    return _lattice_list.addLattice<CSGHexagonalLattice>(name, pitch);
   }
 
   /**

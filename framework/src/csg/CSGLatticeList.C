@@ -15,36 +15,6 @@ namespace CSG
 CSGLatticeList::CSGLatticeList() {}
 
 CSGLattice &
-CSGLatticeList::addCartesianLattice(
-    const std::string & name,
-    const Real pitch,
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-{
-  return addLattice(std::make_unique<CSGCartesianLattice>(name, pitch, universes));
-}
-
-CSGLattice &
-CSGLatticeList::addCartesianLattice(const std::string & name, const Real pitch)
-{
-  return addLattice(std::make_unique<CSGCartesianLattice>(name, pitch));
-}
-
-CSGLattice &
-CSGLatticeList::addHexagonalLattice(const std::string & name, Real pitch)
-{
-  return addLattice(std::make_unique<CSGHexagonalLattice>(name, pitch));
-}
-
-CSGLattice &
-CSGLatticeList::addHexagonalLattice(
-    const std::string & name,
-    const Real pitch,
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-{
-  return addLattice(std::make_unique<CSGHexagonalLattice>(name, pitch, universes));
-}
-
-CSGLattice &
 CSGLatticeList::getLattice(const std::string & name) const
 {
   auto lat = _lattices.find(name);
