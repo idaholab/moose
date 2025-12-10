@@ -99,7 +99,7 @@ protected:
 
   /// Whether we are computing for a lower dimensional variable using boundary restriction, e.g. a
   /// variable whose block restriction is coincident with a higher-dimensional boundary face
-  const bool _coincident_lower_d_calc;
+  std::optional<bool> _coincident_lower_d_calc;
 
   /// Subproblem this kernel is part of
   SubProblem & _subproblem;

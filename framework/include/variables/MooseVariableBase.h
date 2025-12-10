@@ -187,11 +187,6 @@ public:
   virtual bool isArray() const { return !_array_var_component_names.empty(); }
 
   /**
-   * @return whether this variable has degrees of freedom on lower dimensional blocks
-   */
-  bool isLowerD() const { return _is_lower_d; }
-
-  /**
    * Size data structures related to matrix tagging
    */
   virtual void sizeMatrixTagData() { mooseError("Derived class must implement this method"); }

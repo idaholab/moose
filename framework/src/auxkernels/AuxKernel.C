@@ -124,7 +124,7 @@ template <typename ComputeValueType>
 void
 AuxKernelTempl<ComputeValueType>::insert()
 {
-  if (_coincident_lower_d_calc)
+  if (_coincident_lower_d_calc.value())
     _var.insertLower(_aux_sys.solution());
   else
     _var.insert(_aux_sys.solution());
@@ -138,9 +138,6 @@ AuxKernelTempl<ComputeValueType>::compute()
 
   if (isNodal()) /* nodal variables */
   {
-    mooseAssert(!_coincident_lower_d_calc,
-                "Nodal evaluations are point evaluations. We don't have to concern ourselves with "
-                "coincidence of lower-d blocks and higher-d faces because they share nodes");
     if (_var.isNodalDefined())
     {
       _qp = 0;
@@ -151,9 +148,11 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
   else /* elemental variables */
   {
-    _n_shapes = _coincident_lower_d_calc ? _var.dofIndicesLower().size() : _var.numberOfDofs();
+    const auto num_elem_shapes = _var.numberOfDofs();
+    _coincident_lower_d_calc = !num_elem_shapes;
+    _n_shapes = _coincident_lower_d_calc.value() ? _var.dofIndicesLower().size() : num_elem_shapes;
 
-    if (_coincident_lower_d_calc)
+    if (_coincident_lower_d_calc.value())
     {
       static const std::string lower_error = "Make sure that the lower-d variable lives on a "
                                              "lower-d block that is a superset of the boundary";
@@ -176,7 +175,7 @@ AuxKernelTempl<ComputeValueType>::compute()
         // update the variable data referenced by other kernels.
         // Note that this will update the values at the quadrature points too
         // (because this is an Elemental variable)
-        if (_coincident_lower_d_calc)
+        if (_coincident_lower_d_calc.value())
         {
           _local_sol.resize(1);
           if constexpr (std::is_same<Real, ComputeValueType>::value)
@@ -196,7 +195,7 @@ AuxKernelTempl<ComputeValueType>::compute()
       _local_ke.resize(_n_shapes, _n_shapes);
       _local_ke.zero();
 
-      const auto & test = _coincident_lower_d_calc ? _var.phiLower() : _test;
+      const auto & test = _coincident_lower_d_calc.value() ? _var.phiLower() : _test;
 
       // assemble the local mass matrix and the load
       for (unsigned int i = 0; i < test.size(); i++)
@@ -214,7 +213,8 @@ AuxKernelTempl<ComputeValueType>::compute()
       else
         _local_ke.cholesky_solve(_local_re, _local_sol);
 
-      _coincident_lower_d_calc ? _var.setLowerDofValues(_local_sol) : _var.setDofValues(_local_sol);
+      _coincident_lower_d_calc.value() ? _var.setLowerDofValues(_local_sol)
+                                       : _var.setDofValues(_local_sol);
     }
   }
 }

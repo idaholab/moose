@@ -1403,14 +1403,6 @@ public:
   void buildPRefinementAndCoarseningMaps(Assembly * assembly);
 
   /**
-   * @return Whether the subdomain indicated by \p subdomain_id has element dimensions less than
-   * the greatest element dimension in the mesh. Note that a subdomain may have multiple values
-   * of element dimensions contained within it. Only Exodus requires that we have a single type
-   * of element (and consequently dimension) in a subdomain
-   */
-  bool hasLowerD(const SubdomainID subdomain_id) const;
-
-  /**
    * @return Whether there are any lower-dimensional blocks
    */
   bool hasLowerD() const { return getMesh().elem_dimensions().size() > 1; }
@@ -1818,9 +1810,6 @@ private:
     /// The boundary ids that are attached. This set will include any sideset boundary ID that
     /// is a side of any part of the subdomain
     std::set<BoundaryID> boundary_ids;
-
-    /// The element dimensions present on this subdomain stored as a mask
-    unsigned char elem_dims = 0;
   };
 
   /// Holds a map from subdomain ids to associated data
@@ -1837,10 +1826,6 @@ private:
   std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
       _higher_d_elem_side_to_lower_d_elem;
   std::unordered_map<const Elem *, unsigned short int> _lower_d_elem_to_higher_d_elem_side;
-
-  /// Whether there are any lower-dimensional blocks that are manifolds of higher-dimensional block
-  /// faces
-  bool _has_lower_d;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
@@ -2234,13 +2219,4 @@ inline const std::unordered_map<std::pair<const Elem *, unsigned short int>, con
 MooseMesh::getLowerDElemMap() const
 {
   return _higher_d_elem_side_to_lower_d_elem;
-}
-
-inline bool
-MooseMesh::hasLowerD(const SubdomainID subdomain_id) const
-{
-  const auto max_dim = static_cast<unsigned char>(dimension());
-  // Create mask that has all lower dim bits set
-  const unsigned char all_lower_dims = max_dim - 1;
-  return (libmesh_map_find(_sub_to_data, subdomain_id).elem_dims & all_lower_dims) != 0;
 }

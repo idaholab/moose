@@ -94,7 +94,6 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     _var(getVariableHelper(parameters)),
     _bnd(boundaryRestricted()),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
-    _coincident_lower_d_calc(_bnd && !_var.isNodal() && _var.isLowerD()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
@@ -106,7 +105,7 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  if (_bnd && !_var.isNodal() && !_coincident_lower_d_calc && _check_boundary_restricted)
+  if (_bnd && !_var.isNodal() && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,
     // we need to check that no elements are visited more than once through visiting
