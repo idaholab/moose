@@ -118,7 +118,8 @@ class AnalyzeJacobian(FileTester):
     def augmentEnvironment(self, options) -> dict:
         value = super().augmentEnvironment(options)
 
-        # Don't allow python script to use threads
-        value["OMP_NUM_THREADS"] = "1"
+        # Default to no threads
+        if "OMP_NUM_THREADS" not in os.environ:
+            value["OMP_NUM_THREADS"] = "1"
 
         return value

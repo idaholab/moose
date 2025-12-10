@@ -79,6 +79,8 @@ class PythonUnitTest(RunApp):
 
         # Allow only one openmp thread; packages like pandas
         # will use the total number of cores and we don't want that
-        value.update({"OMP_NUM_THREADS": "1"})
+        # Default to no threads
+        if "OMP_NUM_THREADS" not in os.environ:
+            value["OMP_NUM_THREADS"] = "1"
 
         return value
