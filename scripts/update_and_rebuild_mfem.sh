@@ -125,38 +125,45 @@ do
       -DCMAKE_${CMAKE_BUILD_TYPE}_POSTFIX=-$METHOD \
       -DCMAKE_EXPORT_COMPILE_COMMANDS=YES \
       -DCMAKE_INSTALL_PREFIX="$MFEM_DIR" \
+      -DCMAKE_C_FLAGS_PROFILE="-O2 -g -DNDEBUG -fno-omit-frame-pointer" \
       -DCMAKE_CXX_FLAGS_PROFILE="-O2 -g -DNDEBUG -fno-omit-frame-pointer" \
       -DCMAKE_CUDA_FLAGS_PROFILE="-O2 -g -DNDEBUG -fno-omit-frame-pointer" \
       \
-      -DMFEM_ENABLE_MINIAPPS=YES \
-      \
       -DMFEM_USE_CEED=YES \
       -DMFEM_USE_CONDUIT=YES \
+      -DMFEM_USE_GSLIB=NO \
       -DMFEM_USE_MPI=YES \
+      -DMFEM_USE_MUMPS=YES \
       -DMFEM_USE_NETCDF=YES \
       -DMFEM_USE_PETSC=YES \
       -DMFEM_USE_SUPERLU=YES \
+      \
+      -DMFEM_FETCH_GSLIB=YES \
       \
       -DCEED_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DCONDUIT_DIR="$CONDUIT_DIR" \
       -DHDF5_DIR="$HDF5_DIR" \
       -DHYPRE_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
+      -DMUMPS_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DNETCDF_DIR="$LIBMESH_DIR" \
       -DParMETIS_DIR="$PETSC_DIR/$PETSC_ARCH" \
       -DPETSC_ARCH="$PETSC_ARCH" \
       -DPETSC_DIR="$PETSC_DIR" \
+      -DScaLAPACK_ROOT="$PETSC_DIR/$PETSC_ARCH" \
       -DSuperLUDist_DIR="$PETSC_DIR/$PETSC_ARCH" \
       \
       -DBLAS_LIBRARIES="$PETSC_DIR/$PETSC_ARCH/lib/libfblas.a" \
       -DLAPACK_LIBRARIES="$PETSC_DIR/$PETSC_ARCH/lib/libflapack.a" \
+      \
       "$@"
   fi
 
   cd "$MFEM_BUILD_DIR_BASE-$METHOD" ||
   { echo "Error: Need to run this script without --fast at least once."; exit 1; }
 
-  make -j ${MOOSE_JOBS:-4}
+  make -j ${MOOSE_JOBS:-4} install
+  cd miniapps/common
   make -j ${MOOSE_JOBS:-4} install
 
   # Save the configuration file for this build method

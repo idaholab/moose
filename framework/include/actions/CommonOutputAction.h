@@ -44,8 +44,6 @@ public:
     return _common_reporter_names;
   }
 
-  static const ReporterName perf_graph_json_reporter;
-
 private:
   /**
    * Helper method for creating the short-cut actions

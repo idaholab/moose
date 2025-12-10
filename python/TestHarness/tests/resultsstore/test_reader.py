@@ -56,7 +56,7 @@ class TestResultsReader(ResultsStoreTestCase):
         self.assertEqual(reader._database_name, DATABASE_NAME)
         self.assertTrue(reader.check)
         self.assertEqual(reader._timeout, 5.0)
-        self.assertEqual(id(reader._client), id(client))
+        self.assertIs(reader._client, client)
         self.assertIsNone(reader._database)
         self.assertIsNone(reader._authentication)
 
@@ -85,7 +85,7 @@ class TestResultsReader(ResultsStoreTestCase):
         """Test __init__() with authentication by variable."""
         auth = Authentication(**DEFAULT_AUTH)
         reader = ResultsReader(DATABASE_NAME, authentication=auth)
-        self.assertEqual(id(reader._authentication), id(auth))
+        self.assertIs(reader._authentication, auth)
 
     def test_init_no_auth(self):
         """Test __init__() without any authentication."""
@@ -160,7 +160,7 @@ class TestResultsReader(ResultsStoreTestCase):
             "TestHarness.resultsstore.reader.pymongo.MongoClient",
         ) as patch_mongo_client:
             client_again = reader.get_client()
-        self.assertEqual(id(client), id(client_again))
+        self.assertIs(client, client_again)
         patch_mongo_client.assert_not_called()
 
     def test_get_database(self):
@@ -174,13 +174,13 @@ class TestResultsReader(ResultsStoreTestCase):
             client, "get_database", return_value=database
         ) as patch_get_database:
             got_database = reader.get_database()
-        self.assertEqual(id(got_database), id(database))
+        self.assertIs(got_database, database)
         patch_get_database.assert_called_once_with(DATABASE_NAME)
 
         # Second time uses the same value
         with patch.object(client, "get_database") as patch_get_database:
             got_database = reader.get_database()
-        self.assertEqual(id(got_database), id(database))
+        self.assertIs(got_database, database)
         patch_get_database.assert_not_called()
 
     def test_close_without_client(self):
@@ -297,11 +297,11 @@ class TestResultsReader(ResultsStoreTestCase):
         stored_result = reader._build_result(data)
         self.assertIsInstance(stored_result, StoredResult)
         self.assertEqual(len(reader._results), 1)
-        self.assertEqual(id(reader._results[OBJECT_ID]), id(stored_result))
+        self.assertIs(reader._results[OBJECT_ID], stored_result)
 
         # Call again, should now exist
         stored_result_again = reader._build_result(data)
-        self.assertEqual(id(stored_result), id(stored_result_again))
+        self.assertIs(stored_result, stored_result_again)
 
     def test_build_result_failed(self):
         """Test build_result() raising during the build."""
@@ -456,15 +456,15 @@ class TestResultsReader(ResultsStoreTestCase):
         assert collection is not None
         self.assertEqual(len(collection.results), 1)
         self.assertEqual(collection._database_getter, reader.get_database)
-        self.assertEqual(id(collection.results[0]), id(results[0]))
+        self.assertIs(collection.results[0], results[0])
 
         # Now two
         with patch.object(reader, "latest_push_results_iterator", new=fake_it):
             collection = reader.get_latest_push_results(2)
         assert collection is not None
         self.assertEqual(len(collection.results), 2)
-        self.assertEqual(id(collection.results[0]), id(results[0]))
-        self.assertEqual(id(collection.results[1]), id(results[1]))
+        self.assertIs(collection.results[0], results[0])
+        self.assertIs(collection.results[1], results[1])
 
         # And then all (oversized)
         with patch.object(reader, "latest_push_results_iterator", new=fake_it):
@@ -546,7 +546,7 @@ class TestResultsReader(ResultsStoreTestCase):
             collection_again = method(value)
         patch_find_results.assert_not_called()
         assert collection_again is not None
-        self.assertEqual(id(collection_again.result), id(collection.result))
+        self.assertIs(collection_again.result, collection.result)
 
     def test_get_event_result(self):
         """Test get_event_result()."""

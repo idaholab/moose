@@ -176,6 +176,13 @@ public:
   void update();
 
   /**
+   * Get the maximum memory allocation in MB.
+   *
+   * This is thread safe.
+   */
+  std::size_t getMaxMemory() const { return _max_memory; }
+
+  /**
    * @returns The MooseApp
    */
   MooseApp & mooseApp() { return _moose_app; }
@@ -380,6 +387,9 @@ protected:
   /// easier to sort
   std::vector<CumulativeSectionInfo *> _cumulative_section_info_ptrs;
 
+  /// Maximum memory encountered during push and pop
+  std::atomic<std::size_t> _max_memory;
+
   /// Whether or not timing is active
   bool _active;
 
@@ -428,6 +438,11 @@ private:
                            const unsigned int level,
                            const bool heaviest,
                            unsigned int current_depth) const;
+
+  /**
+   * Update _max_memory if current_memory > _max_memory.
+   */
+  void updateMaxMemory(const std::size_t current_memory);
 };
 
 template <typename Functor>

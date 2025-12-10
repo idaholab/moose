@@ -829,8 +829,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
 
   if (!_has_ducts && _sides_to_adapt.empty())
   {
-    libMesh::LaplaceMeshSmoother lms(*mesh0);
-    lms.smooth(_smoothing_max_it);
+    libMesh::LaplaceMeshSmoother lms(*mesh0, _smoothing_max_it);
+    lms.smooth();
   }
 
   // Set up customized Block Names and/or IDs
