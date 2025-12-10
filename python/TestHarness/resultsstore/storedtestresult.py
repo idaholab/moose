@@ -386,8 +386,7 @@ class StoredTestResult:
         self._require_filter(TestDataFilter.MAX_MEMORY)
         if self.result.version > 8:
             return get_typed(self.data, "max_memory", (NoneType, int))
-        else:
-            return None
+        return None
 
     def serialize(self) -> dict:
         """

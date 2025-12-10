@@ -639,8 +639,8 @@ class TestResultsStoredResults(ResultsStoreTestCase):
             del test.data["max_memory"]
             self.assertIsNone(test.max_memory)
 
-    def test_get_max_memory_bad_version(self):
-        """Test get_max_memory()."""
+    def test_get_max_memory_old_version(self):
+        """Test get_max_memory() with version < 9 (before available)."""
         tests = self.get_stored_test_results()
         for test, data in tests:
             test.result.data["testharness"]["version"] = 2
