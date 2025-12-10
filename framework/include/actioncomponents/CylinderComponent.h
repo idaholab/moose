@@ -36,14 +36,9 @@ protected:
   virtual void setupComponent() override;
   virtual void checkIntegrity() override;
 
-  /// Radius of the cylinder
-  const Real _radius;
-  /// Height of the cylinder
-  const Real _height;
-
-  virtual Real volume() const override { return _height * libMesh::pi * Utility::pow<2>(_radius); }
-  virtual Real outerSurfaceArea() const override
-  {
-    return 2 * libMesh::pi * (Utility::pow<2>(_radius) + _radius * _height);
-  }
+  // virtual Real volume() const override { return _height * libMesh::pi * Utility::pow<2>(_radius);
+  // } virtual Real outerSurfaceArea() const override
+  // {
+  //   return 2 * libMesh::pi * (Utility::pow<2>(_radius) + _radius * _height);
+  // }
 };
