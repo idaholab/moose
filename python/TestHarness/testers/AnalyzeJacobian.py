@@ -105,3 +105,11 @@ class AnalyzeJacobian(FileTester):
             return False
 
         return FileTester.checkRunnable(self, options)
+
+    def augmentEnvironment(self, options) -> dict:
+        value = super().augmentEnvironment(options)
+
+        # Don't allow python script to use threads
+        value["OMP_NUM_THREADS"] = "1"
+
+        return value
