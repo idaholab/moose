@@ -139,13 +139,13 @@ class TestHarnessResultsSummary:
         return base_collection, head_collection
 
     @staticmethod
-    def _format_test_name(test_name: str) -> str:
+    def _format_test_name(test_name: TestName) -> str:
         """Format a test name for display, wrapped in backticks."""
         return f"`{str(test_name)}`"
 
     @staticmethod
     def _format_memory(max_memory: int) -> str:
-        """Convert max memory of test to Megabyte and 2 dec place."""
+        """Convert max memory from bytes to megabytes with 2 decimals."""
         assert isinstance(max_memory, (NoneType, int))
         max_memory_mb = max_memory / 1000000 if max_memory else 0
         max_memory_str = f"{max_memory_mb:.2f}"

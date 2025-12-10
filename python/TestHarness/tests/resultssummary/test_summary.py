@@ -109,11 +109,6 @@ class FakeStoredResult(StoredResult):
         """Fake event sha for a result."""
         return self._event_sha
 
-    @property
-    def version(self) -> str:
-        """Fake event sha for a result."""
-        return self._version
-
 
 class FakeResultCollection(ResultCollection):
     """Fake ResultCollection for unit testing."""
