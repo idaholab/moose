@@ -42,6 +42,13 @@ WCNSFVFlowPhysicsBase::validParams()
   // Momentum boundary conditions are important for advection problems as well
   params += NSFVBase::commonMomentumBoundaryTypesParams();
 
+  // Convenient for sharing the executioner block with a non-Physics syntax
+  // or for defining the RhieChow user object outside the Physics
+  params.addParam<UserObjectName>(
+      "rhie_chow_uo_name",
+      "Name of the Rhie Chow user object. Defaults to 'pins_rhie_chow_interpolator' for porous "
+      "flow and 'ins_rhie_chow_interpolator' for non-porous.");
+
   // Specify the weakly compressible boundary flux information. They are used for specifying in flux
   // boundary conditions for advection physics in WCNSFV
   params += NSFVBase::commonMomentumBoundaryFluxesParams();
@@ -124,6 +131,10 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                               ? getParam<MooseFunctorName>("density_gravity")
                               : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
+    _rc_uo_name(isParamValid("rhie_chow_uo_name")
+                    ? getParam<UserObjectName>("rhie_chow_uo_name")
+                    : (_porous_medium_treatment ? "pins_rhie_chow_interpolator"
+                                                : "ins_rhie_chow_interpolator")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
@@ -243,6 +254,15 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
         Moose::createMapFromVectors<BoundaryName, std::vector<MooseFunctorName>>(
             wall_boundaries_with_functors, momentum_wall_functors);
   }
+
+  addRequiredPhysicsTask("add_geometric_rm");
+  addRequiredPhysicsTask("add_variables_physics");
+  addRequiredPhysicsTask("add_ics_physics");
+  addRequiredPhysicsTask("add_materials_physics");
+  addRequiredPhysicsTask("add_user_object");
+  addRequiredPhysicsTask("add_postprocessor");
+  addRequiredPhysicsTask("add_corrector");
+  addRequiredPhysicsTask("get_turbulence_physics");
 }
 
 void
@@ -383,7 +403,7 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
                "The number of velocity components in the " + type() + " initial condition is not " +
                    std::to_string(dimension()) + " or 3!");
 
-  InputParameters params = getFactory().getValidParams("FunctionIC");
+  InputParameters params = getFactory().getValidParams("FVFunctionIC");
   assignBlocks(params, _blocks);
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
@@ -396,7 +416,8 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
                        _blocks,
                        /*whether IC is a default*/ !isParamSetByUser("initial_velocity"),
                        /*error if already an IC*/ isParamSetByUser("initial_velocity")))
-      getProblem().addInitialCondition("FunctionIC", prefix() + _velocity_names[d] + "_ic", params);
+      getProblem().addFVInitialCondition(
+          "FVFunctionIC", prefix() + _velocity_names[d] + "_ic", params);
   }
 
   if (shouldCreateIC(_pressure_name,
@@ -407,7 +428,7 @@ WCNSFVFlowPhysicsBase::addInitialConditions()
     params.set<VariableName>("variable") = _pressure_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_pressure");
 
-    getProblem().addInitialCondition("FunctionIC", prefix() + _pressure_name + "_ic", params);
+    getProblem().addFVInitialCondition("FVFunctionIC", prefix() + _pressure_name + "_ic", params);
   }
 }
 
@@ -464,17 +485,17 @@ WCNSFVFlowPhysicsBase::getPorosityFunctorName(bool smoothed) const
     return _porosity_name;
 }
 
-const WCNSFVTurbulencePhysics *
+const WCNSFVTurbulencePhysicsBase *
 WCNSFVFlowPhysicsBase::getCoupledTurbulencePhysics() const
 {
   // User passed it, just use that
   if (isParamValid("coupled_turbulence_physics"))
-    return getCoupledPhysics<WCNSFVTurbulencePhysics>(
+    return getCoupledPhysics<WCNSFVTurbulencePhysicsBase>(
         getParam<PhysicsName>("coupled_flow_physics"));
   // Look for any physics of the right type, and check the block restriction
   else
   {
-    const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysics>(true);
+    const auto all_turbulence_physics = getCoupledPhysics<const WCNSFVTurbulencePhysicsBase>(true);
     for (const auto physics : all_turbulence_physics)
       if (checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))
@@ -482,4 +503,11 @@ WCNSFVFlowPhysicsBase::getCoupledTurbulencePhysics() const
   }
   // Did not find one
   return nullptr;
+}
+
+const UserObjectName &
+WCNSFVFlowPhysicsBase::rhieChowUOName() const
+{
+  mooseAssert(!_rc_uo_name.empty(), "The Rhie-Chow user-object name should be set!");
+  return _rc_uo_name;
 }

@@ -11,7 +11,7 @@
 #include "INSFVRhieChowInterpolator.h"
 #include "RelationshipManager.h"
 #include "WCNSFVFlowPhysicsBase.h"
-#include "WCNSFVTurbulencePhysics.h"
+#include "WCNSFVTurbulencePhysicsBase.h"
 
 InputParameters
 WCNSFVCoupledAdvectionPhysicsHelper::validParams()
@@ -73,18 +73,18 @@ WCNSFVCoupledAdvectionPhysicsHelper::getCoupledFlowPhysics() const
              "WCNSFVFlowPhysicsBase-derived Physics to couple with");
 }
 
-const WCNSFVTurbulencePhysics *
+const WCNSFVTurbulencePhysicsBase *
 WCNSFVCoupledAdvectionPhysicsHelper::getCoupledTurbulencePhysics() const
 {
   // User passed it, just use that
   if (_advection_physics->isParamValid("coupled_turbulence_physics"))
-    return _advection_physics->getCoupledPhysics<WCNSFVTurbulencePhysics>(
+    return _advection_physics->getCoupledPhysics<WCNSFVTurbulencePhysicsBase>(
         _advection_physics->getParam<PhysicsName>("coupled_turbulence_physics"));
   // Look for any physics of the right type, and check the block restriction
   else
   {
     const auto all_turbulence_physics =
-        _advection_physics->getCoupledPhysics<const WCNSFVTurbulencePhysics>(true);
+        _advection_physics->getCoupledPhysics<const WCNSFVTurbulencePhysicsBase>(true);
     for (const auto physics : all_turbulence_physics)
       if (_advection_physics->checkBlockRestrictionIdentical(
               physics->name(), physics->blocks(), /*error_if_not_identical=*/false))

@@ -13,7 +13,7 @@
 
 class NavierStokesPhysicsBase;
 class WCNSFVFlowPhysicsBase;
-class WCNSFVTurbulencePhysics;
+class WCNSFVTurbulencePhysicsBase;
 
 /**
  * Helper class to interact with a flow and turbulence physics for a Physics that solves
@@ -27,7 +27,7 @@ public:
   WCNSFVCoupledAdvectionPhysicsHelper(const NavierStokesPhysicsBase * derived_physics);
 
   const WCNSFVFlowPhysicsBase * getCoupledFlowPhysics() const;
-  const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
+  const WCNSFVTurbulencePhysicsBase * getCoupledTurbulencePhysics() const;
 
   /// Return the porosity functor name.
   /// It is important to forward to the Physics so we do not get the smoothing status wrong
@@ -42,7 +42,10 @@ protected:
   /// Flow physics
   const WCNSFVFlowPhysicsBase * _flow_equations_physics;
   /// Turbulence
-  const WCNSFVTurbulencePhysics * _turbulence_physics;
+  const WCNSFVTurbulencePhysicsBase * _turbulence_physics;
+  /// Because of the Modules/navierStokesFV syntax, a turbulence physics often exists without a model
+  /// we save (_turbulence_physics && _turbulence_physics->hasTurbulenceModel()) in this attribute
+  bool _has_turbulence_model;
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;

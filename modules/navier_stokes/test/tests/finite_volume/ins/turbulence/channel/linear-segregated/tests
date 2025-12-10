@@ -1,7 +1,7 @@
 [Tests]
-  design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
-  issues = '#29846 #31584'
-  [channel_ERCOFTAC]
+  [channel_ERCOFTAC_linear]
+    design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+    issues = '#29846'
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_out_line_center_channel_0001.csv channel_ERCOFTAC_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_out_side_bottom_0001.csv channel_ERCOFTAC_out_side_top_0001.csv'
@@ -10,17 +10,50 @@
     max_threads = 1 # see libmesh issue #3808
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers.'
   []
-  [channel_ERCOFTAC_scaled_Re]
+  [channel_ERCOFTAC_linear_lumped_eff]
+    design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md FunctorEffectiveDynamicViscosity.md'
+    issues = '#29846'
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC_mu_eff.i'
+    # same results, no need to run if failing
+    prereq = 'channel_ERCOFTAC_linear'
+    csvdiff = 'channel_ERCOFTAC_mu_eff_out_line_center_channel_0001.csv channel_ERCOFTAC_mu_eff_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_mu_eff_out_side_bottom_0001.csv channel_ERCOFTAC_mu_eff_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers, while using a lumped effective viscosity term instead of separate dynamic and turbulent dynamic viscosity diffusion coefficients and kernels.'
+  []
+  [channel_ERCOFTAC_linear_scaled_Re]
+    design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+    issues = '#29846 #31584'
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
+    # same results, no need to run if failing
+    prereq = 'channel_ERCOFTAC_linear'
+    cli_args = 'rho=2'
     csvdiff = 'channel_ERCOFTAC_out_line_center_channel_0001.csv channel_ERCOFTAC_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_out_side_bottom_0001.csv channel_ERCOFTAC_out_side_top_0001.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
-    cli_args = 'rho=2'
     requirement = 'For the same Reynolds number but scaled density over viscosity ratio, the system shall be able to yield the same results than a benchmark case for a channel flow.'
   []
+  [channel_ERCOFTAC_linear_physics]
+    design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md'
+    issues = '#29846 #29175'
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC-physics.i'
+    # use same gold files
+    prereq = 'channel_ERCOFTAC_linear'
+    # Physics includes deviatoric term with dynamic viscosity, regular input does not
+    csvdiff = 'channel_ERCOFTAC-physics_out_line_center_channel_0001.csv channel_ERCOFTAC-physics_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC-physics_out_side_bottom_0001.csv channel_ERCOFTAC-physics_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization and using the shorthand Physics syntax.'
+  []
   [channel_ERCOFTAC_symmetry]
+    design = 'LinearFVTurbulentAdvection.md LinearFVTurbulentDiffusion.md LinearFVTKESourceSink.md LinearFVTKEDSourceSink.md kEpsilonViscosityAux.md INSFVTurbulentViscosityWallFunction.md'
+    issues = '#29846 #31584'
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC_symmetric.i'
     csvdiff = 'channel_ERCOFTAC_symmetric_out_line_center_channel_0001.csv channel_ERCOFTAC_symmetric_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_symmetric_out_side_top_0001.csv'
@@ -28,5 +61,43 @@
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization and symmetry boundary conditions, and reach converged results with segregated solvers.'
+  []
+  [channel_ERCOFTAC_linear_heated_physics]
+    design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md WCNSLinearFVFluidHeatTransferPhysics.md'
+    issues = '#29846 #29175'
+    type = 'CSVDiff'
+    input = 'channel_heated-physics.i'
+    csvdiff = 'channel_heated-physics_out_line_center_channel_0001.csv channel_heated-physics_out_line_quarter_radius_channel_0001.csv channel_heated-physics_out_side_bottom_0001.csv channel_heated-physics_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve a heated channel with linear FV discretization, a k-epsilon turbulence model, and using the shorthand Physics syntax.'
+  []
+  [channel_ERCOFTAC_linear_heated_enthalpy_physics]
+    design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md WCNSLinearFVFluidHeatTransferPhysics.md'
+    issues = '#29846 #29175'
+    type = 'CSVDiff'
+    input = 'channel_heated-physics.i'
+    cli_args = "Physics/NavierStokes/FluidHeatTransferSegregated/energy/solve_for_enthalpy=true
+                FunctorMaterials/active='T_from_h h_from_T'
+                Postprocessors/Q_out/advected_quantity=h"
+    # same gold files
+    prereq = 'channel_ERCOFTAC_linear_heated_physics'
+    csvdiff = 'channel_heated-physics_out_line_center_channel_0001.csv channel_heated-physics_out_line_quarter_radius_channel_0001.csv channel_heated-physics_out_side_bottom_0001.csv channel_heated-physics_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve a heated channel with linear FV discretization, a k-epsilon turbulence model, solving for the enthalpy variable, and using the shorthand Physics syntax.'
+  []
+  [channel_ERCOFTAC_linear_scalar_physics]
+    design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md WCNSLinearFVScalarTransportPhysics.md'
+    issues = '#29846 #29175'
+    type = 'CSVDiff'
+    input = 'channel_scalars-physics.i'
+    csvdiff = 'channel_scalars-physics_out.csv channel_scalars-physics_out_line_center_channel_0001.csv channel_scalars-physics_out_line_quarter_radius_channel_0001.csv channel_scalars-physics_out_side_bottom_0001.csv channel_scalars-physics_out_side_top_0001.csv'
+    abs_zero = 1e-6
+    recover = false # we don't support recovery for SIMPLE yet
+    max_threads = 1 # see libmesh issue #3808
+    requirement = 'The system shall be able to solve a channel with linear FV discretization, a k-epsilon turbulence model, with passive scalar advection, and using the shorthand Physics syntax.'
   []
 []

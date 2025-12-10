@@ -21,14 +21,16 @@ PhysicsComponentInterface::validParams()
 PhysicsComponentInterface::PhysicsComponentInterface(const InputParameters & parameters)
   : PhysicsBase(parameters)
 {
-  addRequiredPhysicsTask("add_ic");
+  // Temporarily not required until TMAP8 physics are updated to use new task
+  // addRequiredPhysicsTask("add_ic");
 }
 
 void
 PhysicsComponentInterface::actOnAdditionalTasks()
 {
   // TODO: find a way to force this routine to be called by derived classes
-  if (_current_task == "add_ic")
+  // TODO: only keep the ics_physics task to prevent the risk of calling this twice
+  if ((_current_task == "add_ic" || _current_task == "add_ics_physics"))
     addInitialConditionsFromComponents();
   else if (_current_task == "add_bc" || _current_task == "add_fv_bc")
     addBoundaryConditionsFromComponents();

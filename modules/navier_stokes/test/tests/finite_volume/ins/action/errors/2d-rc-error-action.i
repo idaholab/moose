@@ -70,10 +70,6 @@ alpha = 1
     passive_scalar_diffusivity = 1e-3
     passive_scalar_source = 0.1
 
-    initial_velocity = '1 1 0'
-    initial_pressure = 0.0
-    initial_temperature = 0.0
-
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
     momentum_inlet_functors = '1 0'

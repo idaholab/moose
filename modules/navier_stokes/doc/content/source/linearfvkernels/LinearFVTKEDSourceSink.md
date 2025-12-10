@@ -34,7 +34,7 @@ where:
 - $C_{2,\epsilon} = 1.92$ is a closure parameter,
 - $\epsilon$ is the solution variable, i.e., the dissipation rate of the turbulent kinetic energy,
 - $k$ is the turbulent kinetic energy,
-- $t_k = \frac{k}{\epsilon}$ is the turbulent time scale; if the [!param](/LinearFVKernels/LinearFVTKEDSourceSink/linearized_model) is `true`, this timescale is computed from the previous iteration; if [!param](/LinearFVKernels/LinearFVTKEDSourceSink/linearized_model) is `false`, in a nonlinear solve, this timescale is aded to the Jacobian.
+- $t_k = \frac{k}{\epsilon}$ is the turbulent time scale
 
 ## Wall formulation:
 

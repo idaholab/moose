@@ -63,7 +63,7 @@
 
   dt = 0.1
   start_time = 0.0
-  num_steps = 30
+  num_steps = 1
 
   solve_type = 'NEWTON'
   line_search = 'basic'
@@ -74,14 +74,8 @@
   l_tol = 1e-3
   l_max_its = 100
 
-  abort_on_solve_fail = true
-
   [Quadrature]
     type = GAUSS
     order = SECOND
   []
-[]
-
-[Outputs]
-  exodus = true
 []

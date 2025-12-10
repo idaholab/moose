@@ -77,6 +77,7 @@ DiffusionPhysicsBase::DiffusionPhysicsBase(const InputParameters & parameters)
 
   addRequiredPhysicsTask("add_preconditioning");
   addRequiredPhysicsTask("add_postprocessor");
+  addRequiredPhysicsTask("add_ics_physics");
 }
 
 void

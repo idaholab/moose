@@ -499,6 +499,8 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
 
+  // In all cases, the functor material defines rho_h and dh/dt
+  // 1st case, we solve for h, the functor material also defines T_fluid
   if (_solve_for_enthalpy)
   {
     params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
@@ -509,11 +511,13 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
     else
       paramError(NS::fluid, "Required when solving for enthalpy");
   }
-  // the functor material defines the temperature
+  // the functor material computes enthalpy from the temperature
   else
   {
     params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
     params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+
+    // using the fluid properties instead of assuming a constant cp
     if (isParamValid(NS::fluid))
     {
       params.set<bool>("assumed_constant_cp") = false;
@@ -521,6 +525,7 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
       params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
     }
   }
+  // We'll default to outputting the temperature because it's a common need
   if (_solve_for_enthalpy)
   {
     params.set<std::vector<std::string>>("output_properties") = {_fluid_temperature_name};
@@ -530,7 +535,8 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
   getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 
   if (_solve_for_enthalpy)
-    WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(/*use ad*/ true);
+    WCNSFVFluidHeatTransferPhysicsBase::defineEffectiveThermalDiffusionCoeffFunctors(
+        /*use ad*/ true);
 }
 
 void

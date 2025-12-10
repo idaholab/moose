@@ -15,11 +15,11 @@
 
 #define registerWCNSFVFluidHeatTransferPhysicsBaseTasks(app_name, derived_name)                    \
   registerMooseAction(app_name, derived_name, "get_turbulence_physics");                           \
-  registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
+  registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
+  registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
   registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
   registerMooseAction(app_name, derived_name, "add_fv_bc");                                        \
-  registerMooseAction(app_name, derived_name, "add_material")
+  registerMooseAction(app_name, derived_name, "add_materials_physics")
 
 /**
  * Creates all the objects needed to solve the Navier Stokes energy equation
@@ -83,8 +83,10 @@ protected:
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
   bool processThermalConductivity();
-  /// Define the k/cp diffusion coefficients when solving for enthalpy
-  void defineKOverCpFunctors(const bool use_ad);
+  /// Define the effective diffusion coefficient when:
+  /// - solving with a turbulence model: k <- k+kt
+  /// - solving for enthalpy: k / cp
+  void defineEffectiveThermalDiffusionCoeffFunctors(const bool use_ad);
 
   /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
   const bool _has_energy_equation;

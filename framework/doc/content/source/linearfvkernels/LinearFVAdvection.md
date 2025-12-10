@@ -29,6 +29,10 @@ contributes to the degree of freedom on the other side of the face with:
 !equation
 \vec{v} \cdot \vec{n}_f |S_f| (1-g_{C,f}).
 
+!alert warning
+When using non-zero flux boundary condition, only a single `LinearFVFluxKernel` may be used, as otherwise
+the boundary conditions may be applied multiple times. This warning applies to all `LinearFVFluxKernel`-derived classes.
+
 ## Example input syntax
 
 This example describes a pure advection problem with a source term on a 2D mesh.
