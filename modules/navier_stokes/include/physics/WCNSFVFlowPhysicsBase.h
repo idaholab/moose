@@ -10,14 +10,14 @@
 #pragma once
 
 #include "NavierStokesPhysicsBase.h"
-#include "WCNSFVTurbulencePhysics.h"
+#include "WCNSFVTurbulencePhysicsBase.h"
 
 #define registerWCNSFVFlowPhysicsBaseTasks(app_name, derived_name)                                 \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_geometric_rm");                                 \
-  registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
-  registerMooseAction(app_name, derived_name, "add_material");                                     \
+  registerMooseAction(app_name, derived_name, "add_variables_physics");                            \
+  registerMooseAction(app_name, derived_name, "add_ics_physics");                                  \
+  registerMooseAction(app_name, derived_name, "add_materials_physics");                            \
   registerMooseAction(app_name, derived_name, "add_user_object");                                  \
   registerMooseAction(app_name, derived_name, "add_postprocessor");                                \
   registerMooseAction(app_name, derived_name, "add_corrector");                                    \
@@ -86,7 +86,7 @@ public:
   /// Get the name of the linear friction coefficient. Returns an empty string if no friction.
   virtual MooseFunctorName getLinearFrictionCoefName() const = 0;
   /// Return the name of the Rhie Chow user object
-  virtual UserObjectName rhieChowUOName() const = 0;
+  const UserObjectName & rhieChowUOName() const;
   /// Return the number of algebraic ghosting layers needed
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
@@ -145,7 +145,7 @@ protected:
   }
 
   /// Find the turbulence physics
-  const WCNSFVTurbulencePhysics * getCoupledTurbulencePhysics() const;
+  const WCNSFVTurbulencePhysicsBase * getCoupledTurbulencePhysics() const;
 
   /// Name of the vector to hold pressure momentum equation contributions
   const TagName _pressure_tag = "p_tag";
@@ -179,6 +179,8 @@ protected:
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
 
+  /// name of the Rhie Chow user object
+  UserObjectName _rc_uo_name;
   /// The velocity face interpolation method for advecting other quantities
   const MooseEnum _velocity_interpolation;
   /// The momentum face interpolation method for being advected
@@ -187,7 +189,7 @@ protected:
   const MooseEnum _momentum_face_interpolation;
 
   /// Can be set to a coupled turbulence physics
-  const WCNSFVTurbulencePhysics * _turbulence_physics;
+  const WCNSFVTurbulencePhysicsBase * _turbulence_physics;
 
   /// Subdomains where we want to have volumetric friction
   std::vector<std::vector<SubdomainName>> _friction_blocks;

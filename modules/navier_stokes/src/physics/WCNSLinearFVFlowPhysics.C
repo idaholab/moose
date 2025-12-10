@@ -31,6 +31,7 @@ WCNSLinearFVFlowPhysics::validParams()
 
   params.addParam<bool>(
       "orthogonality_correction", false, "Whether to use orthogonality correction");
+  params.renameParam("orthogonality_correction", "use_nonorthogonal_correction", "");
   params.set<unsigned short>("ghost_layers") = 1;
 
   // This will be adapted based on the dimension
@@ -56,6 +57,9 @@ WCNSLinearFVFlowPhysics::validParams()
   // No other options so far
   params.set<MooseEnum>("velocity_interpolation") = "rc";
   params.suppressParameter<MooseEnum>("velocity_interpolation");
+
+  // Rhie-Chow
+  params.transferParam<MooseEnum>(RhieChowMassFlux::validParams(), "pressure_projection_method");
 
   return params;
 }
@@ -245,7 +249,11 @@ WCNSLinearFVFlowPhysics::addMomentumFluxKernels()
 
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  if (!_turbulence_physics)
+    params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
+  else
+    params.set<MooseFunctorName>(NS::mu) = NS::mu_eff;
+
   params.set<UserObjectName>("rhie_chow_user_object") = rhieChowUOName();
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   params.set<bool>("use_nonorthogonal_correction") = _non_orthogonal_correction;
@@ -559,6 +567,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
 void
 WCNSLinearFVFlowPhysics::addUserObjects()
 {
+  mooseAssert(!_porous_medium_treatment, "Not implemented");
   // Rhie Chow user object for interpolation velocities
   addRhieChowUserObjects();
 }
@@ -607,6 +616,8 @@ WCNSLinearFVFlowPhysics::addRhieChowUserObjects()
   params.set<VariableName>("pressure") = _pressure_name;
   params.set<std::string>("p_diffusion_kernel") = prefix() + "p_diffusion";
   params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseEnum>("pressure_projection_method") =
+      getParam<MooseEnum>("pressure_projection_method");
 
   getProblem().addUserObject(object_type, rhieChowUOName(), params);
 }
@@ -635,13 +646,6 @@ WCNSLinearFVFlowPhysics::addFunctorMaterials()
             "ADParsedFunctorMaterial", prefix() + "gravity_helper_" + comp_axis[d], params);
       }
   }
-}
-
-UserObjectName
-WCNSLinearFVFlowPhysics::rhieChowUOName() const
-{
-  mooseAssert(!_porous_medium_treatment, "Not implemented");
-  return "ins_rhie_chow_interpolator";
 }
 
 unsigned short

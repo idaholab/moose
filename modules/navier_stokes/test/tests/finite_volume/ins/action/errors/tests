@@ -327,7 +327,8 @@
       input = 2d-rc-error-action.i
       detail = 'an initial condition is provided for velocities when they are defined outside of the action'
       cli_args = "Variables/inactive='scalar' Modules/NavierStokesFV/velocity_variable='vel_x vel_y' "
-                 "Modules/NavierStokesFV/define_variables=false"
+                 "Modules/NavierStokesFV/define_variables=false "
+                 "Modules/NavierStokesFV/initial_velocity='1 1 0'"
       expect_err = "(Velocity is defined externally of NavierStokesFV, so should the inital "
                    "conditions|Velocity is defined externally of WCNSFVFlowPhysics(Base|), so should the "
                    "inital conditions)"
@@ -337,6 +338,7 @@
       input = 2d-rc-error-action.i
       detail = 'an initial condition is provided for pressure when it is defined outside of the action'
       cli_args = "Variables/inactive='scalar' Modules/NavierStokesFV/pressure_variable='pressure' "
+                 "Modules/NavierStokesFV/initial_pressure=0.0 "
                  "Modules/NavierStokesFV/define_variables=false Modules/velocity_variable='vel_x "
                  "vel_y'"
       expect_err = "(Pressure is defined externally of NavierStokesFV, so should the inital "
@@ -349,6 +351,7 @@
       detail = 'an initial condition is provided for temperature when it is defined outside of the action'
       cli_args = "Variables/inactive='scalar' Variables/T_f/type=INSFVEnergyVariable "
                  "Modules/NavierStokesFV/fluid_temperature_variable='T_f' "
+                 "Modules/NavierStokesFV/initial_temperature=0.0 "
                  "Modules/NavierStokesFV/define_variables=false Modules/velocity_variable='vel_x "
                  "vel_y' Modules/pressure_variable='pressure'"
       expect_err = "(T_fluid is defined externally of NavierStokesFV, so should the inital "

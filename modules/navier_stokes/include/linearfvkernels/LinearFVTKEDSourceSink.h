@@ -60,9 +60,6 @@ protected:
   /// Wall boundaries
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// If the user wants to use the linearized model
-  const bool _linearized_model;
-
   /// Method used for wall treatment
   NS::WallTreatmentEnum _wall_treatment;
 
