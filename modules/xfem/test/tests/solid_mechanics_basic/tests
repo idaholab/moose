@@ -170,10 +170,10 @@
                   '3-noded triangle element by two prescribed evolving cutting planes'
     design = 'XFEM/index.md'
   []
-  [test_crack_counter]
+  [crack_counter]
     type = CSVDiff
-    input = test_crack_counter.i
-    csvdiff = 'test_crack_counter_out.csv'
+    input = crack_counter.i
+    csvdiff = 'crack_counter_out.csv'
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM system shall provide an accessor function to the crack_tip_origin_direction_map'
