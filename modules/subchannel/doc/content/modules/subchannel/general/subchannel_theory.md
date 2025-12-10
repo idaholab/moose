@@ -12,11 +12,7 @@ Subchannel codes are thermal-hydraulic codes that offer an efficient compromise 
 
 !! Intentional comment to provide extra spacing
 
-<<<<<<< HEAD
 The subchannel thermal-hydraulic analysis is based on the conservation equations of mass, linear momentum and energy on the specified control volumes. The control volumes are connected in both axial and radial directions to capture the three dimensional effects of the flow geometry. The subchannel control volumes are shown in [ControlVolume] from [!cite](todreas2021nuclear2).
-=======
-The subchannel thermal-hydraulic analysis is based on the conservation equations of mass, linear momentum and energy on the specified control volumes. The control volumes are connected in both axial and radial directions to capture the three dimensional effects of the flow geometry. The subchannel control volumes are shown in [ControlVolume] from [!cite](Todreas).
->>>>>>> 672def255c (create new docs #32029)
 
 !media subchannel/getting_started/ControlVolume.png
     style=width:90%;margin-bottom:2%;margin:auto;

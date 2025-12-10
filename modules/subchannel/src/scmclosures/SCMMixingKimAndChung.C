@@ -52,8 +52,8 @@ SCMMixingKimAndChung::computeTriLatticeMixingParameter(const unsigned int & i_ga
   auto mu_soln = SolutionHandle(_subproblem.getVariable(0, "mu"));
   auto P_soln = SolutionHandle(_subproblem.getVariable(0, "P"));
   auto T_soln = SolutionHandle(_subproblem.getVariable(0, "T"));
-  auto P_out = _scm_problem->_P_out;
-  auto fp = _scm_problem->_fp;
+  auto P_out = _scm_problem._P_out;
+  auto fp = _scm_problem._fp;
   const Real & pitch = _tri_sch_mesh->getPitch();
   const Real & pin_diameter = _tri_sch_mesh->getPinDiameter();
   auto chans = _tri_sch_mesh->getGapChannels(i_gap);
@@ -127,8 +127,8 @@ SCMMixingKimAndChung::computeQuadLatticeMixingParameter(const unsigned int & i_g
   auto mu_soln = SolutionHandle(_subproblem.getVariable(0, "mu"));
   auto P_soln = SolutionHandle(_subproblem.getVariable(0, "P"));
   auto T_soln = SolutionHandle(_subproblem.getVariable(0, "T"));
-  auto P_out = _scm_problem->_P_out;
-  auto fp = _scm_problem->_fp;
+  auto P_out = _scm_problem._P_out;
+  auto fp = _scm_problem._fp;
   const Real & pitch = _quad_sch_mesh->getPitch();
   const Real & pin_diameter = _quad_sch_mesh->getPinDiameter();
   auto chans = _quad_sch_mesh->getGapChannels(i_gap);
