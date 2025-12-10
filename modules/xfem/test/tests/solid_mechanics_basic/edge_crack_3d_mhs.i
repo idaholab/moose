@@ -40,7 +40,7 @@
   []
   [top_trac_y]
     type = ConstantFunction
-    value = 0
+    value = 100
   []
 []
 
