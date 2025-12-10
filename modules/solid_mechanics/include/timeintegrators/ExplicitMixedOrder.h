@@ -66,7 +66,7 @@ public:
   TimeOrder findVariableTimeOrder(unsigned int var_num) const;
 
 protected:
-  /// compile the dof indices for firs and second order in time variables
+  /// compile the dof indices for first and second order in time variables
   void updateDOFIndices();
 
   virtual TagID massMatrixTagID() const override;
@@ -79,8 +79,9 @@ protected:
 
   /**
    * Must be set to true to use adaptivity with a constant mass
-   * matrix.This will recompute the mass matrix on mesh change.The user must make sure that the
-   * underlying density stays constant, otherwise simulation results will depend on adaptivity.
+   * matrix.This will recompute the mass matrix on mesh change. The user must make sure that the
+   * underlying material density stays constant, otherwise simulation results will depend on
+   * adaptivity.
    */
   const bool & _recompute_mass_matrix_on_mesh_change;
 

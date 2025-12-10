@@ -142,6 +142,14 @@ NEML2FEInterpolation::getMOOSEVariable(const std::string & var_name) const
   if (var_fe->scalingFactor() != 1)
     mooseError("Scaling factors other than unity are not yet supported");
 
+  // check domain restrictions for compatibility
+  if (!var_fe->hasBlocks(blockIDs()))
+    mooseError("The variable '",
+               var_fe->name(),
+               "' must be defined on all blocks '",
+               name(),
+               "' is defined on.");
+
   return var_fe;
 }
 
