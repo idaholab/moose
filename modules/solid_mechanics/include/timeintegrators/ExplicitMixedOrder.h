@@ -79,8 +79,8 @@ protected:
 
   /**
    * Must be set to true to use adaptivity with a constant mass
-   * matrix.This will recompute the mass matrix on mesh change. The user must make sure that the
-   * underlying material density stays constant, otherwise simulation results will depend on
+   * matrix. This will recompute the mass matrix when the mesh changes. The user must make sure that
+   * the underlying material density stays constant, otherwise simulation results will depend on
    * adaptivity.
    */
   const bool & _recompute_mass_matrix_on_mesh_change;
