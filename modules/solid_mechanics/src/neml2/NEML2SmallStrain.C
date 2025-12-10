@@ -43,10 +43,13 @@ NEML2SmallStrain::NEML2SmallStrain(const InputParameters & parameters) : NEML2Pr
 void
 NEML2SmallStrain::forward()
 {
+  // gradient of displacements
   const auto & dux = *_grad_disp_x;
   auto duy = _grad_disp_y ? *_grad_disp_y : neml2::Tensor::zeros_like(dux);
   auto duz = _grad_disp_z ? *_grad_disp_z : neml2::Tensor::zeros_like(dux);
   auto du = neml2::R2(neml2::base_stack({dux, duy, duz}, -2));
+
+  // strain = 0.5 * (grad_u + grad_u^T), neml2::SR2 handles the symmetrization
   _output = neml2::SR2(du);
 }
 

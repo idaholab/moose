@@ -204,7 +204,7 @@ NEML2Action::act()
                    input.moose.name);
     }
 
-    // Additional NEML2Kernels that provide input dataAdd commentMore actions
+    // Additional NEML2Kernels that provide input data
     {
       auto kernels = getParam<std::vector<std::string>>("moose_input_kernels");
       gatherers.insert(gatherers.end(), kernels.begin(), kernels.end());

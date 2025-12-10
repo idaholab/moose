@@ -2,7 +2,11 @@
 
 !if! function=hasCapability('neml2')
 
-This userobject loops through elements to cache common assembly information such as element transformation Jacobian, quadrature weight, and coordinate transformation factor.
+This userobject loops through elements to cache common assembly information including:
+
+- Number of elements
+- Number of quadrature points per element
+- The product of $\det(J)$, quadrature weight, and coordinate transformation factor
 
 ## Implementation details
 
