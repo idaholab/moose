@@ -36,37 +36,17 @@ MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
 }
 
 void
-MFEMFESpace::buildFEC(const std::string & fec_name) const
+MFEMFESpace::buildFEC() const
 {
-  auto name = fec_name.c_str();
-  // Handle a few cases that were not supported by mfem::FiniteElementCollection::New as of v4.7
-  if (!strncmp(name, "RT_R1D", 6))
-  {
-    _fec = std::make_shared<mfem::RT_R1D_FECollection>(atoi(name + 11), atoi(name + 7));
-  }
-  else if (!strncmp(name, "RT_R2D", 6))
-  {
-    _fec = std::make_shared<mfem::RT_R2D_FECollection>(atoi(name + 11), atoi(name + 7));
-  }
-  else if (!strncmp(name, "ND_R1D", 6))
-  {
-    _fec = std::make_shared<mfem::ND_R1D_FECollection>(atoi(name + 11), atoi(name + 7));
-  }
-  else if (!strncmp(name, "ND_R2D", 6))
-  {
-    _fec = std::make_shared<mfem::ND_R2D_FECollection>(atoi(name + 11), atoi(name + 7));
-  }
-  else
-  {
-    _fec = std::shared_ptr<mfem::FiniteElementCollection>(mfem::FiniteElementCollection::New(name));
-  }
+  _fec = std::shared_ptr<mfem::FiniteElementCollection>(
+      mfem::FiniteElementCollection::New(getFECName().c_str()));
 }
 
 void
-MFEMFESpace::buildFESpace(const int vdim) const
+MFEMFESpace::buildFESpace() const
 {
   _fespace =
-      std::make_shared<mfem::ParFiniteElementSpace>(&_pmesh, getFEC().get(), vdim, _ordering);
+      std::make_shared<mfem::ParFiniteElementSpace>(&_pmesh, getFEC().get(), getVDim(), _ordering);
 }
 
 #endif
