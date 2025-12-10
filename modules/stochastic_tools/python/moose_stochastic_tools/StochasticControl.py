@@ -602,7 +602,7 @@ class StochasticRunner:
         self._control: StochasticControl = control
         self._result_cache: Optional[_ResultCache] = None
 
-    def parallelWorker(self, func: Callable, x_iter: Iterable) -> Generator[np.ndarray | float]:
+    def parallelWorker(self, func: Callable, x_iter: Iterable) -> Generator[np.ndarray | float, None, None]:
         """
         Map-like callable to use as `workers` in SciPy optimizers (emulates
         `multiprocessing.Pool.map`).
