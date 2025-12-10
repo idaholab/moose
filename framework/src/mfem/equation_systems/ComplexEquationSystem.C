@@ -62,11 +62,15 @@ ComplexEquationSystem::BuildLinearForms()
 
   for (auto & test_var_name : _test_var_names)
   {
-    // Apply kernels
-    auto clf = _clfs.GetShared(test_var_name);
-    ApplyDomainLFIntegrators(test_var_name, clf, _cmplx_kernels_map);
-    ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
-    clf->Assemble();
+    if ((_cmplx_kernels_map.Has(test_var_name) && _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
+        (_cmplx_integrated_bc_map.Has(test_var_name) && _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
+    {
+      // Apply kernels
+      auto clf = _clfs.GetShared(test_var_name);
+      ApplyDomainLFIntegrators(test_var_name, clf, _cmplx_kernels_map);
+      ApplyBoundaryLFIntegrators(test_var_name, clf, _cmplx_integrated_bc_map);
+      clf->Assemble();
+    }
   }
 }
 
@@ -77,18 +81,22 @@ ComplexEquationSystem::BuildBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    _slfs.Register(test_var_name,
-                   std::make_shared<mfem::ParSesquilinearForm>(_test_pfespaces.at(i)));
+    if ((_cmplx_kernels_map.Has(test_var_name) && _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
+        (_cmplx_integrated_bc_map.Has(test_var_name) && _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
+    {
+      _slfs.Register(test_var_name,
+                     std::make_shared<mfem::ParSesquilinearForm>(_test_pfespaces.at(i)));
 
-    // Apply kernels
-    auto slf = _slfs.GetShared(test_var_name);
-    slf->SetAssemblyLevel(_assembly_level);
-    ApplyBoundaryBLFIntegrators<mfem::ParSesquilinearForm>(
-        test_var_name, test_var_name, slf, _cmplx_integrated_bc_map);
-    ApplyDomainBLFIntegrators<mfem::ParSesquilinearForm>(
-        test_var_name, test_var_name, slf, _cmplx_kernels_map);
-    // Assemble
-    slf->Assemble();
+      // Apply kernels
+      auto slf = _slfs.GetShared(test_var_name);
+      slf->SetAssemblyLevel(_assembly_level);
+      ApplyBoundaryBLFIntegrators<mfem::ParSesquilinearForm>(
+          test_var_name, test_var_name, slf, _cmplx_integrated_bc_map);
+      ApplyDomainBLFIntegrators<mfem::ParSesquilinearForm>(
+          test_var_name, test_var_name, slf, _cmplx_kernels_map);
+      // Assemble
+      slf->Assemble();
+    }
   }
 }
 
@@ -275,23 +283,54 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
   {
-    auto & test_var_name = _test_var_names.at(i);
+    auto test_var_name = _test_var_names.at(i);
 
-    mfem::Vector aux_x, aux_rhs;
-    mfem::OperatorHandle aux_a;
+    if ((_cmplx_kernels_map.Has(test_var_name) && _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
+        (_cmplx_integrated_bc_map.Has(test_var_name) && _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
+    {
+      auto & test_var_name = _test_var_names.at(i);
+      auto slf = _slfs.Get(test_var_name);
+      auto clf = _clfs.Get(test_var_name);
+      mfem::Vector aux_x, aux_rhs;
+      mfem::OperatorHandle aux_a;
+      slf->FormLinearSystem(
+          _ess_tdof_lists.at(i), *(_cmplx_var_ess_constraints.at(i)), *clf, aux_a, aux_x, aux_rhs);
+      _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
 
-    auto slf = _slfs.Get(test_var_name);
-    slf->FormLinearSystem(_ess_tdof_lists.at(i),
-                          *_cmplx_var_ess_constraints.at(i),
-                          *_clfs.Get(test_var_name),
-                          aux_a,
-                          aux_x,
-                          aux_rhs,
-                          /*copy_interior=*/true);
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-    _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+      trueX.GetBlock(i) = aux_x;
+      trueRHS.GetBlock(i) = aux_rhs;
+    }
   }
+
+  // Form off-diagonal blocks
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    for (const auto j : index_range(_trial_var_names))
+    {
+      auto trial_var_name = _trial_var_names.at(j);
+
+      mfem::Vector aux_x, aux_rhs;
+      mfem::ParComplexLinearForm aux_lf(_test_pfespaces.at(i));
+      aux_lf = 0.0;
+      if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mslf = _mslfs.Get(test_var_name)->Get(trial_var_name);
+        mfem::OperatorHandle * aux_a = new mfem::OperatorHandle;
+        mslf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
+                                          _ess_tdof_lists.at(i),
+                                          *(_cmplx_var_ess_constraints.at(j)),
+                                          aux_lf,
+                                          *aux_a,
+                                          aux_x,
+                                          aux_rhs);
+        _h_blocks(i, j) = aux_a->As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
+        trueRHS.GetBlock(i) += aux_rhs;
+      }
+    }
+  }
+
+
   // Sync memory
   trueX.SyncFromBlocks();
   trueRHS.SyncFromBlocks();
