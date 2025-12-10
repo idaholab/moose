@@ -11,10 +11,6 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMBlockedMassFlowRateAux);
-registerMooseObjectRenamed("SubChannelApp",
-                           BlockedMassFlowRateAux,
-                           "06/30/2025 24:00",
-                           SCMBlockedMassFlowRateAux);
 
 InputParameters
 SCMBlockedMassFlowRateAux::validParams()

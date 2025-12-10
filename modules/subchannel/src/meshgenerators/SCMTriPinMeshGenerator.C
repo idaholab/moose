@@ -13,10 +13,6 @@
 #include <numeric>
 
 registerMooseObject("SubChannelApp", SCMTriPinMeshGenerator);
-registerMooseObjectRenamed("SubChannelApp",
-                           TriPinMeshGenerator,
-                           "06/30/2025 24:00",
-                           SCMTriPinMeshGenerator);
 
 InputParameters
 SCMTriPinMeshGenerator::validParams()

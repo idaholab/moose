@@ -15,7 +15,6 @@ using namespace std;
 using namespace Eigen;
 
 registerMooseObject("SubChannelApp", SCMQuadPowerIC);
-registerMooseObjectRenamed("SubChannelApp", QuadPowerIC, "06/30/2025 24:00", SCMQuadPowerIC);
 
 InputParameters
 SCMQuadPowerIC::validParams()

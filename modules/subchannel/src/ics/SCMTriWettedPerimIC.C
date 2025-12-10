@@ -11,10 +11,6 @@
 #include "TriSubChannelMesh.h"
 
 registerMooseObject("SubChannelApp", SCMTriWettedPerimIC);
-registerMooseObjectRenamed("SubChannelApp",
-                           TriWettedPerimIC,
-                           "06/30/2025 24:00",
-                           SCMTriWettedPerimIC);
 
 InputParameters
 SCMTriWettedPerimIC::validParams()

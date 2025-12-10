@@ -13,7 +13,6 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMTriPowerAux);
-registerMooseObjectRenamed("SubChannelApp", TriPowerAux, "06/30/2025 24:00", SCMTriPowerAux);
 
 InputParameters
 SCMTriPowerAux::validParams()
