@@ -121,12 +121,12 @@
   [entering_from_left]
     order = CONSTANT
     family = MONOMIAL
-    block = 'lower_half upper_half secondary_lower primary_lower'
     [AuxKernel]
       type = ParsedAux
       expression = 'if(t > x * 4, 1, 0)'
       use_xyzt = true
       # both full-dimensional and low-dimensional should change subdomains
+      block = 'lower_half upper_half secondary_lower primary_lower'
       execute_on = 'INITIAL TIMESTEP_BEGIN'
     []
   []
