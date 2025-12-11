@@ -319,8 +319,8 @@ ComputeMultipleCrystalPlasticityStress::postSolveQp(RankTwoTensor & cauchy_stres
   _updated_rotation[_qp] = rot * _crysrot[_qp];
 
   // Calculate the misorientation
-  auto _misorientation_mat = _updated_rotation[_qp] * _updated_rotation_old[_qp].inverse();
-  auto cos_val = (_misorientation_mat.trace() - 1.0) / 2.0;
+  auto _delta_misorientation_mat = _updated_rotation[_qp] * _updated_rotation_old[_qp].inverse();
+  auto cos_val = (_delta_misorientation_mat.trace() - 1.0) / 2.0;
   // Mathematically, the values should lie in the range of [-1, 1]. However, there maybe numerical
   // errors during calculation. Let's guard small numerical errors here and throw an error when the
   // numerical error is too big, which indicates other issues.
