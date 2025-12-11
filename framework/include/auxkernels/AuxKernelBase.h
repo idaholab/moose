@@ -80,6 +80,8 @@ public:
 
   virtual const std::set<std::string> & getSuppliedItems() override;
 
+  virtual void initialSetup() override;
+
 protected:
   /// Base MooseVariable
   MooseVariableFieldBase & _var;
