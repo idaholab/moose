@@ -22,9 +22,7 @@ using ContiguousNodeID = dof_id_type;
 
 class MooseMesh;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -64,6 +62,10 @@ public:
    * @returns The MOOSE mesh
    */
   const MooseMesh & getMesh() { return _mesh; }
+  /**
+   * Get whether the mesh was initialized
+   */
+  bool initialized() const { return _initialized; }
   /**
    * Update the mesh
    */
@@ -237,6 +239,11 @@ private:
    */
   const MooseMesh & _mesh;
   /**
+   * Flag whether the mesh was initialized
+   */
+  bool _initialized = false;
+
+  /**
    * The wrapper of host maps
    */
   struct MeshMap
@@ -340,7 +347,7 @@ class MeshHolder
 public:
   /**
    * Constructor
-   * @param assembly The Kokkos mesh
+   * @param mesh The Kokkos mesh
    */
   MeshHolder(const Mesh & mesh) : _mesh_host(mesh), _mesh_device(mesh) {}
   /**
@@ -359,7 +366,13 @@ public:
    */
   KOKKOS_FUNCTION const Mesh & kokkosMesh() const
   {
-    KOKKOS_IF_ON_HOST(return _mesh_host;)
+    KOKKOS_IF_ON_HOST(
+        if (!_mesh_host.initialized()) mooseError(
+            "kokkosMesh() was called too early. Kokkos mesh is available after problem "
+            "initialization. Override initialSetup() if you need to setup your object data "
+            "using the Kokkos mesh.");
+
+        return _mesh_host;)
 
     return _mesh_device;
   }
@@ -376,5 +389,4 @@ private:
   const Mesh _mesh_device;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

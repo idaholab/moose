@@ -11,9 +11,7 @@
 
 #include "FEProblemBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -111,5 +109,4 @@ ResidualObject::ResidualObject(const ResidualObject & object)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

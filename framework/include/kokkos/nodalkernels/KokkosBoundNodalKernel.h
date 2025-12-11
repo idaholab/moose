@@ -19,6 +19,8 @@ public:
 
   KokkosBoundNodalKernel(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
@@ -61,7 +63,12 @@ KokkosBoundNodalKernel<Derived>::KokkosBoundNodalKernel(const InputParameters & 
 {
   if (_var.number() == _v_var)
     paramError("v", "Coupled variable needs to be different from 'variable'");
+}
 
+template <typename Derived>
+void
+KokkosBoundNodalKernel<Derived>::initialSetup()
+{
   std::set<ContiguousBoundaryID> bnd_ids;
 
   const auto & bnd_names = getParam<std::vector<BoundaryName>>("exclude_boundaries");

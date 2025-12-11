@@ -86,7 +86,7 @@ public:
    */
   bool hasFunctionByName(const FunctionName & name) const;
 
-#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get a Kokkos function of an abstract type with a given name
    * Calling this function will error out currently if Kokkos was configured with GPU
@@ -159,7 +159,7 @@ private:
   const THREAD_ID _fni_tid;
 };
 
-#ifdef MOOSE_KOKKOS_ENABLED
+#ifdef MOOSE_KOKKOS_SCOPE
 template <typename T>
 const T &
 FunctionInterface::getKokkosFunction(const std::string & name) const

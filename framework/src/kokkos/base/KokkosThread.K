@@ -9,9 +9,7 @@
 
 #include "KokkosThread.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 void
@@ -28,5 +26,4 @@ Thread::resize(std::vector<ThreadID> dims)
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

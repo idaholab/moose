@@ -9,9 +9,7 @@
 
 #include "KokkosAuxKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -114,5 +112,4 @@ AuxKernel::getKokkosMaterialPropertyHook(const std::string & prop_name_in,
                "'.");
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

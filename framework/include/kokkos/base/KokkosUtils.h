@@ -11,9 +11,7 @@
 
 #include "KokkosHeader.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 namespace Utils
 {
@@ -104,12 +102,11 @@ choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int
     Real sum = b[i];
 
     for (unsigned int j = i + 1; j < n; ++j)
-      sum -= A[i + n * j] * b[j];
+      sum -= A[i + n * j] * x[j];
 
     x[i] = sum / A[i + n * i];
   }
 }
 
 } // namespace Utils
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

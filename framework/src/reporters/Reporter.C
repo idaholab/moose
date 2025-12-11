@@ -39,6 +39,18 @@ Reporter::Reporter(const MooseObject * moose_object)
   _reporter_moose_object.getMooseApp().registerInterfaceObject(*this);
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+Reporter::Reporter(const Reporter & object, const Moose::Kokkos::FunctorCopy & key)
+  : OutputInterface(object, key),
+    _reporter_moose_object(object._reporter_moose_object),
+    _reporter_params(object._reporter_params),
+    _reporter_name(object._reporter_name),
+    _reporter_fe_problem(object._reporter_fe_problem),
+    _reporter_data(object._reporter_data)
+{
+}
+#endif
+
 void
 Reporter::store(nlohmann::json & json) const
 {

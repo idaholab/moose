@@ -11,9 +11,7 @@
 
 #include "KokkosKernelBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -322,5 +320,4 @@ Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & d
       });
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
