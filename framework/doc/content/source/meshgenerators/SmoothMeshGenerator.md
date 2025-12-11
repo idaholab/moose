@@ -152,7 +152,7 @@ After a few iterations the mesh typically reaches a steady state.
 As an example, here is an original mesh going through 12 iterations of this smoother:
 
 !media media/mesh/smooth.gif
-       id=inl-logo
+       id=laplace-smoother
        caption=12 iterations of Laplacian smoothing.  Coloring is by element quality (higher is better).
        style=width:50%;padding:20px;
 
@@ -164,7 +164,7 @@ Note that the locations of the (subdomain)boundary nodes do not change.
 !listing test/tests/meshgenerators/smooth_mesh_generator/variational_mesh_smoother_generator.i block=Mesh
 
 !media media/mesh/variational_smoother_ex1.png
-       id=inl-logo
+       id=variational-smoother-1
        caption=Variational smoother applied to mesh with nonlinear boundary. The original mesh is shown on the left and the smoothed mesh is shown on the right.
        style=width:50%;padding:20px;
 
@@ -176,7 +176,7 @@ Note that while the locations of the (subdomain)boundary nodes change, these bou
 !listing test/tests/meshgenerators/smooth_mesh_generator/variational_mesh_smoother_generator_sliding_nodes.i block=Mesh
 
 !media media/mesh/variational_smoother_ex3_distorted.png
-       id=inl-logo
+       id=variational-smoother-2
        caption=Original mesh.
        style=width:50%;padding:20px;
 
