@@ -43,7 +43,6 @@ EulerAngleUpdater::EulerAngleUpdater(const InputParameters & params)
     _first_time(declareRestartableData<bool>("first_time_euler_update", true)),
     _first_time_recovered(_app.isRecovering()),
     _t_step_old(declareRestartableData<int>("euler_update_tstep_old", -1)),
-    _angles(declareRestartableData<std::vector<EulerAngles>>("euler_angles")),
     _angles_old(declareRestartableData<std::vector<EulerAngles>>("euler_angles_old"))
 {
 }
