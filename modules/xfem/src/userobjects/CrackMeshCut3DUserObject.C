@@ -766,8 +766,10 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
       for (unsigned int j = i1; j < i2; ++j)
       {
         // growth direction in crack front coord (cfc) system based on the max hoop stress criterion
-        // Ref "Ceramic nuclear fuel fracture modeling with the extended finite element method" by
-        // W. Jiang, B. Spencer, and J. Dolbow
+        // Jiang, Wen, Benjamin W.Spencer, and John E.Dolbow.
+        // "Ceramic nuclear fuel fracture modeling with the extended finite "
+        // "element method." Engineering Fracture Mechanics 223(2020):106713.
+        // https://doi.org/10.1016/j.engfracmech.2019.106713
         // Equation 6
         int ind = index[j];
         Real ki = _ki_vpp->at(ind);
@@ -782,10 +784,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
           theta_p = 2 * std::atan((ki + sqrt_k) / (4 * kii));
         }
 
-        // check sigma_tt
-        // Ref "Ceramic nuclear fuel fracture modeling with the extended finite element method" by
-        // W. Jiang, B. Spencer, and J. Dolbow
-        // Equation 5 With 1/(4 * std::sqrt(2 * M_PI * r))) removed because it is same for _m & _p
+        // Equation 5 check relative sigma_tt
         Real sigma_tt_m = ki * (3 * std::cos(theta_m / 2) + std::cos(3 * theta_m / 2)) +
                           kii * (-3 * std::sin(theta_m / 2) - 3 * std::sin(3 * theta_m / 2));
         Real sigma_tt_p = ki * (3 * std::cos(theta_p / 2) + std::cos(3 * theta_p / 2)) +
