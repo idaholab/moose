@@ -25,6 +25,7 @@ public:
 protected:
   void buildObjects()
   {
+    // Reference fluid properties
     InputParameters co2_uo_params = _factory.getValidParams("CO2FluidProperties");
     _fe_problem->addUserObject("CO2FluidProperties", "co2_fp", co2_uo_params);
     _co2_fp = &_fe_problem->getUserObject<CO2FluidProperties>("co2_fp");
@@ -33,11 +34,26 @@ protected:
     _fe_problem->addUserObject("IdealGasFluidProperties", "idg_fp", idg_uo_params);
     _idg_fp = &_fe_problem->getUserObject<IdealGasFluidProperties>("idg_fp");
 
+    // Tabulation in (p, T) built from another FluidProperties
     InputParameters tab_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
-    tab_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    tab_uo_params.set<UserObjectName>("input_fp") = "co2_fp";
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_fp", tab_uo_params);
     _tab_pT_from_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp");
 
+    // Tabulation in (p, T) built from another FluidProperties, no p,T tabulation, only passthrough
+    // in p,T
+    InputParameters tab_uo_params_idg = _factory.getValidParams("TabulatedBicubicFluidProperties");
+    tab_uo_params_idg.set<UserObjectName>("input_fp") = "idg_fp";
+    tab_uo_params_idg.set<bool>("create_pT_interpolations") = true;
+    MultiMooseEnum properties_empty("density enthalpy internal_energy viscosity k cv cp entropy",
+                                    "");
+    tab_uo_params_idg.set<MultiMooseEnum>("interpolated_properties") = properties_empty;
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "tab_fp_pT_idg", tab_uo_params_idg);
+    _tab_pT_from_fp_idg =
+        &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp_pT_idg");
+
+    // Tabulation in (v, e) built from loading a (p, T) tabulation
     InputParameters tab_uo_ve_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
     tab_uo_ve_params.set<bool>("construct_pT_from_ve") = true;
     tab_uo_ve_params.set<bool>("construct_pT_from_vh") = true;
@@ -50,8 +66,9 @@ protected:
     _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_fp_ve", tab_uo_ve_params);
     _tab_ve_from_pT = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_fp_ve");
 
+    // Tabulation in (p, T) built from another FluidProperties, specifically for testing generation
     InputParameters tab_gen_uo_params = _factory.getValidParams("TabulatedBicubicFluidProperties");
-    tab_gen_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    tab_gen_uo_params.set<UserObjectName>("input_fp") = "co2_fp";
     tab_gen_uo_params.set<Real>("temperature_min") = 400;
     tab_gen_uo_params.set<Real>("temperature_max") = 500;
     tab_gen_uo_params.set<Real>("pressure_min") = 1e6;
@@ -59,13 +76,16 @@ protected:
     tab_gen_uo_params.set<unsigned int>("num_T") = 6;
     tab_gen_uo_params.set<unsigned int>("num_p") = 6;
     tab_gen_uo_params.set<MultiMooseEnum>("interpolated_properties") = properties;
-    _fe_problem->addUserObject("TabulatedBicubicFluidProperties", "tab_gen_fp", tab_gen_uo_params);
-    _tab_gen_fp = &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_gen_fp");
+    _fe_problem->addUserObject(
+        "TabulatedBicubicFluidProperties", "tab_pT_from_fp_gen", tab_gen_uo_params);
+    _tab_pT_from_fp_gen =
+        &_fe_problem->getUserObject<TabulatedBicubicFluidProperties>("tab_pT_from_fp_gen");
 
+    // Tabulation  in (v, e) built from another FluidProperties
     InputParameters tab_direct_ve_params =
         _factory.getValidParams("TabulatedBicubicFluidProperties");
     // We use ideal gas as it has more (v,e) support than co2
-    tab_direct_ve_params.set<UserObjectName>("fp") = "idg_fp";
+    tab_direct_ve_params.set<UserObjectName>("input_fp") = "idg_fp";
     tab_direct_ve_params.set<MooseEnum>("out_of_bounds_behavior") = "set_to_closest_bound";
     tab_direct_ve_params.set<bool>("create_pT_interpolations") = false;
     tab_direct_ve_params.set<bool>("create_ve_interpolations") = true;
@@ -73,6 +93,9 @@ protected:
     tab_direct_ve_params.set<Real>("temperature_max") = 500;
     tab_direct_ve_params.set<Real>("pressure_min") = 1e6;
     tab_direct_ve_params.set<Real>("pressure_max") = 2e6;
+    // set newton parameters for inversion
+    tab_direct_ve_params.set<Real>("T_initial_guess") = 450;
+    tab_direct_ve_params.set<Real>("p_initial_guess") = 1.5e6;
     MultiMooseEnum properties_ve(
         "density enthalpy viscosity k c cv cp entropy pressure temperature",
         "density enthalpy viscosity k c cv cp entropy pressure temperature");
@@ -127,8 +150,9 @@ protected:
 
   // For testing values
   const TabulatedBicubicFluidProperties * _tab_pT_from_fp;
+  const TabulatedBicubicFluidProperties * _tab_pT_from_fp_idg;
   const TabulatedBicubicFluidProperties * _tab_ve_from_pT;
-  const TabulatedBicubicFluidProperties * _tab_gen_fp;
+  const TabulatedBicubicFluidProperties * _tab_pT_from_fp_gen;
   const TabulatedBicubicFluidProperties * _tab_ve_from_fp;
 
   // These properties are for testing errors and warnings

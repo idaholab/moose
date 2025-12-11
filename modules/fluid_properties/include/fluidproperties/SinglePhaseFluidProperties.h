@@ -447,6 +447,8 @@ protected:
   const Real _p_initial_guess;
   /// Maximum number of iterations for the variable conversion newton solves
   const unsigned int _max_newton_its;
+  /// Whether to output information about newton solves to console
+  const bool _verbose_newton;
 
 private:
   void unimplementedDerivativeMethod(const std::string & property_function_name) const
@@ -528,8 +530,19 @@ SinglePhaseFluidProperties::p_T_from_v_e(const CppType & v, // v value
                       CppType & de_dT) { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
   try
   {
-    FluidPropertiesUtils::NewtonSolve2D(
-        v, e, p0, T0, p, T, _tolerance, _tolerance, v_lambda, e_lambda);
+    FluidPropertiesUtils::NewtonSolve2D(v,
+                                        e,
+                                        p0,
+                                        T0,
+                                        p,
+                                        T,
+                                        _tolerance,
+                                        _tolerance,
+                                        v_lambda,
+                                        e_lambda,
+                                        "p_T_from_v_e",
+                                        _max_newton_its,
+                                        _verbose_newton);
     conversion_succeeded = true;
   }
   catch (MooseException &)
@@ -557,8 +570,19 @@ SinglePhaseFluidProperties::p_T_from_v_h(const T & v,     // v value
   { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
   try
   {
-    FluidPropertiesUtils::NewtonSolve2D(
-        v, h, p0, T0, pressure, temperature, _tolerance, _tolerance, v_lambda, h_lambda);
+    FluidPropertiesUtils::NewtonSolve2D(v,
+                                        h,
+                                        p0,
+                                        T0,
+                                        pressure,
+                                        temperature,
+                                        _tolerance,
+                                        _tolerance,
+                                        v_lambda,
+                                        h_lambda,
+                                        "p_T_from_v_h",
+                                        _max_newton_its,
+                                        _verbose_newton);
     conversion_succeeded = true;
   }
   catch (MooseException &)
@@ -586,8 +610,19 @@ SinglePhaseFluidProperties::p_T_from_h_s(const T & h,     // h value
   { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
   try
   {
-    FluidPropertiesUtils::NewtonSolve2D(
-        h, s, p0, T0, pressure, temperature, _tolerance, _tolerance, h_lambda, s_lambda);
+    FluidPropertiesUtils::NewtonSolve2D(h,
+                                        s,
+                                        p0,
+                                        T0,
+                                        pressure,
+                                        temperature,
+                                        _tolerance,
+                                        _tolerance,
+                                        h_lambda,
+                                        s_lambda,
+                                        "p_T_from_h_s",
+                                        _max_newton_its,
+                                        _verbose_newton);
     conversion_succeeded = true;
   }
   catch (MooseException &)

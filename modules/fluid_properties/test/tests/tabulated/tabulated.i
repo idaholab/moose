@@ -109,7 +109,7 @@
   []
   [tabulated]
     type = TabulatedBicubicFluidProperties
-    fp = co2
+    input_fp = co2
     interpolated_properties = 'density enthalpy viscosity internal_energy k c cv cp entropy'
     # fluid_property_file = fluid_properties.csv
     construct_pT_from_ve = false
