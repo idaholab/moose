@@ -94,7 +94,7 @@
     [mhs]
       type = Exodiff
       input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
-      exodiff = 'edge_crack_3d_mhs_out.e edge_crack_3d_mhs_out.e-s002 edge_crack_3d_mhs_out.e-s003 edge_crack_3d_mhs_out_XFEMCutMeshOutput.e-s0004'
+      exodiff = 'edge_crack_3d_mhs_out.e-s003 edge_crack_3d_mhs_out_XFEMCutMeshOutput.e-s0004'
       abs_zero = 1e-4 #crack face is normal to z so this gets rid of exodiffs caused by z-direction variables
       map = false
       partial=true
@@ -170,10 +170,10 @@
                   '3-noded triangle element by two prescribed evolving cutting planes'
     design = 'XFEM/index.md'
   []
-  [test_crack_counter]
+  [crack_counter]
     type = CSVDiff
-    input = test_crack_counter.i
-    csvdiff = 'test_crack_counter_out.csv'
+    input = crack_counter.i
+    csvdiff = 'crack_counter_out.csv'
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     requirement = 'The XFEM system shall provide an accessor function to the crack_tip_origin_direction_map'

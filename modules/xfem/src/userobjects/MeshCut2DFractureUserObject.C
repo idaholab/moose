@@ -152,37 +152,28 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
       if (k_squared > (k_crit * k_crit) && _ki_vpp->at(i) > 0)
       {
         // growth direction in crack front coord (cfc) system based on the max hoop stress criterion
-        // Ref "Ceramic nuclear fuel fracture modeling with the extended finite element method" by
-        // W. Jiang, B. Spencer, and J. Dolbow
+        // Jiang, Wen, Benjamin W.Spencer, and John E.Dolbow.
+        // "Ceramic nuclear fuel fracture modeling with the extended finite "
+        // "element method." Engineering Fracture Mechanics 223(2020):106713.
+        // https://doi.org/10.1016/j.engfracmech.2019.106713
         // Equation 6
         Real ki = _ki_vpp->at(i);
         Real kii = _kii_vpp->at(i);
         Real sqrt_k = std::sqrt(ki * ki + 8 * kii * kii);
 
-        // check that kii is not zero
-        Real theta_m;
-        Real theta_p;
-        if (std::abs(kii) < libMesh::TOLERANCE)
-          theta_m = theta_p = 0;
-        else
+        Real theta_m = 0;
+        Real theta_p = 0;
+        if (std::abs(kii) > libMesh::TOLERANCE)
         {
           theta_m = 2 * std::atan((ki - sqrt_k) / (4 * kii));
           theta_p = 2 * std::atan((ki + sqrt_k) / (4 * kii));
         }
 
-        // check sigma_tt
-        // Ref "Ceramic nuclear fuel fracture modeling with the extended finite element method" by
-        // W. Jiang, B. Spencer, and J. Dolbow
-        // Equation 5
-        const Real & r = _growth_increment;
-        Real sigma_tt_m = (ki / (4 * std::sqrt(2 * M_PI * r))) *
-                              (3 * std::cos(theta_m / 2) + std::cos(3 * theta_m / 2)) +
-                          (kii / (4 * std::sqrt(2 * M_PI * r))) *
-                              (-3 * std::sin(theta_m / 2) - 3 * std::sin(3 * theta_m / 2));
-        Real sigma_tt_p = (ki / (4 * std::sqrt(2 * M_PI * r))) *
-                              (3 * std::cos(theta_p / 2) + std::cos(3 * theta_p / 2)) +
-                          (kii / (4 * std::sqrt(2 * M_PI * r))) *
-                              (-3 * std::sin(theta_p / 2) - 3 * std::sin(3 * theta_p / 2));
+        // Equation 5 check relative sigma_tt
+        Real sigma_tt_m = ki * (3 * std::cos(theta_m / 2) + std::cos(3 * theta_m / 2)) +
+                          kii * (-3 * std::sin(theta_m / 2) - 3 * std::sin(3 * theta_m / 2));
+        Real sigma_tt_p = ki * (3 * std::cos(theta_p / 2) + std::cos(3 * theta_p / 2)) +
+                          kii * (-3 * std::sin(theta_p / 2) - 3 * std::sin(3 * theta_p / 2));
         Real theta;
         if (sigma_tt_m > sigma_tt_p)
           theta = theta_m;
