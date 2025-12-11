@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MeshGenerator.h"
+#include "MooseEnum.h"
 
 /**
  * MeshGenerator for doing mesh smoothing
@@ -27,6 +28,24 @@ protected:
   /// Mesh that possibly comes from another generator
   std::unique_ptr<MeshBase> & _input;
 
-  /// The number of smoothing passes to do
-  unsigned int _iterations;
+  /// Smoothing algorithm to use
+  const MooseEnum _algorithm;
+
+  /// Laplace only: the number of smoothing passes to do
+  const unsigned int _iterations;
+
+  /// Variational only: the dilation weight (variational smoother only)
+  const Real _dilation_weight;
+
+  /// Variational only: whether to preserve subdomain/block boundaries during smoothing
+  const bool _preserve_subdomain_boundaries;
+
+  /// Variational only: solver relative residual tolerance
+  const Real _relative_residual_tolerance;
+
+  /// Variational only: solver absolute residual tolerance
+  const Real _absolute_residual_tolerance;
+
+  /// Variational only: verbosity level between 0 and 100
+  const unsigned int _verbosity;
 };
