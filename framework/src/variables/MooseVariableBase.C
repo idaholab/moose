@@ -88,12 +88,17 @@ MooseVariableBase::validParams()
       "default: LAGRANGE NEDELEC_ONE RAVIART_THOMAS LAGRANGE_VEC CLOUGH BERNSTEIN and "
       "RATIONAL_BERNSTEIN.");
 
+  params.addParam<bool>("highest_d_blocks_only",
+                        false,
+                        "Whether to only add this variable on blocks that only have element "
+                        "dimensions corresponding to the highest element dimension in the mesh.");
+
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
   params.transferParam<std::vector<Real>>(AddVariableAction::validParams(), "initial_condition");
   params.transferParam<std::string>(AddVariableAction::validParams(), "initial_from_file_var");
-  params.addParamNamesToGroup("scaling eigen use_dual", "Advanced");
+  params.addParamNamesToGroup("scaling eigen use_dual highest_d_blocks_only", "Advanced");
 
   params.registerBase("MooseVariableBase");
   params.addPrivateParam<SystemBase *>("_system_base");
@@ -159,6 +164,10 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
       "An inconsistent numer of names or no names were provided for array variable components");
   if (_count > 1)
     mooseAssert(isArray(), "Must be true with component > 1");
+
+  if (isParamValid("block") && isParamSetByUser("highest_d_blocks_only"))
+    paramError("highest_d_blocks_only",
+               "This parameter should not be used in conjunction with the 'block' parameter.");
 
   if (!blockRestricted())
     _is_lower_d = false;
