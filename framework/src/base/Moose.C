@@ -538,8 +538,11 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("set_mesh_fe_space", "init_mesh");
 
   // add periodic BCs to an mfem mesh, if needed
+  // TODO: needs to be parent class of that one
+  registerMooseObjectTask("add_mfem_periodic_bcs", MFEMPeriodicByVector, false);
   registerTask("add_mfem_periodic_bcs", false);
-  addTaskDependency("add_mfem_periodic_bcs", "init_mesh");
+  addTaskDependency("add_mfem_periodic_bcs", "setup_mesh");
+  addTaskDependency("init_mesh", "add_mfem_periodic_bcs");
 
   // add preconditioning.
   registerMooseObjectTask("add_mfem_preconditioner", Moose::MFEM::SolverBase, false);
@@ -834,7 +837,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solvers/*", "add_mfem_solver");
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
-  registerSyntaxTask("AddMFEMPeriodicBCs", "MFEMPeriodic", "add_mfem_periodic_bcs");
+  registerSyntaxTask("AddMFEMPeriodicBCs", "MFEMPeriodic/*", "add_mfem_periodic_bcs");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");
