@@ -1403,17 +1403,17 @@ public:
   void buildPRefinementAndCoarseningMaps(Assembly * assembly);
 
   /**
-   * @return Whether the subdomain indicated by \p subdomain_id is a lower-dimensional manifold of
-   * some higher-dimensional subdomain, or in implementation speak, whether the elements of this
-   * subdomain have non-null interior parents
+   * @return Whether the subdomain indicated by \p subdomain_id has element dimensions less than
+   * the greatest element dimension in the mesh. Note that a subdomain may have multiple values
+   * of element dimensions contained within it. Only Exodus requires that we have a single type
+   * of element (and consequently dimension) in a subdomain
    */
-  bool isLowerD(const SubdomainID subdomain_id) const;
+  bool hasLowerD(const SubdomainID subdomain_id) const;
 
   /**
-   * @return Whether there are any lower-dimensional blocks that are manifolds of higher-dimensional
-   * block faces
+   * @return Whether there are any lower-dimensional blocks
    */
-  bool hasLowerD() const { return _has_lower_d; }
+  bool hasLowerD() const { return getMesh().elem_dimensions().size() > 1; }
 
   /**
    * @return The set of lower-dimensional blocks for interior sides
@@ -1819,8 +1819,8 @@ private:
     /// is a side of any part of the subdomain
     std::set<BoundaryID> boundary_ids;
 
-    /// Whether this subdomain is a lower-dimensional manifold of a higher-dimensional subdomain
-    bool is_lower_d;
+    /// The element dimensions present on this subdomain stored as a mask
+    unsigned char elem_dims = 0;
   };
 
   /// Holds a map from subdomain ids to associated data
@@ -2237,7 +2237,10 @@ MooseMesh::getLowerDElemMap() const
 }
 
 inline bool
-MooseMesh::isLowerD(const SubdomainID subdomain_id) const
+MooseMesh::hasLowerD(const SubdomainID subdomain_id) const
 {
-  return libmesh_map_find(_sub_to_data, subdomain_id).is_lower_d;
+  const auto max_dim = static_cast<unsigned char>(dimension());
+  // Create mask that has all lower dim bits set
+  const unsigned char all_lower_dims = max_dim - 1;
+  return (libmesh_map_find(_sub_to_data, subdomain_id).elem_dims & all_lower_dims) != 0;
 }

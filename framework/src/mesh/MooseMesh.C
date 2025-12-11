@@ -1526,6 +1526,7 @@ MooseMesh::cacheInfo()
           sub_data.neighbor_subs.insert(neighbor_subdomain_id);
       }
     }
+    sub_data.elem_dims |= elem->dim();
   }
 
   for (const auto blk_id : _mesh_subdomains)
@@ -1533,9 +1534,7 @@ MooseMesh::cacheInfo()
     auto & sub_data = _sub_to_data[blk_id];
     _communicator.set_union(sub_data.neighbor_subs);
     _communicator.set_union(sub_data.boundary_ids);
-    _communicator.max(sub_data.is_lower_d);
-    if (sub_data.is_lower_d)
-      _has_lower_d = true;
+    _communicator.bitwise_or(sub_data.elem_dims);
     _communicator.set_union(_neighbor_subdomain_boundary_ids[blk_id]);
   }
 }
