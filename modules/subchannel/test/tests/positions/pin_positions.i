@@ -160,6 +160,19 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
   # friction model
   friction_closure = 'cheng'
+
+  # HTC
+  pin_HTC_closure = Dittus-Boelter
+  duct_HTC_closure = Dittus-Boelter
+[]
+
+[SCMClosures]
+  [Cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+  []
 []
 
 [SCMClosures]

@@ -4,6 +4,8 @@
 
 ## Benchmark description
 
+!! Intentional comment to provide extra spacing
+
 The ORNL 19-pin experiment was built at Oak Ridge National Laboratory for studying the thermal-hydraulic flow characterisitics in SFRs assemblies as described in [!citep](fontana74).
 The cross section of the experimental facility is depicted in [configuration].
 The validation exercise was done for test series 2 of this experiment.
@@ -25,12 +27,12 @@ Pressure is assumed to be constant at the outlet of the assembly and temperature
 The fuel bundle is divided between inlet, heated, and outlet sections along the pin in increasing elevation.
 A nonzero linear heat rate is only assigned to the heated part of the pin, while no power is imposed at the inlet and outlet sections.
 
-!table id=parameters caption=Design and operational parameters for ORNL's 19-pin benchmark.
+!table id=parameters caption="Design and operational parameters for ORNL's 19-pin benchmark."
 | Experiment Parameter (unit) | Value  |
 | :- | :- |
 | Number of pins (-) | $19$ |
-| Rod Pitch (cm) | $0.726$ |
-| Rod Diameter (cm) | $0.584$ |
+| Pin Pitch (cm) | $0.726$ |
+| Pin Diameter (cm) | $0.584$ |
 | Wire wrap diameter (cm) | $0.142$ |
 | Wire wrap axial pitch (cm) | $30.48$ |
 | Flat-to-flat duct distance (cm) | $3.41$ |
@@ -44,16 +46,15 @@ A nonzero linear heat rate is only assigned to the heated part of the pin, while
 Due to hexagonal symmetry in the experiment, the temperature distribution has been measured over the subchannels that approximately lie on a the diagonal line that connects the opposed vertices in the duct.
 The orientation of the meassuring line connects the south-west vertex to the north-east one.
 For our numbering convention, this lines includes subchannels 37, 36, 20, 10, 4, 1, 12, and 28.
-
 Three different flow and heating configuration were evaluated for the experiment validation.
 These configurations are summarized in [cases].
 
-!table id=cases caption=Validation cases selected in the ORNL benchmark
-| Naming | Run ID | Rod Power (W/cm) | Flow rate (m$^3$/s) | Reynolds number |
+!table id=cases caption="Validation cases selected in the ORNL benchmark."
+| Naming | Run ID | Pin Power (W/cm) | Flow rate (m$^3$/s) | Reynolds number |
 | :- | :- | :- | :- | :- |
-| High flow rate | $022472-hf$ | $318.2$ | $3.47*10^{-3}$ | $6.72*10^4$ |
-| Medium flow rate | $020372$ | $30.8$ | $3.15*10^{-4}$ | $7.35*10^3$ |
-| Low flow rate | $022472-lf$ | $4.9$  | $4.67*10^{-5}$ | $9.05*10^2$ |
+| High flow rate   | $022472\text{-}hf$ | $318.2$ | $3.47\times10^{-3}$ | $6.72\times10^{4}$ |
+| Medium flow rate | $020372$           | $30.8$  | $3.15\times10^{-4}$ | $7.35\times10^{3}$ |
+| Low flow rate    | $022472\text{-}lf$ | $4.9$   | $4.67\times10^{-5}$ | $9.05\times10^{2}$ |
 
 ## SCM input
 
@@ -135,6 +136,8 @@ The detailed mesh uses a *SCMDetailedTriSubChannelMeshGenerator* and the solutio
 !listing /validation/ORNL_19_pin/ORNL_19.i language=moose
 
 ## Results
+
+!! Intentional comment to provide extra spacing
 
 The key factor dominating the temperature profile in the outlet of the domain is the competing effect between heat convection and heat conduction in the coolant.
 An example of the axial and lateral mass flow rates and the temperature and viscosity fields obtained for a high-flow-rate configuration in the ORNL 19-pin benchmark is presented in [3dres].
