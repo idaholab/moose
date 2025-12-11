@@ -31,9 +31,9 @@ protected:
   virtual std::string flowModelClassName() const override;
   void addNumericalFluxVectorPostprocessor();
 
-  /// Adds the nonlinear convergence object
-  void addNonlinearConvergence();
+  /// Adds the functor material for the flow channel
+  void addFlowChannel1PhaseFunctorMaterial();
 
-  /// Nonlinear convergence name
-  const std::string _nl_conv_name;
+  /// Adds a residual norm Postprocessor
+  void addNormalized1PhaseResidualNorm(const VariableName & variable, const std::string & equation);
 };
