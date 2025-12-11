@@ -51,9 +51,17 @@ protected:
   virtual void init() override;
   virtual void check() const override;
   virtual bool usingSecondOrderMesh() const override;
+  virtual Convergence * getNonlinearConvergence() const override;
 
   void
   loadMaterial(InputParameters & pars, const std::string & par, const std::string & material_name);
+
+  /// Adds a PP for the average element size on a block
+  void addAverageElementSizePostprocessor(const SubdomainName & block);
+  /// Adds a residual norm PP for a block
+  void addResidualNormPostprocessor(const SubdomainName & block,
+                                    const UserObjectName & sp_name,
+                                    Real T_ref);
 
   /**
    * Adds a ADConstantDensityThermalSolidPropertiesMaterial for a heat structure region

@@ -18,22 +18,13 @@ FlowModel1PhaseBase::validParams()
   params.addRequiredParam<UserObjectName>("numerical_flux", "Numerical flux user object name");
   params.addRequiredParam<MooseEnum>("rdg_slope_reconstruction",
                                      "Slope reconstruction type for rDG");
-  params.addRequiredParam<Real>("p_ref", "Reference pressure");
-  params.addRequiredParam<Real>("T_ref", "Reference temperature");
-  params.addRequiredParam<Real>("vel_ref", "Reference velocity");
   return params;
 }
 
 FlowModel1PhaseBase::FlowModel1PhaseBase(const InputParameters & params)
   : FlowModel(params),
     _rdg_slope_reconstruction(params.get<MooseEnum>("rdg_slope_reconstruction")),
-    _numerical_flux_name(params.get<UserObjectName>("numerical_flux")),
-    _p_ref(getParam<Real>("p_ref")),
-    _T_ref(getParam<Real>("T_ref")),
-    _vel_ref(getParam<Real>("vel_ref")),
-    _start_point(_flow_channel.getStartPoint()),
-    _end_point(_flow_channel.getEndPoint()),
-    _mid_point(0.5 * (_start_point + _end_point))
+    _numerical_flux_name(params.get<UserObjectName>("numerical_flux"))
 {
 }
 
@@ -410,52 +401,4 @@ FlowModel1PhaseBase::addRDGMooseObjects()
 {
   addSlopeReconstructionMaterial();
   addRDGAdvectionDGKernels();
-}
-
-void
-FlowModel1PhaseBase::addVariableStepFunctorMaterial(const std::string & variable)
-{
-  const std::string class_name = "FunctorChangeFunctorMaterial";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-  params.set<MooseFunctorName>("functor") = THM::functorMaterialPropertyName<false>(variable);
-  params.set<MooseEnum>("change_over") = "nonlinear";
-  params.set<std::string>("prop_name") = variable + "_change";
-  params.set<bool>("take_absolute_value") = true;
-  _sim.addFunctorMaterial(class_name, genName(_comp_name, variable + "_step_fmat"), params);
-}
-
-void
-FlowModel1PhaseBase::addNormalizedVariableStepPP(const std::string & variable, Real normalization)
-{
-  const std::string class_name = "ElementExtremeFunctorValue";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-  params.set<MooseEnum>("value_type") = "max";
-  params.set<MooseFunctorName>("functor") = variable + "_change";
-  params.set<Real>("scale") = 1.0 / normalization;
-  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR_CONVERGENCE;
-  params.set<std::vector<OutputName>>("outputs") = {"none"};
-  _sim.addPostprocessor(class_name, genName(_comp_name, variable + "_rel_step"), params);
-}
-
-void
-FlowModel1PhaseBase::addNormalized1PhaseResidualNorm(const VariableName & variable,
-                                                     const std::string & equation)
-{
-  const std::string class_name = "Normalized1PhaseResidualNorm";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<VariableName>("variable") = variable;
-  params.set<std::vector<SubdomainName>>("block") = _flow_channel.getSubdomainNames();
-  params.set<MooseEnum>("norm_type") = "l_inf";
-  params.set<Real>("p_ref") = _p_ref;
-  params.set<Real>("T_ref") = _T_ref;
-  params.set<Real>("vel_ref") = _vel_ref;
-  params.set<FunctionName>("A") = _flow_channel.getParam<FunctionName>("A");
-  params.set<Point>("point") = _mid_point;
-  params.set<UserObjectName>("fluid_properties") = _fp_name;
-  params.set<Real>("min_elem_size") = _flow_channel.getMinimumElemSize();
-  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR_CONVERGENCE;
-  params.set<std::vector<OutputName>>("outputs") = {"none"};
-  _sim.addPostprocessor(class_name, genName(_comp_name, equation + "_res"), params);
 }

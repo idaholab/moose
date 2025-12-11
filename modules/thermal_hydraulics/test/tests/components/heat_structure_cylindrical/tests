@@ -37,4 +37,11 @@
       detail = 'in a steady problem.'
     []
   []
+
+  [components_convergence]
+    type = Exodiff
+    input = 'components_convergence.i'
+    exodiff = 'components_convergence.e'
+    requirement = 'The system shall allow convergence of a heat structure to be assessed using ComponentsConvergence.'
+  []
 []
