@@ -141,7 +141,6 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     _var(object._var),
     _bnd(object._bnd),
     _check_boundary_restricted(object._check_boundary_restricted),
-    _coincident_lower_d_calc(object._coincident_lower_d_calc),
     _subproblem(object._subproblem),
     _sys(object._sys),
     _nl_sys(object._nl_sys),

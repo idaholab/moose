@@ -75,6 +75,10 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
 
     _current_lower_d_elem(_assembly.lowerDElem())
 {
+
+  if (!_bnd || _nodal)
+    // If we're not boundary restricted then we cannot be a coincident lower-d calculation
+    _coincident_lower_d_calc = false;
 }
 
 template <typename ComputeValueType>
@@ -148,19 +152,8 @@ AuxKernelTempl<ComputeValueType>::compute()
   }
   else /* elemental variables */
   {
-    const auto num_elem_shapes = _var.numberOfDofs();
-    _coincident_lower_d_calc = !num_elem_shapes;
-    _n_shapes = _coincident_lower_d_calc.value() ? _var.dofIndicesLower().size() : num_elem_shapes;
-
-    if (_coincident_lower_d_calc.value())
-    {
-      static const std::string lower_error = "Make sure that the lower-d variable lives on a "
-                                             "lower-d block that is a superset of the boundary";
-      if (!_current_lower_d_elem)
-        mooseError("No lower-dimensional element. ", lower_error);
-      if (!_n_shapes)
-        mooseError("No degrees of freedom. ", lower_error);
-    }
+    _n_shapes =
+        _coincident_lower_d_calc.value() ? _var.dofIndicesLower().size() : _var.numberOfDofs();
 
     if (_n_shapes == 1) /* p0 */
     {
@@ -326,6 +319,27 @@ bool
 AuxKernelTempl<ComputeValueType>::isMortar()
 {
   return dynamic_cast<MortarNodalAuxKernelTempl<ComputeValueType> *>(this) != nullptr;
+}
+
+template <typename ComputeValueType>
+void
+AuxKernelTempl<ComputeValueType>::determineWhetherCoincidentLowerDCalc()
+{
+  mooseAssert(_bnd && !isNodal(),
+              "We can never be a lower-dimensional calculation if we are not boundary restricted "
+              "or if we are a nodal auxiliary kernel");
+
+  _coincident_lower_d_calc = !_var.numberOfDofs();
+
+  if (_coincident_lower_d_calc.value())
+  {
+    static const std::string lower_error = "Make sure that the lower-d variable lives on a "
+                                           "lower-d block that is a superset of the boundary";
+    if (!_current_lower_d_elem)
+      mooseError("No lower-dimensional element. ", lower_error);
+    if (!_var.dofIndicesLower().size())
+      mooseError("No degrees of freedom. ", lower_error);
+  }
 }
 
 // Explicitly instantiates the three versions of the AuxKernelTempl class
