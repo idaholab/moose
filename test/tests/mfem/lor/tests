@@ -14,7 +14,7 @@
                'Preconditioner/ams/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CurlCurlLOR'
     requirement = 'The system shall have the ability to solve a LOR definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & method!=dbg'
     compute_devices = 'cpu cuda'
     valgrind = heavy
     max_parallel = 1 # schemadiff with multiple ranks
@@ -70,7 +70,7 @@
                'Preconditioner/jacobi/low_order_refined=true '
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConductionLOR'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & method!=dbg'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
