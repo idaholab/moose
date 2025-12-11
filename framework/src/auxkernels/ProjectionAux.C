@@ -81,9 +81,7 @@ ProjectionAux::computeValue()
     // Get the neighbor element centroid values & element volumes
     Real sum_weighted_values = 0;
     Real sum_volumes = 0;
-#ifndef NDEBUG
-    std::unordered_set<unsigned short> elem_dims;
-#endif
+    _elem_dims.clear();
     for (const auto id : elem_ids)
     {
       const auto * const elem = _mesh.elemPtr(id);
@@ -91,9 +89,7 @@ ProjectionAux::computeValue()
       if (_source_variable.hasBlocks(block_id) &&
           (!_use_block_restriction_for_source || hasBlocks(block_id)))
       {
-#ifndef NDEBUG
-        elem_dims.insert(elem->dim());
-#endif
+        _elem_dims.insert(elem->dim());
         const auto elem_volume = elem->volume();
         sum_weighted_values +=
             _source_sys.point_value(_source_variable.number(), *_current_node, elem) * elem_volume;
@@ -102,9 +98,9 @@ ProjectionAux::computeValue()
     }
     if (sum_volumes == 0)
       mooseError("Did not find a valid source variable value for node: ", *_current_node);
-    mooseAssert(elem_dims.size() < 2,
-                "We should not use multiple element dimensions when computing the volume weighted "
-                "projection as the units do not make sense");
+    if (_elem_dims.size() > 1)
+      mooseError("We should not use multiple element dimensions when computing the volume weighted "
+                 "projection as the units do not make sense");
     return sum_weighted_values / sum_volumes;
   }
 }
