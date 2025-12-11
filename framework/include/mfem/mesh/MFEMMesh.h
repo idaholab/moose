@@ -13,6 +13,9 @@
 
 #include "MooseMesh.h"
 
+// forward declare
+class MFEMPeriodicByVector;
+
 /**
  * Abstract MooseMesh base for all MFEM-backed mesh types (MFEMFileMesh,
  * MFEMMeshGeneratorMesh). Holds the mfem::ParMesh and provides common
@@ -44,6 +47,8 @@ public:
   void init() override;
   std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base) override;
+
+  void registerPeriodicBCs(MFEMPeriodicByVector &);
 
   mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh&);
 
@@ -103,9 +108,9 @@ protected:
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
 
   bool _periodic = false;
-  std::vector<Real> _translation_x;
-  std::vector<Real> _translation_y;
-  std::vector<Real> _translation_z;
+  mfem::Vector _translation_x;
+  mfem::Vector _translation_y;
+  mfem::Vector _translation_z;
 };
 
 inline const mfem::ParMesh &
