@@ -86,6 +86,7 @@
     n_exponent = 4
     activation_energy = 3.0e5
     temperature = temp
+    scale_strain_predictor = 1
   []
 []
 
@@ -115,6 +116,11 @@
   end_time = 1.0
   num_steps = 10
   dt = 0.1
+
+  [Predictor]
+    type = SimplePredictor
+    scale = 1
+  []
 []
 
 [Outputs]
