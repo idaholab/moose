@@ -76,20 +76,24 @@ ProjectionAux::computeValue()
     // Custom projection rule : use nodal values, if discontinuous the one coming from each element,
     // weighted by element volumes
     // First, find all the elements that this node is part of
-    auto elem_ids_it = _mesh.nodeToElemMap().find(_current_node->id());
-    mooseAssert(elem_ids_it != _mesh.nodeToElemMap().end(),
-                "Should have found an element around node " + std::to_string(_current_node->id()));
+    const auto & elem_ids = libmesh_map_find(_mesh.nodeToElemMap(), _current_node->id());
 
     // Get the neighbor element centroid values & element volumes
     Real sum_weighted_values = 0;
     Real sum_volumes = 0;
-    for (const auto id : elem_ids_it->second)
+#ifndef NDEBUG
+    std::unordered_set<unsigned short> elem_dims;
+#endif
+    for (const auto id : elem_ids)
     {
       const auto * const elem = _mesh.elemPtr(id);
       const auto block_id = elem->subdomain_id();
       if (_source_variable.hasBlocks(block_id) &&
           (!_use_block_restriction_for_source || hasBlocks(block_id)))
       {
+#ifndef NDEBUG
+        elem_dims.insert(elem->dim());
+#endif
         const auto elem_volume = elem->volume();
         sum_weighted_values +=
             _source_sys.point_value(_source_variable.number(), *_current_node, elem) * elem_volume;
@@ -98,6 +102,9 @@ ProjectionAux::computeValue()
     }
     if (sum_volumes == 0)
       mooseError("Did not find a valid source variable value for node: ", *_current_node);
+    mooseAssert(elem_dims.size() < 2,
+                "We should not use multiple element dimensions when computing the volume weighted "
+                "projection as the units do not make sense");
     return sum_weighted_values / sum_volumes;
   }
 }
