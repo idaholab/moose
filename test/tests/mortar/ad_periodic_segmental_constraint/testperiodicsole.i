@@ -81,10 +81,12 @@
   [./flux_x]
       order = FIRST
       family = MONOMIAL
+      block = 1
   [../]
   [./flux_y]
       order = FIRST
       family = MONOMIAL
+      block = 1
   [../]
 []
 
@@ -104,7 +106,6 @@
     variable = flux_x
     diffusion_variable = u
     component = x
-    block = 1
   [../]
   [./flux_y]
     type = DiffusionFluxAux
@@ -112,7 +113,6 @@
     variable = flux_y
     diffusion_variable = u
     component = y
-    block = 1
   [../]
 []
 
