@@ -1,11 +1,16 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/cube.e
+  file = ../mesh/cube_hex10.e
   dim = 3
-  periodic = true
-  translation_x = "1. 0. 0."
-  translation_y = "0. 0. 0."
-  translation_z = "0. 0. 0."
+[]
+
+[MFEMPeriodic]
+  [left-right]
+    type = MFEMPeriodicByVector
+    translation_x = "1. 0. 0."
+    translation_y = "0. 0. 0."
+    translation_z = "0. 0. 0."
+  []
 []
 
 [Problem]
