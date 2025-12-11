@@ -17,6 +17,7 @@
 #include "MFEMHypreADS.h"
 #include "MFEMHypreAMS.h"
 #include "MFEMSuperLU.h"
+#include "MFEMMUMPS.h"
 #include "MFEMGMRESSolver.h"
 #include "MFEMCGSolver.h"
 #include "MFEMOperatorJacobiSmoother.h"
@@ -278,6 +279,20 @@ TEST_F(MFEMSolverTest, MFEMSuperLU)
   MFEMSuperLU & solver = addObject<MFEMSuperLU>("MFEMSuperLU", "solver1", solver_params);
 
   testDiffusionSolve<mfem::SuperLUSolver>(solver, 1e-12);
+}
+
+/**
+ * Test MFEMMUMPS creates an mfem::MUMPSSolver successfully.
+ */
+TEST_F(MFEMSolverTest, MFEMMUMPS)
+{
+  // Build required solver inputs
+  InputParameters solver_params = _factory.getValidParams("MFEMMUMPS");
+
+  // Construct solver
+  MFEMMUMPS & solver = addObject<MFEMMUMPS>("MFEMMUMPS", "solver1", solver_params);
+
+  testDiffusionSolve<mfem::MUMPSSolver>(solver, 1e-12);
 }
 
 /**
