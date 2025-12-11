@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import os
+
 from Tester import Tester
 
 class RunCommand(Tester):
@@ -14,8 +16,14 @@ class RunCommand(Tester):
     @staticmethod
     def validParams():
         params = Tester.validParams()
+
         params.addRequiredParam('command',      "The command line to execute for this test.")
         params.addParam('test_name',          "The name of the test - populated automatically")
+
+        # Should really only use one slot
+        params['min_parallel'] = 1
+        params['max_parallel'] = 1
+
         return params
 
     def __init__(self, name, params):
@@ -33,3 +41,12 @@ class RunCommand(Tester):
             self.setStatus(self.fail, 'CODE %d' % exit_code)
 
         return ''
+
+    def augmentEnvironment(self, options) -> dict:
+        value = super().augmentEnvironment(options)
+
+        # Default to no threads
+        if "OMP_NUM_THREADS" not in os.environ:
+            value["OMP_NUM_THREADS"] = "1"
+
+        return value

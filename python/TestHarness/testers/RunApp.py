@@ -450,3 +450,14 @@ class RunApp(Tester):
             if self.specs.isValid(param):
                 return True
         return super().needFullOutput(options)
+
+    def augmentEnvironment(self, options) -> dict:
+        value = super().augmentEnvironment(options)
+
+        # Be explicit about threads when running another command
+        if "OMP_NUM_THREADS" not in os.environ and (
+            self.specs.isValid("command") or self.specs.isValid("command_proxy")
+        ):
+            value["OMP_NUM_THREADS"] = "1"
+
+        return value

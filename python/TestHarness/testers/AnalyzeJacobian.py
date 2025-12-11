@@ -25,10 +25,19 @@ class AnalyzeJacobian(FileTester):
 
         params['capture_perf_graph'] = False
 
+        # analyzejacobian.py runs in serial; don't run with any more
+        params['min_parallel'] = 1
+        params['max_parallel'] = 1
+
         return params
 
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
+
+        # Require only one rank
+        for name in ['min_parallel', 'max_parallel']:
+            if params[name] != 1:
+                raise ValueError(f"{name} must be 1")
 
     def getOutputFiles(self, options):
         # analyzejacobian.py outputs files prefixed with the input file name
@@ -105,3 +114,12 @@ class AnalyzeJacobian(FileTester):
             return False
 
         return FileTester.checkRunnable(self, options)
+
+    def augmentEnvironment(self, options) -> dict:
+        value = super().augmentEnvironment(options)
+
+        # Default to no threads
+        if "OMP_NUM_THREADS" not in os.environ:
+            value["OMP_NUM_THREADS"] = "1"
+
+        return value
