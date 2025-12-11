@@ -9,7 +9,10 @@
 
 #pragma once
 
-#include "ExplicitTimeIntegrator.h"
+#include "TimeIntegrator.h"
+#include "MeshChangedInterface.h"
+#include "FEProblemBase.h"
+#include <memory>
 
 // Forward declarations
 namespace libMesh
@@ -22,39 +25,36 @@ class SparseMatrix;
  * Implements a form of the central difference time integrator that calculates acceleration directly
  * from the residual forces.
  */
-class ExplicitMixedOrder : public ExplicitTimeIntegrator
+class ExplicitMixedOrder : public TimeIntegrator, public MeshChangedInterface
 {
 public:
   static InputParameters validParams();
 
   ExplicitMixedOrder(const InputParameters & parameters);
 
+  virtual void init() override;
+  virtual void meshChanged() override;
+  virtual bool isExplicit() const override { return true; }
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
-
-  virtual void solve() override;
-  virtual void postResidual(NumericVector<Number> & residual) override;
   virtual bool overridesSolve() const override { return true; }
-
-  virtual void postSolve() override
-  { // Once we have the new solution, we want to adanceState to make sure the
-    // coupling between the solution and the computed material properties is kept correctly.
-    _fe_problem.advanceState();
-  }
   virtual bool advancesProblemState() const override { return true; }
 
-  virtual bool performExplicitSolve(SparseMatrix<Number> & mass_matrix) override;
+  virtual void preSolve() override {}
+  virtual void postResidual(NumericVector<Number> & residual) override;
+  virtual void solve() override;
+  virtual void postSolve() override;
 
   void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override
   {
     mooseError("NOT SUPPORTED");
   }
-  virtual void init() override;
 
   enum TimeOrder
   {
     FIRST,
-    SECOND
+    SECOND,
+    FIRST_AND_SECOND
   };
 
   /**
@@ -64,16 +64,63 @@ public:
   TimeOrder findVariableTimeOrder(unsigned int var_num) const;
 
 protected:
-  virtual TagID massMatrixTagID() const override;
+  virtual TagID massMatrixTagID() const;
+
+  virtual TagID dampingMatrixTagID() const;
+
+  /// calculate the inversed highest order coefficient matrices
+  std::unique_ptr<NumericVector<Number>> computeInvMatrix_first();
+  std::unique_ptr<NumericVector<Number>> computeInvMatrix_second();
+
+  /// calculate acceleration and velocity using the central difference method
+  virtual void discretize();
+
+  /// Update the solution vector. @return true if the solution converged, false otherwise.
+  virtual bool solutionUpdate();
+
+  /// Whether damping is present
+  bool _has_damping;
 
   /// Whether we are reusing the mass matrix
   const bool & _constant_mass;
 
+  /// Whether we aare reusing the damping matrix
+  const bool & _constant_damping;
+
   /// Mass matrix name
   const TagName & _mass_matrix;
 
+  /// Damping matrix name
+  const TagName & _damping_matrix;
+
+  /// First order coefficient matrix
+  std::unique_ptr<NumericVector<Number>> _M1;
+  std::unique_ptr<NumericVector<Number>> _M1_old;
+
+  /// Second order coefficient matrix
+  std::unique_ptr<NumericVector<Number>> _M2;
+  std::unique_ptr<NumericVector<Number>> _M2_old;
+
   /// The older solution
   const NumericVector<Number> & _solution_older;
+
+  /// Residual used for the RHS
+  NumericVector<Real> * _explicit_residual;
+
+  /// Solution vector for the linear solve
+  NumericVector<Real> * _solution_update;
+
+  /// Diagonal of the lumped mass matrix (and its inversion)
+  NumericVector<Real> * _mass_matrix_lumped;
+
+  /// Diagonal of the lumped mass matrix (and its inversion)
+  NumericVector<Real> * _damping_matrix_lumped;
+
+  /// Vector of 1's to help with creating the lumped mass matrix
+  NumericVector<Real> * _ones;
+
+  /// Save off current time to reset it back and forth
+  Real _current_time;
 
   // Variables that forward Euler time integration will be used for
   std::unordered_set<unsigned int> & _vars_first;
@@ -104,16 +151,14 @@ ExplicitMixedOrder::computeTimeDerivativeHelper(T & u_dot,
                                                 const T3 & u_old,
                                                 const T4 & u_older) const
 {
-  // computing first derivative
-  // using the Central Difference method
+  // Computing first derivative using the Central Difference method
   // u_dot_old = (first_term - second_term) / 2 / dt
   //       first_term = u
   //      second_term = u_older
   u_dot -= u_older; // 'older than older' solution
   u_dot *= 1.0 / (2.0 * _dt);
 
-  // computing second derivative
-  // using the Central Difference method
+  // Computing second derivative using the Central Difference method
   // u_dotdot_old = (first_term - second_term + third_term) / dt / dt
   //       first_term = u
   //      second_term = 2 * u_old
