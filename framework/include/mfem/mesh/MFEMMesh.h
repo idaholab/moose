@@ -13,6 +13,9 @@
 
 #include "FileMesh.h"
 
+// forward declare
+class MFEMPeriodicByVector;
+
 /**
  * MFEMMesh inherits a MOOSE mesh class which allows us to work with
  * other MOOSE objects. It contains a pointer to the parallel MFEM mesh.
@@ -46,6 +49,8 @@ public:
   void buildMesh() override;
   std::vector<std::filesystem::path>
   writeRecoveryFiles(const std::filesystem::path & file_base) override;
+
+  void registerPeriodicBCs(MFEMPeriodicByVector &);
 
   mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh&);
 
@@ -103,9 +108,9 @@ private:
   std::shared_ptr<mfem::ParMesh> _mfem_par_mesh{nullptr};
 
   bool _periodic = false;
-  std::vector<Real> _translation_x;
-  std::vector<Real> _translation_y;
-  std::vector<Real> _translation_z;
+  mfem::Vector _translation_x;
+  mfem::Vector _translation_y;
+  mfem::Vector _translation_z;
 };
 
 inline const mfem::ParMesh &
