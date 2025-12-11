@@ -25,10 +25,20 @@ class AnalyzeJacobian(FileTester):
 
         params['capture_perf_graph'] = False
 
+        # analyzejacobian.py doesn't get any of the parallel or thread arguments
+        # from the TestHarness, so don't ever take any more than one slot
+        params["max_parallel"] = 1
+        params["max_threads"] = 1
+
         return params
 
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
+
+        # Enforce one slot
+        for name in ["min_parallel", "max_parallel", "min_threads", "max_threads"]:
+            if params[name] != 1:
+                raise ValueError(f"{name} must be 1")
 
     def getOutputFiles(self, options):
         # analyzejacobian.py outputs files prefixed with the input file name

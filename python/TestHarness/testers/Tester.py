@@ -235,6 +235,9 @@ class Tester(MooseObject, OutputInterface):
         # The command that we actually ended up running; this may change
         # depending on the runner which might inject something
         self.command_ran = None
+        # The additional environment variables that we set when
+        # running the test
+        self.environment_ran: Optional[dict[str, str]] = None
 
         # Paths to additional JSON metadata that can be collected
         self.json_metadata: dict[str, Tester.JSONMetadata] = {}
@@ -504,6 +507,15 @@ class Tester(MooseObject, OutputInterface):
         See setCommandRan() for the distinction.
         """
         return self.command_ran
+
+    def setEnvironmentRan(self, value: dict):
+        """Set the additional environment variables that the test was ran with."""
+        assert isinstance(value, dict)
+        self.environment_ran = value
+
+    def getEnvironmentRan(self) -> Optional[dict[str, str]]:
+        """Get the additional environment variables that the test was ran with."""
+        return self.environment_ran
 
     def postSpawn(self, runner):
         """
@@ -966,3 +978,8 @@ class Tester(MooseObject, OutputInterface):
             if procs > 1 and procs <= options.hpc_scatter_procs:
                 return 'scatter'
         return 'free'
+
+    def augmentEnvironment(self, options) -> dict:
+        """Get environment variables that should be augmented while running."""
+        # Explicitly set OMP_NUM_THREADS to the number of threads
+        return {"OMP_NUM_THREADS": f"{self.getThreads(options)}"}
