@@ -11,29 +11,16 @@
 
 #include "AddMFEMPeriodicBCs.h"
 #include "MFEMMesh.h"
+#include "MFEMPeriodicBCs.h"
 
 registerMooseAction("MooseApp", AddMFEMPeriodicBCs, "add_mfem_periodic_bcs");
-registerMooseObject("MooseApp", MFEMPeriodicByVector);
-
-InputParameters
-MFEMPeriodicByVector::validParams()
-{
-  InputParameters params = MooseObject::validParams();
-  params.addParam<std::string>("type", "MFEMPeriodicByVector", "dummy string");
-  return params;
-}
-
-MFEMPeriodicByVector::MFEMPeriodicByVector(const InputParameters& parameters)
-  : MooseObject(parameters) {}
-
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 InputParameters
 AddMFEMPeriodicBCs::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addParam<std::string>("type", "MFEMPeriodicByVector", "dummy string");
+  params.registerBase("AddMFEMPeriodicBCs");
+  params.addRequiredParam<std::string>("type", "Method to impose periodic BCs on the MFEM mesh");
   return params;
 }
 
@@ -45,10 +32,12 @@ AddMFEMPeriodicBCs::AddMFEMPeriodicBCs(const InputParameters & parameters)
 void
 AddMFEMPeriodicBCs::act()
 {
-  // can we convert the moose mesh into mfemmesh?
-  bool success = ( dynamic_cast<MFEMMesh*>(_mesh.get()) != nullptr );
+  MFEMMesh * mesh_ptr = dynamic_cast<MFEMMesh *>(_mesh.get());
+  mooseAssert(mesh_ptr != nullptr, "Could not cast the mesh pointer into MFEMMesh");
 
-  if (success) std::cout << "Got a successful cast!\n";
+  auto bc = _factory.create<MFEMPeriodicByVector>(_type, "mfemperiodicbc", _moose_object_pars);
+
+  mesh_ptr->registerPeriodicBCs(*bc);
 }
 
 #endif

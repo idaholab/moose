@@ -5,9 +5,11 @@
 []
 
 [MFEMPeriodic]
-  type = MFEMPeriodicByVector
-  #translation_x = "1. 0."
-  #translation_y = "0. 0."
+  [left-right]
+    type = MFEMPeriodicByVector
+    translation_x = "1. 0."
+    translation_y = "0. 0."
+  []
 []
 
 [Problem]
