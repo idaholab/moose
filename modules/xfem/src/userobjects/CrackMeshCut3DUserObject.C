@@ -774,12 +774,9 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
         Real kii = _kii_vpp->at(ind);
         Real sqrt_k = std::sqrt(ki * ki + 8 * kii * kii);
 
-        // check that kii is not zero
-        Real theta_m;
-        Real theta_p;
-        if (std::abs(kii) < libMesh::TOLERANCE)
-          theta_m = theta_p = 0;
-        else
+        Real theta_m = 0;
+        Real theta_p = 0;
+        if (std::abs(kii) > libMesh::TOLERANCE)
         {
           theta_m = 2 * std::atan((ki - sqrt_k) / (4 * kii));
           theta_p = 2 * std::atan((ki + sqrt_k) / (4 * kii));
