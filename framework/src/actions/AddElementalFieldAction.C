@@ -36,7 +36,6 @@ AddElementalFieldAction::init()
 {
   _moose_object_pars.set<MooseEnum>("order") = "CONSTANT";
   _moose_object_pars.set<MooseEnum>("family") = "MONOMIAL";
-  _moose_object_pars.set<bool>("highest_d_blocks_only") = true;
 
   _fe_type = libMesh::FEType(CONSTANT, MONOMIAL);
 
