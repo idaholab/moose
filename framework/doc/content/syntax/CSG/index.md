@@ -27,12 +27,23 @@ For example, if we wanted to use the surfaces from [!ref](fig:halfspaces) to def
 
 [Cells](source/csg/CSGBase.md#cells) are defined by two main characteristics: a region and a fill.
 The region is defined as described above and defines the domain of the cell.
-The fill can typically be set as void (i.e., nothing), a material (placeholder type for now, this will be expanded in future works), a [universe](source/csg/CSGBase.md#universes), or a lattice (note, lattices are not yet supported for MOOSE implementation).
+The fill can typically be set as void (i.e., nothing), a material (placeholder type for now, this will be expanded in future works), a [universe](source/csg/CSGBase.md#universes), or a [lattice](source/csg/CSGBase.md#lattices).
 
 [Universes](source/csg/CSGBase.md#universes) can then be optionally defined as a collection of cells, which can then be used to either fill other cells, or used repeatedly throughout a geometry (such as in a repeated lattice).
 By default, every model will have a [root universe](source/csg/CSGBase.md#root-universe), which is the singular overarching universe that all other universes can be traced back to through the tree defined by universes containing cells and cells filled with universes.
 
-For a more detailed description of how surfaces, cells, and universes are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
+[Lattices](source/csg/CSGBase.md#lattices) are another optional component.
+A lattice is the arrangement of repeated universes in a defined structure.
+Some common types are regular Cartesian or hexagonal lattices (examples can be seen [here](source/csg/CSGBase.md#lattice-indexing)).
+Lattices will sometimes contain universes in the elements of the lattice that do not fill the full spatial domain of that element.
+Therefore, lattices also often rely on a definition of an "outer" fill, usually a single material or another universe, which fills the undefined spatial domain within the lattice.
+A visual depiction of a lattice with an outer fill is shown in [!ref](fig:lat_outer).
+
+!media large_media/csg/hex_lat_outer.png
+       id=fig:lat_outer
+       caption=A visual of a regular hexagonal lattice where the red lines represent the boundary of each of the lattice elements, the yellow circles are the spatial extent of the universe that fills each lattice element, and the blue is the "outer" that fills the remaining spatial domain around the lattice element universes.
+
+For a more detailed description of how surfaces, cells, universes, and lattices are represented within the MOOSE mesh generator system, please refer to [source/csg/CSGBase.md].
 
 ## How to Generate a CSG Model
 
@@ -48,11 +59,12 @@ This process is run as a [data-only mode](source/meshgenerators/MeshGenerator.md
 ## Output
 
 Calling `--csg-only` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
-There are three main sections in the file:
+There are four main sections in the file:
 
 - [`surfaces`](#surfaces)
 - [`cells`](#cells)
 - [`universes`](#universes)
+- [`lattices`](#lattices) (if any)
 
 Each item within each section is keyed (a [!ac](JSON) is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
@@ -81,8 +93,8 @@ Below is an example [!ac](JSON) surface output for a model with a `CSG::CSGPlane
 The cells output contains the following information:
 
 - `region`: the string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
-- `filltype`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, or `"UNIVERSE"`)
-- `fill`: for `"CSG_MATERIAL"` or `"UNIVERSE"` `filltype`, the name of the fill (if `"VOID"` type, then name is an empty string `""`)
+- `filltype`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"`)
+- `fill`: for `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"` `filltype`, the name of the fill object (if `"VOID"` type, then name is an empty string `""`)
 
 | Boolean Operator   | String Representation |
 |--------------------|-----------------------|
@@ -104,3 +116,32 @@ An example of universe output for multiple universes containing various concentr
 In this example, there is one universe, the default `"ROOT_UNIVERSE"`, which contains one cell and is labeled as being the root universe.
 
 !listing csg_only_chained_out_csg.json start="universes"
+
+### Lattices
+
+Lattice output contains the following information:
+
+- `type`: the type of lattice as defined by the class name that was used to create the lattice
+- `universes`: the array of universe names that define the lattice arrangement
+- `outertype`: the type of outer fill in the undefined space of the lattice elements (`"VOID"`, `"CSG_MATERIAL"`, or `"UNIVERSE"`)
+- `outer`: for `"CSG_MATERIAL"` or `"UNIVERSE"` `outertype`, the name of the outer fill object
+- any other attributes associated with the specific lattice type (e.g., pitch, number of rows, etc.)
+
+Two types of lattices are directly supported in the [source/csg/CSGBase.md] class: `CSG::CSGCartesianLattice` and `CSG::CSGHexagonalLattice`.
+The additional attributes that are provided for each of these types are:
+
+- `CSGCartesianLattice`:
+
+  - `nrow`: the number of rows
+  - `ncol`: the number of columns
+  - `pitch`: the flat-to-flat distance of a single lattice element
+
+- `CSGHexagonalLattice`:
+
+  - `nring`: number of rings (consistent with the number of rows)
+  - `nrow`: the number of rows (consistent with the number of rings)
+  - `pitch`: the flat-to-flat distance of a single lattice element
+
+Below is example output for a $2 \times 2$ Cartesian lattice filled with two different universes called `sq1_univ` and `sq2_univ`.
+
+!listing csg_lattice_cart_out_csg.json start="lattices" end="surfaces"
