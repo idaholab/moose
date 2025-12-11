@@ -45,11 +45,11 @@ ExplicitTimeIntegrator::validParams()
 ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     MeshChangedInterface(parameters),
-
     _solve_type(getParam<MooseEnum>("solve_type")),
     _explicit_residual(addVector("explicit_residual", false, PARALLEL)),
     _solution_update(addVector("solution_update", true, PARALLEL)),
-    _mass_matrix_diag_inverted(addVector("mass_matrix_diag_inverted", true, GHOSTED))
+    _mass_matrix_diag_inverted(addVector("mass_matrix_diag_inverted", true, GHOSTED)),
+    _ones(nullptr)
 {
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
@@ -60,14 +60,16 @@ ExplicitTimeIntegrator::ExplicitTimeIntegrator(const InputParameters & parameter
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     _ones = addVector("ones", true, PARALLEL);
-  // don't set any of the common SNES-related petsc options to prevent unused option warnings
+  // don't set any of the common SNES and KSP-related petsc options to prevent unused option
+  // warnings
   Moose::PetscSupport::dontAddCommonSNESOptions(_fe_problem);
+  Moose::PetscSupport::dontAddCommonKSPOptions(_fe_problem);
 }
 
 void
 ExplicitTimeIntegrator::initialSetup()
 {
-  meshChanged();
+  setupSolver();
 
   if (_nl)
   {
@@ -166,9 +168,18 @@ ExplicitTimeIntegrator::preSolve()
 void
 ExplicitTimeIntegrator::meshChanged()
 {
+  setupSolver();
+}
+
+void
+ExplicitTimeIntegrator::setupSolver()
+{
   // Can only be done after the system is initialized
-  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
-    *_ones = 1.;
+  if (_ones)
+  {
+    if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
+      *_ones = 1.;
+  }
 
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
     _linear_solver = LinearSolver<Number>::build(comm());

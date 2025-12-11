@@ -49,6 +49,14 @@ ExplicitMixedOrder::validParams()
                         false,
                         "If set to true, will only compute the mass matrix in the first time step, "
                         "and keep using it throughout the simulation.");
+
+  params.addParam<bool>(
+      "recompute_mass_matrix_after_mesh_change",
+      false,
+      "If set to true, the mass matrix will be recomputed when the mesh changes (e.g. through "
+      "adaptivity). If use_constant_mass is set to true, adadaptivity is used, and this parameter "
+      "is not set to true, the simulation will error out when the mesh changes.");
+
   params.addParam<TagName>("mass_matrix_tag", "mass", "The tag for the mass matrix");
 
   params.addParam<std::vector<VariableName>>(
@@ -75,6 +83,9 @@ ExplicitMixedOrder::validParams()
 ExplicitMixedOrder::ExplicitMixedOrder(const InputParameters & parameters)
   : ExplicitTimeIntegrator(parameters),
     _constant_mass(getParam<bool>("use_constant_mass")),
+    _recompute_mass_matrix_on_mesh_change(
+        getParam<bool>("recompute_mass_matrix_after_mesh_change")),
+    _mesh_changed(true),
     _mass_matrix(getParam<TagName>("mass_matrix_tag")),
     _solution_older(_sys.solutionState(2)),
     _vars_first(declareRestartableData<std::unordered_set<unsigned int>>("first_order_vars")),
@@ -101,6 +112,21 @@ ExplicitMixedOrder::computeTimeDerivatives()
   return;
 }
 
+void
+ExplicitMixedOrder::meshChanged()
+{
+  if (_constant_mass && !_recompute_mass_matrix_on_mesh_change)
+    paramError("recompute_mass_matrix_after_mesh_change",
+               "Must be set to true explicitly by the user to support adaptivity with "
+               "`use_constant_mass`.");
+
+  // after mesh changes we need to recompute the mass matrix, it is not interpolable as it contains
+  // a volume integrated quantity!
+  _mesh_changed = true;
+
+  ExplicitTimeIntegrator::meshChanged();
+}
+
 TagID
 ExplicitMixedOrder::massMatrixTagID() const
 {
@@ -121,8 +147,11 @@ ExplicitMixedOrder::solve()
 
   auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
 
+  if (_mesh_changed)
+    updateDOFIndices();
+
   // Compute the mass matrix
-  if (!_constant_mass || _t_step == 1)
+  if (_mesh_changed || !_constant_mass)
   {
     // We only want to compute "inverted" lumped mass matrix once.
     _fe_problem.computeJacobianTag(
@@ -136,17 +165,14 @@ ExplicitMixedOrder::solve()
     _mass_matrix_diag_inverted->close();
   }
 
+  _mesh_changed = false;
+
   // Set time to the time at which to evaluate the residual
   _fe_problem.time() = _fe_problem.timeOld();
   _nonlinear_implicit_system->update();
 
-  // Compute the residual
-  _explicit_residual->zero();
-  _fe_problem.computeResidual(
-      *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
-
-  // Move the residual to the RHS
-  *_explicit_residual *= -1.0;
+  // Evaluate residual and move it to the RHS
+  evaluateRHSResidual();
 
   // Perform the linear solve
   bool converged = performExplicitSolve(mass_matrix);
@@ -163,6 +189,17 @@ ExplicitMixedOrder::solve()
 }
 
 void
+ExplicitMixedOrder::evaluateRHSResidual()
+{
+  // Compute the residual
+  _fe_problem.computeResidual(
+      *_nonlinear_implicit_system->current_local_solution, *_explicit_residual, _nl->number());
+
+  // Move the residual to the RHS
+  *_explicit_residual *= -1.0;
+}
+
+void
 ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
 {
   residual += *_Re_time;
@@ -176,7 +213,6 @@ ExplicitMixedOrder::postResidual(NumericVector<Number> & residual)
 bool
 ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
 {
-
   bool converged = false;
 
   // Grab all the vectors that we will need
@@ -283,6 +319,12 @@ ExplicitMixedOrder::init()
   // If var_nums is empty then that means the user has specified all the variables in this system
   if (!var_nums.empty())
     mooseError("Not all nonlinear variables have their order specified.");
+}
+
+void
+ExplicitMixedOrder::updateDOFIndices()
+{
+  auto & lm_sys = _sys.system();
 
   std::vector<dof_id_type> var_dof_indices, work_vec;
   for (const auto var_num : _vars_first)
