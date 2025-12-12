@@ -10,6 +10,8 @@
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
 """
+from types import ModuleType
+
 from ..common import mixins
 
 class Extension(mixins.ConfigObject, mixins.TranslatorObject):
@@ -66,7 +68,9 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
         Require that the supplied extension module exists within the Translator object. This
         method cannot be called before init().
         """
-        self.__requires.update(args)
+        for a in args:
+            assert isinstance(a, ModuleType)
+            self.__requires.add(a.__name__)
 
     def init(self):
         """
