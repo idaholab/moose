@@ -45,9 +45,6 @@ MFEMScalarFESpace::getFECName() const
           ? "_T" + std::to_string(getParam<MooseEnum>("basis"))
           : "@" + std::string({mfem::BasisType::GetChar(getParam<MooseEnum>("basis"))});
 
-  // This is to get around an MFEM bug (to be removed in #31525)
-  basis = (basis == "@G" || basis == "_T0") ? "" : basis;
-
   return _fec_type + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
          std::to_string(_fec_order);
 }

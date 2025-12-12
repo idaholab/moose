@@ -629,12 +629,21 @@ class TestResultsStoredResults(ResultsStoreTestCase):
     def test_get_max_memory(self):
         """Test get_max_memory()."""
         tests = self.get_stored_test_results()
+
         max_memory = 1234
         for test, data in tests:
+            test.result.data["testharness"]["version"] = 9
             test.data["max_memory"] = max_memory
             self.assertEqual(test.max_memory, max_memory)
 
             del test.data["max_memory"]
+            self.assertIsNone(test.max_memory)
+
+    def test_get_max_memory_old_version(self):
+        """Test get_max_memory() with version < 9 (before available)."""
+        tests = self.get_stored_test_results()
+        for test, data in tests:
+            test.result.data["testharness"]["version"] = 2
             self.assertIsNone(test.max_memory)
 
     def run_test_serialize_deserialize(self, **kwargs):
