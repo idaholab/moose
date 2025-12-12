@@ -15,6 +15,7 @@ import logging
 import moosetree
 import mooseutils
 import MooseDocs
+from types import ModuleType
 from ..base import Extension, components
 from ..base.readers import MarkdownReader
 from ..common import exceptions
@@ -62,6 +63,23 @@ class IfElseExtension(command.CommandExtension):
         config['modules'] = (list(), "A list of python modules to search for functions; by default the 'ifelse.py' extension is included. All functions called must accept the extension as the first argument.")
         return config
 
+    @staticmethod
+    def loadModules(names) -> list[ModuleType]:
+        """
+        Get a list of modules given a list of module names.
+
+        Used to fill _modules during both __init__ and
+        __setstate__ on pickling.
+        """
+        modules = [sys.modules[__name__]]
+        for name in names:
+            try:
+                modules.append(importlib.import_module(name))
+            except ImportError as e:
+                msg = "Failed to import the supplied '{}' module.\n{}"
+                raise exceptions.MooseDocsException(msg, name, e)
+        return modules
+
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
@@ -69,14 +87,24 @@ class IfElseExtension(command.CommandExtension):
         self._capabilities = None
 
         # Build list of modules for function searching and include this file by default
-        self._modules = list()
-        self._modules.append(sys.modules[__name__])
-        for name in self.get('modules'):
-            try:
-                self._modules.append(importlib.import_module(name))
-            except ImportError as e:
-                msg = "Failed to import the supplied '{}' module.\n{}"
-                raise exceptions.MooseDocsException(msg, name, e)
+        self._modules = self.loadModules(self.get('modules'))
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+
+        # As of python 3.14, modules cannot be pickled so convert
+        # them to the name to be re-imported on deserialization
+        if (modules := state.get('_modules')) is not None:
+            state['_modules'] = [v.__name__ for v in modules]
+
+        return state
+
+    def __setstate__(self, state):
+        # De-serialize module names into modules
+        if (modules := state.get('modules')) is not None:
+            state['_modules'] = self.loadModules(modules)
+
+        self.__dict__.update(state)
 
     def preExecute(self):
         """Populate a list of registered applications."""
