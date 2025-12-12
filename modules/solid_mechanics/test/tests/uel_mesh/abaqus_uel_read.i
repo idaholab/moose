@@ -17,11 +17,14 @@
 
 [AuxVariables]
   [field1]
+    initial_condition = 70.0
   []
   [field2]
+    initial_condition = 0.0
   []
 []
 
+# the action adds the AbaqusEssentialBC, AbaqusForceBC, and AbaqusUELStepUserObject objects
 [BCs]
   [Abaqus]
   []
@@ -33,6 +36,10 @@
 []
 
 [UserObjects]
+  [dload_uo]
+    type = AbaqusDLoadInterpolator
+    step_user_object = abaqus_step_uo
+  []
   [uel]
     type = AbaqusUELMeshUserElement
     uel_type = U1
