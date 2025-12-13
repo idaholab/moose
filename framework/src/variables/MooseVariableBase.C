@@ -159,29 +159,6 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
       "An inconsistent numer of names or no names were provided for array variable components");
   if (_count > 1)
     mooseAssert(isArray(), "Must be true with component > 1");
-
-  if (!blockRestricted())
-    _is_lower_d = false;
-  else
-  {
-    const auto & blk_ids = blockIDs();
-    if (blk_ids.empty())
-      paramError("block",
-                 "Every variable should have at least one subdomain. For '" + name() +
-                     "' no subdomain is defined.");
-
-    _is_lower_d = _mesh.isLowerD(*blk_ids.begin());
-#ifdef DEBUG
-    for (auto it = ++blk_ids.begin(); it != blk_ids.end(); ++it)
-      if (_is_lower_d != _mesh.isLowerD(*it))
-        mooseError("A user should not specify a mix of lower-dimensional and higher-dimensional "
-                   "blocks for variable '" +
-                   name() + "'. This variable is " + (_is_lower_d ? "" : "not ") +
-                   "recognised as lower-dimensional, but is also defined for the " +
-                   (_is_lower_d ? "higher" : "lower") + "-dimensional block '" +
-                   _mesh.getSubdomainName(*it) + "' (block-id " + std::to_string(*it) + ").");
-#endif
-  }
 }
 
 const std::string &

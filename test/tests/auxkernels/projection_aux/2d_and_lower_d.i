@@ -51,6 +51,7 @@
     execute_on = 'INITIAL TIMESTEP_END'
     # block restrict the lower D blocks 1 & 2 away
     block = 0
+    use_block_restriction_for_source = true
   []
 []
 

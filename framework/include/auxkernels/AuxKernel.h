@@ -70,6 +70,11 @@ public:
    */
   void insert();
 
+  /**
+   * Determines whether we're a coincident lower-d calculation
+   */
+  void determineWhetherCoincidentLowerDCalc();
+
 protected:
   /**
    * Compute and return the value of the aux variable.
@@ -155,6 +160,10 @@ protected:
   DenseVector<OutputData> _local_sol;
   /// for holding local mass matrix
   DenseMatrix<Number> _local_ke;
+
+  /// Whether we are computing for a lower dimensional variable using boundary restriction, e.g. a
+  /// variable whose block restriction is coincident with a higher-dimensional boundary face
+  std::optional<bool> _coincident_lower_d_calc;
 
   using MooseVariableInterface<ComputeValueType>::mooseVariableBase;
 
