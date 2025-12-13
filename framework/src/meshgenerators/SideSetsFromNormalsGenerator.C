@@ -120,8 +120,6 @@ SideSetsFromNormalsGenerator::generate()
     _boundary_to_normal_map[boundary_ids[i]] = _normals[i];
   }
 
-  // This is a terrible hack that we'll want to remove once BMBBG isn't terrible
-  if (!_app.getMeshGeneratorSystem().hasBreakMeshByBlockGenerator())
-    mesh->set_isnt_prepared();
+  mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -59,11 +59,35 @@ protected:
   const bool _add_interface_on_two_sides;
 
 private:
-  /// generate the new boundary interface
-  void addInterfaceBoundary(MeshBase & mesh);
+  // Typedef for a single message entry: (node_id, vector of connected block_ids)
+  typedef std::pair<dof_id_type, std::vector<subdomain_id_type>> NodeConnectedBlocksPair;
 
+  /// @brief a set of pairs of block ids between which new boundary sides are created
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
+
+  /// @brief a map from a pair of block ids to a set of pairs of an element and a side
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
-           std::set<std::pair<dof_id_type, unsigned int>>>
+           std::set<std::pair<const Elem *, unsigned int>>>
       _new_boundary_sides_map;
+
+  /// @brief Maps a pair of subdomain ids to the corresponding boundary id.
+  std::unordered_map<std::pair<subdomain_id_type, subdomain_id_type>, boundary_id_type>
+      _subid_pairs_to_boundary_id;
+
+  /// generate the new boundary interface
+  void addInterface(MeshBase & mesh);
+
+  /**
+   * @brief Synchronizes connected blocks across all MPI ranks.
+   *
+   * This process consists of two phases:
+   * Phase 0: Each rank computes the locally connected blocks for the nodes it owns and sends
+   *          this information to the owner of each node.
+   * Phase 1: The owner of each node aggregates all received connected block information and
+   *          broadcasts the global set of connected blocks for each node to all ranks.
+   */
+  void syncConnectedBlocks(
+      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      MeshBase & mesh,
+      std::map<dof_id_type, std::set<subdomain_id_type>> & nodeid_to_connected_blocks);
 };
