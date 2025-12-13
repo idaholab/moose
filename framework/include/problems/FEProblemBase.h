@@ -2118,6 +2118,11 @@ public:
   }
 
   /*
+   * Return reference to function warehouse.
+   */
+  const MooseObjectWarehouse<Function> & getFunctionWarehouse() { return _functions; }
+
+  /*
    * Return a reference to the material warehouse of *all* Material objects.
    */
   const MaterialWarehouse & getMaterialWarehouse() const { return _all_materials; }

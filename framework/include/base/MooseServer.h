@@ -39,6 +39,12 @@ public:
    */
   std::shared_ptr<wasp::lsp::Connection> getConnection() { return _connection; }
 
+  /**
+   * Public interface for writable check app reference with error checks.
+   * @return - writable reference to check app for current input document
+   */
+  MooseApp & getCheckApp();
+
 private:
   /**
    * SortedLocationNodes - type alias for set of nodes sorted by location
@@ -197,6 +203,14 @@ private:
   template <typename MooseEnumType>
   void getEnumsAndDocs(MooseEnumType & moose_enum_param,
                        std::map<std::string, std::string> & options_and_descs);
+
+  /**
+   * Supplement completion list with objects in warehouses if applicable.
+   * @param param_type - parameter type string to pick suitable warehouse
+   * @param options_and_descs - map to fill with options and descriptions
+   */
+  void addObjectsFromWarehouses(const std::string & param_type,
+                                std::map<std::string, std::string> & options_and_descs);
 
   /**
    * Gather definition locations - specific to this server implemention.
@@ -421,10 +435,6 @@ private:
    */
   const hit::Node * queryRoot() const;
 
-  /**
-   * @return The check app for the current document path, with error checking on if it exists
-   */
-  MooseApp & getCheckApp();
   /**
    * @return The root node from the check parser for the current document path, with error checking
    * on if it exists

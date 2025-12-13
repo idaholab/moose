@@ -366,6 +366,7 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
 
   std::vector<hit::ErrorMessage> messages;
 
+  if (_parser.queryCommandLineRoot())
   {
     UnusedWalker uw(_extracted_vars, *this);
     _parser.getCommandLineRoot().walk(&uw);
