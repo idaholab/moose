@@ -691,10 +691,20 @@ class Job(OutputInterface):
         else:
             command = self.getCommand()
 
+        env_ran = self.getTester().getEnvironmentRan()
+        if env_ran is None:
+            env_ran = self.getTester().augmentEnvironment(self.options)
+
         node = self.specs['_node']
         header = [f'Test spec: {node.filename()}:{node.line()}',
                   f'Working directory: {self.getTestDir()}',
                   f'Running command: {command}']
+
+        if env_ran:
+            header += [
+                "Environment variable(s): "
+                + " ".join([f'{k}="{v}"' for k, v in env_ran.items()])
+            ]
         output = '\n'.join(header) + '\n'
 
         # Whether or not to limit the runner_run output, which is the output from the

@@ -69,16 +69,21 @@ class SubprocessRunner(Runner):
         else:
             process_kwargs['preexec_fn'] = os.setsid
 
+        # Augment the environment if needed
+        process_env = tester.augmentEnvironment(self.options)
+
         # Special logic for openmpi runs
         if tester.hasOpenMPI():
-            process_env = os.environ.copy()
-
             # Don't clobber state
             process_env['OMPI_MCA_orte_tmpdir_base'] = self.job.getTempDirectory().name
             # Allow oversubscription for hosts that don't have a hostfile
             process_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
 
-            process_kwargs['env'] = process_env
+        # Add to environment if requested
+        if process_env:
+            tester.setEnvironmentRan(process_env)
+            process_kwargs["env"] = os.environ.copy()
+            process_kwargs["env"].update(process_env)
 
         try:
             self.process = subprocess.Popen(*process_args, **process_kwargs)
