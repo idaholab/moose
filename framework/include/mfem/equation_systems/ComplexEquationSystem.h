@@ -134,7 +134,7 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
       mfem::BilinearFormIntegrator * integ_real = kernel->getRealBFIntegrator();
       mfem::BilinearFormIntegrator * integ_imag = kernel->getImagBFIntegrator();
 
-      if (integ_real != nullptr || integ_imag != nullptr)
+      if (integ_real || integ_imag)
       {
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(
@@ -159,7 +159,7 @@ ComplexEquationSystem::ApplyDomainLFIntegrators(
       mfem::LinearFormIntegrator * integ_real = kernel->getRealLFIntegrator();
       mfem::LinearFormIntegrator * integ_imag = kernel->getImagLFIntegrator();
 
-      if (integ_real != nullptr && integ_imag != nullptr)
+      if (integ_real || integ_imag)
       {
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(
@@ -188,7 +188,7 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
       mfem::BilinearFormIntegrator * integ_real = bc->getRealBFIntegrator();
       mfem::BilinearFormIntegrator * integ_imag = bc->getImagBFIntegrator();
 
-      if (integ_real != nullptr || integ_imag != nullptr)
+      if (integ_real || integ_imag)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(
@@ -214,7 +214,7 @@ ComplexEquationSystem::ApplyBoundaryLFIntegrators(
       mfem::LinearFormIntegrator * integ_real = bc->getRealLFIntegrator();
       mfem::LinearFormIntegrator * integ_imag = bc->getImagLFIntegrator();
 
-      if (integ_real != nullptr && integ_imag != nullptr)
+      if (integ_real || integ_imag)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(

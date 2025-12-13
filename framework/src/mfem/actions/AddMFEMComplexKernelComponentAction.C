@@ -20,7 +20,7 @@ AddMFEMComplexKernelComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription(
-      "Add an MFEM AuxKernel to serve as the real or imaginary component of an MFEMComplexKernel.");
+      "Add an MFEMKernel to serve as the real or imaginary component of an MFEMComplexKernel.");
   return params;
 }
 

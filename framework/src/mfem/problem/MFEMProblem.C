@@ -101,7 +101,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
   FEProblemBase::addUserObject(bc_name, name, parameters);
   const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo) != nullptr)
+  if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo))
   {
     auto object_ptr = getUserObject<MFEMIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMIntegratedBC>(object_ptr);
@@ -113,7 +113,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
       mooseError("Cannot add integrated BC with name '" + name +
                  "' because there is no corresponding equation system.");
   }
-  else if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo) != nullptr)
+  else if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo))
   {
     auto object_ptr = getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr();
     auto bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(object_ptr);
@@ -125,26 +125,26 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
       mooseError("Cannot add complex integrated BC with name '" + name +
                  "' because there is no corresponding equation system.");
   }
-  else if (dynamic_cast<const MFEMComplexEssentialBC *>(mfem_bc_uo) != nullptr)
+  else if (dynamic_cast<const MFEMComplexEssentialBC *>(mfem_bc_uo))
   {
     auto object_ptr = getUserObject<MFEMComplexEssentialBC>(name).getSharedPtr();
-    auto mfem_bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(object_ptr);
+    auto bc = std::dynamic_pointer_cast<MFEMComplexEssentialBC>(object_ptr);
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
     if (eqsys)
-      eqsys->AddComplexEssentialBCs(std::move(mfem_bc));
+      eqsys->AddComplexEssentialBCs(std::move(bc));
     else
       mooseError("Cannot add boundary condition with name '" + name +
                  "' because there is no corresponding equation system.");
   }
-  else if (dynamic_cast<const MFEMEssentialBC *>(mfem_bc_uo) != nullptr)
+  else if (dynamic_cast<const MFEMEssentialBC *>(mfem_bc_uo))
   {
     auto object_ptr = getUserObject<MFEMEssentialBC>(name).getSharedPtr();
-    auto mfem_bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
+    auto bc = std::dynamic_pointer_cast<MFEMEssentialBC>(object_ptr);
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
     if (eqsys)
-      eqsys->AddEssentialBC(std::move(mfem_bc));
+      eqsys->AddEssentialBC(std::move(bc));
     else
       mooseError("Cannot add boundary condition with name '" + name +
                  "' because there is no corresponding equation system.");
@@ -281,39 +281,29 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   FEProblemBase::addUserObject(kernel_name, name, parameters);
   const UserObject * kernel_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMKernel *>(kernel_uo) != nullptr)
+  if (dynamic_cast<const MFEMKernel *>(kernel_uo))
   {
     auto object_ptr = getUserObject<MFEMKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-
     if (eqsys)
-    {
       eqsys->AddKernel(std::move(kernel));
-    }
     else
-    {
       mooseError("Cannot add kernel with name '" + name +
                  "' because there is no corresponding equation system.");
-    }
   }
-  else if (dynamic_cast<const MFEMComplexKernel *>(kernel_uo) != nullptr)
+  else if (dynamic_cast<const MFEMComplexKernel *>(kernel_uo))
   {
     auto object_ptr = getUserObject<MFEMComplexKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMComplexKernel>(object_ptr);
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
-
     if (eqsys)
-    {
       eqsys->AddComplexKernel(std::move(kernel));
-    }
     else
-    {
       mooseError("Cannot add complex kernel with name '" + name +
                  "' because there is no corresponding equation system.");
-    }
   }
   else
   {

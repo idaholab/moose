@@ -210,7 +210,8 @@ EquationSystem::ApplyDomainBLFIntegrators(
     for (auto & kernel : kernels)
     {
       mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
-      if (integ != nullptr)
+
+      if (integ)
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
@@ -234,7 +235,8 @@ EquationSystem::ApplyDomainLFIntegrators(
     for (auto & kernel : kernels)
     {
       mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
-      if (integ != nullptr)
+
+      if (integ)
       {
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
@@ -261,7 +263,8 @@ EquationSystem::ApplyBoundaryBLFIntegrators(
     for (auto & bc : bcs)
     {
       mfem::BilinearFormIntegrator * integ = bc->createBFIntegrator();
-      if (integ != nullptr)
+
+      if (integ)
       {
         if (scale_factor.has_value())
           integ = new ScaleIntegrator(integ, scale_factor.value(), true);
@@ -287,7 +290,8 @@ EquationSystem::ApplyBoundaryLFIntegrators(
     for (auto & bc : bcs)
     {
       mfem::LinearFormIntegrator * integ = bc->createLFIntegrator();
-      if (integ != nullptr)
+
+      if (integ)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
