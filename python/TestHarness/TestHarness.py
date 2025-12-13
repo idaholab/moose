@@ -286,7 +286,7 @@ class TestHarness:
 
     @staticmethod
     def validComputeDevices():
-        return ['cpu', 'cuda', 'hip', 'mps', 'ceed-cpu', 'ceed-cuda', 'ceed-hip']
+        return ['cpu', 'cuda', 'hip', 'mps', 'ceed-cpu', 'ceed-cuda', 'ceed-hip', 'xpu']
 
     def __init__(self, argv: list, moose_dir: str, moose_python: str, test_root: TestRoot):
         self.moose_python_dir = moose_python
