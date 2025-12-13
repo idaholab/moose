@@ -103,7 +103,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   {
     const Real eps = libMesh::TOLERANCE;
 
-    int primary_node_number = 0;
+    std::unordered_set<dof_id_type> local_primary_node_ids;
     for (const auto & bd_node : *_mesh.getBoundaryNodeRange())
     {
       if ((*(bd_node->_node) - _primary_node_coord).norm() < eps)
@@ -115,21 +115,30 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
                       bd_node->_node->id()) != _secondary_node_ids.end() ||
             bd_node->_bnd_id == _mesh.getBoundaryID(_secondary_node_set_id))
         {
-          _primary_node_id = bd_node->_node->id();
-          primary_node_number++;
+          local_primary_node_ids.insert(bd_node->_node->id());
         }
       }
     }
 
-    _mesh.comm().sum(primary_node_number);
+    const std::vector<dof_id_type> local_node_vec(local_primary_node_ids.begin(),
+                                                  local_primary_node_ids.end());
+    std::vector<std::vector<dof_id_type>> gathered_node_vecs;
+    _mesh.comm().allgather(local_node_vec, gathered_node_vecs);
 
-    if (primary_node_number == 0)
+    std::unordered_set<dof_id_type> global_primary_node_ids;
+    for (const auto & vec : gathered_node_vecs)
+      global_primary_node_ids.insert(vec.begin(), vec.end());
+
+    const auto unique_count = global_primary_node_ids.size();
+
+    if (unique_count == 0)
       mooseError("Couldn't find a node ID for the specified primary_node_coord. We go with default "
                  "behavior of choosing primary node.");
-    else if (primary_node_number > 1)
+    else if (unique_count > 1)
       mooseError("Multiple nodes found for the specified primary_node_coord.");
 
-    _mesh.comm().min(_primary_node_id);
+    _primary_node_id =
+        *std::min_element(global_primary_node_ids.begin(), global_primary_node_ids.end());
   }
   else if (_primary_node_id != std::numeric_limits<unsigned int>::max() &&
            isParamSetByUser("primary_node_coord"))
