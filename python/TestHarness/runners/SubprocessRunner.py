@@ -93,7 +93,7 @@ class SubprocessRunner(Runner):
             self.memory_thread.start()
 
     @staticmethod
-    def getProcessMemory(process: psutil.Process) -> Optional[int]:
+    def getProcessMemory(process) -> Optional[int]:
         """Get an approximation for a process' total memory in bytes if possible."""
         assert psutil is not None
         assert isinstance(process, psutil.Process)
