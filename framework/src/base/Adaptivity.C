@@ -218,10 +218,12 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
     // Moving some of h flagged elements to p flagged based on the
     // local smoothness and prior h & p error estimates
-    _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
     if (_adaptivity_type == AdaptivityType::HP)
+    {
+      _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
       _hp_coarsen_test->select_refinement(
           _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
+    }
 
     if (_displaced_problem)
       // Reuse the error vector and refine the displaced mesh
