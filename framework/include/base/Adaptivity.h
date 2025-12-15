@@ -326,10 +326,11 @@ protected:
   /// Whether or not to recompute markers during adaptivity cycles
   bool _recompute_markers_during_cycles;
 
-  /// Sibling coupling object for HP adaptivity to handle ghosting
+  /// Sibling coupling object for HP adaptivity for evaluating data on elements' siblings in
+  /// HPCoarsenTest
   std::unique_ptr<libMesh::SiblingCoupling> _sibling_coupling;
 
-  /// HP coarsen test object for HP adaptivity
+  /// Object for HP adaptivity
   std::unique_ptr<libMesh::HPCoarsenTest> _hp_coarsen_test;
 
   /// Stores pointers to ErrorVectors associated with indicator field names
