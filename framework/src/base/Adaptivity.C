@@ -48,6 +48,7 @@ Adaptivity::Adaptivity(FEProblemBase & fe_problem)
     _stop_time(std::numeric_limits<Real>::max()),
     _cycles_per_step(1),
     _use_new_system(false),
+    _adaptivity_type(AdaptivityType::H),
     _max_h_level(0),
     _recompute_markers_during_cycles(false)
 {
