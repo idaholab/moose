@@ -96,8 +96,7 @@ Adaptivity::init(const unsigned int steps,
   _mesh_refinement->set_periodic_boundaries_ptr(
       _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
 
-  // displaced problem
-  if (_displaced_problem != nullptr)
+  if (_displaced_problem)
   {
     EquationSystems & displaced_es = _displaced_problem->es();
     displaced_es.parameters.set<bool>("adaptivity") = true;
