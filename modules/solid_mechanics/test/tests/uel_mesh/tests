@@ -60,7 +60,7 @@
     input = abaqus_uel_read.i
     exodiff = PATCH_UEL_out.e
     cli_args = 'Outputs/file_base=PATCH_UEL_out'
-    requirement = 'The system shall be able to load and Abaqus input file with an UEL user element applied to multiple mesh elements and apply displacement boundary conditions.'
+    requirement = 'The system shall be able to load an Abaqus input file with a UEL user element applied to multiple mesh elements and apply displacement boundary conditions.'
     installation_type = in_tree
   []
   [patch_uel_csv]
@@ -68,7 +68,27 @@
     input = abaqus_uel_read.i
     csvdiff = PATCH_UEL_out_statev_0010.csv
     cli_args = 'Outputs/file_base=PATCH_UEL_out'
-    requirement = 'The system shall be able to load and Abaqus input file with an UEL user element applied to multiple mesh elements and apply displacement boundary conditions and output UEL state variables.'
+    requirement = 'The system shall be able to load an Abaqus input file with a UEL user element applied to multiple mesh elements and apply displacement boundary conditions and output UEL state variables.'
     installation_type = in_tree
+    prereq ='patch_uel'
+  []
+
+  [multistep_uel]
+    type = Exodiff
+    abs_zero = 1e-9
+    input = abaqus_uel_read.i
+    exodiff = CUBE_UEL_BCS_out.e
+    cli_args = 'Outputs/file_base=CUBE_UEL_BCS_out Mesh/file=CUBE_UEL_BCS.inp Executioner/dt=0.5 Executioner/end_time=3.0'
+    requirement = 'The system shall be able to load an Abaqus input file with a UEL user element and apply distributed loads that vary over multiple steps.'
+    installation_type = in_tree
+  []
+  [multistep_uel_csv]
+    type = CSVDiff
+    input = abaqus_uel_read.i
+    csvdiff = CUBE_UEL_BCS_out_statev_0006.csv
+    cli_args = 'Outputs/file_base=CUBE_UEL_BCS_out Mesh/file=CUBE_UEL_BCS.inp Executioner/dt=0.5 Executioner/end_time=3.0'
+    requirement = 'The system shall be able to load an Abaqus input file with a UEL user element and apply distributed loads that vary over multiple steps and output UEL state variables.'
+    installation_type = in_tree
+    prereq = 'multistep_uel'
   []
 []
