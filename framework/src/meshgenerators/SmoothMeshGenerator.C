@@ -25,9 +25,8 @@ SmoothMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to smooth.");
-  params.addClassDescription(
-      "Utilizes the specified smoothing algorithm to attempt to improve "
-      "mesh quality.");
+  params.addClassDescription("Utilizes the specified smoothing algorithm to attempt to improve "
+                             "mesh quality.");
 
   MooseEnum SmootherAlgorithm("variational laplace", "variational");
   params.addParam<MooseEnum>("algorithm", SmootherAlgorithm, "The smoothing algorithm to use.");
@@ -94,15 +93,14 @@ SmoothMeshGenerator::SmoothMeshGenerator(const InputParameters & parameters)
 
     for (const auto & param_name : check_params)
       if (isParamSetByUser(param_name))
-        mooseError(
-                     " param '",
-                     param_name,
-                     "' applies to algorithm='",
-                     other_algorithm,
-                     "' only and has no effect on the ",
-                     "currently selected algorithm='",
-                     _algorithm,
-                     "'.");
+        mooseError(" param '",
+                   param_name,
+                   "' applies to algorithm='",
+                   other_algorithm,
+                   "' only and has no effect on the ",
+                   "currently selected algorithm='",
+                   _algorithm,
+                   "'.");
   }
 }
 
@@ -119,19 +117,17 @@ SmoothMeshGenerator::generate()
       mooseError(
           "SmoothMeshGenerator with algorithm='laplace' is not implemented for distributed meshes");
 
-    smoother = std::make_unique<libMesh::LaplaceMeshSmoother>(
-        *mesh, _iterations);
+    smoother = std::make_unique<libMesh::LaplaceMeshSmoother>(*mesh, _iterations);
   }
 
   else if (_algorithm == "variational")
   {
-    smoother =
-        std::make_unique<libMesh::VariationalMeshSmoother>(*mesh,
-                                                           _dilation_weight,
-                                                           _preserve_subdomain_boundaries,
-                                                           _relative_residual_tolerance,
-                                                           _absolute_residual_tolerance,
-                                                           _verbosity);
+    smoother = std::make_unique<libMesh::VariationalMeshSmoother>(*mesh,
+                                                                  _dilation_weight,
+                                                                  _preserve_subdomain_boundaries,
+                                                                  _relative_residual_tolerance,
+                                                                  _absolute_residual_tolerance,
+                                                                  _verbosity);
   }
 
   smoother->smooth();
