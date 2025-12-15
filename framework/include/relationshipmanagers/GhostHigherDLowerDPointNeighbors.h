@@ -11,6 +11,9 @@
 
 #include "RelationshipManager.h"
 
+/**
+ * Ghosts lower-D point neighbors of higher-D elements
+ */
 class GhostHigherDLowerDPointNeighbors : public RelationshipManager
 {
 public:
