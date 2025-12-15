@@ -82,13 +82,20 @@ Adaptivity::init(const unsigned int steps,
   if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
     _mesh.doingPRefinement(true);
 
-  _sibling_coupling = std::make_unique<SiblingCoupling>();
   if (_adaptivity_type == AdaptivityType::HP)
-    _fe_problem.getNonlinearSystemBase(0).system().get_dof_map().add_algebraic_ghosting_functor(
+  {
+    if (_fe_problem.numSolverSystems() > 1)
+      mooseError("HP adaptivity doesn't support multiple solver systems because currently only the "
+                 "zeroth solver system solution is analyzed for determining whether to toggle "
+                 "h-refinement flags to p-refinement flags");
+
+    _sibling_coupling = std::make_unique<SiblingCoupling>();
+    _fe_problem.getSolverSystem(0).system().get_dof_map().add_algebraic_ghosting_functor(
         *_sibling_coupling);
+  }
 
   _mesh_refinement->set_periodic_boundaries_ptr(
-      _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
+      _fe_problem.getSolverSystem(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
 
   if (_displaced_problem)
   {
@@ -103,7 +110,7 @@ Adaptivity::init(const unsigned int steps,
     // i.e. neighbors across periodic boundaries, for the purposes of
     // refinement.
     _displaced_mesh_refinement->set_periodic_boundaries_ptr(
-        _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
+        _fe_problem.getSolverSystem(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
 
     // TODO: This is currently an empty function on the DisplacedProblem... could it be removed?
     _displaced_problem->initAdaptivity();
@@ -209,25 +216,36 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   }
   else
   {
+    if (_fe_problem.numSolverSystems() > 1)
+      mooseError("The old adaptivity system based on libMesh error estimators does not currently "
+                 "support multiple solver systems because we currently only use the zeroth solver "
+                 "system solution for estimating errors");
+
     // Compute the error for each active element
-    _error_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(),
-                                     *_error);
+    _error_estimator->estimate_error(_fe_problem.getSolverSystem(/*nl_sys=*/0).system(), *_error);
 
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
 
-    // Moving some of h flagged elements to p flagged based on the
-    // local smoothness and prior h & p error estimates
-    if (_adaptivity_type == AdaptivityType::HP)
-    {
-      _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
-      _hp_coarsen_test->select_refinement(
-          _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system());
-    }
-
     if (_displaced_problem)
       // Reuse the error vector and refine the displaced mesh
       _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
+  }
+
+  // Moving some of h flagged elements to p flagged based on the
+  // local smoothness and prior h & p error estimates
+  if (_adaptivity_type == AdaptivityType::HP)
+  {
+    if (_displaced_problem)
+      mooseError("HP refinement cannot currently be used with a displaced mesh. This is because "
+                 "we may toggle from h-refinement to p-refinement based on solution, gradient "
+                 "(for C0 elements), and hessian (for C0 and C1 elements) differences between "
+                 "coarse and fine states, and the gradient and hessian will be functions of mesh "
+                 "displacements. Consequently it's possible that refinement flags may end up out "
+                 "of sync between reference and displaced meshes which would be disastrous");
+
+    _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
+    _hp_coarsen_test->select_refinement(_fe_problem.getSolverSystem(/*nl_sys=*/0).system());
   }
 
   // If the DisplacedProblem is active, undisplace the DisplacedMesh
