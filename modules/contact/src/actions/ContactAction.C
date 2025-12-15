@@ -278,14 +278,7 @@ ContactAction::validParams()
       false,
       "Whether we are going to enable mortar segment mesh debug information. An exodus"
       "file will be generated if the user sets this flag to true");
-  params.addParam<MooseEnum>(
-      "quadrature",
-      MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
-      "Quadrature rule to use on mortar segments. For 2D mortar DEFAULT is recommended."
-      "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
-      "While DEFAULT quadrature order is typically sufficiently accurate, "
-      "exact integration of QUAD mortar faces requires SECOND order quadrature for FIRST variables "
-      "and FOURTH order quadrature for SECOND order variables.");
+  params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "quadrature");
   return params;
 }
 
