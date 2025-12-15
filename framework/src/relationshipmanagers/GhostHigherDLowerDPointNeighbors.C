@@ -73,16 +73,16 @@ GhostHigherDLowerDPointNeighbors::operator()(const MeshBase::const_element_itera
       // We want to ghost the adjoining lower-d elements if the node hasn't been partitioned yet
       // (e.g. we don't know what processes it will be) or if its processor id matches our
       // processes's id
-      if (node.processor_id() != p)
-        continue;
-
-      const auto & elem_node_neighbors = libmesh_map_find(node_to_elem_map, node.id());
-      for (const auto elem_id : elem_node_neighbors)
+      if (node.processor_id() == p || node.processor_id() == DofObject::invalid_processor_id)
       {
-        const Elem * const elem_node_neighbor = _mesh->elem_ptr(elem_id);
-        if (elem_node_neighbor->dim() != _mesh->mesh_dimension() &&
-            elem_node_neighbor->processor_id() != p)
-          coupled_elements.emplace(elem_node_neighbor, null_mat);
+        const auto & elem_node_neighbors = libmesh_map_find(node_to_elem_map, node.id());
+        for (const auto elem_id : elem_node_neighbors)
+        {
+          const Elem * const elem_node_neighbor = _mesh->elem_ptr(elem_id);
+          if (elem_node_neighbor->dim() != _mesh->mesh_dimension() &&
+              elem_node_neighbor->processor_id() != p)
+            coupled_elements.emplace(elem_node_neighbor, null_mat);
+        }
       }
     }
   }
