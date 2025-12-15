@@ -6,6 +6,13 @@ For a batch of material points, calculate the residual at each point in the form
 
 The kernel then assembles the integrated residual into the global residual vector.
 
+## Limitations
+
+- The current weak form is Cartesian-only; hoop/metric terms for axisymmetric or spherical coordinates are not present.
+- This object assembles residuals only; no Jacobian contributions are produced. This system currently targets only explicit solves.
+- Requires 1-3 displacement variables and uses the test functions from those variables' FE spaces.
+- Pair this with a matching, block-restricted `NEML2Assembly`/`NEML2FEInterpolation` if you have mixed element types/orders.
+
 ## Syntax
 
 !syntax parameters /UserObjects/NEML2StressDivergence

@@ -10,6 +10,11 @@ This object caches the finite element context using the [NEML2FEAssembly](NEML2A
 
 In addition, this object zeros out the algebraic element/node ranges before evaluating the residual. Therefore, regular MOOSE kernels don't work with this time integrator.
 
+### Limitations
+
+- Designed for explicit solves only; no Jacobian contributions are produced by the NEML2 kernels in this workflow.
+- Requires the NEML2 assembly/interpolation objects to have compatible element types within each block (one per element type/order when mixing).
+
 ## Syntax
 
 !syntax parameters /Executioner/TimeIntegrators/NEML2CentralDifference

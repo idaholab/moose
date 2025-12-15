@@ -46,6 +46,9 @@ where $n_e$ is the number of elements, $n_q$ is the number of quadrature points 
 
 - Only variables of type `MooseVariableFE<Real>` are supported
 - Variable scaling factors other than unity are not supported
+- All elements handled by a single `NEML2FEInterpolation` must share the same number of quadrature points and the same number of dofs per element for each FEType. Mixed element topologies or p-adaptivity need to be split into multiple block-restricted `NEML2FEInterpolation`/`NEML2Assembly` pairs (one per element type).
+- Only the current solution is interpolated; old variable values/gradients are not provided to NEML2 through this path.
+- The implementation currently assumes PETSc vectors for the solution transfer.
 
 ## Syntax
 
