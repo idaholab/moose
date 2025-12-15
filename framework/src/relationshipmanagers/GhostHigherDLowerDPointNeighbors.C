@@ -61,10 +61,12 @@ GhostHigherDLowerDPointNeighbors::operator()(const MeshBase::const_element_itera
   const auto & node_to_elem_map = _moose_mesh->nodeToElemMap();
 
   static const CouplingMatrix * const null_mat = nullptr;
+  const auto mesh_dim = _mesh->mesh_dimension();
+  std::unordered_set<dof_id_type> visited_nodes;
 
   for (const Elem * const elem : as_range(range_begin, range_end))
   {
-    if (elem->dim() != _mesh->mesh_dimension())
+    if (elem->dim() != mesh_dim)
       // not a higher-dimensional element
       continue;
 
@@ -73,14 +75,19 @@ GhostHigherDLowerDPointNeighbors::operator()(const MeshBase::const_element_itera
       // We want to ghost the adjoining lower-d elements if the node hasn't been partitioned yet
       // (e.g. we don't know what processes it will be) or if its processor id matches our
       // processes's id
-      if (node.processor_id() == p || node.processor_id() == DofObject::invalid_processor_id)
+      const auto node_pid = node.processor_id();
+      if (node_pid == p || node_pid == DofObject::invalid_processor_id)
       {
+        const auto [_, inserted] = visited_nodes.insert(node.id());
+        if (!inserted)
+          // We've already considered this node
+          continue;
+
         const auto & elem_node_neighbors = libmesh_map_find(node_to_elem_map, node.id());
         for (const auto elem_id : elem_node_neighbors)
         {
           const Elem * const elem_node_neighbor = _mesh->elem_ptr(elem_id);
-          if (elem_node_neighbor->dim() != _mesh->mesh_dimension() &&
-              elem_node_neighbor->processor_id() != p)
+          if (elem_node_neighbor->dim() != mesh_dim && elem_node_neighbor->processor_id() != p)
             coupled_elements.emplace(elem_node_neighbor, null_mat);
         }
       }
