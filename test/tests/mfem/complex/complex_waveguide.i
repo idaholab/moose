@@ -4,7 +4,7 @@ epsilon0 = 8.8541878176e-12
 mu0 = 1.256637061435917e-06
 magnetic_reluctivity = 795774.715459
 elec_cond_mouse = 0.97
-elec_cond_air = 0.0
+elec_cond_air = 1e-323
 
 [Mesh]
   type = MFEMMesh
