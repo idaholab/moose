@@ -70,7 +70,7 @@ SmoothMeshGenerator::SmoothMeshGenerator(const InputParameters & parameters)
 {
   if (isParamSetByUser("algorithm"))
   {
-    // Warn the user if they try to mix laplace smoother params with variational
+    // Error if user tries to mix laplace smoother params with variational
     // smoother params
 
     std::vector<std::string> check_params;
