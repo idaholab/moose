@@ -2,12 +2,12 @@
   design = 'meshgenerators/SmoothMeshGenerator.md'
   [algorithms]
     requirement = 'The system shall be able to use libmesh mesh modification tools:'
+    issue = '#11640 #28424 #22141'
     [laplace_smooth_mesh_generator]
       type = 'Exodiff'
       input = 'laplace_mesh_smoother_generator.i'
       cli_args = '--mesh-only'
       exodiff = 'laplace_mesh_smoother_generator_in.e'
-      issues = '#11640'
       mesh_mode = 'REPLICATED'
       recover = false
       detail = 'lapalce smoothing algorithm'
@@ -18,7 +18,6 @@
       input = 'variational_mesh_smoother_generator.i'
       cli_args = '--mesh-only'
       exodiff = 'variational_mesh_smoother_generator_in.e'
-      issues = '#28424 #22141'
       recover = false
       detail = 'variational smoothing algorithm'
     []
