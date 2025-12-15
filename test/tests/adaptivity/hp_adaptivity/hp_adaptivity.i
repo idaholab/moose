@@ -99,7 +99,8 @@
 
 [AuxKernels]
   [elem_p_level]
-    type = AdaptivityAux
+    type = ElementAdaptivityLevelAux
+    level = p
     variable = p_level
   []
 []
