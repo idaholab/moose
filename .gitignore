@@ -369,3 +369,7 @@ OutputData
 
 # PETSc binary output
 binaryoutput
+
+# Nvidia profiler output
+*.sqlite
+*.nsys-rep
