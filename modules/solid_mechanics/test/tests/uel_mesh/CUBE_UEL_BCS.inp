@@ -48,12 +48,9 @@
 XSYMM, 1, 1
 ** Apply Starting Essential Boundary Conditions
 ** Name: YSYMM
-*Boundary
+**Boundary
 YSYMM, 2, 2
-2, 1, 1, -0.020
-3, 1, 1, +0.020
-6, 1, 1, +0.000
-** 
+**
 *Initial Conditions, type=FIELD, variable=1
 ALL, 70.0
 *Initial Conditions, type=FIELD, variable=2
