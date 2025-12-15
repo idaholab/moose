@@ -80,7 +80,8 @@ MortarConstraintBase::validParams()
       "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
       "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
       "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
-      "quadrature for SECOND order variables.");
+      "quadrature for SECOND order variables. Note that the actual order supplied to the libMesh "
+      "Quadrature class will be two times this value plus one.");
   params.addParam<bool>(
       "use_petrov_galerkin",
       false,
