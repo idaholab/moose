@@ -7,18 +7,20 @@ The `SmoothMeshGenerator` supports two mesh-smoothing algorithms, which are desc
 ## Laplace Algorithm
 
 The Laplace smoothing algorithm utilizes a classical Laplacian smoother that iteratively relocates interior nodes to the average of their neighbors.
-Boundary and subdomain boundary nodes are not moved.
+It supports 1D/2D/3D meshes and tries to preserve exterior boundaries by fixing boundary nodes in place.
+Subdomain boundaries are not preserved.
 This implementation currently requires a replicated mesh.
 
 ## Variational Algorithm
 
 The variational smoothing algorithm is a Newton-based variational optimizer that minimizes a mixed *distortion–dilation* energy.
 It supports 1D/2D/3D meshes, preserves exterior boundaries by constraining nodes, can optionally preserve subdomain (block) boundaries, and can *untangle some* tangled meshes before smoothing.
+Exterior/subdomain boundaries are preserved by only allowing node movement that leaves the domain unchanged.
 Internally it builds a libMesh system that assembles the gradient (residual) and analytic Hessian (jacobian) of the energy and solves to a stationary point.
 
 ### Mathematical Formulation
 
-The Variational Mesh Smoother minimizes a *distortion–dilation energy functional*, $I_h(R)$, originally proposed by *Branets (2005)*:
+The Variational Mesh Smoother minimizes a *distortion–dilation energy functional*, $I_h(R)$, originally proposed by [!cite](branets2005variationalgrid):
 
 !equation
 I_h(R)=\sum_{c=1}^{N_{\text{elem}}} \int_{\hat{\Omega}_c} E_\theta(S_c(R))\, d\hat{\xi}\,
@@ -81,13 +83,15 @@ This is reflected in the table below.
 |:--|:--|:--|
 | EDGE | line | line |
 | TRI | right triangle | equilateral triangle |
+| Polygon | regular polygon | regular polygon |
 | QUAD | square | square |
 | PRISM | right triangular base | equilateral triangular base, equal face areas |
 | HEX | cube | cube |
 | PYRAMID | square base, isosceles triangular sides  | square base, equilateral triangular sides |
 | TET | right tet | regular tet |
+| Polyhedron | not supported | not supported |
 
-##### Reference Volume ($v$)
+#### Reference Volume ($v$)
 
 The term reference "volume" is a bit misleading.
 A more descriptive, albeit longer, term is "reference target-to-physical jacobian determinant".
@@ -100,12 +104,12 @@ The reference volume is automatically calculated as the volumetric average of $\
 !equation
 v = \dfrac{1}{N_\text{elem}} \sum_{c=1}^{N_\text{elem}} \dfrac{\int_{\hat{\Omega}_c} \det S_c d\hat{\xi}}{\int_{\hat{\Omega}_c} d\hat{\xi}}
 
-##### Element Order
+#### Element Order
 
 The variational smoother rejects mixed-order meshes; all active elements must share the same default order.
 Higher-order element types are supported.
 
-##### Untangling
+#### Untangling
 
 The mesh is considered tangled if, at any quadrature point, $\det S \leq 0$.
 If the mesh is initially tangled, the variational smoother runs an *untangling stage* using only the distortion term (temporarily sets the dilation weight to 0), then a *smoothing stage* with the requested weights.
@@ -115,7 +119,7 @@ The use of this term in place of $\det S$ in denominators allows the smoother to
 
 Once the mesh has been untangled, $\varepsilon$ is set to zero to prevent re-tangling during the smoothing solve.
 
-##### Optimal Solutions
+#### Optimal Solutions
 
 It can be shown that, for the smoothing solve, when $\varepsilon = 0$ and $\chi_\varepsilon(\det S) = \det S$, the distortion metric $\beta(S)$ is minimized by any constant-scaled special orthogonal matrix such that
 
@@ -132,7 +136,7 @@ For untangled meshes, the dilation metric simplifies to
 
 It can be shown that the dilation metric is minimized by any $S$ such that $\det S = v$.
 
-##### Boundary/Subdomain Control
+#### Boundary/Subdomain Control
 
 Geometric constraints are automatically detected and applied to boundary nodes; if `preserve_subdomain_boundaries = true`, nodes along interfaces of differing block IDs are likewise constrained so subdomain boundaries do not drift.
 Boundary/subdomain interface nodes are allowed to slide along boundaries/interfaces, so long as those surfaces are linear (e.g., a line in 2D meshes or a plane in 3D meshes).
@@ -146,7 +150,9 @@ These restrictions then propagate into the mesh interior.
 In the future, it will be useful to allow boundary nodes to slide along nonlinear boundaries.
 This is not currently possible because libMesh does not yet support nonlinear constraints.
 
-For further theoretical background, see: Larisa V. Branets, *A Variational Grid Optimization Method Based on a Local Cell Quality Metric*, Ph.D. Dissertation, University of Texas at Austin, 2005.
+For further theoretical background, see: [!cite](branets2005variationalgrid)
+
+!bibtex bibliography
 
 ## Examples
 

@@ -32,7 +32,7 @@
        cli_args = 'Mesh/smooth/preserve_subdomain_boundaries=false --mesh-only'
        mesh_mode = 'REPLICATED'
        recover = false
-       detail = 'they set variational params for a laplace smooth'
+       detail = 'variational smoothing parameters are passed for the Laplace smoothing algorithm.'
        expect_err = "SmoothMeshGenerator param 'preserve_subdomain_boundaries' applies to algorithm='variational' only and has no effect on the currently selected algorithm='laplace'."
     []
 
@@ -41,7 +41,7 @@
        input = 'variational_mesh_smoother_generator.i'
        cli_args = 'Mesh/smooth/iterations=10 --mesh-only'
        recover = false
-       detail = 'they set laplace params for a variational smooth'
+       detail = 'Laplace smoothing parameters are passed for the variational smoothing algorithm.'
        expect_err = "SmoothMeshGenerator param 'iterations' applies to algorithm='laplace' only and has no effect on the currently selected algorithm='variational'."
     []
   []
