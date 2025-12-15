@@ -215,8 +215,7 @@ public:
    * \returns A reference to *this.
    */
   template <typename Scalar>
-  typename libMesh::boostcopy::enable_if_c<libMesh::ScalarTraits<Scalar>::value,
-                                           RankFourTensorTempl &>::type
+  typename std::enable_if<libMesh::ScalarTraits<Scalar>::value, RankFourTensorTempl &>::type
   operator=(const Scalar & libmesh_dbg_var(p))
   {
     libmesh_assert_equal_to(p, Scalar(0));
