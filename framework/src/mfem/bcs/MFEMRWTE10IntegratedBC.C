@@ -41,21 +41,14 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
     _mu(getParam<Real>("mu")),
     _epsilon(getParam<Real>("epsilon")),
     _omega(2 * M_PI * getParam<Real>("frequency")),
-    _a1_vec(to3DMFEMVector(getParam<RealVectorValue>("port_length_vector"))),
-    _a2_vec(to3DMFEMVector(getParam<RealVectorValue>("port_width_vector"))),
-    _a3_vec(CrossProduct(_a1_vec, _a2_vec)),
-    _a2xa3(CrossProduct(_a2_vec, _a3_vec)),
-    _a3xa1(CrossProduct(_a3_vec, _a1_vec)),
-    _v(mfem::InnerProduct(_a1_vec, _a2xa3)),
-    _kc(M_PI / _a1_vec.Norml2()),
-    _k0(_omega * sqrt(_mu * _epsilon)),
-    _k(std::complex<double>(0., sqrt(_k0 * _k0 - _kc * _kc))),
-    _k_a(_a2xa3),
-    _k_c(_a3_vec)
+    _a1(const_cast<mfem::real_t *>(&getParam<RealGradient>("port_length_vector")(0)), Moose::dim),
+    _a2(const_cast<mfem::real_t *>(&getParam<RealGradient>("port_width_vector")(0)), Moose::dim),
+    _k0(_omega * std::sqrt(_mu * _epsilon)),
+    _kc(M_PI / _a1.Norml2()),
+    _k(std::complex<mfem::real_t>(0., std::sqrt(_k0 * _k0 - _kc * _kc))),
+    _k_c(normalizedCrossProduct(_a1, _a2) *= _k.imag()),
+    _k_a(normalizedCrossProduct(_a2, _k_c) *= _kc)
 {
-  _k_a *= M_PI / _v;
-  _k_c *= _k.imag() / _a3_vec.Norml2();
-
   _robin_coef_im = std::make_unique<mfem::ConstantCoefficient>(_k.imag() / _mu);
 
   if (getParam<bool>("input_port"))
@@ -69,15 +62,15 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
 }
 
 void
-MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<double>> & E)
+MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<mfem::real_t>> & E)
 {
 
-  mfem::Vector e_hat(CrossProduct(_k_c, _k_a));
-  e_hat *= 1.0 / e_hat.Norml2();
-  std::complex<double> zi(0., 1.);
+  mfem::Vector e_hat(normalizedCrossProduct(_k_c, _k_a));
+  std::complex<mfem::real_t> zi(0., 1.);
 
-  double e0(sqrt(2 * _omega * _mu / (_a1_vec.Norml2() * _a2_vec.Norml2() * _k.imag())));
-  std::complex<double> e_mag = e0 * sin(InnerProduct(_k_a, x)) * exp(-zi * InnerProduct(_k_c, x));
+  mfem::real_t e0 = std::sqrt(2 * _omega * _mu / (_a1.Norml2() * _a2.Norml2() * _k.imag()));
+  std::complex<mfem::real_t> e_mag =
+      e0 * sin(mfem::InnerProduct(_k_a, x)) * exp(-zi * mfem::InnerProduct(_k_c, x));
 
   E[0] = e_mag * e_hat(1);
   E[1] = e_mag * e_hat(2);
@@ -87,22 +80,18 @@ MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<
 void
 MFEMRWTE10IntegratedBC::RWTE10Real(const mfem::Vector & x, mfem::Vector & v)
 {
-  std::vector<std::complex<double>> eval(x.Size());
+  std::vector<std::complex<mfem::real_t>> eval(x.Size());
   RWTE10(x, eval);
   for (int i = 0; i < x.Size(); ++i)
-  {
     v(i) = -2 * _k.imag() * eval[i].imag() / _mu;
-  }
 }
 void
 MFEMRWTE10IntegratedBC::RWTE10Imag(const mfem::Vector & x, mfem::Vector & v)
 {
-  std::vector<std::complex<double>> eval(x.Size());
+  std::vector<std::complex<mfem::real_t>> eval(x.Size());
   RWTE10(x, eval);
   for (int i = 0; i < x.Size(); ++i)
-  {
     v(i) = 2 * _k.imag() * eval[i].real() / _mu;
-  }
 }
 
 #endif

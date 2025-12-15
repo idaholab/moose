@@ -40,56 +40,28 @@ public:
     return new mfem::VectorFEMassIntegrator(_robin_coef_im.get());
   }
 
-  // Utilities
-  mfem::Vector CrossProduct(const mfem::Vector & va, const mfem::Vector & vb)
+  /// Computes the unit vector in the direction of the cross product of two 3d vectors
+  mfem::Vector normalizedCrossProduct(const mfem::Vector & va, const mfem::Vector & vb)
   {
     mfem::Vector vec;
-    vec.SetSize(3);
-    vec[0] = va[1] * vb[2] - va[2] * vb[1];
-    vec[1] = va[2] * vb[0] - va[0] * vb[2];
-    vec[2] = va[0] * vb[1] - va[1] * vb[0];
-    return vec;
-  }
-
-  // Utilities
-  mfem::real_t InnerProduct(const mfem::Vector & va, const mfem::Vector & vb)
-  {
-    if (va.Size() != vb.Size())
-      mooseError("InnerProduct: vectors must have the same size");
-
-    mfem::real_t res = 0.0;
-    for (int i = 0; i < va.Size(); ++i)
-      res += va[i] * vb[i];
-
-    return res;
-  }
-
-  static inline mfem::Vector to3DMFEMVector(const RealVectorValue & v)
-  {
-    mfem::Vector mfem_vec(3);
-    for (int i = 0; i < 3; ++i)
-      mfem_vec(i) = v(i);
-    return mfem_vec;
+    va.cross3D(vb, vec);
+    return vec /= vec.Norml2();
   }
 
 protected:
   mfem::real_t _mu;
   mfem::real_t _epsilon;
-
   mfem::real_t _omega;
-  mfem::Vector _a1_vec;
-  mfem::Vector _a2_vec;
-  mfem::Vector _a3_vec;
-  mfem::Vector _a2xa3;
-  mfem::Vector _a3xa1;
 
-  mfem::real_t _v;
-  mfem::real_t _kc;
+  mfem::Vector _a1;
+  mfem::Vector _a2;
+
   mfem::real_t _k0;
+  mfem::real_t _kc;
   std::complex<mfem::real_t> _k;
 
-  mfem::Vector _k_a;
   mfem::Vector _k_c;
+  mfem::Vector _k_a;
 
   std::unique_ptr<mfem::ConstantCoefficient> _robin_coef_im{nullptr};
   std::unique_ptr<mfem::VectorFunctionCoefficient> _u_real{nullptr};
