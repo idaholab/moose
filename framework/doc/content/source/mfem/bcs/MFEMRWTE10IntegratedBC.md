@@ -23,7 +23,7 @@ If the parameter [!param](/BCs/MFEMRWTE10IntegratedBC/input_port) is set to `tru
 !equation
 i\mathrm{Im}[k]\mu^{-1}(\vec u, \vec v)_{\partial\Omega} + 2\mathrm{Im}[k]\mu^{-1}(\vec n \times (\mathrm{Im}[\vec f]-i\mathrm{Re}[\vec f]), \vec v)_{\partial\Omega}  \,\,\, \forall \vec v \in V
 
-where $\vec f$ is defined by 
+where $\vec f$ is defined by
 
 !equation
 \vec f=\sqrt{\frac{2\omega\mu}{|\vec a_1||\vec a_2|\mathrm{Im}[k]}} \sin(\vec k_a \cdot \vec x)e^{-i\vec k_c \cdot \vec x}\hat e

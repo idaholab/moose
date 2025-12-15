@@ -13,8 +13,8 @@ If the system of equations is singular - commonly arising, for example, when sol
 magnetic vector potential in magnetostatic systems in the steady state - users should set the
 `singular` parameter to `true` to add a small mass term to ensure solvability.
 
-A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter 
-[!param](/Solver/MFEMHypreAMS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial 
+A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter
+[!param](/Solver/MFEMHypreAMS/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial
 order systems.
 
 ## Example Input File Syntax
