@@ -1431,7 +1431,10 @@ public:
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
   /// Set incomplete interface pairs flag
-  void setIncompleteInterfacePairs() { _has_incomplete_interface_pairs = true; };
+  void setHasIncompleteInterfacePairs(bool has_incomplete)
+  {
+    _has_incomplete_interface_pairs = has_incomplete;
+  };
 
   /// Get incomplete interface pairs flag
   bool hasIncompleteInterfacePairs() const { return _has_incomplete_interface_pairs; };
