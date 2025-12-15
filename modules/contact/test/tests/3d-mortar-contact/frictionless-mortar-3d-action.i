@@ -277,6 +277,5 @@ offset = 0.00
     variable = mortar_normal_lm
     sort_by = 'id'
     execute_on = NONLINEAR
-
   []
 []
