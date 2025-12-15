@@ -2,7 +2,7 @@
   design = 'meshgenerators/SmoothMeshGenerator.md'
   [algorithms]
     requirement = 'The system shall be able to smooth a mesh using a:'
-    issue = '#11640 #28424 #22141'
+    issues = '#11640 #28424 #22141'
     [laplace_smooth_mesh_generator]
       type = 'Exodiff'
       input = 'laplace_mesh_smoother_generator.i'
