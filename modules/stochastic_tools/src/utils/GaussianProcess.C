@@ -172,14 +172,51 @@ GaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x
   int n = out_vec.rows();
   RealEigenMatrix K(x1.rows(), x1.rows());
 
-  std::vector<Real> theta1(_num_tunable, 0.0);
+  std::vector<Real> theta(_num_tunable, 0.0);
 
-  theta1[0] = 1;
-  for (unsigned int i = 0; i < _num_tunable-1; ++i) {
-    theta1[i + 1] = lengthscale(0,i);
+  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
+
+  auto signal_it = _tuning_data.find("covar:signal_variance"); 
+  
+  if (signal_it != _tuning_data.end())
+  {
+      const auto global_index = std::get<0>(signal_it->second);
+      theta[global_index] = 1.0; 
+  }
+  else
+  {
+      ::mooseError("The tunable parameter 'covar:signal_variance' could not be found.");
   }
 
-  vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
+  auto lengthscale_it = _tuning_data.find("covar:length_factor");
+  
+  if (lengthscale_it != _tuning_data.end()) 
+  {
+      const auto first_index = std::get<0>(lengthscale_it->second);
+      const auto num_entries = std::get<1>(lengthscale_it->second);
+      
+      if (num_entries == lengthscale.cols()) 
+      {
+          for (unsigned int ii = 0; ii < num_entries; ++ii) 
+          {
+              const auto global_index = first_index + ii;
+              theta[global_index] = lengthscale(0, ii); 
+          }
+      }
+      else
+      {
+          ::mooseError("The number of length factors (", num_entries, 
+                       ") stored in _tuning_data does not match the input lengthscale dimension (", 
+                       lengthscale.cols(), ") for 'covar:length_factor'.");
+      }
+  } 
+  else 
+  {
+      ::mooseError("The tunable parameter 'covar:length_factor' could not be found.");
+  }
+
+  vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
   _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
   _covariance_function->computeCovarianceMatrix(_K, x1, x1, true);
@@ -296,10 +333,10 @@ void
 GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
                                      const RealEigenMatrix & training_data)
 { 
-  std::vector<Real> theta1(_num_tunable, 0.0);
+  std::vector<Real> theta(_num_tunable, 0.0);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
-  mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
+  mapToVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
 
   RealEigenMatrix x = training_params;
   RealEigenMatrix y = training_data;
@@ -367,24 +404,59 @@ GaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
     index++;
   }
 
-
   Real sum_scale = 0;
-  std::vector<Real> sum_lengthscale(_num_tunable - 1, 0.0);  
-
+  std::vector<Real> sum_lengthscale(lengthscale_thinned.cols(), 0.0);
 
   for (unsigned int k = 0; k < final_nmcmc; k++) {
     sum_scale += scale_thinned(k, 0);
-    for (unsigned int i = 0; i < _num_tunable-1; i++) {
+    for (unsigned int i = 0; i < lengthscale_thinned.cols(); i++) {
       sum_lengthscale[i] += lengthscale_thinned(k, i);
     }
   }
-  theta1[0] = sum_scale / final_nmcmc;
-  for (unsigned int i = 0; i < _num_tunable-1; ++i) {
-    theta1[i + 1] = sum_lengthscale[i] / final_nmcmc;
+
+  auto scale_it = _tuning_data.find("covar:signal_variance"); 
+  if (scale_it != _tuning_data.end())
+  {
+      const auto global_index = std::get<0>(scale_it->second);
+      if (std::get<1>(scale_it->second) != 1)
+          ::mooseError("Signal variance 'covar:signal_variance' must be a scalar (size 1) for this operation.");
+      
+      theta[global_index] = sum_scale / final_nmcmc;
+  }
+  else
+  {
+      ::mooseError("The tunable parameter 'covar:signal_variance' could not be found.");
   }
 
-  vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta1);
+  auto lengthscale_it = _tuning_data.find("covar:length_factor");
+  if (lengthscale_it != _tuning_data.end())
+  {
+      const auto first_index = std::get<0>(lengthscale_it->second);
+      const auto num_entries = std::get<1>(lengthscale_it->second);
+
+      if (num_entries == lengthscale_thinned.cols()) 
+      {
+          for (unsigned int i = 0; i < num_entries; ++i)
+          {
+              const auto global_index = first_index + i;
+              theta[global_index] = sum_lengthscale[i] / final_nmcmc;
+          }
+      }
+      else
+      {
+          ::mooseError("The number of length factors (", num_entries, 
+                       ") stored in _tuning_data does not match the MCMC sample dimension (", 
+                       lengthscale_thinned.cols(), ") for 'covar:length_factor'.");
+      }
+  }
+  else
+  {
+      ::mooseError("The vector tunable parameter 'covar:length_factor' could not be found.");
+  }
+
+  vecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
   _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+
 }
 
 void

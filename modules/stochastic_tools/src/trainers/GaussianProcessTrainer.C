@@ -36,6 +36,11 @@ GaussianProcessTrainer::validParams()
   // Already preparing to use Adam here
   params.addParam<unsigned int>("num_iters", 1000, "Tolerance value for Adam optimization");
   params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
+  // MooseEnum tune_methods("Adam MCMC", "Adam");
+  // params.addParam<MooseEnum>(
+  //     "tune_method",
+  //     tune_methods,
+  //     "Select method for tuning hyperparameters (Adam or MCMC)");
   params.addParam<unsigned int>(
       "tune_method",
       0,
@@ -71,6 +76,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
         getParam<unsigned int>("tune_method"),
+        // getParam<MooseEnum>("tune_method"),
         getParam<unsigned int>("num_layers"),
         getParam<Real>("learning_rate"))),
     _sampler_row(getSamplerData())
