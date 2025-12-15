@@ -2,7 +2,7 @@
 
 !syntax description /Mesh/SmoothMeshGenerator
 
-The `SmoothMeshGenerator` exposes two mesh smoothing algorithms, which are described below.
+The `SmoothMeshGenerator` supports two mesh-smoothing algorithms, which are described below.
 
 ## Laplace Algorithm
 
@@ -16,11 +16,12 @@ The variational smoothing algorithm is a Newton-based variational optimizer that
 It supports 1D/2D/3D meshes, preserves exterior boundaries by constraining nodes, can optionally preserve subdomain (block) boundaries, and can *untangle some* tangled meshes before smoothing.
 Internally it builds a libMesh system that assembles the gradient (residual) and analytic Hessian (jacobian) of the energy and solves to a stationary point.
 
-#### Mathematical Formulation
+### Mathematical Formulation
 
 The Variational Mesh Smoother minimizes a *distortion–dilation energy functional*, $I_h(R)$, originally proposed by *Branets (2005)*:
 
-$I_h(R)=\sum_{c=1}^{N_{\text{elem}}} \int_{\hat{\Omega}_c} E_\theta(S_c(R))\, d\hat{\xi}\,,$
+!equation
+I_h(R)=\sum_{c=1}^{N_{\text{elem}}} \int_{\hat{\Omega}_c} E_\theta(S_c(R))\, d\hat{\xi}\,
 
 where:
 
@@ -36,7 +37,8 @@ Minimization is achieved using a damped Newton method with analytically derived 
 
 For each mesh element, the local energy density is
 
-$E_\theta(S) = \theta\,\mu(S) + (1 - \theta)\,\beta(S) \,,$
+!equation
+E_\theta(S) = \theta\,\mu(S) + (1 - \theta)\,\beta(S)
 
 where:
 
@@ -46,11 +48,13 @@ where:
 
 The *distortion metric* is
 
-$\beta(S)=\dfrac{\left(\tfrac{1}{n}\,\mathrm{tr}(S^{\mathsf T}S)\right)^{n/2}}{\chi_\varepsilon(\det S)}$,
+!equation
+\beta(S)=\dfrac{\left(\tfrac{1}{n}\,\mathrm{tr}(S^{\mathsf T}S)\right)^{n/2}}{\chi_\varepsilon(\det S)}
 
 and the *dilation metric* is
 
-$\mu(S)=\dfrac{1}{2\,\chi_\varepsilon(\det S)}\left(v + \dfrac{(\det S)^2}{v}\right)$.
+!equation
+\mu(S)=\dfrac{1}{2\,\chi_\varepsilon(\det S)}\left(v + \dfrac{(\det S)^2}{v}\right)
 
 Definitions:
 
@@ -64,9 +68,9 @@ Definitions:
 | $\varepsilon$ | small nonzero regularization constant |
 
 
-#### Notes & Limitations
+### Notes & Limitations
 
-##### Target Elements
+#### Target Elements
 
 The target element defines the "ideal" shape for a given element type.
 For some element types, the target element is the same as the reference element used by libMesh.
@@ -93,7 +97,8 @@ When a given mesh element has $\det S \neq v\,,$ the element is considered to be
 
 The reference volume is automatically calculated as the volumetric average of $\det S$ for each element, averaged over the number of elements in the mesh:
 
-$v = \dfrac{1}{N_\text{elem}} \sum_{c=1}^{N_\text{elem}} \dfrac{\int_{\hat{\Omega}_c} \det S_c d\hat{\xi}}{\int_{\hat{\Omega}_c} d\hat{\xi}} \,.$
+!equation
+v = \dfrac{1}{N_\text{elem}} \sum_{c=1}^{N_\text{elem}} \dfrac{\int_{\hat{\Omega}_c} \det S_c d\hat{\xi}}{\int_{\hat{\Omega}_c} d\hat{\xi}}
 
 ##### Element Order
 
@@ -114,14 +119,16 @@ Once the mesh has been untangled, $\varepsilon$ is set to zero to prevent re-tan
 
 It can be shown that, for the smoothing solve, when $\varepsilon = 0$ and $\chi_\varepsilon(\det S) = \det S$, the distortion metric $\beta(S)$ is minimized by any constant-scaled special orthogonal matrix such that
 
-$S^TS = cI \,,\qquad \det S = c^n \,,\qquad \forall c > 0 \,.$
+!equation
+S^TS = cI \,,\qquad \det S = c^n \,,\qquad \forall c > 0
 
 The implication of this is that the distortion metric is minimized by a mesh element that is a scaled rotation of the target element.
 This makes sense because the target element is our definition of the "ideal" smooth element shape.
 
 For untangled meshes, the dilation metric simplifies to
 
-$\mu(S)=\dfrac{1}{2}\left(\dfrac{v}{\det S} + \dfrac{\det S}{v}\right) \,.$
+!equation
+\mu(S)=\dfrac{1}{2}\left(\dfrac{v}{\det S} + \dfrac{\det S}{v}\right)
 
 It can be shown that the dilation metric is minimized by any $S$ such that $\det S = v$.
 
@@ -159,7 +166,7 @@ As an example, here is an original mesh going through 12 iterations of this smoo
 ### Example 2 — Variational smoothing (fixed boundary nodes)
 
 Here is an example of the variational smoother applied to a mesh with 3 subdomains and nonlinear boundaries.
-Note that the locations of the (subdomain)boundary nodes do not change.
+Note that the locations of the (subdomain) boundary nodes do not change.
 
 !listing test/tests/meshgenerators/smooth_mesh_generator/variational_mesh_smoother_generator.i block=Mesh
 
@@ -171,7 +178,7 @@ Note that the locations of the (subdomain)boundary nodes do not change.
 ### Example 3 — Variational smoothing (sliding boundary nodes)
 
 Here is an example of the variational smoother applied to a mesh with 2 subdomains and linear boundaries.
-Note that while the locations of the (subdomain)boundary nodes change, these boundaries are still preserved.
+Note that while the locations of the (subdomain) boundary nodes change, these boundaries are still preserved.
 
 !listing test/tests/meshgenerators/smooth_mesh_generator/variational_mesh_smoother_generator_sliding_nodes.i block=Mesh
 

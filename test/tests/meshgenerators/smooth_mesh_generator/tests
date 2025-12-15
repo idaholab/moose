@@ -1,7 +1,7 @@
 [Tests]
   design = 'meshgenerators/SmoothMeshGenerator.md'
   [algorithms]
-    requirement = 'The system shall be able to use libmesh mesh modification tools:'
+    requirement = 'The system shall be able to smooth a mesh using a:'
     issue = '#11640 #28424 #22141'
     [laplace_smooth_mesh_generator]
       type = 'Exodiff'
@@ -10,7 +10,7 @@
       exodiff = 'laplace_mesh_smoother_generator_in.e'
       mesh_mode = 'REPLICATED'
       recover = false
-      detail = 'lapalce smoothing algorithm'
+      detail = 'Laplace smoothing algorithm'
     []
 
     [variational_smooth_mesh_generator]
@@ -24,7 +24,7 @@
   []
 
   [warnings]
-    requirement = 'The SmoothMeshGenerator shall warn the user when:'
+    requirement = 'The system shall emit an error if'
     issues = '#28424'
     [unused_variational_params]
        type = RunException
