@@ -82,16 +82,10 @@ Adaptivity::init(const unsigned int steps,
   if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
     _mesh.doingPRefinement(true);
 
+  _sibling_coupling = std::make_unique<SiblingCoupling>();
   if (_adaptivity_type == AdaptivityType::HP)
-  {
-    _sibling_coupling = std::make_unique<SiblingCoupling>();
-    _fe_problem.addAlgebraicGhostingFunctor(*_sibling_coupling);
-    if (_displaced_problem)
-    {
-      _displaced_sibling_coupling = _sibling_coupling->clone();
-      _displaced_problem->addAlgebraicGhostingFunctor(*_displaced_sibling_coupling);
-    }
-  }
+    _fe_problem.getNonlinearSystemBase(0).system().get_dof_map().add_algebraic_ghosting_functor(
+        *_sibling_coupling);
 
   _mesh_refinement->set_periodic_boundaries_ptr(
       _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
