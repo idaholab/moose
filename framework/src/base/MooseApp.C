@@ -77,6 +77,11 @@
 #include <torch/version.h>
 #endif
 
+#if __has_include(<torch/xpu.h>)
+#include <torch/xpu.h>
+#define MOOSE_HAVE_XPU 1
+#endif
+
 // C++ includes
 #include <numeric> // std::accumulate
 #include <fstream>
@@ -370,7 +375,7 @@ MooseApp::validParams()
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
 
-  const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
+  const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip xpu", "cpu");
   params.addCommandLineParam<MooseEnum>(
       "compute_device",
       "--compute-device",
@@ -915,6 +920,18 @@ MooseApp::registerCapabilities()
 #else
     missingCapability(
         "kokkos", doc, "Rebuild PETSc with Kokkos support, then rebuild libMesh and MOOSE.");
+#endif
+  }
+
+  {
+    const auto doc = "Intel OneAPI XPU accelerator support";
+#ifdef MOOSE_HAVE_XPU
+    if (torch::xpu::is_available())
+      haveCapability("xpu", doc);
+    else
+      missingCapability("xpu", doc, "No usable XPU devices have been found.");
+#else
+    missingCapability("xpu", doc, "The torch version used to build this app has no XPU support.");
 #endif
   }
 
@@ -3623,7 +3640,16 @@ MooseApp::determineLibtorchDeviceType(const MooseEnum & device_enum) const
     mooseError(pname, "=mps: MPS is not supported on your platform");
 #endif
   }
-
+  else if (device_enum == "xpu")
+  {
+#ifdef MOOSE_HAVE_XPU
+    if (!torch::xpu::is_available())
+      mooseError(pname, "=xpu: XPU support is not available in the linked libtorch library");
+    return torch::kXPU;
+#else
+    mooseError(pname, "=xpu: XPU is not supported in the current application");
+#endif
+  }
   else if (device_enum != "cpu")
     mooseError("The device '",
                device_enum,
