@@ -109,27 +109,24 @@ SmoothMeshGenerator::SmoothMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 SmoothMeshGenerator::generate()
 {
-  std::unique_ptr<MeshBase> mesh = nullptr;
+  std::unique_ptr<MeshBase> input = std::move(_input);
+  std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(input);
   std::unique_ptr<libMesh::MeshSmoother> smoother = nullptr;
 
   if (_algorithm == "laplace")
   {
-    std::unique_ptr<MeshBase> old_mesh = std::move(_input);
-    if (!old_mesh->is_replicated())
+    if (!mesh->is_replicated())
       mooseError(
           "SmoothMeshGenerator with algorithm='laplace' is not implemented for distributed meshes");
 
-    mesh = dynamic_pointer_cast<ReplicatedMesh>(old_mesh);
-
     smoother = std::make_unique<libMesh::LaplaceMeshSmoother>(
-        static_cast<UnstructuredMesh &>(*mesh), _iterations);
+        *mesh, _iterations);
   }
 
   else if (_algorithm == "variational")
   {
-    mesh = std::move(_input);
     smoother =
-        std::make_unique<libMesh::VariationalMeshSmoother>(static_cast<UnstructuredMesh &>(*mesh),
+        std::make_unique<libMesh::VariationalMeshSmoother>(*mesh,
                                                            _dilation_weight,
                                                            _preserve_subdomain_boundaries,
                                                            _relative_residual_tolerance,
