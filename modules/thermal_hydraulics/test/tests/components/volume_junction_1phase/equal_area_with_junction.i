@@ -114,6 +114,15 @@
   []
 []
 
+[Convergence]
+  [default_nl_conv]
+    type = DefaultNonlinearConvergence
+    nl_rel_tol = 0
+    nl_abs_tol = 1e-6
+    nl_max_its = 10
+  []
+[]
+
 [Executioner]
   type = Transient
 
@@ -125,9 +134,7 @@
 
   solve_type = 'PJFNK'
   line_search = 'basic'
-  nl_rel_tol = 0
-  nl_abs_tol = 1e-6
-  nl_max_its = 10
+  nonlinear_convergence = default_nl_conv
 
   l_tol = 1e-3
   l_max_its = 10
