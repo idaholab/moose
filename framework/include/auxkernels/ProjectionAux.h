@@ -27,6 +27,12 @@ public:
   ProjectionAux(const InputParameters & parameters);
 
 protected:
+  enum ElemToNodeProjectionWeighting
+  {
+    VOLUME = 0,
+    IDENTITY
+  };
+
   virtual Real computeValue() override;
 
   /// The variable to project from
@@ -41,6 +47,9 @@ protected:
 
   /// Whether to use the auxkernel block restriction to limit the values for the source variables
   bool _use_block_restriction_for_source;
+
+  /// How to weight element to node projections
+  const ElemToNodeProjectionWeighting _elem_to_node_projection_weighting;
 
 private:
   /// For a node, finds an element we can use to evaluate the (continuous) source variable
