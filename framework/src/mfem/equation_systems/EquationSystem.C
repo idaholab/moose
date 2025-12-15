@@ -26,6 +26,13 @@ EquationSystem::DeleteAllBlocks()
   _h_blocks.DeleteAll();
 }
 
+void EquationSystem::ClearAllBlocks()
+{
+  for (const auto i : index_range(_test_var_names))
+    for (const auto j : index_range(_trial_var_names))
+      _h_blocks(i, j) = nullptr;
+}
+
 bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
@@ -272,6 +279,8 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   // Allocate block operator
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
+  ClearAllBlocks();
+  
   // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
   {
