@@ -431,7 +431,9 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
 {
   auto level = [this](const auto & elem_arg)
   {
-    if (_mesh.doingPRefinement())
+    // The latter check is because if we have any amount of h-refinement we must defer to level() in
+    // order to avoid querying invalid DofObjects
+    if (_mesh.doingPRefinement() && !_mesh.doingHPRefinement())
       return elem_arg.p_level();
     else
       return elem_arg.level();
@@ -445,8 +447,13 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
   // to only compute when we are visiting the element that has the lower element id when element and
   // neighbor are of the same adaptivity level, and then if they are not of the same level, then
   // we only compute when we are visiting the finer element
-  return (neighbor.active() && (neighbor_level == elem_level) && (elem_id < neighbor_id)) ||
-         (neighbor_level < elem_level);
+  const bool use_this_pair =
+      (neighbor.active() && (neighbor_level == elem_level) && (elem_id < neighbor_id)) ||
+      (neighbor_level < elem_level);
+  if (use_this_pair)
+    mooseAssert(elem.active() && neighbor.active(),
+                "Both these elements must be active or else we are going to get invalid dof ids");
+  return use_this_pair;
 }
 
 template <typename RangeType>
