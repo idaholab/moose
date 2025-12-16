@@ -39,7 +39,7 @@
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with vector Robin boundary conditions applied.'
     abs_zero = 1e-6
     capabilities = 'mfem'
-    compute_devices = 'cpu' # csvdiff with cuda
+    compute_devices = 'cpu cuda'
     recover = false
   []
 []
