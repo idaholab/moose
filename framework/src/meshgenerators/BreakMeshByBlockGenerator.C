@@ -177,7 +177,7 @@ BreakMeshByBlockGenerator::generate()
     // check if current_node need to be duplicated
     if (node_multiplicity > 1)
     {
-      // retrieve connected elements from the map
+      // retrieve connected elements for a particular node from the map
       const std::vector<dof_id_type> & connected_elems = map_entry.second;
 
       // find reference_subdomain_id (e.g. the subdomain with lower id or the
@@ -348,12 +348,12 @@ BreakMeshByBlockGenerator::generate()
                       bool need_to_switch)
               {
                 _neighboring_block_list.insert(blocks_pair);
-                _new_boundary_sides_map[blocks_pair].insert(
+                _subid_pairs_to_sides[blocks_pair].insert(
                     std::make_pair(!need_to_switch ? current_elem : connected_elem, side));
                 if (_add_interface_on_two_sides)
                 {
                   _neighboring_block_list.insert(blocks_pair2);
-                  _new_boundary_sides_map[blocks_pair2].insert(std::make_pair(
+                  _subid_pairs_to_sides[blocks_pair2].insert(std::make_pair(
                       !need_to_switch ? connected_elem : current_elem, connected_elem_side));
                 }
               };
@@ -493,8 +493,8 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
     _subid_pairs_to_boundary_id[boundary_side] = boundary_id;
 
     // loop over all the side belonging to each pair and add it to the proper interface
-    auto boundary_side_map = _new_boundary_sides_map.find(boundary_side);
-    if (boundary_side_map != _new_boundary_sides_map.end())
+    auto boundary_side_map = _subid_pairs_to_sides.find(boundary_side);
+    if (boundary_side_map != _subid_pairs_to_sides.end())
       for (auto & element_side : boundary_side_map->second)
         boundary_info.add_side(
             element_side.first /*elem*/, element_side.second /*side*/, boundary_id);
@@ -516,11 +516,11 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
       // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
       mesh.add_disjoint_neighbor_boundary_pairs(
           boundary_id, _subid_pairs_to_boundary_id[rev_pair], RealVectorValue(0.0, 0.0, 0.0));
-      _mesh->setHasIncompleteInterfacePairs(false);
+      _mesh->setHasIncompleteDisjointInterfaceSidesetPairs(false);
     }
     else
     {
-      _mesh->setHasIncompleteInterfacePairs(true);
+      _mesh->setHasIncompleteDisjointInterfaceSidesetPairs(true);
       mooseInfo("Single interface boundary '",
                 boundary_id,
                 "' found (no reverse pair). Compatible only with non-CZM setups.");

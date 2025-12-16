@@ -1430,14 +1430,14 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
-  /// Set incomplete interface pairs flag
-  void setHasIncompleteInterfacePairs(bool has_incomplete)
-  {
-    _has_incomplete_interface_pairs = has_incomplete;
-  };
+  /// Set whether the mesh contains incomplete disjoint interface sideset pairs.
+  void setHasIncompleteDisjointInterfaceSidesetPairs(bool has_incomplete);
 
-  /// Get incomplete interface pairs flag
-  bool hasIncompleteInterfacePairs() const { return _has_incomplete_interface_pairs; };
+  /// Return whether the mesh contains incomplete disjoint interface sideset pairs.
+  bool hasIncompleteDisjointInterfaceSidesetPairs() const
+  {
+    return _has_incomplete_disjoint_interface_sideset_pairs;
+  }
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1851,13 +1851,13 @@ private:
   /// faces
   bool _has_lower_d;
 
-  /// Indicates whether any disconnected boundary pairs are incomplete,
+  /// Indicates whether any disjoint block pairs are incomplete,
   /// i.e., only one side of an expected (blockA, blockB) / (blockB, blockA) pair exists.
   /// This flag is primarily used to ensure compatibility with Cohesive Zone Models (CZM),
-  /// which require distinct boundary pairs on both sides of an interface. When true,
+  /// which require distinct interface pairs on both sides of an interface. When true,
   /// CZM-related actions or kernels should raise an error because the interface definition
   /// is insufficient for cohesive zone modeling.
-  bool _has_incomplete_interface_pairs;
+  bool _has_incomplete_disjoint_block_sidesets;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
@@ -1939,6 +1939,17 @@ private:
   unsigned int _max_p_level;
   /// Maximum h-refinement level of all elements
   unsigned int _max_h_level;
+
+  /// Indicates whether any disjoint interface sideset pairs are incomplete.
+  ///
+  /// Each physical interface is represented by a pair of disjoint boundary
+  /// sidesets corresponding to the "+" and "-" sides. These paired interface
+  /// sidesets are used to establish pseudo-neighbor relationships between
+  /// element faces across the interface (e.g., for cohesive zone modeling).
+  ///
+  /// If only one sideset of an expected "+" / "-" pair is provided, the interface
+  /// sideset pair is considered incomplete.
+  bool _has_incomplete_disjoint_interface_sideset_pairs;
 
   template <typename T>
   struct MeshType;
@@ -2257,4 +2268,10 @@ inline bool
 MooseMesh::isLowerD(const SubdomainID subdomain_id) const
 {
   return libmesh_map_find(_sub_to_data, subdomain_id).is_lower_d;
+}
+
+inline void
+MooseMesh::setHasIncompleteDisjointInterfaceSidesetPairs(bool has_incomplete)
+{
+  _has_incomplete_disjoint_interface_sideset_pairs = has_incomplete;
 }
