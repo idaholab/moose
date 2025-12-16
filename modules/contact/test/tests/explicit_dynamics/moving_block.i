@@ -77,8 +77,7 @@
     displacement = disp_z
     execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END'
   []
-[]      
-
+[]
 
 [Variables]
   [disp_x]
