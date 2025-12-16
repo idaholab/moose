@@ -8,7 +8,7 @@
     ny = 5
     xmax = 2
     ymax = 2
-    elem_type = QUAD8
+    elem_type = QUAD9
   []
 []
 
@@ -81,12 +81,40 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
-  [Adaptivity]
-    adaptivity_type = hp
-    steps = 3
-    refine_fraction = 0.7
-    coarsen_fraction = 0.05
-    max_h_level = 3
+[]
+
+[Adaptivity]
+  adaptivity_type = HP
+  marker = 'combo'
+  steps = 3
+  max_h_level = 3
+  [Markers]
+    [combo]
+      type = ComboMarker
+      markers = 'jump_u jump_v'
+    []
+    [jump_u]
+      type = ErrorFractionMarker
+      coarsen = 0.05
+      refine = 0.7
+      indicator = GJI_u
+    []
+    [jump_v]
+      type = ErrorFractionMarker
+      coarsen = 0.05
+      refine = 0.7
+      indicator = GJI_v
+    []
+  []
+  [Indicators]
+    [GJI_u]
+      type = GradientJumpIndicator
+      variable = u
+    []
+    [GJI_v]
+      type = GradientJumpIndicator
+      variable = v
+    []
   []
 []
 
@@ -94,7 +122,6 @@
   [p_level]
     family = MONOMIAL
     order = CONSTANT
-    disable_p_refinement = true
   []
 []
 
