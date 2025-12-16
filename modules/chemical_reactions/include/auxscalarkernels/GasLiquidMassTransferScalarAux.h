@@ -6,7 +6,7 @@
 // Forward Declarations
 class SinglePhaseFluidProperties;
 
-class GasLiquidMassTransferScalarAux: public AuxScalarKernel
+class GasLiquidMassTransferScalarAux : public AuxScalarKernel
 {
 public:
   static InputParameters validParams();
@@ -32,7 +32,7 @@ protected:
   const SinglePhaseFluidProperties & _fp;
 
   /// Enum used to select the type
-  const enum class Equationlist {STOKESEINSTEIN, WILKECHANG} _equation_list;
+  const enum class Equationlist { STOKESEINSTEIN, WILKECHANG } _equation_list;
 
   /// Particle radius [m]
   const Real _radius;
@@ -48,5 +48,4 @@ protected:
 
   /// Dittus-Boelter leading coefficient
   const Real _db;
-
 };

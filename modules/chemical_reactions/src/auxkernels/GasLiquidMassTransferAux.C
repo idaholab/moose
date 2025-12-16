@@ -13,9 +13,11 @@ GasLiquidMassTransferAux::validParams()
   params.addRequiredCoupledVar("T", "Temperature [K]");
   params.addRequiredCoupledVar("fluid_velocity", "Velocity vector [m/s]");
   params.addRequiredParam<Real>("d", "Pipe diameter [m]");
-  params.addRequiredParam<UserObjectName>("fp", "The name of the user object for liquid side fluid properties");
+  params.addRequiredParam<UserObjectName>(
+      "fp", "The name of the user object for liquid side fluid properties");
   MooseEnum equation_list("StokesEinstein WilkeChang");
-  params.addRequiredParam<MooseEnum>("equation", equation_list, "The equation to use for mass transfer calculation");
+  params.addRequiredParam<MooseEnum>(
+      "equation", equation_list, "The equation to use for mass transfer calculation");
   // Required for Stokes-Einstein
   params.addParam<Real>("radius", "Particle radius [m]");
   // Required for Wilke-Chang
@@ -45,53 +47,53 @@ GasLiquidMassTransferAux::GasLiquidMassTransferAux(const InputParameters & param
 {
   switch (_equation_list)
   {
-     case Equationlist::WILKECHANG:
+    case Equationlist::WILKECHANG:
     {
-       if (!isParamSetByUser("molar_weight"))
-          mooseError("Must set the molecular weight of the gas when using WilkeChang");
-       break;
+      if (!isParamSetByUser("molar_weight"))
+        mooseError("Must set the molecular weight of the gas when using WilkeChang");
+      break;
     }
-     case Equationlist::STOKESEINSTEIN:
+    case Equationlist::STOKESEINSTEIN:
     {
-       if (!isParamSetByUser("radius"))
-          mooseError("Must set particle radius when using StokesEinstein");
-       break;
+      if (!isParamSetByUser("radius"))
+        mooseError("Must set particle radius when using StokesEinstein");
+      break;
     }
   }
-
 }
 
 Real
 GasLiquidMassTransferAux::computeValue()
 {
-  Real mu =  _fp.mu_from_p_T(_pressure[_qp], _temperature[_qp]);
+  Real mu = _fp.mu_from_p_T(_pressure[_qp], _temperature[_qp]);
   Real rho = _fp.rho_from_p_T(_pressure[_qp], _temperature[_qp]);
   Real Diffusivity = 0.0;
   switch (_equation_list)
   {
     case Equationlist::STOKESEINSTEIN:
-      Diffusivity = _kB * _temperature[_qp] /  (6.0 * libMesh::pi * mu * _radius);
+      Diffusivity = _kB * _temperature[_qp] / (6.0 * libMesh::pi * mu * _radius);
       break;
 
     case Equationlist::WILKECHANG:
       // Equation 5 of:
-      // C.R. Wilke, P. Chang, Correlation of diffusion coefficients in dilute solutions, AICHE J., 1955, 1(2) 264-270
-      // Units of Wilke Chang are g-cm-s
+      // C.R. Wilke, P. Chang, Correlation of diffusion coefficients in dilute solutions, AICHE J.,
+      // 1955, 1(2) 264-270 Units of Wilke Chang are g-cm-s
       Real kg_to_g = 1000.0;
       Real m_to_cm = 100.0;
-      Real cm_to_m = 1/m_to_cm;
-      Real mu_cgs =  mu * kg_to_g / m_to_cm; // g/cm/s = Poise
+      Real cm_to_m = 1 / m_to_cm;
+      Real mu_cgs = mu * kg_to_g / m_to_cm; // g/cm/s = Poise
       Real poise_to_centipoise = 100;
-      mu_cgs = mu_cgs * poise_to_centipoise; // cP
+      mu_cgs = mu_cgs * poise_to_centipoise;           // cP
       Real molar_volume = _mw / rho * pow(m_to_cm, 3); // cm3/mol
-      Real molar_weight = _mw * kg_to_g; // g/mol
-      Diffusivity = _wc * _temperature[_qp] * std::sqrt( _phi * molar_weight ) /  ( mu_cgs * std::pow(molar_volume, 0.6));
+      Real molar_weight = _mw * kg_to_g;               // g/mol
+      Diffusivity = _wc * _temperature[_qp] * std::sqrt(_phi * molar_weight) /
+                    (mu_cgs * std::pow(molar_volume, 0.6));
       Diffusivity = Diffusivity * pow(cm_to_m, 2);
       break;
   }
 
-  Real re = rho *  abs(_fluid_velocity[_qp])  * _diameter / mu;
-  Real sc = mu / ( rho * Diffusivity );
-  Real mtc  = _db * std::pow(re, 0.8) * std::pow(sc, 0.4) * Diffusivity / _diameter;
+  Real re = rho * abs(_fluid_velocity[_qp]) * _diameter / mu;
+  Real sc = mu / (rho * Diffusivity);
+  Real mtc = _db * std::pow(re, 0.8) * std::pow(sc, 0.4) * Diffusivity / _diameter;
   return mtc;
 }

@@ -18,9 +18,12 @@ HenryGasConstantScalarAux::validParams()
   params.addParam<MooseEnum>("salt", salt_list, "Salt");
   params.addParam<Real>("alpha", "alpha fit parameter in Henry model, if defining custom fluid");
   params.addParam<Real>("beta", "beta fit parameter in Henry model, if defining custom fluid");
-  params.addParam<Real>("gamma_0", "gamma_0 fit parameter in Henry model, if defining custom fluidl");
-  params.addParam<Real>("dgamma_dT", "gamma derivative fit parameter in Henry model, if defining custom fluid");
-  params.addParam<Real>("KH0", "Reference Henry parameter in Henry model, if defining custom fluid [mol/m^3/Pa]");
+  params.addParam<Real>("gamma_0",
+                        "gamma_0 fit parameter in Henry model, if defining custom fluidl");
+  params.addParam<Real>("dgamma_dT",
+                        "gamma derivative fit parameter in Henry model, if defining custom fluid");
+  params.addParam<Real>(
+      "KH0", "Reference Henry parameter in Henry model, if defining custom fluid [mol/m^3/Pa]");
   params.addClassDescription("Calculates Henry gas constant of a noble gas [mol/m^3/Pa]");
   return params;
 }
@@ -39,37 +42,35 @@ HenryGasConstantScalarAux::HenryGasConstantScalarAux(const InputParameters & par
   switch (_salt_list)
   {
     case Saltlist::FLIBE:
-      _alpha     = HenryGasConstantAux::_alpha_FLiBe;
-      _beta      = HenryGasConstantAux::_beta_FLiBe;
-      _KH0       = HenryGasConstantAux::_KH0_FLiBe;
-      _gamma_0   = HenryGasConstantAux::_gamma_0_FLiBe;
+      _alpha = HenryGasConstantAux::_alpha_FLiBe;
+      _beta = HenryGasConstantAux::_beta_FLiBe;
+      _KH0 = HenryGasConstantAux::_KH0_FLiBe;
+      _gamma_0 = HenryGasConstantAux::_gamma_0_FLiBe;
       _dgamma_dT = HenryGasConstantAux::_dgamma_dT_FLiBe;
       break;
 
     case Saltlist::FLINAK:
-      _alpha     = HenryGasConstantAux::_alpha_FLiNaK;
-      _beta      = HenryGasConstantAux::_beta_FLiNaK;
-      _KH0       = HenryGasConstantAux::_KH0_FLiNaK;
-      _gamma_0   = HenryGasConstantAux::_gamma_0_FLiNaK;
+      _alpha = HenryGasConstantAux::_alpha_FLiNaK;
+      _beta = HenryGasConstantAux::_beta_FLiNaK;
+      _KH0 = HenryGasConstantAux::_KH0_FLiNaK;
+      _gamma_0 = HenryGasConstantAux::_gamma_0_FLiNaK;
       _dgamma_dT = HenryGasConstantAux::_dgamma_dT_FLiNaK;
       break;
 
     case Saltlist::CUSTOM:
       // Ensure that all parameters were set by user
       if (!isParamSetByUser("alpha"))
-         mooseError("Must include alpha parameter when using custom salt Henry gas model");
+        mooseError("Must include alpha parameter when using custom salt Henry gas model");
       if (!isParamSetByUser("beta"))
-         mooseError("Must include beta parameter when using custom salt Henry gas model");
+        mooseError("Must include beta parameter when using custom salt Henry gas model");
       if (!isParamSetByUser("gamma_0"))
-         mooseError("Must include gamma_0 parameter when using custom salt Henry gas model");
+        mooseError("Must include gamma_0 parameter when using custom salt Henry gas model");
       if (!isParamSetByUser("dgamma_dT"))
-         mooseError("Must include dgamma_dT parameter when using custom salt Henry gas model");
+        mooseError("Must include dgamma_dT parameter when using custom salt Henry gas model");
       if (!isParamSetByUser("KH0"))
-         mooseError("Must include KH0 parameter when using custom salt Henry gas model");
+        mooseError("Must include KH0 parameter when using custom salt Henry gas model");
       break;
-
-   }
-
+  }
 }
 
 Real
@@ -78,8 +79,10 @@ HenryGasConstantScalarAux::computeValue()
   const Real m_to_ang = 1e10;
 
   // Equations result in units of mol/cm^3/atm, so convert to mol/m^3/atm
-  Real value = _alpha * 4.0*libMesh::pi*std::pow(_radius*m_to_ang, 2)*(_gamma_0+_dgamma_dT*(_temperature[0]-273.15)) +
-          _beta * 4.0/3.0*libMesh::pi*std::pow(_radius*m_to_ang, 3)*HenryGasConstantAux::_Rgas*_temperature[0];
-  value = exp(value/(HenryGasConstantAux::_Rgas * _temperature[0])) * _KH0;
+  Real value = _alpha * 4.0 * libMesh::pi * std::pow(_radius * m_to_ang, 2) *
+                   (_gamma_0 + _dgamma_dT * (_temperature[0] - 273.15)) +
+               _beta * 4.0 / 3.0 * libMesh::pi * std::pow(_radius * m_to_ang, 3) *
+                   HenryGasConstantAux::_Rgas * _temperature[0];
+  value = exp(value / (HenryGasConstantAux::_Rgas * _temperature[0])) * _KH0;
   return value;
 }
