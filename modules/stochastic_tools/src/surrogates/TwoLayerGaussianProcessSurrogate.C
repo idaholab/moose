@@ -124,7 +124,7 @@ TwoLayerGaussianProcessSurrogate::evaluate(const std::vector<Real> & x,
   RealEigenMatrix covariance = (mu_t_centered * mu_t_centered.transpose()) / (_tgp.getNmcmc() - 1);
   RealEigenMatrix Sigma = (sigma_sum / _tgp.getNmcmc()) + covariance;
   // RealEigenMatrix Sigma = (sigma_sum / _tgp.getNmcmc()) ;
-  std::cout << "sigma is: " << (sigma_sum / _tgp.getNmcmc()) <<  "," << covariance << "," << std::endl;
+  // std::cout << "sigma is: " << (sigma_sum / _tgp.getNmcmc()) <<  "," << covariance << "," << std::endl;
   RealEigenMatrix pred_value = mean.row(0).col(0);
   _tgp.getDataStandardizer().getDestandardized(pred_value);
   RealEigenMatrix pred_var = Sigma;
