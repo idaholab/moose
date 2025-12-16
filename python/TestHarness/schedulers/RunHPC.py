@@ -409,6 +409,11 @@ class RunHPC(RunParallel):
             if tester.isParamValid('hpc_mem_per_cpu'):
                 submission_env['MEM_PER_CPU'] = tester.getParam('hpc_mem_per_cpu')
 
+            # Get any additional environment variables that need to be set
+            run_env = tester.augmentEnvironment(options)
+            if run_env:
+                submission_env['VARS'].update(run_env)
+
             # Get the unescaped command
             command = tester.getCommand(options)
 
@@ -521,6 +526,7 @@ class RunHPC(RunParallel):
             # Set what we've ran for this job so that we can
             # potentially get the context in an error
             tester.setCommandRan(full_cmd)
+            tester.setEnvironmentRan(run_env)
 
             # Nonzero return code
             if exit_code != 0:
