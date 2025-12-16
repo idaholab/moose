@@ -72,13 +72,59 @@
     input = secondary
   []
 
-  patch_update_strategy = auto
-  patch_size = 20
   allow_renumbering = false
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+[]
+
+[AuxVariables]
+  [penalty_normal_pressure]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [mode_mixity_ratio]
+  []
+  [damage]
+  []
+  [local_normal_jump]
+  []
+  [local_tangential_jump]
+  []
+[]
+
+[AuxKernels]
+  [penalty_normal_pressure_auxk]
+    type = MortarUserObjectAux
+    variable = penalty_normal_pressure
+    user_object = czm_uo
+    contact_quantity = normal_pressure
+  []
+  [mode_mixity_ratio]
+    type = CohesiveZoneMortarUserObjectAux
+    variable = mode_mixity_ratio
+    user_object = czm_uo
+    cohesive_zone_quantity = mode_mixity_ratio
+  []
+  [cohesive_damage]
+    type = CohesiveZoneMortarUserObjectAux
+    variable = damage
+    user_object = czm_uo
+    cohesive_zone_quantity = cohesive_damage
+  []
+  [local_normal_jump]
+    type = CohesiveZoneMortarUserObjectAux
+    variable = local_normal_jump
+    user_object = czm_uo
+    cohesive_zone_quantity = local_normal_jump
+  []
+  [local_tangential_jump]
+    type = CohesiveZoneMortarUserObjectAux
+    variable = local_tangential_jump
+    user_object = czm_uo
+    cohesive_zone_quantity = local_tangential_jump
+  []
 []
 
 [Physics]
@@ -89,7 +135,7 @@
         strain = FINITE
         add_variables = true
         use_automatic_differentiation = true
-        decomposition_method = TaylorExpansion
+        decomposition_method = EigenSolution
         generate_output = 'vonmises_stress'
         block = '1 2'
       []
@@ -100,26 +146,26 @@
 [BCs]
   [fix_x]
     type = DirichletBC
-    preset = true
+    preset = false
     value = 0.0
     boundary = bottom_node
     variable = disp_x
   []
 
   [fix_top]
-    type = DirichletBC
-    preset = true
+    type = FunctionDirichletBC
+    preset = false
     boundary = 100
     variable = disp_x
-    value = 0
+    function = 0.2*t
   []
 
   [top]
     type = FunctionDirichletBC
     boundary = 100
     variable = disp_y
-    function = 'if(t<=0.3,t,if(t<=0.6,0.3-(t-0.3),0.6-t))'
-    preset = true
+    function = -0.01
+    preset = false
   []
 
   [bottom]
@@ -127,7 +173,7 @@
     boundary = bottom_base
     variable = disp_y
     value = 0
-    preset = true
+    preset = false
   []
 []
 
@@ -140,7 +186,7 @@
   [shear_strength]
     type = GenericConstantMaterial
     prop_names = 'shear_strength'
-    prop_values = '7.5e2'
+    prop_values = '100'
   []
   [stress]
     type = ADComputeFiniteStrainElasticStress
@@ -148,9 +194,15 @@
   []
   [elasticity_tensor]
     type = ADComputeElasticityTensor
-    fill_method = symmetric9
-    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
-    block = '1 2'
+    fill_method = symmetric_isotropic_E_nu
+    C_ijkl = '1e6 0.3'
+    block = '1'
+  []
+  [elasticity_tensor2]
+    type = ADComputeElasticityTensor
+    fill_method = symmetric_isotropic_E_nu
+    C_ijkl = '1e5 0.3'
+    block = '2'
   []
 []
 
@@ -165,8 +217,6 @@
   type = Transient
 
   solve_type = 'PJFNK'
-  line_search = none
-
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 
@@ -176,13 +226,12 @@
 
   l_max_its = 2
   l_tol = 1e-14
-  nl_max_its = 150
-  nl_rel_tol = 1e-14
-  nl_abs_tol = 1e-12
+  nl_max_its = 20
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-9
   start_time = 0.0
   dt = 0.1
-  end_time = 1.0
-  dtmin = 0.1
+  end_time = 1.6
 []
 
 [Outputs]
@@ -197,22 +246,23 @@
     primary_subdomain = 10000
     secondary_subdomain = 10001
 
-    correct_edge_dropping = true
-
     disp_x = disp_x
     disp_y = disp_y
-    friction_coefficient = 0.0 # with 2.0 works
     secondary_variable = disp_x
-    penalty = 0e6
-    penalty_friction = 0e4
     use_physical_gap = true
+
     set_compressive_traction_to_zero = true
+    correct_edge_dropping = true
+
+    penalty_friction = 5e6
+    penalty = 1e5
+    friction_coefficient = 0.1
 
     # bilinear model parameters
     normal_strength = 'normal_strength'
     shear_strength = 'shear_strength'
-    penalty_stiffness = 200
-    power_law_parameter = 0.1
+    penalty_stiffness = 1e6
+    power_law_parameter = 2
     GI_c = 123
     GII_c = 54
     displacements = 'disp_x disp_y'
@@ -244,6 +294,32 @@
     compute_lm_residuals = false
     weighted_gap_uo = czm_uo
   []
+
+  [t_x]
+    type = TangentialMortarMechanicalContact
+    primary_boundary = 101
+    secondary_boundary = 'top_base'
+    primary_subdomain = 10000
+    secondary_subdomain = 10001
+    secondary_variable = disp_x
+    component = x
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    weighted_velocities_uo = czm_uo
+  []
+  [t_y]
+    type = TangentialMortarMechanicalContact
+    primary_boundary = 101
+    secondary_boundary = 'top_base'
+    primary_subdomain = 10000
+    secondary_subdomain = 10001
+    secondary_variable = disp_y
+    component = y
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    weighted_velocities_uo = czm_uo
+  []
+
   [c_x]
     type = MortarGenericTraction
     primary_boundary = 101

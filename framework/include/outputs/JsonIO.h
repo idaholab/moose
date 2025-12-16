@@ -10,12 +10,12 @@
 #pragma once
 
 #include "MooseError.h"
+#include "TwoVector.h"
 
 #include "nlohmann/json.h"
-
 #include "libmesh/libmesh_common.h"
-
 #include "Eigen/Core"
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 
 #include <memory>
 
@@ -76,6 +76,34 @@ struct adl_serializer<std::unique_ptr<T>>
 };
 }
 
+namespace MetaPhysicL
+{
+template <template <typename, size_t> class Array, typename T, size_t N>
+void
+to_json(nlohmann::json & json, const DynamicArrayWrapper<Array, T, N> & array)
+{
+  for (const auto element : array)
+    nlohmann::to_json(json, element);
+}
+
+template <typename T, typename I, typename N, typename ArrayWrapper>
+void
+to_json(nlohmann::json & json,
+        const SemiDynamicSparseNumberArrayGeneric<T, I, N, ArrayWrapper> & sdsna)
+{
+  to_json(json, sdsna.nude_indices());
+  to_json(json, sdsna.nude_data());
+}
+
+template <typename T, typename D, bool asd>
+void
+to_json(nlohmann::json & json, const DualNumber<T, D, asd> & dn)
+{
+  nlohmann::to_json(json, dn.value());
+  to_json(json, dn.derivatives());
+}
+}
+
 namespace Eigen
 {
 template <typename Scalar, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
@@ -98,4 +126,11 @@ to_json(nlohmann::json & json, const Matrix<Scalar, Rows, Cols, Options, MaxRows
     nlohmann::to_json(json, values);
   }
 }
+}
+
+template <typename T>
+void
+to_json(nlohmann::json & json, const GenericTwoVector<T> & two_vector)
+{
+  to_json(json, static_cast<const Eigen::Matrix<T, 2, 1> &>(two_vector));
 }
