@@ -17,6 +17,7 @@
     input = subdomain1
   []
   displacements = 'disp_x'
+  use_displaced_mesh = false
 []
 
 [AuxVariables]
