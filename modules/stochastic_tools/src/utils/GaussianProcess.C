@@ -31,7 +31,8 @@ namespace StochasticTools
 GaussianProcess::GPOptimizerOptions::GPOptimizerOptions(const bool show_every_nth_iteration,
                                                         const unsigned int num_iter,
                                                         const unsigned int batch_size,
-                                                        const unsigned int tune_method,
+                                                        // const unsigned int tune_method,
+                                                        const GPTuningMethod tune_method,
                                                         const unsigned int num_layers,
                                                         const Real learning_rate,
                                                         const Real b1,
@@ -83,17 +84,26 @@ GaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_params,
   _batch_size = batch_decision ? opts.batch_size : training_params.rows();
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
-  std::cout << "tune method is: " << opts.tune_method << " num layers is: " << opts.num_layers << std::endl;
+  // std::cout << "tune method is: " << opts.tune_method << " num layers is: " << opts.num_layers << std::endl;
+  std::cout << "tune method is: " << static_cast<int>(opts.tune_method) << " num layers is: " << opts.num_layers << std::endl;
   if (_tuning_data.size()) {
-    if (opts.tune_method == 0) {
+    // if (opts.tune_method == 0) {
+    //   tuneHyperParamsAdam(training_params, training_data, opts);
+    // }
+    // else if (opts.tune_method == 1) {
+    //   tuneHyperParamsMcmc(training_params, training_data);
+    // }
+    // else {
+    //   ::mooseError("Unsupported tune_method: ", (unsigned int)opts.tune_method, 
+    //                ". Must be Adam (", (unsigned int)GPTuningMethod::Adam, 
+    //                ") or MCMC (", (unsigned int)GPTuningMethod::MCMC, ").");
+    // }
+    if (opts.tune_method == GPTuningMethod::Adam)
       tuneHyperParamsAdam(training_params, training_data, opts);
-    }
-    else if (opts.tune_method == 1) {
+    else if (opts.tune_method == GPTuningMethod::MCMC)
       tuneHyperParamsMcmc(training_params, training_data);
-    }
-    else {
-      throw std::invalid_argument("Unsupported tune_method: must be 0 (Adam) or 1 (MCMC)");
-    }
+    else
+      ::mooseError("Unsupported tune_method in GPOptimizerOptions (expected Adam or MCMC)");
   }
 
   _K.resize(training_params.rows() * training_data.cols(),

@@ -107,7 +107,7 @@
     num_iters = 1000
     batch_size = 20 
     learning_rate = 0.005
-    tune_method = 1
+    tune_method = 'Adam'
     num_layers = 1
   []
 []

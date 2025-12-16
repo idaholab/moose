@@ -56,6 +56,8 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
+        StochasticTools::GPTuningMethod::Adam,
+        1,
         getParam<Real>("learning_rate")))
 {
   _gp.initialize(getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),

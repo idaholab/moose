@@ -17,6 +17,12 @@
 namespace StochasticTools
 {
 
+enum class GPTuningMethod
+{
+  Adam, 
+  MCMC  
+};
+
 /**
  * Utility class dedicated to hold structures and functions commont to
  * Gaussian Processes. It can be used to standardize parameters, manipulate
@@ -66,13 +72,17 @@ public:
     GPOptimizerOptions(const bool show_every_nth_iteration = 1,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
-                       const unsigned int tune_method = 0,
+                      //  const unsigned int tune_method = 0,
+                       const GPTuningMethod tune_method = GPTuningMethod::Adam,
+                      //  const MooseEnum & tune_method = Adam,
                        const unsigned int num_layers = 1,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
                        const Real b2 = 0.999,
                        const Real eps = 1e-7,
                        const Real lambda = 0.0);
+
+    
 
     /// Switch to enable verbose output for parameter tuning at every n-th iteration
     const unsigned int show_every_nth_iteration = false;
@@ -81,7 +91,8 @@ public:
     /// The batch isize for Adam optimizer
     const unsigned int batch_size = 0;
     /// Method for tuning hyperparameters
-    const unsigned int tune_method = 0;
+    // const unsigned int tune_method = 0;
+    const GPTuningMethod tune_method = GPTuningMethod::Adam;
     /// The number of Gaussian Process layers
     const unsigned int num_layers = 1;
     /// The learning rate for Adam optimizer
