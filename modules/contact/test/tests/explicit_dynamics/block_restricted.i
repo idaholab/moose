@@ -1,4 +1,4 @@
-# This input does not solve any interesting physics.
+# This input file does not solve any interesting physics, such as contact.
 # Its sole purpose is to check that block-restricting the ExplicitDynamicsContact Action
 # produces AuxVariables that are appropriately block restricted.
 # It illustrates that if your mesh contains blocks that are not involved in the
@@ -70,7 +70,7 @@
 []
 
 # From here on, nothing is particularly interesting!
-# I've included block = '1 2 3' explicitly, to distinguish from the above
+# I have included block = '1 2 3' explicitly, to distinguish from the above
 
 [Problem]
   extra_tag_matrices = mass

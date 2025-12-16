@@ -170,10 +170,9 @@ ExplicitDynamicsContactAction::act()
     // Add gap rate for output
     {
       auto var_params = _factory.getValidParams("MooseVariable");
+      var_params.applyParameters(parameters());
       var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
       var_params.set<MooseEnum>("family") = "LAGRANGE";
-      if (!_blocks.empty())
-        var_params.set<std::vector<SubdomainName>>("block") = _blocks;
       _problem->addAuxVariable("MooseVariable", "gap_rate", var_params);
     }
     if (_verbose)
@@ -181,50 +180,40 @@ ExplicitDynamicsContactAction::act()
       // Add ContactPenetrationVarAction
       {
         auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.applyParameters(parameters());
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
-        if (!_blocks.empty())
-          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
-
         _problem->addAuxVariable("MooseVariable", "penetration", var_params);
       }
       {
         auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.applyParameters(parameters());
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
-        if (!_blocks.empty())
-          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
-
         _problem->addAuxVariable("MooseVariable", "contact_pressure", var_params);
       }
       // Add nodal area contact variable
       {
         auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.applyParameters(parameters());
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
-        if (!_blocks.empty())
-          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
-
         _problem->addAuxVariable("MooseVariable", "nodal_area", var_params);
       }
       // Add nodal density variable
       {
         auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.applyParameters(parameters());
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
-        if (!_blocks.empty())
-          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
-
         _problem->addAuxVariable("MooseVariable", "nodal_density", var_params);
       }
       // Add nodal wave speed
       {
         auto var_params = _factory.getValidParams("MooseVariable");
+        var_params.applyParameters(parameters());
         var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
         var_params.set<MooseEnum>("family") = "LAGRANGE";
-        if (!_blocks.empty())
-          var_params.set<std::vector<SubdomainName>>("block") = _blocks;
-
         _problem->addAuxVariable("MooseVariable", "nodal_wave_speed", var_params);
       }
     }
