@@ -90,4 +90,14 @@
     heavy = true
     requirement = 'The system shall be able to solve for a large displacemnt explicit contact problem.'
   []
+  [block_restricted]
+    type = 'Exodiff'
+    input = 'block_restricted.i'
+    exodiff = 'block_restricted_out.e'
+    allow_warnings = true
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    issues = '#32054'
+    design = 'ExplicitDynamicsContactAction.md'
+    requirement = 'The contact system when used with explicit time stepping shall be able to be block restricted to subdomains that are involved in the contact'
+  []
 []
