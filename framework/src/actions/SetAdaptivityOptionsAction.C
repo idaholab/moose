@@ -45,7 +45,7 @@ commonAdaptivityParams()
       "recompute_markers_during_cycles", false, "Recompute markers during adaptivity cycles");
   MooseEnum adaptivity("h=0 p=1 hp=2", "h");
   params.addParam<MooseEnum>(
-      "adaptivity_type", adaptivity, "Switch h or p or hp for respective mesh adaptivity");
+      "adaptivity_type", adaptivity, "Select between h, p or hp mesh adaptivity");
   return params;
 }
 }
