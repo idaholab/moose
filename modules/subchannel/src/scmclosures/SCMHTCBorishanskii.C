@@ -15,26 +15,25 @@ InputParameters
 SCMHTCBorishanskii::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
-  params.addClassDescription("Class that models the convective heat transfer coefficient using the "
-                             "Borishanskii correlation. Only use for fuel-pins.");
+  params.addClassDescription(
+      "Class that computes the convective heat transfer coefficient using the "
+      "Borishanskii correlation. Only use for fuel-pins.");
   return params;
 }
 
 SCMHTCBorishanskii::SCMHTCBorishanskii(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
 {
+  // Check that the correlation is not used for the duct (not supported yet)
+  if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
+    mooseError("'Borishanskii' is not yet supported for the 'duct_htc_correlation'.");
 }
 
 Real
 SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*/,
                                          const NusseltStruct & nusselt_args) const
 {
-  // Check that the correlation is not used for the duct (not supported yet)
-  if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
-    mooseError("'Borishanskii' is not yet supported for the 'duct_htc_correlation'.");
-
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
-
   const Real Pe = pre.Re * pre.Pr;
 
   if (pre.poD < 1.1 || pre.poD > 1.5)
@@ -53,17 +52,15 @@ SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*
   // Peclet number correction term
   const Real corr_prefactor = 0.0174 * (1.0 - std::exp(6.0 - 6.0 * pre.poD));
 
-  if (Pe >= 200.0 && Pe <= 2000.0)
+  if (Pe >= 200.0 && Pe <= 2200.0)
   {
     NuT += corr_prefactor * std::pow(Pe - 200.0, 0.9);
   }
   else if (Pe < 200.0)
   {
-    flagSolutionWarning(
-        "Peclet number (Pe) below recommended range for the Borishanskii correlation.");
-    // NuT unchanged; correlation not applied below Pe = 200
+    // do nothing, no extra term
   }
-  else // Pe > 2000
+  else // Pe > 2200
   {
     flagSolutionWarning(
         "Peclet number (Pe) above recommended range for the Borishanskii correlation.");
@@ -82,7 +79,7 @@ SCMHTCBorishanskii::computeNusseltNumber(const FrictionStruct & /*friction_args*
       return Nu_turb;
 
     const Real denom = pre.ReT - pre.ReL;
-    const Real w = denom > 0.0 ? (pre.Re - pre.ReL) / denom : 1.0; // guard against degenerate case
+    const auto w = (pre.Re - pre.ReL) / denom;
     return w * Nu_turb + (1.0 - w) * pre.laminar_Nu;
   };
 

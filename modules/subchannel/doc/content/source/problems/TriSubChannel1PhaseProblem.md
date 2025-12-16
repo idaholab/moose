@@ -28,7 +28,7 @@ where:
 - $T_{bulk,sc}(z)$ is the bulk temperature for a subchannel $sc$ neighboring the pin at a height $z$
 - $q'_{\text{pin}}(z)$ is the linear heat generation rate for the pin at a height $z$
 - $D_{\text{pin}}(z)$ is the pin diameter at a height $z$
-- $h_{sc}(z)$ is the convective heat transfer coefficientfor a subchannel $sc$ neighboring the pin at a height $z$.
+- $h_d(z)$ is the convective heat transfer coefficient for the subchannel next to the duct node at a height $z$
 
 For the duct, the duct surface temperature is defined as follows:
 
@@ -56,11 +56,14 @@ where:
 
 The modeling of the Nusselt number and consequently of the convective heat transfer coefficient `h` is selected by the user through a closure. The closure models available to the user that are implemented in SCM are the following:
 
-- [Dittus-Boelter](SCMHTCDittusBoelter.md) (recommended for water coolants)
-- [Gnielinski](SCMHTCGnielinski.md) (recommended for liquid metals)
+- [Dittus-Boelter](SCMHTCDittusBoelter.md) (recommended for water coolant)
+- [Gnielinski](SCMHTCGnielinski.md) (recommended for all types of coolants)
 - [Kazimi-Carelli](SCMHTCKazimiCarelli.md) (recommended for liquid metals)
+- [Schad-Modified](SCMHTCSchadModified.md) (recommended for liquid metals)
+- [Graber-Rieger](SCMHTCGraberRieger.md) (recommended for liquid metals)
+- [Borishanskii](SCMHTCBorishanskii.md) (recommended for liquid metals)
 
-All these models inherit from the base class: [SCMHTCClosureBase](SCMHTCClosureBase.md)
+All these models inherit from the base class: [SCMHTCClosureBase](SCMHTCClosureBase.md). A synopsis of the closure models availabe in SCM with the range of validity, is presented in Table [HTC models](SCMHTCClosureBase.md#HTC-models).
 
 ## Example Input File Syntax
 

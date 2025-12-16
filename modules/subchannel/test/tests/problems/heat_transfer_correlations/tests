@@ -13,7 +13,7 @@
       recover = false
       max_parallel = 1
       detail = 'using the default Dittus Boelter correlation for circular tubes.'
-      cli_args = 'SubChannel/pin_HTC_closure=dittus-boelter SubChannel/duct_HTC_closure=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties T_in=300.0'
+      cli_args = 'SubChannel/pin_HTC_closure=dittus-boelter SubChannel/duct_HTC_closure=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties SCMClosures/dittus-boelter/correction_factor=none T_in=300.0'
     []
     [dittus_boelter_Presser]
       type = CSVDiff

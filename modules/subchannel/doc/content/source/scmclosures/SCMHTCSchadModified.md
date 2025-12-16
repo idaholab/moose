@@ -43,7 +43,7 @@ where:
 !alert note
 The Schad-Modified correlation is not currently implemented for computing the duct surface temperature.
 
-The Borishanskii and Schad-modified correlations yield the best agreement over the entire range of P/D values.
+The Borishanskii and Schad-modified correlations yield the best agreement over the entire range of P/D values [!cite](todreas2021nuclear1).
 
 !syntax parameters /SCMClosures/SCMHTCSchadModified
 

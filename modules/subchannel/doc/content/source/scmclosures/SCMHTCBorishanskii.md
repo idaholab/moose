@@ -10,7 +10,7 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 The Borishanskii correlation [!cite](borishanskii1969heat) is used for calculating the Nusselt number in fuel-pin bundles, considering the geometry of the bundle.
 
-For $(1.1 \le P/D \le 1.5)$ and $(200 \le \mathrm{Pe} \le 2000)$, the Nusselt number is:
+For $(1.1 \le P/D \le 1.5)$ and $(200 \le \mathrm{Pe} \le 2200)$, the Nusselt number is:
 
 \begin{equation}
 Nu = 24.15 \log\left[
@@ -40,7 +40,7 @@ where:
 !alert note
 The Borishanskii correlation is not currently implemented for computing the duct surface temperature.
 
-The Borishanskii and Schad-modified correlations yield the best agreement over the entire range of P/D values.
+The Borishanskii and Schad-modified correlations yield the best agreement over the entire range of P/D values [!cite](todreas2021nuclear1).
 
 !syntax parameters /SCMClosures/SCMHTCBorishanskii
 

@@ -15,26 +15,25 @@ InputParameters
 SCMHTCKazimiCarelli::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
-  params.addClassDescription("Class that models the convective heat transfer coefficient using the "
-                             "Kazimi-Carelli correlation. Only use for fuel-pins.");
+  params.addClassDescription(
+      "Class that computes the convective heat transfer coefficient using the "
+      "Kazimi-Carelli correlation. Only use for fuel-pins.");
   return params;
 }
 
 SCMHTCKazimiCarelli::SCMHTCKazimiCarelli(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
 {
+  // Check that Graber-Rieger is not used for the duct (not supported yet)
+  if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
+    mooseError("'Graber-Rieger' is not yet supported for the 'duct_htc_correlation'.");
 }
 
 Real
 SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args*/,
                                           const NusseltStruct & nusselt_args) const
 {
-  // Check that kazimi-carelli is not used for the duct (not supported yet)
-  if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
-    mooseError("'Kazimi-Carelli' is not yet supported for the 'duct_htc_correlation'.");
-
   const auto pre = computeNusseltNumberPreInfo(nusselt_args);
-
   const auto Pe = pre.Re * pre.Pr;
 
   if (Pe < 10 || Pe > 5000)
@@ -55,7 +54,7 @@ SCMHTCKazimiCarelli::computeNusseltNumber(const FrictionStruct & /*friction_args
       return NuT;
 
     const auto denom = (pre.ReT - pre.ReL);
-    const auto w = denom > 0 ? (pre.Re - pre.ReL) / denom : 1.0; // guard against degenerate case
+    const auto w = (pre.Re - pre.ReL) / denom;
     return w * NuT + (1.0 - w) * pre.laminar_Nu;
   };
 

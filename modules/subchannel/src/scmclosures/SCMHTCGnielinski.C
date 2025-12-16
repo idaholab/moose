@@ -16,8 +16,9 @@ InputParameters
 SCMHTCGnielinski::validParams()
 {
   InputParameters params = SCMHTCClosureBase::validParams();
-  params.addClassDescription("Class that models the convective heat transfer coefficient using the "
-                             "Gnielinski correlation.");
+  params.addClassDescription(
+      "Class that computes the convective heat transfer coefficient using the "
+      "Gnielinski correlation.");
   return params;
 }
 
@@ -46,7 +47,7 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
       return NuT;
 
     const auto denom = (pre.ReT - pre.ReL);
-    const auto w = denom > 0 ? (pre.Re - pre.ReL) / denom : 1.0; // guard against degenerate case
+    const auto w = (pre.Re - pre.ReL) / denom;
     return w * NuT + (1.0 - w) * pre.laminar_Nu;
   };
 

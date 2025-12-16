@@ -15,14 +15,15 @@ InputParameters
 SCMHTCDittusBoelter::validParams()
 {
   // Enumerations
-  MooseEnum factors("Presser Weisman none", "none");
+  MooseEnum factors("Presser Weisman none", "Presser");
   InputParameters params = SCMHTCClosureBase::validParams();
-  params.addClassDescription("Class that models the convective heat transfer coefficient using the "
-                             "Dittus Boelter correlation.");
+  params.addClassDescription(
+      "Class that computes the convective heat transfer coefficient using the "
+      "Dittus Boelter correlation.");
   params.addParam<MooseEnum>(
       "correction_factor",
       factors,
-      "Correction factor modeling the effect of the fuel-pin bundle. Default is none");
+      "Correction factor modeling the effect of the fuel-pin bundle. Default is Presser");
   return params;
 }
 
@@ -53,7 +54,7 @@ SCMHTCDittusBoelter::computeNusseltNumber(const FrictionStruct & /*friction_args
       return NuT;
 
     const auto denom = (pre.ReT - pre.ReL);
-    const auto w = denom > 0 ? (pre.Re - pre.ReL) / denom : 1.0; // guard against degenerate case
+    const auto w = (pre.Re - pre.ReL) / denom;
     return w * NuT + (1.0 - w) * pre.laminar_Nu;
   };
 

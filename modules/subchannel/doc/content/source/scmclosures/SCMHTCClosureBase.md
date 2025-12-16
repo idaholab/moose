@@ -87,20 +87,35 @@ The following relation is used depending on the subchannel:
 \end{cases}
 \end{equation}
 
-The values defined here are chosen based on engineering judgement and the values for  laminar flow in a circular/square tube with constant surface temperature (3.66,3.091) and laminar flow in a circular/square tube subjected to constant surface heat flux (4.36,3.54). For a center subchannel that has approximately half contact with circular fuel pins and half flat interface the laminar Nusselt number is chosen to be the average of the two: $\text{Nu}_{\text{laminar}} = (4.36 + 3.091)/2 = 3.73$. Similar logic has been applied for the edge and corner subchannels. For the edge: $\text{Nu}_{\text{laminar}} = (3.54 + 2*4.36 + 3 * 3.091)/6 = 3.59$. For the corner: $\text{Nu}_{\text{laminar}} = (2*3.54 + 4.36 + 2*3.091)/5 = 3.52$
+The values defined here are chosen based on engineering judgement and the values for laminar flow in a circular/square tube with constant surface temperature (3.66/3.091) and laminar flow in a circular/square tube subjected to constant surface heat flux (4.36/3.54). The heat transfer boundary condition for the interface area between subchannels is considered to be that of constant temperature. The heat transfer boundary condition for the fuel-pin surface and duct surface is considered to be that of constant heat-flux.
+
+For a center subchannel that has approximately half contact with circular fuel pins and half with flat interface, the laminar Nusselt number is chosen to be the average of the two: $\text{Nu}_{\text{laminar}} = (4.36 + 3.091)/2 = 3.73$. Similar logic has been applied for the edge and corner subchannels. For the edge: $\text{Nu}_{\text{laminar}} = (3.54 + 2*4.36 + 3 * 3.091)/6 = 3.59$. For the corner: $\text{Nu}_{\text{laminar}} = (2*3.54 + 4.36 + 2*3.091)/5 = 3.52$
+It is important to point out that, the value of Nu is insensitive to the boundary conditions for Pr > 0.7.
 
 ### Correlation for Turbulent Nusselt Number
 
 The modeling of the Turbulent Nusselt number and consequently of the convective heat transfer coefficient `h` is defined by the user. The closure models available to the user that are implemented in SCM are the following:
 
 - [Dittus-Boelter](SCMHTCDittusBoelter.md) (recommended for water coolant)
-- [Gnielinski](SCMHTCGnielinski.md) (recommended for liquid metals)
+- [Gnielinski](SCMHTCGnielinski.md) (recommended for all types of coolants)
 - [Kazimi-Carelli](SCMHTCKazimiCarelli.md) (recommended for liquid metals)
 - [Schad-Modified](SCMHTCSchadModified.md) (recommended for liquid metals)
 - [Graber-Rieger](SCMHTCGraberRieger.md) (recommended for liquid metals)
 - [Borishanskii](SCMHTCBorishanskii.md) (recommended for liquid metals)
 
-The correlations of Borishanskii and Schad-modified yield the best agreement over the entire range of P/D values. The Graber and Rieger correlation appears to significantly overpredict the heat transfer coefficient if extended beyond the published range of applicability P/D ≤ 1.15. The Kazimi and Carelli correlation underestimates Nu at high values of P/D [!cite](todreas2021nuclear1).
+According to [!cite](todreas2021nuclear1), the correlations of Borishanskii and Schad-modified yield the best agreement over the entire range of P/D values. The Graber and Rieger correlation appears to significantly overpredict the heat transfer coefficient if extended beyond the published range of applicability P/D ≤ 1.15. The Kazimi and Carelli correlation underestimates Nu at high values of P/D. A synopsis of the closure models availabe in SCM with the range of validity, is presented in Table [HTC-models] below:
+
+!table id=HTC-models caption=Convective heat transfer coefficient, closure models availabel in `SCM`.
+| Name | Geometry  | Fluid Type  | Range of Validity | Rod Spacing | Entrance Effects | References |
+|------|--------------------------------|-----------------------------|--------------------------------|--------------|------------------|-------------|
+| Dittus-Boelter | Circular tubes | Ordinary non-metallic fluids | $0.7 < Pr < 100, Re>10000$ | Bare (no wire grid or spacers) | None | [!cite](dittus1930heat), [!cite](mcadams1954heat) |
+| Dittus-Boelter/Presser | Rod bundles triangular and square | Ordinary non-metallic fluids | triangular: $1.05 \leq P/D \leq 2.2$, square: $1.05 \leq P/D \leq 1.9$ | Bare (no wire grid or spacers) | None | [!cite](presser1967waermeuebergang) |
+| Dittus-Boelter/Weisman | Rod bundles triangular and square | Water | triangular: $1.1 \leq P/D \leq 1.5$, square: $1.1 \leq P/D \leq 1.3$ | Bare (no wire grid or spacers) | None | [!cite](weisman1959heat) |
+| Gnielinski | Concentric annular ducts / Circular tubes | Extended to most fluids | Extended from original to: $1e-5 \leq Pr \leq 2000$ | Bare (no wire grid or spacers) | None | [!cite](gnielinski1975neue) |
+| Kazimi-Carelli | Triangular Rod Bundle | Metallic Fluids | $1.1 \leq P/D \leq 1.4$, $10 \leq Pe \leq 5000$ | Wire-wrapped (no grid or spacers) | None | [!cite](kazimi1976) |
+| Schad-Modified | Triangular Rod Bundle | Metallic Fluids | $(1.1 \le P/D \le 1.5)$ and $(0.0 \le Pe \le 1000)$, | Bare (no grid or spacers) | None | [!cite](kazimi1976) |
+| Graber-Rieger | Triangular Rod Bundle | Metallic Fluids | $(1.25 \le P/D \le 1.95)$ and $(110 \le Pe \le 4300)$, | Bare (no grid or spacers) | None | [!cite](graber) |
+| Borishanskii | Triangular Rod Bundle | Metallic Fluids | $(1.1 \le P/D \le 1.5)$ and $(0.0 \le \mathrm{Pe} \le 2200)$, | Bare (no grid or spacers) | None | [!cite](borishanskii1969heat) |
 
 ### Transition Regime
 

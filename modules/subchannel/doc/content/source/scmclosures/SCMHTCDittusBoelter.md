@@ -20,17 +20,20 @@ where:
 - $Re$: Reynolds number
 - $Pr$: Prandtl number
 
-All fluid properties are evaluated at the mean bulk temperature when the correlation is used on a local basis. When used on an average basis, the arithmetic mean bulk temperature (i.e., the average of the
-bulk inlet and outlet temperature) is good for constant heat flux while the log mean bulk temperature applies for the constant wall temperature boundary condition.
+All fluid properties are evaluated at the mean subchannel temperature. The correlation is used on a local basis.
 
-Additionally the user has the option to define correction factors to acount for the effect of fully turbulent flow along pin bundles. Nu values may significantly deviate from
+## Correction factors applied to the Dittus-Boelter Correlation
+
+!! Intentional comment to provide extra spacing
+
+Additionally, the user has the option to define correction factors to account for the effect of fully turbulent flow along pin bundles. Nu values may significantly deviate from
 the circular geometry because of the strong geometric nonuniformity of the subchannels [!cite](todreas2021nuclear1). The usual way to represent the relevant correlation is to express the Nusselt number for fully developed conditions $Nu_{\infty}$, as a product of $Nu_{\infty ,c.t}$ for a circular tube multiplied by a correction factor:
 
 \begin{equation}
     Nu_{\infty} = \psi Nu_{\infty ,c.t}
 \end{equation}
 
-The problem then is to calculate $\psi$. The models available to the user to calculate $\psi$ are that of Presser [!cite](presser1967waermeuebergang) and Wiesman [!cite](weisman1959heat).
+The problem then is to calculate $\psi$. The models available to the user to calculate $\psi$ are that of Presser [!cite](presser1967waermeuebergang) and Weisman [!cite](weisman1959heat).
 
 `Presser` suggested:
 
@@ -59,6 +62,8 @@ for the triangular array and $1.1 \leq P/D \leq 1.5$.
 \end{equation}
 
 for the square array and $1.1 \leq P/D \leq 1.3$, both for $Nu_{\infty ,c.t} = 0.023 \times Re^{0.8} \times Pr^{0.333}$.
+
+The default model used for the correction factor is that of `Presser`.
 
 !syntax parameters /SCMClosures/SCMHTCDittusBoelter
 

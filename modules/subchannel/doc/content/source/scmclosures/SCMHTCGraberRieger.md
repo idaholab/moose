@@ -10,7 +10,7 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 The Graber-Rieger correlation [!cite](graber) is used for calculating the Nusselt number in fuel-pin bundles, considering the geometry of the bundle.
 
-For $(1.25 \le P/D \le 1.95)$ and $(150 \le \mathrm{Pe} \le 3000)$, the Nusselt number is:
+For $(1.25 \le P/D \le 1.95)$ and $(110 \le \mathrm{Pe} \le 4300)$, the Nusselt number is:
 
 \begin{equation}
 Nu = 0.25 + 6.2\left(P/D\right) + \left[ -0.007 + 0.032\left(P/D\right) \right] \mathrm{Pe}^{0.8 - 0.024\left(P/D\right)}
@@ -29,7 +29,7 @@ where:
 !alert note
 The Graber-Rieger correlation is not currently implemented for computing the duct surface temperature.
 
-The Graber and Rieger correlation appears to significantly overpredict the heat transfer coefficient if extended beyond the published range of applicability.
+The Graber and Rieger correlation appears to significantly overpredict the heat transfer coefficient if extended beyond the published range of applicability [!cite](todreas2021nuclear1).
 
 !syntax parameters /SCMClosures/SCMHTCGraberRieger
 

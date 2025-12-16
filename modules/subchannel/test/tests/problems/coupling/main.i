@@ -64,6 +64,7 @@ heated_length = 1.0
   []
   [dittus-boelter]
     type = SCMHTCDittusBoelter
+    correction_factor = none
   []
 []
 

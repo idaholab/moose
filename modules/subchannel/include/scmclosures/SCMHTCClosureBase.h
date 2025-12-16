@@ -16,7 +16,7 @@
 struct NusseltPreInfo
 {
   Real Re;                 // Reynolds number
-  Real Pr;                 // Prandlt number
+  Real Pr;                 // Prandtl number
   Real poD;                // Pitch over diameter ratio
   Real ReL;                // Laminar Reynolds number limit
   Real ReT;                // Turbulent Reynolds number limit

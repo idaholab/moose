@@ -102,6 +102,7 @@ P_out = 14.72e6 # Pa
   []
   [Dittus-Boelter]
     type = SCMHTCDittusBoelter
+    correction_factor = none
   []
 []
 

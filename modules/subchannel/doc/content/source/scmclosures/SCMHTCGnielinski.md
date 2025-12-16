@@ -8,9 +8,7 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 !! Intentional comment to provide extra spacing
 
-Gnielinski extended the results of the significant work done by Petukhov to the transition Reynolds number by making small adjustments of the terms of the Petukhov correlation.
-
-A modified Gnielinski correlation for low Prandtl numbers is used for calculating the Nusselt number for transitional and turbulent flows. The baseline correlation is presented  originally here [!cite](gnielinski1975neue) and again here [!cite](gnielinski2009heat) as well as in chapter 10 of [!cite](todreas2021nuclear1). The modified correlation reads as follows:
+Gnielinski extended the results of the significant work done by Petukhov to the transition Reynolds number by making small adjustments of the terms of the Petukhov correlation. A modified Gnielinski correlation for low Prandtl numbers is proposed here for calculating the Nusselt number for transitional and turbulent flows. The baseline correlation is presented  originally here [!cite](gnielinski1975neue) as well as in chapter 10 of [!cite](todreas2021nuclear1). The modified correlation reads as follows:
 
 \begin{equation}
 Nu = \frac{f/8.0 \times (Re - 1000) \times (Pr + 0.01)}{1 + 12.7 \times \sqrt{f/8.0} \times \left( (Pr + 0.01)^{2/3} - 1 \right)},

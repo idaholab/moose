@@ -27,8 +27,7 @@ where:
 !alert note
 The Kazimi-Carelli correlation is not currently implemented for computing the duct surface temperature.
 
-It is applicable for fuel pin bundles with $1.1 \leq P/D \leq 1.4$ and $10.0 \leq Pe \leq 5000$
-The Kazimi and Carelli correlation under-estimates Nu at high values of P/D.
+It is applicable for fuel pin bundles with $1.1 \leq P/D \leq 1.4$ and $10.0 \leq Pe \leq 5000$. The Kazimi and Carelli correlation under-estimates Nu at high values of P/D [!cite](todreas2021nuclear1).
 
 !syntax parameters /SCMClosures/SCMHTCKazimiCarelli
 
