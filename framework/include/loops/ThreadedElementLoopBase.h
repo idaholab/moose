@@ -429,31 +429,29 @@ bool
 ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
                                                               const Elem & neighbor) const
 {
-  auto level = [this](const auto & elem_arg)
-  {
-    // The latter check is because if we have any amount of h-refinement we must defer to level() in
-    // order to avoid querying invalid DofObjects
-    if (_mesh.doingPRefinement() && !_mesh.doingHPRefinement())
-      return elem_arg.p_level();
-    else
-      return elem_arg.level();
-  };
-  const auto elem_id = elem.id(), neighbor_id = neighbor.id();
-  const auto elem_level = level(elem), neighbor_level = level(neighbor);
+  // If we're going to compute the internal side with this elem-neighbor pair, then they must both
+  // be active. Note that if elem is an active coarse element at an interface with finer elements,
+  // then its neighbor will be an equal-level inactive element, hence the following
+  // neighbor.active() check. In that case we'll catch current 'elem' when we come around and
+  // examine one of the finer elements as 'elem'
+  mooseAssert(elem.active(), "This method should never be called with an inactive element");
+  if (!neighbor.active())
+    return false;
 
-  // When looping over elements and then sides, we need to make sure that we do not duplicate
-  // effort, e.g. if a face is shared by element 1 and element 2, then we do not want to do compute
-  // work both when we are visiting element 1 *and* then later when visiting element 2. Our rule is
-  // to only compute when we are visiting the element that has the lower element id when element and
-  // neighbor are of the same adaptivity level, and then if they are not of the same level, then
-  // we only compute when we are visiting the finer element
-  const bool use_this_pair =
-      (neighbor.active() && (neighbor_level == elem_level) && (elem_id < neighbor_id)) ||
-      (neighbor_level < elem_level);
-  if (use_this_pair)
-    mooseAssert(elem.active() && neighbor.active(),
-                "Both these elements must be active or else we are going to get invalid dof ids");
-  return use_this_pair;
+  //
+  // Define an ordering: first prefer finer by h (higher level()), then prefer finer by p (higher
+  // p_level()), then prefer smaller id()"
+  //
+
+  const auto elem_level = elem.level(), neighbor_level = neighbor.level();
+  if (elem_level != neighbor_level)
+    return elem_level > neighbor_level;
+
+  const auto elem_p_level = elem.p_level(), neighbor_p_level = neighbor.p_level();
+  if (elem_p_level != neighbor_p_level)
+    return elem_p_level > neighbor_p_level;
+
+  return elem.id() < neighbor.id();
 }
 
 template <typename RangeType>
