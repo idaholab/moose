@@ -107,13 +107,13 @@ SmoothMeshGenerator::SmoothMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 SmoothMeshGenerator::generate()
 {
-  std::unique_ptr<MeshBase> input = std::move(_input);
-  std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(input);
+  // This cast transfers ownership from _input to mesh
+  std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(_input);
   std::unique_ptr<libMesh::MeshSmoother> smoother = nullptr;
 
   if (_algorithm == "laplace")
   {
-    if (!mesh->is_replicated())
+    if (!mesh->is_serial())
       mooseError(
           "SmoothMeshGenerator with algorithm='laplace' is not implemented for distributed meshes");
 
