@@ -12,6 +12,7 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 #include "Capabilities.h"
+#include "FluidPropertiesApp.h"
 
 InputParameters
 ChemicalReactionsApp::validParams()
@@ -38,6 +39,7 @@ ChemicalReactionsApp::~ChemicalReactionsApp() {}
 void
 ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
 {
+  FluidPropertiesApp::registerAll(f, af, syntax);
   Registry::registerObjectsTo(f, {"ChemicalReactionsApp"});
   Registry::registerActionsTo(af, {"ChemicalReactionsApp"});
 
@@ -62,6 +64,8 @@ ChemicalReactionsApp::registerApps()
 #endif
 
   registerApp(ChemicalReactionsApp);
+
+  FluidPropertiesApp::registerApps();
 }
 
 extern "C" void
