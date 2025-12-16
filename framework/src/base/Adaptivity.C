@@ -79,15 +79,17 @@ Adaptivity::init(const unsigned int steps,
 
   _mesh_refinement_on = true;
 
-  if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
+  if (_adaptivity_type == AdaptivityType::P)
     _mesh.doingPRefinement(true);
-
-  if (_adaptivity_type == AdaptivityType::HP)
+  else if (_adaptivity_type == AdaptivityType::HP)
   {
     if (_fe_problem.numSolverSystems() > 1)
       mooseError("HP adaptivity doesn't support multiple solver systems because currently only the "
                  "zeroth solver system solution is analyzed for determining whether to toggle "
                  "h-refinement flags to p-refinement flags");
+
+    _mesh.doingPRefinement(true);
+    _mesh.doingHPRefinement(true);
 
     _sibling_coupling = std::make_unique<SiblingCoupling>();
     _fe_problem.getSolverSystem(0).system().get_dof_map().add_algebraic_ghosting_functor(

@@ -1360,14 +1360,24 @@ public:
   void setupFiniteVolumeMeshData() const;
 
   /**
-   * Indicate whether the kind of adaptivity we're doing is p-refinement
+   * Indicate whether the kind of adaptivity we're doing includes p-refinement
    */
   void doingPRefinement(bool doing_p_refinement) { _doing_p_refinement = doing_p_refinement; }
 
   /**
-   * Query whether we have p-refinement
+   * Query whether the kind of adaptivity we're doing includes p-refinement
    */
   [[nodiscard]] bool doingPRefinement() const { return _doing_p_refinement; }
+
+  /**
+   * Query whether we're doing both h- and p-refinement
+   */
+  [[nodiscard]] bool doingHPRefinement() const { return _doing_hp_refinement; }
+
+  /**
+   * Indicate that we are doing both h- and p-refinement
+   */
+  void doingHPRefinement(bool doing_hp_refinement) { _doing_hp_refinement = doing_hp_refinement; }
 
   /**
    * Returns the maximum p-refinement level of all elements
@@ -1916,8 +1926,10 @@ private:
   /// Set for holding user-provided coordinate system type block names
   std::vector<SubdomainName> _provided_coord_blocks;
 
-  /// Whether we have p-refinement (as opposed to h-refinement)
+  /// Whether we have p-refinement (whether exclusively p- or hp-refinement)
   bool _doing_p_refinement;
+  /// Whether we are doing both h- and p-refinement
+  bool _doing_hp_refinement;
   /// Maximum p-refinement level of all elements
   unsigned int _max_p_level;
   /// Maximum h-refinement level of all elements
