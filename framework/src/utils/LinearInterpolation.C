@@ -129,51 +129,62 @@ LinearInterpolation::integrate()
   return answer;
 }
 
-Real
-LinearInterpolation::integratePartial(Real xA, Real xB) const
+template <typename T>
+T
+LinearInterpolation::integratePartial(const T & xA, const T & xB) const
 {
   // integral computation below will assume that x2 > x1; if this is not the
   // case, compute as if it is and then use identity to convert
-  Real x1, x2;
+  const T *x1_ptr, *x2_ptr;
   bool switch_bounds;
-  if (MooseUtils::absoluteFuzzyEqual(xA, xB))
+  const Real rawA = MetaPhysicL::raw_value(xA), rawB = MetaPhysicL::raw_value(xB);
+  Real raw1, raw2;
+  if (MooseUtils::absoluteFuzzyEqual(rawA, rawB))
     return 0.0;
-  else if (xB > xA)
+  else if (rawB > rawA)
   {
-    x1 = xA;
-    x2 = xB;
+    x1_ptr = &xA;
+    x2_ptr = &xB;
+    raw1 = rawA;
+    raw2 = rawB;
     switch_bounds = false;
   }
   else
   {
-    x1 = xB;
-    x2 = xA;
+    x1_ptr = &xB;
+    x2_ptr = &xA;
+    raw1 = rawB;
+    raw2 = rawA;
     switch_bounds = true;
   }
+  const auto & x1 = *x1_ptr;
+  const auto & x2 = *x2_ptr;
 
   // compute integral with knowledge that x2 > x1
-  Real integral = 0.0;
+  T integral = 0.0;
   // find minimum i : x[i] > x; if x > x[n-1], i = n
-  auto n = _x.size();
+  const auto n = _x.size();
   const unsigned int i1 =
-      x1 <= _x[n - 1] ? std::distance(_x.begin(), std::upper_bound(_x.begin(), _x.end(), x1)) : n;
+      raw1 <= _x[n - 1] ? std::distance(_x.begin(), std::upper_bound(_x.begin(), _x.end(), raw1))
+                        : n;
   const unsigned int i2 =
-      x2 <= _x[n - 1] ? std::distance(_x.begin(), std::upper_bound(_x.begin(), _x.end(), x2)) : n;
+      raw2 <= _x[n - 1] ? std::distance(_x.begin(), std::upper_bound(_x.begin(), _x.end(), raw2))
+                        : n;
   unsigned int i = i1;
   while (i <= i2)
   {
     if (i == 0)
     {
       // note i1 = i
-      Real integral1, integral2;
+      T integral1, integral2;
       if (_extrap)
       {
-        const Real dydx = (_y[1] - _y[0]) / (_x[1] - _x[0]);
-        const Real y1 = _y[0] + dydx * (x1 - _x[0]);
+        const auto dydx = (_y[1] - _y[0]) / (_x[1] - _x[0]);
+        const auto y1 = _y[0] + dydx * (x1 - _x[0]);
         integral1 = 0.5 * (y1 + _y[0]) * (_x[0] - x1);
         if (i2 == i)
         {
-          const Real y2 = _y[0] + dydx * (x2 - _x[0]);
+          const auto y2 = _y[0] + dydx * (x2 - _x[0]);
           integral2 = 0.5 * (y2 + _y[0]) * (_x[0] - x2);
         }
         else
@@ -193,15 +204,15 @@ LinearInterpolation::integratePartial(Real xA, Real xB) const
     else if (i == n)
     {
       // note i2 = i
-      Real integral1, integral2;
+      T integral1, integral2;
       if (_extrap)
       {
-        const Real dydx = (_y[n - 1] - _y[n - 2]) / (_x[n - 1] - _x[n - 2]);
-        const Real y2 = _y[n - 1] + dydx * (x2 - _x[n - 1]);
+        const auto dydx = (_y[n - 1] - _y[n - 2]) / (_x[n - 1] - _x[n - 2]);
+        const auto y2 = _y[n - 1] + dydx * (x2 - _x[n - 1]);
         integral2 = 0.5 * (y2 + _y[n - 1]) * (x2 - _x[n - 1]);
         if (i1 == n)
         {
-          const Real y1 = _y[n - 1] + dydx * (x1 - _x[n - 1]);
+          const auto y1 = _y[n - 1] + dydx * (x1 - _x[n - 1]);
           integral1 = 0.5 * (y1 + _y[n - 1]) * (x1 - _x[n - 1]);
         }
         else
@@ -220,21 +231,21 @@ LinearInterpolation::integratePartial(Real xA, Real xB) const
     }
     else
     {
-      Real integral1;
+      T integral1;
       if (i == i1)
       {
-        const Real dydx = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
-        const Real y1 = _y[i - 1] + dydx * (x1 - _x[i - 1]);
+        const auto dydx = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+        const auto y1 = _y[i - 1] + dydx * (x1 - _x[i - 1]);
         integral1 = 0.5 * (y1 + _y[i - 1]) * (x1 - _x[i - 1]);
       }
       else
         integral1 = 0.0;
 
-      Real integral2;
+      T integral2;
       if (i == i2)
       {
-        const Real dydx = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
-        const Real y2 = _y[i - 1] + dydx * (x2 - _x[i - 1]);
+        const auto dydx = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+        const auto y2 = _y[i - 1] + dydx * (x2 - _x[i - 1]);
         integral2 = 0.5 * (y2 + _y[i - 1]) * (x2 - _x[i - 1]);
       }
       else
@@ -252,6 +263,9 @@ LinearInterpolation::integratePartial(Real xA, Real xB) const
   else
     return integral;
 }
+
+template Real LinearInterpolation::integratePartial(const Real &, const Real &) const;
+template ADReal LinearInterpolation::integratePartial(const ADReal &, const ADReal &) const;
 
 Real
 LinearInterpolation::domain(int i) const
