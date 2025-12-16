@@ -2960,10 +2960,6 @@ MooseMesh::init()
       getMesh().skip_partitioning(true);
     buildMesh();
 
-    // Re-enable partitioning so the splitter can partition!
-    if (_app.isSplitMesh())
-      getMesh().skip_partitioning(false);
-
     if (getParam<bool>("build_all_side_lowerd_mesh"))
       buildLowerDMesh();
   }

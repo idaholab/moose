@@ -31,6 +31,9 @@ void
 SplitMeshAction::act()
 {
   auto mesh = _app.actionWarehouse().mesh();
+
+  mesh->getMesh().skip_partitioning(false);
+
   const std::string split_file_arg = _app.parameters().isParamSetByUser("split_file")
                                          ? _app.parameters().get<std::string>("split_file")
                                          : "";
