@@ -862,7 +862,7 @@ inj_rate = 3.06e-7
   [smp]
     type = SMP
     full = true
-    petsc_options = '-ksp_snes_ew'
+    petsc_options = '-snes_ksp_ew'
     petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package -sub_pc_factor_shift_type'
     petsc_options_value = 'gmres lu mumps NONZERO'
     # petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type -sub_pc_type -sub_pc_factor_shift_type -sub_pc_factor_levels -ksp_gmres_restart'
