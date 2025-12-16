@@ -2,7 +2,7 @@
 
 #include "AuxScalarKernel.h"
 
-class HenryGasConstantScalarAux: public AuxScalarKernel
+class HenryGasConstantScalarAux : public AuxScalarKernel
 {
 public:
   static InputParameters validParams();
@@ -19,7 +19,7 @@ protected:
   const Real _radius;
 
   /// Enum used to select the type
-  const enum class Saltlist {FLIBE, FLINAK, CUSTOM} _salt_list;
+  const enum class Saltlist { FLIBE, FLINAK, CUSTOM } _salt_list;
 
   /// Fit coefficients for the model
   Real _alpha;
@@ -27,5 +27,4 @@ protected:
   Real _gamma_0;
   Real _dgamma_dT;
   Real _KH0;
-
 };
