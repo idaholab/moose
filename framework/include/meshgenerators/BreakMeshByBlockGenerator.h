@@ -68,7 +68,7 @@ private:
   /// @brief a map from a pair of block ids to a set of pairs of an element and a side
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
            std::set<std::pair<const Elem *, unsigned int>>>
-      _new_boundary_sides_map;
+      _subid_pairs_to_sides;
 
   /// @brief Maps a pair of subdomain ids to the corresponding boundary id.
   std::unordered_map<std::pair<subdomain_id_type, subdomain_id_type>, boundary_id_type>
