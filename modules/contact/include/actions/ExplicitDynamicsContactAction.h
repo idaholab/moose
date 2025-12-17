@@ -59,7 +59,7 @@ protected:
   const bool _verbose;
 
   /// Restrict AuxVariables to these subdomains
-  const std::vector<SubdomainName> _blocks;
+  const std::vector<SubdomainName> & _blocks;
 
 private:
   /**
