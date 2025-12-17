@@ -226,24 +226,12 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
-
-    if (_displaced_problem)
-      // Reuse the error vector and refine the displaced mesh
-      _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
   }
 
   // Moving some of h flagged elements to p flagged based on the
   // local smoothness and prior h & p error estimates
   if (_adaptivity_type == AdaptivityType::HP)
   {
-    if (_displaced_problem)
-      mooseError("HP refinement cannot currently be used with a displaced mesh. This is because "
-                 "we may toggle from h-refinement to p-refinement based on solution, gradient "
-                 "(for C0 elements), and hessian (for C0 and C1 elements) differences between "
-                 "coarse and fine states, and the gradient and hessian will be functions of mesh "
-                 "displacements. Consequently it's possible that refinement flags may end up out "
-                 "of sync between reference and displaced meshes which would be disastrous");
-
     _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
     _hp_coarsen_test->select_refinement(_fe_problem.getSolverSystem(/*nl_sys=*/0).system());
   }
@@ -263,6 +251,15 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (distributed_adaptivity)
     _mesh_refinement->make_flags_parallel_consistent();
 
+  // Sync flags from the reference mesh
+  for (auto * const displaced_elem :
+       _displaced_problem->mesh().getMesh().active_element_ptr_range())
+  {
+    const auto * const reference_elem = _fe_problem.mesh().elemPtr(displaced_elem->id());
+    displaced_elem->set_refinement_flag(reference_elem->refinement_flag());
+    displaced_elem->set_p_refinement_flag(reference_elem->p_refinement_flag());
+  }
+
   if (_adaptivity_type == AdaptivityType::P)
     _mesh_refinement->switch_h_to_p_refinement();
 
@@ -271,11 +268,6 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
   if (_displaced_problem && mesh_changed)
   {
-    // If markers are added to only local elements,
-    // we sync them here.
-    if (distributed_adaptivity)
-      _displaced_mesh_refinement->make_flags_parallel_consistent();
-
     if (_adaptivity_type == AdaptivityType::P)
       _displaced_mesh_refinement->switch_h_to_p_refinement();
 
