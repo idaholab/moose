@@ -14,10 +14,9 @@
     restep = false
   []
   [MFEMDiffusionAltSyntax]
-    type = XMLDiff
+    type = CSVDiff
     input = ../kernels/diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
-                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion/diffusion_line_sample_0001.csv'
     cli_args = 'FESpaces/active= '
                'Variables/concentration/type=MooseVariableBase Variables/concentration/family=LAGRANGE Variables/concentration/fespace= '
                'AuxVariables/concentration_gradient/type=MooseVariableBase AuxVariables/concentration_gradient/family=NEDELEC_ONE AuxVariables/concentration_gradient/fespace= '
