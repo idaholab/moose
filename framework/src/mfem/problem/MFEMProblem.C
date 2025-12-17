@@ -237,10 +237,12 @@ MFEMProblem::addGridFunction(const std::string & var_type,
           var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
     }
     else
+    {
       getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
           var_name + "_real", &mfem_variable.getComplexGridFunction()->real());
-    getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
-        var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
+      getCoefficients().declareVector<mfem::VectorGridFunctionCoefficient>(
+          var_name + "_imag", &mfem_variable.getComplexGridFunction()->imag());
+    }
   }
   else // must be real, but may have been set up indirectly from a MOOSE variable
   {
