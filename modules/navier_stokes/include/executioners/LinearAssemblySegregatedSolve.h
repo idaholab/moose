@@ -131,6 +131,9 @@ protected:
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<LinearSystem *> _passive_scalar_systems;
 
+  /// Pointer(s) to the system(s) corresponding to the participting media radiation equation(s)
+  std::vector<LinearSystem *> _pm_radiation_systems;
+
   /// Pointer(s) to the system(s) corresponding to the active scalar equation(s)
   std::vector<LinearSystem *> _active_scalar_systems;
 
