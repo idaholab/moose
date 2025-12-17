@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMComplexScalarProjectionAux
-
 ## Overview
 
 AuxKernel for projecting a pair of scalar coefficients onto a complex scalar auxiliary variable

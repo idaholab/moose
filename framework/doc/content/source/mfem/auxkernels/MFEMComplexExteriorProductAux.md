@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMComplexExteriorProductAux
-
 ## Overview
 
 AuxKernel for calculating the exterior product of two complex vector fields and projecting onto an L2 vector finite element space complex mfem auxvariable.

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMComplexInnerProductAux
-
 ## Overview
 
 AuxKernel for calculating the inner product of two complex vector fields and projecting onto an L2 finite element space mfem complex auxvariable.

@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMComplexSumAux
-
 ## Overview
 
 AuxKernel for calculating the sum of two or more complex MFEM variables that are defined on the same finite

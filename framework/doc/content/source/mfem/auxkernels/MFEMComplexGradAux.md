@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /AuxKernels/MFEMComplexGradAux
-
 ## Overview
 
 AuxKernel for calculating the gradient of a complex scalar $H^1$ conforming source variable and storing it in
