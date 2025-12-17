@@ -58,7 +58,7 @@ protected:
   /// Verbose output, may increase runtime
   const bool _verbose;
 
-  /// Restrict AuxVariables to these subdomains
+  /// Restrict contact MooseObjects to these subdomains
   const std::vector<SubdomainName> & _blocks;
 
 private:
