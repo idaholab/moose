@@ -35,7 +35,7 @@ WCNSFVFlowPhysicsBase::validParams()
   // We mostly pull the boundary parameters from NSFV Action
 
   params += NSFVBase::commonNavierStokesFlowParams();
-  params.addParam<bool>("include_symmetrized_viscous_stress",
+  params.addParam<bool>("include_deviatoric_stress",
                         false,
                         "Whether to include the symmetrized viscous stress contribution "
                         "(grad(u)+grad(u)^T).");
@@ -143,12 +143,12 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                               ? getParam<MooseFunctorName>("density_gravity")
                               : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
+    _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress")),
+    _include_isotropic_viscous_stress(getParam<bool>("include_isotropic_viscous_stress")),
     _rc_uo_name(isParamValid("rhie_chow_uo_name")
                     ? getParam<UserObjectName>("rhie_chow_uo_name")
                     : (_porous_medium_treatment ? "pins_rhie_chow_interpolator"
                                                 : "ins_rhie_chow_interpolator")),
-    _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress")),
-    _include_isotropic_viscous_stress(getParam<bool>("include_isotropic_viscous_stress")),
     _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),

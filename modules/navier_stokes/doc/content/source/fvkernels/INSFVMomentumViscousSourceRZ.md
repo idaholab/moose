@@ -28,7 +28,7 @@ momentum equation. Axial components should not include this kernel.
 
 !alert note
 When the user enables turbulence, in some cases, kernels can be split into contributions
-from the modlecular and trubulent viscosity. In these cases, the user has to make sure
+from the molecular and turbulent viscosity. In these cases, the user has to make sure
 to include one of these kernels for each [INSFVMomentumDiffusion.md]!
 
 !alert note title=Use only for RZ viscous sources

@@ -256,7 +256,7 @@ computeShearStrainRateNormSquared(const Moose::Functor<T> & u,
   }
 
   // Note that in RZ we can only do X or Y axis. However, due to the hoop stress the
-  // Z direction tensors are not 0 in this case.
+  // Z direction (polar coordinate) tensors are not 0 in this case.
   return (Sij_xx - trace) * grad_xx + Sij_xy * grad_xy + Sij_xz * grad_xz + Sij_xy * grad_yx +
          (Sij_yy - trace) * grad_yy + Sij_yz * grad_yz + Sij_xz * grad_zx + Sij_yz * grad_zy +
          (Sij_zz - trace) * grad_zz;

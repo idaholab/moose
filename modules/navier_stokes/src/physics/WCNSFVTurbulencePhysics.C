@@ -253,10 +253,12 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
 
       getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
     }
-  }
 
-  if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations())
-    addAxisymmetricTurbulentViscousSource();
+    // We only add it here because the mixing length kernels deal with this
+    // withn the kernel. For mixing length see issue: #32112
+    if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations())
+      addAxisymmetricTurbulentViscousSource();
+  }
 }
 
 void
