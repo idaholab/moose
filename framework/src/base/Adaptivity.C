@@ -252,13 +252,14 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _mesh_refinement->make_flags_parallel_consistent();
 
   // Sync flags from the reference mesh
-  for (auto * const displaced_elem :
-       _displaced_problem->mesh().getMesh().active_element_ptr_range())
-  {
-    const auto * const reference_elem = _fe_problem.mesh().elemPtr(displaced_elem->id());
-    displaced_elem->set_refinement_flag(reference_elem->refinement_flag());
-    displaced_elem->set_p_refinement_flag(reference_elem->p_refinement_flag());
-  }
+  if (_displaced_problem)
+    for (auto * const displaced_elem :
+         _displaced_problem->mesh().getMesh().active_element_ptr_range())
+    {
+      const auto * const reference_elem = _fe_problem.mesh().elemPtr(displaced_elem->id());
+      displaced_elem->set_refinement_flag(reference_elem->refinement_flag());
+      displaced_elem->set_p_refinement_flag(reference_elem->p_refinement_flag());
+    }
 
   if (_adaptivity_type == AdaptivityType::P)
     _mesh_refinement->switch_h_to_p_refinement();
