@@ -133,6 +133,14 @@ public:
   virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id);
 
   /**
+   * Invoked when an element side lacks a neighbor so derived classes can validate that treating it
+   * as an external side is acceptable.
+   */
+  virtual void validateMissingNeighbor(const Elem * elem,
+                                       unsigned int side,
+                                       const std::vector<BoundaryID> & boundary_ids);
+
+  /**
    * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
    * is not the same as the subdomain of the last element).  Beware of over-using this!
    * You might think that you can do some expensive stuff in here and get away with it...
@@ -301,7 +309,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             postInternalSide(elem, side);
           }
           else
+          {
+            validateMissingNeighbor(elem, side, boundary_ids);
             onExternalSide(elem, side);
+          }
         } // sides
 
         postElement(elem);
@@ -409,6 +420,13 @@ void
 ThreadedElementLoopBase<RangeType>::onInterface(const Elem * /*elem*/,
                                                 unsigned int /*side*/,
                                                 BoundaryID /*bnd_id*/)
+{
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoopBase<RangeType>::validateMissingNeighbor(
+    const Elem * /*elem*/, unsigned int /*side*/, const std::vector<BoundaryID> & /*boundary_ids*/)
 {
 }
 

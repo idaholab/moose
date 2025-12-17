@@ -76,6 +76,11 @@ protected:
   virtual void computeOnInternalFace() = 0;
   ///@}
 
+  /// Validate that treating the current side as external is acceptable when no neighbor is found.
+  void validateMissingNeighbor(const Elem * elem,
+                               unsigned int side,
+                               const std::vector<BoundaryID> & boundary_ids) override;
+
   /**
    * Will dispatch to computeResidual/computeJacobian/computeResidualAndJacobian based on the
    * derived class
@@ -130,6 +135,8 @@ protected:
 
   NonlinearSystemBase & _nl;
   unsigned int _num_cached;
+  mutable std::unordered_map<BoundaryID, std::vector<std::string>>
+      _boundary_neighbor_required_kernels;
 
   /// Reference to BC storage structures
   MooseObjectTagWarehouse<IntegratedBCBase> & _integrated_bcs;

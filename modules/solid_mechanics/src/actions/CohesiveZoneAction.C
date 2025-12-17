@@ -177,11 +177,6 @@ CohesiveZoneAction::act()
   if (_ndisp != _mesh->dimension())
     paramError("displacements", "Number of displacements must match problem dimension.");
 
-  if (_mesh->hasIncompleteDisjointInterfaceSidesetPairs())
-    mooseError("CohesiveZoneAction Error: The mesh contains incomplete interface boundary pairs. "
-               "Please ensure that for every interface boundary 'blockA_blockB' there is a "
-               "corresponding 'blockB_blockA' boundary when using CZM.");
-
   chekMultipleActionParameters();
 
   if (_current_task == "add_interface_kernel")

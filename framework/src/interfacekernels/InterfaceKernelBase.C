@@ -94,7 +94,8 @@ InterfaceKernelBase::InterfaceKernelBase(const InputParameters & parameters)
     _save_in_var_side(parameters.get<MultiMooseEnum>("save_in_var_side")),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_var_side(parameters.get<MultiMooseEnum>("diag_save_in_var_side")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
+    _require_neighbor(true)
 {
 }
 
