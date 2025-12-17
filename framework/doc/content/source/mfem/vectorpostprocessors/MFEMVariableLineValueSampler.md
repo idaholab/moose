@@ -10,7 +10,7 @@ along a specified line using MFEM's
 
 ## Example Input File Syntax
 
-!listing mfem/vectorpostprocessors/line_value_sampler/line_value_sampler_diffusion.i block=VectorPostprocessors
+!listing mfem/kernels/diffusion.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/MFEMVariableLineValueSampler
 
