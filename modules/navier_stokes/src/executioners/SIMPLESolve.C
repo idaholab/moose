@@ -53,6 +53,10 @@ SIMPLESolve::checkIntegrity()
     for (const auto system : _passive_scalar_systems)
       checkTimeKernels(*system);
 
+  if (_has_pm_radiation_systems)
+    for (const auto system : _pm_radiation_systems)
+      checkTimeKernels(*system);
+
   if (_has_active_scalar_systems)
     for (const auto system : _active_scalar_systems)
       checkTimeKernels(*system);
