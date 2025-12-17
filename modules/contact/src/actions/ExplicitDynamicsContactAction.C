@@ -50,7 +50,7 @@ ExplicitDynamicsContactAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block",
       {},
-      "Optional list of subdomain names on which to create the contact MooseObjects.  If omitted, "
+      "Optional list of subdomain names on which to create the contact MooseObjects. If omitted, "
       "MooseObjects will be created on all subdomains");
   params.addParam<std::vector<VariableName>>(
       "displacements",
