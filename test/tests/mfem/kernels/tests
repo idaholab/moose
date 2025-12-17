@@ -14,16 +14,16 @@
     max_threads = 1
   []
   [MFEMDiffusion]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd
-                OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     expect_out = 'Parallel Type:.*distributed.*Mesh Dimension.*3.*Spatial Dimension.*3.*Elems.*2476.*Num Subdomains.*1.*Solver.*MFEMHypreGMRES'
+    abs_zero = 1e-6
   []
   [MFEMDiffusionAMR]
     design = 'MFEMRefinementMarker.md MFEMIndicator.md MFEML2ZienkiewiczZhuIndicator.md'
@@ -51,10 +51,9 @@
     []
   []
   [MFEMDiffusionPartial]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
-              'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion_line_sample_0001.csv'
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/assembly_level=partial'
     requirement = 'The system shall have the ability to solve a diffusion problem with partial assembly using MFEM.'
@@ -62,12 +61,12 @@
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
+    abs_zero = 1e-6
   []
   [MFEMDiffusionMatFree]
-    type = XMLDiff
+    type = CSVDiff
     input = diffusion.i
-    xmldiff = 'OutputData/Diffusion/Run0/Run0.pvd '
-              'OutputData/Diffusion/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/Diffusion_line_sample_0001.csv'
     cli_args = 'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Executioner/device=ceed-cpu '
                'Executioner/assembly_level=none'
@@ -76,6 +75,7 @@
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
+    abs_zero = 1e-6
   []
   [MFEMGradDiv]
     type = XMLDiff
