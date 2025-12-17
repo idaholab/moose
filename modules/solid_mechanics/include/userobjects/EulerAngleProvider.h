@@ -21,7 +21,11 @@ class EulerAngleProvider : public GeneralUserObject
 public:
   static InputParameters validParams();
 
-  EulerAngleProvider(const InputParameters & parameters) : GeneralUserObject(parameters) {}
+  EulerAngleProvider(const InputParameters & parameters)
+    : GeneralUserObject(parameters),
+      _angles(declareRestartableData<std::vector<EulerAngles>>("euler_angles"))
+  {
+  }
 
   virtual const EulerAngles & getEulerAngles(unsigned int i) const
   {
@@ -32,5 +36,5 @@ public:
   virtual unsigned int getGrainNum() const { return _angles.size(); };
 
 protected:
-  std::vector<EulerAngles> _angles;
+  std::vector<EulerAngles> & _angles;
 };
