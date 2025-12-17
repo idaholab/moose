@@ -74,17 +74,24 @@ void EquationSystem::SortTestAndTrialNames()
   std::vector<std::string> common_vars;
   for (const auto & name : _test_var_names)
   {
-    if (VectorContainsName(_trial_var_names, name))
+    if (VectorContainsName(_coupled_var_names, name))
       common_vars.push_back(name);      
   }
 
-  // Move common variables to beginning of both vectors, and in the same order
+  // Move common variables to beginning of vectors, and in the same order.
+  // The names in _coupled_var_names must be common to test and trial names
   for (const auto & name : common_vars)
   {
     _test_var_names.erase(std::find(_test_var_names.begin(), _test_var_names.end(), name));
     _test_var_names.insert(_test_var_names.begin(), name);
     _trial_var_names.erase(std::find(_trial_var_names.begin(), _trial_var_names.end(), name));
     _trial_var_names.insert(_trial_var_names.begin(), name);
+    _coupled_var_names.erase(std::find(_coupled_var_names.begin(), _coupled_var_names.end(), name));
+    _coupled_var_names.insert(_coupled_var_names.begin(), name);
+
+    //_eliminated_var_names.erase(std::find(_eliminated_var_names.begin(), _eliminated_var_names.end(), name));
+    //_eliminated_var_names.insert(_eliminated_var_names.begin(), name);
+
   }
 }
 
@@ -189,7 +196,6 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     _var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(trial_var_name)->ParFESpace()));
   }
-
 
   // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
