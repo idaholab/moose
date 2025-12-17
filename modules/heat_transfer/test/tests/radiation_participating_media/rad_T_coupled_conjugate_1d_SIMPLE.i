@@ -244,16 +244,6 @@ advected_interp_method = 'upwind'
   []
 []
 
-# [FunctorMaterials]
-#   [rhocpT]
-#     property_name = 'rhocpT'
-#     type = ParsedFunctorMaterial
-#     functor_names = 'T_fluid'
-#     expression = '${rho}*${cp}*T_fluid'
-#   []
-# []
-
-
 [Executioner]
   type = SIMPLE
 
@@ -275,22 +265,30 @@ advected_interp_method = 'upwind'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
 
-  active_scalar_systems = 'radiation_system'
+  #active_scalar_systems = 'radiation_system'
+  pm_radiation_systems = 'radiation_system'
   energy_system = 'energy_system'
   solid_energy_system = 'solid_energy_system'
-  active_scalar_l_abs_tol = 1e-14
+  #active_scalar_l_abs_tol = 1e-14
+  pm_radiation_l_abs_tol = 1e-14
   energy_l_abs_tol = 1e-14
   solid_energy_l_abs_tol = 1e-14
-  active_scalar_l_tol = 0
+  #active_scalar_l_tol = 0
+  pm_radiation_l_tol = 0
   energy_l_tol = 0
   solid_energy_l_tol = 0
-  active_scalar_equation_relaxation = 0.95
+  #active_scalar_equation_relaxation = 0.95
+  pm_radiation_equation_relaxation = 0.95
   energy_equation_relaxation = 1.0
   energy_absolute_tolerance = 1e-9
   solid_energy_absolute_tolerance = 1e-14
-  active_scalar_absolute_tolerance = 1e-14
-  active_scalar_petsc_options_iname = '-pc_type -pc_hypre_type'
-  active_scalar_petsc_options_value = 'hypre boomeramg'
+  #active_scalar_absolute_tolerance = 1e-14
+  #active_scalar_petsc_options_iname = '-pc_type -pc_hypre_type'
+  #active_scalar_petsc_options_value = 'hypre boomeramg'
+  pm_radiation_absolute_tolerance = 1e-14
+  pm_radiation_petsc_options_iname = '-pc_type -pc_hypre_type'
+  pm_radiation_petsc_options_value = 'hypre boomeramg'
+
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
   solid_energy_petsc_options_iname = '-pc_type -pc_hypre_type'
