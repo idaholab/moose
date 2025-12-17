@@ -24,6 +24,17 @@
 #include "Parser.h"
 #include "FEProblemBase.h"
 #include "PiecewiseBase.h"
+#include "ActionWarehouse.h"
+#include "MaterialPropertyRegistry.h"
+#include "MaterialBase.h"
+#include "MaterialWarehouse.h"
+#include "MooseObjectWarehouse.h"
+#include "OutputWarehouse.h"
+#include "Output.h"
+#include "UserObject.h"
+#include "TheWarehouse.h"
+#include "NonlinearSystemBase.h"
+#include "AuxiliarySystem.h"
 #include "pcrecpp.h"
 #include "hit/hit.h"
 #include "wasphit/HITInterpreter.h"
@@ -143,12 +154,10 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
                           &zero_line_diagnostic](const auto & action) -> bool
   {
     Moose::ScopedThrowOnError scoped_throw_on_error;
-    bool threw = true;
 
     try
     {
       action();
-      threw = false;
     }
     // Will be thrown from the Parser while building the tree or
     // by the builder while building the input parameters
@@ -169,7 +178,9 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
       zero_line_diagnostic(err.what());
     }
 
-    return !threw;
+    // continue to build app if parsing fails and run app if building fails
+    // so that problem is there for plotting and warehouse based completion
+    return true;
   };
 
   // Setup command line (needed by the Parser)
@@ -966,6 +977,11 @@ MooseServer::addValuesToList(wasp::DataArray & completionItems,
             options_and_descs[results.adapted(i).name()] = "from /" + input_path;
       }
     }
+
+    // warehouse based completion is unavailable if problem failed to build
+    // input lookup based completion works even when problem fails to build
+    // so warehouse completion supplements lookups rather than replacing it
+    addObjectsFromWarehouses(clean_type, options_and_descs);
   }
 
   // choose format of insertion text based on if client has snippet support
@@ -1014,6 +1030,77 @@ MooseServer::getEnumsAndDocs(MooseEnumType & moose_enum_param,
   // walk over enums filling map with options and any provided descriptions
   for (const auto & item : moose_enum_param.items())
     options_and_descs[item.name()] = enum_docs.count(item) ? enum_docs.at(item) : "";
+}
+
+void
+MooseServer::addObjectsFromWarehouses(const std::string & param_type,
+                                      std::map<std::string, std::string> & options_and_descs)
+{
+  // get check app of document and return with no items if its build failed
+  auto app_ptr = queryCheckApp();
+  if (!app_ptr)
+    return;
+
+  // get problem from action warehouse and return without any items if null
+  std::shared_ptr<FEProblemBase> & problem = app_ptr->actionWarehouse().problemBase();
+  if (!problem)
+    return;
+
+  if (param_type == "NonlinearVariableName")
+  {
+    for (const auto i : make_range(problem->numNonlinearSystems()))
+      for (const auto & nls_var_name : problem->getNonlinearSystemBase(i).getVariableNames())
+        options_and_descs[nls_var_name] = "from NonlinearSystem VariableWarehouse";
+  }
+  else if (param_type == "AuxVariableName")
+  {
+    for (const auto & aux_var_name : problem->getAuxiliarySystem().getVariableNames())
+      options_and_descs[aux_var_name] = "from AuxiliarySystem VariableWarehouse";
+  }
+  else if (param_type == "VariableName")
+  {
+    for (const auto i : make_range(problem->numNonlinearSystems()))
+      for (const auto & nls_var_name : problem->getNonlinearSystemBase(i).getVariableNames())
+        options_and_descs[nls_var_name] = "from NonlinearSystem VariableWarehouse";
+    for (const auto & aux_var_name : problem->getAuxiliarySystem().getVariableNames())
+      options_and_descs[aux_var_name] = "from AuxiliarySystem VariableWarehouse";
+  }
+  else if (param_type == "MaterialPropertyName")
+  {
+    const auto & mat_prop_registry = problem->getMaterialPropertyRegistry();
+    const std::vector<std::string> mat_prop_names(mat_prop_registry.idsToNamesBegin(),
+                                                  mat_prop_registry.idsToNamesEnd());
+    for (const auto & mat_prop_name : mat_prop_names)
+      options_and_descs[mat_prop_name] = "from MaterialPropertyRegistry";
+  }
+  else if (param_type == "MaterialName")
+  {
+    for (const auto & material : problem->getMaterialWarehouse().getObjects())
+      options_and_descs[material->name()] = "from MaterialWarehouse";
+  }
+  else if (param_type == "FunctionName")
+  {
+    for (const auto & function : problem->getFunctionWarehouse().getObjects())
+      options_and_descs[function->name()] = "from FunctionWarehouse";
+  }
+  else if (param_type == "OutputName")
+  {
+    for (const auto & output_name : app_ptr->getOutputWarehouse().getOutputNames<Output>())
+      options_and_descs[output_name] = "from OutputWarehouse";
+    for (const auto & reserved_name : app_ptr->getOutputWarehouse().getReservedNames())
+      options_and_descs[reserved_name] = "from reserved names in OutputWarehouse";
+  }
+  else if (param_type == "UserObjectName")
+  {
+    std::vector<UserObject *> user_objects;
+    problem->theWarehouse()
+        .query()
+        .condition<AttribSystem>("UserObject")
+        .condition<AttribThread>(0)
+        .queryIntoUnsorted(user_objects);
+    for (const auto & user_object : user_objects)
+      options_and_descs[user_object->name()] = "from UserObjectWarehouse";
+  }
 }
 
 bool
