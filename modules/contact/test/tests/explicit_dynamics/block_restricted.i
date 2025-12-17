@@ -46,6 +46,7 @@
     block = '1 2'
   []
 []
+
 [AuxKernels]
   [vel_x]
     type = TestNewmarkTI
