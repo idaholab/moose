@@ -75,6 +75,7 @@
 
 [Problem]
   extra_tag_matrices = mass
+  solve = false
 []
 
 [GlobalParams]
