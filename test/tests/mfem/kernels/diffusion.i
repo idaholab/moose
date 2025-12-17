@@ -86,11 +86,26 @@
   device = cpu
 []
 
+[VectorPostprocessors]
+  [line_sample]
+    type = MFEMLineValueSampler
+    variable = 'concentration'
+    start_point = '2.125 0 -2.375'
+    end_point = '2.125 0 2.625'
+    num_points = 101
+  []
+[]
+
 [Outputs]
-  active = ParaViewDataCollection
+  active = CSV
+  [CSV]
+    type = CSV
+    execute_on = 'timestep_end'
+    file_base = OutputData/Diffusion
+  []
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/ParaView
     vtk_format = ASCII
   []
   [VisItDataCollection]

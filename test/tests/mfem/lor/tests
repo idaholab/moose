@@ -24,14 +24,13 @@
     abs_zero = 1e-6
   []
   [MFEMDiffusionLOR]
-    type = XMLDiff
+    type = CSVDiff
     input = ../kernels/diffusion.i
-    xmldiff = 'OutputData/DiffusionLOR/Run0/Run0.pvd '
-              'OutputData/DiffusionLOR/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/DiffusionLOR_line_sample_0001.csv'
     cli_args = 'FESpaces/H1FESpace/fec_order=SECOND '
                'Solver/type=MFEMCGSolver Solver/preconditioner=jacobi '
                'Preconditioner/jacobi/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/DiffusionLOR'
+               'Outputs/CSV/file_base=OutputData/DiffusionLOR'
     requirement = 'The system shall have the ability to solve a diffusion problem with Low-Order-Refined preconditioning set up from MOOSE and produce the same result as a native MFEM run.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
