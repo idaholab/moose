@@ -1,5 +1,7 @@
 # LibtorchModel
 
+!if! function=hasCapability('neml2')
+
 !alert note
 This is a NEML2 model. See the [NEML2 syntax documentation](syntax/NEML2/index.md) for guidance on using NEML2 models in a MOOSE simulation.
 
@@ -20,3 +22,9 @@ The NEML2 input file is specified inside the `NEML2` block. We specify which NEM
 NEML2 also uses automatic differenciation on the libtorch model to provide arbitrary derivatives of the outputs in relation to the inputs. Here we specify that we want to calculate $\frac{dk_T}{dT}$ to populate the Jacobian in a heat conduction example problem.
 
 !bibtex bibliography
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md

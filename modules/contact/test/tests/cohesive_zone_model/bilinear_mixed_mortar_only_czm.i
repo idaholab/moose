@@ -206,6 +206,7 @@
     penalty = 0e6
     penalty_friction = 0e4
     use_physical_gap = true
+    set_compressive_traction_to_zero = true
 
     # bilinear model parameters
     normal_strength = 'normal_strength'
@@ -215,7 +216,6 @@
     GI_c = 123
     GII_c = 54
     displacements = 'disp_x disp_y'
-
   []
 []
 

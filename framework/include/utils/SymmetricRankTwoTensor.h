@@ -43,8 +43,6 @@ template <typename>
 class TensorValue;
 }
 
-namespace boostcopy = libMesh::boostcopy;
-
 namespace MathUtils
 {
 template <typename T>
@@ -250,8 +248,7 @@ public:
    * Assignment-from-scalar operator.  Used only to zero out vectors.
    */
   template <typename Scalar>
-  typename boostcopy::enable_if_c<libMesh::ScalarTraits<Scalar>::value,
-                                  SymmetricRankTwoTensorTempl &>::type
+  typename std::enable_if<libMesh::ScalarTraits<Scalar>::value, SymmetricRankTwoTensorTempl &>::type
   operator=(const Scalar & libmesh_dbg_var(p))
   {
     libmesh_assert_equal_to(p, Scalar(0));

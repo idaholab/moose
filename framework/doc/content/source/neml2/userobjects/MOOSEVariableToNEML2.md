@@ -1,5 +1,7 @@
 # MOOSEVariableToNEML2
 
+!if! function=hasCapability('neml2')
+
 !syntax description /UserObjects/MOOSEVariableToNEML2
 
 !alert note
@@ -18,3 +20,9 @@ MOOSE[Old]VariableToNEML2
 For example, `MOOSEVariableToNEML2` gathers the (auxiliary) variable from the +current+ time step, and `MOOSEOldVariableToNEML2` gathers the (auxiliary) variable from the +previous+ time step.
 
 !syntax parameters /UserObjects/MOOSEVariableToNEML2
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
