@@ -252,6 +252,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 
     _cht.linkEnergySystems(_solid_energy_system, _energy_system, pm_radiation_systems_base);
   }
+
 }
 
 void
@@ -762,6 +763,23 @@ LinearAssemblySegregatedSolve::solve()
         _cht.resetIntegratedFluxes();
     }
 
+    // If we have participating media radiation equations, solve them here due to the strong coupling with temperature
+    if (_has_pm_radiation_systems)
+    {
+      _problem.execute(EXEC_NONLINEAR);
+
+      // We set the preconditioner/controllable parameters through petsc options. Linear
+      // tolerances will be overridden within the solver.
+      Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
+      for (const auto i : index_range(_pm_radiation_system_names))
+        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+                     i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
+                                              *_pm_radiation_systems[i],
+                                              _pm_radiation_equation_relaxation[i],
+                                              _pm_radiation_linear_control,
+                                              _pm_radiation_l_abs_tol);
+    }
+
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with
     // pressure and velocity
@@ -773,12 +791,21 @@ LinearAssemblySegregatedSolve::solve()
       // tolerances will be overridden within the solver.
       Moose::PetscSupport::petscSetOptions(_active_scalar_petsc_options, solver_params);
       for (const auto i : index_range(_active_scalar_system_names))
+      {
         ns_residuals[active_scalar_indices[i]] =
             solveAdvectedSystem(_active_scalar_system_numbers[i],
                                 *_active_scalar_systems[i],
                                 _active_scalar_equation_relaxation[i],
                                 _active_scalar_linear_control,
                                 _active_scalar_l_abs_tol);
+        // ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+        //              _pm_radiation_system_names.size() + i] =
+        //              solveAdvectedSystem(_active_scalar_system_numbers[i],
+        //                                       *_active_scalar_systems[i],
+        //                                       _active_scalar_equation_relaxation[i],
+        //                                       _active_scalar_linear_control,
+        //                                       _active_scalar_l_abs_tol);
+      }
     }
 
     // If we have turbulence equations, solve them here.
@@ -791,6 +818,8 @@ LinearAssemblySegregatedSolve::solve()
       for (const auto i : index_range(_turbulence_system_names))
       {
         ns_residuals[turbulence_indices[i]] =
+        // ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+        //              _pm_radiation_system_names.size() + _active_scalar_system_names.size() + i] =
             solveAdvectedSystem(_turbulence_system_numbers[i],
                                 *_turbulence_systems[i],
                                 _turbulence_equation_relaxation[i],

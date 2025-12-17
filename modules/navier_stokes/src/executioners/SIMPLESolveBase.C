@@ -30,9 +30,7 @@ SIMPLESolveBase::validParams()
   params.addParam<std::vector<SolverSystemName>>(
       "passive_scalar_systems", {}, "The solver system for each scalar advection equation.");
   params.addParam<std::vector<SolverSystemName>>(
-      "pm_radiation_systems",
-      {},
-      "The solver system for each participating media radiation equation.");
+      "pm_radiation_systems", {}, "The solver system for each participating media radiation equation.");
   params.addParam<std::vector<SolverSystemName>>(
       "turbulence_systems", {}, "The solver system for each surrogate turbulence equation.");
 
