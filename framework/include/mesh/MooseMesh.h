@@ -1430,15 +1430,6 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
-  /// Set whether the mesh contains incomplete disjoint interface sideset pairs.
-  void setHasIncompleteDisjointInterfaceSidesetPairs(bool has_incomplete);
-
-  /// Return whether the mesh contains incomplete disjoint interface sideset pairs.
-  bool hasIncompleteDisjointInterfaceSidesetPairs() const
-  {
-    return _has_incomplete_disjoint_interface_sideset_pairs;
-  }
-
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
@@ -2268,10 +2259,4 @@ inline bool
 MooseMesh::isLowerD(const SubdomainID subdomain_id) const
 {
   return libmesh_map_find(_sub_to_data, subdomain_id).is_lower_d;
-}
-
-inline void
-MooseMesh::setHasIncompleteDisjointInterfaceSidesetPairs(bool has_incomplete)
-{
-  _has_incomplete_disjoint_interface_sideset_pairs = has_incomplete;
 }

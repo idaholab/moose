@@ -70,6 +70,7 @@ NonlinearThread::subdomainChanged()
   // This should come first to setup the residual objects before we do dependency determination of
   // material properties and variables
   determineObjectWarehouses();
+  _boundary_neighbor_required_kernels.clear();
 
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
@@ -411,6 +412,49 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
   }
 
   _boundaries_exec_printed.insert(bid);
+}
+
+void
+NonlinearThread::validateMissingNeighbor(const Elem * elem,
+                                         const unsigned int side,
+                                         const std::vector<BoundaryID> & boundary_ids)
+{
+  if (!_ik_warehouse || boundary_ids.empty())
+    return;
+
+  for (const auto & bnd_id : boundary_ids)
+  {
+    auto cache_it = _boundary_neighbor_required_kernels.find(bnd_id);
+    if (cache_it == _boundary_neighbor_required_kernels.end())
+    {
+      std::vector<std::string> kernels;
+      if (_ik_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
+        for (const auto & ik : _ik_warehouse->getActiveBoundaryObjects(bnd_id, _tid))
+          if (ik->requireNeighbor())
+            kernels.push_back(ik->name());
+      cache_it = _boundary_neighbor_required_kernels.emplace(bnd_id, std::move(kernels)).first;
+    }
+
+    const auto & kernels = cache_it->second;
+    if (!kernels.empty())
+    {
+      std::string kernel_names = kernels.front();
+      for (std::size_t i = 1; i < kernels.size(); ++i)
+        kernel_names += ", " + kernels[i];
+
+      mooseError("[Neighbor not found] Interface kernel(s) ",
+                 kernel_names,
+                 " are present on boundary: ",
+                 _mesh.getBoundaryName(bnd_id),
+                 "(boundary id ",
+                 bnd_id,
+                 "), but no neighboring element exists for element ",
+                 elem->id(),
+                 " on side ",
+                 side,
+                 ". These kernels expect a neighbor on this boundary.");
+    }
+  }
 }
 
 void

@@ -108,7 +108,7 @@
     [boundary_pair_not_found]
       type = RunException
       input = 'czm_multiple_action_and_materials.i'
-      expect_err = 'CohesiveZoneAction Error: The mesh contains incomplete interface boundary pairs'
+      expect_err = '[Neighbor not found]'
       detail = "The system shall report an error when we do not have both sides of the boundary defined but also CZM is enabled"
       cli_args = "Physics/SolidMechanics/CohesiveZone/czm_ik_012/material_output_order=CONSTAN"
                  "T Physics/SolidMechanics/CohesiveZone/czm_ik_23/material_output_order=FIRST "

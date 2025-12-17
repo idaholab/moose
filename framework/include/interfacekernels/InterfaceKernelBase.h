@@ -43,6 +43,12 @@ public:
 
   void prepareShapes(unsigned int var_num) override final;
 
+  /// Whether this interface kernel requires neighbor information
+  bool requireNeighbor() const { return _require_neighbor; }
+
+  /// Set whether this interface kernel requires neighbor information
+  void requireNeighbor(bool req) { _require_neighbor = req; }
+
 protected:
   /// Compute jacobians at quadrature points
   virtual Real computeQpJacobian(Moose::DGJacobianType /*type*/) { return 0; }
@@ -141,4 +147,8 @@ protected:
 
   /// The aux variables to save the diagonal Jacobian contributions of the secondary variables to
   std::vector<MooseVariableFEBase *> _secondary_save_in_jacobian_variables;
+
+private:
+  /// Whether this interface kernel requires neighbor information
+  bool _require_neighbor;
 };
