@@ -32,7 +32,7 @@ SplitMeshAction::act()
 {
   auto mesh = _app.actionWarehouse().mesh();
 
-  // Keep the mesh unpartitioned until right before the split 
+  // Keep the mesh unpartitioned until right before the split
   mesh->getMesh().skip_partitioning(false);
 
   const std::string split_file_arg = _app.parameters().isParamSetByUser("split_file")
