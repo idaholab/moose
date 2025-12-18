@@ -210,6 +210,16 @@ Applications:
         remove:
             - framework/doc/remove.yml
 
+    shifted_boundary_method:
+        exe_directory: modules/combined
+        app_types:
+            - ShiftedBoundaryMethodApp
+        content_directory: modules/shifted_boundary_method/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+
     solid_properties:
         exe_directory: modules/combined
         app_types:
@@ -414,6 +424,11 @@ Requirements:
     scalar_transport:
         directories:
             - modules/scalar_transport
+
+    shifted_boundary_method:
+        directories:
+            - modules/shifted_boundary_method
+        log_missing: WARNING
 
     solid_properties:
         directories:
