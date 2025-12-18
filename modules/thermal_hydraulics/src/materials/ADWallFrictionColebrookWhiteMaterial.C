@@ -1,0 +1,63 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADRealForward.h"
+#include "ADWallFrictionColebrookWhiteMaterial.h"
+#include "Numerics.h"
+#include <cmath>
+
+registerMooseObject("ThermalHydraulicsApp", ADWallFrictionColebrookWhiteMaterial);
+
+InputParameters
+ADWallFrictionColebrookWhiteMaterial::validParams()
+{
+  InputParameters params = Material::validParams();
+  params.addClassDescription("Computes the Darcy friction factor using the Churchill correlation.");
+  params.addRequiredParam<MaterialPropertyName>("rho", "Density");
+  params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the velocity");
+  params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");
+
+  params.addRequiredParam<MaterialPropertyName>("f_D", "Darcy friction factor material property");
+  params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
+
+  params.addParam<Real>("roughness", 0, "Surface roughness");
+  params.declareControllable("roughness");
+  return params;
+}
+
+ADWallFrictionColebrookWhiteMaterial::ADWallFrictionColebrookWhiteMaterial(const InputParameters & parameters)
+  : Material(parameters),
+    _f_D_name(getParam<MaterialPropertyName>("f_D")),
+    _f_D(declareADProperty<Real>(_f_D_name)),
+
+    _mu(getADMaterialProperty<Real>("mu")),
+    _rho(getADMaterialProperty<Real>("rho")),
+    _vel(getADMaterialProperty<Real>("vel")),
+    _D_h(getADMaterialProperty<Real>("D_h")),
+    _roughness(getParam<Real>("roughness"))
+{
+}
+
+void
+ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
+{
+  ADReal Re = THM::Reynolds(1, _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
+  ADReal f_D_old = 0;
+
+  using std::abs, std::pow, std::log10, std::sqrt;
+
+  ADReal & f_D = _f_D[_qp];
+  f_D = 0.01; // initial guess
+  while (abs((f_D - f_D_old)/f_D) > 1e-12)
+  {
+    f_D_old = f_D;
+    f_D = pow(-2.*log10(_roughness/(3.7*_D_h[_qp]) + 2.51/(Re*sqrt(f_D))), -2.);
+  }
+
+}
