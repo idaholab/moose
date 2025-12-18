@@ -133,14 +133,6 @@ public:
   virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id);
 
   /**
-   * Invoked when an element side lacks a neighbor so derived classes can validate that treating it
-   * as an external side is acceptable.
-   */
-  virtual void validateMissingNeighbor(const Elem * elem,
-                                       unsigned int side,
-                                       const std::vector<BoundaryID> & boundary_ids);
-
-  /**
    * Called every time the current subdomain changes (i.e. the subdomain of _this_ element
    * is not the same as the subdomain of the last element).  Beware of over-using this!
    * You might think that you can do some expensive stuff in here and get away with it...
@@ -210,6 +202,19 @@ protected:
    * type of loop where the logic will be different is when projecting stateful material properties
    */
   virtual bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const;
+
+  /**
+   * Check whether there are any active interface kernels on the given element side
+   *
+   * @note Loops derived from ThreadedElementLoopBase that may execute on externel sides _must_
+   * override this method.
+   * @param elem Element we are on
+   * @param side local side number of the element 'elem'
+   * @param boundary_ids Boundary IDs associated with the element side
+   */
+  virtual bool hasActiveInterfaceKernel(const Elem * elem,
+                                        unsigned int side,
+                                        const std::vector<BoundaryID> & boundary_ids) const;
 };
 
 template <typename RangeType>
@@ -310,7 +315,13 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
           }
           else
           {
-            validateMissingNeighbor(elem, side, boundary_ids);
+            if (hasActiveInterfaceKernel(elem, side, boundary_ids))
+              mooseException("Element ",
+                             elem->id(),
+                             " on side ",
+                             side,
+                             " is missing a neighbor (hence identified as an external side) but "
+                             "has interface kernel(s) defined on the boundary.");
             onExternalSide(elem, side);
           }
         } // sides
@@ -425,13 +436,6 @@ ThreadedElementLoopBase<RangeType>::onInterface(const Elem * /*elem*/,
 
 template <typename RangeType>
 void
-ThreadedElementLoopBase<RangeType>::validateMissingNeighbor(
-    const Elem * /*elem*/, unsigned int /*side*/, const std::vector<BoundaryID> & /*boundary_ids*/)
-{
-}
-
-template <typename RangeType>
-void
 ThreadedElementLoopBase<RangeType>::subdomainChanged()
 {
 }
@@ -465,6 +469,16 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
   // we only compute when we are visiting the finer element
   return (neighbor.active() && (neighbor_level == elem_level) && (elem_id < neighbor_id)) ||
          (neighbor_level < elem_level);
+}
+
+template <typename RangeType>
+bool
+ThreadedElementLoopBase<RangeType>::hasActiveInterfaceKernel(
+    const Elem * /*elem*/,
+    unsigned int /*side*/,
+    const std::vector<BoundaryID> & /*boundary_ids*/) const
+{
+  return false;
 }
 
 template <typename RangeType>

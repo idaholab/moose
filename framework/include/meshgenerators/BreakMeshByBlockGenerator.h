@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "BreakMeshByBlockGeneratorBase.h"
+#include "MeshGenerator.h"
 #include <unordered_set>
 
 /*
  * A mesh generator to split a mesh by a set of blocks
  */
-class BreakMeshByBlockGenerator : public BreakMeshByBlockGeneratorBase
+class BreakMeshByBlockGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
@@ -24,7 +24,51 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-protected:
+private:
+  /// check that if split_interface==true interface_id and interface_name are
+  /// not set by the user. It also check that the provided interface_id is not
+  /// already used
+  void checkInputParameter();
+
+  /// given the primary and secondary blocks this method return the appropriate
+  /// boundary id and name
+  void findBoundaryName(const MeshBase & mesh,
+                        const subdomain_id_type & primaryBlockID,
+                        const subdomain_id_type & secondaryBlockID,
+                        BoundaryName & boundary_name,
+                        const boundary_id_type & boundaryID,
+                        BoundaryInfo & boundary_info);
+
+  std::set<std::pair<std::string, BoundaryID>> _bName_bID_set;
+
+  /// this method finds the first free boundary id
+  BoundaryID findFreeBoundaryId(const MeshBase & mesh);
+
+  /// this method generate the boundary name by assembling subdomain names
+  BoundaryName generateBoundaryName(const MeshBase & mesh,
+                                    const subdomain_id_type & primaryBlockID,
+                                    const subdomain_id_type & secondaryBlockID);
+
+  /// this method save the boundary name/id pair
+  void mapBoundaryIdAndBoundaryName(const boundary_id_type & boundaryID,
+                                    const std::string & boundaryName);
+
+  /// generate the new boundary interface
+  void addInterface(MeshBase & mesh);
+
+  /**
+   * @brief Synchronizes connected blocks across all MPI ranks.
+   *
+   * This process consists of two phases:
+   * Phase 0: Each rank computes the locally connected blocks for the nodes it owns and sends
+   *          this information to the owner of each node.
+   * Phase 1: The owner of each node aggregates all received connected block information and
+   *          broadcasts the global set of connected blocks for each node to all ranks.
+   */
+  std::unordered_map<dof_id_type, std::set<subdomain_id_type>> syncConnectedBlocks(
+      const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      const MeshBase & mesh);
+
   /// This is a helper method to avoid recoding the same if everywhere.
   /// If this mesh modifier is used in block restricted mode and the provided
   /// element belongs to one of the provided blocks it returns the
@@ -41,6 +85,10 @@ protected:
 
   /// the mesh to modify
   std::unique_ptr<MeshBase> & _input;
+  /// the name of the new interface
+  std::string _interface_name;
+  /// the flag to split the interface by block
+  bool _split_interface;
   /// set of subdomain pairs between which interfaces will be generated.
   std::unordered_set<std::pair<SubdomainID, SubdomainID>> _block_pairs;
   /// set of the blocks to split the mesh on
@@ -58,36 +106,18 @@ protected:
   /// whether to add two sides interface boundaries
   const bool _add_interface_on_two_sides;
 
-private:
-  // Typedef for a single message entry: (node_id, vector of connected block_ids)
-  typedef std::pair<dof_id_type, std::vector<subdomain_id_type>> NodeConnectedBlocksPair;
+  using NodeConnectedBlocksPair = std::pair<dof_id_type, std::vector<subdomain_id_type>>;
+  using SubdomainPair = std::pair<subdomain_id_type, subdomain_id_type>;
+  using ElemSide = std::tuple<const Elem *, unsigned int>;
 
-  /// @brief a set of pairs of block ids between which new boundary sides are created
-  std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
+  /// Set of pairs of block ids between which new boundary sides are created
+  std::set<SubdomainPair> _neighboring_block_list;
 
-  /// @brief a map from a pair of block ids to a set of pairs of an element and a side
-  std::map<std::pair<subdomain_id_type, subdomain_id_type>,
-           std::set<std::pair<const Elem *, unsigned int>>>
-      _subid_pairs_to_sides;
+  /// Map from a pair of block ids to a set of ElemSide tuples. Each tuple
+  /// contains an element pointer and a side index.
+  std::unordered_map<SubdomainPair, std::set<ElemSide>> _subid_pairs_to_sides;
 
-  /// @brief Maps a pair of subdomain ids to the corresponding boundary id.
+  /// Map from a pair of block ids to the corresponding boundary id.
   std::unordered_map<std::pair<subdomain_id_type, subdomain_id_type>, boundary_id_type>
       _subid_pairs_to_boundary_id;
-
-  /// generate the new boundary interface
-  void addInterface(MeshBase & mesh);
-
-  /**
-   * @brief Synchronizes connected blocks across all MPI ranks.
-   *
-   * This process consists of two phases:
-   * Phase 0: Each rank computes the locally connected blocks for the nodes it owns and sends
-   *          this information to the owner of each node.
-   * Phase 1: The owner of each node aggregates all received connected block information and
-   *          broadcasts the global set of connected blocks for each node to all ranks.
-   */
-  void syncConnectedBlocks(
-      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-      MeshBase & mesh,
-      std::map<dof_id_type, std::set<subdomain_id_type>> & nodeid_to_connected_blocks);
 };

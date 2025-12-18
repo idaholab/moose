@@ -14,8 +14,6 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
 #include "libmesh/partitioner.h"
-#include <typeinfo>
-
 #include "timpi/parallel_sync.h"
 
 registerMooseObject("MooseApp", BreakMeshByBlockGenerator);
@@ -23,11 +21,21 @@ registerMooseObject("MooseApp", BreakMeshByBlockGenerator);
 InputParameters
 BreakMeshByBlockGenerator::validParams()
 {
-  InputParameters params = BreakMeshByBlockGeneratorBase::validParams();
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
       "Break the mesh at interfaces between blocks. New nodes will be generated so elements on "
       "each side of the break are no longer connected.");
+
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+
+  params.addParam<std::string>(
+      "interface_name",
+      "interface",
+      "the name of the new interface. Cannot be used whit `split_interface=true`");
+  params.addParam<bool>("split_interface",
+                        true,
+                        "If true, it creates a "
+                        "different interface for each block pair.");
   params.addParam<std::vector<SubdomainName>>(
       "surrounding_blocks",
       "The list of subdomain names surrounding which interfaces will be generated.");
@@ -48,9 +56,7 @@ BreakMeshByBlockGenerator::validParams()
       "the name of the interface transition boundary created when blocks are provided");
 
   params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC |
-                                    Moose::RelationshipManagerType::COUPLING,
+                                Moose::RelationshipManagerType::GEOMETRIC,
                                 [](const InputParameters &, InputParameters & rm_params)
                                 { rm_params.set<unsigned short>("layers") = 1; });
 
@@ -58,8 +64,10 @@ BreakMeshByBlockGenerator::validParams()
 }
 
 BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & parameters)
-  : BreakMeshByBlockGeneratorBase(parameters),
+  : MeshGenerator(parameters),
     _input(getMesh("input")),
+    _interface_name(getParam<std::string>("interface_name")),
+    _split_interface(getParam<bool>("split_interface")),
     _block_pairs_restricted(parameters.isParamSetByUser("block_pairs")),
     _surrounding_blocks_restricted(parameters.isParamSetByUser("surrounding_blocks")),
     _add_transition_interface(getParam<bool>("add_transition_interface")),
@@ -67,6 +75,10 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     _interface_transition_name(getParam<BoundaryName>("interface_transition_name")),
     _add_interface_on_two_sides(getParam<bool>("add_interface_on_two_sides"))
 {
+  if (getParam<bool>("split_interface") && _pars.isParamSetByUser("interface_name"))
+    paramError("interface_name",
+               "if split_interface == true, the new interface_name cannot be specified by the "
+               "user. It will be automatically assigned");
   if (_block_pairs_restricted && _surrounding_blocks_restricted)
     paramError("block_pairs_restricted",
                "BreakMeshByBlockGenerator: 'surrounding_blocks' and 'block_pairs' can not be used "
@@ -83,16 +95,89 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
                "are specified.");
 }
 
+boundary_id_type
+BreakMeshByBlockGenerator::findFreeBoundaryId(const MeshBase & mesh)
+{
+  const std::set<boundary_id_type> & currentBoundaryIds =
+      mesh.get_boundary_info().get_boundary_ids();
+  bool freeBoundaryNotFound = true;
+  boundary_id_type freeId;
+  for (freeId = 0; freeId < std::numeric_limits<boundary_id_type>::max(); freeId++)
+  {
+    if (currentBoundaryIds.count(freeId) == 0)
+    {
+      // bid is not in the set, boundaryID is free
+      freeBoundaryNotFound = false;
+      break;
+    }
+  }
+
+  if (freeBoundaryNotFound)
+    mooseError("Too many boundaries. Maximum limit exceeded!");
+
+  return freeId;
+}
+
+BoundaryName
+BreakMeshByBlockGenerator::generateBoundaryName(const MeshBase & mesh,
+                                                const subdomain_id_type & primaryBlockID,
+                                                const subdomain_id_type & secondaryBlockID)
+{
+  std::string primary_block_name = mesh.subdomain_name(primaryBlockID);
+  std::string secondary_block_name = mesh.subdomain_name(secondaryBlockID);
+  if (primary_block_name.empty())
+    primary_block_name = "Block" + std::to_string(primaryBlockID);
+  if (secondary_block_name.empty())
+    secondary_block_name = "Block" + std::to_string(secondaryBlockID);
+
+  return primary_block_name + "_" + secondary_block_name;
+}
+
+void
+BreakMeshByBlockGenerator::mapBoundaryIdAndBoundaryName(const boundary_id_type & boundaryID,
+                                                        const std::string & boundaryName)
+{
+  _bName_bID_set.insert(std::pair<std::string, int>(boundaryName, boundaryID));
+}
+
+void
+BreakMeshByBlockGenerator::findBoundaryName(const MeshBase & mesh,
+                                            const subdomain_id_type & primaryBlockID,
+                                            const subdomain_id_type & secondaryBlockID,
+                                            BoundaryName & boundaryName,
+                                            const boundary_id_type & boundaryID,
+                                            BoundaryInfo & boundary_info)
+{
+  boundaryName = generateBoundaryName(mesh, primaryBlockID, secondaryBlockID);
+
+  // check if the boundary name already exist
+  bool checkBoundaryAlreadyExist = false;
+  for (auto b : _bName_bID_set)
+  {
+    if (b.first.compare(boundaryName) == 0)
+    {
+      mooseAssert(boundaryID == b.second, "Boundary with two inconsistent ids");
+      checkBoundaryAlreadyExist = true;
+    }
+  }
+
+  if (checkBoundaryAlreadyExist)
+    return;
+  else
+  {
+    mapBoundaryIdAndBoundaryName(boundaryID, boundaryName);
+
+    boundary_info.sideset_name(boundaryID) = boundaryName;
+
+    return;
+  }
+}
+
 std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-
-  // Try to trick the rest of the world into thinking we're prepared
-  mesh->prepare_for_use();
-
   const auto max_node_id = mesh->max_node_id();
-
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Handle block restrictions
@@ -115,7 +200,8 @@ BreakMeshByBlockGenerator::generate()
           std::min(block_pair[0], block_pair[1]), std::max(block_pair[0], block_pair[1]));
 
       _block_pairs.insert(pair);
-      // Insert all SubdomainIDs from block_pair into _block_set (duplicates automatically ignored)
+      // Insert all SubdomainIDs from block_pair into _block_set (duplicates automatically
+      // ignored)
       std::copy(block_pair.begin(), block_pair.end(), std::inserter(_block_set, _block_set.end()));
     }
   }
@@ -141,33 +227,33 @@ BreakMeshByBlockGenerator::generate()
                "already exits");
 
   // initialize the node to element map
-  std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
+  std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
-    for (unsigned int n = 0; n < elem->n_nodes(); n++)
+    for (const auto n : make_range(elem->n_nodes()))
       node_to_elem_map[elem->node_id(n)].push_back(elem->id());
 
   // Sync connected block info across all ranks
   // a map from a node id to the set of connected block ids
-  std::map<dof_id_type, std::set<subdomain_id_type>> nodeid_to_connected_blocks;
-  syncConnectedBlocks(node_to_elem_map, *mesh, nodeid_to_connected_blocks);
+  const auto nodeid_to_connected_blocks = syncConnectedBlocks(node_to_elem_map, *mesh);
 
   // Main loop to duplicate nodes
-  for (const auto & map_entry : node_to_elem_map)
+  for (const auto & [current_node_id, connected_elems] : node_to_elem_map)
   {
-    const dof_id_type current_node_id = map_entry.first;
-    const Node * current_node = mesh->node_ptr(current_node_id);
+    const auto * current_node = mesh->node_ptr(current_node_id);
     if (!current_node)
       continue;
 
     // If the node is not connected to any blocks, skip it
-    if (nodeid_to_connected_blocks.find(current_node_id) == nodeid_to_connected_blocks.end())
+    auto it = nodeid_to_connected_blocks.find(current_node_id);
+    if (it == nodeid_to_connected_blocks.end())
       continue;
 
     // Get the set of blocks connected to the current node.
     // Make a local copy because we'll modify it (e.g., erase Elem::invalid_subdomain_id).
     // Preserve the original map's information (including invalid_subdomain_id) for global
     // synchronization/logic, but operate on the copy for duplication decisions.
-    auto connected_blocks = nodeid_to_connected_blocks.at(current_node_id);
+    auto connected_blocks = it->second;
+
     // Remove invalid subdomain if block pairs restriction is active
     if (_block_pairs_restricted)
       connected_blocks.erase(Elem::invalid_subdomain_id);
@@ -177,14 +263,12 @@ BreakMeshByBlockGenerator::generate()
     // check if current_node need to be duplicated
     if (node_multiplicity > 1)
     {
-      // retrieve connected elements for a particular node from the map
-      const std::vector<dof_id_type> & connected_elems = map_entry.second;
-
       // find reference_subdomain_id (e.g. the subdomain with lower id or the
       // Elem::invalid_subdomain_id)
       auto subdomain_it = connected_blocks.begin();
       subdomain_id_type reference_subdomain_id =
-          connected_blocks.find(Elem::invalid_subdomain_id) != connected_blocks.end()
+          !_block_pairs_restricted &&
+                  connected_blocks.find(Elem::invalid_subdomain_id) != connected_blocks.end()
               ? Elem::invalid_subdomain_id
               : *subdomain_it;
 
@@ -197,17 +281,17 @@ BreakMeshByBlockGenerator::generate()
         should_create_new_node = false;
 
         // Directly use the global info synchronized earlier by syncConnectedBlocks
-        const auto & sets_blocks_for_this_node = nodeid_to_connected_blocks.at(
-            current_node->id()); // invalid subdomain is included for correct logic
+        // Invalid subdomain is included for correct logic
+        const auto & sets_blocks_for_this_node = it->second;
 
         // Check if this node is exactly at the boundary between two blocks
-        // If it is junction between more than two blocks, we do not split it
+        // If it is a junction between more than two blocks, we do not split it
         if (sets_blocks_for_this_node.size() == 2)
         {
           // Get the two block IDs from the set
-          auto it = sets_blocks_for_this_node.begin();
-          subdomain_id_type block1 = *it;
-          subdomain_id_type block2 = *std::next(it);
+          auto set_blocks_for_this_node_it = sets_blocks_for_this_node.begin();
+          subdomain_id_type block1 = *set_blocks_for_this_node_it;
+          subdomain_id_type block2 = *std::next(set_blocks_for_this_node_it);
 
           // Check if this block pair is one of the user-specified pairs to split
           if (findBlockPairs(block1, block2))
@@ -235,8 +319,8 @@ BreakMeshByBlockGenerator::generate()
 
           std::vector<boundary_id_type> node_boundary_ids;
 
-          for (unsigned int node_id = 0; node_id < current_elem->n_nodes(); ++node_id)
-            if (current_elem->node_id(node_id) ==
+          for (const auto local_node_id : make_range(current_elem->n_nodes()))
+            if (current_elem->node_id(local_node_id) ==
                 current_node->id()) // if current node == node on element
             {
               if (should_create_new_node)
@@ -257,7 +341,7 @@ BreakMeshByBlockGenerator::generate()
                 // subdomain elem
                 new_node->processor_id() = current_elem->processor_id();
                 mesh->add_node(new_node);
-                current_elem->set_node(node_id, new_node);
+                current_elem->set_node(local_node_id, new_node);
                 // Add boundary info to the new node
                 boundary_info.boundary_ids(current_node, node_boundary_ids);
                 boundary_info.add_node(new_node, node_boundary_ids);
@@ -278,11 +362,11 @@ BreakMeshByBlockGenerator::generate()
               if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
                   connected_elem != current_elem)
               {
-                for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
-                  if (connected_elem->node_id(node_id) ==
+                for (const auto local_node_id : make_range(connected_elem->n_nodes()))
+                  if (connected_elem->node_id(local_node_id) ==
                       current_node->id()) // if current node == node on element
                   {
-                    connected_elem->set_node(node_id, new_node);
+                    connected_elem->set_node(local_node_id, new_node);
                     break;
                   }
               }
@@ -348,13 +432,13 @@ BreakMeshByBlockGenerator::generate()
                       bool need_to_switch)
               {
                 _neighboring_block_list.insert(blocks_pair);
-                _subid_pairs_to_sides[blocks_pair].insert(
-                    std::make_pair(!need_to_switch ? current_elem : connected_elem, side));
+                _subid_pairs_to_sides[blocks_pair].emplace(
+                    !need_to_switch ? current_elem : connected_elem, side);
                 if (_add_interface_on_two_sides)
                 {
                   _neighboring_block_list.insert(blocks_pair2);
-                  _subid_pairs_to_sides[blocks_pair2].insert(std::make_pair(
-                      !need_to_switch ? connected_elem : current_elem, connected_elem_side));
+                  _subid_pairs_to_sides[blocks_pair2].emplace(
+                      !need_to_switch ? connected_elem : current_elem, connected_elem_side);
                 }
               };
 
@@ -405,7 +489,7 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
 
   BoundaryName boundary_name;
 
-  std::set<boundary_id_type> ids = boundary_info.get_boundary_ids();
+  const std::set<boundary_id_type> & ids = boundary_info.get_boundary_ids();
   boundary_id_type new_boundaryID = *ids.rbegin() + 1;
 
   // Make sure the new is the same on every processor
@@ -416,7 +500,6 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
   // All ranks will process the pairs in exactly the same order.
   std::vector<std::pair<subdomain_id_type, subdomain_id_type>> sorted_pairs(
       _neighboring_block_list.begin(), _neighboring_block_list.end());
-  std::sort(sorted_pairs.begin(), sorted_pairs.end());
 
   for (auto & boundary_side : sorted_pairs)
   {
@@ -489,28 +572,22 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
     }
 
     // Map the block pair (subdomain_id_A, subdomain_id_B) to the generated boundary_id
-    // This makes it easy to look up or create boundary pairs later
     _subid_pairs_to_boundary_id[boundary_side] = boundary_id;
 
     // loop over all the side belonging to each pair and add it to the proper interface
     auto boundary_side_map = _subid_pairs_to_sides.find(boundary_side);
     if (boundary_side_map != _subid_pairs_to_sides.end())
-      for (auto & element_side : boundary_side_map->second)
-        boundary_info.add_side(
-            element_side.first /*elem*/, element_side.second /*side*/, boundary_id);
+      for (const auto & [elem, side] : boundary_side_map->second)
+        boundary_info.add_side(elem, side, boundary_id);
     new_boundaryID++;
   }
 
-  // Generate boundary_id pairs mapping based on _subid_pairs_to_boundary_id
-  for (auto & entry : _subid_pairs_to_boundary_id)
+  // Generate boundary_id pairs mapping based on _subid_pairs_to_sides
+  for (const auto & [sub_pair, boundary_id] : _subid_pairs_to_boundary_id)
   {
-    const auto & sub_pair = entry.first; // (subA, subB)
-    const auto & boundary_id = entry.second;
     const auto rev_pair = std::make_pair(sub_pair.second, sub_pair.first);
-
     const bool has_reverse =
         _subid_pairs_to_boundary_id.find(rev_pair) != _subid_pairs_to_boundary_id.end();
-
     if (has_reverse)
       // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
       mesh.add_disjoint_neighbor_boundary_pairs(
@@ -539,50 +616,44 @@ BreakMeshByBlockGenerator::findBlockPairs(subdomain_id_type block_one, subdomain
   return false;
 }
 
-void
+std::unordered_map<dof_id_type, std::set<subdomain_id_type>>
 BreakMeshByBlockGenerator::syncConnectedBlocks(
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-    MeshBase & mesh,
-    std::map<dof_id_type, std::set<subdomain_id_type>> & nodeid_to_connected_blocks)
+    const std::unordered_map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+    const MeshBase & mesh)
 {
+  std::unordered_map<dof_id_type, std::set<subdomain_id_type>> nodeid_to_connected_blocks;
+
   // Phase 0: Each rank computes its local connected blocks for nodes it holds
-  for (const auto & map_entry : node_to_elem_map)
+  for (const auto & [node_id, elem_ids] : node_to_elem_map)
   {
     std::set<subdomain_id_type> connected_blocks;
-
-    const auto & elem_ids = map_entry.second;
     for (const dof_id_type elem_id : elem_ids)
     {
       const Elem * current_elem = mesh.elem_ptr(elem_id);
-
       subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
-
-      nodeid_to_connected_blocks[map_entry.first].insert(block_id);
+      nodeid_to_connected_blocks[node_id].insert(block_id);
     }
   }
 
+  // No synchronization needed for replicated meshes
   if (mesh.is_replicated())
-    return; // No synchronization needed for replicated meshes
+    return nodeid_to_connected_blocks;
 
   auto & comm = mesh.comm();
   const auto mesh_pid = mesh.processor_id();
 
   // Phase 1: Ghost nodes push their connected blocks to the owner
-  using NodeConnectedBlocksTuple = std::
-      tuple<dof_id_type, std::vector<subdomain_id_type>, processor_id_type>; // (node_id,
-                                                                             // connected_blocks,
-                                                                             // ghost_pid)
+
+  // (node_id, connected_blocks, ghost_pid)
+  using NodeConnectedBlocksTuple =
+      std::tuple<dof_id_type, std::vector<subdomain_id_type>, processor_id_type>;
   std::map<processor_id_type, std::vector<NodeConnectedBlocksTuple>> to_owner;
-  for (const auto & map_entry : nodeid_to_connected_blocks)
+  for (const auto & [node_id, blocks] : nodeid_to_connected_blocks)
   {
-    const auto node_id = map_entry.first;
     const Node * node = mesh.node_ptr(node_id);
     if (node && node->processor_id() != mesh_pid)
-    {
-      const auto & blocks = map_entry.second;
       to_owner[node->processor_id()].emplace_back(
           node_id, std::vector<subdomain_id_type>(blocks.begin(), blocks.end()), mesh_pid);
-    }
   }
 
   // Owner receives and merges ghost info into its local map, and tracks subscribers
@@ -606,7 +677,7 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
     const Node * node = mesh.node_ptr(node_id);
     if (node && node->processor_id() == mesh_pid)
     {
-      const auto & blocks_set = nodeid_to_connected_blocks.at(node_id);
+      const auto & blocks_set = libmesh_map_find(nodeid_to_connected_blocks, node_id);
       for (const auto pid : sub_pids)
         from_owner[pid].emplace_back(
             node_id, std::vector<subdomain_id_type>(blocks_set.begin(), blocks_set.end()));
@@ -621,4 +692,5 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
         for (const auto & [node_id, blocks_vec] : recv_data)
           nodeid_to_connected_blocks[node_id].insert(blocks_vec.begin(), blocks_vec.end());
       });
+  return nodeid_to_connected_blocks;
 }
