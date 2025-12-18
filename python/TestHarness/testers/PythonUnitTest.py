@@ -27,10 +27,40 @@ class PythonUnitTest(RunApp):
         # Multiple executions; doesn't support perf graph capture
         params['capture_perf_graph'] = False
         params['restep'] = False
+
+        # Force the use of a single slot by default; the -p and --n-threads
+        # options aren't currently passed to the unit test so if the user
+        # really wants threads they better force it
+        params["max_parallel"] = 1
+        params["max_threads"] = 1
+
         return params
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
+
+        # Because the unittest doesn't actually use -p or --n-threads from
+        # the test harness, it should run with exactly one parallel and one
+        # thread option. For example, if your unittest manually runs with
+        # mpiexec -n 2, this job shouldn't ever take up more than 2 slots
+        # as there isn't a way for the unittest to get those slots
+        for suffix in ["parallel", "threads"]:
+            min_name = f"min_{suffix}"
+            max_name = f"max_{suffix}"
+            min_value = params[min_name]
+            max_value = params[max_name]
+
+            # If the user sets min but not max, enforce max to be the min
+            if min_value != 1 and max_value == 1:
+                params[max_name] = min_value
+                self.addCaveats(f'{max_name}={min_value}')
+            # Same for if they set the max but not the min
+            elif max_value != 1 and min_value == 1:
+                params[min_name] = max_value
+                self.addCaveats(f'{min_name}={max_value}')
+            # Otherwise, just require that they are equal (if they set both)
+            elif max_value != min_value:
+                raise ValueError(f"{min_name} and {max_name} must be equal")
 
     def getCommand(self, options):
         """

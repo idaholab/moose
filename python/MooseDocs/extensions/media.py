@@ -146,6 +146,8 @@ class ScriptCommand(ImageCommand):
         python_dir = os.path.abspath(os.path.join(this_dir, '..', '..'))
         run_env = os.environ.copy()
         run_env['PYTHONPATH'] = f'{python_dir}:' + os.environ.get('PYTHONPATH', '')
+        # Don't allow threads in python scripts
+        run_env['OMP_NUM_THREADS'] = '1'
 
         # Generate the plot
         LOG.info("Executing plot script %s", script_path)

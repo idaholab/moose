@@ -331,6 +331,9 @@ MeshGenerator::generateInternal()
 
   if (getParam<bool>("show_info"))
   {
+    if (!mesh->is_prepared())
+      mesh->prepare_for_use();
+
     const auto mesh_info = mesh->get_info(/* verbosity = */ 2);
 
     // We will prefix all information with "type() 'name()':" because this could potentially

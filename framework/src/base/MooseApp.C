@@ -557,7 +557,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
   }
 
   mooseAssert(_command_line->hasParsed(), "Command line has not parsed");
-  mooseAssert(_parser->queryRoot() && _parser->queryCommandLineRoot(), "Parser has not parsed");
+  mooseAssert(_parser->queryRoot(), "Parser has not parsed");
 
   // Set the TIMPI sync type via --timpi-sync
   const auto & timpi_sync = getParam<std::string>("timpi_sync");

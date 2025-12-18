@@ -135,6 +135,11 @@ MeshGeneratorPD::generate()
   // get the MeshBase object this generator will be working on
   std::unique_ptr<MeshBase> old_mesh = std::move(_input);
 
+  // If it's not prepared, we need it to be, to access caches like
+  // mesh_dimension() and spatial_dimension()
+  if (!old_mesh->is_prepared())
+    old_mesh->prepare_for_use();
+
   // STEP 1: obtain FE block(s) and elements to be converted to PD mesh
 
   // get the IDs of all available blocks in the input FE mesh
