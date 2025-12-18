@@ -185,8 +185,12 @@ LinearFVTKEDSourceSink::computeRightHandSideContribution()
     const Real TKED = _var.getElemValue(*_current_elem_info, state);
 
     // Compute production of TKE
-    const auto symmetric_strain_tensor_sq_norm =
-        NS::computeShearStrainRateNormSquared<Real>(_u_var, _v_var, _w_var, elem_arg, state);
+    const auto subdomain_id = _current_elem_info->elem()->subdomain_id();
+    const auto coord_sys = _subproblem.getCoordSystem(subdomain_id);
+    const unsigned int rz_radial_coord =
+        coord_sys == Moose::COORD_RZ ? _subproblem.getAxisymmetricRadialCoord() : 0;
+    const auto symmetric_strain_tensor_sq_norm = NS::computeShearStrainRateNormSquared<Real>(
+        _u_var, _v_var, _w_var, elem_arg, state, coord_sys, rz_radial_coord);
     Real production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
 
     // Limit TKE production (needed for flows with stagnation zones)
