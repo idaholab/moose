@@ -204,17 +204,13 @@ protected:
   virtual bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const;
 
   /**
-   * Check whether there are any active interface kernels on the given element side
+   * Check whether there are any active interface kernels on the given boundaries
    *
    * @note Loops derived from ThreadedElementLoopBase that may execute on externel sides _must_
    * override this method.
-   * @param elem Element we are on
-   * @param side local side number of the element 'elem'
-   * @param boundary_ids Boundary IDs associated with the element side
+   * @param boundary_ids Boundaries to check
    */
-  virtual bool hasActiveInterfaceKernel(const Elem * elem,
-                                        unsigned int side,
-                                        const std::vector<BoundaryID> & boundary_ids) const;
+  virtual bool hasActiveInterfaceKernel(const std::vector<BoundaryID> & boundary_ids) const;
 };
 
 template <typename RangeType>
@@ -315,7 +311,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
           }
           else
           {
-            if (hasActiveInterfaceKernel(elem, side, boundary_ids))
+            if (hasActiveInterfaceKernel(boundary_ids))
               mooseException("Element ",
                              elem->id(),
                              " on side ",
@@ -474,8 +470,6 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
 template <typename RangeType>
 bool
 ThreadedElementLoopBase<RangeType>::hasActiveInterfaceKernel(
-    const Elem * /*elem*/,
-    unsigned int /*side*/,
     const std::vector<BoundaryID> & /*boundary_ids*/) const
 {
   return false;

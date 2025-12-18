@@ -125,9 +125,7 @@ protected:
   /// Print list of specific objects executed on each boundary and in which order
   void printBoundaryExecutionInformation(const unsigned int bid) const override;
 
-  bool hasActiveInterfaceKernel(const Elem * elem,
-                                unsigned int side,
-                                const std::vector<BoundaryID> & boundary_ids) const override;
+  bool hasActiveInterfaceKernel(const std::vector<BoundaryID> & boundary_ids) const override;
 
   /// Return what the loops is meant to compute
   virtual std::string objectType() const { return ""; };
