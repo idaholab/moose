@@ -414,9 +414,7 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
 }
 
 bool
-NonlinearThread::hasActiveInterfaceKernel(const Elem * elem,
-                                          const unsigned int side,
-                                          const std::vector<BoundaryID> & boundary_ids) const
+NonlinearThread::hasActiveInterfaceKernel(const std::vector<BoundaryID> & boundary_ids) const
 {
   for (const auto bid : boundary_ids)
     if (_ik_warehouse && _ik_warehouse->hasActiveBoundaryObjects(bid, _tid))
