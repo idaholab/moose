@@ -278,6 +278,7 @@ ContactAction::validParams()
       false,
       "Whether we are going to enable mortar segment mesh debug information. An exodus"
       "file will be generated if the user sets this flag to true");
+  params.transferParam<MooseEnum>(MortarConstraintBase::validParams(), "quadrature");
   return params;
 }
 
@@ -393,6 +394,9 @@ ContactAction::ContactAction(const InputParameters & params)
       paramError("mortar_dynamics",
                  "The 'mortar_dynamics' constraint option can only be used with the 'mortar' "
                  "formulation and in dynamic simulations using Newmark-beta");
+    else if (params.isParamSetByUser("quadrature"))
+      paramError("quadrature",
+                 "The 'quadrature' option can only be used with the 'mortar' formulation.");
   }
 
   if (_formulation == ContactFormulation::RANFS)
@@ -1116,6 +1120,8 @@ ContactAction::addMortarContact()
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<bool>("compute_primal_residuals") = false;
 
+      params.set<MooseEnum>("quadrature") = getParam<MooseEnum>("quadrature");
+
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
 
       if (ndisp > 1)
@@ -1157,6 +1163,7 @@ ContactAction::addMortarContact()
       if (_formulation == ContactFormulation::MORTAR)
         params.set<NonlinearVariableName>("variable") = variable_name;
 
+      params.set<MooseEnum>("quadrature") = getParam<MooseEnum>("quadrature");
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
 
