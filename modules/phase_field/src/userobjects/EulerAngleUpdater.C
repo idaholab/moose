@@ -43,7 +43,6 @@ EulerAngleUpdater::EulerAngleUpdater(const InputParameters & params)
     _first_time(declareRestartableData<bool>("first_time_euler_update", true)),
     _first_time_recovered(_app.isRecovering()),
     _t_step_old(declareRestartableData<int>("euler_update_tstep_old", -1)),
-    _angles(declareRestartableData<std::vector<EulerAngles>>("euler_angles")),
     _angles_old(declareRestartableData<std::vector<EulerAngles>>("euler_angles_old"))
 {
 }
@@ -163,19 +162,6 @@ EulerAngleUpdater::initialize()
 
   _first_time = false;
   _t_step_old = _t_step;
-}
-
-unsigned int
-EulerAngleUpdater::getGrainNum() const
-{
-  return _angles.size();
-}
-
-const EulerAngles &
-EulerAngleUpdater::getEulerAngles(unsigned int i) const
-{
-  mooseAssert(i < getGrainNum(), "Requesting Euler angles for an invalid grain id");
-  return _angles[i];
 }
 
 const EulerAngles &

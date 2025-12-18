@@ -40,9 +40,7 @@ public:
   virtual void execute() override {}
   virtual void finalize() override {}
 
-  virtual const EulerAngles & getEulerAngles(unsigned int) const override;
   virtual const EulerAngles & getEulerAnglesOld(unsigned int) const;
-  virtual unsigned int getGrainNum() const override;
 
 protected:
   const GrainTrackerInterface & _grain_tracker;
@@ -59,8 +57,5 @@ protected:
   /// Used to determine whether a timestep is being repeated
   int & _t_step_old;
 
-  /// Current set of Euler angles (one per grain), updated on initialize()
-  std::vector<EulerAngles> & _angles;
-  /// Previous set of Euler angles, used when the time step failed to reset the angles (pre-update)
   std::vector<EulerAngles> & _angles_old;
 };
