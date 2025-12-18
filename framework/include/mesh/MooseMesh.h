@@ -1842,14 +1842,6 @@ private:
   /// faces
   bool _has_lower_d;
 
-  /// Indicates whether any disjoint block pairs are incomplete,
-  /// i.e., only one side of an expected (blockA, blockB) / (blockB, blockA) pair exists.
-  /// This flag is primarily used to ensure compatibility with Cohesive Zone Models (CZM),
-  /// which require distinct interface pairs on both sides of an interface. When true,
-  /// CZM-related actions or kernels should raise an error because the interface definition
-  /// is insufficient for cohesive zone modeling.
-  bool _has_incomplete_disjoint_block_sidesets;
-
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
 
@@ -1930,17 +1922,6 @@ private:
   unsigned int _max_p_level;
   /// Maximum h-refinement level of all elements
   unsigned int _max_h_level;
-
-  /// Indicates whether any disjoint interface sideset pairs are incomplete.
-  ///
-  /// Each physical interface is represented by a pair of disjoint boundary
-  /// sidesets corresponding to the "+" and "-" sides. These paired interface
-  /// sidesets are used to establish pseudo-neighbor relationships between
-  /// element faces across the interface (e.g., for cohesive zone modeling).
-  ///
-  /// If only one sideset of an expected "+" / "-" pair is provided, the interface
-  /// sideset pair is considered incomplete.
-  bool _has_incomplete_disjoint_interface_sideset_pairs;
 
   template <typename T>
   struct MeshType;
