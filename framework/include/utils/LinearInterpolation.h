@@ -76,7 +76,8 @@ public:
    * @param[in] x1  First point in integral domain
    * @param[in] x2  Second point in integral domain
    */
-  Real integratePartial(Real x1, Real x2) const;
+  template <typename T>
+  T integratePartial(const T & x1, const T & x2) const;
 
   Real domain(int i) const;
   Real range(int i) const;

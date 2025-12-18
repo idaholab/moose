@@ -61,8 +61,8 @@
     use_mobility = true
     fluid_phase = 0
     # Assume pan evaporation of 4mm/day = 4E-3m3/m2/day = 4kg/m2/day ~ 4E-5kg/m2/s
-    # Assume that if permeability was 1E-10m^2 and water table at topography then ET acts as pan strength
-    # Because use_mobility = true, then 4E-5 = maximum_flux = max * perm * density / visc = max * 1E-4, so max = 40
+    # Assume that if permeability was 1E-12m^2 and water table at topography then ET acts at pan strength
+    # Because use_mobility = true, then 4E-5 = maximum_flux = max * perm * density / visc = max * 1E-6, so max = 40
     max = 40
   []
 []
