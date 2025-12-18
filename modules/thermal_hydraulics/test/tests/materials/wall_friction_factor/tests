@@ -21,6 +21,6 @@
     input = 'colebrook_white_ad.i'
     csvdiff = 'colebrook_white_ad_out.csv'
     recover = false
-    requirement = "The system shall be able to compute wall friction factor using the colebrook-white correlation"
+    requirement = "The system shall be able to compute wall friction factor using the colebrook-white correlation."
   []
 []
