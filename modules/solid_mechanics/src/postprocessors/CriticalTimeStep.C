@@ -18,9 +18,7 @@ CriticalTimeStep::validParams()
   params.addClassDescription(
       "Computes and reports the critical time step for the explicit solver.");
   params.addParam<MaterialPropertyName>(
-      "density",
-      "density",
-      "Name of Material Property defining the density of the material.");
+      "density", "density", "Name of Material Property defining the density of the material.");
   params.addParam<MaterialPropertyName>(
       "density_scaling", "Name of material property to add mass scaling in explicit simulations.");
   params.addParam<Real>("factor", 1.0, "Factor to mulitply to the critical time step.");
