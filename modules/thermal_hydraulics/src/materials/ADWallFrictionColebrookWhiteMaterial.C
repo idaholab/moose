@@ -18,7 +18,8 @@ InputParameters
 ADWallFrictionColebrookWhiteMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Computes the Darcy friction factor using the Colebrook-White correlation.");
+  params.addClassDescription(
+      "Computes the Darcy friction factor using the Colebrook-White correlation.");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the velocity");
   params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");
@@ -31,7 +32,8 @@ ADWallFrictionColebrookWhiteMaterial::validParams()
   return params;
 }
 
-ADWallFrictionColebrookWhiteMaterial::ADWallFrictionColebrookWhiteMaterial(const InputParameters & parameters)
+ADWallFrictionColebrookWhiteMaterial::ADWallFrictionColebrookWhiteMaterial(
+    const InputParameters & parameters)
   : Material(parameters),
     _f_D_name(getParam<MaterialPropertyName>("f_D")),
     _f_D(declareADProperty<Real>(_f_D_name)),
@@ -52,12 +54,12 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
 
   using std::abs, std::pow, std::log10, std::sqrt;
 
-  //Colebrook-white equation has implicit formulation must use iteration
+  // Colebrook-white equation has implicit formulation must use iteration
   ADReal & f_D = _f_D[_qp];
   f_D = 0.01; // initial guess
-  while (abs((f_D - f_D_old)/f_D) > 1e-14)
+  while (abs((f_D - f_D_old) / f_D) > 1e-14)
   {
     f_D_old = f_D;
-    f_D = pow(-2.*log10(_roughness/(3.7*_D_h[_qp]) + 2.51/(Re*sqrt(f_D))), -2.);
+    f_D = pow(-2. * log10(_roughness / (3.7 * _D_h[_qp]) + 2.51 / (Re * sqrt(f_D))), -2.);
   }
 }
