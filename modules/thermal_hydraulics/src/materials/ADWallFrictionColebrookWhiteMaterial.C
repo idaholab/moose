@@ -54,7 +54,7 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
 
   ADReal & f_D = _f_D[_qp];
   f_D = 0.01; // initial guess
-  while (abs((f_D - f_D_old)/f_D) > 1e-12)
+  while (abs((f_D - f_D_old)/f_D) > 1e-14)
   {
     f_D_old = f_D;
     f_D = pow(-2.*log10(_roughness/(3.7*_D_h[_qp]) + 2.51/(Re*sqrt(f_D))), -2.);
