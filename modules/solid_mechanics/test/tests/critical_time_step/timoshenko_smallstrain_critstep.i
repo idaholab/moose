@@ -220,6 +220,7 @@
   [../]
   [./time_step]
     type = CriticalTimeStep
+    density = density
   [../]
 []
 

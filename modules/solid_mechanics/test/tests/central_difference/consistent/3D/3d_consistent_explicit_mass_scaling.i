@@ -172,11 +172,13 @@
   [density_scaling]
     type = DensityScaling
     block = 0
-    density = density
+    true_density = density
     desired_time_step = 0.06
+    scaled_density = density_scaling
     output_properties = density_scaling
     outputs = 'exodus'
-    factor = 0.5
+    safety_factor = 0.5
+    additive_contribution = true
   []
 []
 
