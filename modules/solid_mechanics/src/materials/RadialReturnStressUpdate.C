@@ -239,7 +239,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
     GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
     const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
     GenericRankTwoTensor<is_ad> & stress_new,
-    const RankTwoTensor & /*stress_old*/,
+    const RankTwoTensor & stress_old,
     const GenericRankFourTensor<is_ad> & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
     bool compute_full_tangent_operator,
@@ -264,12 +264,31 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
       _three_shear_modulus != 0.0,
       "Shear modulus is zero. Ensure that the base class computeStressInitialize() is called.");
 
+  GenericRankTwoTensor<is_ad> deviatoric_old_stress = stress_old.deviatoric();
+  GenericReal<is_ad> dev_old_stress_squared =
+      deviatoric_old_stress.doubleContraction(deviatoric_old_stress);
+  GenericReal<is_ad> old_effective_stress = MetaPhysicL::raw_value(dev_old_stress_squared)
+                                                ? sqrt(3.0 / 2.0 * dev_old_stress_squared)
+                                                : 0.0;
+  GenericReal<is_ad> initial_guess =
+      (effective_trial_stress - old_effective_stress) / _three_shear_modulus;
+  if (initial_guess < GenericReal<is_ad>(0.0) || old_effective_stress < 1.0e-10)
+    initial_guess = GenericReal<is_ad>(0.0);
+  // std::cout << "initial_guess: " << MetaPhysicL::raw_value(initial_guess) << std::endl;
+  // std::cout << "old_effective_stress: " << MetaPhysicL::raw_value(old_effective_stress)
+  //           << std::endl;
+  // std::cout << "effective_trial_stress: " << MetaPhysicL::raw_value(effective_trial_stress)
+  //           << std::endl;
+  initial_guess = GenericReal<is_ad>(0.0);
+
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   _effective_inelastic_strain_increment = 0.0;
   if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
   {
-    this->returnMappingSolve(
-        effective_trial_stress, _effective_inelastic_strain_increment, this->_console);
+    this->returnMappingSolve(effective_trial_stress,
+                             _effective_inelastic_strain_increment,
+                             this->_console,
+                             initial_guess);
     if (_effective_inelastic_strain_increment != 0.0)
       inelastic_strain_increment =
           deviatoric_trial_stress *
