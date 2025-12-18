@@ -8,18 +8,18 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef MOOSE_MFEM_ENABLED
+
 #pragma once
 
 #include "MFEMComplexAuxKernel.h"
-#include "mfem.hpp"
 
 /**
- * Project s * (U ^ V*) onto a vector MFEM auxvariable.
+ * Project \f$ s \vec u \wedge \vec v* \f$ onto a complex vector MFEM auxvariable.
  *
  * Notes:
- *   - Currently supports only interior DOFs (no shared/constrained DOFs).
- *   - Enforces 3D: mesh dimension and all involved vdim must be 3.
- *   - Takes into account Hermitian conjugation when computing the cross product.
+ *  - Enforces 3D: all involved vdim must be 3.
+ *  - The target variable's FE Space must be L2.
+ *  - Currently supports only interior DOFs (no shared/constrained DOFs).
  */
 class MFEMComplexExteriorProductAux : public MFEMComplexAuxKernel
 {
@@ -32,23 +32,14 @@ public:
   void execute() override;
 
 protected:
-  /// Names of vector sources
-  const VariableName _u_var_name;
-  const VariableName _v_var_name;
-
-  /// References to the vector ParGridFunctions
-  const mfem::ParComplexGridFunction & _u_var;
-  const mfem::ParComplexGridFunction & _v_var;
-  /// Real part of the scaling factor applied on the resulting field
-  const mfem::real_t _scale_factor_real;
-  /// Imaginary part of the scaling factor applied on the resulting field
-  const mfem::real_t _scale_factor_imag;
+  /// Scaling factor applied on the resulting field
+  const std::complex<mfem::real_t> _scale_factor;
 
   /// Coefficient wrappers
-  mfem::VectorGridFunctionCoefficient _u_coef_real;
-  mfem::VectorGridFunctionCoefficient _u_coef_imag;
-  mfem::VectorGridFunctionCoefficient _v_coef_real;
-  mfem::VectorGridFunctionCoefficient _v_coef_imag;
+  mfem::VectorCoefficient & _u_coef_real;
+  mfem::VectorCoefficient & _u_coef_imag;
+  mfem::VectorCoefficient & _v_coef_real;
+  mfem::VectorCoefficient & _v_coef_imag;
 
   mfem::VectorCrossProductCoefficient _cross_ur_vr;
   mfem::VectorCrossProductCoefficient _cross_ur_vi;

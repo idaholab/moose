@@ -36,10 +36,8 @@ protected:
   const VariableName _source_var_name;
   /// Reference to source gridfunction.
   mfem::ParComplexGridFunction & _source_var;
-  /// Real part of the scalar factor to multiply the result by.
-  const mfem::real_t _scale_factor_real;
-  /// Imaginary part of the scalar factor to multiply the result by.
-  const mfem::real_t _scale_factor_imag;
+  /// Scalar factor to multiply the result by.
+  const std::complex<mfem::real_t> _scale_factor;
   /// Curl operator
   mfem::common::ParDiscreteCurlOperator _curl;
 };

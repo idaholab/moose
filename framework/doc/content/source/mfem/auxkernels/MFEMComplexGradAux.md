@@ -5,7 +5,7 @@
 ## Overview
 
 AuxKernel for calculating the gradient of a complex scalar $H^1$ conforming source variable and storing it in
-a complex scalar elemental result variable defined on an $H(\mathrm{curl})$ conforming Nédélec finite element space.
+a complex result variable defined on an $H(\mathrm{curl})$ conforming Nédélec finite element space.
 
 The result may be scaled by an optional (global) complex scalar factor.
 

@@ -19,7 +19,8 @@ InputParameters
 MFEMComplexExteriorProductAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription("Projects s * (U ^ V*) onto a vector MFEM auxvariable");
+  params.addClassDescription(
+      "Projects $s \\vec u \\wedge \\vec v*$ onto a complex vector MFEM auxvariable");
   params.addRequiredParam<VariableName>("first_source_vec", "Vector MFEMVariable U (vdim=3)");
   params.addRequiredParam<VariableName>("second_source_vec", "Vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
@@ -36,16 +37,12 @@ MFEMComplexExteriorProductAux::validParams()
 
 MFEMComplexExteriorProductAux::MFEMComplexExteriorProductAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
-    _u_var_name(getParam<VariableName>("first_source_vec")),
-    _v_var_name(getParam<VariableName>("second_source_vec")),
-    _u_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_u_var_name)),
-    _v_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_v_var_name)),
-    _scale_factor_real(getParam<mfem::real_t>("scale_factor_real")),
-    _scale_factor_imag(getParam<mfem::real_t>("scale_factor_imag")),
-    _u_coef_real(&_u_var.real()),
-    _u_coef_imag(&_u_var.imag()),
-    _v_coef_real(&_v_var.real()),
-    _v_coef_imag(&_v_var.imag()),
+    _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
+                  getParam<mfem::real_t>("scale_factor_imag")),
+    _u_coef_real(getVectorCoefficientByName(getParam<VariableName>("first_source_vec") + "_real")),
+    _u_coef_imag(getVectorCoefficientByName(getParam<VariableName>("first_source_vec") + "_imag")),
+    _v_coef_real(getVectorCoefficientByName(getParam<VariableName>("second_source_vec") + "_real")),
+    _v_coef_imag(getVectorCoefficientByName(getParam<VariableName>("second_source_vec") + "_imag")),
     _cross_ur_vr(_u_coef_real, _v_coef_real),
     _cross_ur_vi(_u_coef_real, _v_coef_imag),
     _cross_ui_vr(_u_coef_imag, _v_coef_real),
@@ -56,10 +53,9 @@ MFEMComplexExteriorProductAux::MFEMComplexExteriorProductAux(const InputParamete
 {
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
-  const int mesh_dim = fes->GetMesh()->Dimension();
 
   // Enforce 3D cross product
-  if (mesh_dim != 3)
+  if (fes->GetVDim() != 3)
     mooseError("MFEMComplexExteriorProductAux requires a 3D mesh (Dimension == 3).");
 
   // Must be L2
@@ -84,8 +80,7 @@ MFEMComplexExteriorProductAux::execute()
   _result_var.real().ProjectCoefficient(_final_coef_real);
   _result_var.imag().ProjectCoefficient(_final_coef_imag);
 
-  std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
-  complexScale(_result_var, scale_complex);
+  complexScale(_result_var, _scale_factor);
 }
 
 #endif // MOOSE_MFEM_ENABLED

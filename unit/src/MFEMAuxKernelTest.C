@@ -246,11 +246,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexCurlAux)
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable", pgf_in);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_curl", pgf_curl);
 
-  // Initialise scalar variable to take the grad of
-  mfem::Vector real_vec{0, 1, 2};
-  mfem::Vector imag_vec{1, 2, 3};
-  mfem::VectorConstantCoefficient vec_coef_real(real_vec);
-  mfem::VectorConstantCoefficient vec_coef_imag(imag_vec);
+  // Initialise variable to take the curl of
+  mfem::VectorFunctionCoefficient vec_coef_real(3, vec_real);
+  mfem::VectorFunctionCoefficient vec_coef_imag(3, vec_imag);
   pgf_in->ProjectCoefficient(vec_coef_real, vec_coef_imag);
 
   {
@@ -263,7 +261,7 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexCurlAux)
         addObject<MFEMComplexCurlAux>("MFEMComplexCurlAux", "auxkernel", auxkernel_curl_params);
     auxkernel_curl.execute();
 
-    // Check we get the right curl (should be zero since curl of a grad = 0)
+    // Check we get the right result
     ASSERT_LE(abs(pgf_curl->real().GetData()[0]), 1e-8);
     ASSERT_LE(abs(pgf_curl->real().GetData()[1]), 1e-8);
     ASSERT_LE(abs(pgf_curl->real().GetData()[2]), 1e-8);
@@ -325,6 +323,14 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexInnerProductAux)
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_1", pgf_in_1);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_2", pgf_in_2);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_inner", pgf_out);
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_1_real", &pgf_in_1->real());
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_1_imag", &pgf_in_1->imag());
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_2_real", &pgf_in_2->real());
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_2_imag", &pgf_in_2->imag());
 
   // Initialise vector variables to take dot and cross products of
   mfem::Vector real_vec{0, 1, 2};
@@ -352,9 +358,9 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexInnerProductAux)
 }
 
 /**
- * Test the complex cross product auxkernel works on ComplexGridFunctions.
+ * Test the complex exterior product auxkernel works on ComplexGridFunctions.
  */
-TEST_F(MFEMAuxKernelTest, MFEMComplexCrossAux)
+TEST_F(MFEMAuxKernelTest, MFEMComplexExteriorProductAux)
 {
   auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
   mfem::common::ND_ParFESpace fe_hcurl(pm, 2, 3, mfem::Ordering::byVDIM);
@@ -367,8 +373,16 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexCrossAux)
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_1", pgf_in_1);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_2", pgf_in_2);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_cross", pgf_out);
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_1_real", &pgf_in_1->real());
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_1_imag", &pgf_in_1->imag());
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_2_real", &pgf_in_2->real());
+  _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
+      "source_variable_2_imag", &pgf_in_2->imag());
 
-  // Initialise vector variables to take dot and cross products of
+  // Initialise vector variables to take dot and exterior products of
   mfem::Vector real_vec{0, 1, 2};
   mfem::Vector imag_vec{1, 2, 3};
   mfem::VectorConstantCoefficient vec_coef_real(real_vec);
@@ -378,17 +392,17 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexCrossAux)
 
   {
     // Construct cross product auxkernel
-    InputParameters auxkernel_cross_params =
+    InputParameters auxkernel_exterior_params =
         _factory.getValidParams("MFEMComplexExteriorProductAux");
-    auxkernel_cross_params.set<AuxVariableName>("variable") = "output_variable_cross";
-    auxkernel_cross_params.set<VariableName>("first_source_vec") = "source_variable_1";
-    auxkernel_cross_params.set<VariableName>("second_source_vec") = "source_variable_2";
+    auxkernel_exterior_params.set<AuxVariableName>("variable") = "output_variable_cross";
+    auxkernel_exterior_params.set<VariableName>("first_source_vec") = "source_variable_1";
+    auxkernel_exterior_params.set<VariableName>("second_source_vec") = "source_variable_2";
 
-    MFEMComplexExteriorProductAux & auxkernel_cross = addObject<MFEMComplexExteriorProductAux>(
-        "MFEMComplexExteriorProductAux", "auxkernel", auxkernel_cross_params);
-    auxkernel_cross.execute();
+    MFEMComplexExteriorProductAux & auxkernel_exterior = addObject<MFEMComplexExteriorProductAux>(
+        "MFEMComplexExteriorProductAux", "auxkernel", auxkernel_exterior_params);
+    auxkernel_exterior.execute();
 
-    // Check we get the right cross product
+    // Check we get the right exterior product
     ASSERT_LE(abs(pgf_out->real().GetData()[0]), 1e-8);
     ASSERT_LE(abs(pgf_out->real().GetData()[1]), 1e-8);
     ASSERT_LE(abs(pgf_out->real().GetData()[2]), 1e-8);

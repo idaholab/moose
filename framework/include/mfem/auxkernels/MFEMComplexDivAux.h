@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
+
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
@@ -35,10 +36,8 @@ protected:
   const VariableName _source_var_name;
   /// Reference to source gridfunction.
   const mfem::ParComplexGridFunction & _source_var;
-  /// Real part of the scalar factor to multiply the result by.
-  const mfem::real_t _scale_factor_real;
-  /// Imaginary part of the scalar factor to multiply the result by.
-  const mfem::real_t _scale_factor_imag;
+  /// Scalar factor to multiply the result by.
+  const std::complex<mfem::real_t> _scale_factor;
   /// Divergence operator
   mfem::common::ParDiscreteDivOperator _div;
 };

@@ -35,8 +35,8 @@ MFEMComplexDivAux::MFEMComplexDivAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
     _source_var_name(getParam<VariableName>("source")),
     _source_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_source_var_name)),
-    _scale_factor_real(getParam<mfem::real_t>("scale_factor_real")),
-    _scale_factor_imag(getParam<mfem::real_t>("scale_factor_imag")),
+    _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
+                  getParam<mfem::real_t>("scale_factor_imag")),
     _div(_source_var.real().ParFESpace(), _result_var.real().ParFESpace())
 {
   _div.Assemble();
@@ -50,8 +50,7 @@ MFEMComplexDivAux::execute()
   _div.AddMult(_source_var.real(), _result_var.real() = 0);
   _div.AddMult(_source_var.imag(), _result_var.imag() = 0);
 
-  std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
-  complexScale(_result_var, scale_complex);
+  complexScale(_result_var, _scale_factor);
 }
 
 #endif

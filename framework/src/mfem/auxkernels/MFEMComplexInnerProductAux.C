@@ -11,7 +11,6 @@
 
 #include "MFEMComplexInnerProductAux.h"
 #include "MFEMProblem.h"
-#include "mfem.hpp"
 
 registerMooseObject("MooseApp", MFEMComplexInnerProductAux);
 
@@ -19,7 +18,8 @@ InputParameters
 MFEMComplexInnerProductAux::validParams()
 {
   InputParameters params = MFEMComplexAuxKernel::validParams();
-  params.addClassDescription("Projects s * (U x V*) onto a complex vector MFEM auxvariable");
+  params.addClassDescription(
+      "Projects $s \\vec u \\cdot \\vec v*$ onto a complex scalar MFEM auxvariable");
   params.addRequiredParam<VariableName>("first_source_vec",
                                         "Complex vector MFEMVariable U (vdim=3)");
   params.addRequiredParam<VariableName>("second_source_vec",
@@ -38,16 +38,12 @@ MFEMComplexInnerProductAux::validParams()
 
 MFEMComplexInnerProductAux::MFEMComplexInnerProductAux(const InputParameters & parameters)
   : MFEMComplexAuxKernel(parameters),
-    _u_var_name(getParam<VariableName>("first_source_vec")),
-    _v_var_name(getParam<VariableName>("second_source_vec")),
-    _u_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_u_var_name)),
-    _v_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_v_var_name)),
-    _scale_factor_real(getParam<mfem::real_t>("scale_factor_real")),
-    _scale_factor_imag(getParam<mfem::real_t>("scale_factor_imag")),
-    _u_coef_real(&_u_var.real()),
-    _u_coef_imag(&_u_var.imag()),
-    _v_coef_real(&_v_var.real()),
-    _v_coef_imag(&_v_var.imag()),
+    _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
+                  getParam<mfem::real_t>("scale_factor_imag")),
+    _u_coef_real(getVectorCoefficientByName(getParam<VariableName>("first_source_vec") + "_real")),
+    _u_coef_imag(getVectorCoefficientByName(getParam<VariableName>("first_source_vec") + "_imag")),
+    _v_coef_real(getVectorCoefficientByName(getParam<VariableName>("second_source_vec") + "_real")),
+    _v_coef_imag(getVectorCoefficientByName(getParam<VariableName>("second_source_vec") + "_imag")),
     _dot_ur_vr(_u_coef_real, _v_coef_real),
     _dot_ur_vi(_u_coef_real, _v_coef_imag),
     _dot_ui_vr(_u_coef_imag, _v_coef_real),
@@ -57,6 +53,7 @@ MFEMComplexInnerProductAux::MFEMComplexInnerProductAux(const InputParameters & p
 {
   // Check the target variable type and dimensions
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
+
   if (fes->GetVDim() != 1)
     mooseError("MFEMComplexInnerProductAux requires the target variable to be a scalar (vdim=1).");
 
@@ -73,15 +70,10 @@ MFEMComplexInnerProductAux::MFEMComplexInnerProductAux(const InputParameters & p
 void
 MFEMComplexInnerProductAux::execute()
 {
-
-  // MFEM element projection for L2
-  _result_var.real() = 0.0;
-  _result_var.imag() = 0.0;
   _result_var.real().ProjectCoefficient(_final_coef_real);
   _result_var.imag().ProjectCoefficient(_final_coef_imag);
 
-  std::complex<mfem::real_t> scale_complex(_scale_factor_real, _scale_factor_imag);
-  complexScale(_result_var, scale_complex);
+  complexScale(_result_var, _scale_factor);
 }
 
 #endif // MOOSE_MFEM_ENABLED

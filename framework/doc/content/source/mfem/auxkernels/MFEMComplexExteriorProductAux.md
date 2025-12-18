@@ -4,12 +4,14 @@
 
 ## Overview
 
-AuxKernel for calculating the exterior product of two complex vector fields and projecting onto an L2 vector finite element space complex mfem auxvariable.
+AuxKernel for calculating the exterior product of two complex vector fields and projecting
+the result onto an MFEM auxiliary variable in an L2 complex vector finite element space.
 
 !equation
-s (u\wedge v*), \,\,\,
+s \vec u \wedge \vec v*
 
-where $u$ and $v$ are the two complex vector fields and $s$ is an optional complex scaling.
+where $\vec u$ and $\vec v$ are the two complex vector fields and $s$ is an optional
+complex scaling coefficient.
 
 ## Input File Syntax
 

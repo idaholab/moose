@@ -28,8 +28,9 @@ public:
   virtual void execute() override;
 
 protected:
-  /// Reference to source coefficient.
+  /// Reference to source coefficient for the real part
   mfem::VectorCoefficient & _vec_coef_real;
+  /// Reference to source coefficient for the imaginary part
   mfem::VectorCoefficient & _vec_coef_imag;
 };
 
