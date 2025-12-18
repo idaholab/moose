@@ -18,7 +18,7 @@ InputParameters
 ADWallFrictionColebrookWhiteMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-  params.addClassDescription("Computes the Darcy friction factor using the Churchill correlation.");
+  params.addClassDescription("Computes the Darcy friction factor using the Colebrook-White correlation.");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density");
   params.addRequiredParam<MaterialPropertyName>("vel", "x-component of the velocity");
   params.addRequiredParam<MaterialPropertyName>("D_h", "hydraulic diameter");
@@ -52,6 +52,7 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
 
   using std::abs, std::pow, std::log10, std::sqrt;
 
+  //Colebrook-white equation has implicit formulation must use iteration
   ADReal & f_D = _f_D[_qp];
   f_D = 0.01; // initial guess
   while (abs((f_D - f_D_old)/f_D) > 1e-14)
