@@ -59,5 +59,4 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
     f_D_old = f_D;
     f_D = pow(-2.*log10(_roughness/(3.7*_D_h[_qp]) + 2.51/(Re*sqrt(f_D))), -2.);
   }
-
 }

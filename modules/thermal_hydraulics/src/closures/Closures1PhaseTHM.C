@@ -24,7 +24,7 @@ Closures1PhaseTHM::validParams()
                              "dittus_boelter");
   params.addParam<MooseEnum>(
       "wall_htc_closure", wall_htc_closure, "Heat transfer coefficient closure");
-  MooseEnum wall_ff_closure("cheng_todreas=0 churchill=1", "churchill");
+  MooseEnum wall_ff_closure("cheng_todreas=0 churchill=1 colebrook_white=2", "churchill");
   params.addParam<MooseEnum>("wall_ff_closure", wall_ff_closure, "Friction factor closure");
   params.addClassDescription("Closures for 1-phase flow channels");
   return params;
@@ -139,6 +139,22 @@ Closures1PhaseTHM::addWallFFMaterial(const FlowChannel1Phase & flow_channel) con
       }
       const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
       _sim.addMaterial(class_name, obj_name, params);
+      break;
+    }
+    case WallFFClosureType::COLEBROOK_WHITE:
+    {
+      const std::string class_name = "ADWallFrictionColebrookWhiteMaterial";
+      InputParameters params = _factory.getValidParams(class_name);
+      params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
+      params.set<MaterialPropertyName>("rho") = FlowModelSinglePhase::DENSITY;
+      params.set<MaterialPropertyName>("vel") = FlowModelSinglePhase::VELOCITY;
+      params.set<MaterialPropertyName>("D_h") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
+      params.set<MaterialPropertyName>("f_D") = FlowModelSinglePhase::FRICTION_FACTOR_DARCY;
+      params.set<MaterialPropertyName>("mu") = FlowModelSinglePhase::DYNAMIC_VISCOSITY;
+      params.set<Real>("roughness") = flow_channel.getParam<Real>("roughness");
+      const std::string obj_name = genName(flow_channel.name(), "wall_friction_mat");
+      _sim.addMaterial(class_name, obj_name, params);
+      flow_channel.connectObject(params, obj_name, "roughness");
       break;
     }
     default:
