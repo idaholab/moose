@@ -372,8 +372,8 @@ In summary:
 
 - Default to `private`
 - Promote to `public` only when there is a clear, justified use case
-- Treat `protected` as part of the class’s internal design contract, not its public API
-- Prefer composition over inheritance when possible
+- Treat `protected` members as implementation details meant only for subclasses, not as part of the class’s public interface
+- Consider composition as an alternative to inheritance, especially when behavior can be delegated rather than extended.
 
 Code reviews may request access-level reductions if members are more visible than necessary.
 
