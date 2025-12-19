@@ -332,7 +332,7 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexInnerProductAux)
   _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
       "source_variable_2_imag", &pgf_in_2->imag());
 
-  // Initialise vector variables to take dot and cross products of
+  // Initialise vector variables to take the inner product of
   mfem::Vector real_vec{0, 1, 2};
   mfem::Vector imag_vec{1, 2, 3};
   mfem::VectorConstantCoefficient vec_coef_real(real_vec);
@@ -372,7 +372,7 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexExteriorProductAux)
 
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_1", pgf_in_1);
   _mfem_problem->getProblemData().cmplx_gridfunctions.Register("source_variable_2", pgf_in_2);
-  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_cross", pgf_out);
+  _mfem_problem->getProblemData().cmplx_gridfunctions.Register("output_variable_exterior", pgf_out);
   _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
       "source_variable_1_real", &pgf_in_1->real());
   _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
@@ -382,7 +382,7 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexExteriorProductAux)
   _mfem_problem->getProblemData().coefficients.declareVector<mfem::VectorGridFunctionCoefficient>(
       "source_variable_2_imag", &pgf_in_2->imag());
 
-  // Initialise vector variables to take dot and exterior products of
+  // Initialise vector variables to take the exterior product of
   mfem::Vector real_vec{0, 1, 2};
   mfem::Vector imag_vec{1, 2, 3};
   mfem::VectorConstantCoefficient vec_coef_real(real_vec);
@@ -391,10 +391,10 @@ TEST_F(MFEMAuxKernelTest, MFEMComplexExteriorProductAux)
   pgf_in_2->ProjectCoefficient(vec_coef_real, vec_coef_imag);
 
   {
-    // Construct cross product auxkernel
+    // Construct exterior product auxkernel
     InputParameters auxkernel_exterior_params =
         _factory.getValidParams("MFEMComplexExteriorProductAux");
-    auxkernel_exterior_params.set<AuxVariableName>("variable") = "output_variable_cross";
+    auxkernel_exterior_params.set<AuxVariableName>("variable") = "output_variable_exterior";
     auxkernel_exterior_params.set<VariableName>("first_source_vec") = "source_variable_1";
     auxkernel_exterior_params.set<VariableName>("second_source_vec") = "source_variable_2";
 

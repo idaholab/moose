@@ -36,7 +36,7 @@ MFEMComplexGradAux::MFEMComplexGradAux(const InputParameters & parameters)
     _source_var(*getMFEMProblem().getProblemData().cmplx_gridfunctions.Get(_source_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor_real"),
                   getParam<mfem::real_t>("scale_factor_imag")),
-    _grad(_source_var.real().ParFESpace(), _result_var.real().ParFESpace())
+    _grad(_source_var.ParFESpace(), _result_var.ParFESpace())
 {
   _grad.Assemble();
   _grad.Finalize();
