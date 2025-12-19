@@ -22,11 +22,10 @@ if TYPE_CHECKING:
     from TestHarness.utils.monitor_process import KilledReason, monitor_process
 else:
     monitor_process = None
-    with suppress(ModuleNotFoundError):
+    # monitor_process requires psutil
+    if find_spec("psutil") is not None:
         from TestHarness.utils.monitor_process import KilledReason, monitor_process
 
-HAS_PSUTIL = find_spec("psutil") is not None
-"""Whether or not psutil is available; needed for the stats thread."""
 class SubprocessRunner(Runner):
     """
     Runner that spawns a local subprocess.
