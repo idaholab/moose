@@ -45,6 +45,11 @@ INSFVTKESourceSink::validParams()
   params.addParam<bool>("newton_solve", false, "Whether a Newton nonlinear solve is being used");
   params.addParamNamesToGroup("newton_solve", "Advanced");
 
+  params.addParam<MooseFunctorName>(NS::temperature, "The temperature.");
+  params.addParam<MooseFunctorName>("alpha_name", "Thermal expansion factor.");
+  params.addParam<MooseFunctorName>(NS::turbulent_Prandtl, 0.9, "The turbulent Prandtl number.");
+  params.addParam<RealVectorValue>("gravity", "Direction of the gravity vector");
+
   return params;
 }
 
@@ -63,13 +68,27 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl")),
-    _newton_solve(getParam<bool>("newton_solve"))
+    _newton_solve(getParam<bool>("newton_solve")),
+    _temperature(params.isParamValid(NS::temperature) ? &(getFunctor<ADReal>(NS::temperature))
+                                                      : nullptr),
+    _alpha(params.isParamValid("alpha_name") ? &(getFunctor<ADReal>("alpha_name")) : nullptr),
+    _Pr_t(params.isParamValid(NS::turbulent_Prandtl) ? &(getFunctor<ADReal>(NS::turbulent_Prandtl))
+                                                     : nullptr),
+    _gravity(params.isParamValid("gravity") ? &getParam<RealVectorValue>("gravity") : nullptr)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied!");
 
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied!");
+
+  if (_temperature && !_alpha)
+    paramError("alpha",
+               "The thermal expansion coefficient should be >0.0 for themal bouyancy production "
+               "correction.");
+
+  if (_temperature && !_gravity)
+    paramError("gravity", "Gravity should be provided when bouyancy corrections are active.");
 }
 
 void
@@ -204,7 +223,14 @@ INSFVTKESourceSink::computeQpResidual()
     const auto symmetric_strain_tensor_sq_norm = NS::computeShearStrainRateNormSquared<ADReal>(
         _u_var, _v_var, _w_var, elem_arg, state, coord_sys, rz_radial_coord);
 
-    production = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
+    auto base_strain = symmetric_strain_tensor_sq_norm;
+
+    // Bouyancy strain
+    if (_temperature)
+      base_strain += (*_alpha)(elem_arg, state) / (*_Pr_t)(elem_arg, state) *
+                     (_temperature->gradient(elem_arg, state) * (*_gravity));
+
+    production = _mu_t(elem_arg, state) * base_strain;
 
     const auto tke_old_raw = raw_value(TKE);
     const auto epsilon_old = _epsilon(elem_arg, old_state);
