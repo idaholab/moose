@@ -121,15 +121,15 @@ In addition, a few convenience methods are available to help generate integer ra
 ```C++
 #include "libmesh/int_range.h"
 
-// Looping through n1, n1+1, n1+2, ..., n2-1, n2
+// Looping through n1, n1+1, n1+2, ..., n2-1
 for (auto i : make_range(n1, n2))
   // ... Do something with index i
 
-// Looping through 0, 1, 2, ..., n
+// Looping through 0, 1, 2, ..., n-1
 for (auto i : make_range(n))
   // ... Do something with index i
 
-// Looping through 0, 1, 2, ..., v.size()
+// Looping through 0, 1, 2, ..., v.size()-1
 for (auto i : index_range(v))
   // ... Do something with index i
 ```
@@ -369,9 +369,9 @@ If a member is not intended to be used or overridden by derived classes, it shou
 
 In summary:
 
-- Default to private
-- Promote to public only when there is a clear, justified use case
-- Treat protected as part of the class’s internal design contract, not its public API
+- Default to `private`
+- Promote to `public` only when there is a clear, justified use case
+- Treat `protected` as part of the class’s internal design contract, not its public API
 - Prefer composition over inheritance when possible
 
 Code reviews may request access-level reductions if members are more visible than necessary.
@@ -398,7 +398,7 @@ Prefer compile-time constants when values are known at compile time and semantic
 
 Use:
 
-- constexpr or consteval for values and functions known at compile time
+- `constexpr` or `consteval` for values and functions known at compile time
 - Non-type template parameters (e.g., dimensions, tensor ranks, fixed sizes) when they affect layout, correctness, or optimization
 - `std::integral_constant` or `constexpr` variables instead of macros
 
