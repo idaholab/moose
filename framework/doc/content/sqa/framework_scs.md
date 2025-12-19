@@ -356,7 +356,7 @@ Prefer `private` by default. Use `private` for:
 - Helper functions and implementation mechanics
 - Anything that should not be relied upon by derived classes or external code
 
-Private members allow internal refactoring without breaking users and are the strongest tool for enforcing invariants.
+Private members allow internal refactoring without breaking user assumptions and are the strongest tool for enforcing invariants.
 
 `protected` exists to support controlled customization via inheritance, not general access. Use `protected` only when:
 
