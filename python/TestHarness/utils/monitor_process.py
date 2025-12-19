@@ -73,6 +73,10 @@ async def poll_process(pid: int) -> list[ProcessSample]:
 
         # Sample all processes
         for p in all_processes:
+            # Only count processes still running
+            if not p.is_running():
+                continue
+
             # Sample CPU, or skip if it has ended
             try:
                 times = p.cpu_times()
