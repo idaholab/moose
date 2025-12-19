@@ -87,23 +87,20 @@ FlowChannel1Phase::addMooseObjects()
       {THM::PRESSURE, getParam<Real>("p_ref")},
       {THM::TEMPERATURE, getParam<Real>("T_ref")},
       {THM::VELOCITY, getParam<Real>("vel_ref")}};
-  for (const auto & var_norm_pair : var_norm_pairs)
+  for (const auto & [var, norm] : var_norm_pairs)
   {
-    addNonlinearStepFunctorMaterial(THM::functorMaterialPropertyName<false>(var_norm_pair.first),
-                                    var_norm_pair.first + "_change",
-                                    false);
-    addMaximumFunctorPostprocessor(var_norm_pair.first + "_change",
-                                   genName(name(), var_norm_pair.first + "_rel_step"),
-                                   var_norm_pair.second,
-                                   getSubdomainNames());
+    addNonlinearStepFunctorMaterial(
+        THM::functorMaterialPropertyName<false>(var), var + "_change", false);
+    addMaximumFunctorPostprocessor(
+        var + "_change", genName(name(), var + "_rel_step"), norm, getSubdomainNames());
   }
 
   const std::vector<std::pair<std::string, std::string>> var_eq_pairs{
       {THM::RHOA, "mass"}, {THM::RHOUA, "momentum"}, {THM::RHOEA, "energy"}};
-  for (const auto & var_eq_pair : var_eq_pairs)
-    addNormalized1PhaseResidualNorm(var_eq_pair.first, var_eq_pair.second);
+  for (const auto & [var, eq] : var_eq_pairs)
+    addNormalized1PhaseResidualNorm(var, eq);
 
-  addStandardNonlinearConvergence(
+  addMultiPostprocessorConvergence(
       {genName(name(), "p_rel_step"),
        genName(name(), "T_rel_step"),
        genName(name(), "vel_rel_step"),

@@ -458,11 +458,12 @@ protected:
                    const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
   /**
-   * Adds a functor material to compute the absolute nonlinear step in some functor
+   * Adds a functor material to compute the absolute value of the change (step) of some functor
+   * between nonlinear iterations
    *
    * @param[in] functor_name  Functor for which to compute step
    * @param[in] property  Name of new step functor material property
-   * @param[in] functor_is_ad  Is the functor for which to compute step AD?
+   * @param[in] functor_is_ad  Is the functor for which to compute the step AD?
    */
   void addNonlinearStepFunctorMaterial(const std::string & functor_name,
                                        const std::string & property,
@@ -478,7 +479,7 @@ protected:
    */
   void addMaximumFunctorPostprocessor(const std::string & functor_name,
                                       const std::string & pp_name,
-                                      Real normalization,
+                                      const Real normalization,
                                       const std::vector<SubdomainName> & subdomains);
 
   /**
@@ -488,9 +489,9 @@ protected:
    * @param[in] descriptions  Description of each Postprocessor
    * @param[in] tolerances  Tolerance for each check
    */
-  void addStandardNonlinearConvergence(const std::vector<PostprocessorName> & postprocessors,
-                                       const std::vector<std::string> & descriptions,
-                                       const std::vector<Real> & tolerances);
+  void addMultiPostprocessorConvergence(const std::vector<PostprocessorName> & postprocessors,
+                                        const std::vector<std::string> & descriptions,
+                                        const std::vector<Real> & tolerances);
 
   /// Nonlinear Convergence name
   std::string nonlinearConvergenceName() const { return genName(name(), "nlconv"); }

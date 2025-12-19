@@ -29,12 +29,12 @@ protected:
   unsigned int getMaxDescriptionLength() const;
 
   /// Generates a colored line for a tolerance comparison
-  std::string comparisonLine(const std::string & description, Real err, Real tol) const;
+  std::string comparisonLine(const std::string & description, const Real err, const Real tol) const;
 
   /// Postprocessor values
   std::vector<const PostprocessorValue *> _pp_values;
   /// Description of each Postprocessor
-  const std::vector<std::string> & _descriptions;
+  std::vector<std::string> _descriptions;
   /// Tolerance for each Postprocessor
   const std::vector<Real> & _tolerances;
 

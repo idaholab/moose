@@ -35,11 +35,22 @@
 []
 
 [Convergence]
-  [ss_conv]
+  [ss_conv_with_descriptions]
     type = MultiPostprocessorConvergence
     postprocessors = 'pp1 pp2'
-    descriptions = 'PP1 PP2'
+    descriptions = 'QuantityA QuantityB'
     tolerances = '1e-5 1e-7'
+  []
+  [ss_conv_without_descriptions]
+    type = MultiPostprocessorConvergence
+    postprocessors = 'pp1 pp2'
+    tolerances = '1e-5 1e-7'
+  []
+  [ss_conv]
+    type = ParsedConvergence
+    convergence_expression = 'conv1 & conv2'
+    symbol_names = 'conv1 conv2'
+    symbol_values = 'ss_conv_with_descriptions ss_conv_without_descriptions'
   []
 []
 

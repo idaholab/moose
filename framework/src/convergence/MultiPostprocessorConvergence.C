@@ -20,19 +20,28 @@ MultiPostprocessorConvergence::validParams()
 
   params.addRequiredParam<std::vector<PostprocessorName>>("postprocessors",
                                                           "Postprocessors to check");
-  params.addRequiredParam<std::vector<std::string>>("descriptions",
-                                                    "Description of each Postprocessor");
+  params.addParam<std::vector<std::string>>(
+      "descriptions",
+      "Description of each Postprocessor. If not provided, the Postprocessor names are used as "
+      "their descriptions.");
   params.addRequiredParam<std::vector<Real>>("tolerances", "Tolerance for each Postprocessor");
 
   return params;
 }
 
 MultiPostprocessorConvergence::MultiPostprocessorConvergence(const InputParameters & parameters)
-  : IterationCountConvergence(parameters),
-    _descriptions(getParam<std::vector<std::string>>("descriptions")),
-    _tolerances(getParam<std::vector<Real>>("tolerances"))
+  : IterationCountConvergence(parameters), _tolerances(getParam<std::vector<Real>>("tolerances"))
 {
   const auto & pp_names = getParam<std::vector<PostprocessorName>>("postprocessors");
+
+  if (isParamValid("descriptions"))
+    _descriptions = getParam<std::vector<std::string>>("descriptions");
+  else
+  {
+    for (const auto & pp_name : pp_names)
+      _descriptions.push_back(pp_name);
+  }
+
   for (const auto & pp_name : pp_names)
     _pp_values.push_back(&getPostprocessorValueByName(pp_name));
 
@@ -78,7 +87,7 @@ MultiPostprocessorConvergence::checkConvergenceInner(unsigned int /*iter*/)
 unsigned int
 MultiPostprocessorConvergence::getMaxDescriptionLength() const
 {
-  size_t max_desc_length = 0;
+  std::size_t max_desc_length = 0;
   for (const auto & description : _descriptions)
     max_desc_length = std::max(max_desc_length, description.length());
 
@@ -87,8 +96,8 @@ MultiPostprocessorConvergence::getMaxDescriptionLength() const
 
 std::string
 MultiPostprocessorConvergence::comparisonLine(const std::string & description,
-                                              Real err,
-                                              Real tol) const
+                                              const Real err,
+                                              const Real tol) const
 {
   std::string color, compare_str;
   if (std::abs(err) > tol)

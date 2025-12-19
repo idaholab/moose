@@ -265,7 +265,7 @@ Component::addNonlinearStepFunctorMaterial(const std::string & functor_name,
 void
 Component::addMaximumFunctorPostprocessor(const std::string & functor_name,
                                           const std::string & pp_name,
-                                          Real normalization,
+                                          const Real normalization,
                                           const std::vector<SubdomainName> & subdomains)
 {
   const std::string class_name = "ElementExtremeFunctorValue";
@@ -280,9 +280,9 @@ Component::addMaximumFunctorPostprocessor(const std::string & functor_name,
 }
 
 void
-Component::addStandardNonlinearConvergence(const std::vector<PostprocessorName> & postprocessors,
-                                           const std::vector<std::string> & descriptions,
-                                           const std::vector<Real> & tolerances)
+Component::addMultiPostprocessorConvergence(const std::vector<PostprocessorName> & postprocessors,
+                                            const std::vector<std::string> & descriptions,
+                                            const std::vector<Real> & tolerances)
 {
   const std::string class_name = "MultiPostprocessorConvergence";
   InputParameters params = _factory.getValidParams(class_name);
