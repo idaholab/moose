@@ -1,8 +1,8 @@
 freq = 900e6
-angfreq = 5654866776.46
+angfreq = ${fparse 2*pi*freq}
 epsilon0 = 8.8541878176e-12
-mu0 = 1.256637061435917e-06
-magnetic_reluctivity = 795774.715459
+mu0 = ${fparse 4e-7*pi}
+magnetic_reluctivity = ${fparse 1/mu0}
 elec_cond_mouse = 0.97
 elec_cond_air = 1e-323
 
@@ -38,39 +38,21 @@ elec_cond_air = 1e-323
 []
 
 [Functions]
-  [dielec_perm_mouse]
-    type = ParsedFunction
-    expression = 43*${epsilon0}
-  []
   [mass_coef_mouse]
     type = ParsedFunction
-    expression = -dielec_perm_mouse*${angfreq}^2
-    symbol_names = 'dielec_perm_mouse'
-    symbol_values = 'dielec_perm_mouse'
+    expression = -43*${epsilon0}*${angfreq}^2
   []
   [loss_coef_mouse]
     type = ParsedFunction
     expression = ${angfreq}*${elec_cond_mouse}
   []
-  [dielec_perm_air]
-    type = ParsedFunction
-    expression = ${epsilon0}
-  []
   [mass_coef_air]
     type = ParsedFunction
-    expression = -dielec_perm_air*${angfreq}^2
-    symbol_names = dielec_perm_air
-    symbol_values = dielec_perm_air
+    expression = -${epsilon0}*${angfreq}^2
   []
   [loss_coef_air]
     type = ParsedFunction
     expression = ${angfreq}*${elec_cond_air}
-  []
-  [vecZero]
-    type = ParsedVectorFunction
-    expression_x = 0.0
-    expression_y = 0.0
-    expression_z = 0.0
   []
 []
 
@@ -94,8 +76,6 @@ elec_cond_air = 1e-323
     type = MFEMComplexVectorTangentialDirichletBC
     variable = E
     boundary = '2 3 4'
-    vector_coefficient_real = vecZero
-    vector_coefficient_imag = vecZero
   []
   [WaveguidePortIn]
     type = MFEMRWTE10IntegratedBC

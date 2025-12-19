@@ -74,7 +74,7 @@ provides the available settings for the `inputs` command.
 ## Child Objects (`!syntax children`)
 
 MOOSE is designed on the idea of
-[inheritance](https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming), as such it is
+[inheritance](https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming%29), as such it is
 often useful to understand which classes inherit from another. The `children` sub-command creates a
 list of all child classes of the given object, as shown in [appsyntax-children-example]. The
 available settings for the `children` command are provided below.

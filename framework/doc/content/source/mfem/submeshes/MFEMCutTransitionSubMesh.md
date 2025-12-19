@@ -15,7 +15,7 @@ subdomain, consisting of all elements that:
 These elements are collectively referred
 to as a 'transition' subdomain of the parent mesh, due to their role in defining minimal domains of
 support for scalar 'transition' variables used in some methods to enforce global topological
-constraints on domains with non-trivial topologies.  
+constraints on domains with non-trivial topologies.
 
 In addition, `MFEMCutTransitionSubMesh` modifies attributes on the parent `mfem::ParMesh` to allow
 the new transition region and its boundary to be referenced by other kernels and boundary conditions
@@ -41,7 +41,7 @@ like material coefficients, apply to the sets of elements expected whether or no
 `MFEMCutTransitionSubMesh` object is present in the problem.
 
 Further information on the usage of such subdomains to enforce global topological constraints can be
-found in 
+found in
 [P. Dular. International Compumag Society Newsletter, 7, no. 2 (2000):4-7.](https://hdl.handle.net/2268/191358)
 
 ## Example Input File Syntax

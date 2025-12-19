@@ -39,7 +39,7 @@ MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPos
         getParam<VariableName>("primal_variable"))),
     _dual_var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
         getParam<VariableName>("dual_variable"))),
-    _l2_fec(_primal_var.real().ParFESpace()->GetMaxElementOrder(),
+    _l2_fec(_primal_var.ParFESpace()->GetMaxElementOrder(),
             getMFEMProblem().mesh().getMFEMParMesh().Dimension()),
     _scalar_test_fespace(&getMFEMProblem().mesh().getMFEMParMesh(), &_l2_fec),
     _scalar_var(&_scalar_test_fespace),
