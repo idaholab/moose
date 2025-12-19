@@ -75,7 +75,12 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual GenericReal<is_ad> computeResidual(const GenericReal<is_ad> & /*effective_trial_stress*/,
-                                             const GenericReal<is_ad> & /*scalar*/) = 0;
+                                             const GenericReal<is_ad> & /*scalar*/)
+  {
+    mooseError("computeResidual has to be implemented if "
+               "automatic_differentiation_return_mapping = false.");
+    return 0;
+  };
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -85,7 +90,12 @@ protected:
    */
   virtual GenericReal<is_ad>
   computeDerivative(const GenericReal<is_ad> & /*effective_trial_stress*/,
-                    const GenericReal<is_ad> & /*scalar*/) = 0;
+                    const GenericReal<is_ad> & /*scalar*/)
+  {
+    mooseError("computeDerivative has to be implemented if "
+               "automatic_differentiation_return_mapping = false.");
+    return 0;
+  };
 
   /**
    * Compute the residual and the derivative for a predicted value of the scalar.  This residual

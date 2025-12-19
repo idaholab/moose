@@ -73,4 +73,15 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
   // Create an instance of the application and store it in a smart pointer for easy cleanup
   return AppFactory::create(std::move(parser), std::move(command_line));
 }
+
+std::shared_ptr<MooseApp>
+createMinimalMooseApp()
+{
+  const auto & ro = AppFactory::instance().registeredObjects();
+  if (ro.empty())
+    mooseError("Cannot create minimal app, no apps registered.");
+
+  const char * argv[1] = {"\0"};
+  return Moose::createMooseApp(ro.begin()->first, 1, (char **)argv);
+}
 }
