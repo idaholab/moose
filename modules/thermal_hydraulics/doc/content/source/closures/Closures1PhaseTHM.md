@@ -1,11 +1,9 @@
 # Closures1PhaseTHM
 
-!syntax description /Closures/Closures1PhaseTHM
-
 The closures added are:
 
 - a wall friction factor for the pressure drop,
-- a wall heat transfer coefficient for heat transfer.
+- a wall heat transfer coefficient for heat transfer (only if the heat transfer is not a specified heat flux).
 
 The user can choose between a range of correlations for the heat transfer coefficient and friction factor that covers  pipes to rod-bundles. The available correlations for the heat transfer coefficient are listed in [HTC-correlations].
 
@@ -56,7 +54,7 @@ The user can also define the friction factor directly in the component block, ov
 
 In this case, the friction factor for the `Pipe_1` component will be equal to the value defined in the parameter `f`, while for `Pipe_2` the friction factor will given by the correlation chosen in the [Closures1PhaseTHM.md].
 
-Additionally, this object defines:
+If the heat transfer is not a specified heat flux, this object also defines:
 
 - a wall temperature material, to be able to retrieve the wall temperature as a material property for each heat transfer.
 

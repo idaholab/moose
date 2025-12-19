@@ -1,6 +1,6 @@
 [Tests]
   design = 'Closures1PhaseTHM.md'
-  issues = '#19909'
+  issues = '#19909 #29651'
   [tests]
     requirement = "The system shall compute the heat transfer coefficient and the friction factor "
                   "when used with:"
@@ -92,5 +92,11 @@
       csvdiff = 'overwriten_f.csv'
       detail = "the friction factor is prescribed by the user"
     []
+  []
+
+  [multiple_heat_flux]
+    type = RunApp
+    input = 'multiple_heat_flux.i'
+    requirement = 'The system shall be able to run with multiple heat fluxes when using THM closures.'
   []
 []
