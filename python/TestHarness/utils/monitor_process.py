@@ -186,7 +186,6 @@ async def _monitor_process(
                 p = psutil.Process(sample.pid)
                 process_info.append(("Command", " ".join(p.cmdline())))
                 process_info.append(("Parent", p.ppid()))
-                process_info.append(("Num threads", p.num_threads()))
             process_info.append(("Memory", f"{(sample.memory / 1e6):.2f} MB"))
             process_info.append(("CPU", f"{sample_percent_cpu(sample):.2f}%"))
             info.append(f"Process {sample.pid}:")
