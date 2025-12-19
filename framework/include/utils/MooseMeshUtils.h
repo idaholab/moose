@@ -506,5 +506,5 @@ void buildPolyLineMesh(MeshBase & mesh,
                        const bool loop,
                        const BoundaryName & start_boundary,
                        const BoundaryName & end_boundary,
-                       const Real & max_elem_size);
+                       const Real max_elem_size);
 }

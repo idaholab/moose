@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
+#include "DelimitedFileReader.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/enum_to_string.h"
@@ -22,8 +23,6 @@
 #include "libmesh/parsed_function.h"
 #include "libmesh/poly2tri_triangulator.h"
 #include "libmesh/unstructured_mesh.h"
-#include "DelimitedFileReader.h"
-
 #include "libmesh/mesh_serializer.h"
 
 registerMooseObject("ReactorApp", GapMeshGenerator);
@@ -42,9 +41,7 @@ GapMeshGenerator::validParams()
   params.addClassDescription(
       "Generate a polyline mesh that is based on an input 2D-XY mesh. The 2D-XY mesh needs to be a "
       "connected mesh with only one outer boundary manifold. The polyline mesh generated along "
-      "with the boundary of the input mesh form a gap with a specified thickness. The mesh can "
-      "further be used by XYDelaunayGenerator to generate a triangulation mesh that takes the gap "
-      "into account.");
+      "with the boundary of the input mesh form an unmeshed gap with a specified thickness.");
 
   return params;
 }
@@ -79,7 +76,7 @@ GapMeshGenerator::generate()
   auto ply_mesh = buildMeshBaseObject();
 
   MooseMeshUtils::buildPolyLineMesh(
-      *ply_mesh, reduced_pts_list, true, "dummy", "dummy", std::vector<unsigned int>({1}));
+      *ply_mesh, reduced_pts_list, /*loop*/true, "dummy", "dummy", std::vector<unsigned int>({1}));
 
   std::unique_ptr<UnstructuredMesh> ply_mesh_u =
       dynamic_pointer_cast<UnstructuredMesh>(std::move(ply_mesh));
@@ -98,11 +95,12 @@ GapMeshGenerator::generate()
 
   // We need to serialize the mesh for next steps
   libMesh::MeshSerializer serial(*ply_mesh_u);
-  // The mesh now only contain one side set that corresponds to the outer boundary with an ID of 0
+  // The mesh now only contains one side set that corresponds to the outer boundary with an ID of 0
   auto bdry_list(ply_mesh_u->get_boundary_info().build_side_list());
 
   // For each vertex, the shifting direction to form the gap is defined by the normal vectors of the
   // two sides that contain the vertex
+  // We gather the normals for each node on the boundary here, which are all vertices because of the pre-selection of nodes
   std::map<dof_id_type, std::vector<Point>> node_normal_map;
   for (const auto & bside : bdry_list)
   {
@@ -126,6 +124,7 @@ GapMeshGenerator::generate()
                 "Each vertex should be connected to exactly two sides in a polygon.");
 
     const Point original_pt = *(ply_mesh_u->node_ptr(node_id));
+    // Form an average normal at the vertex from the two connected sides' normals
     const Point move_dir = (normal_vecs.front() + normal_vecs.back()).unit();
     const Real mov_dist =
         _thickness /
@@ -142,7 +141,7 @@ GapMeshGenerator::generate()
   }
 
   // To ensure no overlapping, we need to check set of four points
-  // p1 and p2 should be the pair of points before and after shifting
+  // p1 and p2 should be the pair of points before shifting the side
   // p3 and p4 should be the pair of points after shifting a side
   for (const auto & i_node_1 : make_range(mod_reduced_pts_list.size()))
   {

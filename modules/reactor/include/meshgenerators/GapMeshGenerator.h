@@ -14,8 +14,7 @@
 /**
  * Generate a polyline mesh that is based on an input 2D-XY mesh. The 2D-XY mesh needs to be a
  * connected mesh with only one outer boundary manifold. The polyline mesh generated along with the
- * boundary of the input mesh form a gap with a specified thickness. The mesh can further be used by
- * XYDelaunayGenerator to generate a triangulation mesh that takes the gap into account.
+ * boundary of the input mesh form a gap with a specified thickness.
  */
 class GapMeshGenerator : public PolygonMeshGeneratorBase
 {
@@ -31,7 +30,7 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /// The thickness of the gap to be created
-  const Real & _thickness;
+  const Real _thickness;
 
   /**
    * Check if three points are collinear.
