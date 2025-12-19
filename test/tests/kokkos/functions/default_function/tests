@@ -6,7 +6,7 @@
     input = 'kokkos_default_function.i'
     exodiff = 'kokkos_default_function_out.e'
     requirement = 'The Kokkos function system shall include the ability to set default values for input parameters expecting a function name.'
-    capabilities = 'kokkos'
+    capabilities = 'kokkos & !cuda'
     compute_devices = 'cpu'
   []
 []

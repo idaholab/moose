@@ -35,6 +35,12 @@ public:
 
   /// Whether the physics is actually creating the flow equations
   bool hasFlowEquations() const { return _has_flow_equations; }
+  /// Whether the cylindrical viscous source helper is enabled
+  bool addAxisymmetricViscousSourceEnabled() const { return _add_rz_viscous_source; }
+  /// Whether to include the symmetrized contribution in the viscous stress
+  bool includeSymmetrizedViscousStress() const { return _include_symmetrized_viscous_stress; }
+  /// Whether to include the isotropic viscous stress contribution
+  bool includeIsotropicStress() const { return _include_isotropic_viscous_stress; }
 
   /// To interface with other Physics
   const std::vector<std::string> & getVelocityNames() const { return _velocity_names; }
@@ -111,6 +117,17 @@ protected:
   virtual void addMomentumGravityKernels() = 0;
   virtual void addMomentumFrictionKernels() = 0;
   virtual void addMomentumBoussinesqKernels() = 0;
+  /// Adds the cylindrical source kernel for the radial momentum equation when requested and valid
+  void addAxisymmetricViscousSource();
+  /**
+   * Derived classes must override this hook to add the actual object that implements the
+   * axisymmetric viscous source term for their formulation once the helper has determined the
+   * relevant blocks and radial component.
+   */
+  virtual void addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & /*rz_blocks*/,
+                                                  unsigned int /*radial_index*/)
+  {
+  }
 
   /// Functions adding boundary conditions for the flow simulation.
   /// These are used for weakly-compressible simulations as well.
@@ -147,11 +164,16 @@ protected:
   /// Find the turbulence physics
   const WCNSFVTurbulencePhysicsBase * getCoupledTurbulencePhysics() const;
 
+  /// Return the set of blocks restricted to an RZ coordinate system
+  std::vector<SubdomainName> getAxisymmetricRZBlocks() const;
+
   /// Name of the vector to hold pressure momentum equation contributions
   const TagName _pressure_tag = "p_tag";
 
   /// Boolean to keep track of whether the flow equations should be created
   const bool _has_flow_equations;
+  /// Whether to automatically add the cylindrical viscous source term
+  const bool _add_rz_viscous_source;
 
   /// Compressibility type, can be compressible, incompressible or weakly-compressible
   const MooseEnum _compressibility;
@@ -178,6 +200,10 @@ protected:
   const MooseFunctorName _density_gravity_name;
   /// Name of the dynamic viscosity material property
   const MooseFunctorName _dynamic_viscosity_name;
+  /// Whether to include the symmetrized viscous stress contribution
+  const bool _include_symmetrized_viscous_stress;
+  /// Whether to include the isotropic viscous stress contribution
+  const bool _include_isotropic_viscous_stress;
 
   /// name of the Rhie Chow user object
   UserObjectName _rc_uo_name;
@@ -225,4 +251,6 @@ protected:
   std::map<BoundaryName, MooseFunctorName> _pressure_functors;
   /// Functors describing the momentum for each wall boundary
   std::map<BoundaryName, std::vector<MooseFunctorName>> _momentum_wall_functors;
+
+  friend class WCNSFVTurbulencePhysics;
 };

@@ -15,6 +15,7 @@
 #include "INSFVTurbulentViscosityWallFunction.h"
 #include "INSFVTKESourceSink.h"
 #include "NSFVBase.h"
+#include "MooseMesh.h"
 
 registerWCNSFVTurbulenceBaseTasks("NavierStokesApp", WCNSFVTurbulencePhysics);
 
@@ -234,6 +235,8 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
     params.set<MooseEnum>("variable_interp_method") =
         _flow_equations_physics->getMomentumFaceInterpolationMethod();
     params.set<bool>("complete_expansion") = true;
+    if (_flow_equations_physics->includeIsotropicStress())
+      params.set<bool>("include_isotropic_viscous_stress") = true;
 
     std::string kernel_name = prefix() + "ins_momentum_k_epsilon_reynolds_stress_";
     if (_porous_medium_treatment)
@@ -250,7 +253,45 @@ WCNSFVTurbulencePhysics::addFlowTurbulenceKernels()
 
       getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
     }
+
+    // We only add it here because the mixing length kernels deal with this
+    // withn the kernel. For mixing length see issue: #32112
+    if (_flow_equations_physics && _flow_equations_physics->hasFlowEquations())
+      addAxisymmetricTurbulentViscousSource();
   }
+}
+
+void
+WCNSFVTurbulencePhysics::addAxisymmetricTurbulentViscousSource()
+{
+  if (_turbulence_model == "none")
+    return;
+  if (!_flow_equations_physics)
+    return;
+  if (!_flow_equations_physics->addAxisymmetricViscousSourceEnabled())
+    return;
+
+  const auto rz_blocks = _flow_equations_physics->getAxisymmetricRZBlocks();
+  if (rz_blocks.empty())
+    return;
+
+  const auto radial_index =
+      _flow_equations_physics->getProblem().mesh().getAxisymmetricRadialCoord();
+
+  InputParameters params = getFactory().getValidParams("INSFVMomentumViscousSourceRZ");
+  assignBlocks(params, rz_blocks);
+  params.set<MooseFunctorName>(NS::mu) = _turbulent_viscosity_name;
+  params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
+  params.set<MooseEnum>("momentum_component") = NS::directions[radial_index];
+  params.set<bool>("complete_expansion") =
+      _flow_equations_physics->includeSymmetrizedViscousStress();
+  params.set<NonlinearVariableName>("variable") =
+      _flow_equations_physics->getVelocityNames()[radial_index];
+
+  getProblem().addFVKernel("INSFVMomentumViscousSourceRZ",
+                           prefix() + "ins_momentum_turbulent_viscous_source_rz_" +
+                               NS::directions[radial_index],
+                           params);
 }
 
 void

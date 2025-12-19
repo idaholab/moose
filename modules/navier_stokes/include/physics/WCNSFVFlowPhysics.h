@@ -75,4 +75,7 @@ private:
 
   /// Name of the user object in charge of computing the Rhie Chow coefficients
   UserObjectName _rc_uo_name;
+
+  void addAxisymmetricViscousSourceKernel(const std::vector<SubdomainName> & rz_blocks,
+                                          unsigned int radial_index) override;
 };
