@@ -28,6 +28,6 @@
     input = 'colebrook_white_ad.i'
     cli_args = "Materials/props/prop_values='1000 0.01 0.001 0.1'"
     expect_err = "Calculated Reynolds number below 4000"
-    requirement = 'The system shall be able to compute wall friction factor using the colebrook-white correlation.'
+    requirement = 'The system shall warn if Re is less than 4000 when using the colebrook-white correlation.'
   []
 []
