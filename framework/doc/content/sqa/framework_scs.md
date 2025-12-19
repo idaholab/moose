@@ -83,6 +83,7 @@ Const-correctness is not cosmetic. It:
 - Prevents accidental state mutation, especially in generic and templated code
 
 Code that is logically const but not marked const will generally be treated as a design issue during review.
+
 ## Index Variables in Looping Constructs
 
 In keeping with good `auto` practices, it would be really nice if we could use `auto` for
@@ -185,7 +186,7 @@ using ElemSide = std::tuple<dof_id_type, unsigned int, BoundaryID>;
 std::vector<ElemSide> my_vec2;
 ```
 
-Remember `using` also works with template.
+Remember that `using` also works with template.
 
 ## Lambdas
 
@@ -285,7 +286,7 @@ Define a member when the operation:
   tensor.transpose();
   ```
 
-  Ask: “Would users naturally discover this by typing obj.?” If so, make it a member function.
+  Ask yourself: “Would users naturally discover this by typing obj.?” If so, make it a member function.
 
 - Needs privileged access: If the function would otherwise require: friendship, access to private data, or bypassing encapsulation, make it a member (or a carefully chosen friend).
 
@@ -298,6 +299,7 @@ Use a free function for
   distance(p, q);
   misorientation(g1, g2);
   ```
+
   If no operand is conceptually dominant: Avoid `a.dot(b)` and prefer `dot(a, b)`.
 
 - Algorithms over data
@@ -317,7 +319,7 @@ Use a free function for
   auto norm(const T & x);
   ```
 
-  Free functions allow generic programming, ADL-based customization, extension to foreign types. Member functions cannot be added retroactively.
+  Free functions allow generic programming, customization via argument-dependent lookup, extension to foreign types. Member functions cannot be added retroactively.
 
 - Operations that conceptually sit “between” types
 
