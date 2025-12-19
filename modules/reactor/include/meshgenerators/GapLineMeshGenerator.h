@@ -16,12 +16,12 @@
  * connected mesh with only one outer boundary manifold. The polyline mesh generated along with the
  * boundary of the input mesh form a gap with a specified thickness.
  */
-class GapMeshGenerator : public PolygonMeshGeneratorBase
+class GapLineMeshGenerator : public PolygonMeshGeneratorBase
 {
 public:
   static InputParameters validParams();
 
-  GapMeshGenerator(const InputParameters & parameters);
+  GapLineMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -31,24 +31,4 @@ protected:
 
   /// The thickness of the gap to be created
   const Real _thickness;
-
-  /**
-   * Check if three points are collinear.
-   * @param p1 First point
-   * @param p2 Second point
-   * @param p3 Third point
-   * @return true if the three points are collinear, false otherwise
-   */
-  bool isPointsColinear(const Point & p1, const Point & p2, const Point & p3) const;
-
-  /**
-   * Check if the line segment p1-p2 intersects with line segment p3-p4
-   * @param p1 First point of first line segment
-   * @param p2 Second point of first line segment
-   * @param p3 First point of second line segment
-   * @param p4 Second point of second line segment
-   * @return true if the two line segments intersect, false otherwise
-   */
-  bool
-  fourPointOverlap(const Point & p1, const Point & p2, const Point & p3, const Point & p4) const;
 };
