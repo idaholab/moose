@@ -56,6 +56,7 @@ async def poll_process(pid: int) -> list[ProcessSample]:
 
     This is a heaver call so it is asynchronous.
     """
+
     def _poll_process() -> list[ProcessSample]:
         samples: list[ProcessSample] = []
 
@@ -136,6 +137,8 @@ class MonitoredProcess:
     """The estimated maximum percent CPU."""
     killed: Optional[KilledReason] = None
     """The reason the process was killed, if any."""
+    killed_info: Optional[str] = None
+    """Info about the running processes if killed."""
 
 
 async def _monitor_process(
@@ -156,14 +159,45 @@ async def _monitor_process(
     except psutil.NoSuchProcess:
         return result
 
+    # Get the percent cpu for a given sample, if available.
+    # It is available if we have a previous sample for
+    # the same process, as a delta is required.
+    def sample_percent_cpu(sample: ProcessSample) -> float:
+        if (last_sample := last_samples.get(sample.pid)) is not None:
+            return (
+                100.0
+                * (sample.cpu_time - last_sample.cpu_time)
+                / (sample.wall_time - last_sample.wall_time)
+            )
+        return 0.0
+
     # Helper for killing the process and setting the killed state
-    def kill(reason: KilledReason):
+    def kill(reason: KilledReason, samples: list[ProcessSample]):
+        # Accumulate as much info about the running processes
+        # as we can to provide more context
+        info = []
+        for sample in samples:
+            process_info = []
+            with suppress(psutil.NoSuchProcess):
+                p = psutil.Process(sample.pid)
+                process_info.append(("Command", " ".join(p.cmdline())))
+                process_info.append(("Parent", p.ppid()))
+                process_info.append(("Num threads", p.num_threads()))
+            process_info.append(("Memory", f"{(sample.memory / 1e6):.2f} MB"))
+            process_info.append(("CPU", f"{sample_percent_cpu(sample):.2f}%"))
+            info.append(f"Process {sample.pid}:")
+            info += [f"  {k}: {v}" for k, v in process_info]
+
+        # Kill the process
         if platform.system() == "Windows":
             process.terminate()
         else:
             with suppress(OSError):
                 os.killpg(os.getpgid(pid), SIGTERM)
+
         result.killed = reason
+        result.killed_info = "\n".join(info)
+
         return result
 
     num_intervals = 0
@@ -188,22 +222,15 @@ async def _monitor_process(
                 result.max_memory = memory
 
             # Update max percent cpu
-            percent_cpu = 0.0
-            for sample in samples:
-                if (last_sample := last_samples.get(sample.pid)) is not None:
-                    percent_cpu += (
-                        100.0
-                        * (sample.cpu_time - last_sample.cpu_time)
-                        / (sample.wall_time - last_sample.wall_time)
-                    )
+            percent_cpu = sum(sample_percent_cpu(v) for v in samples)
             if percent_cpu > result.max_percent_cpu:
                 result.max_percent_cpu = percent_cpu
 
             # Check failure criteria
             if max_memory and memory > max_memory:
-                return kill(KilledReason.MEMORY)
+                return kill(KilledReason.MEMORY, samples)
             if max_percent_cpu and result.max_percent_cpu > max_percent_cpu:
-                return kill(KilledReason.CPU)
+                return kill(KilledReason.CPU, samples)
 
             # Copy current samples for next cpu calculation
             last_samples = {sample.pid: sample for sample in samples}
@@ -254,6 +281,7 @@ def monitor_process(
         The max memory allowed during a sample in bytes, if any.
 
     """
+
     async def runner():
         return await _monitor_process(
             pid=pid,

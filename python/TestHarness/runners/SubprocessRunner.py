@@ -182,14 +182,16 @@ class SubprocessRunner(Runner):
                 self.setMaxMemory(result.max_memory)
 
             if result.killed is not None:
-                def fail(message, status):
+                def fail(reason, status):
+                    message = f"Job killed: {reason}; process info:"
                     self.appendOutput("\n" + util.outputHeader(message, False))
+                    self.appendOutput("\n" + result.killed_info)
                     self.job.setStatus(self.job.error, status)
 
                 if result.killed == KilledReason.CPU:
                     fail(
                         (
-                            f"Job killed: CPU {result.max_percent_cpu:.2f}% "
+                            f"CPU {result.max_percent_cpu:.2f}% "
                             f"> allowed {self.allowed_percent_cpu:.2f}%"
                         ),
                         "EXCEEDED CPU",
@@ -198,7 +200,7 @@ class SubprocessRunner(Runner):
                     assert self.allowed_memory is not None
                     fail(
                         (
-                            f"Job killed: memory/slot {int(result.max_memory / 1e6)}MB "
+                            f"memory/slot {int(result.max_memory / 1e6)}MB "
                             f"> max {int(self.allowed_memory / 1e6)}MB"
                         ),
                         "EXCEEDED MEMORY",
