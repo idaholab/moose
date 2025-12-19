@@ -39,6 +39,7 @@ class RunApp(Tester):
         params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
         params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
         params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
+        params.addParam("min_threads_per_rank", 1, "Override for the minimum number of threads each rank will always use (Default: 1)")
         params.addParam('redirect_output',  False, "Redirect stdout to files. Necessary when expecting an error when using parallel options")
 
         params.addParam('allow_warnings',   True, "Whether or not warnings are allowed.  If this is False then a warning will be treated as an error.  Can be globally overridden by setting 'allow_warnings = False' in the testroot file.");
@@ -212,6 +213,10 @@ class RunApp(Tester):
             self.addCaveats('max_cpus=' + str(ncpus))
 
         return ncpus
+
+    def getSlots(self, options):
+        # Obey "min_threads_per_rank" if it is set
+        return self.getProcs(options) * max(self.getThreads(options), self.specs["min_threads_per_rank"])
 
     def getCommand(self, options):
         specs = self.specs
