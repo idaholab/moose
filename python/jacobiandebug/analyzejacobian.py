@@ -403,7 +403,8 @@ if __name__ == '__main__':
 
         mooseparams.extend(petsc_test_options + ['-mat_fd_type', 'ds',
                                                  'BCs/active=', 'Outputs/exodus=false', 'Outputs/csv=false',
-                                                 'Outputs/active=', 'Executioner/solve_type=NEWTON'])
+                                                 'Outputs/active=', 'Executioner/solve_type=NEWTON',
+                                                 '--disable-perf-graph-live'])
     if options.cli_args != None:
         mooseparams.extend([options.cli_args])
 
