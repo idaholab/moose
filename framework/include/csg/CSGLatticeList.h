@@ -10,8 +10,6 @@
 #pragma once
 
 #include "CSGLattice.h"
-#include "CSGCartesianLattice.h"
-#include "CSGHexagonalLattice.h"
 
 namespace CSG
 {
@@ -31,40 +29,6 @@ protected:
    * Destructor
    */
   virtual ~CSGLatticeList() = default;
-
-  /**
-   * @brief add a lattice of the specified pitch but does not have a defined
-   * universe layout yet. LatticeType must have a matching constructor.
-   *
-   * @param name unique name identifier of the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @return reference to new lattice object
-   */
-  template <typename LatticeType>
-  LatticeType & addLattice(const std::string & name, const Real pitch)
-  {
-    auto & lattice = addLattice(std::make_unique<LatticeType>(name, pitch));
-    return dynamic_cast<LatticeType &>(lattice);
-  }
-
-  /**
-   * @brief add a lattice whose layout is defined by the set of universes. LatticeType
-   * must have a matching constructor.
-   *
-   * @param name unique name identifier of the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the lattice layout
-   * @return reference to new lattice object
-   */
-  template <typename LatticeType>
-  LatticeType &
-  addLattice(const std::string & name,
-             const Real pitch,
-             std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-  {
-    auto & lattice = addLattice(std::make_unique<LatticeType>(name, pitch, universes));
-    return dynamic_cast<LatticeType &>(lattice);
-  }
 
   /**
    * @brief add an existing universe to list. Ownership of universe will be transferred to universe

@@ -292,201 +292,6 @@ public:
   }
 
   /**
-   * @brief Create a 2D Cartesian Lattice from the provided universes. Each row in the lattice
-   * should be the same length. This version does not set an outer fill type (assumes VOID).
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the layout of the lattice
-   *
-   * @return reference to new Cartesian lattice
-   */
-  const CSGCartesianLattice & createCartesianLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
-
-  /**
-   * @brief Create a 2D Cartesian Lattice from the provided universes with an outer material fill.
-   * Each row in the lattice should be the same length.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the layout of the lattice
-   * @param outer_name name of material to use as outer fill between lattice elements
-   *
-   * @return reference to new Cartesian lattice
-   */
-  const CSGCartesianLattice & createCartesianLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
-      const std::string & outer_name);
-
-  /**
-   * @brief Create a 2D Cartesian Lattice from the provided universes with an outer universe fill.
-   * Each row in the lattice should be the same length.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the layout of the lattice
-   * @param outer_univ universe to use as outer fill between lattice elements
-   *
-   * @return reference to new Cartesian lattice
-   */
-  const CSGCartesianLattice & createCartesianLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
-      const CSGUniverse & outer_univ);
-
-  /**
-   * @brief Create an empty 2D Cartesian lattice. This version does not set an outer fill type
-   * (assumes VOID).
-   * NOTE: this will not create any universe mapping; this must be done by using
-   * setLatticeUniverses.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @return reference to new Cartesian lattice
-   */
-  const CSGCartesianLattice & createCartesianLattice(const std::string & name, const Real pitch)
-  {
-    return _lattice_list.addLattice<CSGCartesianLattice>(name, pitch);
-  }
-
-  /**
-   * @brief Create an empty 2D Cartesian lattice with outer material fill.
-   * NOTE: this will not create any universe mapping; this must be done by using
-   * setLatticeUniverses.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param outer_name name of material to use as outer fill between lattice elements
-   *
-   * @return reference to new Cartesian lattice
-   */
-  const CSGCartesianLattice & createCartesianLattice(const std::string & name,
-                                                     const Real pitch,
-                                                     const std::string & outer_name);
-
-  /**
-   * @brief Create an empty 2D Cartesian lattice with an outer universe fill.
-   * NOTE: this will not create any universe mapping; this must be done by using
-   * setLatticeUniverses.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @return reference to new Cartesian lattice
-   */
-  const CSGCartesianLattice & createCartesianLattice(const std::string & name,
-                                                     const Real pitch,
-                                                     const CSGUniverse & outer_univ);
-
-  /**
-   * @brief Create an 2D empty hexagonal lattice with x orientation. This version does not set an
-   * outer fill type (assumes VOID).
-   * NOTE: this will not create any universe mapping; this must be done by using
-   * setLatticeUniverses.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @return reference to new hexagonal lattice
-   */
-  const CSGHexagonalLattice & createHexagonalLattice(const std::string & name, Real pitch)
-  {
-    return _lattice_list.addLattice<CSGHexagonalLattice>(name, pitch);
-  }
-
-  /**
-   * @brief Create an 2D empty hexagonal lattice with x orientation with an outer material fill.
-   * NOTE: this will not create any universe mapping; this must be done by using
-   * setLatticeUniverses.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param outer_name name of material to use as outer fill between lattice elements
-   * @return reference to new hexagonal lattice
-   */
-  const CSGHexagonalLattice &
-  createHexagonalLattice(const std::string & name, Real pitch, const std::string & outer_name);
-
-  /**
-   * @brief Create an 2D empty hexagonal lattice with x orientation with an outer universe fill.
-   * NOTE: this will not create any universe mapping; this must be done by using
-   * setLatticeUniverses.
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param outer_univ universe to use as outer fill between lattice elements
-   *
-   * @return reference to new hexagonal lattice
-   */
-  const CSGHexagonalLattice &
-  createHexagonalLattice(const std::string & name, Real pitch, const CSGUniverse & outer_univ);
-
-  /**
-   * @brief Create a 2D hexagonal Lattice from the provided universes. Universes should be arranged
-   * by rows and correspond to a hexagonal lattice with x-orientation. For example, a 2-ring lattice
-   * would have the following layout:
-   *  {{u1, u2},
-   * {u3, u4, u5},
-   *  {u6, u7}}
-   *
-   * This version does not set an outer fill type (assumes VOID).
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the layout of the lattice
-   * @return reference to new hexagonal lattice
-   */
-  const CSGHexagonalLattice & createHexagonalLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
-
-  /**
-   * @brief Create a 2D hexagonal Lattice from the provided universes with an outer material fill.
-   * Universes should be arranged by rows and correspond to a hexagonal lattice with x-orientation.
-   * For example, a 2-ring lattice would have the following layout:
-   *  {{u1, u2},
-   * {u3, u4, u5},
-   *  {u6, u7}}
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the layout of the lattice
-   * @param outer_name name of material to use as outer fill between lattice elements
-   * @return reference to new hexagonal lattice
-   */
-  const CSGHexagonalLattice & createHexagonalLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
-      const std::string & outer_name);
-
-  /**
-   * @brief Create a 2D hexagonal Lattice from the provided universes with an outer universe fill.
-   * Universes should be arranged by rows and correspond to a hexagonal lattice with x-orientation.
-   * For example, a 2-ring lattice would have the following layout:
-   *  {{u1, u2},
-   * {u3, u4, u5},
-   *  {u6, u7}}
-   *
-   * @param name unique name identifier for the lattice
-   * @param pitch flat-to-flat size of the lattice elements
-   * @param universes list of list of universes that define the layout of the lattice
-   * @param outer_univ universe to use as outer fill between lattice elements
-   *
-   * @return reference to new hexagonal lattice
-   */
-  const CSGHexagonalLattice & createHexagonalLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
-      const CSGUniverse & outer_univ);
-
-  /**
    * @brief add a unique lattice pointer to this base instance; universes that make the lattice
    * must already be a part of this CSGBase instance.
    *
@@ -494,7 +299,27 @@ public:
    *
    * @return reference to CSGLattice that was added
    */
-  const CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice);
+  template <typename LatticeType = CSGLattice>
+  const LatticeType & addLattice(std::unique_ptr<LatticeType> lattice)
+  {
+    // make sure all universes are a part of this base instance
+    auto universes = lattice->getUniverses();
+    for (auto univ_list : universes)
+      for (const CSGUniverse & univ : univ_list)
+        if (!checkUniverseInBase(univ))
+          mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
+                     ". Universe " + univ.getName() + " is not in the CSGBase instance.");
+
+    if (lattice->getOuterType() == "UNIVERSE")
+    {
+      const CSGUniverse & outer_univ = lattice->getOuterUniverse();
+      if (!checkUniverseInBase(outer_univ))
+        mooseError("Cannot add lattice " + lattice->getName() + " of type " + lattice->getType() +
+                   ". Outer universe " + outer_univ.getName() + " is not in the CSGBase instance.");
+    }
+    auto & lat_ref = _lattice_list.addLattice(std::move(lattice));
+    return dynamic_cast<LatticeType &>(lat_ref);
+  }
 
   /**
    * @brief set location in the lattice to be the provided universe

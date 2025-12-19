@@ -10,6 +10,7 @@
 #include "NestedLatticeCellUniverseMeshGenerator.h"
 #include "CSGBase.h"
 #include "CSGSphere.h"
+#include "CSGCartesianLattice.h"
 
 registerMooseObject("MooseTestApp", NestedLatticeCellUniverseMeshGenerator);
 
@@ -71,8 +72,11 @@ NestedLatticeCellUniverseMeshGenerator::generateCSG()
   std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> lat_univs = {
       {nested_outer_univ, nested_outer_univ}, {nested_outer_univ, nested_outer_univ}};
   auto & lattice_outer = csg_obj->createUniverse("lattice_outer");
-  const auto & lattice =
-      csg_obj->createCartesianLattice("cartesian_lat", 10.0, lat_univs, lattice_outer);
+  std::unique_ptr<CSG::CSGCartesianLattice> lat_ptr =
+      std::make_unique<CSG::CSGCartesianLattice>("cartesian_lat", 10.0, lat_univs);
+  const auto & lattice = csg_obj->addLattice<CSG::CSGCartesianLattice>(std::move(lat_ptr));
+  csg_obj->setLatticeOuter(lattice, lattice_outer);
+
   csg_obj->createCell("cell_lat_fill", lattice, -csg_sphere_lattice);
   csg_obj->createCell("cell_void", +csg_sphere_lattice);
 

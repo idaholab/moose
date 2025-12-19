@@ -215,26 +215,34 @@ When adding and removing cells to/from universes, it is important to maintain th
 ### Lattices
 
 A `CSGLattice` is defined as a patterned arrangement of [`CSGUniverse`](#universes) objects and an "outer" to fill the space around lattice elements.
-The `CSGBase` class provides support for two types of 2D lattice types: Cartesian and regular hexagonal.
-It is assumed that these two types are in the $x-y$ plane (having a $+z$ normal).
+To create any type of lattice, the lattice constructor must be called directly to create a unique pointer.
+This pointer then has to be passed to the current `CSGBase` instance with `addLattice` (optionally specifying the lattice type) which will then return a const reference to that generated lattice object (`const & CSGLattice` or `const & LatticeType`).
+At the time that `addLattice` is called to add the lattice to the base instance, any `CSGUniverse` objects associated with the lattice must also be in the `CSGBase` instance already.
+The syntax for creating the pointer and adding it is shown below, where `LatticeType` should be replaced with the specific type of the lattice (e.g., `CSGCartesianLattice` or `CSGHexagonalLattice`).
+
+```cpp
+// the unique lattice pointer is made first, creating the lattice object of the specified type
+std::unique_ptr<LatticeType> lat_ptr = std::make_unique<:LatticeType>(arguments);
+// and then it is explicitly passed to this CSGBase instance, which holds the memory ownership for the object
+const auto & lattice = csg_obj->addLattice<LatticeType>(std::move(lat_ptr));
+```
+
+An example of creating a Cartesian lattice is shown below:
+
+!listing TestCSGLatticeMeshGenerator.C start=lat_ptr end=addLattice include-end=true
+
+!alert! note title=Specifying the LatticeType
+
+It is _highly_ recommended that the specific `LatticeType` of the lattice object always be specified when calling `addLattice` or `getLatticeByName`. If it is not specified, it will default to setting the type as the abstract type `CSGLattice`. If this is the case, no methods or data that is specific to the actual lattice type will be callable on the lattice object, unless a reference cast is used.
+
+!alert-end!
+
+The `CSGBase` class provides support for two types of 2D lattice types (Cartesian and regular hexagonal), but any custom lattice type can also be defined by following the information in [source/csg/CSGLattice.md].
+It is assumed that both the Cartesian and hexagonal lattice types are in the $x-y$ plane (having a $+z$ normal).
 Three types of outer fill are supported: void (default), material (an `std::string` name), and [`CSGUniverse`](#universes).
-To create either of these types of lattices, use the `createCartesianLattice` or `createHexagonalLattice` methods from `CSGBase`, which will return a const reference to the specific lattice type object (`const CSGCartesianLattice &` or `const CSGHexagonalLattice &`).
 For both lattice types, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
 The pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
 And similarly, the outer fill can be set at the time of initialization or set later with the `setLatticeOuter` method.
-Below are two examples of creating a `CSGCartesianLattice` and `CSGHexagonalLattice`, both initialized with the set of `CSGUniverse` objects that define the lattice layout.
-
-!listing CSGBaseTest.C start=create a 2x3 lattice of universes end=dims_map
-
-!listing CSGBaseTest.C start=create a 3-ring hexagonal lattice of universes end=dims_map
-
-Custom lattice types can also be defined to be used with the `CSGBase` class.
-Information about how to define custom types of lattices can be found in [source/csg/CSGLattice.md].
-If using a custom type, the lattice can be created as a unique pointer and added to the base with `addLattice`.
-If there are `CSGUniverse` objects in the lattice at the time of adding it to the base, the `CSGUniverse` objects must already exist in the `CSGBase` instance.
-An example of using `addLattice` is shown below (`CSGCartesianLattice` would be replaced with the custom type).
-
-!listing CSGBaseTest.C start=create a lattice as a unique pointer end=check that it exists
 
 !alert! note title=2D vs. 3D Lattices
 
@@ -251,12 +259,6 @@ The `CSGLattice` objects can be accessed or updated with the following methods f
 - `renameLattice`: change the name of the `CSGLattice` object.
 - `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
 - `getLatticeByName`: retrieve a const reference to the lattice object of the specified name.
-
-!alert! note title=Using `getLatticeByName`
-
-`getLatticeByName` is a templated function which will return an object of type `CSGLattice` by default if no type is specified when calling. If the type of lattice is known, it is recommended to call it using that type (e.g., `csg_obj->getLatticeByName<LatticeType>(lattice_name)`), so that any lattice type-specific methods or attributes can be called on the returned object. If type `CSGLattice` is used, *only* methods and attributes that are available in the abstract `CSGLattice` class can be used.
-
-!alert-end!
 
 #### Lattice Indexing
 

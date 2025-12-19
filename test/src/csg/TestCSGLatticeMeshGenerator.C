@@ -10,6 +10,8 @@
 #include "TestCSGLatticeMeshGenerator.h"
 #include "MeshGenerator.h"
 #include "CSGPlane.h"
+#include "CSGCartesianLattice.h"
+#include "CSGHexagonalLattice.h"
 
 registerMooseObject("MooseTestApp", TestCSGLatticeMeshGenerator);
 
@@ -92,9 +94,16 @@ TestCSGLatticeMeshGenerator::generateCSG()
   // create the lattice based on the specified type
   std::string lat_name = mg_name + "_lattice";
   if (_lattice_type == "cartesian")
-    csg_obj->createCartesianLattice(lat_name, _pitch, universe_pattern);
+  {
+    std::unique_ptr<CSG::CSGCartesianLattice> lat_ptr =
+        std::make_unique<CSG::CSGCartesianLattice>(lat_name, _pitch, universe_pattern);
+    csg_obj->addLattice<CSG::CSGCartesianLattice>(std::move(lat_ptr));
+  }
   else if (_lattice_type == "hexagonal")
-    csg_obj->createHexagonalLattice(lat_name, _pitch, universe_pattern);
-
+  {
+    std::unique_ptr<CSG::CSGHexagonalLattice> lat_ptr =
+        std::make_unique<CSG::CSGHexagonalLattice>(lat_name, _pitch, universe_pattern);
+    csg_obj->addLattice<CSG::CSGHexagonalLattice>(std::move(lat_ptr));
+  }
   return csg_obj;
 }
