@@ -50,12 +50,18 @@ void
 ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
 {
   ADReal Re = THM::Reynolds(1, _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]);
-  ADReal f_D_old = 0;
+  if (Re < 4000.)
+  {
+    mooseDoOnce(mooseWarning("Calculated Reynolds number below 4000 (",
+                             Re,
+                             "), consider using different friction factor"));
+  }
 
   using std::abs, std::pow, std::log10, std::sqrt;
 
   // Colebrook-white equation has implicit formulation must use iteration
   ADReal & f_D = _f_D[_qp];
+  ADReal f_D_old = 0;
   f_D = 0.01; // initial guess
   while (abs((f_D - f_D_old) / f_D) > 1e-14)
   {
