@@ -69,7 +69,7 @@ Make sure your variables have +good+ names when using auto!
 
 We expect contributions to follow strict const-correctness.
 
-- Use const to accurately express intent, invariants, and ownership:
+- Use const to accurately express intent, invariants, and ownership.
 - Mark function parameters const whenever they are not modified.
 - Mark member functions const whenever they do not modify observable object state.
 - Prefer returning const references when mutation is not intended.
@@ -81,8 +81,8 @@ Const-correctness is not cosmetic. It:
 - Enables safer refactoring and compiler diagnostics
 - Allows the compiler to reason more effectively about aliasing and optimization
 - Prevents accidental state mutation, especially in generic and templated code
-- Code that is logically const but not marked const will generally be treated as a design issue during review.
 
+Code that is logically const but not marked const will generally be treated as a design issue during review.
 ## Index Variables in Looping Constructs
 
 In keeping with good `auto` practices, it would be really nice if we could use `auto` for
@@ -122,15 +122,15 @@ In addition, a few convenience methods are available to help generate integer ra
 #include "libmesh/int_range.h"
 
 // Looping through n1, n1+1, n1+2, ..., n2-1
-for (auto i : make_range(n1, n2))
+for (const auto i : make_range(n1, n2))
   // ... Do something with index i
 
 // Looping through 0, 1, 2, ..., n-1
-for (auto i : make_range(n))
+for (const auto i : make_range(n))
   // ... Do something with index i
 
 // Looping through 0, 1, 2, ..., v.size()-1
-for (auto i : index_range(v))
+for (const auto i : index_range(v))
   // ... Do something with index i
 ```
 
@@ -363,7 +363,8 @@ Private members allow internal refactoring without breaking user assumptions and
 - A derived class must override or extend behavior
 - The base class explicitly documents a customization or extension point
 - The invariant contract between base and derived classes is clear
-- Avoid exposing data members as `protected`. Prefer `protected` virtual functions or `protected` helper methods instead.
+
+Avoid exposing data members as `protected`. Prefer `protected` virtual functions or `protected` helper methods instead.
 
 If a member is not intended to be used or overridden by derived classes, it should **not** be `protected`.
 
