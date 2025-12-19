@@ -84,7 +84,7 @@ async def poll_process(pid: int) -> list[ProcessSample]:
                 memory=0,
             )
 
-            # Sample memory if available
+            # Sample memory; prefer PSS if available
             if MEMORY_PSS:
                 with (
                     suppress(FileNotFoundError),
@@ -94,6 +94,7 @@ async def poll_process(pid: int) -> list[ProcessSample]:
                     for line in f:
                         if line.startswith("Pss:"):  # in kB
                             sample.memory = int(line.split()[1]) * 1000
+                            break
             # Otherwise, use RSS (will double count shared memory)
             else:
                 with suppress(psutil.NoSuchProcess):
