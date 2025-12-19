@@ -331,7 +331,7 @@ Use a free function for
 In summary, when making a decision, ask these questions in order:
 
 1. Does this operation mutate the object or enforce invariants? Yes → member
-2. Is one object conceptually “owned” by the object? Yes → member
+2. Is it conceptually “owned” by the object? Yes → member
 3. Is the operation symmetric or algorithmic? Yes → free function
 4. Do I want/expect others to extend this behavior for new types? Yes → free function
 5. If you’re unsure → default to free function.
