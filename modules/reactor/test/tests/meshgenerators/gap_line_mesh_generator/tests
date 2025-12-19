@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/GapMeshGenerator.md'
+  design = 'meshgenerators/GapLineMeshGenerator.md'
   issues = '#32119'
   [test]
     requirement = "The system shall generate "
@@ -28,7 +28,7 @@
       input = simple_gap.i
       cli_args = "--mesh-only err.e
                   Mesh/gap/thickness=1.0"
-      expect_err = "creates overlapping"
+      expect_err = "mesh is tangled"
       detail = "when the gap thickness exceeds the available space and leads to overlapping."
     []
   []

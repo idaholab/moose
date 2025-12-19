@@ -20,7 +20,7 @@
     boundary = 'shape'
   []
   [gap]
-    type = GapMeshGenerator
+    type = GapLineMeshGenerator
     input = 'xyd'
     thickness = 0.1
   []

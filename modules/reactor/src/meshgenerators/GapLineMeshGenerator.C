@@ -7,12 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GapMeshGenerator.h"
+#include "GapLineMeshGenerator.h"
 
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
-#include "DelimitedFileReader.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/enum_to_string.h"
@@ -25,10 +24,10 @@
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/mesh_serializer.h"
 
-registerMooseObject("ReactorApp", GapMeshGenerator);
+registerMooseObject("ReactorApp", GapLineMeshGenerator);
 
 InputParameters
-GapMeshGenerator::validParams()
+GapLineMeshGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
 
@@ -46,7 +45,7 @@ GapMeshGenerator::validParams()
   return params;
 }
 
-GapMeshGenerator::GapMeshGenerator(const InputParameters & parameters)
+GapLineMeshGenerator::GapLineMeshGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
     _input(getMesh("input")),
     _thickness(getParam<Real>("thickness"))
@@ -54,7 +53,7 @@ GapMeshGenerator::GapMeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase>
-GapMeshGenerator::generate()
+GapLineMeshGenerator::generate()
 {
   // Put the boundary mesh in a local pointer
   std::unique_ptr<UnstructuredMesh> mesh =
@@ -67,16 +66,17 @@ GapMeshGenerator::generate()
   std::vector<Point> reduced_pts_list;
   for (const auto i : make_range(bdry_mh.n_points()))
   {
-    if (!isPointsColinear(bdry_mh.point((i - 1 + bdry_mh.n_points()) % bdry_mh.n_points()),
-                          bdry_mh.point(i),
-                          bdry_mh.point((i + 1) % bdry_mh.n_points())))
+    if (!MooseMeshUtils::isPointsColinear(
+            bdry_mh.point((i - 1 + bdry_mh.n_points()) % bdry_mh.n_points()),
+            bdry_mh.point(i),
+            bdry_mh.point((i + 1) % bdry_mh.n_points())))
       reduced_pts_list.push_back(bdry_mh.point(i));
   }
   // Here we need a method to generate the outward normals of each external side
   auto ply_mesh = buildMeshBaseObject();
 
   MooseMeshUtils::buildPolyLineMesh(
-      *ply_mesh, reduced_pts_list, /*loop*/true, "dummy", "dummy", std::vector<unsigned int>({1}));
+      *ply_mesh, reduced_pts_list, /*loop*/ true, "dummy", "dummy", std::vector<unsigned int>({1}));
 
   std::unique_ptr<UnstructuredMesh> ply_mesh_u =
       dynamic_pointer_cast<UnstructuredMesh>(std::move(ply_mesh));
@@ -100,7 +100,8 @@ GapMeshGenerator::generate()
 
   // For each vertex, the shifting direction to form the gap is defined by the normal vectors of the
   // two sides that contain the vertex
-  // We gather the normals for each node on the boundary here, which are all vertices because of the pre-selection of nodes
+  // We gather the normals for each node on the boundary here, which are all vertices because of the
+  // pre-selection of nodes
   std::map<dof_id_type, std::vector<Point>> node_normal_map;
   for (const auto & bside : bdry_list)
   {
@@ -126,6 +127,19 @@ GapMeshGenerator::generate()
     const Point original_pt = *(ply_mesh_u->node_ptr(node_id));
     // Form an average normal at the vertex from the two connected sides' normals
     const Point move_dir = (normal_vecs.front() + normal_vecs.back()).unit();
+    // Consider four points of interest to determine the moving distance
+    // 1. the vertex point
+    // 2. point along normal_vecs.front() from the vertex with a distance _thickness
+    // 3. point along normal_vecs.back() from the vertex with a distance _thickness
+    // 4. point along move_dir from the vertex with a distance mov_dist
+    // The four points form a kite shape with its symmetry axis along 1-4 direction
+    // Angle 1-2-4 and angle 1-3-4 are right angles
+    // Angle 2-1-3 (i.e., theta) can be calculated using the interior product of
+    // v1 = normal_vecs.front() and v2 = normal_vecs.back():
+    // cos(theta) = (v1 . v2) / (|v1| * |v2|)
+    // Because of the right angles, the distance between 1 and 4 can be calculated as:
+    // mov_dist = _thickness / cos(theta/2)
+    // and cos(theta/2) = sqrt((1 + cos(theta)) / 2)
     const Real mov_dist =
         _thickness /
         std::sqrt((1.0 + (normal_vecs.front() * normal_vecs.back()) /
@@ -153,10 +167,11 @@ GapMeshGenerator::generate()
         continue;
       const Point & p3 = mod_reduced_pts_list[i_node_2];
       const Point & p4 = mod_reduced_pts_list[(i_node_2 + 1) % mod_reduced_pts_list.size()];
-      if (fourPointOverlap(p1, p2, p3, p4))
+      if (MooseMeshUtils::segmentsIntersect(p1, p2, p3, p4))
         paramError("thickness",
-                   "The specified thickness creates overlapping in the gap mesh. Please reduce the "
-                   "thickness value.");
+                   "The thickness is so large that the mesh is tangled because the offset nodes "
+                   "are no longer in the same order when following the original boundary. Please "
+                   "reduce the thickness value.");
     }
   }
 
@@ -170,49 +185,4 @@ GapMeshGenerator::generate()
         *ply_mesh_2, mod_reduced_pts_list, true, "dummy", "dummy", std::vector<unsigned int>({1}));
 
   return ply_mesh_2;
-}
-
-bool
-GapMeshGenerator::isPointsColinear(const Point & p1, const Point & p2, const Point & p3) const
-{
-  const Point v1 = p2 - p1;
-  const Point v2 = p3 - p1;
-  const Point cross_prod = v1.cross(v2);
-
-  return MooseUtils::absoluteFuzzyEqual(cross_prod.norm(), 0.0);
-}
-
-bool
-GapMeshGenerator::fourPointOverlap(const Point & p1,
-                                   const Point & p2,
-                                   const Point & p3,
-                                   const Point & p4) const
-{
-  const Real a1 = p2(1) - p1(1);
-  const Real b1 = p1(0) - p2(0);
-  const Real c1 = p2(0) * p1(1) - p1(0) * p2(1);
-
-  const Real a2 = p4(1) - p3(1);
-  const Real b2 = p3(0) - p4(0);
-  const Real c2 = p4(0) * p3(1) - p3(0) * p4(1);
-
-  const Real denom = a1 * b2 - a2 * b1;
-  // We should not worry about the parallel case here
-  // If there is an overlap issue, it will be captured by other line segments
-  if (MooseUtils::absoluteFuzzyEqual(denom, 0.0))
-    return false;
-
-  const Point intersection_pt =
-      Point((b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom, 0.0);
-
-  const Real ratio_p1p2 = (intersection_pt - p1) * (p2 - p1) / ((p2 - p1).norm_sq());
-  const Real ratio_p3p4 = (intersection_pt - p3) * (p4 - p3) / ((p4 - p3).norm_sq());
-
-  if (MooseUtils::absoluteFuzzyGreaterEqual(ratio_p1p2, 0.0) &&
-      MooseUtils::absoluteFuzzyLessEqual(ratio_p1p2, 1.0) &&
-      MooseUtils::absoluteFuzzyGreaterEqual(ratio_p3p4, 0.0) &&
-      MooseUtils::absoluteFuzzyLessEqual(ratio_p3p4, 1.0))
-    return true;
-  else
-    return false;
 }
