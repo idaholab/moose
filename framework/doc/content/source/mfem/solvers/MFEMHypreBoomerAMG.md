@@ -6,8 +6,8 @@
 
 Defines and builds an `mfem::HypreBoomerAMG` solver to use as a preconditioner or solver to solve the MFEM equation system.
 
-A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter 
-[!param](/Solver/MFEMHypreBoomerAMG/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial 
+A Low-Order-Refined (LOR) version of this solver may be used instead by setting the parameter
+[!param](/Solver/MFEMHypreBoomerAMG/low_order_refined) to `true`. Using an LOR solver improves performance for high polynomial
 order systems.
 
 ## Example Input File Syntax

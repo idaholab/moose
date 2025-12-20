@@ -16,7 +16,7 @@ that may serve as a useful starting point for users to adapt.
 
 - [Transient Heat Transfer (Mixed Form)](syntax/MFEM/MixedHeatTransfer.md): Transient heat
   conduction problem solved using the mixed form of the heat equation, strongly imposing a zero heat
-  flux condition on part of the boundary.  
+  flux condition on part of the boundary.
 
 ## Mechanical Problems
 

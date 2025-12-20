@@ -1,6 +1,6 @@
 # FeatureFloodCount
 
-The FeatureFloodCount object is a utility that inspects solution fields looking for [Connected Components](https://en.wikipedia.org/wiki/Connected_component_(graph_theory)) or "topologically connected regions of a solution field sharing a similar characteristic". Typically, this means a region where the solution value is higher than some threshold. This object is designed to work efficiently on a partitioned unstructured mesh with hundreds to thousands of processors.
+The FeatureFloodCount object is a utility that inspects solution fields looking for [Connected Components](https://en.wikipedia.org/wiki/Connected_component_(graph_theory%29) or "topologically connected regions of a solution field sharing a similar characteristic". Typically, this means a region where the solution value is higher than some threshold. This object is designed to work efficiently on a partitioned unstructured mesh with hundreds to thousands of processors.
 
 !row!
 !col! small=12 medium=6 large=6
