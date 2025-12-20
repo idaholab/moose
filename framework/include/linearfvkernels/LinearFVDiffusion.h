@@ -10,13 +10,14 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
-#include "fvinterpolationmethods/FVInterpolationMethod.h"
+#include "FVInterpolationMethod.h"
+#include "FVInterpolationMethodInterface.h"
 
 /**
  * Kernel that adds contributions from a diffusion term discretized using the finite volume method
  * to a linear system.
  */
-class LinearFVDiffusion : public LinearFVFluxKernel
+class LinearFVDiffusion : public LinearFVFluxKernel, public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();

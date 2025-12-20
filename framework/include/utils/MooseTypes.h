@@ -1210,6 +1210,9 @@ MooseDerivativeStringClass(SamplerName);
 /// This type is used for objects that expect "UserObject" names
 MooseDerivativeStringClass(UserObjectName);
 
+/// This type is used for referencing finite-volume interpolation methods
+MooseDerivativeStringClass(InterpolationMethodName);
+
 /// This type is used for objects that expect an Indicator object name
 MooseDerivativeStringClass(IndicatorName);
 

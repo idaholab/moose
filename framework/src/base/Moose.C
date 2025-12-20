@@ -698,8 +698,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // UserObject and some derived classes
   registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
-  registerSyntax("AddUserObjectAction", "InterpolationMethods/*");
-  syntax.registerSyntaxType("InterpolationMethods/*", "UserObjectName");
+  registerSyntax("AddFVInterpolationMethodAction", "InterpolationMethods/*");
+  syntax.registerSyntaxType("InterpolationMethods/*", "InterpolationMethodName");
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
 
