@@ -26,7 +26,7 @@
 [Functions]
   [params_fun]
     type = ParsedFunction
-    value = '0.5 + x + y + x*y'
+    expression = '0.5 + x + y + x*y'
   []
 []
 

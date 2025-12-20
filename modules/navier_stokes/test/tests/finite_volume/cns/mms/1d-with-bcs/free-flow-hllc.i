@@ -196,15 +196,15 @@ diff_coeff = 0.1
   []
   [rho_bc]
     type = ParsedFunction
-    value = '-diff_coeff*3.48788261470924*sin(x)'
-    vars = 'diff_coeff'
-    vals = '${diff_coeff}'
+    expression = '-diff_coeff*3.48788261470924*sin(x)'
+    symbol_names = 'diff_coeff'
+    symbol_values = '${diff_coeff}'
   []
   [minus_rho_bc]
     type = ParsedFunction
-    value = 'diff_coeff*3.48788261470924*sin(x)'
-    vars = 'diff_coeff'
-    vals = '${diff_coeff}'
+    expression = 'diff_coeff*3.48788261470924*sin(x)'
+    symbol_names = 'diff_coeff'
+    symbol_values = '${diff_coeff}'
   []
   [forcing_rho]
     type = ParsedFunction
@@ -216,15 +216,15 @@ diff_coeff = 0.1
   []
   [rho_u_bc]
     type = ParsedFunction
-    value = '-diff_coeff*3.48788261470924*1.1*sin(1.1*x)'
-    vars = 'diff_coeff'
-    vals = '${diff_coeff}'
+    expression = '-diff_coeff*3.48788261470924*1.1*sin(1.1*x)'
+    symbol_names = 'diff_coeff'
+    symbol_values = '${diff_coeff}'
   []
   [minus_rho_u_bc]
     type = ParsedFunction
-    value = 'diff_coeff*3.48788261470924*1.1*sin(1.1*x)'
-    vars = 'diff_coeff'
-    vals = '${diff_coeff}'
+    expression = 'diff_coeff*3.48788261470924*1.1*sin(1.1*x)'
+    symbol_names = 'diff_coeff'
+    symbol_values = '${diff_coeff}'
   []
   [forcing_rho_u]
     type = ParsedFunction
@@ -236,15 +236,15 @@ diff_coeff = 0.1
   []
   [rho_et_bc]
     type = ParsedFunction
-    value = '-diff_coeff*26.7439413073546*1.2*sin(1.2*x)'
-    vars = 'diff_coeff'
-    vals = '${diff_coeff}'
+    expression = '-diff_coeff*26.7439413073546*1.2*sin(1.2*x)'
+    symbol_names = 'diff_coeff'
+    symbol_values = '${diff_coeff}'
   []
   [minus_rho_et_bc]
     type = ParsedFunction
-    value = 'diff_coeff*26.7439413073546*1.2*sin(1.2*x)'
-    vars = 'diff_coeff'
-    vals = '${diff_coeff}'
+    expression = 'diff_coeff*26.7439413073546*1.2*sin(1.2*x)'
+    symbol_names = 'diff_coeff'
+    symbol_values = '${diff_coeff}'
   []
   [forcing_rho_et]
     type = ParsedFunction

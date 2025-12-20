@@ -126,7 +126,7 @@
   [bad_parsed_function_vars_test]
     type = 'RunException'
     input = 'bad_parsed_function_vars.i'
-    expect_err = 'The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"vars\"'
+    expect_err = 'The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for use and must not be declared in \"symbol_names\"'
 
     requirement = 'The system shall report an error when a previously undeclared variable is used in a parsed function expression.'
     issues = '#4683'

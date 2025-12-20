@@ -75,7 +75,7 @@ in the `[ICs]` block. In this case a constant value throughout the domain is pro
 The volumetric heat source, $\dot{q}$, is defined using the
 [Function System](syntax/Functions/index.md) using the `[Functions]` block. The function, as defined
 in [tutorial03_heat_source] can be defined directly in the input file using the parsed function
-capability. The "vars" and "vals" parameters are used to define named constants within the
+capability. The "symbol_names" and "symbol_values" parameters are used to define named constants within the
 equation. The variables "x", "y", "z", and "t" are always available and represent the
 corresponding spatial location and time.
 
@@ -207,16 +207,16 @@ Executing this script, assuming a name of `spatial_function.py` results in the f
 $ python spatial_function.py
 [mms_force]
   type = ParsedFunction
-  value = 'cp*rho*sin(x*pi)*sin(5*y*pi) + 26*pi^2*k*t*sin(x*pi)*sin(5*y*pi) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
-  vars = 'hours rho shortwave k cp kappa'
-  vals = '1.0 1.0 1.0 1.0 1.0 1.0'
+  expression = 'cp*rho*sin(x*pi)*sin(5*y*pi) + 26*pi^2*k*t*sin(x*pi)*sin(5*y*pi) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
+  symbol_names = 'hours rho shortwave k cp kappa'
+  symbol_values = '1.0 1.0 1.0 1.0 1.0 1.0'
 []
 [mms_exact]
   type = ParsedFunction
-  value = 't*sin(x*pi)*sin(5*y*pi)'
+  expression = 't*sin(x*pi)*sin(5*y*pi)'
 []
 
-Obviously, when adding to the input file the "vals" must be updated to the correct values for the
+Obviously, when adding to the input file the "symbol_values" must be updated to the correct values for the
 desired simulation.
 
 [!ac](MOOSE) allows for multiple input files to be supplied to an executable, when this is done
@@ -294,13 +294,13 @@ Executing this script, assuming a name of `temporal_function.py` results in the 
 $ python temporal_function.py
 [mms_force]
   type = ParsedFunction
-  value = '-3.08641975308642e-5*x*y*cp*rho*exp(-3.08641975308642e-5*t) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
-  vars = 'kappa rho shortwave cp hours'
-  vals = '1.0 1.0 1.0 1.0 1.0'
+  expression = '-3.08641975308642e-5*x*y*cp*rho*exp(-3.08641975308642e-5*t) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
+  symbol_names = 'kappa rho shortwave cp hours'
+  symbol_values = '1.0 1.0 1.0 1.0 1.0'
 []
 [mms_exact]
   type = ParsedFunction
-  value = 'x*y*exp(-3.08641975308642e-5*t)'
+  expression = 'x*y*exp(-3.08641975308642e-5*t)'
 []
 
 A third input file, `~/projects/problems/verification/2d_mms_temporal.i` is created. The content

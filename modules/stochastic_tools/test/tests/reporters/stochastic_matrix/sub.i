@@ -20,9 +20,9 @@
   []
   [fun]
     type = ParsedFunction
-    value = 'a*1000000 + b*10000 + c*100 + d'
-    vars = 'a b c d'
-    vals = 'afun bfun cfun dfun'
+    expression = 'a*1000000 + b*10000 + c*100 + d'
+    symbol_names = 'a b c d'
+    symbol_values = 'afun bfun cfun dfun'
   []
 []
 

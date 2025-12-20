@@ -51,9 +51,9 @@
 [Functions]
   [volumetric_heat_func]
     type = ParsedFunction
-    value = q
-    vars = 'q'
-    vals = 'heat_source_pp'
+    expression = q
+    symbol_names = 'q'
+    symbol_values = 'heat_source_pp'
   []
 []
 [Postprocessors]
