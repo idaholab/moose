@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "fvinterpolationmethods/FVGeometricAverage.h"
+#include "FVGeometricAverage.h"
 
 registerMooseObject("MooseApp", FVGeometricAverage);
 

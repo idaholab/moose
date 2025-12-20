@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
+#include "MooseObject.h"
 #include "FaceInfo.h"
 #include "MooseError.h"
 
@@ -30,16 +30,12 @@
  * the derived classes can use their own member variables (like a power variable for inverse
  * distance weighting, or a limiter variable etc).
  */
-class FVInterpolationMethod : public GeneralUserObject
+class FVInterpolationMethod : public MooseObject
 {
 public:
   static InputParameters validParams();
 
   FVInterpolationMethod(const InputParameters & params);
-
-  virtual void initialize() override {}
-  virtual void execute() override {}
-  virtual void finalize() override {}
 
   /**
    * Lightweight callable container used to evaluate the interpolation at a face.
