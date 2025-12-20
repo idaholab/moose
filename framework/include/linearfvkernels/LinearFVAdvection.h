@@ -10,12 +10,14 @@
 #pragma once
 
 #include "LinearFVFluxKernel.h"
+#include "FVInterpolationMethodInterface.h"
+#include <unordered_map>
 
 /**
  * Kernel that adds contributions from an advection term discretized using the finite volume method
  * to a linear system.
  */
-class LinearFVAdvection : public LinearFVFluxKernel
+class LinearFVAdvection : public LinearFVFluxKernel, public FVInterpolationMethodInterface
 {
 public:
   static InputParameters validParams();
@@ -46,4 +48,25 @@ protected:
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
+
+  /// Optional finite volume interpolation method object for advected quantities
+  const FVInterpolationMethod * _adv_interp_method;
+
+  /// Cached handle used to evaluate the advected interpolation method without virtual dispatch
+  FVInterpolationMethod::AdvectedFaceInterpolator _adv_interp_handle;
+
+  struct AdvectedCacheEntry
+  {
+    FVInterpolationMethod::AdvectedInterpolationResult result;
+    Real correction_flux; // high-order minus upwind flux contribution (scaled by area)
+  };
+
+  /// Cache per face id to avoid recomputing limiter-based weights twice
+  mutable std::unordered_map<dof_id_type, AdvectedCacheEntry> _adv_interp_cache;
+
+  /**
+   * Compute and cache advected interpolation weights (and deferred correction flux) for current
+   * face.
+   */
+  const AdvectedCacheEntry & computeAdvectedWeights(const Real face_flux);
 };
