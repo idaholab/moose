@@ -3856,7 +3856,7 @@ MooseMesh::buildFiniteVolumeInfo() const
 
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
-  _elem_to_elem_info.reserve(nActiveElem());
+  _elem_to_elem_info.reserve(nActiveLocalElem());
   unsigned int num_sides = 0;
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3925,7 +3925,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   // references if ever the new size exceeds capacity
   _elem_side_to_face_info.reserve(_all_face_info.size());
   // heuristic to avoid resizing too much
-  _face_info.reserve(_all_face_info.size() * (nActiveLocalElem() + 1e-8) / nActiveElem());
+  _face_info.reserve(_all_face_info.size());
   for (auto & fi : _all_face_info)
   {
     const Elem * const elem = &fi.elem();
