@@ -54,9 +54,9 @@ the boundary conditions may be applied multiple times. This warning applies to a
 
 By default the diffusion coefficient functor is evaluated directly on each face. You can instead
 select a runtime interpolation policy through the [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method)
-parameter and an object declared in the [FVInterpolationMethod.md]
-block. This is useful when you want the face value to depend on both adjacent cell-centered
-quantities without incurring the cost of virtual dispatch inside the kernel loop.
+parameter and an object declared in the `[InterpolationMethods]` block described in
+[FVInterpolationMethod.md]. This is useful when you want the face value to depend on both adjacent
+cell-centered quantities without incurring the cost of virtual dispatch inside the kernel loop.
 
 ```
 [InterpolationMethods]

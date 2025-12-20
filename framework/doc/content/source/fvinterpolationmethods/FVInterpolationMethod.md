@@ -3,10 +3,10 @@
 ## Description
 
 `FVInterpolationMethod` objects define lightweight policies for interpolating cell-centered data to
-finite-volume faces. They are implemented as `GeneralUserObject`s so they can be declared once and
-shared by any kernel that needs them. Each method provides a small callable handle that MOOSE
-kernels can cache, which keeps per-face evaluations free of virtual dispatch and friendly to
-upcoming vectorized/GPU paths.
+finite-volume faces. They are regular `MooseObject`s stored in the application's warehouse so they
+can be declared once and shared by any kernel that needs them. Each method provides a small callable
+handle that MOOSE kernels can cache, which keeps per-face evaluations free of virtual dispatch and
+friendly to upcoming vectorized/GPU paths.
 
 Interpolation methods are added in the `[InterpolationMethods]` block of an input file and
 referenced through the `coeff_interp_method` parameter on kernels such as
