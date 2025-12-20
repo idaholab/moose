@@ -91,7 +91,11 @@ class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
 class UserObject;
+<<<<<<< HEAD
 class UserObjectBase;
+=======
+class FVInterpolationMethod;
+>>>>>>> c34b146535 (Make sure we register the new syntax and put it in the warehouse. (#31965))
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Convergence;
@@ -1330,6 +1334,9 @@ public:
   virtual std::vector<std::shared_ptr<UserObject>> addUserObject(
       const std::string & user_object_name, const std::string & name, InputParameters & parameters);
 
+  virtual std::vector<std::shared_ptr<FVInterpolationMethod>> addFVInterpolationMethod(
+      const std::string & method_type, const std::string & name, InputParameters & parameters);
+
   // TODO: delete this function after apps have been updated to not call it
   const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
   {
@@ -1418,6 +1425,10 @@ public:
    * @return Const reference to the Positions object
    */
   const Positions & getPositionsObject(const std::string & name) const;
+  const FVInterpolationMethod & getFVInterpolationMethod(const InterpolationMethodName & name,
+                                                         const THREAD_ID tid = 0) const;
+
+  bool hasFVInterpolationMethod(const InterpolationMethodName & name) const;
 
   /**
    * Whether or not a Postprocessor value exists by a given name.
