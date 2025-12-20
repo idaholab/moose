@@ -9,8 +9,8 @@
 
 #include "MooseObjectUnitTest.h"
 
-#include "fvinterpolationmethods/FVGeometricAverage.h"
-#include "fvinterpolationmethods/FVHarmonicAverage.h"
+#include "FVGeometricAverage.h"
+#include "FVHarmonicAverage.h"
 
 #include "gtest/gtest.h"
 
