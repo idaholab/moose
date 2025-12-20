@@ -1127,46 +1127,4 @@ buildPolyLineMesh(MeshBase & mesh,
 
   buildPolyLineMesh(mesh, points, loop, start_boundary, end_boundary, nums_edges_between_points);
 }
-
-bool
-isPointsColinear(const Point & p1, const Point & p2, const Point & p3)
-{
-  const Point v1 = p2 - p1;
-  const Point v2 = p3 - p1;
-  const Point cross_prod = v1.cross(v2);
-
-  return MooseUtils::absoluteFuzzyEqual(cross_prod.norm(), 0.0);
-}
-
-bool
-segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Point & p4)
-{
-  const Real a1 = p2(1) - p1(1);
-  const Real b1 = p1(0) - p2(0);
-  const Real c1 = p2(0) * p1(1) - p1(0) * p2(1);
-
-  const Real a2 = p4(1) - p3(1);
-  const Real b2 = p3(0) - p4(0);
-  const Real c2 = p4(0) * p3(1) - p3(0) * p4(1);
-
-  const Real denom = a1 * b2 - a2 * b1;
-  // We should not worry about the parallel case here
-  // If there is an overlap issue, it will be captured by other line segments
-  if (MooseUtils::absoluteFuzzyEqual(denom, 0.0))
-    return false;
-
-  const Point intersection_pt =
-      Point((b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom, 0.0);
-
-  const Real ratio_p1p2 = (intersection_pt - p1) * (p2 - p1) / ((p2 - p1).norm_sq());
-  const Real ratio_p3p4 = (intersection_pt - p3) * (p4 - p3) / ((p4 - p3).norm_sq());
-
-  if (MooseUtils::absoluteFuzzyGreaterEqual(ratio_p1p2, 0.0) &&
-      MooseUtils::absoluteFuzzyLessEqual(ratio_p1p2, 1.0) &&
-      MooseUtils::absoluteFuzzyGreaterEqual(ratio_p3p4, 0.0) &&
-      MooseUtils::absoluteFuzzyLessEqual(ratio_p3p4, 1.0))
-    return true;
-  else
-    return false;
-}
 }

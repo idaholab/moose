@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
+#include "GeometryUtils.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/enum_to_string.h"
@@ -66,7 +67,7 @@ GapLineMeshGenerator::generate()
   std::vector<Point> reduced_pts_list;
   for (const auto i : make_range(bdry_mh.n_points()))
   {
-    if (!MooseMeshUtils::isPointsColinear(
+    if (!geom_utils::isPointsColinear(
             bdry_mh.point((i - 1 + bdry_mh.n_points()) % bdry_mh.n_points()),
             bdry_mh.point(i),
             bdry_mh.point((i + 1) % bdry_mh.n_points())))
@@ -167,7 +168,7 @@ GapLineMeshGenerator::generate()
         continue;
       const Point & p3 = mod_reduced_pts_list[i_node_2];
       const Point & p4 = mod_reduced_pts_list[(i_node_2 + 1) % mod_reduced_pts_list.size()];
-      if (MooseMeshUtils::segmentsIntersect(p1, p2, p3, p4))
+      if (geom_utils::segmentsIntersect(p1, p2, p3, p4))
         paramError("thickness",
                    "The thickness is so large that the mesh is tangled because the offset nodes "
                    "are no longer in the same order when following the original boundary. Please "
