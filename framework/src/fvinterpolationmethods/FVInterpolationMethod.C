@@ -23,4 +23,5 @@ FVInterpolationMethod::validParams()
 FVInterpolationMethod::FVInterpolationMethod(const InputParameters & params)
   : MooseObject(params)
 {
+  // Default: no advected interpolator provided by base class
 }
