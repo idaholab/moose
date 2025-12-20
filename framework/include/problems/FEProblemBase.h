@@ -92,6 +92,7 @@ class IntegratedBCBase;
 class LineSearch;
 class UserObject;
 class UserObjectBase;
+class FVInterpolationMethod;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Convergence;
@@ -1330,6 +1331,18 @@ public:
   virtual std::vector<std::shared_ptr<UserObject>> addUserObject(
       const std::string & user_object_name, const std::string & name, InputParameters & parameters);
 
+  /// Add an FVInterpolationMethod to the Problem
+  virtual std::vector<std::shared_ptr<FVInterpolationMethod>> addFVInterpolationMethod(
+      const std::string & method_type, const std::string & name, InputParameters & parameters);
+
+  // TODO: delete this function after apps have been updated to not call it
+  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
+  {
+    mooseDeprecated(
+        "This function is deprecated, use theWarehouse().query() to construct a query instead");
+    return _all_user_objects;
+  }
+
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
@@ -1410,6 +1423,10 @@ public:
    * @return Const reference to the Positions object
    */
   const Positions & getPositionsObject(const std::string & name) const;
+  const FVInterpolationMethod & getFVInterpolationMethod(const InterpolationMethodName & name,
+                                                         const THREAD_ID tid = 0) const;
+
+  bool hasFVInterpolationMethod(const InterpolationMethodName & name) const;
 
   /**
    * Whether or not a Postprocessor value exists by a given name.
