@@ -9,11 +9,13 @@
 
 #include "DeleteElementsNearMeshGenerator.h"
 #include "SetupQuadratureAction.h"
+#include "KDTree.h"
 
 #include "libmesh/type_vector.h"
 #include "libmesh/point.h"
 #include "libmesh/elem.h"
-#include "KDTree.h"
+#include "libmesh/fe_base.h"
+#include "libmesh/quadrature_gauss.h"
 
 registerMooseObject("MooseApp", DeleteElementsNearMeshGenerator);
 
