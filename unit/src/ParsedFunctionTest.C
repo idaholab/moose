@@ -46,7 +46,7 @@ ParsedFunctionTest::buildFunction(InputParameters & params)
 TEST_F(ParsedFunctionTest, basicConstructor)
 {
   auto params = getParams();
-  params.set<std::string>("value") = std::string("x + 1.5*y + 2 * z + t/4");
+  params.set<std::string>("expression") = std::string("x + 1.5*y + 2 * z + t/4");
   auto & f = buildFunction(params);
   Moose::Functor<Real> f_wrapped(f);
   f.initialSetup();
@@ -161,9 +161,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   one_var[0] = "q";
 
   auto params = getParams();
-  params.set<std::string>("value") = "x + y + q";
-  params.set<std::vector<std::string>>("vars") = one_var;
-  params.set<std::vector<std::string>>("vals") =
+  params.set<std::string>("expression") = "x + y + q";
+  params.set<std::vector<std::string>>("symbol_names") = one_var;
+  params.set<std::vector<std::string>>("symbol_values") =
       std::vector<std::string>(1, "-1"); // Dummy value, will be overwritten in test below
 
   auto & f = buildFunction(params);
@@ -181,9 +181,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   three_vars[2] = "r";
 
   auto params2 = getParams();
-  params2.set<std::string>("value") = "r*x + y/w + q";
-  params2.set<std::vector<std::string>>("vars") = three_vars;
-  params2.set<std::vector<std::string>>("vals") =
+  params2.set<std::string>("expression") = "r*x + y/w + q";
+  params2.set<std::vector<std::string>>("symbol_names") = three_vars;
+  params2.set<std::vector<std::string>>("symbol_values") =
       std::vector<std::string>(3, "-1"); // Dummy values, will be overwritten in test below
 
   auto & f2 = buildFunction(params2);
@@ -199,9 +199,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   one_val[0] = "2.5";
 
   auto params3 = getParams();
-  params3.set<std::string>("value") = "q*x";
-  params3.set<std::vector<std::string>>("vars") = one_var;
-  params3.set<std::vector<std::string>>("vals") = one_val;
+  params3.set<std::string>("expression") = "q*x";
+  params3.set<std::vector<std::string>>("symbol_names") = one_var;
+  params3.set<std::vector<std::string>>("symbol_values") = one_val;
 
   auto & f3 = buildFunction(params3);
   f3.initialSetup();
@@ -214,9 +214,9 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   three_vals[2] = "0";
 
   auto params4 = getParams();
-  params4.set<std::string>("value") = "q*x + y/r + w";
-  params4.set<std::vector<std::string>>("vars") = three_vars;
-  params4.set<std::vector<std::string>>("vals") = three_vals;
+  params4.set<std::string>("expression") = "q*x + y/r + w";
+  params4.set<std::vector<std::string>>("symbol_names") = three_vars;
+  params4.set<std::vector<std::string>>("symbol_values") = three_vals;
 
   auto & f4 = buildFunction(params4);
   f4.initialSetup();
@@ -236,9 +236,9 @@ TEST_F(ParsedFunctionTest, testVariables)
   one_var[0] = "q";
 
   auto params = getParams();
-  params.set<std::string>("value") = "x + y + q";
-  params.set<std::vector<std::string>>("vars") = one_var;
-  params.set<std::vector<std::string>>("vals") =
+  params.set<std::string>("expression") = "x + y + q";
+  params.set<std::vector<std::string>>("symbol_names") = one_var;
+  params.set<std::vector<std::string>>("symbol_values") =
       std::vector<std::string>(1, "-1"); // Dummy value, will be overwritten in test below
 
   auto & f = buildFunction(params);
@@ -261,9 +261,9 @@ TEST_F(ParsedFunctionTest, testVariables)
   three_vars[2] = "r";
 
   auto params2 = getParams();
-  params2.set<std::string>("value") = "r*x + y/w + q";
-  params2.set<std::vector<std::string>>("vars") = three_vars;
-  params2.set<std::vector<std::string>>("vals") =
+  params2.set<std::string>("expression") = "r*x + y/w + q";
+  params2.set<std::vector<std::string>>("symbol_names") = three_vars;
+  params2.set<std::vector<std::string>>("symbol_values") =
       std::vector<std::string>(3, "-1"); // Dummy values, will be overwritten in test below
 
   auto & f2 = buildFunction(params2);
@@ -290,14 +290,14 @@ TEST_F(ParsedFunctionTest, testConstants)
   // this functions tests that pi and e get correctly substituted
   // it also tests built in functions of the function parser
   auto params = getParams();
-  params.set<std::string>("value") = "log(e) + x";
+  params.set<std::string>("expression") = "log(e) + x";
 
   auto & f = buildFunction(params);
   f.initialSetup();
   EXPECT_NEAR(2, f.value(0, 1), 0.0000001);
 
   auto params2 = getParams();
-  params2.set<std::string>("value") = "sin(pi*x)";
+  params2.set<std::string>("expression") = "sin(pi*x)";
 
   auto & f2 = buildFunction(params2);
   f2.initialSetup();

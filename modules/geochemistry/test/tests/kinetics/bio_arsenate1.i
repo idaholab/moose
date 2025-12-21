@@ -85,9 +85,9 @@
 [Functions]
   [rate]
     type = ParsedFunction
-    vars = 'dt reaction_rate_times_dt'
-    vals = 'dt reaction_rate_times_dt'
-    value = 'reaction_rate_times_dt / dt'
+    symbol_names = 'dt reaction_rate_times_dt'
+    symbol_values = 'dt reaction_rate_times_dt'
+    expression = 'reaction_rate_times_dt / dt'
   []
 []
 [Postprocessors]

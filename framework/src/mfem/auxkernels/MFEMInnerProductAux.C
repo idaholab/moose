@@ -34,9 +34,9 @@ MFEMInnerProductAux::MFEMInnerProductAux(const InputParameters & parameters)
   // The target variable's finite element space
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
 
-  // Must be L2
-  if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
-    mooseError("MFEMInnerProductAux requires the target variable to use L2_FECollection.");
+  // Must be scalar L2
+  if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()) || fes->GetVDim() != 1)
+    mooseError("MFEMInnerProductAux requires the target variable to be scalar L2.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())

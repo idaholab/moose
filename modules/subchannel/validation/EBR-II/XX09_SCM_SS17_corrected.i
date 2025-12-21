@@ -63,9 +63,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
-    vars = 'L alpha'
-    vals = '${heated_length} 1.8012'
+    expression = '(pi/2)*sin(pi*z/L)*exp(-alpha*z)/(1.0/alpha*(1.0 - exp(-alpha*L)))*L'
+    symbol_names = 'L alpha'
+    symbol_values = '${heated_length} 1.8012'
   []
 []
 

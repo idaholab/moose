@@ -242,23 +242,23 @@ Q2PAction::act()
     // user wants total masses, so need to build Functions to do this
     InputParameters params = _factory.getValidParams("ParsedFunction");
 
-    params.set<std::string>("value") = "a*b";
+    params.set<std::string>("expression") = "a*b";
 
     std::vector<std::string> vars;
     vars.push_back("a");
     vars.push_back("b");
-    params.set<std::vector<std::string>>("vars") = vars;
+    params.set<std::vector<std::string>>("symbol_names") = vars;
 
     std::vector<std::string> vals_water;
     vals_water.push_back("Q2P_mass_water_divided_by_dt");
     vals_water.push_back("Q2P_dt");
-    params.set<std::vector<std::string>>("vals") = vals_water;
+    params.set<std::vector<std::string>>("symbol_values") = vals_water;
     _problem->addFunction("ParsedFunction", "Q2P_water_mass_fcn", params);
 
     std::vector<std::string> vals_gas;
     vals_gas.push_back("Q2P_mass_gas_divided_by_dt");
     vals_gas.push_back("Q2P_dt");
-    params.set<std::vector<std::string>>("vals") = vals_gas;
+    params.set<std::vector<std::string>>("symbol_values") = vals_gas;
     _problem->addFunction("ParsedFunction", "Q2P_gas_mass_fcn", params);
   }
 

@@ -39,7 +39,7 @@
 [Functions]
   [design_function]
     type = ParsedFunction
-    value = 't/3600*297'
+    expression = 't/3600*297'
   []
   [reward_function]
     type = ScaledAbsDifferenceDRLRewardFunction

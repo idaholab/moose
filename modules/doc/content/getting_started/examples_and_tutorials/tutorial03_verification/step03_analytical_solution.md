@@ -142,8 +142,8 @@ that is added in the `[Functions]` block.
 
 !listing tutorial03_verification/app/test/tests/step03_analytical/1d_analytical.i link=False block=Functions
 
-The "vars" and "vals" have a one-to-one relationship, e.g., $k=80.2$. If defined in this manner
-then the names in "vars" can be used in the definition of the equation in the "value" parameter.
+The "symbol_names" and "symbol_values" items have a one-to-one relationship, e.g., $k=80.2$. If defined in this manner
+then the names in "symbol_names" can be used in the definition of the equation in the "expression" parameter.
 
 The error is a single value for each time step. Since the exact solution is known the $L_2$-norm
 can be computed using the [postprocessors/NodalL2Error.md] object within the `[Postprocessors]` block,

@@ -1,7 +1,7 @@
 [GlobalParams]
   # Parameters used by Functions.
-  vars   = 'c'
-  vals   = '50'
+  symbol_names = 'c'
+  symbol_values = '50'
 []
 
 [Mesh]
