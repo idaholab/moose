@@ -9,21 +9,13 @@
 
 #include "GapLineMeshGenerator.h"
 
-#include "CastUniquePointer.h"
 #include "MooseMeshUtils.h"
 #include "MooseUtils.h"
 #include "GeometryUtils.h"
 
-#include "libmesh/elem.h"
-#include "libmesh/enum_to_string.h"
-#include "libmesh/int_range.h"
-#include "libmesh/mesh_modification.h"
 #include "libmesh/mesh_serializer.h"
 #include "libmesh/mesh_triangle_holes.h"
-#include "libmesh/parsed_function.h"
 #include "libmesh/poly2tri_triangulator.h"
-#include "libmesh/unstructured_mesh.h"
-#include "libmesh/mesh_serializer.h"
 
 registerMooseObject("ReactorApp", GapLineMeshGenerator);
 
@@ -35,6 +27,18 @@ GapLineMeshGenerator::validParams()
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh to create the gap based on.");
 
   params.addRequiredParam<Real>("thickness", "The thickness of the gap to be created.");
+
+  MooseEnum gap_direction("OUTWARD INWARD", "OUTWARD");
+
+  params.addParam<MooseEnum>(
+      "gap_direction",
+      gap_direction,
+      "In which direction the gap is created with respect to the boundary of the input mesh.");
+
+  params.addParam<std::vector<boundary_id_type>>(
+      "boundary_ids",
+      std::vector<boundary_id_type>(),
+      "The boundary IDs around which the gap will be created.");
 
   params.addParam<Real>("max_elem_size", "The maximum element size for the generated gap mesh.");
 
@@ -49,7 +53,9 @@ GapLineMeshGenerator::validParams()
 GapLineMeshGenerator::GapLineMeshGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
     _input(getMesh("input")),
-    _thickness(getParam<Real>("thickness"))
+    _thickness(getParam<Real>("thickness")),
+    _gap_direction(getParam<MooseEnum>("gap_direction").template getEnum<GapDirection>()),
+    _boundary_ids(getParam<std::vector<boundary_id_type>>("boundary_ids"))
 {
 }
 
@@ -60,8 +66,9 @@ GapLineMeshGenerator::generate()
   std::unique_ptr<UnstructuredMesh> mesh =
       dynamic_pointer_cast<UnstructuredMesh>(std::move(_input));
 
+  std::set<std::size_t> mesh_bdry_ids(_boundary_ids.begin(), _boundary_ids.end());
   // MeshedHole is a good tool to extract and sort boundary points
-  TriangulatorInterface::MeshedHole bdry_mh(*mesh);
+  TriangulatorInterface::MeshedHole bdry_mh(*mesh, mesh_bdry_ids);
 
   // Reduce the point list to only contain vertices
   std::vector<Point> reduced_pts_list;
@@ -127,7 +134,8 @@ GapLineMeshGenerator::generate()
 
     const Point original_pt = *(ply_mesh_u->node_ptr(node_id));
     // Form an average normal at the vertex from the two connected sides' normals
-    const Point move_dir = (normal_vecs.front() + normal_vecs.back()).unit();
+    const Point move_dir = (normal_vecs.front() + normal_vecs.back()).unit() *
+                           ((_gap_direction == GapDirection::OUTWARD) ? 1.0 : -1.0);
     // Consider four points of interest to determine the moving distance
     // 1. the vertex point
     // 2. point along normal_vecs.front() from the vertex with a distance _thickness
