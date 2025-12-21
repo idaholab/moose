@@ -210,6 +210,16 @@ Applications:
         remove:
             - framework/doc/remove.yml
 
+    shallow_water:
+        exe_directory: modules/combined
+        app_types:
+            - ShallowWaterApp
+        content_directory: modules/shallow_water/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+
     solid_properties:
         exe_directory: modules/combined
         app_types:
@@ -412,6 +422,10 @@ Requirements:
         log_missing: NONE # deprecated module
 
     scalar_transport:
+        directories:
+            - modules/scalar_transport
+
+    shallow_water:
         directories:
             - modules/scalar_transport
 
