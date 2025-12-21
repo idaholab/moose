@@ -31,4 +31,10 @@ protected:
 
   /// The thickness of the gap to be created
   const Real _thickness;
+
+  /// The direction in which the gap is created with respect to the boundary of the input mesh
+  const enum class GapDirection { OUTWARD, INWARD } _gap_direction;
+
+  /// The boundary IDs around which the gap will be created
+  const std::vector<boundary_id_type> _boundary_ids;
 };

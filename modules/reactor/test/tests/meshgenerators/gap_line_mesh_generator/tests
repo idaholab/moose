@@ -9,7 +9,16 @@
       cli_args = "--mesh-only"
       exodiff = simple_gap_in.e
       recover = false
-      detail = "A simple non-refined polyline mesh based on a provided input mesh's external boundary with a gap."
+      detail = "A simple non-refined polyline mesh based on a provided input mesh's external boundary with an outward gap."
+    []
+    [simple_inward]
+      type = Exodiff
+      input = simple_gap.i
+      cli_args = "--mesh-only simple_gap_inward.e
+                  Mesh/gap/gap_direction=INWARD"
+      exodiff = simple_gap_inward.e
+      recover = false
+      detail = "A simple non-refined polyline mesh based on a provided input mesh's external boundary with an inward gap."
     []
     [simple_refine]
       type = Exodiff
@@ -18,7 +27,15 @@
                   Mesh/gap/max_elem_size=0.5"
       exodiff = simple_gap_refine_in.e
       recover = false
-      detail = "A refined polyline mesh based on a provided input mesh's external boundary with a gap."
+      detail = "A refined polyline mesh based on a provided input mesh's external boundary with an outward gap."
+    []
+    [bdry_ids]
+      type = Exodiff
+      input = bdry_gap.i
+      cli_args = "--mesh-only"
+      exodiff = bdry_gap_in.e
+      recover = false
+      detail = "A polyline mesh based on selected boundary IDs of a provided input mesh with an outward gap."
     []
   []
   [error]
