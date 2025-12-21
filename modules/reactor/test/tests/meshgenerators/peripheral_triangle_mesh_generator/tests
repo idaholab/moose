@@ -1,13 +1,22 @@
 [Tests]
   design = 'meshgenerators/PeripheralTriangleMeshGenerator.md'
   issues = '#22435'
-  [no_refinement]
-    type = 'Exodiff'
+  [no_refinement_uncorrected]
+    type = 'CSVDiff'
     input = 'abtr_tri.i'
-    exodiff = 'abtr_tri.e'
-    cli_args = '--mesh-only "abtr_tri.e"'
+    csvdiff = 'abtr_tri.csv'
     installation_type = in_tree
-    requirement ='The system shall generate a triangulation without any refinement.'
+    requirement ='The system shall generate a triangulation without any refinement without area preservation.'
+    recover = false
+  []
+  [no_refinement_corrected]
+    type = 'CSVDiff'
+    input = 'abtr_tri.i'
+    csvdiff = 'abtr_tri_corr.csv'
+    cli_args = 'Mesh/tmg/preserve_volumes=true
+                Outputs/file_base=abtr_tri_corr'
+    installation_type = in_tree
+    requirement ='The system shall generate a triangulation without any refinement with area preservation.'
     recover = false
   []
   [refinement]
