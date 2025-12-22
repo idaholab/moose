@@ -272,9 +272,8 @@ NewtonSolve2D(const T & f,
     else
     {
       // use a 1D newton when the Jacobian has an empty row
-      u_update(system_size - 1 - degenerate_row) =
-          minus_R(system_size - 1 - degenerate_row) /
-          J(system_size - 1 - degenerate_row, system_size - 1 - degenerate_row);
+      const auto other_row = system_size - 1 - degenerate_row;
+      u_update(other_row) = minus_R(other_row) / J(other_row, other_row);
       u_update(degenerate_row) = 0;
     }
     // reset the decomposition
