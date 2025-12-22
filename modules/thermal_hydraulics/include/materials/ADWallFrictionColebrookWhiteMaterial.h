@@ -12,7 +12,7 @@
 #include "Material.h"
 
 /**
- * Computes drag coefficient using the Colebrook-White formula for Fanning friction factor
+ * Computes drag coefficient using the Colebrook-White formula for the Darcy friction factor
  */
 class ADWallFrictionColebrookWhiteMaterial : public Material
 {
