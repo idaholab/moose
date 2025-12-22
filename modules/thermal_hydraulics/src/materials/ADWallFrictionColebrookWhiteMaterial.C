@@ -57,8 +57,6 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
                              "), consider using different friction factor"));
   }
 
-  using std::abs, std::pow, std::log10, std::sqrt;
-
   // Colebrook-white equation has implicit formulation must use iteration
   ADReal & f_D = _f_D[_qp];
   ADReal f_D_old = 0;

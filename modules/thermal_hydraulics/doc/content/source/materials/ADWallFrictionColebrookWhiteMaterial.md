@@ -2,7 +2,7 @@
 
 !syntax description /Materials/ADWallFrictionColebrookWhiteMaterial
 
-The Colebrook-White friction factor material is computed using
+The Colebrook-White friction factor $f$ is computed using
 
 !equation
 \dfrac{1}{\sqrt{f}}= -2 \log \left( \dfrac { \varepsilon} {3.7 D_h} + \dfrac {2.51} {\mathrm{Re} \sqrt{f}} \right),
