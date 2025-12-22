@@ -28,6 +28,13 @@
     type = ADElementAverageMaterialProperty
     mat_prop = f_D
   []
+  [fD_residual]
+    type = ParsedPostprocessor
+    expression = '(1/sqrt(fD) + 2*log10(eps/(3.7*D_h) + 2.51/(Re*sqrt(fD))))/(1/sqrt(fD))'
+    constant_names = 'D_h Re eps'
+    constant_expressions = '0.1 1e5 0.001'
+    pp_names = 'fD'
+  []
 []
 
 [Problem]
