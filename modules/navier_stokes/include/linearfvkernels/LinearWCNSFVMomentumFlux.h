@@ -11,6 +11,8 @@
 
 #include "LinearFVFluxKernel.h"
 
+#include <array>
+
 class RhieChowMassFlux;
 class LinearFVBoundaryCondition;
 class LinearFVAdvectionDiffusionBC;
@@ -126,10 +128,15 @@ protected:
   /// in the stress term
   const unsigned int _index;
 
-  /// Velocity in direction x
-  const MooseLinearVariableFVReal * const _u_var;
-  /// Velocity in direction y
-  const MooseLinearVariableFVReal * const _v_var;
-  /// Velocity in direction z
-  const MooseLinearVariableFVReal * const _w_var;
+  /// Velocity variables for each coordinate direction
+  std::array<const MooseLinearVariableFVReal *, 3> _velocity_vars;
+
+  /// Coordinate system of the blocks this kernel operates on
+  const Moose::CoordinateSystemType _coord_type;
+
+  /// Axisymmetric radial coordinate index (only used when in RZ)
+  const unsigned int _rz_radial_coord;
+
+  /// Helper to access the velocity variable for a given direction
+  const MooseLinearVariableFVReal & velocityVar(unsigned int dir) const;
 };

@@ -510,9 +510,9 @@ RhieChowMassFlux::populateCouplingFunctors(
             for (const auto & force_kernel : _body_force_kernels[dim_i])
             {
               force_kernel->setCurrentElemInfo(&elem_info);
-              face_hbya(dim_i) -= force_kernel->computeRightHandSideContribution() *
-                                  ainv_reader[dim_i](elem_dof) /
-                                  elem_info.volume(); // zero-term expansion
+              face_hbya(dim_i) -=
+                  force_kernel->computeRightHandSideContribution() * ainv_reader[dim_i](elem_dof) /
+                  (elem_info.volume() * elem_info.coordFactor()); // zero-term expansion
             }
           face_hbya(dim_i) *= boundary_normal_multiplier;
         }
