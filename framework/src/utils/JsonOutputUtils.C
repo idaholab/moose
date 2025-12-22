@@ -8,29 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "CSGUtils.h"
+#include "JsonOutputUtils.h"
 
-using namespace CSG;
-
-namespace CSGUtils
+namespace JsonOutputUtils
 {
-
-CSGRegion
-getInnerRegion(const std::vector<std::reference_wrapper<const CSGSurface>> & surfaces,
-               const libMesh::Point & origin)
-{
-  CSGRegion inner_region;
-  for (const auto & surf_ref : surfaces)
-  {
-    const auto & surf = surf_ref.get();
-    const auto direction = surf.getHalfspaceFromPoint(origin);
-    auto halfspace = (direction == CSGSurface::Halfspace::POSITIVE) ? +surf : -surf;
-    inner_region = (inner_region.getRegionType() == CSGRegion::RegionType::EMPTY)
-                       ? halfspace
-                       : inner_region & halfspace;
-  }
-  return inner_region;
-}
 
 nlohmann::json
 anyToJson(const std::any & data)
