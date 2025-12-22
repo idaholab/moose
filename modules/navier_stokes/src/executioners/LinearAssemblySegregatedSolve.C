@@ -738,6 +738,9 @@ LinearAssemblySegregatedSolve::solve()
           if (_cht.enabled())
           {
             _energy_system->computeGradients();
+            // if (_has_pm_radiation_systems)
+            //   for (const auto i : index_range(_pm_radiation_system_names))
+            //     _pm_radiation_systems[i]->computeGradients();
             _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::SOLID);
           }
 
@@ -764,21 +767,21 @@ LinearAssemblySegregatedSolve::solve()
     }
 
     // If we have participating media radiation equations, solve them here due to the strong coupling with temperature
-    if (_has_pm_radiation_systems)
-    {
-      _problem.execute(EXEC_NONLINEAR);
+    // if (_has_pm_radiation_systems)
+    // {
+    //   _problem.execute(EXEC_NONLINEAR);
 
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
-      for (const auto i : index_range(_pm_radiation_system_names))
-        ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
-                     i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
-                                              *_pm_radiation_systems[i],
-                                              _pm_radiation_equation_relaxation[i],
-                                              _pm_radiation_linear_control,
-                                              _pm_radiation_l_abs_tol);
-    }
+    //   // We set the preconditioner/controllable parameters through petsc options. Linear
+    //   // tolerances will be overridden within the solver.
+    //   Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
+    //   for (const auto i : index_range(_pm_radiation_system_names))
+    //     ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+    //                  i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
+    //                                           *_pm_radiation_systems[i],
+    //                                           _pm_radiation_equation_relaxation[i],
+    //                                           _pm_radiation_linear_control,
+    //                                           _pm_radiation_l_abs_tol);
+    // }
 
     // If we have active scalar equations, solve them here in case they depend on temperature
     // or they affect the fluid properties such that they must be solved concurrently with
