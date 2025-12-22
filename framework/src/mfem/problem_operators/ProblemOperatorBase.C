@@ -25,22 +25,30 @@ void
 ProblemOperatorBase::SetGridFunctions()
 {
   _trial_variables = _problem_data.gridfunctions.Get(_trial_var_names);
+  _test_variables = _problem_data.gridfunctions.Get(_test_var_names);
 
-  // Set operator size and block structure
-  _block_true_offsets.SetSize(_trial_variables.size() + 1);
-  _block_true_offsets[0] = 0;
+  // Set operator size and block structure for trial spaces
+  _block_true_offsets_trial.SetSize(_trial_variables.size() + 1);
+  _block_true_offsets_trial[0] = 0;
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
-    _block_true_offsets[ind + 1] = _trial_variables.at(ind)->ParFESpace()->TrueVSize();
-  _block_true_offsets.PartialSum();
+    _block_true_offsets_trial[ind + 1] = _trial_variables.at(ind)->ParFESpace()->TrueVSize();
+  _block_true_offsets_trial.PartialSum();
 
-  _true_x.Update(_block_true_offsets);
-  _true_rhs.Update(_block_true_offsets);
+  // Set operator size and block structure for test spaces
+  _block_true_offsets_test.SetSize(_test_variables.size() + 1);
+  _block_true_offsets_test[0] = 0;
+  for (unsigned int ind = 0; ind < _test_variables.size(); ++ind)
+    _block_true_offsets_test[ind + 1] = _test_variables.at(ind)->ParFESpace()->TrueVSize();
+  _block_true_offsets_test.PartialSum();
+
+  _true_x.Update(_block_true_offsets_trial);
+  _true_rhs.Update(_block_true_offsets_test);
 }
 
 void
 ProblemOperatorBase::Init(mfem::BlockVector & X)
 {
-  X.Update(_block_true_offsets);
+  X.Update(_block_true_offsets_trial);
   for (const auto i : index_range(_trial_variables))
     X.GetBlock(i) = _trial_variables[i]->GetTrueVector();
   // Sync the flags from sub-block vectors to global vector
@@ -49,7 +57,7 @@ ProblemOperatorBase::Init(mfem::BlockVector & X)
   // After initial assignment of X from the grid function, which may contain initial conditions,
   // we alias the grid function to X
   for (const auto i : index_range(_trial_variables))
-    _trial_variables[i]->MakeTRef(_trial_variables[i]->ParFESpace(), X, _block_true_offsets[i]);
+    _trial_variables[i]->MakeTRef(_trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
   _trial_true_vector = &X;
 
   // This might seem silly but after making the tref the memory flags of the grid function and its

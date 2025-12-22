@@ -26,13 +26,6 @@ EquationSystem::DeleteAllBlocks()
   _h_blocks.DeleteAll();
 }
 
-void EquationSystem::ClearAllBlocks()
-{
-  for (const auto i : index_range(_test_var_names))
-    for (const auto j : index_range(_trial_var_names))
-      _h_blocks(i, j) = nullptr;
-}
-
 bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
@@ -88,10 +81,6 @@ void EquationSystem::SortTestAndTrialNames()
     _trial_var_names.insert(_trial_var_names.begin(), name);
     _coupled_var_names.erase(std::find(_coupled_var_names.begin(), _coupled_var_names.end(), name));
     _coupled_var_names.insert(_coupled_var_names.begin(), name);
-
-    //_eliminated_var_names.erase(std::find(_eliminated_var_names.begin(), _eliminated_var_names.end(), name));
-    //_eliminated_var_names.insert(_eliminated_var_names.begin(), name);
-
   }
 }
 
@@ -168,7 +157,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   SetTrialVariableNames();
 
   // Now that all test and trial variables are known, order them
-  SortTestAndTrialNames();
+  //SortTestAndTrialNames();
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -318,38 +307,34 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 {
   // Allocate block operator
   DeleteAllBlocks();
-  _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
+  _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _h_blocks = nullptr;
-  // Form diagonal blocks.
-  for (const auto i : index_range(_test_var_names))
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    mfem::Vector aux_x, aux_rhs;
-    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a;
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-  }
+  trueRHS = 0.0;
 
-  // Form off-diagonal blocks
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
+
     for (const auto j : index_range(_trial_var_names))
     {
       auto trial_var_name = _trial_var_names.at(j);
 
       mfem::Vector aux_x, aux_rhs;
       mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
-      aux_lf = 0.0;
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+
+      if (test_var_name == trial_var_name)
       {
+        aux_lf = *_lfs.Get(test_var_name);
+        auto blf = _blfs.Get(test_var_name);
+        blf->FormLinearSystem(
+            _ess_tdof_lists.at(j), *(_var_ess_constraints.at(j)), aux_lf, *aux_a, aux_x, aux_rhs);
+        trueX.GetBlock(j) = aux_x;
+      } 
+      else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        aux_lf = 0.0;
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
-        mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *(_var_ess_constraints.at(j)),
@@ -357,9 +342,13 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
-        _h_blocks(i, j) = aux_a;
-        trueRHS.GetBlock(i) += aux_rhs;
       }
+      else
+        continue;
+      
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks(i, j) = aux_a;
+
     }
   }
   // Sync memory
