@@ -1,0 +1,11 @@
+[Tests]
+  design = 'MultiPostprocessorConvergence.md'
+  issues = '#31038'
+
+  [test]
+    type = CSVDiff
+    input = 'multi_postprocessor_convergence.i'
+    csvdiff = 'multi_postprocessor_convergence_out.csv'
+    requirement = 'The system shall be able to terminate nonlinear iteration according to multiple post-processor values.'
+  []
+[]

@@ -1,0 +1,14 @@
+[Tests]
+  design = 'NodeElemMeshGenerator.md'
+  issues = '#31038'
+
+  [test]
+    type = Exodiff
+    input = 'node_elem_mesh_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'node_elem_mesh_generator_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the capability of generating a mesh containing a node element.'
+  []
+[]

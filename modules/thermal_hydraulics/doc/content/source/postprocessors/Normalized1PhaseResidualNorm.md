@@ -1,6 +1,6 @@
 # Normalized1PhaseResidualNorm
 
-This post-processor computes normalized residual norms for [FlowChannel1PhaseConvergence.md]:
+This post-processor computes normalized residual norms for checking convergence in [FlowChannel1Phase.md]:
 
 !equation
 \frac{\|R_\text{mass}\|_\infty}{\rho_\text{ref} A_\text{ref} h_\text{min}}

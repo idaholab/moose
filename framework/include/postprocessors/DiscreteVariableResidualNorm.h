@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ElementPostprocessor.h"
+#include "VariableResidualNormBase.h"
 
 /**
  * Computes a discrete norm for a block-restricted variable residual.
  */
-class DiscreteVariableResidualNorm : public ElementPostprocessor
+class DiscreteVariableResidualNorm : public VariableResidualNormBase
 {
 public:
   static InputParameters validParams();
@@ -29,28 +29,12 @@ public:
 
   DiscreteVariableResidualNorm(const InputParameters & parameters);
 
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual void threadJoin(const UserObject & y) override;
-  virtual void finalize() override;
-
-  virtual PostprocessorValue getValue() const override;
-
 protected:
-  /// The variable we compute the residual for
-  MooseVariableFieldBase & _var;
+  virtual std::vector<dof_id_type> getCurrentElemDofIndices() const override;
+  virtual void computeNorm() override;
+
   /// Type of norm to compute
   const NormType _norm_type;
   /// If true, correct mesh-size bias in norm
   const bool _correct_mesh_bias;
-  /// If false, divide by residual scaling factor
-  const bool _include_scaling_factor;
-  /// Nonlinear residual vector
-  NumericVector<Number> & _nl_residual_vector;
-  /// Local DoF indices for the variable, block-restricted
-  std::set<dof_id_type> _local_dof_indices;
-  /// Non-local DoF indices map, indexed by the owning PID
-  std::map<processor_id_type, std::vector<dof_id_type>> _nonlocal_dof_indices_map;
-  /// The computed residual norm
-  Real _norm;
 };

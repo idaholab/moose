@@ -21,6 +21,7 @@ public:
 
 protected:
   virtual void check() const override;
+  virtual Convergence * getNonlinearConvergence() const override { return nullptr; }
 
   /// Heat structure name
   const std::string & _hs_name;
