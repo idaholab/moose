@@ -236,7 +236,7 @@ NewtonSolve2D(const T & f,
     int degenerate_row = -1;
     for (const auto i : make_range(system_size))
     {
-      const auto rowmax = std::max(std::abs(J(i, 0)), std::abs(J(i, 1)));
+      const auto rowmax = max(abs(J(i, 0)), abs(J(i, 1)));
       if (rowmax > 0)
       {
         for (const auto j : make_range(system_size))
