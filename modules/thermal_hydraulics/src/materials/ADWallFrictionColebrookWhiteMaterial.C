@@ -29,6 +29,13 @@ ADWallFrictionColebrookWhiteMaterial::validParams()
 
   params.addParam<Real>("roughness", 0, "Surface roughness");
   params.declareControllable("roughness");
+
+  params.addParam<Real>("rtol", 1e-14, "Relative tolerance for implicit solve.");
+  params.addParam<unsigned int>("max_iterations", 20, "Max iterations for iterative solve.");
+  MooseEnum max_its_behaviour{"error warn accept", "error"};
+  params.addParam<MooseEnum>("max_iterations_behaviour",
+                             max_its_behaviour,
+                             "Whether to error, warn or accept when max iterations is reached");
   return params;
 }
 
@@ -42,8 +49,13 @@ ADWallFrictionColebrookWhiteMaterial::ADWallFrictionColebrookWhiteMaterial(
     _rho(getADMaterialProperty<Real>("rho")),
     _vel(getADMaterialProperty<Real>("vel")),
     _D_h(getADMaterialProperty<Real>("D_h")),
-    _roughness(getParam<Real>("roughness"))
+    _roughness(getParam<Real>("roughness")),
+    _max_its(getParam<unsigned int>("max_iterations")),
+    _max_its_behaviour(getParam<MooseEnum>("max_iterations_behaviour")),
+    _tol(getParam<Real>("rtol"))
 {
+  if (_tol < 0. || _tol >= 1.)
+    mooseError("Colebrook-White friction factor relative tolerance must be between 0 and 1");
 }
 
 void
@@ -61,9 +73,21 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
   ADReal & f_D = _f_D[_qp];
   ADReal f_D_old = 0;
   f_D = 0.01; // initial guess
-  while (abs((f_D - f_D_old) / f_D) > 1e-14)
+
+  unsigned int it = 0;
+  for (; it < _max_its; ++it)
   {
     f_D_old = f_D;
     f_D = pow(-2. * log10(_roughness / (3.7 * _D_h[_qp]) + 2.51 / (Re * sqrt(f_D))), -2.);
+    if (abs(f_D - f_D_old) / f_D < _tol)
+      break;
+  }
+
+  if (it == _max_its)
+  {
+    if (_max_its_behaviour == "error")
+      mooseError("Colebrook-White friction factor maximum iterations reached: ", _max_its, ".");
+    else if (_max_its_behaviour == "warn")
+      mooseWarning("Colebrook-White friction factor maximum iterations reached: ", _max_its, ".");
   }
 }

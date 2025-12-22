@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Material.h"
+#include "MooseEnum.h"
 
 /**
  * Computes drag coefficient using the Colebrook-White formula for the Darcy friction factor
@@ -37,6 +38,13 @@ protected:
   const ADMaterialProperty<Real> & _D_h;
   /// Roughness of the surface
   const Real & _roughness;
+
+  /// max iterations for iterative solve
+  const unsigned int _max_its;
+  /// Whether to error, warn or accept on reaching max its
+  MooseEnum _max_its_behaviour;
+  /// Tolerance for implicit solve
+  const Real _tol;
 
 public:
   static InputParameters validParams();
