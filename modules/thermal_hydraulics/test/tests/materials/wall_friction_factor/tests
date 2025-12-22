@@ -30,4 +30,32 @@
     expect_err = "Calculated Reynolds number below 4000"
     requirement = 'The system shall warn if the Reynolds number is less than 4000 when using the Colebrook-White correlation.'
   []
+  [check_max_its_error]
+    type = RunException
+    input = 'colebrook_white_ad.i'
+    cli_args = "Materials/fD_material/max_iterations=5"
+    expect_err = "Colebrook-White friction factor maximum iterations reached: 5."
+    requirement = 'The system shall error if maximum iterations is reached when using the Colebrook-White correlation.'
+    allow_warnings=true
+  []
+  [check_max_its_warn]
+    type = RunException
+    input = 'colebrook_white_ad.i'
+    cli_args = "Materials/fD_material/max_iterations=5 Materials/fD_material/max_iterations_behaviour=warn"
+    expect_err = "Colebrook-White friction factor maximum iterations reached: 5."
+    requirement = 'The system shall warn if maximum iterations is reached when using the Colebrook-White correlation.'
+  []
+  [check_max_its_accept]
+    type = RunApp
+    input = 'colebrook_white_ad.i'
+    cli_args = "Materials/fD_material/max_iterations=5 Materials/fD_material/max_iterations_behaviour=accept"
+    requirement = 'The system shall do nothing if maximum iterations is reached when using the Colebrook-White correlation.'
+  []
+  [check_tolerance_valid]
+    type = RunException
+    input = 'colebrook_white_ad.i'
+    cli_args = "Materials/fD_material/rtol=1.1"
+    expect_err = "Colebrook-White friction factor relative tolerance must be between 0 and 1"
+    requirement = 'The system shall have a settable tolerance when using the Colebrook-White correlation.'
+  []
 []
