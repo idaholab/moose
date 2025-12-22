@@ -19,7 +19,7 @@ from enum import Enum
 from importlib.util import find_spec
 from queue import Queue
 from signal import SIGTERM
-from time import perf_counter
+from time import perf_counter, time
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -184,8 +184,12 @@ async def _monitor_process(
             process_info = []
             with suppress(psutil.NoSuchProcess):
                 p = psutil.Process(sample.pid)
-                process_info.append(("Command", " ".join(p.cmdline())))
-                process_info.append(("Parent", p.ppid()))
+                cmdline = " ".join(p.cmdline())
+                parent = p.ppid()
+                wall_time = time() - p.create_time()
+                process_info.append(("Command", cmdline))
+                process_info.append(("Parent", parent))
+                process_info.append(("Wall time", f"{wall_time:.2f} sec"))
             process_info.append(("Memory", f"{(sample.memory / 1e6):.2f} MB"))
             process_info.append(("CPU", f"{sample_percent_cpu(sample):.2f}%"))
             info.append(f"Process {sample.pid}:")
