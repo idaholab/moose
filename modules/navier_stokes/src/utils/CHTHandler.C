@@ -88,10 +88,11 @@ CHTHandler::CHTHandler(const InputParameters & params)
 }
 
 void
-CHTHandler::linkEnergySystems(SystemBase * solid_energy_system, SystemBase * fluid_energy_system)
+CHTHandler::linkEnergySystems(SystemBase * solid_energy_system, SystemBase * fluid_energy_system, std::vector<SystemBase *> pm_radiation_systems)
 {
   _energy_system = fluid_energy_system;
   _solid_energy_system = solid_energy_system;
+  _pm_radiation_systems = pm_radiation_systems;
 
   if (!_energy_system || !_solid_energy_system)
     paramError("cht_interfaces",
@@ -120,6 +121,20 @@ CHTHandler::deduceCHTBoundaryCoupling()
   _cht_conduction_kernels = std::vector<LinearFVFluxKernel *>({nullptr, nullptr});
   _cht_boundary_conditions.clear();
   _cht_boundary_conditions.resize(_cht_boundary_names.size(), {nullptr, nullptr});
+
+  //Populate the PM radiation system numbers
+  if (!_pm_radiation_systems.empty())
+  {
+    for (const auto sys_i : index_range(_pm_radiation_systems))
+      _cht_pm_radiation_system_numbers.push_back(_pm_radiation_systems[sys_i]->number());
+
+    // Reserve space for _cht_pm_radiation_kernels based on the size of _cht_pm_radiation_system_numbers
+    _cht_pm_radiation_kernels.reserve(_cht_pm_radiation_system_numbers.size());
+    // Reserve space for pm radiation boundary conditions
+    _cht_pm_radiation_boundary_conditions.clear();
+    _cht_pm_radiation_boundary_conditions.resize(_cht_boundary_names.size(),
+      std::vector<LinearFVBoundaryCondition*>(_cht_pm_radiation_system_numbers.size(), nullptr));
+  }
 
   const auto flux_relaxation_param_names =
       std::vector<std::string>({"cht_solid_flux_relaxation", "cht_fluid_flux_relaxation"});
@@ -171,6 +186,23 @@ CHTHandler::deduceCHTBoundaryCoupling()
         .template condition<AttribSysNum>(_cht_system_numbers[region_index])
         .queryInto(flux_kernels);
 
+    // We then fetch the radiation conduction kernels in the fluid region
+    if (!_pm_radiation_systems.empty() && region_index == 1)
+      for (const auto sys_i : index_range(_pm_radiation_systems))
+      {
+        // We then fetch the radiation conduction kernels
+        std::vector<LinearFVFluxKernel *> radiation_kernels;
+        //LinearFVFluxKernel * radiation_kernels;
+        _app.theWarehouse()
+            .query()
+            .template condition<AttribSystem>("LinearFVFluxKernel")
+            .template condition<AttribVar>(0)
+            .template condition<AttribSysNum>(_cht_pm_radiation_system_numbers[sys_i])
+            .queryInto(radiation_kernels);
+
+        _cht_pm_radiation_kernels.push_back(radiation_kernels[sys_i]);
+      }
+
     for (auto kernel : flux_kernels)
     {
       auto check_diff = dynamic_cast<LinearFVDiffusion *>(kernel);
@@ -206,6 +238,26 @@ CHTHandler::deduceCHTBoundaryCoupling()
           .template condition<AttribSysNum>(_cht_system_numbers[region_index])
           .template condition<AttribBoundaries>(boundary_id)
           .queryInto(bcs);
+
+      // We then fetch the radiation conduction bcs in the fluid region (i.e MarshakBC in P1)
+      if (!_pm_radiation_systems.empty() && region_index == 1)
+        for (const auto sys_i : index_range(_pm_radiation_systems))
+        {
+          std::vector<LinearFVBoundaryCondition *> rad_bcs;
+          _app.theWarehouse()
+              .query()
+              .template condition<AttribSystem>("LinearFVBoundaryCondition")
+              .template condition<AttribVar>(0)
+              .template condition<AttribSysNum>(_cht_pm_radiation_system_numbers[sys_i])
+              .template condition<AttribBoundaries>(boundary_id)
+              .queryInto(rad_bcs);
+
+        if (!rad_bcs.empty())
+          _cht_pm_radiation_boundary_conditions[bd_index][sys_i] = rad_bcs[0];
+        else
+          mooseError("No LinearFVBoundaryCondition found for the given boundary or system.");
+        }
+
 
       if (bcs.size() != 1)
         mooseError("We found multiple or no boundary conditions for solid energy on boundary ",
@@ -370,10 +422,22 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
 
       // Flux_new = relaxation * Flux_boundary + (1-relaxation) * Flux_old,
       // minus sign is due to the normal differences
-      const auto flux = flux_relaxation * other_kernel->computeBoundaryFlux(*other_bc) +
-                        (1 - flux_relaxation) * flux_container[fi->id()];
+      // auto flux = flux_relaxation * other_kernel->computeBoundaryFlux(*other_bc) +
+      //                   (1 - flux_relaxation) * flux_container[fi->id()];
 
-      flux_container[fi->id()] = flux;
+      // Conductive flux
+      auto flux = other_kernel->computeBoundaryFlux(*other_bc);
+
+      if (!_pm_radiation_systems.empty() && side == NS::CHTSide::SOLID)
+          for (const auto sys_i : index_range(_pm_radiation_systems))
+          {
+            _cht_pm_radiation_kernels[sys_i]->setupFaceData(fi);
+            _cht_pm_radiation_kernels[sys_i]->setCurrentFaceArea(1.0);
+            _cht_pm_radiation_boundary_conditions[bd_index][sys_i]->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_pm_radiation_system_numbers[sys_i])));
+            flux += _cht_pm_radiation_kernels[sys_i]->computeBoundaryFlux(*_cht_pm_radiation_boundary_conditions[bd_index][sys_i]);
+          }
+
+      flux_container[fi->id()] = flux_relaxation * flux + (1 - flux_relaxation) * flux_container[fi->id()]; // flux;
 
       // We do the integral here
       integrated_flux += flux * fi->faceArea() * fi->faceCoord();
