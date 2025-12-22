@@ -247,6 +247,54 @@ Component::setSubdomainInfo(SubdomainID subdomain_id,
 }
 
 void
+Component::addNonlinearStepFunctorMaterial(const std::string & functor_name,
+                                           const std::string & property,
+                                           bool functor_is_ad)
+{
+  const std::string class_name =
+      functor_is_ad ? "ADFunctorChangeFunctorMaterial" : "FunctorChangeFunctorMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+  params.set<MooseFunctorName>("functor") = functor_name;
+  params.set<MooseEnum>("change_over") = "nonlinear";
+  params.set<std::string>("prop_name") = property;
+  params.set<bool>("take_absolute_value") = true;
+  getTHMProblem().addFunctorMaterial(class_name, genName(name(), property + "_fmat"), params);
+}
+
+void
+Component::addMaximumFunctorPostprocessor(const std::string & functor_name,
+                                          const std::string & pp_name,
+                                          const Real normalization,
+                                          const std::vector<SubdomainName> & subdomains)
+{
+  const std::string class_name = "ElementExtremeFunctorValue";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = subdomains;
+  params.set<MooseEnum>("value_type") = "max";
+  params.set<MooseFunctorName>("functor") = functor_name;
+  params.set<Real>("scale") = 1.0 / normalization;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR_CONVERGENCE;
+  params.set<std::vector<OutputName>>("outputs") = {"none"};
+  getTHMProblem().addPostprocessor(class_name, pp_name, params);
+}
+
+void
+Component::addMultiPostprocessorConvergence(const std::vector<PostprocessorName> & postprocessors,
+                                            const std::vector<std::string> & descriptions,
+                                            const std::vector<Real> & tolerances)
+{
+  const std::string class_name = "MultiPostprocessorConvergence";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<PostprocessorName>>("postprocessors") = postprocessors;
+  params.set<std::vector<std::string>>("descriptions") = descriptions;
+  params.set<std::vector<Real>>("tolerances") = tolerances;
+  params.set<unsigned int>("min_iterations") = 1;
+  params.set<unsigned int>("max_iterations") = std::numeric_limits<unsigned int>::max();
+  getTHMProblem().addConvergence(class_name, nonlinearConvergenceName(), params);
+}
+
+void
 Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
                                             bool need_one_specified) const
 {
