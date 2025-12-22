@@ -72,9 +72,7 @@ public:
     GPOptimizerOptions(const bool show_every_nth_iteration = 1,
                        const unsigned int num_iter = 1000,
                        const unsigned int batch_size = 0,
-                      //  const unsigned int tune_method = 0,
                        const GPTuningMethod tune_method = GPTuningMethod::Adam,
-                      //  const MooseEnum & tune_method = Adam,
                        const unsigned int num_layers = 1,
                        const Real learning_rate = 1e-3,
                        const Real b1 = 0.9,
@@ -91,7 +89,6 @@ public:
     /// The batch isize for Adam optimizer
     const unsigned int batch_size = 0;
     /// Method for tuning hyperparameters
-    // const unsigned int tune_method = 0;
     const GPTuningMethod tune_method = GPTuningMethod::Adam;
     /// The number of Gaussian Process layers
     const unsigned int num_layers = 1;
@@ -156,7 +153,6 @@ public:
    */
   void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
 
-  // void sq_dist(const RealEigenMatrix &X1_in, RealEigenMatrix &D_out, const RealEigenMatrix &X2_in = RealEigenMatrix(0,0));
 
   /**
    * Parameter setting for MCMC sampling.

@@ -63,7 +63,6 @@ TwoLayerGaussianProcess::setupCovarianceMatrix(const RealEigenMatrix & training_
   _K.resize(_num_outputs * _batch_size, _num_outputs * _batch_size);
 
   if (_tuning_data.size())
-    // tuneHyperParamsAdam(training_params, training_data, opts);
     tuneHyperParamsMcmc(training_params, training_data);
 
   _K.resize(training_params.rows() * training_data.cols(),
@@ -136,30 +135,7 @@ TwoLayerGaussianProcess::standardizeData(RealEigenMatrix & data, bool keep_momen
   _data_standardizer.getStandardized(data);
 }
 
-// void
-// TwoLayerGaussianProcess::squared_exponential_covariance(const RealEigenMatrix &x1,
-//                   const RealEigenMatrix &x2,
-//                   Real scale,
-//                   const RealEigenMatrix &lengthscale,
-//                   Real noise,
-//                   RealEigenMatrix &k)
-// {
-//   int n1 = x1.rows();
-//   int n2 = x2.rows();
 
-//   for (int i = 0; i < n1; i++) {
-//     for (int j = 0; j < n2; j++) {
-//       // Compute the scaled distance r_l(x1, x2)
-//       Eigen::RowVectorXd diff = (x1.row(i) - x2.row(j)).array() / lengthscale.row(0).array();
-//       Real r_l = std::sqrt(diff.squaredNorm());
-//       Real cov_val = scale * std::exp(-0.5 * r_l * r_l);
-//       if (i == j) {
-//           cov_val += noise;
-//       }
-//       k(i, j) = cov_val;
-//     }
-//   }
-// }
 
 void
 TwoLayerGaussianProcess::squared_exponential_covariance(const RealEigenMatrix & x1,
@@ -197,39 +173,7 @@ TwoLayerGaussianProcess::squared_exponential_covariance(const RealEigenMatrix & 
   }
 }
 
-// void
-// TwoLayerGaussianProcess::logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const
-// RealEigenMatrix & x2, Real noise, const RealEigenMatrix & lengthscale,
-//           LogLResult & result, bool outer, bool scale, Real outerscale) {
-//   int n = out_vec.rows();
-//   RealEigenMatrix K(x1.rows(), x2.rows());
 
-//   squared_exponential_covariance(x1, x2, 1, lengthscale, noise, K);
-//   Eigen::LLT<RealEigenMatrix> llt(K);
-//   RealEigenMatrix Mi = llt.solve(RealEigenMatrix::Identity(K.rows(), K.cols()));
-//   RealEigenMatrix L = llt.matrixL();
-//   Real ldet = 2 * L.diagonal().array().log().sum();
-
-//   RealEigenMatrix diff = out_vec;
-//   Real quadterm = (diff.transpose() * Mi * diff)(0,0);
-
-//   Real logl_val;
-//   if (outer) {
-//       logl_val = (-n * 0.5) * std::log(quadterm) - 0.5 * ldet;
-//   } else {
-//       logl_val = -0.5 * quadterm - 0.5 * ldet;
-//   }
-
-//   Real scale_val;
-//   if (scale) {
-//       scale_val = quadterm / n;
-//   } else {
-//       scale_val = NAN;
-//   }
-
-//   result.logl = logl_val;
-//   result.scale = scale_val;
-// }
 void
 TwoLayerGaussianProcess::logl(const RealEigenMatrix & out_vec,
                               const RealEigenMatrix & x1,
@@ -442,7 +386,6 @@ TwoLayerGaussianProcess::sampleW(const RealEigenMatrix & out_vec,
 
   for (unsigned int i = 0; i < x1.cols(); i++)
   {
-    // for (unsigned int i=0; i< 1; i++){
     for (unsigned int h = 0; h < x1.cols(); h++)
     {
       lengthscale_w_i(0, h) = lengthscale_w(0, i);
@@ -532,7 +475,6 @@ TwoLayerGaussianProcess::krig(const RealEigenMatrix & y,
     RealEigenMatrix quad_term = C_cross * C_inv * C_cross.transpose();
     squared_exponential_covariance(x_new, x_new, 1, lengthscale, noise, C_new);
     krig_sigma = outerscale * (C_new - quad_term);
-    // krig_sigma = (C_new - quad_term);
   }
 }
 
@@ -594,8 +536,6 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
 
   for (unsigned int j = 1; j < nmcmc; ++j)
   {
-    // MooseRandom generator;
-    // generator.seed(0, 1980);
     SampleNoiseResult sample_noise_result;
     sampleNoise(y,
                 w[j - 1],
@@ -607,22 +547,6 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
                 sample_noise_result);
     noise(j, 0) = sample_noise_result.noise;
     ll = sample_noise_result.ll;
-
-    // for (unsigned int i=0; i<x.cols(); i++){
-    //   SampleLengthscaleResult sample_lengthscale_result;
-    //   sampleLengthscale(y, w[j-1], w[j-1], noise(j,0), lengthscale_y.row(j-1), i,
-    //   settings.alpha.lengthscale_y, settings.beta.lengthscale_y, settings.l,
-    //                 settings.u, sample_lengthscale_result, ll, true, true);
-    //   lengthscale_y(j,i) = sample_lengthscale_result.lengthscale;
-    //   ll = sample_lengthscale_result.ll;
-    //   ll_store(j,i) = ll;
-    //   if (std::isnan(sample_lengthscale_result.scale)) {
-    //     scale(j,0) = scale(j-1,0);
-    //   }
-    //   else {
-    //     scale(j,0) = sample_lengthscale_result.scale;
-    //   }
-    // }
 
     SampleLengthscaleResult r_y;
     sampleLengthscale(y,
@@ -709,7 +633,7 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
     w_thinned[index] = w[i];
     index++;
   }
-  // _noise = RealEigenMatrix::Constant(final_nmcmc, noise.cols(), 1e-6);
+
   _noise = noise_thinned;
   _lengthscale_y = lengthscale_y_thinned;
   _lengthscale_w = lengthscale_w_thinned;

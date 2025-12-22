@@ -41,10 +41,6 @@ GaussianProcessTrainer::validParams()
       "tune_method",
       tune_methods,
       "Select method for tuning hyperparameters (Adam or MCMC)");
-  // params.addParam<unsigned int>(
-  //     "tune_method",
-  //     0,
-  //     "Select method for tuning hyperparameters");
   params.addParam<unsigned int>(
       "num_layers",
       1,
@@ -75,8 +71,6 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<unsigned int>("show_every_nth_iteration"),
         getParam<unsigned int>("num_iters"),
         getParam<unsigned int>("batch_size"),
-        // getParam<unsigned int>("tune_method"),
-        // getParam<MooseEnum>("tune_method"),
         getParam<MooseEnum>("tune_method").getEnum<StochasticTools::GPTuningMethod>(),
         getParam<unsigned int>("num_layers"),
         getParam<Real>("learning_rate"))),
@@ -202,9 +196,6 @@ GaussianProcessTrainer::postTrain()
     // Setup the covariance
     _tgp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 
-    // _tgp.paramStandardizer().set(0, 1, _n_dims);
-    // _tgp.dataStandardizer().set(0, 1, _n_outputs);
-    // _tgp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
   }
 
 }

@@ -3,7 +3,7 @@
 
 [Distributions]
   [k_dist]
-    type = Uniform  # input file gold folder tgp
+    type = Uniform
     lower_bound = 1
     upper_bound = 10
   []

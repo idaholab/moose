@@ -94,8 +94,7 @@ public:
    */
   void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
 
-  // void sq_dist(const RealEigenMatrix &X1_in, RealEigenMatrix &D_out, const RealEigenMatrix &X2_in
-  // = RealEigenMatrix(0,0));
+
 
 
   /**

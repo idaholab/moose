@@ -44,6 +44,7 @@ private:
   /// Gaussian process handler responsible for managing training related tasks
   StochasticTools::GaussianProcess & _gp;
 
+  /// Two layer Gaussian process handler responsible for managing training related tasks
   StochasticTools::TwoLayerGaussianProcess & _tgp;
 
   /// Parameters (x) used for training -- we'll allgather these in postTrain().
