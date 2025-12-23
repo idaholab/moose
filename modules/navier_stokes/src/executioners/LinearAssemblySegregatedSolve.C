@@ -190,8 +190,6 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   // Link CHT objects, this will also do some error checking
   // Make a copy for compatibility. These could change in the future
   // Convert _pm_radiation_systems to std::vector<SystemBase *>
-  // if (_cht.enabled())
-  //   _cht.linkEnergySystems(_solid_energy_system, _energy_system);
 
   if (_cht.enabled())
   {
