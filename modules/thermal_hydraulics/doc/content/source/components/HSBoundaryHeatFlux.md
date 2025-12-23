@@ -11,9 +11,6 @@ that applies a specified heat flux function on the boundary.
 The parameter [!param](/Components/HSBoundaryHeatFlux/q) gives the incoming
 boundary heat flux function $q$.
 
-The parameter [!param](/Components/HSBoundaryHeatFlux/scale_pp) specifies
-the name of a post-processor $f$ that can scale the boundary conditions.
-
 !syntax parameters /Components/HSBoundaryHeatFlux
 
 If this component is used with a cylindrical heat structure, the post-processor

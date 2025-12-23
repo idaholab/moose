@@ -19,13 +19,6 @@ ADRadiativeHeatFluxBC::validParams()
   params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor");
   params.addRequiredParam<MooseFunctorName>("emissivity", "Emissivity functor");
   params.addParam<MooseFunctorName>("view_factor", 1.0, "View factor functor");
-  params.addDeprecatedParam<PostprocessorName>(
-      "scale_pp",
-      "1.0",
-      "Post-processor by which to scale boundary condition",
-      "The 'scale' parameter is replacing the 'scale_pp' parameter. 'scale' is a function "
-      "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
-      "value, use a PostprocessorFunction.");
   params.addParam<MooseFunctorName>(
       "scale", 1.0, "Functor by which to scale the boundary condition");
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "Stefan-Boltzmann constant");
@@ -41,7 +34,6 @@ ADRadiativeHeatFluxBC::ADRadiativeHeatFluxBC(const InputParameters & parameters)
     _T_ambient(getFunctor<ADReal>("T_ambient")),
     _emissivity(getFunctor<ADReal>("emissivity")),
     _view_factor(getFunctor<ADReal>("view_factor")),
-    _scale_pp(getPostprocessorValue("scale_pp")),
     _scale(getFunctor<ADReal>("scale")),
     _sigma(getParam<Real>("stefan_boltzmann_constant"))
 {
@@ -59,5 +51,5 @@ ADRadiativeHeatFluxBC::computeQpResidual()
   const auto T4 = MathUtils::pow(_u[_qp], 4);
   const auto T4inf = MathUtils::pow(T_ambient, 4);
 
-  return _test[_i][_qp] * _sigma * _scale_pp * scale * emissivity * view_factor * (T4 - T4inf);
+  return _test[_i][_qp] * _sigma * scale * emissivity * view_factor * (T4 - T4inf);
 }
