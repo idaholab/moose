@@ -26,8 +26,6 @@ protected:
   const ADVariableValue & _T_ext;
   /// Heat transfer coefficient from external application
   const ADVariableValue & _htc_ext;
-  /// Post-processor by which to scale boundary condition
-  const PostprocessorValue & _scale_pp;
   /// Function by which to scale the boundary condition
   const Function & _scale_fn;
 
