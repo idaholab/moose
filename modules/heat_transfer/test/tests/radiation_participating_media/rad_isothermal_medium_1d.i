@@ -7,27 +7,19 @@
 # -theta = sqrt(absorption_coeff/diffusion_coef)
 # G_bc = (4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta)))
 
-# High-Order Spherical Harmonics Methods for Radiative Heat
-#Transfer and Applications in Combustion Simulations
-#by
-#Wenjun Ge
-
-sigma = 5.670374419e-8
-sigma_a = 1.0 #10.0 #0.33333
-diffusion_coef = ${fparse 1/(3*sigma_a)}
-temperature_radiation = ${fparse pow(1/(4*sigma),0.25) } #350.0
-wall_temperature = 0.0
-eps_w = 1.0
+diffusion_coef = 1e-1
+sigma_a = 1.0
+temperature_radiation = 100.0
+wall_temperature = 100.0
 theta = ${fparse sqrt(sigma_a/diffusion_coef)}
-G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
-(2*(2-eps_w)/eps_w*diffusion_coef*theta*sinh(theta)+cosh(theta))}
-
+G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta))}
+sigma = 5.670374419e-8
 
 [Mesh]
   [mesh]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 100
+    nx = 50
     xmin = 0
     xmax = 1
   []
@@ -81,14 +73,6 @@ G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
     variable = G
     temperature_radiation = ${wall_temperature}
     coeff_diffusion = ${diffusion_coef}
-    boundary_emissivity = ${eps_w}
-  []
-  [left_bc]
-    type = LinearFVP1RadiationMarshakBC
-    boundary = 'left'
-    variable = G
-    temperature_radiation = ${wall_temperature}
-    coeff_diffusion = ${diffusion_coef}
     boundary_emissivity = 1.0
   []
 []
@@ -133,6 +117,5 @@ G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
 [Outputs]
   file_base = rad_isothermal_medium_1d_adiabatic
   csv = true
-  exodus = true
   execute_on = timestep_end
 []
