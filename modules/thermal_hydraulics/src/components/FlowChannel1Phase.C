@@ -21,6 +21,19 @@ FlowChannel1Phase::validParams()
 {
   InputParameters params = FlowChannel1PhaseBase::validParams();
 
+  params.addParam<std::vector<FunctionName>>(
+      "initial_passives",
+      {},
+      "Initial passive transport variable values in the flow channel, if any (units are "
+      "[amount/m^3], where 'amount' may be mass (kg) or a number (molecules, moles, etc.))");
+  params.addParam<std::vector<VariableName>>(
+      "passives_names",
+      {},
+      "Names for each passive transport variable [amount/m^3]. Note that the conserved (solution) "
+      "variables will be an amount per unit volume multiplied by the channel cross-sectional area, "
+      "yielding an amount per unit length; these solution variable names will append '_times_area' "
+      "to the names given in this parameter.");
+
   MooseEnum wave_speed_formulation("einfeldt davis", "einfeldt");
   params.addParam<MooseEnum>(
       "wave_speed_formulation", wave_speed_formulation, "Method for computing wave speeds");
@@ -30,6 +43,8 @@ FlowChannel1Phase::validParams()
       "scaling_factor_1phase",
       sf_1phase,
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
+  params.addParam<std::vector<Real>>("scaling_factor_passives",
+                                     "Scaling factor for each passive transport variable");
   params.addParam<bool>(
       "create_flux_vpp",
       false,
@@ -51,6 +66,16 @@ FlowChannel1Phase::validParams()
 
 FlowChannel1Phase::FlowChannel1Phase(const InputParameters & params) : FlowChannel1PhaseBase(params)
 {
+}
+
+void
+FlowChannel1Phase::check() const
+{
+  FlowChannel1PhaseBase::check();
+
+  checkEqualSize<VariableName, FunctionName>("passives_names", "initial_passives");
+  if (isParamValid("scaling_factor_passives"))
+    checkEqualSize<VariableName, Real>("passives_names", "scaling_factor_passives");
 }
 
 void

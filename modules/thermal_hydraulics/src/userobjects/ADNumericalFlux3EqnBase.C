@@ -25,13 +25,17 @@ ADNumericalFlux3EqnBase::ADNumericalFlux3EqnBase(const InputParameters & paramet
 std::vector<ADReal>
 ADNumericalFlux3EqnBase::convert1DInputTo3D(const std::vector<ADReal> & U_1d) const
 {
-  std::vector<ADReal> U_3d(THMVACE3D::N_FLUX_INPUTS);
+  const auto n_passives = U_1d.size() - THMVACE1D::N_FLUX_INPUTS;
+
+  std::vector<ADReal> U_3d(THMVACE3D::N_FLUX_INPUTS + n_passives);
   U_3d[THMVACE3D::RHOA] = U_1d[THMVACE1D::RHOA];
   U_3d[THMVACE3D::RHOUA] = U_1d[THMVACE1D::RHOUA];
   U_3d[THMVACE3D::RHOVA] = 0;
   U_3d[THMVACE3D::RHOWA] = 0;
   U_3d[THMVACE3D::RHOEA] = U_1d[THMVACE1D::RHOEA];
   U_3d[THMVACE3D::AREA] = U_1d[THMVACE1D::AREA];
+  for (const auto i : make_range(n_passives))
+    U_3d[THMVACE3D::N_FLUX_INPUTS + i] = U_1d[THMVACE1D::N_FLUX_INPUTS + i];
 
   return U_3d;
 }
@@ -39,10 +43,14 @@ ADNumericalFlux3EqnBase::convert1DInputTo3D(const std::vector<ADReal> & U_1d) co
 std::vector<ADReal>
 ADNumericalFlux3EqnBase::convert3DFluxTo1D(const std::vector<ADReal> & F_3d) const
 {
-  std::vector<ADReal> F_1d(THMVACE1D::N_FLUX_OUTPUTS);
+  const auto n_passives = F_3d.size() - THMVACE3D::N_FLUX_OUTPUTS;
+
+  std::vector<ADReal> F_1d(THMVACE1D::N_FLUX_OUTPUTS + n_passives);
   F_1d[THMVACE1D::MASS] = F_3d[THMVACE3D::MASS];
   F_1d[THMVACE1D::MOMENTUM] = F_3d[THMVACE3D::MOM_NORM];
   F_1d[THMVACE1D::ENERGY] = F_3d[THMVACE3D::ENERGY];
+  for (const auto i : make_range(n_passives))
+    F_1d[THMVACE1D::N_FLUX_OUTPUTS + i] = F_3d[THMVACE3D::N_FLUX_OUTPUTS + i];
 
   return F_1d;
 }
@@ -52,4 +60,8 @@ ADNumericalFlux3EqnBase::transform3DFluxDirection(std::vector<ADReal> & F_3d, Re
 {
   F_3d[THMVACE3D::MASS] *= nLR_dot_d;
   F_3d[THMVACE3D::ENERGY] *= nLR_dot_d;
+
+  const auto n_passives = F_3d.size() - THMVACE3D::N_FLUX_OUTPUTS;
+  for (const auto i : make_range(n_passives))
+    F_3d[THMVACE3D::N_FLUX_OUTPUTS + i] *= nLR_dot_d;
 }
