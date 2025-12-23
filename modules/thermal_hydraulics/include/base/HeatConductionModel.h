@@ -40,11 +40,6 @@ public:
   virtual void addInitialConditions();
 
   /**
-   * Add materials used by this model
-   */
-  virtual void addMaterials();
-
-  /**
    * Add heat conduction equation for cartesian coordinate system
    */
   virtual void addHeatEquationXYZ();
