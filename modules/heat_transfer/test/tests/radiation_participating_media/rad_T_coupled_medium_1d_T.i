@@ -1,22 +1,14 @@
-# The test gurantees that the P1 radiation model in the Linear FV system matches the analytical solution
-# for the incident radiation G under adiabatic and radiative interaction with the environment.
-# This simulation is a 1D test with adiabatic Neumann BC on the left of the domain and a Marshak BC on
-# the right of the domain, with varying wall temperatures.
-# Assuming isothermal conditions along the volume, the analytical solution for this problem is:
-# G(x) = G_bc * cosh(theta x) + 4*sigma*T^4, where:
-# -theta = sqrt(absorption_coeff/diffusion_coef)
-# G_bc = (4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta)))
+# The test gurantees that the P1 radiation model in the Linear FV system using the Newton solver
+# can be used with MultiApps to relax the solution update via relaxation to improve convergence
+# of the coupled energy and radiative systems.
+# This simulation is a 1D test with Dirichlet BCs on the left and right of the domain. Marshak BCs are
+# applied at the boundaries for G.
+
 
 k = 1.0
-b_eps = 1.0
 sigma_a = 0.33333
-diffusion_coef = ${fparse 1/(3*sigma_a)}
-temperature_radiation = 100.0
-wall_temperature = 100.0
-theta = ${fparse sqrt(sigma_a/diffusion_coef)}
-G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta))}
-sigma = 5.670374419e-8
-
+r_wall_temp = 400.0
+l_wall_temp = 300.0
 
 [Mesh]
   [salt_mesh]
@@ -42,20 +34,9 @@ sigma = 5.670374419e-8
 []
 
 [AuxVariables]
-  [G_analytic]
-    type = MooseLinearVariableFVReal
-  []
   [G]
     type = MooseLinearVariableFVReal
-    initial_condition = 3400 #22.6815
-  []
-[]
-
-[AuxKernels]
-  [populate_analytical]
-    type = FunctorAux
-    functor = analytical_sol
-    variable = G_analytic
+    initial_condition = 3400
   []
 []
 
@@ -78,40 +59,13 @@ sigma = 5.670374419e-8
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
     boundary = 'left'
-    functor = 300.
+    functor = ${l_wall_temp}
   []
   [right_bc_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T
     boundary = 'right'
-    functor = 400.
-  []
-  # [left_bc_T]
-  #   type = LinearFVP1TemperatureMarshakBC
-  #   variable = T
-  #   temperature_radiation = 300.0
-  #   boundary = 'left'
-  #   G = 'G'
-  #   coeff_diffusion = ${k}
-  #   boundary_emissivity = ${b_eps}
-  # []
-  # [right_bc_T]
-  #   type = LinearFVP1TemperatureMarshakBC
-  #   variable = T
-  #   temperature_radiation = 400.0
-  #   boundary = 'right'
-  #   G = 'G'
-  #   coeff_diffusion = ${k}
-  #   boundary_emissivity = ${b_eps}
-  # []
-[]
-
-[Functions]
-  [analytical_sol]
-    type = ParsedFunction
-    symbol_names = 'a'
-    symbol_values = '${fparse sqrt(sigma_a / diffusion_coef)}'
-    expression = '${G_bc} * cosh(${theta}*x) + 4* ${sigma} * ${temperature_radiation}^4'
+    functor = ${r_wall_temp}
   []
 []
 
@@ -134,29 +88,9 @@ sigma = 5.670374419e-8
   []
 []
 
-# [Convergence]
-#   [fp_conv]
-#     type = IterationCountConvergence
-#     max_iterations = 100
-#     converge_at_max_iterations = true
-#   []
-# []
-
-[FunctorMaterials]
-  [parsed_source_right]
-    type = ParsedFunctorMaterial
-    expression = 'if(x>0.99, 0*${b_eps}/(2*(2-${b_eps})) *(4*5.67e-8*pow(400,4)-G),
-                  if(x<0.01, 0*${b_eps}/(2*(2-${b_eps})) *(4*5.67e-8*pow(300,4)-G), 0.0 ))'
-    property_name = 'emmision_source'
-    functor_names = 'G'
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  # petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  # petsc_options_value = 'lu NONZERO'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   l_abs_tol = 1e-14
@@ -165,15 +99,12 @@ sigma = 5.670374419e-8
   fixed_point_min_its = 2
   fixed_point_max_its = 500
   relaxation_factor = 0.9
+  transformed_variables = 'T'
   fixed_point_rel_tol = 1e-12
   fixed_point_abs_tol = 1e-12
-  # multiapp_fixed_point_convergence = fp_conv
-  # multi_system_fixed_point=true
-  # multi_system_fixed_point_convergence=linear
 []
 
 [Outputs]
-  #file_base = rad_isothermal_medium_1d_adiabatic
   csv = true
   exodus = true
   execute_on = timestep_end
@@ -183,7 +114,6 @@ sigma = 5.670374419e-8
   [sub_app]
     type = FullSolveMultiApp
     input_files = 'rad_T_coupled_medium_1d_G.i'
-    #execute_on = timestep_end
     relaxation_factor = 0.9
   []
 []

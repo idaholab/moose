@@ -25,6 +25,20 @@
     max_threads = 1
     requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation and match the analytical solution under ambient cooling conditions.'
   []
+  [1d_rad_energy_coupling_mapp]
+    type = 'Exodiff'
+    input = 'rad_T_coupled_medium_1d_T.i'
+    exodiff = 'rad_T_coupled_medium_1d_T_out.e'
+    max_threads = 1
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system.'
+  []
+  [1d_rad_energy_coupling_mapp_csv]
+    type = 'CSVDiff'
+    input = 'rad_T_coupled_medium_1d_T.i'
+    csvdiff = 'rad_T_coupled_medium_1d_T_out.csv'
+    max_threads = 1
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system.'
+  []
   [1d_rad_energy_coupling]
     type = 'Exodiff'
     input = 'rad_T_coupled_medium_1d.i'
