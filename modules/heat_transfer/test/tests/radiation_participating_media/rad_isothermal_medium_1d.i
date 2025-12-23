@@ -12,7 +12,9 @@ sigma_a = 1.0
 temperature_radiation = 100.0
 wall_temperature = 100.0
 theta = ${fparse sqrt(sigma_a/diffusion_coef)}
-G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/(2*diffusion_coef*theta*sinh(theta)+cosh(theta))}
+eps_w = 1.0
+G_bc = ${fparse 4*sigma*(pow(wall_temperature,4)-pow(temperature_radiation,4))/
+(2*(2-eps_w)/eps_w*diffusion_coef*theta*sinh(theta)+cosh(theta))}
 sigma = 5.670374419e-8
 
 [Mesh]
@@ -73,7 +75,7 @@ sigma = 5.670374419e-8
     variable = G
     temperature_radiation = ${wall_temperature}
     coeff_diffusion = ${diffusion_coef}
-    boundary_emissivity = 1.0
+    boundary_emissivity = ${eps_w}
   []
 []
 
