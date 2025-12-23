@@ -20,12 +20,6 @@ VolumeJunction1Phase::validParams()
 {
   InputParameters params = FlowJunction1Phase::validParams();
 
-  params.addDeprecatedParam<bool>(
-      "use_scalar_variables",
-      "True if the junction variables are scalar variables",
-      "Please remove this parameter; it no longer has any effect. The behavior corresponding to "
-      "'use_scalar_variables = false' is now the only option.");
-
   params.addRequiredParam<Real>("volume", "Volume of the junction [m^3]");
   params.addRequiredParam<Point>("position", "Spatial position of the center of the junction [m]");
 
@@ -229,7 +223,7 @@ VolumeJunction1Phase::addMooseObjects()
     }
   }
 
-  // Add scalar kernels for the junction
+  // Add kernels for the junction
   std::vector<NonlinearVariableName> var_names(N_EQ);
   var_names[RHOV_INDEX] = _rhoV_var_name;
   var_names[RHOUV_INDEX] = _rhouV_var_name;
