@@ -23,6 +23,7 @@ public:
 
 protected:
   virtual void check() const override;
+  virtual bool supportsPassiveTransport() const override { return true; }
 
 public:
   static InputParameters validParams();

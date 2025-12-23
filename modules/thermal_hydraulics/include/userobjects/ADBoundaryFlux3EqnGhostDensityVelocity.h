@@ -23,8 +23,8 @@ public:
   ADBoundaryFlux3EqnGhostDensityVelocity(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<ADReal>
-  getGhostCellSolution(const std::vector<ADReal> & U_interior) const override;
+  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U_interior,
+                                                   const Point & point) const override;
 
   /// Specified density
   const Real & _rho;
