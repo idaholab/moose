@@ -17,9 +17,6 @@ namespace THM
 void
 associateSyntax(Syntax & syntax)
 {
-  syntax.registerActionSyntax("AddHeatStructureMaterialAction",
-                              "HeatStructureMaterials/*",
-                              "THM:add_heat_structure_material");
   syntax.registerActionSyntax("THMCreateMeshAction", "Components");
   syntax.registerActionSyntax("AddComponentAction", "Components/*", "THM:add_component");
   syntax.registerActionSyntax("AddComponentAction", "Components/*/*", "THM:add_component");
@@ -61,7 +58,6 @@ registerActions(Syntax & syntax)
   registerTask("THM:add_relationship_managers", true);
 
   registerMooseObjectTask("THM:add_component", Component, false);
-  registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
   registerMooseObjectTask("THM:add_closures", Closures, false);
 
   try
@@ -90,7 +86,6 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_elemental_field_variable", "add_fluid_properties");
     syntax.addDependency("add_aux_variable", "add_fluid_properties");
     syntax.addDependency("add_variable", "add_fluid_properties");
-    syntax.addDependency("THM:init_components", "THM:add_heat_structure_material");
     syntax.addDependency("THM:init_components", "THM:add_closures");
     syntax.addDependency("add_variable", "THM:init_components");
     syntax.addDependency("THM:setup_output", "add_output");

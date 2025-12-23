@@ -5,21 +5,11 @@
   [physics]
     requirement = 'The system shall simulate a 2D cylindrical heat structure'
 
-    [by_hsmaterials]
-      type = Exodiff
-      input = 'by_hsmaterials.i'
-      exodiff = 'transient.e'
-      custom_cmp = 'transient.exodiff'
-      no_error_deprecated = True
-      restep = false # Test is prescribed to abort on failed timestep
-      detail = 'in a transient problem, with properties defined by HeatStructureMaterials.'
-    []
     [by_materials]
       type = Exodiff
       input = 'by_materials.i'
       exodiff = 'transient.e'
       custom_cmp = 'transient.exodiff'
-      prereq = 'physics/by_hsmaterials'
       detail = 'in a transient problem, with properties defined by Materials.'
     []
     [by_solid_properties]

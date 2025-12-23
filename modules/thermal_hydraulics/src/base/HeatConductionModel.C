@@ -66,24 +66,6 @@ HeatConductionModel::addInitialConditions()
 }
 
 void
-HeatConductionModel::addMaterials()
-{
-  const auto & blocks = _geometrical_component.getSubdomainNames();
-  const auto & material_names =
-      _geometrical_component.getParam<std::vector<std::string>>("materials");
-
-  for (std::size_t i = 0; i < blocks.size(); i++)
-  {
-    std::string class_name = "ADSolidMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = {blocks[i]};
-    params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
-    params.set<UserObjectName>("properties") = material_names[i];
-    _sim.addMaterial(class_name, genName(blocks[i], "mat"), params);
-  }
-}
-
-void
 HeatConductionModel::addHeatEquationXYZ()
 {
   const auto & blocks = _geometrical_component.getSubdomainNames();

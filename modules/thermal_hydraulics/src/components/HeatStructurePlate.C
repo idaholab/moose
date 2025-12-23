@@ -20,12 +20,6 @@ HeatStructurePlate::validParams()
   params.addRequiredParam<std::vector<Real>>("widths", "Width of each transverse region [m]");
   params.addRequiredParam<std::vector<unsigned int>>(
       "n_part_elems", "Number of elements of each transverse region");
-  params.addDeprecatedParam<std::vector<std::string>>(
-      "materials",
-      "Material name for each transverse region",
-      "HeatStructureMaterials are deprecated. Please make corresponding SolidProperties objects "
-      "and replace the heat structure parameter 'materials' with the parameters 'solid_properties' "
-      "and 'solid_properties_T_ref'. See heat structure documentation for more information.");
   params.addParam<std::vector<UserObjectName>>(
       "solid_properties", "Solid properties object name for each radial region");
   params.addParam<std::vector<Real>>(
@@ -50,9 +44,6 @@ HeatStructurePlate::HeatStructurePlate(const InputParameters & params)
   for (unsigned int i = 0; i < _names.size(); i++)
     _name_index[_names[i]] = i;
 
-  _material_names = isParamValid("materials") ? getParam<std::vector<std::string>>("materials")
-                                              : std::vector<std::string>{};
-
   _width = getParam<std::vector<Real>>("widths");
   _total_width = std::accumulate(_width.begin(), _width.end(), 0.0);
 
@@ -76,14 +67,11 @@ HeatStructurePlate::check() const
 
   checkEqualSize<std::string, unsigned int>("names", "n_part_elems");
   checkEqualSize<std::string, Real>("names", "widths");
-  if (isParamValid("materials"))
-    checkEqualSize<std::string, std::string>("names", "materials");
   if (isParamValid("solid_properties"))
   {
     checkEqualSize<UserObjectName, std::string>("solid_properties", "names");
     checkEqualSize<UserObjectName, Real>("solid_properties", "solid_properties_T_ref");
   }
-  checkMutuallyExclusiveParameters({"materials", "solid_properties"}, false);
 }
 
 Real
