@@ -192,7 +192,6 @@ CHTHandler::deduceCHTBoundaryCoupling()
       {
         // We then fetch the radiation conduction kernels
         std::vector<LinearFVFluxKernel *> radiation_kernels;
-        //LinearFVFluxKernel * radiation_kernels;
         _app.theWarehouse()
             .query()
             .template condition<AttribSystem>("LinearFVFluxKernel")
@@ -200,7 +199,14 @@ CHTHandler::deduceCHTBoundaryCoupling()
             .template condition<AttribSysNum>(_cht_pm_radiation_system_numbers[sys_i])
             .queryInto(radiation_kernels);
 
-        _cht_pm_radiation_kernels.push_back(radiation_kernels[sys_i]);
+        if (radiation_kernels.size() > 1)
+          mooseError("We already have a kernel that describes the participating media radiation diffusion "
+                      "with the name: ", radiation_kernels[0]->name(), ". Make sure that you have only one conduction kernel.");
+        else if (radiation_kernels.empty())
+          mooseError("We did not find a diffusion kernel for the participating media radiation diffusion to compute the "
+                      "radiative heat flux. Please add a diffusion kernel.");
+        else
+          _cht_pm_radiation_kernels.push_back(radiation_kernels[0]);
       }
 
     for (auto kernel : flux_kernels)
@@ -428,6 +434,8 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
       // Conductive flux
       auto flux = other_kernel->computeBoundaryFlux(*other_bc);
 
+      // If participating media radiation system exists we add the heat flux from the fluid
+      // to the solid region.
       if (!_pm_radiation_systems.empty() && side == NS::CHTSide::SOLID)
           for (const auto sys_i : index_range(_pm_radiation_systems))
           {
@@ -437,7 +445,7 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
             flux += _cht_pm_radiation_kernels[sys_i]->computeBoundaryFlux(*_cht_pm_radiation_boundary_conditions[bd_index][sys_i]);
           }
 
-      flux_container[fi->id()] = flux_relaxation * flux + (1 - flux_relaxation) * flux_container[fi->id()]; // flux;
+      flux_container[fi->id()] = flux_relaxation * flux + (1 - flux_relaxation) * flux_container[fi->id()];
 
       // We do the integral here
       integrated_flux += flux * fi->faceArea() * fi->faceCoord();
