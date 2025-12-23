@@ -114,8 +114,12 @@ class SubprocessRunner(Runner):
             self.monitor_queue = Queue(maxsize=1)
             self.monitor_thread = Thread(
                 target=monitor_process,
-                args=(self.process.pid, 0.05, 4, self.monitor_queue),
                 kwargs={
+                    'pid': self.process.pid,
+                    'poll_time': 0.025,
+                    'cpu_update_interval': 20,
+                    'memory_update_interval': 10,
+                    'result_queue': self.monitor_queue,
                     'max_percent_cpu': self.allowed_percent_cpu,
                     'max_memory': self.allowed_memory
                 },

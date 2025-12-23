@@ -42,20 +42,21 @@ class ProcessSample:
 
     pid: int
     """The process ID."""
-    wall_time: float
-    """Wall time at which the sample was made in seconds."""
-    cpu_time: float
-    """CPU time of the process in seconds during the sample."""
-    memory: int
-    """Memory usage of the process in bytes during the sample."""
+    wall_time: Optional[float] = None
+    """Wall time at which the cpu sample was made in seconds, if sampled."""
+    cpu_time: Optional[float] = None
+    """Total CPU time of the process in seconds, if sampled."""
+    memory: Optional[int] = None
+    """Memory usage of the process in bytes, if samples."""
 
 
-async def poll_process(pid: int) -> list[ProcessSample]:
+async def poll_process(pid: int, cpu: bool, memory: bool) -> list[ProcessSample]:
     """
     Sample a process and all of its children.
 
     This is a heaver call so it is asynchronous.
     """
+    assert cpu or memory, "No sample options set"
 
     def _poll_process() -> list[ProcessSample]:
         samples: list[ProcessSample] = []
@@ -73,39 +74,52 @@ async def poll_process(pid: int) -> list[ProcessSample]:
 
         # Sample all processes
         for p in all_processes:
-            # Only count processes still running
             if not p.is_running():
                 continue
 
-            # Sample CPU, or skip if it has ended
-            try:
-                times = p.cpu_times()
-            except psutil.NoSuchProcess:
-                continue
-            sample = ProcessSample(
-                pid=p.pid,
-                wall_time=perf_counter(),
-                cpu_time=(times.user + times.system),
-                memory=0,
-            )
+            sample = None
 
-            # Sample memory; prefer PSS if available
-            if MEMORY_PSS:
-                with (
-                    suppress(FileNotFoundError),
-                    suppress(ProcessLookupError),
-                    open(f"/proc/{p.pid}/smaps_rollup", "r") as f,
-                ):
-                    for line in f:
-                        if line.startswith("Pss:"):  # in kB
-                            sample.memory = int(line.split()[1]) * 1000
-                            break
-            # Otherwise, use RSS (will double count shared memory)
-            else:
-                with suppress(psutil.NoSuchProcess):
-                    sample.memory = p.memory_info().rss
+            # Sample CPU if requested, or skip if ended
+            if cpu:
+                try:
+                    times = p.cpu_times()
+                except psutil.NoSuchProcess:
+                    continue
+                sample = ProcessSample(
+                    pid=p.pid,
+                    wall_time=perf_counter(),
+                    cpu_time=(times.user + times.system),
+                    memory=0,
+                )
 
-            samples.append(sample)
+            # Sample memory if requested
+            if memory:
+                p_memory = None
+
+                # Prefer PSS if available
+                if MEMORY_PSS:
+                    with (
+                        suppress(FileNotFoundError),
+                        suppress(ProcessLookupError),
+                        open(f"/proc/{p.pid}/smaps_rollup", "r") as f,
+                    ):
+                        for line in f:
+                            if line.startswith("Pss:"):  # in kB
+                                p_memory = int(line.split()[1]) * 1000
+                                break
+                # Otherwise, use RSS (will double count shared memory)
+                else:
+                    with suppress(psutil.NoSuchProcess):
+                        p_memory = p.memory_info().rss
+
+                if p_memory is not None:
+                    if sample is None:
+                        sample = ProcessSample(pid=p.pid, memory=p_memory)
+                    else:
+                        sample.memory = p_memory
+
+            if sample is not None:
+                samples.append(sample)
 
         return samples
 
@@ -148,14 +162,15 @@ class MonitoredProcess:
 async def _monitor_process(
     pid: int,
     poll_time: float,
-    update_interval: int,
+    cpu_update_interval: int,
+    memory_update_interval: int,
     max_percent_cpu: Optional[float],
     max_memory: Optional[int],
 ) -> MonitoredProcess:
     # The final result
     result = MonitoredProcess()
-    # The samples from the previous iteration
-    last_samples: dict[int, ProcessSample] = {}
+    # The samples from the previous CPU update
+    last_cpu_samples: dict[int, ProcessSample] = {}
 
     # Process has already ended, nothing to do
     try:
@@ -167,7 +182,11 @@ async def _monitor_process(
     # It is available if we have a previous sample for
     # the same process, as a delta is required.
     def sample_percent_cpu(sample: ProcessSample) -> float:
-        if (last_sample := last_samples.get(sample.pid)) is not None:
+        if (last_sample := last_cpu_samples.get(sample.pid)) is not None:
+            assert sample.cpu_time is not None
+            assert last_sample.cpu_time is not None
+            assert sample.wall_time is not None
+            assert last_sample.wall_time is not None
             return (
                 100.0
                 * (sample.cpu_time - last_sample.cpu_time)
@@ -190,8 +209,10 @@ async def _monitor_process(
                 process_info.append(("Command", cmdline))
                 process_info.append(("Parent", parent))
                 process_info.append(("Wall time", f"{wall_time:.2f} sec"))
-            process_info.append(("Memory", f"{(sample.memory / 1e6):.2f} MB"))
-            process_info.append(("CPU", f"{sample_percent_cpu(sample):.2f}%"))
+            if sample.memory is not None:
+                process_info.append(("Memory", f"{(sample.memory / 1e6):.2f} MB"))
+            if cpu := sample_percent_cpu(sample):
+                process_info.append(("CPU", f"{cpu:.2f}%"))
             info.append(f"Process {sample.pid}:")
             info += [f"  {k}: {v}" for k, v in process_info]
 
@@ -207,40 +228,52 @@ async def _monitor_process(
 
         return result
 
+    # Poll; every poll will check if the main process is
+    # running. We will only update stats every so often
+    # based on the intervals as updating is expensive.
+    # We want to check on the main process state every time
+    # as it's cheaper and we want this thread to be able
+    # to exit quickly once the main process is done.
     num_intervals = 0
     while process.is_running():
         num_intervals += 1
 
-        # Have reached an update point
-        if num_intervals == update_interval:
-            # Reset as we're updating
-            num_intervals = 0
-
+        # Determine if there is anything to update, do so if so
+        update_cpu = num_intervals % cpu_update_interval == 0
+        update_memory = num_intervals % memory_update_interval == 0
+        if update_cpu or update_memory:
             # Get current samples
-            samples = await poll_process(pid)
+            samples = await poll_process(pid, update_cpu, update_memory)
 
             # No samples, we're done
             if not samples:
                 return result
 
-            # Update max memory
-            memory = sum(v.memory for v in samples)
-            if memory > result.max_memory:
-                result.max_memory = memory
+            kill_reason: Optional[KilledReason] = None
 
-            # Update max percent cpu
-            percent_cpu = sum(sample_percent_cpu(v) for v in samples)
-            if percent_cpu > result.max_percent_cpu:
-                result.max_percent_cpu = percent_cpu
+            # Update max memory and check requirement, if any
+            if update_memory:
+                memory = sum(v.memory for v in samples if v.memory is not None)
+                if memory > result.max_memory:
+                    result.max_memory = memory
+                    if max_memory and memory > max_memory:
+                        kill_reason = KilledReason.MEMORY
 
-            # Check failure criteria
-            if max_memory and memory > max_memory:
-                return kill(KilledReason.MEMORY, samples)
-            if max_percent_cpu and result.max_percent_cpu > max_percent_cpu:
-                return kill(KilledReason.CPU, samples)
+            # Update percent cpu and check requirement, if any
+            if update_cpu:
+                percent_cpu = sum(sample_percent_cpu(v) for v in samples)
+                if percent_cpu > result.max_percent_cpu:
+                    result.max_percent_cpu = percent_cpu
+                    if max_percent_cpu and percent_cpu > max_percent_cpu:
+                        kill_reason = KilledReason.CPU
+
+            # Kill if we have a reason to do so
+            if kill_reason is not None:
+                kill(kill_reason, samples)
 
             # Copy current samples for next cpu calculation
-            last_samples = {sample.pid: sample for sample in samples}
+            if update_cpu:
+                last_cpu_samples = {sample.pid: sample for sample in samples}
 
         # Poll
         await asyncio.sleep(poll_time)
@@ -251,7 +284,8 @@ async def _monitor_process(
 def monitor_process(
     pid: int,
     poll_time: float,
-    update_interval: int,
+    cpu_update_interval: int,
+    memory_update_interval: int,
     result_queue: Queue[MonitoredProcess],
     max_percent_cpu: Optional[float] = None,
     max_memory: Optional[int] = None,
@@ -275,8 +309,10 @@ def monitor_process(
         The top-level ID of the process to monitor.
     poll_time : float
         How often to poll the process in seconds.
-    update_interval : int
-        How often to update process stats in number of polls.
+    cpu_update_interval : int
+        How often to update CPU stats in number of polls.
+    memory_update_interval : int
+        How often to update memory stats in number of polls.
     result_queue : Queue[MonitoredProcess]
         The queue to insert the final result into.
 
@@ -293,7 +329,8 @@ def monitor_process(
         return await _monitor_process(
             pid=pid,
             poll_time=poll_time,
-            update_interval=update_interval,
+            cpu_update_interval=cpu_update_interval,
+            memory_update_interval=memory_update_interval,
             max_percent_cpu=max_percent_cpu,
             max_memory=max_memory,
         )
