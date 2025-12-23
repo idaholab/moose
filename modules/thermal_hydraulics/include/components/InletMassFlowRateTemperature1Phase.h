@@ -23,9 +23,7 @@ public:
 
 protected:
   virtual void check() const override;
-
-  /// True to allow the flow to reverse, otherwise false
-  bool _reversible;
+  virtual bool supportsPassiveTransport() const override { return true; }
 
 public:
   static InputParameters validParams();

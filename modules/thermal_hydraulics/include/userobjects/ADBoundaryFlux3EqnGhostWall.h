@@ -20,7 +20,8 @@ public:
   ADBoundaryFlux3EqnGhostWall(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U1) const override;
+  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U1,
+                                                   const Point & point) const override;
 
 public:
   static InputParameters validParams();

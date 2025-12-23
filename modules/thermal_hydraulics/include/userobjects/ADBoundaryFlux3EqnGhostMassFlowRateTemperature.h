@@ -23,13 +23,19 @@ public:
   ADBoundaryFlux3EqnGhostMassFlowRateTemperature(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U) const override;
+  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U,
+                                                   const Point & point) const override;
 
   /// Specified mass flow rate
   const Real & _rhouA;
-
   /// Specified temperature
   const Real & _T;
+
+  /// Number of passive transport variables
+  unsigned int _n_passives;
+  /// Passive transport functions
+  std::vector<const Function *> _passives_fn;
+
   /// Reversible flag
   const bool & _reversible;
 

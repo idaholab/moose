@@ -23,7 +23,8 @@ public:
   ADBoundaryFlux3EqnGhostVelocityTemperature(const InputParameters & parameters);
 
 protected:
-  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U) const override;
+  virtual std::vector<ADReal> getGhostCellSolution(const std::vector<ADReal> & U,
+                                                   const Point & point) const override;
 
   /// Specified velocity
   const Real & _vel;
