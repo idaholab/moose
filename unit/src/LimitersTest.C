@@ -36,12 +36,13 @@ TEST(LimitersTest, limitVector)
   ReplicatedMesh mesh(app->comm(), /*dim=*/2);
   MeshTools::Generation::build_square(mesh, 2, 2);
   ElemInfo ei(mesh.elem_ptr(0));
+  libMesh::ElemSideBuilder side_builder;
 
   dof_id_type counter = 0;
   for (const auto s : ei.elem()->side_index_range())
     if (ei.elem()->neighbor_ptr(s))
     {
-      FaceInfo fi(&ei, s, counter++);
+      FaceInfo fi(&ei, s, counter++, side_builder);
       ElemInfo ni(ei.elem()->neighbor_ptr(s));
       fi.computeInternalCoefficients(&ni);
       auto result = interpolate(limiter, upwind, downwind, &grad, fi, true);

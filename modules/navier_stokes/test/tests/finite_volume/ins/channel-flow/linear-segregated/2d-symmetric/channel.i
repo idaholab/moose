@@ -52,6 +52,7 @@ half_width = 0.2
 []
 
 [LinearFVKernels]
+  inactive = v_viscous_forcing
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
@@ -84,6 +85,13 @@ half_width = 0.2
     type = LinearFVMomentumPressure
     variable = vel_y
     pressure = pressure
+    momentum_component = 'y'
+  []
+
+  [v_viscous_forcing]
+    type = LinearFVRZViscousSource
+    variable = vel_y
+    mu = ${mu}
     momentum_component = 'y'
   []
 

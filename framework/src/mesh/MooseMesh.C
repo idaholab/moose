@@ -61,6 +61,7 @@
 #include "libmesh/ghost_point_neighbors.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/enum_to_string.h"
+#include "libmesh/elem_side_builder.h"
 
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
@@ -3855,9 +3856,19 @@ MooseMesh::buildFiniteVolumeInfo() const
 
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
+  _elem_to_elem_info.reserve(nActiveLocalElem());
+  unsigned int num_sides = 0;
   for (const Elem * elem : as_range(begin, end))
+  {
     _elem_to_elem_info.emplace(elem->id(), elem);
+    num_sides += elem->n_sides();
+  }
 
+  // Used to speed up FaceInfo creation:
+  // - element side builder that caches per type of element
+  libMesh::ElemSideBuilder side_builder;
+
+  _all_face_info.reserve(num_sides / 2);
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3876,7 +3887,9 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "be active.");
 
         // We construct the faceInfo using the elementinfo and side index
-        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side, face_index++);
+        mooseAssert(elem->default_order() < 4, "Did not expect such high element orders in FV");
+        _all_face_info.emplace_back(
+            &_elem_to_elem_info[elem->id()], side, face_index++, side_builder);
 
         auto & fi = _all_face_info.back();
 
@@ -3910,6 +3923,9 @@ MooseMesh::buildFiniteVolumeInfo() const
   // Build the local face info and elem_side to face info maps. We need to do this after
   // _all_face_info is finished being constructed because emplace_back invalidates all iterators and
   // references if ever the new size exceeds capacity
+  _elem_side_to_face_info.reserve(_all_face_info.size());
+  // heuristic to avoid resizing too much
+  _face_info.reserve(_all_face_info.size());
   for (auto & fi : _all_face_info)
   {
     const Elem * const elem = &fi.elem();
@@ -3928,6 +3944,7 @@ MooseMesh::buildFiniteVolumeInfo() const
       _face_info.push_back(&fi);
   }
 
+  _elem_info.reserve(nActiveLocalElem());
   for (auto & ei : _elem_to_elem_info)
     if (ei.second.elem()->processor_id() == this->processor_id())
       _elem_info.push_back(&ei.second);
