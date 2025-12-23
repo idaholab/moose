@@ -1,0 +1,72 @@
+{
+  "app_name": "main",
+  "current_time": "Tue Dec 23 13:51:41 2025",
+  "executable": "/Users/spenbw/gitproj/githerd/moose/test/moose_test-opt",
+  "executable_time": "Tue Dec 23 13:33:42 2025",
+  "libmesh_version": "",
+  "moose_version": "git commit 1ff0d423159 on 2025-12-20",
+  "petsc_version": "3.24.2",
+  "reporters": {
+    "max": {
+      "type": "ADElementExtremeMaterialPropertyReporter",
+      "values": {
+        "coordinates": {
+          "type": "libMesh::Point"
+        },
+        "extreme_value": {
+          "type": "double"
+        },
+        "mat_prop2": {
+          "type": "double"
+        },
+        "mat_prop3": {
+          "type": "double"
+        }
+      }
+    },
+    "min": {
+      "type": "ADElementExtremeMaterialPropertyReporter",
+      "values": {
+        "coordinates": {
+          "type": "libMesh::Point"
+        },
+        "extreme_value": {
+          "type": "double"
+        },
+        "mat_prop2": {
+          "type": "double"
+        },
+        "mat_prop3": {
+          "type": "double"
+        }
+      }
+    }
+  },
+  "slepc_version": "3.24.0",
+  "time_steps": [
+    {
+      "max": {
+        "coordinates": {
+          "x": 0.125,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "extreme_value": 5.0,
+        "mat_prop2": 0.125,
+        "mat_prop3": 0.875
+      },
+      "min": {
+        "coordinates": {
+          "x": 0.375,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "extreme_value": 2.0,
+        "mat_prop2": 0.375,
+        "mat_prop3": 0.625
+      },
+      "time": 0.0,
+      "time_step": 0
+    }
+  ]
+}
