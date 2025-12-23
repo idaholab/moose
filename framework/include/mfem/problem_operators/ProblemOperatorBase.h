@@ -30,7 +30,6 @@ public:
   mfem::Array<int> _block_true_offsets_test;
   mfem::Array<int> _block_true_offsets_trial;
 
-
   mfem::BlockVector _true_x, _true_rhs;
 
 protected:

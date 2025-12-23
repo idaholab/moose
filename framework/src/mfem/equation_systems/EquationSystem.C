@@ -62,13 +62,14 @@ EquationSystem::SetTrialVariableNames()
   }
 }
 
-void EquationSystem::SortTestAndTrialNames()
+void
+EquationSystem::SortTestAndTrialNames()
 {
   std::vector<std::string> common_vars;
   for (const auto & name : _test_var_names)
   {
     if (VectorContainsName(_coupled_var_names, name))
-      common_vars.push_back(name);      
+      common_vars.push_back(name);
   }
 
   // Move common variables to beginning of vectors, and in the same order.
@@ -157,7 +158,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   SetTrialVariableNames();
 
   // Now that all test and trial variables are known, order them
-  //SortTestAndTrialNames();
+  // SortTestAndTrialNames();
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -330,7 +331,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         blf->FormLinearSystem(
             _ess_tdof_lists.at(j), *(_var_ess_constraints.at(j)), aux_lf, *aux_a, aux_x, aux_rhs);
         trueX.GetBlock(j) = aux_x;
-      } 
+      }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
         aux_lf = 0.0;
@@ -345,10 +346,9 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       }
       else
         continue;
-      
+
       trueRHS.GetBlock(i) += aux_rhs;
       _h_blocks(i, j) = aux_a;
-
     }
   }
   // Sync memory

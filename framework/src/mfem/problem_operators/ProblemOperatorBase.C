@@ -57,7 +57,8 @@ ProblemOperatorBase::Init(mfem::BlockVector & X)
   // After initial assignment of X from the grid function, which may contain initial conditions,
   // we alias the grid function to X
   for (const auto i : index_range(_trial_variables))
-    _trial_variables[i]->MakeTRef(_trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
+    _trial_variables[i]->MakeTRef(
+        _trial_variables[i]->ParFESpace(), X, _block_true_offsets_trial[i]);
   _trial_true_vector = &X;
 
   // This might seem silly but after making the tref the memory flags of the grid function and its

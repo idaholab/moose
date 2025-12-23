@@ -27,7 +27,8 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   _block_true_offsets_trial[0] = 0;
   for (unsigned int ind = 0; ind < _cmplx_trial_variables.size(); ++ind)
   {
-    _block_true_offsets_trial[ind + 1] = 2 * _cmplx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
+    _block_true_offsets_trial[ind + 1] =
+        2 * _cmplx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
   }
   _block_true_offsets_trial.PartialSum();
 
@@ -36,10 +37,10 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   _block_true_offsets_test[0] = 0;
   for (unsigned int ind = 0; ind < _cmplx_test_variables.size(); ++ind)
   {
-    _block_true_offsets_test[ind + 1] = 2 * _cmplx_test_variables.at(ind)->ParFESpace()->TrueVSize();
+    _block_true_offsets_test[ind + 1] =
+        2 * _cmplx_test_variables.at(ind)->ParFESpace()->TrueVSize();
   }
   _block_true_offsets_test.PartialSum();
-
 
   _true_x.Update(_block_true_offsets_trial);
   _true_rhs.Update(_block_true_offsets_test);
