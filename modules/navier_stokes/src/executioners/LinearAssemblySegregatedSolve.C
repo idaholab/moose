@@ -238,6 +238,10 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   // Link CHT objects, this will also do some error checking
   // Make a copy for compatibility. These could change in the future
   // Convert _pm_radiation_systems to std::vector<SystemBase *>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 404f1c66fa (Reverting to the initial participating media radiation input test file.)
   if (_cht.enabled())
   {
     if (!_should_solve_energy)
