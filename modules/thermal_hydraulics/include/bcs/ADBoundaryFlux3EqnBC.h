@@ -45,11 +45,15 @@ protected:
   const ADMaterialProperty<Real> & _rhoA;
   const ADMaterialProperty<Real> & _rhouA;
   const ADMaterialProperty<Real> & _rhoEA;
+  const ADMaterialProperty<std::vector<Real>> & _passives_times_area;
 
   // coupled variable indices
   const unsigned int _rhoA_var;
   const unsigned int _rhouA_var;
   const unsigned int _rhoEA_var;
+
+  /// Number of passive transport variables
+  const unsigned int _n_passives;
 
   /// index within the Euler system of the equation upon which this BC acts
   unsigned int _equation_index;
