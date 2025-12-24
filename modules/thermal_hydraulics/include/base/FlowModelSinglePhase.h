@@ -34,15 +34,11 @@ protected:
   virtual void addPressureAux() override;
   virtual void addTemperatureAux() override;
 
-  virtual void addFunctorMaterials() override;
-
   virtual void addFluidPropertiesMaterials() override;
 
   virtual void addNumericalFluxUserObject() override;
   virtual void addSlopeReconstructionMaterial() override;
   virtual void addRDGAdvectionDGKernels() override;
-
-  virtual void addPostprocessors() override;
 
   /// Scaling factors for each solution variable (rhoA, rhouA, rhoEA)
   const std::vector<Real> _scaling_factors;

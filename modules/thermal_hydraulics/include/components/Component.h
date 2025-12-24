@@ -457,6 +457,45 @@ protected:
                    const std::string & subdomain_name,
                    const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
+  /**
+   * Adds a functor material to compute the absolute value of the change (step) of some functor
+   * between nonlinear iterations
+   *
+   * @param[in] functor_name  Functor for which to compute step
+   * @param[in] property  Name of new step functor material property
+   * @param[in] functor_is_ad  Is the functor for which to compute the step AD?
+   */
+  void addNonlinearStepFunctorMaterial(const std::string & functor_name,
+                                       const std::string & property,
+                                       bool functor_is_ad);
+
+  /**
+   * Adds a Postprocessor to compute the maximum of a functor over some domain
+   *
+   * @param[in] functor_name  Functor for which to compute maximum
+   * @param[in] pp_name  Name of new Postprocessor
+   * @param[in] normalization  Factor by which to divide quantity
+   * @param[in] subdomains  Subdomains over which to compute maximum
+   */
+  void addMaximumFunctorPostprocessor(const std::string & functor_name,
+                                      const std::string & pp_name,
+                                      const Real normalization,
+                                      const std::vector<SubdomainName> & subdomains);
+
+  /**
+   * Adds a MultiPostprocessorConvergence for nonlinear convergence for the component
+   *
+   * @param[in] postprocessors  Postprocessors to compare
+   * @param[in] descriptions  Description of each Postprocessor
+   * @param[in] tolerances  Tolerance for each check
+   */
+  void addMultiPostprocessorConvergence(const std::vector<PostprocessorName> & postprocessors,
+                                        const std::vector<std::string> & descriptions,
+                                        const std::vector<Real> & tolerances);
+
+  /// Nonlinear Convergence name
+  std::string nonlinearConvergenceName() const { return genName(name(), "nlconv"); }
+
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 
