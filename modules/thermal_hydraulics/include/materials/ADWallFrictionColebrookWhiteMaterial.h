@@ -42,7 +42,7 @@ protected:
   /// max iterations for iterative solve
   const unsigned int _max_its;
   /// Whether to error, warn or accept on reaching max its
-  MooseEnum _max_its_behaviour;
+  MooseEnum _max_its_behavior;
   /// Tolerance for implicit solve
   const Real _tol;
 

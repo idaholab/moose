@@ -32,9 +32,9 @@ ADWallFrictionColebrookWhiteMaterial::validParams()
 
   params.addParam<Real>("rtol", 1e-14, "Relative tolerance for implicit solve.");
   params.addParam<unsigned int>("max_iterations", 20, "Max iterations for iterative solve.");
-  MooseEnum max_its_behaviour{"error warn accept", "error"};
-  params.addParam<MooseEnum>("max_iterations_behaviour",
-                             max_its_behaviour,
+  MooseEnum max_its_behavior{"error warn accept", "error"};
+  params.addParam<MooseEnum>("max_iterations_behavior",
+                             max_its_behavior,
                              "Whether to error, warn or accept when max iterations is reached");
   return params;
 }
@@ -51,7 +51,7 @@ ADWallFrictionColebrookWhiteMaterial::ADWallFrictionColebrookWhiteMaterial(
     _D_h(getADMaterialProperty<Real>("D_h")),
     _roughness(getParam<Real>("roughness")),
     _max_its(getParam<unsigned int>("max_iterations")),
-    _max_its_behaviour(getParam<MooseEnum>("max_iterations_behaviour")),
+    _max_its_behavior(getParam<MooseEnum>("max_iterations_behavior")),
     _tol(getParam<Real>("rtol"))
 {
   if (_tol < 0. || _tol >= 1.)
@@ -85,9 +85,9 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
 
   if (it == _max_its)
   {
-    if (_max_its_behaviour == "error")
+    if (_max_its_behavior == "error")
       mooseError("Colebrook-White friction factor maximum iterations reached: ", _max_its, ".");
-    else if (_max_its_behaviour == "warn")
-      mooseWarning("Colebrook-White friction factor maximum iterations reached: ", _max_its, ".");
+    else if (_max_its_behavior == "warn")
+      mooseDoOnce(mooseWarning("Colebrook-White friction factor maximum iterations reached: ", _max_its, "."));
   }
 }
