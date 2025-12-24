@@ -130,6 +130,5 @@ ComputeResidualAndJacobianThread::computeOnInternalFace()
   mooseAssert(_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid),
               "We should not be called if we have no active HDG kernels");
   for (const auto & hdg_kernel : _hdg_warehouse->getActiveBlockObjects(_subdomain, _tid))
-    if (hdg_kernel->hasBlocks(_subdomain))
-      hdg_kernel->computeResidualAndJacobianOnSide();
+    hdg_kernel->computeResidualAndJacobianOnSide();
 }
