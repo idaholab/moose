@@ -88,6 +88,7 @@ ADWallFrictionColebrookWhiteMaterial::computeQpProperties()
     if (_max_its_behavior == "error")
       mooseError("Colebrook-White friction factor maximum iterations reached: ", _max_its, ".");
     else if (_max_its_behavior == "warn")
-      mooseDoOnce(mooseWarning("Colebrook-White friction factor maximum iterations reached: ", _max_its, "."));
+      mooseDoOnce(mooseWarning(
+          "Colebrook-White friction factor maximum iterations reached: ", _max_its, "."));
   }
 }
