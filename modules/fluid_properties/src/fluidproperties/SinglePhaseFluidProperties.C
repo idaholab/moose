@@ -30,8 +30,11 @@ SinglePhaseFluidProperties::validParams()
       "Pressure initial guess for Newton Method variable set conversion");
   params.addParam<unsigned int>(
       "max_newton_its", 100, "Maximum number of Newton iterations for variable set conversions");
-  params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess max_newton_its",
-                              "Variable set conversions Newton solve");
+  params.addParam<bool>(
+      "verbose_newton", false, "Whether to output Newton inversion iterations to console");
+  params.addParamNamesToGroup(
+      "tolerance T_initial_guess p_initial_guess max_newton_its verbose_newton",
+      "Variable set conversions Newton solve");
 
   return params;
 }
@@ -39,10 +42,11 @@ SinglePhaseFluidProperties::validParams()
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
   : FluidProperties(parameters),
     // downstream apps are creating fluid properties without their parameters, hence the workaround
-    _tolerance(isParamValid("tolerance") ? getParam<Real>("tolerance") : 1e-8),
-    _T_initial_guess(isParamValid("T_initial_guess") ? getParam<Real>("T_initial_guess") : 400),
-    _p_initial_guess(isParamValid("p_initial_guess") ? getParam<Real>("p_initial_guess") : 2e5),
-    _max_newton_its(getParam<unsigned int>("max_newton_its"))
+    _tolerance(getParam<Real>("tolerance")),
+    _T_initial_guess(getParam<Real>("T_initial_guess")),
+    _p_initial_guess(getParam<Real>("p_initial_guess")),
+    _max_newton_its(getParam<unsigned int>("max_newton_its")),
+    _verbose_newton(getParam<bool>("verbose_newton"))
 {
 }
 

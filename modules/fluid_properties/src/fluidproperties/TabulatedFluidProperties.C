@@ -33,13 +33,16 @@ TabulatedFluidProperties::validParams()
                         true,
                         "Whether to load (from file) or create (from a fluid property object) "
                         "properties interpolations from pressure and temperature");
-  params.addParam<bool>("create_ve_interpolations",
-                        false,
-                        "Whether to load (from file) or create (from a fluid property object) "
-                        "properties interpolations from pressure and temperature");
+  params.addParam<bool>(
+      "create_ve_interpolations",
+      false,
+      "Whether to load (from file) or create (from a fluid property object) "
+      "properties interpolations from specific volume and specific internal energy");
 
   // Input / output
   params.addParam<UserObjectName>("fp", "The name of the FluidProperties UserObject");
+  params.deprecateParam("fp", "input_fp", "12/12/26");
+  // deprecate to be able to put "fp" in the GlobalParams without creating issues with TabulatedFP
   params.addParam<FileName>("fluid_property_file",
                             "Name of the csv file containing the tabulated fluid property data.");
   params.addParam<FileName>(
@@ -57,6 +60,9 @@ TabulatedFluidProperties::validParams()
       "Whether to save the csv fluid properties file",
       "This parameter is no longer required. Whether to save a CSV tabulation file is controlled "
       "by specifying the 'fluid_property_output_file' parameter");
+  params.addParam<bool>("skip_header_tabulation",
+                        false,
+                        "Whether to skip the header in the tabulation output, useful for testing");
 
   // Data source on a per-property basis
   MultiMooseEnum properties(
@@ -64,7 +70,9 @@ TabulatedFluidProperties::validParams()
       "density enthalpy internal_energy viscosity");
   params.addParam<MultiMooseEnum>("interpolated_properties",
                                   properties,
-                                  "Properties to interpolate if no data file is provided");
+                                  "Properties to interpolate. If unspecified and a data file is "
+                                  "provided, the properties from the data file will be used. If "
+                                  "specified, some properties from the data file can be ignored.");
 
   // (p,T) grid parameters
   params.addRangeCheckedParam<Real>(
@@ -165,7 +173,8 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
                           ? getParam<FileName>("fluid_property_ve_output_file")
                           : ""),
     _save_file(isParamValid("save_file") ? getParam<bool>("save_file")
-                                         : isParamValid("fluid_property_output_file")),
+                                         : (isParamValid("fluid_property_output_file") ||
+                                            isParamValid("fluid_property_ve_output_file"))),
     _create_direct_pT_interpolations(getParam<bool>("create_pT_interpolations")),
     _create_direct_ve_interpolations(getParam<bool>("create_ve_interpolations")),
     _temperature_min(getParam<Real>("temperature_min")),
@@ -174,7 +183,11 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _pressure_max(getParam<Real>("pressure_max")),
     _num_T(getParam<unsigned int>("num_T")),
     _num_p(getParam<unsigned int>("num_p")),
-    _fp(isParamValid("fp") ? &getUserObject<SinglePhaseFluidProperties>("fp") : nullptr),
+    // work-around to allow use of 'fp' in GlobalParams
+    _fp(isParamValid("input_fp") ? ((getParam<UserObjectName>("input_fp") != name())
+                                        ? &getUserObject<SinglePhaseFluidProperties>("input_fp")
+                                        : nullptr)
+                                 : nullptr),
     _allow_fp_and_tabulation(getParam<bool>("allow_fp_and_tabulation")),
     _interpolated_properties_enum(getParam<MultiMooseEnum>("interpolated_properties")),
     _interpolated_properties(),
@@ -209,10 +222,14 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _log_space_v(getParam<bool>("use_log_grid_v")),
     _log_space_e(getParam<bool>("use_log_grid_e")),
     _log_space_h(getParam<bool>("use_log_grid_h")),
-    _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior"))
+    _OOBBehavior(getParam<MooseEnum>("out_of_bounds_behavior")),
+    _e_min(0),
+    _e_max(0),
+    _v_min(0),
+    _v_max(0)
 {
   // Check that initial guess (used in Newton Method) is within min and max values
-  checkInitialGuess();
+  checkInitialGuess(false);
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
     mooseError("temperature_max must be greater than temperature_min");
@@ -257,14 +274,16 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
 
   // Can only and must receive one source of data between fp and tabulations
   if (_fp && (!_file_name_in.empty() || !_file_name_ve_in.empty()) && !_allow_fp_and_tabulation)
-    paramError("fluid_property_file",
-               "Cannot supply both a fluid properties object with 'fp' and a source tabulation "
-               "file with 'fluid_property_file', unless 'allow_fp_and_tabulation' is set to true");
+    paramError(
+        "fluid_property_file",
+        "Cannot supply both a fluid properties object with 'input_fp' and a source tabulation "
+        "file with 'fluid_property_file', unless 'allow_fp_and_tabulation' is set to true");
   if (!_fp && _file_name_in.empty() && _file_name_ve_in.empty())
-    paramError("fluid_property_file",
-               "Either a fluid properties object with the parameter 'fp' and a source tabulation "
-               "file with the parameter 'fluid_property_file' or 'fluid_property_ve_file' should "
-               "be provided.");
+    paramError(
+        "fluid_property_file",
+        "Either a fluid properties object with the parameter 'input_fp' and a source tabulation "
+        "file with the parameter 'fluid_property_file' or 'fluid_property_ve_file' should "
+        "be provided.");
   if (!_create_direct_pT_interpolations && !_create_direct_ve_interpolations)
     paramError("create_pT_interpolations", "Must create either (p,T) or (v,e) interpolations");
 
@@ -311,10 +330,10 @@ TabulatedFluidProperties::initialSetup()
     else
     {
       if (!_fp)
-        paramError(
-            "create_pT_interpolations",
-            "No FluidProperties (specified with 'fp' parameter) exists. Either specify a 'fp' or "
-            "specify a (p, T) tabulation file with the 'fluid_property_file' parameter");
+        paramError("create_pT_interpolations",
+                   "No FluidProperties (specified with 'input_fp' parameter) exists. Either "
+                   "specify a 'input_fp' or "
+                   "specify a (p, T) tabulation file with the 'fluid_property_file' parameter");
       _console << name() + ": Generating (p, T) tabulated data\n";
       _console << std::flush;
 
@@ -330,10 +349,10 @@ TabulatedFluidProperties::initialSetup()
     else
     {
       if (!_fp)
-        paramError(
-            "create_ve_interpolations",
-            "No FluidProperties (specified with 'fp' parameter) exists. Either specify a 'fp' or "
-            "specify a (v, e) tabulation file with the 'fluid_property_ve_file' parameter");
+        paramError("create_ve_interpolations",
+                   "No FluidProperties (specified with 'input_fp' parameter) exists. Either "
+                   "specify a 'input_fp' or "
+                   "specify a (v, e) tabulation file with the 'fluid_property_ve_file' parameter");
       _console << name() + ": Generating (v, e) tabulated data\n";
       _console << std::flush;
 
@@ -343,6 +362,10 @@ TabulatedFluidProperties::initialSetup()
 
   computePropertyIndicesInInterpolationVectors();
   constructInterpolation();
+
+  // Could be needed to get bounds computed from (p, T) bounds
+  if (_fp && !_create_direct_ve_interpolations)
+    createVEGridVectors();
 
   // Write tabulated data to file
   if (_save_file)
@@ -367,7 +390,7 @@ TabulatedFluidProperties::molarMass() const
   if (_fp)
     return _fp->molarMass();
   else
-    FluidPropertiesForwardError("molarMass");
+    TabulationNotImplementedError("molarMass");
 }
 
 Real
@@ -378,12 +401,77 @@ TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
   }
+  else if (_create_direct_ve_interpolations)
+  {
+    checkInputVariables(pressure, temperature);
+    Real v, e;
+    auto p_from_v_e = [&](Real v, Real e, Real & new_p, Real & dp_dv, Real & dp_de)
+    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
+    auto T_from_v_e = [&](Real v, Real e, Real & new_T, Real & dT_dv, Real & dT_de)
+    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
+    FluidPropertiesUtils::NewtonSolve2D(pressure,
+                                        temperature,
+                                        (_v_min + _v_max) / 2,
+                                        (_e_min + _e_max) / 2,
+                                        v,
+                                        e,
+                                        _tolerance,
+                                        _tolerance,
+                                        p_from_v_e,
+                                        T_from_v_e,
+                                        name() + "::v_from_p_T",
+                                        _max_newton_its,
+                                        _verbose_newton);
+    return v;
+  }
   else
   {
     if (_fp)
       return 1.0 / _fp->rho_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      NeedTabulationOrFPError("AD v_from_p_T", "density");
+  }
+}
+
+ADReal
+TabulatedFluidProperties::v_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_interpolate_density && _create_direct_pT_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    return 1.0 / _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
+  }
+  else if (_create_direct_ve_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    ADReal v, e;
+    auto p_from_v_e = [&](ADReal v, ADReal e, ADReal & new_p, ADReal & dp_dv, ADReal & dp_de)
+    { this->p_from_v_e(v, e, new_p, dp_dv, dp_de); };
+    auto T_from_v_e = [&](ADReal v, ADReal e, ADReal & new_T, ADReal & dT_dv, ADReal & dT_de)
+    { this->T_from_v_e(v, e, new_T, dT_dv, dT_de); };
+    FluidPropertiesUtils::NewtonSolve2D(pressure_nc,
+                                        temperature_nc,
+                                        (_v_min + _v_max) / 2,
+                                        (_e_min + _e_max) / 2,
+                                        v,
+                                        e,
+                                        _tolerance,
+                                        _tolerance,
+                                        p_from_v_e,
+                                        T_from_v_e,
+                                        name() + "::v_from_p_T",
+                                        _max_newton_its,
+                                        _verbose_newton);
+    return v;
+  }
+  else
+  {
+    if (_fp)
+      return 1.0 / _fp->rho_from_p_T(pressure, temperature);
+    else
+      NeedTabulationOrFPError("AD v_from_p_T", "density");
   }
 }
 
@@ -403,7 +491,7 @@ TabulatedFluidProperties::v_from_p_T(
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      NeedTabulationOrFPError("v_from_p_T with derivatives", "density");
   }
   // convert from rho to v
   v = 1.0 / rho;
@@ -419,12 +507,34 @@ TabulatedFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
     checkInputVariables(pressure, temperature);
     return _property_ipol[_density_idx]->sample(pressure, temperature);
   }
+  else if (_create_direct_ve_interpolations)
+    return 1. / v_from_p_T(pressure, temperature);
   else
   {
     if (_fp)
       return _fp->rho_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      NeedTabulationOrFPError("rho_from_p_T", "density");
+  }
+}
+
+ADReal
+TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_interpolate_density && _create_direct_pT_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    return _property_ipol[_density_idx]->sample(pressure_nc, temperature_nc);
+  }
+  else if (_create_direct_ve_interpolations)
+    return 1. / v_from_p_T(pressure, temperature);
+  else
+  {
+    if (_fp)
+      return _fp->rho_from_p_T(pressure, temperature);
+    else
+      NeedTabulationOrFPError("AD rho_from_p_T", "density");
   }
 }
 
@@ -438,12 +548,21 @@ TabulatedFluidProperties::rho_from_p_T(
     _property_ipol[_density_idx]->sampleValueAndDerivatives(
         pressure, temperature, rho, drho_dp, drho_dT);
   }
+  else if (_create_direct_ve_interpolations)
+  {
+    checkInputVariables(pressure, temperature);
+    // use finite differencing stencil
+    rho = rho_from_p_T(pressure, temperature);
+    Real eps = 1e-8;
+    drho_dp = (rho_from_p_T(pressure * (1 + eps), temperature) - rho) / (eps * pressure);
+    drho_dT = (rho_from_p_T(pressure, temperature * (1 + eps)) - rho) / (eps * temperature);
+  }
   else
   {
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      NeedTabulationOrFPError("rho_from_p_T with derivatives", "density");
   }
 }
 
@@ -465,7 +584,7 @@ TabulatedFluidProperties::rho_from_p_T(const ADReal & pressure,
     if (_fp)
       _fp->rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for density.");
+      NeedTabulationOrFPError("AD rho_from_p_T with derivatives", "density");
   }
 }
 
@@ -491,17 +610,74 @@ TabulatedFluidProperties::rho_from_p_s(
 Real
 TabulatedFluidProperties::e_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_internal_energy && _create_direct_pT_interpolations)
+  if (_interpolate_internal_energy)
   {
     checkInputVariables(pressure, temperature);
-    return _property_ipol[_internal_energy_idx]->sample(pressure, temperature);
+    if (_create_direct_pT_interpolations)
+      return _property_ipol[_internal_energy_idx]->sample(pressure, temperature);
+    else
+      NeedTabulationError("internal_energy");
+  }
+  else if (_create_direct_ve_interpolations)
+  {
+    checkInputVariables(pressure, temperature);
+    const Real rho = rho_from_p_T(pressure, temperature);
+    auto lambda = [&](Real v, Real current_e, Real & new_T, Real & dT_dv, Real & dT_de)
+    { T_from_v_e(v, current_e, new_T, dT_dv, dT_de); };
+    const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
+                                                        temperature,
+                                                        /*initial guess*/ (_e_min + _e_max) / 2,
+                                                        _tolerance,
+                                                        lambda,
+                                                        name() + "::e_from_p_T",
+                                                        _max_newton_its,
+                                                        _verbose_newton);
+    return pair.first;
   }
   else
   {
     if (_fp)
       return _fp->e_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for internal energy.");
+      NeedTabulationOrFPError("e_from_p_T", "internal_energy");
+  }
+}
+
+ADReal
+TabulatedFluidProperties::e_from_p_T(const ADReal & pressure, const ADReal & temperature) const
+{
+  if (_interpolate_internal_energy)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    if (_create_direct_pT_interpolations)
+      return _property_ipol[_internal_energy_idx]->sample(pressure_nc, temperature_nc);
+    else
+      NeedTabulationError("internal_energy");
+  }
+  else if (_create_direct_ve_interpolations)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    const ADReal rho = rho_from_p_T(pressure_nc, temperature_nc);
+    auto lambda = [&](ADReal v, ADReal current_e, ADReal & new_T, ADReal & dT_dv, ADReal & dT_de)
+    { T_from_v_e(v, current_e, new_T, dT_dv, dT_de); };
+    const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
+                                                        temperature_nc,
+                                                        /*initial guess*/ (_e_min + _e_max) / 2,
+                                                        _tolerance,
+                                                        lambda,
+                                                        name() + "::e_from_p_T",
+                                                        _max_newton_its,
+                                                        _verbose_newton);
+    return pair.first;
+  }
+  else
+  {
+    if (_fp)
+      return _fp->e_from_p_T(pressure, temperature);
+    else
+      NeedTabulationOrFPError("AD e_from_p_T", "internal_energy");
   }
 }
 
@@ -509,26 +685,88 @@ void
 TabulatedFluidProperties::e_from_p_T(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
-  if (_interpolate_internal_energy && _create_direct_pT_interpolations)
+  if (_interpolate_internal_energy)
   {
     checkInputVariables(pressure, temperature);
-    _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
-        pressure, temperature, e, de_dp, de_dT);
+    if (_create_direct_pT_interpolations)
+      _property_ipol[_internal_energy_idx]->sampleValueAndDerivatives(
+          pressure, temperature, e, de_dp, de_dT);
+    else
+      NeedTabulationError("internal_energy");
+  }
+  else if (_create_direct_ve_interpolations)
+  {
+    checkInputVariables(pressure, temperature);
+    // use finite differencing stencil
+    e = e_from_p_T(pressure, temperature);
+    Real eps = 1e-8;
+    de_dp = (e_from_p_T(pressure * (1 + eps), temperature) - e) / (eps * pressure);
+    de_dT = (e_from_p_T(pressure, temperature * (1 + eps)) - e) / (eps * temperature);
   }
   else
   {
     if (_fp)
       _fp->e_from_p_T(pressure, temperature, e, de_dp, de_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for internal energy.");
+      NeedTabulationOrFPError("e_from_p_T with derivatives", "internal_energy");
   }
+}
+
+ADReal
+TabulatedFluidProperties::e_from_p_rho(const ADReal & pressure, const ADReal & rho) const
+{
+  ADReal e;
+  // Use v,e data, we already have v from rho
+  if (_create_direct_ve_interpolations)
+  {
+    auto lambda = [&](ADReal v, ADReal current_e, ADReal & new_p, ADReal & dp_dv, ADReal & dp_de)
+    { p_from_v_e(v, current_e, new_p, dp_dv, dp_de); };
+    const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
+                                                        pressure,
+                                                        /*initial guess*/ (_e_min + _e_max) / 2,
+                                                        _tolerance,
+                                                        lambda,
+                                                        name() + "::e_from_p_rho",
+                                                        _max_newton_its,
+                                                        _verbose_newton);
+    e = pair.first;
+  }
+  // May use rho_from_p_T with derivatives in a Newton solve
+  else
+  {
+    const auto T = T_from_p_rho(pressure, rho);
+    e = e_from_p_T(pressure, T);
+  }
+  return e;
 }
 
 Real
 TabulatedFluidProperties::e_from_p_rho(Real pressure, Real rho) const
 {
-  Real T = T_from_p_rho(pressure, rho);
-  Real e = e_from_p_T(pressure, T);
+  Real e;
+  // Use v,e data, we already have v from rho
+  if (_create_direct_ve_interpolations)
+  {
+    Real T_dummy = _T_initial_guess;
+    checkInputVariables(pressure, T_dummy);
+    auto lambda = [&](Real v, Real current_e, Real & new_p, Real & dp_dv, Real & dp_de)
+    { p_from_v_e(v, current_e, new_p, dp_dv, dp_de); };
+    const auto pair = FluidPropertiesUtils::NewtonSolve(1. / rho,
+                                                        pressure,
+                                                        /*initial guess*/ (_e_min + _e_max) / 2,
+                                                        _tolerance,
+                                                        lambda,
+                                                        name() + "::e_from_p_rho",
+                                                        _max_newton_its,
+                                                        _verbose_newton);
+    e = pair.first;
+  }
+  // May use rho_from_p_T with derivatives in a Newton solve
+  else
+  {
+    Real T = T_from_p_rho(pressure, rho);
+    e = e_from_p_T(pressure, T);
+  }
   return e;
 }
 
@@ -556,16 +794,26 @@ TabulatedFluidProperties::e_from_p_rho(
 Real
 TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
-  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
-  { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T = FluidPropertiesUtils::NewtonSolve(pressure,
-                                             rho,
-                                             _T_initial_guess,
-                                             _tolerance,
-                                             lambda,
-                                             name() + "::T_from_p_rho",
-                                             _max_newton_its)
-               .first;
+  Real T = _T_initial_guess;
+  if (_interpolate_density && _create_direct_pT_interpolations)
+  {
+    checkInputVariables(pressure, T);
+    auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
+    { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+    T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                          rho,
+                                          _T_initial_guess,
+                                          _tolerance,
+                                          lambda,
+                                          name() + "::T_from_p_rho",
+                                          _max_newton_its,
+                                          _verbose_newton)
+            .first;
+  }
+  else if (_create_direct_ve_interpolations)
+    T = T_from_v_e(1. / rho, e_from_p_rho(pressure, rho));
+  else
+    NeedTabulationOrFPError("T_from_p_rho", "temperature");
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from pressure (p = ",
@@ -574,6 +822,38 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
                rho,
                ") to temperature failed to converge.");
   return T;
+}
+
+ADReal
+TabulatedFluidProperties::T_from_p_rho(const ADReal & pressure, const ADReal & rho) const
+{
+  if (_interpolate_density)
+  {
+    auto lambda =
+        [&](ADReal p, ADReal current_T, ADReal & new_rho, ADReal & drho_dp, ADReal & drho_dT)
+    { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
+    ADReal T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                                 rho,
+                                                 _T_initial_guess,
+                                                 _tolerance,
+                                                 lambda,
+                                                 name() + "::T_from_p_rho",
+                                                 _max_newton_its,
+                                                 _verbose_newton)
+                   .first;
+    // check for nans
+    if (std::isnan(T.value()))
+      mooseError("Conversion from pressure (p = ",
+                 pressure,
+                 ") and density (rho = ",
+                 rho,
+                 ") to temperature failed to converge.");
+    return T;
+  }
+  else if (_create_direct_ve_interpolations)
+    return T_from_v_e(1. / rho, e_from_p_rho(pressure, rho));
+  else
+    NeedTabulationOrFPError("AD T_from_p_rho", "temperature");
 }
 
 void
@@ -597,7 +877,8 @@ TabulatedFluidProperties::T_from_p_s(Real pressure, Real s) const
                                              _tolerance,
                                              lambda,
                                              name() + "::T_from_p_s",
-                                             _max_newton_its)
+                                             _max_newton_its,
+                                             _verbose_newton)
                .first;
   // check for nans
   if (std::isnan(T))
@@ -622,45 +903,82 @@ TabulatedFluidProperties::T_from_p_s(
 Real
 TabulatedFluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {
-  if (_interpolate_enthalpy && _create_direct_pT_interpolations)
+  if (_interpolate_enthalpy)
   {
     checkInputVariables(pressure, temperature);
-    return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
+    if (_create_direct_pT_interpolations)
+      return _property_ipol[_enthalpy_idx]->sample(pressure, temperature);
+    else if (_create_direct_ve_interpolations)
+    {
+      Real v, e;
+      SinglePhaseFluidProperties::v_e_from_p_T(pressure, temperature, v, e);
+      return _property_ve_ipol[_enthalpy_idx]->sample(v, e);
+    }
+    else
+      NeedTabulationError("enthalpy");
   }
   else
   {
     if (_fp)
       return _fp->h_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for enthalpy.");
+      NeedTabulationOrFPError("h_from_p_T", "enthalpy");
   }
 }
 
 ADReal
 TabulatedFluidProperties::h_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
-  if (_fp) // Assuming _fp can handle ADReal types
+  if (_interpolate_enthalpy)
+  {
+    ADReal pressure_nc = pressure, temperature_nc = temperature;
+    checkInputVariables(pressure_nc, temperature_nc);
+    if (_create_direct_pT_interpolations)
+      return _property_ipol[_enthalpy_idx]->sample(pressure_nc, temperature_nc);
+    else if (_create_direct_ve_interpolations)
+    {
+      ADReal v, e;
+      SinglePhaseFluidProperties::v_e_from_p_T(pressure_nc, temperature_nc, v, e);
+      return _property_ve_ipol[_enthalpy_idx]->sample(v, e);
+    }
+    else
+      NeedTabulationError("enthalpy");
+  }
+  else if (_fp) // Assuming _fp can handle ADReal types
     return _fp->h_from_p_T(pressure, temperature);
   else
-    FluidPropertiesForwardError("h_from_p_T");
+    NeedTabulationOrFPError("AD h_from_p_T", "enthalpy");
 }
 
 void
 TabulatedFluidProperties::h_from_p_T(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  if (_interpolate_enthalpy && _create_direct_pT_interpolations)
+  if (_interpolate_enthalpy)
   {
     checkInputVariables(pressure, temperature);
-    _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
-        pressure, temperature, h, dh_dp, dh_dT);
+    if (_create_direct_pT_interpolations)
+      _property_ipol[_enthalpy_idx]->sampleValueAndDerivatives(
+          pressure, temperature, h, dh_dp, dh_dT);
+    else if (_create_direct_ve_interpolations)
+    {
+      Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+      SinglePhaseFluidProperties::v_e_from_p_T(
+          pressure, temperature, v, dv_dp, dv_dT, e, de_dp, de_dT);
+      Real dh_dv, dh_de;
+      _property_ve_ipol[_enthalpy_idx]->sampleValueAndDerivatives(v, e, h, dh_dv, dh_de);
+      dh_dp = dh_dv * dv_dp + dh_de * de_dp;
+      dh_dT = dh_dv * dv_dT + dh_de * de_dT;
+    }
+    else
+      NeedTabulationError("enthalpy");
   }
   else
   {
     if (_fp)
       _fp->h_from_p_T(pressure, temperature, h, dh_dp, dh_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for enthalpy.");
+      NeedTabulationOrFPError("h_from_p_T with derivatives", "enthalpy");
   }
 }
 
@@ -677,7 +995,7 @@ TabulatedFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->mu_from_p_T(pressure, temperature);
     else
-      paramError("fp", "No fluid properties or csv data provided for viscosity.");
+      NeedTabulationOrFPError("mu_from_p_T", "viscosity");
   }
 }
 
@@ -696,7 +1014,7 @@ TabulatedFluidProperties::mu_from_p_T(
     if (_fp)
       _fp->mu_from_p_T(pressure, temperature, mu, dmu_dp, dmu_dT);
     else
-      paramError("fp", "No fluid properties or csv data provided for viscosity.");
+      NeedTabulationOrFPError("mu_from_p_T with derivatives", "viscosity");
   }
 }
 
@@ -713,7 +1031,7 @@ TabulatedFluidProperties::c_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->c_from_p_T(pressure, temperature);
     else
-      paramError("interpolated_properties", "No data to interpolate for speed of sound.");
+      NeedTabulationOrFPError("c_from_p_T", "c");
   }
 }
 
@@ -731,7 +1049,7 @@ TabulatedFluidProperties::c_from_p_T(
     if (_fp)
       _fp->c_from_p_T(pressure, temperature, c, dc_dp, dc_dT);
     else
-      paramError("interpolated_properties", "No data to interpolate for speed of sound.");
+      NeedTabulationOrFPError("c_from_p_T with derivatives", "c");
   }
 }
 
@@ -748,8 +1066,7 @@ TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->cp_from_p_T(pressure, temperature);
     else
-      paramError("interpolated_properties",
-                 "No data to interpolate for specific heat capacity at constant pressure.");
+      NeedTabulationOrFPError("cp_from_p_T", "c");
   }
 }
 
@@ -767,8 +1084,7 @@ TabulatedFluidProperties::cp_from_p_T(
     if (_fp)
       _fp->cp_from_p_T(pressure, temperature, cp, dcp_dp, dcp_dT);
     else
-      paramError("interpolated_properties",
-                 "No data to interpolate for specific heat capacity at constant pressure.");
+      NeedTabulationOrFPError("cp_from_p_T with derivatives", "cp");
   }
 }
 
@@ -785,8 +1101,7 @@ TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->cv_from_p_T(pressure, temperature);
     else
-      paramError("interpolated_properties",
-                 "No data to interpolate for specific heat capacity at constant volume.");
+      NeedTabulationOrFPError("cv_from_p_T", "cv");
   }
 }
 
@@ -804,8 +1119,7 @@ TabulatedFluidProperties::cv_from_p_T(
     if (_fp)
       _fp->cv_from_p_T(pressure, temperature, cv, dcv_dp, dcv_dT);
     else
-      paramError("interpolated_properties",
-                 "No data to interpolate for specific heat capacity at constant volume.");
+      NeedTabulationOrFPError("cv_from_p_T with derivatives", "cv");
   }
 }
 
@@ -822,7 +1136,7 @@ TabulatedFluidProperties::k_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->k_from_p_T(pressure, temperature);
     else
-      paramError("interpolated_properties", "No data to interpolate for thermal conductivity.");
+      NeedTabulationOrFPError("k_from_p_T", "k");
   }
 }
 
@@ -841,7 +1155,7 @@ TabulatedFluidProperties::k_from_p_T(
     if (_fp)
       return _fp->k_from_p_T(pressure, temperature, k, dk_dp, dk_dT);
     else
-      paramError("interpolated_properties", "No data to interpolate for thermal conductivity.");
+      NeedTabulationOrFPError("k_from_p_T with derivatives", "k");
   }
 }
 
@@ -858,24 +1172,36 @@ TabulatedFluidProperties::s_from_p_T(Real pressure, Real temperature) const
     if (_fp)
       return _fp->s_from_p_T(pressure, temperature);
     else
-      paramError("interpolated_properties", "No data to interpolate for entropy.");
+      NeedTabulationOrFPError("s_from_p_T", "entropy");
   }
 }
 
 void
 TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  if (_interpolate_entropy && _create_direct_pT_interpolations)
+  if (_interpolate_entropy)
   {
     checkInputVariables(p, T);
-    _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
+    if (_create_direct_pT_interpolations)
+      _property_ipol[_entropy_idx]->sampleValueAndDerivatives(p, T, s, ds_dp, ds_dT);
+    else if (_create_direct_ve_interpolations)
+    {
+      Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+      SinglePhaseFluidProperties::v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+      Real ds_dv, ds_de;
+      _property_ve_ipol[_entropy_idx]->sampleValueAndDerivatives(v, e, s, ds_dv, ds_de);
+      ds_dp = ds_dv * dv_dp + ds_de * de_dp;
+      ds_dT = ds_dv * dv_dT + ds_de * de_dT;
+    }
+    else
+      NeedTabulationError("entropy");
   }
   else
   {
     if (_fp)
       _fp->s_from_p_T(p, T, s, ds_dp, ds_dT);
     else
-      paramError("interpolated_properties", "No data to interpolate for entropy.");
+      NeedTabulationOrFPError("s_from_p_T with derivatives", "entropy");
   }
 }
 
@@ -899,15 +1225,15 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
                                                _tolerance,
                                                lambda,
                                                name() + "::e_from_v_h",
-                                               _max_newton_its)
+                                               _max_newton_its,
+                                               _verbose_newton)
                  .first;
     return e;
   }
   else if (_fp)
     return _fp->e_from_v_h(v, h);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("e_from_v_h", "internal_energy");
 }
 
 void
@@ -936,7 +1262,8 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
                                           _tolerance,
                                           lambda,
                                           name() + "::e_from_v_h",
-                                          _max_newton_its);
+                                          _max_newton_its,
+                                          _verbose_newton);
     e = e_data.first;
     // Finite difference approximation
     const auto e2 = e_from_v_h(v * (1 + TOLERANCE), h);
@@ -946,8 +1273,7 @@ TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Rea
   else if (_fp)
     _fp->e_from_v_h(v, h, e, de_dv, de_dh);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("e_from_v_h", "internal_energy");
 }
 
 std::vector<Real>
@@ -956,7 +1282,7 @@ TabulatedFluidProperties::henryCoefficients() const
   if (_fp)
     return _fp->henryCoefficients();
   else
-    FluidPropertiesForwardError("henryCoefficients");
+    TabulationNotImplementedError("henryCoefficients");
 }
 
 Real
@@ -965,7 +1291,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature) const
   if (_fp)
     return _fp->vaporPressure(temperature);
   else
-    FluidPropertiesForwardError("vaporPressure");
+    TabulationNotImplementedError("vaporPressure");
 }
 
 void
@@ -974,7 +1300,7 @@ TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dp
   if (_fp)
     _fp->vaporPressure(temperature, psat, dpsat_dT);
   else
-    FluidPropertiesForwardError("vaporPressure");
+    TabulationNotImplementedError("vaporPressure");
 }
 
 Real
@@ -983,7 +1309,7 @@ TabulatedFluidProperties::vaporTemperature(Real pressure) const
   if (_fp)
     return _fp->vaporTemperature(pressure);
   else
-    FluidPropertiesForwardError("vaporTemperature");
+    TabulationNotImplementedError("vaporTemperature");
 }
 
 void
@@ -993,7 +1319,7 @@ TabulatedFluidProperties::vaporTemperature(Real pressure, Real & Tsat, Real & dT
   if (_fp)
     _fp->vaporTemperature(pressure, Tsat, dTsat_dp);
   else
-    FluidPropertiesForwardError("vaporTemperature");
+    TabulationNotImplementedError("vaporTemperature");
 }
 
 Real
@@ -1003,7 +1329,7 @@ TabulatedFluidProperties::triplePointPressure() const
   if (_fp)
     return _fp->triplePointPressure();
   else
-    FluidPropertiesForwardError("triplePointPressure");
+    TabulationNotImplementedError("triplePointPressure");
 }
 
 Real
@@ -1013,7 +1339,7 @@ TabulatedFluidProperties::triplePointTemperature() const
   if (_fp)
     return _fp->triplePointTemperature();
   else
-    FluidPropertiesForwardError("triplePointTemperature");
+    TabulationNotImplementedError("triplePointTemperature");
 }
 
 Real
@@ -1023,7 +1349,7 @@ TabulatedFluidProperties::criticalPressure() const
   if (_fp)
     return _fp->criticalPressure();
   else
-    FluidPropertiesForwardError("criticalPressure");
+    TabulationNotImplementedError("criticalPressure");
 }
 
 Real
@@ -1033,7 +1359,7 @@ TabulatedFluidProperties::criticalTemperature() const
   if (_fp)
     return _fp->criticalTemperature();
   else
-    FluidPropertiesForwardError("criticalTemperature");
+    TabulationNotImplementedError("criticalTemperature");
 }
 
 Real
@@ -1042,7 +1368,7 @@ TabulatedFluidProperties::criticalDensity() const
   if (_fp)
     return _fp->criticalDensity();
   else
-    FluidPropertiesForwardError("criticalDensity");
+    TabulationNotImplementedError("criticalDensity");
 }
 
 Real
@@ -1059,8 +1385,7 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->p_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("p_from_v_e", "pressure");
 }
 
 void
@@ -1077,8 +1402,26 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
   else if (_fp)
     _fp->p_from_v_e(v, e, p, dp_dv, dp_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("p_from_v_e with derivatives", "pressure");
+}
+
+void
+TabulatedFluidProperties::p_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
+{
+  if (_interpolate_pressure && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
+  ADReal vc = v, ec = e;
+  checkInputVariablesVE(vc, ec);
+
+  if (_create_direct_ve_interpolations && _interpolate_pressure)
+    _property_ve_ipol[_p_idx]->sampleValueAndDerivatives(vc, ec, p, dp_dv, dp_de);
+  else if (_construct_pT_from_ve)
+    _p_from_v_e_ipol->sampleValueAndDerivatives(vc, ec, p, dp_dv, dp_de);
+  else if (_fp)
+    _fp->p_from_v_e(vc, ec, p, dp_dv, dp_de);
+  else
+    NeedTabulationOrFPError("AD p_from_v_e with derivatives", "pressure");
 }
 
 Real
@@ -1095,8 +1438,7 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->T_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("T_from_v_e", "temperature");
 }
 
 void
@@ -1113,8 +1455,26 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
   else if (_fp)
     _fp->T_from_v_e(v, e, T, dT_dv, dT_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("T_from_v_e with derivatives", "temperature");
+}
+
+void
+TabulatedFluidProperties::T_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & T, ADReal & dT_dv, ADReal & dT_de) const
+{
+  if (_interpolate_temperature && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
+  ADReal vc = v, ec = e;
+  checkInputVariablesVE(vc, ec);
+
+  if (_create_direct_ve_interpolations && _interpolate_temperature)
+    _property_ve_ipol[_T_idx]->sampleValueAndDerivatives(vc, ec, T, dT_dv, dT_de);
+  else if (_construct_pT_from_ve)
+    _T_from_v_e_ipol->sampleValueAndDerivatives(vc, ec, T, dT_dv, dT_de);
+  else if (_fp)
+    _fp->T_from_v_e(vc, ec, T, dT_dv, dT_de);
+  else
+    NeedTabulationOrFPError("AD T_from_v_e with derivatives", "temperature");
 }
 
 Real
@@ -1135,8 +1495,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->c_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("c_from_v_e", "c");
 }
 
 void
@@ -1162,8 +1521,7 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
   else if (_fp)
     _fp->c_from_v_e(v, e, c, dc_dv, dc_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("c_from_v_e with derivatives", "c");
 }
 
 Real
@@ -1184,8 +1542,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->cp_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("cp_from_v_e", "cp");
 }
 
 void
@@ -1211,8 +1568,7 @@ TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, 
   else if (_fp)
     _fp->cp_from_v_e(v, e, cp, dcp_dv, dcp_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("cp_from_v_e with derivatives", "cp");
 }
 
 Real
@@ -1233,8 +1589,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->cv_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("cv_from_v_e", "cv");
 }
 
 void
@@ -1260,8 +1615,7 @@ TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, 
   else if (_fp)
     _fp->cv_from_v_e(v, e, cv, dcv_dv, dcv_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("cv_from_v_e with derivatives", "cv");
 }
 
 Real
@@ -1282,8 +1636,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->mu_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("mu_from_v_e", "viscosity");
 }
 
 void
@@ -1309,8 +1662,7 @@ TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, 
   else if (_fp)
     _fp->mu_from_v_e(v, e, mu, dmu_dv, dmu_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("mu_from_v_e with derivatives", "viscosity");
 }
 
 Real
@@ -1331,8 +1683,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->k_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("k_from_v_e", "k");
 }
 
 void
@@ -1358,8 +1709,7 @@ TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Rea
   else if (_fp)
     _fp->k_from_v_e(v, e, k, dk_dv, dk_de);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("k_from_v_e with derivatives", "k");
 }
 
 Real
@@ -1380,8 +1730,32 @@ TabulatedFluidProperties::s_from_v_e(Real v, Real e) const
   else if (_fp)
     return _fp->s_from_v_e(v, e);
   else
-    mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+    NeedTabulationOrFPError("s_from_v_e", "entropy");
+}
+
+void
+TabulatedFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
+{
+  if (_interpolate_entropy && !_construct_pT_from_ve && !_create_direct_ve_interpolations)
+    missingVEInterpolationError(__PRETTY_FUNCTION__);
+  checkInputVariablesVE(v, e);
+
+  if (_create_direct_ve_interpolations && _interpolate_entropy)
+    _property_ve_ipol[_entropy_idx]->sampleValueAndDerivatives(v, e, s, ds_dv, ds_de);
+  else if (_construct_pT_from_ve)
+  {
+    Real p, T, dT_dv, dT_de, dp_dv, dp_de;
+    _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+    _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+    Real ds_dp, ds_dT;
+    s_from_p_T(p, T, s, ds_dp, ds_dT);
+    ds_dv = ds_dp * dp_dv + ds_dT * dT_dv;
+    ds_dv = ds_dp * dp_de + ds_dT * dT_de;
+  }
+  else if (_fp)
+    _fp->s_from_v_e(v, e, s, ds_dv, ds_de);
+  else
+    NeedTabulationOrFPError("s_from_v_e", "entropy");
 }
 
 Real
@@ -1412,7 +1786,7 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   }
   else
     mooseError(__PRETTY_FUNCTION__,
-               "\nNo tabulation or fluid property 'fp' object to compute value");
+               "\nNo tabulation or fluid property 'input_fp' object to compute value");
   return h - T * s;
 }
 
@@ -1430,14 +1804,18 @@ TabulatedFluidProperties::T_from_h_s(Real h, Real s) const
 Real
 TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
 {
-  if (_fp)
-    return _fp->T_from_p_h(pressure, enthalpy);
-  else
+  if (_create_direct_pT_interpolations || _create_direct_ve_interpolations)
   {
     auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
     { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
-    Real T = FluidPropertiesUtils::NewtonSolve(
-                 pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
+    Real T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                               enthalpy,
+                                               _T_initial_guess,
+                                               _tolerance,
+                                               lambda,
+                                               name() + "::T_from_p_h",
+                                               _max_newton_its,
+                                               _verbose_newton)
                  .first;
     // check for nans
     if (std::isnan(T))
@@ -1448,15 +1826,17 @@ TabulatedFluidProperties::T_from_p_h(Real pressure, Real enthalpy) const
                  ") to temperature failed to converge.");
     return T;
   }
+  else if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    NeedTabulationOrFPError("T_from_p_h", "temperature");
 }
 
 ADReal
 TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & enthalpy) const
 {
   using std::isnan;
-  if (_fp)
-    return _fp->T_from_p_h(pressure, enthalpy);
-  else
+  if (_create_direct_pT_interpolations || _create_direct_ve_interpolations)
   {
     auto lambda =
         [&](ADReal pressure, ADReal current_T, ADReal & new_h, ADReal & dh_dp, ADReal & dh_dT)
@@ -1466,10 +1846,15 @@ TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & ent
       new_h.derivatives() =
           dh_dp.value() * pressure.derivatives() + dh_dT.value() * current_T.derivatives();
     };
-    ADReal T =
-        FluidPropertiesUtils::NewtonSolve(
-            pressure, enthalpy, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_h")
-            .first;
+    ADReal T = FluidPropertiesUtils::NewtonSolve(pressure,
+                                                 enthalpy,
+                                                 _T_initial_guess,
+                                                 _tolerance,
+                                                 lambda,
+                                                 name() + "::T_from_p_h",
+                                                 _max_newton_its,
+                                                 _verbose_newton)
+                   .first;
     // check for nans
     if (isnan(T))
       mooseError("Conversion from enthalpy (h = ",
@@ -1479,6 +1864,10 @@ TabulatedFluidProperties::T_from_p_h(const ADReal & pressure, const ADReal & ent
                  ") to temperature failed to converge.");
     return T;
   }
+  else if (_fp)
+    return _fp->T_from_p_h(pressure, enthalpy);
+  else
+    NeedTabulationOrFPError("T_from_p_h", "temperature");
 }
 
 Real
@@ -1492,46 +1881,71 @@ void
 TabulatedFluidProperties::s_from_h_p(
     Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const
 {
-
   if (_fp)
     _fp->s_from_h_p(h, pressure, s, ds_dh, ds_dp);
   else
-    mooseError("fp", "s_from_h_p derivatives not implemented.");
+    TabulationNotImplementedError("s_from_h_p with derivatives");
 }
 
 [[noreturn]] void
-TabulatedFluidProperties::FluidPropertiesForwardError(const std::string & desired_routine) const
+TabulatedFluidProperties::TabulationNotImplementedError(const std::string & desired_routine) const
 {
   mooseError("TabulatedFluidProperties can only call the function '" + desired_routine +
-             "' when the 'fp' parameter is provided. It is currently not implemented using "
+             "' when the 'input_fp' parameter is provided. It is currently not implemented using "
              "tabulations, and this property is simply forwarded to the FluidProperties specified "
-             "in the 'fp' parameter");
+             "in the 'input_fp' parameter");
+}
+
+[[noreturn]] void
+TabulatedFluidProperties::NeedTabulationOrFPError(const std::string & desired_routine,
+                                                  const std::string & needed_property) const
+{
+  mooseError(
+      "TabulatedFluidProperties can only call the function '" + desired_routine +
+      "' when either:\n- the property '" + needed_property +
+      "' is tabulated and listed in the 'interpolated_properties' parameter.\n- the 'input_fp' "
+      "parameter is provided.");
+}
+
+[[noreturn]] void
+TabulatedFluidProperties::NeedTabulationError(const std::string & needed_property) const
+{
+  mooseError("Property '" + needed_property +
+             "' is marked as interpolated but neither of the following methods are active:\n- "
+             "(p,T) interpolation created from fluid properties ('create_pT_interpolations' "
+             "parameter)\n- a (p,T) tabulation file ('fluid_property_file')\n- (v,e) interpolation "
+             "created from fluid properties or a (p,T) tabulation ('create_ve_interpolations' "
+             "parameter)\n- a (v,e) tabulation file ('fluid_property_ve_file' parameter)");
 }
 
 void
 TabulatedFluidProperties::writeTabulatedData(std::string file_name)
 {
-  file_name = file_name.empty() ? "fluid_properties_" + name() + "_out.csv" : file_name;
   if (processor_id() == 0)
   {
+    // Write out the (p, T) interpolation tables
+    if (_file_name_out != "")
     {
+      file_name = file_name.empty() ? "fluid_properties_" + name() + "_out.csv" : file_name;
       MooseUtils::checkFileWriteable(file_name);
 
       std::ofstream file_out(file_name.c_str());
 
-      // Write out date and fluid type
-      time_t now = std::time(&now);
-      if (_fp)
-        file_out << "# " << _fp->fluidName()
-                 << " properties created by TabulatedFluidProperties on " << ctime(&now) << "\n";
-      else
-        file_out << "# tabulated properties created by TabulatedFluidProperties on " << ctime(&now)
-                 << "\n";
+      if (!getParam<bool>("skip_header_tabulation"))
+      {
+        // Write out date and fluid type
+        time_t now = std::time(&now);
+        file_out << "# " << (_fp ? _fp->fluidName() : "")
+                 << " properties (p,T) tabulation created by TabulatedFluidProperties on "
+                 << ctime(&now) << "\n";
+      }
 
       // Write out column names
       file_out << "pressure, temperature";
       for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
-        file_out << ", " << _interpolated_properties[i];
+        if (_interpolated_properties[i] != "pressure" &&
+            _interpolated_properties[i] != "temperature")
+          file_out << ", " << _interpolated_properties[i];
       file_out << "\n";
 
       // Write out the fluid property data
@@ -1548,8 +1962,8 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
       file_out.close();
     }
 
-    // Write out the (v,e) to (p,T) conversions
-    if (_construct_pT_from_ve)
+    // Write out the (v,e) interpolation tables
+    if (_file_name_ve_out != "" && (_construct_pT_from_ve || _create_direct_ve_interpolations))
     {
       const auto file_name_ve = (_file_name_ve_out == "")
                                     ? std::regex_replace(file_name, std::regex("\\.csv"), "_ve.csv")
@@ -1557,10 +1971,22 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
       MooseUtils::checkFileWriteable(file_name_ve);
       std::ofstream file_out(file_name_ve.c_str());
 
+      // Write out date and fluid type
+      if (!getParam<bool>("skip_header_tabulation"))
+      {
+        time_t now = std::time(&now);
+        file_out << "# " << (_fp ? _fp->fluidName() : "")
+                 << " properties (v,e) tabulation created by TabulatedFluidProperties on "
+                 << ctime(&now) << "\n";
+      }
+
       // Write out column names
       file_out << "specific_volume, internal_energy, pressure, temperature";
-      for (const auto i : index_range(_properties))
-        if (_interpolated_properties[i] != "internal_energy")
+      for (const auto i : index_range(_interpolated_properties))
+        // Avoid writing the fixed columns twice
+        if (_interpolated_properties[i] != "internal_energy" &&
+            _interpolated_properties[i] != "pressure" &&
+            _interpolated_properties[i] != "temperature")
           file_out << ", " << _interpolated_properties[i];
       file_out << "\n";
 
@@ -1570,18 +1996,30 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
         {
           const auto v_val = _specific_volume[v];
           const auto e_val = _internal_energy[e];
-          const auto pressure = _p_from_v_e_ipol->sample(v_val, e_val);
-          const auto temperature = _T_from_v_e_ipol->sample(v_val, e_val);
-          file_out << v_val << ", " << e_val << ", " << pressure << ", " << temperature << ", ";
-          for (const auto i : index_range(_properties))
+          // Use the expected source for the grid. Note that the tabulations are already created
+          Real pressure, temperature;
+          if (_construct_pT_from_ve)
+          {
+            pressure = _p_from_v_e_ipol->sample(v_val, e_val);
+            temperature = _T_from_v_e_ipol->sample(v_val, e_val);
+          }
+          else
+          {
+            pressure = p_from_v_e(v_val, e_val);
+            temperature = T_from_v_e(v_val, e_val);
+          }
+          file_out << v_val << ", " << e_val << ", " << pressure << ", " << temperature
+                   << (_interpolated_properties.size() ? ", " : "");
+          for (const auto i : index_range(_interpolated_properties))
           {
             bool add_comma = true;
             if (i == _density_idx)
-              file_out << 1 / v_val;
+              file_out << 1. / v_val;
             else if (i == _enthalpy_idx)
-              file_out << h_from_p_T(pressure, temperature);
+              file_out << h_from_v_e(v_val, e_val);
             // Note that we could use (p,T) routine to generate this instead of (v,e)
-            // Or could use the _properties_ve array
+            // Or could use the _properties_ve array similar to what we do for (pressure,
+            // temperature)
             else if (i == _viscosity_idx)
               file_out << mu_from_v_e(v_val, e_val);
             else if (i == _k_idx)
@@ -1596,7 +2034,7 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
               file_out << s_from_v_e(v_val, e_val);
             else
               add_comma = false;
-            if (i != _properties.size() - 1 && add_comma)
+            if (i != _interpolated_properties.size() - 1 && add_comma)
               file_out << ", ";
           }
 
@@ -1867,9 +2305,14 @@ TabulatedFluidProperties::checkInputVariablesVE(T & v, T & e) const
 }
 
 void
-TabulatedFluidProperties::checkInitialGuess() const
+TabulatedFluidProperties::checkInitialGuess(bool post_reading_tabulation) const
 {
-  if (_fp && (_construct_pT_from_ve || _construct_pT_from_vh))
+  // First condition applies when generating a tabulation
+  // Second condition applies when using a pre-generated loaded tabulation
+  if ((!post_reading_tabulation && _fp && (_construct_pT_from_ve || _construct_pT_from_vh)) ||
+      (post_reading_tabulation && (_file_name_in != "" || _file_name_ve_in != "") &&
+       (_create_direct_ve_interpolations || isParamSetByUser("T_initial_guess") ||
+        isParamSetByUser("p_initial_guess"))))
   {
     if (_p_initial_guess < _pressure_min || _p_initial_guess > _pressure_max)
       mooseWarning("Pressure initial guess for (p,T), (v,e) conversions " +
@@ -1957,9 +2400,12 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
                      "understands. It will be ignored.");
       // We could be reading a (v,e) tabulation after having read a (p,T) tabulation, do not
       // insert twice
+      // Also only allow properties specified as interpolated if user passed the parameter
       else if (std::find(_interpolated_properties.begin(),
                          _interpolated_properties.end(),
-                         column_names[i]) == _interpolated_properties.end())
+                         column_names[i]) == _interpolated_properties.end() &&
+               (!isParamSetByUser("interpolated_properties") ||
+                _interpolated_properties_enum.contains(column_names[i])))
         _interpolated_properties.push_back(column_names[i]);
     }
   }
@@ -2005,6 +2451,7 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
     _pressure_max = _pressure.back();
     _temperature_min = _temperature.front();
     _temperature_max = _temperature.back();
+    checkInitialGuess(true);
 
     // Extract the fluid property data from the file
     for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
@@ -2036,6 +2483,15 @@ TabulatedFluidProperties::readFileTabulationData(const bool use_pT)
     _properties_ve.reserve(_interpolated_properties.size());
     for (std::size_t i = 0; i < _interpolated_properties.size(); ++i)
       _properties_ve.push_back(column_data[data_index.find(_interpolated_properties[i])->second]);
+
+    // Obtain the min/max T, p and check the initial guess
+    const auto & p_col = column_data[data_index.find("pressure")->second];
+    _pressure_min = *std::min_element(p_col.begin(), p_col.end());
+    _pressure_max = *std::max_element(p_col.begin(), p_col.end());
+    const auto & T_col = column_data[data_index.find("temperature")->second];
+    _temperature_min = *std::min_element(T_col.begin(), T_col.end());
+    _temperature_max = *std::max_element(T_col.begin(), T_col.end());
+    checkInitialGuess(true);
   }
 }
 
@@ -2178,18 +2634,8 @@ TabulatedFluidProperties::createVGridVector()
   mooseAssert(_file_name_ve_in.empty(), "We should be reading the specific volume grid from file");
   if (!_v_bounds_specified)
   {
-    if (_fp)
-    {
-      // extreme values of specific volume for the grid bounds
-      Real v1 = v_from_p_T(_pressure_min, _temperature_min);
-      Real v2 = v_from_p_T(_pressure_max, _temperature_min);
-      Real v3 = v_from_p_T(_pressure_min, _temperature_max);
-      Real v4 = v_from_p_T(_pressure_max, _temperature_max);
-      _v_min = std::min({v1, v2, v3, v4});
-      _v_max = std::max({v1, v2, v3, v4});
-    }
     // if csv exists, get max and min values from csv file
-    else
+    if (_interpolate_density)
     {
       Real rho_max =
           *std::max_element(_properties[_density_idx].begin(), _properties[_density_idx].end());
@@ -2198,6 +2644,20 @@ TabulatedFluidProperties::createVGridVector()
       _v_max = 1 / rho_min;
       _v_min = 1 / rho_max;
     }
+    else if (_fp)
+    {
+      // extreme values of specific volume for the grid bounds
+      Real v1 = _fp->v_from_p_T(_pressure_min, _temperature_min);
+      Real v2 = _fp->v_from_p_T(_pressure_max, _temperature_min);
+      Real v3 = _fp->v_from_p_T(_pressure_min, _temperature_max);
+      Real v4 = _fp->v_from_p_T(_pressure_max, _temperature_max);
+      _v_min = std::min({v1, v2, v3, v4});
+      _v_max = std::max({v1, v2, v3, v4});
+    }
+    else
+      mooseWarning("Unable to compute grid bounds in specific volume. Please specify the v_min/max "
+                   "parameters");
+
     // Prevent changing the bounds of the grid
     _v_bounds_specified = true;
   }
@@ -2227,24 +2687,27 @@ TabulatedFluidProperties::createVEGridVectors()
   createVGridVector();
   if (!_e_bounds_specified)
   {
-    if (_fp)
-    {
-      // extreme values of internal energy for the grid bounds
-      Real e1 = e_from_p_T(_pressure_min, _temperature_min);
-      Real e2 = e_from_p_T(_pressure_max, _temperature_min);
-      Real e3 = e_from_p_T(_pressure_min, _temperature_max);
-      Real e4 = e_from_p_T(_pressure_max, _temperature_max);
-      _e_min = std::min({e1, e2, e3, e4});
-      _e_max = std::max({e1, e2, e3, e4});
-    }
     // if csv exists, get max and min values from csv file
-    else
+    if (_interpolate_internal_energy)
     {
       _e_min = *std::min_element(_properties[_internal_energy_idx].begin(),
                                  _properties[_internal_energy_idx].end());
       _e_max = *std::max_element(_properties[_internal_energy_idx].begin(),
                                  _properties[_internal_energy_idx].end());
     }
+    else if (_fp)
+    {
+      // extreme values of internal energy for the grid bounds
+      Real e1 = _fp->e_from_p_T(_pressure_min, _temperature_min);
+      Real e2 = _fp->e_from_p_T(_pressure_max, _temperature_min);
+      Real e3 = _fp->e_from_p_T(_pressure_min, _temperature_max);
+      Real e4 = _fp->e_from_p_T(_pressure_max, _temperature_max);
+      _e_min = std::min({e1, e2, e3, e4});
+      _e_max = std::max({e1, e2, e3, e4});
+    }
+    else
+      mooseWarning("Unable to compute grid bounds in internal energy. Please specify the e_min/max "
+                   "parameters");
   }
 
   // Create e grid for interpolation
@@ -2278,10 +2741,10 @@ TabulatedFluidProperties::createVHGridVectors()
   if (_fp)
   {
     // extreme values of enthalpy for the grid bounds
-    Real h1 = h_from_p_T(_pressure_min, _temperature_min);
-    Real h2 = h_from_p_T(_pressure_max, _temperature_min);
-    Real h3 = h_from_p_T(_pressure_min, _temperature_max);
-    Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+    Real h1 = _fp->h_from_p_T(_pressure_min, _temperature_min);
+    Real h2 = _fp->h_from_p_T(_pressure_max, _temperature_min);
+    Real h3 = _fp->h_from_p_T(_pressure_min, _temperature_max);
+    Real h4 = _fp->h_from_p_T(_pressure_max, _temperature_max);
     _h_min = std::min({h1, h2, h3, h4});
     _h_max = std::max({h1, h2, h3, h4});
   }

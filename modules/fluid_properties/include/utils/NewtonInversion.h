@@ -31,10 +31,11 @@ namespace FluidPropertiesUtils
  * @param[in] z_initial_guess initial guess for return variables
  * @param[in] tolerance criterion for relative or absolute (if y is sufficiently close to zero)
  * convergence checking
- * @param[in] function two-variable function returning both values and derivatives as references
+ * @param[in] y_from_x_z two-variable function returning both values and derivatives as references
  * @param[in] caller_name name of the fluid properties appended to name of the routine calling the
  * method
  * @param[in] max_its the maximum number of iterations for Newton's method
+ * @param[in] verbose whether to output Newton iteration data
  * @return a pair in which the first member is the value z such that f(x, z) = y and the second
  * member is dy/dz
  */
@@ -44,9 +45,10 @@ NewtonSolve(const T & x,
             const T & y,
             const Real z_initial_guess,
             const Real tolerance,
-            const Functor & func,
+            const Functor & y_from_x_z,
             const std::string & caller_name,
-            const unsigned int max_its = 100)
+            const unsigned int max_its = 100,
+            const bool verbose = false)
 {
   // R represents residual
 
@@ -63,10 +65,12 @@ NewtonSolve(const T & x,
   unsigned int iteration = 0;
 
   using std::isnan;
+  if (verbose)
+    Moose::out << "Target value for 1D Newton inversion:\n" << y << std::endl;
 
   do
   {
-    func(x, z, new_y, dy_dx, dy_dz);
+    y_from_x_z(x, z, new_y, dy_dx, dy_dz);
     R = new_y - y;
 
     // We always want to perform at least one update in order to get derivatives on z correct (z
@@ -77,7 +81,7 @@ NewtonSolve(const T & x,
 #ifndef NDEBUG
     static constexpr Real perturbation_factor = 1 + 1e-8;
     T perturbed_y, dummy, dummy2;
-    func(x, perturbation_factor * z, perturbed_y, dummy, dummy2);
+    y_from_x_z(x, perturbation_factor * z, perturbed_y, dummy, dummy2);
     // Check the accuracy of the Jacobian
     auto J_differenced = (perturbed_y - new_y) / (1e-8 * z);
     if (!MooseUtils::relativeFuzzyEqual(J_differenced, dy_dz, 1e-2))
@@ -85,6 +89,14 @@ NewtonSolve(const T & x,
 #endif
 
     z += -(R / dy_dz);
+
+    if (verbose)
+    {
+      Moose::out << "Iteration " << iteration << std::endl;
+      Moose::out << "Current solution vector: " << z << std::endl;
+      Moose::out << "Current (minus) residual: " << -R << std::endl;
+      Moose::out << "Current Jacobian: " << dy_dz << std::endl;
+    }
 
     // Check for NaNs
     if (isnan(z))
@@ -106,10 +118,10 @@ NewtonSolve(const T & x,
 
 /**
  * NewtonSolve2D does a 2D Newton Solve to solve for the x and y such that:
- * f = func1(x, y) and g = func2(x, y). This is done for example in the constant of (v, e)
+ * f = f_from_x_y(x, y) and g = g_from_x_y(x, y). This is done for example in the constant of (v, e)
  * to (p, T) variable set conversion.
- * @param[in] f target value for func1
- * @param[in] g target value for func2
+ * @param[in] f target value for f_from_x_y
+ * @param[in] g target value for g_from_x_y
  * @param[in] x0 initial guess for first output variable
  * @param[in] y0 initial guess for second output variable
  * @param[out] x_final output for first variable
@@ -118,9 +130,11 @@ NewtonSolve(const T & x,
  * convergence checking
  * @param[in] g_tol criterion for relative or absolute (if g is sufficently close to zero)
  * convergence checking
- * @param[in] func1 two-variable function returning both values and derivatives as references
- * @param[in] func2 two-variable function returning both values and derivatives as references
+ * @param[in] f_from_x_y two-variable function returning both values and derivatives as references
+ * @param[in] g_from_x_y two-variable function returning both values and derivatives as references
+ * @param[in] caller_name routine calling this solve
  * @param[in] max_its the maximum number of iterations for Newton's method
+ * @param[in] debug whether to output the solution, residual and Jacobian on every iteration
  */
 template <typename T, typename Functor1, typename Functor2>
 void
@@ -132,9 +146,11 @@ NewtonSolve2D(const T & f,
               T & y_final,
               const Real f_tol,
               const Real g_tol,
-              const Functor1 & func1,
-              const Functor2 & func2,
-              const unsigned int max_its = 100)
+              const Functor1 & f_from_x_y,
+              const Functor2 & g_from_x_y,
+              const std::string & caller_name = "",
+              const unsigned int max_its = 100,
+              bool debug = false)
 {
 
   constexpr unsigned int system_size = 2;
@@ -157,7 +173,7 @@ NewtonSolve2D(const T & f,
   };
 
   DenseVector<T> u = {{x0, y0}};
-  DenseVector<T> minus_R(system_size), func_evals(system_size), u_update;
+  DenseVector<T> minus_R(system_size), func_evals(system_size), u_update(system_size);
   DenseMatrix<T> J(system_size, system_size);
   unsigned int iteration = 0;
 #ifndef NDEBUG
@@ -166,13 +182,23 @@ NewtonSolve2D(const T & f,
 #endif
 
   typedef std::function<void(const T &, const T &, T &, T &, T &)> FuncType;
-  std::array<FuncType, 2> func = {{func1, func2}};
+  std::array<FuncType, 2> func = {{f_from_x_y, g_from_x_y}};
 
   auto assign_solution = [&u, &x_final, &y_final]()
   {
     x_final = u(0);
     y_final = u(1);
   };
+  auto status_string = [&u, &func_evals, &targets, &minus_R](unsigned int comp) -> std::stringstream
+  {
+    std::stringstream ss;
+    ss << "Current solution for component " << comp << ": " << u(comp)
+       << " (current ordinate: " << func_evals(comp) << " -> target: " << targets(comp)
+       << ", scaled residual: " << minus_R(comp) << ")";
+    return ss;
+  };
+  if (debug)
+    Moose::out << "Target values for 2D Newton inversion:\n" << targets << std::endl;
 
   using std::isnan, std::max, std::abs;
 
@@ -195,16 +221,34 @@ NewtonSolve2D(const T & f,
       if (isnan(minus_R(i)))
       {
         assign_solution();
-        mooseException("NaN detected in Newton solve");
+        mooseException(caller_name + ": NaN detected in Newton solve");
       }
 
-    // Do some Jacobi (rowmax) preconditioning
+    if (debug)
+    {
+      Moose::out << "Iteration " << iteration << std::endl;
+      Moose::out << "Current solution vector:\n" << u << std::endl;
+      Moose::out << "Current (minus) residual:\n" << minus_R << std::endl;
+      Moose::out << "Current Jacobian:\n" << J << std::endl;
+    }
+
+    // Do some Jacobi (rowmax) preconditioning and check for an empty row
+    int degenerate_row = -1;
     for (const auto i : make_range(system_size))
     {
       const auto rowmax = max(abs(J(i, 0)), abs(J(i, 1)));
-      for (const auto j : make_range(system_size))
-        J(i, j) /= rowmax;
-      minus_R(i) /= rowmax;
+      if (rowmax > 0)
+      {
+        for (const auto j : make_range(system_size))
+          J(i, j) /= rowmax;
+        minus_R(i) /= rowmax;
+      }
+      else
+      {
+        if (degenerate_row != -1)
+          mooseException(caller_name + ": Jacobian is all zeros in NewtonSolve2D");
+        degenerate_row = i;
+      }
     }
 
 #ifndef NDEBUG
@@ -219,9 +263,19 @@ NewtonSolve2D(const T & f,
       }
     raw_J.svd(svs);
     raw_J2.evd(evs_real, evs_imag);
+    if (debug)
+      Moose::out << "Jacobian singular values:\n" << svs << std::endl;
 #endif
 
-    J.lu_solve(minus_R, u_update);
+    if (degenerate_row == -1)
+      J.lu_solve(minus_R, u_update);
+    else
+    {
+      // use a 1D newton when the Jacobian has an empty row
+      const auto other_row = system_size - 1 - degenerate_row;
+      u_update(other_row) = minus_R(other_row) / J(other_row, other_row);
+      u_update(degenerate_row) = 0;
+    }
     // reset the decomposition
     J.zero();
     u += u_update;
@@ -231,7 +285,8 @@ NewtonSolve2D(const T & f,
       if (isnan(u(i)))
       {
         assign_solution();
-        mooseException("NaN detected in Newton solve");
+        mooseException(caller_name + ": NaN detected in NewtonSolve2D\n" + status_string(0).str() +
+                       "\n" + status_string(1).str());
       }
 
     if (converged)
@@ -242,7 +297,9 @@ NewtonSolve2D(const T & f,
 
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
-    mooseException(
-        "Newton solve convergence failed: maximum number of iterations, ", max_its, ", exceeded");
+    mooseException(caller_name +
+                       ": Newton solve convergence failed: maximum number of iterations, ",
+                   max_its,
+                   ", exceeded.\n" + status_string(0).str() + "\n" + status_string(1).str());
 }
 } // namespace FluidPropertiesUtils

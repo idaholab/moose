@@ -105,7 +105,7 @@ divided into 50 and 100 equal points, respectively, then the input file syntax n
   []
   [tabulated]
     type = TabulatedBicubicFluidProperties
-    fp = co2
+    input_fp = co2
     fluid_property_output_file = fluid_properties.csv
     interpolated_properties = 'density enthalpy viscosity'
 
@@ -216,7 +216,7 @@ reachable values.
 
 To avoid the difficulties in converting from (v,e) to (pressure, temperature) and then evaluating the properties
 with (pressure, temperature), the properties can also be interpolated in (v,e). These interpolations can be created
-from either another `FluidProperties` object, with the [!param](/FluidProperties/TabulatedFluidProperties/fp), or from a
+from either another `FluidProperties` object, with the [!param](/FluidProperties/TabulatedFluidProperties/input_fp), or from a
 (specific volume, specific internal energy) tabulation, using the [!param](/FluidProperties/TabulatedFluidProperties/fluid_property_ve_file) parameter.
 
 Similarly as for (pressure, temperature), the list of properties to interpolate should be provided using the [!param](/FluidProperties/TabulatedFluidProperties/interpolated_properties) parameter.

@@ -7,7 +7,7 @@
     input = 'tabulated.i'
     csvdiff = 'tabulated_pT_out.csv'
     cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
-                FluidProperties/tabulated/fp=co2
+                FluidProperties/tabulated/input_fp=co2
                 FluidProperties/tabulated/fluid_property_output_file='fluid_properties.csv'
                 Outputs/file_base=tabulated_pT_out"
     rel_err = 1e-4
@@ -51,7 +51,7 @@
       csvdiff = 'tabulated_v_e_loge_out.csv'
       # raise the minimum temperature to avoid negative internal energy
       cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
-                  FluidProperties/tabulated/fp=co2
+                  FluidProperties/tabulated/input_fp=co2
                   FluidProperties/tabulated/temperature_min=400
                   FluidProperties/tabulated/temperature_max=800
                   FluidProperties/tabulated/pressure_min=2e5
@@ -67,15 +67,33 @@
   [file_writing]
     requirement = "The system shall be able to output tabulated fluid property data when requested "
                   "by the user"
+    [pT]
+      type = CSVDiff
+      input = 'tabulated.i'
+      csvdiff = 'fluid_properties_10_10_out.csv'
+      cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
+                  FluidProperties/tabulated/num_p=10
+                  FluidProperties/tabulated/num_T=10
+                  FluidProperties/tabulated/skip_header_tabulation=true
+                  FluidProperties/tabulated/fluid_property_output_file='fluid_properties_10_10_out.csv'"
+      detail = 'for the (pressure, temperature) interpolation grids.'
+      prereq = tabulated_bicubic
+
+      # Some conversions are going to fail
+      allow_warnings = true
+    []
     [ve]
       type = CSVDiff
       input = 'tabulated_v_e.i'
-      csvdiff = 'fluid_properties_out_ve.csv'
+      csvdiff = 'fluid_properties_ve_10_10_out.csv'
       cli_args = "FluidProperties/tabulated/type=TabulatedBicubicFluidProperties
-                  FluidProperties/tabulated/num_v=10
-                  FluidProperties/tabulated/num_e=10
-                  FluidProperties/tabulated/fluid_property_file='fluid_properties.csv'
-                  FluidProperties/tabulated/fluid_property_output_file='fluid_properties_out.csv'"
+                  FluidProperties/tabulated/create_pT_interpolations=false
+                  FluidProperties/tabulated/construct_pT_from_ve=false
+                  FluidProperties/tabulated/construct_pT_from_vh=false
+                  FluidProperties/tabulated/skip_header_tabulation=true
+                  FluidProperties/tabulated/fluid_property_ve_file='gold/fluid_properties_out_ve.csv'
+                  FluidProperties/tabulated/create_ve_interpolations=true
+                  FluidProperties/tabulated/fluid_property_ve_output_file='fluid_properties_ve_10_10_out.csv'"
       detail = 'for the (specific volume, internal energy) conversion grids.'
       prereq = tabulated_bicubic
 
@@ -99,6 +117,7 @@
     rel_err = 1e-4
     threading = '!pthreads'
     allow_warnings = true
+    prereq = 'file_writing/ve'
   []
   [exceptions]
     requirement = "The system shall throw an error if"
@@ -120,7 +139,7 @@
       type = RunException
       input = 'tabulated_v_e.i'
       cli_args = "FluidProperties/tabulated/p_initial_guess=10 "
-                 "FluidProperties/tabulated/save_file=false FluidProperties/tabulated/fp=co2"
+                 "FluidProperties/tabulated/save_file=false FluidProperties/tabulated/input_fp=co2"
       expect_err = 'Pressure initial guess for \(p,T\), \(v,e\) conversions 10 is outside the range of tabulated pressure'
       detail = 'if the user-specified pressure initial guess for variable set inversions is out of bounds'
     []
@@ -128,7 +147,7 @@
       type = RunException
       input = 'tabulated_v_e.i'
       cli_args = "FluidProperties/tabulated/T_initial_guess=1e5 "
-                 "FluidProperties/tabulated/save_file=false FluidProperties/tabulated/fp=co2"
+                 "FluidProperties/tabulated/save_file=false FluidProperties/tabulated/input_fp=co2"
       expect_err = 'Temperature initial guess for \(p,T\), \(v,e\) conversions 100000 is outside the range of tabulated temperature'
       detail = 'if the user-specified temperature initial guess for variable set inversions is out of bounds'
     []
