@@ -72,7 +72,7 @@ LinearAssemblySegregatedSolve::validParams()
 
   /*
    * Flags to optionally skip solving subsets of the thermal-hydraulics system (useful when
-   * recovering a converged solution and only advancing scalar transport).
+   * recovering a converged solution and only advancing scalar transport for example).
    */
   params.addParam<bool>("solve_momentum", true, "Solve the momentum predictor/corrector.");
   params.addParam<bool>("solve_pressure", true, "Solve the pressure corrector.");
@@ -618,14 +618,12 @@ LinearAssemblySegregatedSolve::solve()
 
   std::vector<unsigned int> momentum_indices;
   if (_solve_momentum)
-  {
-    for (const auto system_i : index_range(_momentum_systems))
+    for ([[maybe_unused]] const auto system_i : index_range(_momentum_systems))
     {
       momentum_indices.push_back(static_cast<unsigned int>(ns_residuals.size()));
       ns_residuals.push_back(std::make_pair(0, 1.0));
       ns_abs_tols.push_back(_momentum_absolute_tolerance);
     }
-  }
 
   auto pressure_index = libMesh::invalid_uint;
   if (_solve_pressure)
@@ -653,25 +651,21 @@ LinearAssemblySegregatedSolve::solve()
 
   std::vector<unsigned int> active_scalar_indices;
   if (_has_active_scalar_systems && _solve_active_scalars)
-  {
-    for (const auto i : index_range(_active_scalar_system_names))
+    for ([[maybe_unused]] const auto i : index_range(_active_scalar_system_names))
     {
       active_scalar_indices.push_back(static_cast<unsigned int>(ns_residuals.size()));
       ns_residuals.push_back(std::make_pair(0, 1.0));
       ns_abs_tols.push_back(_active_scalar_absolute_tolerance[i]);
     }
-  }
 
   std::vector<unsigned int> turbulence_indices;
   if (_has_turbulence_systems && _solve_turbulence)
-  {
-    for (const auto i : index_range(_turbulence_system_names))
+    for ([[maybe_unused]] const auto i : index_range(_turbulence_system_names))
     {
       turbulence_indices.push_back(static_cast<unsigned int>(ns_residuals.size()));
       ns_residuals.push_back(std::make_pair(0, 1.0));
       ns_abs_tols.push_back(_turbulence_absolute_tolerance[i]);
     }
-  }
 
   bool converged = ns_residuals.empty();
   // Loop until converged or hit the maximum allowed iteration number
