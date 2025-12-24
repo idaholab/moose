@@ -40,6 +40,37 @@ block is different:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/linear-segregated/2d/2d-boussinesq-transient.i block=Executioner
 
+### Restarting and keeping certain solution fields unchanged
+
+When recovering from a checkpoint, it can be useful to hold the thermal-hydraulics fields fixed
+and only advance other systems. The `PIMPLE` executioner exposes flags that selectively disable parts
+of the segregated solve:
+
+- [!param](/Executioner/PIMPLE/solve_momentum)
+- [!param](/Executioner/PIMPLE/solve_pressure)
+- [!param](/Executioner/PIMPLE/solve_energy)
+- [!param](/Executioner/PIMPLE/solve_solid_energy)
+- [!param](/Executioner/PIMPLE/solve_turbulence)
+- [!param](/Executioner/PIMPLE/solve_active_scalars)
+- [!param](/Executioner/PIMPLE/solve_passive_scalars)
+
+For example, to load a converged flow/temperature field from a steady-state run and only march
+passive scalars, enable [restart and recovery](restart_recover.md), keep the scalar solves enabled, and disable the momentum,
+pressure, and energy solves:
+
+```
+[Problem]
+  restart_file_base=converged_run_cp/LATEST
+[]
+[Executioner]
+  type = PIMPLE
+  ...
+  solve_momentum = false
+  solve_pressure = false
+  solve_energy = false
+[]
+```
+
 !syntax parameters /Executioner/PIMPLE
 
 !syntax inputs /Executioner/PIMPLE
