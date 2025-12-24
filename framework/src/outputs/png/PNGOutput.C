@@ -29,7 +29,7 @@ PNGOutput::validParams()
                                         "The name of the variable to use when creating the image");
   params.addParam<Real>("max", 1, "The maximum for the variable we want to use");
   params.addParam<Real>("min", 0, "The minimum for the variable we want to use");
-  MooseEnum color("GRAY BRYW BWR RWB BR");
+  MooseEnum color("GRAY BRYW BWR RWB BR", "BR");
   params.addRequiredParam<MooseEnum>("color", color, "Choose the color scheme to use.");
   params.addRangeCheckedParam<unsigned int>(
       "resolution", 25, "resolution>0", "The length of the longest side of the image in pixels.");
@@ -44,6 +44,7 @@ PNGOutput::validParams()
                                     "Value is between 0 and 1"
                                     "where 0 is completely transparent and 1 is completely opaque. "
                                     "Default transparency of the image is no transparency.");
+  params.addParamNamesToGroup("color resolution out_bounds_shade transparency", "Plotting");
   params.addClassDescription("Output data in the PNG format");
   return params;
 }
