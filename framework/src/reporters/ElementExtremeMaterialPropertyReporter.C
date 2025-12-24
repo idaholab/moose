@@ -61,7 +61,7 @@ ElementExtremeMaterialPropertyReporterTempl<is_ad>::ElementExtremeMaterialProper
   //       either Real (if using the non-AD version of this, or ADReal if using the AD version).
   //       ElementMaterialSampler can get multiple types (int, real, unsigned), maybe do
   //       something like that and also get AD and non-AD verisons.
-  for (const auto mpn : mat_prop_names)
+  for (const auto & mpn : mat_prop_names)
   {
     _reported_properties.push_back(&getGenericMaterialPropertyByName<Real, is_ad>(mpn));
     _reported_property_values.push_back(&declareValueByName<Real>(mpn));
@@ -82,13 +82,16 @@ ElementExtremeMaterialPropertyReporterTempl<is_ad>::initialize()
       _extreme_value = std::numeric_limits<Real>::max();
       break;
   }
+  _coordinates = Point(0., 0., 0.);
+  for (const auto i : make_range(_reported_properties.size()))
+    *_reported_property_values[i] = 0.0;
 }
 
 template <bool is_ad>
 void
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::execute()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpValue();
 }
 
@@ -104,7 +107,7 @@ ElementExtremeMaterialPropertyReporterTempl<is_ad>::computeQpValue()
       {
         _extreme_value = raw_mat_val;
         _coordinates = _q_point[_qp];
-        for (unsigned int i = 0; i < _reported_properties.size(); ++i)
+        for (const auto i : make_range(_reported_properties.size()))
           *_reported_property_values[i] = MetaPhysicL::raw_value((*_reported_properties[i])[_qp]);
       }
       break;
@@ -114,7 +117,7 @@ ElementExtremeMaterialPropertyReporterTempl<is_ad>::computeQpValue()
       {
         _extreme_value = raw_mat_val;
         _coordinates = _q_point[_qp];
-        for (unsigned int i = 0; i < _reported_properties.size(); ++i)
+        for (const auto i : make_range(_reported_properties.size()))
           *_reported_property_values[i] = MetaPhysicL::raw_value((*_reported_properties[i])[_qp]);
       }
       break;
@@ -125,7 +128,7 @@ template <bool is_ad>
 void
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::finalize()
 {
-  unsigned int rank;
+  unsigned int rank = 0;
   Real ev_value = _extreme_value;
 
   switch (_type)
