@@ -81,6 +81,9 @@ LinearAssemblySegregatedSolve::validParams()
   params.addParam<bool>("solve_turbulence", true, "Solve the turbulence surrogate equations.");
   params.addParam<bool>("solve_passive_scalars", true, "Solve passive scalar equations.");
   params.addParam<bool>("solve_active_scalars", true, "Solve active scalar equations.");
+  params.addParamNamesToGroup("solve_momentum solve_pressure solve_energy solve_solid_energy "
+                              "solve_turbulence solve_passive_scalars solve_active_scalars",
+                              "Solve control");
 
   /*
    * Parameters to control the conjugate heat transfer
