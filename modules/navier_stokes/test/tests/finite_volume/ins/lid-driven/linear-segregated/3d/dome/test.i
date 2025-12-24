@@ -1,10 +1,17 @@
+# dfan_thickness = 0.30478512648582745
+fan_normal_velocity = 10.719816 # m/s
+# fan_tau = ${fparse dfan_thickness / fan_normal_velocity}
 ilet_width = 0.5472
 ilet_length = 0.4064
 ilet_area = '${fparse ilet_width * ilet_length}'
 volumetric_flow_rate = 0.31478894915 # m3/s
-velocity_inlet_magnitude = ${fparse volumetric_flow_rate / ilet_area}
+velocity_inlet_magnitude = '${fparse volumetric_flow_rate / ilet_area}'
 # Make this negative so that it's the opposite direction of the normal vector
 velocity_diri_condition = '${fparse -velocity_inlet_magnitude}'
+
+cylinder_inner_radius = '${fparse 23.75 / 2}'
+cylinder_height = 14.40
+boundary_layer_cell_size = 0.25 # meters
 
 # air
 rho = 1.177
@@ -12,18 +19,18 @@ mu = 1.846e-5
 k = .0262
 cp = 1006
 beta = 3.33e-3
-alpha = ${fparse k / (cp * rho)}
-nu = ${fparse mu / rho}
+alpha = '${fparse k / (cp * rho)}'
+nu = '${fparse mu / rho}'
 
 # Dimensionless numbers
 L = 10
-Re = ${fparse L * velocity_inlet_magnitude / nu}
-Pr = ${fparse cp * mu / k}
+Re = '${fparse L * velocity_inlet_magnitude / nu}'
+Pr = '${fparse cp * mu / k}'
 
 # mixed laminar-turbulent forced convection flat plate correlation
 Re_crit = 5e5
-Nu = ${fparse (.037 * Re^(4/5) - .664 * Re_crit^(1/2)) * Pr^(1/3)}
-h = ${fparse Nu * k / L}
+Nu = '${fparse (.037 * Re^(4/5) - .664 * Re_crit^(1/2)) * Pr^(1/3)}'
+h = '${fparse Nu * k / L}'
 
 T_0 = 300.0
 T_hot = 373
@@ -37,13 +44,16 @@ sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
-walls = 'air_box_boundary air_wall_boundary air_floor_boundary'
+walls = 'air_box_boundary air_wall_boundary air_floor_boundary ahu_exhaust ahu_intake air_ahu_boundary'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 Pr_t = 0.9
 
 intensity = 0.01
 k_init = '${fparse 1.5*(intensity * velocity_inlet_magnitude)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
+
+# Heat from flow
+floor_heat = 3.12e3 # W
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -54,6 +64,35 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
   [file]
     type = FileMeshGenerator
     file = zach-mesh_in.e
+  []
+  [removal]
+    type = BlockDeletionGenerator
+    input = file
+    block = '2 20'
+  []
+  [fan1_outlet]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = removal
+    new_boundary = fan1_outlet
+    paired_block = 1
+    primary_block = 10
+    normal = '0 0 1'
+  []
+  [fan2_outlet]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = fan1_outlet
+    new_boundary = fan2_outlet
+    paired_block = 1
+    primary_block = 11
+    normal = '0 0 1'
+  []
+  [fan3_outlet]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = fan2_outlet
+    new_boundary = fan3_outlet
+    paired_block = 1
+    primary_block = 12
+    normal = '0 0 1'
   []
   uniform_refine = 0
 []
@@ -110,7 +149,7 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
   [compute_y_plus]
     type = RANSYPlusAux
     variable = yplus
-    tke =TKE
+    tke = TKE
     mu = ${mu}
     rho = ${rho}
     u = vel_x
@@ -139,7 +178,7 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = "; ; w_buoyancy"
+    body_force_kernel_names = "; ; w_buoyancy w_fan"
     pressure_projection_method = consistent
   []
 []
@@ -274,6 +313,12 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
     alpha_name = ${beta}
     momentum_component = 'z'
   []
+  [w_fan]
+    type = LinearFVSource
+    variable = vel_z
+    source_density = 'fan_source'
+  []
+
   [p_diffusion]
     type = LinearFVAnisotropicDiffusion
     variable = pressure
@@ -392,53 +437,86 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
     functor_names = 'k_t'
     property_name = 'k_tot'
   []
+  [momentum_source_fan1]
+    type = ParsedFunctorMaterial
+    expression = '${rho} * acceleration_fan1'
+    property_name = 'fan_source'
+    functor_names = 'acceleration_fan1'
+    block = '10'
+  []
+  [momentum_source_fan2]
+    type = ParsedFunctorMaterial
+    expression = '${rho} * acceleration_fan2'
+    property_name = 'fan_source'
+    functor_names = 'acceleration_fan2'
+    block = '11'
+  []
+  [momentum_source_fan3]
+    type = ParsedFunctorMaterial
+    expression = '${rho} * acceleration_fan3'
+    property_name = 'fan_source'
+    functor_names = 'acceleration_fan3'
+    block = '12'
+  []
+  [momentum_source_fan_null]
+    type = GenericFunctorMaterial
+    prop_names = 'fan_source'
+    prop_values = '0'
+    block = '1'
+  []
+  [mass_z]
+    type = ParsedFunctorMaterial
+    expression = 'rho * vel_z'
+    property_name = 'mass_z'
+    functor_names = '${rho} vel_z'
+    functor_symbols = 'rho vel_z'
+  []
 []
 
 [LinearFVBCs]
   [inlet_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
+    boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${velocity_diri_condition}
     variable = vel_x
     normal_component = 'x'
   []
   [inlet_y]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
+    boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${velocity_diri_condition}
     variable = vel_y
     normal_component = 'y'
   []
   [inlet_z]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
+    boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${velocity_diri_condition}
     variable = vel_z
     normal_component = 'z'
   []
   [inlet_TKE]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
+    boundary = 'inlet_1 inlet_2 inlet_3'
     functor = '${k_init}'
     variable = TKE
   []
   [inlet_TKED]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
+    boundary = 'inlet_1 inlet_2 inlet_3'
     functor = '${eps_init}'
     variable = TKED
   []
   [inlet_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
+    boundary = 'inlet_1 inlet_2 inlet_3'
     functor = ${T_cold}
     variable = T_fluid
   []
 
-
   [outlet_p]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'outlet'
+    boundary = 'outlet_1 outlet_2'
     variable = pressure
     functor = 0
   []
@@ -446,55 +524,55 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = vel_x
     use_two_term_expansion = true
-    boundary = outlet
+    boundary = 'outlet_1 outlet_2'
   []
   [outlet_y]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = vel_y
     use_two_term_expansion = true
-    boundary = outlet
+    boundary = 'outlet_1 outlet_2'
   []
   [outlet_z]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = vel_z
     use_two_term_expansion = true
-    boundary = outlet
+    boundary = 'outlet_1 outlet_2'
   []
   [outlet_TKE]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = TKE
     use_two_term_expansion = true
-    boundary = outlet
+    boundary = 'outlet_1 outlet_2'
   []
   [outlet_TKED]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = TKED
     use_two_term_expansion = true
-    boundary = outlet
+    boundary = 'outlet_1 outlet_2'
   []
   [outlet_T]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = T_fluid
     use_two_term_expansion = true
-    boundary = outlet
+    boundary = 'outlet_1 outlet_2'
   []
 
   [no_slip_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_x
-    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
+    boundary = ${walls}
     functor = 0
   []
   [no_slip_y]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_y
-    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
+    boundary = ${walls}
     functor = 0
   []
   [no_slip_z]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = vel_z
-    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
+    boundary = ${walls}
     functor = 0
   []
 
@@ -513,14 +591,20 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
 
   [pressure-flux]
     type = LinearFVPressureFluxBC
-    boundary = 'air_box_boundary air_wall_boundary air_floor_boundary'
+    boundary = ${walls}
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
   []
-  [T_adiabatic]
+  [T_floor]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     boundary = 'air_floor_boundary'
+    functor = floor_heat_density
+    variable = T_fluid
+  []
+  [T_ahu]
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
+    boundary = 'ahu_exhaust ahu_intake air_ahu_boundary'
     functor = 0
     variable = T_fluid
   []
@@ -558,9 +642,9 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
   turbulence_systems = 'TKE_system TKED_system'
   momentum_equation_relaxation = 0.80
   pressure_variable_relaxation = 0.95
-  turbulence_equation_relaxation = '0.5 0.5'
+  turbulence_equation_relaxation = '0.9 0.9'
   energy_equation_relaxation = 0.9
-  num_iterations = 20
+  num_iterations = 50
   pressure_absolute_tolerance = 1e-4
   momentum_absolute_tolerance = 1e-4
   turbulence_absolute_tolerance = '1e-6 1e-6'
@@ -591,7 +675,11 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
 [Outputs]
   [nemesis]
     type = Nemesis
-    time_step_interval = 20
+    time_step_interval = 1
+  []
+  [console]
+    type = Console
+    hide = 'floor_area floor_heat_density h cfl new_dt_for_unity_cfl rayleigh t_diff dt area_fan1 area_fan2 area_fan3'
   []
   csv = true
   checkpoint = true
@@ -606,7 +694,7 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
     cp_ave = ${cp}
     gravity_magnitude = 9.8
     k_ave = ${k}
-    l = 35
+    l = ${L}
     mu_ave = ${mu}
     rho_ave = ${rho}
     beta = ${beta}
@@ -664,5 +752,131 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / ilet_width}'
     constant_names = 'alpha'
     constant_expressions = '${alpha}'
     execute_on = 'initial'
+  []
+  [floor_area]
+    type = SideIntegralFunctorPostprocessor
+    boundary = air_floor_boundary
+    functor = 1
+    execute_on = 'initial'
+  []
+  [floor_heat_density]
+    type = ParsedPostprocessor
+    expression = 'heat / area'
+    constant_names = 'heat'
+    constant_expressions = ${floor_heat}
+    pp_names = 'floor_area'
+    pp_symbols = 'area'
+    execute_on = 'initial'
+  []
+  [sensor_one]
+    type = PointValue
+    variable = T_fluid
+    point = '0 ${fparse cylinder_inner_radius - boundary_layer_cell_size/2} 0.9144'
+  []
+  [sensor_two]
+    type = PointValue
+    variable = T_fluid
+    point = '0 ${fparse cylinder_inner_radius - boundary_layer_cell_size/2} 10.668'
+  []
+  [sensor_three]
+    type = PointValue
+    variable = T_fluid
+    point = '0 ${fparse sqrt(cylinder_inner_radius^2 - (25.60 - cylinder_height)^2) - boundary_layer_cell_size/2} 25.60'
+  []
+  [vfr_fan1]
+    type = VolumetricFlowRate
+    boundary = fan1_outlet
+    vel_x = vel_x
+    vel_y = vel_y
+    vel_z = vel_z
+    advected_quantity = 1
+  []
+  [vfr_fan2]
+    type = VolumetricFlowRate
+    boundary = fan2_outlet
+    vel_x = vel_x
+    vel_y = vel_y
+    vel_z = vel_z
+    advected_quantity = 1
+  []
+  [vfr_fan3]
+    type = VolumetricFlowRate
+    boundary = fan3_outlet
+    vel_x = vel_x
+    vel_y = vel_y
+    vel_z = vel_z
+    advected_quantity = 1
+  []
+  [area_fan1]
+    type = AreaPostprocessor
+    boundary = fan1_outlet
+    execute_on = 'initial'
+  []
+  [area_fan2]
+    type = AreaPostprocessor
+    boundary = fan2_outlet
+    execute_on = 'initial'
+  []
+  [area_fan3]
+    type = AreaPostprocessor
+    boundary = fan3_outlet
+    execute_on = 'initial'
+  []
+  [axial_velocity_fan1]
+    type = ParsedPostprocessor
+    expression = 'vfr_fan1 / area_fan1'
+    pp_names = 'vfr_fan1 area_fan1'
+  []
+  [axial_velocity_fan2]
+    type = ParsedPostprocessor
+    expression = 'vfr_fan2 / area_fan2'
+    pp_names = 'vfr_fan2 area_fan2'
+  []
+  [axial_velocity_fan3]
+    type = ParsedPostprocessor
+    expression = 'vfr_fan3 / area_fan3'
+    pp_names = 'vfr_fan3 area_fan3'
+  []
+  [acceleration_fan1]
+    type = ConstantPostprocessor
+  []
+  [acceleration_fan2]
+    type = ConstantPostprocessor
+  []
+  [acceleration_fan3]
+    type = ConstantPostprocessor
+  []
+[]
+
+[Controls]
+  [fan1]
+    type = PIDTransientControl
+    postprocessor = axial_velocity_fan1
+    target = ${fan_normal_velocity}
+    parameter = 'Postprocessors/acceleration_fan1/value'
+    K_integral = 0
+    K_proportional = -10
+    K_derivative = 0
+    execute_on = 'initial timestep_begin'
+  []
+  [fan2]
+    type = PIDTransientControl
+    postprocessor = axial_velocity_fan2
+    target = ${fan_normal_velocity}
+    parameter = 'Postprocessors/acceleration_fan2/value'
+    K_integral = 0
+    K_proportional = -10
+    K_derivative = 0
+    execute_on = 'initial timestep_begin'
+  []
+  [fan3]
+    type = PIDTransientControl
+    postprocessor = axial_velocity_fan3
+    target = ${fan_normal_velocity}
+    parameter = 'Postprocessors/acceleration_fan3/value'
+    K_integral = 0
+    K_proportional = -10
+    K_derivative = 0
+    execute_on = 'initial timestep_begin'
   []
 []
