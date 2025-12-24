@@ -178,7 +178,7 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _passive_scalar_l_abs_tol;
 
-    // ************************ Participating Media Radiation Variables ************************ //
+  // ************************ Participating Media Radiation Variables ************************ //
 
   /// The names of the participating media radiation systems
   const std::vector<SolverSystemName> & _pm_radiation_system_names;

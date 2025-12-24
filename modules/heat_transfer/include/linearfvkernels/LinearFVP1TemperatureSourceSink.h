@@ -31,7 +31,6 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
-
   /// The functor for the incident radiation
   const Moose::Functor<Real> & _G;
 
