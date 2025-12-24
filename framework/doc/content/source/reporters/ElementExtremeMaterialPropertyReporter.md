@@ -11,7 +11,7 @@ In this example, the minimum and maximum of the material property `mat_prop` are
 by two `ElementExtremeMaterialPropertyReporter` objects. The values of other material properties
 are also reported at the locations of those extreme values.
 
-!listing test/tests/reporters/element_extreme_material_property/element_extreme_material_property.i block=Materials Reporters
+!listing test/tests/reporters/element_extreme_material_property_reporter/element_extreme_material_property_reporter.i block=Materials Reporters
 
 !syntax parameters /Reporters/ElementExtremeMaterialPropertyReporter
 
