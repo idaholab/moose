@@ -39,8 +39,8 @@ protected:
   /// method to prepare save_in and diag_save_in inputs for the interface kernel
   void prepareSaveInInputs(std::vector<AuxVariableName> & /*save_in_names*/,
                            std::string & /*save_in_side*/,
-                           const std::vector<AuxVariableName> & /*var_name_master*/,
-                           const std::vector<AuxVariableName> & /*var_name_slave*/,
+                           const std::vector<AuxVariableName> & /*var_name_primary*/,
+                           const std::vector<AuxVariableName> & /*var_name_secondary*/,
                            const int & /*i*/) const;
 
   /// method checking multiple CohesiveZoneAction block inputs
@@ -72,10 +72,10 @@ protected:
   } _strain;
 
   ///@{ residual debugging
-  std::vector<AuxVariableName> _save_in_master;
-  std::vector<AuxVariableName> _diag_save_in_master;
-  std::vector<AuxVariableName> _save_in_slave;
-  std::vector<AuxVariableName> _diag_save_in_slave;
+  std::vector<AuxVariableName> _save_in_primary;
+  std::vector<AuxVariableName> _diag_save_in_primary;
+  std::vector<AuxVariableName> _save_in_secondary;
+  std::vector<AuxVariableName> _diag_save_in_secondary;
   ///@}
 
   /// kernel's and materials's names

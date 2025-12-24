@@ -42,10 +42,10 @@ CohesiveZoneAction::CohesiveZoneAction(const InputParameters & params)
                    : ""),
     _boundary(getParam<std::vector<BoundaryName>>("boundary")),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _save_in_master(getParam<std::vector<AuxVariableName>>("save_in_master")),
-    _diag_save_in_master(getParam<std::vector<AuxVariableName>>("diag_save_in_master")),
-    _save_in_slave(getParam<std::vector<AuxVariableName>>("save_in_slave")),
-    _diag_save_in_slave(getParam<std::vector<AuxVariableName>>("diag_save_in_slave")),
+    _save_in_primary(getParam<std::vector<AuxVariableName>>("save_in_primary")),
+    _diag_save_in_primary(getParam<std::vector<AuxVariableName>>("diag_save_in_primary")),
+    _save_in_secondary(getParam<std::vector<AuxVariableName>>("save_in_secondary")),
+    _diag_save_in_secondary(getParam<std::vector<AuxVariableName>>("diag_save_in_secondary")),
     _material_output_order(getParam<MultiMooseEnum>("material_output_order")),
     _material_output_family(getParam<MultiMooseEnum>("material_output_family")),
     _verbose(getParam<bool>("verbose"))
@@ -82,23 +82,25 @@ CohesiveZoneAction::CohesiveZoneAction(const InputParameters & params)
                  "SmallStrain or TotalLagrangian");
   }
 
-  if (_save_in_master.size() != 0 && _save_in_master.size() != _ndisp)
+  if (_save_in_primary.size() != 0 && _save_in_primary.size() != _ndisp)
     mooseError(
-        "Number of save_in_master variables should equal to the number of displacement variables ",
+        "Number of save_in_primary variables should equal to the number of displacement variables ",
         _ndisp);
-  if (_diag_save_in_master.size() != 0 && _diag_save_in_master.size() != _ndisp)
-    mooseError("Number of diag_save_in_master variables should equal to the number of displacement "
+  if (_diag_save_in_primary.size() != 0 && _diag_save_in_primary.size() != _ndisp)
+    mooseError(
+        "Number of diag_save_in_primary variables should equal to the number of displacement "
+        "variables ",
+        _ndisp);
+  if (_save_in_secondary.size() != 0 && _save_in_secondary.size() != _ndisp)
+    mooseError("Number of save_in_secondary variables should equal to the number of displacement "
                "variables ",
                _ndisp);
-  if (_save_in_slave.size() != 0 && _save_in_slave.size() != _ndisp)
-    mooseError(
-        "Number of save_in_slave variables should equal to the number of displacement variables ",
-        _ndisp);
 
-  if (_diag_save_in_slave.size() != 0 && _diag_save_in_slave.size() != _ndisp)
-    mooseError("Number of diag_save_in_slave variables should equal to the number of displacement "
-               "variables ",
-               _ndisp);
+  if (_diag_save_in_secondary.size() != 0 && _diag_save_in_secondary.size() != _ndisp)
+    mooseError(
+        "Number of diag_save_in_secondary variables should equal to the number of displacement "
+        "variables ",
+        _ndisp);
 
   // convert output variable names to lower case
   for (const auto & out : getParam<MultiMooseEnum>("generate_output"))
@@ -131,16 +133,16 @@ CohesiveZoneAction::addRequiredCZMInterfaceKernels()
 
     std::string save_in_side;
     std::vector<AuxVariableName> save_in_var_names;
-    if (_save_in_master.size() == _ndisp || _save_in_slave.size() == _ndisp)
+    if (_save_in_primary.size() == _ndisp || _save_in_secondary.size() == _ndisp)
     {
-      prepareSaveInInputs(save_in_var_names, save_in_side, _save_in_master, _save_in_slave, i);
+      prepareSaveInInputs(save_in_var_names, save_in_side, _save_in_primary, _save_in_secondary, i);
       paramsk.set<std::vector<AuxVariableName>>("save_in") = save_in_var_names;
       paramsk.set<MultiMooseEnum>("save_in_var_side") = save_in_side;
     }
-    if (_diag_save_in_master.size() == _ndisp || _diag_save_in_slave.size() == _ndisp)
+    if (_diag_save_in_primary.size() == _ndisp || _diag_save_in_secondary.size() == _ndisp)
     {
       prepareSaveInInputs(
-          save_in_var_names, save_in_side, _diag_save_in_master, _diag_save_in_slave, i);
+          save_in_var_names, save_in_side, _diag_save_in_primary, _diag_save_in_secondary, i);
       paramsk.set<std::vector<AuxVariableName>>("diag_save_in") = save_in_var_names;
       paramsk.set<MultiMooseEnum>("diag_save_in_var_side") = save_in_side;
     }
@@ -198,22 +200,22 @@ CohesiveZoneAction::addRelationshipManagers(Moose::RelationshipManagerType input
 void
 CohesiveZoneAction::prepareSaveInInputs(std::vector<AuxVariableName> & save_in_names,
                                         std::string & save_in_side,
-                                        const std::vector<AuxVariableName> & var_name_master,
-                                        const std::vector<AuxVariableName> & var_name_slave,
+                                        const std::vector<AuxVariableName> & var_name_primary,
+                                        const std::vector<AuxVariableName> & var_name_secondary,
                                         const int & i) const
 {
   save_in_names.clear();
   save_in_side.clear();
-  if (var_name_master.size() == _ndisp)
+  if (var_name_primary.size() == _ndisp)
   {
-    save_in_names.push_back(var_name_master[i]);
+    save_in_names.push_back(var_name_primary[i]);
     save_in_side += "m";
-    if (var_name_slave.size() == _ndisp)
+    if (var_name_secondary.size() == _ndisp)
       save_in_side += " ";
   }
-  if (var_name_slave.size() == _ndisp)
+  if (var_name_secondary.size() == _ndisp)
   {
-    save_in_names.push_back(var_name_slave[i]);
+    save_in_names.push_back(var_name_secondary[i]);
     save_in_side += "s";
   }
 }
