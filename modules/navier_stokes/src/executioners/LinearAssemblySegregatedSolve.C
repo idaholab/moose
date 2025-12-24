@@ -193,10 +193,10 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
 
   if (_cht.enabled())
   {
-    std::vector<SystemBase *> pm_radiation_systems_base(_pm_radiation_systems.begin(), _pm_radiation_systems.end());
+    std::vector<SystemBase *> pm_radiation_systems_base(_pm_radiation_systems.begin(),
+                                                        _pm_radiation_systems.end());
     _cht.linkEnergySystems(_solid_energy_system, _energy_system, pm_radiation_systems_base);
   }
-
 }
 
 void
@@ -591,7 +591,7 @@ LinearAssemblySegregatedSolve::solve()
   // Assign residuals to general residual vector
   const unsigned int no_systems = _momentum_systems.size() + 1 + _has_energy_system +
                                   _has_solid_energy_system + _pm_radiation_systems.size() +
-                                  _active_scalar_systems.size() +_turbulence_systems.size();
+                                  _active_scalar_systems.size() + _turbulence_systems.size();
 
   std::vector<std::pair<unsigned int, Real>> ns_residuals(no_systems, std::make_pair(0, 1.0));
   std::vector<Real> ns_abs_tols(_momentum_systems.size(), _momentum_absolute_tolerance);
@@ -666,7 +666,6 @@ LinearAssemblySegregatedSolve::solve()
                                 _energy_linear_control,
                                 _energy_l_abs_tol);
 
-
         if (_has_pm_radiation_systems)
         {
           //_problem.execute(EXEC_NONLINEAR); ????
@@ -676,12 +675,13 @@ LinearAssemblySegregatedSolve::solve()
           Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
           for (const auto i : index_range(_pm_radiation_system_names))
           {
-            ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
-                        i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
-                                                  *_pm_radiation_systems[i],
-                                                  _pm_radiation_equation_relaxation[i],
-                                                  _pm_radiation_linear_control,
-                                                  _pm_radiation_l_abs_tol);
+            ns_residuals[momentum_residual.size() + 1 + _has_energy_system +
+                         _has_solid_energy_system + i] =
+                solveAdvectedSystem(_pm_radiation_system_numbers[i],
+                                    *_pm_radiation_systems[i],
+                                    _pm_radiation_equation_relaxation[i],
+                                    _pm_radiation_linear_control,
+                                    _pm_radiation_l_abs_tol);
           }
         }
 
@@ -720,8 +720,8 @@ LinearAssemblySegregatedSolve::solve()
         _cht.resetIntegratedFluxes();
     }
 
-    // If we have participating media radiation equations, solve them here due to the strong coupling with temperature
-    // if (_has_pm_radiation_systems)
+    // If we have participating media radiation equations, solve them here due to the strong
+    // coupling with temperature if (_has_pm_radiation_systems)
     // {
     //   _problem.execute(EXEC_NONLINEAR);
 
@@ -729,7 +729,8 @@ LinearAssemblySegregatedSolve::solve()
     //   // tolerances will be overridden within the solver.
     //   Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);
     //   for (const auto i : index_range(_pm_radiation_system_names))
-    //     ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
+    //     ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system
+    //     +
     //                  i] = solveAdvectedSystem(_pm_radiation_system_numbers[i],
     //                                           *_pm_radiation_systems[i],
     //                                           _pm_radiation_equation_relaxation[i],
@@ -750,11 +751,11 @@ LinearAssemblySegregatedSolve::solve()
       for (const auto i : index_range(_active_scalar_system_names))
         ns_residuals[momentum_residual.size() + 1 + _has_energy_system + _has_solid_energy_system +
                      _pm_radiation_system_names.size() + i] =
-                     solveAdvectedSystem(_active_scalar_system_numbers[i],
-                                              *_active_scalar_systems[i],
-                                              _active_scalar_equation_relaxation[i],
-                                              _active_scalar_linear_control,
-                                              _active_scalar_l_abs_tol);
+            solveAdvectedSystem(_active_scalar_system_numbers[i],
+                                *_active_scalar_systems[i],
+                                _active_scalar_equation_relaxation[i],
+                                _active_scalar_linear_control,
+                                _active_scalar_l_abs_tol);
     }
 
     // If we have turbulence equations, solve them here.

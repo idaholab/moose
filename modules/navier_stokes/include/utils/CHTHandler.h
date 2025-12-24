@@ -35,7 +35,9 @@ public:
   static InputParameters validParams();
 
   /// Link energy systems
-  void linkEnergySystems(SystemBase * solid_energy_system, SystemBase * fluid_energy_system, std::vector<SystemBase *> pm_radiation_systems);
+  void linkEnergySystems(SystemBase * solid_energy_system,
+                         SystemBase * fluid_energy_system,
+                         std::vector<SystemBase *> pm_radiation_systems);
 
   /// Set up the boundary condition pairs, functor maps, and every other necessary
   /// structure for the conjugate heat transfer routines
@@ -84,7 +86,7 @@ protected:
   /// The solid energy system
   SystemBase * _solid_energy_system;
 
-    /// The solid energy system
+  /// The solid energy system
   std::vector<SystemBase *> _pm_radiation_systems;
 
   /// The names of the CHT boundaries
