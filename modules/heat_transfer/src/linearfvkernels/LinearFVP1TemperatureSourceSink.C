@@ -39,7 +39,6 @@ LinearFVP1TemperatureSourceSink::computeMatrixContribution()
 {
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const auto state_arg = determineState();
-  // std::cout << "TemperatureSourceSink_T" << _var.getElemValue(*_current_elem_info, state_arg) << std::endl;
 
   return  4.0 * HeatConduction::Constants::sigma * std::pow(_var.getElemValue(*_current_elem_info, state_arg),3) *
           _sigma_a(elem_arg,state_arg) * _current_elem_volume;
@@ -50,7 +49,6 @@ LinearFVP1TemperatureSourceSink::computeRightHandSideContribution()
 {
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const auto state_arg = determineState();
-  //std::cout << "TemperatureSourceSink_G" <<  _G(elem_arg,state_arg) << std::endl;
 
   return _sigma_a(elem_arg, state_arg) * _G(elem_arg,state_arg) *
         _current_elem_volume;
