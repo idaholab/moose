@@ -29,6 +29,15 @@ PNGOutput::validParams()
                                         "The name of the variable to use when creating the image");
   params.addParam<Real>("max", 1, "The maximum for the variable we want to use");
   params.addParam<Real>("min", 0, "The minimum for the variable we want to use");
+
+  params.addParam<Point>("frame_translation", Point(0,0,0), "Center of the frame when defining the rectangular plotting region dimensions. Applied after the frame rotation");
+  params.addParam<Point>("frame_rotation", Point(0, 0, 0), "Euler rotation angles (phi, theta, psi) to apply to the rectangular plotting region.");
+  params.addParam<Real>("min_x", "Minimum coordinate along the first axis. Defaults to XY bounding box min X value");
+  params.addParam<Real>("max_x", "Minimum coordinate along the first axis. Defaults to XY bounding box max X value");
+  params.addParam<Real>("min_y", "Minimum coordinate along the second axis. Default to XY bounding box min Y value");
+  params.addParam<Real>("max_y", "Minimum coordinate along the second axis. Default to XY bounding box max Y value");
+  params.addParamNamesToGroup("frame_translation frame_rotation min_x max_x min_y max_y", "Rectangular box extent");
+
   MooseEnum color("GRAY BRYW BWR RWB BR", "BR");
   params.addRequiredParam<MooseEnum>("color", color, "Choose the color scheme to use.");
   params.addRangeCheckedParam<unsigned int>(
@@ -331,7 +340,17 @@ PNGOutput::makePNG()
   Point max_point = _box.max();
   Point min_point = _box.min();
 
-  // The the total distance on the x and y axes.
+  // Modify the bounding box if the user passed different bounds
+  if (isParamValid("min_x"))
+    min_point(0) = getParam<Real>("min_x");
+  if (isParamValid("min_y"))
+    min_point(1) = getParam<Real>("min_y");
+  if (isParamValid("max_x"))
+    max_point(0) = getParam<Real>("max_x");
+  if (isParamValid("max_y"))
+    max_point(1) = getParam<Real>("max_y");
+
+  // The total distance on the two plotting axes.
   Real dist_x = max_point(0) - min_point(0);
   Real dist_y = max_point(1) - min_point(1);
 
@@ -400,10 +419,29 @@ PNGOutput::makePNG()
 
   png_write_info(pngp, infop);
 
-  // Initiallizing the point that will be used for populating the mesh values.
+  // Initializing the point that will be used for populating the mesh values.
   // Initializing x, y, z to zero so that we don't access the point before it's
   // been set.  z = 0 for all the png's.
   Point pt(0, 0, 0);
+
+  // Pre-compute the transformations
+  bool has_translation = false;
+  Point offset(0, 0, 0);
+  if (isParamValid("frame_translation"))
+  {
+    has_translation = true;
+    offset = getParam<Point>("frame_translation");
+  }
+  bool has_rotation = false;
+  RealTensorValue rotation_matrix;
+  if (isParamSetByUser("frame_rotation"))
+  {
+    has_rotation = true;
+    const auto & rotation = getParam<Point>("frame_rotation");
+    rotation_matrix = RealTensorValue::intrinsic_rotation_matrix(rotation(0) / 180 * libMesh::pi,
+                                                                 rotation(1) / 180 * libMesh::pi,
+                                                                 rotation(2) / 180 * libMesh::pi);
+  }
 
   // Dense vector that we can pass into the _mesh_function to fill with a value for a given point.
   DenseVector<Number> dv(0);
@@ -416,6 +454,14 @@ PNGOutput::makePNG()
     for (Real x = min_point(0); x <= max_point(0); x += 1. / normalized_resolution)
     {
       pt(0) = x;
+
+      // Rotate and offset the point
+      if (has_rotation)
+        pt = rotation_matrix * pt;
+      if (has_translation)
+        pt += offset;
+      std::cout << name() <<  " Evaluating at " << pt << " from " << x << " " << y << std::endl;
+
       (*_mesh_function)(pt, _time, dv, nullptr);
 
       // Determine whether to create the PNG in color or grayscale
