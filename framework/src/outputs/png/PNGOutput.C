@@ -27,16 +27,39 @@ PNGOutput::validParams()
                         "Determination of whether the background will be transparent.");
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable to use when creating the image");
-  params.addParam<Real>("max", 1, "The maximum for the variable we want to use");
-  params.addParam<Real>("min", 0, "The minimum for the variable we want to use");
+  params.addParam<Real>("max",
+                        "The maximum for the variable we want to use. If unspecified, the maximum "
+                        "of the variable's DOF values is used");
+  params.addParam<Real>("min",
+                        "The minimum for the variable we want to use. If unspecified, the minimum "
+                        "of the variable's DOF values is used");
 
-  params.addParam<Point>("frame_translation", Point(0,0,0), "Center of the frame when defining the rectangular plotting region dimensions. Applied after the frame rotation");
-  params.addParam<Point>("frame_rotation", Point(0, 0, 0), "Euler rotation angles (phi, theta, psi) to apply to the rectangular plotting region.");
-  params.addParam<Real>("min_x", "Minimum coordinate along the first axis. Defaults to XY bounding box min X value");
-  params.addParam<Real>("max_x", "Minimum coordinate along the first axis. Defaults to XY bounding box max X value");
-  params.addParam<Real>("min_y", "Minimum coordinate along the second axis. Default to XY bounding box min Y value");
-  params.addParam<Real>("max_y", "Minimum coordinate along the second axis. Default to XY bounding box max Y value");
-  params.addParamNamesToGroup("frame_translation frame_rotation min_x max_x min_y max_y", "Rectangular box extent");
+  params.addParam<Point>("frame_center",
+                         Point(0, 0, 0),
+                         "Center of the frame when defining the rectangular plotting region "
+                         "dimensions. Applied after the frame rotation");
+  params.addParam<Point>(
+      "first_axis",
+      Point(1, 0, 0),
+      "First axis to generate the rectangular plotting region. The axis vector will be normalized");
+  params.addParam<Point>("second_axis",
+                         Point(0, 1, 0),
+                         "Second axis to generate the rectangular plotting region. The axis vector "
+                         "will be normalized");
+  params.addParam<Real>(
+      "min_x",
+      "Minimum coordinate along the first axis. Defaults to mesh bounding box min X value");
+  params.addParam<Real>(
+      "max_x",
+      "Maximum coordinate along the first axis. Defaults to mesh bounding box max X value");
+  params.addParam<Real>(
+      "min_y",
+      "Minimum coordinate along the second axis. Default to mesh bounding box min Y value");
+  params.addParam<Real>(
+      "max_y",
+      "Maximum coordinate along the second axis. Default to mesh bounding box max Y value");
+  params.addParamNamesToGroup("frame_center first_axis second_axis min_x max_x min_y max_y",
+                              "Rectangular box extent");
 
   MooseEnum color("GRAY BRYW BWR RWB BR", "BR");
   params.addRequiredParam<MooseEnum>("color", color, "Choose the color scheme to use.");
@@ -66,17 +89,19 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
     _transparency(getParam<Real>("transparency")),
     _nl_sys_num(libMesh::invalid_uint),
     _variable(getParam<VariableName>("variable")),
-    _max(getParam<Real>("max")),
-    _min(getParam<Real>("min")),
+    _max(isParamValid("max") ? getParam<Real>("max") : 1),
+    _min(isParamValid("min") ? getParam<Real>("min") : 0),
     _out_bounds_shade(getParam<Real>("out_bounds_shade"))
 {
+  if (!MooseUtils::absoluteFuzzyEqual(
+          getParam<Point>("first_axis") * getParam<Point>("second_axis"), 0))
+    paramWarning("first_axis", "The two axis are not orthogonal");
 }
 
 // Funtion for making the _mesh_function object.
 void
 PNGOutput::makeMeshFunc()
 {
-
   // The number assigned to the variable.  Used to build the correct mesh.  Default is 0.
   unsigned int variable_number = 0;
 
@@ -139,7 +164,7 @@ PNGOutput::calculateRescalingValues()
 {
   // The max and min.
   // If the max value wasn't specified in the input file, find it from the system.
-  if (!_pars.isParamSetByUser("max"))
+  if (!_pars.isParamValid("max"))
   {
     if (_nl_sys_num == libMesh::invalid_uint)
       _scaling_max = _problem_ptr->getAuxiliarySystem().serializedSolution().max();
@@ -150,7 +175,7 @@ PNGOutput::calculateRescalingValues()
     _scaling_max = _max;
 
   // If the min value wasn't specified in the input file, find it from the system.
-  if (!_pars.isParamSetByUser("min"))
+  if (!_pars.isParamValid("min"))
   {
     if (_nl_sys_num == libMesh::invalid_uint)
       _scaling_min = _problem_ptr->getAuxiliarySystem().serializedSolution().min();
@@ -358,22 +383,16 @@ PNGOutput::makePNG()
   Real width;
   Real height;
 
-  // Variable to record the resolution variable after normalized to work with pixels in longest
-  // direction.
-  Real normalized_resolution;
-
   // The longer dimension becomes the value to which we scale the other.
   if (dist_x > dist_y)
   {
     width = _resolution;
     height = (_resolution / dist_x) * dist_y;
-    normalized_resolution = (((Real)_resolution) / dist_x);
   }
   else
   {
     height = _resolution;
     width = (_resolution / dist_y) * dist_x;
-    normalized_resolution = (((Real)_resolution) / dist_y);
   }
 
   // Create the filename based on base and the test step number.
@@ -420,57 +439,39 @@ PNGOutput::makePNG()
   png_write_info(pngp, infop);
 
   // Initializing the point that will be used for populating the mesh values.
-  // Initializing x, y, z to zero so that we don't access the point before it's
-  // been set.  z = 0 for all the png's.
   Point pt(0, 0, 0);
 
   // Pre-compute the transformations
-  bool has_translation = false;
-  Point offset(0, 0, 0);
-  if (isParamValid("frame_translation"))
-  {
-    has_translation = true;
-    offset = getParam<Point>("frame_translation");
-  }
-  bool has_rotation = false;
-  RealTensorValue rotation_matrix;
-  if (isParamSetByUser("frame_rotation"))
-  {
-    has_rotation = true;
-    const auto & rotation = getParam<Point>("frame_rotation");
-    rotation_matrix = RealTensorValue::intrinsic_rotation_matrix(rotation(0) / 180 * libMesh::pi,
-                                                                 rotation(1) / 180 * libMesh::pi,
-                                                                 rotation(2) / 180 * libMesh::pi);
-  }
+  Point center(0, 0, 0);
+  if (isParamValid("frame_center"))
+    center = getParam<Point>("frame_center");
+  else
+    center = Point((min_point(0) + max_point(0)) / 2, (min_point(1) + max_point(1)) / 2, 0);
+
+  const auto first_axis = getParam<Point>("first_axis").unit();
+  const auto second_axis = getParam<Point>("second_axis").unit();
 
   // Dense vector that we can pass into the _mesh_function to fill with a value for a given point.
   DenseVector<Number> dv(0);
 
   // Loop through to create the image.
-  for (Real y = max_point(1); y >= min_point(1); y -= 1. / normalized_resolution)
+  for (const auto iy : make_range(_resolution))
   {
-    pt(1) = y;
-    unsigned int index = 0;
-    for (Real x = min_point(0); x <= max_point(0); x += 1. / normalized_resolution)
+    for (const auto ix : make_range(_resolution))
     {
-      pt(0) = x;
-
-      // Rotate and offset the point
-      if (has_rotation)
-        pt = rotation_matrix * pt;
-      if (has_translation)
-        pt += offset;
-      std::cout << name() <<  " Evaluating at " << pt << " from " << x << " " << y << std::endl;
+      // Move along the axis from the center
+      // Center the point in the pixel
+      pt = center +
+           (min_point(0) + Real(ix) / _resolution * (max_point(0) - min_point(0))) * first_axis +
+           (min_point(1) + Real(iy) / _resolution * (max_point(1) - min_point(1))) * second_axis;
 
       (*_mesh_function)(pt, _time, dv, nullptr);
 
       // Determine whether to create the PNG in color or grayscale
       if (_color)
-        setRGB(&row.data()[index * 4], applyScale(dv(0)));
+        setRGB(&row.data()[ix * 4], applyScale(dv(0)));
       else
-        row.data()[index] = applyScale(dv(0)) * 255;
-
-      index++;
+        row.data()[ix] = applyScale(dv(0)) * 255;
     }
     png_write_row(pngp, row.data());
   }
