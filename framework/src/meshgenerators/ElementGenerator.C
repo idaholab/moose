@@ -57,10 +57,10 @@ ElementGenerator::ElementGenerator(const InputParameters & parameters)
 {
 }
 
-Elem *
+std::unique_ptr<Elem>
 ElementGenerator::getElemType(const std::string & type)
 {
-  return Elem::build(Utility::string_to_enum<ElemType>(type)).release();
+  return Elem::build(Utility::string_to_enum<ElemType>(type));
 }
 
 std::unique_ptr<MeshBase>
@@ -72,8 +72,11 @@ ElementGenerator::generate()
   if (!mesh)
     mesh = buildMeshBaseObject();
 
-  MooseEnum elem_type_enum = getParam<MooseEnum>("elem_type");
-  auto elem = getElemType(elem_type_enum);
+  std::unique_ptr<Elem> elem;
+  if (_elem_type != "C0POLYGON")
+    elem = getElemType(_elem_type);
+  else
+    elem = std::make_unique<libMesh::C0Polygon>(_nodal_positions.size());
   elem->subdomain_id() = getParam<SubdomainID>("subdomain_id");
   if (isParamValid("subdomain_name"))
     mesh->subdomain_name(getParam<SubdomainID>("subdomain_id")) =
@@ -82,31 +85,23 @@ ElementGenerator::generate()
   mesh->set_mesh_dimension(std::max((unsigned int)elem->dim(), mesh->mesh_dimension()));
 
   std::vector<Node *> nodes;
-
   nodes.reserve(_nodal_positions.size());
 
   // Add all the nodes
-  for (auto & point : _nodal_positions)
+  for (const auto & point : _nodal_positions)
     nodes.push_back(mesh->add_point(point));
-
-  mesh->add_elem(elem);
-
   auto n = elem->n_nodes();
 
-  for (dof_id_type i = 0; i < _element_connectivity.size(); i += n)
-  {
-    for (unsigned int j = 0; j < n; j++)
-    {
-      elem->set_node(j, nodes[_element_connectivity[j + i]]);
-    }
-  }
+  for (const auto j : make_range(n))
+    elem->set_node(j, nodes[_element_connectivity[j]]);
 
+  mesh->add_elem(std::move(elem));
   // We just added an element
   mesh->set_isnt_prepared();
 
   if (getParam<bool>("create_sidesets"))
     for (const auto i_side : make_range(elem->n_sides()))
-      mesh->get_boundary_info().add_side(elem, i_side, i_side);
+      mesh->get_boundary_info().add_side(elem.get(), i_side, i_side);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
