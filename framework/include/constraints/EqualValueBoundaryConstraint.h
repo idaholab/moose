@@ -39,12 +39,28 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
-  // Holds the primary node id
-  unsigned int _primary_node_id;
-  // Holds the list of secondary node ids
-  std::vector<unsigned int> _secondary_node_ids;
-  // Holds the secondary node set or side set
-  BoundaryName _secondary_node_set_id;
-  // Penalty if constraint is not satisfied
+  /// Penalty if constraint is not satisfied
   Real _penalty;
+
+private:
+  /**
+   * Populate the set of secondary nodes from user input
+   */
+  void populateSecondaryNodes();
+
+  /**
+   * Pick the primary node from user input or from the secondary node set
+   */
+  void pickPrimaryNode();
+
+  /**
+   * Ghost elements and nodes connected to the primary node
+   */
+  void ghostPrimary();
+
+  /**
+   * Get the primary node ID by searching for the node with coordinates
+   * matching _primary_node_coord on the secondary node set
+   */
+  dof_id_type getPrimaryNodeIDByCoord() const;
 };
