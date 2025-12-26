@@ -249,8 +249,8 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonSink()
     params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
-    params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
-    params.set<Real>("C2_eps") = getParam<Real>("C2_eps");
+    params.set<MooseFunctorName>("C1_eps") = getParam<MooseFunctorName>("C1_eps");
+    params.set<MooseFunctorName>("C2_eps") = getParam<MooseFunctorName>("C2_eps");
     params.set<Real>("C_mu") = getParam<Real>("C_mu");
     params.set<Real>("C_pl") = getParam<Real>("C_pl");
     for (const auto d : make_range(dimension()))
