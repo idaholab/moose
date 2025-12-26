@@ -65,6 +65,18 @@ void prismElemSplitter(MeshBase & mesh,
                        std::vector<dof_id_type> & converted_elems_ids);
 
 /**
+ * Split a polyhedron element into n_sides TET4 elements.
+ * @param mesh The mesh to be modified
+ * @param bdry_side_list A list that contains the boundary information of the original mesh
+ * @param elem_id The id of the element to be split
+ * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
+ */
+void polyhedronElemSplitter(MeshBase & mesh,
+                            const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
+                            const dof_id_type elem_id,
+                            std::vector<dof_id_type> & converted_elems_ids);
+
+/**
  * Rotate a HEX8 element's nodes to ensure that the node with the minimum id is the first node;
  * and the node among its three neighboring nodes with the minimum id is the second node.
  * @param min_id_index The index of the node with the minimum id
