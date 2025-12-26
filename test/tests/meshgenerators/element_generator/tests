@@ -1,10 +1,10 @@
 [Tests]
-  issues = '#11640 #30158'
   design = 'meshgenerators/ElementGenerator.md'
 
   [generate]
     requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
                   'points, element types, and connectivity,'
+    issues = '#11640 #30158 '
 
     [single_element_no_ss]
       type = 'Exodiff'
@@ -35,6 +35,17 @@
       recover = false
 
       detail = 'resulting in a mesh with multiple disconnected elements.'
+    []
+  []
+  [polys]
+    issues = '#32159'
+    requirement = 'The system shall be able to generate'
+    [polygon]
+      type = CSVDiff
+      input = 'polygon.i'
+      csvdiff = 'polygon.csv'
+      recover = false
+      detail = 'a polygon from user-specified nodes,'
     []
   []
 []
