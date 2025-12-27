@@ -6,7 +6,7 @@
                        1 1 0'
 
     element_connectivity = '0 1 2'
-    elem_type = "TRI3"
+    elem_type = "C0POLYGON"
     subdomain_name = 'base'
   []
 []
