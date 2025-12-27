@@ -499,8 +499,8 @@ WCNSFVTurbulencePhysics::addKEpsilonSink()
     params.set<bool>("linearized_model") = getParam<bool>("linearize_sink_sources");
     params.set<std::vector<BoundaryName>>("walls") = _turbulence_walls;
     params.set<MooseEnum>("wall_treatment") = _wall_treatment_eps;
-    params.set<Real>("C1_eps") = getParam<Real>("C1_eps");
-    params.set<Real>("C2_eps") = getParam<Real>("C2_eps");
+    params.set<MooseFunctorName>("C1_eps") = getParam<MooseFunctorName>("C1_eps");
+    params.set<MooseFunctorName>("C2_eps") = getParam<MooseFunctorName>("C2_eps");
     // Currently only Newton method for WCNSFVTurbulencePhysics
     params.set<bool>("newton_solve") = true;
     for (const auto d : make_range(dimension()))

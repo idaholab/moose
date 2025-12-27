@@ -38,8 +38,8 @@ INSFVTKEDSourceSink::validParams()
                              wall_treatment,
                              "The method used for computing the wall functions "
                              "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'");
-  params.addParam<Real>("C1_eps", 1.44, "First epsilon coefficient");
-  params.addParam<Real>("C2_eps", 1.92, "Second epsilon coefficient");
+  params.addParam<MooseFunctorName>("C1_eps", 1.44, "First epsilon coefficient");
+  params.addParam<MooseFunctorName>("C2_eps", 1.92, "Second epsilon coefficient");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   params.addParam<Real>("C_pl", 10.0, "Production limiter constant multiplier.");
   params.set<unsigned short>("ghost_layers") = 2;
@@ -61,8 +61,8 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
     _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
-    _C1_eps(getParam<Real>("C1_eps")),
-    _C2_eps(getParam<Real>("C2_eps")),
+    _C1_eps(getFunctor<ADReal>("C1_eps")),
+    _C2_eps(getFunctor<ADReal>("C2_eps")),
     _C_mu(getParam<Real>("C_mu")),
     _C_pl(getParam<Real>("C_pl")),
     _newton_solve(getParam<bool>("newton_solve"))
@@ -179,8 +179,8 @@ INSFVTKEDSourceSink::computeQpResidual()
     production_k = min(production_k, production_limit);
 
     const auto time_scale = raw_value(TKE_old) / raw_value(eps_old);
-    production = _C1_eps * production_k / time_scale;
-    destruction = _C2_eps * rho * _var(elem_arg, state) / time_scale;
+    production = _C1_eps(elem_arg, state) * production_k / time_scale;
+    destruction = _C2_eps(elem_arg, state) * rho * _var(elem_arg, state) / time_scale;
 
     residual = destruction - production;
   }

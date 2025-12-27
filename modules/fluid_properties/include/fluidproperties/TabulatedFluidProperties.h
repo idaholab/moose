@@ -39,6 +39,8 @@ public:
 
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
 
+  virtual ADReal rho_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
   virtual void rho_from_p_T(const ADReal & pressure,
@@ -53,20 +55,28 @@ public:
 
   virtual Real v_from_p_T(Real pressure, Real temperature) const override;
 
+  virtual ADReal v_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+
   virtual void
   v_from_p_T(Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const override;
 
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
+
+  virtual ADReal e_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
 
   virtual void
   e_from_p_T(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
   virtual Real e_from_p_rho(Real pressure, Real rho) const override;
 
+  virtual ADReal e_from_p_rho(const ADReal & pressure, const ADReal & rho) const override;
+
   virtual void
   e_from_p_rho(Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
 
   virtual Real T_from_p_rho(Real pressure, Real rho) const;
+
+  virtual ADReal T_from_p_rho(const ADReal & pressure, const ADReal & rho) const;
 
   virtual void T_from_p_rho(Real pressure, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const;
 
@@ -135,8 +145,18 @@ public:
    */
   virtual Real p_from_v_e(Real v, Real e) const override;
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
+  virtual void p_from_v_e(const ADReal & v,
+                          const ADReal & e,
+                          ADReal & p,
+                          ADReal & dp_dv,
+                          ADReal & dp_de) const override;
   virtual Real T_from_v_e(Real v, Real e) const override;
   virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
+  virtual void T_from_v_e(const ADReal & v,
+                          const ADReal & e,
+                          ADReal & p,
+                          ADReal & dp_dv,
+                          ADReal & dp_de) const override;
   virtual Real c_from_v_e(Real v, Real e) const override;
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
   virtual Real cp_from_v_e(Real v, Real e) const override;
@@ -154,6 +174,7 @@ public:
   virtual Real T_from_p_s(Real p, Real s) const;
   virtual void T_from_p_s(Real p, Real s, Real & T, Real & dT_dp, Real & dT_ds) const;
   virtual Real s_from_v_e(Real v, Real e) const override;
+  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
   virtual Real s_from_h_p(Real h, Real pressure) const override;
   virtual void
   s_from_h_p(Real h, Real pressure, Real & s, Real & ds_dh, Real & ds_dp) const override;
@@ -190,8 +211,10 @@ protected:
 
   /**
    * Checks initial guess for Newton Method
+   * @param post_reading_tabulation whether the check is performed at construction (false) or after
+   * reading a file tabulation (true)
    */
-  virtual void checkInitialGuess() const;
+  virtual void checkInitialGuess(bool post_reading_tabulation) const;
 
   /// Read tabulation data from file
   void readFileTabulationData(bool use_pT);
@@ -239,8 +262,15 @@ protected:
   /// Standardized error message for missing interpolation
   void missingVEInterpolationError(const std::string & function_name) const;
 
-  // Utility to forward errors related to fluid properties methods not implemented
-  [[noreturn]] void FluidPropertiesForwardError(const std::string & desired_routine) const;
+  /// Utility to forward errors related to fluid properties methods not implemented
+  [[noreturn]] void TabulationNotImplementedError(const std::string & desired_routine) const;
+  /// Utility to forward errors related to fluid properties needing more data for their computation
+  /// This should generally be used as an 'else' condition to if (_interpolate_property) / else if (_fp)
+  [[noreturn]] void NeedTabulationOrFPError(const std::string & desired_routine,
+                                            const std::string & needed_property) const;
+  /// Utility to forward errors related to properties being requested for tabulation, but no tabulation is present
+  /// This should generally be used as an 'else' condition to if (_interpolate_needed_property)
+  [[noreturn]] void NeedTabulationError(const std::string & needed_property) const;
 
   /// File name of input tabulated data file
   FileName _file_name_in;
@@ -264,9 +294,9 @@ protected:
   /// Specific enthalpy vector
   std::vector<Real> _enthalpy;
 
-  /// Whether to create direct (p,T) interpolations
+  /// Whether the object has direct (p,T) interpolations (whether created from file or from _fp)
   const bool _create_direct_pT_interpolations;
-  /// Whether to create direct (v,e) interpolations
+  /// Whether the object has direct (v,e) interpolations (whether created from file or from _fp)
   const bool _create_direct_ve_interpolations;
 
   /// Tabulated fluid properties (read from file OR computed from _fp)

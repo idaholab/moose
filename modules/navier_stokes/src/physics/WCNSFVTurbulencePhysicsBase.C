@@ -50,10 +50,10 @@ WCNSFVTurbulencePhysicsBase::validParams()
       "initial_tked", "0", "Initial value for the turbulence kinetic energy dissipation");
   params.addParam<FunctionName>("initial_mu_t", "Initial value for the turbulence viscosity");
 
-  params.addParam<Real>("C1_eps",
-                        "C1 coefficient for the turbulent kinetic energy dissipation equation");
-  params.addParam<Real>("C2_eps",
-                        "C2 coefficient for the turbulent kinetic energy dissipation equation");
+  params.addParam<MooseFunctorName>(
+      "C1_eps", "C1 coefficient for the turbulent kinetic energy dissipation equation");
+  params.addParam<MooseFunctorName>(
+      "C2_eps", "C2 coefficient for the turbulent kinetic energy dissipation equation");
   params.addParam<MooseFunctorName>(
       "sigma_k", "Scaling coefficient for the turbulent kinetic energy diffusion term");
   params.addParam<MooseFunctorName>(
