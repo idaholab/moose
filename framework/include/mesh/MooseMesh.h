@@ -66,7 +66,7 @@ const std::string LIST_GEOM_ELEM = "EDGE EDGE2 EDGE3 EDGE4 "
                                    "TET TET4 TET10 TET14 "
                                    "PRISM PRISM6 PRISM15 PRISM18 "
                                    "PYRAMID PYRAMID5 PYRAMID13 PYRAMID14 "
-                                   "C0POLYGON";
+                                   "C0POLYGON C0POLYHEDRON";
 
 /**
  * Helper object for holding qp mapping info.

@@ -34,7 +34,7 @@ protected:
   const std::vector<Point> & _nodal_positions;
 
   /// The connectivity of the elements to the nodes
-  const std::vector<dof_id_type> & _element_connectivity;
+  const std::vector<std::vector<dof_id_type>> & _element_connectivity;
 
   /// The type of element to build.
   const MooseEnum & _elem_type;
