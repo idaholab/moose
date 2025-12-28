@@ -60,18 +60,22 @@ public:
    */
   void lmOutflow();
 
+protected:
+  /**
+   * compute the face flux, e.g. the advected quantity times the velocity dotted with the normal
+   * @param qp The quadrature point index
+   * @param face_value The advected quantity evaluated right on the face, so either the trace
+   * unknown or a Dirichlet value
+   */
+  ADReal computeFlux(const unsigned int qp, const ADReal & face_value);
+
   /// The velocity in the element interior
   const ADMaterialProperty<RealVectorValue> & _velocity;
 
   /// The velocity on the element faces
   const ADMaterialProperty<RealVectorValue> & _face_velocity;
 
-  /// The quantity we are advecting, e.g. something like a density. If \p _self_advection is true
-  /// then the advected quantity value is this \p _coeff value multipled by the
+  /// The advected quantity value is this \p _coeff value multipled by the
   /// variable/side_variable pair (for element upwind/downwind of the face respectively)
   const Real _coeff;
-
-  /// Whether this kernel should advect itself, e.g. its variable/side_variable pair (for element
-  /// upwind/downwind of the face respectively). If false, we will advect just the \p _coeff value
-  const bool _self_advection;
 };

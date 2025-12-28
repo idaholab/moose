@@ -3,6 +3,11 @@ rho = 1
 U = 1
 n = 5
 l = 1
+gamma = 2
+
+[GlobalParams]
+  gamma = ${gamma}
+[]
 
 [Mesh]
   [gen]
@@ -85,13 +90,19 @@ l = 1
     component = 1
   []
 
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
+  []
+
+  [pb_mass]
+    type = MassMatrixHDG
+    variable = pressure_bar
+    matrix_tags = 'mass'
+    density = '${fparse -1/gamma}'
   []
 []
 
@@ -106,16 +117,19 @@ l = 1
     type = MassMatrix
     variable = vel_x
     matrix_tags = 'mass'
+    density = '${fparse -1/gamma}'
   []
   [mass_matrix_vel_y]
     type = MassMatrix
     variable = vel_y
     matrix_tags = 'mass'
+    density = '${fparse -1/gamma}'
   []
   [mass_matrix_pressure]
     type = MassMatrix
     variable = pressure
     matrix_tags = 'mass'
+    density = '${fparse -1/gamma}'
   []
 
   [u_jump]
@@ -150,12 +164,6 @@ l = 1
 []
 
 [DGKernels]
-  [pb_mass]
-    type = MassMatrixDGKernel
-    variable = pressure_bar
-    matrix_tags = 'mass'
-  []
-
   [u_jump]
     type = MassFluxPenalty
     matrix_only = true
@@ -216,15 +224,21 @@ l = 1
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]
@@ -232,68 +246,64 @@ l = 1
     variable = pressure_bar
     matrix_tags = 'mass'
     boundary = 'left right bottom top'
+    density = '${fparse -1/gamma}'
   []
 
   [u_jump_walls]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
-    dirichlet_value = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
-    dirichlet_value = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
-    dirichlet_value = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
-    dirichlet_value = 'top'
-  []
-[]
-
-[Functions]
-  [top]
-    type = ParsedVectorFunction
-    value_x = ${U}
-    value_y = 0
-  []
-  [walls]
-    type = ParsedVectorFunction
-    value_x = 0
-    value_y = 0
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
 []
 
@@ -308,6 +318,19 @@ l = 1
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
+  []
+[]
+
+[FunctorMaterials]
+  [top]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = top
+    prop_values = '${U} 0 0'
+  []
+  [walls]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 

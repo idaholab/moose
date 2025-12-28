@@ -95,7 +95,7 @@ protected:
   /// Current side
   const unsigned int & _current_side;
   /// Current side element
-  const Elem *& _current_side_elem;
+  const Elem * const & _current_side_elem;
   /// The volume (or length) of the current side
   const Real & _current_side_volume;
 

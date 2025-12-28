@@ -28,3 +28,9 @@ AdvectionIPHDGKernel::AdvectionIPHDGKernel(const InputParameters & params)
         this, this, this, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
+
+IPHDGAssemblyHelper &
+AdvectionIPHDGKernel::iphdgHelper()
+{
+  return *_iphdg_helper;
+}

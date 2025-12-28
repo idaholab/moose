@@ -3,6 +3,8 @@ rho = 1
 l = 1
 U = 100
 n = 8
+degree = 2
+alpha = '${fparse 10 * degree^2}'
 
 [Mesh]
   [gen]
@@ -41,7 +43,7 @@ n = 8
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [lambda]
     family = SCALAR
@@ -62,7 +64,7 @@ n = 8
     variable = vel_x
     face_variable = vel_bar_x
     diffusivity = 'mu'
-    alpha = 6
+    alpha = ${alpha}
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 0
@@ -79,18 +81,17 @@ n = 8
     variable = vel_y
     face_variable = vel_bar_y
     diffusivity = 'mu'
-    alpha = 6
+    alpha = ${alpha}
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -119,7 +120,7 @@ n = 8
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
+    alpha = ${alpha}
     functor = '0'
     diffusivity = 'mu'
     component = 0
@@ -131,7 +132,7 @@ n = 8
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
+    alpha = ${alpha}
     functor = '${U}'
     diffusivity = 'mu'
     component = 0
@@ -143,21 +144,27 @@ n = 8
     face_variable = vel_bar_y
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
+    alpha = ${alpha}
     functor = '0'
     diffusivity = 'mu'
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 []
 
@@ -178,8 +185,8 @@ n = 8
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       NONZERO               mumps'
   nl_rel_tol = 1e-12
 []
 
