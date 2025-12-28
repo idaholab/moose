@@ -248,6 +248,7 @@
   []
   [critical_time_step]
     type = CriticalTimeStep
+    density = density
   []
   [contact_pressure_max]
     type = NodalExtremeValue
