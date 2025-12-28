@@ -1,9 +1,8 @@
 [Tests]
+  design = 'meshgenerators/PolyLineMeshGenerator.md'
+  issues = '#20192'
   [polyline]
-    design = 'meshgenerators/PolyLineMeshGenerator.md'
-    issues = '#20192'
     requirement = "The system shall have the capability of generating a polyline geometry mesh"
-
     [basic]
       type = 'Exodiff'
       input = 'polyline_mesh_generator.i'
@@ -28,6 +27,14 @@
       recover = false
       detail = "refining a line if requested"
     []
+    [multi_refine]
+      type = 'Exodiff'
+      input = 'polyline_mesh_generator_multi_refine.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polyline_mesh_generator_multi_refine_in.e'
+      recover = false
+      detail = "refining lines with different numbers of edges if requested"
+    []
     [loop_refine]
       type = 'Exodiff'
       input = 'polyline_mesh_generator_loop_refine.i'
@@ -35,6 +42,14 @@
       exodiff = 'polyline_mesh_generator_loop_refine_in.e'
       recover = false
       detail = "refining a loop if requested"
+    []
+    [multip_loop_refine]
+      type = 'Exodiff'
+      input = 'polyline_mesh_generator_multi_loop_refine.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polyline_mesh_generator_multi_loop_refine_in.e'
+      recover = false
+      detail = "refining a loop with different numbers of edges for line segments if requested"
     []
   []
   [polyline_good_boundary]
@@ -46,5 +61,24 @@
     exodiff = 'polyline_mesh_generator_good_boundary_in.e'
     recover = false
     requirement = "The system shall set a boundary name or id if requested."
+  []
+  [errors]
+     requirement = "The system shall throw an error if"
+     [nums_edges_mismatch]
+       type = 'RunException'
+       input = 'polyline_mesh_generator_multi_refine.i'
+       cli_args = '--mesh-only err.e
+                  Mesh/poly/nums_edges_between_points="2 3 4"'
+       expect_err = "must be 1 or match"
+       detail = "the number of edges between points is not 1 and does not match the number of segments for an open polyline"
+     []
+     [nums_edges_mismatch_loop]
+       type = 'RunException'
+       input = 'polyline_mesh_generator_multi_loop_refine.i'
+       cli_args = '--mesh-only err.e
+                  Mesh/poly/nums_edges_between_points="2 3"'
+       expect_err = "must be 1 or match"
+       detail = "the number of edges between points is not 1 and does not match the number of segments for a looped polyline"
+     []
   []
 []
