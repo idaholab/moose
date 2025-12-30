@@ -1403,17 +1403,9 @@ public:
   void buildPRefinementAndCoarseningMaps(Assembly * assembly);
 
   /**
-   * @return Whether the subdomain indicated by \p subdomain_id is a lower-dimensional manifold of
-   * some higher-dimensional subdomain, or in implementation speak, whether the elements of this
-   * subdomain have non-null interior parents
+   * @return Whether there are any lower-dimensional blocks
    */
-  bool isLowerD(const SubdomainID subdomain_id) const;
-
-  /**
-   * @return Whether there are any lower-dimensional blocks that are manifolds of higher-dimensional
-   * block faces
-   */
-  bool hasLowerD() const { return _has_lower_d; }
+  bool hasLowerD() const { return getMesh().elem_dimensions().size() > 1; }
 
   /**
    * @return The set of lower-dimensional blocks for interior sides
@@ -1818,9 +1810,6 @@ private:
     /// The boundary ids that are attached. This set will include any sideset boundary ID that
     /// is a side of any part of the subdomain
     std::set<BoundaryID> boundary_ids;
-
-    /// Whether this subdomain is a lower-dimensional manifold of a higher-dimensional subdomain
-    bool is_lower_d;
   };
 
   /// Holds a map from subdomain ids to associated data
@@ -1837,10 +1826,6 @@ private:
   std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *>
       _higher_d_elem_side_to_lower_d_elem;
   std::unordered_map<const Elem *, unsigned short int> _lower_d_elem_to_higher_d_elem_side;
-
-  /// Whether there are any lower-dimensional blocks that are manifolds of higher-dimensional block
-  /// faces
-  bool _has_lower_d;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
@@ -2234,10 +2219,4 @@ inline const std::unordered_map<std::pair<const Elem *, unsigned short int>, con
 MooseMesh::getLowerDElemMap() const
 {
   return _higher_d_elem_side_to_lower_d_elem;
-}
-
-inline bool
-MooseMesh::isLowerD(const SubdomainID subdomain_id) const
-{
-  return libmesh_map_find(_sub_to_data, subdomain_id).is_lower_d;
 }

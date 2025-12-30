@@ -257,7 +257,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
         getParam<MooseEnum>("patch_update_strategy").getEnum<Moose::PatchUpdateType>()),
     _regular_orthogonal_mesh(false),
     _is_split(getParam<bool>("_is_split")),
-    _has_lower_d(false),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
     _displace_node_list_by_side_list(getParam<bool>("displace_node_list_by_side_list")),
@@ -326,7 +325,6 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _is_split(other_mesh._is_split),
     _lower_d_interior_blocks(other_mesh._lower_d_interior_blocks),
     _lower_d_boundary_blocks(other_mesh._lower_d_boundary_blocks),
-    _has_lower_d(other_mesh._has_lower_d),
     _allow_recovery(other_mesh._allow_recovery),
     _construct_node_list_from_side_list(other_mesh._construct_node_list_from_side_list),
     _displace_node_list_by_side_list(other_mesh._displace_node_list_by_side_list),
@@ -1454,7 +1452,6 @@ MooseMesh::cacheInfo()
 {
   TIME_SECTION("cacheInfo", 3);
 
-  _has_lower_d = false;
   _sub_to_data.clear();
   _neighbor_subdomain_boundary_ids.clear();
   _block_node_list.clear();
@@ -1472,8 +1469,6 @@ MooseMesh::cacheInfo()
 
     if (ip_elem)
     {
-      if (elem->active())
-        _sub_to_data[elem->subdomain_id()].is_lower_d = true;
       unsigned int ip_side = ip_elem->which_side_am_i(elem);
 
       // For some grid sequencing tests: ip_side == libMesh::invalid_uint
@@ -1534,9 +1529,6 @@ MooseMesh::cacheInfo()
     auto & sub_data = _sub_to_data[blk_id];
     _communicator.set_union(sub_data.neighbor_subs);
     _communicator.set_union(sub_data.boundary_ids);
-    _communicator.max(sub_data.is_lower_d);
-    if (sub_data.is_lower_d)
-      _has_lower_d = true;
     _communicator.set_union(_neighbor_subdomain_boundary_ids[blk_id]);
   }
 }

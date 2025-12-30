@@ -126,6 +126,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
 
         for (const auto & aux : iter->second)
         {
+          aux->determineWhetherCoincidentLowerDCalc();
           aux->compute();
           aux->insert();
         }

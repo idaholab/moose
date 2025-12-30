@@ -49,6 +49,8 @@ SolutionAux::SolutionAux(const InputParameters & parameters)
 void
 SolutionAux::initialSetup()
 {
+  AuxKernel::initialSetup();
+
   // If 'from_variable' is supplied, use the value
   if (isParamValid("from_variable"))
     _var_name = getParam<std::string>("from_variable");

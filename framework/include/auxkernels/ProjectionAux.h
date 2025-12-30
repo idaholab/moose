@@ -27,6 +27,12 @@ public:
   ProjectionAux(const InputParameters & parameters);
 
 protected:
+  enum ElemToNodeProjectionWeighting
+  {
+    VOLUME = 0,
+    IDENTITY
+  };
+
   virtual Real computeValue() override;
 
   /// The variable to project from
@@ -42,7 +48,16 @@ protected:
   /// Whether to use the auxkernel block restriction to limit the values for the source variables
   bool _use_block_restriction_for_source;
 
+  /// How to weight element to node projections
+  const ElemToNodeProjectionWeighting _elem_to_node_projection_weighting;
+
 private:
   /// For a node, finds an element we can use to evaluate the (continuous) source variable
   const Elem * elemOnNodeVariableIsDefinedOn() const;
+
+  /// Set for holding element dimensions when mapping from multiple element values to a node. We use
+  /// this for error checking that we aren't doing volume weighted averaging with multiple element
+  /// dimensions which would result in inconsistent units and consequently illogical results. We use
+  /// this data member to reduce dynamic heap allocations
+  std::unordered_set<unsigned short> _elem_dims;
 };
