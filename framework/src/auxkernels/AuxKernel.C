@@ -128,6 +128,8 @@ template <typename ComputeValueType>
 void
 AuxKernelTempl<ComputeValueType>::insert()
 {
+  mooseAssert(_coincident_lower_d_calc.has_value(),
+              "We should have set _coincident_lower_d_calc by now");
   if (_coincident_lower_d_calc.value())
     _var.insertLower(_aux_sys.solution());
   else
@@ -329,6 +331,12 @@ AuxKernelTempl<ComputeValueType>::determineWhetherCoincidentLowerDCalc()
               "We can never be a lower-dimensional calculation if we are not boundary restricted "
               "or if we are a nodal auxiliary kernel");
 
+  // MOOSE maintains three copies of finite element data. One is for the current canonical element,
+  // one is for the element neighbor, and one is for a lower-d element. These three copies have
+  // supported all of MOOSE's finite element use cases to date, including mortar. For AuxKernel, we
+  // do not use the neighbor data copy, but we do use the other two copies. The numberOfDofs() API
+  // returns the number of degrees of freedom for the canonical element. If there are none, then
+  // there must be degrees of freedom associated with the lower-d element
   _coincident_lower_d_calc = !_var.numberOfDofs();
 
   if (_coincident_lower_d_calc.value())

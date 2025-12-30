@@ -12,7 +12,7 @@
 #include "RelationshipManager.h"
 
 /**
- * Ghosts all point neighbors (not including peridioc neighbors) regardless of the dimensionality of
+ * Ghosts all point neighbors (not including periodic neighbors) regardless of the dimensionality of
  * the elements using node-to-element maps
  */
 class GhostAllPointNeighbors : public RelationshipManager
