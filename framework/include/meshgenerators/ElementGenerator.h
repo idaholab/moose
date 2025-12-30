@@ -23,7 +23,8 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-  Elem * getElemType(const std::string & type);
+  /// Creates the base element of the given type
+  std::unique_ptr<Elem> getElemType(const std::string & type);
 
 protected:
   /// Mesh that possibly comes from another generator
@@ -33,8 +34,8 @@ protected:
   const std::vector<Point> & _nodal_positions;
 
   /// The connectivity of the elements to the nodes
-  const std::vector<dof_id_type> & _element_connectivity;
+  const std::vector<std::vector<dof_id_type>> & _element_connectivity;
 
   /// The type of element to build.
-  const unsigned int _elem_type;
+  const MooseEnum & _elem_type;
 };
