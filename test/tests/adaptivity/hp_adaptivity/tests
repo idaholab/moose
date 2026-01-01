@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#31109'
+  design = "Adaptivity.md"
+  [test]
+    requirement = "MOOSE shall support hp adaptivity"
+    [libmesh]
+      type = 'CSVDiff'
+      input = 'hp_adaptivity.i'
+      csvdiff = 'hp_adaptivity_out.csv'
+      detail = 'with elements flagged for refinement using libMesh error estimation classes, and'
+    []
+    [user]
+      type = 'CSVDiff'
+      input = 'hp-adaptivity-new-system.i'
+      csvdiff = 'hp-adaptivity-new-system_out.csv'
+      detail = 'with elements flagged for refinement using the MOOSE indicator and marker systems.'
+    []
+  []
+[]

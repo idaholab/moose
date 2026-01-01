@@ -48,6 +48,7 @@ Adaptivity::Adaptivity(FEProblemBase & fe_problem)
     _stop_time(std::numeric_limits<Real>::max()),
     _cycles_per_step(1),
     _use_new_system(false),
+    _adaptivity_type(AdaptivityType::H),
     _max_h_level(0),
     _recompute_markers_during_cycles(false)
 {
@@ -58,7 +59,7 @@ Adaptivity::~Adaptivity() {}
 void
 Adaptivity::init(const unsigned int steps,
                  const unsigned int initial_steps,
-                 const bool p_refinement)
+                 const AdaptivityType adaptivity_type)
 {
   // Get the pointer to the DisplacedProblem, this cannot be done at construction because
   // DisplacedProblem
@@ -73,17 +74,30 @@ Adaptivity::init(const unsigned int steps,
 
   _initial_steps = initial_steps;
   _steps = steps;
-  _p_refinement_flag = p_refinement;
+
+  _adaptivity_type = adaptivity_type;
+
   _mesh_refinement_on = true;
 
-  if (_p_refinement_flag)
+  if (_adaptivity_type == AdaptivityType::P || _adaptivity_type == AdaptivityType::HP)
     _mesh.doingPRefinement(true);
 
-  _mesh_refinement->set_periodic_boundaries_ptr(
-      _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
+  if (_adaptivity_type == AdaptivityType::HP)
+  {
+    if (_fe_problem.numSolverSystems() > 1)
+      mooseError("HP adaptivity doesn't support multiple solver systems because currently only the "
+                 "zeroth solver system solution is analyzed for determining whether to toggle "
+                 "h-refinement flags to p-refinement flags");
 
-  // displaced problem
-  if (_displaced_problem != nullptr)
+    _sibling_coupling = std::make_unique<SiblingCoupling>();
+    _fe_problem.getSolverSystem(0).system().get_dof_map().add_algebraic_ghosting_functor(
+        *_sibling_coupling);
+  }
+
+  _mesh_refinement->set_periodic_boundaries_ptr(
+      _fe_problem.getSolverSystem(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
+
+  if (_displaced_problem)
   {
     EquationSystems & displaced_es = _displaced_problem->es();
     displaced_es.parameters.set<bool>("adaptivity") = true;
@@ -96,7 +110,7 @@ Adaptivity::init(const unsigned int steps,
     // i.e. neighbors across periodic boundaries, for the purposes of
     // refinement.
     _displaced_mesh_refinement->set_periodic_boundaries_ptr(
-        _fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
+        _fe_problem.getSolverSystem(/*nl_sys=*/0).dofMap().get_periodic_boundaries());
 
     // TODO: This is currently an empty function on the DisplacedProblem... could it be removed?
     _displaced_problem->initAdaptivity();
@@ -202,16 +216,24 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   }
   else
   {
+    if (_fe_problem.numSolverSystems() > 1)
+      mooseError("The old adaptivity system based on libMesh error estimators does not currently "
+                 "support multiple solver systems because we currently only use the zeroth solver "
+                 "system solution for estimating errors");
+
     // Compute the error for each active element
-    _error_estimator->estimate_error(_fe_problem.getNonlinearSystemBase(/*nl_sys=*/0).system(),
-                                     *_error);
+    _error_estimator->estimate_error(_fe_problem.getSolverSystem(/*nl_sys=*/0).system(), *_error);
 
     // Flag elements to be refined and coarsened
     _mesh_refinement->flag_elements_by_error_fraction(*_error);
+  }
 
-    if (_displaced_problem)
-      // Reuse the error vector and refine the displaced mesh
-      _displaced_mesh_refinement->flag_elements_by_error_fraction(*_error);
+  // Moving some of h flagged elements to p flagged based on the
+  // local smoothness and prior h & p error estimates
+  if (_adaptivity_type == AdaptivityType::HP)
+  {
+    _hp_coarsen_test = std::make_unique<HPCoarsenTest>();
+    _hp_coarsen_test->select_refinement(_fe_problem.getSolverSystem(/*nl_sys=*/0).system());
   }
 
   // If the DisplacedProblem is active, undisplace the DisplacedMesh
@@ -229,7 +251,17 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
   if (distributed_adaptivity)
     _mesh_refinement->make_flags_parallel_consistent();
 
-  if (_p_refinement_flag)
+  // Sync flags from the reference mesh
+  if (_displaced_problem)
+    for (auto * const displaced_elem :
+         _displaced_problem->mesh().getMesh().active_element_ptr_range())
+    {
+      const auto * const reference_elem = _fe_problem.mesh().elemPtr(displaced_elem->id());
+      displaced_elem->set_refinement_flag(reference_elem->refinement_flag());
+      displaced_elem->set_p_refinement_flag(reference_elem->p_refinement_flag());
+    }
+
+  if (_adaptivity_type == AdaptivityType::P)
     _mesh_refinement->switch_h_to_p_refinement();
 
   // Perform refinement and coarsening
@@ -237,12 +269,7 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
 
   if (_displaced_problem && mesh_changed)
   {
-    // If markers are added to only local elements,
-    // we sync them here.
-    if (distributed_adaptivity)
-      _displaced_mesh_refinement->make_flags_parallel_consistent();
-
-    if (_p_refinement_flag)
+    if (_adaptivity_type == AdaptivityType::P)
       _displaced_mesh_refinement->switch_h_to_p_refinement();
 
 #ifndef NDEBUG

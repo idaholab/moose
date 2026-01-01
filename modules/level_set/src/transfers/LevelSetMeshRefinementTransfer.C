@@ -55,7 +55,8 @@ LevelSetMeshRefinementTransfer::initialSetup()
       Adaptivity & adapt = to_problem.adaptivity();
       adapt.setMarkerVariableName(to_var.name());
       adapt.setCyclesPerStep(from_problem.adaptivity().getCyclesPerStep());
-      adapt.init(1, 0, false);
+      MooseEnum adaptivity_type("h p hp", "h");
+      adapt.init(1, 0, adaptivity_type.getEnum<AdaptivityType>());
       adapt.setUseNewSystem();
       adapt.setMaxHLevel(from_problem.adaptivity().getMaxHLevel());
       adapt.setAdaptivityOn(false);
