@@ -157,6 +157,37 @@ Several systems may be used, for each passive scalar.
 
 For the conjuagate heat transfer capabilities visit the [corresponding design page](linear_fv_cht.md)
 
+### Restarting and keeping certain solution fields unchanged
+
+When recovering from a checkpoint, it can be useful to hold the thermal-hydraulics fields fixed
+and only advance other systems. The `PIMPLE` executioner exposes flags that selectively disable parts
+of the segregated solve:
+
+- [!param](/Executioner/SIMPLE/solve_momentum)
+- [!param](/Executioner/SIMPLE/solve_pressure)
+- [!param](/Executioner/SIMPLE/solve_energy)
+- [!param](/Executioner/SIMPLE/solve_solid_energy)
+- [!param](/Executioner/SIMPLE/solve_turbulence)
+- [!param](/Executioner/SIMPLE/solve_active_scalars)
+- [!param](/Executioner/SIMPLE/solve_passive_scalars)
+
+For example, to load a converged flow/temperature field from a steady-state run and only march
+passive scalars, enable [restart and recovery](restart_recover.md), keep the scalar solves enabled, and disable the momentum,
+pressure, and energy solves:
+
+```
+[Problem]
+  restart_file_base=converged_run_cp/LATEST
+[]
+[Executioner]
+  type = SIMPLE
+  ...
+  solve_momentum = false
+  solve_pressure = false
+  solve_energy = false
+[]
+```
+
 !syntax parameters /Executioner/SIMPLE
 
 !syntax inputs /Executioner/SIMPLE

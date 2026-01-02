@@ -114,6 +114,15 @@ protected:
   /// Shortcut to every linear system that we solve for here
   std::vector<LinearSystem *> _systems_to_solve;
 
+  /// Flags controlling which systems are actively solved (can be used with restart to freeze flow)
+  const bool _solve_momentum;
+  const bool _solve_pressure;
+  const bool _solve_energy;
+  const bool _solve_solid_energy;
+  const bool _solve_turbulence;
+  const bool _solve_passive_scalars;
+  const bool _solve_active_scalars;
+
   // ************************ Active Scalar Variables ************************ //
 
   /// The names of the active scalar systems
