@@ -34,3 +34,12 @@
     T_ref = 300
   []
 []
+
+[Convergence]
+  [nl_conv]
+    type = DefaultNonlinearConvergence
+    nl_rel_tol = 1e-6
+    nl_abs_tol = 1e-6
+    nl_max_its = 30
+  []
+[]
