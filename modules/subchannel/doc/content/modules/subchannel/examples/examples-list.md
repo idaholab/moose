@@ -5,10 +5,10 @@ These examples do not fit into the verification or validation categories, but ar
 
 ## List of examples
 
+!! Intentional comment to provide extra spacing
+
 ### Coupling
 
 | Case | Title |
 | :- | :- |
 | 1 | [Thermo-mechanical coupling of 1 pin and 4 square subchannels](quad_thermo_mech.md) |
-
-

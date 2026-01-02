@@ -4,11 +4,15 @@
 
 ## Validation overview
 
+!! Intentional comment to provide extra spacing
+
 This validation case showcases SCM validation for the implemented capability to model flows within a deformed duct. The deformed geometry considered in this paper has deformations of the kind that have been observed in LMFBR fuel assemblies. For this purpose, this work leverages experimental data produced in the context of the project: Thermal Hydraulic Computational Fluid Dynamics Simulations and Experimental Investigation of Deformed Fuel Assemblies [!citep](mays2017thermal). This project was a two-year collaboration between AREVA, TerraPower, Argonne National Laboratory (ANL) and Texas A\&M University (TAMU). Experiments were performed by AREVA and TAMU. Numerical simulations of these experiments were performed by TerraPower and ANL. The experimental data used in this work were produced during the second phase (objectives 2.3, 2.4) of the project: Non-Dilated/Dilated Duct Heated Bundle Experiment. The results presented here are a summary of the validation that is documented in [!citep](kyriakopoulos2024validation). For more details on the validation the reader is encouraged to access the cited document.
 
 The project experiments included the first known wire-wrapped assembly experiment with deformed duct geometries and the largest numerical simulations ever produced for wire-wrapped bundles. The specific bundle designs are not exact designs of specific LMFBR fuel assemblies, but are representative in order to acquire data for use in validation. AREVA and TerraPower cooperated to produce a deformed and non-deformed duct test section bundle, which was integrated in the Areva fuel cooling test facility (FCTF). Both experiment bundles incorporated a 61 wire-wrapped pin bundle design. 61 pins were chosen because 61 pins results in a large enough of a bundle, in terms of rows of pins in the hexagonal packing configuration to minimize wall effects and therefore, represent a full size bundle while also limiting the computational resources and experiment costs.
 
 ## Experimental specifications
+
+!! Intentional comment to provide extra spacing
 
 The FCTF in Richland, Washington, at the AREVA fuel fabrication facility was modified to accommodate the wire wrapped heated pin assembly test section. Steady state thermal-hydraulic tests were run with water flowing through the bundle at a Reynolds number $\approx 20,000$ in the fully turbulent regime. The bundle was partially heated: 19 of the 61 pins were electric heater rods that provided heating. Measurements included thermocouples at the unheated tube walls and fluid interface, embedded inside heaters, and on the internal duct wall. Pressure drop measurements were taken across different lengths of the pin bundle to capture entrance effects, planar pressure gradient due to bulk flow swirl, and fully developed conditions.
 
@@ -40,6 +44,8 @@ TerraPower was responsible for the RANS CFD computations. The CD-Adapco commerci
 
 ## SCM duct deformation model
 
+!! Intentional comment to provide extra spacing
+
 SCM models the effect of the deformation of the duct by adapting the geometric parameters of the perimetric subchannels according to a representative per subchannel deformation variable, which is called Displacement (D). This displacement variable is calculated based on the centroid coordinates of each subchannel. Particularly, the relative lateral location of the subchannel centroid in relation to the center of each deformed duct side ($x_i$) and the height ($z$). These values are plugged into the equation that describes the deformation, which is presented in [bundle]. The result is the value of Displacement D for each subchannel at a specific axial height.
 
 The geometric parameters affected by displacement D are the wetted perimeter, the gap, and the surface area. This consequently leads to a change in the hydraulic diameter, friction factor, and friction force, among others, which, in turn, have an effect on the resolved flow field via the conservation of momentum equations. The effect of the displacement value on the geometric parameters is graphically presented in [displacement].
@@ -58,6 +64,8 @@ For the corner subchannel the surface area, gap, and wetted perimeter are affect
 
 ## Input files
 
+!! Intentional comment to provide extra spacing
+
 The SCM deformation model is implemented by a custom IC: [FCTFdisplacementIC](/ics/FCTFdisplacementIC.md)
 
 The deformed duct simulation is run by the following input files:
@@ -67,6 +75,8 @@ The deformed duct simulation is run by the following input files:
 !listing /validation/areva_FCTF/deformed_duct_pp.i language=moose
 
 ## Results
+
+!! Intentional comment to provide extra spacing
 
 Pressure measurements were taken from a pressure tap in the middle of Face B (see [DP-FaceB]) at various axial heights from the start of the heated section of the bundle.
 
@@ -99,5 +109,7 @@ The plot above presents the temperature gradients on the plane along with the SC
 The four values calculated by SCM (# 1,2,3,4) that lie outside of the error bars and exhibit the most error, correspond to the inner most unheated pins which are in the higher temperature region of the bundle. The error in the rest of the pins is much smaller. It should be noted again that experiment and CFD capture point-wise quantities while SCM produces surface averaged quantities, so some difference is to be expected.
 
 ## Conclusion
+
+!! Intentional comment to provide extra spacing
 
 In summary, this case presents a subchannel methodology for modeling duct deformation in Liquid Metal Fast Breeder Reactors. This methodology has been validated against the non-deformed and deformed duct cases of the project Thermal Hydraulic Computational Fluid Dynamics Simulations and Experimental Investigation of Deformed Fuel Assemblies.

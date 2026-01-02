@@ -54,13 +54,17 @@ heated_length = 1.0
   P_out = ${P_out}
 
   # Heat Transfer Correlations
-  pin_htc_correlation = 'dittus-boelter'
+  pin_HTC_closure = 'dittus-boelter'
   friction_closure = 'MATRA'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [dittus-boelter]
+    type = SCMHTCDittusBoelter
+    correction_factor = none
   []
 []
 
