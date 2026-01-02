@@ -86,3 +86,9 @@ CacheChangedListsThread::join(const CacheChangedListsThread & y)
   _coarsened_element_children.insert(y._coarsened_element_children.begin(),
                                      y._coarsened_element_children.end());
 }
+
+bool
+CacheChangedListsThread::shouldComputeInternalSide(const Elem &, const Elem &) const
+{
+  return false;
+}

@@ -94,7 +94,6 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
     _var(getVariableHelper(parameters)),
     _bnd(boundaryRestricted()),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
-    _coincident_lower_d_calc(_bnd && !_var.isNodal() && _var.isLowerD()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl_sys(*getCheckedPointerParam<SystemBase *>("_nl_sys")),
@@ -105,32 +104,6 @@ AuxKernelBase::AuxKernelBase(const InputParameters & parameters)
 {
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
-
-  if (_bnd && !_var.isNodal() && !_coincident_lower_d_calc && _check_boundary_restricted)
-  {
-    // when the variable is elemental and this aux kernel operates on boundaries,
-    // we need to check that no elements are visited more than once through visiting
-    // all the sides on the boundaries
-    auto boundaries = _mesh.getMesh().get_boundary_info().build_side_list();
-    std::set<dof_id_type> elements;
-    for (const auto & t : boundaries)
-    {
-      if (hasBoundary(std::get<2>(t)))
-      {
-        const auto eid = std::get<0>(t);
-        const auto stat = elements.insert(eid);
-        if (!stat.second) // already existed in the set
-          mooseError(
-              "Boundary restricted auxiliary kernel '",
-              name(),
-              "' has element (id=",
-              eid,
-              ") connected with more than one boundary sides.\nTo skip this error check, "
-              "set 'check_boundary_restricted = false'.\nRefer to the AuxKernel "
-              "documentation on boundary restricted aux kernels for understanding this error.");
-      }
-    }
-  }
 
   // Check for supported variable types
   // Any 'nodal' family that actually has DoFs outside of nodes, or gradient dofs at nodes is
@@ -168,7 +141,6 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
     _var(object._var),
     _bnd(object._bnd),
     _check_boundary_restricted(object._check_boundary_restricted),
-    _coincident_lower_d_calc(object._coincident_lower_d_calc),
     _subproblem(object._subproblem),
     _sys(object._sys),
     _nl_sys(object._nl_sys),
@@ -179,6 +151,37 @@ AuxKernelBase::AuxKernelBase(const AuxKernelBase & object, const Moose::Kokkos::
 {
 }
 #endif
+
+void
+AuxKernelBase::initialSetup()
+{
+  // This check must occur after the EquationSystems object has been init'd (due to calls to
+  // Elem::n_dofs()) so we can't do it in the constructor
+  if (_bnd && !_var.isNodal() && _check_boundary_restricted)
+  {
+    // when the variable is elemental and this aux kernel operates on boundaries,
+    // we need to check that no elements are visited more than once through visiting
+    // all the sides on the boundaries
+    auto boundaries = _mesh.getMesh().get_boundary_info().build_side_list();
+    std::set<dof_id_type> element_ids;
+    for (const auto & [elem_id, _, boundary_id] : boundaries)
+    {
+      if (hasBoundary(boundary_id) && _mesh.elemPtr(elem_id)->n_dofs(_sys.number(), _var.number()))
+      {
+        const auto [_, inserted] = element_ids.insert(elem_id);
+        if (!inserted) // already existed in the set
+          mooseError(
+              "Boundary restricted auxiliary kernel '",
+              name(),
+              "' has element (id=",
+              elem_id,
+              ") connected with more than one boundary sides.\nTo skip this error check, "
+              "set 'check_boundary_restricted = false'.\nRefer to the AuxKernel "
+              "documentation on boundary restricted aux kernels for understanding this error.");
+      }
+    }
+  }
+}
 
 const std::set<std::string> &
 AuxKernelBase::getRequestedItems()

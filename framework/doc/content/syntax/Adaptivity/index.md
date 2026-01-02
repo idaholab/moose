@@ -23,12 +23,28 @@ higher than their parents.
 
 ## P-Refinement
 
-P-refinement level mismatches are not supported for continuous, non-hierarchic
+P-refinement can be selected by setting `adaptivity_type = p` in the `Adaptivity` block (whether
+using the older [Executioner/Adaptivity](Executioner/Adaptivity/index.md) syntax which uses libMesh
+error estimators or the newer top-level `Adaptivity` block (referenced by this page) using the
+`Indicators` and `Markers` introduced towards the beginning of this page). P-refinement level
+mismatches are not supported for continuous, non-hierarchic
 finite element families. Additionally, p-refinement of `NEDELEC_ONE` and `RAVIART_THOMAS`
 elements is not supported. Consequently, by default we disable p-refinement of the
 following bases: `LAGRANGE`, `NEDELEC_ONE`, `RAVIART_THOMAS`, `LAGRANGE_VEC`, `CLOUGH`,
 `BERNSTEIN`, and `RATIONAL_BERNSTEIN`. Users can control what families are disabled for
 p-refinement by setting the `disable_p_refinement_for_families` parameter.
+
+## HP-Refinement
+
+MOOSE includes experimental HP refinement capability. HP refinement can be selected by setting
+`adaptivity_type = hp` in the `Adaptivity` block. HP-refinement works by performing a coarsening
+test on elements just flagged for h-refinement (using libMesh error indicators or the
+`Indicator`/`Marker` systems). The coarsening test coarsens in both h and p and notes whichever
+changes the solution more. If p shows a larger solution change (after doing some weighting based on
+how many degrees of freedom are added) *and* the solution is sufficiently smooth as determined by
+decay rates of Legendre coefficients, then we switch the element refinement choice from h to p. As
+noted in the documentation for the `HPCoarsenTest` class, more development is likely required to
+produce optimal hp meshes.
 
 ## Cycles and Intervals
 

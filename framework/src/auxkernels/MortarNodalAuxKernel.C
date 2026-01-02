@@ -68,6 +68,8 @@ template <typename ComputeValueType>
 void
 MortarNodalAuxKernelTempl<ComputeValueType>::initialSetup()
 {
+  AuxKernelTempl<ComputeValueType>::initialSetup();
+
   std::array<const MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
   Moose::Mortar::setupMortarMaterials(consumers,

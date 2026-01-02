@@ -12,14 +12,15 @@
 #include "RelationshipManager.h"
 
 /**
- * Ghosts lower-D point neighbors of higher-D elements
+ * Ghosts all point neighbors (not including periodic neighbors) regardless of the dimensionality of
+ * the elements using node-to-element maps
  */
-class GhostHigherDLowerDPointNeighbors : public RelationshipManager
+class GhostAllPointNeighbors : public RelationshipManager
 {
 public:
-  GhostHigherDLowerDPointNeighbors(const InputParameters &);
+  GhostAllPointNeighbors(const InputParameters &);
 
-  GhostHigherDLowerDPointNeighbors(const GhostHigherDLowerDPointNeighbors & others);
+  GhostAllPointNeighbors(const GhostAllPointNeighbors & others);
 
   static InputParameters validParams();
 
