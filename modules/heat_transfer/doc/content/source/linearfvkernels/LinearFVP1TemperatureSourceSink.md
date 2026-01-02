@@ -20,8 +20,7 @@ where:
 
 ## Example Input File Syntax
 
- !listing modules/heat_transfer/test/tests/radiation_participating_media/rad_T_coupled_medium_1d.i
- block=LinearFVKernels
+!listing test/tests/radiation_participating_media/rad_T_coupled_medium_1d.i block=LinearFVKernels
 
 !syntax parameters /LinearFVKernels/LinearFVP1TemperatureSourceSink
 
