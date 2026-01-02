@@ -25,8 +25,9 @@ DeleteElementsNearMeshGenerator::validParams()
   InputParameters params = ElementDeletionGeneratorBase::validParams();
 
   params.addClassDescription(
-      "Removes elements lying 'near' another mesh. The proximity is examined by the distance from "
-      "the element's centroid to the faces of elements of the 'proximity_mesh'");
+      "Removes elements lying \"near\" another mesh. The proximity is examined by the distance "
+      "from "
+      "the element's centroid to the faces of elements of the \"proximity_mesh\"");
   params.addRequiredParam<MeshGeneratorName>("proximity_mesh",
                                              "Mesh providing the deletion criterion");
   params.addRequiredRangeCheckedParam<Real>(
@@ -36,10 +37,10 @@ DeleteElementsNearMeshGenerator::validParams()
       "'proximity_mesh' under which they are marked for deletion");
   auto options_order = SetupQuadratureAction::getQuadratureOrderEnum();
   options_order.assign(CONSTANT);
-  params.addParam<MooseEnum>(
-      "side_order",
-      options_order,
-      "Order of the face quadrature used to find the nearest face in the 'proximity_mesh'");
+  params.addParam<MooseEnum>("side_order",
+                             options_order,
+                             "Order of the face quadrature used to find the nearest face in the "
+                             "'proximity_mesh'. Default is CONSTANT");
 
   return params;
 }
@@ -62,13 +63,12 @@ DeleteElementsNearMeshGenerator::generate()
   // NOTE: side Qps are just one option. We could have done nodes, side centroids (~ side Qp at
   // order 0)
   std::vector<Point> all_side_qps;
-  const auto order = getParam<MooseEnum>("side_order");
-  all_side_qps.reserve(_proximity_mesh->n_elem() * _proximity_mesh->spatial_dimension() * 2 *
-                       order);
-  for (const auto elem : _proximity_mesh->element_ptr_range())
+  const auto & order = getParam<MooseEnum>("side_order");
+  const auto order_enum = Moose::stringToEnum<Order>(order);
+  for (const auto * const elem : _proximity_mesh->element_ptr_range())
   {
     // Build side then side Qps
-    unsigned int dim = elem->dim();
+    const auto dim = elem->dim();
     for (const auto side_i : make_range(elem->n_sides()))
     {
       // Internal sides cannot be closest to an external point
@@ -77,9 +77,9 @@ DeleteElementsNearMeshGenerator::generate()
       const std::unique_ptr<const Elem> face = elem->build_side_ptr(side_i);
       std::unique_ptr<libMesh::FEBase> fe(
           libMesh::FEBase::build(dim, libMesh::FEType(elem->default_order())));
-      libMesh::QGauss qface(dim - 1, Moose::stringToEnum<Order>(order));
+      libMesh::QGauss qface(dim - 1, order_enum);
       fe->attach_quadrature_rule(&qface);
-      const std::vector<libMesh::Point> & qpoints = fe->get_xyz();
+      const auto & qpoints = fe->get_xyz();
       fe->reinit(elem, side_i);
       all_side_qps.insert(all_side_qps.end(), qpoints.begin(), qpoints.end());
     }
