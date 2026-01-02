@@ -65,9 +65,7 @@
   }
 #endif
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 /**
  * Maximum tag ID
@@ -77,5 +75,4 @@ constexpr unsigned int MAX_TAG = 30;
  * Maximum number of DOFs to cache during residual and Jacobian computation
  */
 constexpr unsigned int MAX_CACHED_DOF = 30;
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

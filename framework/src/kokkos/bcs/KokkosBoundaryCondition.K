@@ -9,9 +9,7 @@
 
 #include "KokkosBoundaryCondition.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -37,5 +35,4 @@ BoundaryCondition::BoundaryCondition(const BoundaryCondition & object)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

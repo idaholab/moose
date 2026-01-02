@@ -15,9 +15,7 @@
 
 #include "MooseTypes.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -156,5 +154,4 @@ protected:
   const T _copy;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

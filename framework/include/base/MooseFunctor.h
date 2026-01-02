@@ -153,10 +153,16 @@ public:
   FunctorBase(const MooseFunctorName & name,
               const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS})
     : _always_evaluate(true), _functor_name(name)
-
   {
     setCacheClearanceSchedule(clearance_schedule);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  FunctorBase(const FunctorBase<T> &, const Moose::Kokkos::FunctorCopy &) {}
+#endif
 
   /**
    * Perform a generic evaluation based on the supplied template argument \p FET and supplied

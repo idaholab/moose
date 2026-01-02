@@ -428,6 +428,14 @@ InputParameters::isParamDeprecated(const std::string & name_in) const
   return _params.count(name) > 0 && !_params.at(name)._deprecation_message.empty();
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+bool
+InputParameters::isKokkosObject() const
+{
+  return isParamValid(MooseBase::kokkos_object_param);
+}
+#endif
+
 bool
 InputParameters::areAllRequiredParamsValid() const
 {

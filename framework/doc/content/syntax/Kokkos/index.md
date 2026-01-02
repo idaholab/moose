@@ -276,16 +276,13 @@ Namely, its copy constructor only performs a shallow copy and does not invoke th
 If it is required to explicitly invoke the copy constructor of each entry for a certain data type used in an array, you should define a specialization of the `Moose::Kokkos::ArrayDeepCopy` type trait template as follows:
 
 ```cpp
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 template <>
 struct ArrayDeepCopy<SomeType>
 {
   static const bool value = true;
 };
-}
 }
 ```
 
@@ -306,7 +303,7 @@ Namely, the copy constructor copies the reference to the instance, which guarant
 The wrapper automatically returns the reference on CPU and the instance on GPU, depending on where it is being accessed.
 
 For arithmetic values, there exists `Moose::Kokkos::Scalar` which is a derived class from `Moose::Kokkos::ReferenceWrapper` and provides arithmetic operators that can directly operate to the stored value.
-`Moose::Kokkos::PostprocessrValue` is an alias for `Moose::Kokkos::Scalar<PostprocessorValue>`.
+`Moose::Kokkos::PostprocessrValue` is an alias for `Moose::Kokkos::Scalar<const PostprocessorValue>`.
 
 !listing framework/include/kokkos/base/KokkosReferenceWrapper.h
          id=kokkos_reference_wrapper_source
@@ -338,7 +335,8 @@ The following pseudo-codes demonstrate a typical template method pattern impleme
 - Dynamic polymorphism
 
 ```cpp
-class Base{
+class Base
+{
 public:
   void compute()
   {
@@ -406,7 +404,7 @@ The Kokkos-MOOSE base classes are carefully designed to avoid the CRTP by levera
 Namely, the base classes themselves are not template classes, which alleviates the burden of users in dealing with templates.
 However, any polymorphic pattern implemented on GPU in the derived class level will likely require the CRTP.
 
-#### Alternative Way to Implement Static Polymorphism
+#### Alternative Way to Implement Static Polymorphism id=kokkos_shim
 
 While the CRTP is a generic design pattern for implementing static polymorphism, the use of class templates can complicate class designs.
 In Kokkos-MOOSE objects, there is an alternative way to implement static polymorphism by defining shims instead of hook methods.
@@ -472,6 +470,8 @@ The following objects are currently available in Kokkos-MOOSE:
 - [Materials](syntax/KokkosMaterials/index.md)
 - [AuxKernels](syntax/KokkosAuxKernels/index.md)
 - [Functions](syntax/KokkosFunctions/index.md)
+- [UserObjects](syntax/KokkosUserObjects/index.md)
+- [Postprocessors](syntax/KokkosPostprocessors/index.md)
 
 !if-end!
 

@@ -38,6 +38,13 @@ public:
    */
   SamplerInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  SamplerInterface(const SamplerInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * Get a sampler with a given name
    * @param name The name of the parameter key of the sampler to retrieve
