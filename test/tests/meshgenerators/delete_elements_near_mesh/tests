@@ -1,0 +1,13 @@
+[Tests]
+  design = 'meshgenerators/DeleteElementsNearMeshGenerator.md'
+  issues = '#32138'
+  [2d_cut_by_2d]
+    type = 'Exodiff'
+    input = 'test_2d_2d.i'
+    cli_args = '--mesh-only'
+    exodiff = 'test_2d_2d_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall be able to delete elements in a mesh that are nearer than a user-defined distance to another mesh.'
+  []
+[]
