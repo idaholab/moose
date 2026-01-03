@@ -67,7 +67,7 @@ public:
   /**
    * Get whether the mesh was initialized
    */
-  bool initialized() const { return _initialized; }
+  [[nodiscard]] bool initialized() const { return _initialized; }
   /**
    * Update the mesh
    */

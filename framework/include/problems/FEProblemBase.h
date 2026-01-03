@@ -156,9 +156,9 @@ public:
   virtual ~FEProblemBase();
 
   /**
-   * @returns Whether the problem was initialized
+   * @returns Whether the problem was initialized, i.e. whether \p init() has executed
    */
-  bool initialized() const { return _initialized; }
+  [[nodiscard]] bool initialized() const { return _initialized; }
 
   enum class CoverageCheckMode
   {
@@ -2763,7 +2763,7 @@ public:
   /**
    * @returns whether any Kokkos object was added in the problem
    */
-  virtual bool hasKokkosObjects() const { return _has_kokkos_objects; }
+  bool hasKokkosObjects() const { return _has_kokkos_objects; }
   /**
    * @returns whether any Kokkos residual object was added in the problem
    */
