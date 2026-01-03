@@ -1,5 +1,3 @@
-# Tests that cylindrical heat structure thermal properties can be defined in the SolidProperties block
-
 !include part_base.i
 
 [SolidProperties]
@@ -32,9 +30,16 @@
 
 [Convergence]
   [nl_conv]
-    type = DefaultNonlinearConvergence
-    nl_rel_tol = 1e-6
-    nl_abs_tol = 1e-6
-    nl_max_its = 30
+    type = ComponentsConvergence
+    max_iterations = 10
   []
+[]
+
+[Executioner]
+  verbose = true
+[]
+
+[Outputs]
+  file_base := components_convergence
+  show = 'T_solid'
 []
