@@ -156,9 +156,9 @@ public:
   virtual ~FEProblemBase();
 
   /**
-   * @returns Whether the problem was initialized
+   * @returns Whether the problem was initialized, i.e. whether \p init() has executed
    */
-  bool initialized() const { return _initialized; }
+  [[nodiscard]] bool initialized() const { return _initialized; }
 
   enum class CoverageCheckMode
   {

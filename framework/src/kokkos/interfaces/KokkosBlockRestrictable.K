@@ -34,7 +34,7 @@ BlockRestrictable::initializeKokkosBlockRestrictable()
 
   auto & blocks = blockRestricted() ? blockIDs() : meshBlockIDs();
 
-  auto kokkos_mesh = _blk_mesh->getKokkosMesh();
+  const auto * const kokkos_mesh = _blk_mesh->getKokkosMesh();
 
   std::set<ContiguousElementID> element_ids;
   std::set<ContiguousNodeID> node_ids;
@@ -60,9 +60,9 @@ BlockRestrictable::initializeKokkosBlockRestrictable()
 
     for (const auto eid : element_ids)
     {
-      auto type = kokkos_mesh->getElementInfo(eid).type;
+      const auto type = kokkos_mesh->getElementInfo(eid).type;
 
-      for (unsigned int side = 0; side < kokkos_mesh->getNumSides(type); ++side)
+      for (const auto side : make_range(kokkos_mesh->getNumSides(type)))
         element_side_ids.insert({eid, side});
     }
 

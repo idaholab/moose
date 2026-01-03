@@ -205,16 +205,13 @@ FEProblemBase::initKokkos()
     mooseError("Kokkos does not support adaptivity yet.");
 
   // Initialize Kokkos mesh
-
   _mesh.getKokkosMesh()->update();
 
   // Call functions that require Kokkos mesh to be initialized first
-
   for (auto hook : _kokkos_mesh_initialization_hooks)
     hook();
 
   // Initialize Kokkos assembly
-
   _kokkos_assembly.init();
 
   // Initialize Kokkos systems

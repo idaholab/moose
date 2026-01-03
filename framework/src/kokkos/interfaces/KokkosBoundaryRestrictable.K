@@ -36,7 +36,7 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable()
 
   auto & boundaries = boundaryRestricted() ? boundaryIDs() : meshBoundaryIDs();
 
-  auto kokkos_mesh = _bnd_mesh->getKokkosMesh();
+  const auto * const kokkos_mesh = _bnd_mesh->getKokkosMesh();
 
   if (_bnd_nodal)
   {
