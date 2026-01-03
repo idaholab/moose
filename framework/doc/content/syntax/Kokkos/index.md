@@ -305,8 +305,9 @@ It holds the reference of the CPU variable and an instance of the variable at th
 Namely, the copy constructor copies the reference to the instance, which guarantees that the instance has the value of the variable at the moment of functor dispatch.
 The wrapper automatically returns the reference on CPU and the instance on GPU, depending on where it is being accessed.
 
-For arithmetic values, there exists `Moose::Kokkos::Scalar` which is a derived class from `Moose::Kokkos::ReferenceWrapper` and provides arithmetic operators that can directly operate to the stored value.
-`Moose::Kokkos::PostprocessrValue` is an alias for `Moose::Kokkos::Scalar<PostprocessorValue>`.
+For arithmetic values, there exists `Moose::Kokkos::Scalar` which is a derived class from `Moose::Kokkos::ReferenceWrapper` and provides arithmetic operators that can directly operate on the stored values for non-const types.
+For const types, those operators will be undefined.
+For example, a postprocessor value which is always provided as read-only can be held by `Moose::Kokkos::Scalar<const PostprocessorValue>` or its alias `Moose::Kokkos::PostprocessrValue`.
 
 !listing framework/include/kokkos/base/KokkosReferenceWrapper.h
          id=kokkos_reference_wrapper_source
@@ -338,7 +339,8 @@ The following pseudo-codes demonstrate a typical template method pattern impleme
 - Dynamic polymorphism
 
 ```cpp
-class Base{
+class Base
+{
 public:
   void compute()
   {

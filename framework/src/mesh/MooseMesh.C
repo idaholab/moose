@@ -667,8 +667,11 @@ MooseMesh::update()
   // the flag might have been set by calling doingPRefinement(true)
   _doing_p_refinement = _doing_p_refinement || (_max_p_level > 0);
 
+  computeMaxPerElemAndSide();
+
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_app.hasKokkosObjects() || (_app.getExecutioner() && _app.feProblem().hasKokkosObjects()))
+  if (_app.getExecutioner() && _app.feProblem().initialized() &&
+      _app.feProblem().hasKokkosObjects())
     _kokkos_mesh->update();
 #endif
 
@@ -2956,8 +2959,6 @@ MooseMesh::init()
     if (getParam<bool>("build_all_side_lowerd_mesh"))
       buildLowerDMesh();
   }
-
-  computeMaxPerElemAndSide();
 }
 
 unsigned int
