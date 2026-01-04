@@ -1,0 +1,13 @@
+[Tests]
+  design = 'meshgenerators/ProjectSideSetOntoLevelSetGenerator.md'
+  issues = '#32166'
+
+  [3d_onto_plane]
+    type = 'Exodiff'
+    input = 'cube_sides_onto_plane.i'
+    exodiff = 'cube_sides_onto_plane_in.e'
+    requirement = "The system shall be able to project a sideset onto a level set surface to create a surface mesh."
+    cli_args = '--mesh-only'
+    recover = false
+  []
+[]
