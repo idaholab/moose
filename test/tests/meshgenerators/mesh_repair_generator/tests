@@ -1,12 +1,12 @@
 [Tests]
   design = 'MeshRepairGenerator.md'
-  issues = '#25107'
   [node_overlap]
     type = JSONDiff
     input = overlapping_fix_test.i
     jsondiff = overlapping_fix_test_json.json
     requirement = 'The system shall be able to merge overlapping nodes.'
     mesh_mode = 'replicated'
+    issues = '#25107'
   []
   [element_flip]
     type = CSVDiff
@@ -14,6 +14,7 @@
     csvdiff = flip_element_out.csv
     requirement = 'The system shall be able to flip the orientation of negative-volume elements.'
     mesh_mode = 'replicated'
+    issues = '#25107'
   []
   [separate_element_types]
     type = JSONDiff
@@ -21,6 +22,7 @@
     jsondiff = mixed_elements_json.json
     requirement = "The system shall be able to split blocks across their element's type."
     mesh_mode = 'replicated'
+    issues = '#25107'
   []
   [boundary_merge]
     type = JSONDiff
@@ -28,5 +30,13 @@
     jsondiff = merge_boundaries_json.json
     requirement = "The system shall be able to merge boundaries with the same names but different boundary IDs."
     mesh_mode = 'replicated'
+    issues = '#25107'
+  []
+  [fix_nonconvex_polygons]
+    type = RunApp
+    input = 'nonconvex_polygon.i'
+    expect_out = "Number of non convex polygons: 0"
+    requirement = "The system shall be able to split nonconvex polygons to turn them into convex ones."
+    issues = '#32159'
   []
 []
