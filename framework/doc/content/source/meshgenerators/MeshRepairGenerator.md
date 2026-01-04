@@ -18,6 +18,8 @@ The operations currently implemented are:
 
 - merging boundaries with the same name but different boundary IDs.
 
+- splitting non-convex polygons into convex polygons
+
 !syntax parameters /Mesh/MeshRepairGenerator
 
 !syntax inputs /Mesh/MeshRepairGenerator
