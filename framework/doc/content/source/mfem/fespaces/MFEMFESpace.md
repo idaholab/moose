@@ -13,8 +13,8 @@ MFEM which one or more `MFEMVariable`s can be defined with respect to.
 
 This class has pure virtual methods `MFEMFESpace::getFECName()` and
 `MFEMFESpace::getVDim()`, which child classes must implement. The
-first should return a name to be passed to [MFEM factory method
-`FiniteElementCollection::New()`](https://docs.mfem.org/html/classmfem_1_1FiniteElementCollection.html#a15fcfa553d4949eb08f9926ac74d1e80).
+first should return a name to be passed to
+[MFEM factory method `FiniteElementCollection::New()`](https://docs.mfem.org/html/classmfem_1_1FiniteElementCollection.html#a15fcfa553d4949eb08f9926ac74d1e80).
 The second should specify the number of degrees of freedom per basis
 function in the finite element space and will be passed as the
 argument `vdim` in the
