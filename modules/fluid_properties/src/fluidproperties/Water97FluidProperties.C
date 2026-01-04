@@ -781,9 +781,28 @@ Water97FluidProperties::T_from_p_h_ad(const ADReal & pressure, const ADReal & en
     }
 
     case 5:
-      mooseError("temperature_from_ph() not implemented for region 5");
-      break;
+    {
+      Real T_min = 1073.15;
+      Real T_max = 2273.15;
+      ADReal T_find;
+      Real T_error = 1.0;
 
+      // Bisection solve
+      while (T_error > libMesh::TOLERANCE)
+      {
+        T_find = 0.5 * (T_min + T_max);
+        Real h_find = h_from_p_T(pressure.value(), T_find.value());
+
+        if (h_find > enthalpy.value())
+          T_max = T_find.value();
+        else
+          T_min = T_find.value();
+
+        T_error = std::abs((T_max - T_min) / T_find.value());
+      }
+
+      break;
+    }
     default:
       mooseError("inRegionPH() has given an incorrect region");
   }
