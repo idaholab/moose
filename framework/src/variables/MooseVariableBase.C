@@ -35,32 +35,15 @@ MooseVariableBase::validParams()
   params += BlockRestrictable::validParams();
   params += OutputInterface::validParams();
 
-  MooseEnum order(
-      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH ELEVENTH TWELFTH "
-      "THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH EIGHTTEENTH NINETEENTH TWENTIETH "
-      "TWENTYFIRST TWENTYSECOND TWENTYTHIRD TWENTYFOURTH TWENTYFIFTH TWENTYSIXTH TWENTYSEVENTH "
-      "TWENTYEIGHTH TWENTYNINTH THIRTIETH THIRTYFIRST THIRTYSECOND THIRTYTHIRD THIRTYFOURTH "
-      "THIRTYFIFTH THIRTYSIXTH THIRTYSEVENTH THIRTYEIGHTH THIRTYNINTH FORTIETH FORTYFIRST "
-      "FORTYSECOND FORTYTHIRD",
-      "FIRST",
-      true);
-  params.addParam<MooseEnum>("order",
-                             order,
-                             "Order of the FE shape function to use for this variable (additional "
-                             "orders not listed here are allowed, depending on the family).");
-
-  MooseEnum family{AddVariableAction::getNonlinearVariableFamilies()};
-
-  params.addParam<MooseEnum>(
-      "family", family, "Specifies the family of FE shape functions to use for this variable.");
+  params.transferParam<MooseEnum>(AddVariableAction::validParams(), "order");
+  params.transferParam<MooseEnum>(AddVariableAction::validParams(), "family");
 
   // ArrayVariable capability
   params.addRangeCheckedParam<unsigned int>(
       "components", 1, "components>0", "Number of components for an array variable");
 
   // Advanced input options
-  params.addParam<std::vector<Real>>("scaling",
-                                     "Specifies a scaling factor to apply to this variable");
+  params.transferParam<std::vector<Real>>(AddVariableAction::validParams(), "scaling");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
   params.addParam<bool>("fv", false, "True to make this variable a finite volume variable");
   params.addParam<bool>("array",

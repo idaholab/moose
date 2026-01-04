@@ -35,15 +35,13 @@ AddVariableAction::validParams()
   params.set<std::string>("type") = "MooseVariableBase";
 
   // The below is for backwards compatibility
-  MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
-  MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  params.addParam<MooseEnum>(
-      "family", families, "Specifies the family of FE shape functions to use for this variable");
+  params.addParam<MooseEnum>("family",
+                             AddVariableAction::getNonlinearVariableFamilies(),
+                             "Specifies the family of FE shape functions to use for this variable");
   params.addParam<MooseEnum>("order",
-                             orders,
-                             "Specifies the order of the FE shape function to use "
-                             "for this variable (additional orders not listed are "
-                             "allowed)");
+                             AddVariableAction::getNonlinearVariableOrders(),
+                             "Specifies the order of the FE shape function to use for this "
+                             "variable (additional orders not listed are allowed)");
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<std::vector<Real>>("initial_condition",
@@ -74,7 +72,15 @@ AddVariableAction::getNonlinearVariableFamilies()
 MooseEnum
 AddVariableAction::getNonlinearVariableOrders()
 {
-  return MooseEnum("CONSTANT FIRST SECOND THIRD FOURTH", "FIRST", true);
+  return MooseEnum(
+      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH ELEVENTH TWELFTH "
+      "THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH EIGHTTEENTH NINETEENTH TWENTIETH "
+      "TWENTYFIRST TWENTYSECOND TWENTYTHIRD TWENTYFOURTH TWENTYFIFTH TWENTYSIXTH TWENTYSEVENTH "
+      "TWENTYEIGHTH TWENTYNINTH THIRTIETH THIRTYFIRST THIRTYSECOND THIRTYTHIRD THIRTYFOURTH "
+      "THIRTYFIFTH THIRTYSIXTH THIRTYSEVENTH THIRTYEIGHTH THIRTYNINTH FORTIETH FORTYFIRST "
+      "FORTYSECOND FORTYTHIRD",
+      "FIRST",
+      true);
 }
 
 FEType
