@@ -616,43 +616,42 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
   Real p273 = vaporPressure(273.15);
   Real p623 = vaporPressure(623.15);
 
+  if (enthalpy < h_from_p_T(pressure, 273.15))
+    mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
+
   if (pressure >= p273 && pressure <= p623)
   {
-    if (enthalpy >= h_from_p_T(pressure, 273.15) &&
-        enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure)))
+    if (enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure)))
       region = 1;
-    else if (enthalpy > h_from_p_T(pressure, vaporTemperature(pressure)) &&
-             enthalpy <= h_from_p_T(pressure, 1073.15))
+    else if (enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure) + 1e-6))
+      return 4;
+    else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
-    else if (enthalpy > h_from_p_T(pressure, 1073.15) && enthalpy <= h_from_p_T(pressure, 2273.15))
+    else if (enthalpy <= h_from_p_T(pressure, 2273.15))
       region = 5;
     else
       mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
   }
   else if (pressure > p623 && pressure <= 50.0e6)
   {
-    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, 623.15))
+    if (enthalpy <= h_from_p_T(pressure, 623.15))
       region = 1;
-    else if (enthalpy > h_from_p_T(pressure, 623.15) &&
-             enthalpy <= h_from_p_T(pressure, b23T(pressure)))
+    else if (enthalpy <= h_from_p_T(pressure, b23T(pressure)))
       region = 3;
-    else if (enthalpy > h_from_p_T(pressure, b23T(pressure)) &&
-             enthalpy <= h_from_p_T(pressure, 1073.15))
+    else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
-    else if (enthalpy > h_from_p_T(pressure, 1073.15) && enthalpy <= h_from_p_T(pressure, 2273.15))
+    else if (enthalpy <= h_from_p_T(pressure, 2273.15))
       region = 5;
     else
       mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
   }
   else if (pressure > 50.0e6 && pressure <= 100.0e6)
   {
-    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, 623.15))
+    if (enthalpy <= h_from_p_T(pressure, 623.15))
       region = 1;
-    else if (enthalpy > h_from_p_T(pressure, 623.15) &&
-             enthalpy <= h_from_p_T(pressure, b23T(pressure)))
+    else if (enthalpy <= h_from_p_T(pressure, b23T(pressure)))
       region = 3;
-    else if (enthalpy > h_from_p_T(pressure, b23T(pressure)) &&
-             enthalpy <= h_from_p_T(pressure, 1073.15))
+    else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
     else
       mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
