@@ -29,6 +29,10 @@ ProjectSideSetOntoLevelSetGenerator::validParams()
   params.addRequiredParam<Point>("direction", "Projection direction");
   params.addParam<SubdomainName>(
       "subdomain_name", "projected", "Name of the subdomain on the projected mesh");
+  params.addParam<Real>("max_search_distance",
+                        1e6,
+                        "Maximum distance from the sideset to search for the projected point in "
+                        "the projection direction.");
 
   // Source domain parameters
   params.addRequiredParam<MeshGeneratorName>(
@@ -58,7 +62,8 @@ ProjectSideSetOntoLevelSetGenerator::ProjectSideSetOntoLevelSetGenerator(
     FunctionParserUtils<false>(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
     _input(getMeshByName(_input_name)),
-    _level_set(getParam<std::string>("level_set"))
+    _level_set(getParam<std::string>("level_set")),
+    _max_search_distance(getParam<Real>("max_search_distance"))
 {
   // Create parsed function
   _func_level_set = std::make_shared<SymFunction>();
@@ -106,8 +111,7 @@ ProjectSideSetOntoLevelSetGenerator::generate()
     for (const auto i : make_range(n_nodes))
     {
       const auto start = side_elem->point(i);
-      // Will be a bit inefficient..
-      const auto end = start + 1e6 * _proj_dir;
+      const auto end = start + _max_search_distance * _proj_dir;
 
       new_nodes[i] = new_mesh->add_point(pointPairLevelSetInterception(start, end));
     }

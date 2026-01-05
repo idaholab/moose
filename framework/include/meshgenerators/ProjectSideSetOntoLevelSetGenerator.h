@@ -34,6 +34,8 @@ protected:
   Point _proj_dir;
   /// The analytic level set function in the form of a string that can be parsed by FParser
   const std::string _level_set;
+  /// Maximum distance to search for from starting nodeset to projection point
+  const Real _max_search_distance;
   /// function parser object describing the level set
   SymFunctionPtr _func_level_set;
 
