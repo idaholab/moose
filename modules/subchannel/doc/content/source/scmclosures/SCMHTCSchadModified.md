@@ -8,7 +8,7 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 !! Intentional comment to provide extra spacing
 
-The Schad-Modified correlation [!cite](kazimi1976) is used for calculating the Nusselt number in fuel-pin bundles, considering the geometry of the bundle.
+The Schad-Modified correlation [!cite](kazimi1976) is used for calculating the Nusselt number in triangular fuel-pin bundles, considering the geometry of the bundle.
 
 For $(1.1 \le P/D \le 1.5)$ and $(150 \le \mathrm{Pe} \le 1000)$, the Nusselt number is:
 

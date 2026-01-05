@@ -32,9 +32,6 @@ SCMClosureBase::validParams()
 SCMClosureBase::SCMClosureBase(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
     _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_subproblem.mesh())),
-    _scm_problem(dynamic_cast<SubChannel1PhaseProblem *>(&_fe_problem))
+    _scm_problem(dynamic_cast<SubChannel1PhaseProblem &>(_fe_problem))
 {
-  if (!_scm_problem)
-    mooseError(
-        name(), ": SCM closures require SubChannel1PhaseProblem (got ", _fe_problem.name(), ").");
 }

@@ -8,7 +8,7 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 !! Intentional comment to provide extra spacing
 
-The Graber-Rieger correlation [!cite](graber) is used for calculating the Nusselt number in fuel-pin bundles, considering the geometry of the bundle.
+The Graber-Rieger correlation [!cite](graber) is used for calculating the Nusselt number in triangular fuel-pin bundles, considering the geometry of the bundle.
 
 For $(1.25 \le P/D \le 1.95)$ and $(110 \le \mathrm{Pe} \le 4300)$, the Nusselt number is:
 

@@ -25,7 +25,7 @@ SCMHTCGraberRieger::SCMHTCGraberRieger(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
 {
   // Check that Graber-Rieger is not used for the duct (not supported yet)
-  if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
+  if (const auto * duct_uo = _scm_problem.getDuctHTCClosure(); duct_uo && duct_uo == this)
     mooseError("'Graber-Rieger' is not yet supported for the 'duct_htc_correlation'.");
 }
 

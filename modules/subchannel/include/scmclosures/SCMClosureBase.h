@@ -34,5 +34,5 @@ protected:
   /// Reference to the subchannel mesh
   const SubChannelMesh & _subchannel_mesh;
   /// Reference to the subchannel problem
-  const SubChannel1PhaseProblem * const _scm_problem;
+  const SubChannel1PhaseProblem & _scm_problem;
 };

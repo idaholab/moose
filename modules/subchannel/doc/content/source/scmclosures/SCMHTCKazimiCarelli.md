@@ -8,7 +8,7 @@ The HTC closure models inherit from: [SCMHTCClosureBase](SCMHTCClosureBase.md).
 
 !! Intentional comment to provide extra spacing
 
-The Kazimi-Carelli correlation [!cite](kazimi1976) is used for calculating the Nusselt number in fuel-pin bundles, considering the geometry of the bundle.
+The Kazimi-Carelli correlation [!cite](kazimi1976) is used for calculating the Nusselt number in triangular fuel-pin bundles, considering the geometry of the bundle.
 
 \begin{equation}
 Nu = 4.0 + 0.33 \left( P/D \right)^{3.8} \left( Pe/100 \right)^{0.86} + 0.16 \left( P/D \right)^{5.0},

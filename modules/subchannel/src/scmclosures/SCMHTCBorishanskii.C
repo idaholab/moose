@@ -25,7 +25,7 @@ SCMHTCBorishanskii::SCMHTCBorishanskii(const InputParameters & parameters)
   : SCMHTCClosureBase(parameters)
 {
   // Check that the correlation is not used for the duct (not supported yet)
-  if (const auto * duct_uo = _scm_problem->getDuctHTCClosure(); duct_uo && duct_uo == this)
+  if (const auto * duct_uo = _scm_problem.getDuctHTCClosure(); duct_uo && duct_uo == this)
     mooseError("'Borishanskii' is not yet supported for the 'duct_htc_correlation'.");
 }
 

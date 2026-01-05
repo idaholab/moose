@@ -51,7 +51,7 @@ SCMHTCGnielinski::computeNusseltNumber(const FrictionStruct & friction_args,
     return w * NuT + (1.0 - w) * pre.laminar_Nu;
   };
 
-  Real f_turb = _scm_problem->getFrictionClosure()->computeFrictionFactor(friction_args) / 8.0;
+  Real f_turb = _scm_problem.getFrictionClosure()->computeFrictionFactor(friction_args) / 8.0;
 
   /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
   /// which is what we should see in practice, i.e., for very low Pr numbers the heat exchange
