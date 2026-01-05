@@ -36,7 +36,8 @@ public:
   enum class WallFFClosureType
   {
     CHENG_TODREAS,
-    CHURCHILL
+    CHURCHILL,
+    COLEBROOK_WHITE
   };
 
   virtual void checkFlowChannel(const FlowChannelBase & flow_channel) const override;
