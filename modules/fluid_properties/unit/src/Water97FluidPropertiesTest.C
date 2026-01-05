@@ -54,7 +54,7 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   // Region 2
   EXPECT_EQ(_fp->inRegion(3.5e3, 300), (unsigned int)2);
   EXPECT_EQ(_fp->inRegion(30.0e6, 700), (unsigned int)2);
-  EXPECT_EQ(_fp->inRegion(30.0e6, 700), (unsigned int)2);
+  EXPECT_EQ(_fp->inRegion(75.0e6, 950), (unsigned int)2);
 
   // Region 3
   EXPECT_EQ(_fp->inRegion(25.588e6, 650), (unsigned int)3);
@@ -105,6 +105,91 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   {
     std::string msg(e.what());
     ASSERT_NE(msg.find("Temperature 2001 is out of range in fp: inRegion()"), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
+
+/**
+ * Verify that the correct region is provided for a given pressure and
+ * enthalpy. Also verify that an error is thrown if pressure and enthalpy
+ * are outside the range of validity
+ */
+TEST_F(Water97FluidPropertiesTest, inRegionPH)
+{
+  // Region 1
+  EXPECT_EQ(_fp->inRegionPH(3.0e6, _fp->h_from_p_T(3.0e6, 300)), (unsigned int)1);
+  EXPECT_EQ(_fp->inRegionPH(80.0e6, _fp->h_from_p_T(80.0e6, 300)), (unsigned int)1);
+  EXPECT_EQ(_fp->inRegionPH(3.0e6, _fp->h_from_p_T(3.0e6, 500)), (unsigned int)1);
+
+  // Region 2
+  EXPECT_EQ(_fp->inRegionPH(3.5e3, _fp->h_from_p_T(3.5e3, 300)), (unsigned int)2);
+  EXPECT_EQ(_fp->inRegionPH(30.0e6, _fp->h_from_p_T(30.0e6, 700)), (unsigned int)2);
+  EXPECT_EQ(_fp->inRegionPH(75.0e6, _fp->h_from_p_T(75.0e6, 950)), (unsigned int)2);
+
+  // Region 3
+  EXPECT_EQ(_fp->inRegionPH(25.588e6, _fp->h_from_p_T(25.588e6, 650)), (unsigned int)3);
+  EXPECT_EQ(_fp->inRegionPH(22.298e6, _fp->h_from_p_T(22.298e6, 650)), (unsigned int)3);
+  EXPECT_EQ(_fp->inRegionPH(78.32e6, _fp->h_from_p_T(78.32e6, 750)), (unsigned int)3);
+
+  // Region 5
+  EXPECT_EQ(_fp->inRegionPH(0.5e6, _fp->h_from_p_T(0.5e6, 1500)), (unsigned int)5);
+  EXPECT_EQ(_fp->inRegionPH(30.0e6, _fp->h_from_p_T(30.0e6, 1500)), (unsigned int)5);
+  EXPECT_EQ(_fp->inRegionPH(30.0e6, _fp->h_from_p_T(30.0e6, 2000)), (unsigned int)5);
+
+  // Test out of range errors
+  // Low enthalpy
+  try
+  {
+    // Trigger invalid pressure error
+    _fp->inRegionPH(101.0e6, 0.1);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Pressure 1.01e+08 is out of range in fp: inRegion()"), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  // Low pressure, too high enthalpy
+  try
+  {
+    // Trigger another invalid pressure error
+    _fp->inRegionPH(1.0e6, 1e8);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Enthalpy 1e+08 is out of range in fp: inRegionPH()"), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  // Medium pressure, too high enthalpy
+  try
+  {
+    // Trigger invalid temperature error
+    _fp->inRegionPH(20e6, 1e8);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Enthalpy 1e+08 is out of range in fp: inRegionPH()"), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  // High pressure, too high enthalpy
+  try
+  {
+    // Trigger invalid temperature error
+    _fp->inRegionPH(70e6, 1e8);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Enthalpy 1e+08 is out of range in fp: inRegionPH()"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
