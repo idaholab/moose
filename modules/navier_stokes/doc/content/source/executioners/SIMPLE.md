@@ -163,13 +163,13 @@ When recovering from a checkpoint, it can be useful to hold the thermal-hydrauli
 and only advance other systems. The `PIMPLE` executioner exposes flags that selectively disable parts
 of the segregated solve:
 
-- [!param](/Executioner/SIMPLE/solve_momentum)
-- [!param](/Executioner/SIMPLE/solve_pressure)
-- [!param](/Executioner/SIMPLE/solve_energy)
-- [!param](/Executioner/SIMPLE/solve_solid_energy)
-- [!param](/Executioner/SIMPLE/solve_turbulence)
-- [!param](/Executioner/SIMPLE/solve_active_scalars)
-- [!param](/Executioner/SIMPLE/solve_passive_scalars)
+- [!param](/Executioner/SIMPLE/should_solve_momentum)
+- [!param](/Executioner/SIMPLE/should_solve_pressure)
+- [!param](/Executioner/SIMPLE/should_solve_energy)
+- [!param](/Executioner/SIMPLE/should_solve_solid_energy)
+- [!param](/Executioner/SIMPLE/should_solve_turbulence)
+- [!param](/Executioner/SIMPLE/should_solve_active_scalars)
+- [!param](/Executioner/SIMPLE/should_solve_passive_scalars)
 
 For example, to load a converged flow/temperature field from a steady-state run and only march
 passive scalars, enable [restart and recovery](restart_recover.md), keep the scalar solves enabled, and disable the momentum,
@@ -182,9 +182,9 @@ pressure, and energy solves:
 [Executioner]
   type = SIMPLE
   ...
-  solve_momentum = false
-  solve_pressure = false
-  solve_energy = false
+  should_solve_momentum = false
+  should_solve_pressure = false
+  should_solve_energy = false
 []
 ```
 

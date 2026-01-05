@@ -37,25 +37,25 @@ void
 SIMPLESolve::checkIntegrity()
 {
   // check to make sure that we don't have any time kernels in this simulation (Steady State)
-  if (_solve_momentum)
+  if (_should_solve_momentum)
     for (const auto system : _momentum_systems)
       checkTimeKernels(*system);
 
-  if (_solve_pressure)
+  if (_should_solve_pressure)
     checkTimeKernels(_pressure_system);
 
-  if (_has_energy_system && _solve_energy)
+  if (_has_energy_system && _should_solve_energy)
     checkTimeKernels(*_energy_system);
 
-  if (_has_turbulence_systems && _solve_turbulence)
+  if (_has_turbulence_systems && _should_solve_turbulence)
     for (const auto system : _turbulence_systems)
       checkTimeKernels(*system);
 
-  if (_has_passive_scalar_systems && _solve_passive_scalars)
+  if (_has_passive_scalar_systems && _should_solve_passive_scalars)
     for (const auto system : _passive_scalar_systems)
       checkTimeKernels(*system);
 
-  if (_has_active_scalar_systems && _solve_active_scalars)
+  if (_has_active_scalar_systems && _should_solve_active_scalars)
     for (const auto system : _active_scalar_systems)
       checkTimeKernels(*system);
 }

@@ -5,7 +5,7 @@
     type = CSVDiff
     input = pipe_flow_energy_scalars.i
     csvdiff = 'base_th_line_sampler_0002.csv'
-    cli_args = 'Outputs/file_base=base_th Outputs/checkpoint=true Executioner/solve_passive_scalars=false Executioner/num_iterations=150'
+    cli_args = 'Outputs/file_base=base_th Outputs/checkpoint=true Executioner/should_solve_passive_scalars=false Executioner/num_iterations=150'
     requirement = 'The system shall be able to converge a steady segregated flow and energy solution suitable for restart.'
     max_threads = 1 # see libmesh issue
     recover = false # Using a SIMPLE solver
@@ -16,7 +16,7 @@
     input = pipe_flow_energy_scalars.i
     prereq = base_th
     csvdiff = 'recover_scalars_line_sampler_0002.csv'
-    cli_args = 'Problem/restart_file_base=base_th_cp/LATEST Outputs/file_base=recover_scalars Executioner/solve_momentum=false Executioner/solve_pressure=false Executioner/solve_energy=false'
+    cli_args = 'Problem/restart_file_base=base_th_cp/LATEST Outputs/file_base=recover_scalars Executioner/should_solve_momentum=false Executioner/should_solve_pressure=false Executioner/should_solve_energy=false'
     requirement = 'The system shall be able to restart restart the flow/energy state, keep them unchanged, and advance passive scalars only.'
     max_threads = 1 # see libmesh issue
     recover = false # Using a SIMPLE solver
