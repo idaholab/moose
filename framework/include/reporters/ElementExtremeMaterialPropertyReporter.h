@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
 
   /// Type of extreme value to compute
-  enum ExtremeType
+  enum class ExtremeType
   {
     MAX,
     MIN
@@ -40,13 +40,13 @@ protected:
    * the extreme value as well as the other associated data in member
    * variables
    */
-  virtual void computeQpValue();
+  void computeQpValue();
 
   /// Material property for which to find extreme
   const GenericMaterialProperty<Real, is_ad> & _mat_prop;
 
   /// Type of extreme value to compute
-  ExtremeType _type;
+  const ExtremeType _type;
 
   /// Extreme value
   Real & _extreme_value;
@@ -54,11 +54,11 @@ protected:
   /// Coordinates of point with extreme value
   Point & _coordinates;
 
-  /// Other reportred material properties: properties
-  std::vector<const GenericMaterialProperty<Real, is_ad> *> _reported_properties;
+  /// Pointers to other reported material property objects
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _additional_reported_properties;
 
-  /// Other reported material properties: reported values
-  std::vector<Real *> _reported_property_values;
+  /// Values of other reported material properties
+  std::vector<Real *> _additional_reported_property_values;
 
   /// Current quadrature point
   unsigned int _qp;

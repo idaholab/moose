@@ -25,17 +25,18 @@ ElementExtremeMaterialPropertyReporterTempl<is_ad>::validParams()
 {
   InputParameters params = ElementReporter::validParams();
 
-  params.addRequiredParam<MaterialPropertyName>("mat_prop",
-                                                "Material property for which to find the extreme");
+  params.addRequiredParam<MaterialPropertyName>("material_property",
+                                                "Material property for which to find the extreme. "
+                                                "The value of this property is always reported.");
   MooseEnum type_options("max=0 min=1");
   params.addRequiredParam<MooseEnum>("value_type",
                                      type_options,
-                                     "Type of extreme value to return: 'max' "
-                                     "returns the maximum value and 'min' returns "
+                                     "Type of extreme value to report: 'max' "
+                                     "reports the maximum value and 'min' reports "
                                      "the minimum value.");
 
   params.addParam<std::vector<MaterialPropertyName>>(
-      "reported_properties",
+      "additional_reported_properties",
       {},
       "Additional material properties reported at the location of the extreme value");
   params.addClassDescription(
@@ -49,22 +50,22 @@ template <bool is_ad>
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::ElementExtremeMaterialPropertyReporterTempl(
     const InputParameters & parameters)
   : ElementReporter(parameters),
-
-    _mat_prop(getGenericMaterialProperty<Real, is_ad>("mat_prop")),
-    _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
+    _mat_prop(getGenericMaterialProperty<Real, is_ad>("material_property")),
+    _type(getParam<MooseEnum>("value_type").template getEnum<ExtremeType>()),
     _extreme_value(declareValueByName<Real>("extreme_value")),
     _coordinates(declareValueByName<Point>("coordinates")),
     _qp(0)
 {
-  const auto mat_prop_names = getParam<std::vector<MaterialPropertyName>>("reported_properties");
+  const auto & mat_prop_names =
+      getParam<std::vector<MaterialPropertyName>>("additional_reported_properties");
   // TODO: Add more options for the type of reported properties. Currently these have to be
   //       either Real (if using the non-AD version of this, or ADReal if using the AD version).
   //       ElementMaterialSampler can get multiple types (int, real, unsigned), maybe do
   //       something like that and also get AD and non-AD verisons.
   for (const auto & mpn : mat_prop_names)
   {
-    _reported_properties.push_back(&getGenericMaterialPropertyByName<Real, is_ad>(mpn));
-    _reported_property_values.push_back(&declareValueByName<Real>(mpn));
+    _additional_reported_properties.push_back(&getGenericMaterialPropertyByName<Real, is_ad>(mpn));
+    _additional_reported_property_values.push_back(&declareValueByName<Real>(mpn));
   }
 }
 
@@ -74,17 +75,17 @@ ElementExtremeMaterialPropertyReporterTempl<is_ad>::initialize()
 {
   switch (_type)
   {
-    case MAX:
+    case ExtremeType::MAX:
       _extreme_value = -std::numeric_limits<Real>::max();
       break;
 
-    case MIN:
+    case ExtremeType::MIN:
       _extreme_value = std::numeric_limits<Real>::max();
       break;
   }
   _coordinates = Point(0., 0., 0.);
-  for (const auto i : make_range(_reported_properties.size()))
-    *_reported_property_values[i] = 0.0;
+  for (const auto i : index_range(_additional_reported_properties))
+    *_additional_reported_property_values[i] = 0.0;
 }
 
 template <bool is_ad>
@@ -99,26 +100,28 @@ template <bool is_ad>
 void
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::computeQpValue()
 {
-  Real raw_mat_val = MetaPhysicL::raw_value(_mat_prop[_qp]);
+  const Real raw_mat_val = MetaPhysicL::raw_value(_mat_prop[_qp]);
   switch (_type)
   {
-    case MAX:
+    case ExtremeType::MAX:
       if (raw_mat_val > _extreme_value)
       {
         _extreme_value = raw_mat_val;
         _coordinates = _q_point[_qp];
-        for (const auto i : make_range(_reported_properties.size()))
-          *_reported_property_values[i] = MetaPhysicL::raw_value((*_reported_properties[i])[_qp]);
+        for (const auto i : index_range(_additional_reported_properties))
+          *_additional_reported_property_values[i] =
+              MetaPhysicL::raw_value((*_additional_reported_properties[i])[_qp]);
       }
       break;
 
-    case MIN:
+    case ExtremeType::MIN:
       if (raw_mat_val < _extreme_value)
       {
         _extreme_value = raw_mat_val;
         _coordinates = _q_point[_qp];
-        for (const auto i : make_range(_reported_properties.size()))
-          *_reported_property_values[i] = MetaPhysicL::raw_value((*_reported_properties[i])[_qp]);
+        for (const auto i : index_range(_additional_reported_properties))
+          *_additional_reported_property_values[i] =
+              MetaPhysicL::raw_value((*_additional_reported_properties[i])[_qp]);
       }
       break;
   }
@@ -129,35 +132,27 @@ void
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::finalize()
 {
   unsigned int rank = 0;
-  Real ev_value = _extreme_value;
 
   switch (_type)
   {
-    case MAX:
-      _communicator.maxloc(ev_value, rank);
+    case ExtremeType::MAX:
+      _communicator.maxloc(_extreme_value, rank);
       break;
-    case MIN:
-      _communicator.minloc(ev_value, rank);
+    case ExtremeType::MIN:
+      _communicator.minloc(_extreme_value, rank);
       break;
   }
-  _extreme_value = ev_value;
 
-  Point ev_coord(0., 0., 0.);
-  const auto prop_size = _reported_property_values.size();
+  const auto prop_size = _additional_reported_property_values.size();
   std::vector<Real> ev_rep_prop_vals(prop_size, 0.);
+
+  _communicator.broadcast(_coordinates, rank);
   if (rank == processor_id())
-  {
-    ev_coord = _coordinates;
     for (const auto i : make_range(prop_size))
-      ev_rep_prop_vals[i] = *_reported_property_values[i];
-  }
-  _communicator.sum(ev_coord);
-  _coordinates = ev_coord;
+      ev_rep_prop_vals[i] = *_additional_reported_property_values[i];
+  _communicator.broadcast(ev_rep_prop_vals, rank, /*identical_sizes=*/true);
   for (const auto i : make_range(prop_size))
-  {
-    _communicator.sum(ev_rep_prop_vals[i]);
-    *_reported_property_values[i] = ev_rep_prop_vals[i];
-  }
+    *_additional_reported_property_values[i] = ev_rep_prop_vals[i];
 }
 
 template <bool is_ad>
@@ -165,27 +160,27 @@ void
 ElementExtremeMaterialPropertyReporterTempl<is_ad>::threadJoin(const UserObject & uo)
 {
   const auto & rpt = static_cast<const ElementExtremeMaterialPropertyReporterTempl<is_ad> &>(uo);
-  const auto prop_size = _reported_property_values.size();
+  const auto prop_size = _additional_reported_property_values.size();
 
   switch (_type)
   {
-    case MAX:
+    case ExtremeType::MAX:
       if (rpt._extreme_value > _extreme_value)
       {
         _extreme_value = rpt._extreme_value;
         _coordinates = rpt._coordinates;
         for (const auto i : make_range(prop_size))
-          *_reported_property_values[i] = *(rpt._reported_property_values[i]);
+          *_additional_reported_property_values[i] = *(rpt._additional_reported_property_values[i]);
       }
       break;
 
-    case MIN:
+    case ExtremeType::MIN:
       if (rpt._extreme_value < _extreme_value)
       {
         _extreme_value = rpt._extreme_value;
         _coordinates = rpt._coordinates;
         for (const auto i : make_range(prop_size))
-          *_reported_property_values[i] = *(rpt._reported_property_values[i]);
+          *_additional_reported_property_values[i] = *(rpt._additional_reported_property_values[i]);
       }
       break;
   }

@@ -44,17 +44,17 @@
 [Reporters]
   [min]
     type = ElementExtremeMaterialPropertyReporter
-    mat_prop = mat_prop
+    material_property = mat_prop
     value_type = min
     execute_on = 'INITIAL'
-    reported_properties = 'mat_prop2 mat_prop3'
+    additional_reported_properties = 'mat_prop2 mat_prop3'
   []
   [max]
     type = ElementExtremeMaterialPropertyReporter
-    mat_prop = mat_prop
+    material_property = mat_prop
     value_type = max
     execute_on = 'INITIAL'
-    reported_properties = 'mat_prop2 mat_prop3'
+    additional_reported_properties = 'mat_prop2 mat_prop3'
   []
 []
 
