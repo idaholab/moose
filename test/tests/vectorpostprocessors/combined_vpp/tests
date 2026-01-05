@@ -7,4 +7,12 @@
         csvdiff = 'test_out_combined_0001.csv'
         requirement = 'The system shall be able to combine vectors from multiple vectorpostprocessors.'
     []
+    [restricted_to_some]
+        type = CSVDiff
+        input = 'test.i'
+        cli_args = "VectorPostprocessors/combined/vectors='v1 v2; v6'
+                    Outputs/file_base=restricted"
+        csvdiff = 'restricted_combined_0001.csv'
+        requirement = 'The system shall be able to combine vectors from multiple vectorpostprocessors.'
+    []
 []
