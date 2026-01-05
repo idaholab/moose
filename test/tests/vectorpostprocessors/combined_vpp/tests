@@ -1,10 +1,18 @@
 [Tests]
-    issues = ''
+    issues = '#32173'
     design = 'CombinedVectorPostprocessor.md'
     [combine]
         type = CSVDiff
         input = 'test.i'
         csvdiff = 'test_out_combined_0001.csv'
-        requirement = 'The system shall be able to combine vectors from multiple vectorpostprocessors.'
+        requirement = 'The system shall be able to combine vectors from multiple vectorpostprocessors into a single combined vectorpostprocessor.'
+    []
+    [restricted_to_some]
+        type = CSVDiff
+        input = 'test.i'
+        cli_args = "VectorPostprocessors/combined/vectors='v1 v2; v6'
+                    Outputs/file_base=restricted"
+        csvdiff = 'restricted_combined_0001.csv'
+        requirement = 'The system shall be able to combine a selection of vectors from multiple vectorpostprocessors into a single combined vectorpostprocessor.'
     []
 []
