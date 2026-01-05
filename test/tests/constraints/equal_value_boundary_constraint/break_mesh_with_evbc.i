@@ -1,6 +1,5 @@
 [Problem]
   boundary_restricted_node_integrity_check = false
-  solve = false
 []
 
 [Mesh]
@@ -11,9 +10,8 @@
 
   [breakmesh]
     type = BreakMeshByBlockGenerator
+    block_pairs = '2 4'
     input = fmg
-    split_interface = true
-    add_interface_on_two_sides = true
   []
 
   [add_surfaces]
@@ -26,7 +24,6 @@
     fixed_normal = true
     new_boundary = 'y1 x1 y0 x0'
   []
-  parallel_type = REPLICATED
 []
 
 [Outputs]
@@ -41,6 +38,13 @@
 
 [Executioner]
   type = Steady
+
+  solve_type = 'NEWTON'
+
+  petsc_options_iname = '-pc_type -sub_pc_type'
+  petsc_options_value = 'asm       lu'
+
+  line_search = 'none'
 []
 
 [BCs]
@@ -64,8 +68,8 @@
   [corner]
     type = EqualValueBoundaryConstraint
     variable = diffused
-    secondary_node_ids = '5 10'
-    primary_node_coord = '0.5 0.5 0.0'
+    secondary_node_ids = '1 2 3 4 5 6'
+    primary_node_coord = '-0.5 0.5 0'
     penalty = 10e6
   []
 []
