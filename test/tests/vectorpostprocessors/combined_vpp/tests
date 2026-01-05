@@ -1,0 +1,10 @@
+[Tests]
+    issues = ''
+    design = 'CombinedVectorPostprocessor.md'
+    [combine]
+        type = CSVDiff
+        input = 'test.i'
+        csvdiff = 'test_out_combined_0001.csv'
+        requirement = 'The system shall be able to combine vectors from multiple vectorpostprocessors.'
+    []
+[]
