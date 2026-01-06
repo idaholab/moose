@@ -779,6 +779,10 @@ Water97FluidProperties::T_from_p_h_ad(const ADReal & pressure, const ADReal & en
       break;
     }
 
+    case 4:
+      return vaporTemperature(pressure);
+      break;
+
     case 5:
     {
       Real T_min = 1073.15;
