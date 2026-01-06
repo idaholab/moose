@@ -17,7 +17,7 @@ To use `DensityScaling` effectively, two steps are needed.  The following is a w
 
 #### Step 1
 
-To ensure that a time step of $\Delta t = 4$ is stable, use a `DensityScaling` Material to compute the required density in each element:
+To ensure that a user-defined time step ($\Delta t = 4$ in this case) is stable, use a `DensityScaling` Material to compute the required density in each element:
 
 !listing modules/solid_mechanics/test/tests/dynamics/time_integration/mass_scaling.i start=[density_true] end=[Elasticity_tensor]
 
