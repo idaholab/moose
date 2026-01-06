@@ -34,11 +34,11 @@ private:
   /// User-prescribed desired time step
   const Real _desired_time_step;
 
-  /// whether to compute the additional density needed (_additive_contribution = true) or the density needed (_additive_contribution = false)
-  const bool _additive_contribution;
-
   /// The scaled density
   MaterialProperty<Real> & _density_scaled;
+
+  /// Scaled density minus true density
+  MaterialProperty<Real> & _additional_density;
 
   /// The true inertial density of the material
   const MaterialProperty<Real> & _material_density;

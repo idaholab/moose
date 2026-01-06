@@ -174,11 +174,11 @@
     block = 0
     true_density = density
     desired_time_step = 0.06
-    scaled_density = density_scaling
+    scaled_density = density_scaled
+    additional_density = density_scaling
     output_properties = density_scaling
     outputs = 'exodus'
     safety_factor = 0.5
-    additive_contribution = true
   []
 []
 

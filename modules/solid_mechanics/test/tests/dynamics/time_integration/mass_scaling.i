@@ -153,7 +153,7 @@ density_true = 16 # the true inertial density of the material
     scaled_density = density_scaled
     desired_time_step = 4
     safety_factor = 0.8
-    output_properties = density_scaled
+    output_properties = 'density_scaled additional_density'
     outputs = exodus
     implicit = false
   []

@@ -4,10 +4,12 @@
 
 ## Description
 
-This material computes the density required to achieve stable explicit time stepping with a user-defined time step (see [CriticalTimeStep](/CriticalTimeStep.md) for the stability condition).  Depending on the advanced `additive_contribution` parameter, this Material computes:
+This material computes the density required to achieve stable explicit time stepping with a user-defined time step (see [CriticalTimeStep](/CriticalTimeStep.md) for the stability condition).  This Material computes:
 
-- when `additive_contribution = false`: the density needed to enable time-stepping with given `desired_time_step`;
-- when `additive_contribution = true`: the portion of the density that should be added to the true density to enable the desired time stepping, that is max(0, density needed minus true density).
+- the density needed to enable time-stepping with given `desired_time_step`;
+- `scaled_density` minus the true density.
+
+The names of these are defined by the `scaled_density` and `additional_density` input parameters.
 
 Note that the density computed acts as your model's *inertial* density (see example below) and you should not use it as your *gravitational* density.
 
@@ -30,7 +32,7 @@ The important features here are:
 - The `DensityScaling` Material computes the density required for stable time-stepping, then increases it by multiplying it by 1/`safety_factor`.  For example, in this case, $\Delta t = 4 / 0.8 = 5$ is theoretically stable, but for safety, the input file only uses $\Delta t = 4$.
 - The `DensityScaling` Material stores the computed density in `density_scaled` (or whatever is specified by the `scaled_density` parameter).
 
-The other specified parameters, such as `implicit = false`, `output_properties`, `outputs`, are unimportant here (eg, the outputs are just so the result is stored in the exodus file).
+The other specified parameters, such as `implicit = false`, `output_properties`, `outputs`, are unimportant for this example (eg, the outputs are just so the result is stored in the exodus file).
 
 #### Step 2
 

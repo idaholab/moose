@@ -26,16 +26,13 @@ DensityScaling::validParams()
       "true_density",
       "Name of Material Property defining the true inertial density of the material.");
   params.addRequiredParam<MaterialPropertyName>(
-      "scaled_density", "Name of the Property that this Material will compute.");
+      "scaled_density", "Name of the density that this Material will compute.");
+  params.addParam<MaterialPropertyName>(
+      "additional_density",
+      "additional_density",
+      "Scaled_density - true_density will be put into a Material Property with this name.  This is "
+      "typically used to determine where density has been added.");
   params.addRequiredParam<Real>("desired_time_step", "The desired time step.");
-  params.addParam<bool>(
-      "additive_contribution",
-      false,
-      "When false, this Material computes the inertial density needed to enable time-stepping with "
-      "given desired_time_step.  When true, the Material computes max(inertial_density_needed - "
-      "true_density, 0), ie, just the portion that needs to be added to the true density to enable "
-      "the desired time stepping.");
-  params.addParamNamesToGroup("additive_contribution", "Advanced");
   params.addRangeCheckedParam<Real>(
       "safety_factor",
       0.7,
@@ -50,8 +47,9 @@ DensityScaling::validParams()
 DensityScaling::DensityScaling(const InputParameters & parameters)
   : Material(parameters),
     _desired_time_step(getParam<Real>("desired_time_step")),
-    _additive_contribution(getParam<bool>("additive_contribution")),
     _density_scaled(declareProperty<Real>(getParam<MaterialPropertyName>("scaled_density"))),
+    _additional_density(
+        declareProperty<Real>(getParam<MaterialPropertyName>("additional_density"))),
     _material_density(getMaterialProperty<Real>("true_density")),
     _sqrt_effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness")),
     _safety_factor(getParam<Real>("safety_factor"))
@@ -64,8 +62,6 @@ DensityScaling::computeQpProperties()
   const Real stable_density = Utility::pow<2>(_sqrt_effective_stiffness[_qp] * _desired_time_step /
                                               _safety_factor / _current_elem->hmin());
 
-  if (_additive_contribution)
-    _density_scaled[_qp] = std::max(stable_density - _material_density[_qp], 0.0);
-  else
-    _density_scaled[_qp] = std::max(stable_density, _material_density[_qp]);
+  _density_scaled[_qp] = std::max(stable_density, _material_density[_qp]);
+  _additional_density[_qp] = _density_scaled[_qp] - _material_density[_qp];
 }
