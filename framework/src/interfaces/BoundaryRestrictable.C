@@ -187,7 +187,8 @@ BoundaryRestrictable::initializeBoundaryRestrictable()
 
 #ifdef MOOSE_KOKKOS_ENABLED
   if (_moose_object.isKokkosObject())
-    initializeKokkosBoundaryRestrictable(_bnd_mesh);
+    _bnd_feproblem->addKokkosMeshInitializationHook(
+        std::bind(&BoundaryRestrictable::initializeKokkosBoundaryRestrictable, this));
 #endif
 }
 

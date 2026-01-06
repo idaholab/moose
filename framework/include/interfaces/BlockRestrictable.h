@@ -244,7 +244,7 @@ protected:
   void initializeBlockRestrictable(const MooseObject * moose_object);
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  void initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh * mesh);
+  void initializeKokkosBlockRestrictable();
 #endif
 
   /**

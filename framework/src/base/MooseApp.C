@@ -1711,23 +1711,6 @@ MooseApp::setupOptions()
     _exit_code = 1;
   }
 
-#ifdef MOOSE_KOKKOS_ENABLED
-  for (auto & action : _action_warehouse.allActionBlocks())
-  {
-    auto object_action = std::dynamic_pointer_cast<MooseObjectAction>(action);
-    if (object_action &&
-        object_action->getObjectParams().isParamValid(MooseBase::kokkos_object_param))
-    {
-      if (!isKokkosAvailable())
-        mooseError("Attempted to add a ",
-                   object_action->getMooseObjectType(),
-                   " but no GPU was detected in the system.");
-
-      _has_kokkos_objects = true;
-    }
-  }
-#endif
-
   Moose::out << std::flush;
 }
 
