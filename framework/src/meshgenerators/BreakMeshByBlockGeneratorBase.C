@@ -20,7 +20,7 @@ BreakMeshByBlockGeneratorBase::validParams()
       "interface",
       "the name of the new interface. Cannot be used whit `split_interface=true`");
   params.addParam<bool>("split_interface",
-                        false,
+                        true,
                         "If true, it creates a "
                         "different interface for each block pair.");
   params.addClassDescription("This is the base class used to split a monolithic"

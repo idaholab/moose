@@ -105,6 +105,18 @@
       recover = false
       allow_test_objects = true
     []
+    [boundary_pair_not_found]
+      type = RunException
+      input = 'czm_multiple_action_and_materials.i'
+      expect_err = 'CohesiveZoneAction Error: The mesh contains incomplete interface boundary pairs'
+      detail = "The system shall report an error when we do not have both sides of the boundary defined but also CZM is enabled"
+      cli_args = "Physics/SolidMechanics/CohesiveZone/czm_ik_012/material_output_order=CONSTAN"
+                 "T Physics/SolidMechanics/CohesiveZone/czm_ik_23/material_output_order=FIRST "
+                 "Outputs/file_base=czm_multiple_action_differnt_outputs_orders_on_different_block_ou"
+                 "t Mesh/split/add_interface_on_two_sides=false"
+      recover = false
+      allow_test_objects = true
+    []
     [multiple_action_common_outputs]
       type = Exodiff
       input = 'czm_multiple_action_and_materials.i'
