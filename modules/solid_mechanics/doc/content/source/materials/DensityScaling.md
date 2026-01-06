@@ -25,7 +25,7 @@ The important features here are:
 
 - A Material Property called `density_true` is calculated by some Material (in this case, the `density_true` Material) and fed into the `DensityScaling` Material
 - The `desired_time_step` is defined in the `DensityScaling` Material
-- The `safety_factor` is set.  What happens is that the `DensityScaling` Material computes the density required for stable time-stepping, then increases it using 1/`safety_factor`.  This means that, in this case, $\Delta t = 4 / 0.8 = 5$ is theoretically stable, but for safety, the input file only uses $\Delta t = 4$.
+- The `DensityScaling` Material computes the density required for stable time-stepping, then increases it by multiplying it by 1/`safety_factor`.  For example, in this case, $\Delta t = 4 / 0.8 = 5$ is theoretically stable, but for safety, the input file only uses $\Delta t = 4$.
 - The `DensityScaling` Material stores the computed density in `density_scaled` (or whatever is specified by the `scaled_density` parameter).
 
 The other specified parameters, such as `implicit = false`, `output_properties`, `outputs`, are unimportant here (eg, the outputs are just so the result is stored in the exodus file).
