@@ -31,21 +31,21 @@
     type = RunException
     input = 'equal_value_boundary_constraint_test.i'
     expect_err = "Both 'primary' and 'primary_node_coord' parameters are set. They are mutually exclusive."
-    detail = "The system shall report an error when user sets both 'primary' and 'primary_node_coord' parameters."
     cli_args = "Constraints/y_top/primary=45 Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0'"
+    requirement = "The system shall report an error when both node ID and node coordinates are set."
   []
   [error_not_find_node_id]
     type = RunException
     input = 'equal_value_boundary_constraint_test.i'
-    expect_err = "Couldn't find a node ID for the specified primary_node_coord. We go with default behavior of choosing primary node."
-    detail = "The system shall report a warning when it cannot find a node ID for the specified primary_node_coord."
+    expect_err = "Couldn't find a node ID for the specified primary_node_coord."
     cli_args = "Constraints/y_top/primary_node_coord='0.37 1.0 0.0'"
+    requirement = "The system shall report a warning when it cannot find a node ID for the specified node coordinates."
   []
   [error_multiple_primary_nodes]
     type = RunException
     input = 'break_mesh_with_evbc.i'
     expect_err = "Multiple nodes found for the specified primary_node_coord."
-    detail = "The system shall report an error when multiple nodes are found for the specified primary_node_coord."
     cli_args = "Constraints/corner/primary_node_coord='0.5 0.5 0.0'"
+    requirement = "The system shall report an error when multiple nodes are found for the specified node coordinates."
   []
 []

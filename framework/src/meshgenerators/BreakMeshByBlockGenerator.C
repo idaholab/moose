@@ -512,12 +512,15 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
         _subid_pairs_to_boundary_id.find(rev_pair) != _subid_pairs_to_boundary_id.end();
 
     if (has_reverse)
+    {
       // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
       mesh.add_disjoint_neighbor_boundary_pairs(
           boundary_id, _subid_pairs_to_boundary_id[rev_pair], RealVectorValue(0.0, 0.0, 0.0));
+      _mesh->setHasIncompleteInterfacePairs(false);
+    }
     else
     {
-      _mesh->setIncompleteInterfacePairs();
+      _mesh->setHasIncompleteInterfacePairs(true);
       mooseInfo("Single interface boundary '",
                 boundary_id,
                 "' found (no reverse pair). Compatible only with non-CZM setups.");

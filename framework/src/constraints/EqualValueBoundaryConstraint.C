@@ -59,9 +59,9 @@ EqualValueBoundaryConstraint::validParams()
       std::numeric_limits<unsigned int>::max(),
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
   params.addParam<Point>("primary_node_coord",
-                         Point(std::numeric_limits<unsigned int>::max(),
-                               std::numeric_limits<unsigned int>::max(),
-                               std::numeric_limits<unsigned int>::max()),
+                         Point(std::numeric_limits<Real>::max(),
+                               std::numeric_limits<Real>::max(),
+                               std::numeric_limits<Real>::max()),
                          "Coordinates of the primary node to locate.");
   params.addParam<std::vector<unsigned int>>(
       "secondary_node_ids", {}, "The IDs of the secondary node");
@@ -94,16 +94,18 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
   _primary_node_vector.clear();
   _connected_nodes.clear();
 
-  // user provide nothing
+  // user provided nothing
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
     mooseError("Please specify secondary node ids or boundary id.");
 
+  // Find primary node id from user-specified primary node coordinates
   if (_primary_node_id == std::numeric_limits<unsigned int>::max() &&
       isParamSetByUser("primary_node_coord"))
   {
     const Real eps = libMesh::TOLERANCE;
 
     std::unordered_set<dof_id_type> local_primary_node_ids;
+    // Gather local candidates
     for (const auto & bd_node : *_mesh.getBoundaryNodeRange())
     {
       if ((*(bd_node->_node) - _primary_node_coord).norm() < eps)
@@ -132,8 +134,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     const auto unique_count = global_primary_node_ids.size();
 
     if (unique_count == 0)
-      mooseError("Couldn't find a node ID for the specified primary_node_coord. We go with default "
-                 "behavior of choosing primary node.");
+      mooseError("Couldn't find a node ID for the specified primary_node_coord.");
     else if (unique_count > 1)
       mooseError("Multiple nodes found for the specified primary_node_coord.");
 
@@ -145,7 +146,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
     mooseError(
         "Both 'primary' and 'primary_node_coord' parameters are set. They are mutually exclusive.");
 
-  // user provide boundary name
+  // user provided boundary name
   if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
   {
     std::vector<dof_id_type> nodelist =
@@ -172,7 +173,7 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
         _connected_nodes.push_back(*in);
     }
   }
-  // user provide node ids
+  // user provided node ids
   else if ((_secondary_node_ids.size() != 0) && (_secondary_node_set_id == "NaN"))
   {
     if (_primary_node_id == std::numeric_limits<unsigned int>::max())
