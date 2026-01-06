@@ -20,8 +20,8 @@ CoupledPenaltyInterfaceDiffusion::validParams()
   params.addRequiredParam<Real>(
       "penalty",
       "The penalty that penalizes jump between primary and neighbor secondary variables.");
-  params.addCoupledVar("primary_coupled_var", "The coupled variable on the master side");
-  params.addCoupledVar("secondary_coupled_var", "The coupled variable on the slave side");
+  params.addCoupledVar("primary_coupled_var", "The coupled variable on the primary side");
+  params.addCoupledVar("secondary_coupled_var", "The coupled variable on the secondary side");
   return params;
 }
 

@@ -48,19 +48,19 @@ CohesiveZoneActionBase::validParams()
                         "Whether to use automatic differentiation to compute the Jacobian");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<AuxVariableName>>(
-      "save_in_master", {}, "The displacement residuals on the  master side");
+      "save_in_primary", {}, "The displacement residuals on the primary side");
   params.addParam<std::vector<AuxVariableName>>(
-      "diag_save_in_master",
+      "diag_save_in_primary",
       {},
-      "The displacement diagonal preconditioner terms on the  master side");
+      "The displacement diagonal preconditioner terms on the primary side");
   params.addParam<std::vector<AuxVariableName>>(
-      "save_in_slave", {}, "The displacement residuals on the  slave side");
+      "save_in_secondary", {}, "The displacement residuals on the secondary side");
   params.addParam<std::vector<AuxVariableName>>(
-      "diag_save_in_slave",
+      "diag_save_in_secondary",
       {},
-      "The displacement diagonal preconditioner terms on the  slave side");
-  params.addParamNamesToGroup("save_in_master diag_save_in_master save_in_slave diag_save_in_slave",
-                              "Advanced");
+      "The displacement diagonal preconditioner terms on the secondary side");
+  params.addParamNamesToGroup(
+      "save_in_primary diag_save_in_primary save_in_secondary diag_save_in_secondary", "Advanced");
   params.addParam<bool>("verbose", false, "Display extra information.");
 
   // Output
