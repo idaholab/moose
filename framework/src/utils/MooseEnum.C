@@ -59,14 +59,21 @@ MooseEnum::operator=(const MooseEnumItem & item)
 void
 MooseEnum::assign(const std::string & name, const std::optional<std::string> & context)
 {
-  if (name == "")
+  if (MooseUtils::trim(name) == "")
   {
     _current = MooseEnumItem("", MooseEnumItem::INVALID_ID);
     return;
   }
 
-  std::set<MooseEnumItem>::const_iterator iter = find(name);
-  if (iter == _items.end())
+  // Check if name can be parsed cleanly into an integer
+  int value = 0;
+  bool integer = (std::istringstream(MooseUtils::trim(name)) >> value).eof();
+
+  if (auto iter = find(name); iter != _items.end())
+    _current = *iter;
+  else if (auto subs = find(value); subs != _items.end() && integer)
+    _current = *subs;
+  else
   {
     if (!_allow_out_of_range) // Are out of range values allowed?
       mooseError(context ? (*context + ":\n\n") : std::string(""),
@@ -75,14 +82,10 @@ MooseEnum::assign(const std::string & name, const std::optional<std::string> & c
                  "\" in MooseEnum.  Valid options (not case-sensitive) are \"",
                  getRawNames(),
                  "\".");
-    else
-    {
-      _current = MooseEnumItem(name, getNextValidID());
-      _items.insert(_current);
-    }
+
+    _current = MooseEnumItem(name, integer ? value : getNextValidID());
+    _items.insert(_current);
   }
-  else
-    _current = *iter;
 
   checkDeprecated();
 }
@@ -96,15 +99,14 @@ MooseEnum::assign(int value)
     return;
   }
 
-  std::set<MooseEnumItem>::const_iterator iter = find(value);
-  if (iter == _items.end())
+  if (auto iter = find(value); iter != _items.end())
+    _current = *iter;
+  else
     mooseError("Invalid id \"",
                value,
                "\" in MooseEnum. Valid ids are \"",
                Moose::stringify(getIDs()),
                "\".");
-  else
-    _current = *iter;
 
   checkDeprecated();
 }

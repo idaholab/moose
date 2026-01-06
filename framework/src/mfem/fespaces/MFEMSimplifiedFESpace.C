@@ -11,6 +11,7 @@
 
 #include "MFEMSimplifiedFESpace.h"
 #include "MFEMProblem.h"
+#include "AddVariableAction.h"
 
 InputParameters
 MFEMSimplifiedFESpace::validParams()
@@ -18,15 +19,9 @@ MFEMSimplifiedFESpace::validParams()
   InputParameters params = MFEMFESpace::validParams();
   params.addClassDescription("Base class for the simplified interfaces to build MFEM finite "
                              "element spaces. It provides the common parameters.");
-  MooseEnum fec_order(
-      "CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH ELEVENTH TWELFTH "
-      "THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH EIGHTTEENTH NINETEENTH TWENTIETH "
-      "TWENTYFIRST TWENTYSECOND TWENTYTHIRD TWENTYFOURTH TWENTYFIFTH TWENTYSIXTH TWENTYSEVENTH "
-      "TWENTYEIGHTH TWENTYNINTH THIRTIETH THIRTYFIRST THIRTYSECOND THIRTYTHIRD THIRTYFOURTH "
-      "THIRTYFIFTH THIRTYSIXTH THIRTYSEVENTH THIRTYEIGHTH THIRTYNINTH FORTIETH FORTYFIRST "
-      "FORTYSECOND FORTYTHIRD",
-      "FIRST");
-  params.addParam<MooseEnum>("fec_order", fec_order, "Order of the FE shape function to use.");
+  params.addParam<MooseEnum>("fec_order",
+                             AddVariableAction::getNonlinearVariableOrders(),
+                             "Order of the FE shape function to use.");
   return params;
 }
 
