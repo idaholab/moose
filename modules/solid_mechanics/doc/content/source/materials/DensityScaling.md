@@ -4,12 +4,14 @@
 
 ## Description
 
-This Material computes the inertial density needed to enable stable explicit time-stepping in solid-mechanics problems (see [CriticalTimeStep](/CriticalTimeStep.md)).  It outputs:
+This material computes the density required to achieve stable explicit time stepping with a user-defined time step (see [CriticalTimeStep](/CriticalTimeStep.md) for the stability condition).  Depending on the advanced `additive_contribution` parameter, this Material computes:
 
-- when `additive_contribution = false`: the inertial density needed to enable time-stepping with given `desired_time_step`; 
-- when `additive_contribution = true`: the portion of intertial density that should be added to the true density to enable the desired time stepping, that is max(0, inertial density needed minus true inertial density).
+- when `additive_contribution = false`: the density needed to enable time-stepping with given `desired_time_step`;
+- when `additive_contribution = true`: the portion of the density that should be added to the true density to enable the desired time stepping, that is max(0, density needed minus true density).
 
-When used in the [MassMatrix](MassMatrix.md), time-steps of size `desired_time_step` will be stable.  However, note that the addition of mass will alter the dynamics of the system.  In particular, high-frequency oscillations will largely be eliminated in elements that are small and/or stiff and/or light.  Hence, using mass scaling is particularly recommended when the finite element mesh contains a handful of small/stiff/light elements, or when high-frequency dynamics are unimportant.
+Note that the density computed acts as your model's *inertial* density (see example below) and you should not use it as your *gravitational* density.
+
+When used in the [MassMatrix](MassMatrix.md), time-steps of size `desired_time_step` will be stable.  However, note that the addition of mass will alter the dynamics of the system.  In particular, high-frequency oscillations will largely be eliminated in elements that are small and/or stiff and/or light.  Hence, using mass scaling is particularly recommended when the finite element mesh contains a handful of small/stiff/light elements, or when high-frequency dynamics are unimportant.  Mass scaling has a smaller, yet noticeable, impact on low-frequency dynamics.
 
 ## Example
 

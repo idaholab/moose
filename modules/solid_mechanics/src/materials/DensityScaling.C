@@ -35,6 +35,7 @@ DensityScaling::validParams()
       "given desired_time_step.  When true, the Material computes max(inertial_density_needed - "
       "true_density, 0), ie, just the portion that needs to be added to the true density to enable "
       "the desired time stepping.");
+  params.addParamNamesToGroup("additive_contribution", "Advanced");
   params.addRangeCheckedParam<Real>(
       "safety_factor",
       0.7,

@@ -13,7 +13,7 @@
 #include "RankTwoTensor.h"
 
 /**
- * This material computes a density that is scaled to enable stable explicit time stepping 
+ * This material computes a density that is scaled to enable stable explicit time stepping
  * with steps larger than those governed by stability conditions in solid-mechanics problems.
  * Adding mass to elements can affect the dynamics of the system. For this reason, this
  * should only be done when the user knows that such additions will not affect the numerical
