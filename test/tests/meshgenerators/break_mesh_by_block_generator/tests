@@ -7,7 +7,7 @@
     [3d_auto_test]
       type = 'Exodiff'
       input = 'break_mesh_3D_auto.i'
-      cli_args = '--mesh-only Mesh/breakmesh/add_interface_on_two_sides=false'
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
       exodiff = 'break_mesh_3D_auto_in.e'
       recover = false
       exodiff_opts = '-pedantic'
@@ -18,7 +18,7 @@
     [3d_split_test]
       type = 'Exodiff'
       input = 'break_mesh_3D_splittrue.i'
-      cli_args = '--mesh-only Mesh/breakmesh/add_interface_on_two_sides=false'
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
       exodiff = 'break_mesh_3D_splittrue_in.e'
       recover = false
       exodiff_opts = '-pedantic'
@@ -29,7 +29,7 @@
     [3d_polycrystal_test]
       type = 'Exodiff'
       input = 'break_mesh_3D_polycrystal.i'
-      cli_args = '--mesh-only Mesh/breakmesh/add_interface_on_two_sides=false'
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
       exodiff = 'break_mesh_3D_polycrystal_in.e'
       recover = false
       exodiff_opts = '-pedantic'
@@ -40,7 +40,7 @@
     [2d_auto_test]
       type = 'Exodiff'
       input = 'break_mesh_2DJunction_auto.i'
-      cli_args = '--mesh-only Mesh/breakmesh/add_interface_on_two_sides=false'
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
       exodiff = 'break_mesh_2DJunction_auto_in.e'
       recover = false
 
@@ -50,7 +50,7 @@
     [2d_splittrue_test]
       type = 'Exodiff'
       input = 'break_mesh_2DJunction_splittrue.i'
-      cli_args = '--mesh-only Mesh/breakmesh/add_interface_on_two_sides=false'
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
       exodiff = 'break_mesh_2DJunction_splittrue_in.e'
       recover = false
       exodiff_opts = '-pedantic'
@@ -61,7 +61,7 @@
     [polycrystal_test]
       type = 'Exodiff'
       input = 'break_mesh_2DJunction_polycrystal.i'
-      cli_args = '--mesh-only Mesh/breakmesh/add_interface_on_two_sides=false'
+      cli_args = 'Mesh/breakmesh/add_interface_on_two_sides=false --mesh-only'
       exodiff = 'break_mesh_2DJunction_polycrystal_in.e'
       recover = false
       exodiff_opts = '-pedantic'

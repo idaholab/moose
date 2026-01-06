@@ -151,8 +151,6 @@ BreakMeshByBlockGenerator::generate()
   std::map<dof_id_type, std::set<subdomain_id_type>> nodeid_to_connected_blocks;
   syncConnectedBlocks(node_to_elem_map, *mesh, nodeid_to_connected_blocks);
 
-  std::unordered_map<std::pair<const Elem *, unsigned int>, std::pair<const Elem *, unsigned int>>
-      elem_side_to_fake_neighbor_elem_side;
   // Main loop to duplicate nodes
   for (const auto & map_entry : node_to_elem_map)
   {
@@ -165,8 +163,10 @@ BreakMeshByBlockGenerator::generate()
     if (nodeid_to_connected_blocks.find(current_node_id) == nodeid_to_connected_blocks.end())
       continue;
 
-    // Get the set of blocks connected to the current node (we do not want to use reference because
-    // we need to modify it)
+    // Get the set of blocks connected to the current node.
+    // Make a local copy because we'll modify it (e.g., erase Elem::invalid_subdomain_id).
+    // Preserve the original map's information (including invalid_subdomain_id) for global
+    // synchronization/logic, but operate on the copy for duplication decisions.
     auto connected_blocks = nodeid_to_connected_blocks.at(current_node_id);
     // Remove invalid subdomain if block pairs restriction is active
     if (_block_pairs_restricted)
@@ -226,6 +226,7 @@ BreakMeshByBlockGenerator::generate()
         Elem * current_elem = mesh->elem_ptr(elem_id);
         subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
 
+        // Work on duplicating the node only from the element that is not on the reference subdomain
         if ((block_id != reference_subdomain_id) ||
             (_block_pairs_restricted && findBlockPairs(reference_subdomain_id, block_id)))
         {
@@ -262,7 +263,7 @@ BreakMeshByBlockGenerator::generate()
                 boundary_info.add_node(new_node, node_boundary_ids);
               }
               multiplicity_counter--; // node created, update multiplicity counter
-              break; // ones the proper node has been fixed in one element we can break the
+              break; // once the proper node has been fixed in one element we can break the
                      // loop
             }
 
@@ -297,20 +298,21 @@ BreakMeshByBlockGenerator::generate()
         {
           Elem * current_elem = mesh->elem_ptr(elem_id);
           Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
+
+          // Early out if both elements are the same
+          if (current_elem == connected_elem)
+            continue;
+
           subdomain_id_type curr_elem_subid = blockRestrictedElementSubdomainID(current_elem);
           subdomain_id_type connected_elem_subid =
               blockRestrictedElementSubdomainID(connected_elem);
 
-          if (current_elem != connected_elem && curr_elem_subid < connected_elem_subid)
+          if (curr_elem_subid < connected_elem_subid)
           {
             if (current_elem->has_neighbor(connected_elem))
             {
               unsigned int side = current_elem->which_neighbor_am_i(connected_elem);
               unsigned int connected_elem_side = connected_elem->which_neighbor_am_i(current_elem);
-
-              elem_side_to_fake_neighbor_elem_side.emplace(
-                    std::make_pair(current_elem, side),
-                    std::make_pair(connected_elem, connected_elem_side));
 
               // in this case we need to play a game to reorder the sides
               // Ensure consistent ordering: (min, max) for block (subdomain) IDs
@@ -382,36 +384,10 @@ BreakMeshByBlockGenerator::generate()
       }
 
     } // end multiplicity check
-  } // end loop over nodes
+  } // end loop to duplicate nodes
 
   addInterface(*mesh);
   Partitioner::set_node_processor_ids(*mesh);
-
-  // create the ghosted information for the fake neighbor elements
-  {
-    InputParameters rm_params = _factory.getValidParams("FakeNeighborRM");
-
-    rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-        Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-        Moose::RelationshipManagerType::COUPLING;
-
-    rm_params.set<std::string>("for_whom") = "bmbb";
-    rm_params.set<MooseMesh *>("mesh") = _mesh;
-
-    // Create the RelationshipManager object
-    auto rm = _factory.create<RelationshipManager>("FakeNeighborRM", "fake_neighbor_rm", rm_params);
-
-    if (auto fake_neighbor_rm = std::dynamic_pointer_cast<FakeNeighborRM>(rm))
-    {
-      // Call the set method to pass the map data. The RM will make a safe copy.
-      fake_neighbor_rm->setFakeNeighborMap(elem_side_to_fake_neighbor_elem_side);
-    }
-    else
-      mooseError("Failed to cast to FakeNeighborRM.");
-
-    if (!_app.addRelationshipManager(rm))
-      _factory.releaseSharedObjects(*rm);
-  }
 
   mesh->set_isnt_prepared();
 
@@ -512,7 +488,6 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
       }
     }
 
-
     // Map the block pair (subdomain_id_A, subdomain_id_B) to the generated boundary_id
     // This makes it easy to look up or create boundary pairs later
     _subid_pairs_to_boundary_id[boundary_side] = boundary_id;
@@ -533,21 +508,21 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
     const auto & boundary_id = entry.second;
     const auto rev_pair = std::make_pair(sub_pair.second, sub_pair.first);
 
-    const bool has_reverse = _subid_pairs_to_boundary_id.find(rev_pair) != _subid_pairs_to_boundary_id.end();
+    const bool has_reverse =
+        _subid_pairs_to_boundary_id.find(rev_pair) != _subid_pairs_to_boundary_id.end();
 
     if (has_reverse)
       // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
-      mesh.add_disconnected_boundaries(boundary_id,
-                                      _subid_pairs_to_boundary_id[rev_pair],
-                                      RealVectorValue(0.0, 0.0, 0.0));
+      mesh.add_disconnected_boundaries(
+          boundary_id, _subid_pairs_to_boundary_id[rev_pair], RealVectorValue(0.0, 0.0, 0.0));
     else
     {
       _mesh->setIncompleteInterfacePairs();
-      mooseInfo("Single interface boundary '", boundary_id,
+      mooseInfo("Single interface boundary '",
+                boundary_id,
                 "' found (no reverse pair). Compatible only with non-CZM setups.");
     }
   }
-
 }
 
 subdomain_id_type
@@ -654,4 +629,3 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
           nodeid_to_connected_blocks[node_id].insert(blocks_vec.begin(), blocks_vec.end());
       });
 }
-

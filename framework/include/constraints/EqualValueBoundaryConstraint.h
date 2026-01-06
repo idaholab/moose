@@ -39,12 +39,14 @@ protected:
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
-  // Holds the primary node id
+  /// Holds the primary node id
   unsigned int _primary_node_id;
-  // Holds the list of secondary node ids
+  /// Holds the primary node coordinates
+  Point _primary_node_coord;
+  /// Holds the list of secondary node ids
   std::vector<unsigned int> _secondary_node_ids;
-  // Holds the secondary node set or side set
+  /// Holds the secondary node set or side set
   BoundaryName _secondary_node_set_id;
-  // Penalty if constraint is not satisfied
+  /// Penalty if constraint is not satisfied
   Real _penalty;
 };
