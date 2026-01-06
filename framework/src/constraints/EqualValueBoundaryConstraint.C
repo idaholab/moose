@@ -76,9 +76,6 @@ EqualValueBoundaryConstraint::meshChanged()
 void
 EqualValueBoundaryConstraint::updateConstrainedNodes()
 {
-  _primary_node_vector.clear();
-  _connected_nodes.clear();
-
   populateSecondaryNodes();
   pickPrimaryNode();
   ghostPrimary();
@@ -97,17 +94,18 @@ EqualValueBoundaryConstraint::populateSecondaryNodes()
                "Both 'secondary' and 'secondary_node_ids' parameters are set. They are mutually "
                "exclusive.");
 
+  // Fill in _connected_nodes, which defines local secondary nodes in the base class
+  //
+  // Note that later on when we pick the primary node from the secondary node set, we
+  // will make sure to remove it from _connected_nodes
+  _connected_nodes.clear();
+
   // user provided boundary name
   if (isParamValid("secondary"))
   {
     const auto & secondary_bnd = getParam<BoundaryName>("secondary");
     const auto secondary_nodes = _mesh.getNodeList(_mesh.getBoundaryID(secondary_bnd));
-    std::vector<dof_id_type>::iterator in;
 
-    // Fill in _connected_nodes, which defines local secondary nodes in the base class
-    //
-    // Note that later on when we pick the primary node from the secondary node set, we
-    // will make sure to remove it from _connected_nodes
     for (const auto & nid : secondary_nodes)
       if (_mesh.nodeRef(nid).processor_id() == _subproblem.processor_id())
         _connected_nodes.push_back(nid);
@@ -115,7 +113,6 @@ EqualValueBoundaryConstraint::populateSecondaryNodes()
   // user provided node ids
   else if (isParamValid("secondary_node_ids"))
   {
-    // Fill in _connected_nodes, which defines local secondary nodes in the base class
     const auto & secondary_node_ids = getParam<std::vector<unsigned int>>("secondary_node_ids");
     for (const auto & nid : secondary_node_ids)
       if (_mesh.queryNodePtr(nid) &&
@@ -140,7 +137,7 @@ EqualValueBoundaryConstraint::pickPrimaryNode()
   // user provided primary node id
   else if (isParamValid("primary"))
     primary_node_id = getParam<unsigned int>("primary");
-  // no primary node id provided, so we pick one from secondary nodes
+  // no primary node provided, so we pick one from secondary nodes
   else
   {
     // If the user provided secondary node ids, set primary node to first one
@@ -161,7 +158,8 @@ EqualValueBoundaryConstraint::pickPrimaryNode()
     _connected_nodes.erase(it);
 
   // Store primary node id
-  _primary_node_vector.push_back(primary_node_id);
+  _primary_node_vector.resize(1);
+  _primary_node_vector[0] = primary_node_id;
 }
 
 dof_id_type
