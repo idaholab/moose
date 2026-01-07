@@ -63,29 +63,16 @@ public:
     }
   };
 
-  /**
-   * Callable container used to evaluate advection-specific interpolation at a face.
-   * This supports TVD-style schemes that may depend on gradients and the mass flux.
-   */
-  struct AdvectedInterpolationResult
+  /// Callable container used to evaluate a single advected face value.
+  struct AdvectedValueInterpolator
   {
-    /// Weights used for the matrix contribution (e.g. upwind when deferring correction)
-    std::pair<Real, Real> weights_matrix;
-    /// High-order weights (may equal weights_matrix when no deferred correction)
-    std::pair<Real, Real> weights_high;
-    /// Flag indicating whether a deferred correction should be applied using weights_high
-    bool has_correction = false;
-  };
-
-  struct AdvectedFaceInterpolator
-  {
-    using Eval = AdvectedInterpolationResult (*)(const FVInterpolationMethod &,
-                                                 const FaceInfo &,
-                                                 Real,
-                                                 Real,
-                                                 const VectorValue<Real> *,
-                                                 const VectorValue<Real> *,
-                                                 Real);
+    using Eval = Real (*)(const FVInterpolationMethod &,
+                          const FaceInfo &,
+                          Real,
+                          Real,
+                          const VectorValue<Real> *,
+                          const VectorValue<Real> *,
+                          Real);
 
     const FVInterpolationMethod * object = nullptr;
     Eval eval = nullptr;
@@ -94,12 +81,51 @@ public:
     bool valid() const { return object && eval; }
     bool needsGradients() const { return _needs_gradients; }
 
-    AdvectedInterpolationResult operator()(const FaceInfo & face,
-                                           Real elem_value,
-                                           Real neighbor_value,
-                                           const VectorValue<Real> * elem_grad,
-                                           const VectorValue<Real> * neighbor_grad,
-                                           Real mass_flux) const
+    Real operator()(const FaceInfo & face,
+                    Real elem_value,
+                    Real neighbor_value,
+                    const VectorValue<Real> * elem_grad,
+                    const VectorValue<Real> * neighbor_grad,
+                    Real mass_flux) const
+    {
+      mooseAssert(valid(), "Attempting to call an empty advected value interpolation handle");
+      mooseAssert(!needsGradients() || elem_grad,
+                  "Gradient required by advected value interpolation but elem_grad is null");
+      return eval(*object, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+    }
+  };
+
+  /// Matrix/RHS contribution for an advected face interpolation.
+  struct AdvectedSystemContribution
+  {
+    std::pair<Real, Real> weights_matrix;
+    Real rhs_face_value = 0.0;
+  };
+
+  /// Callable container used to evaluate advection-specific matrix/RHS contributions.
+  struct AdvectedSystemContributionCalculator
+  {
+    using Eval = AdvectedSystemContribution (*)(const FVInterpolationMethod &,
+                                                const FaceInfo &,
+                                                Real,
+                                                Real,
+                                                const VectorValue<Real> *,
+                                                const VectorValue<Real> *,
+                                                Real);
+
+    const FVInterpolationMethod * object = nullptr;
+    Eval eval = nullptr;
+    bool _needs_gradients = false;
+
+    bool valid() const { return object && eval; }
+    bool needsGradients() const { return _needs_gradients; }
+
+    AdvectedSystemContribution operator()(const FaceInfo & face,
+                                          Real elem_value,
+                                          Real neighbor_value,
+                                          const VectorValue<Real> * elem_grad,
+                                          const VectorValue<Real> * neighbor_grad,
+                                          Real mass_flux) const
     {
       mooseAssert(valid(), "Attempting to call an empty advected interpolation handle");
       mooseAssert(!needsGradients() || elem_grad,
@@ -113,29 +139,16 @@ public:
    */
   const FaceInterpolator & faceInterpolator() const { return _face_interpolator; }
 
-  /**
-   * @return The advected face interpolation callable associated with this user object.
-   */
-  const AdvectedFaceInterpolator & advectedFaceInterpolator() const
+  const AdvectedValueInterpolator & advectedFaceValueInterpolator() const
   {
-    return _advected_face_interpolator;
+    return _advected_face_value_interpolator;
+  }
+  const AdvectedSystemContributionCalculator & advectedSystemContributionCalculator() const
+  {
+    return _advected_system_contribution_calculator;
   }
 
 protected:
-  /**
-   * Here is the call wrapper, this makes everything trivially copiable. This also
-   * makes sure that we can use parameters that only live in the context of the
-   * given interpolation method.
-   */
-  template <typename Derived>
-  static Real callInterpolate(const FVInterpolationMethod & method,
-                              const FaceInfo & face,
-                              const Real elem_value,
-                              const Real neighbor_value)
-  {
-    return static_cast<const Derived &>(method).interpolate(face, elem_value, neighbor_value);
-  }
-
   /**
    * Utility to build an interpolation function for Derived classes.
    */
@@ -144,10 +157,20 @@ protected:
   {
     FaceInterpolator interpolator;
     interpolator.object = this;
-
-    // We are calling the wrapper here so that the interpolation function
-    // can access the member variables (limiters, manual weights etc)
     interpolator.eval = &FVInterpolationMethod::callInterpolate<Derived>;
+    return interpolator;
+  }
+
+  /**
+   * Utility to build an advected face value interpolation function for Derived classes.
+   */
+  template <typename Derived>
+  AdvectedValueInterpolator buildAdvectedFaceValueInterpolator(const bool needs_gradients) const
+  {
+    AdvectedValueInterpolator interpolator;
+    interpolator.object = this;
+    interpolator.eval = &FVInterpolationMethod::callAdvectedInterpolateValue<Derived>;
+    interpolator._needs_gradients = needs_gradients;
     return interpolator;
   }
 
@@ -155,11 +178,12 @@ protected:
    * Utility to build an advected interpolation function for Derived classes.
    */
   template <typename Derived>
-  AdvectedFaceInterpolator buildAdvectedFaceInterpolator(const bool needs_gradients) const
+  AdvectedSystemContributionCalculator
+  buildAdvectedSystemContributionCalculator(const bool needs_gradients) const
   {
-    AdvectedFaceInterpolator interpolator;
+    AdvectedSystemContributionCalculator interpolator;
     interpolator.object = this;
-    interpolator.eval = &FVInterpolationMethod::callAdvectedInterpolate<Derived>;
+    interpolator.eval = &FVInterpolationMethod::callAdvectedSystemContribution<Derived>;
     interpolator._needs_gradients = needs_gradients;
     return interpolator;
   }
@@ -170,31 +194,67 @@ protected:
   void setFaceInterpolator(FaceInterpolator interpolator) { _face_interpolator = interpolator; }
 
   /**
+   * Save a fully constructed advected face value interpolator.
+   */
+  void setAdvectedFaceValueInterpolator(AdvectedValueInterpolator interpolator)
+  {
+    _advected_face_value_interpolator = interpolator;
+  }
+
+  /**
    * Save a fully constructed advected interpolator so advection kernels can evaluate it later.
    */
-  void setAdvectedFaceInterpolator(AdvectedFaceInterpolator interpolator)
+  void setAdvectedSystemContributionCalculator(AdvectedSystemContributionCalculator interpolator)
   {
-    _advected_face_interpolator = interpolator;
+    _advected_system_contribution_calculator = interpolator;
   }
 
 private:
+  /// Wrapper for face interpolation calls (kept adjacent to other call wrappers)
+  template <typename Derived>
+  static Real callInterpolate(const FVInterpolationMethod & method,
+                              const FaceInfo & face,
+                              const Real elem_value,
+                              const Real neighbor_value)
+  {
+    return static_cast<const Derived &>(method).interpolate(face, elem_value, neighbor_value);
+  }
+
+  /**
+   * Wrapper for advected value interpolation calls.
+   */
+  template <typename Derived>
+  static Real callAdvectedInterpolateValue(const FVInterpolationMethod & method,
+                                           const FaceInfo & face,
+                                           const Real elem_value,
+                                           const Real neighbor_value,
+                                           const VectorValue<Real> * elem_grad,
+                                           const VectorValue<Real> * neighbor_grad,
+                                           const Real mass_flux)
+  {
+    return static_cast<const Derived &>(method).advectedInterpolateValue(
+        face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  }
+
   /**
    * Wrapper for advected interpolation calls to allow member access while staying trivially
    * copyable.
    */
   template <typename Derived>
-  static AdvectedInterpolationResult callAdvectedInterpolate(const FVInterpolationMethod & method,
-                                                             const FaceInfo & face,
-                                                             const Real elem_value,
-                                                             const Real neighbor_value,
-                                                             const VectorValue<Real> * elem_grad,
-                                                             const VectorValue<Real> * neighbor_grad,
-                                                             const Real mass_flux)
+  static AdvectedSystemContribution
+  callAdvectedSystemContribution(const FVInterpolationMethod & method,
+                                 const FaceInfo & face,
+                                 const Real elem_value,
+                                 const Real neighbor_value,
+                                 const VectorValue<Real> * elem_grad,
+                                 const VectorValue<Real> * neighbor_grad,
+                                 const Real mass_flux)
   {
     return static_cast<const Derived &>(method).advectedInterpolate(
         face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   }
 
   FaceInterpolator _face_interpolator;
-  AdvectedFaceInterpolator _advected_face_interpolator;
+  AdvectedValueInterpolator _advected_face_value_interpolator;
+  AdvectedSystemContributionCalculator _advected_system_contribution_calculator;
 };
