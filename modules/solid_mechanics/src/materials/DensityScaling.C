@@ -30,8 +30,7 @@ DensityScaling::validParams()
   params.addParam<MaterialPropertyName>(
       "additional_density",
       "additional_density",
-      "Scaled_density - true_density will be put into a Material Property with this name.  This is "
-      "typically used to determine where density has been added.");
+      "Name of the additional density property that this Material computes");
   params.addRequiredParam<Real>("desired_time_step", "The desired time step.");
   params.addRangeCheckedParam<Real>(
       "safety_factor",
