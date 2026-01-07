@@ -121,7 +121,7 @@ protected:
     return TangentCalculationMethod::FULL;
   }
 
-  /// Internal dimensionality of tensors (currently this is 3 throughout tensor_mechanics)
+  /// Internal dimensionality of tensors (currently this is 3 throughout solid mechanics)
   constexpr static unsigned _tensor_dimensionality = 3;
 
   /// Number of stress parameters
@@ -226,6 +226,19 @@ protected:
         d2g(num_var, std::vector<Real>(num_var, 0.0)),
         d2g_di(num_var, std::vector<Real>(num_intnl, 0.0))
     {
+    }
+
+    // Zero everything without resizing/reallocating
+    void reset()
+    {
+      f = 0.0;
+      std::fill(df.begin(), df.end(), 0.0);
+      std::fill(df_di.begin(), df_di.end(), 0.0);
+      std::fill(dg.begin(), dg.end(), 0.0);
+      for (auto & row : d2g)
+        std::fill(row.begin(), row.end(), 0.0);
+      for (auto & row : d2g_di)
+        std::fill(row.begin(), row.end(), 0.0);
     }
 
     // this may be involved in the smoothing of a group of yield functions
@@ -566,13 +579,12 @@ protected:
    * @param inelastic_strain_increment[out] The inelastic strain increment resulting from this
    * return-map
    */
-  virtual void
-  setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
-                                         Real gaE,
-                                         const yieldAndFlow & smoothed_q,
-                                         const RankFourTensor & elasticity_tensor,
-                                         const RankTwoTensor & returned_stress,
-                                         RankTwoTensor & inelastic_strain_increment) const;
+  virtual void setInelasticStrainIncrementAfterReturn(const RankTwoTensor & stress_trial,
+                                                      Real gaE,
+                                                      const yieldAndFlow & smoothed_q,
+                                                      const RankFourTensor & elasticity_tensor,
+                                                      const RankTwoTensor & returned_stress,
+                                                      RankTwoTensor & inelastic_strain_increment);
 
   /**
    * Calculates the consistent tangent operator.
@@ -608,18 +620,39 @@ protected:
 
   /**
    * d(stress_param[i])/d(stress) at given stress
+   * TODO: remove this function when Blackbear and others have implemented the void version
    * @param stress stress tensor
    * @return d(stress_param[:])/d(stress)
    */
-  virtual std::vector<RankTwoTensor> dstress_param_dstress(const RankTwoTensor & stress) const = 0;
+  virtual std::vector<RankTwoTensor> dstress_param_dstress(const RankTwoTensor & stress) const;
+
+  /**
+   * d(stress_param[i])/d(stress) at given stress.  When overriding, ensure to assert that dsp has
+   * size _num_sp
+   * TODO: when Blackbear and others have this implemented, make this pure virtual
+   * @param stress[in] stress tensor
+   * @param dsp[out] d(stress_param[:])/d(stress)
+   */
+  virtual void dstressparam_dstress(const RankTwoTensor & stress,
+                                    std::vector<RankTwoTensor> & dsp) const;
 
   /**
    * d2(stress_param[i])/d(stress)/d(stress) at given stress
+   * TODO: remove this function when Blackbear and others have implemented the void version
    * @param stress stress tensor
    * @return d2(stress_param[:])/d(stress)/d(stress)
    */
-  virtual std::vector<RankFourTensor>
-  d2stress_param_dstress(const RankTwoTensor & stress) const = 0;
+  virtual std::vector<RankFourTensor> d2stress_param_dstress(const RankTwoTensor & stress) const;
+
+  /**
+   * d2(stress_param[i])/d(stress)/d(stress) at given stress.  When overriding, ensure to assert
+   * that d2sp has size _num_sp
+   * TODO: when Blackbear and others have this implemented, make this pure virtual
+   * @param stress[in] stress tensor
+   * @param d2sp[out] d2(stress_param[:])/d(stress)/d(stress)
+   */
+  virtual void d2stressparam_dstress(const RankTwoTensor & stress,
+                                     std::vector<RankFourTensor> & d2sp) const;
 
   /// Sets _Eij and _En and _Cij
   virtual void setEffectiveElasticity(const RankFourTensor & Eijkl) = 0;
@@ -731,6 +764,73 @@ private:
    * The current values of the internal params during the Newton-Raphson
    */
   std::vector<Real> _current_intnl;
+
+  /**
+   * Current values of the yield function, derivatives, etc during updateState.
+   * During Newton-Raphson convergence, this is potentially re-calculated multiple times within the
+   * loops of updateState and by the lineSearch function that is called within those loops.
+   */
+  yieldAndFlow _smoothed_q;
+
+  /**
+   * d(stress_param[:])/d(stress) used in dstressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankTwoTensor> _dsp_scratch;
+
+  /**
+   * d(stress_param[:])/d(stress_trial) used in dstressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankTwoTensor> _dsp_trial_scratch;
+
+  /**
+   * d2(stress_param[:])/d(stress)/d(stress)  used in d2stressparam_dstress
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<RankFourTensor> _d2sp_scratch;
+
+  /**
+   * values of yield functions in yieldF,
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<Real> _yfs_scratch;
+
+  /**
+   * container to hold old values of old stress_params in lineSearch
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<Real> _sp_params_old_scratch;
+
+  /**
+   * container to hold initial values of rhs in lineSearch
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<Real> _delta_nr_params_scratch;
+
+  /**
+   * derivative of internal parameters with respect to stress parameters,
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<std::vector<Real>> _dintnl_scratch;
+
+  /**
+   * jacobian in the NR process,
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<double> _jac_scratch;
+
+  /**
+   * container to hold LAPACK ipiv integers,
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<PetscBLASInt> _ipiv_scratch;
+
+  /**
+   * all the yield function information, for use in smoothAllQuantities,
+   * to avoid repeatedly allocating/deallocating this vector
+   */
+  mutable std::vector<yieldAndFlow> _all_q_scratch;
 
 private:
   /**

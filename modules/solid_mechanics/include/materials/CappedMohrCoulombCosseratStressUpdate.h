@@ -74,4 +74,7 @@ protected:
                                           bool compute_full_tangent_operator,
                                           const std::vector<std::vector<Real>> & dvar_dtrial,
                                           RankFourTensor & cto) override;
+
+private:
+  std::vector<Real> _eigvals_scratch; // used as temporary storage to avoid heap allocation
 };

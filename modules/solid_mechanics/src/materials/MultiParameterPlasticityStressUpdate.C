@@ -126,6 +126,18 @@ MultiParameterPlasticityStressUpdate::MultiParameterPlasticityStressUpdate(
     _del_stress_params(num_sp),
     _current_sp(num_sp),
     _current_intnl(num_intnl),
+    _smoothed_q(yieldAndFlow(yieldAndFlow(num_sp, num_intnl))),
+    _dsp_scratch(num_sp),
+    _dsp_trial_scratch(num_sp),
+    _d2sp_scratch(num_sp),
+    _yfs_scratch(num_yf),
+    _sp_params_old_scratch(num_sp),
+    _delta_nr_params_scratch(num_sp + 1),
+    _dintnl_scratch(num_intnl, std::vector<Real>(num_sp)),
+    _jac_scratch((num_sp + 1) * (num_sp + 1)),
+    _ipiv_scratch(num_sp + 1),
+    _all_q_scratch(num_yf, yieldAndFlow(num_sp, num_intnl)),
+
     _smoother_function_type(
         parameters.get<MooseEnum>("smoother_function_type").getEnum<SmootherFunctionType>())
 {
@@ -240,11 +252,8 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
   Real step_size = 1.0;  // potentially can apply del_stress_params in substeps
   Real gaE_total = 0.0;
 
-  // current values of the yield function, derivatives, etc
-  yieldAndFlow smoothed_q;
-
   // In the following sub-stepping procedure it is possible that
-  // the last step is an elastic step, and therefore smoothed_q won't
+  // the last step is an elastic step, and therefore _smoothed_q won't
   // be computed on the last step, so we have to compute it.
   bool smoothed_q_calculated = false;
 
@@ -284,16 +293,16 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
       // initialize current_sp, gaE and current_intnl based on the non-smoothed situation
       initializeVarsV(_trial_sp, _ok_intnl, _current_sp, gaE, _current_intnl);
       // and find the smoothed yield function, flow potential and derivatives
-      smoothed_q = smoothAllQuantities(_current_sp, _current_intnl);
+      _smoothed_q = smoothAllQuantities(_current_sp, _current_intnl);
       smoothed_q_calculated = true;
-      calculateRHS(_trial_sp, _current_sp, gaE, smoothed_q, _rhs);
+      calculateRHS(_trial_sp, _current_sp, gaE, _smoothed_q, _rhs);
       res2 = calculateRes2(_rhs);
 
-      // Perform a Newton-Raphson with linesearch to get current_sp, gaE, and also smoothed_q
+      // Perform a Newton-Raphson with linesearch to get current_sp, gaE, and also _smoothed_q
       while (res2 > _f_tol2 && step_iter < _max_nr_its && nr_failure == 0 && ls_failure == 0)
       {
         // solve the linear system and store the answer (the "updates") in rhs
-        nr_failure = nrStep(smoothed_q, _trial_sp, _current_sp, _current_intnl, gaE, _rhs);
+        nr_failure = nrStep(_smoothed_q, _trial_sp, _current_sp, _current_intnl, gaE, _rhs);
         if (nr_failure != 0)
           break;
 
@@ -312,12 +321,12 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
           break;
         }
 
-        // apply (parts of) the updates, re-calculate smoothed_q, and res2
+        // apply (parts of) the updates, re-calculate _smoothed_q, and res2
         ls_failure = lineSearch(res2,
                                 _current_sp,
                                 gaE,
                                 _trial_sp,
-                                smoothed_q,
+                                _smoothed_q,
                                 _ok_intnl,
                                 _current_intnl,
                                 _rhs,
@@ -340,7 +349,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                  _ok_sp,
                  gaE,
                  _ok_intnl,
-                 smoothed_q,
+                 _smoothed_q,
                  step_size,
                  compute_full_tangent_operator,
                  _dvar_dtrial);
@@ -365,14 +374,14 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
   yieldFunctionValuesV(_ok_sp, _intnl[_qp], _yf[_qp]);
 
   if (!smoothed_q_calculated)
-    smoothed_q = smoothAllQuantities(_ok_sp, _intnl[_qp]);
+    _smoothed_q = smoothAllQuantities(_ok_sp, _intnl[_qp]);
 
   setStressAfterReturnV(
-      _stress_trial, _ok_sp, gaE_total, _intnl[_qp], smoothed_q, elasticity_tensor, stress_new);
+      _stress_trial, _ok_sp, gaE_total, _intnl[_qp], _smoothed_q, elasticity_tensor, stress_new);
 
   setInelasticStrainIncrementAfterReturn(_stress_trial,
                                          gaE_total,
-                                         smoothed_q,
+                                         _smoothed_q,
                                          elasticity_tensor,
                                          stress_new,
                                          inelastic_strain_increment);
@@ -387,7 +396,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                                stress_new,
                                _ok_sp,
                                gaE_total,
-                               smoothed_q,
+                               _smoothed_q,
                                elasticity_tensor,
                                compute_full_tangent_operator,
                                _dvar_dtrial,
@@ -398,8 +407,11 @@ MultiParameterPlasticityStressUpdate::yieldAndFlow
 MultiParameterPlasticityStressUpdate::smoothAllQuantities(const std::vector<Real> & stress_params,
                                                           const std::vector<Real> & intnl) const
 {
-  std::vector<yieldAndFlow> all_q(_num_yf, yieldAndFlow(_num_sp, _num_intnl));
-  computeAllQV(stress_params, intnl, all_q);
+  mooseAssert(_all_q_scratch.size() == _num_yf,
+              "_all_q_scratch incorrectly sized in smoothAllQuantities");
+  for (auto & q : _all_q_scratch)
+    q.reset();
+  computeAllQV(stress_params, intnl, _all_q_scratch);
 
   /* This routine holds the key to my smoothing strategy.  It
    * may be proved that this smoothing strategy produces a
@@ -427,55 +439,61 @@ MultiParameterPlasticityStressUpdate::smoothAllQuantities(const std::vector<Real
   // res_f is the index that contains the smoothed yieldAndFlow
   std::size_t res_f = 0;
 
-  for (std::size_t a = 1; a < all_q.size(); ++a)
+  for (std::size_t a = 1; a < _all_q_scratch.size(); ++a)
   {
-    if (all_q[res_f].f >= all_q[a].f + _smoothing_tol)
+    if (_all_q_scratch[res_f].f >= _all_q_scratch[a].f + _smoothing_tol)
       // no smoothing is needed: res_f is already indexes the largest yield function
       continue;
-    else if (all_q[a].f >= all_q[res_f].f + _smoothing_tol)
+    else if (_all_q_scratch[a].f >= _all_q_scratch[res_f].f + _smoothing_tol)
     {
-      // no smoothing is needed, and res_f needs to index to all_q[a]
+      // no smoothing is needed, and res_f needs to index to _all_q_scratch[a]
       res_f = a;
       continue;
     }
     else
     {
       // smoothing is required
-      const Real f_diff = all_q[res_f].f - all_q[a].f;
+      const Real f_diff = _all_q_scratch[res_f].f - _all_q_scratch[a].f;
       const Real ism = ismoother(f_diff);
       const Real sm = smoother(f_diff);
       const Real dsm = dsmoother(f_diff);
-      // we want: all_q[res_f].f = 0.5 * all_q[res_f].f + all_q[a].f + _smoothing_tol) + ism,
-      // but we have to do the derivatives first
+      // we want: _all_q_scratch[res_f].f = 0.5 * _all_q_scratch[res_f].f + _all_q_scratch[a].f +
+      // _smoothing_tol) + ism, but we have to do the derivatives first
       for (unsigned i = 0; i < _num_sp; ++i)
       {
         for (unsigned j = 0; j < _num_sp; ++j)
-          all_q[res_f].d2g[i][j] =
-              0.5 * (all_q[res_f].d2g[i][j] + all_q[a].d2g[i][j]) +
-              dsm * (all_q[res_f].df[j] - all_q[a].df[j]) * (all_q[res_f].dg[i] - all_q[a].dg[i]) +
-              sm * (all_q[res_f].d2g[i][j] - all_q[a].d2g[i][j]);
+          _all_q_scratch[res_f].d2g[i][j] =
+              0.5 * (_all_q_scratch[res_f].d2g[i][j] + _all_q_scratch[a].d2g[i][j]) +
+              dsm * (_all_q_scratch[res_f].df[j] - _all_q_scratch[a].df[j]) *
+                  (_all_q_scratch[res_f].dg[i] - _all_q_scratch[a].dg[i]) +
+              sm * (_all_q_scratch[res_f].d2g[i][j] - _all_q_scratch[a].d2g[i][j]);
         for (unsigned j = 0; j < _num_intnl; ++j)
-          all_q[res_f].d2g_di[i][j] = 0.5 * (all_q[res_f].d2g_di[i][j] + all_q[a].d2g_di[i][j]) +
-                                      dsm * (all_q[res_f].df_di[j] - all_q[a].df_di[j]) *
-                                          (all_q[res_f].dg[i] - all_q[a].dg[i]) +
-                                      sm * (all_q[res_f].d2g_di[i][j] - all_q[a].d2g_di[i][j]);
+          _all_q_scratch[res_f].d2g_di[i][j] =
+              0.5 * (_all_q_scratch[res_f].d2g_di[i][j] + _all_q_scratch[a].d2g_di[i][j]) +
+              dsm * (_all_q_scratch[res_f].df_di[j] - _all_q_scratch[a].df_di[j]) *
+                  (_all_q_scratch[res_f].dg[i] - _all_q_scratch[a].dg[i]) +
+              sm * (_all_q_scratch[res_f].d2g_di[i][j] - _all_q_scratch[a].d2g_di[i][j]);
       }
       for (unsigned i = 0; i < _num_sp; ++i)
       {
-        all_q[res_f].df[i] = 0.5 * (all_q[res_f].df[i] + all_q[a].df[i]) +
-                             sm * (all_q[res_f].df[i] - all_q[a].df[i]);
+        _all_q_scratch[res_f].df[i] =
+            0.5 * (_all_q_scratch[res_f].df[i] + _all_q_scratch[a].df[i]) +
+            sm * (_all_q_scratch[res_f].df[i] - _all_q_scratch[a].df[i]);
         // whether the following (smoothing g with f's smoother) is a good strategy remains to be
         // seen...
-        all_q[res_f].dg[i] = 0.5 * (all_q[res_f].dg[i] + all_q[a].dg[i]) +
-                             sm * (all_q[res_f].dg[i] - all_q[a].dg[i]);
+        _all_q_scratch[res_f].dg[i] =
+            0.5 * (_all_q_scratch[res_f].dg[i] + _all_q_scratch[a].dg[i]) +
+            sm * (_all_q_scratch[res_f].dg[i] - _all_q_scratch[a].dg[i]);
       }
       for (unsigned i = 0; i < _num_intnl; ++i)
-        all_q[res_f].df_di[i] = 0.5 * (all_q[res_f].df_di[i] + all_q[a].df_di[i]) +
-                                sm * (all_q[res_f].df_di[i] - all_q[a].df_di[i]);
-      all_q[res_f].f = 0.5 * (all_q[res_f].f + all_q[a].f + _smoothing_tol) + ism;
+        _all_q_scratch[res_f].df_di[i] =
+            0.5 * (_all_q_scratch[res_f].df_di[i] + _all_q_scratch[a].df_di[i]) +
+            sm * (_all_q_scratch[res_f].df_di[i] - _all_q_scratch[a].df_di[i]);
+      _all_q_scratch[res_f].f =
+          0.5 * (_all_q_scratch[res_f].f + _all_q_scratch[a].f + _smoothing_tol) + ism;
     }
   }
-  return all_q[res_f];
+  return _all_q_scratch[res_f];
 }
 
 Real
@@ -559,9 +577,13 @@ MultiParameterPlasticityStressUpdate::lineSearch(Real & res2,
                                                  Real & linesearch_needed) const
 {
   const Real res2_old = res2;
-  const std::vector<Real> sp_params_old = stress_params;
+  mooseAssert(_sp_params_old_scratch.size() == _num_sp,
+              "_sp_params_old_scratch incorrectly sized in lineSearch");
+  _sp_params_old_scratch = stress_params;
   const Real gaE_old = gaE;
-  const std::vector<Real> delta_nr_params = rhs;
+  mooseAssert(_delta_nr_params_scratch.size() == rhs.size(),
+              "_delta_nr_params_scratch incorrectly sized in lineSearch");
+  _delta_nr_params_scratch = rhs;
 
   Real lam = 1.0;                     // line-search parameter
   const Real lam_min = 1E-10;         // minimum value of lam allowed
@@ -576,8 +598,8 @@ MultiParameterPlasticityStressUpdate::lineSearch(Real & res2,
   {
     // update variables using the current line-search parameter
     for (unsigned i = 0; i < _num_sp; ++i)
-      stress_params[i] = sp_params_old[i] + lam * delta_nr_params[i];
-    gaE = gaE_old + lam * delta_nr_params[_num_sp];
+      stress_params[i] = _sp_params_old_scratch[i] + lam * _delta_nr_params_scratch[i];
+    gaE = gaE_old + lam * _delta_nr_params_scratch[_num_sp];
 
     // and internal parameters
     setIntnlValuesV(trial_stress_params, stress_params, intnl_ok, intnl);
@@ -639,19 +661,26 @@ MultiParameterPlasticityStressUpdate::nrStep(const yieldAndFlow & smoothed_q,
                                              Real gaE,
                                              std::vector<Real> & rhs) const
 {
-  std::vector<std::vector<Real>> dintnl(_num_intnl, std::vector<Real>(_num_sp));
-  setIntnlDerivativesV(trial_stress_params, stress_params, intnl, dintnl);
+  mooseAssert(_dintnl_scratch.size() == _num_intnl, "_dintnl_scratch incorrectly sized in nrStep");
+  setIntnlDerivativesV(trial_stress_params, stress_params, intnl, _dintnl_scratch);
 
-  std::vector<double> jac((_num_sp + 1) * (_num_sp + 1));
-  dnRHSdVar(smoothed_q, dintnl, stress_params, gaE, jac);
+  mooseAssert(_jac_scratch.size() == (_num_sp + 1) * (_num_sp + 1),
+              "_jac_scratch incorrectly sized in nrStep");
+  dnRHSdVar(smoothed_q, _dintnl_scratch, stress_params, gaE, _jac_scratch);
 
   // use LAPACK to solve the linear system
   const PetscBLASInt nrhs = 1;
-  std::vector<PetscBLASInt> ipiv(_num_sp + 1);
+  mooseAssert(_ipiv_scratch.size() == _num_sp + 1, "_ipiv_scratch incorrectly sized in nrStep");
   PetscBLASInt info;
   const PetscBLASInt gesv_num_rhs = _num_sp + 1;
-  LAPACKgesv_(
-      &gesv_num_rhs, &nrhs, &jac[0], &gesv_num_rhs, &ipiv[0], &rhs[0], &gesv_num_rhs, &info);
+  LAPACKgesv_(&gesv_num_rhs,
+              &nrhs,
+              &_jac_scratch[0],
+              &gesv_num_rhs,
+              &_ipiv_scratch[0],
+              &rhs[0],
+              &gesv_num_rhs,
+              &info);
   return info;
 }
 
@@ -686,9 +715,9 @@ Real
 MultiParameterPlasticityStressUpdate::yieldF(const std::vector<Real> & stress_params,
                                              const std::vector<Real> & intnl) const
 {
-  std::vector<Real> yfs(_num_yf);
-  yieldFunctionValuesV(stress_params, intnl, yfs);
-  return yieldF(yfs);
+  mooseAssert(_yfs_scratch.size() == _num_yf, "_yfs_scratch incorrectly sized in yieldF");
+  yieldFunctionValuesV(stress_params, intnl, _yfs_scratch);
+  return yieldF(_yfs_scratch);
 }
 
 Real
@@ -738,26 +767,26 @@ MultiParameterPlasticityStressUpdate::consistentTangentOperatorV(
 
   const Real ga = gaE / _En;
 
-  const std::vector<RankTwoTensor> dsp = dstress_param_dstress(stress);
-  const std::vector<RankTwoTensor> dsp_trial = dstress_param_dstress(stress_trial);
+  dstressparam_dstress(stress, _dsp_scratch);
+  dstressparam_dstress(stress_trial, _dsp_trial_scratch);
 
   for (unsigned a = 0; a < _num_sp; ++a)
   {
     for (unsigned b = 0; b < _num_sp; ++b)
     {
-      const RankTwoTensor t = elasticity_tensor * dsp_trial[a];
-      RankTwoTensor s = _Cij[b][a] * dsp[b];
+      const RankTwoTensor t = elasticity_tensor * _dsp_trial_scratch[a];
+      RankTwoTensor s = _Cij[b][a] * _dsp_scratch[b];
       for (unsigned c = 0; c < _num_sp; ++c)
-        s -= dsp[b] * _Cij[b][c] * dvar_dtrial[c][a];
+        s -= _dsp_scratch[b] * _Cij[b][c] * dvar_dtrial[c][a];
       s = elasticity_tensor * s;
       cto -= s.outerProduct(t);
     }
   }
 
-  const std::vector<RankFourTensor> d2sp = d2stress_param_dstress(stress);
+  d2stressparam_dstress(stress, _d2sp_scratch);
   RankFourTensor Tijab;
   for (unsigned i = 0; i < _num_sp; ++i)
-    Tijab += smoothed_q.dg[i] * d2sp[i];
+    Tijab += smoothed_q.dg[i] * _d2sp_scratch[i];
   Tijab = ga * elasticity_tensor * Tijab;
 
   RankFourTensor inv = RankFourTensor(RankFourTensor::initIdentityFour) + Tijab;
@@ -780,6 +809,48 @@ MultiParameterPlasticityStressUpdate::consistentTangentOperatorV(
   cto = (cto.transposeMajor() * inv).transposeMajor();
 }
 
+std::vector<RankTwoTensor>
+MultiParameterPlasticityStressUpdate::dstress_param_dstress(const RankTwoTensor & /*stress*/) const
+{
+  std::vector<RankTwoTensor> dummy(_num_sp);
+  return dummy;
+}
+
+void
+MultiParameterPlasticityStressUpdate::dstressparam_dstress(const RankTwoTensor & stress,
+                                                           std::vector<RankTwoTensor> & dsp) const
+{
+  /*
+    Maybe put this deprecated message in at some stage.  It causes CIVET to fail, however
+  mooseDeprecated(
+      "The function std::vector<RankTwoTensor> dstress_param_dstress(stress) is deprecated.  "
+      "You need to override the new function void dstressparam_dstress(stress, dsp)");
+  */
+  mooseAssert(dsp.size() == _num_sp, "dsp incorrectly sized in dstressparam_dstress");
+  dsp = dstress_param_dstress(stress);
+}
+
+std::vector<RankFourTensor>
+MultiParameterPlasticityStressUpdate::d2stress_param_dstress(const RankTwoTensor & /*stress*/) const
+{
+  std::vector<RankFourTensor> dummy(_num_sp);
+  return dummy;
+}
+
+void
+MultiParameterPlasticityStressUpdate::d2stressparam_dstress(
+    const RankTwoTensor & stress, std::vector<RankFourTensor> & d2sp) const
+{
+  /*
+    Maybe put this deprecated message in at some stage.  It causes CIVET to fail, however
+  mooseDeprecated(
+      "The function std::vector<RankFourTensor> d2stress_param_dstress(stress) is deprecated.  "
+      "You need to override the new function void d2stressparam_dstress(stress, d2sp)");
+  */
+  mooseAssert(d2sp.size() == _num_sp, "dsp incorrectly sized in d2stressparam_dstress");
+  d2sp = d2stress_param_dstress(stress);
+}
+
 void
 MultiParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
     const RankTwoTensor & /*stress_trial*/,
@@ -787,12 +858,12 @@ MultiParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
     const yieldAndFlow & smoothed_q,
     const RankFourTensor & /*elasticity_tensor*/,
     const RankTwoTensor & returned_stress,
-    RankTwoTensor & inelastic_strain_increment) const
+    RankTwoTensor & inelastic_strain_increment)
 {
-  const std::vector<RankTwoTensor> dsp_dstress = dstress_param_dstress(returned_stress);
+  dstressparam_dstress(returned_stress, _dsp_scratch);
   inelastic_strain_increment = RankTwoTensor();
   for (unsigned i = 0; i < _num_sp; ++i)
-    inelastic_strain_increment += smoothed_q.dg[i] * dsp_dstress[i];
+    inelastic_strain_increment += smoothed_q.dg[i] * _dsp_scratch[i];
   inelastic_strain_increment *= gaE / _En;
 }
 
@@ -893,6 +964,9 @@ MultiParameterPlasticityStressUpdate::dVardTrial(bool elastic_only,
   }
 
   const Real ga = gaE / _En;
+
+  // the following uses heap allocations in the belief that the compute time spent on alloc/dealloc
+  // will be dwarfed by other aspects of implicit time stepping
 
   std::vector<std::vector<Real>> dintnl(_num_intnl, std::vector<Real>(_num_sp));
   setIntnlDerivativesV(trial_stress_params, stress_params, intnl, dintnl);
