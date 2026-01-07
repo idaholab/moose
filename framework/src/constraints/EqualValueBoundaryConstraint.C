@@ -142,15 +142,20 @@ EqualValueBoundaryConstraint::pickPrimaryNode()
   {
     // If the user provided secondary node ids, set primary node to first one
     if (isParamValid("secondary_node_ids"))
-      primary_node_id = _connected_nodes[0];
+    {
+      if (_connected_nodes.size())
+        primary_node_id = _connected_nodes[0];
+    }
     // otherwise, we pick the minimum node id from the secondary node set
     else
     {
-      dof_id_type node_id = (*std::min_element(_connected_nodes.begin(), _connected_nodes.end()));
-      _mesh.comm().min(node_id);
-      primary_node_id = node_id;
+      if (_connected_nodes.size())
+        primary_node_id = (*std::min_element(_connected_nodes.begin(), _connected_nodes.end()));
+      _mesh.comm().min(primary_node_id);
     }
   }
+
+  mooseAssert(primary_node_id != Node::invalid_id, "We should have found a primary node");
 
   // Remove primary node from secondary nodes
   auto it = std::find(_connected_nodes.begin(), _connected_nodes.end(), primary_node_id);
