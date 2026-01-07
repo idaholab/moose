@@ -26,7 +26,7 @@ DensityScaling::validParams()
       "true_density",
       "Name of Material Property defining the true inertial density of the material.");
   params.addRequiredParam<MaterialPropertyName>(
-      "scaled_density", "Name of the density that this Material will compute.");
+      "scaled_density", "Name of the scaled density property that this Material computes.");
   params.addParam<MaterialPropertyName>(
       "additional_density",
       "additional_density",
