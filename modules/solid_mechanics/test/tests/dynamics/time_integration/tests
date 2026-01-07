@@ -110,4 +110,14 @@
     design = "ExplicitMixedOrder.md"
     issues = "#27833"
   []
+  [mass_scaling]
+    type = 'Exodiff'
+    input = 'mass_scaling.i'
+    exodiff = 'mass_scaling_out.e'
+    requirement = "The solid mechanics app shall support mass scaling to enable taking time steps larger than those permitted by the stability condition when
+                   using explicit time stepping."
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    design = "DensityScaling.md"
+    issues = "#32116"
+  []
 []

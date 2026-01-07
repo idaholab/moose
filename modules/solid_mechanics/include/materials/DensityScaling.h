@@ -13,7 +13,8 @@
 #include "RankTwoTensor.h"
 
 /**
- * This material computes the mass required to fulfill a prescribed critical time step.
+ * This material computes a density that is scaled to enable stable explicit time stepping
+ * with steps larger than those governed by stability conditions in solid-mechanics problems.
  * Adding mass to elements can affect the dynamics of the system. For this reason, this
  * should only be done when the user knows that such additions will not affect the numerical
  * results. One such example is the existence of a number of very small elements in the
@@ -30,18 +31,21 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  /// User-prescribed desired time step. Mass will be added until fulfilled.
+  /// User-prescribed desired time step
   const Real _desired_time_step;
 
-  /// The stress tensor
-  MaterialProperty<Real> & _density_scaling;
+  /// The scaled density
+  MaterialProperty<Real> & _density_scaled;
 
-  /// Density of the material
+  /// Scaled density minus true density
+  MaterialProperty<Real> & _additional_density;
+
+  /// The true inertial density of the material
   const MaterialProperty<Real> & _material_density;
 
-  /// Effective stiffness of element: function of material properties and element size
-  const MaterialProperty<Real> & _effective_stiffness;
+  /// Square root of effective stiffness of element
+  const MaterialProperty<Real> & _sqrt_effective_stiffness;
 
-  /// User defined factor to be multiplied to the critical time step
-  const Real & _factor;
+  /// User-defined safety factor that the minimum density required for stability is divided by
+  const Real & _safety_factor;
 };
