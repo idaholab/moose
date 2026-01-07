@@ -112,15 +112,7 @@
       capabilities = 'unique_id'
       detail = ' growth directions determined by an parsed function.'
     []
-    [double_cantilever]
-      issues = '#32187'
-      type = CSVDiff
-      input = 'double_cantilever_crack.i'
-      csvdiff = 'double_cantilever_crack_out_II_KI_1_0009.csv'
-      # XFEM requires --enable-unique-ids in libmesh
-      capabilities = 'unique_id'
-      detail = ' growth directions determined by hoop stress and reproducing a crack path from literature for a double cantilever beam.'
-    []
+
   []
   [penny_crack]
     requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics '
@@ -188,5 +180,15 @@
     requirement = 'The XFEM system shall provide an accessor function to the crack_tip_origin_direction_map'
     allow_test_objects = true
     design = 'XFEM/index.md'
+  []
+  [double_cantilever]
+    issues = '#32187'
+    design = 'growingEdgeCrack.md'
+    type = CSVDiff
+    input = 'double_cantilever_crack.i'
+    csvdiff = 'double_cantilever_crack_out_II_KI_1_0009.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    capabilities = 'unique_id & method=opt'
+    requirement = 'The XFEM module shall reproduce results for a moving crack in a double cantilever beam.'
   []
 []
