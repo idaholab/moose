@@ -22,6 +22,9 @@ FVGeometricAverage::validParams()
 FVGeometricAverage::FVGeometricAverage(const InputParameters & params)
   : FVInterpolationMethod(params)
 {
+  setAdvectedSystemContributionCalculator(
+      buildAdvectedSystemContributionCalculator<FVGeometricAverage>(false));
+  setAdvectedFaceValueInterpolator(buildAdvectedFaceValueInterpolator<FVGeometricAverage>(false));
   setFaceInterpolator(buildFaceInterpolator<FVGeometricAverage>());
 }
 
@@ -32,4 +35,29 @@ FVGeometricAverage::interpolate(const FaceInfo & face,
 {
   const Real gc = face.gC();
   return gc * elem_value + (1.0 - gc) * neighbor_value;
+}
+
+FVInterpolationMethod::AdvectedSystemContribution
+FVGeometricAverage::advectedInterpolate(const FaceInfo & face,
+                                        Real /*elem_value*/,
+                                        Real /*neighbor_value*/,
+                                        const VectorValue<Real> * /*elem_grad*/,
+                                        const VectorValue<Real> * /*neighbor_grad*/,
+                                        Real /*mass_flux*/) const
+{
+  AdvectedSystemContribution result;
+  const Real gc = face.gC();
+  result.weights_matrix = std::make_pair(gc, 1.0 - gc);
+  return result;
+}
+
+Real
+FVGeometricAverage::advectedInterpolateValue(const FaceInfo & face,
+                                             Real elem_value,
+                                             Real neighbor_value,
+                                             const VectorValue<Real> * /*elem_grad*/,
+                                             const VectorValue<Real> * /*neighbor_grad*/,
+                                             Real /*mass_flux*/) const
+{
+  return interpolate(face, elem_value, neighbor_value);
 }
