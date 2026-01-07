@@ -24,10 +24,20 @@ public:
   /**
    * Return the (elem, neighbor) interpolation weights for the advected quantity.
    */
-  AdvectedInterpolationResult advectedInterpolate(const FaceInfo & face,
-                                                  Real elem_value,
-                                                  Real neighbor_value,
-                                                  const VectorValue<Real> * elem_grad,
-                                                  const VectorValue<Real> * neighbor_grad,
-                                                  Real mass_flux) const;
+  AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
+                                                 Real elem_value,
+                                                 Real neighbor_value,
+                                                 const VectorValue<Real> * elem_grad,
+                                                 const VectorValue<Real> * neighbor_grad,
+                                                 Real mass_flux) const;
+
+  /**
+   * Return only the upwind face value for the advected quantity.
+   */
+  Real advectedInterpolateValue(const FaceInfo & face,
+                                Real elem_value,
+                                Real neighbor_value,
+                                const VectorValue<Real> * elem_grad,
+                                const VectorValue<Real> * neighbor_grad,
+                                Real mass_flux) const;
 };
