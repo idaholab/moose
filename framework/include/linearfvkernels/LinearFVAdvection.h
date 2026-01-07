@@ -11,6 +11,7 @@
 
 #include "LinearFVFluxKernel.h"
 #include "FVInterpolationMethodInterface.h"
+#include "FVInterpolationMethod.h"
 #include <unordered_map>
 
 /**
@@ -28,6 +29,7 @@ public:
    */
   LinearFVAdvection(const InputParameters & params);
 
+  virtual void setupFaceData(const FaceInfo * face_info) override;
   virtual void initialSetup() override;
 
   virtual Real computeElemMatrixContribution() override;
@@ -47,26 +49,13 @@ protected:
   const RealVectorValue _velocity;
 
   /// The interpolation method to use for the advected quantity
-  Moose::FV::InterpMethod _advected_interp_method;
-
-  /// Optional finite volume interpolation method object for advected quantities
   const FVInterpolationMethod * _adv_interp_method;
 
   /// Cached handle used to evaluate the advected interpolation method without virtual dispatch
-  FVInterpolationMethod::AdvectedFaceInterpolator _adv_interp_handle;
+  FVInterpolationMethod::AdvectedSystemContributionCalculator _adv_interp_handle;
 
-  struct AdvectedCacheEntry
-  {
-    FVInterpolationMethod::AdvectedInterpolationResult result;
-    Real correction_flux; // high-order minus upwind flux contribution (scaled by area)
-  };
+  /// Cached weights/correction for the current face (refreshed in setupFaceData)
+  mutable FVInterpolationMethod::AdvectedSystemContribution _adv_interp_result;
 
-  /// Cache per face id to avoid recomputing limiter-based weights twice
-  mutable std::unordered_map<dof_id_type, AdvectedCacheEntry> _adv_interp_cache;
-
-  /**
-   * Compute and cache advected interpolation weights (and deferred correction flux) for current
-   * face.
-   */
-  const AdvectedCacheEntry & computeAdvectedWeights(const Real face_flux);
+  Real _adv_face_flux = 0.0;
 };
