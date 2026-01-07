@@ -21,10 +21,12 @@ FVAdvectedUpwind::validParams()
 
 FVAdvectedUpwind::FVAdvectedUpwind(const InputParameters & params) : FVInterpolationMethod(params)
 {
-  setAdvectedFaceInterpolator(buildAdvectedFaceInterpolator<FVAdvectedUpwind>(false));
+  setAdvectedSystemContributionCalculator(
+      buildAdvectedSystemContributionCalculator<FVAdvectedUpwind>(false));
+  setAdvectedFaceValueInterpolator(buildAdvectedFaceValueInterpolator<FVAdvectedUpwind>(false));
 }
 
-FVInterpolationMethod::AdvectedInterpolationResult
+FVInterpolationMethod::AdvectedSystemContribution
 FVAdvectedUpwind::advectedInterpolate(const FaceInfo & /*face*/,
                                       Real /*elem_value*/,
                                       Real /*neighbor_value*/,
@@ -32,12 +34,22 @@ FVAdvectedUpwind::advectedInterpolate(const FaceInfo & /*face*/,
                                       const VectorValue<Real> * /*neighbor_grad*/,
                                       Real mass_flux) const
 {
-  AdvectedInterpolationResult result;
-  if (mass_flux >= 0.0)
-    result.weights_matrix = result.weights_high = std::make_pair(1.0, 0.0);
-  else
-    result.weights_matrix = result.weights_high = std::make_pair(0.0, 1.0);
-
-  result.has_correction = false;
+  AdvectedSystemContribution result;
+  // Branchless upwind selection to keep interpolation SIMD/GPU friendly
+  const Real neighbor_weight = mass_flux < 0.0;
+  result.weights_matrix = std::make_pair(1.0 - neighbor_weight, neighbor_weight);
   return result;
+}
+
+Real
+FVAdvectedUpwind::advectedInterpolateValue(const FaceInfo & face,
+                                           Real elem_value,
+                                           Real neighbor_value,
+                                           const VectorValue<Real> * /*elem_grad*/,
+                                           const VectorValue<Real> * /*neighbor_grad*/,
+                                           Real mass_flux) const
+{
+  const auto result =
+      advectedInterpolate(face, elem_value, neighbor_value, nullptr, nullptr, mass_flux);
+  return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
