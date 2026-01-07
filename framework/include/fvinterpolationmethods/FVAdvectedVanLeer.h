@@ -11,6 +11,7 @@
 
 #include "FVInterpolationMethod.h"
 #include "Limiter.h"
+#include <memory>
 
 /**
  * TVD Van Leer interpolation for advected quantities.
@@ -24,16 +25,27 @@ public:
   FVAdvectedVanLeer(const InputParameters & params);
 
   /**
-   * Return interpolation weights computed with a Van Leer limiter. If deferred correction is
-   * enabled, matrix weights are upwind and high-order weights are returned for the correction.
+   * Return interpolation weights computed with a Van Leer limiter.
+   * Uses deferred correction: matrix weights are upwind and high-order weights
+   * are always provided for the correction.
    */
-  AdvectedInterpolationResult advectedInterpolate(const FaceInfo & face,
-                                                  Real elem_value,
-                                                  Real neighbor_value,
-                                                  const VectorValue<Real> * elem_grad,
-                                                  const VectorValue<Real> * neighbor_grad,
-                                                  Real mass_flux) const;
+  AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
+                                                 Real elem_value,
+                                                 Real neighbor_value,
+                                                 const VectorValue<Real> * elem_grad,
+                                                 const VectorValue<Real> * neighbor_grad,
+                                                 Real mass_flux) const;
+
+  /**
+   * Return only the high-order face value for the advected quantity.
+   */
+  Real advectedInterpolateValue(const FaceInfo & face,
+                                Real elem_value,
+                                Real neighbor_value,
+                                const VectorValue<Real> * elem_grad,
+                                const VectorValue<Real> * neighbor_grad,
+                                Real mass_flux) const;
 
 private:
-  const bool _deferred_correction;
+  const std::unique_ptr<Moose::FV::Limiter<Real>> _limiter;
 };
