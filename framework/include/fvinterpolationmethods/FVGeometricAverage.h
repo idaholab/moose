@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVInterpolationMethod.h"
+#include "MooseTypes.h"
 
 /**
  * Simple linear interpolation that uses the geometric weighting stored on FaceInfo.
@@ -22,4 +23,24 @@ public:
   FVGeometricAverage(const InputParameters & params);
 
   Real interpolate(const FaceInfo & face, Real elem_value, Real neighbor_value) const;
+
+  /**
+   * Advected variant: returns matrix weights and no deferred correction.
+   */
+  AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
+                                                 Real elem_value,
+                                                 Real neighbor_value,
+                                                 const VectorValue<Real> * elem_grad,
+                                                 const VectorValue<Real> * neighbor_grad,
+                                                 Real mass_flux) const;
+
+  /**
+   * Advected variant returning only the face value.
+   */
+  Real advectedInterpolateValue(const FaceInfo & face,
+                                Real elem_value,
+                                Real neighbor_value,
+                                const VectorValue<Real> * elem_grad,
+                                const VectorValue<Real> * neighbor_grad,
+                                Real mass_flux) const;
 };
