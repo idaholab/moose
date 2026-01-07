@@ -52,22 +52,14 @@ LinearFVAdvection::setupFaceData(const FaceInfo * face_info)
 {
   LinearFVFluxKernel::setupFaceData(face_info);
   _adv_face_flux = _velocity * _current_face_info->normal();
-  const auto state = determineState();
-  const auto elem_value = _var.getElemValue(*_current_face_info->elemInfo(), state);
-  const auto neighbor_value = _var.getElemValue(*_current_face_info->neighborInfo(), state);
-  const VectorValue<Real> elem_grad_storage = _adv_interp_handle.needsGradients()
-                                                  ? _var.gradSln(*_current_face_info->elemInfo())
-                                                  : VectorValue<Real>();
-  const VectorValue<Real> neighbor_grad_storage = _adv_interp_handle.needsGradients()
-                                                      ? _var.gradSln(*_current_face_info->neighborInfo())
-                                                      : VectorValue<Real>();
-  const VectorValue<Real> * elem_grad =
-      _adv_interp_handle.needsGradients() ? &elem_grad_storage : nullptr;
-  const VectorValue<Real> * neighbor_grad =
-      _adv_interp_handle.needsGradients() ? &neighbor_grad_storage : nullptr;
 
-  _adv_interp_result = _adv_interp_handle(
-      *_current_face_info, elem_value, neighbor_value, elem_grad, neighbor_grad, _adv_face_flux);
+  // Only internal faces need advected interpolation results; boundary contributions are handled
+  // through the linear FV boundary conditions.
+  if (_current_face_type != FaceInfo::VarFaceNeighbors::BOTH)
+    return;
+
+  const auto state = determineState();
+  _adv_interp_result = _adv_interp_handle(_var, *_current_face_info, state, _adv_face_flux);
 }
 
 void
