@@ -41,7 +41,7 @@ void free(void * ptr);
 /**
  * The enumerator that dictates the memory copy direction
  */
-enum class MemcpyKind
+enum class MemcpyType
 {
   HOST_TO_HOST,
   HOST_TO_DEVICE,
@@ -266,7 +266,7 @@ public:
    * @param n The number of entries to copy
    * @param offset The starting offset of this array
    */
-  void copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset = 0);
+  void copyIn(const T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset = 0);
   /**
    * Copy data to an external data from this array
    * @param ptr The pointer to the external data
@@ -274,7 +274,7 @@ public:
    * @param n The number of entries to copy
    * @param offset The starting offset of this array
    */
-  void copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset = 0);
+  void copyOut(T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset = 0);
   /**
    * Copy all the nested Kokkos arrays including self from host to device
    */
@@ -702,7 +702,7 @@ ArrayBase<T, dimension>::copyToHost()
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset)
+ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset)
 {
   if (n > _size)
     mooseError("Kokkos array error: cannot copyin data larger than the array size.");
@@ -710,7 +710,7 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
-  if (dir == MemcpyKind::HOST_TO_HOST)
+  if (dir == MemcpyType::HOST_TO_HOST)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
@@ -719,7 +719,7 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
     // Copy from host to host
     copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(_host_data + offset, ptr, n);
   }
-  else if (dir == MemcpyKind::HOST_TO_DEVICE)
+  else if (dir == MemcpyType::HOST_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -728,7 +728,7 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data + offset, ptr, n);
   }
-  else if (dir == MemcpyKind::DEVICE_TO_HOST)
+  else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
@@ -737,7 +737,7 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data + offset, ptr, n);
   }
-  else if (dir == MemcpyKind::DEVICE_TO_DEVICE)
+  else if (dir == MemcpyType::DEVICE_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -750,7 +750,7 @@ ArrayBase<T, dimension>::copyIn(const T * ptr, MemcpyKind dir, dof_id_type n, do
 
 template <typename T, unsigned int dimension>
 void
-ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_type offset)
+ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyType dir, dof_id_type n, dof_id_type offset)
 {
   if (n > _size)
     mooseError("Kokkos array error: cannot copyout data larger than the array size.");
@@ -758,7 +758,7 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
-  if (dir == MemcpyKind::HOST_TO_HOST)
+  if (dir == MemcpyType::HOST_TO_HOST)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
@@ -767,7 +767,7 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
     // Copy from host to host
     copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
-  else if (dir == MemcpyKind::HOST_TO_DEVICE)
+  else if (dir == MemcpyType::HOST_TO_DEVICE)
   {
     // If host side memory is not allocated, do nothing
     if (!_is_host_alloc)
@@ -776,7 +776,7 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
-  else if (dir == MemcpyKind::DEVICE_TO_HOST)
+  else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -785,7 +785,7 @@ ArrayBase<T, dimension>::copyOut(T * ptr, MemcpyKind dir, dof_id_type n, dof_id_
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(ptr, _device_data + offset, n);
   }
-  else if (dir == MemcpyKind::DEVICE_TO_DEVICE)
+  else if (dir == MemcpyType::DEVICE_TO_DEVICE)
   {
     // If device side memory is not allocated, do nothing
     if (!_is_device_alloc)
@@ -914,7 +914,7 @@ dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
 
     T * data = static_cast<T *>(std::malloc(array.size() * sizeof(T)));
 
-    array.copyOut(data, MemcpyKind::DEVICE_TO_HOST, array.size());
+    array.copyOut(data, MemcpyType::DEVICE_TO_HOST, array.size());
 
     for (dof_id_type i = 0; i < array.size(); ++i)
       dataStore(stream, data[i], context);
@@ -989,7 +989,7 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
     for (auto & value : data)
       dataLoad(stream, value, context);
 
-    array.copyIn(data.data(), MemcpyKind::HOST_TO_DEVICE, array.size());
+    array.copyIn(data.data(), MemcpyType::HOST_TO_DEVICE, array.size());
   }
 }
 #endif
