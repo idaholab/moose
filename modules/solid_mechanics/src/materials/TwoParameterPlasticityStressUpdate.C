@@ -280,26 +280,31 @@ TwoParameterPlasticityStressUpdate::setInelasticStrainIncrementAfterReturn(
     const yieldAndFlow & smoothed_q,
     const RankFourTensor & /*elasticity_tensor*/,
     const RankTwoTensor & returned_stress,
-    RankTwoTensor & inelastic_strain_increment) const
+    RankTwoTensor & inelastic_strain_increment)
 {
   inelastic_strain_increment = (gaE / _Epp) * (smoothed_q.dg[0] * dpdstress(returned_stress) +
                                                smoothed_q.dg[1] * dqdstress(returned_stress));
 }
 
-std::vector<RankTwoTensor>
-TwoParameterPlasticityStressUpdate::dstress_param_dstress(const RankTwoTensor & stress) const
+void
+TwoParameterPlasticityStressUpdate::dstressparam_dstress(const RankTwoTensor & stress,
+                                                         std::vector<RankTwoTensor> & dsp) const
 {
-  std::vector<RankTwoTensor> dsp(_num_pq, RankTwoTensor());
+  // _num_pq = _num_sp
+  mooseAssert(dsp.size() == _num_pq,
+              "TwoParameterPlasticityStressUpdate: dsp incorrectly sized in dstressparam_dstress");
   dsp[0] = dpdstress(stress);
   dsp[1] = dqdstress(stress);
-  return dsp;
 }
 
-std::vector<RankFourTensor>
-TwoParameterPlasticityStressUpdate::d2stress_param_dstress(const RankTwoTensor & stress) const
+void
+TwoParameterPlasticityStressUpdate::d2stressparam_dstress(const RankTwoTensor & stress,
+                                                          std::vector<RankFourTensor> & d2sp) const
 {
-  std::vector<RankFourTensor> d2(_num_pq, RankFourTensor());
-  d2[0] = d2pdstress2(stress);
-  d2[1] = d2qdstress2(stress);
-  return d2;
+  // _num_pq = _num_sp
+  mooseAssert(
+      d2sp.size() == _num_pq,
+      "TwoParameterPlasticityStressUpdate: d2sp incorrectly sized in d2stressparam_dstress");
+  d2sp[0] = d2pdstress2(stress);
+  d2sp[1] = d2qdstress2(stress);
 }
