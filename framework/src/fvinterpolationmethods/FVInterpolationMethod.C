@@ -9,6 +9,10 @@
 
 #include "FVInterpolationMethod.h"
 
+#include "MooseFunctor.h"
+#include "MooseFunctorArguments.h"
+#include "MooseLinearVariableFV.h"
+
 InputParameters
 FVInterpolationMethod::validParams()
 {
@@ -20,8 +24,152 @@ FVInterpolationMethod::validParams()
   return params;
 }
 
-FVInterpolationMethod::FVInterpolationMethod(const InputParameters & params)
-  : MooseObject(params)
+FVInterpolationMethod::FVInterpolationMethod(const InputParameters & params) : MooseObject(params)
 {
-  // Default: no advected interpolator provided by base class
+}
+
+Real
+FVInterpolationMethod::FaceInterpolator::operator()(const Moose::FunctorBase<Real> & functor,
+                                                    const FaceInfo & face,
+                                                    const Moose::StateArg & state) const
+{
+  mooseAssert(face.neighborPtr(),
+              "This convenience overload assumes internal faces (neighbor exists)");
+  const Moose::ElemArg elem_arg{&face.elem(), false};
+  const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
+  const Real elem_value = functor(elem_arg, state);
+  const Real neighbor_value = functor(neighbor_arg, state);
+
+  return (*this)(face, elem_value, neighbor_value);
+}
+
+Real
+FVInterpolationMethod::FaceInterpolator::operator()(const MooseLinearVariableFV<Real> & var,
+                                                    const FaceInfo & face,
+                                                    const Moose::StateArg & state) const
+{
+  mooseAssert(face.neighborPtr(),
+              "This convenience overload assumes internal faces (neighbor exists)");
+  const Real elem_value = var.getElemValue(*face.elemInfo(), state);
+  const Real neighbor_value = var.getElemValue(*face.neighborInfo(), state);
+
+  return (*this)(face, elem_value, neighbor_value);
+}
+
+Real
+FVInterpolationMethod::AdvectedValueInterpolator::operator()(
+    const Moose::FunctorBase<Real> & functor,
+    const FaceInfo & face,
+    const Moose::StateArg & state,
+    const Real mass_flux) const
+{
+  mooseAssert(face.neighborPtr(),
+              "This convenience overload assumes internal faces (neighbor exists)");
+  const Moose::ElemArg elem_arg{&face.elem(), false};
+  const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
+
+  const Real elem_value = functor(elem_arg, state);
+  const Real neighbor_value = functor(neighbor_arg, state);
+
+  VectorValue<Real> elem_grad_storage;
+  VectorValue<Real> neighbor_grad_storage;
+  const VectorValue<Real> * elem_grad = nullptr;
+  const VectorValue<Real> * neighbor_grad = nullptr;
+
+  if (needsGradients())
+  {
+    elem_grad_storage = functor.gradient(elem_arg, state);
+    elem_grad = &elem_grad_storage;
+    neighbor_grad_storage = functor.gradient(neighbor_arg, state);
+    neighbor_grad = &neighbor_grad_storage;
+  }
+
+  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+}
+
+Real
+FVInterpolationMethod::AdvectedValueInterpolator::operator()(
+    const MooseLinearVariableFV<Real> & var,
+    const FaceInfo & face,
+    const Moose::StateArg & state,
+    const Real mass_flux) const
+{
+  mooseAssert(face.neighborPtr(),
+              "This convenience overload assumes internal faces (neighbor exists)");
+  const Real elem_value = var.getElemValue(*face.elemInfo(), state);
+  const Real neighbor_value = var.getElemValue(*face.neighborInfo(), state);
+
+  VectorValue<Real> elem_grad_storage;
+  VectorValue<Real> neighbor_grad_storage;
+  const VectorValue<Real> * elem_grad = nullptr;
+  const VectorValue<Real> * neighbor_grad = nullptr;
+
+  if (needsGradients())
+  {
+    elem_grad_storage = var.gradSln(*face.elemInfo());
+    elem_grad = &elem_grad_storage;
+    neighbor_grad_storage = var.gradSln(*face.neighborInfo());
+    neighbor_grad = &neighbor_grad_storage;
+  }
+
+  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+}
+
+FVInterpolationMethod::AdvectedSystemContribution
+FVInterpolationMethod::AdvectedSystemContributionCalculator::operator()(
+    const Moose::FunctorBase<Real> & functor,
+    const FaceInfo & face,
+    const Moose::StateArg & state,
+    const Real mass_flux) const
+{
+  mooseAssert(face.neighborPtr(),
+              "This convenience overload assumes internal faces (neighbor exists)");
+  const Moose::ElemArg elem_arg{&face.elem(), false};
+  const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
+
+  const Real elem_value = functor(elem_arg, state);
+  const Real neighbor_value = functor(neighbor_arg, state);
+
+  VectorValue<Real> elem_grad_storage;
+  VectorValue<Real> neighbor_grad_storage;
+  const VectorValue<Real> * elem_grad = nullptr;
+  const VectorValue<Real> * neighbor_grad = nullptr;
+
+  if (needsGradients())
+  {
+    elem_grad_storage = functor.gradient(elem_arg, state);
+    elem_grad = &elem_grad_storage;
+    neighbor_grad_storage = functor.gradient(neighbor_arg, state);
+    neighbor_grad = &neighbor_grad_storage;
+  }
+
+  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+}
+
+FVInterpolationMethod::AdvectedSystemContribution
+FVInterpolationMethod::AdvectedSystemContributionCalculator::operator()(
+    const MooseLinearVariableFV<Real> & var,
+    const FaceInfo & face,
+    const Moose::StateArg & state,
+    const Real mass_flux) const
+{
+  mooseAssert(face.neighborPtr(),
+              "This convenience overload assumes internal faces (neighbor exists)");
+  const Real elem_value = var.getElemValue(*face.elemInfo(), state);
+  const Real neighbor_value = var.getElemValue(*face.neighborInfo(), state);
+
+  VectorValue<Real> elem_grad_storage;
+  VectorValue<Real> neighbor_grad_storage;
+  const VectorValue<Real> * elem_grad = nullptr;
+  const VectorValue<Real> * neighbor_grad = nullptr;
+
+  if (needsGradients())
+  {
+    elem_grad_storage = var.gradSln(*face.elemInfo());
+    elem_grad = &elem_grad_storage;
+    neighbor_grad_storage = var.gradSln(*face.neighborInfo());
+    neighbor_grad = &neighbor_grad_storage;
+  }
+
+  return (*this)(face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
 }

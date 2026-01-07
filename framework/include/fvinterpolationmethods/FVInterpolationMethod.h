@@ -11,7 +11,11 @@
 
 #include "MooseObject.h"
 #include "FaceInfo.h"
+#include "MooseFunctorForward.h"
 #include "MooseError.h"
+
+template <typename>
+class MooseLinearVariableFV;
 
 /**
  * Base class for face interpolation functions used by linear FV objects.
@@ -61,6 +65,16 @@ public:
       mooseAssert(valid(), "Attempting to call an empty interpolation handle");
       return eval(*object, face, elem_value, neighbor_value);
     }
+
+    /// Convenience interface: interpolate a functor to a face.
+    Real operator()(const Moose::FunctorBase<Real> & functor,
+                    const FaceInfo & face,
+                    const Moose::StateArg & state) const;
+
+    /// Convenience interface: interpolate a linear FV variable to a face.
+    Real operator()(const MooseLinearVariableFV<Real> & var,
+                    const FaceInfo & face,
+                    const Moose::StateArg & state) const;
   };
 
   /// Callable container used to evaluate a single advected face value.
@@ -93,6 +107,20 @@ public:
                   "Gradient required by advected value interpolation but elem_grad is null");
       return eval(*object, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
     }
+
+    /// Convenience interface: interpolate a functor to a face with an upwind decision based on
+    /// the supplied mass flux.
+    Real operator()(const Moose::FunctorBase<Real> & functor,
+                    const FaceInfo & face,
+                    const Moose::StateArg & state,
+                    Real mass_flux) const;
+
+    /// Convenience interface: interpolate a linear FV variable to a face with an upwind decision
+    /// based on the supplied mass flux.
+    Real operator()(const MooseLinearVariableFV<Real> & var,
+                    const FaceInfo & face,
+                    const Moose::StateArg & state,
+                    Real mass_flux) const;
   };
 
   /// Matrix/RHS contribution for an advected face interpolation.
@@ -132,6 +160,20 @@ public:
                   "Gradient required by advected interpolation but elem_grad is null");
       return eval(*object, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
     }
+
+    /// Convenience interface: compute advected contributions using a functor sampled on each side
+    /// of the face.
+    AdvectedSystemContribution operator()(const Moose::FunctorBase<Real> & functor,
+                                          const FaceInfo & face,
+                                          const Moose::StateArg & state,
+                                          Real mass_flux) const;
+
+    /// Convenience interface: compute advected contributions using a linear FV variable sampled
+    /// on each side of the face.
+    AdvectedSystemContribution operator()(const MooseLinearVariableFV<Real> & var,
+                                          const FaceInfo & face,
+                                          const Moose::StateArg & state,
+                                          Real mass_flux) const;
   };
 
   /**
