@@ -46,6 +46,6 @@ private:
   /// Square root of effective stiffness of element
   const MaterialProperty<Real> & _sqrt_effective_stiffness;
 
-  /// User defined factor to be multiplied to the critical time step
+  /// User-defined safety factor that the minimum density required for stability is divided by
   const Real & _safety_factor;
 };

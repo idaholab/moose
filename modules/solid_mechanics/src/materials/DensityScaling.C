@@ -1,5 +1,4 @@
 //* This file is part of the MOOSE framework
-//* This file is part of the MOOSE framework
 //* https://mooseframework.inl.gov
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -18,10 +17,12 @@ DensityScaling::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription(
-      "Computes the inertial density needed to enable stable explicit time-stepping using the "
+      "Computes the scaled inertial density needed to enable stable explicit time-stepping using "
+      "the "
       "desired_time_step in solid-mechanics problems.  Note that if this inertial density is used "
       "in input files (for instance, in the mass matrix) it will impact the dynamics of the "
-      "system, largely eliminating high-frequency oscillations.  Hence, use with caution.");
+      "system, largely eliminating high-frequency oscillations, and impacting low-frequency "
+      "dynamics.  Hence, use with caution.");
   params.addRequiredParam<MaterialPropertyName>(
       "true_density",
       "Name of Material Property defining the true inertial density of the material.");
