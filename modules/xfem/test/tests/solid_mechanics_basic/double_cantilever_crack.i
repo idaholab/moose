@@ -1,17 +1,8 @@
 # 3D Double Cantiler beam example.
-# Figure 9 in:
-# @article{belytschko1999elastic,
-#   title={Elastic crack growth in finite elements with minimal remeshing},
-#   author={Belytschko, Ted and Black, Tom},
-#   journal={International journal for numerical methods in engineering},
-#   volume={45},
-#   number={5},
-#   pages={601--620},
-#   year={1999},
-#   publisher={Wiley Online Library}
-# }
+# Figure 9 in: Belytschko and Black (1999)
+# https://doi.org/10.1002/(SICI)1097-0207(19990620)45:5<601::AID-NME598>3.0.CO;2-S
 
-# to reproduce literature results the mesh must be refined with smaller q-integrals and smaller growth rates
+# to reproduce literature results the mesh must be refined, in addition to using smaller fracture domain integral radii and smaller crack growth increments
 # search comments for "to reproduce literature use"
 
 L = 11.8

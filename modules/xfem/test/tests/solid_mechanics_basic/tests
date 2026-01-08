@@ -188,6 +188,6 @@
     csvdiff = 'double_cantilever_crack_out_II_KI_1_0009.csv'
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id & method=opt'
-    requirement = 'The XFEM module shall reproduce results for a moving crack in a 3D double cantilever beam.'
+    requirement = 'The XFEM module shall reproduce published results for a moving crack in a 3D double cantilever beam.'
   []
 []
