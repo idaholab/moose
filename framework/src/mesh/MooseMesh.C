@@ -1465,7 +1465,7 @@ MooseMesh::cacheInfo()
 
   auto & mesh = getMesh();
 
-  // TODO: Thread this!
+  // Cache higher and lowerD element information
   for (const auto & elem : mesh.element_ptr_range())
   {
     const Elem * ip_elem = elem->interior_parent();
@@ -1506,13 +1506,15 @@ MooseMesh::cacheInfo()
   _communicator.set_union(_lower_d_interior_blocks);
   _communicator.set_union(_lower_d_boundary_blocks);
 
+  // Cache the boundaries next to each subdomain
   for (const auto & elem : mesh.active_local_element_ptr_range())
   {
     SubdomainID subdomain_id = elem->subdomain_id();
     auto & sub_data = _sub_to_data[subdomain_id];
+    const auto elem_boundary_ids = getBoundaryIDs(elem);
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
+      const auto & boundary_ids = elem_boundary_ids[side];
       sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
@@ -3007,6 +3009,14 @@ MooseMesh::getBoundaryIDs(const Elem * const elem, const unsigned short int side
 {
   std::vector<BoundaryID> ids;
   getMesh().get_boundary_info().boundary_ids(elem, side, ids);
+  return ids;
+}
+
+std::vector<std::vector<BoundaryID>>
+MooseMesh::getBoundaryIDs(const Elem * const elem) const
+{
+  std::vector<std::vector<BoundaryID>> ids;
+  getMesh().get_boundary_info().side_boundary_ids(elem, ids);
   return ids;
 }
 

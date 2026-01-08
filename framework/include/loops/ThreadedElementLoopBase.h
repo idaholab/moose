@@ -273,9 +273,10 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
           continue;
         }
 
+        auto elem_boundary_ids = _mesh.getBoundaryIDs(elem);
         for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
-          std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+          auto & boundary_ids = elem_boundary_ids[side];
           const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
 
           if (boundary_ids.size() > 0)
