@@ -154,4 +154,5 @@ protected:
   MaterialPropertyName _functionally_graded_youngs_modulus;
   /// Whether to create automatic differentiation objects from the action
   const bool _use_ad;
+  const bool _use_incremental_serd;
 };
