@@ -177,7 +177,17 @@ std::unique_ptr<MeshBase>
 BreakMeshByBlockGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
-  const auto max_node_id = mesh->max_node_id();
+
+  // Max node id is used later to generate new unique node IDs
+  // We need to make sure that max_node_id is the same on all processors so that unique IDs are
+  // consistent across processors
+  auto max_node_id = mesh->max_node_id();
+  if (!mesh->is_replicated())
+    mesh->comm().max(max_node_id);
+#if LIBMESH_ENABLE_UNIQUE_ID
+  const auto max_unique_id = mesh->parallel_max_unique_id();
+#endif
+
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
   // Handle block restrictions
@@ -336,6 +346,10 @@ BreakMeshByBlockGenerator::generate()
                                            : (current_elem->subdomain_id() + 1) * max_node_id +
                                                  current_node->id())
                                .release();
+#if LIBMESH_ENABLE_UNIQUE_ID
+                new_node->set_unique_id((current_elem->subdomain_id() + 1) * max_unique_id +
+                                        current_node->unique_id());
+#endif
                 // We're duplicating nodes so that each subdomain elem has its own copy, so it
                 // seems natural to assign this new node the same proc id as corresponding
                 // subdomain elem
@@ -490,11 +504,12 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
   BoundaryName boundary_name;
 
   const std::set<boundary_id_type> & ids = boundary_info.get_boundary_ids();
-  boundary_id_type new_boundaryID = *ids.rbegin() + 1;
+  boundary_id_type new_boundaryID = ids.empty() ? -1 : *ids.rbegin() + 1;
 
   // Make sure the new is the same on every processor
   mesh.comm().set_union(_neighboring_block_list);
   mesh.comm().max(new_boundaryID);
+  mooseAssert(new_boundaryID >= 0, "Invalid new boundary ID computed.");
 
   // loop over boundary sides
   // All ranks will process the pairs in exactly the same order.
