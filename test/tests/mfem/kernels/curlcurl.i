@@ -123,7 +123,7 @@
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = ams
-  l_tol = 1e-6
+  l_tol = 1e-12
 []
 
 [Executioner]
