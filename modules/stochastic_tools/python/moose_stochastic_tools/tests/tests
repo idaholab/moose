@@ -34,4 +34,46 @@
     design = 'StochasticControl.md'
     requirement = "The system shall include python utilities for driving stochastic simulations of MOOSE-based models."
   []
+  [vector_config]
+    type = PythonUnitTest
+    input = test_stochastic_controls_vpp.py
+    issues = '#32196'
+    required_python_packages = 'numpy'
+    requirement = "Python utilities for driving stochastic simulations shall support cache tolerances supplied on a per-parameter basis"
+  []
+  [list_format]
+    type = PythonUnitTest
+    input = test_stochastic_controls_vpp.py
+    issues = '#32196'
+    required_python_packages = 'numpy'
+    requirement = "Python utilities for driving stochastic simulations shall support output of arbitrary dimensions (after the first two)"
+  []
+  [cached_list]
+    type = PythonUnitTest
+    input = test_stochastic_controls_vpp.py
+    issues = '#32196'
+    required_python_packages = 'numpy'
+    requirement = "Python utilities for driving stochastic simulations shall support caching in arbitrary output format"
+  []
+  [batch_list]
+    type = PythonUnitTest
+    input = test_stochastic_controls_vpp.py
+    issues = '#32196'
+    required_python_packages = 'numpy'
+    requirement = "Python utilities for driving stochastic simulations shall support caching in arbitrary output format in batch format"
+  []
+  [array_format]
+    type = PythonUnitTest
+    input = test_stochastic_controls_vpp.py
+    issues = '#32196'
+    required_python_packages = 'numpy'
+    requirement = "Python utilities for driving stochastic simulations shall support caching in array format for uniformly shaped VPPs"
+  []
+  [vector_array]
+    type = PythonUnitTest
+    input = test_stochastic_controls_vpp.py
+    issues = '#32196'
+    required_python_packages = 'numpy'
+    requirement = "Python utilities for driving stochastic simulations shall support caching in array format for uniformly shaped VPPs in batch form"
+  []
 []
