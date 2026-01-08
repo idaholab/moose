@@ -34,10 +34,11 @@ mfem_index(const size_t i_dim,
 }
 
 mfem::Vector
-points_to_mfem_vector(const std::vector<Point> & points, const mfem::Ordering::Type ordering)
+points_to_mfem_vector(const std::vector<Point> & points,
+                      const unsigned int num_dims,
+                      const mfem::Ordering::Type ordering)
 {
   const unsigned int num_points = points.size();
-  const unsigned int num_dims = LIBMESH_DIM;
   mfem::Vector mfem_points(num_points * num_dims);
   for (unsigned int i_point = 0; i_point < num_points; i_point++)
   {
@@ -56,9 +57,9 @@ void
 mfem_vector_to_postprocessor_points(
     const mfem::Vector & mfem_points,
     std::vector<std::reference_wrapper<VectorPostprocessorValue>> & points,
+    const unsigned int num_dims,
     const mfem::Ordering::Type ordering)
 {
-  const unsigned int num_dims = LIBMESH_DIM;
   const unsigned int num_points = mfem_points.Size() / num_dims;
   for (unsigned int i_point = 0; i_point < num_points; i_point++)
   {
@@ -92,7 +93,8 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _finder(this->comm().get()),
     _points_ordering(getParam<MooseEnum>("point_ordering") == "NODES" ? mfem::Ordering::byNODES
                                                                       : mfem::Ordering::byVDIM),
-    _points(points_to_mfem_vector(points, _points_ordering)),
+    _points(points_to_mfem_vector(
+        points, this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension(), _points_ordering)),
     _interp_vals(points.size()),
     _var_name(getParam<VariableName>("variable")),
     _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(_var_name))
@@ -154,7 +156,8 @@ MFEMValueSamplerBase::finalize()
   }
   _points.HostReadWrite();
 
-  mfem_vector_to_postprocessor_points(_points, _declared_points, _points_ordering);
+  const auto mesh_dim = this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension();
+  mfem_vector_to_postprocessor_points(_points, _declared_points, mesh_dim, _points_ordering);
   const auto val_dims = _var.VectorDim();
   const auto num_points = _declared_points[0].get().size();
   const auto val_fespace_ordering = _var.FESpace()->GetOrdering();
