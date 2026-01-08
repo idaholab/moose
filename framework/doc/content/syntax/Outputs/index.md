@@ -89,7 +89,7 @@ It is possible to create multiple output objects for outputting:
     type = Exodus
     file_base = displaced
     use_displaced = true
-    interval = 3
+    time_step_interval = 3
   []
 []
 
@@ -112,7 +112,7 @@ as detailed below, does not get inherited.
 !listing id=common-output-params caption=Example use of common parameters in the Outputs block.
 [Outputs]
   execute_on = 'timestep_end' # disable the output of initial condition
-  interval = 2                # only output every 2 timesteps
+  time_step_interval = 2      # only output every 2 timesteps
   vtk = true                  # output VTK file
   print_perf_log = true       # enable the performance log
   [initial]
@@ -122,7 +122,7 @@ as detailed below, does not get inherited.
   [displaced]
     type = Exodus
     use_displaced = true
-    interval = 3              # this ExodusII will only output every third time step
+    time_step_interval = 3    # this ExodusII will only output every third time step
   []
 []
 
@@ -134,10 +134,10 @@ common output parameters.
 Several parameters are available common to all output objects to control the frequency with which
 output occurs.
 
-- `interval = N` will cause output objects to output only every _Nth_ simulation step
+- `time_step_interval = N` will cause output objects to output only every _Nth_ simulation step
 - if `start_time` and/or `end_time` are specified, outputs will only happen after the given start time and/or before the given end time
 - `sync_times = 't1 t2 t3 ... tN` will cause MOOSE to hit each listed simulation time _t1 .. tN_ exactly. With `sync_only = true` outputs will _only_ happen at the specified sync times.
-- `minimum_time_interval = dt` will suppress any output if the previous output happened at an earlier time that is more recent than _dt_ time units ago (specifically this means that outputs during linear iterations are not suppressed, as they are happening at the _same_ simulation time, and output from failed, cut steps do not lead to output suppression in repeated steps as they happened in the future)
+- `min_simulation_time_interval = dt` will suppress any output if the previous output happened at an earlier time that is more recent than _dt_ time units ago (specifically this means that outputs during linear iterations are not suppressed, as they are happening at the _same_ simulation time, and output from failed, cut steps do not lead to output suppression in repeated steps as they happened in the future)
 
 ## Outputs and execute_on
 
@@ -235,7 +235,7 @@ consider the following input file that has three output objects defined and a si
   csv = true
   [vtk]
     type = VTK
-    interval = 2
+    time_step_interval = 2
   []
 []
 ```
