@@ -485,7 +485,10 @@ BreakMeshByBlockGenerator::generate()
   } // end loop to duplicate nodes
 
   addInterface(*mesh);
-  Partitioner::set_node_processor_ids(*mesh);
+
+  // I don't quite understand yet why calling this function makes some nodes have invalid processor
+  // ID.
+  // Partitioner::set_node_processor_ids(*mesh);
 
   mesh->set_isnt_prepared();
 
@@ -506,7 +509,7 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
   const std::set<boundary_id_type> & ids = boundary_info.get_boundary_ids();
   boundary_id_type new_boundaryID = ids.empty() ? -1 : *ids.rbegin() + 1;
 
-  // Make sure the new is the same on every processor
+  // Make sure the new boundary ID is the same on every processor
   mesh.comm().set_union(_neighboring_block_list);
   mesh.comm().max(new_boundaryID);
   mooseAssert(new_boundaryID >= 0, "Invalid new boundary ID computed.");
@@ -596,6 +599,10 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
         boundary_info.add_side(elem, side, boundary_id);
     new_boundaryID++;
   }
+
+  // Sync boundary info
+  boundary_info.parallel_sync_side_ids();
+  boundary_info.parallel_sync_node_ids();
 
   // Generate boundary_id pairs mapping based on _subid_pairs_to_sides
   for (const auto & [sub_pair, boundary_id] : _subid_pairs_to_boundary_id)
