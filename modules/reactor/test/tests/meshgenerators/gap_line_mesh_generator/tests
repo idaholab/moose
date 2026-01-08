@@ -46,7 +46,7 @@
       cli_args = "--mesh-only err.e
                   Mesh/gap/thickness=1.0"
       expect_err = "mesh is tangled"
-      detail = "when the gap thickness exceeds the available space and leads to overlapping."
+      detail = "when the gap thickness exceeds the available space and leads to overlapping elements."
     []
   []
 []

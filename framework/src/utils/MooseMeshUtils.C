@@ -1041,12 +1041,10 @@ buildPolyLineMesh(MeshBase & mesh,
                                                 : nums_edges_between_points[i];
 
     Point p = points[i];
-    mesh.add_point(p,
-                   nums_edges_between_points.size() == 1
-                       ? (i * num_edges_between_points)
-                       : (std::accumulate(nums_edges_between_points.begin(),
-                                          nums_edges_between_points.begin() + i,
-                                          0)));
+    const auto pt_counter = std::accumulate(
+        nums_edges_between_points.begin(), nums_edges_between_points.begin() + i, 0);
+    mesh.add_point(
+        p, nums_edges_between_points.size() == 1 ? (i * num_edges_between_points) : pt_counter);
 
     if (num_edges_between_points > 1)
     {
@@ -1059,13 +1057,10 @@ buildPolyLineMesh(MeshBase & mesh,
       for (auto j : make_range(1u, num_edges_between_points))
       {
         p += pvec;
-        mesh.add_point(p,
-                       (nums_edges_between_points.size() == 1
-                            ? (i * num_edges_between_points)
-                            : (std::accumulate(nums_edges_between_points.begin(),
-                                               nums_edges_between_points.begin() + i,
-                                               0))) +
-                           j);
+        mesh.add_point(
+            p,
+            (nums_edges_between_points.size() == 1 ? (i * num_edges_between_points) : pt_counter) +
+                j);
       }
     }
   }
@@ -1099,6 +1094,9 @@ buildPolyLineMesh(MeshBase & mesh,
     bi.add_side(mesh.elem_ptr(0), 0, ids[0]);
     bi.add_side(mesh.elem_ptr(n_elem - 1), 1, ids[1]);
   }
+  else
+    mooseAssert(start_boundary.empty() && end_boundary.empty(),
+                "Cannot assign start/end boundaries on a looped polyline.");
 
   mesh.prepare_for_use();
 }

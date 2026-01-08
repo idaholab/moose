@@ -30,10 +30,10 @@ GapLineMeshGenerator::validParams()
 
   MooseEnum gap_direction("OUTWARD INWARD", "OUTWARD");
 
-  params.addParam<MooseEnum>(
-      "gap_direction",
-      gap_direction,
-      "In which direction the gap is created with respect to the boundary of the input mesh.");
+  params.addParam<MooseEnum>("gap_direction",
+                             gap_direction,
+                             "In which direction the gap is created with respect to the side "
+                             "normal of the elements along the boundary of the input mesh.");
 
   params.addParam<std::vector<boundary_id_type>>(
       "boundary_ids",
@@ -43,7 +43,8 @@ GapLineMeshGenerator::validParams()
   params.addParam<Real>("max_elem_size", "The maximum element size for the generated gap mesh.");
 
   params.addClassDescription(
-      "Generate a polyline mesh that is based on an input 2D-XY mesh. The 2D-XY mesh needs to be a "
+      "Generates a polyline mesh that is based on an input 2D-XY mesh. The 2D-XY mesh needs to be "
+      "a "
       "connected mesh with only one outer boundary manifold. The polyline mesh generated along "
       "with the boundary of the input mesh form an unmeshed gap with a specified thickness.");
 
@@ -74,7 +75,7 @@ GapLineMeshGenerator::generate()
   std::vector<Point> reduced_pts_list;
   for (const auto i : make_range(bdry_mh.n_points()))
   {
-    if (!geom_utils::isPointsColinear(
+    if (!geom_utils::arePointsColinear(
             bdry_mh.point((i - 1 + bdry_mh.n_points()) % bdry_mh.n_points()),
             bdry_mh.point(i),
             bdry_mh.point((i + 1) % bdry_mh.n_points())))
@@ -83,8 +84,12 @@ GapLineMeshGenerator::generate()
   // Here we need a method to generate the outward normals of each external side
   auto ply_mesh = buildMeshBaseObject();
 
-  MooseMeshUtils::buildPolyLineMesh(
-      *ply_mesh, reduced_pts_list, /*loop*/ true, "dummy", "dummy", std::vector<unsigned int>({1}));
+  MooseMeshUtils::buildPolyLineMesh(*ply_mesh,
+                                    reduced_pts_list,
+                                    /*loop*/ true,
+                                    BoundaryName(),
+                                    BoundaryName(),
+                                    std::vector<unsigned int>({1}));
 
   std::unique_ptr<UnstructuredMesh> ply_mesh_u =
       dynamic_pointer_cast<UnstructuredMesh>(std::move(ply_mesh));
@@ -187,11 +192,19 @@ GapLineMeshGenerator::generate()
   auto ply_mesh_2 = buildMeshBaseObject();
 
   if (isParamValid("max_elem_size"))
-    MooseMeshUtils::buildPolyLineMesh(
-        *ply_mesh_2, mod_reduced_pts_list, true, "dummy", "dummy", getParam<Real>("max_elem_size"));
+    MooseMeshUtils::buildPolyLineMesh(*ply_mesh_2,
+                                      mod_reduced_pts_list,
+                                      true,
+                                      BoundaryName(),
+                                      BoundaryName(),
+                                      getParam<Real>("max_elem_size"));
   else
-    MooseMeshUtils::buildPolyLineMesh(
-        *ply_mesh_2, mod_reduced_pts_list, true, "dummy", "dummy", std::vector<unsigned int>({1}));
+    MooseMeshUtils::buildPolyLineMesh(*ply_mesh_2,
+                                      mod_reduced_pts_list,
+                                      true,
+                                      BoundaryName(),
+                                      BoundaryName(),
+                                      std::vector<unsigned int>({1}));
 
   return ply_mesh_2;
 }

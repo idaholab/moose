@@ -278,7 +278,7 @@ boxCorners(const libMesh::BoundingBox & box, const Real factor)
 }
 
 bool
-isPointsColinear(const Point & p1, const Point & p2, const Point & p3)
+arePointsColinear(const Point & p1, const Point & p2, const Point & p3)
 {
   const Point v1 = p2 - p1;
   const Point v2 = p3 - p1;
@@ -290,6 +290,15 @@ isPointsColinear(const Point & p1, const Point & p2, const Point & p3)
 bool
 segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Point & p4)
 {
+  mooseAssert(
+      MooseUtils::absoluteFuzzyEqual(p1(2), 0.0) && MooseUtils::absoluteFuzzyEqual(p2(2), 0.0) &&
+          MooseUtils::absoluteFuzzyEqual(p3(2), 0.0) && MooseUtils::absoluteFuzzyEqual(p4(2), 0.0),
+      "segmentsIntersect only works in 2D (x-y plane)");
+
+  mooseAssert(MooseUtils::absoluteFuzzyGreaterThan((p1 - p2).norm(), 0.0) &&
+                  MooseUtils::absoluteFuzzyGreaterThan((p3 - p4).norm(), 0.0),
+              "Zero length segments are not allowed in segmentsIntersect");
+
   const Real a1 = p2(1) - p1(1);
   const Real b1 = p1(0) - p2(0);
   const Real c1 = p2(0) * p1(1) - p1(0) * p2(1);
@@ -299,13 +308,28 @@ segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Po
   const Real c2 = p4(0) * p3(1) - p3(0) * p4(1);
 
   const Real denom = a1 * b2 - a2 * b1;
-  // We should not worry about the parallel case here
-  // If there is an overlap issue, it will be captured by other line segments
+  Point intersection_pt;
+  // Parallel case
   if (MooseUtils::absoluteFuzzyEqual(denom, 0.0))
-    return false;
-
-  const Point intersection_pt =
-      Point((b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom, 0.0);
+  {
+    if (arePointsColinear(p1, p2, p3))
+    {
+      // for colinear segments, we construct a "virtual" intersection point using weighted average
+      // In that case, the virtual point will always lie outside of both segments unless they
+      // overlap
+      const Point p12 = (p1 + p2) / 2.0;
+      const Point p34 = (p3 + p4) / 2.0;
+      const Real dist12 = (p1 - p2).norm();
+      const Real dist34 = (p3 - p4).norm();
+      intersection_pt = p12 + (p34 - p12) * (dist12 / (dist12 + dist34));
+    }
+    else
+      return false;
+  }
+  else
+  {
+    intersection_pt = Point((b1 * c2 - b2 * c1) / denom, (a2 * c1 - a1 * c2) / denom, 0.0);
+  }
 
   const Real ratio_p1p2 = (intersection_pt - p1) * (p2 - p1) / ((p2 - p1).norm_sq());
   const Real ratio_p3p4 = (intersection_pt - p3) * (p4 - p3) / ((p4 - p3).norm_sq());

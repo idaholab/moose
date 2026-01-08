@@ -10,13 +10,13 @@ In the mesh generation for reactor geometries, it is often necessary to create u
 
 This mesh generator first utilizes the `libMesh` utility used by [`XYDelaunayGenerator`](/XYDelaunayGenerator.md) to extract the external boundary or the specified boundary of the input mesh ([!param](/Mesh/GapLineMeshGenerator/input)). The boundary vertices are then shifted outward along the averaged normal directions of the connected edges to form the designated gap thickness ([!param](/Mesh/GapLineMeshGenerator/thickness)). The shifted vertices are then connected to form a new polyline mesh representing the gap using the meshing utilities of [`PolyLineMeshGenerator`](/PolyLineMeshGenerator.md).
 
-The gap can be created either outward or inward with respect to the boundary of the input mesh by specifying the gap direction ([!param](/Mesh/GapLineMeshGenerator/gap_direction)).
+The gap can be created either outward or inward with respect to the boundary of the input mesh by specifying the gap direction ([!param](/Mesh/GapLineMeshGenerator/gap_direction)). This direction is defined with regards to the volume enclosed by the boundaries specified (or the entire input mesh if unspecified).
 
-By default, this mesh generator only captures the vertices of the input mesh that are on the polygon boundary and generate only one `EDGE2` element for each side of the polygon. In that case, users need to rely on the refinement capabilities in [`XYDelaunayGenerator`](/XYDelaunayGenerator.md) to achieve the desired mesh density. Optionally, users can specify a maximum element size ([!param](/Mesh/GapLineMeshGenerator/max_elem_size)) to have this mesh generator automatically insert additional nodes along each side of the polygon.
+By default, this mesh generator only captures the vertices of the input mesh that are on the polygon boundary and generate only one `EDGE2` element for each side of the polygon. In that case, users need to rely on the refinement capabilities in [`XYDelaunayGenerator`](/XYDelaunayGenerator.md) to achieve the desired mesh density. Alternatively, users can specify a maximum element size ([!param](/Mesh/GapLineMeshGenerator/max_elem_size)) to have this mesh generator automatically insert additional nodes along each side of the polygon.
 
 ## Examples
 
-A simple example shown here is based on a set of patterned hexagons. As shown in [simple_gap], the generated polyline mesh without refinement only contains one `EDGE2` element for each side of the hexagons with a gap from the original hexagons.
+A simple example shown here is based on a set of patterned hexagons. As shown in [simple_gap], the generated polyline mesh without refinement only contains one `EDGE2` element for each side of the hexagons with a gap from the original hexagons' sides.
 
 !media reactor/meshgenerators/simple_gap.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;

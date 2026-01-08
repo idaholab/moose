@@ -54,8 +54,8 @@ PolyLineMeshGenerator::PolyLineMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _points(getParam<std::vector<Point>>("points")),
     _loop(getParam<bool>("loop")),
-    _start_boundary(getParam<BoundaryName>("start_boundary")),
-    _end_boundary(getParam<BoundaryName>("end_boundary")),
+    _start_boundary(_loop ? BoundaryName() : getParam<BoundaryName>("start_boundary")),
+    _end_boundary(_loop ? BoundaryName() : getParam<BoundaryName>("end_boundary")),
     _nums_edges_between_points(
         parameters.isParamSetByUser("num_edges_between_points")
             ? std::vector<unsigned int>{getParam<unsigned int>("num_edges_between_points")}
