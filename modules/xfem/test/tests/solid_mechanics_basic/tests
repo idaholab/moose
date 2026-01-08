@@ -112,7 +112,6 @@
       capabilities = 'unique_id'
       detail = ' growth directions determined by an parsed function.'
     []
-
   []
   [penny_crack]
     requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics '
@@ -189,6 +188,6 @@
     csvdiff = 'double_cantilever_crack_out_II_KI_1_0009.csv'
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id & method=opt'
-    requirement = 'The XFEM module shall reproduce results for a moving crack in a double cantilever beam.'
+    requirement = 'The XFEM module shall reproduce results for a moving crack in a 3D double cantilever beam.'
   []
 []
