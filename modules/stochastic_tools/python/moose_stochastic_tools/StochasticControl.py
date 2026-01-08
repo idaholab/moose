@@ -9,6 +9,7 @@
 
 import enum
 import os
+import copy
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from logging import getLogger
@@ -258,6 +259,23 @@ class StochasticControl(MooseControl):
         else:
             self.set_continue()
 
+    def getVectorOutput(self) ->list:
+        """
+        Waits for simulation completion and retrieves QoI reporter vector
+        
+        
+        Returns: 
+            A list of lists with shape (num_samples, num_qois, len(qois))
+        :rtype: list
+        """
+        self.wait("TIMESTEP_END")
+
+        y = []
+        for qoi in self._qois:
+            rep = f"{self.qoi_storage_name}/"+qoi.replace("/",":")
+            y.append(self.get_reporter(rep))
+        return y
+
     def getOutput(self) -> np.ndarray:
         """
         Waits for simulation completion and retrieves QoI reporter values.
@@ -271,7 +289,15 @@ class StochasticControl(MooseControl):
         for qoi in self._qois:
             rep = f"{self.qoi_storage_name}/" + qoi.replace("/", ":")
             y.append(self.get_reporter(rep))
-        return np.array(y).T
+        yarr = np.array(y,dtype=object)
+        if len(yarr.shape)>3:
+            return np.transpose(yarr,axes=(1,0,2,3))
+        elif len(yarr.shape)==3:
+            return np.transpose(yarr,axes=(1,0,2))
+        elif len(yarr.shape)==2:
+            return np.transpose(yarr)
+        else:
+            raise ValueError("Quantities of interest returned unexpected shape: "+"({:s})".format(','.join(['{:f}'.format(x) for x in y.shape])))
 
     def _buildStochasticInput(self) -> pyhit.Node:
         """
@@ -491,7 +517,10 @@ class _ResultCache:
                 Must be > 0.
         """
         assert maxsize > 0
-        assert tol > 0.0
+        if type(tol) is list:
+            assert all([x>0 for x in tol])
+        else:
+            assert tol > 0.0
         self.maxsize = maxsize
         self.tol = tol
         self._cache: OrderedDict[tuple[int, ...], tuple[np.ndarray, np.ndarray]] = (
@@ -570,7 +599,10 @@ class _ResultCache:
             store outputs corresponding to `x`.
         """
         k = self._key(x)
-        self._cache[k] = (x.copy(), y.copy())
+        if y.size > 0 and y[*[0 for i in range(len(y.shape))]]:
+            self._cache[k] = (x.copy(), copy.deepcopy(y))
+        else:
+            self._cache[k] = (x.copy(), y.copy())
         self._cache.move_to_end(k)
         if len(self._cache) > self.maxsize:
             self._cache.popitem(False)
@@ -672,7 +704,9 @@ class StochasticRunner:
             - Sets `_result_cache` to a new `_ResultCache` instance when both
             `maxsize > 0` and `tol > 0.0`; otherwise sets `_result_cache = None`.
         """
-        if maxsize > 0 and tol > 0.0:
+        if maxsize > 0 and type(tol) is list and all([x>0 for x in tol]):
+            self._result_cache = _ResultCache(maxsize, tol)
+        elif maxsize > 0 and tol > 0.0:
             self._result_cache = _ResultCache(maxsize, tol)
         else:
             self._result_cache = None
@@ -714,11 +748,27 @@ class StochasticRunner:
             y_cache = self._result_cache.get(x[i, :])
             if not y_cache is None:
                 need_run_rows[i] = False
-                y[i, :] = y_cache
+                if type(y_cache) is np.ndarray:
+                    if y.shape[1:]!=y_cache.shape:
+                        y = np.empty((nrows,*y_cache.shape),dtype=y_cache.dtype)
+                    y[i,:] = y_cache
+                else:
+                    y[i, :] = y_cache
 
         # Run if any rows are not cached
         if any(need_run_rows):
-            y[need_run_rows, :] = self._run_control(x[need_run_rows, :])
+            src = self._run_control(x[need_run_rows, :])
+            if len(src.shape)==3:
+                if y.shape[1:] != src.shape[1:]:
+                    y = np.empty( (nrows, *src.shape[1:]), dtype=object)
+                y[need_run_rows, :, :] = src
+            elif len(src.shape)==4:
+                if y.shape != src.shape:
+                    y = np.empty( (nrows, *src.shape[1:]), dtype=object)
+                y[need_run_rows, :, :, :] = src
+            else:
+                y[need_run_rows, :] = src
+
             # Store
             for i, store in enumerate(need_run_rows):
                 if store:
@@ -773,7 +823,9 @@ class StochasticRunner:
         """Return either float, vector, or matrix based on size of 2-D array."""
         if np.size(y) == 1:  # A single QoI and row
             return y[0, 0]
-        elif 1 in y.shape:  # A single QoI or row
+        elif y.shape[0] == 1 and y.shape.count(1)<len(y.shape)-1:
+            return y[0,:]
+        elif y.shape.count(1) >= len(y.shape)-1:  # A single QoI or row
             return y.reshape(-1)
         else:
             return y
