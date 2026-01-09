@@ -27,6 +27,8 @@ public:
 
   virtual void initialize() override;
 
+  virtual bool isCutterMeshChanged() const override;
+
 protected:
   virtual void findActiveBoundaryGrowth() override;
 
