@@ -48,11 +48,15 @@ pin_diameter = 0.00950
   verbose_subchannel = true
   constant_beta = false
   friction_closure = 'Cheng'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
   [Cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 

@@ -98,6 +98,24 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
   []
+  [dittus-boelter]
+    type = SCMHTCDittusBoelter
+  []
+  [gnielinski]
+    type = SCMHTCGnielinski
+  []
+  [kazimi-carelli]
+    type = SCMHTCKazimiCarelli
+  []
+  [schad-modified]
+    type = SCMHTCSchadModified
+  []
+  [graber-rieger]
+    type = SCMHTCGraberRieger
+  []
+  [borishanskii]
+    type = SCMHTCBorishanskii
+  []
 []
 
 [ICs]

@@ -67,11 +67,15 @@ length = 0.5
   implicit = true
   segregated = false
   friction_closure = 'MATRA'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 

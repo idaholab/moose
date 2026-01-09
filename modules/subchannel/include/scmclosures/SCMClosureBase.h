@@ -11,6 +11,7 @@
 
 #include "ThreadedGeneralUserObject.h"
 #include "SubChannelMesh.h"
+#include "SubChannel1PhaseProblem.h"
 
 /**
  * Base class for SCM closures
@@ -32,4 +33,6 @@ public:
 protected:
   /// Reference to the subchannel mesh
   const SubChannelMesh & _subchannel_mesh;
+  /// Reference to the subchannel problem
+  const SubChannel1PhaseProblem & _scm_problem;
 };

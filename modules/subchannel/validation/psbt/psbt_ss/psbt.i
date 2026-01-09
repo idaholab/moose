@@ -92,13 +92,17 @@ P_out = 14.72e6 # Pa
   verbose_subchannel = true
   interpolation_scheme = exponential
   deformation = true # this flag allows the re-calculation of subchannel geometric parameters based on the dpin value
-  # friction model
   friction_closure = 'MATRA'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
+    correction_factor = none
   []
 []
 

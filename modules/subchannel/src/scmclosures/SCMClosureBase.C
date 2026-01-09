@@ -31,6 +31,7 @@ SCMClosureBase::validParams()
 
 SCMClosureBase::SCMClosureBase(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
-    _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_subproblem.mesh()))
+    _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_subproblem.mesh())),
+    _scm_problem(dynamic_cast<SubChannel1PhaseProblem &>(_fe_problem))
 {
 }
