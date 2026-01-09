@@ -328,7 +328,24 @@ MFEMProblem::addKernel(const std::string & kernel_name,
       mooseError("Cannot add complex kernel with name '" + name +
                  "' because there is no corresponding equation system.");
   }
-  else
+  else if (dynamic_cast<const MFEMDGKernel*>(kernel_uo)) {
+    auto object_ptr = getUserObject<MFEMDGKernel>(name).getSharedPtr();
+    auto kernel = std::dynamic_pointer_cast<MFEMDGKernel>(object_ptr);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+
+    if (eqsys)
+    {
+      eqsys->AddDGKernel(std::move(kernel));
+    }
+    else
+    {
+      mooseError("Cannot add kernel with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+
+  else if (dynamic_cast<const MFEMKernel *>(kernel_uo))
   {
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
