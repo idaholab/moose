@@ -1,0 +1,21 @@
+[Tests]
+  design = 'ElementExtremeMaterialProperty.md'
+  issues = '#32035'
+
+  [base]
+    requirement = 'The system shall compute the extreme (min/max) values of a material property over the domain, and report the coordinates of the location of that extreme value as well as other requested material properties'
+    [non_ad]
+      type = 'JSONDiff'
+      input = 'element_extreme_material_property_reporter.i'
+      jsondiff = 'element_extreme_material_property_reporter_out.json'
+      detail = 'for non-AD properties, and'
+    []
+    [ad]
+      type = 'JSONDiff'
+      input = 'element_extreme_material_property_reporter.i'
+      cli_args = 'Materials/mat/type=ADGenericFunctionMaterial Materials/mat2/type=ADGenericFunctionMaterial Materials/mat3/type=ADGenericFunctionMaterial Reporters/min/type=ADElementExtremeMaterialPropertyReporter Reporters/max/type=ADElementExtremeMaterialPropertyReporter Outputs/file_base=ad_element_extreme_material_property_reporter_out'
+      jsondiff = 'ad_element_extreme_material_property_reporter_out.json'
+      detail = 'for AD properties'
+    []
+  []
+[]

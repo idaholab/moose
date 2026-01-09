@@ -42,8 +42,8 @@ protected:
   /// Added density due to mass scaling (zero if no scaling is selected or applied)
   const MaterialProperty<Real> * _density_scaling;
 
-  /// Effective stiffness of element: function of material properties and element size
-  const MaterialProperty<Real> & _effective_stiffness;
+  /// Square root of Effective stiffness of element
+  const MaterialProperty<Real> & _sqrt_effective_stiffness;
 
   /// User defined factor to be multiplied to the critical time step
   const Real & _factor;
