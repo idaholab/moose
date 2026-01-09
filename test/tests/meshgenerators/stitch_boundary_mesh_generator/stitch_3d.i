@@ -24,6 +24,8 @@
     input = block2
     type = BreakMeshByBlockGenerator
     block_pairs = '1 2'
+    split_interface = true
+    add_interface_on_two_sides = true
   []
   [block1_block2_top]
     type = SideSetsFromBoundingBoxGenerator
@@ -66,7 +68,6 @@
     clear_stitched_boundary_ids = false
     stitch_boundaries_pair = '101 103'
   []
-  parallel_type = REPLICATED
 []
 
 [Outputs]
