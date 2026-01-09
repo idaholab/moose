@@ -243,7 +243,7 @@ All non-system includes should use quotes with a single space between `include` 
 #include <system_library>
 ```
 
-## Free function vs. member function vs. static member function
+## Free function vs. member function vs. static member function
 
 When adding a new function, carefully decide whether it should be
 
@@ -256,7 +256,7 @@ Make it a non-static member function only if it fundamentally depends on the obj
 
 ### Use a **non-static member function** when the operation:
 
-- Maintains or relies on class invariants
+- Maintains or relies on class internal data that must be kept consistent
 
   ``` cpp
   class Matrix
@@ -266,7 +266,7 @@ Make it a non-static member function only if it fundamentally depends on the obj
   };
   ```
 
-  If the function mutates internal state, must preserve invariants, or requires intimate knowledge of representation, it should be a non-static member.
+  If the function mutates internal state or requires intimate knowledge of representation, it should be a non-static member.
 
 - Is conceptually "owned" by a specific object
 
@@ -325,7 +325,7 @@ Make it a non-static member function only if it fundamentally depends on the obj
   misorientation(g1, g2);
   ```
 
-  If no operand is conceptually dominant, avoid `a.dot(b)`.
+  If no operand is conceptually dominant, e.g. avoid `a.dot(b)`.
 
 - An algorithm over data
 
@@ -335,7 +335,7 @@ Make it a non-static member function only if it fundamentally depends on the obj
   project(u, v);
   ```
 
-  If it takes objects as inputs, produces a value, and does not manage invariants, prefer a free function (STL style).
+  If it takes objects as inputs and produces a value, prefer a free function (STL style).
 
 - Meant to be extensible across unrelated types
 
@@ -344,7 +344,7 @@ Make it a non-static member function only if it fundamentally depends on the obj
   auto norm(const T & x);
   ```
 
-  Free functions enable generic programming, ADL customization, and retroactive extension to foreign types.
+  Free functions enable generic programming, argument-dependent lookup (ADL) customization, and retroactive extension to foreign types.
 
 - Conceptually "between" types
 
@@ -357,7 +357,7 @@ Make it a non-static member function only if it fundamentally depends on the obj
 
 ### Decision checklist
 
-1.  Does it mutate the object or enforce invariants? Yes → non-static member
+1.  Does it mutate the object or enforce consistency of internal state? Yes → non-static member
 2.  Does it conceptually belong to the type, but not an instance? Yes → static member
 3.  Is it symmetric, algorithmic, or cross-cutting? Yes → free function
 4.  Should users be able to extend it for new types via overloading/ADL? Yes → free function
@@ -429,7 +429,7 @@ Prefer
 
 Be cautious about
 
-- **Templates used only to avoid small amounts of duplication**, without a clear gain
+- **Templates used only to avoid small amounts of duplication**, without a clear gain and with decreased readability
 - **Encoding inherently runtime variability as template parameters** without a strong semantic or performance reason
 - **Letting template machinery leak into user code**
 
