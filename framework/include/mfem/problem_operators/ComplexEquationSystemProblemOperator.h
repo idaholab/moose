@@ -45,6 +45,7 @@ public:
 private:
   std::shared_ptr<Moose::MFEM::ComplexEquationSystem> _equation_system{nullptr};
   std::vector<mfem::ParComplexGridFunction *> _cmplx_trial_variables;
+  std::vector<mfem::ParComplexGridFunction *> _cmplx_test_variables;
 };
 
 } // namespace Moose::MFEM

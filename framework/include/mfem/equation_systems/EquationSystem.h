@@ -70,6 +70,8 @@ protected:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
+  void SortTestAndTrialNames();
+
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
   /// itself, resetting all dimensions to zero.

@@ -63,6 +63,29 @@ EquationSystem::SetTrialVariableNames()
 }
 
 void
+EquationSystem::SortTestAndTrialNames()
+{
+  std::vector<std::string> common_vars;
+  for (const auto & name : _test_var_names)
+  {
+    if (VectorContainsName(_coupled_var_names, name))
+      common_vars.push_back(name);
+  }
+
+  // Move common variables to beginning of vectors, and in the same order.
+  // The names in _coupled_var_names must be common to test and trial names
+  for (const auto & name : common_vars)
+  {
+    _test_var_names.erase(std::find(_test_var_names.begin(), _test_var_names.end(), name));
+    _test_var_names.insert(_test_var_names.begin(), name);
+    _trial_var_names.erase(std::find(_trial_var_names.begin(), _trial_var_names.end(), name));
+    _trial_var_names.insert(_trial_var_names.begin(), name);
+    _coupled_var_names.erase(std::find(_coupled_var_names.begin(), _coupled_var_names.end(), name));
+    _coupled_var_names.insert(_coupled_var_names.begin(), name);
+  }
+}
+
+void
 EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
   AddTestVariableNameIfMissing(kernel->getTestVariableName());
@@ -131,6 +154,12 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     mooseError("Complex variables have been created but the executioner numeric type has not been "
                "set to complex. Please set Executioner/numeric_type = complex.");
 
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
+
+  // Now that all test and trial variables are known, order them
+  // SortTestAndTrialNames();
+
   for (auto & test_var_name : _test_var_names)
   {
     if (!gridfunctions.Has(test_var_name))
@@ -142,13 +171,21 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     }
     // Store pointers to test FESpaces
     _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
-    // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
-    _var_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
-  // Extract which coupled variables are to be trivially eliminated and which are trial variables
-  SetTrialVariableNames();
+  for (auto & trial_var_name : _trial_var_names)
+  {
+    if (!gridfunctions.Has(trial_var_name))
+    {
+      mooseError("MFEM variable ",
+                 trial_var_name,
+                 " requested by equation system during initialisation was "
+                 "not found in gridfunctions");
+    }
+    // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
+    _var_ess_constraints.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(trial_var_name)->ParFESpace()));
+  }
 
   // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
@@ -185,16 +222,16 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
 void
 EquationSystem::ApplyEssentialBCs()
 {
-  _ess_tdof_lists.resize(_test_var_names.size());
-  for (const auto i : index_range(_test_var_names))
+  _ess_tdof_lists.resize(_trial_var_names.size());
+  for (const auto i : index_range(_trial_var_names))
   {
-    const auto & test_var_name = _test_var_names.at(i);
+    const auto & trial_var_name = _trial_var_names.at(i);
     mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
     // essential boundaries to the global_ess_markers array
-    ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
+    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
     trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
 }
@@ -271,37 +308,34 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 {
   // Allocate block operator
   DeleteAllBlocks();
-  _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
-  // Form diagonal blocks.
-  for (const auto i : index_range(_test_var_names))
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    mfem::Vector aux_x, aux_rhs;
-    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a;
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-  }
+  _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _h_blocks = nullptr;
+  trueRHS = 0.0;
 
-  // Form off-diagonal blocks
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
+
     for (const auto j : index_range(_trial_var_names))
     {
       auto trial_var_name = _trial_var_names.at(j);
 
       mfem::Vector aux_x, aux_rhs;
       mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
-      aux_lf = 0.0;
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
+
+      if (test_var_name == trial_var_name)
       {
+        aux_lf = *_lfs.Get(test_var_name);
+        auto blf = _blfs.Get(test_var_name);
+        blf->FormLinearSystem(
+            _ess_tdof_lists.at(j), *(_var_ess_constraints.at(j)), aux_lf, *aux_a, aux_x, aux_rhs);
+        trueX.GetBlock(j) = aux_x;
+      }
+      else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        aux_lf = 0.0;
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
-        mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *(_var_ess_constraints.at(j)),
@@ -309,9 +343,12 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
-        _h_blocks(i, j) = aux_a;
-        trueRHS.GetBlock(i) += aux_rhs;
       }
+      else
+        continue;
+
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks(i, j) = aux_a;
     }
   }
   // Sync memory
