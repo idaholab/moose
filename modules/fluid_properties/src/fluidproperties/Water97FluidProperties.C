@@ -790,22 +790,26 @@ Water97FluidProperties::T_from_p_h_ad(const ADReal & pressure, const ADReal & en
     {
       Real T_min = 1073.15;
       Real T_max = 2273.15;
-      ADReal T_find;
+      Real T_find = 0.;
       Real T_error = 1.0;
 
       // Bisection solve
       while (T_error > libMesh::TOLERANCE)
       {
         T_find = 0.5 * (T_min + T_max);
-        Real h_find = h_from_p_T(pressure.value(), T_find.value());
+        Real h_find = h_from_p_T(pressure.value(), T_find);
 
         if (h_find > enthalpy.value())
-          T_max = T_find.value();
+          T_max = T_find;
         else
-          T_min = T_find.value();
+          T_min = T_find;
 
-        T_error = std::abs((T_max - T_min) / T_find.value());
+        T_error = std::abs((T_max - T_min) / T_find);
       }
+      if (!_allow_imperfect_jacobians)
+        mooseDoOnce(
+            mooseWarning("The derivatives for T_from_p_h_ad are currently neglected, set to 0."));
+      temperature = T_find;
 
       break;
     }
