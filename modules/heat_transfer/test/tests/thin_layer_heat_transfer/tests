@@ -7,6 +7,7 @@
                   'domains in 2D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
     recover = false
   []
   [steady_3d]
@@ -17,6 +18,7 @@
                   'domains in 3D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
     recover = false
   []
   [transient_2d]
@@ -27,6 +29,7 @@
                   'domains in 2D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
     recover = false
   []
   [transient_3d]
@@ -37,6 +40,7 @@
                   'domains in 3D.'
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
+    mesh_mode = 'REPLICATED'
     recover = false
   []
   [jacobian]
@@ -47,6 +51,7 @@
     issues = '#21988'
     design = 'ThinLayerHeatTransfer.md'
     difference_tol = 1e-6
+    mesh_mode = 'REPLICATED'
     recover = false
     requirement = 'The Jacobian for the ThinLayerHeatTransfer calculations shall provide perfect '
                   'jacobians.'

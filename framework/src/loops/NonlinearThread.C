@@ -413,15 +413,6 @@ NonlinearThread::printBoundaryExecutionInformation(const unsigned int bid) const
   _boundaries_exec_printed.insert(bid);
 }
 
-bool
-NonlinearThread::hasActiveInterfaceKernel(const std::vector<BoundaryID> & boundary_ids) const
-{
-  for (const auto bid : boundary_ids)
-    if (_ik_warehouse && _ik_warehouse->hasActiveBoundaryObjects(bid, _tid))
-      return true;
-  return false;
-}
-
 void
 NonlinearThread::prepareFace(const Elem * const elem,
                              const unsigned int side,
