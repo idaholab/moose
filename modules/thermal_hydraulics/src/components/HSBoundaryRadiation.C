@@ -22,12 +22,6 @@ HSBoundaryRadiation::validParams()
   params.addRequiredParam<MooseFunctorName>("emissivity", "Emissivity functor [-]");
   params.addParam<MooseFunctorName>("view_factor", 1.0, "View factor functor [-]");
   params.addRequiredParam<MooseFunctorName>("T_ambient", "Ambient temperature functor [K]");
-  params.addDeprecatedParam<PostprocessorName>(
-      "scale_pp",
-      "Post-processor by which to scale boundary condition",
-      "The 'scale' parameter is replacing the 'scale_pp' parameter. 'scale' is a function "
-      "parameter instead of a post-processor parameter. If you need to scale from a post-processor "
-      "value, use a PostprocessorFunction.");
   params.addParam<MooseFunctorName>(
       "scale", 1.0, "Functor by which to scale the boundary condition");
   params.addParam<bool>(
@@ -65,8 +59,6 @@ HSBoundaryRadiation::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     }
     pars.set<MooseFunctorName>("scale") = getParam<MooseFunctorName>("scale");
-    if (isParamValid("scale_pp"))
-      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
     getTHMProblem().addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
