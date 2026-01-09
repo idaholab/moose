@@ -251,9 +251,6 @@ When adding a new function, carefully decide whether it should be
 - a **static member function** (conceptually belongs to a type, but not to an instance), or
 - a **free function** (algorithm or operation external to any one type).
 
-!alert note title=Core rule
-Make it a non-static member function only if it fundamentally depends on the object's invariants or representation.
-
 ### Use a **non-static member function** when the operation:
 
 - Maintains or relies on class internal data that must be kept consistent
