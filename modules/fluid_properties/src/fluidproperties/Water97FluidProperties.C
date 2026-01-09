@@ -623,8 +623,11 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
   {
     if (enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure)))
       region = 1;
-    else if (enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure) + 1e-6))
-      return 4;
+    // Use region 2 definition of h_from_p_T to get the bound
+    else if (enthalpy <=
+             _Rw * _T_star[1] *
+                 dgamma2_dtau(pressure / _p_star[1], _T_star[1] / vaporTemperature(pressure)))
+      region = 4;
     else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
     else if (enthalpy <= h_from_p_T(pressure, 2273.15))
@@ -780,7 +783,7 @@ Water97FluidProperties::T_from_p_h_ad(const ADReal & pressure, const ADReal & en
     }
 
     case 4:
-      return vaporTemperature(pressure);
+      return vaporTemperature_ad(pressure);
       break;
 
     case 5:
