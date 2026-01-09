@@ -86,6 +86,30 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 }
 
 void
+EquationSystem::AddDGKernel(std::shared_ptr<MFEMDGKernel> kernel)
+{
+  AddTestVariableNameIfMissing(kernel->getTestVariableName());
+  AddCoupledVariableNameIfMissing(kernel->getTrialVariableName());
+  auto trial_var_name = kernel->getTrialVariableName();
+  auto test_var_name = kernel->getTestVariableName();
+  if (!_dg_kernels_map.Has(test_var_name))
+  {
+    auto kernel_field_map =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>>();
+    _dg_kernels_map.Register(test_var_name, std::move(kernel_field_map));    
+  }
+  // Register new kernels map if not present for the test/trial variable
+  // pair
+  if (!_dg_kernels_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMDGKernel>>>();
+    _dg_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+  }
+  _dg_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));  
+}
+
+
+void
 EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 {
   AddTestVariableNameIfMissing(bc->getTestVariableName());
@@ -374,6 +398,9 @@ EquationSystem::BuildLinearForms()
     auto lf = _lfs.GetShared(test_var_name);
     ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
+
+    // same with the dg stuff
+    ApplyDomainDGLFIntegrators(test_var_name, lf, _dg_kernels_map);
     lf->Assemble();
   }
 
@@ -400,6 +427,10 @@ EquationSystem::BuildBilinearForms()
         test_var_name, test_var_name, blf, _integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, blf, _kernels_map);
+
+    // and the dg stuff too
+    ApplyDomainDGBLFIntegrators<mfem::ParBilinearForm>(
+      test_var_name, test_var_name, blf, _dg_kernels_map);
     // Assemble
     blf->Assemble();
   }
