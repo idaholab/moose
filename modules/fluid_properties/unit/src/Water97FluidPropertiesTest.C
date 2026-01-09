@@ -121,6 +121,11 @@ TEST_F(Water97FluidPropertiesTest, inRegionPH)
   EXPECT_EQ(_fp->inRegionPH(80.0e6, _fp->h_from_p_T(80.0e6, 300)), (unsigned int)1);
   EXPECT_EQ(_fp->inRegionPH(3.0e6, _fp->h_from_p_T(3.0e6, 500)), (unsigned int)1);
 
+  // Region 4
+  const auto p_test = _fp->vaporPressure(400);
+  EXPECT_EQ(_fp->inRegionPH(p_test, _fp->h_from_p_T(p_test, 400 - 0.01) + 1e2), (unsigned int)4);
+  EXPECT_EQ(_fp->inRegionPH(p_test, _fp->h_from_p_T(p_test, 400 + 0.01) - 1e2), (unsigned int)4);
+
   // Region 2
   EXPECT_EQ(_fp->inRegionPH(3.5e3, _fp->h_from_p_T(3.5e3, 300)), (unsigned int)2);
   EXPECT_EQ(_fp->inRegionPH(30.0e6, _fp->h_from_p_T(30.0e6, 700)), (unsigned int)2);
