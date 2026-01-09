@@ -648,14 +648,10 @@ getUnion(const std::vector<T> & vector1, const std::vector<T> & vector2, std::ve
 {
   std::unordered_set<T> unique_elements;
   unique_elements.reserve(vector1.size() + vector2.size());
-
-  for (const T & entry : vector1)
-    unique_elements.insert(entry);
-  for (const T & entry : vector2)
-    unique_elements.insert(entry);
+  unique_elements.insert(vector1.begin(), vector1.end());
+  unique_elements.insert(vector2.begin(), vector2.end());
 
   // Now populate the common vector with the union
-  common.clear();
   common.assign(unique_elements.begin(), unique_elements.end());
 }
 
