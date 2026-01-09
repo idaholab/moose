@@ -75,19 +75,19 @@ class Array;
 template <typename T>
 struct ArrayDeepCopy
 {
-  static const bool value = false;
+  static constexpr bool value = false;
 };
 
 template <typename T, unsigned int dimension>
 struct ArrayDeepCopy<Array<T, dimension, LayoutType::LEFT>>
 {
-  static const bool value = ArrayDeepCopy<T>::value;
+  static constexpr bool value = ArrayDeepCopy<T>::value;
 };
 
 template <typename T, unsigned int dimension>
 struct ArrayDeepCopy<Array<T, dimension, LayoutType::RIGHT>>
 {
-  static const bool value = ArrayDeepCopy<T>::value;
+  static constexpr bool value = ArrayDeepCopy<T>::value;
 };
 ///@}
 
@@ -837,9 +837,9 @@ copyToDeviceInner(T & /* data */)
 {
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, LayoutType layout>
 void
-copyToDeviceInner(Array<T, dimension> & data)
+copyToDeviceInner(Array<T, dimension, layout> & data)
 {
   data.copyToDeviceNested();
 }
@@ -920,9 +920,9 @@ ArrayBase<T, dimension>::operator=(const T & scalar)
   return *this;
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, LayoutType layout>
 void
-dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
+dataStore(std::ostream & stream, Array<T, dimension, layout> & array, void * context)
 {
   using ::dataStore;
 
@@ -964,9 +964,9 @@ dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
       dataStore(stream, value, context);
 }
 
-template <typename T, unsigned int dimension>
+template <typename T, unsigned int dimension, LayoutType layout>
 void
-dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
+dataLoad(std::istream & stream, Array<T, dimension, layout> & array, void * context)
 {
   using ::dataLoad;
 

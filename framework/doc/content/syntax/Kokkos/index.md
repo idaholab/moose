@@ -284,7 +284,7 @@ namespace Kokkos
 template <>
 struct ArrayDeepCopy<SomeType>
 {
-  static const bool value = true;
+  static constexpr bool value = true;
 };
 }
 }
