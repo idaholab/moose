@@ -103,21 +103,7 @@ know the correct type? If you are thinking "unsigned int" you are in the majorit
 also wrong. The right type for a container is `::size_type (aka 'unsigned long')`. See the error
 message once more above.
 
-The ideal solution would be to match the type you are looping over, but this is slightly more
-difficult than just using `decltype` due to qualifiers like `const`. In MOOSE we have solved this for
-you with `MooseIndex`:
-
-```C++
-  // Looping to a scalar index
-  for (MooseIndex(n_nodes) i = 0; i < nodes; ++i)
-    // ... Do something with index i
-
-  // Looping to a container size (where range-for isn't sufficient)
-  for (MooseIndex(vector) i = 0; i < vector.size(); ++i)
-    // ... Do something with index i
-```
-
-In addition, a few convenience methods are available to help generate integer ranges:
+A few convenience methods are available to help generate integer ranges:
 
 ```C++
 #include "libmesh/int_range.h"
@@ -186,7 +172,7 @@ using ElemSide = std::tuple<dof_id_type, unsigned int, BoundaryID>;
 std::vector<ElemSide> my_vec2;
 ```
 
-Remember that `using` also works with template.
+Remember that `using` also works with templates.
 
 ## Lambdas
 
@@ -257,19 +243,22 @@ All non-system includes should use quotes with a single space between `include` 
 #include <system_library>
 ```
 
-## Free function v.s. member function
+## Free function vs. member function vs. static member function
 
-When adding a new function, please carefully decide whether to make it a free function (i.e., outside the scope of the class) or a member function.
+When adding a new function, carefully decide whether it should be
 
-The core rule is
+- a **non-static member function** (operates on an object),
+- a **static member function** (conceptually belongs to a type, but not to an instance), or
+- a **free function** (algorithm or operation external to any one type).
 
-> Make it a member function only if it fundamentally depends on the object’s invariants or representation.
+!alert note title=Core rule
+Make it a non-static member function only if it fundamentally depends on the object's invariants or representation.
 
-Define a member when the operation:
+### Use a **non-static member function** when the operation:
 
 - Maintains or relies on class invariants
 
-  ```C++
+  ``` cpp
   class Matrix
   {
   public:
@@ -277,68 +266,106 @@ Define a member when the operation:
   };
   ```
 
-  If the function mutates internal state, must preserve class invariants, or requires intimate knowledge of representation, make it a member function.
+  If the function mutates internal state, must preserve invariants, or requires intimate knowledge of representation, it should be a non-static member.
 
-- Is conceptually “owned” by the type
+- Is conceptually "owned" by a specific object
 
-  ```C++
+  ``` cpp
   particle.update(dt);
   tensor.transpose();
   ```
 
-  Ask yourself: “Would users naturally discover this by typing obj.?” If so, make it a member function.
+  Ask: "Would users naturally expect to discover this via `obj.`?" If yes, make it a non-static member.
 
-- Needs privileged access: If the function would otherwise require: friendship, access to private data, or bypassing encapsulation, make it a member (or a carefully chosen friend).
+- Needs privileged access to object internals
 
-Use a free function for
+  If it would otherwise require friendship or breaking encapsulation, it usually belongs as a non-static member (or, rarely, a tightly controlled friend).
 
-- Symmetric operations
+### Use a **static member function** when the operation:
 
-  ```C++
+- Conceptually belongs to the type, but not to any one instance
+
+  ``` cpp
+  class Tensor
+  {
+  public:
+    static Tensor identity(unsigned int dim);
+    static Tensor fromEulerAngles(double a, double b, double c);
+  };
+  ```
+
+  These are type-level operations: factories, validators, canonical constructors, or utilities closely tied to the abstraction.
+
+- Provides behavior naturally namespaced under the class
+
+  ``` cpp
+  Elem::build(type, dim);
+  FEProblemBase::validParams();
+  ```
+
+  Static members improve discoverability, communicate conceptual ownership, and avoid polluting surrounding namespaces, even though no object data is used.
+
+- Logically groups algorithms that are tightly coupled to a type's meaning
+
+  Especially in large frameworks like MOOSE, static members can act as a *semantic namespace* that documents intent better than a free function.
+
+  Think of static members as answering:
+
+  > "Does this function describe the concept of this class, even though it doesn't operate on an instance?"
+
+  If yes, a static member is often the right choice.
+
+### Use a **free function** when the operation is:
+
+- Symmetric
+
+  ``` cpp
   dot(a, b);
   distance(p, q);
   misorientation(g1, g2);
   ```
 
-  If no operand is conceptually dominant: Avoid `a.dot(b)` and prefer `dot(a, b)`.
+  If no operand is conceptually dominant, avoid `a.dot(b)`.
 
-- Algorithms over data
+- An algorithm over data
 
-  ```C++
+  ``` cpp
   norm(v);
   det(A);
   project(u, v);
   ```
 
-  If it takes an object as input, produces a value, and does not modify the object, make it a free function. This aligns with the STL design: containers own storage; algorithms are free.
+  If it takes objects as inputs, produces a value, and does not manage invariants, prefer a free function (STL style).
 
-- Extensibility across types
+- Meant to be extensible across unrelated types
 
-  ```C++
-  template<class T>
+  ``` cpp
+  template <class T>
   auto norm(const T & x);
   ```
 
-  Free functions allow generic programming, customization via argument-dependent lookup, extension to foreign types. Member functions cannot be added retroactively.
+  Free functions enable generic programming, ADL customization, and retroactive extension to foreign types.
 
-- Operations that conceptually sit “between” types
+- Conceptually "between" types
 
-  ```C++
+  ``` cpp
   intersect(mesh, plane);
   assemble(system, element);
   ```
 
-  These don’t belong to either object alone.
+  These don't belong to either type alone.
 
-In summary, when making a decision, ask these questions in order:
+### Decision checklist
 
-1. Does this operation mutate the object or enforce invariants? Yes → member
-2. Is it conceptually “owned” by the object? Yes → member
-3. Is the operation symmetric or algorithmic? Yes → free function
-4. Do I want/expect others to extend this behavior for new types? Yes → free function
-5. If you’re unsure → default to free function.
+1.  Does it mutate the object or enforce invariants? Yes → non-static member
+2.  Does it conceptually belong to the type, but not an instance? Yes → static member
+3.  Is it symmetric, algorithmic, or cross-cutting? Yes → free function
+4.  Should users be able to extend it for new types via overloading/ADL? Yes → free function
+5.  Unsure? → default to free function (or static member if discoverability/namespacing is the primary concern)
 
-As a reminder, helper free functions defined only in the translation unit (i.e., `.C` files) should be marked as `static` or encapsulated in an anonymous namespace to force static linking.
+### Implementation note
+
+Helper free functions that are local to a translation unit (`.C` files) should be placed in an anonymous namespace (or marked `static`) to avoid external linkage.
 
 ## Access control: public, protected, and private
 
@@ -377,25 +404,36 @@ In summary:
 - Treat `protected` members as implementation details meant only for subclasses, not as part of the class’s public interface
 - Consider composition as an alternative to inheritance, especially when behavior can be delegated rather than extended.
 
-Code reviews may request access-level reductions if members are more visible than necessary.
+Code reviews may request access-level reductions if members are more visible than necessary. In MOOSE, the preferred access order should be, whenever possible,
 
-## Generic Programming and Compile-Time Constants
+- public
+- protected
+- private
 
-Prefer generic programming and compile-time constants when they improve correctness, expressiveness, or performance. Use templates to express behavior that is truly type- or dimension-independent.
+in the class definition. Following this convention helps expedite API review.
 
-Prefer:
+## Generic programming and compile-time design
 
-- Function and class templates for algorithms that operate uniformly across types
-- `auto` and template parameter deduction to reduce redundancy
-- Concepts (not available yet in C++17) or `static_assert` to document and enforce template requirements
+Prefer generic programming and compile-time constructs when they improve correctness, extensibility, or performance, or when they enable significantly cleaner and safer downstream code. Use templates to express behavior that is truly type-, dimension-, or policy-independent.
 
-Avoid:
+!alert note
+Generic code often forms infrastructure: it may be more complex than its uses, but should make user code simpler, safer, and more expressive.
 
-- Templates used only to avoid writing a small amount of code
-- Deep or obscure template metaprogramming that obscures intent
-- Encoding runtime variability as template parameters without a clear benefit
+Prefer
 
-Templates should make code more general and clearer, not harder to understand.
+- **Function and class templates** for algorithms and abstractions that operate uniformly across types, dimensions, or policies
+- **Compile-time constants and types** to express invariants, dimensions, and configuration that are fundamental to the model
+- **`auto` and template deduction** to reduce redundancy
+- **Explicit documentation of template requirements**: Use `static_assert`, type traits, and clear comments to state what a template expects and guarantees.
+- **Encapsulation of template complexity**: Isolate nontrivial metaprogramming behind small, stable interfaces.
+
+Be cautious about
+
+- **Templates used only to avoid small amounts of duplication**, without a clear gain
+- **Encoding inherently runtime variability as template parameters** without a strong semantic or performance reason
+- **Letting template machinery leak into user code**
+
+Not all valuable templates are simple. Foundational libraries (e.g. the STL, MetaPhysicL, expression-template frameworks) are often hard to read internally, yet dramatically improve downstream code. In that vein, do not reject generic designs solely because their implementation is nontrivial. Do require that unavoidable complexity be justified, contained, documented, and tested.
 
 Prefer compile-time constants when values are known at compile time and semantically fixed.
 
@@ -445,4 +483,3 @@ class MyClass:
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
 - Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless proof is provided that it can't fail.
-- Thou shalt use range-based loops or `MooseIndex()` based loops for iteration.
