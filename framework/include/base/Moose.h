@@ -14,6 +14,7 @@
 #include "libmesh/libmesh_common.h"
 #include "XTermConstants.h"
 
+#include <limits>
 #include <memory>
 #include <set>
 #include <string>
@@ -160,6 +161,9 @@ static_assert(LIBMESH_DIM == 3,
  * Note that lower dimensional simulations embedded in 3D space can always be requested at runtime.
  */
 static constexpr std::size_t dim = LIBMESH_DIM;
+
+/// Value for invalid size_t indices
+inline constexpr std::size_t invalid_size_t = std::numeric_limits<std::size_t>::max();
 
 /**
  * Used by the signal handler to determine if we should write a checkpoint file out at any point
