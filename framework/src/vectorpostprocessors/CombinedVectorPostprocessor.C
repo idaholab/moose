@@ -22,6 +22,10 @@ CombinedVectorPostprocessor::validParams()
       "vectorpostprocessors", "The vectorpostprocessors whose vector values are to be combined");
   params.addParam<std::vector<std::vector<std::string>>>(
       "vectors", "Vectors to combine from each vectorpostprocessor");
+  params.addParam<Real>("vector_filler_value",
+                        0,
+                        "Which value to use to fill the smaller vectors (any smaller than the "
+                        "largest vector) if the vectors are not the same size");
   params.addClassDescription(
       "Outputs the values of an arbitrary user-specified set of "
       "vectorpostprocessors as a combined vector in the order specified by the user");
@@ -34,7 +38,7 @@ CombinedVectorPostprocessor::validParams()
 }
 
 CombinedVectorPostprocessor::CombinedVectorPostprocessor(const InputParameters & parameters)
-  : GeneralVectorPostprocessor(parameters)
+  : GeneralVectorPostprocessor(parameters), _filler_value(getParam<Real>("vector_filler_value"))
 {
   // Get all the names of the vectors to combine them
   std::vector<VectorPostprocessorName> vpps_names(
@@ -81,7 +85,20 @@ CombinedVectorPostprocessor::initialize()
 void
 CombinedVectorPostprocessor::execute()
 {
+  unsigned long max_size = 0;
   // The vectors are already ordered
   for (const auto i : index_range(_vectorpostprocessor_values))
+  {
     *(_vpp_vecs[i]) = *(_vectorpostprocessor_values[i]);
+    max_size = std::max(max_size, _vectorpostprocessor_values[i]->size());
+  }
+
+  // Resize to the max size
+  for (const auto i : index_range(_vectorpostprocessor_values))
+    _vpp_vecs[i]->resize(max_size);
+
+  // Fill with the filler value
+  for (const auto i : index_range(_vectorpostprocessor_values))
+    for (const auto j : make_range(_vectorpostprocessor_values[i]->size(), max_size))
+      (*(_vpp_vecs[i]))[j] = _filler_value;
 }
