@@ -1,8 +1,8 @@
 [Tests]
-  issues = '#11594 #31240'
   design = 'ElementValueSampler.md'
 
   [element_value_sampler]
+    issues = '#11594 #31240'
     requirement = 'The system shall support sampling of a field variable at the centroid of every element in the domain'
     [monomial]
       type = 'CSVDiff'
@@ -31,7 +31,19 @@
       max_threads = 1 # see libmesh issue #3808 (due to the linear fv variable here)
     []
   []
+  [sorting]
+    issues = '#31913'
+    requirement = "The system shall be able to sort sampled output"
+    [by_variable]
+      type = CSVDiff
+      input = 'element_value_sampler.i'
+      cli_args = "Outputs/file_base=sort_var VectorPostprocessors/element_value_sampler/sort_by='u'"
+      csvdiff = 'sort_var_element_value_sampler_0000.csv'
+      detail = "using the variables as a sorting index,"
+    []
+  []
   [exceptions]
+    issues = '#11594 #31240'
     requirement = 'The system shall throw an error if the variables specified for elemental sampling are'
     [nodal]
       type = 'RunException'
