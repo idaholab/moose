@@ -28,7 +28,7 @@ ProjectSideSetOntoLevelSetGenerator::validParams()
 
   params.addRequiredParam<Point>("direction", "Projection direction");
   params.addParam<SubdomainName>(
-      "subdomain_name", "projected", "Name of the subdomain on the projected mesh");
+      "subdomain_name", "projected", "Name of the subdomain of the projected surface");
   params.addParam<Real>("max_search_distance",
                         1e6,
                         "Maximum distance from the sideset to search for the projected point in "
@@ -41,7 +41,9 @@ ProjectSideSetOntoLevelSetGenerator::validParams()
 
   // Surface definition
   params.addRequiredParam<std::string>(
-      "level_set", "Level set used to cut the mesh as a function of x, y, and z.");
+      "level_set",
+      "Level set to define the surface to project onto as a function of x, y, and z. The surface "
+      "should be 'in front of' the sideset when following the projection direction.");
   params.addParam<std::vector<std::string>>(
       "constant_names", {}, "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
@@ -119,7 +121,7 @@ ProjectSideSetOntoLevelSetGenerator::generate()
     // Build the same element as the side, on the surface, using the projected nodes
     if (side_type == libMesh::C0POLYGON)
       mooseError("Projection of polygonal sides is not supported at this time");
-    std::unique_ptr<Elem> new_elem = Elem::build(Elem::first_order_equivalent_type(side_type));
+    std::unique_ptr<Elem> new_elem = Elem::build(side_type);
     for (const auto i : make_range(n_nodes))
       new_elem->set_node(i, new_nodes[i]);
 
@@ -152,8 +154,10 @@ ProjectSideSetOntoLevelSetGenerator::pointPairLevelSetInterception(const Point &
   Point mid_point;
 
   // Bisection method to find midpoint
-  while (MooseUtils::absoluteFuzzyGreaterThan(dist, 0.0))
+  unsigned int num_its = 0;
+  while (MooseUtils::absoluteFuzzyGreaterThan(dist, 0.0) && num_its < 1e3)
   {
+    num_its++;
     mid_point = 0.5 * (p1 + p2);
     const Real dist_mid = levelSetEvaluator(mid_point);
     // We do not need Fuzzy here as it will be covered by the while loop
@@ -172,6 +176,11 @@ ProjectSideSetOntoLevelSetGenerator::pointPairLevelSetInterception(const Point &
       dist = abs(dist1) + abs(dist2);
     }
   }
+
+  if (num_its == 1e3)
+    mooseError("Projection failed for point " + Moose::stringify(point1) +
+               ". Is the level set 'in front of' the sideset when following the projection "
+               "direction?");
   return mid_point;
 }
 

@@ -17,6 +17,6 @@
     input = 'combine_3_sides'
     direction = '1 1 1'
     sideset = 'corner'
-    level_set = 'x + y + z -10'
+    level_set = 'x + y + z - 10'
   []
 []
