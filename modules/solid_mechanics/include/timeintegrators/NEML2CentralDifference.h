@@ -36,7 +36,7 @@ protected:
 
 private:
   /// Empty element vector to help zero out the algebraic range
-  std::vector<const Elem *> _boundary_elements = {};
+  std::vector<const Elem *> _boundary_elems = {};
 
   /// Empty node vector to help zero out the algebraic range
   std::vector<const Node *> _no_node = {};

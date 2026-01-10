@@ -11,11 +11,14 @@
 #include "MOOSEToNEML2.h"
 #include "NEML2Utils.h"
 #include <string>
+#include <sstream>
 
 #ifdef NEML2_ENABLED
+#include <ATen/ATen.h>
 #include "libmesh/id_types.h"
 #include "neml2/tensors/functions/jacrev.h"
 #include "neml2/dispatchers/ValueMapLoader.h"
+#include "neml2/misc/string_utils.h"
 #endif
 
 registerMooseObject("MooseApp", NEML2ModelExecutor);
@@ -31,6 +34,17 @@ NEML2ModelExecutor::actionParams()
       "List of NEML2 variables to skip error checking when setting up the model input. If an "
       "input variable is skipped, its value will stay zero. If a required input variable is "
       "not skipped, an error will be raised.");
+  params.addParam<bool>(
+      "advance_step_on_device",
+      false,
+      "Keep state and forces on the device and advance it to old_state and old_forces without a "
+      "roundtrip through MOOSE materials. This is only recommended for explicit time integration "
+      "or when absolutely no restepping occurs (e.g. failed timesteps).");
+  params.addParam<bool>(
+      "debug_inputs_on_failure",
+      false,
+      "When a NEML2 solve fails, append a detailed dump of input tensors (defined/missing, "
+      "shapes, and devices) to the error message.");
   return params;
 }
 
@@ -57,7 +71,7 @@ NEML2ModelExecutor::validParams()
   // want to execute this user object only at execute_on = LINEAR (i.e. during residual evaluation).
   // The NONLINEAR exec flag below is for computing Jacobian during automatic scaling.
   ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
-  execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+  execute_options = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
   params.set<ExecFlagEnum>("execute_on") = execute_options;
 
   return params;
@@ -68,6 +82,8 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
 #ifdef NEML2_ENABLED
     ,
     _batch_index_generator(getUserObject<NEML2BatchIndexGenerator>("batch_index_generator")),
+    _advance_step_on_device(getParam<bool>("advance_step_on_device")),
+    _debug_inputs_on_failure(getParam<bool>("debug_inputs_on_failure")),
     _output_ready(false),
     _error_message("")
 #endif
@@ -147,7 +163,8 @@ NEML2ModelExecutor::initialSetup()
     if (_skip_vars.count(input))
       continue;
     // skip input state variables because they are "initial guesses" to the nonlinear system
-    if (input.is_state())
+    if (input.is_state() ||
+        (_advance_step_on_device && (input.is_old_state() || input.is_old_force())))
       continue;
     if (!_gathered_variable_names.count(input))
       paramError("gatherers", "The required model input `", input, "` is not gathered");
@@ -157,7 +174,8 @@ NEML2ModelExecutor::initialSetup()
   // sufficient for stateful data management, but that's the best we can do here without being
   // overly restrictive.
   for (const auto & input : required_inputs)
-    if (input.is_old_state() && !_retrieved_outputs.count(input.current()))
+    if (!_advance_step_on_device && input.is_old_state() &&
+        !_retrieved_outputs.count(input.current()))
       mooseError(
           "The NEML2 model requires a stateful input variable `",
           input,
@@ -174,6 +192,13 @@ NEML2ModelExecutor::initialSetup()
     if (vname.is_old_state())
       _has_old_state = true;
   }
+}
+
+void
+NEML2ModelExecutor::timestepSetup()
+{
+  if (_advance_step_on_device)
+    return;
 }
 
 std::size_t
@@ -228,6 +253,10 @@ NEML2ModelExecutor::meshChanged()
     return;
 
   _output_ready = false;
+  if (_advance_step_on_device)
+    mooseError("The mesh changed while `advance_step_on_device = true` for NEML2 model executor '",
+               name(),
+               "'. This mode requires a fixed mesh because state history is cached on the device.");
 }
 
 void
@@ -235,6 +264,13 @@ NEML2ModelExecutor::execute()
 {
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
+
+  if (_current_execute_flag == EXEC_TIMESTEP_END)
+  {
+    if (_advance_step_on_device && _fe_problem.solverSystemConverged(/*sys_num=*/0))
+      advanceDeviceCaches();
+    return;
+  }
 
   // If the batch is empty, we do not need to do anything
   if (_batch_index_generator.isEmpty())
@@ -258,6 +294,48 @@ NEML2ModelExecutor::fillInputs()
   {
     for (const auto & uo : _gatherers)
       uo->insertInto(_in, _model_params);
+
+    if (_advance_step_on_device && _t_step > 0)
+    {
+      for (const auto & [name, val] : _device_state_cache)
+        if (val.defined() && model().input_axis().has_variable(name.old()))
+          _in[name.old()] = val;
+      for (const auto & [name, val] : _device_forces_cache)
+        if (val.defined() && model().input_axis().has_variable(name.old()))
+          _in[name.old()] = val;
+    }
+
+    // Initialize missing inputs that are allowed to be absent
+    if (_advance_step_on_device || !_skip_vars.empty())
+    {
+      std::vector<neml2::Tensor> defined;
+      for (const auto & [key, value] : _in)
+        if (value.defined())
+          defined.push_back(value);
+
+      neml2::TraceableTensorShape dynamic_shape =
+          defined.empty()
+              ? neml2::TraceableTensorShape(neml2::Size(_batch_index_generator.getBatchIndex()))
+              : neml2::utils::broadcast_dynamic_sizes(defined);
+
+      const auto options = neml2::default_tensor_options().dtype(neml2::kFloat64).device(device());
+
+      for (const auto & var : model().input_axis().variable_names())
+      {
+        const auto it = _in.find(var);
+        if (it != _in.end() && it->second.defined())
+          continue;
+
+        if (!_skip_vars.count(var) && !var.is_state() &&
+            !(_advance_step_on_device && (var.is_old_state() || var.is_old_force())))
+          continue;
+
+        const auto & v = model().input_variable(var);
+        const auto & intmd_shape = v.intmd_sizes();
+        const auto & base_shape = v.base_sizes();
+        _in[var] = neml2::Tensor::zeros(dynamic_shape, intmd_shape, base_shape, options);
+      }
+    }
 
     // Send input variables and parameters to device
     for (auto & [var, val] : _in)
@@ -297,7 +375,12 @@ NEML2ModelExecutor::applyPredictor()
     const auto & input_old_state = model().input_axis().subaxis(neml2::OLD_STATE);
     for (const auto & var : input_state.variable_names())
       if (input_old_state.has_variable(var))
-        _in[var.prepend(neml2::STATE)] = _in[var.prepend(neml2::OLD_STATE)];
+      {
+        const auto old_name = var.prepend(neml2::OLD_STATE);
+        const auto it = _in.find(old_name);
+        if (it != _in.end() && it->second.defined())
+          _in[var.prepend(neml2::STATE)] = it->second;
+      }
   }
   catch (std::exception & e)
   {
@@ -322,6 +405,23 @@ NEML2ModelExecutor::expandInputs()
       _in[key] = value.dynamic_unsqueeze(0).dynamic_expand(s);
 }
 
+void
+NEML2ModelExecutor::advanceDeviceCaches()
+{
+  if (!_advance_step_on_device || _t_step == 0)
+    return;
+
+  _device_state_cache.clear();
+  for (const auto & [name, val] : _out)
+    if (name.is_state() && val.defined())
+      _device_state_cache[name] = val;
+
+  _device_forces_cache.clear();
+  for (const auto & [name, val] : _in)
+    if (name.is_force() && !name.is_old_force() && val.defined())
+      _device_forces_cache[name] = val;
+}
+
 bool
 NEML2ModelExecutor::solve()
 {
@@ -343,7 +443,8 @@ NEML2ModelExecutor::solve()
     }
     else
       std::tie(_out, _dout_din) = model().value_and_dvalue(_in);
-    _in.clear();
+    if (!_advance_step_on_device)
+      _in.clear();
 
     // Restore the default dtype
     neml2::set_default_dtype(prev_dtype);
@@ -352,6 +453,108 @@ NEML2ModelExecutor::solve()
   {
     _error_message = e.what();
     _error = true;
+    if (_debug_inputs_on_failure)
+    {
+      auto shape_to_string = [](const neml2::TensorShapeRef & shape) -> std::string
+      {
+        std::ostringstream os;
+        os << "[";
+        for (std::size_t i = 0; i < shape.size(); ++i)
+        {
+          if (i)
+            os << ", ";
+          os << shape[i];
+        }
+        os << "]";
+        return os.str();
+      };
+
+      std::ostringstream os;
+      os << "\nNEML2 input debug (input map + expected shapes):\n";
+      for (const auto & var : model().input_axis().variable_names())
+      {
+        os << "  - " << neml2::utils::stringify(var) << ": ";
+        const auto it = _in.find(var);
+        if (it == _in.end())
+          os << "missing\n";
+        else if (!it->second.defined())
+          os << "undefined\n";
+        else
+        {
+          const auto & val = it->second;
+          const auto & v = model().input_variable(var);
+          neml2::TensorShape expected;
+          const auto & intmd_sizes = v.intmd_sizes();
+          expected.insert(expected.end(), intmd_sizes.begin(), intmd_sizes.end());
+          const auto & base_sizes = v.base_sizes();
+          expected.insert(expected.end(), base_sizes.begin(), base_sizes.end());
+
+          os << "device=" << neml2::utils::stringify(val.device())
+             << " dtype=" << neml2::utils::stringify(val.scalar_type())
+             << " sizes=" << shape_to_string(val.sizes())
+             << " batch=" << shape_to_string(val.batch_sizes().concrete())
+             << " expected_base=" << shape_to_string(expected);
+
+          if (val.numel() > 0)
+          {
+            auto cpu = val.detach().to(val.options().device(at::kCPU));
+            auto flat = cpu.reshape({-1});
+            auto min = flat.min().item<double>();
+            auto max = flat.max().item<double>();
+            auto mean = flat.mean().item<double>();
+            auto has_nan = at::isnan(flat).any().item<bool>();
+            auto has_inf = at::isinf(flat).any().item<bool>();
+            os << " min=" << min << " max=" << max << " mean=" << mean
+               << " nan=" << (has_nan ? "true" : "false")
+               << " inf=" << (has_inf ? "true" : "false");
+          }
+
+          os << "\n";
+        }
+      }
+
+      if (_advance_step_on_device && model().input_axis().has_subaxis(neml2::OLD_STATE) &&
+          model().output_axis().has_subaxis(neml2::STATE))
+      {
+        os << "NEML2 cached outputs (state for old_state inputs):\n";
+        const auto & input_old_state = model().input_axis().subaxis(neml2::OLD_STATE);
+        for (const auto & var : input_old_state.variable_names())
+        {
+          const auto state_var = var.prepend(neml2::STATE);
+          os << "  - " << neml2::utils::stringify(state_var) << ": ";
+          const auto it = _out.find(state_var);
+          if (it == _out.end())
+            os << "missing\n";
+          else if (!it->second.defined())
+            os << "undefined\n";
+          else
+          {
+            const auto & val = it->second;
+            os << "device=" << neml2::utils::stringify(val.device())
+               << " dtype=" << neml2::utils::stringify(val.scalar_type())
+               << " sizes=" << shape_to_string(val.sizes())
+               << " batch=" << shape_to_string(val.batch_sizes().concrete());
+
+            if (val.numel() > 0)
+            {
+              auto cpu = val.detach().to(val.options().device(at::kCPU));
+              auto flat = cpu.reshape({-1});
+              auto min = flat.min().item<double>();
+              auto max = flat.max().item<double>();
+              auto mean = flat.mean().item<double>();
+              auto has_nan = at::isnan(flat).any().item<bool>();
+              auto has_inf = at::isinf(flat).any().item<bool>();
+              os << " min=" << min << " max=" << max << " mean=" << mean
+                 << " nan=" << (has_nan ? "true" : "false")
+                 << " inf=" << (has_inf ? "true" : "false");
+            }
+
+            os << "\n";
+          }
+        }
+      }
+      _error_message += os.str();
+    }
   }
 
   return !_error;
@@ -378,8 +581,9 @@ NEML2ModelExecutor::extractOutputs()
                                /*allow_unused=*/false)
                      .to(output_device());
 
-    // clear output
-    _out.clear();
+    // clear output unless we need it for on-device state advance
+    if (!_advance_step_on_device)
+      _out.clear();
 
     // retrieve derivatives
     for (auto & [y, dy] : _retrieved_derivatives)
