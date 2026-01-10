@@ -354,7 +354,7 @@ When adding a new function, carefully decide whether it should be
 
 ### Decision checklist
 
-1.  Does it mutate the object or enforce consistency of internal state? Yes → non-static member
+1.  Does the function need access to object's internal data/state? Yes → non-static member
 2.  Does it conceptually belong to the type, but not an instance? Yes → static member
 3.  Is it symmetric, algorithmic, or cross-cutting? Yes → free function
 4.  Should users be able to extend it for new types via overloading/ADL? Yes → free function
