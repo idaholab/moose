@@ -43,4 +43,7 @@ protected:
 
   /// The vector of VectorPostprocessorValue objects that are used to get the values of the vectorpostprocessors
   std::vector<const VectorPostprocessorValue *> _vectorpostprocessor_values;
+
+  /// A filler value to place on vectors that are smaller than the longest vector
+  const Real _filler_value;
 };
