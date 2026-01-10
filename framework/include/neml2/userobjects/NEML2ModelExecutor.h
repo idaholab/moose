@@ -41,6 +41,7 @@ public:
   void finalize() override;
 
   void initialSetup() override;
+  void timestepSetup() override;
 
   /// Get the batch index for the given element ID
   std::size_t getBatchIndex(dof_id_type elem_id) const;
@@ -86,6 +87,9 @@ protected:
 
   /// The NEML2BatchIndexGenerator used to generate the element-to-batch-index map
   const NEML2BatchIndexGenerator & _batch_index_generator;
+
+  /// Advance state on device (rather than via MOSOE material properties)
+  const bool _advance_step_on_device;
 
   /// flag that indicates if output data has been fully computed
   bool _output_ready;
