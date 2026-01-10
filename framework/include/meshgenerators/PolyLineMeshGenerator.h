@@ -35,5 +35,5 @@ protected:
   const BoundaryName _start_boundary, _end_boundary;
 
   /// How many Edge elements to build between each point pair
-  const unsigned int _num_edges_between_points;
+  const std::vector<unsigned int> _nums_edges_between_points;
 };
