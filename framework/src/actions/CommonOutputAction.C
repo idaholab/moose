@@ -92,7 +92,7 @@ CommonOutputAction::validParams()
                                      std::vector<Real>(),
                                      "Times at which the output and solution is forced to occur");
   params.addParam<Real>(
-      "minimum_time_interval", 0.0, "The minimum simulation time between output steps");
+      "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
   params.addParam<bool>(
       "append_date", false, "When true the date and time are appended to the output filename.");
   params.addParam<std::string>("append_date_format",

@@ -51,17 +51,7 @@
     type = MFEMCurlAux
     variable = b_field
     source = a_field
-    scale_factor = 1.0
     execute_on = TIMESTEP_END
-  []
-[]
-
-[Functions]
-  [exact_a_field]
-    type = ParsedVectorFunction
-    expression_x = '0'
-    expression_y = '0'
-    expression_z = '0'
   []
 []
 
@@ -69,16 +59,7 @@
   [tangential_a_bdr]
     type = MFEMVectorTangentialDirichletBC
     variable = a_field
-    vector_coefficient = exact_a_field
     boundary = '1 2 3'
-  []
-[]
-
-[FunctorMaterials]
-  [Vacuum]
-    type = MFEMGenericFunctorMaterial
-    prop_names = reluctivity
-    prop_values = 1.0
   []
 []
 
@@ -86,29 +67,18 @@
   [curlcurl]
     type = MFEMCurlCurlKernel
     variable = a_field
-    coefficient = reluctivity
   []
   [source]
     type = MFEMMixedVectorGradientKernel
     trial_variable = electric_potential
     variable = a_field
-    coefficient = 1.0
     block = 1
-  []
-[]
-
-[Preconditioner]
-  [ams]
-    type = MFEMHypreAMS
-    fespace = HCurlFESpace
-    singular = true
   []
 []
 
 [Solver]
   type = MFEMHypreGMRES
-  preconditioner = ams
-  l_tol = 1e-9
+  l_tol = 1e-12
 []
 
 [Executioner]

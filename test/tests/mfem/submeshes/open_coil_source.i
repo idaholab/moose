@@ -79,13 +79,11 @@
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = boomeramg
-  l_tol = 1e-10
-  l_max_its = 1000
+  l_tol = 1e-12
 []
 
 [Executioner]
   type = MFEMSteady
-  device = cpu
 []
 
 [Transfers]
