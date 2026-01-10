@@ -1,0 +1,32 @@
+[Tests]
+  [flibe]
+    type = 'CSVDiff'
+    input = 'flibe.i'
+    csvdiff = 'flibe_csv.csv'
+  []
+  [flinak]
+    type = 'CSVDiff'
+    input = 'flinak.i'
+    csvdiff = 'flinak_csv.csv'
+  []
+  [custom]
+    type = 'CSVDiff'
+    input = 'custom.i'
+    csvdiff = 'custom_csv.csv'
+  []
+  [scalar_flibe]
+    type = 'CSVDiff'
+    input = 'scalar_flibe.i'
+    csvdiff = 'scalar_flibe_csv.csv'
+  []
+  [scalar_flinak]
+    type = 'CSVDiff'
+    input = 'scalar_flinak.i'
+    csvdiff = 'scalar_flinak_csv.csv'
+  []
+  [scalar_custom]
+    type = 'CSVDiff'
+    input = 'scalar_custom.i'
+    csvdiff = 'scalar_custom_csv.csv'
+  []
+[]
