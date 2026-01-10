@@ -19,9 +19,7 @@
 
 #include "MooseMesh.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 inline void
@@ -162,5 +160,4 @@ propertyLoad(std::istream & stream, void * prop)
   dataLoad(stream, property->_data, nullptr);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

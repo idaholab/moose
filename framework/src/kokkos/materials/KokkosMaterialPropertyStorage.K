@@ -12,9 +12,7 @@
 #include "FEProblemBase.h"
 #include "MaterialBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 std::unordered_map<std::type_index, PropertyStore> MaterialPropertyStorage::_store_functions;
@@ -173,8 +171,7 @@ MaterialPropertyStorage::copy()
         prop->copy(*_kokkos_props[0][name], {});
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
 
 void
 dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context)

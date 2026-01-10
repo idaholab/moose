@@ -11,9 +11,7 @@
 
 #include "KokkosNodalKernelBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -200,5 +198,4 @@ NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived &
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

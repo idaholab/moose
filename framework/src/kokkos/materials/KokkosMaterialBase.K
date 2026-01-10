@@ -11,9 +11,7 @@
 
 #include "FEProblemBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -104,5 +102,4 @@ MaterialBase::initialSetup()
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

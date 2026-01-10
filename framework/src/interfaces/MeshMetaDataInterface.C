@@ -21,6 +21,14 @@ MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+MeshMetaDataInterface::MeshMetaDataInterface(const MeshMetaDataInterface & object,
+                                             const Moose::Kokkos::FunctorCopy &)
+  : _meta_data_app(object._meta_data_app), _meta_data_object(object._meta_data_object)
+{
+}
+#endif
+
 bool
 MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
                                        const std::string & prefix) const
