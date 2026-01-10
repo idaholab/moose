@@ -31,6 +31,12 @@ NEML2ModelExecutor::actionParams()
       "List of NEML2 variables to skip error checking when setting up the model input. If an "
       "input variable is skipped, its value will stay zero. If a required input variable is "
       "not skipped, an error will be raised.");
+  params.addParam<bool>(
+      "advance_step_on_device",
+      false,
+      "Keep state and forces on the device and advance it to old_state and old_forces without a "
+      "roundtrip through MOOSE materials. This is only recommended for explicit time integration "
+      "or when absolutely no restepping occurs (e.g. failed timesteps).");
   return params;
 }
 
@@ -68,6 +74,7 @@ NEML2ModelExecutor::NEML2ModelExecutor(const InputParameters & params)
 #ifdef NEML2_ENABLED
     ,
     _batch_index_generator(getUserObject<NEML2BatchIndexGenerator>("batch_index_generator")),
+    _advance_step_on_device(getParam<bool>("advance_step_on_device")),
     _output_ready(false),
     _error_message("")
 #endif
@@ -165,6 +172,29 @@ NEML2ModelExecutor::initialSetup()
           "Therefore, there is no way to properly propagate the corresponding stateful data in "
           "time. The common solution to this problem is to add a NEML2ToMOOSE retriever such as "
           "those called `NEML2To*MOOSEMaterialProperty`.");
+}
+
+void
+NEML2ModelExecutor::timestepSetup()
+{
+  if (_advance_step_on_device && _t_step > 0)
+  {
+    // Set old state variables and old forces
+    if (model().input_axis().has_subaxis(neml2::OLD_STATE) &&
+        model().output_axis().has_subaxis(neml2::STATE))
+    {
+      const auto & input_old_state = model().input_axis().subaxis(neml2::OLD_STATE);
+      for (const auto & var : input_old_state.variable_names())
+        _in[var.prepend(neml2::OLD_STATE)] = _out[var.prepend(neml2::STATE)];
+    }
+    if (model().input_axis().has_subaxis(neml2::OLD_FORCES) &&
+        model().input_axis().has_subaxis(neml2::FORCES))
+    {
+      const auto & input_old_forces = model().input_axis().subaxis(neml2::OLD_FORCES);
+      for (const auto & var : input_old_forces.variable_names())
+        _in[var.prepend(neml2::OLD_FORCES)] = _in[var.prepend(neml2::FORCES)];
+    }
+  }
 }
 
 std::size_t
