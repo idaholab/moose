@@ -31,7 +31,7 @@ combination is given in the `steady_vector_fsp_al.i` input
 
 where we have indicated that we should use the pressure mass matrix as the
 preconditioner for the Schur complement using the
-[!param](/Problem/NavierStokesProblem/use_pressure_mass_matrix) parameter. The
+[!param](/Problem/NavierStokesProblem/set_schur_pre) parameter. The
 scaled pressure mass matrix is built using the [MassMatrix.md] kernel with block
 
 !listing modules/navier_stokes/test/tests/finite_element/ins/lid_driven/steady_vector_fsp_al.i block=Kernels/mass_kernel
