@@ -5,7 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html */
+//* https://www.gnu.org/licenses/lgpl-2.1.html*/
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -159,19 +159,6 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   for (auto & eliminated_var_name : _eliminated_var_names)
     _eliminated_variables.Register(eliminated_var_name,
                                    gridfunctions.GetShared(eliminated_var_name));
-
-  //Get a reference to the GridFunctions
-  (*_gfuncs) = gridfunctions;
-
-  //Build the temporary BlockVectors
-  _block_true_offsets = new mfem::Array<int>(_trial_var_names.size()+1);
-  (*_block_true_offsets)[0] = 0;
-  for(unsigned I=0; I<_trial_var_names.size(); I++){
-    (*_block_true_offsets)[I+1] = _gfuncs->Get(_trial_var_names.at(I))->ParFESpace()->TrueVSize();
-  }
-  _block_true_offsets->PartialSum();
-  _trueBlockSol.Update(*_block_true_offsets);
-  _blockResidual.Update(*_block_true_offsets);
 }
 
 void
@@ -343,31 +330,12 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
-void CopyVec(const mfem::Vector & x, mfem::Vector & y){y = x;};
-
 void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
-  //Use block vector to update
-  //the grid functions
-  CopyVec(x, _trueBlockSol);
-  for(unsigned I=0; I<_trial_var_names.size(); I++){
-    auto & trial_var_name = _trial_var_names.at(I);
-    _trueBlockSol.GetBlock(I).SyncAliasMemory(_trueBlockSol);
-    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(I)));
-  }
-
-  //Check if problem is
-  //non-linear and update
-  //non-linear actions
-  if(false){
-
-
-  }else{
-    _jacobian->Mult(x, residual);
-    x.HostRead();
-    residual.HostRead();
-  }
+  _jacobian->Mult(x, residual);
+  x.HostRead();
+  residual.HostRead();
 }
 
 mfem::Operator &
