@@ -406,7 +406,7 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
       _blockResidual.GetBlock(I).SetSubVector(_ess_tdof_lists.at(I),0.00);
       _blockResidual.GetBlock(I).SyncAliasMemory(_blockResidual);
     }
-    FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
+    const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
     residual =  static_cast<mfem::Vector &>(_blockResidual);
   }else{
     _jacobian->Mult(x, residual);
