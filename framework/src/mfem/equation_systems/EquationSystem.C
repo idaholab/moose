@@ -464,6 +464,26 @@ EquationSystem::BuildLinearForms()
 }
 
 void
+EquationSystem::BuildNonLinearActionForms()
+{
+  // Register non-linear Action forms
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    _nlAs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
+    _nlAs.GetRef(test_var_name) = 0.0;
+  }
+
+  for (auto & test_var_name : _test_var_names)
+  {
+    // Apply kernels
+    auto nlA = _nlAs.GetShared(test_var_name);
+    ApplyDomainNLAFIntegrators(test_var_name, nlA, _kernels_map);
+    ApplyBoundaryNLAFIntegrators(test_var_name, nlA, _integrated_bc_map);
+  }
+}
+
+void
 EquationSystem::BuildBilinearForms()
 {
   // Register bilinear forms
@@ -529,6 +549,7 @@ EquationSystem::BuildEquationSystem()
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
+  BuildNonLinearActionForms();
 }
 
 } // namespace Moose::MFEM

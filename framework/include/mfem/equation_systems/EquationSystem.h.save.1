@@ -63,12 +63,10 @@ public:
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
 protected:
-  /// Add coupled variable to EquationSystem.
-  virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
-  /// Add eliminated variable to EquationSystem.
-  virtual void AddEliminatedVariableNameIfMissing(const std::string & eliminated_var_name);
   /// Add test variable to EquationSystem.
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
+  /// Add coupled variable to EquationSystem.
+  virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
@@ -80,9 +78,9 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
+  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
   /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & var_name,
+  virtual void ApplyEssentialBC(const std::string & test_var_name,
                                 mfem::ParGridFunction & trial_gf,
                                 mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
@@ -92,8 +90,8 @@ protected:
   virtual void EliminateCoupledVariables();
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
-  /// Build non-linear action forms
-  virtual void BuildNonLinearActionForms();
+  /// Build the non-linear actions
+  virtual void 
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
@@ -134,11 +132,6 @@ protected:
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
-  void ApplyDomainNLAFIntegrators(
-      const std::string & test_var_name,
-      std::shared_ptr<mfem::ParLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
-
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
@@ -149,12 +142,6 @@ protected:
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   void ApplyBoundaryLFIntegrators(
-      const std::string & test_var_name,
-      std::shared_ptr<mfem::ParLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-          integrated_bc_map);
-
-  void ApplyBoundaryNLAFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
@@ -270,29 +257,6 @@ EquationSystem::ApplyDomainLFIntegrators(
   }
 }
 
-inline void
-EquationSystem::ApplyDomainNLAFIntegrators(
-    const std::string & test_var_name,
-    std::shared_ptr<mfem::ParLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
-{
-  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
-  {
-    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
-    for (auto & kernel : kernels)
-    {
-      mfem::LinearFormIntegrator * integ = kernel->createNLAIntegrator();
-      if (integ)
-      {
-        _non_linear=true;
-        kernel->isSubdomainRestricted()
-            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
-            : form->AddDomainIntegrator(std::move(integ));
-      }
-    }
-  }
-}
-
 template <class FormType>
 void
 EquationSystem::ApplyBoundaryBLFIntegrators(
@@ -340,32 +304,6 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 
       if (integ)
       {
-        bc->isBoundaryRestricted()
-            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
-            : form->AddBoundaryIntegrator(std::move(integ));
-      }
-    }
-  }
-}
-
-
-inline void
-EquationSystem::ApplyBoundaryNLAFIntegrators(
-    const std::string & test_var_name,
-    std::shared_ptr<mfem::ParLinearForm> form,
-    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-        integrated_bc_map)
-{
-  if (integrated_bc_map.Has(test_var_name) &&
-      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
-  {
-    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
-    for (auto & bc : bcs)
-    {
-      mfem::LinearFormIntegrator * integ = bc->createNLAIntegrator();
-      if (integ)
-      {
-        _non_linear = true;
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));
