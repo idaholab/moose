@@ -169,8 +169,8 @@ protected:
   NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   NamedFieldsMap<mfem::ParLinearForm> _lfs;
   NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
-      _mblfs; // named according to trial variable
+  NamedFieldsMap<mfem::ParLinearForm>    _nlAs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>> _mblfs; //named according to trial var
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
@@ -187,9 +187,18 @@ protected:
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
+  //Operator handle for the jacobian matrix
   mutable mfem::OperatorHandle _jacobian;
-
   mfem::AssemblyLevel _assembly_level;
+
+  //Temporary vectors used for non-linear action
+  //assembly process
+  mutable mfem::BlockVector _trueBlockSol, _blockResidual;
+  Moose::MFEM::GridFunctions * _gfuncs;
+  mfem::Array<int> * _block_true_offsets;
+  mfem::Array<int> empty_tdof;
+  bool _non_linear = false;
+
 
 private:
   friend class EquationSystemProblemOperator;
