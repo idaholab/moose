@@ -392,7 +392,7 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
   //Check if problem is
   //non-linear and update
   //non-linear actions
-  if(0){
+  if(_non_linear){
     _blockResidual = 0.00;
     for(unsigned I=0; I<_test_var_names.size(); I++){
       auto test_var_name = _test_var_names.at(I);
