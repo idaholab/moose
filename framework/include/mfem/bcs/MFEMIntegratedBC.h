@@ -24,6 +24,9 @@ public:
   /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
   virtual mfem::LinearFormIntegrator * createLFIntegrator() = 0;
 
+  /// Create MFEM integrator to apply non-linear residual form. Ownership managed by the caller.
+  virtual mfem::LinearFormIntegrator * createNLAIntegrator(){return nullptr;};
+
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() = 0;
 
