@@ -5,7 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
+//* https://www.gnu.org/licenses/lgpl-2.1.html*/
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -195,7 +195,7 @@ protected:
   //assembly process
   mutable mfem::BlockVector _trueBlockSol, _blockForces, _blockResidual;
   Moose::MFEM::GridFunctions * _gfuncs;
-  mfem::Array<int> * _block_true_offsets;
+  mfem::Array<int> *_block_true_offsets=NULL;
   mfem::Array<int> empty_tdof;
   bool _non_linear = false;
 

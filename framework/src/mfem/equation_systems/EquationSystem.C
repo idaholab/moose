@@ -15,7 +15,12 @@
 namespace Moose::MFEM
 {
 
-EquationSystem::~EquationSystem() { DeleteAllBlocks(); }
+EquationSystem::~EquationSystem()
+{
+  if(_gfuncs != NULL) delete _gfuncs;
+  if(_block_true_offsets != NULL) delete _block_true_offsets;
+  DeleteAllBlocks();
+}
 
 void
 EquationSystem::DeleteAllBlocks()
@@ -181,11 +186,12 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                                    gridfunctions.GetShared(eliminated_var_name));
 
   //Get a reference to the GridFunctions
-  (*_gfuncs) = gridfunctions;
+  _gfuncs = new Moose::MFEM::GridFunctions(gridfunctions);
 
   //Build the temporary BlockVectors
   _block_true_offsets = new mfem::Array<int>(_trial_var_names.size()+1);
   (*_block_true_offsets)[0] = 0;
+
   for(unsigned I=0; I<_trial_var_names.size(); I++){
     (*_block_true_offsets)[I+1] = _gfuncs->Get(_trial_var_names.at(I))->ParFESpace()->TrueVSize();
   }
@@ -386,7 +392,7 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
   //Check if problem is
   //non-linear and update
   //non-linear actions
-  if(false){
+  if(0){
     _blockResidual = 0.00;
     for(unsigned I=0; I<_test_var_names.size(); I++){
       auto test_var_name = _test_var_names.at(I);
