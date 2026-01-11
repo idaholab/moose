@@ -193,7 +193,7 @@ protected:
 
   //Temporary vectors used for non-linear action
   //assembly process
-  mutable mfem::BlockVector _trueBlockSol, _blockResidual;
+  mutable mfem::BlockVector _trueBlockSol, _blockForces, _blockResidual;
   Moose::MFEM::GridFunctions * _gfuncs;
   mfem::Array<int> * _block_true_offsets;
   mfem::Array<int> empty_tdof;

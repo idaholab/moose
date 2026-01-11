@@ -191,6 +191,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   }
   _block_true_offsets->PartialSum();
   _trueBlockSol.Update(*_block_true_offsets);
+  _blockForces.Update(*_block_true_offsets);
   _blockResidual.Update(*_block_true_offsets);
 }
 
@@ -386,8 +387,25 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
   //non-linear and update
   //non-linear actions
   if(false){
+    _blockResidual = 0.00;
+    for(unsigned I=0; I<_test_var_names.size(); I++){
+      auto test_var_name = _test_var_names.at(I);
 
+      //Bulid the linear forms
+      _lfs.GetShared(test_var_name)->Assemble();
+      _lfs.GetShared(test_var_name)->ParallelAssemble(_blockForces.GetBlock(I));
+      _blockForces.GetBlock(I).SyncAliasMemory(_blockForces);
 
+      //Build the non-linear actions
+      _nlAs.GetShared(test_var_name)->Assemble();
+      _nlAs.GetShared(test_var_name)->ParallelAssemble(_blockResidual.GetBlock(I));
+
+      //Apply the boundary conditions
+      //and sync the memory
+      _blockResidual.GetBlock(I) = _blockForces.GetBlock(I) - _blockResidual.GetBlock(I);
+      _blockResidual.GetBlock(I).SetSubVector(_ess_tdof_lists.at(I),0.00);
+      _blockResidual.GetBlock(I).SyncAliasMemory(_blockResidual);
+    }
   }else{
     _jacobian->Mult(x, residual);
     x.HostRead();
