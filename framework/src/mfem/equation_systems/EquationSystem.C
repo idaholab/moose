@@ -402,10 +402,12 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 
       //Apply the boundary conditions
       //and sync the memory
-      _blockResidual.GetBlock(I) = _blockForces.GetBlock(I) - _blockResidual.GetBlock(I);
+      _blockResidual.GetBlock(I) = _blockResidual.GetBlock(I) - _blockForces.GetBlock(I);
       _blockResidual.GetBlock(I).SetSubVector(_ess_tdof_lists.at(I),0.00);
       _blockResidual.GetBlock(I).SyncAliasMemory(_blockResidual);
     }
+    FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
+    residual =  static_cast<mfem::Vector &>(_blockResidual);
   }else{
     _jacobian->Mult(x, residual);
     x.HostRead();
