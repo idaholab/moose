@@ -19,7 +19,9 @@
 INL is the site where 52 nuclear reactors were designed and constructed, including the
 first reactor to generate usable amounts of electricity: Experimental Breeder Reactor I (EBR-1)
 
-!media darcy_thermo_mech/inl_erb1.jpg style=width:30%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_erb1.jpg
+       style=width:30%;margin-left:auto;margin-right:auto;display:block;
+       alt=Experimental Breeder Reactor I
 
 !---
 
@@ -29,7 +31,9 @@ first reactor to generate usable amounts of electricity: Experimental Breeder Re
 - Constructed in 1967
 - Volume of 1.4 cubic meters, with 43 kg of uranium, and operates at 60C
 
-!media darcy_thermo_mech/inl_atr.jpg style=width:25%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_atr.jpg
+       style=width:25%;margin-left:auto;margin-right:auto;display:block;
+       alt=Advanced Test Reactor, demonstrating Cherenkov radiation.
 
 !---
 
@@ -40,7 +44,9 @@ of fuels and materials to accident conditions
 
 High-intensity (+20 GW+), short-duration (+80 ms+) neutron pulses for severe accident testing
 
-!media darcy_thermo_mech/inl_treat.png style=width:40%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/inl_treat.png
+       style=width:40%;margin-left:auto;margin-right:auto;display:block;
+       alt=The Transient Reactor Test Facility
 
 !---
 
@@ -54,10 +60,3 @@ NRIC is composed of two physical test beds to build prototypes of advanced nucle
 
 And an open-source [online virtual test bed](https://mooseframework.inl.gov/virtual_test_bed)
 to demonstrate advanced reactors through modeling and simulation. More information about NRIC can be found at [https://nric.inl.gov](https://nric.inl.gov).
-
-!--
-
-## Advanced Reactor Demonstration Timeline
-
-!style halign=center
-!media inl_reactor_timeline.png

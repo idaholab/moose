@@ -150,7 +150,7 @@ Reactor\\
 !---
 
 !style halign=center
-!media multiapp_tree.png style=width:70%
+!media tutorials/darcy_thermo_mech/multiapp_hierarchy.png style=width:70%
 
 !---
 
