@@ -87,7 +87,6 @@ protected:
                                 mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
-
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
   /// Build linear forms and eliminate constrained DoFs
@@ -100,6 +99,8 @@ protected:
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
+  //Reassemble the Jacobian matrix/Operator (Assuming Gridfunction dependant Operator)
+  virtual void ReassembleJacobian();
 
   /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
