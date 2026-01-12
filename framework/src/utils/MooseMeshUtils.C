@@ -1041,8 +1041,11 @@ buildPolyLineMesh(MeshBase & mesh,
                                                 : nums_edges_between_points[i];
 
     Point p = points[i];
-    const auto pt_counter = std::accumulate(
-        nums_edges_between_points.begin(), nums_edges_between_points.begin() + i, 0);
+    const auto pt_counter = (nums_edges_between_points.size() == 1)
+                                ? i
+                                : std::accumulate(nums_edges_between_points.begin(),
+                                                  nums_edges_between_points.begin() + i,
+                                                  0);
     mesh.add_point(
         p, nums_edges_between_points.size() == 1 ? (i * num_edges_between_points) : pt_counter);
 
