@@ -1,5 +1,8 @@
 mu = 2
 rho = 2
+k = FIRST
+k_minus_one = CONSTANT
+pressure_family = MONOMIAL
 
 [GlobalParams]
   alpha = 6
@@ -22,27 +25,27 @@ rho = 2
 [Variables]
   [vel_x]
     family = L2_HIERARCHIC
-    order = FIRST
+    order = ${k}
   []
   [vel_y]
     family = L2_HIERARCHIC
-    order = FIRST
+    order = ${k}
   []
   [pressure]
-    family = MONOMIAL
-    order = CONSTANT
+    family = ${pressure_family}
+    order = ${k_minus_one}
   []
   [vel_bar_x]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = ${k}
   []
   [vel_bar_y]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = ${k}
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = ${k}
   []
 []
 

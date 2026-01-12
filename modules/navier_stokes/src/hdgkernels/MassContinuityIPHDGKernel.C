@@ -18,7 +18,8 @@ MassContinuityIPHDGKernel::validParams()
   auto params = IPHDGKernel::validParams();
   params += MassContinuityAssemblyHelper::validParams();
   params.addClassDescription("Adds element and interior face integrals for a hybridized interior "
-                             "penalty discontinuous Galerkin discretization of an advection term.");
+                             "penalty discontinuous Galerkin discretization of a conservation of "
+                             "mass term for incompressible Navier-Stokes.");
   return params;
 }
 

@@ -1,2 +1,2 @@
 !include lid-driven-root.i
-!include ../strumpack-solver-options.i
+!include ../fs-plus-strumpack-preconditioner.i

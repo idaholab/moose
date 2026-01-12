@@ -16,8 +16,9 @@ class MooseMesh;
 
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
- * (IPDG-H), which is a type of HDG method, discretization of the advection equation. These routines
- * may be called by both HDG kernels and integrated boundary conditions.
+ * (IPDG-H), which is a type of HDG method, discretization of the conservation of mass equation for
+ * incompressible Navier-Stokes. These routines may be called by both HDG kernels and integrated
+ * boundary conditions.
  */
 class MassContinuityAssemblyHelper : public IPHDGAssemblyHelper, public ADFunctorInterface
 {
@@ -39,21 +40,23 @@ public:
   virtual void lmFace() override;
   virtual void scalarDirichlet(const Moose::Functor<Real> &) override
   {
-    mooseError("We do not assign Dirichlet values for pressure");
+    mooseError(
+        "This kernel is applied for the pressure variable, but the pressure does not itself appear "
+        "in the weak form this kernel implements, so the scalarDirichlet method does not fit");
   }
 
   /// The coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
+  const Moose::CoordinateSystemType _coord_sys;
 
   /// The radial coordinate index for RZ coordinate systems
   const unsigned int _rz_radial_coord;
 
-  /// The velocities on the element interior
+  /// The velocities at interior element quadrature points
   std::vector<const ADVariableValue *> _interior_vels;
 
-  /// The velocity gradients on the element interior
+  /// The velocity gradients at interior element quadrature points
   std::vector<const ADVariableGradient *> _interior_vel_grads;
 
-  /// The velocities on the element faces
+  /// The velocity functors used to evalute the velocity on element face quadrature points
   std::vector<const Moose::Functor<ADReal> *> _face_vels;
 };

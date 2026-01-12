@@ -58,6 +58,8 @@ AdvectionIPHDGAssemblyHelper::computeFlux(const unsigned int qp, const ADReal & 
   const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
   const auto face_phi = _coeff * face_value;
   const auto internal_phi = _coeff * _u_sol[qp];
+  // Short form for writing upwinding. If the velocity is in the direction of the surface normal,
+  // the the internal value is used, else the face value is used
   return 0.5 * vdotn * (internal_phi + face_phi) + 0.5 * abs(vdotn) * (internal_phi - face_phi);
 }
 

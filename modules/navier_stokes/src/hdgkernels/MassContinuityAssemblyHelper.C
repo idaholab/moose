@@ -19,8 +19,8 @@ InputParameters
 MassContinuityAssemblyHelper::validParams()
 {
   auto params = IPHDGAssemblyHelper::validParams();
-  params.addRequiredParam<std::vector<NonlinearVariableName>>(
-      "interior_velocity_vars", "The velocity variables on the element interiors");
+  params.addRequiredCoupledVar("interior_velocity_vars",
+                               "The velocity variables on the element interiors");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "face_velocity_functors", "The velocity variables on element faces/facets");
   return params;
@@ -43,7 +43,7 @@ MassContinuityAssemblyHelper::MassContinuityAssemblyHelper(
 
 {
   for (const auto & interior_vel_var_name :
-       moose_obj->getParam<std::vector<NonlinearVariableName>>("interior_velocity_vars"))
+       moose_obj->getParam<std::vector<VariableName>>("interior_velocity_vars"))
   {
     const auto & var = sys.getFieldVariable<Real>(tid, interior_vel_var_name);
     _interior_vels.push_back(&var.adSln());
