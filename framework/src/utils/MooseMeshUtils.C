@@ -1036,9 +1036,10 @@ buildPolyLineMesh(MeshBase & mesh,
   const auto n_points = points.size();
   for (auto i : make_range(n_points))
   {
-    const auto & num_edges_between_points = (nums_edges_between_points.size() == 1)
-                                                ? nums_edges_between_points[0]
-                                                : nums_edges_between_points[i];
+    const auto & num_edges_between_points =
+        (nums_edges_between_points.size() == 1)
+            ? nums_edges_between_points[0]
+            : (i == nums_edges_between_points.size() ? 0 : nums_edges_between_points[i]);
 
     Point p = points[i];
     const auto pt_counter = (nums_edges_between_points.size() == 1)
