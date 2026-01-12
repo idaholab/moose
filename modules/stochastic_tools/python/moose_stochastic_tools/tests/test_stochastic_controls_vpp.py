@@ -1,39 +1,45 @@
-#!/Users/rietaa/miniconda3/envs/moose/bin/python3
-
 import numpy as np
 import sys
 import os
 import unittest
+import importlib
 from unittest import mock
-
 
 if importlib.util.find_spec('moose_stochastic_tools') is None:
     _stm_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'python'))
     sys.path.append(_stm_python_path)
 
 from moose_stochastic_tools import StochasticControl, StochasticRunOptions
-
+from moose_stochastic_tools.StochasticControl import StochasticRunner
 
 
 class TestStochasticVectors(unittest.TestCase):
     input_file_name = 'main_runner.i'
-    def __init__(self):
-        self.opts = StochasticControl.StochasticRunOptions(
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.opts = StochasticRunOptions(
             num_procs=10,
             mpi_command="mpiexec",
             input_name='stochastic_run.i',
-            multiapp_mode=StochasticControl.StochasticRunOptions.MultiAppMode.BATCH_RESET,
+            multiapp_mode=StochasticRunOptions.MultiAppMode.BATCH_RESET,
             ignore_solve_not_converge=False
         )
-        self.runner = StochasticControl.StochasticControl(os.path.join(os.environ['MOOSE_DIR'],'modules','stochastic_tools','stochastic_tools-opt'),
-                                         physics_input='main_runner.i',options=opts,
-                                         parameters=['capsule1:Postprocessors/frequency_factor/value', 
-                                            'capsule1:Postprocessors/activation_energy/value',
-                                            'capsule1:BCs/heat_DRV_outer/value',
-                                            'capsule1:mesh_specified'],
-                        quantities_of_interest=['capsule_01/x',
+        self.control = StochasticControl(os.path.join(os.environ['MOOSE_DIR'],'modules','stochastic_tools','stochastic_tools-opt'),
+                         physics_input='vpp_test_runner.i',options=self.opts,
+                         parameters=['capsule1:Postprocessors/frequency_factor/value', 
+                            'capsule1:Postprocessors/activation_energy/value',
+                            'capsule1:BCs/heat_DRV_outer/value',
+                            'capsule1:mesh_specified'],
+                         quantities_of_interest=['capsule_01/x',
                                                 'capsule_01/temp',
-                                                ])
+                                        ])
+    def setUp(self):
+        self.runner = self.control.__enter__()
+
+    def tearDown(self):
+        self.control.__exit__()
+        del self.runner
+
     def testVectorConfig(self):
         self.runner.configCache(tol=[1,1e-10,1e-14,1e-14])
 
