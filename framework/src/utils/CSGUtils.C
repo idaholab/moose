@@ -31,31 +31,4 @@ getInnerRegion(const std::vector<std::reference_wrapper<const CSGSurface>> & sur
   }
   return inner_region;
 }
-
-nlohmann::json
-anyToJson(const std::any & data)
-{
-  if (data.type() == typeid(int))
-    return nlohmann::json(std::any_cast<int>(data));
-  else if (data.type() == typeid(unsigned int))
-    return nlohmann::json(std::any_cast<unsigned int>(data));
-  else if (data.type() == typeid(std::string))
-    return nlohmann::json(std::any_cast<std::string>(data));
-  else if (data.type() == typeid(Real))
-    return nlohmann::json(std::any_cast<Real>(data));
-  else if (data.type() == typeid(bool))
-    return nlohmann::json(std::any_cast<bool>(data));
-  else if (data.type() == typeid(std::vector<int>))
-    return nlohmann::json(std::any_cast<std::vector<int>>(data));
-  else if (data.type() == typeid(std::vector<unsigned int>))
-    return nlohmann::json(std::any_cast<std::vector<unsigned int>>(data));
-  else if (data.type() == typeid(std::vector<std::string>))
-    return nlohmann::json(std::any_cast<std::vector<std::string>>(data));
-  else if (data.type() == typeid(std::vector<Real>))
-    return nlohmann::json(std::any_cast<std::vector<Real>>(data));
-  else if (data.type() == typeid(std::vector<bool>))
-    return nlohmann::json(std::any_cast<std::vector<bool>>(data));
-  else
-    mooseError("Unsupported any data type to convert to JSON.");
-}
 }
