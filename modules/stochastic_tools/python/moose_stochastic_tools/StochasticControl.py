@@ -262,9 +262,9 @@ class StochasticControl(MooseControl):
     def getVectorOutput(self) ->list:
         """
         Waits for simulation completion and retrieves QoI reporter vector
-        
-        
-        Returns: 
+
+
+        Returns:
             A list of lists with shape (num_samples, num_qois, len(qois))
         :rtype: list
         """

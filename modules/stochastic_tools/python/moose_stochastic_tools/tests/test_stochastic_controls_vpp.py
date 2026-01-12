@@ -26,7 +26,7 @@ class TestStochasticVectors(unittest.TestCase):
         )
         self.control = StochasticControl(os.path.join(os.environ['MOOSE_DIR'],'modules','stochastic_tools','stochastic_tools-opt'),
                          physics_input='vpp_test_runner.i',options=self.opts,
-                         parameters=['capsule1:Postprocessors/frequency_factor/value', 
+                         parameters=['capsule1:Postprocessors/frequency_factor/value',
                             'capsule1:Postprocessors/activation_energy/value',
                             'capsule1:BCs/heat_DRV_outer/value',
                             'capsule1:mesh_specified'],
@@ -47,7 +47,7 @@ class TestStochasticVectors(unittest.TestCase):
         return self.runner(params)
 
     def testListFormat(self):
-        self.objective([335478,27700,500,1]) 
+        self.objective([335478,27700,500,1])
 
     def testCachedList(self):
         self.objective([335478,27700,500,1])
@@ -58,7 +58,7 @@ class TestStochasticVectors(unittest.TestCase):
                      [485478,21700,385,1],
                      [365478,23700,385,1],
                      ]) # Vector of samples simultaneous ok with list output and caching?
-    
+
     def testArrayFormat(self):
         self.objective([385478,27700,500,20]) # Test vector compatibility
 
