@@ -63,11 +63,13 @@
   },
   "lattices": {
     "cartesian_lat_copy_1": {
-      "ncol": 2,
-      "nrow": 2,
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 10.0
+      },
       "outer": "lattice_outer_copy_1",
       "outertype": "UNIVERSE",
-      "pitch": 10.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
         [
@@ -81,11 +83,13 @@
       ]
     },
     "cartesian_lat_copy_2": {
-      "ncol": 2,
-      "nrow": 2,
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 10.0
+      },
       "outer": "lattice_outer_copy_2",
       "outertype": "UNIVERSE",
-      "pitch": 10.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
         [

@@ -18,10 +18,12 @@
   },
   "lattices": {
     "lat1_lattice": {
-      "ncol": 2,
-      "nrow": 2,
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 3.0
+      },
       "outertype": "VOID",
-      "pitch": 3.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
         [
@@ -35,10 +37,12 @@
       ]
     },
     "lat2_lattice": {
-      "ncol": 3,
-      "nrow": 3,
+      "attributes": {
+        "ncol": 3,
+        "nrow": 3,
+        "pitch": 10.0
+      },
       "outertype": "VOID",
-      "pitch": 10.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
         [

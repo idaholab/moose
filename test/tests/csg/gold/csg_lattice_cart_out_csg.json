@@ -18,10 +18,12 @@
   },
   "lattices": {
     "cart_lat_lattice": {
-      "ncol": 2,
-      "nrow": 2,
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 5.0
+      },
       "outertype": "VOID",
-      "pitch": 5.0,
       "type": "CSG::CSGCartesianLattice",
       "universes": [
         [

@@ -18,10 +18,12 @@
   },
   "lattices": {
     "hex_lat_lattice": {
-      "nring": 3,
-      "nrow": 5,
+      "attributes": {
+        "nring": 3,
+        "nrow": 5,
+        "pitch": 5.0
+      },
       "outertype": "VOID",
-      "pitch": 5.0,
       "type": "CSG::CSGHexagonalLattice",
       "universes": [
         [

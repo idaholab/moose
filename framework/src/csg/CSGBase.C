@@ -644,9 +644,10 @@ CSGBase::generateOutput() const
       else if (outer_type == "CSG_MATERIAL")
         csg_json["lattices"][lat_name]["outer"] = lat.getOuterMaterial();
       // write out any additional attributes
-      const auto & lat_dims = lat.getAttributes();
-      for (const auto & dim : lat_dims)
-        csg_json["lattices"][lat_name][dim.first] = dim.second;
+      csg_json["lattices"][lat_name]["attributes"] = {};
+      const auto & lat_attrs = lat.getAttributes();
+      for (const auto & attr : lat_attrs)
+        csg_json["lattices"][lat_name]["attributes"][attr.first] = attr.second;
       // write the map of universe names: list of lists
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
     }
