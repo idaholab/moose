@@ -65,4 +65,11 @@
     installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
+  [diagonal-step-2d]
+    type = RunApp
+    input = diagonal-step-2d.i
+    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    mesh_mode = REPLICATED # line sampling is sensitive to distributed partitioning
+    max_threads = 1 # see libmesh issue #3808
+  []
 []
