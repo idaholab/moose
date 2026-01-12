@@ -20,6 +20,7 @@
 #include "MultiApp.h"
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
+#include "MooseRandomStateless.h"
 
 /**
  * This is the base class for Samplers as used within the Stochastic Tools module.
@@ -194,6 +195,12 @@ protected:
    */
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
+  Real getRandStateless(std::size_t n, unsigned int index = 0) const;
+  unsigned int getRandlStateless(std::size_t n,
+                                 unsigned int lower,
+                                 unsigned int upper,
+                                 unsigned int index = 0) const;
+
   /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
@@ -332,6 +339,7 @@ private:
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
+  std::vector<std::unique_ptr<MooseRandomStateless>> _generators_stateless;
 
   /// Number of rows for this processor
   dof_id_type _n_local_rows;

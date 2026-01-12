@@ -26,11 +26,6 @@ protected:
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /**
-   * Used to setup matrices for trajectory computation
-   */
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-
-  /**
    * Morris sampling should have a slightly different partitioning in order to keep
    * the sample and resample samplers distributed and make computing indices more
    * efficient.
@@ -50,9 +45,13 @@ private:
    * This is only called once per trajectory (_n_rows / (_n_cols + 1))
    */
   void updateBstar();
+  void updateBstarStateless();
+
+  /// The trajectory the current _bstar represents
+  dof_id_type _curr_trajectory = std::numeric_limits<dof_id_type>::max();
 
   ///@{
-  /// Matrices used for trajector computation
+  /// Matrices used for trajectory computation
   RealEigenMatrix _b;
   RealEigenMatrix _pstar;
   RealEigenMatrix _j;

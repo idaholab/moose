@@ -44,15 +44,11 @@ MorrisSampler::MorrisSampler(const InputParameters & parameters)
 {
   for (const auto & name : getParam<std::vector<DistributionName>>("distributions"))
     _distributions.push_back(&getDistributionByName(name));
+  const dof_id_type nc = _distributions.size();
 
-  setNumberOfCols(_distributions.size());
-  setNumberOfRows(_num_trajectories * (_distributions.size() + 1));
-}
+  setNumberOfCols(nc);
+  setNumberOfRows(_num_trajectories * (nc + 1));
 
-void
-MorrisSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
-{
-  const dof_id_type nc = getNumberOfCols();
   _b = RealEigenMatrix::Ones(nc + 1, nc).triangularView<Eigen::StrictlyLower>();
   _pstar.resize(nc, nc);
   _j.setOnes(nc + 1, nc);
@@ -64,23 +60,32 @@ MorrisSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 Real
 MorrisSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  const dof_id_type traj = row_index / (getNumberOfCols() + 1);
   const dof_id_type traj_ind = row_index % (getNumberOfCols() + 1);
-  if (traj_ind == 0 && col_index == 0)
+  if (traj != _curr_trajectory)
+  {
+    _curr_trajectory = traj;
     updateBstar();
+  }
   return _distributions[col_index]->quantile(_bstar(traj_ind, col_index));
 }
 
 void
 MorrisSampler::updateBstar()
 {
+  mooseAssert(_curr_trajectory < _num_trajectories,
+              "Current trajectory index is greater than the prescribed number of trajectories.");
+
   const dof_id_type nc = getNumberOfCols(); // convenience
+  dof_id_type rn_ind = _curr_trajectory * nc * (nc + 1);
+
   _pstar.setZero();
   // Which parameter to perturb
   std::vector<dof_id_type> pchoice(nc);
   std::iota(pchoice.begin(), pchoice.end(), 0);
   for (dof_id_type c = 0; c < nc; ++c)
   {
-    const unsigned int ind = nc > 1 ? getRandl(0, 0, pchoice.size()) : 0;
+    const unsigned int ind = nc > 1 ? getRandlStateless(rn_ind++, 0, pchoice.size()) : 0;
     _pstar(pchoice[ind], c) = 1.0;
     pchoice.erase(pchoice.begin() + ind);
   }
@@ -88,23 +93,17 @@ MorrisSampler::updateBstar()
   _dstar.setZero();
   // Direction of perturbation
   for (dof_id_type c = 0; c < nc; ++c)
-    _dstar(c, c) = getRand() < 0.5 ? -1.0 : 1.0;
+    _dstar(c, c) = getRandStateless(rn_ind++) < 0.5 ? -1.0 : 1.0;
 
   // Initial value
   for (dof_id_type c = 0; c < nc; ++c)
   {
-    const auto lind = getRandl(0, 0, _num_levels / 2);
+    const auto lind = getRandlStateless(rn_ind++, 0, _num_levels / 2);
     _xstar.col(c).setConstant((Real)lind * 1.0 / ((Real)_num_levels - 1));
   }
 
   _bstar =
       _xstar + _num_levels / 4.0 / (_num_levels - 1) * ((2.0 * _b * _pstar - _j) * _dstar + _j);
-
-  // This matrix represent _n_cols * (_n_cols + 1) samples, but so far we have only
-  // advanced the generator 3 * _n_cols times. For the generator state restore
-  // to work properly, we need to finish advancing the generator
-  if (nc > 2)
-    advanceGenerator(0, nc * (nc - 2));
 }
 
 LocalRankConfig

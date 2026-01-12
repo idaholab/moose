@@ -146,7 +146,7 @@ public:
     const auto range = upper - lower;
 
     auto [it, is_new] = _randlb_generators.try_emplace(
-        range, [&range](mt_state * state) { return rds_iuniform(state, 0, range); }, _seed);
+        range, [range](mt_state * state) { return rds_iuniform(state, 0, range); }, _seed);
 
     if (is_new)
       it->second.advance(_advance_count);

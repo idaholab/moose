@@ -102,8 +102,13 @@ Sampler::init()
   seed_generator.seed(0, seed);
 
   // See the "secondary" generator that will be used for the random number generation
+  _generators_stateless.resize(_n_seeds);
   for (std::size_t i = 0; i < _n_seeds; ++i)
-    _generator.seed(i, seed_generator.randl(0));
+  {
+    const auto gseed = seed_generator.randl(0);
+    _generator.seed(i, gseed);
+    _generators_stateless[i] = std::make_unique<MooseRandomStateless>(gseed);
+  }
 
   // Save the initial state
   saveGeneratorState();
@@ -180,6 +185,12 @@ Sampler::setNumberOfRandomSeeds(std::size_t n_seeds)
 void
 Sampler::execute()
 {
+  const bool advance_stateless =
+      _auto_advance_generators && _current_execute_flag != EXEC_PRE_MULTIAPP_SETUP;
+  if (advance_stateless && !_has_executed)
+    for (const auto & gen : _generators_stateless)
+      gen->advance(_n_rows * _n_cols);
+
   executeSetUp();
   if (_needs_reinit)
     reinit();
@@ -190,6 +201,11 @@ Sampler::execute()
     advanceGeneratorsInternal(_n_rows * _n_cols);
   }
   saveGeneratorState();
+
+  if (advance_stateless && _has_executed)
+    for (const auto & gen : _generators_stateless)
+      gen->advance(_n_rows * _n_cols);
+
   executeTearDown();
   _has_executed = true;
 }
@@ -368,6 +384,23 @@ Sampler::getRandl(unsigned int index, uint32_t lower, uint32_t upper)
 {
   mooseAssert(index < _generator.size(), "The seed number index does not exists.");
   return _generator.randl(index, lower, upper);
+}
+
+Real
+Sampler::getRandStateless(std::size_t n, unsigned int index) const
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exists.");
+  return _generators_stateless[index]->rand(n);
+}
+
+unsigned int
+Sampler::getRandlStateless(std::size_t n,
+                           unsigned int lower,
+                           unsigned int upper,
+                           unsigned int index) const
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exists.");
+  return _generators_stateless[index]->randl(n, lower, upper);
 }
 
 dof_id_type

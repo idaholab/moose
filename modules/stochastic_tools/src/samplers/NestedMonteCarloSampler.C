@@ -40,54 +40,34 @@ NestedMonteCarloSampler::NestedMonteCarloSampler(const InputParameters & paramet
 
   // Gather distribution pointers and fill in loop index
   const std::size_t nloop = dnames.size();
+  std::vector<std::size_t> loop_index;
   for (const auto & n : make_range(nloop))
     for (const auto & name : dnames[n])
     {
       _distributions.push_back(&getDistributionByName(name));
-      _loop_index.push_back(n);
+      loop_index.push_back(n);
     }
 
   // Compute what row indices need to recompute which columns
-  _loop_mod.resize(nloop);
-  std::partial_sum(
-      nrows.rbegin(), nrows.rend(), _loop_mod.rbegin(), std::multiplies<dof_id_type>());
-  _loop_mod.erase(_loop_mod.begin());
-  _loop_mod.push_back(1);
+  std::vector<dof_id_type> loop_mod(nloop);
+  std::partial_sum(nrows.rbegin(), nrows.rend(), loop_mod.rbegin(), std::multiplies<dof_id_type>());
+  loop_mod.erase(loop_mod.begin());
+  loop_mod.push_back(1);
 
-  // Allocate row storage
-  _row_data.resize(_distributions.size());
+  // Fill in the mod for each column
+  _col_mod.resize(_distributions.size());
+  for (const auto j : index_range(_distributions))
+    _col_mod[j] = loop_mod[loop_index[j]];
 
   setNumberOfRows(std::accumulate(nrows.begin(), nrows.end(), 1, std::multiplies<dof_id_type>()));
   setNumberOfCols(_distributions.size());
 }
 
-void
-NestedMonteCarloSampler::sampleSetUp(const SampleMode mode)
-{
-  if (mode == Sampler::SampleMode::GLOBAL || getNumberOfRows() == 0)
-    return;
-
-  dof_id_type curr_row = 0;
-  for (const auto & mod : _loop_mod)
-  {
-    if (getLocalRowBegin() % mod == 0)
-      break;
-
-    const dof_id_type target_row = std::floor(getLocalRowBegin() / mod) * mod;
-    advanceGenerators((target_row - curr_row) * getNumberOfCols());
-    for (const auto & j : make_range(getNumberOfCols()))
-      computeSample(target_row, j);
-    curr_row = target_row + 1;
-  }
-  restoreGeneratorState();
-}
-
 Real
 NestedMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  const Real rn = getRand();
-  const auto & loop = _loop_index[col_index];
-  if (row_index % _loop_mod[loop] == 0)
-    _row_data[col_index] = _distributions[col_index]->quantile(rn);
-  return _row_data[col_index];
+  const auto mod = _col_mod[col_index];
+  const dof_id_type target_row = std::floor(row_index / mod) * mod;
+  const Real rn = getRandStateless(target_row * getNumberOfCols() + col_index);
+  return _distributions[col_index]->quantile(rn);
 }
