@@ -44,7 +44,7 @@ These attributes are what get returned in a map using the `getAttributes()` meth
 
 !alert! note title=Attributes Data Type
 
-The `getAttributes()` method returns a map of `JsonOutputUtils::AttributeVariant` data types (`std::unordered_map<std::string, JsonOutputUtils::AttributeVariant>`) to support flexibility in the type of data that might need to be defined. The `AttributeVariant` is a `std::variant` that can hold any of the following types: `int`, `unsigned int`, `std::string`, `Real`, `bool`, and vectors of these types (`std::vector<int>`, `std::vector<unsigned int>`, `std::vector<std::string>`, `std::vector<Real>`, `std::vector<bool>`).
+The `getAttributes()` method returns a map of `AttributeVariant` data types (`std::unordered_map<std::string, AttributeVariant>`) to support flexibility in the type of data that might need to be defined. The `AttributeVariant` is a `std::variant` that can hold any of the following types: `int`, `unsigned int`, `std::string`, `Real`, `bool`, and vectors of these types (`std::vector<int>`, `std::vector<unsigned int>`, `std::vector<std::string>`, `std::vector<Real>`, `std::vector<bool>`).
 
 !alert-end!
 
