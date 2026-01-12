@@ -367,6 +367,29 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
+void EquationSystem::ReassembleJacobian()
+{
+  //Reassemble all the Forms
+  for (const auto I : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(I);
+    _blfs.GetShared(test_var_name)->Assemble();
+    for (const auto J : index_range(_coupled_var_names))
+    {
+      auto coupled_var_name = _coupled_var_names.at(J);
+      if(_mblfs.GetShared(test_var_name)->GetShared(coupled_var_name))
+      {
+        _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Assemble();
+      }
+    }
+  }
+
+  //Form the system matrix
+  //This uses dummy arguments
+  //for the vectors
+  FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
+};
+
 void
 EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
@@ -416,14 +439,21 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
     residual =  static_cast<mfem::Vector &>(_blockResidual);
   }else{
     _jacobian->Mult(x, residual);
-    x.HostRead();
-    residual.HostRead();
   }
+  x.HostRead();
+  residual.HostRead();
 }
 
 mfem::Operator &
-EquationSystem::GetGradient(const mfem::Vector &) const
+EquationSystem::GetGradient(const mfem::Vector & x) const
 {
+  if(_non_linear)
+  {
+    //Clears the old Jacobian and reassembles
+    //the bilinear and mixed-bilinear forms
+    //then reforms the Jacobian
+    const_cast<EquationSystem *>(this)->ReassembleJacobian();
+  }
   return *_jacobian;
 }
 
