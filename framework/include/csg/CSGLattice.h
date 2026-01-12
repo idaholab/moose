@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGUniverse.h"
+#include "JsonOutputUtils.h"
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -128,7 +129,7 @@ public:
    *
    * @return map of string attribute name to value of that attribute
    */
-  virtual std::unordered_map<std::string, std::any>
+  virtual std::unordered_map<std::string, JsonOutputUtils::AttributeVariant>
   getAttributes() const = 0; // pure virtual function
 
   /**

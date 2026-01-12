@@ -646,7 +646,7 @@ CSGBase::generateOutput() const
       // write out any additional attributes
       const auto & lat_dims = lat.getAttributes();
       for (const auto & dim : lat_dims)
-        csg_json["lattices"][lat_name][dim.first] = JsonOutputUtils::anyToJson(dim.second);
+        csg_json["lattices"][lat_name][dim.first] = JsonOutputUtils::variantToJson(dim.second);
       // write the map of universe names: list of lists
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
     }

@@ -165,9 +165,9 @@ TEST(CSGLatticeTest, testGetAttributes)
         {univ1, univ1, univ1}, {univ1, univ1, univ1}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
     auto dims_map = cart_lattice.getAttributes();
-    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nrow"]), 2);
-    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["ncol"]), 3);
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    ASSERT_EQ(std::get<unsigned int>(dims_map["nrow"]), 2);
+    ASSERT_EQ(std::get<unsigned int>(dims_map["ncol"]), 3);
+    ASSERT_EQ(std::get<Real>(dims_map["pitch"]), 1.0);
   }
   {
     // hexagonal lattice
@@ -175,9 +175,9 @@ TEST(CSGLatticeTest, testGetAttributes)
         {univ1, univ1}, {univ1, univ1, univ1}, {univ1, univ1}};
     auto hex_lattice = CSGHexagonalLattice("hexlat", 1.0, univ_map);
     auto dims_map = hex_lattice.getAttributes();
-    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nrow"]), 3);
-    ASSERT_EQ(*std::any_cast<unsigned int>(&dims_map["nring"]), 2); // should be (nrow + 1)/2
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    ASSERT_EQ(std::get<unsigned int>(dims_map["nrow"]), 3);
+    ASSERT_EQ(std::get<unsigned int>(dims_map["nring"]), 2); // should be (nrow + 1)/2
+    ASSERT_EQ(std::get<Real>(dims_map["pitch"]), 1.0);
   }
 }
 

@@ -39,4 +39,11 @@ anyToJson(const std::any & data)
   else
     mooseError("Unsupported any data type to convert to JSON.");
 }
+
+nlohmann::json
+variantToJson(const AttributeVariant & data)
+{
+  return std::visit([](const auto & value) -> nlohmann::json { return nlohmann::json(value); },
+                    data);
+}
 }

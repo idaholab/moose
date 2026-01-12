@@ -105,14 +105,11 @@ CSGHexagonalLattice::compareAttributes(const CSGLattice & other) const
 
   auto this_dims = this->getAttributes();
   auto other_dims = other.getAttributes();
-
-  if (std::any_cast<unsigned int>(this_dims["nrow"]) !=
-      std::any_cast<unsigned int>(other_dims["nrow"]))
+  if (std::get<unsigned int>(this_dims["nrow"]) != std::get<unsigned int>(other_dims["nrow"]))
     return false;
-  if (std::any_cast<unsigned int>(this_dims["nring"]) !=
-      std::any_cast<unsigned int>(other_dims["nring"]))
+  if (std::get<unsigned int>(this_dims["nring"]) != std::get<unsigned int>(other_dims["nring"]))
     return false;
-  if (std::any_cast<Real>(this_dims["pitch"]) != std::any_cast<Real>(other_dims["pitch"]))
+  if (std::get<Real>(this_dims["pitch"]) != std::get<Real>(other_dims["pitch"]))
     return false;
   return true;
 }

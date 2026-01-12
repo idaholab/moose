@@ -69,9 +69,12 @@ public:
    *
    * @return map of string dimension name to value of that dimension
    */
-  virtual std::unordered_map<std::string, std::any> getAttributes() const override
+  virtual std::unordered_map<std::string, JsonOutputUtils::AttributeVariant>
+  getAttributes() const override
   {
-    return {{"nrow", _nrow}, {"nring", _nring}, {"pitch", _pitch}};
+    return {{"nrow", static_cast<unsigned int>(_nrow)},
+            {"nring", static_cast<unsigned int>(_nring)},
+            {"pitch", _pitch}};
   }
 
   /**

@@ -44,14 +44,12 @@ These attributes are what get returned in a map using the `getAttributes()` meth
 
 !alert! note title=Attributes Data Type
 
-The `getAttributes()` method returns a map of `std::any` data types (`std::unordered_map<std::string, std::any>`) to support flexibility in the type of data that might need to be defined.
-However, this also means that to convert the information to the proper [!ac](JSON) data form, the data type needs to be explicitly determined.
-Because of this, only certain data types are supported at this time: `int`, `unsigned int`, `Real`, `std::string`, and `bool`.
+The `getAttributes()` method returns a map of `JsonOutputUtils::AttributeVariant` data types (`std::unordered_map<std::string, JsonOutputUtils::AttributeVariant>`) to support flexibility in the type of data that might need to be defined. The `AttributeVariant` is a `std::variant` that can hold any of the following types: `int`, `unsigned int`, `std::string`, `Real`, `bool`, and vectors of these types (`std::vector<int>`, `std::vector<unsigned int>`, `std::vector<std::string>`, `std::vector<Real>`, `std::vector<bool>`).
 
 !alert-end!
 
 These attributes are also what gets compared in the `compareAttributes()` method, which is used by the equality operators (`==` and `!=`) to check for lattice equality.
-Because this data can be of any data type, this method must be explicitly defined for the lattice type, and use of `std::any_cast<type>` will likely be necessary to compare the values.
+Because this data can be of different types, this method must be explicitly defined for the lattice type, and use of `std::get<type>` will be necessary to compare the values.
 
 ### Creating a Lattice Clone
 
