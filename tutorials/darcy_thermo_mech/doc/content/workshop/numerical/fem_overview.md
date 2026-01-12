@@ -389,8 +389,8 @@ Write in inner product notation. Each term of the equation will inherit from an 
 !style! fontsize=120%
 
 !equation
-\underbrace{\left(\nabla\psi, k\nabla u \right)}_{Kernel} -
-\underbrace{\langle\psi, k\nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
+\underbrace{\left(\nabla\psi, \nabla u \right)}_{Kernel} -
+\underbrace{\langle\psi, \nabla u\cdot \hat{n} \rangle}_{BoundaryCondition} +
 \underbrace{\left(\psi, \vec{\beta} \cdot \nabla u\right)}_{Kernel} -
 \underbrace{\left(\psi, f\right)}_{Kernel} = 0
 
@@ -402,7 +402,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !col! width=10%
 
-!listing test/tests/kernels/2d_diffusion/neumannbc.i block=Kernels link=False
+!listing test/tests/kernels/ad_simple_diffusion/ad_simple_diffusion.i block=Kernels link=False
 
 !col-end!
 
@@ -414,7 +414,7 @@ $\quad$
 
 !col! width=10%
 
-!listing test/tests/kernels/2d_diffusion/neumannbc.i block=BCs BCs/left link=False
+!listing test/tests/kernels/ad_simple_diffusion/ad_simple_diffusion.i block=BCs BCs/left link=False
 
 !col-end!
 
@@ -426,7 +426,7 @@ $\quad$
 
 !col! width=10%
 
-!listing test/tests/dgkernels/1d_advection_dg/1d_advection_dg.i block=Kernels remove=Kernels/time_u link=False
+!listing test/tests/auxkernels/advection_flux/advection_flux_fe.i block=Kernels remove=Kernels/udot Kernels/vdot Kernels/v_advec link=False
 
 !col-end!
 

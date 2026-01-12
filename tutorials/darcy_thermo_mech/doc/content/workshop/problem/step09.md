@@ -10,14 +10,14 @@ direction.
 !equation
 \begin{aligned}
 \nabla \cdot (\boldsymbol{\sigma} + \boldsymbol{\sigma}_0) + \boldsymbol{b} =& \boldsymbol{0} \;\mathrm{in}\;\Omega \\
-\boldsymbol{u} =& \boldsymbol{g}\;\mathrm{in}\;\Gamma_{ \boldsymbol{g}} \\
-\boldsymbol{\sigma} \cdot \boldsymbol{n}=&\boldsymbol{t}\;\mathrm{in}\;\Gamma_{ \boldsymbol{t}}
+\boldsymbol{u} =& \boldsymbol{d}\;\mathrm{in}\;\partial \Omega_{ \boldsymbol{d}} \\
+\boldsymbol{\sigma} \cdot \boldsymbol{n}=&\boldsymbol{t}\;\mathrm{in}\;\partial \Omega_{ \boldsymbol{t}}
 \end{aligned}
 
 where $\boldsymbol{\sigma}$  is the Cauchy stress tensor, $\boldsymbol{\sigma}_0$
 is an additional source of stress (such as pore pressure), $\boldsymbol{u}$ is
 the displacement vector, $\boldsymbol{b}$ is the body force, $\boldsymbol{n}$ is
-the unit normal to the boundary, $\boldsymbol{g}$ is the prescribed displacement
+the unit normal to the boundary, $\boldsymbol{d}$ is the prescribed displacement
 on the boundary and $\boldsymbol{t}$ is the prescribed traction on the boundary.
 
 !!end-intro
