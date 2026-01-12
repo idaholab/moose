@@ -290,11 +290,11 @@ For the 3-ring lattice above in [!ref](fig:hex_lat_row), the corresponding $(r, 
 
 For any lattice, the $(r, p)$ index of a universe in the lattice can be retrieved from the $(i, j)$ index by calling the `getRingIndexFromRowIndex` method.
 And similarly, if the $(r, p)$ index form is known, the corresponding $(i, j)$ index can be retrieved using the `getRowIndexFromRingIndex` method.
-It is important to note that while these convenience methods exists to convert between the two indexing schemes, the `CSGUniverse` objects in the lattice can only be accessed using the $(i, j)$ index.
+It is important to note that while these convenience methods exist to convert between the two indexing schemes, the `CSGUniverse` objects in the lattice can only be accessed using the $(i, j)$ index.
 
 #### Defining the Universe Layout
 
-As mentioned above, the layout of the `CSGUniverse` objects of the lattice can be set at the time of initialization or set/updated later.
+As mentioned above, the layout of the `CSGUniverse` objects for the lattice can be set at the time of initialization or set/updated later.
 At the time that the universes are set, the dimensionality of the lattice is determined (i.e., the number of rows, columns, or rings for the lattice).
 If the dimensionality should need to be changed, a new complete universe arrangement can be set to overwrite the previous arrangement using `setLatticeUniverses`.
 Anytime the universe layout is set or changed, the dimensionality will be validated to ensure it compatible with the lattice type.

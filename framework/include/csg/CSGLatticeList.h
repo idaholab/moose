@@ -31,11 +31,11 @@ protected:
   virtual ~CSGLatticeList() = default;
 
   /**
-   * @brief add an existing universe to list. Ownership of universe will be transferred to universe
-   * list object that calls this function
+   * @brief add an existing lattice to list. Ownership of lattice will be transferred to
+   * CSGLatticeList object that calls this function
    *
-   * @param universe pointer to universe to add
-   * @return reference to universe that is passed in
+   * @param lattice pointer to lattice to add
+   * @return reference to CSGLattice that is passed in
    */
   CSGLattice & addLattice(std::unique_ptr<CSGLattice> lattice);
 
@@ -71,17 +71,17 @@ protected:
   }
 
   /**
-   * @brief Get all the universes in CSGBase instance
+   * @brief Get all the lattices in CSGBase instance
    *
-   * @return list of references to all CSGUniverse objects
+   * @return list of references to all CSGLattice objects
    */
   std::vector<std::reference_wrapper<const CSGLattice>> getAllLattices() const;
 
   /**
    * @brief Get a Lattice from the list by its name
    *
-   * @param name name of universe
-   * @return reference to CSGUniverse of the specified name
+   * @param name name of lattice
+   * @return reference to CSGLattice of the specified name
    */
   CSGLattice & getLattice(const std::string & name) const;
 
@@ -99,10 +99,10 @@ protected:
   /// Operator overload for checking if two CSGLatticeList objects are not equal
   bool operator!=(const CSGLatticeList & other) const;
 
-  /// Mapping of universe names to pointers of stored universe objects
+  /// Mapping of lattice names to pointers of stored lattice objects
   std::unordered_map<std::string, std::unique_ptr<CSGLattice>> _lattices;
 
-  // Only CSGBase should be calling the methods in CSGUniverseList
+  // Only CSGBase should be calling the methods in CSGLatticeList
   friend class CSGBase;
 };
 } // namespace CSG

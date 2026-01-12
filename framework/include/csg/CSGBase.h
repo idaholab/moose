@@ -395,7 +395,7 @@ public:
    * is needed, it can be specified when calling. If the type is unknown or not specified,
    * it will default to CSGLattice to get the base class reference.
    * NOTE: if CSGLattice is used as the template type, any lattice type-specific attributes or
-   * methods may not be accessible.
+   * methods may not be accessible, except using a reference cast.
    *
    * @param name lattice name
    * @return reference to CSGLattice object
