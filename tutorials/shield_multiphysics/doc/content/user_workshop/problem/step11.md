@@ -56,11 +56,15 @@ Primary difference from the previous step is the addition of the `T_solid` auxil
 used as the "container" for solid heat-conduction app to transfer its solution
 into.
 
-!style fontsize=50% halign=left
+!style fontsize=70% halign=left
 !listing step11_multiapps/step11_2d_fluid.i
          block=AuxVariables FVBCs/T_fluid_water_boundary
          diff=step10_finite_volume/step10.i
-         style=width:90%;height:300px
+         style=width:80%;height:280px
+
+!col-end!
+
+!col! width=10%
 
 !col-end!
 
@@ -71,10 +75,10 @@ into.
 - [TransientMultiApp](TransientMultiApp.md)
 - [MultiAppCopyTransfer](MultiAppCopyTransfer.md)
 
-!style fontsize=50% halign=right
+!style fontsize=70% halign=right
 !listing step11_multiapps/step11_2d_heat_conduction.i
          block=AuxVariables/T_fluid MultiApps/fluid Transfers/send_T_solid Transfers/recv_T_fluid
-         style=width:90%;height:300px
+         style=width:80%;height:300px
 
 !col-end!
 
@@ -90,9 +94,13 @@ into.
 
 ### Sensor Sub-App
 
-!style fontsize=50% halign=left
+!style fontsize=70% halign=left
 !listing step11_multiapps/step11_local.i
-         style=width:90%;height:350px
+         style=width:80%;height:350px
+
+!col-end!
+
+!col! width=10%
 
 !col-end!
 
@@ -109,12 +117,12 @@ into.
 
 !style-end!
 
-!style fontsize=50% halign=right
+!style fontsize=70% halign=right
 !listing step11_multiapps/step11_2d_heat_conduction.i
          block=AuxVariables/flux AuxVariables/T_hdpe_inner AuxVariables/T_boron_inner
                MultiApps/detectors
                Transfers/send_exterior_temperature Transfers/send_local_flux Transfers/hdpe_temperature Transfers/boron_temperature
-         style=width:90%;height:300px
+         style=width:80%;height:200px
 
 !col-end!
 
@@ -124,17 +132,26 @@ into.
 
 ## Step 11: Run Decoupled Physics
 
+!row!
+
+!col! width=45%
+
 Before fully coupled simulation, we must make sure
 each input file runs well separately.
 
-!style fontsize=60%
+!style fontsize=90%;width:80%
 ```bash
 cd ~/projects/moose/tutorials/shield_multiphysics/inputs/step11_multiapps
 moose-opt -i mesh2d_coarse.i --mesh-only
 moose-opt -i step11_local.i
 moose-opt -i step11_2d_fluid.i
+# Disable multiapps and transfers to run the parent application standalone
 moose-opt -i step11_2d_heat_conduction.i MultiApps/active='' Transfers/active=''
 ```
+
+!col-end!
+
+!col! width=45%
 
 !media results/step11_local.png
        style=width:40%;margin-left:auto;margin-right:auto;display:block
@@ -142,6 +159,10 @@ moose-opt -i step11_2d_heat_conduction.i MultiApps/active='' Transfers/active=''
 
 !style halign=center
 Sensor temperature field with dummy fixed boundary conditions
+
+!col-end!
+
+!row-end!
 
 !---
 
