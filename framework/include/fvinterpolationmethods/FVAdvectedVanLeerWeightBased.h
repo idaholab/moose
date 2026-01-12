@@ -11,24 +11,27 @@
 
 #include "FVInterpolationMethod.h"
 #include "Limiter.h"
+
 #include <memory>
 
 /**
- * TVD Van Leer interpolation for advected quantities.
- * Produces weights based on a limiter computed from cell gradients.
+ * Van Leer interpolation for advected quantities that blends between upwind and the
+ * higher-order limited value using only (elem, neighbor) weights.
+ *
+ * In contrast to FVAdvectedVanLeerDeferredCorrection, this method does not perform a MUSCL-style
+ * reconstruction at the face and does not use deferred correction. Instead, it returns matrix
+ * weights that incorporate the limiter directly (in the OpenFOAM-style "limited scheme" sense).
+ *
+ * Note: The limiter coefficient depends on solution gradients, so this is typically used in a
+ * fixed-point outer loop where the weights are lagged.
  */
-class FVAdvectedVanLeer : public FVInterpolationMethod
+class FVAdvectedVanLeerWeightBased : public FVInterpolationMethod
 {
 public:
   static InputParameters validParams();
 
-  FVAdvectedVanLeer(const InputParameters & params);
+  FVAdvectedVanLeerWeightBased(const InputParameters & params);
 
-  /**
-   * Return interpolation weights computed with a Van Leer limiter.
-   * Uses deferred correction: matrix weights are upwind and high-order weights
-   * are always provided for the correction.
-   */
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
                                                  Real neighbor_value,
@@ -36,9 +39,6 @@ public:
                                                  const VectorValue<Real> * neighbor_grad,
                                                  Real mass_flux) const;
 
-  /**
-   * Return only the high-order face value for the advected quantity.
-   */
   Real advectedInterpolateValue(const FaceInfo & face,
                                 Real elem_value,
                                 Real neighbor_value,
@@ -48,4 +48,6 @@ public:
 
 private:
   const std::unique_ptr<Moose::FV::Limiter<Real>> _limiter;
+  const bool _limit_to_linear;
+  const Real _blending_factor;
 };
