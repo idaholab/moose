@@ -435,8 +435,6 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
 
       // Flux_new = relaxation * Flux_boundary + (1-relaxation) * Flux_old,
       // minus sign is due to the normal differences
-      // auto flux = flux_relaxation * other_kernel->computeBoundaryFlux(*other_bc) +
-      //                   (1 - flux_relaxation) * flux_container[fi->id()];
 
       // Conductive flux
       auto flux = other_kernel->computeBoundaryFlux(*other_bc);
