@@ -8,6 +8,7 @@ pressure_outlet = 42
 inlet_velocity = 0.6
 inlet_temperature = 320
 inlet_scalar = 13
+scalar_source = 1.0
 
 [Mesh]
   [gen]
@@ -64,6 +65,7 @@ inlet_scalar = 13
       system_names = 'scalar_system'
 
       passive_scalar_diffusivity = '${scalar_diff}'
+      passive_scalar_source = ${scalar_source}
 
       passive_scalar_inlet_types = 'fixed-value'
       passive_scalar_inlet_functors = ${inlet_scalar}
@@ -131,5 +133,6 @@ inlet_scalar = 13
 
 [Outputs]
   csv = true
+  checkpoint=true
   execute_on = final
 []

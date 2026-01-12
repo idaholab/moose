@@ -1,24 +1,36 @@
 [Tests]
   design = 'SIMPLE.md PIMPLE.md'
   issues = '#32151'
-  [base_th]
+  [all_equations]
     type = CSVDiff
     input = pipe_flow_energy_scalars.i
-    csvdiff = 'base_th_line_sampler_0002.csv'
-    cli_args = 'Outputs/file_base=base_th Outputs/checkpoint=true Executioner/should_solve_passive_scalars=false Executioner/num_iterations=150'
-    requirement = 'The system shall be able to converge a steady segregated flow and energy solution suitable for restart.'
-    max_threads = 1 # see libmesh issue
+    csvdiff = 'all_equations_line_sampler_0002.csv'
+    cli_args = 'Outputs/file_base=all_equations'
+    requirement = 'The system shall be able to converge a steady segregated flow, energy, and passive scalar solution suitable for restart.'
+    max_threads = 1
     recover = false # Using a SIMPLE solver
   []
 
-  [restart_scalars_only]
+  [scalar_off]
     type = CSVDiff
     input = pipe_flow_energy_scalars.i
-    prereq = base_th
-    csvdiff = 'recover_scalars_line_sampler_0002.csv'
-    cli_args = 'Problem/restart_file_base=base_th_cp/LATEST Outputs/file_base=recover_scalars Executioner/should_solve_momentum=false Executioner/should_solve_pressure=false Executioner/should_solve_energy=false'
-    requirement = 'The system shall be able to restart restart the flow/energy state, keep them unchanged, and advance passive scalars only.'
-    max_threads = 1 # see libmesh issue
+    prereq = all_equations
+    csvdiff = 'scalar_off_line_sampler_0002.csv'
+    cli_args = 'Outputs/file_base=scalar_off Executioner/should_solve_passive_scalars=false'
+    requirement = 'The system shall be able to disable passive scalar solves, keeping the scalar field equal to its initial condition.'
+    max_threads = 1
+    recover = false # Using a SIMPLE solver
+  []
+
+  [restart_scalar_only]
+    type = CSVDiff
+    input = pipe_flow_energy_scalars.i
+    prereq = scalar_off
+    csvdiff = 'restart_scalar_only_line_sampler_0002.csv'
+    cli_args = "Problem/restart_file_base=scalar_off_cp/LATEST
+                Outputs/file_base=restart_scalar_only"
+    requirement = 'The system shall be able to restart only the passive scalar solution and reproduce the same converged state as a fully coupled run.'
+    max_threads = 1
     recover = false # Using a SIMPLE solver
   []
 []
