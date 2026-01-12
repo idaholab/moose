@@ -13,6 +13,7 @@ Content:
             - ../../../tutorials/tutorial02_multiapps/doc/content/getting_started/examples_and_tutorials/tutorial02_multiapps/images/coupling.png
             - large_media/tutorials/darcy_thermo_mech/*
             - large_media/tutorials/shield_multiphysics/**
+            - large_media/tutorials/tutorial04_meshing/rgmb_abtr_hethom_stepbystep.png
             - large_media/testing/*
             - large_media/tutorials/INL_Hex_Light_Presentation_Background_Thin.png
             - large_media/contact/ironing_gallery.mp4

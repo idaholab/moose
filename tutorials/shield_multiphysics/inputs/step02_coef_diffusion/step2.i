@@ -39,13 +39,13 @@
 []
 
 [BCs]
-  [left]
+  [top]
     type = DirichletBC  # Simple u=value BC
     variable = T        # Variable to be set
     boundary = top      # Name of a sideset in the mesh
     value = 330
   []
-  [right]
+  [bottom]
     type = DirichletBC
     variable = T
     boundary = bottom

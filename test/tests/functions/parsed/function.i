@@ -31,9 +31,12 @@
   []
   [fn]
     type = ParsedFunction
-    expression = 's/c'
-    symbol_names = 's c'
+    # Inputs we will use in the parsed expression
     symbol_values = 'sin_fn cos_fn'
+    # Short names for each input
+    symbol_names = 's c'
+    # Expression to parse
+    expression = 's/c'
   []
 []
 

@@ -64,7 +64,9 @@ into.
 
 !col-end!
 
-!col! width=10%
+!col! width=9%
+
+!! Intentional comment to provide extra spacing
 
 !col-end!
 
@@ -100,7 +102,9 @@ into.
 
 !col-end!
 
-!col! width=10%
+!col! width=9%
+
+!! Intentional comment to provide extra spacing
 
 !col-end!
 

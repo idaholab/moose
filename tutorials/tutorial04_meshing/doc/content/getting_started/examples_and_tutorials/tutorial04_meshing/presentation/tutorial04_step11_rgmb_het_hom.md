@@ -10,9 +10,9 @@ This example illustrates the use of RGMB mesh generators to define a pin-resolve
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
        alt=Process for producing an extruded homogeneous core for a sodium-cooled fast reactor.
 
-+Hands-on package MOOSE input file (Heterogeneous ABTR mesh)+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i`
++Hands-on package MOOSE input file (Heterogeneous ABTR mesh)+: [input](https://github.com/idaholab/moose/tree/next/tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_abtr/rgmb_abtr_het_mesh.i)
 
-+Hands-on package Griffin input file (Equivalent homogeneous ABTR mesh, requires Griffin executable)+: `tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_abtr/rgmb_abtr_hom_mesh.i`
++Hands-on package Griffin input file (Equivalent homogeneous ABTR mesh, requires Griffin executable)+:  [input](https://github.com/idaholab/moose/tree/next/tutorials/tutorial04_meshing/doc/listings/reactor_examples/rgmb_abtr/rgmb_abtr_hom_mesh.i)
 
 !---
 

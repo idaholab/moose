@@ -256,11 +256,15 @@ Common interpolation method for $u_f$:
 
 !---
 
+!!code-3
+
 ## Approximating the Advection Term
 
 !listing framework/src/fvkernels/FVAdvection.C re=ADReal\sFVAdvection::computeQpResidual.*?^}
 
 !---
+
+!!code-3-end
 
 ## Example Input File
 
