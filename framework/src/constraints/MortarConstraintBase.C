@@ -74,14 +74,17 @@ MortarConstraintBase::validParams()
   params.addParam<bool>(
       "compute_lm_residuals", true, "Whether to compute Lagrange Multiplier residuals");
   params.addParam<MooseEnum>(
-      "quadrature",
+      "polynomial_basis_order_for_integration",
       MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
-      "Quadrature rule to use on mortar segments. For 2D mortar DEFAULT is recommended. "
-      "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
-      "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
-      "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
-      "quadrature for SECOND order variables. Note that the actual order supplied to the libMesh "
-      "Quadrature class will be two times this value plus one.");
+      "Polynomial basis order to assume when building quadrature rules to use on mortar segments. "
+      "For 2D mortar DEFAULT is recommended. "
+      "For 3D mortar, QUAD meshes are integrated using triangular mortar segments. "
+      "While DEFAULT order is typically sufficiently accurate, exact integration of "
+      "QUAD mortar faces with first order polynomial bases (bilinears) requires building a "
+      "quadrature rule based off of a *quadratic* (SECOND) polynomial basis on triangles. "
+      "Similarly, exact integration of QUAD mortar faces with second order polynomial bases "
+      "(biquadratics) requires building a quadrature rule based off of a *quartic* (FOURTH) "
+      "polynomial basis on triangles.");
   params.addParam<bool>(
       "use_petrov_galerkin",
       false,
@@ -155,7 +158,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
                "false`.");
 
   // Note parameter is discretization order, we then convert to quadrature order
-  const MooseEnum p_order = getParam<MooseEnum>("quadrature");
+  const auto & p_order = getParam<MooseEnum>("polynomial_basis_order_for_integration");
   // If quadrature not DEFAULT, set mortar qrule
   if (p_order != "DEFAULT")
   {
