@@ -34,8 +34,16 @@ PolyLineMeshGenerator::validParams()
   params.addParam<BoundaryName>(
       "end_boundary", "end", "Boundary to assign to (non-looped) polyline end");
 
-  params.addParam<unsigned int>(
-      "num_edges_between_points", 1, "How many Edge elements to build between each point pair");
+  params.addParam<std::vector<unsigned int>>(
+      "nums_edges_between_points",
+      {1},
+      "How many Edge elements to build between each point pair. If a single value is given, it is "
+      "applied to all segments. Otherwise, the number of entries must match the number of "
+      "segments.");
+  params.addDeprecatedParam<unsigned int>("num_edges_between_points",
+                                          1,
+                                          "How many Edge elements to build between each point pair",
+                                          "Use nums_edges_between_points instead");
 
   params.addClassDescription("Generates meshes from edges connecting a list of points.");
 
@@ -46,15 +54,24 @@ PolyLineMeshGenerator::PolyLineMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _points(getParam<std::vector<Point>>("points")),
     _loop(getParam<bool>("loop")),
-    _start_boundary(getParam<BoundaryName>("start_boundary")),
-    _end_boundary(getParam<BoundaryName>("end_boundary")),
-    _num_edges_between_points(getParam<unsigned int>("num_edges_between_points"))
+    _start_boundary(_loop ? BoundaryName() : getParam<BoundaryName>("start_boundary")),
+    _end_boundary(_loop ? BoundaryName() : getParam<BoundaryName>("end_boundary")),
+    _nums_edges_between_points(
+        parameters.isParamSetByUser("num_edges_between_points")
+            ? std::vector<unsigned int>{getParam<unsigned int>("num_edges_between_points")}
+            : getParam<std::vector<unsigned int>>("nums_edges_between_points"))
 {
   if (_points.size() < 2)
     paramError("points", "At least 2 points are needed to define a polyline");
 
   if (_loop && _points.size() < 3)
     paramError("points", "At least 3 points are needed to define a polygon");
+
+  if (_nums_edges_between_points.size() != 1 &&
+      _nums_edges_between_points.size() != _points.size() - 1 + (_loop ? 1 : 0))
+    paramError(
+        "nums_edges_between_points",
+        "This size of this vector input parameter must be 1 or match the number of segments");
 }
 
 std::unique_ptr<MeshBase>
@@ -63,50 +80,8 @@ PolyLineMeshGenerator::generate()
   auto uptr_mesh = buildMeshBaseObject();
   MeshBase & mesh = *uptr_mesh;
 
-  const auto n_points = _points.size();
-  for (auto i : make_range(n_points))
-  {
-    Point p = _points[i];
-    mesh.add_point(p, i * _num_edges_between_points);
-    if (_num_edges_between_points > 1)
-    {
-      if (!_loop && (i + 1) == n_points)
-        break;
-
-      const auto ip1 = (i + 1) % n_points;
-      const Point pvec = (_points[ip1] - p) / _num_edges_between_points;
-
-      for (auto j : make_range(1u, _num_edges_between_points))
-      {
-        p += pvec;
-        mesh.add_point(p, i * _num_edges_between_points + j);
-      }
-    }
-  }
-
-  const auto n_segments = _loop ? n_points : (n_points - 1);
-  const auto n_elem = n_segments * _num_edges_between_points;
-  const auto max_nodes = n_points * _num_edges_between_points;
-  for (auto i : make_range(n_elem))
-  {
-    const auto ip1 = (i + 1) % max_nodes;
-    auto elem = Elem::build(EDGE2);
-    elem->set_node(0, mesh.node_ptr(i));
-    elem->set_node(1, mesh.node_ptr(ip1));
-    elem->set_id() = i;
-    mesh.add_elem(std::move(elem));
-  }
-
-  if (!_loop)
-  {
-    BoundaryInfo & bi = mesh.get_boundary_info();
-    std::vector<BoundaryName> bdy_names{_start_boundary, _end_boundary};
-    std::vector<boundary_id_type> ids = MooseMeshUtils::getBoundaryIDs(mesh, bdy_names, true);
-    bi.add_side(mesh.elem_ptr(0), 0, ids[0]);
-    bi.add_side(mesh.elem_ptr(n_elem - 1), 1, ids[1]);
-  }
-
-  mesh.prepare_for_use();
+  MooseMeshUtils::buildPolyLineMesh(
+      mesh, _points, _loop, _start_boundary, _end_boundary, _nums_edges_between_points);
 
   return uptr_mesh;
 }

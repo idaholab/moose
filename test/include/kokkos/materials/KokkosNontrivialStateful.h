@@ -24,7 +24,7 @@ namespace Kokkos
 template <>
 struct ArrayDeepCopy<NotTriviallyCopyable>
 {
-  static const bool value = true;
+  static constexpr bool value = true;
 };
 } // namespace Kokkos
 } // namespace Moose

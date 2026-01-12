@@ -13,7 +13,7 @@
     bottom_left = '0 0 0'
     top_right = '1 1 0'
     block_id = 1
-    block_name = 'Block1'
+    block_name = 'block1'
   []
   [block2]
     type = SubdomainBoundingBoxGenerator
@@ -21,7 +21,7 @@
     bottom_left = '0 1 0'
     top_right = '1 2 0'
     block_id = 2
-    block_name = 'Block2'
+    block_name = 'block2'
   []
   [split]
     type = BreakMeshByBlockGenerator
@@ -110,20 +110,20 @@
     variable = mode_mixity_ratio
     property = mode_mixity_ratio
     execute_on = timestep_end
-    boundary = Block1_Block2
+    boundary = interface
   []
   [damage]
     type = MaterialRealAux
     variable = damage
     property = damage
     execute_on = timestep_end
-    boundary = Block1_Block2
+    boundary = interface
   []
 []
 
 [Physics/SolidMechanics/CohesiveZone]
   [czm_ik]
-    boundary = 'Block1_Block2'
+    boundary = 'interface'
   []
 []
 
@@ -143,7 +143,7 @@
   []
   [czm]
     type = BiLinearMixedModeTraction
-    boundary = 'Block1_Block2'
+    boundary = 'interface'
     penalty_stiffness = 1e6
     GI_c = 1e3
     GII_c = 1e2

@@ -87,7 +87,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   // Copy data and cache variable values at element quadature points
 
-  systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
+  systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
 
   for (auto & system : systems)
   {
@@ -96,7 +96,7 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
     {
       TIME_SECTION("KokkosCopy", 1);
-      system.sync(Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
+      system.sync(Moose::Kokkos::MemcpyType::HOST_TO_DEVICE);
     }
     {
       TIME_SECTION("KokkosReinit", 1);
@@ -133,9 +133,9 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
     TIME_SECTION("KokkosCopy", 1);
 
     for (auto & system : systems)
-      system.sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+      system.sync(Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
-    systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+    systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyType::DEVICE_TO_HOST);
 
     _sys.update();
   }

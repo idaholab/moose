@@ -26,12 +26,12 @@ free(void * ptr)
 template <>
 template <>
 void
-Array<Real, 1>::axby<Real>(const Real a,
-                           const Array<Real, 1> & x,
-                           const char op,
-                           const Real b,
-                           const Array<Real, 1> & y,
-                           const bool accumulate)
+Array<Real, 1, LayoutType::LEFT>::axby<Real>(const Real a,
+                                             const Array<Real, 1, LayoutType::LEFT> & x,
+                                             const char op,
+                                             const Real b,
+                                             const Array<Real, 1, LayoutType::LEFT> & y,
+                                             const bool accumulate)
 {
   if (!isDeviceAlloc() || !x.isDeviceAlloc() || !y.isDeviceAlloc())
     mooseError("Kokkos array error: all arrays for axby() should be on device.");
@@ -91,7 +91,8 @@ Array<Real, 1>::axby<Real>(const Real a,
 template <>
 template <>
 void
-Array<Real, 1>::scal<Real>(const Real a, const Array<Real, 1> & x)
+Array<Real, 1, LayoutType::LEFT>::scal<Real>(const Real a,
+                                             const Array<Real, 1, LayoutType::LEFT> & x)
 {
   if (!isDeviceAlloc() || !x.isDeviceAlloc())
     mooseError("Kokkos array error: all arrays for scal() should be on device.");
@@ -110,7 +111,7 @@ Array<Real, 1>::scal<Real>(const Real a, const Array<Real, 1> & x)
 template <>
 template <>
 void
-Array<Real, 1>::scal<Real>(const Real a)
+Array<Real, 1, LayoutType::LEFT>::scal<Real>(const Real a)
 {
   return scal(a, *this);
 }
@@ -118,7 +119,7 @@ Array<Real, 1>::scal<Real>(const Real a)
 template <>
 template <>
 Real
-Array<Real, 1>::dot<Real>(const Array<Real, 1> & x)
+Array<Real, 1, LayoutType::LEFT>::dot<Real>(const Array<Real, 1, LayoutType::LEFT> & x)
 {
   if (!isDeviceAlloc() || !x.isDeviceAlloc())
     mooseError("Kokkos array error: all arrays for dot() should be on device.");
@@ -148,7 +149,7 @@ Array<Real, 1>::nrm2<Real>()
   return KokkosBlas::nrm2(self);
 }
 
-template class Array<Real, 1>;
+template class Array<Real, 1, LayoutType::LEFT>;
 
 } // namespace Kokkos
 } // namespace Moose

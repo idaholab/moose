@@ -38,4 +38,12 @@
       cli_args = "AuxKernels/active='' Postprocessors/copy/variable=heat_source"
     []
   []
+  [external_functors]
+    type = 'CSVDiff'
+    input = 'functors.i'
+    csvdiff = 'functors_out.csv'
+    requirement = "The system shall support the use of functors in a code coupling interface."
+    design = "ExternalProblem.md"
+    issues = "#32185"
+  []
 []

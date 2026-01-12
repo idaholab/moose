@@ -10,24 +10,5 @@
     input = msh
     type = BreakMeshByBlockGenerator
     split_interface = true
-    add_interface_on_two_sides = false
   []
 []
-
-[AuxVariables]
-  [proc]
-    [AuxKernel]
-      type = ProcessorIDAux
-      execute_on = initial
-    []
-  []
-  [proc_elem]
-    family = MONOMIAL
-    order = CONSTANT
-    [AuxKernel]
-      type = ProcessorIDAux
-      execute_on = initial
-    []
-  []
-[]
-

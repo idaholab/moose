@@ -283,7 +283,7 @@ private:
 template <typename T, unsigned int dimension>
 struct ArrayDeepCopy<MaterialProperty<T, dimension>>
 {
-  static const bool value = true;
+  static constexpr bool value = true;
 };
 
 } // namespace Kokkos

@@ -1,0 +1,52 @@
+[Tests]
+  design = 'meshgenerators/GapLineMeshGenerator.md'
+  issues = '#32119'
+  [test]
+    requirement = "The system shall generate "
+    [simple]
+      type = Exodiff
+      input = simple_gap.i
+      cli_args = "--mesh-only"
+      exodiff = simple_gap_in.e
+      recover = false
+      detail = "A simple non-refined polyline mesh based on a provided input mesh's external boundary with an outward gap."
+    []
+    [simple_inward]
+      type = Exodiff
+      input = simple_gap.i
+      cli_args = "--mesh-only simple_gap_inward.e
+                  Mesh/gap/gap_direction=INWARD"
+      exodiff = simple_gap_inward.e
+      recover = false
+      detail = "A simple non-refined polyline mesh based on a provided input mesh's external boundary with an inward gap."
+    []
+    [simple_refine]
+      type = Exodiff
+      input = simple_gap.i
+      cli_args = "--mesh-only simple_gap_refine_in.e
+                  Mesh/gap/max_elem_size=0.5"
+      exodiff = simple_gap_refine_in.e
+      recover = false
+      detail = "A refined polyline mesh based on a provided input mesh's external boundary with an outward gap."
+    []
+    [bdry_ids]
+      type = Exodiff
+      input = bdry_gap.i
+      cli_args = "--mesh-only"
+      exodiff = bdry_gap_in.e
+      recover = false
+      detail = "A polyline mesh based on selected boundary IDs of a provided input mesh with an outward gap."
+    []
+  []
+  [error]
+    requirement = "The system shall throw an error "
+    [too_thick]
+      type = RunException
+      input = simple_gap.i
+      cli_args = "--mesh-only err.e
+                  Mesh/gap/thickness=1.0"
+      expect_err = "mesh is tangled"
+      detail = "when the gap thickness exceeds the available space and leads to overlapping elements."
+    []
+  []
+[]

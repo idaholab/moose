@@ -63,8 +63,6 @@
   [split]
     type = BreakMeshByBlockGenerator
     input = subdomain_6
-    split_interface = false
-    add_interface_on_two_sides = false
   []
 []
 

@@ -167,4 +167,24 @@ bool pointOnEdge(const libMesh::Point & point,
  */
 std::vector<libMesh::Point> boxCorners(const libMesh::BoundingBox & box,
                                        const libMesh::Real factor);
+
+/**
+ * Check if three points are colinear.
+ * @param p1 First point
+ * @param p2 Second point
+ * @param p3 Third point
+ * @return true if the three points are colinear, false otherwise
+ */
+bool arePointsColinear(const Point & p1, const Point & p2, const Point & p3);
+
+/**
+ * Check if the line segment p1-p2 intersects with line segment p3-p4 (only working in 2D (x-y
+ * plane)).
+ * @param p1 First point of first line segment
+ * @param p2 Second point of first line segment
+ * @param p3 First point of second line segment
+ * @param p4 Second point of second line segment
+ * @return true if the two line segments intersect, false otherwise
+ */
+bool segmentsIntersect(const Point & p1, const Point & p2, const Point & p3, const Point & p4);
 } // end of namespace geom_utils

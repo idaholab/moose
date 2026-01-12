@@ -66,6 +66,10 @@ PeripheralTriangleMeshGenerator::validParams()
   MooseEnum tri_elem_type("TRI3 TRI6 TRI7 DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>(
       "tri_element_type", tri_elem_type, "Type of the triangular elements to be generated.");
+  params.addParam<bool>(
+      "preserve_volumes",
+      false,
+      "Whether the volume of the peripheral region is preserved by fixing the radius.");
   params.addClassDescription("This PeripheralTriangleMeshGenerator object is designed to generate "
                              "a triangulated mesh between a generated outer circle boundary "
                              "and a provided inner mesh.");
@@ -82,7 +86,8 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     _peripheral_ring_radius(getParam<Real>("peripheral_ring_radius")),
     _peripheral_ring_num_segments(getParam<unsigned int>("peripheral_ring_num_segments")),
     _desired_area(getParam<Real>("desired_area")),
-    _desired_area_func(getParam<std::string>("desired_area_func"))
+    _desired_area_func(getParam<std::string>("desired_area_func")),
+    _preserve_volumes(getParam<bool>("preserve_volumes"))
 {
   // Calculate outer boundary points
 
@@ -91,11 +96,17 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
   Real d_theta = 2.0 * M_PI / _peripheral_ring_num_segments;
   for (unsigned int i = 0; i < _peripheral_ring_num_segments; i++)
   {
+    // sqrt{2 * pi / Sigma_i [sin (azi_i)]}
+    const Real radius_correction_factor =
+        _preserve_volumes ? std::sqrt(2. * M_PI / _peripheral_ring_num_segments /
+                                      std::sin(2. * M_PI / _peripheral_ring_num_segments))
+                          : 1.0;
+
     // rotation angle
     Real theta = i * d_theta;
     // calculate (x, y) coords
-    Real x = _peripheral_ring_radius * std::cos(theta);
-    Real y = _peripheral_ring_radius * std::sin(theta);
+    Real x = _peripheral_ring_radius * std::cos(theta) * radius_correction_factor;
+    Real y = _peripheral_ring_radius * std::sin(theta) * radius_correction_factor;
 
     // add to outer boundary list
     outer_polyline.emplace_back(x, y, 0);
@@ -105,7 +116,7 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
   {
     auto params = _app.getFactory().getValidParams("PolyLineMeshGenerator");
     params.set<std::vector<Point>>("points") = outer_polyline;
-    params.set<unsigned int>("num_edges_between_points") = 1;
+    params.set<std::vector<unsigned int>>("nums_edges_between_points") = {1};
     params.set<bool>("loop") = true;
     addMeshSubgenerator("PolyLineMeshGenerator", _input_name + "_periphery_polyline", params);
   }
