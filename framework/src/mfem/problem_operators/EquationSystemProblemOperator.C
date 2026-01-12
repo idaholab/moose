@@ -39,9 +39,10 @@ EquationSystemProblemOperator::Solve()
       *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
       GetEquationSystem()->_ess_tdof_lists.at(0));
 
+  mfem::Vector zero_vec(0.00);
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+  _problem_data.nonlinear_solver->Mult(zero_vec, _true_x);
 
   GetEquationSystem()->RecoverFEMSolution(
       _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);

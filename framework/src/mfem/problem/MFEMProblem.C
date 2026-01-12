@@ -48,7 +48,6 @@ void
 MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
-  addMFEMNonlinearSolver();
 }
 
 void
@@ -81,15 +80,18 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 }
 
 void
-MFEMProblem::addMFEMNonlinearSolver()
+MFEMProblem::addMFEMNonlinearSolver(unsigned int nl_max_its,
+                                    mfem::real_t nl_abs_tol,
+                                    mfem::real_t nl_rel_tol,
+                                    unsigned int print_level)
 {
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(0.0);
-  nl_solver->SetAbsTol(0.0);
-  nl_solver->SetMaxIter(1);
-
+  nl_solver->SetRelTol(nl_rel_tol);
+  nl_solver->SetAbsTol(nl_abs_tol);
+  nl_solver->SetMaxIter(nl_max_its);
+  nl_solver->SetPrintLevel(print_level);
   getProblemData().nonlinear_solver = nl_solver;
 }
 

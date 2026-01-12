@@ -373,13 +373,17 @@ void EquationSystem::ReassembleJacobian()
   for (const auto I : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(I);
+    _blfs.GetShared(test_var_name)->Update();
     _blfs.GetShared(test_var_name)->Assemble();
-    for (const auto J : index_range(_coupled_var_names))
-    {
-      auto coupled_var_name = _coupled_var_names.at(J);
-      if(_mblfs.GetShared(test_var_name)->GetShared(coupled_var_name))
+    if (_mblfs.Has(test_var_name)){
+      for (const auto J : index_range(_coupled_var_names))
       {
-        _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Assemble();
+        auto coupled_var_name = _coupled_var_names.at(J);
+        if (_mblfs.Get(test_var_name)->Has(coupled_var_name))
+        {
+          _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Update();
+          _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Assemble();
+        }
       }
     }
   }
@@ -431,14 +435,19 @@ EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 
       //Apply the boundary conditions
       //and sync the memory
-      _blockResidual.GetBlock(I) = _blockResidual.GetBlock(I) - _blockForces.GetBlock(I);
+      _blockResidual.GetBlock(I) = _blockForces.GetBlock(I) - _blockResidual.GetBlock(I);
       _blockResidual.GetBlock(I).SetSubVector(_ess_tdof_lists.at(I),0.00);
       _blockResidual.GetBlock(I).SyncAliasMemory(_blockResidual);
     }
     const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
     residual =  static_cast<mfem::Vector &>(_blockResidual);
   }else{
-    _jacobian->Mult(x, residual);
+    _jacobian->Mult(x, _blockResidual);
+    for(unsigned I=0; I<_test_var_names.size(); I++){
+      auto test_var_name = _test_var_names.at(I);
+      _blockResidual.GetBlock(I) = (*_lfs.GetShared(test_var_name)) - _blockResidual.GetBlock(I);
+    }
+    residual =  static_cast<mfem::Vector &>(_blockResidual);
   }
   x.HostRead();
   residual.HostRead();
