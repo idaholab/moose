@@ -16,12 +16,14 @@ Compute the elastic and thermal strain if the shield is only held on the ground 
 where:
 
 - $\boldsymbol{\sigma}$  is the Cauchy stress tensor
-- $\boldsymbol{\sigma}_0$ is an additional source of stress (here, thermal expansion)
+- $\boldsymbol{\sigma}_0$ is an additional source of stress
 - $\boldsymbol{u}$ is the displacement vector
 - $\boldsymbol{b}$ is the body force (here, gravity)
 - $\boldsymbol{n}$ is the unit normal to the boundary
 - $\boldsymbol{d}$ is the prescribed displacement on the boundary (here, the ground)
 - $\boldsymbol{t}$ is the prescribed traction on the boundary (here, none)
+
+Thermal expansion causes additional strain.
 
 !!end-intro
 

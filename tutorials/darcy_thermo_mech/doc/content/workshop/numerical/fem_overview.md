@@ -396,11 +396,11 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !style-end!
 
-!style! fontsize=40%
+!style! fontsize=70%
 
 !row!
 
-!col! width=10%
+!col! width=20%
 
 !listing test/tests/kernels/ad_simple_diffusion/ad_simple_diffusion.i block=Kernels link=False
 
@@ -412,9 +412,9 @@ $\quad$
 
 !col-end!
 
-!col! width=10%
+!col! width=20%
 
-!listing test/tests/kernels/ad_simple_diffusion/ad_simple_diffusion.i block=BCs BCs/left link=False
+!listing test/tests/kernels/ad_simple_diffusion/ad_simple_diffusion.i block=BCs link=False
 
 !col-end!
 
@@ -424,7 +424,7 @@ $\quad$
 
 !col-end!
 
-!col! width=10%
+!col! width=20%
 
 !listing test/tests/auxkernels/advection_flux/advection_flux_fe.i block=Kernels remove=Kernels/udot Kernels/vdot Kernels/v_advec link=False
 
@@ -436,7 +436,7 @@ $\quad$
 
 !col-end!
 
-!col! width=10%
+!col! width=20%
 
 !listing test/tests/bcs/nodal_normals/circle_tris.i block=Kernels remove=Kernels/diff link=False
 
