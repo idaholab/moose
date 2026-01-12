@@ -486,9 +486,17 @@ BreakMeshByBlockGenerator::generate()
 
   addInterface(*mesh);
 
-  // I don't quite understand yet why calling this function makes some nodes have invalid processor
-  // ID.
-  // Partitioner::set_node_processor_ids(*mesh);
+  // We want to reset node processor ids, which may need to change
+  // because of elements being disconnected, but we may have
+  // completely disconnected some ghosted nodes on some processors
+  // from all ghosted elements that should own them, in which case
+  // libMesh on those processors may not be able to tell who to query
+  // for an authoritative node processor id.  Let's just delete
+  // orphaned nodes so we don't end up with invalid_processor_id on
+  // some processors (confusing consistency checks).
+  if (!mesh->is_serial())
+    mesh->remove_orphaned_nodes();
+  Partitioner::set_node_processor_ids(*mesh);
 
   mesh->set_isnt_prepared();
 
