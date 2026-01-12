@@ -30,14 +30,14 @@
     input = 'rad_T_coupled_medium_1d_T.i'
     exodiff = 'rad_T_coupled_medium_1d_T_out.e'
     max_threads = 1
-    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system and obtain the test's spatial distribution.'
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system and obtain the tests spatial distribution.'
   []
   [1d_rad_energy_coupling_mapp_csv]
     type = 'CSVDiff'
     input = 'rad_T_coupled_medium_1d_T.i'
     csvdiff = 'rad_T_coupled_medium_1d_T_out.csv'
     max_threads = 1
-    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system  and obtain the test's maximum and mean values.'
+    requirement = 'The system shall be able to solve the 1D isothermal medium with radiation using the P1 formulation coupled to the energy equation using the Newton solver and a multiapp system  and obtain the tests maximum and mean values.'
   []
   [1d_rad_energy_coupling]
     type = 'Exodiff'
