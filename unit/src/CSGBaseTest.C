@@ -12,6 +12,7 @@
 #include "CSGBase.h"
 #include "CSGSphere.h"
 #include "CSGCartesianLattice.h"
+#include "CSGHexagonalLattice.h"
 
 #include "MooseUnitUtils.h"
 
