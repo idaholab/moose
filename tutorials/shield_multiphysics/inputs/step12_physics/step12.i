@@ -36,7 +36,7 @@ h_water = 600
         block = 'concrete_hd concrete Al'
         temperature_name = "T"
         system_names = 'nl0'
-        preconditioning = 'none'
+        preconditioning = 'defer'
 
         # Solve for steady state
         # It takes a while to heat up concrete
