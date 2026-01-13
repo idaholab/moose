@@ -34,7 +34,7 @@ MFEMDGDiffusionKernel::createDGBFIntegrator()
   // One of the DG penalty parameters. Typically +/- 1.0
   mfem::real_t sigma(-1.0);
   // One of the DG penalty parameters. Negative values replaced with (order+1)^2
-  mfem::real_t kappa(-1.0);
+  mfem::real_t kappa(4.0);
 
   return new mfem::DGDiffusionIntegrator(_one, sigma, kappa);
 }
@@ -51,7 +51,7 @@ MFEMDGDirichletLFKernel::createDGLFIntegrator()
   // One of the DG penalty parameters. Typically +/- 1.0
   mfem::real_t sigma(-1.0);
   // One of the DG penalty parameters. Negative values replaced with (order+1)^2
-  mfem::real_t kappa(-1.0);
+  mfem::real_t kappa(4.0);
 
   return new mfem::DGDirichletLFIntegrator(_zero, _one, sigma, kappa);
 }
