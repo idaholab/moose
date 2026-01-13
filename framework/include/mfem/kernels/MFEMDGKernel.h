@@ -20,6 +20,10 @@ Everything goes in this header for now!!
 class MFEMDGKernel : public MFEMKernel {
 public:
   MFEMDGKernel(const InputParameters & parameters);
+protected:
+  int _fe_order;
+  mfem::ConstantCoefficient _one;
+  mfem::ConstantCoefficient _zero;
 };
 
 // all this class needs to do differently is to implement createDGBFIntegrator
@@ -29,9 +33,6 @@ public:
   MFEMDGDiffusionKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createDGBFIntegrator() override;
-private:
-  mfem::ConstantCoefficient _one;
-  mfem::ConstantCoefficient _zero;
 };
 
 // all this class needs to do differently is to implement createDGLFIntegrator
@@ -40,9 +41,6 @@ class MFEMDGDirichletLFKernel : public MFEMDGKernel
 public:
   MFEMDGDirichletLFKernel(const InputParameters & parameters);
   virtual mfem::LinearFormIntegrator * createDGLFIntegrator() override;
-private:
-  mfem::ConstantCoefficient _one;
-  mfem::ConstantCoefficient _zero;
 };
 
 

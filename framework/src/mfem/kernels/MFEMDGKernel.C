@@ -20,11 +20,13 @@ registerMooseObject("MooseApp", MFEMDGDiffusionKernel);
 registerMooseObject("MooseApp", MFEMDGDirichletLFKernel);
 
 MFEMDGKernel::MFEMDGKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters) {}
+  : MFEMKernel(parameters), _fe_order(getMFEMProblem().getProblemData().gridfunctions.Get(_test_var_name)->ParFESpace()->FEColl()->GetOrder())
+    , _one(1.0), _zero(0.0)  
+{}
 
 
 MFEMDGDiffusionKernel::MFEMDGDiffusionKernel(const InputParameters & parameters)
-  : MFEMDGKernel(parameters), _one(1.0), _zero(0.0)
+  : MFEMDGKernel(parameters)
 {
 }
 
@@ -34,14 +36,14 @@ MFEMDGDiffusionKernel::createDGBFIntegrator()
   // One of the DG penalty parameters. Typically +/- 1.0
   mfem::real_t sigma(-1.0);
   // One of the DG penalty parameters. Negative values replaced with (order+1)^2
-  mfem::real_t kappa(4.0);
+  mfem::real_t kappa( (_fe_order+1)*(_fe_order+1) );
 
   return new mfem::DGDiffusionIntegrator(_one, sigma, kappa);
 }
 
 
 MFEMDGDirichletLFKernel::MFEMDGDirichletLFKernel(const InputParameters & parameters)
-  : MFEMDGKernel(parameters), _one(1.0), _zero(0.0)
+  : MFEMDGKernel(parameters)
 {
 }
 
@@ -51,7 +53,7 @@ MFEMDGDirichletLFKernel::createDGLFIntegrator()
   // One of the DG penalty parameters. Typically +/- 1.0
   mfem::real_t sigma(-1.0);
   // One of the DG penalty parameters. Negative values replaced with (order+1)^2
-  mfem::real_t kappa(4.0);
+  mfem::real_t kappa( (_fe_order+1)*(_fe_order+1) );
 
   return new mfem::DGDirichletLFIntegrator(_zero, _one, sigma, kappa);
 }
