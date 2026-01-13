@@ -64,11 +64,11 @@ function baked_flags()
 
     # Remove orphaned -Wl, flags
     # Note we cannot use variable replacement here as it will not work with spaces in zsh
-    b_CXXFLAGS=$(echo "\$b_CXXFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_CPPFLAGS=$(echo "\$b_CPPFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_CFLAGS=$(echo "\$b_CFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_FFLAGS=$(echo "\$b_FFLAGS" | sed 's/-Wl,[[:space:]]//g')
-    b_LDFLAGS=$(echo "\$b_LDFLAGS" | sed 's/-Wl,[[:space:]]//g')
+    b_CXXFLAGS="\$(echo "\$b_CXXFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_CPPFLAGS="\$(echo "\$b_CPPFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_CFLAGS="\$(echo "\$b_CFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_FFLAGS="\$(echo "\$b_FFLAGS" | sed 's/-Wl,[[:space:]]//g')"
+    b_LDFLAGS="\$(echo "\$b_LDFLAGS" | sed 's/-Wl,[[:space:]]//g')"
 
     # append necessary std c library
     export CXXFLAGS="\${b_CXXFLAGS} -std=c++17"
