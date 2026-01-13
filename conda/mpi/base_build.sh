@@ -102,14 +102,7 @@ unset C_INCLUDE_PATH CXXFLAGS CPPFLAGS CFLAGS FFLAGS LDFLAGS
 EOF
 
 # shellcheck disable=SC2154
-if [[ "${mpi}" == 'mpich' ]]; then
-    cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_zzz_${PKG_NAME}.sh"
-export FI_PROVIDER=tcp
-EOF
-    cat <<EOF >> "${PREFIX}/etc/conda/deactivate.d/deactivate_zzz_${PKG_NAME}.sh"
-unset FI_PROVIDER
-EOF
-elif [[ "${mpi}" == 'openmpi' ]]; then
+if [[ "${mpi}" == 'openmpi' ]]; then
     cat <<EOF >> "${PREFIX}/etc/conda/activate.d/activate_zzz_${PKG_NAME}.sh"
 export OMPI_MCA_mca_base_component_show_load_errors=0
 EOF
