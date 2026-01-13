@@ -17,10 +17,12 @@ import shutil
 
 StochasticControl = None
 StochasticRunOptions = None
+StochasticRunner = None
 
 def tryImportStochasticControl(path = None):
     global StochasticControl
     global StochasticRunOptions
+    global StochasticRunner
 
     if StochasticControl is not None:
         return True
@@ -60,10 +62,8 @@ def test_options():
 if __name__ == "__main__":
     options = {
             'input_name':'stochastic_run.i',
-            'multiapp_mode':StochasticRunOptions.MultiAppMode.BATCH_RESET,
             'ignore_solve_not_converge':False
         }
-
     cmd = os.environ.get("RUNAPP_COMMAND")
     if cmd is None:
         sys.exit("Missing expected command variable RUNAPP_COMMAND")
@@ -86,6 +86,8 @@ if __name__ == "__main__":
         if not (tryImportStochasticControl(_moose_python) and tryImportStochasticControl(_moose_stm_python)):
             raise ModuleNotFoundError("Could not find MOOSE stochastic tools module python utilities.")
 
+    if StochasticRunOptions.MultiAppMode.BATCH_RESET is not None:
+        options['multiapp_mode'] = StochasticRunOptions.MultiAppMode.BATCH_RESET,
     cli_args = test_options()
     input_file_name = 'main_runner.i'
     input_file = 'vpp_test_runner.i'
