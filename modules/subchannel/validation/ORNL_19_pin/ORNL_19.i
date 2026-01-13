@@ -66,7 +66,7 @@ P_out = 2.0e5 # Pa
   [q_prime_IC]
     type = SCMTriPowerIC
     variable = q_prime
-    power = 16975 # W/m
+    power = 16975 # W
     filename = "pin_power_profile19.txt"
   []
 

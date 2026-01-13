@@ -16,6 +16,8 @@ subchannels that is taken into consideration, since the perimetric subchannels a
 
 ## Example Input File Syntax
 
+!! Intentional comment to provide extra spacing
+
 An example input file that uses this initial condition kernel is shown below:
 
 !listing /validation/areva_FCTF/FCTF_deformed.i language=moose

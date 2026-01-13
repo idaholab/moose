@@ -124,10 +124,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
-
   # Heat Transfer Correlations
-  pin_htc_correlation = 'gnielinski'
-  duct_htc_correlation = 'gnielinski'
+  pin_HTC_closure = 'gnielinski'
+  duct_HTC_closure = 'gnielinski'
   # friction model
   friction_closure = 'cheng'
 []
@@ -135,6 +134,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [gnielinski]
+    type = SCMHTCGnielinski
   []
 []
 

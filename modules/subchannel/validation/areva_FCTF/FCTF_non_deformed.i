@@ -141,6 +141,19 @@ unheated_length_exit = 0.855 #m
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
   deformation = false
+  # Heat Transfer Correlations
+  pin_HTC_closure = 'gnielinski'
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
+  [gnielinski]
+    type = SCMHTCGnielinski
+  []
 []
 
 [ICs]

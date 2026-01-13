@@ -89,11 +89,15 @@ P_out = 4.923e6 # Pa
   compute_power = true
   P_out = ${P_out}
   friction_closure = 'MATRA'
+  pin_HTC_closure = 'Dittus-Boelter'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [Dittus-Boelter]
+    type = SCMHTCDittusBoelter
   []
 []
 
