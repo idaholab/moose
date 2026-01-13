@@ -45,11 +45,19 @@ Example scheme (implicit-explicit)
 
 !! Intentional comment to provide extra spacing
 
+[-](https://mooseframework.inl.gov/ style=color:white;)
+
+!! Intentional comment to provide extra spacing
+
 !equation
 \text{solve }M(u_{n,i}, v_{n,i}) u_{n,i+1} = 0\\
 \text{then }N(u_{n,i+1}, v_{n,i}) v_{n,i+1} = 0\\
 \text{then }M(u_{n,i+1}, v_{n,i+1}) u_{n,i+2} = 0\\
 \text{etc }
+
+!! Intentional comment to provide extra spacing
+
+[-](https://mooseframework.inl.gov/ style=color:white;)
 
 !! Intentional comment to provide extra spacing
 

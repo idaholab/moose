@@ -77,13 +77,9 @@ Names can be assigned to IDs for existing meshes to ease input file maintenance.
 
 !---
 
-We create a mesh with ids
+We create a mesh with ids, and give the blocks, identified by their id, names for convenience
 
-!listing inputs/step01_diffusion/mesh.i block=Mesh remove=Mesh/hollow_concrete Mesh/rename_blocks Mesh/rename_boundaries_step1 Mesh/rename_boundaries_step2 Mesh/rename_boundaries_step3 style=height:150px link=False
-
-And give the blocks, identified by their id so far, names for convenience
-
-!listing inputs/step01_diffusion/mesh.i block=Mesh remove=Mesh/bulk Mesh/hollow_concrete Mesh/rename_boundaries_step1 Mesh/rename_boundaries_step2 Mesh/rename_boundaries_step3 link=False
+!listing inputs/step01_diffusion/mesh.i block=Mesh remove=Mesh/hollow_concrete Mesh/rename_boundaries_step1 Mesh/rename_boundaries_step2 Mesh/rename_boundaries_step3 style=height:150px link=False
 
 !---
 
