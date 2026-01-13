@@ -1,4 +1,4 @@
-# NavierStokesStressIPHDGPrescribedFluxBC
+# NavierStokesStressIPHDGPrescribedTractionBC
 
 This class weakly imposes a prescribed traction vector $\sigma\hat{n}$. Perhaps the most common
 use case for this boundary condition is for a zero traction condition
@@ -13,8 +13,8 @@ and
 When applying a zero traction condition at an outflow, if the flow is fully developed, then
 implicitly this applies a zero pressure condition.
 
-!syntax parameters /BCs/NavierStokesStressIPHDGPrescribedFluxBC
+!syntax parameters /BCs/NavierStokesStressIPHDGPrescribedTractionBC
 
-!syntax inputs /BCs/NavierStokesStressIPHDGPrescribedFluxBC
+!syntax inputs /BCs/NavierStokesStressIPHDGPrescribedTractionBC
 
-!syntax children /BCs/NavierStokesStressIPHDGPrescribedFluxBC
+!syntax children /BCs/NavierStokesStressIPHDGPrescribedTractionBC

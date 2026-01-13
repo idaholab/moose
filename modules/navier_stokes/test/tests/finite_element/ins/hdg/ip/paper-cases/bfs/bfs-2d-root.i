@@ -220,7 +220,7 @@ rho = 1
     coeff = ${rho}
   []
   [momentum_x_diffusion_neumann]
-    type = NavierStokesStressIPHDGPrescribedFluxBC
+    type = NavierStokesStressIPHDGPrescribedTractionBC
     boundary = '3'
     component = 0
     diffusivity = 'mu'
@@ -232,7 +232,7 @@ rho = 1
     alpha = ${alpha}
   []
   [momentum_y_diffusion_neumann]
-    type = NavierStokesStressIPHDGPrescribedFluxBC
+    type = NavierStokesStressIPHDGPrescribedTractionBC
     boundary = '3'
     component = 1
     diffusivity = 'mu'

@@ -17,11 +17,11 @@ class NavierStokesStressIPHDGAssemblyHelper;
  * Implements a prescribed stress boundary condition for use with a hybridized discretization of
  * the Navier-Stokes equation
  */
-class NavierStokesStressIPHDGPrescribedFluxBC : public IPHDGPrescribedFluxBC
+class NavierStokesStressIPHDGPrescribedTractionBC : public IPHDGPrescribedFluxBC
 {
 public:
   static InputParameters validParams();
-  NavierStokesStressIPHDGPrescribedFluxBC(const InputParameters & parameters);
+  NavierStokesStressIPHDGPrescribedTractionBC(const InputParameters & parameters);
 
 protected:
   virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }

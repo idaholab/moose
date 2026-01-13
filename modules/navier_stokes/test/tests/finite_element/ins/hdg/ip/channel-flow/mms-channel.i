@@ -184,7 +184,7 @@ pressure_family = MONOMIAL
     coeff = ${rho}
   []
   [momentum_x_diffusion_neumann]
-    type = NavierStokesStressIPHDGPrescribedFluxBC
+    type = NavierStokesStressIPHDGPrescribedTractionBC
     boundary = 'right'
     component = 0
     diffusivity = 'mu'
@@ -195,7 +195,7 @@ pressure_family = MONOMIAL
     variable = vel_x
   []
   [momentum_y_diffusion_neumann]
-    type = NavierStokesStressIPHDGPrescribedFluxBC
+    type = NavierStokesStressIPHDGPrescribedTractionBC
     boundary = 'right'
     component = 1
     diffusivity = 'mu'

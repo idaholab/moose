@@ -8,12 +8,12 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NavierStokesStressIPHDGAssemblyHelper.h"
-#include "NavierStokesStressIPHDGPrescribedFluxBC.h"
+#include "NavierStokesStressIPHDGPrescribedTractionBC.h"
 
-registerMooseObject("NavierStokesApp", NavierStokesStressIPHDGPrescribedFluxBC);
+registerMooseObject("NavierStokesApp", NavierStokesStressIPHDGPrescribedTractionBC);
 
 InputParameters
-NavierStokesStressIPHDGPrescribedFluxBC::validParams()
+NavierStokesStressIPHDGPrescribedTractionBC::validParams()
 {
   auto params = IPHDGPrescribedFluxBC::validParams();
   params += NavierStokesStressIPHDGAssemblyHelper::validParams();
@@ -22,7 +22,7 @@ NavierStokesStressIPHDGPrescribedFluxBC::validParams()
   return params;
 }
 
-NavierStokesStressIPHDGPrescribedFluxBC::NavierStokesStressIPHDGPrescribedFluxBC(
+NavierStokesStressIPHDGPrescribedTractionBC::NavierStokesStressIPHDGPrescribedTractionBC(
     const InputParameters & parameters)
   : IPHDGPrescribedFluxBC(parameters),
     _iphdg_helper(std::make_unique<NavierStokesStressIPHDGAssemblyHelper>(
