@@ -38,7 +38,7 @@ if [ -n "$help" ]; then
   echo
   echo "Influential variables"
   echo "CONDUIT_DIR              Path to conduit; default: ../framework/contrib/conduit/installed"
-  echo "LIBMESH_DIR              Path to libmesh (for netcdf); default ../libmesh/installed"
+  echo "LIBMESH_DIR              Path to libmesh (for netcdf); default: ../libmesh/installed"
   echo "MFEM_DIR                 MFEM install prefix; default: ../framework/contrib/mfem/installed"
   echo "MFEM_SRC_DIR             Path to MFEM source; default: ../framework/contrib/mfem from submodule"
   echo "PETSC_ARCH               PETSc arch; default: arch-moose if PETSC_DIR not set"
@@ -55,14 +55,10 @@ fi
 
 set -e
 
-get_realpath() {
-    python3 -c "import os, sys; print(os.path.realpath(sys.argv[1]))" "$1"
-}
-
 if [ -n "$MFEM_SRC_DIR" ]; then
   skip_sub_update=1
 else
-  MFEM_SRC_DIR="$(get_realpath "${SCRIPT_DIR}"/../framework/contrib/mfem)"
+  MFEM_SRC_DIR=$(realpath "${SCRIPT_DIR}/../framework/contrib/mfem")
 fi
 MFEM_BUILD_DIR_BASE="${MFEM_SRC_DIR}/build"
 if [ -n "$MFEM_DIR" ]; then
@@ -73,24 +69,16 @@ else
   rm -rf "$MFEM_DIR"
 fi
 
-if [ -n "$CONDUIT_SRC_DIR" ]; then
-  skip_conduit_update=1
-else
-  CONDUIT_SRC_DIR="$(get_realpath "${SCRIPT_DIR}"/../framework/contrib/conduit)"
-fi
-CONDUIT_BUILD_DIR="${CONDUIT_SRC_DIR}/build"
-
-CONDUIT_DIR=${CONDUIT_DIR:-$(get_realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
-LIBMESH_DIR=${LIBMESH_DIR:-$(get_realpath "${SCRIPT_DIR}/../libmesh/installed")}
+: ${CONDUIT_DIR:=$(realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
+: ${LIBMESH_DIR:=$(realpath "${SCRIPT_DIR}/../libmesh/installed")}
 if [ -z "$PETSC_DIR" ]; then
-  PETSC_DIR=$(get_realpath "${SCRIPT_DIR}/../petsc")
+  PETSC_DIR=$(realpath "${SCRIPT_DIR}/../petsc")
   PETSC_ARCH="arch-moose"
 fi
-HDF5_DIR=${HDF5_DIR:-$PETSC_DIR/$PETSC_ARCH}
+: ${HDF5_DIR:=$PETSC_DIR/$PETSC_ARCH}
 
 if [ -z "$skip_sub_update" ]; then
-  cd "${SCRIPT_DIR}/.."
-  git submodule update --init --checkout framework/contrib/mfem
+  git submodule update --init --checkout "${MFEM_SRC_DIR}"
 fi
 
 # Set of supported build methods
