@@ -234,6 +234,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     ln -s combined-${METHOD} moose-${METHOD}
 {%- endif %}
 
+    # Strip debug symbols from library
+    find "${MOOSE_PREFIX}/lib" -type f -name "*.so*" -print -exec strip -S {} \;
+
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
