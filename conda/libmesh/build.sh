@@ -32,11 +32,10 @@ function set_libmesh_env(){
     export CXXFLAGS="${CTUNING}"
     export HYDRA_LAUNCHER=fork
     export INSTALL_BINARY="${SRC_DIR:?}/build-aux/install-sh -C"
+    export LDFLAGS=""
 
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
-        LDFLAGS="-L${PREFIX:?}/lib -Wl,-S,-rpath,${PREFIX:?}/lib"
-    else
-        export LDFLAGS="-Wl,-S"
+        LDFLAGS="-L${PREFIX:?}/lib -rpath,${PREFIX:?}/lib"
     fi
 }
 
