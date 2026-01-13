@@ -48,7 +48,7 @@ Three inputs representing each region/physics:
 
 !row!
 
-!col! width=45%
+!col! width=40%
 
 ### Fluids Sub-App
 
@@ -60,17 +60,19 @@ into.
 !listing step11_multiapps/step11_2d_fluid.i
          block=AuxVariables FVBCs/T_fluid_water_boundary
          diff=step10_finite_volume/step10.i
-         style=width:80%;height:280px
+         style=width:70%;height:280px
 
 !col-end!
 
-!col! width=9%
+!col! width=16%
 
 !! Intentional comment to provide extra spacing
 
+[-](https://mooseframework.inl.gov/ style=color:white;)
+
 !col-end!
 
-!col! width=45%
+!col! width=40%
 
 ### Heat Conduction Main App
 
@@ -80,7 +82,7 @@ into.
 !style fontsize=70% halign=right
 !listing step11_multiapps/step11_2d_heat_conduction.i
          block=AuxVariables/T_fluid MultiApps/fluid Transfers/send_T_solid Transfers/recv_T_fluid
-         style=width:80%;height:300px
+         style=width:70%;height:300px
 
 !col-end!
 
@@ -92,23 +94,25 @@ into.
 
 !row!
 
-!col! width=45%
+!col! width=40%
 
 ### Sensor Sub-App
 
 !style fontsize=70% halign=left
 !listing step11_multiapps/step11_local.i
-         style=width:80%;height:350px
+         style=width:70%;height:350px
 
 !col-end!
 
-!col! width=9%
+!col! width=17%
 
 !! Intentional comment to provide extra spacing
 
+[-](https://mooseframework.inl.gov/ style=color:white;)
+
 !col-end!
 
-!col! width=45%
+!col! width=4%
 
 ### Heat Conduction Main App
 
@@ -126,7 +130,7 @@ into.
          block=AuxVariables/flux AuxVariables/T_hdpe_inner AuxVariables/T_boron_inner
                MultiApps/detectors
                Transfers/send_exterior_temperature Transfers/send_local_flux Transfers/hdpe_temperature Transfers/boron_temperature
-         style=width:80%;height:200px
+         style=width:70%;height:200px
 
 !col-end!
 
