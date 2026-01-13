@@ -132,7 +132,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
     MINIFORGE_VERSION=25.11.0-1
     PYTHON_VERSION=3.14
-    PYTORCH_VERSION=2.7.1
+    PYTORCH_VERSION=2.9.1
 
     # Special runtime setup for OpenMPI
     if which ompi_info &> /dev/null; then
@@ -228,7 +228,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Create a temporary python environment for building pytorch
     PYTORCH_CONDA_ENV=pytorch_build
-    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.12
+    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.14
     source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
     pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
 
