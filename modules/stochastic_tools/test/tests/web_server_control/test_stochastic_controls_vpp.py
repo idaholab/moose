@@ -13,7 +13,7 @@ This should be called by the test harness with sub.i input file.
 The purpose is to test StochasticControl for perturbing input parameters and
 gathering results on-the-fly using the MOOSE WebServerControl for VPP style outputs.
 
-It works by checking predefined matrices and running the STM with some 
+It works by checking predefined matrices and running the STM with some
  benchmark problems. There is no
 "gold" file in this sense, it instead checks for syntax correctness.
 """
