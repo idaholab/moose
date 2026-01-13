@@ -3,12 +3,10 @@ mpi:
   - openmpi
 
 mpi_version:
-  # MPICH versions
-  - 4.3.2    # [linux]
-  - 4.3.2    # [osx]
-  # OpenMPI versions
-  - 5.0.8    # [linux]
-  - 5.0.8    # [osx]
+  # MPICH version
+  - 4.3.2
+  # OpenMPI version
+  - 5.0.8
 
 mpi_friendly_name:
   - MPICH
@@ -126,7 +124,7 @@ moose_llvm_tools:                                           # [osx]
   - llvm-tools 19.1.7 hb0207f0_2                            # [not arm64 and osx]
   - llvm-tools 19.1.7 h855ad52_2                            # [arm64]
 
-moose_libclang:
+moose_libclang:                                             # [osx]
   - libclang-cpp19.1 19.1.7 default_hc369343_5              # [not arm64 and osx]
   - libclang-cpp19.1 19.1.7 default_h73dfc95_5              # [arm64]
 
