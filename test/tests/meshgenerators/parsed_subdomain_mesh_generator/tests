@@ -15,7 +15,7 @@
     cli_args = '--mesh-only'
     exodiff = 'parsed_subdomain_include_in.e'
     recover = false
-    requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions abc.'
+    requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions and a list of specific subdomains to include in this assignment.'
     issues = '#32205'
   []
   [parsed_subdomain_eeid_test]
