@@ -7,13 +7,24 @@
 # *
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
-import numpy as np
-import sys
+"""
+This should be called by the test harness with sub.i input file.
+
+The purpose is to test StochasticControl for perturbing input parameters and
+gathering results on-the-fly using the MOOSE WebServerControl for VPP style outputs.
+
+It works by checking predefined matrices and running the STM with some 
+ benchmark problems. There is no
+"gold" file in this sense, it instead checks for syntax correctness.
+"""
+
 import os
-import importlib
-import importlib.util
-import argparse
+import sys
 import shutil
+import numpy as np
+import argparse
+import importlib.util
+import importlib
 
 StochasticControl = None
 StochasticRunOptions = None
@@ -62,46 +73,48 @@ def test_options():
 if __name__ == "__main__":
     options = {
             'input_name':'stochastic_run.i',
-            'ignore_solve_not_converge':False
         }
     cmd = os.environ.get("RUNAPP_COMMAND")
     if cmd is None:
         sys.exit("Missing expected command variable RUNAPP_COMMAND")
     cmd = cmd.split()
-
+    # Gather MPI options if running with MPI
     if "-n" in cmd:
-        mpi_index = cmd.index("-n")-1
+        mpi_index = cmd.index("-n") - 1
         options["mpi_command"] = cmd[mpi_index]
-        options["num_procs"] = int(cmd[mpi_index+2])
-    exec_index = cmd.index("-i")-1
+        options["num_procs"] = int(cmd[mpi_index + 2])
+    # Get executable and input file based on position of '-i' argument
+    exec_index = cmd.index("-i") - 1
     executable = cmd[exec_index]
-    input_file = cmd[exec_index+2]
-    options["cli_args"] = cmd[(exec_index + 3):]
+    input_file = cmd[exec_index + 2]
+    # Everything after the input is cli_args
+    options["cli_args"] = cmd[(exec_index + 3) :]
 
     if StochasticControl is None:
-        _exec_dir = os.path.dirname(os.path.abspatch(shutil.which(executable)))
+        _exec_dir = os.path.dirname(os.path.abspath(shutil.which(executable)))
         _share_dir = os.path.abspath(os.path.join(_exec_dir, "..", "share"))
-        _moose_stm_python = os.path.join(_share_dir, "stochastic_tools","python")
+        _moose_stm_python = os.path.join(_share_dir, "stochastic_tools", "python")
         _moose_python = os.path.join(_moose_stm_python,'..','..','..','python')
         if not (tryImportStochasticControl(_moose_python) and tryImportStochasticControl(_moose_stm_python)):
             raise ModuleNotFoundError("Could not find MOOSE stochastic tools module python utilities.")
 
     if StochasticRunOptions.MultiAppMode.BATCH_RESET is not None:
-        options['multiapp_mode'] = StochasticRunOptions.MultiAppMode.BATCH_RESET,
+        options['multiapp_mode'] = StochasticRunOptions.MultiAppMode.BATCH_RESET
     cli_args = test_options()
-    input_file_name = 'main_runner.i'
+    parameters = ['capsule1:Postprocessors/frequency_factor/value',
+        'capsule1:Postprocessors/activation_energy/value',
+        'capsule1:BCs/heat_DRV_outer/value',
+        'capsule1:mesh_specified'
+    ]
+    qois = ['capsule_01/x', 'capsule_01/temp']
     input_file = 'vpp_test_runner.i'
-    command_possibilities = []
-    with StochasticControl(executable=executable,
-                         physics_input=input_file,
-                         options=StochasticRunOptions(**options),
-                         parameters=['capsule1:Postprocessors/frequency_factor/value',
-                            'capsule1:Postprocessors/activation_energy/value',
-                            'capsule1:BCs/heat_DRV_outer/value',
-                            'capsule1:mesh_specified'],
-                         quantities_of_interest=['capsule_01/x',
-                                                'capsule_01/temp',
-                                        ]) as runner:
+    with StochasticControl(
+        executable=executable,
+        physics_input=input_file,
+        parameters=parameters,
+        quantities_of_interest=qois,
+        options=StochasticRunOptions(**options),
+    ) as runner:
         if cmd[exec_index+3]==0:
             runner.configCache(tol=[1,1e-10,1e-14,1e-14])
         elif cmd[exec_index+3]==1:
