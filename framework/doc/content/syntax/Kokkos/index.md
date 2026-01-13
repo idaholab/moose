@@ -26,12 +26,15 @@ Standard containers such as `std::vector`, `std::set`, `std::map` and others are
 Basically, it is safe to assume that any dynamically-allocated data on CPU cannot be accessed on GPU.
 Therefore, we provide alternative data containers to be used on GPU: `Moose::Kokkos::Array`, `Moose::Kokkos::JaggedArray`, and `Moose::Kokkos::Map`.
 
-`Moose::Kokkos::Array` is a template class and designed to hold arbitrary type of data.
-It receives three template arguments: data type, dimension, and layout type.
+`Moose::Kokkos::Array` is a template class designed to hold arbitrary type of data.
+It receives up to four template arguments: data type, dimension, index type, and layout type.
 It supports multi-dimensional indexing, and up to five-dimensional arrays are supported.
 The dimension can either be specified through the second template argument with the default being one-dimension or using type aliases: for instance, a three-dimensional array of type `double` can be declared either by `Array<double, 3>` or `Array3D<double>`.
 The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the innermost dimension varies the fastest.
-If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the third layout template argument can be optionally set to `Moose::Kokkos::LayoutType::RIGHT` (default is `LEFT`).
+The index type template argument is set to 8-byte integer by default to accomodate large arrays.
+However, 8-byte integer computation is significantly more expensive than 4-byte integer computation.
+If your array size is small enough, consider using 4-byte indices to optimize index calculations.
+If having the outermost dimension run the fastest is desired for multi-dimensional arrays, the fourth layout template argument can be optionally set to `Moose::Kokkos::LayoutType::RIGHT` (default is `LEFT`).
 They automatically return either CPU or GPU data depending on where they are being accessed.
 Arrays can be allocated through the following APIs: `create()`, `createHost()`, and `createDevice()`.
 `create()` allocates memories on both CPU and GPU, while `createHost()` or `createDevice()` only allocates memory on either CPU or GPU.
@@ -135,7 +138,7 @@ Therefore, `Moose::Kokkos::JaggedArray` stores the data of a jagged array sequen
 It is divided into inner and outer arrays.
 The outer array is the regular part of a jagged array.
 Each entry of the outer array is the inner array, whose size can vary with each other.
-As a result, it is defined with four template arguments: the data type, inner array dimension size, outer array dimension size, and inner array layout type (defaults to `Moose::Kokkos::LayoutType::LEFT`).
+As a result, it is defined with up to five template arguments: the data type, inner array dimension size, outer array dimension size, outer array index type (defaults to 8-byte integer; inner arrays always use 4-byte integer), and inner array layout type (defaults to `Moose::Kokkos::LayoutType::LEFT`).
 Both inner and outer arrays can be up to three-dimensional.
 However, it is not possible to have inner arrays with different dimensions in a single jagged array.
 
