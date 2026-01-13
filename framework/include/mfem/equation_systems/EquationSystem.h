@@ -160,21 +160,6 @@ protected:
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & kernels_map);
 
-  // template <class FormType>
-  // void ApplyBoundaryDGBLFIntegrators(
-  //     const std::string & trial_var_name,
-  //     const std::string & test_var_name,
-  //     std::shared_ptr<FormType> form,
-  //     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-  //         integrated_bc_map,
-  //     std::optional<mfem::real_t> scale_factor = std::nullopt);
-
-  // void ApplyBoundaryDGLFIntegrators(
-  //     const std::string & test_var_name,
-  //     std::shared_ptr<mfem::ParLinearForm> form,
-  //     NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
-  //         integrated_bc_map);
-
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.
   std::vector<std::string> _coupled_var_names;
@@ -199,9 +184,6 @@ protected:
   NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
   NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
-  NamedFieldsMap<mfem::ParBilinearForm> _dg_blfs;
-  NamedFieldsMap<mfem::ParLinearForm> _dg_lfs;
-
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;

@@ -2,6 +2,7 @@
   type = MFEMMesh
   file = ../mesh/star.mesh
   dim = 2
+  uniform_refine = 6
 []
 
 [Problem]
@@ -24,21 +25,6 @@
     fespace = H1FESpace
   []
 []
-
-
-#[BCs]
-#  [bottom]
-#    type = MFEMScalarDirichletBC
-#    variable = concentration
-#    boundary = 'bottom'
-#    coefficient = 1.0
-#  []
-#  [top]
-#    type = MFEMScalarDirichletBC
-#    variable = concentration
-#    boundary = 'top'
-#  []
-#[]
 
 [Kernels]
   [dg_diff]
@@ -80,7 +66,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/DG_Diffusion
     vtk_format = ASCII
   []
 []
