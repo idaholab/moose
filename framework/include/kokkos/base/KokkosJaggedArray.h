@@ -30,7 +30,7 @@ struct JaggedArrayInnerDim
   /**
    * Stride of each dimension
    */
-  dof_id_type stride[inner] = {0};
+  dof_id_type stride[inner + 1] = {0};
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -67,7 +67,7 @@ public:
    * Get the total inner array size
    * @returns The total inner array size
    */
-  KOKKOS_FUNCTION dof_id_type size() const { return _dim.stride[inner - 1]; }
+  KOKKOS_FUNCTION dof_id_type size() const { return _dim.stride[inner]; }
   /**
    * Get the size of a dimension of the inner array
    * @param dim The dimension index
@@ -80,7 +80,7 @@ public:
    */
   KOKKOS_FUNCTION T & operator[](dof_id_type i) const
   {
-    KOKKOS_ASSERT(i < _dim.stride[inner - 1]);
+    KOKKOS_ASSERT(i < _dim.stride[inner]);
 
     return _data[i];
   }
@@ -162,7 +162,7 @@ public:
     KOKKOS_ASSERT(i0 < _dim[0]);
     KOKKOS_ASSERT(i1 < _dim[1]);
 
-    return _data[i0 + _dim.stride[0] * i1];
+    return _data[_dim.stride[0] * i0 + _dim.stride[1] * i1];
   }
 };
 
@@ -194,7 +194,7 @@ public:
     KOKKOS_ASSERT(i1 < _dim[1]);
     KOKKOS_ASSERT(i2 < _dim[2]);
 
-    return _data[i0 + _dim.stride[0] * i1 + _dim.stride[1] * i2];
+    return _data[_dim.stride[0] * i0 + _dim.stride[1] * i1 + _dim.stride[2] * i2];
   }
 };
 ///@}
@@ -220,8 +220,14 @@ public:
 template <typename T, unsigned int inner, unsigned int outer>
 class JaggedArrayBase
 {
-#ifdef MOOSE_KOKKOS_SCOPE
 public:
+  /**
+   * Constructor
+   * @param layout The memory layout type
+   */
+  JaggedArrayBase(const LayoutType layout) : _layout(layout) {}
+
+#ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Allocate outer array
    * @param n The vector containing the size of each dimension for the outer array
@@ -311,9 +317,13 @@ protected:
    */
   Array<dof_id_type, outer> _offsets;
   /**
+   * Inner array memory layout type
+   */
+  const LayoutType _layout;
+  /**
    * Whether the array was finalized
    */
-  bool _finalized;
+  bool _finalized = false;
 };
 
 #define usingKokkosJaggedArrayBaseMembers(T, inner, outer)                                         \
@@ -350,15 +360,25 @@ JaggedArrayBase<T, inner, outer>::reserve(const std::array<dof_id_type, outer> &
     stride *= _offsets.n(o);
   }
 
+  for (unsigned int i = 0; i < inner; ++i)
+    _dims[idx].dim[i] = dimension[i];
+
   stride = 1;
 
-  for (unsigned int i = 0; i < inner; ++i)
-  {
-    stride *= dimension[i];
+  if (_layout == LayoutType::LEFT)
+    for (unsigned int i = 0; i < inner; ++i)
+    {
+      _dims[idx].stride[i] = stride;
+      stride *= dimension[i];
+    }
+  else
+    for (int i = inner - 1; i >= 0; --i)
+    {
+      _dims[idx].stride[i] = stride;
+      stride *= dimension[i];
+    }
 
-    _dims[idx].dim[i] = dimension[i];
-    _dims[idx].stride[i] = stride;
-  }
+  _dims[idx].stride[inner] = stride;
 }
 
 template <typename T, unsigned int inner, unsigned int outer>
@@ -391,13 +411,14 @@ JaggedArrayBase<T, inner, outer>::finalize()
 
 /**
  * The specialization of the Kokkos jagged array class for each dimension.
+ * @tparam layout The inner array memory layout type
  */
 ///{@
-template <typename T, unsigned int inner, unsigned int outer>
+template <typename T, unsigned int inner, unsigned int outer, LayoutType layout = LayoutType::LEFT>
 class JaggedArray;
 
-template <typename T, unsigned int inner>
-class JaggedArray<T, inner, 1> : public JaggedArrayBase<T, inner, 1>
+template <typename T, unsigned int inner, LayoutType layout>
+class JaggedArray<T, inner, 1, layout> : public JaggedArrayBase<T, inner, 1>
 {
   usingKokkosJaggedArrayBaseMembers(T, inner, 1);
 
@@ -405,7 +426,7 @@ public:
   /**
    * Default constructor
    */
-  JaggedArray() = default;
+  JaggedArray() : JaggedArrayBase<T, inner, 1>(layout) {}
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -413,7 +434,7 @@ public:
    * Allocate outer array with given dimensions
    * @param n0 The first dimension size for the outer array
    */
-  JaggedArray(dof_id_type n0) { create(n0); }
+  JaggedArray(dof_id_type n0) : JaggedArrayBase<T, inner, 1>(layout) { create(n0); }
   /**
    * Allocate outer array with given dimensions
    * @param n0 The first dimension size for the outer array
@@ -435,8 +456,8 @@ public:
 #endif
 };
 
-template <typename T, unsigned int inner>
-class JaggedArray<T, inner, 2> : public JaggedArrayBase<T, inner, 2>
+template <typename T, unsigned int inner, LayoutType layout>
+class JaggedArray<T, inner, 2, layout> : public JaggedArrayBase<T, inner, 2>
 {
   usingKokkosJaggedArrayBaseMembers(T, inner, 2);
 
@@ -444,7 +465,7 @@ public:
   /**
    * Default constructor
    */
-  JaggedArray() = default;
+  JaggedArray() : JaggedArrayBase<T, inner, 2>(layout) {}
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -453,7 +474,10 @@ public:
    * @param n0 The first dimension size for the outer array
    * @param n1 The second dimension size for the outer array
    */
-  JaggedArray(dof_id_type n0, dof_id_type n1) { create(n0, n1); }
+  JaggedArray(dof_id_type n0, dof_id_type n1) : JaggedArrayBase<T, inner, 2>(layout)
+  {
+    create(n0, n1);
+  }
   /**
    * Allocate outer array with given dimensions
    * @param n0 The first dimension size for the outer array
@@ -477,8 +501,8 @@ public:
 #endif
 };
 
-template <typename T, unsigned int inner>
-class JaggedArray<T, inner, 3> : public JaggedArrayBase<T, inner, 3>
+template <typename T, unsigned int inner, LayoutType layout>
+class JaggedArray<T, inner, 3, layout> : public JaggedArrayBase<T, inner, 3>
 {
   usingKokkosJaggedArrayBaseMembers(T, inner, 3);
 
@@ -486,7 +510,7 @@ public:
   /**
    * Default constructor
    */
-  JaggedArray() = default;
+  JaggedArray() : JaggedArrayBase<T, inner, 3>(layout) {}
 
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
@@ -496,7 +520,10 @@ public:
    * @param n1 The second dimension size for the outer array
    * @param n2 The third dimension size for the outer array
    */
-  JaggedArray(dof_id_type n0, dof_id_type n1, dof_id_type n2) { create(n0, n1, n2); }
+  JaggedArray(dof_id_type n0, dof_id_type n1, dof_id_type n2) : JaggedArrayBase<T, inner, 3>(layout)
+  {
+    create(n0, n1, n2);
+  }
   /**
    * Allocate outer array with given dimensions
    * @param n0 The first dimension size for the outer array
