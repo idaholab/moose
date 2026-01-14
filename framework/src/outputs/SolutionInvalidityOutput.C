@@ -22,7 +22,7 @@ SolutionInvalidityOutput::validParams()
 {
   InputParameters params = Output::validParams();
 
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL, EXEC_FAILED};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
 
   params.addParam<unsigned int>("solution_invalidity_timestep_interval",
                                 1,
