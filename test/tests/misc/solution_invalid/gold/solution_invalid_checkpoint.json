@@ -28,14 +28,14 @@
             "solution_invalidity": {
                 "solution_invalidity": [
                     {
-                        "converged_counts": 16,
+                        "converged_counts": 0,
                         "message": "The diffusivity is greater than the threshold value!",
                         "object_type": "NonsafeMaterial",
                         "timestep_counts": 48,
                         "total_counts": 48
                     },
                     {
-                        "converged_counts": 16,
+                        "converged_counts": 0,
                         "message": "Extra invalid thing!",
                         "object_type": "NonsafeMaterial",
                         "timestep_counts": 48,
@@ -50,14 +50,14 @@
             "solution_invalidity": {
                 "solution_invalidity": [
                     {
-                        "converged_counts": 16,
+                        "converged_counts": 0,
                         "message": "The diffusivity is greater than the threshold value!",
                         "object_type": "NonsafeMaterial",
                         "timestep_counts": 48,
                         "total_counts": 96
                     },
                     {
-                        "converged_counts": 16,
+                        "converged_counts": 0,
                         "message": "Extra invalid thing!",
                         "object_type": "NonsafeMaterial",
                         "timestep_counts": 48,
