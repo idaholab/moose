@@ -15,6 +15,7 @@
 #include "SCM.h"
 #include <limits> // for std::numeric_limits
 #include <cmath>  // for std::isnan
+#include "SCMMixingClosureBase.h"
 
 registerMooseObject("SubChannelApp", TriSubChannel1PhaseProblem);
 
