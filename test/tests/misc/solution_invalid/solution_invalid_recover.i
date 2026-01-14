@@ -65,7 +65,6 @@
 []
 
 [Reporters]
-
   [solution_invalidity]
     type = SolutionInvalidityReporter
   []

@@ -18,6 +18,8 @@ SolutionInvalidityReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Reports the Summary Table of Solution Invalid Counts.");
+  // This reporter is simply executed on JSON output
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
