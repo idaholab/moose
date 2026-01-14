@@ -119,7 +119,7 @@ do
       \
       -DMFEM_USE_CEED=YES \
       -DMFEM_USE_CONDUIT=YES \
-      -DMFEM_USE_GSLIB=NO \
+      -DMFEM_USE_GSLIB=YES \
       -DMFEM_USE_MPI=YES \
       -DMFEM_USE_MUMPS=YES \
       -DMFEM_USE_NETCDF=YES \
