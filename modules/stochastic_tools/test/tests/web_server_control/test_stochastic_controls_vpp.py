@@ -55,7 +55,7 @@ def tryImportStochasticControl(path = None):
 if not tryImportStochasticControl():
     _moose_dir = os.environ.get("MOOSE_DIR", None)
     if not _moose_dir:
-        _moose_dir = os.path.join(os.path.dirname(__file__), *(["..", * 5]))
+        _moose_dir = os.path.join(os.path.dirname(__file__), *([".."] * 5))
     _moose_python_dir = os.path.abspath(os.path.join(_moose_dir,'python'))
     sys.path.append(_moose_python_dir)
     _stm_python_path = os.path.abspath(
