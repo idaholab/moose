@@ -1,0 +1,11 @@
+[Tests]
+  design = 'NodeElemVariableResidualNorm.md'
+  issues = '#31038'
+
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    requirement = 'The system shall compute the residual norm for a variable on a subdomain with a single NodeElem.'
+  []
+[]
