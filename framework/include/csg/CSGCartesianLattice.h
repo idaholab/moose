@@ -25,16 +25,18 @@ class CSGCartesianLattice : public CSGLattice
 {
 public:
   /**
-   * @brief Construct a new CSGCartesianLattice object from the map of universes provided
+   * @brief Construct a new CSGCartesianLattice object from the map of universes provided.
    *
    * @param name unique identifying name of lattice
    * @param pitch pitch of lattice elements
    * @param universes list of list of universes to set as the lattice map
+   * @param outer optional outer universe or material name that fills space around lattice elements.
+   *              If not provided, outer is assumed to be VOID.
    */
-  CSGCartesianLattice(
-      const std::string & name,
-      const Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+  CSGCartesianLattice(const std::string & name,
+                      const Real pitch,
+                      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+                      const std::optional<OuterVariant> & outer = std::nullopt);
 
   /**
    * @brief Construct a new empty CSGCartesianLattice object with specified pitch.
@@ -42,8 +44,12 @@ public:
    *
    * @param name unique identifying name of lattice
    * @param pitch pitch of lattice elements
+   * @param outer optional outer universe or material name that fills space around lattice elements.
+   *              If not provided, outer is assumed to be VOID.
    */
-  CSGCartesianLattice(const std::string & name, const Real pitch);
+  CSGCartesianLattice(const std::string & name,
+                      const Real pitch,
+                      const std::optional<OuterVariant> & outer = std::nullopt);
 
   /**
    * Destructor

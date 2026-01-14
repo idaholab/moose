@@ -12,30 +12,16 @@
 namespace CSG
 {
 
-CSGLattice::CSGLattice(const std::string & name, const std::string & lattice_type)
+CSGLattice::CSGLattice(const std::string & name,
+                       const std::string & lattice_type,
+                       const std::optional<OuterVariant> & outer)
   : _name(name), _lattice_type(lattice_type), _outer_type("VOID"), _outer_universe(nullptr)
 {
-}
-
-CSGLattice::CSGLattice(const std::string & name,
-                       const std::string & lattice_type,
-                       const std::string outer_name)
-  : _name(name),
-    _lattice_type(lattice_type),
-    _outer_type("CSG_MATERIAL"),
-    _outer_material(outer_name),
-    _outer_universe(nullptr)
-{
-}
-
-CSGLattice::CSGLattice(const std::string & name,
-                       const std::string & lattice_type,
-                       const CSGUniverse & outer_universe)
-  : _name(name),
-    _lattice_type(lattice_type),
-    _outer_type("UNIVERSE"),
-    _outer_universe(&outer_universe)
-{
+  // Handle the outer variant if provided
+  if (outer.has_value())
+  {
+    std::visit([this](auto && outer_arg) { updateOuter(outer_arg); }, outer.value());
+  }
 }
 
 void

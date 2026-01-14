@@ -15,16 +15,19 @@ namespace CSG
 CSGHexagonalLattice::CSGHexagonalLattice(
     const std::string & name,
     Real pitch,
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()), _pitch(pitch)
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+    const std::optional<OuterVariant> & outer)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>(), outer), _pitch(pitch)
 {
   setUniverses(universes); // this will set _nrow
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
-CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name, Real pitch)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()),
+CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name,
+                                         Real pitch,
+                                         const std::optional<OuterVariant> & outer)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>(), outer),
     _pitch(pitch),
     _nrow(0),
     _nring(0)

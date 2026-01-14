@@ -15,16 +15,19 @@ namespace CSG
 CSGCartesianLattice::CSGCartesianLattice(
     const std::string & name,
     const Real pitch,
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()), _pitch(pitch)
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+    const std::optional<OuterVariant> & outer)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>(), outer), _pitch(pitch)
 {
   setUniverses(universes); // this will set _nrow and _ncol
   if (_pitch < 0)
     mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
-CSGCartesianLattice::CSGCartesianLattice(const std::string & name, const Real pitch)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
+CSGCartesianLattice::CSGCartesianLattice(const std::string & name,
+                                         const Real pitch,
+                                         const std::optional<OuterVariant> & outer)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>(), outer),
     _pitch(pitch),
     _nrow(0),
     _ncol(0)

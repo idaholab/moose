@@ -570,6 +570,15 @@ TEST(CSGBaseTest, testLatticeOuter)
     csg_obj->resetLatticeOuter(lat);
     ASSERT_TRUE(lat.getOuterType() == "VOID");
   }
+  // try to set outer universe that is not in this base
+  {
+    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
+    auto & u_out2 = csg_obj2->createUniverse("univ_outer");
+    Moose::UnitUtils::assertThrows([&csg_obj, &lat, &u_out2]()
+                                   { csg_obj->setLatticeOuter(lat, u_out2); },
+                                   "Cannot set outer universe for lattice lat1. Outer universe "
+                                   "univ_outer is not in the CSGBase instance.");
+  }
 }
 
 /// tests CSGBase::addLattice

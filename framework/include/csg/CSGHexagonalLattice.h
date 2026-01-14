@@ -32,11 +32,13 @@ public:
    * @param name unique identifying name of lattice
    * @param pitch flat-to-flat distance for one hexagonal lattice element
    * @param universes row-wise ragged vector of universes representing hex pattern
+   * @param outer optional outer universe or material name that fills space around lattice elements.
+   *              If not provided, outer is assumed to be VOID.
    */
-  CSGHexagonalLattice(
-      const std::string & name,
-      Real pitch,
-      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+  CSGHexagonalLattice(const std::string & name,
+                      Real pitch,
+                      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
+                      const std::optional<OuterVariant> & outer = std::nullopt);
 
   /**
    * Construct a new empty CSGHexagonalLattice with the specified pitch.
@@ -44,8 +46,12 @@ public:
    *
    * @param name unique identifying name of lattice
    * @param pitch flat-to-flat distance for one hexagonal lattice element
+   * @param outer optional outer universe or material name that fills space around lattice elements.
+   *              If not provided, outer is assumed to be VOID.
    */
-  CSGHexagonalLattice(const std::string & name, Real pitch);
+  CSGHexagonalLattice(const std::string & name,
+                      Real pitch,
+                      const std::optional<OuterVariant> & outer = std::nullopt);
 
   /**
    * Destructor

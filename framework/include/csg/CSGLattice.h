@@ -11,6 +11,8 @@
 
 #include "CSGUniverse.h"
 #include "JsonIO.h"
+#include <variant>
+#include <optional>
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -20,40 +22,28 @@ namespace CSG
 {
 
 /**
+ * Type definition for a variant that can hold either a CSGUniverse reference or a string
+ * for use as the outer parameter in lattice constructors
+ */
+typedef std::variant<std::reference_wrapper<const CSGUniverse>, std::string> OuterVariant;
+
+/**
  * CSGLattice is the abstract class for defining lattices.
  */
 class CSGLattice
 {
 public:
   /**
-   * @brief Construct a new CSGLattice of specific type without an outer defined
+   * @brief Construct a new CSGLattice of specific type
    *
    * @param name unique name of lattice
    * @param lattice_type type of lattice
-   */
-  CSGLattice(const std::string & name, const std::string & lattice_type);
-
-  /**
-   * @brief Construct a new CSGLattice of specific type with material string outer
-   *
-   * @param name unique name of lattice
-   * @param lattice_type type of lattice
-   * @param outer_name name of outer material name that fills space around lattice elements
+   * @param outer optional outer universe or material name that fills space around lattice elements.
+   *              If not provided, outer is assumed to be VOID.
    */
   CSGLattice(const std::string & name,
              const std::string & lattice_type,
-             const std::string outer_name);
-
-  /**
-   * @brief Construct a new CSGLattice of specific type with a universe outer
-   *
-   * @param name unique name of lattice
-   * @param lattice_type type of lattice
-   * @param outer_universe pointer to outer universe that fills space around lattice elements
-   */
-  CSGLattice(const std::string & name,
-             const std::string & lattice_type,
-             const CSGUniverse & outer_universe);
+             const std::optional<OuterVariant> & outer = std::nullopt);
 
   /**
    * Destructor
