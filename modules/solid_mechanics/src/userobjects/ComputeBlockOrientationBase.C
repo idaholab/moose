@@ -27,13 +27,7 @@ ComputeBlockOrientationBase::ComputeBlockOrientationBase(const InputParameters &
 EulerAngles
 ComputeBlockOrientationBase::getBlockOrientation(SubdomainID block) const
 {
-  // Note that we can't use operator[] for a std::map in a const function!
-  if (_block_ea_values.find(block) != _block_ea_values.end())
-    return _block_ea_values.find(block)->second;
-
-  mooseError("Unknown block requested for Euler angle values!");
-
-  return EulerAngles(); // To satisfy compilers
+  return _block_ea_values.at(block);
 }
 
 void

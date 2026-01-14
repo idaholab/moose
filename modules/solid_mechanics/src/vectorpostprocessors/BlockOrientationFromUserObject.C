@@ -50,9 +50,7 @@ BlockOrientationFromUserObject::BlockOrientationFromUserObject(const InputParame
     if (j == 0)
       _output_vector[j] = &declareVector("subdomain_id");
     else
-    {
       _output_vector[j] = &declareVector("euler_angle_" + std::to_string(j)); // can change
-    }
   }
 
   _uo = &getUserObjectByName<ComputeBlockOrientationBase>(_uo_name);
@@ -73,12 +71,8 @@ BlockOrientationFromUserObject::finalize()
 {
   // parallel communication
   for (const auto row : make_range(_num_rows))
-  {
     for (const auto col : make_range(_num_cols))
-    {
       _communicator.max((*_output_vector[col])[row]);
-    }
-  }
 }
 
 void

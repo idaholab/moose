@@ -45,7 +45,6 @@ ComputeBlockOrientationByMisorientation::execute()
 {
   // Compute the average of the rotation matrix and misorientation in this element
   RankTwoTensor rot;
-  MathUtils::mooseSetToZero(rot);
   Real misorient = 0.0;
 
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -71,21 +70,18 @@ ComputeBlockOrientationByMisorientation::execute()
 
   // store value for the current misorientation in the subdomain
   // save EulerAngle in tuple so that we can gather the data from all processors
-  _grain_misorientation[_current_elem->subdomain_id()].push_back(
-      std::make_tuple(misorient, ea.phi1, ea.Phi, ea.phi2));
+  _grain_misorientation[_current_elem->subdomain_id()].emplace_back(misorient, ea.phi1, ea.Phi, ea.phi2);
 }
 
 void
 ComputeBlockOrientationByMisorientation::finalize()
 {
-  const std::set<SubdomainID> & blocks = _fe_problem.mesh().meshSubdomains();
-
-  for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+  for (const auto & block : _fe_problem.mesh().meshSubdomains())
   {
     // Sync data from all processors (gather the maximum misorientation and the corresponding
     // EulerAngle from every processor)
-    _communicator.allgather(_grain_misorientation[*it]);
-    _block_ea_values[*it] = computeSubdomainEulerAngles(*it);
+    _communicator.allgather(_grain_misorientation[block]);
+    _block_ea_values[block] = computeSubdomainEulerAngles(block);
   }
 }
 
@@ -95,12 +91,12 @@ ComputeBlockOrientationByMisorientation::computeSubdomainEulerAngles(const Subdo
   Real max_misorientation = 0.0; // misorientation values should within [0, pi]
   EulerAngles ea;
   bool has_update = false;
-  for (const auto & orient : _grain_misorientation[sid])
+  for (const auto & [misorientation, phi1, Phi, phi2] : _grain_misorientation[sid])
   {
-    if (std::get<0>(orient) > max_misorientation)
+    if (misorientation > max_misorientation)
     {
-      max_misorientation = std::get<0>(orient);
-      ea = EulerAngles(std::get<1>(orient), std::get<2>(orient), std::get<3>(orient));
+      max_misorientation = misorientation;
+      ea = EulerAngles(phi1, Phi, phi2);
       has_update = true;
     }
   }
