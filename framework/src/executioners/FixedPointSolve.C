@@ -375,6 +375,10 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 {
   bool auto_advance = autoAdvance();
 
+  // Start new TIMESTEP_BEGIN section for solution invalidity
+  _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
+  _app.solutionInvalidity().resetSolutionInvalidTimeStep();
+
   _executioner.preSolve();
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
 
@@ -414,6 +418,11 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     auto & convergence = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
     convergence.preExecute();
   }
+
+  // Keep track of the solution warnings from the TIMESTEP_BEGIN phase
+  _app.solutionInvalidity().syncIteration();
+  _app.solutionInvalidity().solutionInvalidAccumulation();
+  _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(_problem.timeStep());
 
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
@@ -459,17 +468,26 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
       _xfem_update_count = 0;
     }
 
+    // Start new TIMESTEP_END section for solution invalidity
+    // We have to restart the current iteration count to avoid double counting, but
+    // but we keep the time step count to have it be: solve count + exec_timestep_end count
+    _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
+
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
     _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
-    {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-      return false;
-    }
+
+    // Keep track of the solution warnings from the TIMESTEP_END phase
+    _app.solutionInvalidity().syncIteration();
+    _app.solutionInvalidity().solutionInvalidAccumulation();
+    // Similarly, don't tally the step counts into the total counts to avoid double counting
   }
 
+  if (_fixed_point_status == MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP)
+    return false;
   if (_fail_step)
   {
     _fail_step = false;
