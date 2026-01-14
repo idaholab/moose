@@ -4,14 +4,14 @@ moose_cmake:
 
 moose_cc:
   - gcc 14.3.0 h0dff253_16                                  # [linux]
-  - clang 19.1.7 default_h1323312_5                         # [not arm64 and osx]
-  - clang 19.1.7 default_hf9bcbb7_5                         # [arm64]
+  - clang 19.1.7 default_h1323312_7                         # [not arm64 and osx]
+  - clang 19.1.7 default_hf9bcbb7_7                         # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
   - gxx 14.3.0 h76987e4_16                                  # [linux]
-  - clangxx 19.1.7 default_h1c12a56_5                       # [not arm64 and osx]
-  - clangxx 19.1.7 default_h36137df_5                       # [arm64]
+  - clangxx 19.1.7 default_h9089c59_7                       # [not arm64 and osx]
+  - clangxx 19.1.7 default_hc995acf_7                       # [arm64]
 
 ### If you change these versions, change also conda/mpi/*
 moose_gfortran:

@@ -41,14 +41,14 @@ moose_cmake:
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
   - gcc 14.3.0 h0dff253_16                                  # [linux]
-  - clang 19.1.7 default_h1323312_5                         # [not arm64 and osx]
-  - clang 19.1.7 default_hf9bcbb7_5                         # [arm64]
+  - clang 19.1.7 default_h1323312_7                         # [not arm64 and osx]
+  - clang 19.1.7 default_hf9bcbb7_7                         # [arm64]
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cxx:
   - gxx 14.3.0 h76987e4_16                                  # [linux]
-  - clangxx 19.1.7 default_h1c12a56_5                       # [not arm64 and osx]
-  - clangxx 19.1.7 default_h36137df_5                       # [arm64]
+  - clangxx 19.1.7 default_h9089c59_7                       # [not arm64 and osx]
+  - clangxx 19.1.7 default_hc995acf_7                       # [arm64]
 
 ### If you change these versions, change also conda/seacas/*
 moose_gfortran:
@@ -69,8 +69,8 @@ moose_cxxcompiler:
 
 moose_libgfortran5:
   - libgfortran5 15.2.0 h68bc16d_16                         # [linux]
-  - libgfortran5 15.2.0 h336fb69_1                          # [not arm64 and osx]
-  - libgfortran5 15.2.0 h742603c_1                          # [arm64]
+  - libgfortran5 15.2.0 hd16e46c_15                         # [not arm64 and osx]
+  - libgfortran5 15.2.0 hdae7583_16                         # [arm64]
 
 moose_gcc_impl:                                             # [linux]
   - gcc_impl_linux-64 14.3.0 he8b2097_16                    # [linux]
@@ -89,8 +89,8 @@ moose_libstdcxx_devel:                                      # [linux]
 
 moose_libcxx:
   - libcxx 21.1.8 ha0f52bf_0                                # [linux]
-  - libcxx 21.1.6 h3d58e20_0                                # [not arm64 and osx]
-  - libcxx 21.1.6 hf598326_0                                # [arm64]
+  - libcxx 21.1.8 h3d58e20_0                                # [not arm64 and osx]
+  - libcxx 21.1.8 hf598326_0                                # [arm64]
 
 moose_libzlib:
   - libzlib 1.3.1 hb9d3cd8_2                                # [linux]
@@ -105,28 +105,28 @@ moose_icu:
   - icu 75.1 hfee45f7_0                                     # [arm64]
 
 moose_cctools:                                              # [osx]
-  - cctools_osx-64 1024.3 llvm19_1_h3b512aa_9               # [not arm64 and osx]
-  - cctools_osx-arm64 1024.3 llvm19_1_h8c76c84_9            # [arm64]
+  - cctools_osx-64 1030.6.3 llvm19_1_h8f0d4bb_3             # [not arm64 and osx]
+  - cctools_osx-arm64 1030.6.3 llvm19_1_h6d92914_3          # [arm64]
 
 moose_compiler_rt:                                          # [osx]
   - compiler-rt 19.1.7 he914875_1                           # [not arm64 and osx]
   - compiler-rt 19.1.7 h855ad52_1                           # [arm64]
 
 moose_clang_osx:                                            # [osx]
-  - clangxx_osx-64 19.1.7 h7e5c614_25                       # [not arm64 and osx]
-  - clang_osx-arm64 19.1.7 h07b0088_25                      # [arm64]
+  - clangxx_osx-64 19.1.7 h8a78ed7_30                       # [not arm64 and osx]
+  - clangxx_osx-arm64 19.1.7 h75f8d18_30                    # [arm64]
 
 moose_llvm_openmp:                                          # [osx]
-  - llvm-openmp 21.1.5 h472b3d1_2                           # [not arm64 and osx]
-  - llvm-openmp 21.1.5 h4a912ad_2                           # [arm64]
+  - llvm-openmp 21.1.8 h472b3d1_0                           # [not arm64 and osx]
+  - llvm-openmp 21.1.8 h4a912ad_0                           # [arm64]
 
 moose_llvm_tools:                                           # [osx]
   - llvm-tools 19.1.7 hb0207f0_2                            # [not arm64 and osx]
   - llvm-tools 19.1.7 h855ad52_2                            # [arm64]
 
 moose_libclang:                                             # [osx]
-  - libclang-cpp19.1 19.1.7 default_hc369343_5              # [not arm64 and osx]
-  - libclang-cpp19.1 19.1.7 default_h73dfc95_5              # [arm64]
+  - libclang-cpp19.1 19.1.7 default_hd70426c_7              # [not arm64 and osx]
+  - libclang-cpp19.1 19.1.7 default_hf3020a7_7              # [arm64]
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
