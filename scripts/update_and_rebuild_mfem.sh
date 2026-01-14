@@ -44,6 +44,7 @@ if [ -n "$help" ]; then
   echo "PETSC_ARCH               PETSc arch; default: arch-moose if PETSC_DIR not set"
   echo "PETSC_DIR                Path to PETSc install; default: ../petsc"
   echo "HDF5_DIR                 Path to HDF5 install; default: \$PETSC_DIR/\$PETSC_ARCH"
+  echo "GSLIB_DIR                Path to GSLIB source git repo"
   exit 0
 fi
 
@@ -76,6 +77,13 @@ if [ -z "$PETSC_DIR" ]; then
   PETSC_ARCH="arch-moose"
 fi
 : ${HDF5_DIR:=$PETSC_DIR/$PETSC_ARCH}
+
+# Overwrite GSLIB repo URL if GSLIB_DIR looks like a git repo
+if [ -n "$GSLIB_DIR" ] && [ -d "$GSLIB_DIR/.git" ]; then
+  export GIT_CONFIG_COUNT=1
+  export GIT_CONFIG_KEY_0=url.file://$GSLIB_DIR.insteadOf
+  export GIT_CONFIG_VALUE_0=https://github.com/Nek5000/gslib
+fi
 
 if [ -z "$skip_sub_update" ]; then
   git submodule update --init --checkout "${MFEM_SRC_DIR}"
