@@ -1763,7 +1763,6 @@ NonlinearSystemBase::residualSetup()
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
     _fe_problem.residualSetup();
-  _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 }
 
 void
@@ -2843,7 +2842,6 @@ NonlinearSystemBase::jacobianSetup()
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
     _fe_problem.jacobianSetup();
-  _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 }
 
 void
