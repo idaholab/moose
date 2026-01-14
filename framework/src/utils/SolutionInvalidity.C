@@ -30,7 +30,8 @@ SolutionInvalidity::SolutionInvalidity(MooseApp & app)
     _solution_invalidity_registry(moose::internal::getSolutionInvalidityRegistry()),
     _has_synced(true),
     _has_solution_warning(false),
-    _has_solution_error(false)
+    _has_solution_error(false),
+    _has_recorded_issue(false)
 {
 }
 
@@ -62,6 +63,13 @@ bool
 SolutionInvalidity::hasInvalidSolution() const
 {
   return hasInvalidSolutionWarning() || hasInvalidSolutionError();
+}
+
+bool
+SolutionInvalidity::hasEverHadSolutionIssue() const
+{
+  mooseAssert(_has_synced, "Has not synced");
+  return _has_recorded_issue;
 }
 
 void
@@ -127,7 +135,10 @@ void
 SolutionInvalidity::printHistory(const ConsoleStream & console,
                                  unsigned int & timestep_interval_size) const
 {
-  console << "\nSolution Invalid Warnings History:\n";
+  if (hasInvalidSolutionError())
+    console << "\nSolution Invalid History:\n";
+  else
+    console << "\nWarnings History:\n";
   transientTable(timestep_interval_size).print(console);
 }
 
@@ -197,6 +208,10 @@ SolutionInvalidity::syncIteration()
   // Set the state across all processors
   comm().max(_has_solution_warning);
   comm().max(_has_solution_error);
+
+  // Keep track of any occurence
+  if (_has_solution_warning || _has_solution_error)
+    _has_recorded_issue = true;
 
   // We've now synced
   _has_synced = true;

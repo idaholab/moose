@@ -68,6 +68,13 @@ public:
    */
   bool hasInvalidSolution() const;
 
+  /**
+   * Whether or not any warning or invalid solution has ever been encountered
+   *
+   * This must be called after a sync.
+   */
+  bool hasEverHadSolutionIssue() const;
+
   /// Reset the number of solution invalid occurrences back to zero for the current time step
   void resetSolutionInvalidTimeStep();
 
@@ -161,6 +168,8 @@ private:
   bool _has_solution_warning;
   /// Whether or not we have an invalid solution (only after a sync)
   bool _has_solution_error;
+  /// Whether or not we have ever had any warning or solution issue during the simulation
+  bool _has_recorded_issue;
 };
 
 // datastore and dataload for recover
