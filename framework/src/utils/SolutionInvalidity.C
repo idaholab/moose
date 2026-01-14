@@ -273,7 +273,7 @@ SolutionInvalidity::transientTable(unsigned int & step_interval) const
 {
   mooseAssert(_has_synced, "Has not synced");
 
-  TimeTable vtable({"Object", "Time", "Stepinterval Count", "Total Count"}, 4);
+  TimeTable vtable({"Object", "Step", "Interval Count", "Total Count"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object information
