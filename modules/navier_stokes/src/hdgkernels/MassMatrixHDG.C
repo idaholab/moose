@@ -41,11 +41,12 @@ MassMatrixHDG::computeJacobianOnSide()
   mooseAssert(_face_phi.size() == _var.dofIndices().size(), "These should be the same size");
   // resize always zeroes for DenseMatrix
   _mass.resize(_face_phi.size(), _face_phi.size());
+  // The division by 2 here is necessary because each face will be visited twice, once from each
+  // neighboring element
+  const auto quant = _density / 2 * _current_side_elem->hmax();
   for (const auto qp : make_range(_qrule_face->n_points()))
   {
-    // The division by 2 here is necessary because each face will be visited twice, once from each
-    // neighboring element
-    const auto qp_quant = _JxW_face[qp] * _coord[qp] * _density / 2;
+    const auto qp_quant = _JxW_face[qp] * _coord[qp] * quant;
     for (const auto i : index_range(_face_phi))
     {
       const auto qp_i_quant = qp_quant * _face_phi[i][qp];

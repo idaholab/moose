@@ -23,10 +23,9 @@ DiffusionIPHDGAssemblyHelper::validParams()
 {
   auto params = IPHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
-  params.addParam<Real>("alpha",
-                        1,
-                        "The stabilization coefficient required for discontinuous Galerkin "
-                        "schemes.");
+  params.addRequiredParam<Real>("alpha",
+                                "The stabilization coefficient required for discontinuous Galerkin "
+                                "schemes.");
   return params;
 }
 
@@ -57,7 +56,7 @@ DiffusionIPHDGAssemblyHelper::scalarVolume()
 void
 DiffusionIPHDGAssemblyHelper::scalarFace()
 {
-  const auto h_elem = _elem_volume / _side_area;
+  const auto h_elem = _ip_current_elem->hmax();
 
   for (const auto i : index_range(_scalar_re))
     for (const auto qp : make_range(_ip_qrule_face->n_points()))
@@ -74,7 +73,7 @@ DiffusionIPHDGAssemblyHelper::scalarFace()
 void
 DiffusionIPHDGAssemblyHelper::lmFace()
 {
-  const auto h_elem = _elem_volume / _side_area;
+  const auto h_elem = _ip_current_elem->hmax();
 
   for (const auto i : index_range(_lm_re))
     for (const auto qp : make_range(_ip_qrule_face->n_points()))
@@ -89,7 +88,7 @@ DiffusionIPHDGAssemblyHelper::lmFace()
 void
 DiffusionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & dirichlet_value)
 {
-  const auto h_elem = _elem_volume / _side_area;
+  const auto h_elem = _ip_current_elem->hmax();
 
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {

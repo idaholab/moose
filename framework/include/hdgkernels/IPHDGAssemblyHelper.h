@@ -116,6 +116,9 @@ protected:
   /// The current element side
   const unsigned int & _ip_current_side;
 
+  /// The current side element
+  const Elem * const & _ip_current_side_elem;
+
   /// The element JxW
   const MooseArray<Real> & _ip_JxW;
 

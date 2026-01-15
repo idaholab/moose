@@ -11,6 +11,8 @@
 
 #include "IPHDGBC.h"
 
+class AdvectionIPHDGAssemblyHelper;
+
 /**
  * Implements an outflow boundary condition for use with a hybridized discretization of
  * the Advection equation
@@ -27,8 +29,12 @@ protected:
    */
   virtual void compute() override;
 
-  virtual AdvectionIPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual AdvectionIPHDGAssemblyHelper & iphdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<AdvectionIPHDGAssemblyHelper> _iphdg_helper;
+
+  /// Whether to constrain the Lagrange multiplier to weakly match the interior solution on this
+  /// boundary. This should be set to true for pure advection problems and likely false otherwise
+  const bool _constrain_lm;
 };

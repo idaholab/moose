@@ -455,7 +455,7 @@ public:
    * Returns the side element
    * @return A _reference_.  Make sure to store this as a reference!
    */
-  const Elem *& sideElem() { return _current_side_elem; }
+  const Elem * const & sideElem() const { return _current_side_elem; }
 
   /**
    * Returns the reference to the volume of current side element

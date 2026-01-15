@@ -95,7 +95,7 @@ n=8
   type = NavierStokesProblem
   mass_matrix = 'mass'
   extra_tag_matrices = 'mass'
-  use_pressure_mass_matrix = true
+  set_schur_pre = mass
 []
 
 [Preconditioning]

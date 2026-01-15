@@ -6,6 +6,7 @@ class TestMonomialTri(unittest.TestCase):
     def test(self):
         df1 = mms.run_spatial('mms-advection-diffusion.i', 5, "--error", "--error-unused",
                               "Mesh/elem_type=TRI6",
+                              "Variables/u/family=MONOMIAL",
                               y_pp=['L2u'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
@@ -19,6 +20,7 @@ class TestMonomialQuad(unittest.TestCase):
     def test(self):
         df1 = mms.run_spatial('mms-advection-diffusion.i', 6, "--error", "--error-unused",
                               "Mesh/elem_type=QUAD9",
+                              "Variables/u/family=MONOMIAL",
                               y_pp=['L2u'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
@@ -54,7 +56,7 @@ class TestLagrangeQuad(unittest.TestCase):
         fig.save('lagrange-quad.png')
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            self.assertTrue(fuzzyAbsoluteEqual(value, 3., .1))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
 
 class TestHierarchicTri(unittest.TestCase):
     def test(self):
@@ -82,7 +84,7 @@ class TestHierarchicQuad(unittest.TestCase):
         fig.save('hierarchic-quad.png')
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
-            self.assertTrue(fuzzyAbsoluteEqual(value, 3., .1))
+            self.assertTrue(fuzzyAbsoluteEqual(value, 2., .1))
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)

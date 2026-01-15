@@ -9,7 +9,9 @@
 
 #pragma once
 
-#include "HDGKernel.h"
+#include "IPHDGKernel.h"
+
+class MassFluxPenaltyIPHDGAssemblyHelper;
 
 /*
  * Imposes a singular perturbation on the component momentum equations penalizing discontinuities in
@@ -17,48 +19,17 @@
  * neighboring elements, which makes this class useful in tandem with hybridized discretizations
  * because it supports static condensation
  */
-class MassFluxPenaltyIPHDG : public HDGKernel
+class MassFluxPenaltyIPHDG : public IPHDGKernel
 {
 public:
   static InputParameters validParams();
 
   MassFluxPenaltyIPHDG(const InputParameters & parameters);
 
-  virtual void computeResidual() override {}
-  virtual void computeJacobian() override {}
-  virtual void computeOffDiagJacobian(unsigned int) override {}
-  virtual void computeResidualOnSide() override;
-  virtual void computeJacobianOnSide() override;
-
 protected:
-  ADReal computeQpResidualOnSide();
-
-  const MooseVariableField<Real> & _vel_x_var;
-  const MooseVariableField<Real> & _vel_y_var;
-  const MooseVariableField<Real> & _vel_x_face_var;
-  const MooseVariableField<Real> & _vel_y_face_var;
-  const ADVariableValue & _vel_x;
-  const ADVariableValue & _vel_y;
-  const ADVariableValue & _vel_x_face;
-  const ADVariableValue & _vel_y_face;
-  const MooseArray<std::vector<Real>> & _vel_x_phi;
-  const MooseArray<std::vector<Real>> & _vel_y_phi;
-  const MooseArray<std::vector<Real>> & _vel_x_face_phi;
-  const MooseArray<std::vector<Real>> & _vel_y_face_phi;
-  const unsigned short _comp;
-  const Real _gamma;
-
-  std::vector<Real> _residuals;
-  std::vector<ADReal> _ad_residuals;
+  virtual IPHDGAssemblyHelper & iphdgHelper() override;
 
 private:
-  /**
-   * Helper method to reduce code duplication, this will multiply quadrature point residuals
-   * corresponding to the jump in mass flux by the passed-in \p test functions (corresponding to
-   * either interior or face test functions) and \p sign (+1 or -1 respectively)
-   */
-  template <typename T>
-  void computeOnSideHelper(std::vector<T> & residuals,
-                           const MooseArray<std::vector<Real>> & test,
-                           Real sign);
+  /// The assembly helper providing the required IP-HDG method implementations
+  std::unique_ptr<MassFluxPenaltyIPHDGAssemblyHelper> _iphdg_helper;
 };
