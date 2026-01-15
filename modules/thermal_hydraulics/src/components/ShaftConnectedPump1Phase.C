@@ -116,11 +116,15 @@ ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
+    auto flow_model_1phase = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
+    params.set<std::vector<VariableName>>("passives_times_area") =
+        flow_model_1phase->passiveTransportSolutionVariableNames();
     params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
     params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<std::vector<VariableName>>("passives_times_V") = _passives_times_V;
     // the direction of the outlet channel
     params.set<Point>("di_out") = _directions[1].unit();
     params.set<Real>("gravity_magnitude") = THM::gravity_const;

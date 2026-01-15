@@ -65,11 +65,15 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
+    auto flow_model_1phase = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
+    params.set<std::vector<VariableName>>("passives_times_area") =
+        flow_model_1phase->passiveTransportSolutionVariableNames();
     params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
     params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<std::vector<VariableName>>("passives_times_V") = _passives_times_V;
     params.set<RealVectorValue>("dir_c0") = _directions[0];
     params.set<Real>("K") = _K;
     params.set<Real>("A_ref") = _A_ref;

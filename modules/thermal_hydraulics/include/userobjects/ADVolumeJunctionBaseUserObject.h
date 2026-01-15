@@ -60,6 +60,9 @@ protected:
    */
   virtual void computeFluxesAndResiduals(const unsigned int & c) = 0;
 
+  /// Gets the flow channel variables
+  virtual std::vector<const MooseVariableBase *> getFlowChannelVariables() const;
+
   /**
    * Gets the junction variables
    */

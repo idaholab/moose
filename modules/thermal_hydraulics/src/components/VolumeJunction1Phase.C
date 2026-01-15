@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VolumeJunction1Phase.h"
+#include "FlowChannel1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
 
@@ -28,12 +29,18 @@ VolumeJunction1Phase::validParams()
   params.addParam<FunctionName>("initial_vel_x", "Initial velocity in x-direction [m/s]");
   params.addParam<FunctionName>("initial_vel_y", "Initial velocity in y-direction [m/s]");
   params.addParam<FunctionName>("initial_vel_z", "Initial velocity in z-direction [m/s]");
+  params.addParam<std::vector<FunctionName>>(
+      "initial_passives",
+      "Initial passive transport variable values in the flow channel, if any (units are "
+      "[amount/m^3], where 'amount' may be mass (kg) or a number (molecules, moles, etc.))");
 
   params.addParam<Real>("scaling_factor_rhoV", 1.0, "Scaling factor for rho*V [-]");
   params.addParam<Real>("scaling_factor_rhouV", 1.0, "Scaling factor for rho*u*V [-]");
   params.addParam<Real>("scaling_factor_rhovV", 1.0, "Scaling factor for rho*v*V [-]");
   params.addParam<Real>("scaling_factor_rhowV", 1.0, "Scaling factor for rho*w*V [-]");
   params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V [-]");
+  params.addParam<std::vector<Real>>("scaling_factor_passives_times_V",
+                                     "Scaling factor for each passive transport variable [-]");
 
   params.addParam<Real>("K", 0., "Form loss factor [-]");
   params.addParam<Real>("A_ref", "Reference area [m^2]");
@@ -99,22 +106,51 @@ VolumeJunction1Phase::setupMesh()
 }
 
 void
+VolumeJunction1Phase::init()
+{
+  FlowJunction1Phase::init();
+
+  for (const auto & passive_name : _passives_names)
+    _passives_times_V.push_back(passive_name + "_times_V");
+}
+
+void
 VolumeJunction1Phase::check() const
 {
   FlowJunction1Phase::check();
 
-  bool ics_set =
-      getTHMProblem().hasInitialConditionsFromFile() ||
-      (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&
-       isParamValid("initial_vel_y") && isParamValid("initial_vel_z"));
+  // List of IC parameters that are needed
+  std::vector<std::string> needed_ic_params = {
+      "initial_p", "initial_T", "initial_vel_x", "initial_vel_y", "initial_vel_z"};
+  if (_passives_times_V.size() > 0)
+    needed_ic_params.push_back("initial_passives");
+
+  // Check valid number of passive scaling factors is provided
+  if (isParamSetByUser("scaling_factor_passives_times_V"))
+    checkEqualSize<Real, FunctionName>("scaling_factor_passives_times_V", "initial_passives");
+
+  // Check whether the required ICs have been set by parameters
+  bool ics_set_from_params = true;
+  for (const auto & ic_param : needed_ic_params)
+    if (!isParamValid(ic_param))
+      ics_set_from_params = false;
+
+  bool ics_set = getTHMProblem().hasInitialConditionsFromFile() || ics_set_from_params;
+
+  if (ics_set)
+  {
+    std::vector<FunctionName> initial_passives;
+    if (_passives_times_V.size() > 0)
+      initial_passives = getParam<std::vector<FunctionName>>("initial_passives");
+    if (initial_passives.size() != _passives_times_V.size())
+      logError("The size of the 'initial_passives' parameter must equal the size of "
+               "'passives_names' on the connected flow channels.");
+  }
 
   if (!ics_set && !_app.isRestarting())
   {
-    // create a list of the missing IC parameters
-    const std::vector<std::string> ic_params{
-        "initial_p", "initial_T", "initial_vel_x", "initial_vel_y", "initial_vel_z"};
     std::ostringstream oss;
-    for (const auto & ic_param : ic_params)
+    for (const auto & ic_param : needed_ic_params)
       if (!isParamValid(ic_param))
         oss << " " << ic_param;
 
@@ -139,6 +175,13 @@ VolumeJunction1Phase::addVariables()
   addJunctionVariable(true, _rhowV_var_name, _scaling_factor_rhowV);
   addJunctionVariable(true, _rhoEV_var_name, _scaling_factor_rhoEV);
 
+  const auto scaling_factor_passives_times_V =
+      isParamSetByUser("scaling_factor_passives_times_V")
+          ? getParam<std::vector<Real>>("scaling_factor_passives_times_V")
+          : std::vector<Real>(_passives_times_V.size(), 1.0);
+  for (const auto i : index_range(_passives_times_V))
+    addJunctionVariable(true, _passives_times_V[i], scaling_factor_passives_times_V[i]);
+
   addJunctionVariable(false, _pressure_var_name);
   addJunctionVariable(false, _temperature_var_name);
   addJunctionVariable(false, _velocity_var_name);
@@ -155,6 +198,13 @@ VolumeJunction1Phase::addVariables()
     addVolumeJunctionIC(_pressure_var_name, "p");
     addVolumeJunctionIC(_temperature_var_name, "T");
     addVolumeJunctionIC(_velocity_var_name, "vel");
+  }
+
+  if (isParamValid("initial_passives"))
+  {
+    const auto & initial_passives = getParam<std::vector<FunctionName>>("initial_passives");
+    for (const auto i : index_range(_passives_times_V))
+      addPassiveTransportIC(_passives_times_V[i], initial_passives[i]);
   }
 }
 
@@ -178,11 +228,15 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
+    auto flow_model_1phase = dynamic_cast<const FlowModelSinglePhase *>(_flow_model.get());
+    params.set<std::vector<VariableName>>("passives_times_area") =
+        flow_model_1phase->passiveTransportSolutionVariableNames();
     params.set<std::vector<VariableName>>("rhoV") = {_rhoV_var_name};
     params.set<std::vector<VariableName>>("rhouV") = {_rhouV_var_name};
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<std::vector<VariableName>>("passives_times_V") = _passives_times_V;
     params.set<Real>("K") = _K;
     params.set<Real>("A_ref") = _A_ref;
     params.set<UserObjectName>("fp") = _fp_name;
@@ -201,8 +255,12 @@ VolumeJunction1Phase::addMooseObjects()
   // Add BC to each of the connected flow channels
   for (std::size_t i = 0; i < _boundary_names.size(); i++)
   {
-    const std::vector<NonlinearVariableName> var_names = {
-        FlowModelSinglePhase::RHOA, FlowModelSinglePhase::RHOUA, FlowModelSinglePhase::RHOEA};
+    const auto & flow_channel =
+        getComponentByName<FlowChannel1Phase>(_connections[i]._component_name);
+    const auto flow_model = flow_channel.getFlowModel();
+    const auto flow_model_1phase = dynamic_cast<const FlowModelSinglePhase *>(flow_model.get());
+    const auto var_names = flow_model_1phase->solutionVariableNames();
+
     for (std::size_t j = 0; j < var_names.size(); j++)
     {
       const std::string class_name = "ADVolumeJunction1PhaseBC";
@@ -217,6 +275,8 @@ VolumeJunction1Phase::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
+      params.set<std::vector<VariableName>>("passives_times_area") =
+          flow_model_1phase->passiveTransportSolutionVariableNames();
       params.set<bool>("implicit") = getTHMProblem().getImplicitTimeIntegrationFlag();
       getTHMProblem().addBoundaryCondition(
           class_name, genName(name(), i, var_names[j] + ":" + class_name), params);
@@ -230,7 +290,9 @@ VolumeJunction1Phase::addMooseObjects()
   var_names[RHOVV_INDEX] = _rhovV_var_name;
   var_names[RHOWV_INDEX] = _rhowV_var_name;
   var_names[RHOEV_INDEX] = _rhoEV_var_name;
-  for (std::size_t i = 0; i < N_EQ; i++)
+  for (const auto & passive_times_V : _passives_times_V)
+    var_names.push_back(passive_times_V);
+  for (const auto i : index_range(var_names))
   {
     {
       const std::string class_name = "ADTimeDerivative";
@@ -333,4 +395,17 @@ VolumeJunction1Phase::addVolumeJunctionIC(const VariableName & var, const std::s
                                   "position"});
   params.set<UserObjectName>("fluid_properties") = _fp_name;
   getTHMProblem().addSimInitialCondition(class_name, genName(name(), var, "ic"), params);
+}
+
+void
+VolumeJunction1Phase::addPassiveTransportIC(const VariableName & var,
+                                            const FunctionName & function_name)
+{
+  const std::string class_name = "FunctionIC";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+  params.set<VariableName>("variable") = var;
+  params.set<FunctionName>("function") = function_name;
+  params.set<Real>("scaling_factor") = _volume;
+  getTHMProblem().addSimInitialCondition(class_name, genName(name(), var + "_ic"), params);
 }

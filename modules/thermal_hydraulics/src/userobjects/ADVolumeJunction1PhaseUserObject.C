@@ -30,12 +30,16 @@ ADVolumeJunction1PhaseUserObject::validParams()
   params.addRequiredCoupledVar("rhoA", "rho*A of the connected flow channels");
   params.addRequiredCoupledVar("rhouA", "rhou*A of the connected flow channels");
   params.addRequiredCoupledVar("rhoEA", "rhoE*A of the connected flow channels");
+  params.addRequiredCoupledVar("passives_times_area",
+                               "Passive transport solution variables on flow channel");
 
   params.addRequiredCoupledVar("rhoV", "rho*V of the junction");
   params.addRequiredCoupledVar("rhouV", "rho*u*V of the junction");
   params.addRequiredCoupledVar("rhovV", "rho*v*V of the junction");
   params.addRequiredCoupledVar("rhowV", "rho*w*V of the junction");
   params.addRequiredCoupledVar("rhoEV", "rho*E*V of the junction");
+  params.addRequiredCoupledVar("passives_times_V",
+                               "Passive transport solution variables on junction");
 
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
 
@@ -61,6 +65,7 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
     _rhoA(adCoupledValue("rhoA")),
     _rhouA(adCoupledValue("rhouA")),
     _rhoEA(adCoupledValue("rhoEA")),
+    _n_passives(coupledComponents("passives_times_area")),
 
     _K(getParam<Real>("K")),
     _A_ref(getParam<Real>("A_ref")),
@@ -69,17 +74,8 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
-  _flow_variable_names.resize(THMVACE1D::N_FLUX_OUTPUTS);
-  _flow_variable_names[THMVACE1D::RHOA] = "rhoA";
-  _flow_variable_names[THMVACE1D::RHOUA] = "rhouA";
-  _flow_variable_names[THMVACE1D::RHOEA] = "rhoEA";
-
-  _scalar_variable_names.resize(VolumeJunction1Phase::N_EQ);
-  _scalar_variable_names[VolumeJunction1Phase::RHOV_INDEX] = "rhoV";
-  _scalar_variable_names[VolumeJunction1Phase::RHOUV_INDEX] = "rhouV";
-  _scalar_variable_names[VolumeJunction1Phase::RHOVV_INDEX] = "rhovV";
-  _scalar_variable_names[VolumeJunction1Phase::RHOWV_INDEX] = "rhowV";
-  _scalar_variable_names[VolumeJunction1Phase::RHOEV_INDEX] = "rhoEV";
+  for (const auto i : make_range(_n_passives))
+    _passives_times_area.push_back(&adCoupledValue("passives_times_area", i));
 
   _junction_var_values.resize(VolumeJunction1Phase::N_EQ);
   _junction_var_values[VolumeJunction1Phase::RHOV_INDEX] = &coupledJunctionValue("rhoV");
@@ -87,6 +83,8 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
   _junction_var_values[VolumeJunction1Phase::RHOVV_INDEX] = &coupledJunctionValue("rhovV");
   _junction_var_values[VolumeJunction1Phase::RHOWV_INDEX] = &coupledJunctionValue("rhowV");
   _junction_var_values[VolumeJunction1Phase::RHOEV_INDEX] = &coupledJunctionValue("rhoEV");
+  for (const auto i : make_range(_n_passives))
+    _junction_var_values.push_back(&coupledJunctionValue("passives_times_V", i));
 
   _numerical_flux_uo.resize(_n_connections);
   for (std::size_t i = 0; i < _n_connections; i++)
@@ -101,20 +99,24 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   const RealVectorValue ni = di * din;
   const Real nJi_dot_di = -din;
 
-  std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS, 0.);
+  std::vector<ADReal> Ui(THMVACE3D::N_FLUX_INPUTS + _n_passives, 0.);
   Ui[THMVACE3D::RHOA] = _rhoA[0];
   Ui[THMVACE3D::RHOUA] = _rhouA[0] * di(0);
   Ui[THMVACE3D::RHOVA] = _rhouA[0] * di(1);
   Ui[THMVACE3D::RHOWA] = _rhouA[0] * di(2);
   Ui[THMVACE3D::RHOEA] = _rhoEA[0];
   Ui[THMVACE3D::AREA] = _A[0];
+  for (const auto i : make_range(_n_passives))
+    Ui[THMVACE3D::N_FLUX_INPUTS + i] = (*_passives_times_area[i])[0];
 
   const auto flux_3d = compute3DFlux(*(_numerical_flux_uo[c]), Ui, ni);
 
-  _flux[c].resize(THMVACE1D::N_FLUX_OUTPUTS);
+  _flux[c].resize(THMVACE1D::N_FLUX_OUTPUTS + _n_passives);
   _flux[c][THMVACE1D::MASS] = flux_3d[THMVACE3D::MASS] * nJi_dot_di;
   _flux[c][THMVACE1D::MOMENTUM] = flux_3d[THMVACE3D::MOM_NORM];
   _flux[c][THMVACE1D::ENERGY] = flux_3d[THMVACE3D::ENERGY] * nJi_dot_di;
+  for (const auto i : make_range(_n_passives))
+    _flux[c][THMVACE1D::N_FLUX_OUTPUTS + i] = flux_3d[THMVACE3D::N_FLUX_OUTPUTS + i] * nJi_dot_di;
 
   const bool is_primary_connection = (c == 0);
   const auto residual = computeResidual(flux_3d, Ui, ni, is_primary_connection);
@@ -143,7 +145,7 @@ ADVolumeJunction1PhaseUserObject::compute3DFlux(const ADNumericalFlux3EqnBase & 
   const auto & rhowV = _cached_junction_var_values[VolumeJunction1Phase::RHOWV_INDEX];
   const auto & rhoEV = _cached_junction_var_values[VolumeJunction1Phase::RHOEV_INDEX];
 
-  std::vector<ADReal> UJi(THMVACE3D::N_FLUX_INPUTS, 0.);
+  std::vector<ADReal> UJi(THMVACE3D::N_FLUX_INPUTS + _n_passives, 0.);
   UJi[THMVACE3D::RHOA] = rhoV / _volume * Ai;
   if (_apply_velocity_scaling)
   {
@@ -193,6 +195,9 @@ ADVolumeJunction1PhaseUserObject::compute3DFlux(const ADNumericalFlux3EqnBase & 
     UJi[THMVACE3D::RHOEA] = rhoEV / _volume * Ai;
   }
   UJi[THMVACE3D::AREA] = Ai;
+  for (const auto i : make_range(_n_passives))
+    UJi[THMVACE3D::N_FLUX_INPUTS + i] =
+        _cached_junction_var_values[VolumeJunction1Phase::N_EQ + i] / _volume * Ai;
 
   std::vector<ADReal> FL, FR;
   numerical_flux.calcFlux(UJi, Ui, nJi, t1, t2, FL, FR);
@@ -282,6 +287,8 @@ ADVolumeJunction1PhaseUserObject::computeResidual(const std::vector<ADReal> & fl
   residual[VolumeJunction1Phase::RHOVV_INDEX] -= -flux_mom_n * ey - pJ * ni(1) * Ai;
   residual[VolumeJunction1Phase::RHOWV_INDEX] -= -flux_mom_n * ez - pJ * ni(2) * Ai;
   residual[VolumeJunction1Phase::RHOEV_INDEX] -= -flux_3d[THMVACE3D::RHOEA];
+  for (const auto i : make_range(_n_passives))
+    residual[VolumeJunction1Phase::N_EQ + i] -= -flux_3d[THMVACE3D::N_FLUX_OUTPUTS + i];
 
   return residual;
 }
@@ -292,4 +299,32 @@ ADVolumeJunction1PhaseUserObject::finalize()
   ADVolumeJunctionBaseUserObject::finalize();
   for (unsigned int i = 0; i < _n_scalar_eq; i++)
     comm().sum(_residual[i]);
+}
+
+std::vector<const MooseVariableBase *>
+ADVolumeJunction1PhaseUserObject::getFlowChannelVariables() const
+{
+  std::vector<const MooseVariableBase *> vars(THMVACE1D::N_FLUX_OUTPUTS + _n_passives);
+  vars[THMVACE1D::RHOA] = getVar("rhoA", 0);
+  vars[THMVACE1D::RHOUA] = getVar("rhouA", 0);
+  vars[THMVACE1D::RHOEA] = getVar("rhoEA", 0);
+  for (const auto i : make_range(_n_passives))
+    vars[THMVACE1D::N_FLUX_OUTPUTS + i] = getVar("passives_times_area", i);
+
+  return vars;
+}
+
+std::vector<const MooseVariableBase *>
+ADVolumeJunction1PhaseUserObject::getJunctionVariables() const
+{
+  std::vector<const MooseVariableBase *> vars(VolumeJunction1Phase::N_EQ + _n_passives);
+  vars[VolumeJunction1Phase::RHOV_INDEX] = getJunctionVar("rhoV");
+  vars[VolumeJunction1Phase::RHOUV_INDEX] = getJunctionVar("rhouV");
+  vars[VolumeJunction1Phase::RHOVV_INDEX] = getJunctionVar("rhovV");
+  vars[VolumeJunction1Phase::RHOWV_INDEX] = getJunctionVar("rhowV");
+  vars[VolumeJunction1Phase::RHOEV_INDEX] = getJunctionVar("rhoEV");
+  for (const auto i : make_range(_n_passives))
+    vars[VolumeJunction1Phase::N_EQ + i] = getJunctionVar("passives_times_V", i);
+
+  return vars;
 }
