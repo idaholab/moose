@@ -79,6 +79,7 @@
     input_files = sub_level1.i
     execute_on = 'timestep_end'
     keep_solution_during_restore = true
+    update_old_solution_when_keeping_solution_during_restore = true
   []
 []
 

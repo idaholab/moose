@@ -30,17 +30,42 @@ FullSolveMultiApp::validParams()
   params.addParam<bool>("ignore_solve_not_converge",
                         false,
                         "True to continue main app even if a sub app's solve does not converge.");
+  params.addParam<bool>("update_old_solution_when_keeping_solution_during_restore",
+                        true,
+                        "Whether to update the old solution vector (to the previous fixed point "
+                        "iteration solution) when keeping the solution during restore.");
   return params;
 }
 
 FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
-  : MultiApp(parameters), _ignore_diverge(getParam<bool>("ignore_solve_not_converge"))
+  : MultiApp(parameters),
+    _ignore_diverge(getParam<bool>("ignore_solve_not_converge")),
+    _update_old_state_when_keeping_solution_during_restore(
+        getParam<bool>("update_old_solution_when_keeping_solution_during_restore"))
 {
   // You could end up with some dirty hidden behavior if you do this. We could remove this check,
   // but I don't think that it's sane to do so.
   if (_no_restore && (_app.isRecovering() || _app.isRestarting()))
     paramError("no_restore",
                "The parent app is restarting or recovering, restoration cannot be disabled");
+  if (_keep_solution_during_restore &&
+      !isParamSetByUser("update_old_solution_when_keeping_solution_during_restore"))
+    paramError("update_old_solution_when_keeping_solution_during_restore",
+               "Due to 'keep_solution_during_restore' parameter being true, which is an "
+               "optimization for fixed point iterations, the "
+               "unrestored solution will be kept as the starting solution for the next solve "
+               "of the MultiApp. You must set this parameter to decide if this solution should "
+               "be copied as the old solution at the beginning of the next time step, "
+               "or not. If the MultiApp is running a transient, you likely want to set this to "
+               "true. If the MultiApp is a quasi-static simulation, you likely want to set "
+               "this to false. If you don't know what this error message means, please set "
+               "'keep_solution_during_restore' to false and no need to set "
+               "'update_old_solution_when_keeping_solution_during_restore'.");
+  if (isParamSetByUser("update_old_solution_when_keeping_solution_during_restore") &&
+      !_keep_solution_during_restore)
+    paramError("update_old_solution_when_keeping_solution_during_restore",
+               "Should not be set if not keeping the solution during restore "
+               "(keep_solution_during_restore=false)");
 }
 
 void
@@ -110,6 +135,9 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     // reset output system if desired
     if (!getParam<bool>("keep_full_output_history"))
       _apps[i]->getOutputWarehouse().reset();
+    // Prevent the copy of the post-FP iteration solution state onto the old vector
+    if (!_update_old_state_when_keeping_solution_during_restore)
+      appProblemBase(_first_local_app + i).skipNextForwardSolutionCopyToOld();
 
     Executioner * ex = _executioners[i];
     ex->execute();

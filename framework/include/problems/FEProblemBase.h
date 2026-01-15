@@ -570,6 +570,11 @@ public:
 
   virtual void copySolutionsBackwards();
 
+  /// Prevents the copy of the solution vector to the old solution vector in each system.
+  /// Old -> Older is still performed
+  /// This is useful for MultiApps fixed point iterations
+  void skipNextForwardSolutionCopyToOld();
+
   /**
    * Advance all of the state holding vectors / datastructures so that we can move to the next
    * timestep.
