@@ -76,12 +76,8 @@ TestCSGLatticeMeshGenerator::generateCSG()
 
   // build the universe pattern for the lattice using the input pattern
   std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> universe_pattern;
-  size_t max_row_size = 0; // track max row size for later use in cell creation
   for (const auto & row : _pattern)
   {
-    if (row.size() > max_row_size)
-      max_row_size = row.size();
-
     std::vector<std::reference_wrapper<const CSG::CSGUniverse>> universe_row;
     for (const auto univ_id : row)
     {
