@@ -242,7 +242,14 @@ It is assumed that both the Cartesian and hexagonal lattice types are in the $x-
 Three types of outer fill are supported: void (default), material (an `std::string` name), and [`CSGUniverse`](#universes).
 For both lattice types, the lattice can be initialized minimally with a name and pitch (the flat-to-flat size of a lattice element).
 The pattern of universes can also be set at the time of initialization or updated later using the `setLatticeUniverses` method.
-And similarly, the outer fill can be set at the time of initialization or set later with the `setLatticeOuter` method.
+And similarly, the outer fill (either a `CSGUniverse` object or an `std::string` representing the name of a material) can be set at the time of initialization or set later with the `setLatticeOuter` method; if the outer is not set, it is assumed to be `VOID`.
+Some examples of initializing a lattice with the various options are shown below.
+
+!listing CSGLatticeTest.C start=initialize without universe map, outer is void, and pitch end=CSGCartesianLattice include-end=true
+
+!listing CSGLatticeTest.C start=initialize with universe map and set outer fill to be a universe end=CSGCartesianLattice include-end=true
+
+!listing CSGLatticeTest.C start=initialize without universe map but set outer to a material end=CSGCartesianLattice include-end=true
 
 !alert! note title=2D vs. 3D Lattices
 

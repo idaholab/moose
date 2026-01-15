@@ -26,12 +26,13 @@ namespace CSG
 /// tests valid CSGCartesianLattice construction
 TEST(CSGLatticeTest, testCreateCartLatticeValid)
 {
-  // universe map to use throughout tests
+  // universe map and outer universe to use throughout tests
   const auto univ1 = CSGUniverse("univ1", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
       {univ1, univ1, univ1}, {univ1, univ1, univ1}};
+  const auto outer_univ = CSGUniverse("outer_univ", false);
   {
-    // initialize without universes: nrow=2, ncol=3, pitch=1.0
+    // initialize without universe map, outer is void, and pitch=1.0
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
     // check dimensions/attributes
     ASSERT_EQ(cart_lattice.getNRows(), 0);
@@ -46,7 +47,6 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
   }
   {
     // initialize with an array of universes, pitch=1.0
-
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
     // check dimensions/attributes
     ASSERT_EQ(cart_lattice.getNRows(), 2);
@@ -63,21 +63,18 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
   }
   {
     // initialize without universe map but set outer universe
-    const auto outer_univ = CSGUniverse("outer_univ", false);
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, outer_univ);
     ASSERT_EQ(cart_lattice.getOuterType(), "UNIVERSE");
     ASSERT_EQ(cart_lattice.getOuterUniverse(), outer_univ);
   }
   {
-    // initialize with universe map but set outer universe
-    const auto outer_univ = CSGUniverse("outer_univ", false);
+    // initialize with universe map and set outer fill to be a universe
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map, outer_univ);
     ASSERT_EQ(cart_lattice.getOuterType(), "UNIVERSE");
     ASSERT_EQ(cart_lattice.getOuterUniverse(), outer_univ);
   }
   {
-    // initialize without universe map but set outer material
-    const auto outer_univ = CSGUniverse("outer_univ", false);
+    // initialize without universe map but set outer to a material
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, "outer_univ");
     ASSERT_EQ(cart_lattice.getOuterType(), "CSG_MATERIAL");
     ASSERT_EQ(cart_lattice.getOuterMaterial(), "outer_univ");
@@ -114,7 +111,7 @@ TEST(CSGLatticeTest, testCreateCartLatticeInvalid)
 /// tests valid CSGHexagonalLattice construction
 TEST(CSGLatticeTest, testCreateHexLatticeValid)
 {
-  // universe map to use throughout tests
+  // universe map and outer universe to use throughout tests
   const auto univ1 = CSGUniverse("univ1", false);
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
       {univ1, univ1, univ1},
@@ -122,7 +119,7 @@ TEST(CSGLatticeTest, testCreateHexLatticeValid)
       {univ1, univ1, univ1, univ1, univ1},
       {univ1, univ1, univ1, univ1},
       {univ1, univ1, univ1}};
-
+  const auto outer_univ = CSGUniverse("outer_univ", false);
   {
     // initialize without universes: pitch=1.0
     auto hex_lat = CSGHexagonalLattice("hexlat", 1.0);
@@ -153,14 +150,12 @@ TEST(CSGLatticeTest, testCreateHexLatticeValid)
   }
   {
     // initialize without universe map but set outer universe
-    const auto outer_univ = CSGUniverse("outer_univ", false);
     auto hex_lat = CSGHexagonalLattice("hexlat", 1.0, outer_univ);
     ASSERT_EQ(hex_lat.getOuterType(), "UNIVERSE");
     ASSERT_EQ(hex_lat.getOuterUniverse(), outer_univ);
   }
   {
     // initialize with universe map but set outer universe
-    const auto outer_univ = CSGUniverse("outer_univ", false);
     auto hex_lat = CSGHexagonalLattice("hexlat", 1.0, univ_map, outer_univ);
     ASSERT_EQ(hex_lat.getOuterType(), "UNIVERSE");
     ASSERT_EQ(hex_lat.getOuterUniverse(), outer_univ);
