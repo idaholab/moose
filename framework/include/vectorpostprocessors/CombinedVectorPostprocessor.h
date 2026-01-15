@@ -15,7 +15,6 @@
  * CombinedVectorPostprocessor is a type of VectorPostprocessor that outputs the
  * values of multiple vectors from other vectorpostprocessors.
  */
-
 class CombinedVectorPostprocessor : public GeneralVectorPostprocessor
 {
 public:
