@@ -29,6 +29,29 @@ import importlib
 StochasticControl = None
 StochasticRunOptions = None
 
+def compare_gen(nl1,nl2):
+    for el_a, el_b in zip(nl1,nl2):
+        if type(el_a)!=type(el_b):
+            yield False
+        if isinstance(el_a, list):
+            if len(el_a)!=len(el_b):
+                yield False
+            yield from compare_gen(el_a, el_b)
+        elif isinstance(el_a, np.ndarray):
+            if el_a.shape != el_b.shape:
+                yield False
+            else:
+                yield from compare_gen(el_a, el_b)
+        else:
+            yield np.isclose(el_a,el_b)
+
+def compare(l1,l2):
+    latcher = True
+    for element in compare_gen(l1,l2):
+        if element != True:
+            latcher = False
+    return latcher
+
 def tryImportStochasticControl(path = None):
     global StochasticControl
     global StochasticRunOptions
@@ -106,22 +129,53 @@ if __name__ == "__main__":
     ]
     qois = ['capsule_01/x', 'capsule_01/temp']
     input_file = 'vpp_test_runner.i'
-    with StochasticControl(
-        executable=executable,
-        physics_input=input_file,
-        parameters=parameters,
-        quantities_of_interest=qois,
-        options=StochasticRunOptions(**options),
-    ) as runner:
-        if cmd[exec_index+3]==0:
-            runner.configCache(tol=[1,1e-10,1e-14,1e-14])
-        elif cmd[exec_index+3]==1:
-            runner([335478,27700,500,1])
-            runner([[335478,27700,500,1],
-                   [335078,23700,500,1]])#Test caching
-        elif cmd[exec_index+3]==2:
-            runner([ [385478,29700,385,20],
-                     [335478,27700,500,1],
-                     [485478,21700,385,1],
-                     [385478,29700,385,20],
-                     ])
+    if cli_args.mode != 3:
+        with StochasticControl(
+            executable=executable,
+            physics_input=input_file,
+            parameters=parameters,
+            quantities_of_interest=qois,
+            options=StochasticRunOptions(**options),
+        ) as runner:
+            if cli_args.mode == 0:
+                result = runner.configCache(tol=[1,1e-10,1e-14,1e-14])
+                assert all([runner._result_cache.tol[i] == [1,1e-10,1e-14,1e-14][i] for i in range(4)])
+            elif cli_args.mode == 1:
+                result = runner([ [385478,29700,385,20],
+                         [335478,27700,500,1],
+                         [485478,21700,385,1],
+                         [385478,29700,385,20],
+                         ])
+                np.save('listmode',result)
+                gold_res = np.load('gold/listmode.npy',allow_pickle=True)
+
+                assert compare(result, gold_res)
+            elif cli_args.mode == 2:
+                result = runner([335478,27700,500,20])
+                np.save('arraymode1',result.astype(np.float64))
+                gold_res1 = np.load('gold/arraymode1.npy',allow_pickle=False)
+                assert compare(result.astype(np.float64), gold_res1)
+                result = runner([[335478,27700,500,20],
+                       [335078,23700,500,20]]).astype(np.float64)#Test caching
+                np.save('arraymode2',result)
+                gold_res2 = np.load('gold/arraymode2.npy',allow_pickle=False)
+                assert compare(result.astype(np.float64), gold_res2)
+            else:
+                raise ValueError("Unable to parse options")
+    else:
+        qois.append('capsule_01/nonsense')
+        with StochasticControl(
+            executable=executable,
+            physics_input=input_file,
+            parameters=parameters,
+            quantities_of_interest=qois,
+            options=StochasticRunOptions(**options),
+        ) as runner:
+            result = runner([ [385478,29700,385,20],
+                         [335478,27700,500,1],
+                         [485478,21700,385,1],
+                         [385478,29700,385,20],
+                         ])
+            np.save('nestedlist',result)
+            gold_res = np.load('gold/nestedlist.npy',allow_pickle=True)
+            assert compare(result, gold_res)
