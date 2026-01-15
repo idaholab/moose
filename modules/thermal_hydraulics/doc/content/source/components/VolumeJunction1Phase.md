@@ -30,6 +30,8 @@ are taken from the *first* connection.
 
 !template load file=volume_junction_1phase_usage.md.template name=VolumeJunction1Phase
 
+If connected flow channels include passive transport variables (see [FlowChannel1Phase.md]), then [!param](/Components/VolumeJunction1Phase/initial_passives) must be specified to give the initial value for each passive $y$; [!param](/Components/VolumeJunction1Phase/scaling_factor_passives_times_V) may be specified to use non-unity values for the scaling factors for each corresponding junction variable $y V$.
+
 !alert tip title=Visualizing junction solutions
 Since junction variables are located on the mesh, they can visualized alongside the other field variables, such as from pipes. In Paraview, the junction can be made more visible using the "point size" parameter.
 
