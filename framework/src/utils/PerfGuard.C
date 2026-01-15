@@ -9,16 +9,22 @@
 
 #include "PerfGuard.h"
 #include "PerfGraph.h"
+#ifdef LIBMESH_HAVE_NVTX_API
 #include "nvtx3/nvtx3.hpp"
+#endif
 
 PerfGuard::PerfGuard(PerfGraph & graph, const PerfID id) : _graph(graph)
 {
   _graph.push(id);
+#ifdef LIBMESH_HAVE_NVTX_API
   nvtxRangePushA(moose::internal::getPerfGraphRegistry().sectionInfo(id)._name.c_str());
+#endif
 }
 
 PerfGuard::~PerfGuard()
 {
   _graph.pop();
+#ifdef LIBMESH_HAVE_NVTX_API
   nvtxRangePop();
+#endif
 }
