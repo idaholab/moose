@@ -1,3 +1,3 @@
-mesh_samples :override= 3
+mesh_samples :override= 2
 !include vpp_general.i
 

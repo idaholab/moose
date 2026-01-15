@@ -1,4 +1,4 @@
-mesh_samples = 5
+mesh_samples = 1
 mesh_outer = 3
 mesh_specified=1
 [Mesh]
@@ -7,7 +7,7 @@ mesh_specified=1
     dim = 1
     xmin = 0
     xmax = ${fparse mesh_outer}
-    nx = ${fparse max(mesh_samples*2,mesh_specified)}
+    nx = ${fparse max(mesh_samples,mesh_specified)}
   []
 []
 
