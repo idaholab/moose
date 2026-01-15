@@ -43,7 +43,6 @@ ComputeBlockOrientationByMisorientation::initialize()
 void
 ComputeBlockOrientationByMisorientation::execute()
 {
-  // Compute the average of the rotation matrix and misorientation in this element
   RankTwoTensor rot;
   Real misorient = 0.0;
 
@@ -78,8 +77,6 @@ ComputeBlockOrientationByMisorientation::finalize()
 {
   for (const auto & block : _fe_problem.mesh().meshSubdomains())
   {
-    // Sync data from all processors (gather the maximum misorientation and the corresponding
-    // EulerAngle from every processor)
     _communicator.allgather(_grain_misorientation[block]);
     _block_ea_values[block] = computeSubdomainEulerAngles(block);
   }

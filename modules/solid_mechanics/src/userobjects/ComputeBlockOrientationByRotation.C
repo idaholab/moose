@@ -47,7 +47,6 @@ ComputeBlockOrientationByRotation::initialize()
 void
 ComputeBlockOrientationByRotation::execute()
 {
-  // Compute the average of the rotation matrix in this element
   RankTwoTensor rot;
   MathUtils::mooseSetToZero(rot);
 
@@ -71,13 +70,11 @@ ComputeBlockOrientationByRotation::execute()
 void
 ComputeBlockOrientationByRotation::finalize()
 {
-  const std::set<SubdomainID> & blocks = _fe_problem.mesh().meshSubdomains();
-
-  for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
+  for (const auto & block : _fe_problem.mesh().meshSubdomains())
   {
     // Use allgather to sync data from all processors
-    _communicator.allgather(_quat[*it]);
-    _block_ea_values[*it] = computeSubdomainEulerAngles(*it);
+    _communicator.allgather(_quat[block]);
+    _block_ea_values[block] = computeSubdomainEulerAngles(block);
   }
 }
 
@@ -87,23 +84,17 @@ ComputeBlockOrientationByRotation::computeSubdomainEulerAngles(const SubdomainID
   // creating a map to store the quaternion count for each bin index
   std::map<std::tuple<int, int, int, int>, unsigned int> feature_weights;
 
-  for (const auto & q : _quat[sid])
+  // precompute the scaling from the bins once and reuse
+  const Real bin_scale = 0.5 * _bins;
+
+  for (const auto & [w, x, y, z] : _quat[sid])
   {
-    const auto bin = std::make_tuple<int, int, int, int>(std::floor(std::get<0>(q) * 0.5 * _bins),
-                                                         std::floor(std::get<1>(q) * 0.5 * _bins),
-                                                         std::floor(std::get<2>(q) * 0.5 * _bins),
-                                                         std::floor(std::get<3>(q) * 0.5 * _bins));
+    const auto bin = std::make_tuple<int, int, int, int>(std::floor(w * bin_scale),
+                                                         std::floor(x * bin_scale),
+                                                         std::floor(y * bin_scale),
+                                                         std::floor(z * bin_scale));
     feature_weights[bin]++;
   }
-
-  /**
-   * Markley, F. Landis, Yang Cheng, John Lucas Crassidis, and Yaakov Oshman.
-   * "Averaging quaternions." Journal of Guidance, Control, and Dynamics 30,
-   * no. 4 (2007): 1193-1197.
-   * A 4 by N matrix (Q) is constructed, where N is the number of quaternions.
-   * A weight matrix (W) is created. The eigenvector corresponding to the
-   * maximum eigenvalue of Q*W*Q' is the weighted average quaternion
-   */
 
   // quaternion average matrix Q*w*Q^T
   typedef Eigen::Matrix<Real, 4, 4> Matrix4x4;
@@ -112,14 +103,14 @@ ComputeBlockOrientationByRotation::computeSubdomainEulerAngles(const SubdomainID
 
   Real total_weight = 0.0;
 
-  for (const auto & q : _quat[sid])
+  for (const auto & [w, x, y, z] : _quat[sid])
   {
-    Vector4 v(std::get<0>(q), std::get<1>(q), std::get<2>(q), std::get<3>(q));
+    Vector4 v(w, x, y, z);
 
-    const auto bin = std::make_tuple<int, int, int, int>(std::floor(std::get<0>(q) * 0.5 * _bins),
-                                                         std::floor(std::get<1>(q) * 0.5 * _bins),
-                                                         std::floor(std::get<2>(q) * 0.5 * _bins),
-                                                         std::floor(std::get<3>(q) * 0.5 * _bins));
+    const auto bin = std::make_tuple<int, int, int, int>(std::floor(w * bin_scale),
+                                                         std::floor(x * bin_scale),
+                                                         std::floor(y * bin_scale),
+                                                         std::floor(z * bin_scale));
     const auto bin_size = feature_weights[bin];
     const auto weight = std::pow(bin_size, _L_norm);
     total_weight += weight;

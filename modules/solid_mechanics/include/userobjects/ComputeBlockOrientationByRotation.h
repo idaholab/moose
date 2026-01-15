@@ -22,30 +22,28 @@ public:
   static InputParameters validParams();
 
   /**
-   * This is called before execute so you can reset any internal data.
+   * Clear internal Euler angle and misorientationdata.
    */
   virtual void initialize() override;
 
   /**
-   * Called on every "object" (like every element or node).
-   * In this case, it is called at every quadrature point on every element.
+   * Compute the average of the rotation matrix in this element
    */
   virtual void execute() override;
 
-  /**
-   * Called when using threading.  You need to combine the data from "y"
-   * into _this_ object.
-   */
   virtual void threadJoin(const UserObject & /*y*/) override {};
 
   /**
-   * Called _once_ after execute has been called all all "objects".
+   * Gather all Euler angles from this block
    */
   virtual void finalize() override;
 
 protected:
   /**
-   * Compute Quaternion for each subdomain (block)
+   * Compute Quaternion for each subdomain (block), following
+   * Markley, F. Landis, Yang Cheng, John Lucas Crassidis, and Yaakov Oshman.
+   * "Averaging quaternions." Journal of Guidance, Control, and Dynamics 30,
+   * no. 4 (2007): 1193-1197.
    */
   EulerAngles computeSubdomainEulerAngles(const SubdomainID & sid);
 
@@ -55,7 +53,7 @@ protected:
   /// number of bins for each quaternion component
   unsigned int _bins;
 
-  /// L_norm value for averaging
+  /// parameter used to compute the weighting function for the average quaternion calculation
   Real _L_norm;
 
   // Array of vectors to store quaternions of each grain

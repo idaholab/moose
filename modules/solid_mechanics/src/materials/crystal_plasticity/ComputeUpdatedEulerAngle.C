@@ -27,7 +27,8 @@ ComputeUpdatedEulerAngle::validParams()
 ComputeUpdatedEulerAngle::ComputeUpdatedEulerAngle(const InputParameters & parameters)
   : Material(parameters),
     _updated_rotation(getMaterialProperty<RankTwoTensor>("updated_rotation")),
-    _updated_euler_angle(declareProperty<RealVectorValue>("updated_Euler_angle"))
+    _updated_euler_angle(declareProperty<RealVectorValue>("updated_Euler_angle")),
+    _degree_to_radian(getParam<bool>("degree_to_radian"))
 {
 }
 
@@ -61,6 +62,6 @@ ComputeUpdatedEulerAngle::computeEulerAngleFromRotationMatrix(const RankTwoTenso
   // convert EulerAngles to RealVectorValue
   euler_angle = (RealVectorValue)ea;
 
-  if (getParam<bool>("degree_to_radian"))
+  if (_degree_to_radian)
     euler_angle *= libMesh::pi / 180.0;
 }

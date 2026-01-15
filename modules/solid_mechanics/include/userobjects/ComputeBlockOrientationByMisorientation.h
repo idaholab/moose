@@ -25,24 +25,21 @@ public:
   static InputParameters validParams();
 
   /**
-   * This is called before execute so you can reset any internal data.
+   * Clear internal Euler angle and misorientationdata.
    */
   virtual void initialize() override;
 
   /**
-   * Called on every "object" (like every element or node).
-   * In this case, it is called at every quadrature point on every element.
+   * Compute the average of the rotation matrix, Euler angles, and
+   * misorientation in each element
    */
   virtual void execute() override;
 
-  /**
-   * Called when using threading.  You need to combine the data from "y"
-   * into _this_ object.
-   */
   virtual void threadJoin(const UserObject & /*y*/) override {};
 
   /**
-   * Called _once_ after execute has been called on all "objects".
+   * Sync data from all processors (gather the maximum misorientation and the corresponding
+   * EulerAngle from every processor)
    */
   virtual void finalize() override;
 
