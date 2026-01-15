@@ -3887,36 +3887,13 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
               "We're performing a projection based on data from just the thread 0 variable, so any "
               "modifications to the variable solution must have been thread joined already");
 
-  const auto & var = getStandardVariable(0, target_var);
-  const auto var_num = var.number();
   const auto sn = systemNumForVariable(target_var);
   auto & sys = getSystemBase(sn);
 
   // Let libmesh handle the projection
   System & libmesh_sys = getSystem(target_var);
-  auto temp_vec = libmesh_sys.current_local_solution->zero_clone();
-  libmesh_sys.project_vector(func, func_grad, params, *temp_vec);
-  temp_vec->close();
+  libmesh_sys.project_vector(func, func_grad, params, sys.solution(), -1 /*is_adjoint*/, elem_range);
 
-  // Get the dof indices to copy
-  DofMap & dof_map = sys.dofMap();
-  std::set<dof_id_type> dof_indices;
-  std::vector<dof_id_type> elem_dof_indices;
-
-  for (const auto & elem : elem_range)
-  {
-    dof_map.dof_indices(elem, elem_dof_indices, var_num);
-    dof_indices.insert(elem_dof_indices.begin(), elem_dof_indices.end());
-  }
-  std::vector<dof_id_type> dof_indices_v(dof_indices.begin(), dof_indices.end());
-
-  // Copy the projected values into the solution vector
-  std::vector<Real> dof_vals;
-  temp_vec->get(dof_indices_v, dof_vals);
-  mooseAssert(sys.solution().closed(),
-              "The solution should be closed before mapping our projection");
-  sys.solution().insert(dof_vals, dof_indices_v);
-  sys.solution().close();
   sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
 }
 

@@ -1082,11 +1082,6 @@ public:
   /**
    * Project a function onto a range of elements for a given variable
    *
-   * @warning The current implementation is not ideal. The projection takes place on all local
-   * active elements, ignoring the specified \p elem_range. After the projection, dof values on the
-   * specified \p elem_range are copied over to the current solution vector. This should be fixed
-   * once the project_vector or project_solution API is modified to take a custom element range.
-   *
    * \param elem_range          Element range to project on
    * \param func                Function to project
    * \param func_grad           Gradient of the function
