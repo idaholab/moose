@@ -10,6 +10,7 @@
 #include "ReactorGeometryMeshBuilderBase.h"
 #include "DepletionIDGenerator.h"
 #include "MooseMeshUtils.h"
+#include "CSGPlane.h"
 
 InputParameters
 ReactorGeometryMeshBuilderBase::validParams()
@@ -229,4 +230,43 @@ ReactorGeometryMeshBuilderBase::callExtrusionMeshSubgenerators(
   }
 
   return output_mesh_name;
+}
+
+std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+ReactorGeometryMeshBuilderBase::getOuterRadialSurfaces(unsigned int radial_index,
+                                                       Real halfpitch,
+                                                       CSG::CSGBase & csg_obj)
+{
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>> duct_surfaces;
+  const auto mesh_geometry = getReactorParam<std::string>(RGMB::mesh_geometry);
+  auto n_surfaces = mesh_geometry == "Square" ? 4 : 6;
+
+  // Convert halfpitch to radius (distance from vertex to center)
+  Real angle_offset_degrees = mesh_geometry == "Square" ? 45 : 30;
+  Real angle_offset_radians = angle_offset_degrees * (M_PI / 180.);
+  const auto radius = halfpitch / std::cos(angle_offset_radians);
+
+  Real angle_increment_radians = 360. / n_surfaces * (M_PI / 180.);
+
+  for (const auto i : make_range(n_surfaces))
+  {
+    const auto surf_name =
+        name() + "_radial_duct_" + std::to_string(radial_index) + "_surf_" + std::to_string(i);
+
+    // Define 3 points on the surface
+    const auto current_angle = i * angle_increment_radians + angle_offset_radians;
+    const auto next_angle = (i + 1) * angle_increment_radians + angle_offset_radians;
+    libMesh::Point p0(radius * std::cos(current_angle), radius * std::sin(current_angle), 0.);
+    libMesh::Point p1(radius * std::cos(next_angle), radius * std::sin(next_angle), 0.);
+    libMesh::Point p2 = (p0 + p1) / 2.;
+    // Place third point above the two others to form a vertical plane
+    p2(2) = angle_offset_degrees;
+
+    std::unique_ptr<CSG::CSGSurface> duct_surf_ptr =
+        std::make_unique<CSG::CSGPlane>(surf_name, p0, p1, p2);
+    const auto & duct_surf = csg_obj.addSurface(std::move(duct_surf_ptr));
+    duct_surfaces.push_back(duct_surf);
+  }
+
+  return duct_surfaces;
 }

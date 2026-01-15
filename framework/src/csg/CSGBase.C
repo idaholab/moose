@@ -669,7 +669,7 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_name_join)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, const std::string & new_root_name_join)
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());

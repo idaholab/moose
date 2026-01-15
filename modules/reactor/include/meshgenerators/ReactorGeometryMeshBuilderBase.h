@@ -278,6 +278,16 @@ protected:
                       const DepletionIDGenerationLevel generation_level,
                       const bool extrude);
 
+  /**
+   * Get CSGSurfaces corresponding to hexagonal or square region with given halfpitch
+   * @param radial_index Radial index of hex / square region, for surface naming
+   * @param halfpitch Halfpitch of square or hexagon
+   * @param csg_obj Reference to CSGBase object for adding defined surfaces to
+   * @return vector of surfaces that correspond to hexagonal or square region
+   */
+  std::vector<std::reference_wrapper<const CSG::CSGSurface>>
+  getOuterRadialSurfaces(unsigned int radial_index, Real halfpitch, CSG::CSGBase & csg_obj);
+
 private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)
   std::unique_ptr<MeshBase> * _reactor_params_mesh;

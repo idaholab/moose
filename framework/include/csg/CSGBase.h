@@ -543,7 +543,7 @@ public:
    * @param base pointer to a different CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_name_join);
+  void joinOtherBase(std::unique_ptr<CSGBase> base, const std::string & new_root_name_join);
 
   /**
    * @brief Join another CSGBase object to this one. The root universe for the incoming CSGBase
