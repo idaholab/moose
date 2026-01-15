@@ -73,7 +73,7 @@ SolutionInvalidity::hasEverHadSolutionIssue() const
 }
 
 void
-SolutionInvalidity::resetSolutionInvalidCurrentIteration()
+SolutionInvalidity::resetIterationOccurences()
 {
   // Zero current counts
   for (auto & entry : _counts)
@@ -81,7 +81,7 @@ SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 }
 
 void
-SolutionInvalidity::resetSolutionInvalidTimeStep()
+SolutionInvalidity::resetTimeStepOccurences()
 {
   // Reset that we have synced because we're on a new iteration
   _has_synced = false;
@@ -91,14 +91,14 @@ SolutionInvalidity::resetSolutionInvalidTimeStep()
 }
 
 void
-SolutionInvalidity::solutionInvalidAccumulation()
+SolutionInvalidity::accumulateIterationIntoTimeStepOccurences()
 {
   for (auto & entry : _counts)
     entry.current_timestep_counts += entry.current_counts;
 }
 
 void
-SolutionInvalidity::solutionInvalidAccumulationTimeStep(const unsigned int timestep_index)
+SolutionInvalidity::accumulateTimeStepIntoTotalOccurences(const unsigned int timestep_index)
 {
   for (auto & entry : _counts)
     if (entry.current_timestep_counts)

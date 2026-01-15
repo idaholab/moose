@@ -18,7 +18,6 @@
 #include "ComputeFDResidualFunctor.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
-#include "SolutionInvalidity.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
 
@@ -148,10 +147,6 @@ NonlinearSystem::solve()
   if (_fe_problem.hasDampers() || _fe_problem.shouldUpdateSolution() ||
       _fe_problem.needsPreviousNewtonIteration())
     _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
-
-  // reset solution invalid counter for the time step
-  if (!_time_integrators.empty())
-    _app.solutionInvalidity().resetSolutionInvalidTimeStep();
 
   if (shouldEvaluatePreSMOResidual())
   {

@@ -76,16 +76,16 @@ public:
   bool hasEverHadSolutionIssue() const;
 
   /// Reset the number of solution invalid occurrences back to zero for the current time step
-  void resetSolutionInvalidTimeStep();
+  void resetTimeStepOccurences();
 
   /// Reset the number of solution invalid occurrences back to zero
-  void resetSolutionInvalidCurrentIteration();
+  void resetIterationOccurences();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative counters
-  void solutionInvalidAccumulation();
+  void accumulateIterationIntoTimeStepOccurences();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
-  void solutionInvalidAccumulationTimeStep(const unsigned int timestep_index);
+  void accumulateTimeStepIntoTotalOccurences(const unsigned int timestep_index);
 
   /// Struct used in InvalidCounts for storing the time history of invalid occurrences
   struct TimestepCounts
