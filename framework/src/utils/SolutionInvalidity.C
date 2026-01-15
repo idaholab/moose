@@ -112,19 +112,6 @@ SolutionInvalidity::solutionInvalidAccumulationTimeStep(const unsigned int times
 }
 
 void
-SolutionInvalidity::computeTotalCounts()
-{
-  mooseAssert(_has_synced, "Has not synced");
-
-  for (auto & entry : _counts)
-  {
-    entry.total_counts = 0;
-    for (auto & time_counts : entry.timestep_counts)
-      entry.total_counts += time_counts.counts;
-  }
-}
-
-void
 SolutionInvalidity::print(const ConsoleStream & console) const
 {
   console << "\nSolution Invalid Warnings:\n";

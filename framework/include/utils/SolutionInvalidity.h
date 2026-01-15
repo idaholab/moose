@@ -87,9 +87,6 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
   void solutionInvalidAccumulationTimeStep(const unsigned int timestep_index);
 
-  /// Compute the total number of solution invalid occurrences
-  void computeTotalCounts();
-
   /// Struct used in InvalidCounts for storing the time history of invalid occurrences
   struct TimestepCounts
   {
