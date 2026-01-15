@@ -207,9 +207,6 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
-  // Accumulate only the occurence of solution invalid warnings for each time step
-  _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(_fe_problem.timeStep());
-
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();
 

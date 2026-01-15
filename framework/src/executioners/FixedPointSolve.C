@@ -443,6 +443,10 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   {
     _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
 
+    // Keep track of the solution warnings from the TIMESTEP_END phase
+    _app.solutionInvalidity().syncIteration();
+    _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(_problem.timeStep());
+
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
     return false;
@@ -469,8 +473,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     }
 
     // Start new TIMESTEP_END section for solution invalidity
-    // We have to restart the current iteration count to avoid double counting, but
-    // but we keep the time step count to have it be: solve count + exec_timestep_end count
+    // We have to restart the current iteration count to avoid double counting
     _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 
     _problem.onTimestepEnd();
@@ -483,7 +486,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     // Keep track of the solution warnings from the TIMESTEP_END phase
     _app.solutionInvalidity().syncIteration();
     _app.solutionInvalidity().solutionInvalidAccumulation();
-    // Similarly, don't tally the step counts into the total counts to avoid double counting
+    _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(_problem.timeStep());
   }
 
   if (_fixed_point_status == MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP)
