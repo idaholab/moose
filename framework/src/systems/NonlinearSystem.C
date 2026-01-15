@@ -338,7 +338,11 @@ NonlinearSystem::converged()
 {
   if (_fe_problem.hasException() || _fe_problem.getFailNextNonlinearConvergenceCheck())
     return false;
-  if (!_fe_problem.acceptInvalidSolution())
+  // When not computing the residual (for example at the beginning of a time step),
+  // we may be in the process of counting invalid solution warnings, so the call to
+  // acceptInvalidSolution() would fail due to lack of parallel synchronization
+  // TODO: think of a better solution
+  if (_app.solutionInvalidity().hasSynced() && !_fe_problem.acceptInvalidSolution())
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
     return false;

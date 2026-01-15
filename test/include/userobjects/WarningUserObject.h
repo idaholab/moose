@@ -20,13 +20,10 @@ public:
   static InputParameters validParams();
 
   WarningUserObject(const InputParameters & params);
-  // Get the solution invalid warnings to work
-  // usingCombinedWarningSolutionWarnings;
-  // This is not needed, so the trick I did works
 
   virtual void initialSetup() override;
   virtual void initialize() override {};
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject &) override;
+  virtual void threadJoin(const UserObject &) override {};
 };

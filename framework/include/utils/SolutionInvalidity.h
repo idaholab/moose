@@ -130,6 +130,9 @@ public:
    */
   void syncIteration();
 
+  /// Whether the solution invalidity has synchronized iteration counts
+  bool hasSynced() const { return _has_synced; }
+
   friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
   friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
 

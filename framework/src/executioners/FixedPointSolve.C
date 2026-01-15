@@ -445,7 +445,6 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
 
     // Keep track of the solution warnings from the solve
-    _app.solutionInvalidity().syncIteration();
     _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
 
     // Perform the output of the current, failed time step (this only occurs if desired)

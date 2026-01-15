@@ -92,6 +92,11 @@
     requirement = 'The system shall be able to keep track of all warnings generated during a simulation.'
     allow_warnings = true
     recover = false
+    # The counts are not restartable data, we are double counting over the failed step
+    restep = false
+    # The warnings are emitted by all ranks and threads, and the counts are naturally higher
+    max_parallel = 1
+    max_threads = 1
   []
 
   [solution_invalid_parallel]

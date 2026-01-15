@@ -41,9 +41,3 @@ WarningUserObject::finalize()
 {
   mooseWarning("During finalize");
 }
-
-void
-WarningUserObject::threadJoin(const UserObject & /*uo*/)
-{
-  mooseWarning("During threadJoin");
-}
