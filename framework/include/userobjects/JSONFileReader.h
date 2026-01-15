@@ -64,7 +64,7 @@ public:
     {
       if (key_index == value_keys.size() - 1)
       {
-        value = current_node->get<T>();
+        value = current_node->template get<T>();
         break;
       }
       current_node = &(*current_node)[value_keys[key_index + 1]];
@@ -113,7 +113,7 @@ public:
                      vector_keys[key_index]);
         vector_to_fill.clear();
         for (const auto & item : *current_node)
-          vector_to_fill.push_back(item.get<T>());
+          vector_to_fill.push_back(item.template get<T>());
         return;
       }
       if (current_node->is_array())
