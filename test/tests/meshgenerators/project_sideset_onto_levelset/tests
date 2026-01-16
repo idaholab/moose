@@ -9,5 +9,6 @@
     requirement = "The system shall be able to project a sideset onto a level set surface to create a surface mesh."
     cli_args = '--mesh-only'
     recover = false
+    mesh_mode = 'replicated'
   []
 []

@@ -91,6 +91,9 @@ ProjectSideSetOntoLevelSetGenerator::generate()
   auto mesh = mesh_uptr.get();
   auto new_mesh = buildMeshBaseObject(3);
 
+  if (!mesh_uptr->is_serial())
+    paramError("input", "Input mesh must not be distributed");
+
   // Use a new subdomain ID to avoid an overlap if merging the two later
   const auto projection_block_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
 
