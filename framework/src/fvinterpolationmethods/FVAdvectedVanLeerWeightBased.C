@@ -13,7 +13,6 @@
 #include <limits>
 
 registerMooseObject("MooseApp", FVAdvectedVanLeerWeightBased);
-registerMooseObjectAliased("MooseApp", FVAdvectedVanLeerWeightBased, "FVAdvectedVanLeer2");
 
 InputParameters
 FVAdvectedVanLeerWeightBased::validParams()

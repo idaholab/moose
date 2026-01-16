@@ -18,9 +18,9 @@
  * Van Leer interpolation for advected quantities that blends between upwind and the
  * higher-order limited value using only (elem, neighbor) weights.
  *
- * In contrast to FVAdvectedVanLeerDeferredCorrection, this method does not perform a MUSCL-style
- * reconstruction at the face and does not use deferred correction. Instead, it returns matrix
- * weights that incorporate the limiter directly (in the OpenFOAM-style "limited scheme" sense).
+ * This is implemented as a limited-scheme style blending weight (OpenFOAM-style) rather than a
+ * MUSCL face reconstruction with deferred correction. Instead, it returns matrix weights that
+ * incorporate the limiter directly.
  *
  * Note: The limiter coefficient depends on solution gradients, so this is typically used in a
  * fixed-point outer loop where the weights are lagged.

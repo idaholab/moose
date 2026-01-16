@@ -12,6 +12,7 @@
 #include "MooseFunctor.h"
 #include "MooseFunctorArguments.h"
 #include "MooseLinearVariableFV.h"
+#include "GradientLimiterType.h"
 
 InputParameters
 FVInterpolationMethod::validParams()
@@ -65,6 +66,8 @@ FVInterpolationMethod::AdvectedValueInterpolator::operator()(
 {
   mooseAssert(face.neighborPtr(),
               "This convenience overload assumes internal faces (neighbor exists)");
+  mooseAssert(!needsLimitedGradients(),
+              "Limited gradient reconstruction is not available for generic functors.");
   const Moose::ElemArg elem_arg{&face.elem(), false};
   const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
 
@@ -106,9 +109,11 @@ FVInterpolationMethod::AdvectedValueInterpolator::operator()(
 
   if (needsGradients())
   {
-    elem_grad_storage = var.gradSln(*face.elemInfo());
+    const auto limiter_type = gradientLimiter();
+
+    elem_grad_storage = var.gradSln(*face.elemInfo(), limiter_type);
     elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = var.gradSln(*face.neighborInfo());
+    neighbor_grad_storage = var.gradSln(*face.neighborInfo(), limiter_type);
     neighbor_grad = &neighbor_grad_storage;
   }
 
@@ -124,6 +129,8 @@ FVInterpolationMethod::AdvectedSystemContributionCalculator::operator()(
 {
   mooseAssert(face.neighborPtr(),
               "This convenience overload assumes internal faces (neighbor exists)");
+  mooseAssert(!needsLimitedGradients(),
+              "Limited gradient reconstruction is not available for generic functors.");
   const Moose::ElemArg elem_arg{&face.elem(), false};
   const Moose::ElemArg neighbor_arg{&face.neighbor(), false};
 
@@ -165,9 +172,11 @@ FVInterpolationMethod::AdvectedSystemContributionCalculator::operator()(
 
   if (needsGradients())
   {
-    elem_grad_storage = var.gradSln(*face.elemInfo());
+    const auto limiter_type = gradientLimiter();
+
+    elem_grad_storage = var.gradSln(*face.elemInfo(), limiter_type);
     elem_grad = &elem_grad_storage;
-    neighbor_grad_storage = var.gradSln(*face.neighborInfo());
+    neighbor_grad_storage = var.gradSln(*face.neighborInfo(), limiter_type);
     neighbor_grad = &neighbor_grad_storage;
   }
 
