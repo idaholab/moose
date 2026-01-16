@@ -2,8 +2,8 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 50
-    ny = 50
+    nx = 51
+    ny = 51
   []
 []
 
@@ -26,12 +26,17 @@
   [average]
     type = FVGeometricAverage
   []
-  [vanleer]
-    type = FVAdvectedVanLeerDeferredCorrection
+  [muscl_venkat]
+    type = FVAdvectedVenkatakrishnanDeferredCorrection
+    deferred_correction_factor = 1.0
   []
-  [vanleer2]
+  [nvd_vanleer]
     type = FVAdvectedVanLeerWeightBased
-    blending_factor = 0.6
+    blending_factor = 0.75
+  []
+  [nvd_minmod]
+    type = FVAdvectedMinmodWeightBased
+    blending_factor = 1.0
   []
 []
 
@@ -40,7 +45,7 @@
     type = LinearFVAdvection
     variable = u
     velocity = "1 1 0"
-    advected_interp_method_name = vanleer2
+    advected_interp_method_name = nvd_minmod
   []
 []
 
@@ -49,7 +54,7 @@
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = u
     boundary = left
-    functor = 0
+    functor = 0.5
   []
   [bottom_inflow]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -92,8 +97,9 @@
   l_tol = 1e-12
   multi_system_fixed_point = true
   multi_system_fixed_point_convergence = linear
+  multi_system_fixed_point_relaxation_factor = 0.3
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-10'
+  petsc_options_value = 'lu       NONZERO               1e-12'
 []
 
 [Outputs]
