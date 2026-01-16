@@ -865,17 +865,18 @@ class TestHarness:
                 for job in longest_jobs:
                     print(util.formatJobResult(job, self.options, caveats=True, timing=True))
 
-            heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
-            if heaviest_jobs:
-                print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/proc)'))
-                for job in heaviest_jobs:
-                    print(util.formatJobResult(
-                        job,
-                        self.options,
-                        caveats=True,
-                        timing=True,
-                        memory_per_proc=True,
-                    ))
+            # Heaviest jobs by memory; disabled for now, see #32243
+            # heaviest_jobs = self.getHeaviestJobs(self.options.longest_jobs)
+            # if heaviest_jobs:
+            #     print(header(f'{self.options.longest_jobs} Heaviest Jobs (memory/proc)'))
+            #     for job in heaviest_jobs:
+            #         print(util.formatJobResult(
+            #             job,
+            #             self.options,
+            #             caveats=True,
+            #             timing=True,
+            #             memory_per_proc=True,
+            #         ))
 
             longest_folders = self.getLongestFolders(self.options.longest_jobs)
             if longest_folders:
@@ -1268,7 +1269,8 @@ class TestHarness:
         failgroup = parser.add_argument_group('Failure Criteria', 'Control the failure criteria')
         failgroup.add_argument('--max-fails', nargs=1, type=int, default=50, help='The number of tests allowed to fail before any additional tests will run')
         failgroup.add_argument('--valgrind-max-fails', nargs=1, type=int, default=5, help='The number of valgrind tests allowed to fail before any additional valgrind tests will run')
-        failgroup.add_argument('--max-memory', nargs=1, type=float, help='The maximum memory to allow for a job in MB, per slot')
+        # disabled for now; see #32243
+        # failgroup.add_argument('--max-memory', nargs=1, type=float, help='The maximum memory to allow for a job in MB, per slot')
 
         hpcgroup = parser.add_argument_group('HPC', 'Enable and control HPC execution')
         hpcgroup.add_argument('--hpc', dest='hpc', action='store', choices=['pbs', 'slurm'], help='Launch tests using a HPC scheduler')
@@ -1367,14 +1369,15 @@ class TestHarness:
             print('INFO: Setting --no-capabilities because there is not an application')
             self.options.no_capabilities = True
 
-        # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set
-        if (
-            self.options.max_memory is None
-            and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
-        ):
-            value = float(MOOSE_MAX_MEMORY)
-            print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
-            self.options.max_memory = value
+        # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set;
+        # disabled for now, see #32243
+        # if (
+        #     self.options.max_memory is None
+        #     and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
+        # ):
+        #     value = float(MOOSE_MAX_MEMORY)
+        #     print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
+        #     self.options.max_memory = value
 
     def preRun(self):
         if self.options.json:
