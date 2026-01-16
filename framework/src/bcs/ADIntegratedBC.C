@@ -99,6 +99,7 @@ ADIntegratedBCTempl<T>::computeResidual()
   for (auto & r : _residuals)
     r = 0;
 
+  precalculateResidual();
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     const auto jxw_c = _JxW[_qp] * _coord[_qp];
@@ -122,6 +123,7 @@ ADIntegratedBCTempl<T>::computeResidualsForJacobian()
   for (auto & r : _residuals_and_jacobians)
     r = 0;
 
+  precalculateResidual();
   if (_use_displaced_mesh)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {

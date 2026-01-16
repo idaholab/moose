@@ -33,6 +33,8 @@ h_2 = \frac{(h_{1,in} + h_{2,in})}{2} + \frac{1}{2}(h_{2,in} - h_{1,in})\exp(-\f
 
 ## Results
 
+!! Intentional comment to provide extra spacing
+
 The analytical solution is compared with the code results in [enthalpy-ver]. The code results are in good agreement with the analytical solution.
 
 !media subchannel/v&v/enthalpy/enthalpy-ver.png
@@ -41,6 +43,8 @@ The analytical solution is compared with the code results in [enthalpy-ver]. The
     caption=Enthalpy distribution in the axial direction
 
 ## Input file
+
+!! Intentional comment to provide extra spacing
 
 To run the enthalpy mixing model verification problem use the following input file:
 

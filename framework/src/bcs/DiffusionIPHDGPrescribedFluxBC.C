@@ -28,3 +28,9 @@ DiffusionIPHDGPrescribedFluxBC::DiffusionIPHDGPrescribedFluxBC(const InputParame
         this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs()))
 {
 }
+
+IPHDGAssemblyHelper &
+DiffusionIPHDGPrescribedFluxBC::iphdgHelper()
+{
+  return *_iphdg_helper;
+}

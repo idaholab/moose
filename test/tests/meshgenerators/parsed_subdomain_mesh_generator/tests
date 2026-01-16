@@ -9,6 +9,15 @@
     requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions.'
     issues = '#11640'
   []
+  [parsed_subdomain_included_test]
+    type = 'Exodiff'
+    input = 'parsed_subdomain_include.i'
+    cli_args = '--mesh-only'
+    exodiff = 'parsed_subdomain_include_in.e'
+    recover = false
+    requirement = 'The system shall have the ability to assign mesh subdomains based on parsed spatial functions and a list of specific subdomains to include in this assignment.'
+    issues = '#32205'
+  []
   [parsed_subdomain_eeid_test]
     type = Exodiff
     input = 'parsed_subdomain_eeid.i'
@@ -23,7 +32,23 @@
     input = parsed_subdomain_mg.i
     cli_args = "Mesh/subdomains2/excluded_subdomains='missing'"
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = 'The system shall report an error if a specified subdomain does not exist in the mesh.'
+    requirement = 'The system shall report an error if a specified excluded subdomain does not exist in the mesh.'
     issues = '#22117'
+  []
+  [invalid_included_subdomain]
+    type = RunException
+    input = parsed_subdomain_include.i
+    cli_args = "Mesh/sd_included/included_subdomains='missing'"
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = 'The system shall report an error if a specified included subdomain does not exist in the mesh.'
+    issues = '#32205'
+  []
+  [conflicting_included_excluded]
+    type = RunException
+    input = parsed_subdomain_include.i
+    cli_args = "Mesh/sd_included/included_subdomains='0' Mesh/sd_included/excluded_subdomains='2'"
+    expect_err = 'You cannot use both excluded_subdomains and included_subdomains at the same time.'
+    requirement = 'The system shall report an error if both included_subdomains and excluded_subdomains are used at the same time.'
+    issues = '#32205'
   []
 []

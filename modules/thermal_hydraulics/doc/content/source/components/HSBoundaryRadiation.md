@@ -12,9 +12,6 @@ The parameter [!param](/Components/HSBoundaryRadiation/T_ambient) gives the ambi
 [!param](/Components/HSBoundaryRadiation/emissivity) gives the surface emissivity $\epsilon$, and
 [!param](/Components/HSBoundaryRadiation/view_factor) gives the view factor $F$.
 
-The parameter [!param](/Components/HSBoundaryRadiation/scale_pp) specifies
-the name of a post-processor $f$ that can scale the boundary conditions.
-
 !syntax parameters /Components/HSBoundaryRadiation
 
 If this component is used with a cylindrical heat structure, the post-processor

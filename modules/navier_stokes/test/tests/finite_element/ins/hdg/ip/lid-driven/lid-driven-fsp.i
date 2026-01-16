@@ -23,7 +23,7 @@ gamma = 1e5
   type = NavierStokesProblem
   extra_tag_matrices = 'mass'
   mass_matrix = 'mass'
-  use_pressure_mass_matrix = true
+  set_schur_pre = mass
 []
 
 [Variables]
@@ -88,13 +88,12 @@ gamma = 1e5
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -188,15 +187,21 @@ gamma = 1e5
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]
@@ -210,55 +215,63 @@ gamma = 1e5
   [u_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'left right bottom'
     gamma = ${gamma}
-    dirichlet_value = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'left right bottom'
     gamma = ${gamma}
-    dirichlet_value = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'top'
     gamma = ${gamma}
-    dirichlet_value = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'top'
     gamma = ${gamma}
-    dirichlet_value = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
 []
 
-[Functions]
+[FunctorMaterials]
   [top]
-    type = ParsedVectorFunction
-    value_x = ${U}
-    value_y = 0
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = top
+    prop_values = '${U} 0 0'
   []
   [walls]
-    type = ParsedVectorFunction
-    value_x = 0
-    value_y = 0
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 
