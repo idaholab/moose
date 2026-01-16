@@ -21,9 +21,10 @@ namespace FV
  */
 enum class GradientLimiterType : int
 {
+  /// No gradient limiting.
   None = -1,
+  /// Venkatakrishnan limiter (smooth, multidimensional).
   Venkatakrishnan = 0
 };
 }
 }
-

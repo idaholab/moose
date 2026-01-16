@@ -24,31 +24,20 @@ FVAdvectedMinmodWeightBased::validParams()
   params.addParam<bool>(
       "limit_to_linear",
       true,
-      "Whether to limit the scheme to be no more downwind-biased than linear interpolation "
-      "(blends between upwind and linear; avoids 'compressive' weights that can lead to "
-      "downwind weighting and poor linear solver behavior).");
+      "Whether to limit the scheme to be no more downwind-biased than linear interpolation.");
   params.addRangeCheckedParam<Real>(
       "blending_factor",
       1.0,
       "blending_factor>=0 & blending_factor<=1",
       "Scales the high-order blending strength; 0 gives pure upwind, 1 gives the full limited "
       "blending. Values < 1 can improve linear solver robustness for fully implicit assembly.");
-  params.addDeprecatedParam<bool>("bounded",
-                                  true,
-                                  "Deprecated alias for 'limit_to_linear'.",
-                                  "The 'bounded' parameter has been renamed to 'limit_to_linear'.");
   return params;
 }
 
 FVAdvectedMinmodWeightBased::FVAdvectedMinmodWeightBased(const InputParameters & params)
   : FVInterpolationMethod(params),
     _limiter(Moose::FV::Limiter<Real>::build(Moose::FV::LimiterType::MinMod)),
-    _limit_to_linear(
-        [this]()
-        {
-          return isParamSetByUser("bounded") ? getParam<bool>("bounded")
-                                             : getParam<bool>("limit_to_linear");
-        }()),
+    _limit_to_linear(getParam<bool>("limit_to_linear")),
     _blending_factor(getParam<Real>("blending_factor"))
 {
   setAdvectedSystemContributionCalculator(
@@ -68,39 +57,47 @@ FVAdvectedMinmodWeightBased::advectedInterpolate(const FaceInfo & face,
   mooseAssert(elem_grad && neighbor_grad,
               "Minmod advected interpolation requires both element and neighbor gradients.");
 
-  const bool elem_is_upwind = mass_flux >= 0.0;
+  // Use a branchless selection for upwind/downwind quantities (will be SIMD/GPU friendly when we
+  // get there).
+  const Real upwind_mask = mass_flux >= 0.0;
+  const Real downwind_mask = 1.0 - upwind_mask;
 
-  const Real phi_upwind = elem_is_upwind ? elem_value : neighbor_value;
-  const Real phi_downwind = elem_is_upwind ? neighbor_value : elem_value;
-  const VectorValue<Real> & grad_upwind = elem_is_upwind ? *elem_grad : *neighbor_grad;
-  const VectorValue<Real> & grad_downwind = elem_is_upwind ? *neighbor_grad : *elem_grad;
+  const Real phi_upwind = upwind_mask * elem_value + downwind_mask * neighbor_value;
+  const Real phi_downwind = upwind_mask * neighbor_value + downwind_mask * elem_value;
 
+  const VectorValue<Real> grad_upwind =
+      upwind_mask * (*elem_grad) + downwind_mask * (*neighbor_grad);
+
+  // Compute the limiter coefficient beta for the upwind cell.
   const auto beta = _limiter->limit(phi_upwind,
                                     phi_downwind,
                                     &grad_upwind,
-                                    &grad_downwind,
-                                    face.dCN() * (elem_is_upwind ? 1.0 : -1.0),
+                                    nullptr,
+                                    face.dCN() * (2.0 * upwind_mask - 1.0),
                                     /*max_value*/ std::numeric_limits<Real>::max(),
                                     /*min_value*/ std::numeric_limits<Real>::lowest(),
                                     &face,
-                                    elem_is_upwind);
+                                    mass_flux >= 0.0);
 
-  const Real w_f = elem_is_upwind ? face.gC() : (1.0 - face.gC());
+  // Geometric weight associated with the upwind cell for this face.
+  const Real w_f = upwind_mask * face.gC() + downwind_mask * (1.0 - face.gC());
 
+  // Use a Greenshields-style blending:
+  //   phi_f = (1-g)*phi_upwind + g*phi_downwind, where g = beta*(1-w_f)
   Real g = _blending_factor * beta * (1.0 - w_f);
   if (_limit_to_linear)
+    // Clamp to [0, 1-w_f] so the weights do not become more downwind-biased than linear.
     g = std::clamp(g, 0.0, 1.0 - w_f);
 
   const Real w_upwind = 1.0 - g;
   const Real w_downwind = g;
 
-  AdvectedSystemContribution result;
-  result.rhs_face_value = 0.0;
+  // Map (upwind, downwind) weights back to (elem, neighbor) ordering without branches.
+  const Real w_elem = upwind_mask * w_upwind + downwind_mask * w_downwind;
+  const Real w_neighbor = upwind_mask * w_downwind + downwind_mask * w_upwind;
 
-  if (elem_is_upwind)
-    result.weights_matrix = std::make_pair(w_upwind, w_downwind);
-  else
-    result.weights_matrix = std::make_pair(w_downwind, w_upwind);
+  AdvectedSystemContribution result;
+  result.weights_matrix = std::make_pair(w_elem, w_neighbor);
 
   return result;
 }

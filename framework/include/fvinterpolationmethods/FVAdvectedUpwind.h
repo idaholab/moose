@@ -23,21 +23,27 @@ public:
 
   /**
    * Return the (elem, neighbor) interpolation weights for the advected quantity.
+   * @param face The face being interpolated.
+   * @param mass_flux Face mass flux for determining upwind direction.
    */
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
-                                                 Real elem_value,
-                                                 Real neighbor_value,
-                                                 const VectorValue<Real> * elem_grad,
-                                                 const VectorValue<Real> * neighbor_grad,
+                                                 Real,
+                                                 Real,
+                                                 const VectorValue<Real> *,
+                                                 const VectorValue<Real> *,
                                                  Real mass_flux) const;
 
   /**
    * Return only the upwind face value for the advected quantity.
+   * @param face The face being interpolated.
+   * @param elem_value Element-side scalar value.
+   * @param neighbor_value Neighbor-side scalar value.
+   * @param mass_flux Face mass flux for determining upwind direction.
    */
   Real advectedInterpolateValue(const FaceInfo & face,
                                 Real elem_value,
                                 Real neighbor_value,
-                                const VectorValue<Real> * elem_grad,
-                                const VectorValue<Real> * neighbor_grad,
+                                const VectorValue<Real> *,
+                                const VectorValue<Real> *,
                                 Real mass_flux) const;
 };
