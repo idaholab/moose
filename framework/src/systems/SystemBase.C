@@ -27,6 +27,7 @@
 #include "FVBoundaryCondition.h"
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
+#include "GradientLimiterType.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
@@ -1573,7 +1574,46 @@ SystemBase::initialSetup()
         libmesh_ignore(i);
         _raw_grad_container.push_back(currentSolution()->zero_clone());
       }
+      gradient_storage_initialized = true;
     }
+
+  // If we need limited gradients, we initialize the requested limiter containers here.
+  if (!_requested_limited_gradient_types.empty())
+    for (const auto limiter_type : _requested_limited_gradient_types)
+    {
+      if (limiter_type == Moose::FV::GradientLimiterType::None)
+        continue;
+      auto & container = _raw_limited_grad_containers[limiter_type];
+      container.clear();
+      for (const auto i : make_range(this->_mesh.dimension()))
+      {
+        libmesh_ignore(i);
+        container.push_back(currentSolution()->zero_clone());
+      }
+    }
+}
+
+void
+SystemBase::requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type)
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return;
+  _requested_limited_gradient_types.insert(limiter_type);
+}
+
+const std::vector<std::unique_ptr<NumericVector<Number>>> &
+SystemBase::limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const
+{
+  if (limiter_type == Moose::FV::GradientLimiterType::None)
+    return _raw_grad_container;
+
+  const auto it = _raw_limited_grad_containers.find(limiter_type);
+  if (it == _raw_limited_grad_containers.end())
+    mooseError("Limited gradient container was requested but not initialized on system '",
+               name(),
+               "'.");
+
+  return it->second;
 }
 
 void
