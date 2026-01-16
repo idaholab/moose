@@ -25,8 +25,20 @@ public:
 
   FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
 
+  /**
+   * @return The cell-gradient limiter used by this interpolation method.
+   */
   Moose::FV::GradientLimiterType gradientLimiter() const { return _gradient_limiter; }
 
+  /**
+   * Compute the matrix weights and RHS deferred correction for the advected face value.
+   * @param face The face being interpolated.
+   * @param elem_value Element-side scalar value.
+   * @param neighbor_value Neighbor-side scalar value.
+   * @param elem_grad Element-side cell gradient (required).
+   * @param neighbor_grad Neighbor-side cell gradient (required).
+   * @param mass_flux Face mass flux; sign determines upwind direction.
+   */
   AdvectedSystemContribution advectedInterpolate(const FaceInfo & face,
                                                  Real elem_value,
                                                  Real neighbor_value,
@@ -34,6 +46,15 @@ public:
                                                  const VectorValue<Real> * neighbor_grad,
                                                  Real mass_flux) const;
 
+  /**
+   * Convenience wrapper that returns the face value implied by matrix weights plus RHS correction.
+   * @param face The face being interpolated.
+   * @param elem_value Element-side scalar value.
+   * @param neighbor_value Neighbor-side scalar value.
+   * @param elem_grad Element-side cell gradient (required).
+   * @param neighbor_grad Neighbor-side cell gradient (required).
+   * @param mass_flux Face mass flux; sign determines upwind direction.
+   */
   Real advectedInterpolateValue(const FaceInfo & face,
                                 Real elem_value,
                                 Real neighbor_value,
@@ -44,5 +65,6 @@ public:
 private:
   Moose::FV::GradientLimiterType _gradient_limiter =
       Moose::FV::GradientLimiterType::Venkatakrishnan;
+  /// Scales the deferred correction strength (0 = upwind, 1 = full deferred correction).
   Real _deferred_correction_factor = 1.0;
 };

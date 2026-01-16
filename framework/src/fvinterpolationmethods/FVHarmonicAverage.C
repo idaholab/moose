@@ -47,10 +47,12 @@ FVHarmonicAverage::interpolate(const FaceInfo & face,
   // We guard against those nasty zeros here
   const auto safe = [](const Real value)
   {
+    // Use the smallest positive normalized value to avoid division by zero while keeping sign.
     const Real eps = std::numeric_limits<Real>::min();
     return std::copysign(std::max(std::abs(value), eps), value);
   };
 
+  // Weighted harmonic mean: 1 / (g/phi_e + (1-g)/phi_n).
   const Real denom = gc / safe(elem_value) + one_minus_gc / safe(neighbor_value);
   return 1.0 / denom;
 }
