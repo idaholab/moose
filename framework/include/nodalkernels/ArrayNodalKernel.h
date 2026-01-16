@@ -12,6 +12,8 @@
 #include "NodalKernelBase.h"
 #include "MooseVariableInterface.h"
 
+#include <utility>
+
 /**
  * Base class for creating nodal kernels with hand-coded Jacobians
  */
@@ -56,6 +58,15 @@ public:
    * @return the variable
    */
   const MooseVariableFE<RealEigenVector> & variable() const override { return _var; }
+
+  /**
+   * Override to declare component-level Jacobian couplings for sparsity preallocation.
+   * Pairs are (row_component, column_component) indices for this array variable.
+   */
+  virtual void getJacobianComponentCoupling(
+      std::vector<std::pair<unsigned int, unsigned int>> & /*coupling*/) const
+  {
+  }
 
 protected:
   /**
