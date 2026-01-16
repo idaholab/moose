@@ -17,8 +17,6 @@ InputParameters
 HeatTransferBase::validParams()
 {
   InputParameters params = ConnectorBase::validParams();
-  params.addDeprecatedParam<std::string>(
-      "pipe", "Name of pipe component to connect", "Use 'flow_channel' parameter instead.");
   params.addRequiredParam<std::string>("flow_channel",
                                        "Name of flow channel component to connect to");
   params.addParam<bool>(

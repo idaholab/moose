@@ -21,8 +21,6 @@ public:
 
   virtual ADReal computeQpResidual() override;
 
-  /// Post-processor by which to scale boundary condition
-  const PostprocessorValue & _scale_pp;
   /// Function by which to scale the boundary condition
   const Function & _scale_fn;
 

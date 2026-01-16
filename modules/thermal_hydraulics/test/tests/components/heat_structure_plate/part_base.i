@@ -43,7 +43,6 @@
   start_time = 0
   dt = 1
   num_steps = 10
-  abort_on_solve_fail = true
 
   solve_type = 'NEWTON'
   nl_rel_tol = 1e-8

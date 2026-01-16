@@ -78,7 +78,7 @@ protected:
 
   const Real _mu;
   const Real _k;
-  Real _Pr;
+  const Real _Pr;
 
 public:
   static InputParameters validParams();

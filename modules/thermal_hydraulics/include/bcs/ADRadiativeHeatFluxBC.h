@@ -29,8 +29,6 @@ protected:
   /// View factor
   const Moose::Functor<ADReal> & _view_factor;
 
-  /// Post-processor by which to scale boundary condition
-  const PostprocessorValue & _scale_pp;
   /// Functor by which to scale the boundary condition
   const Moose::Functor<ADReal> & _scale;
 
