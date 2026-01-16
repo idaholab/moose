@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <map>
+#include <set>
 #include <vector>
 
 #include "DataIO.h"
@@ -17,6 +19,7 @@
 #include "InputParameters.h"
 #include "MooseVariableBase.h"
 #include "ConsoleStreamInterface.h"
+#include "GradientLimiterType.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
@@ -932,6 +935,16 @@ public:
     return _raw_grad_container;
   }
 
+  void requestLimitedGradients(const Moose::FV::GradientLimiterType limiter_type);
+
+  const std::vector<std::unique_ptr<NumericVector<Number>>> &
+  limitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type) const;
+
+  const std::set<Moose::FV::GradientLimiterType> & requestedLimitedGradientTypes() const
+  {
+    return _requested_limited_gradient_types;
+  }
+
   /**
    * Compute time derivatives, auxiliary variables, etc.
    * @param type Our current execution stage
@@ -1077,6 +1090,10 @@ protected:
   /// because we create copies of variables on each thread and that would
   /// lead to increased data duplication when using threading-based parallelism.
   std::vector<std::unique_ptr<NumericVector<Number>>> _raw_grad_container;
+
+  std::set<Moose::FV::GradientLimiterType> _requested_limited_gradient_types;
+  std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _raw_limited_grad_containers;
 
 private:
   /**

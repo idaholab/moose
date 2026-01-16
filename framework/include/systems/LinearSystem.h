@@ -11,6 +11,9 @@
 
 #include "SolverSystem.h"
 #include "PerfGraphInterface.h"
+#include "GradientLimiterType.h"
+
+#include <map>
 
 #include "libmesh/transient_system.h"
 #include "libmesh/linear_implicit_system.h"
@@ -139,6 +142,13 @@ public:
     return _new_gradient;
   }
 
+  /**
+   * Return a reference to the new (temporary) limited gradient container vectors for the supplied
+   * limiter type.
+   */
+  std::vector<std::unique_ptr<NumericVector<Number>>> &
+  newLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type);
+
   virtual void compute(ExecFlagType type) override;
 
 protected:
@@ -206,6 +216,10 @@ protected:
   /// (for extrapolated boundary conditions). Once the computation is done, we
   /// move the nev vectors to the original containers.
   std::vector<std::unique_ptr<NumericVector<Number>>> _new_gradient;
+
+  /// Vectors to store new limited gradients during computation (keyed by limiter type).
+  std::map<Moose::FV::GradientLimiterType, std::vector<std::unique_ptr<NumericVector<Number>>>>
+      _new_limited_gradient;
 
 private:
   /// The current states of the solution (0 = current, 1 = old, etc)

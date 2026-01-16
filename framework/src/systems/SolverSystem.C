@@ -11,6 +11,7 @@
 #include "SolutionInvalidity.h"
 #include "FEProblemBase.h"
 #include "TimeIntegrator.h"
+#include "MooseUtils.h"
 
 using namespace libMesh;
 
@@ -72,6 +73,46 @@ SolverSystem::setSolution(const NumericVector<Number> & soln)
 
   if (_serialized_solution.get())
     serializeSolution();
+}
+
+void
+SolverSystem::setFixedPointRelaxationFactor(const Real relaxation_factor)
+{
+  _fixed_point_relaxation_factor = relaxation_factor;
+}
+
+void
+SolverSystem::clearFixedPointRelaxation()
+{
+  _fixed_point_relaxation_factor = 1.0;
+  _fixed_point_old_solution.reset();
+}
+
+void
+SolverSystem::saveOldSolutionForFixedPointRelaxation()
+{
+  if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
+    return;
+
+  if (!_fixed_point_old_solution)
+    _fixed_point_old_solution = solution().clone();
+  *_fixed_point_old_solution = solution();
+}
+
+void
+SolverSystem::applyFixedPointRelaxation()
+{
+  if (MooseUtils::absoluteFuzzyEqual(_fixed_point_relaxation_factor, 1.0))
+    return;
+
+  mooseAssert(_fixed_point_old_solution,
+              "Fixed point relaxation was requested but the old solution was not saved.");
+
+  auto & sol = solution();
+  sol.scale(_fixed_point_relaxation_factor);
+  sol.add(1.0 - _fixed_point_relaxation_factor, *_fixed_point_old_solution);
+  sol.close();
+  update();
 }
 
 void
