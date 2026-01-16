@@ -11,6 +11,7 @@
 
 #include "MooseObject.h"
 #include "FaceInfo.h"
+#include "GradientLimiterType.h"
 #include "MooseFunctorForward.h"
 #include "MooseError.h"
 
@@ -91,9 +92,15 @@ public:
     const FVInterpolationMethod * object = nullptr;
     Eval eval = nullptr;
     bool _needs_gradients = false;
+    Moose::FV::GradientLimiterType _gradient_limiter = Moose::FV::GradientLimiterType::None;
 
     bool valid() const { return object && eval; }
     bool needsGradients() const { return _needs_gradients; }
+    bool needsLimitedGradients() const
+    {
+      return _gradient_limiter != Moose::FV::GradientLimiterType::None;
+    }
+    Moose::FV::GradientLimiterType gradientLimiter() const { return _gradient_limiter; }
 
     Real operator()(const FaceInfo & face,
                     Real elem_value,
@@ -144,9 +151,15 @@ public:
     const FVInterpolationMethod * object = nullptr;
     Eval eval = nullptr;
     bool _needs_gradients = false;
+    Moose::FV::GradientLimiterType _gradient_limiter = Moose::FV::GradientLimiterType::None;
 
     bool valid() const { return object && eval; }
     bool needsGradients() const { return _needs_gradients; }
+    bool needsLimitedGradients() const
+    {
+      return _gradient_limiter != Moose::FV::GradientLimiterType::None;
+    }
+    Moose::FV::GradientLimiterType gradientLimiter() const { return _gradient_limiter; }
 
     AdvectedSystemContribution operator()(const FaceInfo & face,
                                           Real elem_value,
@@ -217,6 +230,22 @@ protected:
   }
 
   /**
+   * Utility to build an advected face value interpolation function for Derived classes where the
+   * limiter type is encapsulated by the Derived class (e.g. a member variable populated from input
+   * parameters).
+   *
+   * The Derived class must provide:
+   *   Moose::FV::GradientLimiterType gradientLimiter() const;
+   */
+  template <typename Derived>
+  AdvectedValueInterpolator buildAdvectedFaceValueInterpolatorLimited() const
+  {
+    auto interpolator = buildAdvectedFaceValueInterpolator<Derived>(true);
+    interpolator._gradient_limiter = static_cast<const Derived &>(*this).gradientLimiter();
+    return interpolator;
+  }
+
+  /**
    * Utility to build an advected interpolation function for Derived classes.
    */
   template <typename Derived>
@@ -227,6 +256,21 @@ protected:
     interpolator.object = this;
     interpolator.eval = &FVInterpolationMethod::callAdvectedSystemContribution<Derived>;
     interpolator._needs_gradients = needs_gradients;
+    return interpolator;
+  }
+
+  /**
+   * Utility to build an advected interpolation function for Derived classes where the limiter type
+   * is encapsulated by the Derived class.
+   *
+   * The Derived class must provide:
+   *   Moose::FV::GradientLimiterType gradientLimiter() const;
+   */
+  template <typename Derived>
+  AdvectedSystemContributionCalculator buildAdvectedSystemContributionCalculatorLimited() const
+  {
+    auto interpolator = buildAdvectedSystemContributionCalculator<Derived>(true);
+    interpolator._gradient_limiter = static_cast<const Derived &>(*this).gradientLimiter();
     return interpolator;
   }
 
