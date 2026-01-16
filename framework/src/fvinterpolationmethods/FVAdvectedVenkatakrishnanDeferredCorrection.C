@@ -50,6 +50,7 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
   mooseAssert(elem_grad && neighbor_grad,
               "Venkatakrishnan deferred correction requires both element and neighbor gradients.");
 
+  // Use a branchless selection for upwind/downwind quantities.
   const bool elem_is_upwind = mass_flux >= 0.0;
   const Real upwind_mask = elem_is_upwind;
   const Real downwind_mask = 1.0 - upwind_mask;
@@ -59,6 +60,8 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
   const VectorValue<Real> grad_upwind =
       upwind_mask * (*elem_grad) + downwind_mask * (*neighbor_grad);
 
+  // Reconstruct a higher-order face value from the upwind cell using the (limited) cell gradient.
+  // We use a skewness-corrected face centroid projected to the line connecting cell centroids.
   const Point face_on_cn_line = face.faceCentroid() - face.skewnessCorrectionVector();
   const Point upwind_centroid = elem_is_upwind ? face.elemCentroid() : face.neighborCentroid();
   const Point face_delta = face_on_cn_line - upwind_centroid;
@@ -66,10 +69,13 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolate(
   const Real phi_high = phi_upwind + (grad_upwind * face_delta);
 
   AdvectedSystemContribution result;
+  // Matrix contribution: pure upwind.
   result.weights_matrix = std::make_pair(upwind_mask, downwind_mask);
 
   const Real phi_matrix =
       result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
+  // Deferred correction: add the difference between low-order and high-order reconstructions
+  // explicitly on the RHS (scaled for robustness).
   result.rhs_face_value = _deferred_correction_factor * (phi_matrix - phi_high);
 
   return result;
