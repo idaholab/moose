@@ -18,7 +18,6 @@ packages:
     templates:
       conda/mpi/meta.yaml.template: conda/mpi/meta.yaml
     influential:
-      - apptainer/set_prompt.bash
       - apptainer/mpi.def
       - apptainer/files/mpi
       - conda/mpi/base_build.sh

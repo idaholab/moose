@@ -11,9 +11,6 @@
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
-{#- The location for the bash prompt script in the container                                  -#}
-{%- set SET_PROMPT_SCRIPT = '/.singularity.d/set_prompt.bash' -%}
-
 {#- The system GCC version based on ALTERNATE_FROM clang or clang_min                         -#}
 {#- Note: harmless if not set                                                                 -#}
 {%- if ALTERNATE_FROM == "clang" %}
@@ -106,7 +103,7 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
     dnf install -y tmux emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
         perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
         libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
-        automake cppunit-devel glpk-devel patchelf lcov
+        automake cppunit-devel glpk-devel patchelf lcov bash-completion
 
 {%- if ALTERNATE_FROM == "clang" %}
     # Installing system Clang, and its GCC GNU dependencies
@@ -230,3 +227,7 @@ EOF
         {{ OPENMPI_DIR }}/bin/mpiexec --version
         {{ OPENMPI_DIR }}/bin/ompi_info
     fi
+
+%files
+    {{ FILES_DIR }}/.singularity.d/env/02-fix-actions.sh /.singularity.d/env/02-fix-actions.sh
+    {{ FILES_DIR }}/.singularity.d/moose_bashrc /.singularity.d/moose_bashrc
