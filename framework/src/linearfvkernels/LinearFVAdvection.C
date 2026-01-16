@@ -11,6 +11,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "LinearFVAdvectionDiffusionBC.h"
+#include "GradientLimiterType.h"
 #include <limits>
 
 registerMooseObject("MooseApp", LinearFVAdvection);
@@ -42,7 +43,7 @@ LinearFVAdvection::LinearFVAdvection(const InputParameters & params)
 
   _adv_interp_handle = _adv_interp_method->advectedSystemContributionCalculator();
   if (_adv_interp_handle.needsGradients())
-    _var.computeCellGradients();
+    _var.computeCellGradients(_adv_interp_handle.gradientLimiter());
   if (!_adv_interp_handle.valid())
     mooseError("Advected interpolation handle is invalid; check the interpolation method setup.");
 }
