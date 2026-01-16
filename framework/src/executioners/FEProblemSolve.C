@@ -298,7 +298,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
             : (getMooseApp().defaultAutomaticScaling() &&
                std::any_of(_systems.begin(),
                            _systems.end(),
-                           [this](const auto & solver_sys) {
+                           [this](const auto & solver_sys)
+                           {
                              return _problem.solverParams(solver_sys->number())._type !=
                                     Moose::ST_JFNK;
                            })));
@@ -492,7 +493,6 @@ FEProblemSolve::solve()
         {
           const auto linear_sys_number =
               cast_int<unsigned int>(sys->number() - _problem.numNonlinearSystems());
-          auto & linear_sys = _problem.getLinearSystem(linear_sys_number);
           _problem.solveLinearSystem(linear_sys_number, &_problem.getPetscOptions());
         }
 

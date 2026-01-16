@@ -5,6 +5,8 @@
     nx = 51
     ny = 51
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
@@ -15,7 +17,7 @@
   [u]
     type = MooseLinearVariableFVReal
     solver_sys = 'u_sys'
-    initial_condition = 0.0
+    initial_condition = 0.5
   []
 []
 
@@ -36,7 +38,7 @@
   []
   [nvd_minmod]
     type = FVAdvectedMinmodWeightBased
-    blending_factor = 1.0
+    blending_factor = 0.75
   []
 []
 
@@ -76,7 +78,7 @@
     variable = u
     start_point = '1.0 0 0'
     end_point = '0 1.0 0'
-    num_points = 200
+    num_points = 101
     sort_by = id
     warn_discontinuous_face_values = false
     execute_on = TIMESTEP_END
@@ -86,7 +88,7 @@
 [Convergence]
   [linear]
     type = IterationCountConvergence
-    max_iterations = 200
+    max_iterations = 50
     converge_at_max_iterations = true
   []
 []
@@ -98,8 +100,8 @@
   multi_system_fixed_point = true
   multi_system_fixed_point_convergence = linear
   multi_system_fixed_point_relaxation_factor = 0.3
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       NONZERO               1e-12'
+  petsc_options_iname = '-ksp_type -pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'gmres    lu                NONZERO                     1e-12'
 []
 
 [Outputs]

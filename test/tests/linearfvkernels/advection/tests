@@ -51,11 +51,45 @@
     requirement = 'The system shall display second-order convergence for advection problems with linear interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh in cylindrical coordinate system.'
     max_threads = 1 # see libmesh issue #3808
   []
-  [diagonal-step-2d]
-    type = RunApp
+  [diagonal-step-2d-upwind]
+    type = CSVDiff
     input = diagonal-step-2d.i
+    csvdiff = 'upwind_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    cli_args = "Outputs/file_base=upwind LinearFVKernels/advection/advected_interp_method_name=upwind"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-linear]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'average_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    cli_args = "Outputs/file_base=average LinearFVKernels/advection/advected_interp_method_name=average"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-venkat-deferred]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'diagonal-step-2d_out_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    cli_args = "LinearFVKernels/advection/advected_interp_method_name=muscl_venkat Convergence/linear/max_iterations=100"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-vanleer]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'vanleer_diag_sample_0001.csv'
     requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
     mesh_mode = REPLICATED # line sampling is sensitive to distributed partitioning
+    cli_args = "Outputs/file_base=vanleer LinearFVKernels/advection/advected_interp_method_name=nvd_vanleer"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-minmod]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'minmod_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    cli_args = "Outputs/file_base=minmod LinearFVKernels/advection/advected_interp_method_name=nvd_minmod"
     max_threads = 1 # see libmesh issue #3808
   []
 []
