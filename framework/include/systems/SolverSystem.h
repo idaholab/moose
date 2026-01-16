@@ -14,6 +14,7 @@
 
 #include "libmesh/system.h"
 
+#include <memory>
 #include <string>
 
 class SubProblem;
@@ -65,6 +66,21 @@ public:
   void setSolution(const NumericVector<Number> & soln);
 
   /**
+   * Enable solution under/over-relaxation for fixed point iterations.
+   *
+   * Intended for segregated multi-system fixed point iterations where the system is solved
+   * repeatedly with coefficients that depend on other systems/loops (e.g. deferred correction).
+   * A value of 1 disables relaxation.
+   *
+   * The relaxed update is:
+   *   u <- relaxation_factor * u_new + (1 - relaxation_factor) * u_old
+   */
+  void setFixedPointRelaxationFactor(const Real relaxation_factor);
+  void clearFixedPointRelaxation();
+  void saveOldSolutionForFixedPointRelaxation();
+  void applyFixedPointRelaxation();
+
+  /**
    * Set the side on which the preconditioner is applied to.
    * @param pcs The required preconditioning side
    */
@@ -108,6 +124,12 @@ protected:
   Moose::PCSideType _pc_side;
   /// KSP norm type
   Moose::MooseKSPNormType _ksp_norm;
+
+  /// Boolean to see if solution is invalid
+  bool _solution_is_invalid;
+
+  Real _fixed_point_relaxation_factor = 1.0;
+  std::unique_ptr<NumericVector<Number>> _fixed_point_old_solution;
 };
 
 inline const NumericVector<Number> * const &
