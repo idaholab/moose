@@ -23,25 +23,24 @@ free(void * ptr)
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(ptr);
 }
 
-template <>
-template <>
+template <typename T, typename index_type>
 void
-Array<Real, 1, LayoutType::LEFT>::axby<Real>(const Real a,
-                                             const Array<Real, 1, LayoutType::LEFT> & x,
-                                             const char op,
-                                             const Real b,
-                                             const Array<Real, 1, LayoutType::LEFT> & y,
-                                             const bool accumulate)
+Array<T, 1, index_type, LayoutType::LEFT>::axby(const T a,
+                                                const Array<T, 1, index_type, LayoutType::LEFT> & x,
+                                                const char op,
+                                                const T b,
+                                                const Array<T, 1, index_type, LayoutType::LEFT> & y,
+                                                const bool accumulate)
 {
-  if (!isDeviceAlloc() || !x.isDeviceAlloc() || !y.isDeviceAlloc())
+  if (!this->isDeviceAlloc() || !x.isDeviceAlloc() || !y.isDeviceAlloc())
     mooseError("Kokkos array error: all arrays for axby() should be on device.");
 
-  if (!(size() == x.size() && (x.size() == y.size())))
+  if (!(this->size() == x.size() && (x.size() == y.size())))
     mooseError("Kokkos array error: all arrays for axby() should have the same size.");
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, size());
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, this->size());
 
-  auto data = deviceData();
+  auto data = this->deviceData();
 
   switch (op)
   {
@@ -88,68 +87,67 @@ Array<Real, 1, LayoutType::LEFT>::axby<Real>(const Real a,
   ::Kokkos::fence();
 }
 
-template <>
-template <>
+template <typename T, typename index_type>
 void
-Array<Real, 1, LayoutType::LEFT>::scal<Real>(const Real a,
-                                             const Array<Real, 1, LayoutType::LEFT> & x)
+Array<T, 1, index_type, LayoutType::LEFT>::scal(const T a,
+                                                const Array<T, 1, index_type, LayoutType::LEFT> & x)
 {
-  if (!isDeviceAlloc() || !x.isDeviceAlloc())
+  if (!this->isDeviceAlloc() || !x.isDeviceAlloc())
     mooseError("Kokkos array error: all arrays for scal() should be on device.");
 
-  if (size() != x.size())
+  if (this->size() != x.size())
     mooseError("Kokkos array error: all arrays for scal() should have the same size.");
 
-  ::Kokkos::View<Real *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(deviceData(),
-                                                                                     size());
-  ::Kokkos::View<Real *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> other(
-      x.deviceData(), x.size());
+  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(
+      this->deviceData(), this->size());
+  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> other(x.deviceData(),
+                                                                                   x.size());
 
   KokkosBlas::scal(self, a, other);
 }
 
-template <>
-template <>
+template <typename T, typename index_type>
 void
-Array<Real, 1, LayoutType::LEFT>::scal<Real>(const Real a)
+Array<T, 1, index_type, LayoutType::LEFT>::scal(const T a)
 {
   return scal(a, *this);
 }
 
-template <>
-template <>
-Real
-Array<Real, 1, LayoutType::LEFT>::dot<Real>(const Array<Real, 1, LayoutType::LEFT> & x)
+template <typename T, typename index_type>
+T
+Array<T, 1, index_type, LayoutType::LEFT>::dot(const Array<T, 1, index_type, LayoutType::LEFT> & x)
 {
-  if (!isDeviceAlloc() || !x.isDeviceAlloc())
+  if (!this->isDeviceAlloc() || !x.isDeviceAlloc())
     mooseError("Kokkos array error: all arrays for dot() should be on device.");
 
-  if (size() != x.size())
+  if (this->size() != x.size())
     mooseError("Kokkos array error: all arrays for dot() should have the same size.");
 
-  ::Kokkos::View<Real *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(deviceData(),
-                                                                                     size());
-  ::Kokkos::View<Real *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> other(
-      x.deviceData(), x.size());
+  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(
+      this->deviceData(), this->size());
+  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> other(x.deviceData(),
+                                                                                   x.size());
 
   return KokkosBlas::dot(self, other);
 }
 
-template <>
-template <>
-Real
-Array<Real, 1>::nrm2<Real>()
+template <typename T, typename index_type>
+T
+Array<T, 1, index_type, LayoutType::LEFT>::nrm2()
 {
-  if (!isDeviceAlloc())
+  if (!this->isDeviceAlloc())
     mooseError("Kokkos array error: array for nrm2() should be on device.");
 
-  ::Kokkos::View<Real *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(deviceData(),
-                                                                                     size());
+  ::Kokkos::View<T *, MemSpace, ::Kokkos::MemoryTraits<::Kokkos::Unmanaged>> self(
+      this->deviceData(), this->size());
 
   return KokkosBlas::nrm2(self);
 }
 
-template class Array<Real, 1, LayoutType::LEFT>;
+template class Array<Real, 1, uint8_t, LayoutType::LEFT>;
+template class Array<Real, 1, uint16_t, LayoutType::LEFT>;
+template class Array<Real, 1, uint32_t, LayoutType::LEFT>;
+template class Array<Real, 1, uint64_t, LayoutType::LEFT>;
 
 } // namespace Kokkos
 } // namespace Moose
