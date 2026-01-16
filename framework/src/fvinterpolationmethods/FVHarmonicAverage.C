@@ -14,8 +14,6 @@
 #include <limits>
 
 registerMooseObject("MooseApp", FVHarmonicAverage);
-registerMooseObjectAliased("MooseApp", FVHarmonicAverage, "HarmonicAverage");
-registerMooseObjectAliased("MooseApp", FVHarmonicAverage, "harmonicAverage");
 
 InputParameters
 FVHarmonicAverage::validParams()
