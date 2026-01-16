@@ -764,8 +764,8 @@ class StochasticRunner:
             y_cache = self._result_cache.get(x[i, :])
             if not y_cache is None:
                 need_run_rows[i] = False
-                if isinstance(y_cache.dtype, np._object):
-                    y = y.astype(np._object)
+                if isinstance(y_cache.dtype, np.object_):
+                    y = y.astype(np.object_)
                 y[i, :] = y_cache
 
         # Run if any rows are not cached
