@@ -33,9 +33,9 @@
 []
 
 [Functions]
-  [minus]
+  [one]
     type = ParsedFunction
-    expression = -1.0
+    expression = 1.0
   []
   [initial]
     type = ParsedFunction
@@ -79,7 +79,7 @@
   [jacobian_two]
     type = MFEMMixedScalarWeakDivergenceKernel
     variable = concentration
-    coefficient = minus
+    coefficient = one
   []
 []
 
