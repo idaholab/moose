@@ -1086,7 +1086,7 @@ public:
    * \param func                Function to project
    * \param func_grad           Gradient of the function
    * \param params              Parameters to pass to the function
-   * \param target_var          variable name to project
+   * \param target_vars         variable names to project
    */
   void projectFunctionOnCustomRange(ConstElemRange & elem_range,
                                     Number (*func)(const Point &,
@@ -1098,7 +1098,7 @@ public:
                                                           const std::string &,
                                                           const std::string &),
                                     const libMesh::Parameters & params,
-                                    const VariableName & target_var);
+                                    const std::vector<VariableName> & target_vars);
 
   // Materials
   virtual void addMaterial(const std::string & material_name,

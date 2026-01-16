@@ -3881,20 +3881,26 @@ FEProblemBase::projectFunctionOnCustomRange(ConstElemRange & elem_range,
                                                                   const std::string &,
                                                                   const std::string &),
                                             const libMesh::Parameters & params,
-                                            const VariableName & target_var)
+                                            const std::vector<VariableName> & target_vars)
 {
   mooseAssert(!Threads::in_threads,
               "We're performing a projection based on data from just the thread 0 variable, so any "
               "modifications to the variable solution must have been thread joined already");
 
-  const auto sn = systemNumForVariable(target_var);
-  auto & sys = getSystemBase(sn);
+  std::unordered_map<unsigned int, std::vector<unsigned int>> sys_to_var_nums;
 
-  // Let libmesh handle the projection
-  System & libmesh_sys = getSystem(target_var);
-  libmesh_sys.project_vector(func, func_grad, params, sys.solution(), -1 /*is_adjoint*/, elem_range);
+  for (const auto & target_var : target_vars)
+  {
+    const auto sn = systemNumForVariable(target_var);
+    const auto & var = getStandardVariable(0, target_var);
+    sys_to_var_nums[sn].push_back(var.number());
+  }
 
-  sys.solution().localize(*libmesh_sys.current_local_solution, sys.dofMap().get_send_list());
+  for (const auto & [sys_num, var_nums] : sys_to_var_nums)
+  {
+    System & libmesh_sys = getSystemBase(sys_num).system();
+    libmesh_sys.project_solution(func, func_grad, params, elem_range, var_nums);
+  }
 }
 
 std::shared_ptr<MaterialBase>

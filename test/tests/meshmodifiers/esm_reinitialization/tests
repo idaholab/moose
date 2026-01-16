@@ -109,6 +109,13 @@
       exodiff = 'restore_not_restore_test_out.e-s003'
       detail = 'using a configuration that tests both restoring and not restoring DOF values after reinitialization.'
     []
+
+    [reinitialization_none_test]
+      type = 'Exodiff'
+      input = 'external_moving_boundary_three_vars_three_strategies_none_strategy.i'
+      exodiff = 'external_moving_boundary_three_vars_three_strategies_none_strategy_out.e-s003'
+      detail = 'using a strategy that leaves newly activated nodes unmodified.'
+    []
   []
 
   [error_test]

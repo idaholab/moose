@@ -67,7 +67,7 @@ ElementSubdomainModifierBase::validParams()
 
   params.addParam<std::vector<VariableName>>(
       "reinitialize_variables", {}, "Which variables to reinitialize when subdomain changes.");
-  MooseEnum reinit_strategy("IC POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE POLYNOMIAL_NEARBY", "IC");
+  MooseEnum reinit_strategy("IC POLYNOMIAL_NEIGHBOR POLYNOMIAL_WHOLE POLYNOMIAL_NEARBY NONE", "IC");
   params.addParam<std::vector<MooseEnum>>(
       "reinitialization_strategy",
       {reinit_strategy},
@@ -592,8 +592,9 @@ ElementSubdomainModifierBase::prepareVariableForReinitialization(const VariableN
 {
   switch (reinit_strategy)
   {
+    case ReinitStrategy::NONE:
     case ReinitStrategy::IC:
-      // No additional preparation needed for IC
+      // No additional preparation needed for IC and NONE strategies
       break;
     case ReinitStrategy::POLYNOMIAL_NEIGHBOR:
     case ReinitStrategy::POLYNOMIAL_WHOLE:
@@ -1108,6 +1109,9 @@ ElementSubdomainModifierBase::gatherPatchElements(const VariableName & var_name,
       }
       break;
     }
+    case ReinitStrategy::NONE:
+      // do nothing
+      break;
     default:
       mooseError("Unknown reinitialization strategy");
       break;
@@ -1221,6 +1225,7 @@ ElementSubdomainModifierBase::extrapolatePolynomial(const VariableName & var_nam
     return grad;
   };
 
+  std::vector<VariableName> var_names = {var_name};
   _fe_problem.projectFunctionOnCustomRange(
-      reinitializedElemRange(), poly_func, poly_func_grad, function_parameters, var_name);
+      reinitializedElemRange(), poly_func, poly_func_grad, function_parameters, var_names);
 }
