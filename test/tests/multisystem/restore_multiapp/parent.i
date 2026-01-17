@@ -82,6 +82,9 @@
     input_files = sub.i
     execute_on = TIMESTEP_END
     keep_solution_during_restore = true
+    # The choice does not matter here, but conceptually there is no need to override
+    # the old solution when the subapp is a Steady solve
+    update_old_solution_when_keeping_solution_during_restore = false
   []
 []
 

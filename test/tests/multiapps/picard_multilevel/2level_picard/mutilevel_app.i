@@ -79,6 +79,8 @@
     input_files = sub_level1.i
     execute_on = 'timestep_end'
     keep_solution_during_restore = true
+    # We update the old solution to be able to compute the time derivative when we start the child app's
+    # transient again at the beginning of the next fixed point iteration
     update_old_solution_when_keeping_solution_during_restore = true
   []
 []
