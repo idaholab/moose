@@ -58,7 +58,7 @@ moose-opt -i step13c_restart_from_checkpoint.i
 
 !alert note
 - only variables with `initial_from_file_var` set will be initialized
-- reading exodus files is a replicated operation, meaning the file is loaded by every process in parallel. Use Nemesis files in parallel to reduce memory costs
+- reading exodus files is a replicated operation, meaning the file is loaded by every process in parallel. Use checkpoint files or a pre-split mesh for parallel mesh reading.
 - Variables are output to exodus files as linear lagrange or constant monomial, this can create a projection error when restarting.
 
 !---
