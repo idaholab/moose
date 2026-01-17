@@ -93,6 +93,8 @@
 [Preconditioning]
   [sc]
     type = StaticCondensation
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu       nonzero'
   []
 []
 
