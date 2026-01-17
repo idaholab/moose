@@ -32,8 +32,8 @@ FVAdvectedVenkatakrishnanDeferredCorrection::FVAdvectedVenkatakrishnanDeferredCo
   : FVInterpolationMethod(params),
     _deferred_correction_factor(getParam<Real>("deferred_correction_factor"))
 {
-  setAdvectedSystemContributionCalculator(
-      buildAdvectedSystemContributionCalculatorLimited<FVAdvectedVenkatakrishnanDeferredCorrection>());
+  setAdvectedSystemContributionCalculator(buildAdvectedSystemContributionCalculatorLimited<
+                                          FVAdvectedVenkatakrishnanDeferredCorrection>());
   setAdvectedFaceValueInterpolator(
       buildAdvectedFaceValueInterpolatorLimited<FVAdvectedVenkatakrishnanDeferredCorrection>());
 }

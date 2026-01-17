@@ -1609,9 +1609,8 @@ SystemBase::limitedGradientContainer(const Moose::FV::GradientLimiterType limite
 
   const auto it = _raw_limited_grad_containers.find(limiter_type);
   if (it == _raw_limited_grad_containers.end())
-    mooseError("Limited gradient container was requested but not initialized on system '",
-               name(),
-               "'.");
+    mooseError(
+        "Limited gradient container was requested but not initialized on system '", name(), "'.");
 
   return it->second;
 }

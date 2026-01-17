@@ -43,22 +43,21 @@ protected:
 TEST_F(FVInterpolationMethodTest, geometricAverageMatchesGC)
 {
   InputParameters params = _factory.getValidParams("FVGeometricAverage");
-  auto & method =
-      addObject<FVGeometricAverage>("FVGeometricAverage", "geom_interp_method", params);
+  auto & method = addObject<FVGeometricAverage>("FVGeometricAverage", "geom_interp_method", params);
 
   const Real elem_value = 2.0;
   const Real neighbor_value = 10.0;
   const Real expected =
       _internal_face->gC() * elem_value + (1.0 - _internal_face->gC()) * neighbor_value;
 
-  EXPECT_NEAR(method.faceInterpolator()(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+  EXPECT_NEAR(
+      method.faceInterpolator()(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, harmonicAverage)
 {
   InputParameters params = _factory.getValidParams("FVHarmonicAverage");
-  auto & method =
-      addObject<FVHarmonicAverage>("FVHarmonicAverage", "harm_interp_method", params);
+  auto & method = addObject<FVHarmonicAverage>("FVHarmonicAverage", "harm_interp_method", params);
 
   const Real elem_value = 4.0;
   const Real neighbor_value = 1.0;
@@ -66,7 +65,8 @@ TEST_F(FVInterpolationMethodTest, harmonicAverage)
   const Real gc = _internal_face->gC();
   const Real expected = 1.0 / (gc / elem_value + (1.0 - gc) / neighbor_value);
 
-  EXPECT_NEAR(method.faceInterpolator()(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
+  EXPECT_NEAR(
+      method.faceInterpolator()(*_internal_face, elem_value, neighbor_value), expected, 1e-12);
 }
 
 TEST_F(FVInterpolationMethodTest, advectedUpwind)
