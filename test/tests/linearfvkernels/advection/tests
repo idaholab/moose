@@ -1,6 +1,6 @@
 [Tests]
-  design = 'LinearFVAdvection.md LinearFVAdvectionDiffusionOutflowBC.md'
-  issues = '#25722'
+  design = 'LinearFVAdvection.md LinearFVAdvectionDiffusionOutflowBC.md FVInterpolationMethod.md FVAdvectedUpwind.md FVGeometricAverage.md FVAdvectedVenkatakrishnanDeferredCorrection.md FVAdvectedVanLeerWeightBased.md FVAdvectedMinmodWeightBased.md'
+  issues = '#25722 #31965'
   [mms-1d-upwind]
     type = MMSTest
     input = 'test.py'
@@ -55,7 +55,7 @@
     type = CSVDiff
     input = diagonal-step-2d.i
     csvdiff = 'upwind_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    requirement = 'The system shall support linear finite volume advection using upwind interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
     cli_args = "Outputs/file_base=upwind LinearFVKernels/advection/advected_interp_method_name=upwind"
     max_threads = 1 # see libmesh issue #3808
   []
@@ -63,7 +63,7 @@
     type = CSVDiff
     input = diagonal-step-2d.i
     csvdiff = 'average_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    requirement = 'The system shall support linear finite volume advection using linear (average) interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
     cli_args = "Outputs/file_base=average LinearFVKernels/advection/advected_interp_method_name=average"
     max_threads = 1 # see libmesh issue #3808
   []
@@ -71,7 +71,7 @@
     type = CSVDiff
     input = diagonal-step-2d.i
     csvdiff = 'diagonal-step-2d_out_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    requirement = 'The system shall support linear finite volume advection using deferred-correction Venkatakrishnan MUSCL interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
     cli_args = "LinearFVKernels/advection/advected_interp_method_name=muscl_venkat Convergence/linear/max_iterations=100"
     max_threads = 1 # see libmesh issue #3808
   []
@@ -79,8 +79,7 @@
     type = CSVDiff
     input = diagonal-step-2d.i
     csvdiff = 'vanleer_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
-    mesh_mode = REPLICATED # line sampling is sensitive to distributed partitioning
+    requirement = 'The system shall support linear finite volume advection using NVD vanLeer weight-based interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
     cli_args = "Outputs/file_base=vanleer LinearFVKernels/advection/advected_interp_method_name=nvd_vanleer"
     max_threads = 1 # see libmesh issue #3808
   []
@@ -88,8 +87,48 @@
     type = CSVDiff
     input = diagonal-step-2d.i
     csvdiff = 'minmod_diag_sample_0001.csv'
-    requirement = 'The system shall support linear finite volume advection on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
+    requirement = 'The system shall support linear finite volume advection using NVD minmod weight-based interpolation on a two-dimensional square domain with diagonal flow and mixed inflow Dirichlet boundaries.'
     cli_args = "Outputs/file_base=minmod LinearFVKernels/advection/advected_interp_method_name=nvd_minmod"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-neg-upwind]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'upwind_neg_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume upwind advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
+    cli_args = "Outputs/file_base=upwind_neg LinearFVKernels/advection/advected_interp_method_name=upwind LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-neg-linear]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'average_neg_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume linear (average) advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
+    cli_args = "Outputs/file_base=average_neg LinearFVKernels/advection/advected_interp_method_name=average LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-neg-venkat-deferred]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'venkat_neg_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume Venkatakrishnan deferred-correction advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
+    cli_args = "Outputs/file_base=venkat_neg LinearFVKernels/advection/advected_interp_method_name=muscl_venkat LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom' Convergence/linear/max_iterations=100"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-neg-vanleer]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'vanleer_neg_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume NVD vanLeer weight-based advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
+    cli_args = "Outputs/file_base=vanleer_neg LinearFVKernels/advection/advected_interp_method_name=nvd_vanleer LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
+    max_threads = 1 # see libmesh issue #3808
+  []
+  [diagonal-step-2d-neg-minmod]
+    type = CSVDiff
+    input = diagonal-step-2d.i
+    csvdiff = 'minmod_neg_diag_sample_0001.csv'
+    requirement = 'The system shall support linear finite volume NVD minmod weight-based advection on a two-dimensional square domain for diagonal flow entering from the top-right (velocity -1 -1).'
+    cli_args = "Outputs/file_base=minmod_neg LinearFVKernels/advection/advected_interp_method_name=nvd_minmod LinearFVKernels/advection/velocity='-1 -1 0' LinearFVBCs/left_inflow/boundary=top LinearFVBCs/bottom_inflow/boundary=right LinearFVBCs/outflow/boundary='left bottom'"
     max_threads = 1 # see libmesh issue #3808
   []
 []

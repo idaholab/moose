@@ -100,8 +100,8 @@
   multi_system_fixed_point = true
   multi_system_fixed_point_convergence = linear
   multi_system_fixed_point_relaxation_factor = 0.3
-  petsc_options_iname = '-ksp_type -pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'gmres    lu                NONZERO                     1e-12'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -pc_factor_mat_solver_type -mat_mumps_icntl_14'
+  petsc_options_value = 'lu       NONZERO               1e-12                     mumps                    30'
 []
 
 [Outputs]
