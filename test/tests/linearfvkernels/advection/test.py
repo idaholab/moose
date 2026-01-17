@@ -76,6 +76,7 @@ class TestAdvection2DUpwind(unittest.TestCase):
 
 class TestAdvection2DLinear(unittest.TestCase):
     def test(self):
+<<<<<<< HEAD
         df1 = run_spatial(
             "advection-2d.i",
             6,
@@ -83,6 +84,9 @@ class TestAdvection2DLinear(unittest.TestCase):
             mpi=1,
             file_base="advection-2d_csv",
         )
+=======
+        df1 = run_spatial('advection-2d.i', 6, "LinearFVKernels/advection/advected_interp_method_name=average LinearFVBCs/outflow/use_two_term_expansion=true Convergence/linear/max_iterations=10", mpi=1, file_base="advection-2d_csv")
+>>>>>>> fcddafafbe (Add reverse tests and fix parallel lu. (#31965))
 
         fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
         fig.plot(
@@ -128,6 +132,7 @@ class TestAdvection2DUpwindTris(unittest.TestCase):
 
 class TestAdvection2DLinearTris(unittest.TestCase):
     def test(self):
+<<<<<<< HEAD
         df1 = run_spatial(
             "advection-2d.i",
             6,
@@ -135,6 +140,9 @@ class TestAdvection2DLinearTris(unittest.TestCase):
             mpi=1,
             file_base="advection-2d_csv",
         )
+=======
+        df1 = run_spatial('advection-2d.i', 6, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/advection/advected_interp_method_name=average LinearFVBCs/outflow/use_two_term_expansion=true Convergence/linear/max_iterations=10", mpi=1, file_base="advection-2d_csv")
+>>>>>>> fcddafafbe (Add reverse tests and fix parallel lu. (#31965))
 
         fig = mms.ConvergencePlot(xlabel="Element Size ($h$)", ylabel="$L_2$ Error")
         fig.plot(
