@@ -61,7 +61,7 @@ cell-centered quantities without incurring the cost of virtual dispatch inside t
 ```
 [InterpolationMethods]
   [face_k]
-    type = harmonicAverage
+    type = FVHarmonicAverage
   []
 []
 
