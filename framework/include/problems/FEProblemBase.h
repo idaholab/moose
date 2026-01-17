@@ -1312,9 +1312,7 @@ public:
       const std::string & user_object_name, const std::string & name, InputParameters & parameters);
 
   virtual std::vector<std::shared_ptr<FVInterpolationMethod>> addFVInterpolationMethod(
-      const std::string & method_type,
-      const std::string & name,
-      InputParameters & parameters);
+      const std::string & method_type, const std::string & name, InputParameters & parameters);
 
   // TODO: delete this function after apps have been updated to not call it
   const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
@@ -1365,9 +1363,8 @@ public:
    */
   bool hasUserObject(const std::string & name) const;
 
-  const FVInterpolationMethod &
-  getFVInterpolationMethod(const InterpolationMethodName & name,
-                           const THREAD_ID tid = 0) const;
+  const FVInterpolationMethod & getFVInterpolationMethod(const InterpolationMethodName & name,
+                                                         const THREAD_ID tid = 0) const;
 
   bool hasFVInterpolationMethod(const InterpolationMethodName & name) const;
 
