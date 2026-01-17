@@ -36,10 +36,10 @@ LinearFVDiffusion::LinearFVDiffusion(const InputParameters & params)
   : LinearFVFluxKernel(params),
     FVInterpolationMethodInterface(this),
     _diffusion_coeff(getFunctor<Real>("diffusion_coeff")),
-    _coeff_interp_method(isParamValid("coeff_interp_method")
-                             ? &getFVInterpolationMethod(
-                                   getParam<InterpolationMethodName>("coeff_interp_method"))
-                             : nullptr),
+    _coeff_interp_method(
+        isParamValid("coeff_interp_method")
+            ? &getFVInterpolationMethod(getParam<InterpolationMethodName>("coeff_interp_method"))
+            : nullptr),
     _use_nonorthogonal_correction(getParam<bool>("use_nonorthogonal_correction")),
     _flux_matrix_contribution(0.0),
     _flux_rhs_contribution(0.0),

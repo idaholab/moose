@@ -129,18 +129,18 @@ MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info) const
 
 template <typename OutputType>
 const VectorValue<Real>
-MooseLinearVariableFV<OutputType>::gradSln(
-    const ElemInfo & elem_info, const Moose::FV::GradientLimiterType limiter_type) const
+MooseLinearVariableFV<OutputType>::gradSln(const ElemInfo & elem_info,
+                                           const Moose::FV::GradientLimiterType limiter_type) const
 {
-  return (limiter_type == Moose::FV::GradientLimiterType::None) ? gradSln(elem_info)
-                                                                : limitedGradSln(elem_info,
-                                                                                 limiter_type);
+  return (limiter_type == Moose::FV::GradientLimiterType::None)
+             ? gradSln(elem_info)
+             : limitedGradSln(elem_info, limiter_type);
 }
 
 template <typename OutputType>
 const VectorValue<Real>
-MooseLinearVariableFV<OutputType>::limitedGradSln(const ElemInfo & elem_info,
-                                                  const Moose::FV::GradientLimiterType limiter_type) const
+MooseLinearVariableFV<OutputType>::limitedGradSln(
+    const ElemInfo & elem_info, const Moose::FV::GradientLimiterType limiter_type) const
 {
   _cell_gradient.zero();
   const auto & limited_grad_container = this->_sys.limitedGradientContainer(limiter_type);
@@ -180,8 +180,8 @@ MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi, const StateArg &
 template <typename OutputType>
 VectorValue<Real>
 MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi,
-                                          const StateArg & state,
-                                          const Moose::FV::GradientLimiterType limiter_type) const
+                                           const StateArg & state,
+                                           const Moose::FV::GradientLimiterType limiter_type) const
 {
   return (limiter_type == Moose::FV::GradientLimiterType::None)
              ? gradSln(fi, state)
@@ -190,9 +190,10 @@ MooseLinearVariableFV<OutputType>::gradSln(const FaceInfo & fi,
 
 template <typename OutputType>
 VectorValue<Real>
-MooseLinearVariableFV<OutputType>::limitedGradSln(const FaceInfo & fi,
-                                                  const StateArg & /*state*/,
-                                                  const Moose::FV::GradientLimiterType limiter_type) const
+MooseLinearVariableFV<OutputType>::limitedGradSln(
+    const FaceInfo & fi,
+    const StateArg & /*state*/,
+    const Moose::FV::GradientLimiterType limiter_type) const
 {
   const auto face_type = fi.faceType(std::make_pair(this->_var_num, this->_sys_num));
   mooseAssert(face_type != FaceInfo::VarFaceNeighbors::NEITHER,

@@ -298,8 +298,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
             : (getMooseApp().defaultAutomaticScaling() &&
                std::any_of(_systems.begin(),
                            _systems.end(),
-                           [this](const auto & solver_sys)
-                           {
+                           [this](const auto & solver_sys) {
                              return _problem.solverParams(solver_sys->number())._type !=
                                     Moose::ST_JFNK;
                            })));
