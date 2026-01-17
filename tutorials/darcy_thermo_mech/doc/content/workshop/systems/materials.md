@@ -88,7 +88,7 @@ the output file.
 
 ## Supported Property Types for Output
 
-`Material` properties can be of arbitrary (C++) type. Auxkernels have been created only for specific common types:
+`Material` properties can be of arbitrary (C++) type. Auxkernels have been created for material output only for specific common types:
 
 | Type | AuxKernel | Variable Name(s) |
 | :- | :- | :- |
