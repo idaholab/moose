@@ -69,7 +69,7 @@ public:
   bool hasInvalidSolution() const;
 
   /**
-   * Whether or not any warning or invalid solution has ever been encountered
+   * Whether or not any warning or invalid solution has ever been encountered during the simulation
    *
    * This must be called after a sync.
    */
@@ -84,7 +84,7 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to cumulative counters
   void accumulateIterationIntoTimeStepOccurences();
 
-  /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
+  /// Pass the number of solution invalid occurrences from current timestep to cumulative timestep counter (e.g. the total)
   void accumulateTimeStepIntoTotalOccurences(const unsigned int timestep_index);
 
   /// Struct used in InvalidCounts for storing the time history of invalid occurrences
@@ -96,12 +96,16 @@ public:
     unsigned int counts = 0;
   };
 
-  /// Struct used in _counts for storing invalid occurrences
+  /// Struct used in _counts for storing warning and invalid-solution occurrences
   struct InvalidCounts
   {
+    /// Counts for the current iteration (depends on the count, but usually linear iteration)
     unsigned int current_counts = 0;
+    /// Counts for the current time step
     unsigned int current_timestep_counts = 0;
+    /// Total counts across the entire simulation
     unsigned int total_counts = 0;
+    /// Keep track of the occurences across all time steps
     std::vector<TimestepCounts> timestep_counts;
   };
 
@@ -127,10 +131,11 @@ public:
 
   /**
    * Sync iteration counts to main processor
+   * Sum across all processors
    */
   void syncIteration();
 
-  /// Whether the solution invalidity has synchronized iteration counts
+  /// Whether the solution invalidity has synchronized iteration counts across MPI processes
   bool hasSynced() const { return _has_synced; }
 
   friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
