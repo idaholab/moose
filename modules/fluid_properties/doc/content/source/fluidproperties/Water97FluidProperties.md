@@ -19,7 +19,7 @@ been implemented yet.
 
 Dissolution of a dilute gas into water is calculated using Henry's law [!citep](iapws2004).
 
-## Properties of water
+## Selected constant properties of water
 
 !table
 | Property             | value |
@@ -37,6 +37,20 @@ The Water97FluidProperties UserObject is valid for:
 
 - 273.15 K $\le$ T $\le$ 1073.15 K for p $\le$ 100 MPa
 - 1073.15 K $\le$ T $\le$ 2273.15 K for p $\le$ 50 MPa
+
+## IAPWS97 regions
+
+The water fluid properties are calculated using different expressions depending on the pressure and temperature.
+Most routines are implemented for all five regions. The regions can be seen in
+Figure [!ref](regions) from [!cite](iapws97_original).
+Some regions are defined explicitly using a temperature/pressure range, others are defined implicitly
+using the fluid properties at a given vapor pressure or temperature.
+
+!media large_media/fluid_properties/water97/water97_regions.png
+       style=width:60%
+       alt=Five regions for expressions defining the water fluid properties in IAPWS97
+       id=regions
+
 
 !syntax parameters /FluidProperties/Water97FluidProperties
 
