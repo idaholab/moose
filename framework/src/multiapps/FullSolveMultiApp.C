@@ -11,6 +11,8 @@
 #include "LayeredSideDiffusiveFluxAverage.h"
 #include "Executioner.h"
 #include "TransientBase.h"
+#include "FEProblemBase.h"
+#include "MaterialPropertyStorage.h"
 #include "Console.h"
 
 // libMesh
@@ -105,6 +107,14 @@ FullSolveMultiApp::initialSetup()
       }
 
       ex->init();
+
+      if (!_update_old_state_when_keeping_solution_during_restore &&
+          appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties())
+        paramError("update_old_solution_when_keeping_solution_during_restore",
+                   "While we are updating old solutions using the solution from the previous fixed "
+                   "point iteration, we are not updating the old stateful material properties as "
+                   "well. This is not consistent. We recommend you consider using the 'no_restore' "
+                   "parameter instead of 'keep_solution_during_restore'.");
 
       _executioners[i] = ex;
     }
