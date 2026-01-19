@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Sampler.h"
+#include <cstddef>
 
 /**
  * A class used to perform Monte Carlo Sampling
@@ -28,14 +29,22 @@ public:
 protected:
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual void executeTearDown() override;
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
 private:
+  void shuffleStateless(std::vector<Real> & data,
+                        const std::size_t seed_index,
+                        const CommMethod method);
+
   // Probability values for each distribution
   std::vector<std::vector<Real>> _probabilities;
 
   // toggle for local/global data access in computeSample
   bool _is_local;
+
+  // track whether stateless RNGs should be advanced at execute tear down
+  bool _stateless_advance_pending = false;
 };

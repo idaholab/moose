@@ -182,17 +182,21 @@ Real
 ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   unsigned int seed_value = _step > 0 ? (_step - 1) * 2 : 0;
+  const auto rn_ind = static_cast<std::size_t>(row_index) * getNumberOfCols() + col_index;
   Real val;
 
   if (_subset == 0)
-    val = getRand(seed_value);
+    val = getRandStateless(rn_ind, seed_value);
   else
   {
     const dof_id_type loc_ind = row_index - getLocalRowBegin();
-    const Real rv = Normal::quantile(getRand(seed_value), _markov_seed[col_index][loc_ind], 1.0);
+    const Real rv =
+        Normal::quantile(getRandStateless(rn_ind, seed_value),
+                         _markov_seed[col_index][loc_ind],
+                         1.0);
     const Real acceptance_ratio = std::log(Normal::pdf(rv, 0, 1)) -
                                   std::log(Normal::pdf(_markov_seed[col_index][loc_ind], 0, 1));
-    const Real new_sample = acceptance_ratio > std::log(getRand(seed_value + 1))
+    const Real new_sample = acceptance_ratio > std::log(getRandStateless(rn_ind, seed_value + 1))
                                 ? rv
                                 : _markov_seed[col_index][loc_ind];
     val = Normal::cdf(new_sample, 0, 1);

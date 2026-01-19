@@ -9,6 +9,8 @@
 
 #include "LatinHypercubeSampler.h"
 #include "Distribution.h"
+#include <algorithm>
+#include <unordered_map>
 registerMooseObjectAliased("StochasticToolsApp", LatinHypercubeSampler, "LatinHypercube");
 
 InputParameters
@@ -64,9 +66,10 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
       {
         const auto lower = row * bin_size;
         const auto upper = (row + 1) * bin_size;
-        local[row] = getRand(col) * (upper - lower) + lower;
+        local[row] =
+            getRandStateless(static_cast<std::size_t>(row), col) * (upper - lower) + lower;
       }
-      shuffle(local, col + getNumberOfCols(), CommMethod::NONE);
+      shuffleStateless(local, col + getNumberOfCols(), CommMethod::NONE);
     }
   }
 
@@ -76,19 +79,20 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
     {
       std::vector<Real> & local = _probabilities[col];
       local.resize(getNumberOfLocalRows());
-      advanceGenerator(col, getLocalRowBegin());
       for (dof_id_type row = getLocalRowBegin(); row < getLocalRowEnd(); ++row)
       {
         const auto lower = row * bin_size;
         const auto upper = (row + 1) * bin_size;
-        local[row - getLocalRowBegin()] = getRand(col) * (upper - lower) + lower;
+        local[row - getLocalRowBegin()] =
+            getRandStateless(static_cast<std::size_t>(row), col) * (upper - lower) + lower;
       }
-      advanceGenerator(col, getNumberOfRows() - getLocalRowEnd());
 
       // Do not advance generator for shuffle, the shuffle handles it
-      shuffle(local, col + getNumberOfCols(), CommMethod::SEMI_LOCAL);
+      shuffleStateless(local, col + getNumberOfCols(), CommMethod::SEMI_LOCAL);
     }
   }
+
+  _stateless_advance_pending = true;
 }
 
 Real
@@ -97,4 +101,117 @@ LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_inde
   // NOTE: All calls to generators (getRand, etc.) occur in sampleSetup
   auto row = _is_local ? row_index - getLocalRowBegin() : row_index;
   return _distributions[col_index]->quantile(_probabilities[col_index][row]);
+}
+
+void
+LatinHypercubeSampler::executeTearDown()
+{
+  if (!_stateless_advance_pending)
+    return;
+
+  const auto n_rows = static_cast<std::size_t>(getNumberOfRows());
+  const auto n_cols = getNumberOfCols();
+  if (n_rows == 0 || n_cols == 0)
+    return;
+
+  const auto shuffle_count = n_rows > 0 ? n_rows - 1 : 0;
+  for (dof_id_type col = 0; col < n_cols; ++col)
+  {
+    advanceStatelessGenerator(col, n_rows);
+    if (shuffle_count > 0)
+      advanceStatelessGenerator(col + n_cols, shuffle_count);
+  }
+
+  _stateless_advance_pending = false;
+}
+
+void
+LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
+                                        const std::size_t seed_index,
+                                        const CommMethod method)
+{
+  const libMesh::Parallel::Communicator * comm_ptr = nullptr;
+  if (method == CommMethod::LOCAL)
+    comm_ptr = &_communicator;
+  else if (method == CommMethod::SEMI_LOCAL)
+    comm_ptr = &_local_comm;
+
+  if (!comm_ptr || comm_ptr->size() == 1)
+  {
+    const std::size_t n_global = data.size();
+    if (n_global < 2)
+      return;
+
+    std::size_t rn_ind = 0;
+    for (std::size_t i = n_global - 1; i > 0; --i)
+    {
+      const auto j = getRandlStateless(rn_ind++, 0, i, seed_index);
+      MooseUtils::swap(data, i, j, nullptr);
+    }
+  }
+  else
+  {
+    std::size_t n_local = data.size();
+    std::size_t n_global = n_local;
+    comm_ptr->sum(n_global);
+    if (n_global < 2)
+      return;
+
+    std::vector<std::size_t> offsets(comm_ptr->size());
+    {
+      std::vector<std::size_t> local_sizes;
+      comm_ptr->allgather(n_local, local_sizes);
+      for (std::size_t i = 0; i < local_sizes.size() - 1; ++i)
+        offsets[i + 1] = offsets[i] + local_sizes[i];
+    }
+
+    const auto rank = comm_ptr->rank();
+    std::size_t rn_ind = 0;
+    for (std::size_t idx0 = n_global - 1; idx0 > 0; --idx0)
+    {
+      const auto idx1 = getRandlStateless(rn_ind++, 0, idx0, seed_index);
+
+      auto idx0_offset_iter = std::prev(std::upper_bound(offsets.begin(), offsets.end(), idx0));
+      auto idx0_rank = std::distance(offsets.begin(), idx0_offset_iter);
+      auto idx0_local_idx = idx0 - *idx0_offset_iter;
+
+      auto idx1_offset_iter = std::prev(std::upper_bound(offsets.begin(), offsets.end(), idx1));
+      auto idx1_rank = std::distance(offsets.begin(), idx1_offset_iter);
+      auto idx1_local_idx = idx1 - *idx1_offset_iter;
+
+      std::unordered_map<processor_id_type, std::vector<std::size_t>> needs;
+      if (idx0_rank != rank && idx1_rank == rank)
+        needs[idx0_rank].push_back(idx0_local_idx);
+      if (idx0_rank == rank && idx1_rank != rank)
+        needs[idx1_rank].push_back(idx1_local_idx);
+
+      std::unordered_map<processor_id_type, std::vector<Real>> returns;
+      auto return_functor =
+          [&data, &returns](processor_id_type pid, const std::vector<std::size_t> & indices)
+      {
+        auto & returns_pid = returns[pid];
+        for (auto idx : indices)
+          returns_pid.push_back(data[idx]);
+      };
+      Parallel::push_parallel_vector_data(*comm_ptr, needs, return_functor);
+
+      std::vector<Real> incoming;
+      auto recv_functor = [&incoming](processor_id_type /*pid*/, const std::vector<Real> & values)
+      { incoming = values; };
+      Parallel::push_parallel_vector_data(*comm_ptr, returns, recv_functor);
+
+      if (idx0_rank == rank && idx1_rank == rank)
+        MooseUtils::swap(data, idx0_local_idx, idx1_local_idx);
+      else if (idx0_rank == rank)
+      {
+        mooseAssert(incoming.size() == 1, "Only one value should be received");
+        data[idx0_local_idx] = incoming[0];
+      }
+      else if (idx1_rank == rank)
+      {
+        mooseAssert(incoming.size() == 1, "Only one value should be received");
+        data[idx1_local_idx] = incoming[0];
+      }
+    }
+  }
 }

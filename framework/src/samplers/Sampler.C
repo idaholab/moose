@@ -375,21 +375,21 @@ Sampler::setAutoAdvanceGenerators(const bool state)
 double
 Sampler::getRand(const unsigned int index)
 {
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  mooseAssert(index < _generator.size(), "The seed number index does not exist.");
   return _generator.rand(index);
 }
 
 uint32_t
 Sampler::getRandl(unsigned int index, uint32_t lower, uint32_t upper)
 {
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  mooseAssert(index < _generator.size(), "The seed number index does not exist.");
   return _generator.randl(index, lower, upper);
 }
 
 Real
 Sampler::getRandStateless(std::size_t n, unsigned int index) const
 {
-  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exists.");
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
   return _generators_stateless[index]->rand(n);
 }
 
@@ -399,8 +399,15 @@ Sampler::getRandlStateless(std::size_t n,
                            unsigned int upper,
                            unsigned int index) const
 {
-  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exists.");
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
   return _generators_stateless[index]->randl(n, lower, upper);
+}
+
+void
+Sampler::advanceStatelessGenerator(unsigned int index, std::size_t count)
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
+  _generators_stateless[index]->advance(count);
 }
 
 dof_id_type

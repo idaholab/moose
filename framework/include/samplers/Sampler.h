@@ -200,6 +200,7 @@ protected:
                                  unsigned int lower,
                                  unsigned int upper,
                                  unsigned int index = 0) const;
+  void advanceStatelessGenerator(unsigned int index, std::size_t count);
 
   /**
    * Base class must override this method to supply the sample distribution data.

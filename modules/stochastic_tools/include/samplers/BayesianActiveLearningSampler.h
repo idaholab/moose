@@ -34,14 +34,16 @@ public:
   const std::vector<Real> & getVarSampleTries() const;
 
 protected:
-  virtual void proposeSamples(const unsigned int seed_value) override;
+  virtual void proposeSamples(const unsigned int seed_value, std::size_t & rn_ind) override;
 
   /**
    * Fill in the provided vector with random samples given the distributions
    * @param vector The vector to be filled
    * @param seed_value The seed value to generate random numbers
    */
-  virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
+  virtual void fillVector(std::vector<Real> & vector,
+                          const unsigned int & seed_value,
+                          std::size_t & rn_ind);
 
   /// The selected sample indices to evaluate the subApp
   const std::vector<unsigned int> & _sorted_indices;

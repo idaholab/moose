@@ -45,7 +45,7 @@ AffineInvariantStretchSampler::AffineInvariantStretchSampler(const InputParamete
 }
 
 void
-AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
+AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value, std::size_t & rn_ind)
 {
   unsigned int j = 0;
   bool indicator;
@@ -53,15 +53,17 @@ AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
   while (j < _num_parallel_proposals)
   {
     indicator = 0;
-    _affine_step[j] = Utility::pow<2>((_step_size - 1.0) * getRand(seed_value) + 1.0) / _step_size;
-    randomIndex(_num_parallel_proposals, j, seed_value, index_req);
+    _affine_step[j] =
+        Utility::pow<2>((_step_size - 1.0) * getRandStateless(rn_ind++, seed_value) + 1.0) /
+        _step_size;
+    randomIndex(_num_parallel_proposals, j, seed_value, rn_ind, index_req);
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
       _new_samples[j][i] =
           (_t_step > decisionStep())
               ? (_previous_state[index_req][i] +
                  _affine_step[j] * (_previous_state[j][i] - _previous_state[index_req][i]))
-              : _priors[i]->quantile(getRand(seed_value));
+              : _priors[i]->quantile(getRandStateless(rn_ind++, seed_value));
       if (_lower_bound)
         indicator =
             (_new_samples[j][i] < (*_lower_bound)[i] || _new_samples[j][i] > (*_upper_bound)[i])
@@ -74,7 +76,7 @@ AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
           (_t_step > decisionStep())
               ? (_previous_state_var[index_req] +
                  _affine_step[j] * (_previous_state_var[j] - _previous_state_var[index_req]))
-              : _var_prior->quantile(getRand(seed_value));
+              : _var_prior->quantile(getRandStateless(rn_ind++, seed_value));
       if (_new_var_samples[j] < 0.0 || _new_var_samples[j] > _variance_bound)
         indicator = 1;
     }

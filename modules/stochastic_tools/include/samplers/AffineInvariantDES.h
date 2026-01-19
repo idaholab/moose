@@ -24,7 +24,7 @@ public:
   virtual int decisionStep() const override { return 2; }
 
 protected:
-  virtual void proposeSamples(const unsigned int seed_value) override;
+  virtual void proposeSamples(const unsigned int seed_value, std::size_t & rn_ind) override;
 
   /**
    * Compute the differential evolution from the current state

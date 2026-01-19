@@ -12,6 +12,7 @@
 #include "Sampler.h"
 #include "TransientInterface.h"
 #include "Distribution.h"
+#include <cstddef>
 
 /**
  * A generic sampler to support parallel active learning
@@ -44,7 +45,9 @@ protected:
    * @param vector The vector to be filled
    * @param seed_value The seed value to generate random numbers
    */
-  virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
+  virtual void fillVector(std::vector<Real> & vector,
+                          const unsigned int & seed_value,
+                          std::size_t & rn_ind);
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
