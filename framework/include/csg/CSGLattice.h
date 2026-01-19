@@ -182,7 +182,7 @@ protected:
   void setName(const std::string & name) { _name = name; }
 
   /// @brief assign the vectors of universes as the lattice elements
-  /// @param universes
+  /// @param universes vector of vectors of universes to be set as lattice elements, ordering depends on derived class
   virtual void
   setUniverses(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) = 0;
 

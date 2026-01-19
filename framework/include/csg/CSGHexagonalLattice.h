@@ -224,10 +224,10 @@ protected:
 };
 
 /// methods to help convert between number of rows and rings
-// get the total number of rings from the number of rows
+/// get the total number of rings from the number of rows
 unsigned int nRowToRing(int nrow);
 
-// get the total number of rows from the number of rings
+/// get the total number of rows from the number of rings
 unsigned int nRingToRow(int nring);
 
 } // namespace CSG

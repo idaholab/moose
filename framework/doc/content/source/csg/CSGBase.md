@@ -223,7 +223,7 @@ The syntax for creating the pointer and adding it is shown below, where `Lattice
 ```cpp
 // the unique lattice pointer is made first, creating the lattice object of the specified type
 std::unique_ptr<LatticeType> lat_ptr = std::make_unique<:LatticeType>(arguments);
-// and then it is explicitly passed to this CSGBase instance, which holds the memory ownership for the object
+// and then it is explicitly passed to this CSGBase instance, which will keep the memory ownership for the object
 const auto & lattice = csg_obj->addLattice<LatticeType>(std::move(lat_ptr));
 ```
 
@@ -264,7 +264,7 @@ The `CSGLattice` objects can be accessed or updated with the following methods f
 - `setLatticeOuter`: sets the `CSGUniverse` (for a `CSGUniverse` outer) or the `std::string` name (for a material outer) as the outer fill.
 - `resetLatticeOuter`: resets the outer fill to void for the lattice.
 - `renameLattice`: change the name of the `CSGLattice` object.
-- `getAllLattices`: retrieve a list of const references to each `CSGLattice` object in the `CSGBase` instance.
+- `getAllLattices`: retrieve a vector of const references to each `CSGLattice` object in the `CSGBase` instance.
 - `getLatticeByName`: retrieve a const reference to the lattice object of the specified name.
 
 #### Lattice Indexing

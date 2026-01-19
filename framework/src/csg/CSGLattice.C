@@ -50,7 +50,7 @@ const std::vector<std::vector<std::string>>
 CSGLattice::getUniverseNameMap() const
 {
   std::vector<std::vector<std::string>> name_map;
-  for (auto univ_list : _universe_map)
+  for (auto & univ_list : _universe_map)
   {
     std::vector<std::string> name_list;
     for (const CSGUniverse & univ : univ_list)
@@ -77,8 +77,8 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
     mooseError("Universe " + univ_name + " does not exist in lattice " + getName());
 
   std::vector<std::pair<unsigned int, unsigned int>> indices;
-  for (auto i : make_range(_universe_map.size()))
-    for (auto j : make_range(_universe_map[i].size()))
+  for (auto i : index_range(_universe_map))
+    for (auto j : index_range(_universe_map[i]))
     {
       const CSGUniverse & univ = _universe_map[i][j];
       if (univ.getName() == univ_name)

@@ -75,15 +75,15 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
   }
   {
     // initialize without universe map but set outer to a material
-    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, "outer_univ");
+    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, "outer_mat");
     ASSERT_EQ(cart_lattice.getOuterType(), "CSG_MATERIAL");
-    ASSERT_EQ(cart_lattice.getOuterMaterial(), "outer_univ");
+    ASSERT_EQ(cart_lattice.getOuterMaterial(), "outer_mat");
   }
   {
     // initialize with universe map but set outer material
-    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map, "outer_univ");
+    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map, "outer_mat");
     ASSERT_EQ(cart_lattice.getOuterType(), "CSG_MATERIAL");
-    ASSERT_EQ(cart_lattice.getOuterMaterial(), "outer_univ");
+    ASSERT_EQ(cart_lattice.getOuterMaterial(), "outer_mat");
   }
 }
 

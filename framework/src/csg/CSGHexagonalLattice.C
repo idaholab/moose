@@ -120,10 +120,10 @@ CSGHexagonalLattice::compareAttributes(const CSGLattice & other) const
 void
 CSGHexagonalLattice::buildIndexMap()
 {
-  for (unsigned int ring = 0; ring < _nring; ++ring)
+  for (const auto ring : make_range(_nring))
   {
     unsigned int num_elements = (ring == _nring - 1) ? 1 : 6 * (_nring - 1 - ring);
-    for (unsigned int element = 0; element < num_elements; ++element)
+    for (const auto element make_range(num_elements))
     {
       std::pair<unsigned int, unsigned int> ring_index = std::make_pair(ring, element);
       std::pair<unsigned int, unsigned int> row_index = getRowIndexFromRingIndex(ring_index);
