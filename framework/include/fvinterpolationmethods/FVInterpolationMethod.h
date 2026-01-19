@@ -20,7 +20,7 @@ class MooseLinearVariableFV;
 
 /**
  * Base class for face interpolation functions used by linear FV objects.
- * Maybe we can extend it a little late to regular FV as well.
+ * Maybe we can extend it a little later to regular FV as well.
  *
  * These user objects expose lightweight callable interpolators that can be cached by kernels so
  * that interpolation does not require virtual dispatch inside hot loops. Derived classes only need

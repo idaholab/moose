@@ -18,7 +18,7 @@
   []
 []
 
-[InterpolationMethods]
+[FVInterpolationMethods]
   [upwind]
     type = FVAdvectedUpwind
   []

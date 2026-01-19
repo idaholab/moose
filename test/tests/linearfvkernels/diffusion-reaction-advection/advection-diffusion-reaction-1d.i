@@ -18,6 +18,12 @@
   []
 []
 
+[FVInterpolationMethods]
+  [average]
+    type = FVGeometricAverage
+  []
+[]
+
 [LinearFVKernels]
   [diffusion]
     type = LinearFVDiffusion
@@ -29,7 +35,7 @@
     type = LinearFVAdvection
     variable = u
     velocity = "0.5 0 0"
-    advected_interp_method = average
+    advected_interp_method_name = average
   []
   [reaction]
     type = LinearFVReaction
