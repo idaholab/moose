@@ -42,6 +42,9 @@ private:
   /// Whether to merge boundaries with the same name but different ID
   const bool _boundary_id_merge;
 
+  /// Whether to split non-convex polygons
+  const bool _split_nonconvex_polygons;
+
   /// @brief Removes the elements with an volume value below the user threshold
   /// @param mesh the mesh to modify
   void removeSmallVolumeElements(std::unique_ptr<MeshBase> & mesh) const;
@@ -54,4 +57,8 @@ private:
   ///        do not support mixed element types
   /// @param mesh the mesh to modify
   void separateSubdomainsByElementType(std::unique_ptr<MeshBase> & mesh) const;
+
+  /// @brief Splits non-convex polygonal elements to keep only convex elements
+  /// @param mesh the mesh to modify
+  void splitNonConvexPolygons(std::unique_ptr<MeshBase> & mesh) const;
 };

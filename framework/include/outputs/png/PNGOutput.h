@@ -19,10 +19,12 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/bounding_box.h"
 
+/**
+ * Output class to create a 2D figure in PNG format
+ */
 class PNGOutput : public FileOutput
 {
 public:
-  /// Basic constructor.  Takes parameters passed in to create a PNGOutput object.
   static InputParameters validParams();
 
   PNGOutput(const InputParameters & parameters);
