@@ -298,6 +298,13 @@ class RunApp(Tester):
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
 
+        # Append additional global command line arguments
+        if options.append_runapp_cliarg:
+            append_cliarg = options.append_runapp_cliarg
+            if isinstance(append_cliarg, str):
+                append_cliarg = [append_cliarg]
+            cli_args += append_cliarg
+
         command = specs['executable'] + ' '
         if len(specs['input']) > 0: # only apply if we have input set
             command += specs['input_switch'] + ' ' + specs['input'] + ' '

@@ -1240,6 +1240,7 @@ class TestHarness:
         appgroup.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (pass --error-unused)')
         appgroup.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations (pass --error-deprecated)')
         appgroup.add_argument('--recoversuffix', action='store', type=str, default='cpr', help='Set the file suffix for recover mode (pass --recoversuffix)')
+        appgroup.add_argument('--append-runapp-cliarg', type=str, action='extend', nargs=1, help='Append this command line argument to RunApp tests')
 
         methodgroup = parser.add_argument_group('Application Methods', 'Control which application biunary method is to be ran')
         methodgroup.add_argument('--opt', action='store_const', dest='method', const='opt', help='Test the <app_name>-opt binary')
