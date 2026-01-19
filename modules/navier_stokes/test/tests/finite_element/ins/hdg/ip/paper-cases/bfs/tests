@@ -9,5 +9,6 @@
     capabilities = 'method!=dbg'
     cli_args = 'Executioner/num_steps=1 Executioner/abort_on_solve_fail=false' # Latter option to allow restep
     max_threads = 1
+    valgrind = 'none'
   []
 []
