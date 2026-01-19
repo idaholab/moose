@@ -23,11 +23,11 @@ public:
 
   SCMMixingConstantBeta(const InputParameters & parameters);
 
-  virtual Real computeMixingParameter(const unsigned int & i_gap,
-                                      const unsigned int & iz,
-                                      const bool & sweep_flow) const override;
+  virtual Real computeMixingParameter(const unsigned int i_gap,
+                                      const unsigned int iz,
+                                      const bool sweep_flow) const override;
 
 protected:
   /// Turbulent mixing parameter
-  const Real & _beta;
+  const Real _beta;
 };

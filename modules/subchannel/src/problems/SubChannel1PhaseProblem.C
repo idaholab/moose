@@ -113,6 +113,14 @@ SubChannel1PhaseProblem::validParams()
                                   "Closure computing HTC on duct (required if duct mesh exists).");
   params.addParam<bool>(
       "full_output", false, "Flag that enables the output of the maximum number of variables.");
+  params.addDeprecatedParam<Real>("beta",
+                                  "Thermal diffusion coefficient used in turbulent crossflow.",
+                                  "Use closure system instead.");
+  params.addDeprecatedParam<bool>(
+      "constant_beta",
+      true,
+      "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)",
+      "Use closure system instead.");
   return params;
 }
 
@@ -155,6 +163,9 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _Tduct_soln(nullptr),
     _HTC_soln(nullptr)
 {
+  if (params.isParamSetByUser("beta") || params.isParamSetByUser("constant_beta"))
+    paramError("turbulent mixing modeling:",
+               "You are using a deprecated parameter. Please use the mixing_closure system.");
   if (_pin_mesh_exist && !isParamValid("pin_HTC_closure"))
     paramError("pin_HTC_closure", "required when a pin mesh exists.");
   if (_duct_mesh_exist && !isParamValid("duct_HTC_closure"))

@@ -10,12 +10,12 @@
 #pragma once
 
 #include "SCMMixingClosureBase.h"
-#include "TriSubChannelMesh.h"
-#include "QuadSubChannelMesh.h"
+
+class SubChannelMesh;
 
 /**
  * Class that calculates the turbulent mixing coefficient based on the Kim and Chung (2001)
- * corellation (eq 25) It is used for both quad and tri lattices with bare fuel pins.
+ * correllation (eq 25). It is used for both quad and tri lattices with bare fuel pins.
  */
 class SCMMixingKimAndChung : public SCMMixingClosureBase
 {
@@ -24,22 +24,34 @@ public:
 
   SCMMixingKimAndChung(const InputParameters & parameters);
 
-  virtual Real computeMixingParameter(const unsigned int & i_gap,
-                                      const unsigned int & iz,
-                                      const bool & sweep_flow) const override;
+  virtual Real computeMixingParameter(const unsigned int i_gap,
+                                      const unsigned int iz,
+                                      const bool sweep_flow) const override;
 
 protected:
-  Real computeTriLatticeMixingParameter(const unsigned int & i_gap,
-                                        const unsigned int & iz,
-                                        const bool & sweep_flow) const;
-  Real computeQuadLatticeMixingParameter(const unsigned int & i_gap,
-                                         const unsigned int & iz,
-                                         const bool & sweep_flow) const;
+  Real computeTriLatticeMixingParameter(const unsigned int i_gap,
+                                        const unsigned int iz,
+                                        const bool sweep_flow) const;
+
+  Real computeQuadLatticeMixingParameter(const unsigned int i_gap,
+                                         const unsigned int iz,
+                                         const bool sweep_flow) const;
+
+  Real computeLatticeMixingParameter(const unsigned int i_gap,
+                                     const unsigned int iz,
+                                     const Real delta,
+                                     const Real sf,
+                                     const bool sweep_flow) const;
 
   /// Keep track of the lattice type
   bool _is_tri_lattice;
-  /// Pointer to the tri lattice mesh
-  const TriSubChannelMesh * const _tri_sch_mesh;
-  /// Pointer to the quad lattice mesh
-  const QuadSubChannelMesh * const _quad_sch_mesh;
+  /// Pointer to the base subchannel mesh
+  const SubChannelMesh & _sch_mesh;
+
+  SolutionHandle _S_soln;
+  SolutionHandle _mdot_soln;
+  SolutionHandle _w_perim_soln;
+  SolutionHandle _mu_soln;
+  SolutionHandle _P_soln;
+  SolutionHandle _T_soln;
 };

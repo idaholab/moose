@@ -88,10 +88,17 @@ public:
     return computeAddedHeatDuct(i_ch, iz);
   }
 
-  /// Outlet Pressure
+  /// Outlet pressure postprocessor value
   const PostprocessorValue & _P_out;
-  /// Fluid properties object
+
+  /// Get outlet pressure
+  const PostprocessorValue & getOutletPressure() const { return _P_out; }
+
+  /// Non-owning pointer to fluid properties user object
   const SinglePhaseFluidProperties * _fp;
+
+  /// Get fluid properties object
+  const SinglePhaseFluidProperties * getSinglePhaseFluidProperties() const { return _fp; }
 
 protected:
   /// Pure virtual: daughters provide different implementations
