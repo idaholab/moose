@@ -123,7 +123,7 @@ A cell is an object defined by a region and a fill.
 To create any `CSGCell`, use the method `createCell` from `CSGBase` which will return a const reference to the `CSGCell` object that is created (`const CSGCell &`).
 At the time of calling `createCell`, a unique cell name, the cell region (`CSGRegion`), and an indicator of the fill must be provided.
 The `CSGRegion` is defined by boolean combinations of `CSGSurfaces` as described below.
-Three types of cell fills are currently supported: void, material, universe, and lattice.
+Four types of cell fills are currently supported: void, material, universe, and lattice.
 If creating a void cell, no fill has to be passed to the creation method.
 To create a cell with a material fill, simply provide it with a name of a material as a string.
 For a cell with a `CSGUniverse` fill, pass it a reference to the `CSGUniverse`.
