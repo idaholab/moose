@@ -58,7 +58,7 @@ set -e
 if [ -n "$MFEM_SRC_DIR" ]; then
   skip_sub_update=1
 else
-  MFEM_SRC_DIR=$(realpath "${SCRIPT_DIR}/../framework/contrib/mfem")
+  MFEM_SRC_DIR=$(realpath "${SCRIPT_DIR}/../framework/contrib/mfem/.")
 fi
 MFEM_BUILD_DIR_BASE="${MFEM_SRC_DIR}/build"
 if [ -n "$MFEM_DIR" ]; then
@@ -69,10 +69,10 @@ else
   rm -rf "$MFEM_DIR"
 fi
 
-: ${CONDUIT_DIR:=$(realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed")}
-: ${LIBMESH_DIR:=$(realpath "${SCRIPT_DIR}/../libmesh/installed")}
+: ${CONDUIT_DIR:=$(realpath "${SCRIPT_DIR}/../framework/contrib/conduit/installed/.")}
+: ${LIBMESH_DIR:=$(realpath "${SCRIPT_DIR}/../libmesh/installed/.")}
 if [ -z "$PETSC_DIR" ]; then
-  PETSC_DIR=$(realpath "${SCRIPT_DIR}/../petsc")
+  PETSC_DIR=$(realpath "${SCRIPT_DIR}/../petsc/.")
   PETSC_ARCH="arch-moose"
 fi
 : ${HDF5_DIR:=$PETSC_DIR/$PETSC_ARCH}
