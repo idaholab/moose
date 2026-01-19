@@ -8,9 +8,9 @@ can be declared once and shared by any kernel that needs them. Each method provi
 handle that MOOSE kernels can cache, which keeps per-face evaluations free of virtual dispatch and
 friendly to upcoming vectorized/GPU paths.
 
-Interpolation methods are added in the `[InterpolationMethods]` block of an input file and
+Interpolation methods are added in the `[FVInterpolationMethods]` block of an input file and
 referenced through the `coeff_interp_method` parameter on kernels such as
-[`LinearFVDiffusion`](../linearfvkernels/LinearFVDiffusion.md). If the parameter is omitted the
+[LinearFVDiffusion.md]. If the parameter is omitted the
 kernel will keep evaluating the functor directly on the face, preserving the legacy behavior.
 
 ## Available methods
@@ -22,26 +22,11 @@ kernel will keep evaluating the functor directly on the face, preserving the leg
 
 ## Example input syntax
 
-```
-[InterpolationMethods]
-  [geom]
-    type = GeometricAverage
-  []
-  [harm]
-    type = harmonicAverage
-  []
-[]
+Declare the interpolation method in `[FVInterpolationMethods]`:
 
-[LinearFVKernels]
-  [diff]
-    type = LinearFVDiffusion
-    variable = u
-    diffusion_coeff = k
-    coeff_interp_method = harm
-  []
-[]
-```
+!listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=geom
 
-The example above declares two interpolation schemes: a geometric (linear) average and an
-inverse-distance-weighted average with exponent one. The diffusion kernel selects the IDW method at
-runtime via its `coeff_interp_method` parameter.
+Use it for a coefficient functor via
+[!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method):
+
+!listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=diffusion replace=['diffusion_coeff = coeff_func','diffusion_coeff = coeff_pos_func\\n    coeff_interp_method = geom']

@@ -9,8 +9,8 @@ unstructured meshes it provides a consistent baseline interpolation that is ofte
 interpolating material coefficients (e.g., diffusion coefficients) to faces ([!cite](moukalled2016finite),
 [!cite](jasak1996error)).
 
-Let \(\phi_C\) and \(\phi_N\) be cell-centered values on the element and neighbor sides of a face.
-Let \(g_C\in[0,1]\) denote the geometric weight associated with the element-side value (based on the
+Let $\phi_C$ and $\phi_N$ be cell-centered values on the element and neighbor sides of a face.
+Let $g_C\in[0,1]$ denote the geometric weight associated with the element-side value (based on the
 relative distances from the face to each centroid, measured along the centroid-to-centroid line).
 The interpolated face value is
 
@@ -24,24 +24,17 @@ general; use a limiter-based method when boundedness near sharp gradients is req
 
 ## Example Syntax
 
-Declare the interpolation method in `[InterpolationMethods]`:
+Declare the interpolation method in `[FVInterpolationMethods]`:
 
-!listing framework/doc/content/source/fvinterpolationmethods/examples/linear-fv-diffusion-coeff-geometric.i start=[geom] end=[] include-end=true
+!listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=geom
 
 Use it for a coefficient functor via
 [!param](/LinearFVKernels/LinearFVDiffusion/coeff_interp_method):
 
-!listing framework/doc/content/source/fvinterpolationmethods/examples/linear-fv-diffusion-coeff-geometric.i start=[diffusion] end=[] include-end=true
+!listing test/tests/linearfvkernels/diffusion/diffusion-1d.i block=diffusion replace=['diffusion_coeff = coeff_func','diffusion_coeff = coeff_pos_func\n    coeff_interp_method = geom']
 
-## Useful Links
+!syntax parameters /FVInterpolationMethods/FVGeometricAverage
 
-See [FVInterpolationMethod.md] for the base class, [Limiters](syntax/Limiters/index.md) for limiter
-background, and [../linearfvkernels/LinearFVDiffusion.md] / [../linearfvkernels/LinearFVAdvection.md]
-for typical usage.
+!syntax inputs /FVInterpolationMethods/FVGeometricAverage
 
-!syntax parameters /InterpolationMethods/FVGeometricAverage
-
-!syntax inputs /InterpolationMethods/FVGeometricAverage
-
-!syntax children /InterpolationMethods/FVGeometricAverage
-
+!syntax children /FVInterpolationMethods/FVGeometricAverage
