@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableDataLinearFV.h"
 #include "GradientLimiterType.h"
+#include "SystemBase.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
