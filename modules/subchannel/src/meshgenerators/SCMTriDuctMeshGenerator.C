@@ -66,7 +66,7 @@ SCMTriDuctMeshGenerator::generate()
   std::vector<Point> corners;
   ductCorners(corners, _flat_to_flat, Point(0, 0, 0));
   std::vector<Point> xsec;
-  ductXsec(xsec, corners, _n_rings, _pitch, _flat_to_flat);
+  ductXsec(xsec, corners, _n_rings, _pitch);
   std::vector<Point> points;
   ductPoints(points, xsec, _z_grid);
   std::vector<std::vector<size_t>> elem_point_indices;
@@ -103,16 +103,15 @@ void
 SCMTriDuctMeshGenerator::ductXsec(std::vector<Point> & xsec,
                                   const std::vector<Point> & corners,
                                   unsigned int nrings,
-                                  Real pitch,
-                                  Real /*flat_to_flat*/) const
+                                  Real pitch) const
 {
   xsec.clear();
 
   if (pitch <= 0.0)
-    mooseError("SCMTriDuctMeshGenerator: 'pitch' must be > 0.");
+    mooseError("The 'pitch' must be > 0.");
 
   if (nrings < 2)
-    mooseError("SCMTriDuctMeshGenerator: 'nrings' must be >= 2.");
+    mooseError("The 'nrings' must be >= 2.");
 
   // Side length of the regular hexagon (distance between adjacent corners)
   const Real side_length = (corners[0] - corners[1]).norm();
@@ -120,22 +119,11 @@ SCMTriDuctMeshGenerator::ductXsec(std::vector<Point> & xsec,
   // start_offset = (hexagon_side - (nrings - 2)*pitch) / 2
   const Real start_offset = 0.5 * (side_length - (nrings - 2) * pitch);
 
-  // If this is negative, your requested layout cannot fit.
+  // If this is negative, the requested layout cannot fit.
   if (start_offset < 0.0)
     mooseError("SCMTriDuctMeshGenerator: computed start_offset is negative (",
                start_offset,
                "). Check 'nrings', 'pitch', and duct side length.");
-
-  // Ensure the last of the interior points on the duct side still lies strictly within the side
-  // (so we don't collide with / pass the right corner).
-  const Real last_offset = start_offset + (nrings - 2) * pitch;
-  if (last_offset >= side_length)
-    mooseError("SCMTriDuctMeshGenerator: duct boundary point placement exceeds side length. "
-               "last_offset=",
-               last_offset,
-               " side_length=",
-               side_length,
-               ". Check 'nrings' and 'pitch'.");
 
   for (size_t i = 0; i < corners.size(); i++)
   {
@@ -150,19 +138,10 @@ SCMTriDuctMeshGenerator::ductXsec(std::vector<Point> & xsec,
 
     // Add exactly (nrings - 1) points after the left corner
     // at start_offset + k*pitch, k = 0..(nrings-2)
-    for (unsigned int k = 0; k < nrings - 1; ++k)
+    for (const auto k : make_range(nrings - 1))
     {
       const Real offset_from_corner = start_offset + k * pitch;
-
-      // These should always be inside (0, side_length) given checks above, but keep a tiny guard.
-      if (offset_from_corner > 1e-12 && offset_from_corner < side_length - 1e-12)
-        xsec.push_back(left + direc * offset_from_corner);
-      else
-        mooseError("SCMTriDuctMeshGenerator: invalid offset_from_corner=",
-                   offset_from_corner,
-                   " for side_length=",
-                   side_length,
-                   ". This indicates inconsistent geometry/parameters.");
+      xsec.push_back(left + direc * offset_from_corner);
     }
   }
 }
