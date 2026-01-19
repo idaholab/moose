@@ -145,10 +145,8 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
           _inputs_sto[i].push_back(_inputs_sto[i].back());
       }
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
-        _prev_value[i] =
-            Normal::quantile(getRandStateless(rn_ind++, _t_step),
-                             _inputs_sto[i].back(),
-                             _proposal_std[i]);
+        _prev_value[i] = Normal::quantile(
+            getRandStateless(rn_ind++, _t_step), _inputs_sto[i].back(), _proposal_std[i]);
     }
   }
   else if (sample && !gp_flag)
@@ -164,10 +162,8 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
         _mean_sto[i] = AdaptiveMonteCarloUtils::computeMean(_inputs_sto[i], 1);
         _std_sto[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 1);
       }
-      _prev_value[i] =
-          (Normal::quantile(getRandStateless(rn_ind++, _t_step),
-                            _mean_sto[i],
-                            _std_factor * _std_sto[i]));
+      _prev_value[i] = (Normal::quantile(
+          getRandStateless(rn_ind++, _t_step), _mean_sto[i], _std_factor * _std_sto[i]));
     }
 
     // check if we have performed all the importance sampling steps

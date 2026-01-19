@@ -66,8 +66,7 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
       {
         const auto lower = row * bin_size;
         const auto upper = (row + 1) * bin_size;
-        local[row] =
-            getRandStateless(static_cast<std::size_t>(row), col) * (upper - lower) + lower;
+        local[row] = getRandStateless(static_cast<std::size_t>(row), col) * (upper - lower) + lower;
       }
       shuffleStateless(local, col + getNumberOfCols(), CommMethod::NONE);
     }

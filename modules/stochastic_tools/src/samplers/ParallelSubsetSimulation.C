@@ -190,10 +190,8 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
   else
   {
     const dof_id_type loc_ind = row_index - getLocalRowBegin();
-    const Real rv =
-        Normal::quantile(getRandStateless(rn_ind, seed_value),
-                         _markov_seed[col_index][loc_ind],
-                         1.0);
+    const Real rv = Normal::quantile(
+        getRandStateless(rn_ind, seed_value), _markov_seed[col_index][loc_ind], 1.0);
     const Real acceptance_ratio = std::log(Normal::pdf(rv, 0, 1)) -
                                   std::log(Normal::pdf(_markov_seed[col_index][loc_ind], 0, 1));
     const Real new_sample = acceptance_ratio > std::log(getRandStateless(rn_ind, seed_value + 1))

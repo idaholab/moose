@@ -85,8 +85,7 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
       {
         const auto rn_ind = static_cast<std::size_t>(i) * n_cols + j;
-        _inputs_sto[i][j] =
-            _distributions[j]->quantile(getRandStateless(rn_ind, _step));
+        _inputs_sto[i][j] = _distributions[j]->quantile(getRandStateless(rn_ind, _step));
       }
   }
   // If we do have enough failed inputs, assign them and clear the tracked ones

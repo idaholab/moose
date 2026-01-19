@@ -35,9 +35,8 @@ protected:
   std::vector<Distribution const *> _distributions;
 
 private:
-  void shuffleStateless(std::vector<Real> & data,
-                        const std::size_t seed_index,
-                        const CommMethod method);
+  void
+  shuffleStateless(std::vector<Real> & data, const std::size_t seed_index, const CommMethod method);
 
   // Probability values for each distribution
   std::vector<std::vector<Real>> _probabilities;

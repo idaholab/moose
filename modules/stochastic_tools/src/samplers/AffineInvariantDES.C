@@ -102,9 +102,9 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value, std::size_t & 
                           getRandStateless(rn_ind++, seed_value),
                           _scales[i],
                           diff);
-      _new_samples[j][i] = (_t_step > decisionStep()) ? (_previous_state[j][i] + diff)
-                                                      : _priors[i]->quantile(
-                                                            getRandStateless(rn_ind++, seed_value));
+      _new_samples[j][i] = (_t_step > decisionStep())
+                               ? (_previous_state[j][i] + diff)
+                               : _priors[i]->quantile(getRandStateless(rn_ind++, seed_value));
       if (_lower_bound)
         indicator =
             (_new_samples[j][i] < (*_lower_bound)[i] || _new_samples[j][i] > (*_upper_bound)[i])
@@ -118,9 +118,9 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value, std::size_t & 
                           getRandStateless(rn_ind++, seed_value),
                           1.0,
                           diff);
-      _new_var_samples[j] = (_t_step > decisionStep()) ? (_previous_state_var[j] + diff)
-                                                       : _var_prior->quantile(
-                                                             getRandStateless(rn_ind++, seed_value));
+      _new_var_samples[j] = (_t_step > decisionStep())
+                                ? (_previous_state_var[j] + diff)
+                                : _var_prior->quantile(getRandStateless(rn_ind++, seed_value));
       if (_new_var_samples[j] < 0.0 || _new_var_samples[j] > _variance_bound)
         indicator = 1;
     }
