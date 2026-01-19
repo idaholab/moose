@@ -703,6 +703,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
   registerSyntax("AddFVInterpolationMethodAction", "InterpolationMethods/*");
   syntax.registerSyntaxType("InterpolationMethods/*", "InterpolationMethodName");
+  registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
+  syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
   registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
