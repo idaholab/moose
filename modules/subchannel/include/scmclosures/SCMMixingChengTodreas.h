@@ -24,12 +24,17 @@ public:
 
   SCMMixingChengTodreas(const InputParameters & parameters);
 
-  virtual Real computeMixingParameter(const unsigned int & i_gap,
-                                      const unsigned int & iz,
-                                      const bool & sweep_flow) const override;
+  Real computeMixingParameter(const unsigned int i_gap,
+                              const unsigned int iz,
+                              const bool sweep_flow) const override;
 
   /// Keep track of the lattice type
   bool _is_tri_lattice;
   /// Pointer to the tri lattice mesh
   const TriSubChannelMesh * const _tri_sch_mesh;
+
+  SolutionHandle _S_soln;
+  SolutionHandle _mdot_soln;
+  SolutionHandle _w_perim_soln;
+  SolutionHandle _mu_soln;
 };

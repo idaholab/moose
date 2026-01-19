@@ -54,4 +54,6 @@ public:
   Real computeHTC(const FrictionStruct & friction_info,
                   const NusseltStruct & nusselt_info,
                   const Real conduction_k) const;
+
+  SolutionHandle _Dpin_soln;
 };
