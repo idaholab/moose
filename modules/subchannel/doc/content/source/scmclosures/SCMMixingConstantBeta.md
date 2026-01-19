@@ -18,10 +18,12 @@ It is important to note that the mixing coefficient is simply a tuning parameter
 
 After calibrating the turbulent diffusion coefficient $\beta$ we turned our attention to the turbulent modeling parameter $C_{T}$. This is a tuning parameter that informs on how much momentum is transferred/diffused between subchannels, due to turbulence. The CNEN 4x4 test [!cite](Marinelli) performed at Studsvik laboratory for studying the flow mixing effect between adjacent subchannels was chosen to tune this parameter. This experiment consists in velocity and temperature measurements taken at the outlet of a 16-pin assembly test section. Analysis of the velocity distribution at the exit of the assembly can be used to calibrate the turbulent parameter $C_{T}$.
 
-For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoulos2022development).
+For quadrilateral assemblies, the calibration values computed were: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoulos2022development).
 
 !syntax parameters /SCMClosures/SCMMixingConstantBeta
 
 !syntax inputs /SCMClosures/SCMMixingConstantBeta
 
 !syntax children /SCMClosures/SCMMixingConstantBeta
+
+!bibtex bibliography
