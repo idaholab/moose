@@ -74,4 +74,7 @@ protected:
 private:
   /// Performs setup related to Convergence objects
   void convergenceSetup();
+
+  /// Initializes/expands the multi-system fixed point relaxation factors
+  void setupMultiSystemFixedPointRelaxationFactors();
 };
