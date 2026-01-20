@@ -58,7 +58,7 @@
     cli_args = 'FluidProperties/fp/emit_on_nan=warning'
     # A NaN is produced by the fluid property in the NaNInterfaceTestKernel, preventing the convergence
     # Nonlinear solve did not converge due to DIVERGED_FNORM_NAN iterations 0
-    should_crash = true
+    expect_exit_code = 1
     allow_test_objects = True
     allow_warnings = true
     expect_out = 'fp: A NaN was produced.'

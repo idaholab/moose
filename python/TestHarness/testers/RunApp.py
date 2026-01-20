@@ -24,7 +24,6 @@ class RunApp(Tester):
         params.addParam('expect_out',         "A regular expression or literal string that must occur in the output in order for the test to be considered passing (see match_literal).")
         params.addParam('match_literal', False, "Treat expect_out as a string not a regular expression.")
         params.addParam('absent_out',         "A regular expression that must be *absent* from the output for the test to pass.")
-        params.addParam('should_crash', False, "Indicates that the test is expected to crash or otherwise terminate early")
         params.addParam('executable_pattern', "A test that only runs if the executable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('custom_evaluation_script', False, "A .py file containing a custom function for evaluating a test's success. For syntax, please check https://mooseframework.inl.gov/python/TestHarness.html")
@@ -107,8 +106,8 @@ class RunApp(Tester):
             for param in ['expect_out', 'absent_out']:
                 if self.specs.isValid(param):
                     caveats.append(param)
-            if self.specs['should_crash'] == True:
-                caveats.append('should_crash')
+            if self.specs["expect_exit_code"] != 0:
+                caveats.append("nonzero_exit")
             if caveats:
                 self.addCaveats(f'{",".join(caveats)} {reason}')
                 self.setStatus(self.skip)
@@ -148,15 +147,17 @@ class RunApp(Tester):
         # where it doesn't make sense to do it
         if options.capture_perf_graph:
             assert 'perf_graph' not in self.json_metadata
-            skip = not self.specs['capture_perf_graph'] or \
-                self.specs['should_crash'] or \
-                self.specs['no_additional_cli_args'] or \
-                self.getCheckInput() or \
-                '--check-input' in self.specs['cli_args'] or \
-                '--mesh-only' in self.specs['cli_args'] or \
-                '--split-mesh' in self.specs['cli_args'] or \
-                (self.specs.isValid('input') and not self.specs['input']) or \
-                not self.specs['should_execute']
+            skip = (
+                not self.specs["capture_perf_graph"]
+                or self.specs["expect_exit_code"] != 0
+                or self.specs["no_additional_cli_args"]
+                or self.getCheckInput()
+                or "--check-input" in self.specs["cli_args"]
+                or "--mesh-only" in self.specs["cli_args"]
+                or "--split-mesh" in self.specs["cli_args"]
+                or (self.specs.isValid("input") and not self.specs["input"])
+                or not self.specs["should_execute"]
+            )
             if skip:
                 self.addCaveats('no --capture-perf-graph')
             else:
@@ -394,35 +395,31 @@ class RunApp(Tester):
 
     def testExitCodes(self, options, exit_code, runner_output):
         specs = self.specs
+        reason = None
 
-        # If we had capability requirements and get an exit 77, it means that the
-        # capability doesn't exist in the binary
-        if specs['capabilities'] and exit_code == 77:
-            self.setStatus(self.skip, "CAPABILITIES")
-            self.addCaveats(specs['capabilities'])
-            return ''
-
-        # Don't do anything if we already have a status set
-        reason = ''
-
-        # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
-        # since a message to standard error might actually be a real error.  This case should be handled
-        # in the derived class.
-        if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in runner_output, specs['errors'] )] ) > 0:
-            reason = 'ERRMSG'
-        elif exit_code == 0 and specs['should_crash'] == True:
-            reason = 'NO CRASH'
-        elif exit_code != 0 and specs['should_crash'] == False and self.shouldExecute():
-            # Let's look at the error code to see if we can perhaps further split this out later with a post exam
-            reason = 'CRASH'
+        if specs["expect_exit_code"] != exit_code:
+            reason = f'EXIT CODE {exit_code} != {specs["expect_exit_code"]}'
+        elif (
+            options.valgrind_mode == ""
+            and not specs.isValid("expect_err")
+            and len([x for x in filter(lambda x: x in runner_output, specs["errors"])])
+            > 0
+        ):
+            reason = "ERRMSG"
         # Valgrind runs
-        elif exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in runner_output:
-            reason = 'MEMORY ERROR'
+        elif (
+            exit_code == 0
+            and self.shouldExecute()
+            and options.valgrind_mode != ""
+            and "ERROR SUMMARY: 0 errors" not in runner_output
+        ):
+            reason = "MEMORY ERROR"
 
         if reason:
             self.setStatus(self.fail, str(reason))
             return "\n\nExit Code: " + str(exit_code)
-        return ''
+
+        return ""
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         """
@@ -438,6 +435,19 @@ class RunApp(Tester):
         # TODO: because RunParallel is now setting every successful status message,
                 refactor testFileOutput and processResults.
         """
+        # If we had capability requirements and get an exit 77, it means that the
+        # capability doesn't exist in the binary
+        if self.specs["capabilities"] and exit_code == 77:
+            self.setStatus(self.skip, "CAPABILITIES")
+            self.addCaveats(self.specs["capabilities"])
+            return ""
+
+        # Parent check; check exit code
+        if parent_out := super().processResults(
+            moose_dir, options, exit_code, runner_output
+        ):
+            return parent_out
+
         output = ''
         output += self.testFileOutput(moose_dir, options, runner_output)
         if self.isNoStatus():
@@ -446,7 +456,7 @@ class RunApp(Tester):
         return output
 
     def mustOutputExist(self, exit_code):
-        if self.specs['should_crash']:
+        if self.specs["expect_exit_code"] != 0:
             return exit_code != 0
         return exit_code == 0
 

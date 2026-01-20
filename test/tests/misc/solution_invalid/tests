@@ -60,7 +60,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
-    should_crash = true
+    expect_exit_code = 1
     jsondiff = 'solution_invalid.json'
     hpc = false # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
@@ -73,7 +73,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
-    should_crash = true
+    expect_exit_code = 1
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
     hpc = false # iteration counts can be MPI dependent
@@ -88,7 +88,7 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
-    should_crash = true
+    expect_exit_code = 1
     cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
     jsondiff = 'solution_invalid_parallel.json'
     hpc = false # iteration counts can be MPI dependent

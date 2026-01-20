@@ -94,7 +94,7 @@
     expect_err = "unused parameter 'Mesh/extrude/x"
     issues = '#29788'
     requirement = 'The system shall throw an error about unused parameters if --mesh-only is used with --check-input'
-    should_crash = true
+    expect_exit_code = 1
     capabilities = 'method!=dbg'
   []
   [mesh_only_warning_unused]
@@ -105,7 +105,7 @@
     recover = false
     issues = '#14550'
     requirement = 'The system shall throw a warning if an unused parameter exists in Mesh block in --mesh-only mode'
-    should_crash = true
+    expect_exit_code = 1
     capabilities = 'method!=dbg'
   []
   [mesh_only_allow_unused]
