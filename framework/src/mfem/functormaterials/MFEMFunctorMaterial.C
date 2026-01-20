@@ -35,8 +35,8 @@ MFEMFunctorMaterial::pointFromMFEMVector(const mfem::Vector & vec)
 
 MFEMFunctorMaterial::MFEMFunctorMaterial(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
-    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    MFEMBlockRestrictable(parameters, getMFEMProblem().mfemParMesh()),
+    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mfemParMesh()),
     _properties(getMFEMProblem().getCoefficients())
 {
   if (isSubdomainRestricted() && isBoundaryRestricted())

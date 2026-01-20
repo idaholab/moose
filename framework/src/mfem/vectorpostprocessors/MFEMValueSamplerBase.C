@@ -94,18 +94,22 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _points_ordering(getParam<MooseEnum>("point_ordering") == "NODES" ? mfem::Ordering::byNODES
                                                                       : mfem::Ordering::byVDIM),
     _points(pointsToMFEMVector(
-        points, this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension(), _points_ordering)),
+        points, this->getMFEMProblem().mfemParMesh().SpaceDimension(), _points_ordering)),
     _interp_vals(points.size()),
     _var_name(getParam<VariableName>("variable")),
     _var(getMFEMProblem().getProblemData().gridfunctions.GetRef(_var_name))
 {
-  if (this->getMFEMProblem().mesh().shouldDisplace())
+  auto & moose_mesh = getMFEMProblem().mesh();
+  if (moose_mesh.type() == "MFEMMesh")
   {
-    mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
+    if (static_cast<MFEMMesh &>(moose_mesh).shouldDisplace())
+    {
+      mooseError("MFEMValueSamplerBase does not yet support problems with displacement.");
+    }
   }
 
   // set up points vector
-  auto & mesh = this->getMFEMProblem().mesh().getMFEMParMesh();
+  auto & mesh = this->getMFEMProblem().mfemParMesh();
   mesh.EnsureNodes();
   _finder.Setup(mesh);
   _finder.FindPoints(_points, _points_ordering);
@@ -121,7 +125,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
   }
 
   // declare points vectors for outputting
-  const auto mesh_dim = this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension();
+  const auto mesh_dim = this->getMFEMProblem().mfemParMesh().SpaceDimension();
   for (int i = 0; i < mesh_dim; i++)
   {
     std::reference_wrapper<VectorPostprocessorValue> declared_dim =
@@ -153,7 +157,7 @@ MFEMValueSamplerBase::finalize()
   _interp_vals.HostReadWrite();
   _points.HostReadWrite();
 
-  const auto mesh_dim = this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension();
+  const auto mesh_dim = this->getMFEMProblem().mfemParMesh().SpaceDimension();
   MFEMVectorToPostprocessorPoints(_points, _declared_points, mesh_dim, _points_ordering);
   const auto val_dims = _var.VectorDim();
   const auto num_points = _declared_points[0].get().size();

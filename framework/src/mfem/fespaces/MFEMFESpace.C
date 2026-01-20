@@ -31,7 +31,7 @@ MFEMFESpace::MFEMFESpace(const InputParameters & parameters)
     _pmesh(
         parameters.isParamValid("submesh")
             ? getMFEMProblem().getProblemData().submeshes.GetRef(getParam<std::string>("submesh"))
-            : const_cast<mfem::ParMesh &>(getMFEMProblem().mesh().getMFEMParMesh()))
+            : const_cast<mfem::ParMesh &>(getMFEMProblem().mfemParMesh()))
 {
 }
 

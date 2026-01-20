@@ -29,12 +29,10 @@ public:
   virtual void syncSolutions(Direction) override {}
 
   /**
-   * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
-   * MFEMMesh.
+   * Provide the underlying MFEM mesh object used by the problem.
    */
-  virtual MFEMMesh & mesh() override;
-  virtual const MFEMMesh & mesh() const override;
-  using ExternalProblem::mesh;
+  mfem::ParMesh & mfemParMesh() { return *(_problem_data.pmesh); }
+  const mfem::ParMesh & mfemParMesh() const { return *(_problem_data.pmesh); }
 
   /**
    * Returns all the variable names from the auxiliary system base. This is helpful in the

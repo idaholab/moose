@@ -34,14 +34,14 @@ MFEMComplexVectorPeriodAveragedPostprocessor::validParams()
 MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPostprocessor(
     const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    MFEMBlockRestrictable(parameters, getMFEMProblem().mfemParMesh()),
     _primal_var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
         getParam<VariableName>("primal_variable"))),
     _dual_var(getMFEMProblem().getProblemData().cmplx_gridfunctions.GetRef(
         getParam<VariableName>("dual_variable"))),
     _l2_fec(_primal_var.ParFESpace()->GetMaxElementOrder(),
-            getMFEMProblem().mesh().getMFEMParMesh().Dimension()),
-    _scalar_test_fespace(&getMFEMProblem().mesh().getMFEMParMesh(), &_l2_fec),
+            getMFEMProblem().mfemParMesh().Dimension()),
+    _scalar_test_fespace(&getMFEMProblem().mfemParMesh(), &_l2_fec),
     _scalar_var(&_scalar_test_fespace),
     _scalar_coef(getScalarCoefficient("coefficient")),
     _primal_var_real_coef(&_primal_var.real()),
