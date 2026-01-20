@@ -28,7 +28,7 @@ MFEMBoundarySubMesh::validParams()
 
 MFEMBoundarySubMesh::MFEMBoundarySubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
-    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh())
+    MFEMBoundaryRestrictable(parameters, getMFEMProblem().mfemParMesh())
 {
 }
 

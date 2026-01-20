@@ -27,7 +27,7 @@ MFEMDomainSubMesh::validParams()
 
 MFEMDomainSubMesh::MFEMDomainSubMesh(const InputParameters & parameters)
   : MFEMSubMesh(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh())
+    MFEMBlockRestrictable(parameters, getMFEMProblem().mfemParMesh())
 {
 }
 

@@ -37,7 +37,7 @@ SetMFEMMeshFESpaceAction::act()
     return;
   }
 
-  mfem::ParMesh & mesh = mfem_problem->mesh().getMFEMParMesh();
+  mfem::ParMesh & mesh = mfem_problem->mfemParMesh();
   auto const displacement = mfem_problem->getMeshDisplacementGridFunction();
   if (!displacement)
   {
