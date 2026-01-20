@@ -57,7 +57,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   type = NavierStokesProblem
   extra_tag_matrices = 'mass'
   mass_matrix = 'mass'
-  use_pressure_mass_matrix = true
+  set_schur_pre = mass
   kernel_coverage_check = false
 []
 
@@ -146,34 +146,33 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 
   [u_jump]
     type = MassFluxPenaltyIPHDG
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
-    u_face = vel_bar_x
-    v_face = vel_bar_y
     component = 0
     gamma = ${gamma}
+    face_velocity = face_velocity
   []
   [v_jump]
     type = MassFluxPenaltyIPHDG
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
-    u_face = vel_bar_x
-    v_face = vel_bar_y
     component = 1
     gamma = ${gamma}
+    face_velocity = face_velocity
   []
   [pb_mass]
     type = MassMatrixHDG
@@ -221,15 +220,21 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom_v2 top_v2 right_v2'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom_v2 right_v2'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top_v2'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]
@@ -243,56 +248,75 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   [u_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    dirichlet_value = walls
+    face_velocity = walls
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    dirichlet_value = walls
+    face_velocity = walls
+    dirichlet_boundary = true
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'top_v2'
     gamma = ${gamma}
-    dirichlet_value = top_vel
+    face_velocity = top_vel
+    dirichlet_boundary = true
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'top_v2'
     gamma = ${gamma}
-    dirichlet_value = top_vel
+    face_velocity = top_vel
+    dirichlet_boundary = true
   []
 []
 
 [Functions]
-  [top_vel]
-    type = ParsedVectorFunction
-    expression_x = ${U}
-  []
-  [walls]
-    type = ParsedVectorFunction
-  []
   [reynolds]
     type = ParsedFunction
     expression = '10^(log10(${starting_re}) + (t - 1) * ${step_length})'
+  []
+[]
+
+[FunctorMaterials]
+  [top]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = top_vel
+    prop_values = '${U} 0 0'
+  []
+  [walls]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
+  []
+  [vel]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = face_velocity
+    prop_values = 'vel_bar_x vel_bar_y 0'
   []
 []
 

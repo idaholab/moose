@@ -18,6 +18,7 @@
 #include "SCM.h"
 #include "SinglePhaseFluidProperties.h"
 #include "SCMFrictionClosureBase.h"
+#include "SCMHTCClosureBase.h"
 
 struct Ctx
 {
@@ -60,7 +61,6 @@ SubChannel1PhaseProblem::validParams()
   // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
-  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli", "dittus-boelter");
 
   // Inputs
   InputParameters params = ExternalProblem::validParams();
@@ -75,15 +75,10 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
-  params.addParam<MooseEnum>("interpolation_scheme",
-                             schemes,
-                             "Interpolation scheme used for the method. Default is exponential");
-  params.addParam<MooseEnum>("pin_htc_correlation",
-                             htc_correlations,
-                             "The correlation used for computing the pin surface temperature.");
-  params.addParam<MooseEnum>("duct_htc_correlation",
-                             htc_correlations,
-                             "The correlation used for computing the duct surface temperature.");
+  params.addParam<MooseEnum>(
+      "interpolation_scheme",
+      schemes,
+      "Interpolation scheme used for the method. Default is central_difference");
   params.addParam<MooseEnum>(
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
   params.addParam<bool>(
@@ -109,21 +104,20 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   params.addRequiredParam<UserObjectName>("friction_closure",
                                           "Closure computing the friction factor");
+  // Make these OPTIONAL here; enforce them conditionally
+  params.addParam<UserObjectName>(
+      "pin_HTC_closure", "Closure computing HTC on fuel pin (required if pin mesh exists).");
+  params.addParam<UserObjectName>("duct_HTC_closure",
+                                  "Closure computing HTC on duct (required if duct mesh exists).");
   return params;
 }
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     PostprocessorInterface(this),
-    _pin_htc_correlation(getParam<MooseEnum>("pin_htc_correlation")),
-    _duct_htc_correlation(getParam<MooseEnum>("duct_htc_correlation")),
+    _friction_args(/*i_ch=*/0, /*Re=*/1.0, /*S=*/0.0, /*w_perim=*/0.0),
     _nusselt_args(
-        /*Re*/ 1.0,
-        /*Pr*/ 1.0,
-        /*i_pin*/ std::numeric_limits<unsigned int>::max(), // sentinel (duct) default
-        /*iz*/ 0,
-        /*i_ch*/ 0,
-        /*htc_corr*/ _pin_htc_correlation),
+        /*Re=*/1.0, /*Pr=*/1.0, std::numeric_limits<unsigned int>::max(), /*iz=*/0, /*i_ch=*/0),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -157,6 +151,10 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _duct_heat_flux_soln(nullptr),
     _Tduct_soln(nullptr)
 {
+  if (_pin_mesh_exist && !isParamValid("pin_HTC_closure"))
+    paramError("pin_HTC_closure", "required when a pin mesh exists.");
+  if (_duct_mesh_exist && !isParamValid("duct_HTC_closure"))
+    paramError("duct_HTC_closure", "required when a duct mesh exists.");
   // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
@@ -273,6 +271,8 @@ SubChannel1PhaseProblem::initialSetup()
   {
     _Tpin_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PIN_TEMPERATURE));
     _Dpin_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::PIN_DIAMETER));
+    _pin_HTC_closure =
+        &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("pin_HTC_closure"));
   }
   _rho_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DENSITY));
   _mu_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::VISCOSITY));
@@ -287,6 +287,8 @@ SubChannel1PhaseProblem::initialSetup()
     _duct_heat_flux_soln =
         std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_HEAT_FLUX));
     _Tduct_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DUCT_TEMPERATURE));
+    _duct_HTC_closure =
+        &getUserObject<SCMHTCClosureBase>(getParam<UserObjectName>("duct_HTC_closure"));
   }
 }
 
@@ -386,125 +388,6 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
 {
   PetscScalar alpha = computeInterpolationCoefficients(Peclet);
   return alpha * botValue + (1.0 - alpha) * topValue;
-}
-
-Real
-SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args)
-{
-  // Correlation Specific Parameters
-  const auto htc_correlation = nusselt_args.htc_correlation;
-  const auto Re = nusselt_args.Re;
-  auto Pr = nusselt_args.Pr;
-
-  // Geometry Specific Parameters
-  const auto pitch = _subchannel_mesh.getPitch();
-  Real D;
-  // Use sentinel i_pin == max() to denote duct; otherwise it's a pin
-  const bool is_duct = (nusselt_args.i_pin == std::numeric_limits<unsigned int>::max());
-
-  if (!is_duct) // pin temperature path
-  {
-    const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
-    if ((*_Dpin_soln)(pin_node) > 0)
-      D = (*_Dpin_soln)(pin_node);
-    else
-      mooseError(name(),
-                 "The diameter of the pin is equal or smaller than zero, "
-                 "please initialize the auxiliary variable Dpin.");
-  }
-  else // duct temperature path
-  {
-    D = _subchannel_mesh.getPinDiameter();
-  }
-
-  const auto poD = pitch / D;
-  auto subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
-
-  // Lambda function for laminar flow Nusselt
-  auto laminar_Nu = [subch_type]() -> Real
-  {
-    if (subch_type == EChannelType::CENTER)
-      return 4.0;
-    else if (subch_type == EChannelType::EDGE)
-      return 3.7;
-    else // corner channel
-      return 3.3;
-  };
-
-  // Precompute ReL and ReT
-  const auto ReL = 300 * std::pow(10.0, 1.7 * (poD - 1.0));
-  const auto ReT = 1e4 * std::pow(10.0, 1.7 * (poD - 1.0));
-
-  if (Re <= ReL)
-    return laminar_Nu();
-
-  // Lambda function for turbulent Nusselt
-  auto blended_Nu = [&](Real NuT) -> Real
-  {
-    if (Re >= ReT)
-      return NuT;
-    else // transition regime
-    {
-      const auto w = (Re - ReL) / (ReT - ReL);
-      return w * NuT + (1.0 - w) * laminar_Nu();
-    }
-  };
-
-  switch (htc_correlation)
-  {
-    case 0: // dittus-boelter
-    {
-      if (Pr < 0.7 || Pr > 1.6e2)
-        mooseDoOnce(mooseWarning("Pr number out of range in the Dittus Bolter correlation for "
-                                 "pin or duct surface temperature calculation."));
-
-      const auto NuT = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
-      return blended_Nu(NuT);
-    }
-
-    case 1: // gnielinski
-    {
-      if (Pr < 1e-5 || Pr > 2e3)
-        mooseDoOnce(mooseWarning("Pr number out of range in the Gnielinski correlation for "
-                                 "pin or duct surface temperature calculation."));
-
-      const auto iz = nusselt_args.iz;
-      const auto i_ch = nusselt_args.i_ch;
-
-      FrictionStruct friction_args;
-      friction_args.i_ch = i_ch;
-      friction_args.Re = Re;
-      const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-      friction_args.S = (*_S_flow_soln)(node);
-      friction_args.w_perim = (*_w_perim_soln)(node);
-      Real f_darcy = _friction_closure->computeFrictionFactor(friction_args) / 8.0;
-
-      /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
-      /// which is what we should see in practice, i.e., for very low Pr numbers the heat exchange
-      /// will be dominated by conduction and Nu profile should be flat.
-      const auto NuT = f_darcy * (Re - 1e3) * (Pr + 0.01) /
-                       (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
-      return blended_Nu(NuT);
-    }
-
-    case 2: // kazimi-carelli
-    {
-      const auto Pe = Re * Pr;
-
-      if (Pe < 1.5 || Pe > 1e4)
-        mooseDoOnce(mooseWarning("Pr number out of range in the Kazimi Carelli correlation for "
-                                 "pin or duct surface temperture calculation."));
-
-      const auto NuT =
-          4.0 + 0.33 * std::pow(poD, 3.8) * std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
-      return blended_Nu(NuT);
-    }
-
-    default:
-      mooseError(name(),
-                 ": Invalid heat transfer correlation, "
-                 "please use 'dittus-boelter', 'gnielinski', or 'kazimi-carelli'");
-  }
 }
 
 void
@@ -776,10 +659,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         }
         turbulent_term *= _CT;
         auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
-        _friction_args.Re = Re;
-        _friction_args.i_ch = i_ch;
-        _friction_args.S = S;
-        _friction_args.w_perim = w_perim;
+        _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
         _ff_soln->set(node_out, ff);
         /// Upwind local form loss
@@ -841,10 +721,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           auto Dh_i = 4.0 * S_interp / w_perim_interp;
           // Compute friction factor
           auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
-          _friction_args.Re = Re;
-          _friction_args.i_ch = i_ch;
-          _friction_args.S = S_interp;
-          _friction_args.w_perim = w_perim_interp;
+          _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
           Real ff = _friction_closure->computeFrictionFactor(_friction_args);
           _ff_soln->set(node_out, ff);
           /// Upwind local form loss
@@ -1080,10 +957,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         PetscScalar mdot_interp =
             computeInterpolatedValue((*_mdot_soln)(node_out), (*_mdot_soln)(node_in), Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
-        _friction_args.Re = Re;
-        _friction_args.i_ch = i_ch;
-        _friction_args.S = S_interp;
-        _friction_args.w_perim = w_perim_interp;
+        _friction_args = FrictionStruct(i_ch, Re, S_interp, w_perim_interp);
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
         _ff_soln->set(node_out, ff);
         /// Upwind local form loss
@@ -2664,13 +2538,13 @@ SubChannel1PhaseProblem::externalSolve()
           auto Pr = (*_mu_soln)(node)*cp / k;
 
           // Create nusselt number structure
-          NusseltStruct nusselt_struct(Re, Pr, i_pin, iz, i_ch, _pin_htc_correlation);
+          _nusselt_args = NusseltStruct(Re, Pr, i_pin, iz, i_ch);
 
-          // Compute Nusselt number
-          auto Nu = this->computeNusseltNumber(nusselt_struct);
+          // Create Friction structure
+          _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
 
           // Compute HTC
-          auto hw = Nu * k / Dh_i;
+          auto hw = _pin_HTC_closure->computeHTC(_friction_args, _nusselt_args, k);
 
           // Compute surface temperature contribution from subchannel side
           sumTemp +=
@@ -2701,28 +2575,19 @@ SubChannel1PhaseProblem::externalSolve()
       auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
 
-      // Check that kazimi-carelli is not used for the duct (not supported yet)
-      if (_duct_htc_correlation == "kazimi-carelli")
-        mooseError("'kazimi-carelli' is not yet supported for the 'duct_htc_correlation'.");
-
       // Create nusselt number structure (consistent with pin case)
       const libMesh::Point & node_point = *_subchannel_mesh.getChannelNodeFromDuct(dn);
       const unsigned int iz = _subchannel_mesh.getZIndex(node_point);
       const unsigned int i_ch = _subchannel_mesh.channelIndex(node_point);
 
-      NusseltStruct nusselt_struct(
-          Re,
-          Pr,
-          std::numeric_limits<unsigned int>::max(), // sentinel pin index for duct
-          iz,
-          i_ch,
-          _duct_htc_correlation);
+      // Create nusselt number structure
+      _nusselt_args = NusseltStruct(Re, Pr, std::numeric_limits<unsigned int>::max(), iz, i_ch);
 
-      // Compute Nusselt number
-      auto Nu = this->computeNusseltNumber(nusselt_struct);
+      // Create Friction structure
+      _friction_args = FrictionStruct(i_ch, Re, S, w_perim);
 
       // Compute HTC
-      auto hw = Nu * k / Dh_i;
+      auto hw = _duct_HTC_closure->computeHTC(_friction_args, _nusselt_args, k);
 
       // Compute Channel Temperature
       auto T_chan = (*_duct_heat_flux_soln)(dn) / hw + (*_T_soln)(node_chan);

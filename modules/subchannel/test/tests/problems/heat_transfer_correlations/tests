@@ -12,8 +12,32 @@
       valgrind = NONE
       recover = false
       max_parallel = 1
-      detail = 'using the Dittus Boelter correlation.'
-      cli_args = 'SubChannel/pin_htc_correlation=dittus-boelter SubChannel/duct_htc_correlation=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties T_in=300.0'
+      detail = 'using the default Dittus Boelter correlation for circular tubes.'
+      cli_args = 'SubChannel/pin_HTC_closure=dittus-boelter SubChannel/duct_HTC_closure=dittus-boelter Outputs/file_base=dittus_boelter FluidProperties/sodium/type=Water97FluidProperties SCMClosures/dittus-boelter/correction_factor=none T_in=300.0'
+    []
+    [dittus_boelter_Presser]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'dittus_boelter_Presser.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Dittus Boelter correlation and the Presser correction factor.'
+      cli_args = 'SubChannel/pin_HTC_closure=dittus-boelter SubChannel/duct_HTC_closure=dittus-boelter Outputs/file_base=dittus_boelter_Presser FluidProperties/sodium/type=Water97FluidProperties SCMClosures/dittus-boelter/correction_factor=Presser T_in=300.0'
+    []
+    [dittus_boelter_Weisman]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'dittus_boelter_Weisman.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Dittus Boelter correlation and the Weisman correction factor.'
+      cli_args = 'SubChannel/pin_HTC_closure=dittus-boelter SubChannel/duct_HTC_closure=dittus-boelter Outputs/file_base=dittus_boelter_Weisman FluidProperties/sodium/type=Water97FluidProperties SCMClosures/dittus-boelter/correction_factor=Weisman T_in=300.0'
     []
     [gnielinski]
       type = CSVDiff
@@ -25,7 +49,7 @@
       recover = false
       max_parallel = 1
       detail = 'using the Gnielinski correlation.'
-      cli_args = 'SubChannel/pin_htc_correlation=gnielinski SubChannel/duct_htc_correlation=gnielinski Outputs/file_base=gnielinski'
+      cli_args = 'SubChannel/pin_HTC_closure=gnielinski SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=gnielinski'
     []
     [kazimi_carelli]
       type = CSVDiff
@@ -36,8 +60,44 @@
       valgrind = NONE
       recover = false
       max_parallel = 1
-      detail = 'using the Kazimi Carelli correlation.'
-      cli_args = 'SubChannel/pin_htc_correlation=kazimi-carelli SubChannel/duct_htc_correlation=gnielinski Outputs/file_base=kazimi-carelli'
+      detail = 'using the Kazimi-Carelli correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=kazimi-carelli SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=kazimi-carelli'
+    []
+    [schad_modified]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'schad-modified.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Schad-Modified correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=schad-modified SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=schad-modified'
+    []
+    [graber_rieger]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'graber-rieger.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Graber-Rieger correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=graber-rieger SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=graber-rieger'
+    []
+    [borishanskii]
+      type = CSVDiff
+      input = 'XX09_SCM_SS17.i'
+      csvdiff  = 'borishanskii.csv'
+      capabilities = 'method!=dbg'
+      abs_zero = 1e-5
+      valgrind = NONE
+      recover = false
+      max_parallel = 1
+      detail = 'using the Borishanskii correlation.'
+      cli_args = 'SubChannel/pin_HTC_closure=borishanskii SubChannel/duct_HTC_closure=gnielinski Outputs/file_base=borishanskii'
     []
   []
 []

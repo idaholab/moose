@@ -1,6 +1,8 @@
 [GlobalParams]
   variable = u
   face_variable = side_u
+  alpha = 1
+  coeff = 1
 []
 
 [Mesh]
@@ -44,6 +46,7 @@
     type = AdvectionIPHDGOutflowBC
     boundary = 'right'
     velocity = vel
+    constrain_lm = false
   []
   [diffusive_influx]
     type = DiffusionIPHDGPrescribedFluxBC
@@ -88,8 +91,10 @@
 []
 
 [Preconditioning]
-  [smp]
+  [sc]
     type = StaticCondensation
+    petsc_options_iname = '-pc_type -pc_factor_shift_type'
+    petsc_options_value = 'lu       nonzero'
   []
 []
 

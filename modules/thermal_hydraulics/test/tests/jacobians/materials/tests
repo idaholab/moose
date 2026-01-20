@@ -1,17 +1,4 @@
 [Tests]
-  [ad_solid_material]
-    type = 'PetscJacobianTester'
-    input = 'ad_solid_material.i'
-    ratio_tol = 1e-7
-    difference_tol = 1e-6
-    max_threads = 1
-    max_parallel = 1
-    allow_test_objects = true
-    no_error_deprecated = true
-    issues = '#20662'
-    design = 'ADSolidMaterial.md'
-    requirement = 'The system shall be able to use the material property system to define solid properties for a solid energy equation.'
-  []
   [constant_material]
     type = 'PetscJacobianTester'
     input = 'constant_material.i'

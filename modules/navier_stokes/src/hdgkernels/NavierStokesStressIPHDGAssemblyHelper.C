@@ -90,3 +90,14 @@ NavierStokesStressIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real
       _scalar_re(i) += _ip_JxW_face[qp] * _pressure_face_sol[qp] * _ip_normals[qp](_component) *
                        _scalar_phi_face[i][qp];
 }
+
+void
+NavierStokesStressIPHDGAssemblyHelper::lmFace()
+{
+  DiffusionIPHDGAssemblyHelper::lmFace();
+
+  for (const auto i : index_range(_lm_re))
+    for (const auto qp : make_range(_ip_qrule_face->n_points()))
+      _lm_re(i) -= _ip_JxW_face[qp] * _pressure_face_sol[qp] * _ip_normals[qp](_component) *
+                   _lm_phi_face[i][qp];
+}

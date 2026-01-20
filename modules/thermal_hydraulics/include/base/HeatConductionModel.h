@@ -42,7 +42,7 @@ public:
   /**
    * Add materials used by this model
    */
-  virtual void addMaterials();
+  virtual void addMaterials() {}
 
   /**
    * Add heat conduction equation for cartesian coordinate system

@@ -16,7 +16,7 @@ SCMFrictionMATRA::validParams()
 {
   InputParameters params = SCMFrictionClosureBase::validParams();
   params.addClassDescription(
-      "Class that models the axial friction factor using the MATRA correlation.");
+      "Class that computes the axial friction factor using the MATRA correlation.");
   return params;
 }
 

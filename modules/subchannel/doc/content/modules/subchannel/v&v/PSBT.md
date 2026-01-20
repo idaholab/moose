@@ -7,7 +7,7 @@ The PSBT 5x5 benchmark is an international benchmark developed by the Organisati
 
 | Item | Value |
 | - | - |
-| Rods array | $5\times5$ |
+| Fuel-pin array | $5\times5$ |
 | Number of heated pins | $25$ |
 | Heated pin outer diameter (mm) | $9.50$ |
 | Pitch (mm) | $12.60$ |

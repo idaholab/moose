@@ -30,12 +30,13 @@ GenericVectorFunctorMaterialTempl<is_ad>::validParams()
   params.addClassDescription(
       "FunctorMaterial object for declaring vector properties that are populated by "
       "evaluation of functor (constants, functions, variables, matprops) object.");
-  params.addParam<std::vector<std::string>>("prop_names",
-                                            "The names of the properties this material will have");
-  params.addParam<std::vector<MooseFunctorName>>("prop_values",
-                                                 "The corresponding names of the "
-                                                 "functors that are going to provide "
-                                                 "the values for the vector material properties");
+  params.addRequiredParam<std::vector<std::string>>(
+      "prop_names", "The names of the properties this material will have");
+  params.addRequiredParam<std::vector<MooseFunctorName>>(
+      "prop_values",
+      "The corresponding names of the "
+      "functors that are going to provide "
+      "the values for the vector material properties");
   return params;
 }
 

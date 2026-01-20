@@ -11,6 +11,8 @@
 
 #include "IPHDGKernel.h"
 
+class AdvectionIPHDGAssemblyHelper;
+
 /**
  * Implements an advection term for a interior penalty hybridized discretization
  */
@@ -21,7 +23,7 @@ public:
   AdvectionIPHDGKernel(const InputParameters & params);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual IPHDGAssemblyHelper & iphdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<AdvectionIPHDGAssemblyHelper> _iphdg_helper;

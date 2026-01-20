@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#31399'
+  design = 'AdvectionIPHDGKernel.md NavierStokesStressIPHDGKernel.md MassContinuityIPHDGKernel.md MassFluxPenaltyIPHDG.md MassMatrixHDG.md'
+  [csv]
+    type = CSVDiff
+    input = bfs-2d-ilu.i
+    csvdiff = bfs-2d-ilu_out.csv
+    requirement = 'The system shall be able to solve a backwards facing step Navier-Stokes problem, discretized with HDG and with a flux jump augmentation, using a triangular Schur complement preconditioner and a multifrontal sparse LU solver with butterfly compression for the augmented and condensed velocity block.'
+    capabilities = 'method!=dbg'
+    cli_args = 'Executioner/num_steps=1 Executioner/abort_on_solve_fail=false' # Latter option to allow restep
+    max_threads = 1
+    valgrind = 'none'
+  []
+[]

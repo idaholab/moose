@@ -3,6 +3,12 @@ rho = 1
 l = 1
 U = 100
 n = 8
+degree = 2
+alpha = '${fparse 10 * degree^2}'
+
+[GlobalParams]
+  alpha = ${alpha}
+[]
 
 [Mesh]
   [gen]
@@ -41,7 +47,7 @@ n = 8
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = FIRST
+    order = SECOND
   []
   [lambda]
     family = SCALAR
@@ -62,7 +68,6 @@ n = 8
     variable = vel_x
     face_variable = vel_bar_x
     diffusivity = 'mu'
-    alpha = 6
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 0
@@ -79,18 +84,16 @@ n = 8
     variable = vel_y
     face_variable = vel_bar_y
     diffusivity = 'mu'
-    alpha = 6
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [mass_advection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -119,7 +122,6 @@ n = 8
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = '0'
     diffusivity = 'mu'
     component = 0
@@ -131,7 +133,6 @@ n = 8
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = '${U}'
     diffusivity = 'mu'
     component = 0
@@ -143,21 +144,26 @@ n = 8
     face_variable = vel_bar_y
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = '0'
     diffusivity = 'mu'
     component = 1
   []
 
-  [mass_advection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 []
 

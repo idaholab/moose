@@ -24,10 +24,6 @@ LinearFluidProperties::validParams()
   params.addRequiredParam<Real>("T_0", "Reference internal energy");
   params.addRequiredParam<Real>("mu", "Dynamic viscosity, Pa.s");
   params.addRequiredParam<Real>("k", "Thermal conductivity, W/(m-K)");
-  params.addDeprecatedParam<Real>(
-      "Pr",
-      "Prandtl Number, [-]",
-      "This parameter is no longer required. It is computed from the other parameters.");
   params.addClassDescription(
       "Fluid properties for a fluid with density linearly dependent on temperature and pressure");
   return params;
@@ -43,16 +39,9 @@ LinearFluidProperties::LinearFluidProperties(const InputParameters & parameters)
     _e_0(getParam<Real>("e_0")),
     _T_0(getParam<Real>("T_0")),
     _mu(getParam<Real>("mu")),
-    _k(getParam<Real>("k"))
+    _k(getParam<Real>("k")),
+    _Pr(_cv / _k * _mu)
 {
-  if (isParamValid("Pr"))
-    _Pr = getParam<Real>("Pr");
-  else
-    _Pr = _cv / _k * _mu;
-
-  // Sanity checks
-  if (!MooseUtils::absoluteFuzzyEqual(_Pr, _cv / _k * _mu))
-    paramError("Pr", "Prandtl number should be equal to cv * mu / k");
 }
 
 Real

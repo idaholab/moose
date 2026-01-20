@@ -11,6 +11,8 @@
 
 #include "IPHDGPrescribedFluxBC.h"
 
+class DiffusionIPHDGAssemblyHelper;
+
 /**
  * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
  * the diffusion equation
@@ -22,7 +24,7 @@ public:
   DiffusionIPHDGPrescribedFluxBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual IPHDGAssemblyHelper & iphdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;

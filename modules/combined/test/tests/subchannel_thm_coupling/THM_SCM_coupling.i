@@ -83,9 +83,6 @@ m_dot_sec_in = 1. # kg/s
   [thm_closures]
     type = Closures1PhaseTHM
   []
-  [none_closures]
-    type = Closures1PhaseNone
-  []
 []
 
 [Materials]
@@ -98,9 +95,9 @@ m_dot_sec_in = 1. # kg/s
   []
 []
 
-[HeatStructureMaterials]
+[SolidProperties]
   [steel]
-    type = SolidMaterialProperties
+    type = ThermalFunctionSolidProperties
     rho = 8050
     k = 45
     cp = 466
@@ -145,7 +142,7 @@ m_dot_sec_in = 1. # kg/s
     length = ${core_length}
     n_elems = ${core_n_elems}
     A = ${A_core}
-    closures = none_closures
+    closures = ''
   []
 
   [core_ht]
@@ -253,7 +250,8 @@ m_dot_sec_in = 1. # kg/s
       n_elems = ${hx_n_elems}
       widths = '${hx_wall_thickness}'
       n_part_elems = '3'
-      materials = 'steel'
+      solid_properties = 'steel'
+      solid_properties_T_ref = '300'
       names = '0'
       inner_radius = '${fparse hx_dia_inner / 2.}'
     []

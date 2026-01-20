@@ -23,7 +23,8 @@ HDGKernel::HDGKernel(const InputParameters & parameters)
     _qrule_face(_assembly.qRuleFace()),
     _q_point_face(_assembly.qPointsFace()),
     _JxW_face(_assembly.JxWFace()),
-    _normals(_assembly.normals())
+    _normals(_assembly.normals()),
+    _current_side_elem(_assembly.sideElem())
 {
   if (const auto * const ti = _sys.queryTimeIntegrator(_var.number()); ti && ti->isExplicit())
     mooseError("HDGKernels do not currently work with explicit time integration. This is because "

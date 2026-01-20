@@ -20,9 +20,11 @@
 #include <petscsys.h>
 #include <petscvec.h>
 #include <petscsnes.h>
+#include <limits>
 
 class SinglePhaseFluidProperties;
 class SCMFrictionClosureBase;
+class SCMHTCClosureBase;
 
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
@@ -38,29 +40,40 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
-public:
+  const SCMHTCClosureBase * getDuctHTCClosure() const { return _duct_HTC_closure; }
+  const SCMHTCClosureBase * getPinHTCClosure() const { return _pin_HTC_closure; } // optional
+  const SCMFrictionClosureBase * getFrictionClosure() const { return _friction_closure; }
+
+  /// structure with the needed information to compute the friction factor at a specific subchannel cell
   struct FrictionStruct
   {
-    unsigned int i_ch;
-    Real Re, S, w_perim;
-  } _friction_args;
+    unsigned int i_ch = 0;
+    Real Re = 1.0;
+    Real S = 0.0;
+    Real w_perim = 0.0;
 
-  struct NusseltStruct
-  {
-    Real Re, Pr;
-    unsigned int i_pin, iz, i_ch;
-    MooseEnum htc_correlation;
-    // parameterized constructor
-    NusseltStruct(Real Re_,
-                  Real Pr_,
-                  unsigned int i_pin_,
-                  unsigned int iz_,
-                  unsigned int i_ch_,
-                  const MooseEnum & htc_corr)
-      : Re(Re_), Pr(Pr_), i_pin(i_pin_), iz(iz_), i_ch(i_ch_), htc_correlation(htc_corr)
+    FrictionStruct() = delete;
+    FrictionStruct(unsigned int i_ch_, Real Re_, Real S_, Real w_perim_)
+      : i_ch(i_ch_), Re(Re_), S(S_), w_perim(w_perim_)
     {
     }
-  };
+  } _friction_args;
+
+  /// structure with the needed information to compute the Nusselt number at a specific subchannel cell and heated surface
+  struct NusseltStruct
+  {
+    Real Re = 1.0;
+    Real Pr = 1.0;
+    unsigned int i_pin = std::numeric_limits<unsigned int>::max(); // sentinel (duct) default
+    unsigned int iz = 0;
+    unsigned int i_ch = 0;
+
+    NusseltStruct() = delete;
+    NusseltStruct(Real Re_, Real Pr_, unsigned int i_pin_, unsigned int iz_, unsigned int i_ch_)
+      : Re(Re_), Pr(Pr_), i_pin(i_pin_), iz(iz_), i_ch(i_ch_)
+    {
+    }
+  } _nusselt_args;
 
   /// Return the added heat coming from the fuel pins
   Real getAddedHeatPin(unsigned int i_ch, unsigned int iz) const
@@ -81,13 +94,6 @@ protected:
   /// Non-pure: implemented in the base (or override in a child if needed)
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz) const;
 
-  /// The correlation used for computing the heat transfer correlation near the pin
-  const MooseEnum _pin_htc_correlation;
-  /// The correlation used for computing the heat transfer correlation near the duct
-  const MooseEnum _duct_htc_correlation;
-  NusseltStruct _nusselt_args;
-  /// Function that computes the Nusselt number given a heat exchange correlation
-  Real computeNusseltNumber(const NusseltStruct & nusselt_args);
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -238,6 +244,9 @@ protected:
   const SinglePhaseFluidProperties * _fp;
   /// Friction closure object
   const SCMFrictionClosureBase * _friction_closure;
+  /// HTC closure objects
+  const SCMHTCClosureBase * _pin_HTC_closure;
+  const SCMHTCClosureBase * _duct_HTC_closure;
 
   /// Solutions handles and link to TH tables properties
   std::unique_ptr<SolutionHandle> _mdot_soln;

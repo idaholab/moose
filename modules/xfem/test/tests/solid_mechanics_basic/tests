@@ -180,4 +180,14 @@
     allow_test_objects = true
     design = 'XFEM/index.md'
   []
+  [double_cantilever]
+    issues = '#32187'
+    design = 'growingEdgeCrack.md'
+    type = CSVDiff
+    input = 'double_cantilever_crack.i'
+    csvdiff = 'double_cantilever_crack_out_II_KI_1_0009.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    capabilities = 'unique_id & method=opt'
+    requirement = 'The XFEM module shall reproduce published results for a moving crack in a 3D double cantilever beam.'
+  []
 []
