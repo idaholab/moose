@@ -222,7 +222,7 @@ The syntax for creating the pointer and adding it is shown below, where `Lattice
 
 ```cpp
 // the unique lattice pointer is made first, creating the lattice object of the specified type
-std::unique_ptr<LatticeType> lat_ptr = std::make_unique<:LatticeType>(arguments);
+std::unique_ptr<LatticeType> lat_ptr = std::make_unique<LatticeType>(arguments);
 // and then it is explicitly passed to this CSGBase instance, which will keep the memory ownership for the object
 const auto & lattice = csg_obj->addLattice<LatticeType>(std::move(lat_ptr));
 ```
