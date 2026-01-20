@@ -50,15 +50,15 @@ IterationCountConvergence::checkConvergence(unsigned int iter)
       {
         if (_converge_at_max_iterations)
         {
-          oss << "Converged due to iterations (" << iter << ") >= max iterations ("
-              << _max_iterations << ") and 'converge_at_max_iterations' = 'true'.";
+          oss << COLOR_GREEN << "Converged due to iterations (" << iter << ") >= max iterations ("
+              << _max_iterations << ") and 'converge_at_max_iterations' = 'true'." << COLOR_DEFAULT;
           verboseOutput(oss);
           return MooseConvergenceStatus::CONVERGED;
         }
         else
         {
-          oss << "Diverged due to iterations (" << iter << ") >= max iterations ("
-              << _max_iterations << ").";
+          oss << COLOR_RED << "Diverged due to iterations (" << iter << ") >= max iterations ("
+              << _max_iterations << ")." << COLOR_DEFAULT;
           verboseOutput(oss);
           return MooseConvergenceStatus::DIVERGED;
         }
