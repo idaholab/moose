@@ -55,7 +55,7 @@ of the segregated solve:
 - [!param](/Executioner/PIMPLE/should_solve_passive_scalars)
 
 For example, to load a converged flow/temperature field from a steady-state run and only march
-passive scalars, enable [restart and recovery](restart_recover.md), keep the scalar solves enabled, and disable the momentum,
+passive scalars, enable [restart and recovery](restart_recover.md optional=True), keep the scalar solves enabled, and disable the momentum,
 pressure, and energy solves:
 
 ```
