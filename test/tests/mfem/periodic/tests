@@ -1,0 +1,15 @@
+[Tests]
+  design = 'syntax/Problem/index.md'
+  [MFEMPeriodicMesh]
+    type = XMLDiff
+    input = periodic_mesh.i
+    xmldiff = 'OutputData/PeriodicGmsh/Run0/Run0.pvd
+                OutputData/PeriodicGmsh/Run0/Cycle000001/proc000000.vtu'
+    requirement = 'The system shall have the ability to solve a problem defined on a mesh with pre-defined periodic boundaries using MFEM.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    max_parallel = 1 # schemadiff with multiple ranks
+    recover = false
+    platform = 'linux'
+  []
+[]
