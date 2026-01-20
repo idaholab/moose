@@ -291,6 +291,10 @@ class RunApp(Tester):
         if options.scaling and specs['scale_refine'] > 0:
             cli_args.insert(0, ' -r ' + str(specs['scale_refine']))
 
+        # WIP REMOVE ONCE LIBMESH IS FIXED
+        if specs["expect_exit_code"] != 0:
+            cli_args.append("--disable-thread-safe-output")
+
         # Get the number of processors and threads the Tester requires
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
