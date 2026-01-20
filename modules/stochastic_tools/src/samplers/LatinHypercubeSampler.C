@@ -105,6 +105,13 @@ LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_inde
 void
 LatinHypercubeSampler::executeTearDown()
 {
+  /**
+   * Advance stateless RNG streams once per execute after sampleSetUp usage.
+   *
+   * sampleSetUp generates n_rows draws per column (for bin selection) and
+   * a Fisher-Yates shuffle that consumes (n_rows - 1) integer draws. We advance
+   * both stateless streams here to mirror the sampler's execute-time progression.
+   */
   if (!_stateless_advance_pending)
     return;
 
@@ -113,6 +120,7 @@ LatinHypercubeSampler::executeTearDown()
   if (n_rows == 0 || n_cols == 0)
     return;
 
+  // Advance the per-column bin RNG and shuffle RNG to match sampleSetUp usage.
   const auto shuffle_count = n_rows > 0 ? n_rows - 1 : 0;
   for (dof_id_type col = 0; col < n_cols; ++col)
   {
@@ -129,6 +137,12 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
                                         const std::size_t seed_index,
                                         const CommMethod method)
 {
+  /**
+   * Stateless Fisher-Yates shuffle that uses getRandlStateless for determinism.
+   *
+   * For distributed data, this computes global indices and performs the required
+   * inter-rank swaps via point-to-point exchanges.
+   */
   const libMesh::Parallel::Communicator * comm_ptr = nullptr;
   if (method == CommMethod::LOCAL)
     comm_ptr = &_communicator;
@@ -145,6 +159,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
     for (std::size_t i = n_global - 1; i > 0; --i)
     {
       const auto j = getRandlStateless(rn_ind++, 0, i, seed_index);
+      // Local Fisher-Yates swap.
       MooseUtils::swap(data, i, j, nullptr);
     }
   }
@@ -160,6 +175,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
     {
       std::vector<std::size_t> local_sizes;
       comm_ptr->allgather(n_local, local_sizes);
+      // Build prefix offsets to map global indices to rank-local indices.
       for (std::size_t i = 0; i < local_sizes.size() - 1; ++i)
         offsets[i + 1] = offsets[i] + local_sizes[i];
     }
@@ -178,6 +194,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
       auto idx1_rank = std::distance(offsets.begin(), idx1_offset_iter);
       auto idx1_local_idx = idx1 - *idx1_offset_iter;
 
+      // Request the remote value needed for the swap (if any).
       std::unordered_map<processor_id_type, std::vector<std::size_t>> needs;
       if (idx0_rank != rank && idx1_rank == rank)
         needs[idx0_rank].push_back(idx0_local_idx);
@@ -194,6 +211,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
       };
       Parallel::push_parallel_vector_data(*comm_ptr, needs, return_functor);
 
+      // Receive the remote value needed to complete the swap.
       std::vector<Real> incoming;
       auto recv_functor = [&incoming](processor_id_type /*pid*/, const std::vector<Real> & values)
       { incoming = values; };
