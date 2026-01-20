@@ -29,4 +29,4 @@ class TestHarnessTester(TestHarnessTestCase):
         Test that --recover still checks status on Part1 tests
         """
         out = self.runTests('-i', 'exception_transient', '--recover', exit_code=128).output
-        self.assertRegex(out, r'test_harness.*?part1.*?FAILED \(CRASH\)')
+        self.assertRegex(out, r'test_harness.*?part1.*?FAILED \(EXIT CODE 1 != 0\)')

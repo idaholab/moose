@@ -21,7 +21,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertRegex(out, r'test_harness\.no_expect_err_literal.*?FAILED \(EXPECTED ERROR MISSING\)')
         self.assertRegex(out, r'test_harness\.no_expect_out_literal.*?FAILED \(EXPECTED OUTPUT MISSING\)')
         self.assertRegex(out, r'test_harness\.absent_out_literal.*?FAILED \(OUTPUT NOT ABSENT\)')
-        self.assertRegex(out, r'test_harness\.no_expect_exit_code.*?FAILED \(WRONG EXIT CODE\)')
+        self.assertRegex(out, r'test_harness\.no_expect_exit_code.*?FAILED \(EXIT CODE 1 != 2\)')
 
     def testExpectMissing(self):
         """
