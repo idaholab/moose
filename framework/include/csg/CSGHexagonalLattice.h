@@ -75,12 +75,7 @@ public:
    *
    * @return map of string dimension name to value of that dimension
    */
-  virtual std::unordered_map<std::string, AttributeVariant> getAttributes() const override
-  {
-    return {{"nrow", static_cast<unsigned int>(_nrow)},
-            {"nring", static_cast<unsigned int>(_nring)},
-            {"pitch", _pitch}};
-  }
+  virtual std::unordered_map<std::string, AttributeVariant> getAttributes() const override;
 
   /**
    * @brief check if provided index in row-column form is valid for the given hexagonal lattice

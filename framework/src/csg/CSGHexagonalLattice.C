@@ -82,6 +82,14 @@ CSGHexagonalLattice::setPitch(const Real pitch)
   _pitch = pitch;
 }
 
+std::unordered_map<std::string, AttributeVariant>
+CSGHexagonalLattice::getAttributes() const
+{
+  return {{"nrow", static_cast<unsigned int>(_nrow)},
+          {"nring", static_cast<unsigned int>(_nring)},
+          {"pitch", _pitch}};
+}
+
 bool
 CSGHexagonalLattice::isValidIndex(const std::pair<int, int> index) const
 {

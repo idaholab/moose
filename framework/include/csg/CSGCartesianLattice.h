@@ -74,12 +74,7 @@ public:
    *
    * @return map of string dimension name to value of that dimension
    */
-  virtual std::unordered_map<std::string, AttributeVariant> getAttributes() const override
-  {
-    return {{"nrow", static_cast<unsigned int>(_nrow)},
-            {"ncol", static_cast<unsigned int>(_ncol)},
-            {"pitch", _pitch}};
-  }
+  virtual std::unordered_map<std::string, AttributeVariant> getAttributes() const override;
 
   /**
    * @brief Checks if the given index location (row, column) is a valid index for the

@@ -44,6 +44,14 @@ CSGCartesianLattice::setPitch(const Real pitch)
   _pitch = pitch;
 }
 
+std::unordered_map<std::string, AttributeVariant>
+CSGCartesianLattice::getAttributes() const
+{
+  return {{"nrow", static_cast<unsigned int>(_nrow)},
+          {"ncol", static_cast<unsigned int>(_ncol)},
+          {"pitch", _pitch}};
+}
+
 bool
 CSGCartesianLattice::isValidUniverseMap(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const
