@@ -72,13 +72,28 @@ MFEMProblemSolve::solve()
   _mfem_problem.updateActiveObjects();
 
   if (_mfem_problem.shouldSolve())
+  {
     for (const auto & problem_operator : _problem_operators)
       problem_operator->Solve();
+
+    while (_mfem_problem.useAMR() and applyRefinements())
+    {
+      updateAfterRefinement();
+      // Solve again
+      for (const auto & problem_operator : _problem_operators)
+        problem_operator->Solve();
+    }
+  }
   _mfem_problem.displaceMesh();
 
   // Execute user objects, transfers, and multiapps at timestep end
   _mfem_problem.onTimestepEnd();
   _mfem_problem.execute(EXEC_TIMESTEP_END);
+
+  // Inform objects (e.g aux kernels) that they don't need to update after this point.
+  // H/P-refinement sets this to true
+  _mfem_problem.setMeshChanged(false);
+
   _mfem_problem.execTransfers(EXEC_TIMESTEP_END);
   _mfem_problem.execMultiApps(EXEC_TIMESTEP_END, true);
   _executioner.postSolve();
@@ -94,5 +109,38 @@ MFEMProblemSolve::solve()
   }
 
   return converged;
+}
+
+//! Returns true if we need to solve again
+bool
+MFEMProblemSolve::applyRefinements()
+{
+  bool output = false;
+
+  if (_mfem_problem.usePRefinement())
+  {
+    output = true;
+    _mfem_problem.pRefine();
+  }
+
+  if (_mfem_problem.useHRefinement())
+  {
+    output = true;
+    _mfem_problem.hRefine();
+  }
+
+  return output;
+}
+
+void
+MFEMProblemSolve::updateAfterRefinement()
+{
+  // Update in the mfem problem
+  _mfem_problem.updateAfterRefinement();
+
+  for (const auto & problem_operator : _problem_operators)
+  {
+    problem_operator->SetGridFunctions();
+  }
 }
 #endif
