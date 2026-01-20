@@ -58,11 +58,11 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
   _probabilities.resize(getNumberOfCols());
   if (mode == Sampler::SampleMode::GLOBAL)
   {
-    for (dof_id_type col = 0; col < getNumberOfCols(); ++col)
+    for (const auto col : make_range(getNumberOfCols()))
     {
       std::vector<Real> & local = _probabilities[col];
       local.resize(getNumberOfRows());
-      for (dof_id_type row = 0; row < getNumberOfRows(); ++row)
+      for (const auto row : make_range(getNumberOfRows()))
       {
         const auto lower = row * bin_size;
         const auto upper = (row + 1) * bin_size;
@@ -74,11 +74,11 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
 
   else
   {
-    for (dof_id_type col = 0; col < getNumberOfCols(); ++col)
+    for (const auto col : make_range(getNumberOfCols()))
     {
       std::vector<Real> & local = _probabilities[col];
       local.resize(getNumberOfLocalRows());
-      for (dof_id_type row = getLocalRowBegin(); row < getLocalRowEnd(); ++row)
+      for (const auto row : make_range(getLocalRowBegin(), getLocalRowEnd()))
       {
         const auto lower = row * bin_size;
         const auto upper = (row + 1) * bin_size;
@@ -122,7 +122,7 @@ LatinHypercubeSampler::executeTearDown()
 
   // Advance the per-column bin RNG and shuffle RNG to match sampleSetUp usage.
   const auto shuffle_count = n_rows > 0 ? n_rows - 1 : 0;
-  for (dof_id_type col = 0; col < n_cols; ++col)
+  for (const auto col : make_range(n_cols))
   {
     advanceStatelessGenerator(col, n_rows);
     if (shuffle_count > 0)
@@ -176,7 +176,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
       std::vector<std::size_t> local_sizes;
       comm_ptr->allgather(n_local, local_sizes);
       // Build prefix offsets to map global indices to rank-local indices.
-      for (std::size_t i = 0; i < local_sizes.size() - 1; ++i)
+      for (const auto i : make_range(local_sizes.size() - 1))
         offsets[i + 1] = offsets[i] + local_sizes[i];
     }
 
