@@ -108,7 +108,12 @@ MFEMProblem::execute(const ExecFlagType & exec_type)
 void
 MFEMProblem::setMesh()
 {
-  auto pmesh = mesh().getMFEMParMeshPtr();
+  // TODO: Handle case where _mesh is not an MFEMMesh and we need to
+  // construct the parmesh ourselves.
+  auto * mfem_mesh = dynamic_cast<MFEMMesh *>(&_mesh);
+  mooseAssert(mfem_mesh,
+              "The mesh for an MFEMProblem must be MFEMFileMesh or MFEMMeshGeneratorMesh.");
+  auto pmesh = mfem_mesh->getMFEMParMeshPtr();
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();
@@ -708,7 +713,7 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 
   const auto family = Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family"));
   auto order = static_cast<int>(parameters.get<MooseEnum>("order"));
-  const auto dim = mesh().dimension();
+  const auto dim = mfemParMesh().Dimension();
 
   std::string space;
   int vdim = 1;
@@ -765,9 +770,10 @@ void
 MFEMProblem::displaceMesh()
 {
   // Displace mesh
-  if (mesh().shouldDisplace())
+  if (shouldDisplaceMesh())
   {
-    mesh().displace(cast_ref<mfem::GridFunction const &>(getMeshDisplacementGridFunction()));
+    cast_ref<MFEMMesh &>(_mesh).displace(
+        cast_ref<mfem::GridFunction const &>(getMeshDisplacementGridFunction()));
     // TODO: update FESpaces GridFunctions etc for transient solves
   }
 }
@@ -775,7 +781,8 @@ MFEMProblem::displaceMesh()
 const mfem::ParGridFunction &
 MFEMProblem::getMeshDisplacementGridFunction()
 {
-  return *getGridFunction(mesh().getMeshDisplacementVariable());
+  mooseAssert(shouldDisplaceMesh(), "Mesh displacement is not enabled for this problem.");
+  return *getGridFunction(cast_ref<const MFEMMesh &>(_mesh).getMeshDisplacementVariable());
 }
 
 void
@@ -809,19 +816,11 @@ MFEMProblem::getAuxVariableNames()
   return systemBaseAuxiliary().getVariableNames();
 }
 
-MFEMMesh &
-MFEMProblem::mesh()
+bool
+MFEMProblem::shouldDisplaceMesh() const
 {
-  auto * mfem_mesh = dynamic_cast<MFEMMesh *>(&_mesh);
-  mooseAssert(mfem_mesh,
-              "The mesh for an MFEMProblem must be MFEMFileMesh or MFEMMeshGeneratorMesh.");
-  return *mfem_mesh;
-}
-
-const MFEMMesh &
-MFEMProblem::mesh() const
-{
-  return const_cast<MFEMProblem *>(this)->mesh();
+  const auto * mfem_mesh = dynamic_cast<const MFEMMesh *>(&_mesh);
+  return mfem_mesh && mfem_mesh->shouldDisplace();
 }
 
 void

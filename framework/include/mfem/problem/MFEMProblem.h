@@ -52,12 +52,10 @@ public:
   virtual void syncSolutions(Direction) override {}
 
   /**
-   * Overwritten mesh() method from base MooseMesh to retrieve the correct mesh type, in this case
-   * MFEMMesh.
+   * Provide the underlying MFEM mesh object used by the problem.
    */
-  virtual MFEMMesh & mesh() override;
-  virtual const MFEMMesh & mesh() const override;
-  using ExternalProblem::mesh;
+  mfem::ParMesh & mfemParMesh() { return *(_problem_data.pmesh); }
+  const mfem::ParMesh & mfemParMesh() const { return *(_problem_data.pmesh); }
 
   /**
    * Returns all the variable names from the auxiliary system base. This is helpful in the
@@ -343,6 +341,11 @@ public:
       mooseError("Variable " + var_name +
                  " not found in MFEMProblem real or complex gridfunctions.");
   }
+
+  /**
+   * Returns true if the mesh is an MFEMMesh with mesh displacement enabled.
+   */
+  bool shouldDisplaceMesh() const;
 
   /**
    * Displace the mesh, if mesh displacement is enabled.
