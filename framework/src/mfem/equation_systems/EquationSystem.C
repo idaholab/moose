@@ -367,7 +367,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
-void EquationSystem::ReassembleJacobian()
+void EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs)
 {
   //Reassemble all the Forms
   for (const auto I : index_range(_test_var_names))
@@ -391,7 +391,7 @@ void EquationSystem::ReassembleJacobian()
   //Form the system matrix
   //This uses dummy arguments
   //for the vectors
-  FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
+  FormLinearSystem(_jacobian, x, rhs);
 };
 
 void
@@ -402,67 +402,94 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
+void
+EquationSystem::UpdateJacobian() const
+{
+
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto blf = _blfs.Get(test_var_name);
+    blf->Update();
+    blf->Assemble();
+  }
+
+  // Form off-diagonal blocks
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto test_var_name = _test_var_names.at(i);
+    for (unsigned int j = 0; j < _test_var_names.size(); j++)
+    {
+      auto trial_var_name = _test_var_names.at(j);
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        mblf->Update();
+        mblf->Assemble();
+      }
+    }
+  }
+}
+
 void CopyVec(const mfem::Vector & x, mfem::Vector & y){y = x;};
 
 void
-EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  //Use block vector to update
-  //the grid functions
-  CopyVec(x, _trueBlockSol);
-  for(unsigned I=0; I<_trial_var_names.size(); I++){
-    auto & trial_var_name = _trial_var_names.at(I);
-    _trueBlockSol.GetBlock(I).SyncAliasMemory(_trueBlockSol);
-    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(I)));
+  static_cast<mfem::Vector &>(_trueBlockSol) = sol;
+  for (unsigned int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    _trueBlockSol.GetBlock(i).SyncAliasMemory(_trueBlockSol);
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
 
-  //Check if problem is
-  //non-linear and update
-  //non-linear actions
-  if(_non_linear){
-    _blockResidual = 0.00;
-    for(unsigned I=0; I<_test_var_names.size(); I++){
-      auto test_var_name = _test_var_names.at(I);
+  if (_non_linear)
+  {
+    _blockResidual = 0.0;
+    UpdateJacobian();
 
-      //Bulid the linear forms
-      _lfs.GetShared(test_var_name)->Assemble();
-      _lfs.GetShared(test_var_name)->ParallelAssemble(_blockForces.GetBlock(I));
-      _blockForces.GetBlock(I).SyncAliasMemory(_blockForces);
+    for (unsigned int i = 0; i < _test_var_names.size(); i++)
+    {
+      auto & test_var_name = _test_var_names.at(i);
+      int offset = _blockResidual.GetBlock(i).Size();
+      mfem::Vector b(offset);
 
-      //Build the non-linear actions
-      _nlAs.GetShared(test_var_name)->Assemble();
-      _nlAs.GetShared(test_var_name)->ParallelAssemble(_blockResidual.GetBlock(I));
+      auto lf = _lfs.GetShared(test_var_name);
+      lf->Assemble();
+      lf->ParallelAssemble(b);
+      b.SyncAliasMemory(b);
 
-      //Apply the boundary conditions
-      //and sync the memory
-      _blockResidual.GetBlock(I) = _blockForces.GetBlock(I) - _blockResidual.GetBlock(I);
-      _blockResidual.GetBlock(I).SetSubVector(_ess_tdof_lists.at(I),0.00);
-      _blockResidual.GetBlock(I).SyncAliasMemory(_blockResidual);
+      auto nlf = _nlAs.GetShared(test_var_name);
+      nlf->Assemble();
+      nlf->ParallelAssemble(_blockResidual.GetBlock(i));
+
+      _blockResidual.GetBlock(i) -= b;
+      _blockResidual.GetBlock(i) *= -1;
+
+      _blockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
+      _blockResidual.GetBlock(i).SyncAliasMemory(_blockResidual);
     }
+
+    residual = static_cast<mfem::Vector &>(_blockResidual);
     const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
-    residual =  static_cast<mfem::Vector &>(_blockResidual);
-  }else{
-    _jacobian->Mult(x, _blockResidual);
-    for(unsigned I=0; I<_test_var_names.size(); I++){
-      auto test_var_name = _test_var_names.at(I);
-      _blockResidual.GetBlock(I) = (*_lfs.GetShared(test_var_name)) - _blockResidual.GetBlock(I);
-    }
-    residual =  static_cast<mfem::Vector &>(_blockResidual);
+    residual *= -1.0;
   }
-  x.HostRead();
+  else
+  {
+    residual = 0.0;
+    _jacobian->Mult(sol, residual);
+  }
+
+  sol.HostRead();
   residual.HostRead();
 }
+
+
 
 mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & x) const
 {
-  if(_non_linear)
-  {
-    //Clears the old Jacobian and reassembles
-    //the bilinear and mixed-bilinear forms
-    //then reforms the Jacobian
-    const_cast<EquationSystem *>(this)->ReassembleJacobian();
-  }
   return *_jacobian;
 }
 
