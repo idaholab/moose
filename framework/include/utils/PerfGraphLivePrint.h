@@ -34,15 +34,20 @@ public:
 
 private:
   /**
-   * Print the live message
+   * Print the live message for a single section
+   *
+   * @param section_increment The section increment to print
    */
   void printLiveMessage(PerfGraph::SectionIncrement & section_increment);
 
   /**
-   * Print the stats
+   * Print the stats for a range of sections
+   *
+   * @param section_increment_start The section increment to start from
+   * @param section_increment_finish The section increment to finish with
    */
-  void printStats(PerfGraph::SectionIncrement & section_increment_start,
-                  PerfGraph::SectionIncrement & section_increment_finish);
+  void printStats(const PerfGraph::SectionIncrement & section_increment_start,
+                  const PerfGraph::SectionIncrement & section_increment_finish);
 
   /**
    * Print everything underneath the current top of the stack
@@ -58,6 +63,19 @@ private:
    * What to do if there are new things in the execution list
    */
   void iterateThroughExecutionList();
+
+  /**
+   * Output the given buffer to console now,
+   *
+   * Requires that _console_lock be a lock to the console mutex.
+   */
+  void outputNow(const std::ostringstream & out);
+
+  /**
+   * Format a section message for output
+   */
+  static std::string formatMessage(const PerfGraph::SectionIncrement & section_increment,
+                                   const std::string & message);
 
   /// Number of columns before wrapping
   const unsigned int WRAP_LENGTH = 90;
@@ -99,17 +117,15 @@ private:
   /// entire iteration
   unsigned int _current_execution_list_end;
 
-  /// The actual last entry in the list
-  /// This is useful because it is a circular queue - so this is not just
-  /// end - 1 (although, often it will be)
-  unsigned int _current_execution_list_last;
-
   /// Where the end of the execution list was during the last call
   /// If this == the current_end... then nothing has happened
   unsigned int _last_execution_list_end;
 
   /// Which increment was last printed
-  PerfGraph::SectionIncrement * _last_printed_increment;
+  const PerfGraph::SectionIncrement * _last_printed_increment;
+
+  /// Whether or not the last finished increment finished
+  bool _last_printed_increment_finished;
 
   /// The output count from the console the last time we printed
   unsigned long long int _last_num_printed;
@@ -119,4 +135,11 @@ private:
 
   /// Whether or not the top thing on the stack is set to print dots
   bool _stack_top_print_dots;
+
+  /// Lock for locking console output
+  std::unique_lock<std::mutex> _console_lock;
+
+  /// Output buffer; we need to keep this the same so that OutputWarehouse
+  /// knows that we're writing from the same buffer
+  std::ostringstream _out;
 };
