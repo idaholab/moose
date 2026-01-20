@@ -41,6 +41,6 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
-    max_parallel = 1
+    max_parallel = 1 # idaholab/moose#32250
   []
 []
