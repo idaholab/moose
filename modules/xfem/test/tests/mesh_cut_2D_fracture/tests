@@ -75,4 +75,14 @@
     requirement = 'The XFEM module shall reproduce results from literature of interaction integrals for an '
                   'inclined crack in a plate under a far-field load.'
   []
+  [double_cantilever]
+    issues = '#32187'
+    design = 'growingEdgeCrack.md'
+    type = CSVDiff
+    input = double_cantilever_crack_2d.i
+    csvdiff = 'double_cantilever_crack_2d_out_II_KI_1_0009.csv'
+    # XFEM requires --enable-unique-ids in libmesh
+    capabilities = 'unique_id'
+    requirement = 'The XFEM module shall reproduce published results for a moving crack in a 2D double cantilever beam.'
+  []
 []
