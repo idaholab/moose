@@ -302,6 +302,7 @@ public:
   template <typename LatticeType = CSGLattice>
   const LatticeType & addLattice(std::unique_ptr<LatticeType> lattice)
   {
+    static_assert(std::is_base_of_v<CSGLattice, LatticeType>, "Is not a CSGLattice");
     // make sure all universes are a part of this base instance
     auto universes = lattice->getUniverses();
     for (auto univ_list : universes)
