@@ -15,6 +15,7 @@ from typing import Optional, TYPE_CHECKING
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
 from TestHarness import util
+from TestHarness.mpi_config import MPIConfig, MPIType
 
 # Try to load psutil; not a strict requirement but
 # enables tracking memory
@@ -72,12 +73,22 @@ class SubprocessRunner(Runner):
         # Augment the environment if needed
         process_env = tester.augmentEnvironment(self.options)
 
-        # Special logic for openmpi runs
-        if tester.hasOpenMPI():
-            # Don't clobber state
-            process_env['OMPI_MCA_orte_tmpdir_base'] = self.job.getTempDirectory().name
-            # Allow oversubscription for hosts that don't have a hostfile
-            process_env['PRTE_MCA_rmaps_default_mapping_policy'] = ':oversubscribe'
+        # Special MPI environment options, if not disabled
+        if not self.options.disable_mpi_options:
+            mpi_config: MPIConfig = self.options._mpi_config
+            # OpenMPI
+            if mpi_config.mpi_type == MPIType.OPENMPI:
+                # Don't clobber state
+                process_env["OMPI_MCA_orte_tmpdir_base"] = (
+                    self.job.getTempDirectory().name
+                )
+                # Allow oversubscription for hosts that don't have a hostfile
+                process_env["PRTE_MCA_rmaps_default_mapping_policy"] = ":oversubscribe"
+            # MPICH with hwloc with a prebuilt topology file
+            elif mpi_config.mpi_type == MPIType.MPICH:
+                if mpi_config.hwloc and mpi_config.hwloc_topo_file is not None:
+                    process_env["HWLOC_XMLFILE"] = mpi_config.hwloc_topo_file
+                    process_env["HWLOC_THISSYSTEM"] = "1"
 
         # Add to environment if requested
         if process_env:
@@ -218,9 +229,13 @@ class SubprocessRunner(Runner):
             # For some reason openmpi will append a null character at the end
             # when the exit code is nonzero. Not sure why this is... but remove
             # it until we figure out what's broken
-            if file == self.errfile and self.exit_code != 0 \
-                and self.job.getTester().hasOpenMPI() and len(output) > 2 \
-                and output[-3:] in ['\n\0\n', '\n\x00\n']:
+            if (
+                file == self.errfile
+                and self.exit_code != 0
+                and self.options._mpi_config.mpi_type == MPIType.OPENMPI
+                and len(output) > 2
+                and output[-3:] in ["\n\0\n", "\n\x00\n"]
+            ):
                 output = output[:-3]
 
             self.getRunOutput().appendOutput(output)

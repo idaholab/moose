@@ -10,6 +10,7 @@
 import re, os, shutil
 from Tester import Tester
 from TestHarness import util, TestHarness
+from TestHarness.mpi_config import MPIConfig
 from shlex import quote
 
 class RunApp(Tester):
@@ -171,9 +172,9 @@ class RunApp(Tester):
         if self.specs['no_additional_cli_args']:
             return 1
 
-        #Set number of threads to be used lower bound
+        # Set number of threads to be used lower bound
         nthreads = max(options.nthreads, int(self.specs['min_threads']))
-        #Set number of threads to be used upper bound
+        # Set number of threads to be used upper bound
         nthreads = min(nthreads, int(self.specs['max_threads']))
 
         if nthreads > options.nthreads:
@@ -232,7 +233,7 @@ class RunApp(Tester):
             cmd = os.path.join(specs['test_dir'], specs['executable']) + ' ' + ' '.join(specs['cli_args'])
 
             # Need to run mpiexec with containerized openmpi
-            if options.hpc and self.hasOpenMPI():
+            if options.hpc and options._mpi_config == MPIConfig.OPENMPI:
                 cmd = f'mpiexec -n 1 {cmd}'
 
             return cmd
@@ -316,7 +317,11 @@ class RunApp(Tester):
             command = command + ' --n-threads=' + str(nthreads)
 
         # Force mpi, more than 1 core, or containerized openmpi (requires mpiexec serial)
-        if self.force_mpi or ncpus > 1 or (options.hpc and self.hasOpenMPI()):
+        if (
+            self.force_mpi
+            or ncpus > 1
+            or (options.hpc and options._mpi_config == MPIConfig.OPENMPI)
+        ):
             command = f'{self.mpi_command} -n {ncpus} {command}'
 
         # Arbitrary proxy command, but keep track of the command so that someone could use it later
