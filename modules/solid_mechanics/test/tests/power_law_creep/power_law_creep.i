@@ -20,12 +20,18 @@
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic]
-  [all]
-    strain = FINITE
-    incremental = true
-    add_variables = true
-    generate_output = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
+[Physics]
+
+  [SolidMechanics]
+
+    [QuasiStatic]
+      [all]
+        strain = FINITE
+        incremental = true
+        add_variables = true
+        generate_output = 'stress_yy creep_strain_xx creep_strain_yy creep_strain_zz elastic_strain_yy'
+      []
+    []
   []
 []
 
@@ -99,6 +105,32 @@
     n_exponent = 4
     activation_energy = 3.0e5
     temperature = temp
+    scale_strain_predictor = 1
+    debug_newton_solve_materials = true
+  []
+[]
+
+[Postprocessors]
+  [nl_residual]
+    type = ElementExtremeMaterialProperty
+    mat_prop = nl_residual
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
+  []
+  [nl_iterations]
+    type = ElementExtremeMaterialProperty
+    mat_prop = nl_iterations
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
+  []
+  [effective_creep_strain]
+    type = ElementExtremeMaterialProperty
+    mat_prop = effective_creep_strain
+    value_type = max
+    execute_on = 'NONLINEAR'
+    outputs = csv_out
   []
 []
 
@@ -121,8 +153,16 @@
   end_time = 1.0
   num_steps = 10
   dt = 0.1
+  [Predictor]
+    type = SimplePredictor
+    scale = 1
+  []
 []
 
 [Outputs]
   exodus = true
+  [csv_out]
+    type = CSV
+    execute_on = 'NONLINEAR'
+  []
 []

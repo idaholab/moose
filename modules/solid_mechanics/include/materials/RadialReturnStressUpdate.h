@@ -219,6 +219,18 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
 
+  /// effective inelastic strain rate.
+  /// Using _old*_dt value as strain increment predictor
+  MaterialProperty<Real> & _effective_inelastic_strain_rate;
+  const MaterialProperty<Real> & _effective_inelastic_strain_rate_old;
+
+  /// For outputting material nonlinear iterations
+  /// this is Real instead of unsigned int to allow for output with materialRealAux
+  MaterialProperty<Real> * _nl_iterations;
+
+  /// For outputting material nonlinear residual
+  MaterialProperty<Real> * _nl_residual;
+
   /// Stores the scalar effective inelastic strain increment from Newton iteration
   GenericReal<is_ad> _effective_inelastic_strain_increment;
 
@@ -264,6 +276,9 @@ protected:
 
   /// original timestep (to be restored after substepping is completed)
   Real _dt_original;
+
+  /// amount to scale the effective strain increment from the previous time step to use as a predictor
+  const Real _scale_strain_predictor;
 };
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;

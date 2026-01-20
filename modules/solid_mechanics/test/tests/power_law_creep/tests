@@ -77,6 +77,13 @@
       exodiff = 'smallstrain_out.e'
       detail = 'that works with a small strain formulation.'
     []
+    [strain_predictor]
+      type = 'CSVDiff'
+      input = 'power_law_creep.i'
+      cli_args = "Materials/power_law_creep/scale_strain_predictor=1"
+      csvdiff = power_law_creep_csv_out.csv
+      detail = 'that uses the previous nonlinear solves inelastic strain increment to speed up convergence.'
+    []
   []
   [ad]
     issues = '#8642'
