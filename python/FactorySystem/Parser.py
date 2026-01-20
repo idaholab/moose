@@ -99,12 +99,12 @@ class Parser:
             if params.type(key) == list:
                 if isinstance(value, str):
                     value = value.replace('\n', ' ')
-                    params[key] = re.split(r'\s+', value)
+                    params.setParamByUser(key, re.split(r'\s+', value))
                 else:
-                    params[key] = [str(value)]
+                    params.setParamByUser(key, [str(value)])
             else:
                 if isinstance(value, str) and re.match('".*"', value):   # Strip quotes
-                    params[key] = value[1:-1]
+                    params.setParamByUser(key, value[1:-1])
                 else:
                     if key in params.strict_types:
                         # The developer wants to enforce a specific type without setting a valid value
@@ -113,7 +113,7 @@ class Parser:
                         if strict_type == time.struct_time:
                             # Dates have to be parsed
                             try:
-                                params[key] = time.strptime(value, "%m/%d/%Y")
+                                params.setParamByUser(key, time.strptime(value, "%m/%d/%Y"))
                             except ValueError:
                                 self.error("invalid date value: '{}=\"{}\"'".format(child.fullpath, value), node=child)
                                 have_err = True
@@ -122,7 +122,7 @@ class Parser:
                             have_err = True
                     else:
                         # Otherwise, just do normal assignment
-                        params[key] = value
+                        params.setParamByUser(key, value)
 
         if have_err:
             params['_have_parse_errors'] = True
