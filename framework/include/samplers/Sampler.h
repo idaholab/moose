@@ -195,11 +195,30 @@ protected:
    */
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
+  /**
+   * Return the n-th random number from the stateless generator for a given seed index.
+   * @param n Zero-based index into the stateless random sequence
+   * @param index The stateless generator index (seed), defaults to zero
+   */
   Real getRandStateless(std::size_t n, unsigned int index = 0) const;
+
+  /**
+   * Return the n-th bounded integer random number from the stateless generator.
+   * @param n Zero-based index into the stateless random sequence
+   * @param lower Lower bound (inclusive)
+   * @param upper Upper bound (exclusive)
+   * @param index The stateless generator index (seed), defaults to zero
+   */
   unsigned int getRandlStateless(std::size_t n,
                                  unsigned int lower,
                                  unsigned int upper,
                                  unsigned int index = 0) const;
+
+  /**
+   * Advance the stateless generator by a fixed count.
+   * @param index The stateless generator index (seed)
+   * @param count Number of RNG calls to skip
+   */
   void advanceStatelessGenerator(unsigned int index, std::size_t count);
 
   /**

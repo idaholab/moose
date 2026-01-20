@@ -35,15 +35,20 @@ public:
   dof_id_type getNumParallelProposals() const { return _num_parallel_proposals; }
 
 protected:
-  /// Gather all the samples
+  /**
+   * Gather all the samples, including stateless RNG proposals.
+   */
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-  /// Return the sample for the given row and column
+  /**
+   * Return the sample for the given row and column.
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /**
    * Fill in the provided vector with random samples given the distributions
    * @param vector The vector to be filled
    * @param seed_value The seed value to generate random numbers
+   * @param rn_ind The stateless RNG index to advance
    */
   virtual void
   fillVector(std::vector<Real> & vector, const unsigned int & seed_value, std::size_t & rn_ind);

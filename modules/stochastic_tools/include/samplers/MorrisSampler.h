@@ -45,6 +45,11 @@ private:
    * This is only called once per trajectory (_n_rows / (_n_cols + 1))
    */
   void updateBstar();
+
+  /**
+   * Stateless RNG variant of updateBstar().
+   * Computes the same trajectory data using stateless random draws.
+   */
   void updateBstarStateless();
 
   /// The trajectory the current _bstar represents

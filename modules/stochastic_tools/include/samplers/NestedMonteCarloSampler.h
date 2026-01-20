@@ -22,7 +22,9 @@ public:
   NestedMonteCarloSampler(const InputParameters & parameters);
 
 protected:
-  /// Return the sample for the given row and column
+  /**
+   * Return the sample for the given row and column using stateless RNG indexing.
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /// Storage for distribution objects to be utilized
