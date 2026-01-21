@@ -160,6 +160,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_dirac_kernel",             VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,                  false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,                  false);
+  registerMooseObjectTask("add_interpolation_method",     FVInterpolationMethod,     false);
   registerMooseObjectTask("add_linear_fv_kernel",         LinearFVKernel,            false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,       false);
   registerMooseObjectTask("add_linear_fv_bc",             LinearFVBoundaryCondition, false);
@@ -409,7 +410,8 @@ addActionTypes(Syntax & syntax)
                            "(add_reporter)"
                            "(declare_late_reporters)"
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel,"
-                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_linear_fv_kernel,"
+                           " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_interpolation_method,"
+                           " add_linear_fv_kernel,"
                            " add_fv_bc, add_linear_fv_bc, add_fv_ik, add_interface_kernel,"
                            " add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker,"
                            " add_bound, add_hybridized_kernel, add_hybridized_integrated_bc)"
@@ -478,6 +480,9 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_solver", "add_mfem_preconditioner");
   addTaskDependency("add_mfem_solver", "add_mfem_problem_operator");
 #endif
+
+  // Linear FV kernels fetch FVInterpolationMethod instances in their constructors
+  addTaskDependency("add_linear_fv_kernel", "add_interpolation_method");
 
   registerTask("parse_neml2", /*required=*/false);
   addTaskDependency("add_material", "parse_neml2");
@@ -696,6 +701,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // UserObject and some derived classes
   registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
+  registerSyntax("AddFVInterpolationMethodAction", "InterpolationMethods/*");
+  syntax.registerSyntaxType("InterpolationMethods/*", "InterpolationMethodName");
+  registerSyntax("AddFVInterpolationMethodAction", "FVInterpolationMethods/*");
+  syntax.registerSyntaxType("FVInterpolationMethods/*", "InterpolationMethodName");
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
   registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");

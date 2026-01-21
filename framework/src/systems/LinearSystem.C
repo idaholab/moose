@@ -16,6 +16,7 @@
 #include "ParallelUniqueId.h"
 #include "ComputeLinearFVGreenGaussGradientFaceThread.h"
 #include "ComputeLinearFVGreenGaussGradientVolumeThread.h"
+#include "ComputeLinearFVLimitedGradientThread.h"
 #include "ComputeLinearFVElementalThread.h"
 #include "ComputeLinearFVFaceThread.h"
 #include "DisplacedProblem.h"
@@ -38,6 +39,7 @@
 #include "LinearFVFluxKernel.h"
 #include "LinearFVElementalKernel.h"
 #include "LinearFVBoundaryCondition.h"
+#include "GradientLimiterType.h"
 
 // libMesh
 #include "libmesh/linear_solver.h"
@@ -217,6 +219,47 @@ LinearSystem::computeGradients()
     _new_gradient[i]->close();
     _raw_grad_container[i] = std::move(_new_gradient[i]);
   }
+
+  // Compute any requested limited gradients using the newly updated raw gradients.
+  if (!requestedLimitedGradientTypes().empty())
+  {
+    using ElemInfoRange = StoredRange<MooseMesh::const_elem_info_iterator, const ElemInfo *>;
+    ElemInfoRange elem_info_range(_fe_problem.mesh().ownedElemInfoBegin(),
+                                  _fe_problem.mesh().ownedElemInfoEnd());
+
+    for (const auto limiter_type : requestedLimitedGradientTypes())
+    {
+      if (limiter_type == Moose::FV::GradientLimiterType::None)
+        continue;
+
+      auto & new_container = _new_limited_gradient[limiter_type];
+      new_container.clear();
+      for (const auto i : make_range(_fe_problem.mesh().dimension()))
+      {
+        libmesh_ignore(i);
+        new_container.push_back(currentSolution()->zero_clone());
+      }
+
+      PARALLEL_TRY
+      {
+        ComputeLinearFVLimitedGradientThread limited_gradient_thread(
+            _fe_problem, _fe_problem.linearSysNum(name()), limiter_type);
+        Threads::parallel_reduce(elem_info_range, limited_gradient_thread);
+      }
+      PARALLEL_CATCH;
+
+      for (auto & vec : new_container)
+        vec->close();
+
+      _raw_limited_grad_containers[limiter_type] = std::move(new_container);
+    }
+  }
+}
+
+std::vector<std::unique_ptr<NumericVector<Number>>> &
+LinearSystem::newLimitedGradientContainer(const Moose::FV::GradientLimiterType limiter_type)
+{
+  return _new_limited_gradient[limiter_type];
 }
 
 void
