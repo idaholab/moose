@@ -27,28 +27,27 @@ NEML2_LIB_DIR 	 := $(NEML2_DIR)/lib
 else
 $(error Failed to find NEML2 libraries in $(NEML2_DIR)/lib)
 endif
-NEML2_LIBS       := neml2_base$(NEML2_SUFFIX) \
+NEML2_LIBS       := neml2${NEML2_SUFFIX} \
+										neml2_base$(NEML2_SUFFIX) \
 									  neml2_dispatcher$(NEML2_SUFFIX) \
 										neml2_driver$(NEML2_SUFFIX) \
-										neml2_jit$(NEML2_SUFFIX) \
 										neml2_misc$(NEML2_SUFFIX) \
 										neml2_model$(NEML2_SUFFIX) \
 										neml2_solver$(NEML2_SUFFIX) \
 										neml2_tensor$(NEML2_SUFFIX) \
 										neml2_user_tensor$(NEML2_SUFFIX)
-NEML2_LINK_FLAGS := $(addprefix -l,$(NEML2_LIBS))
+NEML2_LIBS       := $(addprefix -l,$(NEML2_LIBS))
 NEML2_LIB_FILES  := $(addprefix $(NEML2_LIB_DIR)/lib,$(addsuffix .$(DYLIB_SUFFIX),$(NEML2_LIBS)))
 
 # Compile flags for NEML2
 neml2_INCLUDES    += $(addprefix -iquote,$(NEML2_INCLUDE))
 neml2_CPPFLAGS    += -DNEML2_ENABLED
-ifeq ($(HAVE_NO_AS_NEEDED),yes)
-  neml2_LDFLAGS += $(NO_AS_NEEDED_FLAG)
-endif
-neml2_LDFLAGS     += -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR) $(NEML2_LINK_FLAGS)
+neml2_LDFLAGS     += -Wl,-rpath,$(NEML2_LIB_DIR) -L$(NEML2_LIB_DIR)
+neml2_LIBS        += $(NEML2_LIBS)
 libmesh_CXXFLAGS  += $(neml2_CPPFLAGS)
 libmesh_INCLUDE   += $(neml2_INCLUDES)
-libmesh_LIBS      += $(neml2_LDFLAGS)
+libmesh_LDFLAGS   += $(neml2_LDFLAGS)
+libmesh_LIBS      += $(neml2_LIBS)
 
 endif
 
@@ -63,6 +62,7 @@ ifeq ($(ENABLE_NEML2),true)
 	@echo "NEML2 cppflags: $(neml2_CPPFLAGS)"
 	@echo "NEML2 includes: $(neml2_INCLUDES)"
 	@echo "NEML2 ldflags: $(neml2_LDFLAGS)"
+	@echo "NEML2 libs: $(neml2_LIBS)"
 else
 	@echo "NEML2 is disabled"
 endif
