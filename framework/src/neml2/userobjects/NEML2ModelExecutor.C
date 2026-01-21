@@ -165,6 +165,15 @@ NEML2ModelExecutor::initialSetup()
           "Therefore, there is no way to properly propagate the corresponding stateful data in "
           "time. The common solution to this problem is to add a NEML2ToMOOSE retriever such as "
           "those called `NEML2To*MOOSEMaterialProperty`.");
+
+  // check if the model has state/old_state
+  for (const auto & [vname, var] : model().input_variables())
+  {
+    if (vname.is_state())
+      _has_state = true;
+    if (vname.is_old_state())
+      _has_old_state = true;
+  }
 }
 
 std::size_t
@@ -278,9 +287,7 @@ NEML2ModelExecutor::applyPredictor()
 {
   try
   {
-    if (!model().input_axis().has_state())
-      return;
-    if (!model().input_axis().has_old_state())
+    if (!_has_state || !_has_old_state)
       return;
 
     // Set trial state variables (i.e., initial guesses).
@@ -307,12 +314,12 @@ NEML2ModelExecutor::expandInputs()
   std::vector<neml2::Tensor> defined;
   for (const auto & [key, value] : _in)
     defined.push_back(value);
-  const auto batch_shape = neml2::utils::broadcast_batch_sizes(defined);
+  const auto s = neml2::utils::broadcast_dynamic_sizes(defined);
 
   // Make all inputs conformal
   for (auto & [key, value] : _in)
-    if (value.batch_sizes() != batch_shape)
-      _in[key] = value.batch_unsqueeze(0).batch_expand(batch_shape);
+    if (value.dynamic_sizes() != s)
+      _in[key] = value.dynamic_unsqueeze(0).dynamic_expand(s);
 }
 
 bool
@@ -380,7 +387,7 @@ NEML2ModelExecutor::extractOutputs()
       {
         const auto & source = _dout_din[y][x];
         if (source.defined())
-          target = source.to(output_device()).batch_expand({neml2::Size(N)});
+          target = source.to(output_device()).dynamic_expand({neml2::Size(N)});
       }
 
     // clear derivatives
