@@ -7,33 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-/*
-Everything goes in this header for now!!
-
-*/
-
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMKernel.h"
-
-class MFEMDGKernel : public MFEMKernel {
-public:
-  MFEMDGKernel(const InputParameters & parameters);
-protected:
-  int _fe_order;
-  mfem::ConstantCoefficient _one;
-  mfem::ConstantCoefficient _zero;
-};
-
-// all this class needs to do differently is to implement createDGBFIntegrator
-class MFEMDGDiffusionKernel : public MFEMDGKernel
-{
-public:
-  MFEMDGDiffusionKernel(const InputParameters & parameters);
-
-  virtual mfem::BilinearFormIntegrator * createDGBFIntegrator() override;
-};
 
 // all this class needs to do differently is to implement createDGLFIntegrator
 class MFEMDGDirichletLFKernel : public MFEMDGKernel
@@ -42,6 +18,5 @@ public:
   MFEMDGDirichletLFKernel(const InputParameters & parameters);
   virtual mfem::LinearFormIntegrator * createDGLFIntegrator() override;
 };
-
 
 #endif
