@@ -13,6 +13,9 @@
 #include "TwoVector.h"
 
 #include "nlohmann/json.h"
+
+#include <variant>
+
 #include "libmesh/libmesh_common.h"
 #include "Eigen/Core"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
@@ -20,6 +23,21 @@
 #include <memory>
 
 class MooseApp;
+
+/**
+ * Type definition for a variant that can hold all the supported types for lattice attributes
+ */
+typedef std::variant<int,
+                     unsigned int,
+                     std::string,
+                     Real,
+                     bool,
+                     std::vector<int>,
+                     std::vector<unsigned int>,
+                     std::vector<std::string>,
+                     std::vector<Real>,
+                     std::vector<bool>>
+    AttributeVariant;
 
 namespace libMesh
 {
@@ -54,6 +72,16 @@ void to_json(nlohmann::json & json,
 
 namespace nlohmann
 {
+// Serializer for AttributeVariant
+template <>
+struct adl_serializer<AttributeVariant>
+{
+  static void to_json(json & j, const AttributeVariant & data)
+  {
+    std::visit([&j](const auto & value) { j = value; }, data);
+  }
+};
+
 template <typename T>
 struct adl_serializer<std::unique_ptr<T>>
 {

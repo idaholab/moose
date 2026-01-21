@@ -1,44 +1,106 @@
 {
   "cells": {
-    "cell_inner_copy_1": {
+    "cell_inner1_copy_1": {
       "fill": "mat1",
       "filltype": "CSG_MATERIAL",
       "region": "-inner_surf"
     },
-    "cell_inner_copy_2": {
+    "cell_inner1_copy_2": {
       "fill": "mat1",
       "filltype": "CSG_MATERIAL",
       "region": "-inner_surf"
+    },
+    "cell_inner2_copy_1": {
+      "fill": "mat2",
+      "filltype": "CSG_MATERIAL",
+      "region": "+inner_surf"
+    },
+    "cell_inner2_copy_2": {
+      "fill": "mat2",
+      "filltype": "CSG_MATERIAL",
+      "region": "+inner_surf"
+    },
+    "cell_lat_fill_copy_1": {
+      "fill": "cartesian_lat_copy_1",
+      "filltype": "LATTICE",
+      "region": "-lattice_surf"
+    },
+    "cell_lat_fill_copy_2": {
+      "fill": "cartesian_lat_copy_2",
+      "filltype": "LATTICE",
+      "region": "-lattice_surf"
     },
     "cell_outer_copy_1": {
-      "fill": "mat2",
+      "fill": "mat3",
       "filltype": "CSG_MATERIAL",
-      "region": "+inner_surf"
+      "region": "+outer_surf"
     },
     "cell_outer_copy_2": {
-      "fill": "mat2",
+      "fill": "mat3",
       "filltype": "CSG_MATERIAL",
-      "region": "+inner_surf"
+      "region": "+outer_surf"
     },
     "cell_univ_fill_copy_1": {
-      "fill": "inner_univ",
+      "fill": "nested_inner_univ_copy_1",
       "filltype": "UNIVERSE",
       "region": "-outer_surf"
     },
     "cell_univ_fill_copy_2": {
-      "fill": "inner_univ",
+      "fill": "nested_inner_univ_copy_2",
       "filltype": "UNIVERSE",
       "region": "-outer_surf"
     },
     "cell_void_copy_1": {
       "fill": "",
       "filltype": "VOID",
-      "region": "+outer_surf"
+      "region": "+lattice_surf"
     },
     "cell_void_copy_2": {
       "fill": "",
       "filltype": "VOID",
-      "region": "+outer_surf"
+      "region": "+lattice_surf"
+    }
+  },
+  "lattices": {
+    "cartesian_lat_copy_1": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 10.0
+      },
+      "outer": "lattice_outer_copy_1",
+      "outertype": "UNIVERSE",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "nested_outer_univ_copy_1",
+          "nested_outer_univ_copy_1"
+        ],
+        [
+          "nested_outer_univ_copy_1",
+          "nested_outer_univ_copy_1"
+        ]
+      ]
+    },
+    "cartesian_lat_copy_2": {
+      "attributes": {
+        "ncol": 2,
+        "nrow": 2,
+        "pitch": 10.0
+      },
+      "outer": "lattice_outer_copy_2",
+      "outertype": "UNIVERSE",
+      "type": "CSG::CSGCartesianLattice",
+      "universes": [
+        [
+          "nested_outer_univ_copy_2",
+          "nested_outer_univ_copy_2"
+        ],
+        [
+          "nested_outer_univ_copy_2",
+          "nested_outer_univ_copy_2"
+        ]
+      ]
     }
   },
   "surfaces": {
@@ -54,6 +116,24 @@
     "inner_surf_copy_2": {
       "coefficients": {
         "r": 3.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "type": "CSG::CSGSphere"
+    },
+    "lattice_surf_copy_1": {
+      "coefficients": {
+        "r": 10.0,
+        "x0": 0.0,
+        "y0": 0.0,
+        "z0": 0.0
+      },
+      "type": "CSG::CSGSphere"
+    },
+    "lattice_surf_copy_2": {
+      "coefficients": {
+        "r": 10.0,
         "x0": 0.0,
         "y0": 0.0,
         "z0": 0.0
@@ -82,22 +162,40 @@
   "universes": {
     "ROOT_UNIVERSE": {
       "cells": [
-        "cell_univ_fill_copy_1",
+        "cell_lat_fill_copy_1",
         "cell_void_copy_1",
-        "cell_univ_fill_copy_2",
+        "cell_lat_fill_copy_2",
         "cell_void_copy_2"
       ],
       "root": true
     },
-    "inner_univ_copy_1": {
+    "lattice_outer_copy_1": {
+      "cells": null
+    },
+    "lattice_outer_copy_2": {
+      "cells": null
+    },
+    "nested_inner_univ_copy_1": {
       "cells": [
-        "cell_inner_copy_1",
+        "cell_inner1_copy_1",
+        "cell_inner2_copy_1"
+      ]
+    },
+    "nested_inner_univ_copy_2": {
+      "cells": [
+        "cell_inner1_copy_2",
+        "cell_inner2_copy_2"
+      ]
+    },
+    "nested_outer_univ_copy_1": {
+      "cells": [
+        "cell_univ_fill_copy_1",
         "cell_outer_copy_1"
       ]
     },
-    "inner_univ_copy_2": {
+    "nested_outer_univ_copy_2": {
       "cells": [
-        "cell_inner_copy_2",
+        "cell_univ_fill_copy_2",
         "cell_outer_copy_2"
       ]
     }

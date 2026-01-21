@@ -55,6 +55,14 @@ CSGCellList::addUniverseCell(const std::string & name,
   return addCell(std::make_unique<CSGCell>(name, &univ, region));
 }
 
+CSGCell &
+CSGCellList::addLatticeCell(const std::string & name,
+                            const CSGLattice & lattice,
+                            const CSGRegion & region)
+{
+  return addCell(std::make_unique<CSGCell>(name, &lattice, region));
+}
+
 std::vector<std::reference_wrapper<const CSGCell>>
 CSGCellList::getAllCells() const
 {
