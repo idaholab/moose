@@ -17,8 +17,8 @@ class EulerAngleProvider;
 
 /**
  *  BlockOrientationVectorPostprocessor is a VectorPostprocessor that outputs the
- *  the coordinates, block id, and Euler Angles associated with each element from a EulerAngleProvider.
- *  Currently only works with a uniform, structured grid (no mesh adaptivity).
+ *  the coordinates, block id, and Euler Angles associated with each element from a
+ * EulerAngleProvider. Currently only works with a uniform, structured grid (no mesh adaptivity).
  */
 class BlockOrientationVectorPostprocessor : public ElementVectorPostprocessor, public SamplerBase
 {

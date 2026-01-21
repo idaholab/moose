@@ -18,13 +18,16 @@ BlockOrientationVectorPostprocessor::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
   params += SamplerBase::validParams();
-  params.addRequiredParam<UserObjectName>("euler_angle_provider",
-                                          "The EulerAngleProvider user object that provides Euler angle values in degrees.");
-  params.addClassDescription("This object outputs the coordinates, block id, and Euler Angles (degrees) associated with each element from a EulerAngleProvider.");
+  params.addRequiredParam<UserObjectName>(
+      "euler_angle_provider",
+      "The EulerAngleProvider user object that provides Euler angle values in degrees.");
+  params.addClassDescription("This object outputs the coordinates, block id, and Euler Angles "
+                             "(degrees) associated with each element from a EulerAngleProvider.");
   return params;
 }
 
-BlockOrientationVectorPostprocessor::BlockOrientationVectorPostprocessor(const InputParameters & parameters)
+BlockOrientationVectorPostprocessor::BlockOrientationVectorPostprocessor(
+    const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     SamplerBase(parameters, this, _communicator),
     _euler(getUserObject<EulerAngleProvider>("euler_angle_provider")),
@@ -48,17 +51,16 @@ BlockOrientationVectorPostprocessor::initialize()
 void
 BlockOrientationVectorPostprocessor::execute()
 {
-    auto sid = _current_elem->subdomain_id();
-    _sample[0] = sid;
+  auto sid = _current_elem->subdomain_id();
+  _sample[0] = sid;
 
-    const EulerAngles & angle = _euler.getEulerAngles(sid);
-    _sample[1] = angle.phi1;
-    _sample[2] = angle.Phi;
-    _sample[3] = angle.phi2;
-    SamplerBase::addSample(_current_elem->vertex_average() /* x,y,z coordinates of elem centroid */,
+  const EulerAngles & angle = _euler.getEulerAngles(sid);
+  _sample[1] = angle.phi1;
+  _sample[2] = angle.Phi;
+  _sample[3] = angle.phi2;
+  SamplerBase::addSample(_current_elem->vertex_average() /* x,y,z coordinates of elem centroid */,
                          _current_elem->id(),
                          _sample);
-
 }
 
 void

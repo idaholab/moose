@@ -69,7 +69,8 @@ ComputeBlockOrientationByMisorientation::execute()
 
   // store value for the current misorientation in the subdomain
   // save EulerAngle in tuple so that we can gather the data from all processors
-  _grain_misorientation[_current_elem->subdomain_id()].emplace_back(misorient, ea.phi1, ea.Phi, ea.phi2);
+  _grain_misorientation[_current_elem->subdomain_id()].emplace_back(
+      misorient, ea.phi1, ea.Phi, ea.phi2);
 }
 
 void
