@@ -17,6 +17,7 @@
 
 #ifdef NEML2_ENABLED
 #include <ATen/Parallel.h>
+#include "neml2/neml2.h"
 #include "neml2/models/Model.h"
 #include "neml2/dispatchers/WorkScheduler.h"
 #include "neml2/dispatchers/WorkDispatcher.h"

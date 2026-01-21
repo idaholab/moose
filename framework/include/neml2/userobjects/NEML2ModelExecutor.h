@@ -124,6 +124,12 @@ protected:
   mutable std::map<neml2::VariableName, std::map<std::string, neml2::Tensor>>
       _retrieved_parameter_derivatives;
 
+  /// Whether the model has any state variable
+  bool _has_state = false;
+
+  /// Whether the model has any old state variable
+  bool _has_old_state = false;
+
 private:
   /// Whether an error was encountered
   bool _error;
