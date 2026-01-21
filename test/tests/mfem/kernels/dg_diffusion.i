@@ -2,7 +2,6 @@
   type = MFEMMesh
   file = ../mesh/star.mesh
   dim = 2
-  uniform_refine = 6
 []
 
 [Problem]
@@ -27,22 +26,32 @@
 []
 
 [Kernels]
-  [dg_diff]
-    type = MFEMDGDiffusionKernel
+  [diff]
+    type = MFEMDiffusionKernel
     variable = concentration
   []
   [dg_diff_domain]
     type = MFEMDomainLFKernel
     variable = concentration
   []
-  [dg_diff_bdr]
+[]
+
+[DGKernels]
+  [dg_diff]
+    type = MFEMDGDiffusionKernel
+    variable = concentration
+  []
+[]
+
+[DGBoundaryConditions]
+  [dg_diff_lf_bc]
     type = MFEMDGDirichletLFKernel
     variable = concentration
   []
-  [diff]
-    type = MFEMDiffusionKernel
-    variable = concentration
-  []
+#  [dg_diff_bc]
+#    type = MFEMDGDiffusionKernel
+#    variable = concentration
+#  []
 []
 
 [Preconditioner]
