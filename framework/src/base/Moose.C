@@ -440,6 +440,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
   addTaskDependency("add_bc", "add_mfem_problem_operator");
   addTaskDependency("add_kernel", "add_mfem_problem_operator");
+  addTaskDependency("add_dg_kernel", "add_mfem_problem_operator");
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
@@ -456,6 +457,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_aux_variable", "add_mfem_fespaces");
   addTaskDependency("add_elemental_field_variable", "add_mfem_fespaces");
   addTaskDependency("add_kernel", "add_mfem_fespaces");
+  addTaskDependency("add_dg_kernel", "add_mfem_fespaces");
 
   // add complex kernels
   registerMooseObjectTask("add_mfem_complex_kernel_components", Kernel, false);
@@ -464,6 +466,10 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_complex_bc_components", "add_mfem_fespaces");
   addTaskDependency("add_mfem_complex_kernel_components", "add_kernel");
   addTaskDependency("add_mfem_complex_bc_components", "add_bc");
+
+  // add DG boundary conditions
+  registerMooseObjectTask("add_mfem_dg_bc", MFEMDGKernel, false);
+  addTaskDependency("add_mfem_dg_bc", "add_bc");
 
   // set mesh FE space
   registerTask("set_mesh_fe_space", true);
@@ -748,6 +754,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
       "AddMFEMComplexBCComponentAction", "BCs/*/*", "add_mfem_complex_bc_components");
   registerSyntaxTask("AddMFEMPreconditionerAction", "Preconditioner/*", "add_mfem_preconditioner");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
+  registerSyntax("AddMFEMDGBoundaryConditions", "DGBoundaryConditions/*");
+  registerSyntaxTask("AddMFEMDGBoundaryConditions", "DGBoundaryConditions/*", "add_mfem_dg_bc");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");

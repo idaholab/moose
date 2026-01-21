@@ -283,24 +283,7 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   FEProblemBase::addUserObject(kernel_name, name, parameters);
   const UserObject * kernel_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMDGKernel*>(kernel_uo)!=nullptr) {
-    auto object_ptr = getUserObject<MFEMDGKernel>(name).getSharedPtr();
-    auto kernel = std::dynamic_pointer_cast<MFEMDGKernel>(object_ptr);
-    auto eqsys =
-        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
-
-    if (eqsys)
-    {
-      eqsys->AddDGKernel(std::move(kernel));
-    }
-    else
-    {
-      mooseError("Cannot add kernel with name '" + name +
-                 "' because there is no corresponding equation system.");
-    }
-  }
-
-  else if (dynamic_cast<const MFEMKernel *>(kernel_uo) != nullptr)
+  if (dynamic_cast<const MFEMKernel *>(kernel_uo) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMKernel>(object_ptr);
@@ -327,6 +310,68 @@ MFEMProblem::addKernel(const std::string & kernel_name,
   else
   {
     mooseError("Unsupported kernel of type '", kernel_name, "' and name '", name, "' detected.");
+  }
+}
+
+void
+MFEMProblem::addDGKernel(const std::string & kernel_name,
+                         const std::string & name,
+                         InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(kernel_name, name, parameters);
+  const UserObject * kernel_uo = &(getUserObjectBase(name));
+
+  if (dynamic_cast<const MFEMDGKernel*>(kernel_uo)!=nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMDGKernel>(name).getSharedPtr();
+    auto kernel = std::dynamic_pointer_cast<MFEMDGKernel>(object_ptr);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+
+    if (eqsys)
+    {
+      eqsys->AddDGKernel(std::move(kernel));
+    }
+    else
+    {
+      mooseError("Cannot add kernel with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+  else
+  {
+    mooseError("Unsupported kernel of type '", kernel_name, "' and name '", name, "' detected.");
+  }
+}
+
+void
+MFEMProblem::addDGBoundaryCondition(const std::string & bc_name,
+                                    const std::string & name,
+                                    InputParameters & parameters)
+{
+  FEProblemBase::addUserObject(bc_name, name, parameters);
+  const UserObject * bc_uo = &(getUserObjectBase(name));
+
+  if (dynamic_cast<const MFEMDGKernel*>(bc_uo)!=nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMDGKernel>(name).getSharedPtr();
+    auto kernel = std::dynamic_pointer_cast<MFEMDGKernel>(object_ptr);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
+    if (eqsys)
+    {
+      eqsys->AddDGBC(std::move(kernel));
+    }
+    else
+    {
+      mooseError("Cannot add kernel with name '" + name +
+                 "' because there is no corresponding equation system.");
+    }
+  }
+  else
+  {
+    mooseError("Unsupported bc of type '", bc_name, "' and name '", name, "' detected.");
+
   }
 }
 

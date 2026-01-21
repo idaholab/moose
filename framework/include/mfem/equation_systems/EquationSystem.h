@@ -39,6 +39,7 @@ public:
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddDGKernel(std::shared_ptr<MFEMDGKernel> kernel);
+  virtual void AddDGBC(std::shared_ptr<MFEMDGKernel> bc);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
@@ -154,8 +155,21 @@ protected:
       std::shared_ptr<FormType> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & kernels_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
+
+  template <class FormType>
+  void ApplyBoundaryDGBLFIntegrators(
+      const std::string & trial_var_name,
+      const std::string & test_var_name,
+      std::shared_ptr<FormType> form,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & kernels_map,
+      std::optional<mfem::real_t> scale_factor = std::nullopt);
   
   void ApplyDomainDGLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & kernels_map);
+  
+  void ApplyBoundaryDGLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & kernels_map);
@@ -194,6 +208,7 @@ protected:
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _kernels_map;
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> _dg_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> _dg_bc_map;
   /// Arrays to store integrated BCs to act on each component of weak form.
   /// Named according to test and trial variables.
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> _integrated_bc_map;
@@ -337,13 +352,50 @@ EquationSystem::ApplyDomainDGBLFIntegrators(
         mooseAssert( !kernel->isSubdomainRestricted(), "AddInteriorFaceIntegrator doesn't have an overload for this case " );
         form->AddInteriorFaceIntegrator(std::move(integ));
       }
-      
-      // let's go crazy here and just add in the other call as well. Really this should be in its own method,
-      // but we just wanna get the diffusion example working
-      mfem::BilinearFormIntegrator * face_integ = kernel->createDGBFIntegrator();
+    }
+  }
+}
+
+template <class FormType>
+void
+EquationSystem::ApplyBoundaryDGBLFIntegrators(
+    const std::string & trial_var_name,
+    const std::string & test_var_name,
+    std::shared_ptr<FormType> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & bc_map,
+    std::optional<mfem::real_t> /*scale_factor*/)
+{
+  if (bc_map.Has(test_var_name) && bc_map.Get(test_var_name)->Has(trial_var_name))
+  {
+    auto bcs = bc_map.GetRef(test_var_name).GetRef(trial_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::BilinearFormIntegrator * face_integ = bc->createDGBFIntegrator();
       if (face_integ != nullptr)
       {
         form->AddBdrFaceIntegrator(std::move(face_integ));
+      }
+    }
+  }
+}
+
+inline void
+EquationSystem::ApplyBoundaryDGLFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & bc_map)
+{
+  if (bc_map.Has(test_var_name) && bc_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto bcs = bc_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::LinearFormIntegrator * integ = bc->createDGLFIntegrator();
+      if (integ != nullptr)
+      {
+        bc->isSubdomainRestricted()
+            ? form->AddBdrFaceIntegrator(std::move(integ), bc->getSubdomainMarkers())
+            : form->AddBdrFaceIntegrator(std::move(integ));
       }
     }
   }
@@ -363,14 +415,12 @@ EquationSystem::ApplyDomainDGLFIntegrators(
       mfem::LinearFormIntegrator * integ = kernel->createDGLFIntegrator();
       if (integ != nullptr)
       {
-        kernel->isSubdomainRestricted()
-            ? form->AddBdrFaceIntegrator(std::move(integ), kernel->getSubdomainMarkers())
-            : form->AddBdrFaceIntegrator(std::move(integ));
+        mooseAssert( !kernel->isSubdomainRestricted(), "AddInteriorFaceIntegrator doesn't have an overload for this case " );
+        form->AddInteriorFaceIntegrator(std::move(integ));
       }
     }
   }
 }
-
 
 
 } // namespace Moose::MFEM

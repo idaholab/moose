@@ -11,25 +11,18 @@
 
 #pragma once
 
-#include "MFEMGeneralUserObject.h"
-#include "MFEMContainers.h"
 #include "MFEMBlockRestrictable.h"
+#include "MFEMGeneralUserObject.h"
 
-/**
- * Class to construct an MFEM integrator to apply to the equation system.
- */
-class MFEMKernel : public MFEMGeneralUserObject, public MFEMBlockRestrictable
+class MFEMDGKernel : public MFEMGeneralUserObject, public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
+  MFEMDGKernel(const InputParameters & parameters);
+  virtual ~MFEMDGKernel() = default;
 
-  MFEMKernel(const InputParameters & parameters);
-
-  virtual ~MFEMKernel() = default;
-
-  /// Create a new MFEM integrator to apply to the weak form. Ownership managed by the caller.
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; }
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() { return nullptr; }
+  virtual mfem::BilinearFormIntegrator * createDGBFIntegrator() { return nullptr; }
+  virtual mfem::LinearFormIntegrator * createDGLFIntegrator() { return nullptr; }
 
   /// Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
@@ -41,6 +34,12 @@ public:
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;
+  int _fe_order;
+  mfem::ConstantCoefficient _one;
+  mfem::ConstantCoefficient _zero;
+  mfem::real_t _sigma;
+  mfem::real_t _kappa;
+
 };
 
 #endif
