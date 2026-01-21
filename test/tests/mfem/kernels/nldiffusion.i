@@ -66,20 +66,11 @@
 []
 
 [Kernels]
-  [residual]
-    type = MFEMDomainLFGradKernel
+ active = 'nl'
+  [nl]
+    type = MFEMNLDiffusionKernel
     variable = concentration
     coefficient = diffCoeff
-  []
-  [jacobian_one]
-    type = MFEMDiffusionKernel
-    variable = concentration
-    coefficient = diffCoeff
-  []
-  [jacobian_two]
-    type = MFEMMixedScalarWeakDivergenceKernel
-    variable = concentration
-    coefficient = one
   []
 []
 
