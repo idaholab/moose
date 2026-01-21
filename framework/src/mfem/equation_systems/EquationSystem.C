@@ -63,29 +63,6 @@ EquationSystem::SetTrialVariableNames()
 }
 
 void
-EquationSystem::SortTestAndTrialNames()
-{
-  std::vector<std::string> common_vars;
-  for (const auto & name : _test_var_names)
-  {
-    if (VectorContainsName(_coupled_var_names, name))
-      common_vars.push_back(name);
-  }
-
-  // Move common variables to beginning of vectors, and in the same order.
-  // The names in _coupled_var_names must be common to test and trial names
-  for (const auto & name : common_vars)
-  {
-    _test_var_names.erase(std::find(_test_var_names.begin(), _test_var_names.end(), name));
-    _test_var_names.insert(_test_var_names.begin(), name);
-    _trial_var_names.erase(std::find(_trial_var_names.begin(), _trial_var_names.end(), name));
-    _trial_var_names.insert(_trial_var_names.begin(), name);
-    _coupled_var_names.erase(std::find(_coupled_var_names.begin(), _coupled_var_names.end(), name));
-    _coupled_var_names.insert(_coupled_var_names.begin(), name);
-  }
-}
-
-void
 EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
   AddTestVariableNameIfMissing(kernel->getTestVariableName());
@@ -156,9 +133,6 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
-
-  // Now that all test and trial variables are known, order them
-  // SortTestAndTrialNames();
 
   for (auto & test_var_name : _test_var_names)
   {
