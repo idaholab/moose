@@ -515,7 +515,7 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
   BoundaryName boundary_name;
 
   const std::set<boundary_id_type> & ids = boundary_info.get_boundary_ids();
-  boundary_id_type new_boundaryID = ids.empty() ? -1 : *ids.rbegin() + 1;
+  boundary_id_type new_boundaryID = ids.empty() ? 0 : *ids.rbegin() + 1;
 
   // Make sure the new boundary ID is the same on every processor
   mesh.comm().set_union(_neighboring_block_list);
