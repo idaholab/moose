@@ -1,0 +1,38 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifdef MOOSE_MFEM_ENABLED
+
+#pragma once
+#include "MFEMKernel.h"
+
+/**
+ * \f[
+ * (k \vec \nabla u, \vec \nabla v)
+ * \f]
+ */
+class MFEMNLDiffusionKernel : public MFEMKernel
+{
+public:
+  static InputParameters validParams();
+
+  MFEMNLDiffusionKernel(const InputParameters & parameters);
+
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual mfem::LinearFormIntegrator *  createNLAIntegrator() override;
+
+protected:
+  mfem::Coefficient & _coef;
+  mfem::ScalarVectorProductCoefficient * _product_coef_res;
+  mfem::ScalarVectorProductCoefficient * _product_coef_jac;
+  mfem::SumIntegrator * _sum; 
+  mfem::ConstantCoefficient * _one;
+};
+
+#endif
