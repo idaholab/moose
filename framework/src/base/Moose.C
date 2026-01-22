@@ -489,7 +489,7 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_mfem_complex_bc_components", "add_bc");
 
   // add DG boundary conditions
-  registerMooseObjectTask("add_mfem_dg_bc", MFEMDGKernel, false);
+  registerMooseObjectTask("add_mfem_dg_bc", MFEMDGBoundaryCondition, false);
   addTaskDependency("add_mfem_dg_bc", "add_bc");
 
   // set mesh FE space
@@ -785,7 +785,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   syntax.registerSyntaxType("Solvers/*", "MFEMSolverName");
   registerSyntaxTask("AddMFEMSolverAction", "Solver", "add_mfem_solver");
   registerSyntax("AddMFEMDGBoundaryConditions", "DGBoundaryConditions/*");
-  registerSyntaxTask("AddMFEMDGBoundaryConditions", "DGBoundaryConditions/*", "add_mfem_dg_bc");
 #endif
 
   registerSyntax("NEML2ActionCommon", "NEML2");
