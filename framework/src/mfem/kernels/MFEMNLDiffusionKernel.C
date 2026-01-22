@@ -27,8 +27,7 @@ MFEMNLDiffusionKernel::validParams()
   return params;
 }
 
-MFEMNLDiffusionKernel::MFEMNLDiffusionKernel(
-    const InputParameters & parameters)
+MFEMNLDiffusionKernel::MFEMNLDiffusionKernel(const InputParameters & parameters)
   : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
