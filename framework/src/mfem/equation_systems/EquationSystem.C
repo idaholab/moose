@@ -109,7 +109,7 @@ EquationSystem::AddDGKernel(std::shared_ptr<MFEMDGKernel> kernel)
 }
 
 void
-EquationSystem::AddDGBC(std::shared_ptr<MFEMDGKernel> bc)
+EquationSystem::AddDGBC(std::shared_ptr<MFEMDGBoundaryCondition> bc)
 {
   AddTestVariableNameIfMissing(bc->getTestVariableName());
   AddCoupledVariableNameIfMissing(bc->getTrialVariableName());
@@ -118,14 +118,14 @@ EquationSystem::AddDGBC(std::shared_ptr<MFEMDGKernel> bc)
   if (!_dg_bc_map.Has(test_var_name))
   {
     auto dg_bc_field_map = std::make_shared<
-        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>>();
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>>();
     _dg_bc_map.Register(test_var_name, std::move(dg_bc_field_map));
   }
   // Register new integrated bc map if not present for the test/trial variable
   // pair
   if (!_dg_bc_map.Get(test_var_name)->Has(trial_var_name))
   {
-    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMDGKernel>>>();
+    auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>();
     _dg_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
   }
   _dg_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));  
@@ -421,9 +421,10 @@ EquationSystem::BuildLinearForms()
     auto lf = _lfs.GetShared(test_var_name);
     ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
-
+    
     // same with the dg stuff
     ApplyDomainDGLFIntegrators(test_var_name, lf, _dg_kernels_map);
+    ApplyBoundaryDGLFIntegrators(test_var_name, lf, _dg_bc_map);
     lf->Assemble();
   }
 
@@ -454,6 +455,8 @@ EquationSystem::BuildBilinearForms()
     // and the dg stuff too
     ApplyDomainDGBLFIntegrators<mfem::ParBilinearForm>(
       test_var_name, test_var_name, blf, _dg_kernels_map);
+    ApplyBoundaryDGBLFIntegrators<mfem::ParBilinearForm>(
+      test_var_name, test_var_name, blf, _dg_bc_map);
     // Assemble
     blf->Assemble();
   }

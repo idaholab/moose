@@ -11,36 +11,32 @@
 
 #pragma once
 
-#include "MFEMBlockRestrictable.h"
-#include "MFEMGeneralUserObject.h"
+#include "MFEMBoundaryCondition.h"
 
-class MFEMDGKernel : public MFEMGeneralUserObject, public MFEMBlockRestrictable
+class MFEMDGBoundaryCondition : public MFEMBoundaryCondition
 {
 public:
   static InputParameters validParams();
-  MFEMDGKernel(const InputParameters & parameters);
-  virtual ~MFEMDGKernel() = default;
 
-  // TODO: rename these back to createLFIntegrator and createBFIntegrator
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() { return nullptr; }
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() { return nullptr; }
+  MFEMDGBoundaryCondition(const InputParameters & parameters);
+  virtual ~MFEMDGBoundaryCondition() = default;
 
-  /// Get name of the test variable labelling the weak form this kernel is added to
-  const VariableName & getTestVariableName() const { return _test_var_name; }
+  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() = 0;
+
+  /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() = 0;
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
-  virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
-
+  virtual const std::string & getTrialVariableName() const { return _test_var_name; }
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
-  const VariableName & _test_var_name;
   int _fe_order;
   mfem::ConstantCoefficient _one;
   mfem::ConstantCoefficient _zero;
   mfem::real_t _sigma;
   mfem::real_t _kappa;
-
 };
 
 #endif

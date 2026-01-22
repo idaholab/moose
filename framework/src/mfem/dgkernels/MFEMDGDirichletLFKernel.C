@@ -19,7 +19,7 @@ MFEMDGDirichletLFKernel::MFEMDGDirichletLFKernel(const InputParameters & paramet
 }
 
 mfem::LinearFormIntegrator *
-MFEMDGDirichletLFKernel::createDGLFIntegrator()
+MFEMDGDirichletLFKernel::createLFIntegrator()
 {
   return new mfem::DGDirichletLFIntegrator(_zero, _one, _sigma, _kappa);
 }

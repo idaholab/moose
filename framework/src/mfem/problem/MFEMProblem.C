@@ -352,10 +352,10 @@ MFEMProblem::addDGBoundaryCondition(const std::string & bc_name,
   FEProblemBase::addUserObject(bc_name, name, parameters);
   const UserObject * bc_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMDGKernel*>(bc_uo)!=nullptr)
+  if (dynamic_cast<const MFEMDGBoundaryCondition*>(bc_uo)!=nullptr)
   {
-    auto object_ptr = getUserObject<MFEMDGKernel>(name).getSharedPtr();
-    auto kernel = std::dynamic_pointer_cast<MFEMDGKernel>(object_ptr);
+    auto object_ptr = getUserObject<MFEMDGBoundaryCondition>(name).getSharedPtr();
+    auto kernel = std::dynamic_pointer_cast<MFEMDGBoundaryCondition>(object_ptr);
     auto eqsys =
         std::dynamic_pointer_cast<Moose::MFEM::EquationSystem>(getProblemData().eqn_system);
     if (eqsys)
