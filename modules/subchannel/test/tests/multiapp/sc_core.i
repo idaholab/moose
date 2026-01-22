@@ -132,7 +132,6 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}
-  CT = 1.0
   P_tol = 1.0e-2
   T_tol = 1.0e-2
 

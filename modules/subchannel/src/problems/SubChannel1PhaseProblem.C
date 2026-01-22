@@ -68,7 +68,6 @@ SubChannel1PhaseProblem::validParams()
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
   params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
-  params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
   params.addParam<int>("T_maxit", 100, "Maximum number of iterations for inner temperature loop");
@@ -107,7 +106,6 @@ SubChannel1PhaseProblem::validParams()
                                           "Closure computing the friction factor");
   params.addRequiredParam<UserObjectName>("mixing_closure",
                                           "Closure computing the turbulent mixing parameter");
-  // Make these OPTIONAL here; enforce them conditionally
   params.addParam<UserObjectName>(
       "pin_HTC_closure", "Closure computing HTC on fuel pin (required if pin mesh exists).");
   params.addParam<UserObjectName>("duct_HTC_closure",
@@ -142,7 +140,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_power(getParam<bool>("compute_power")),
     _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _duct_mesh_exist(_subchannel_mesh.ductMeshExist()),
-    _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
     _T_maxit(getParam<int>("T_maxit")),
@@ -275,6 +272,9 @@ SubChannel1PhaseProblem::initialSetup()
       &getUserObject<SCMFrictionClosureBase>(getParam<UserObjectName>("friction_closure"));
   _mixing_closure =
       &getUserObject<SCMMixingClosureBase>(getParam<UserObjectName>("mixing_closure"));
+
+  /// Set value for turbulent momentum modeling parameter CT
+  _CT = _mixing_closure->getCT();
 
   // Create variables for output and storage
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
