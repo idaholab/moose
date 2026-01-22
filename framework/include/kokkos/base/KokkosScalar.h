@@ -17,7 +17,6 @@ namespace Moose::Kokkos
 /**
  * The Kokkos wrapper class that can hold the reference of an arithmetic scalar variable
  */
-///@{
 template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
 class Scalar : public ReferenceWrapper<T>
 {
@@ -42,19 +41,11 @@ public:
   // TODO: add support for arithmetic operators
 };
 
-// The const specialization
 template <typename T>
-class Scalar<const T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
-  : public ReferenceWrapper<const T>
+struct ArrayDeepCopy<Scalar<T>>
 {
-public:
-  /**
-   * Constructor
-   * @param value The const reference of the arithmetic scalar variable to store
-   */
-  Scalar(const T & value) : ReferenceWrapper<const T>(value) {}
+  static constexpr bool value = true;
 };
-///@}
 
 // Mimic MOOSE convention
 using PostprocessorValue = Scalar<const PostprocessorValue>;
