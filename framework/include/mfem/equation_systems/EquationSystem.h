@@ -99,7 +99,7 @@ protected:
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
-  //Reassemble the Jacobian matrix/Operator (Assuming Gridfunction dependant Operator)
+  // Reassemble the Jacobian matrix/Operator (Assuming Gridfunction dependant Operator)
   virtual void ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs);
   virtual void UpdateJacobian() const;
 
@@ -184,8 +184,8 @@ protected:
   NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   NamedFieldsMap<mfem::ParLinearForm> _lfs;
   NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  NamedFieldsMap<mfem::ParLinearForm>    _nlAs;
-  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>> _mblfs; //named according to trial var
+  NamedFieldsMap<mfem::ParLinearForm> _nlAs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>> _mblfs; // named according to trial var
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
@@ -202,18 +202,17 @@ protected:
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
-  //Operator handle for the jacobian matrix
+  // Operator handle for the jacobian matrix
   mutable mfem::OperatorHandle _jacobian;
   mfem::AssemblyLevel _assembly_level;
 
-  //Temporary vectors used for non-linear action
-  //assembly process
+  // Temporary vectors used for non-linear action
+  // assembly process
   mutable mfem::BlockVector _trueBlockSol, _blockForces, _blockResidual;
   Moose::MFEM::GridFunctions * _gfuncs;
-  mfem::Array<int> *_block_true_offsets=NULL;
+  mfem::Array<int> * _block_true_offsets = NULL;
   mfem::Array<int> empty_tdof;
   bool _non_linear = false;
-
 
 private:
   friend class EquationSystemProblemOperator;
@@ -286,7 +285,7 @@ EquationSystem::ApplyDomainNLAFIntegrators(
       mfem::LinearFormIntegrator * integ = kernel->createNLAIntegrator();
       if (integ)
       {
-        _non_linear=true;
+        _non_linear = true;
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
             : form->AddDomainIntegrator(std::move(integ));
@@ -349,7 +348,6 @@ EquationSystem::ApplyBoundaryLFIntegrators(
     }
   }
 }
-
 
 inline void
 EquationSystem::ApplyBoundaryNLAFIntegrators(

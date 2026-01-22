@@ -17,8 +17,10 @@ namespace Moose::MFEM
 
 EquationSystem::~EquationSystem()
 {
-  if(_gfuncs != NULL) delete _gfuncs;
-  if(_block_true_offsets != NULL) delete _block_true_offsets;
+  if (_gfuncs != NULL)
+    delete _gfuncs;
+  if (_block_true_offsets != NULL)
+    delete _block_true_offsets;
   DeleteAllBlocks();
 }
 
@@ -185,15 +187,16 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     _eliminated_variables.Register(eliminated_var_name,
                                    gridfunctions.GetShared(eliminated_var_name));
 
-  //Get a reference to the GridFunctions
+  // Get a reference to the GridFunctions
   _gfuncs = new Moose::MFEM::GridFunctions(gridfunctions);
 
-  //Build the temporary BlockVectors
-  _block_true_offsets = new mfem::Array<int>(_trial_var_names.size()+1);
+  // Build the temporary BlockVectors
+  _block_true_offsets = new mfem::Array<int>(_trial_var_names.size() + 1);
   (*_block_true_offsets)[0] = 0;
 
-  for(unsigned I=0; I<_trial_var_names.size(); I++){
-    (*_block_true_offsets)[I+1] = _gfuncs->Get(_trial_var_names.at(I))->ParFESpace()->TrueVSize();
+  for (unsigned I = 0; I < _trial_var_names.size(); I++)
+  {
+    (*_block_true_offsets)[I + 1] = _gfuncs->Get(_trial_var_names.at(I))->ParFESpace()->TrueVSize();
   }
   _block_true_offsets->PartialSum();
   _trueBlockSol.Update(*_block_true_offsets);
@@ -367,15 +370,17 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
-void EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs)
+void
+EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs)
 {
-  //Reassemble all the Forms
+  // Reassemble all the Forms
   for (const auto I : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(I);
     _blfs.GetShared(test_var_name)->Update();
     _blfs.GetShared(test_var_name)->Assemble();
-    if (_mblfs.Has(test_var_name)){
+    if (_mblfs.Has(test_var_name))
+    {
       for (const auto J : index_range(_coupled_var_names))
       {
         auto coupled_var_name = _coupled_var_names.at(J);
@@ -388,9 +393,9 @@ void EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector
     }
   }
 
-  //Form the system matrix
-  //This uses dummy arguments
-  //for the vectors
+  // Form the system matrix
+  // This uses dummy arguments
+  // for the vectors
   FormLinearSystem(_jacobian, x, rhs);
 };
 
@@ -431,7 +436,11 @@ EquationSystem::UpdateJacobian() const
   }
 }
 
-void CopyVec(const mfem::Vector & x, mfem::Vector & y){y = x;};
+void
+CopyVec(const mfem::Vector & x, mfem::Vector & y)
+{
+  y = x;
+};
 
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
@@ -484,8 +493,6 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   sol.HostRead();
   residual.HostRead();
 }
-
-
 
 mfem::Operator &
 EquationSystem::GetGradient(const mfem::Vector & x) const
