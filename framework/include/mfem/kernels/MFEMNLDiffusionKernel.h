@@ -25,13 +25,13 @@ public:
   MFEMNLDiffusionKernel(const InputParameters & parameters);
 
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
-  virtual mfem::LinearFormIntegrator *  createNLAIntegrator() override;
+  virtual mfem::LinearFormIntegrator * createNLAIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;
   mfem::ScalarVectorProductCoefficient * _product_coef_res;
   mfem::ScalarVectorProductCoefficient * _product_coef_jac;
-  mfem::SumIntegrator * _sum; 
+  mfem::SumIntegrator * _sum;
   mfem::ConstantCoefficient * _one;
 };
 
