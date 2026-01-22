@@ -273,7 +273,7 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
-//Equation system Mult
+// Equation system Mult
 void
 ComplexEquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
@@ -281,7 +281,6 @@ ComplexEquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) con
   x.HostRead();
   residual.HostRead();
 }
-
 
 void
 ComplexEquationSystem::RecoverComplexFEMSolution(
