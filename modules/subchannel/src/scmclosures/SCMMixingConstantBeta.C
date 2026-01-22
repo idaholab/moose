@@ -18,7 +18,7 @@ SCMMixingConstantBeta::validParams()
   InputParameters params = SCMMixingClosureBase::validParams();
   params.addClassDescription(
       "Class that models the turbulent mixing coefficient beta as a user defined constant.");
-  params.addRequiredParam<Real>("beta", "Turbulent mixing parameter [-]");
+  params.addRequiredParam<Real>("beta", "Turbulent mixing parameter [-].");
   return params;
 }
 

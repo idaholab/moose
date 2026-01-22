@@ -14,10 +14,11 @@ InputParameters
 SCMMixingClosureBase::validParams()
 {
   InputParameters params = SCMClosureBase::validParams();
+  params.addParam<Real>("CT", 1.0, "Turbulent momentum, modeling parameter [-].");
   return params;
 }
 
 SCMMixingClosureBase::SCMMixingClosureBase(const InputParameters & parameters)
-  : SCMClosureBase(parameters)
+  : SCMClosureBase(parameters), _CT(getParam<Real>("CT"))
 {
 }

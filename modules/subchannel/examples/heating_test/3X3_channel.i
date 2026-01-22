@@ -34,7 +34,6 @@ n_cells = 20
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  CT = 2.0
   P_tol = 1e-6
   T_tol = 1e-6
   full_output = true
@@ -53,6 +52,7 @@ n_cells = 20
   [constant_beta]
     type = SCMMixingConstantBeta
     beta = 0.006
+    CT = 2.0
   []
 []
 

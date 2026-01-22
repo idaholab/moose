@@ -61,7 +61,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -87,6 +86,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
   [cheng_todreas]
     type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

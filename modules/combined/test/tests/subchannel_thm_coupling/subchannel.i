@@ -51,7 +51,6 @@ heated_length = 1.0
   fp = Sodium
   n_blocks = 1
   P_out = report_pressure_outlet
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -77,6 +76,7 @@ heated_length = 1.0
   []
   [Cheng_Todreas]
     type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 
