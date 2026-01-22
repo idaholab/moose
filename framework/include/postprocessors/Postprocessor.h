@@ -29,6 +29,13 @@ public:
 
   Postprocessor(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  Postprocessor(const Postprocessor & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * This will get called to actually grab the final value the postprocessor has calculated.
    *

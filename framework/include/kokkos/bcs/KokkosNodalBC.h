@@ -11,9 +11,7 @@
 
 #include "KokkosNodalBCBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -194,5 +192,4 @@ NodalBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc)
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -43,6 +43,14 @@ PerfGraphInterface::PerfGraphInterface(PerfGraph & perf_graph, const std::string
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+PerfGraphInterface::PerfGraphInterface(const PerfGraphInterface & object,
+                                       const Moose::Kokkos::FunctorCopy &)
+  : _pg_moose_app(object._pg_moose_app), _prefix(object._prefix)
+{
+}
+#endif
+
 std::string
 PerfGraphInterface::timedSectionName(const std::string & section_name) const
 {

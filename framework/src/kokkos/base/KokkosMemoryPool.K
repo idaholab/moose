@@ -9,9 +9,7 @@
 
 #include "KokkosMemoryPool.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 MemoryPool::MemoryPool(dof_id_type size, unsigned int ways)
@@ -30,5 +28,4 @@ MemoryPool::MemoryPool(dof_id_type size, unsigned int ways)
   _pools.copyToDevice();
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

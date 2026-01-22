@@ -71,7 +71,7 @@
 
 [Postprocessors]
   [integral]
-    type = ElementAverageValue
+    type = KokkosElementAverageValue
     variable = prop1
     execute_on = 'initial timestep_end'
   []

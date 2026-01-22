@@ -669,6 +669,14 @@ public:
    */
   bool isParamDeprecated(const std::string & name) const;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Returns whether this InputParameters belongs to a Kokkos object
+   * Checks whether MooseBase::kokkos_object_param is valid
+   */
+  bool isKokkosObject() const;
+#endif
+
   /**
    * This method returns true if all of the parameters in this object are valid
    * (i.e. isParamValid(name) == true - for all parameters)

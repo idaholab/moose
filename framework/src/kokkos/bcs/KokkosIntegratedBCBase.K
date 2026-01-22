@@ -9,9 +9,7 @@
 
 #include "KokkosIntegratedBCBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -41,5 +39,4 @@ IntegratedBCBase::IntegratedBCBase(const IntegratedBCBase & object)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

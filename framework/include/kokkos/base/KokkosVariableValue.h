@@ -13,9 +13,7 @@
 
 #include "MooseVariableBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -158,6 +156,12 @@ public:
    */
   KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
 
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
+
 private:
   /**
    * Coupled Kokkos variable
@@ -205,6 +209,12 @@ public:
    * @returns The variable gradient
    */
   KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int idx, unsigned int comp = 0) const;
+
+  /**
+   * Get the Kokkos variable
+   * @returns The Kokkos variable
+   */
+  KOKKOS_FUNCTION const Variable & variable() const { return _var; }
 
 private:
   /**
@@ -279,5 +289,4 @@ VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) 
     return Real3(0);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

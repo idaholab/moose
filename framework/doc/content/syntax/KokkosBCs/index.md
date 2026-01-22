@@ -12,7 +12,7 @@ Before reading this documentation, consider reading the following materials firs
 Kokkos-MOOSE boundary conditions do not support automatic differention yet.
 
 The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels System](syntax/Kokkos/index.md) applies to the boundary conditions as well.
-You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with `registerKokkosResidualObject()`.
+You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with either `registerKokkosBoundaryCondition()` or `registerKokkosResidualObject()`.
 Especially, integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail.
 See the following source codes of `KokkosCoupledVarNeumannBC` for an example of an integrated boundary condition:
 

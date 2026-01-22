@@ -18,9 +18,7 @@ dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storag
 void
 dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context);
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -148,5 +146,4 @@ private:
   ///@}
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

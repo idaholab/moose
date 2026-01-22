@@ -25,6 +25,17 @@ ReporterInterface::ReporterInterface(const MooseObject * moose_object)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+ReporterInterface::ReporterInterface(const ReporterInterface & object,
+                                     const Moose::Kokkos::FunctorCopy &)
+  : _ri_params(object._ri_params),
+    _ri_fe_problem_base(object._ri_fe_problem_base),
+    _ri_reporter_data(object._ri_reporter_data),
+    _ri_moose_object(object._ri_moose_object)
+{
+}
+#endif
+
 bool
 ReporterInterface::hasReporterValue(const std::string & param_name) const
 {

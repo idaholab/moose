@@ -91,6 +91,7 @@ class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
 class UserObject;
+class UserObjectBase;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Convergence;
@@ -108,6 +109,7 @@ namespace Moose::Kokkos
 {
 class MaterialPropertyStorage;
 class Function;
+class UserObject;
 }
 #endif
 
@@ -1290,6 +1292,12 @@ public:
   virtual void
   addReporter(const std::string & type, const std::string & name, InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  virtual void addKokkosPostprocessor(const std::string & pp_name,
+                                      const std::string & name,
+                                      InputParameters & parameters);
+#endif
+
   /**
    * Provides const access the ReporterData object.
    *
@@ -1321,7 +1329,7 @@ public:
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
-   * @return Const reference to the user object
+   * @return Reference to the user object
    */
   template <class T>
   T & getUserObject(const std::string & name, unsigned int tid = 0) const
@@ -1337,6 +1345,7 @@ public:
       mooseError("Unable to find user object with name '" + name + "'");
     return *(objs[0]);
   }
+
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
@@ -1346,18 +1355,57 @@ public:
   const UserObject & getUserObjectBase(const std::string & name, const THREAD_ID tid = 0) const;
 
   /**
-   * Get the Positions object by its name
-   * @param name The name of the Positions object being retrieved
-   * @return Const reference to the Positions object
-   */
-  const Positions & getPositionsObject(const std::string & name) const;
-
-  /**
    * Check if there if a user object of given name
    * @param name The name of the user object being checked for
    * @return true if the user object exists, false otherwise
    */
   bool hasUserObject(const std::string & name) const;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  virtual void addKokkosUserObject(const std::string & user_object_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+
+  /**
+   * Get the Kokkos user object by its name
+   * @param name The name of the Kokkos user object being retrieved
+   * @return const reference to the Kokkos user object
+   */
+  template <class T>
+  const T & getKokkosUserObject(const std::string & name) const
+  {
+    std::vector<T *> objs;
+    theWarehouse()
+        .query()
+        .condition<AttribSystem>("KokkosUserObject")
+        .condition<AttribName>(name)
+        .queryInto(objs);
+    if (objs.empty())
+      mooseError("Unable to find Kokkos user object with name '" + name + "'");
+    return *(objs[0]);
+  }
+
+  /**
+   * Check if there if a Kokkos user object of given name
+   * @param name The name of the Kokkos user object being checked for
+   * @return true if the Kokkos user object exists, false otherwise
+   */
+  bool hasKokkosUserObject(const std::string & name) const;
+#endif
+
+  /**
+   * Check for name collision between different user objects
+   * @param name The object name being added
+   * @param type The object type being added
+   */
+  void checkUserObjectNameCollision(const std::string & name, const std::string & type) const;
+
+  /**
+   * Get the Positions object by its name
+   * @param name The name of the Positions object being retrieved
+   * @return Const reference to the Positions object
+   */
+  const Positions & getPositionsObject(const std::string & name) const;
 
   /**
    * Whether or not a Postprocessor value exists by a given name.
@@ -3061,6 +3109,12 @@ protected:
                                   const Moose::AuxGroup & group,
                                   TheWarehouse::Query & query);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void computeKokkosUserObjectsInternal(const ExecFlagType & type,
+                                        const Moose::AuxGroup & group,
+                                        TheWarehouse::Query & query);
+#endif
+
   /// Verify that SECOND order mesh uses SECOND order displacements.
   void checkDisplacementOrders();
 
@@ -3304,6 +3358,10 @@ private:
   void updateMaxQps();
 
   void joinAndFinalize(TheWarehouse::Query query, bool isgen = false);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  void kokkosJoinAndFinalize(const std::vector<Moose::Kokkos::UserObject *> & userobjs);
+#endif
 
   /**
    * Reset state of this object in preparation for the next evaluation.

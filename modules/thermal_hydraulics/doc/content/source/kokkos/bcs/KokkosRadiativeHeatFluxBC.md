@@ -5,7 +5,7 @@
 This is the Kokkos version of [RadiativeHeatFluxBC](RadiativeHeatFluxBC.md). See the original document for details.
 
 !alert note
-Kokkos-MOOSE does not support functions yet. Therefore, [!param](/BCs/RadiativeHeatFluxBC/view_factor) in the original version is not available in the Kokkos version.
+Kokkos-MOOSE does not fully support functions yet. Therefore, [!param](/BCs/RadiativeHeatFluxBC/view_factor) is not available.
 
 ## Example Syntax
 

@@ -17,9 +17,7 @@
 
 class Coupleable;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -160,5 +158,4 @@ private:
   Array<Real> _default_value;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

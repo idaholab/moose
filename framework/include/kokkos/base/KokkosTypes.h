@@ -18,9 +18,7 @@
 
 #include "libmesh/tensor_tools.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 struct Real33
@@ -334,5 +332,4 @@ operator<(const Pair<T1, T2> & left, const Pair<T1, T2> & right)
   return std::make_pair(left.first, left.second) < std::make_pair(right.first, right.second);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

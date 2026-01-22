@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#30655'
+  [integral]
+    type = 'CSVDiff'
+    input = 'kokkos_element_integral_material_property.i'
+    csvdiff = 'kokkos_element_integral_material_property_out.csv'
+    requirement = 'The Kokkos system shall compute the integral quantity over an element of a scalar material property.'
+    design = 'KokkosElementIntegralMaterialProperty.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+  [average]
+    type = 'CSVDiff'
+    input = 'kokkos_element_average_material_property.i'
+    csvdiff = 'kokkos_element_average_material_property_out.csv'
+    requirement = 'The Kokkos system shall compute the average quantity over an element of a scalar material property.'
+    design = 'KokkosElementAverageMaterialProperty.md'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

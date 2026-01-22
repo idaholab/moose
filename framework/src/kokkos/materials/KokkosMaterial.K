@@ -9,9 +9,7 @@
 
 #include "KokkosMaterial.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -136,5 +134,4 @@ Material::getKokkosMaterialPropertyHook(const std::string & prop_name_in, const 
   registerPropName(prop_name, true, state);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

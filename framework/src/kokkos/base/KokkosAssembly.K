@@ -19,9 +19,7 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/reference_elem.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 Assembly::Assembly(FEProblemBase & problem)
@@ -437,5 +435,4 @@ Assembly::operator()(const ThreadID tid) const
     computePhysicalMap(info, qp, &jacobian[qp], &jxw[qp], &xyz[qp]);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

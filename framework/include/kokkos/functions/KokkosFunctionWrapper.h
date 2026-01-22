@@ -11,9 +11,7 @@
 
 #include "KokkosTypes.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 template <typename Object>
@@ -215,5 +213,4 @@ FunctionWrapperHost<Object>::~FunctionWrapperHost()
   ::Kokkos::kokkos_free<ExecSpace::memory_space>(_function_device);
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
