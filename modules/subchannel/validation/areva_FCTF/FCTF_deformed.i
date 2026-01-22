@@ -85,7 +85,6 @@ unheated_length_exit = 0.855 #m
   fp = water
   n_blocks = 1
   P_out = ${P_out}
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -113,6 +112,7 @@ unheated_length_exit = 0.855 #m
   []
   [cheng_todreas]
     type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

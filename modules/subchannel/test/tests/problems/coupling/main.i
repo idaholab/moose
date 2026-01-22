@@ -46,7 +46,6 @@ heated_length = 1.0
   type = QuadSubChannel1PhaseProblem
   n_blocks = 1
   fp = water
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -67,6 +66,7 @@ heated_length = 1.0
   [constant]
     type = SCMMixingConstantBeta
     beta = 0.006
+    CT = 2.6
   []
 []
 

@@ -57,7 +57,6 @@ num_cells = 40
   fp = sodium
   n_blocks = 1
   P_out = 2.0e5
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -79,6 +78,7 @@ num_cells = 40
   []
   [cheng_todreas]
     type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 

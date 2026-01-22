@@ -39,7 +39,6 @@ pin_diameter = 0.00950
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -59,6 +58,7 @@ pin_diameter = 0.00950
   []
   [Kim_and_Chung]
     type = SCMMixingKimAndChung
+    CT = 2.6
   []
 []
 

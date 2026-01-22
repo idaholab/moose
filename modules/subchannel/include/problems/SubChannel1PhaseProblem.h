@@ -218,7 +218,7 @@ protected:
   /// Time step
   Real _dt;
   /// Turbulent modeling parameter used in axial momentum equation
-  const Real & _CT;
+  Real _CT;
   /// Convergence tolerance for the pressure loop in external solve
   const Real & _P_tol;
   /// Convergence tolerance for the temperature loop in external solve
