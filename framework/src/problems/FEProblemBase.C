@@ -745,6 +745,17 @@ FEProblemBase::needSolutionState(unsigned int state, Moose::SolutionIterationTyp
   _aux->needSolutionState(state, iteration_type);
 }
 
+bool
+FEProblemBase::hasSolutionState(unsigned int state,
+                                Moose::SolutionIterationType iteration_type) const
+{
+  bool has_solution_state = false;
+  for (auto & sys : _solver_systems)
+    has_solution_state |= sys->hasSolutionState(state, iteration_type);
+  has_solution_state |= _aux->hasSolutionState(state, iteration_type);
+  return has_solution_state;
+}
+
 void
 FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<SolverSystem>> & solver_systems)
 {

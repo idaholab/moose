@@ -601,6 +601,13 @@ public:
   void needSolutionState(unsigned int oldest_needed, Moose::SolutionIterationType iteration_type);
 
   /**
+   * Whether we need up to old (1) or older (2) solution states for a given type of iteration
+   * @param oldest_needed oldest solution state needed
+   * @param iteration_type the type of iteration for which old/older states are needed
+   */
+  bool hasSolutionState(unsigned int state, Moose::SolutionIterationType iteration_type) const;
+
+  /**
    * Output the current step.
    * Will ensure that everything is in the proper state to be outputted.
    * Then tell the OutputWarehouse to do its thing

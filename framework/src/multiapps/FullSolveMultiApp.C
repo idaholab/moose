@@ -50,6 +50,7 @@ FullSolveMultiApp::FullSolveMultiApp(const InputParameters & parameters)
   if (_no_restore && (_app.isRecovering() || _app.isRestarting()))
     paramError("no_restore",
                "The parent app is restarting or recovering, restoration cannot be disabled");
+  // Force the user to make a decision on updating or not the old state of variables
   if (_keep_solution_during_restore &&
       !isParamSetByUser("update_old_solution_when_keeping_solution_during_restore"))
     paramError("update_old_solution_when_keeping_solution_during_restore",
@@ -109,12 +110,34 @@ FullSolveMultiApp::initialSetup()
       ex->init();
 
       if (!_update_old_state_when_keeping_solution_during_restore &&
-          appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties())
-        paramError("update_old_solution_when_keeping_solution_during_restore",
-                   "While we are updating old solutions using the solution from the previous fixed "
-                   "point iteration, we are not updating the old stateful material properties as "
-                   "well. This is not consistent. We recommend you consider using the 'no_restore' "
-                   "parameter instead of 'keep_solution_during_restore'.");
+          (appProblemBase(_first_local_app + i).getMaterialPropertyStorage().hasStatefulProperties()
+#ifdef KOKKOS_ENABLED
+           || appProblemBase(_first_local_app + i)
+                  .getKokkosMaterialPropertyStorage()
+                  .hasStatefulProperties()
+#endif
+               ))
+        paramError(
+            "update_old_solution_when_keeping_solution_during_restore",
+            "While we are updating old solutions using the solution from the previous fixed "
+            "point iteration, we are not updating the old stateful material properties as "
+            "well. This is not consistent. We recommend you consider using the 'no_restore' "
+            "parameter instead of 'keep_solution_during_restore', or stop using the latter.");
+      if (_keep_solution_during_restore &&
+          appProblemBase(_first_local_app + i)
+              .hasSolutionState(2, Moose::SolutionIterationType::Time))
+        mooseDoOnce(paramWarning(
+            "keep_solution_during_restore",
+            "This FullSolveMultiApp simulation(s) uses older time step variable states (notably "
+            "from two time steps prior in transients). Due to 'keep_solution_during_restore' "
+            "parameter being true, which is an optimization for fixed point iterations, the "
+            "unrestored solution will be kept as the starting solution. It would normally be "
+            "copied onto the 'old' state at the beginning of the first time step. This copy can be "
+            "skipped using 'update_old_solution_when_keeping_solution_during_restore', while the "
+            "copy of the old state onto the 'older' state and the stateful material properties "
+            "state updates do not have such an option at this time. This warning relates to this "
+            "inconsistency. If you suspect this is a problem, please set "
+            "'keep_solution_during_restore' to false"));
 
       _executioners[i] = ex;
     }
