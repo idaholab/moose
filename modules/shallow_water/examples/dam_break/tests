@@ -1,0 +1,16 @@
+[Tests]
+  [1d_dam_break_walled]
+    [HLL]
+      type = RunApp
+      input = '1d_dam_break_walled_HLL.i'
+      capabilities = 'method!=dbg'
+      check_input = True
+    []
+    [HLLC]
+      type = RunApp
+      input = '1d_dam_break_walled_HLLC.i'
+      capabilities = 'method!=dbg'
+      check_input = True
+    []
+  []
+[]

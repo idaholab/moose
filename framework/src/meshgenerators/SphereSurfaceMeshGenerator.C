@@ -18,7 +18,7 @@
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/replicated_mesh.h"
 
-registerMooseObject("PhaseFieldApp", SphereSurfaceMeshGenerator);
+registerMooseObject("MooseApp", SphereSurfaceMeshGenerator);
 
 InputParameters
 SphereSurfaceMeshGenerator::validParams()

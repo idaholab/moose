@@ -49,6 +49,8 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
     scalar_transport:
         root_dir: ${MOOSE_DIR}/modules/scalar_transport/doc/content
+    shallow_water:
+        root_dir: ${MOOSE_DIR}/modules/scalar_transport/doc/content
     solid_mechanics:
         root_dir: ${MOOSE_DIR}/modules/solid_mechanics/doc/content
     solid_properties:
@@ -258,6 +260,7 @@ Extensions:
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             reactor: !include modules/reactor/doc/sqa_reactor.yml
             scalar_transport: !include modules/scalar_transport/doc/sqa_scalar_transport.yml
+            shallow_water: !include modules/shallow_water/doc/sqa_shallow_water.yml
             solid_properties: !include modules/solid_properties/doc/sqa_solid_properties.yml
             stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml
             subchannel: !include modules/subchannel/doc/sqa_subchannel.yml

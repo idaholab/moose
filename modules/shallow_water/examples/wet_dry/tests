@@ -1,0 +1,8 @@
+[Tests]
+  [wet_dry]
+    type = RunApp
+    input = 'wet_dry.i'
+    capabilities = 'method!=dbg'
+    check_input = True
+  []
+[]
