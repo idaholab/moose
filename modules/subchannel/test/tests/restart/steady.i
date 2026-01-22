@@ -28,7 +28,6 @@ P_out = 4.923e6 # Pa
   type = QuadSubChannel1PhaseProblem
   fp = water
   n_blocks = 1
-  CT = 1.8
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -44,6 +43,7 @@ P_out = 4.923e6 # Pa
   [constant_beta]
     type = SCMMixingConstantBeta
     beta = 0.006
+    CT = 1.8
   []
 []
 

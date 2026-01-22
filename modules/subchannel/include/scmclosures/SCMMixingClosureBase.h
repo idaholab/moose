@@ -30,4 +30,12 @@ public:
   virtual Real computeMixingParameter(const unsigned int i_gap,
                                       const unsigned int iz,
                                       const bool sweep_flow = false) const = 0;
+
+  /// Turbulent modeling parameter used in axial momentum equation
+  const Real & _CT;
+
+  /**
+   * Return the Turbulent modeling parameter
+   */
+  virtual const Real & getCT() const { return _CT; }
 };
