@@ -11,12 +11,12 @@
 
 #pragma once
 
-// all this class needs to do differently is to implement createDGLFIntegrator
+// all this class needs to do differently is to implement createLFIntegrator
 class MFEMDGDirichletLFKernel : public MFEMDGKernel
 {
 public:
   MFEMDGDirichletLFKernel(const InputParameters & parameters);
-  virtual mfem::LinearFormIntegrator * createDGLFIntegrator() override;
+  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
 };
 
 #endif

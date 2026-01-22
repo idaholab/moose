@@ -11,13 +11,13 @@
 
 #pragma once
 
-// all this class needs to do differently is to implement createDGBFIntegrator
+// all this class needs to do differently is to implement createBFIntegrator
 class MFEMDGDiffusionKernel : public MFEMDGKernel
 {
 public:
   MFEMDGDiffusionKernel(const InputParameters & parameters);
 
-  virtual mfem::BilinearFormIntegrator * createDGBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 };
 
 #endif

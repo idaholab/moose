@@ -44,14 +44,14 @@
 []
 
 [DGBoundaryConditions]
-  [dg_diff_lf_bc]
-    type = MFEMDGDirichletLFKernel
+  [dg_diff_bc]
+    type = MFEMDGDiffusionBC
     variable = concentration
   []
-#  [dg_diff_bc]
-#    type = MFEMDGDiffusionKernel
-#    variable = concentration
-#  []
+  [dg_diff_lf_bc]
+    type = MFEMDGDirichletLFBC
+    variable = concentration
+  []
 []
 
 [Preconditioner]
