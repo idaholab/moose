@@ -11,12 +11,12 @@
 
 #include "MeshGenerator.h"
 
-class NestedCellUniverseMeshGenerator : public MeshGenerator
+class TestCSGLatticeMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  NestedCellUniverseMeshGenerator(const InputParameters & parameters);
+  TestCSGLatticeMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -25,8 +25,15 @@ public:
   std::unique_ptr<CSG::CSGBase> generateCSG() override;
 
 protected:
-  /// radius of inner sphere surface
-  const Real _inner_rad;
-  /// radius of outer sphere surface
-  const Real _outer_rad;
+  /// hexagonal or cartesian lattice type
+  std::string _lattice_type;
+  /// pitch of the lattice
+  Real _pitch;
+  const std::vector<MeshGeneratorName> _input_names;
+  /// Pointers to the input mesh
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
+  /// Holds the input CSGBase objects
+  std::vector<std::unique_ptr<CSG::CSGBase> *> _input_csgs;
+  /// input pattern of universes
+  std::vector<std::vector<unsigned int>> _pattern;
 };

@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#10327'
+  issues = '#10327 #32241'
   design = 'ChangeOverTimePostprocessor.md'
 
   [change_over_time]
@@ -20,6 +20,12 @@
       csvdiff = 'change_over_time_initial.csv'
 
       detail = 'with respect to the initial calculation.'
+    []
+    [time_derivative]
+      type = CSVDiff
+      input = 'time_derivative.i'
+      csvdiff = 'time_derivative.csv'
+      detail = 'and dividing by the time step size.'
     []
   []
 

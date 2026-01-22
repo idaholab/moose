@@ -7,16 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PostprocessorConvergence.h"
+#include "PostprocessorSteadyStateConvergence.h"
 
-registerMooseObject("MooseApp", PostprocessorConvergence);
+registerMooseObject("MooseApp", PostprocessorSteadyStateConvergence);
 
 InputParameters
-PostprocessorConvergence::validParams()
+PostprocessorSteadyStateConvergence::validParams()
 {
-  InputParameters params = IterationCountConvergence::validParams();
+  InputParameters params = Convergence::validParams();
 
-  params.addClassDescription("Compares the absolute value of a post-processor to a tolerance.");
+  params.addClassDescription(
+      "Compares the absolute value of a post-processor to a tolerance for steady-state checks.");
 
   params.addRequiredParam<PostprocessorName>("postprocessor",
                                              "Post-processor to use for convergence criteria");
@@ -25,16 +26,21 @@ PostprocessorConvergence::validParams()
   return params;
 }
 
-PostprocessorConvergence::PostprocessorConvergence(const InputParameters & parameters)
-  : IterationCountConvergence(parameters),
+PostprocessorSteadyStateConvergence::PostprocessorSteadyStateConvergence(
+    const InputParameters & parameters)
+  : Convergence(parameters),
     _postprocessor(getPostprocessorValue("postprocessor")),
     _tol(getParam<Real>("tolerance"))
 {
 }
 
 Convergence::MooseConvergenceStatus
-PostprocessorConvergence::checkConvergenceInner(unsigned int /*iter*/)
+PostprocessorSteadyStateConvergence::checkConvergence(unsigned int iter)
 {
+  // Often post-processors checking steady conditions are falsely 0 on INITIAL
+  if (iter == 0)
+    return MooseConvergenceStatus::ITERATING;
+
   if (std::abs(_postprocessor) <= _tol)
   {
     std::ostringstream oss;
