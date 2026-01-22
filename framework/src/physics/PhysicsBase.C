@@ -384,7 +384,7 @@ PhysicsBase::checkIntegrityEarly() const
   if (_system_names.size() != 1 && _system_names.size() != _solver_var_names.size())
     paramError("system_names",
                "There should be one system name per solver variable (potentially repeated), or a "
-               "single system name for all variables. Current you have '" +
+               "single system name for all variables. Currently you have '" +
                    std::to_string(_system_names.size()) + "' systems specified for '" +
                    std::to_string(_solver_var_names.size()) + "' solver variables.");
 
@@ -695,8 +695,8 @@ PhysicsBase::shouldCreateIC(const VariableName & var_name,
   mooseError("There is a partial overlap between the subdomains covered by pre-existing initial "
              "conditions (ICs), defined on blocks (ids): " +
              Moose::stringify(getSubdomainNamesAndIDs(blocks_ids_covered)) +
-             "\n and a newly created IC for variable " + var_name +
-             ", to be defined on blocks: " + Moose::stringify(blocks) +
+             "\n and a newly created IC for variable '" + var_name +
+             "', to be defined on blocks: " + Moose::stringify(blocks) +
              ".\nWe should be creating the Physics' IC only for non-covered blocks. This is not "
              "implemented at this time.");
 }
@@ -804,7 +804,8 @@ PhysicsBase::shouldCreateTimeDerivative(const VariableName & var_name,
 
 void
 PhysicsBase::reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
-                                               const std::string & object_type) const
+                                               const std::string & object_type,
+                                               const std::string & object_name) const
 {
   std::vector<std::string> defaults_unused;
   std::vector<std::string> user_values_unused;
@@ -815,21 +816,23 @@ PhysicsBase::reportPotentiallyMissedParameters(const std::vector<std::string> & 
     else if (isParamValid(param))
       defaults_unused.push_back(param);
   }
+  const std::string object_name_string =
+      object_name.empty() ? "" : ("and name '" + object_name + "' ");
+
   if (defaults_unused.size() && _verbose)
     mooseInfoRepeated("Defaults for parameters '" + Moose::stringify(defaults_unused) +
-                      "' for object of type '" + object_type +
-                      "' were not used because the object was not created by this Physics.");
+                      "' for object of type '" + object_type + "' " + object_name_string +
+                      "were not used because the object was not created by this Physics.");
   if (user_values_unused.size())
   {
     if (_app.unusedFlagIsWarning())
       mooseWarning(
           "User-specifed values for parameters '" + Moose::stringify(user_values_unused) +
-          "' for object of type '" + object_type +
-          "' were not used because the corresponding object was not created by this Physics.");
+          "' for object of type '" + object_type + "' " + object_name_string +
+          "were not used because the corresponding object was not created by this Physics.");
     else if (_app.unusedFlagIsError())
-      mooseError(
-          "User-specified values for parameters '" + Moose::stringify(user_values_unused) +
-          "' for object of type '" + object_type +
-          "' were not used because the corresponding object was not created by this Physics.");
+      mooseError("User-specified values for parameters '" + Moose::stringify(user_values_unused) +
+                 "' for object of type '" + object_type + "' " + object_name_string +
+                 "were not used because the corresponding object was not created by this Physics.");
   }
 }
