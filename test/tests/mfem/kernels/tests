@@ -78,10 +78,10 @@
     abs_zero = 1e-6
   []
   [MFEMGradDiv]
-    type = XMLDiff
+    type = CSVDiff
     input = graddiv.i
-    xmldiff = 'OutputData/GradDiv/Run0/Run0.pvd
-                OutputData/GradDiv/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/GradDiv/graddiv_F_line_sample_0001.csv '
+              'OutputData/GradDiv/graddiv_divF_line_sample_0001.csv'
     requirement = 'The system shall have the ability to solve a grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'

@@ -39,15 +39,15 @@
     abs_zero = 1e-6
   []
   [MFEMGradDivLOR]
-    type = XMLDiff
+    type = CSVDiff
     input = ../kernels/graddiv.i
-    xmldiff = 'OutputData/GradDivLOR/Run0/Run0.pvd
-                OutputData/GradDivLOR/Run0/Cycle000001/proc000000.vtu'
+    csvdiff = 'OutputData/GradDivLOR/graddiv_F_line_sample_0001.csv '
+              'OutputData/GradDivLOR/graddiv_divF_line_sample_0001.csv'
     cli_args = 'Mesh/file=../mesh/beam-hex.mesh FESpaces/HDivFESpace/fec_order=THIRD '
                'FESpaces/HDivFESpace/closed_basis=GaussLobatto '
                'FESpaces/HDivFESpace/open_basis=IntegratedGLL '
                'Preconditioner/ADS/low_order_refined=true '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/GradDivLOR'
+               'Outputs/CSV/file_base=OutputData/GradDivLOR/graddiv'
     requirement = 'The system shall have the ability to solve a LOR grad-div problem with Raviart-Thomas elements using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
