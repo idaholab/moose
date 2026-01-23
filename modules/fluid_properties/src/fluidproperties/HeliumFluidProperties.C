@@ -319,18 +319,16 @@ HeliumFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real &
   Real T = 0., p = 0., dT_dv = 0., dT_de = 0., dp_dv = 0., dp_de = 0.;
   T_from_v_e(v, e, T, dT_dv, dT_de);
   p_from_v_e(v, e, p, dp_dv, dp_de);
-  Real p_in_bar = p * 1.0e-5;
 
+  // b and d scaled by 1e-5 to account for conversion to bar
   constexpr Real a = 2.682e-3;
-  constexpr Real b = 1.123e-3;
+  constexpr Real b = 1.123e-8;
   constexpr Real c = 0.71;
-  constexpr Real d = 2.0e-4;
+  constexpr Real d = 2.0e-9;
 
-  k = a * (1.0 + b * p_in_bar) * std::pow(T, c * (1.0 - d * p_in_bar));
-  Real dk_dT = a * (1.0 + b * p_in_bar) * c * (1.0 - d * p_in_bar) *
-               std::pow(T, c * (1.0 - d * p_in_bar) - 1.0);
-  Real dk_dp =
-      -a * std::pow(T, a * (1.0 - b * p_in_bar)) * (c * d * (1 + b * p_in_bar) * std::log(T) - b);
+  k = a * (1.0 + b * p) * std::pow(T, c * (1.0 - d * p));
+  Real dk_dT = a * c * (1.0 + b * p) * (1.0 - d * p) * std::pow(T, c * (1.0 - d * p) - 1.0);
+  Real dk_dp = a * std::pow(T, c * (1.0 - d * p)) * (b - c * d * (1 + b * p) * std::log(T));
 
   dk_dv = dk_dp * dp_dv; // dT_dv is zero
   dk_de = dk_dT * dT_de + dk_dp * dp_de;
