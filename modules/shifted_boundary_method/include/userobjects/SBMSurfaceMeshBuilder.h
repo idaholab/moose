@@ -30,12 +30,11 @@ public:
 
   const KDTree & getKDTree() const { return *_kd_tree; }
 
-  const std::vector<std::unique_ptr<SBMBndElementBase>> & getBoundaryElements() const
-  {
-    return _boundary_elements;
-  }
+  /// Get the SBM boundary elements
+  const std::vector<std::unique_ptr<SBMBndElementBase>> & getBoundaryElements() const;
 
-  const std::vector<Point> & getCentroids() const { return _centroids; }
+  /// Get the centroids of the boundary elements
+  const std::vector<Point> & getCentroids() const;
 
   /**
    * @brief Checks whether the boundary mesh is watertight.
