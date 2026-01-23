@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndEdge2.h"
-#include "libmesh/utility.h" // for orientation and intersection utilities
+#include "Ball.h"
+#include "LineSegment.h"
 
 SBMBndEdge2::SBMBndEdge2(const Elem * elem) : SBMBndElementBase(elem)
 {
@@ -19,42 +20,32 @@ SBMBndEdge2::SBMBndEdge2(const Elem * elem) : SBMBndElementBase(elem)
 }
 
 bool
-SBMBndEdge2::intercepted(const Point & a, const Point & b) const
+SBMBndEdge2::intercepted(const LineSegment & line_segment) const
 {
   const auto & p1 = _elem->point(0);
   const auto & p2 = _elem->point(1);
 
-  // Check if line segments (a-b) and (p1-p2) intersect
-  // This is a 2D geometric segment-segment intersection
+  LineSegment edge_seg(p1, p2);
+
+  Point ip;
+  if (!edge_seg.intersect(line_segment, ip))
+    return false;
+
   auto orientation = [](const Point & p, const Point & q, const Point & r)
   { return (q(1) - p(1)) * (r(0) - q(0)) - (q(0) - p(0)) * (r(1) - q(1)); };
 
-  auto onSegment = [](const Point & p, const Point & q, const Point & r)
-  {
-    return std::min(p(0), r(0)) <= q(0) && q(0) <= std::max(p(0), r(0)) &&
-           std::min(p(1), r(1)) <= q(1) && q(1) <= std::max(p(1), r(1));
-  };
+  const bool collinear =
+      MooseUtils::absoluteFuzzyEqual(orientation(p1, p2, line_segment.start()), 0) &&
+      MooseUtils::absoluteFuzzyEqual(orientation(p1, p2, line_segment.end()), 0);
 
-  Real o1 = orientation(a, b, p1);
-  Real o2 = orientation(a, b, p2);
-  Real o3 = orientation(p1, p2, a);
-  Real o4 = orientation(p1, p2, b);
+  if (!collinear)
+    return true; // Non-collinear case: the result from edge_seg.intersect(line_segment, ip)
+                 // is reliable and sufficient to confirm an intersection.
 
-  // General case
-  if ((o1 * o2 < 0) && (o3 * o4 < 0))
-    return true;
-
-  // Special Cases
-  if (MooseUtils::absoluteFuzzyEqual(o1, 0) && onSegment(a, p1, b))
-    return true;
-  if (MooseUtils::absoluteFuzzyEqual(o2, 0) && onSegment(a, p2, b))
-    return true;
-  if (MooseUtils::absoluteFuzzyEqual(o3, 0) && onSegment(p1, a, p2))
-    return true;
-  if (MooseUtils::absoluteFuzzyEqual(o4, 0) && onSegment(p1, b, p2))
-    return true;
-
-  return false;
+  const bool overlap = line_segment.contains_point(p1) || line_segment.contains_point(p2) ||
+                       edge_seg.contains_point(line_segment.start()) ||
+                       edge_seg.contains_point(line_segment.end());
+  return overlap;
 }
 
 const Point
@@ -72,12 +63,12 @@ SBMBndEdge2::computeNormal() const
   return n;
 }
 
-std::pair<Point, Real>
+Ball
 SBMBndEdge2::computeBoundingBall() const
 {
   const auto & p1 = _elem->point(0);
   const auto & p2 = _elem->point(1);
   const auto center = _elem->vertex_average();
   const auto radius = 0.5 * (p2 - p1).norm();
-  return {center, radius};
+  return Ball(center, radius);
 }

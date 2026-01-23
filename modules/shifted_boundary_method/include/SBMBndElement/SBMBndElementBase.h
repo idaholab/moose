@@ -18,6 +18,9 @@ enum class IntersectionType
   ON_GEOMETRY = 2
 };
 
+class Ball;
+class LineSegment;
+
 /// Abstract base class for SBM boundary elements
 class SBMBndElementBase
 {
@@ -29,10 +32,9 @@ public:
   virtual ~SBMBndElementBase() = default;
 
   /**
-   * Check if a line segment from Point a to Point b intercepts this boundary element.
-   * This is a pure virtual function and must be implemented in derived classes.
+   * Check if the given line segment intersects this boundary element.
    */
-  virtual bool intercepted(const Point & a, const Point & b) const = 0;
+  virtual bool intercepted(const LineSegment & line_segment) const = 0;
 
   /// Getter for the underlying element
   const Elem & elem() const { return *_elem; }
@@ -57,14 +59,22 @@ public:
    * Compute the bounding ball (or circle in 2D, sphere in 3D) of this boundary element.
    * This is a pure virtual function and must be implemented in derived classes.
    */
-  virtual std::pair<Point, Real> computeBoundingBall() const = 0;
+  virtual Ball computeBoundingBall() const = 0;
 
   /**
-   * Compute the longest diagonal of the projected bounding box onto a given plane.
-   * @param plane_normal: The normal vector of the plane onto which the bounding box is projected.
+   * Compute the length of the element bounding-box diagonal projected onto
+   * a plane orthogonal to a given direction.
+   *
+   * The projection plane is defined only by its normal direction; the
+   * specific location (offset) of the plane is irrelevant for this operation.
+   * Equivalently, this function removes the component of the bounding-box
+   * diagonal along the given normal direction and returns the norm of the
+   * remaining tangential component.
+   *
+   * @param normal_dir: A direction vector defining the plane normal.
    * @return The length of the longest diagonal of the projected rectangle.
    */
-  Real getProjectedBoundingBoxDiagonal(const Point & plane_normal) const;
+  Real getProjectedBoundingBoxDiagonal(const Point & normal_dir) const;
 
 protected:
   ///< Pointer to the libMesh element representing this boundary face
