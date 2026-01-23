@@ -296,6 +296,21 @@ HeliumFluidProperties::mu_from_v_e(Real v, Real e) const
   return 3.674e-7 * std::pow(T_from_v_e(v, e), 0.7);
 }
 
+void
+HeliumFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+{
+  mu = mu_from_v_e(v, e);
+
+  Real T = 0, dT_dv = 0., dT_de = 0.;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+
+  dmu_dv = 0.0; // no dependence on pressure, dT_dv is zero
+  const Real dmu_dT = 0.7 * 3.674e-7 * std::pow(T_from_v_e(v, e), -0.3);
+
+  // dmu_dp = 0
+  dmu_de = dmu_dT * dT_de;
+}
+
 Real
 HeliumFluidProperties::k_from_v_e(Real v, Real e) const
 {
@@ -323,7 +338,7 @@ HeliumFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real &
   Real dk_dp =
       -a * std::pow(T, a * (1.0 - b * p_in_bar)) * (c * d * (1 + b * p_in_bar) * std::log(T) - b);
 
-  dk_dv = dk_dT * dT_dv + dk_dp * dp_dv;
+  dk_dv = dk_dp * dp_dv; // dT_dv is zero
   dk_de = dk_dT * dT_de + dk_dp * dp_de;
 }
 
@@ -384,6 +399,22 @@ HeliumFluidProperties::e_from_p_T(
   e = e_from_p_T(pressure, temperature);
   de_dp = 0.0;
   de_dT = _cv;
+}
+
+Real
+HeliumFluidProperties::e_from_v_h(Real /*v*/, Real h) const
+{
+  return _cv * (h / _cp);
+}_cv
+
+void
+HeliumFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
+{
+  e = e_from_v_h(v, h);
+  Real cv = cv_from_v_e(v, e);
+  Real cp = cp_from_v_e(v, e);
+  de_dv = 0.0;
+  de_dh = cv / cp;
 }
 
 Real
