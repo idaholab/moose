@@ -10,7 +10,8 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "ShortestDistanceToSurface.h"
+
+class ShortestDistanceToSurface;
 
 class DistanceAux : public AuxKernel
 {

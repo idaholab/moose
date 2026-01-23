@@ -39,12 +39,15 @@ public:
   RealVectorValue distanceVectorToSurface(const Point & p) const;
 
   /// Return unsigned distance value
-  virtual Real value(Real t, const Point & p) const override;
+  Real value(Real t, const Point & p) const override;
 
-  /// Return unit direction of distance vector (derivative)
-  virtual RealGradient gradient(Real t, const Point & p) const override;
+  /// Return the spatial gradient of the unsigned distance function.
+  /// The gradient is a unit vector pointing in the direction of decreasing
+  /// distance, i.e., from the query point toward the closest point on the surface.
+  RealGradient gradient(Real t, const Point & p) const override;
 
-  /// Return surface normal vector on boundary
+  /// Return the true boundary surface normal evaluated at the closest point obtained
+  /// by projecting the query point onto the true boundary.
   RealVectorValue surfaceNormal(const Point & p) const;
 
 protected:

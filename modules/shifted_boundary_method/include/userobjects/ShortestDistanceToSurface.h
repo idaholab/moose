@@ -19,10 +19,10 @@ class ShortestDistanceToSurface : public ElementUserObject
 public:
   static InputParameters validParams();
   ShortestDistanceToSurface(const InputParameters & parameters);
-  virtual void execute() override {};
-  virtual void finalize() override {}
-  virtual void initialize() override {}
-  virtual void threadJoin(const UserObject &) override {}
+  void execute() override {};
+  void finalize() override {}
+  void initialize() override {}
+  void threadJoin(const UserObject &) override {}
 
   /// @brief Get the SBMSurfaceMeshBuilder user objects
   const std::vector<const Function *> & getDistanceFuncs() const { return _distance_functions; }
@@ -33,16 +33,18 @@ public:
   /// Return the true normal vector at the closest point on the boundaries
   RealVectorValue trueNormal(const Point & pt) const;
 
-  /// Directly select a distance strategy by index
+  /// A distance vector from a point \p pt to a specific surface specified by index \p idx
+  /// in the 'surfaces' parameter list.
   RealVectorValue distanceVectorByIndex(unsigned int idx, const Point & pt) const;
 
-  /// Directly select a normal strategy by index
+  /// A true normal vector at the projected point of \p pt onto a specific surface specified
+  /// by index \p idx in the 'surfaces' parameter list.
   RealVectorValue trueNormalByIndex(unsigned int idx, const Point & pt) const;
 
-  /// Compute distance vector using a specific function
+  /// Compute distance vector using a specific distance function
   const RealVectorValue distanceVectorByFunc(const Point & pt, Real t, const Function * func) const;
 
-  /// Compute true normal using a specific function
+  /// Compute true normal using a specific distance function
   const RealVectorValue trueNormalByFunc(const Point & pt, Real t, const Function * func) const;
 
 protected:

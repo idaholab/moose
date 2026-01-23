@@ -55,6 +55,12 @@ buildDistanceFunctions(const std::vector<FunctionName> & function_names,
 RealVectorValue
 distanceVectorFromFunction(const Function * func, const libMesh::Point & pt, Real t)
 {
+  mooseAssert(dynamic_cast<const MooseParsedFunction *>(func) ||
+                  dynamic_cast<const UnsignedDistanceToSurfaceMesh *>(func),
+              "Function was not a valid distance strategy, the only "
+              "supported types are ParsedFunction and "
+              "UnsignedDistanceToSurfaceMesh.");
+
   const Real phi = func->value(t, pt);
   const RealVectorValue grad_phi = func->gradient(t, pt);
   const Real grad_norm = grad_phi.norm();

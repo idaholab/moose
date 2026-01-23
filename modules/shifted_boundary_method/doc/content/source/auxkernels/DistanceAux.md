@@ -1,9 +1,8 @@
 # DistanceAux
 
-`DistanceAux` evaluates the unsigned distance from an element centroid to the closest
-surface described by a [`ShortestDistanceToSurface`](userobjects/ShortestDistanceToSurface.md)
-user object. The auxiliary kernel calculates the Euclidean distance from an element's
-centroid to the boundary represented by the `distance_to_surface` object.
+`DistanceAux` outputs the distance from an element centroid to the closest
+surface calculated by a [`ShortestDistanceToSurface`](userobjects/ShortestDistanceToSurface.md)
+user object.
 
 ## Usage
 

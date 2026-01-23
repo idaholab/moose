@@ -125,3 +125,15 @@ SBMSurfaceMeshBuilder::checkWatertightness() const
   return SBMUtils::checkWatertightnessFromRawElems(std::vector<const Elem *>(
       _mesh->active_element_ptr_range().begin(), _mesh->active_element_ptr_range().end()));
 }
+
+const std::vector<std::unique_ptr<SBMBndElementBase>> &
+SBMSurfaceMeshBuilder::getBoundaryElements() const
+{
+  return _boundary_elements;
+}
+
+const std::vector<Point> &
+SBMSurfaceMeshBuilder::getCentroids() const
+{
+  return _centroids;
+}

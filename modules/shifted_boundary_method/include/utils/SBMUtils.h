@@ -29,19 +29,25 @@ std::vector<const Function *>
 buildDistanceFunctions(const std::vector<FunctionName> & function_names,
                        const FunctionInterface & function_provider);
 
-/// Compute the distance vector contributed by a single function.
+/// Compute the distance vector induced by a distance function.
+/// The provided function must represent a distance to the true boundary:
+/// either a signed distance function (ParsedFunction) or an unsigned distance
+/// function provided by UnsignedDistanceToSurfaceMesh.
 RealVectorValue
 distanceVectorFromFunction(const Function * func, const libMesh::Point & pt, Real t);
 
-/// Compute the true normal contributed by a single function.
+/// Compute the true boundary surface normal using a distance function.
+/// The query point is first projected onto the true boundary, and the
+/// surface normal of the boundary is then evaluated at the projected
+/// (closest) point.
 RealVectorValue trueNormalFromFunction(const Function * func, const libMesh::Point & pt, Real t);
 
-/// Scan all functions and return the closest distance vector.
+/// Scan all distance functions and return the closest distance vector.
 RealVectorValue closestDistanceVector(const std::vector<const Function *> & funcs,
                                       const libMesh::Point & pt,
                                       Real t);
 
-/// Scan all functions and return the corresponding normal vector.
+/// Scan all distance functions and return the corresponding normal vector.
 RealVectorValue closestTrueNormalVector(const std::vector<const Function *> & funcs,
                                         const libMesh::Point & pt,
                                         Real t);

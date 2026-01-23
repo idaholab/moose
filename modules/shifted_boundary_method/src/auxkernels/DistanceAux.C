@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DistanceAux.h"
-#include "MooseMesh.h"
+#include "ShortestDistanceToSurface.h"
 
 // Register the new AuxKernel class name
 registerMooseObject("ShiftedBoundaryMethodApp", DistanceAux);
@@ -21,8 +21,8 @@ DistanceAux::validParams()
   params.addParam<UserObjectName>("distance_to_surface",
                                   "UserObject that provides distance calculations.");
 
-  params.addClassDescription("Computes the distance using "
-                             "geometry data provided by the 'distance_to_surface' UserObject.");
+  params.addClassDescription(
+      "Creates a distance field based on the 'distance_to_surface' UserObject.");
 
   return params;
 }

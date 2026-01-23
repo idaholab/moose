@@ -6,7 +6,7 @@ meshes. Instead of conforming the mesh to curved or intricate boundaries, SBM em
 the geometry inside a background mesh and shifts the boundary conditions from the
 true interface to surrogate locations on nearby mesh faces. This approach preserves
 accuracy, avoids costly remeshing, and enables robust treatment of Dirichlet, Neumann,
-and Robin conditions.
+and Robin boundary conditions.
 
 The module includes implementations for distance and normal evaluation, as well as
 surrogate boundary integration. It also provides interfaces to boundary-representation–
