@@ -15,6 +15,7 @@
 #include "libmesh/edge_edge2.h"
 #include "SBMUtils.h"
 #include "LineSegment.h"
+
 using namespace libMesh;
 
 // Public wrapper classes to access protected computeNormal
