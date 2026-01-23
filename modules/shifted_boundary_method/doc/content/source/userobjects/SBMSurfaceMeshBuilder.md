@@ -4,8 +4,7 @@
 [`UnsignedDistanceToSurfaceMesh`](functions/UnsignedDistanceToSurfaceMesh.md) and
 other distance-based components. It processes a source mesh—identified by the
 `surface_mesh` parameter—to generate a list of boundary element wrappers (such as
-[`SBMBndEdge2`](SBMBndElement/SBMBndEdge2.md) and
-[`SBMBndTri3`](SBMBndElement/SBMBndTri3.md)), a map of element IDs, and a KDTree for
+`SBMBndEdge2` and `SBMBndTri3`), a map of element IDs, and a KDTree for
 efficient nearest-neighbor queries.
 
 To ensure valid spatial searches, the builder verifies that the input mesh is replicated
