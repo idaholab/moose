@@ -18,7 +18,7 @@ public:
   /// Constructor
   explicit SBMBndEdge2(const Elem * elem);
 
-  /// Check if a line (a-b) intersects this edge
+  /// Check if a line segment (a-b) intersects this edge
   bool intercepted(const Point & a, const Point & b) const override;
 
   /// Compute the bounding ball (circle) of the edge
