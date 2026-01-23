@@ -104,11 +104,10 @@
                'Executioner/assembly_level=none'
     compute_devices = 'ceed-cpu'
     requirement = 'The system shall have the ability to solve a diffusion problem with matrix-free assembly using MFEM.'
-    abs_zero = 2e-10
     capabilities = 'mfem'
     max_parallel = 1
     recover = false
-    abs_zero = 1e-6
+    abs_zero = 2e-10
   []
   [MFEMDiffusionPartialMultiGPUAwareMPI]
     type = CSVDiff
@@ -157,14 +156,15 @@
     errors = 'foobarbaz' # allow cuda errors I guess?
   []
   [MFEMHeatConduction]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConduction/heatconduction_line_sample_0001.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0002.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0003.csv '
+              'OutputData/HeatConduction/heatconduction_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction'
+               'Outputs/CSV/file_base=OutputData/HeatConduction/heatconduction'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -173,15 +173,16 @@
     restep = false
   []
   [MFEMHeatConductionElement]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConductionElement/heatconductionelement_line_sample_0001.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0002.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0003.csv '
+              'OutputData/HeatConductionElement/heatconductionelement_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
                'Solvers/inactive="boomeramg" '
+               'Outputs/CSV/file_base=OutputData/HeatConductionElement/heatconductionelement '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
                'Executioner/assembly_level=element'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with element assembly using MFEM.'
@@ -193,16 +194,17 @@
     restep = false
   []
   [MFEMHeatConductionMatFree]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatConduction/Run0/Run0.pvd '
-              'OutputData/HeatConduction/Run0/Cycle000001/proc000000.vtu '
-              'OutputData/HeatConduction/Run0/Cycle000004/proc000000.vtu'
+    csvdiff = 'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0001.csv '
+              'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0002.csv '
+              'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0003.csv '
+              'OutputData/HeatConductionMatFree/heat_conduction_mat_free_line_sample_0004.csv'
     cli_args = 'BCs/active="bottom top_dirichlet" '
                'Executioner/dt=0.25 Executioner/end_time=1.0 '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/HeatConduction '
-               'Solvers/inactive="boomeramg" '
                'Solvers/main/type=MFEMCGSolver Solvers/main/preconditioner=jacobi '
+               'Solvers/inactive="boomeramg" '
+               'Outputs/CSV/file_base=OutputData/HeatConductionMatFree/heat_conduction_mat_free '
                'Executioner/assembly_level=none '
                'Executioner/device=ceed-cpu'
     compute_devices = 'ceed-cpu'
@@ -214,10 +216,11 @@
     restep = false
   []
   [MFEMHeatTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
-                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    csvdiff = 'OutputData/HeatTransfer/heattransfer_line_sample_0001.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0002.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
