@@ -300,15 +300,9 @@ void
 HeliumFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
   mu = mu_from_v_e(v, e);
-
-  Real T = 0, dT_dv = 0., dT_de = 0.;
-  T_from_v_e(v, e, T, dT_dv, dT_de);
-
-  dmu_dv = 0.0; // no dependence on pressure, dT_dv is zero
   const Real dmu_dT = 0.7 * 3.674e-7 * std::pow(T_from_v_e(v, e), -0.3);
-
-  // dmu_dp = 0
-  dmu_de = dmu_dT * dT_de;
+  dmu_dv = 0.0;          // dmu_dp = 0, dT_dv is zero
+  dmu_de = dmu_dT / _cv; // dmu_dp = 0
 }
 
 Real
