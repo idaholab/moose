@@ -9,6 +9,9 @@
 #include "MFEMComplexKernel.h"
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
+#include "ParMixedSesquilinearForm.h"
+#include "MFEMMixedBilinearFormKernel.h"
+
 
 namespace Moose::MFEM
 {
@@ -28,14 +31,14 @@ public:
                     ComplexGridFunctions & cmplx_gridfunctions,
                     mfem::AssemblyLevel assembly_level) override;
 
-  /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem() override;
-
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms() override;
 
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms() override;
+
+  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
+  virtual void BuildMixedBilinearForms() override;
 
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs() override;
@@ -101,6 +104,7 @@ public:
   // Complex Linear and Bilinear Forms
   NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
+  NamedFieldsMap<NamedFieldsMap<ParMixedSesquilinearForm>> _mslfs;
 
   // Complex kernels and integrated BCs
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
@@ -111,7 +115,7 @@ public:
   // Complex essential BCs
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cmplx_essential_bc_map;
 
-  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  /// Pointers to coupled variables not part of the reduced ComplexEquationSystem.
   ComplexGridFunctions _cmplx_eliminated_variables;
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
