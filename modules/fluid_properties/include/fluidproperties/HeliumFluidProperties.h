@@ -184,6 +184,17 @@ public:
    */
   virtual Real k_from_v_e(Real v, Real e) const override;
 
+  /**
+   * Thermal conductivity and its derivatives from specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume (m$^3$/kg)
+   * @param[in] e   specific internal energy (J/kg)
+   * @param[out] k thermal conductivity (W/m.K)
+   * @param[out] dk_dv derivative of thermal conductivity w.r.t. specific volume
+   * @param[out] dk_de derivative of thermal conductivity w.r.t. specific internal energy
+   */
+  virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
+
   using SinglePhaseFluidProperties::beta_from_p_T;
 
   /**
