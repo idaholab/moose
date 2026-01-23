@@ -14,7 +14,7 @@
 #include "libmesh/face_tri3.h"
 #include "libmesh/edge_edge2.h"
 #include "SBMUtils.h"
-
+#include "LineSegment.h"
 using namespace libMesh;
 
 // Public wrapper classes to access protected computeNormal
@@ -52,12 +52,14 @@ TEST(SBMBndElementTest, Edge2Normal)
   // Line crossing through (0.5, -1) to (0.5, 1)
   Point a(0.5, -1.0, 0.0);
   Point b(0.5, 1.0, 0.0);
-  EXPECT_TRUE(bnd_edge.intercepted(a, b));
+  LineSegment line_segment_ab(a, b);
+  EXPECT_TRUE(bnd_edge.intercepted(line_segment_ab));
 
   // Line parallel, no intercept
   Point c(0.0, 1.0, 0.0);
   Point d(1.0, 1.0, 0.0);
-  EXPECT_FALSE(bnd_edge.intercepted(c, d));
+  LineSegment line_segment_cd(c, d);
+  EXPECT_FALSE(bnd_edge.intercepted(line_segment_cd));
 
   // Check distance vector
   Point pt(0.5, 1.0, 0.0);
@@ -87,12 +89,14 @@ TEST(SBMBndElementTest, Tri3Normal)
   // Line from below passing through triangle center
   Point a(0.3, 0.3, -1.0);
   Point b(0.3, 0.3, 1.0);
-  EXPECT_TRUE(bnd_tri.intercepted(a, b));
+  LineSegment line_segment_ab(a, b);
+  EXPECT_TRUE(bnd_tri.intercepted(line_segment_ab));
 
   // Line away from triangle
   Point c(2.0, 2.0, -1.0);
   Point d(2.0, 2.0, 1.0);
-  EXPECT_FALSE(bnd_tri.intercepted(c, d));
+  LineSegment line_segment_cd(c, d);
+  EXPECT_FALSE(bnd_tri.intercepted(line_segment_cd));
 
   // Check distance vector roughly in +Z
   Point pt(0.3, 0.3, 1.0);
@@ -122,12 +126,14 @@ TEST(SBMBndElementTest, Edge2NormalTilted)
   // Line crossing
   Point a(0.5, 0.0, 0.0);
   Point b(0.5, 1.0, 0.0);
-  EXPECT_TRUE(bnd_edge.intercepted(a, b));
+  LineSegment line_segment_ab(a, b);
+  EXPECT_TRUE(bnd_edge.intercepted(line_segment_ab));
 
   // Line outside
   Point c(1.5, 1.0, 0.0);
   Point d(1.5, 2.0, 0.0);
-  EXPECT_FALSE(bnd_edge.intercepted(c, d));
+  LineSegment line_segment_cd(c, d);
+  EXPECT_FALSE(bnd_edge.intercepted(line_segment_cd));
 
   // Check distance vector direction
   Point pt(0.5, 0.0, 0.0); // Point below edge
@@ -161,12 +167,14 @@ TEST(SBMBndElementTest, Tri3NormalTilted)
   // Line from below passing through triangle center
   Point a(0.3, 0.3, -1.0);
   Point b(0.3, 0.3, 2.0);
-  EXPECT_TRUE(bnd_tri.intercepted(a, b));
+  LineSegment line_segment_ab(a, b);
+  EXPECT_TRUE(bnd_tri.intercepted(line_segment_ab));
 
   // Line away from triangle
   Point c(2.0, 2.0, -1.0);
   Point d(2.0, 2.0, 2.0);
-  EXPECT_FALSE(bnd_tri.intercepted(c, d));
+  LineSegment line_segment_cd(c, d);
+  EXPECT_FALSE(bnd_tri.intercepted(line_segment_cd));
 
   // Check distance vector
   Point pt(2.0, 0.0, 2.0);

@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndTri3.h"
+#include "Ball.h"
+#include "LineSegment.h"
 
 SBMBndTri3::SBMBndTri3(const Elem * elem) : SBMBndElementBase(elem)
 {
@@ -30,7 +32,7 @@ SBMBndTri3::computeNormal() const
   return n;
 }
 
-std::pair<Point, Real>
+Ball
 SBMBndTri3::computeBoundingBall() const
 {
   // Compute centroid of triangle
@@ -53,12 +55,15 @@ SBMBndTri3::computeBoundingBall() const
   }
 
   Real radius = std::sqrt(max_sq_dist) * 1.01; // add epsilon buffer
-  return {centroid, radius};
+  return Ball(centroid, radius);
 }
 
 bool
-SBMBndTri3::intercepted(const Point & a, const Point & b) const
+SBMBndTri3::intercepted(const LineSegment & line_segment) const
 {
+  const auto & a = line_segment.start();
+  const auto & b = line_segment.end();
+
   // (a) Build basic vectors and choose a robust tolerance
   const Point dir = b - a;
   const Point v0 = _elem->point(0);

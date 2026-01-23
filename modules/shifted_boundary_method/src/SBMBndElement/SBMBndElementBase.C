@@ -108,7 +108,7 @@ SBMBndElementBase::normal()
 }
 
 Real
-SBMBndElementBase::getProjectedBoundingBoxDiagonal(const Point & plane_normal) const
+SBMBndElementBase::getProjectedBoundingBoxDiagonal(const Point & normal_dir) const
 {
   BoundingBox bbox = _elem->loose_bounding_box();
 
@@ -118,9 +118,9 @@ SBMBndElementBase::getProjectedBoundingBoxDiagonal(const Point & plane_normal) c
   // Step (a): Calculate box_vec
   Point box_vec = max_pt - min_pt;
 
-  // Step (b): Project box_vec onto plane_normal
-  Real normal_scale = box_vec * plane_normal;
-  Point normal_box_vec = plane_normal * normal_scale;
+  // Step (b): Project box_vec onto normal_dir
+  Real normal_scale = box_vec * normal_dir;
+  Point normal_box_vec = normal_dir * normal_scale;
 
   // Step (c): Calculate tangent_vec and its norm
   Point tangent_vec = box_vec - normal_box_vec;
