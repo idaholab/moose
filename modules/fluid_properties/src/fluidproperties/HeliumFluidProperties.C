@@ -405,16 +405,14 @@ Real
 HeliumFluidProperties::e_from_v_h(Real /*v*/, Real h) const
 {
   return _cv * (h / _cp);
-}_cv
+}
 
 void
 HeliumFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
 {
   e = e_from_v_h(v, h);
-  Real cv = cv_from_v_e(v, e);
-  Real cp = cp_from_v_e(v, e);
-  de_dv = 0.0;
-  de_dh = cv / cp;
+  de_dv = 0.;
+  de_dh = _cv / _cp;
 }
 
 Real
