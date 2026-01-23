@@ -145,10 +145,11 @@
     restep = false
   []
   [MFEMHeatTransfer]
-    type = XMLDiff
+    type = CSVDiff
     input = heattransfer.i
-    xmldiff = 'OutputData/HeatTransfer/Run0/Run0.pvd
-                OutputData/HeatTransfer/Run0/Cycle000003/proc000000.vtu'
+    csvdiff = 'OutputData/HeatTransfer/heattransfer_line_sample_0001.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0002.csv '
+              'OutputData/HeatTransfer/heattransfer_line_sample_0003.csv'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem with a heat transfer coefficient on one boundary using MFEM.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
