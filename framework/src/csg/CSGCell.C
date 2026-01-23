@@ -9,11 +9,13 @@
 
 #include "CSGCell.h"
 #include "CSGUniverse.h"
+#include "CSGLattice.h"
 
 namespace CSG
 {
 
-CSGCell::CSGCell(const std::string & name, const CSGRegion & region) : _name(name), _region(region)
+CSGCell::CSGCell(const std::string & name, const CSGRegion & region)
+  : _name(name), _fill_name(""), _region(region)
 {
   _fill_type = "VOID";
 }
@@ -25,9 +27,26 @@ CSGCell::CSGCell(const std::string & name, const std::string & mat_name, const C
 }
 
 CSGCell::CSGCell(const std::string & name, const CSGUniverse * univ, const CSGRegion & region)
-  : _name(name), _fill_name(univ->getName()), _region(region), _fill_universe(univ)
+  : _name(name), _fill_name(""), _region(region), _fill_universe(univ)
 {
   _fill_type = "UNIVERSE";
+}
+
+CSGCell::CSGCell(const std::string & name, const CSGLattice * lattice, const CSGRegion & region)
+  : _name(name), _fill_name(""), _region(region), _fill_lattice(lattice)
+{
+  _fill_type = "LATTICE";
+}
+
+const std::string &
+CSGCell::getFillName() const
+{
+  if (getFillType() == "UNIVERSE")
+    return _fill_universe->getName();
+  else if (getFillType() == "LATTICE")
+    return _fill_lattice->getName();
+  else
+    return _fill_name;
 }
 
 const CSGUniverse &
@@ -48,6 +67,15 @@ CSGCell::getFillMaterial() const
     return _fill_name;
 }
 
+const CSGLattice &
+CSGCell::getFillLattice() const
+{
+  if (getFillType() != "LATTICE")
+    mooseError("Cell '" + getName() + "' has " + getFillType() + " fill, not LATTICE.");
+  else
+    return *_fill_lattice;
+}
+
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {
@@ -61,6 +89,8 @@ CSGCell::operator==(const CSG::CSGCell & other) const
       return this->getFillMaterial() == other.getFillMaterial();
     else if (this->getFillType() == "UNIVERSE")
       return this->getFillUniverse() == other.getFillUniverse();
+    else if (this->getFillType() == "LATTICE")
+      return this->getFillLattice() == other.getFillLattice();
     else
       return true;
   }

@@ -1,0 +1,11 @@
+[Tests]
+  design = 'PostprocessorSteadyStateConvergence.md'
+  issues = '#32246'
+
+  [steady_state]
+    type = CSVDiff
+    input = 'steady_state.i'
+    csvdiff = 'steady_state.csv'
+    requirement = 'The system shall be able to terminate a transient according to a post-processor value.'
+  []
+[]

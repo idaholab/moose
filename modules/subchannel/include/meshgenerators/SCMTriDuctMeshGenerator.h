@@ -42,8 +42,7 @@ protected:
   void ductXsec(std::vector<Point> & xsec,
                 const std::vector<Point> & corners,
                 unsigned int nrings,
-                Real pitch,
-                Real flat_to_flat) const;
+                Real pitch) const;
 
   /**
    * Calculates all the point/node positions that will be used to form elements

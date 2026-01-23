@@ -9,9 +9,7 @@
 
 #include "KokkosNodalKernel.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -68,5 +66,4 @@ NodalKernel::computeJacobian()
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

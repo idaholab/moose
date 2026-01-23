@@ -12,9 +12,7 @@
 #include "KokkosArray.h"
 #include "KokkosThread.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 void
@@ -149,5 +147,4 @@ template class Array<Real, 1, uint16_t, LayoutType::LEFT>;
 template class Array<Real, 1, uint32_t, LayoutType::LEFT>;
 template class Array<Real, 1, uint64_t, LayoutType::LEFT>;
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

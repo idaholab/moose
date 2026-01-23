@@ -19,6 +19,8 @@ ExampleCSGInfiniteSquareMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<Real>("side_length", "Side length of infinite square.");
+  params.addParam<MeshGeneratorName>(
+      "fill", "optional input lattice mesh generator to fill generated cell with.");
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;
@@ -26,8 +28,16 @@ ExampleCSGInfiniteSquareMeshGenerator::validParams()
 
 ExampleCSGInfiniteSquareMeshGenerator::ExampleCSGInfiniteSquareMeshGenerator(
     const InputParameters & params)
-  : MeshGenerator(params), _side_length(getParam<Real>("side_length"))
+  : MeshGenerator(params),
+    _side_length(getParam<Real>("side_length")),
+    _input_fill_name(isParamValid("fill") ? getParam<MeshGeneratorName>("fill") : ""),
+    _has_fill(isParamValid("fill"))
 {
+  if (_has_fill)
+  {
+    _input_fill_mg_ptr = &getMesh("fill");
+    _input_fill_csg = &getCSGBase("fill");
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -91,8 +101,20 @@ ExampleCSGInfiniteSquareMeshGenerator::generateCSG()
 
   // create the cell defined by the surfaces and region just created
   const auto cell_name = mg_name + "_square_cell";
-  const auto material_name = "square_material";
-  csg_obj->createCell(cell_name, material_name, region);
+  // determine fill: either from input fill mesh generator or default material
+  if (_has_fill)
+  {
+    // join the fill CSGBase into the current CSGBase & use the lattice as the fill
+    csg_obj->joinOtherBase(std::move(*_input_fill_csg));
+    // assume input MG is a lattice type for sake of this example/test
+    const CSG::CSGLattice & lattice = csg_obj->getLatticeByName(_input_fill_name + "_lattice");
+    csg_obj->createCell(cell_name, lattice, region);
+  }
+  else // default material fill
+  {
+    const auto material_name = "square_material";
+    csg_obj->createCell(cell_name, material_name, region);
+  }
 
   return csg_obj;
 }

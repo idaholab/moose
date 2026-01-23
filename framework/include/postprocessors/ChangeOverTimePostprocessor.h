@@ -37,6 +37,9 @@ protected:
   /// option to take the absolute value of the change
   const bool _take_absolute_value;
 
+  /// option to divide by the time step size
+  const bool _divide_by_dt;
+
   /// current post-processor value
   const PostprocessorValue & _pps_value;
 

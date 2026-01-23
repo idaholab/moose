@@ -16,9 +16,7 @@
 #include "MooseVariableBase.h"
 #include "ResidualObject.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -376,5 +374,4 @@ ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) co
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

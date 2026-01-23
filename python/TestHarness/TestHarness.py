@@ -857,13 +857,6 @@ class TestHarness:
         if not self.finished_jobs:
             print('No tests ran')
 
-        # If something failed or verbosity is requested, print combined results
-        if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print(header('Final Test Results'))
-            sorted_jobs = sorted(self.finished_jobs, key=lambda job: job.getJointStatus().sort_value)
-            for job in sorted_jobs:
-                print((util.formatJobResult(job, self.options, caveats=True)))
-
         # Longest jobs and longest folders
         if not self.options.dry_run and self.options.longest_jobs:
             longest_jobs = self.getLongestJobs(self.options.longest_jobs)
@@ -902,6 +895,12 @@ class TestHarness:
             print(header('Parser Errors'))
             for err in self.parse_errors:
                 print(err)
+
+        # Print out failed tests with final status, if any
+        if (failed_jobs := [j for j in self.finished_jobs if j.isFail()]):
+            print(header('Failed Tests'))
+            for job in failed_jobs:
+                print((util.formatJobResult(job, self.options, caveats=True)))
 
         time_total = (datetime.datetime.now() - self.start_time).total_seconds()
         stats = self.getStats(time_total)

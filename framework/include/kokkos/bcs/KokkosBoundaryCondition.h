@@ -13,9 +13,7 @@
 
 #pragma once
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -38,5 +36,4 @@ public:
   BoundaryCondition(const BoundaryCondition & object);
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

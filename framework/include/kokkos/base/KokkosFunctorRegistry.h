@@ -12,9 +12,7 @@
 #include "KokkosFunctorWrapper.h"
 #include "KokkosFunctionWrapper.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class FunctorRegistryEntryBase
@@ -151,8 +149,7 @@ private:
   std::map<std::string, std::unique_ptr<FunctionRegistryEntryBase>> _functions;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
 
 #define registerKokkosFunction(app, classname)                                                     \
   registerMooseObject(app, classname);                                                             \

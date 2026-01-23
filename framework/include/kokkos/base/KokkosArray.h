@@ -31,9 +31,7 @@ public:                                                                         
   using ArrayBase<T, dimension, index_type>::offset;                                               \
   using ArrayBase<T, dimension, index_type>::operator=
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 // This function simply calls ::Kokkos::kokkos_free, but it is separately defined in KokkosArray.K
@@ -1800,5 +1798,4 @@ using Array4D = Array<T, 4, index_type, layout>;
 template <typename T, typename index_type = dof_id_type, LayoutType layout = LayoutType::LEFT>
 using Array5D = Array<T, 5, index_type, layout>;
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

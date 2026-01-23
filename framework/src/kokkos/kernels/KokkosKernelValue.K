@@ -9,9 +9,7 @@
 
 #include "KokkosKernelValue.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -23,5 +21,4 @@ KernelValue::validParams()
 
 KernelValue::KernelValue(const InputParameters & parameters) : Kernel(parameters) {}
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

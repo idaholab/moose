@@ -46,6 +46,14 @@ protected:
    */
   MeshMetaDataInterface(MooseApp & moose_app);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MeshMetaDataInterface(const MeshMetaDataInterface & object,
+                        const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * Method for retrieving a property with the given type and name exists in the mesh meta-data
    * store. This method will throw an error if the property does not exist.

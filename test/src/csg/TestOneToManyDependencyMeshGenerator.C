@@ -73,5 +73,13 @@ TestOneToManyDependencyMeshGenerator::generateCSG()
       csg_obj->renameUniverse(univ, new_univ_name);
     }
 
+  // Get all lattices in base object and rename them
+  for (const auto & lattice : csg_obj->getAllLattices())
+  {
+    const auto lattice_name = lattice.get().getName();
+    const auto new_lattice_name = lattice_name + "_copy_" + std::to_string(_copy_id);
+    csg_obj->renameLattice(lattice, new_lattice_name);
+  }
+
   return csg_obj;
 }

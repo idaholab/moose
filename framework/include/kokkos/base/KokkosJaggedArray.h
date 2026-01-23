@@ -11,9 +11,7 @@
 
 #include "KokkosArray.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -576,5 +574,4 @@ public:
 };
 ///@}
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

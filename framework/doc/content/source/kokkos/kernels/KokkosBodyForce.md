@@ -5,7 +5,7 @@
 This is the Kokkos version of [BodyForce](BodyForce.md). See the original document for details.
 
 !alert note
-The original version supports functions, but the Kokkos version does not support functions yet.
+Kokkos-MOOSE does not fully support functions yet. Therefore, [!param](/Kernels/BodyForce/function) is not available.
 
 ## Example Syntax
 

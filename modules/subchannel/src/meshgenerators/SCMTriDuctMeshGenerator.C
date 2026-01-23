@@ -66,7 +66,7 @@ SCMTriDuctMeshGenerator::generate()
   std::vector<Point> corners;
   ductCorners(corners, _flat_to_flat, Point(0, 0, 0));
   std::vector<Point> xsec;
-  ductXsec(xsec, corners, _n_rings, _pitch, _flat_to_flat);
+  ductXsec(xsec, corners, _n_rings, _pitch);
   std::vector<Point> points;
   ductPoints(points, xsec, _z_grid);
   std::vector<std::vector<size_t>> elem_point_indices;
@@ -103,24 +103,46 @@ void
 SCMTriDuctMeshGenerator::ductXsec(std::vector<Point> & xsec,
                                   const std::vector<Point> & corners,
                                   unsigned int nrings,
-                                  Real pitch,
-                                  Real flat_to_flat) const
+                                  Real pitch) const
 {
   xsec.clear();
 
-  Real r_corner = flat_to_flat / 2. / std::cos(libMesh::pi / 6.);
-  Real start_offset = (r_corner - (nrings - 2) * pitch) * std::sin(libMesh::pi / 6.);
-  Real side_length = (corners[0] - corners[1]).norm();
+  if (pitch <= 0.0)
+    mooseError("The 'pitch' must be > 0.");
+
+  if (nrings < 2)
+    mooseError("The 'nrings' must be >= 2.");
+
+  // Side length of the regular hexagon (distance between adjacent corners)
+  const Real side_length = (corners[0] - corners[1]).norm();
+
+  // start_offset = (hexagon_side - (nrings - 2)*pitch) / 2
+  const Real start_offset = 0.5 * (side_length - (nrings - 2) * pitch);
+
+  // If this is negative, the requested layout cannot fit.
+  if (start_offset < 0.0)
+    mooseError("SCMTriDuctMeshGenerator: computed start_offset is negative (",
+               start_offset,
+               "). Check 'nrings', 'pitch', and duct side length.");
 
   for (size_t i = 0; i < corners.size(); i++)
   {
-    auto left = corners[i];
-    auto right = corners[(i + 1) % corners.size()];
+    const Point left = corners[i];
+    const Point right = corners[(i + 1) % corners.size()];
+
+    // Always include the left corner
     xsec.push_back(left);
-    auto direc = (right - left).unit();
-    for (Real offset_from_corner = start_offset; offset_from_corner < side_length;
-         offset_from_corner += pitch)
+
+    // Unit direction along this side
+    const Point direc = (right - left).unit();
+
+    // Add exactly (nrings - 1) points after the left corner
+    // at start_offset + k*pitch, k = 0..(nrings-2)
+    for (const auto k : make_range(nrings - 1))
+    {
+      const Real offset_from_corner = start_offset + k * pitch;
       xsec.push_back(left + direc * offset_from_corner);
+    }
   }
 }
 

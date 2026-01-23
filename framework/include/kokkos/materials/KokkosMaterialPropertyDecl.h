@@ -18,9 +18,7 @@
 class MooseMesh;
 class MaterialBase;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 class MaterialPropertyStorage;
@@ -286,5 +284,4 @@ struct ArrayDeepCopy<MaterialProperty<T, dimension>>
   static constexpr bool value = true;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
