@@ -501,7 +501,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 }
 
 mfem::Operator &
-EquationSystem::GetGradient(const mfem::Vector & x) const
+EquationSystem::GetGradient(const mfem::Vector &) const
 {
   return *_jacobian;
 }
