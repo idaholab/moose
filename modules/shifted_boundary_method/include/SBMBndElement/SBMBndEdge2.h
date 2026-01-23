@@ -18,11 +18,11 @@ public:
   /// Constructor
   explicit SBMBndEdge2(const Elem * elem);
 
-  /// Check if a line segment (a-b) intersects this edge
-  bool intercepted(const Point & a, const Point & b) const override;
+  /// Check if a line segment intersects this edge
+  bool intercepted(const LineSegment & line_segment) const override;
 
   /// Compute the bounding ball (circle) of the edge
-  std::pair<Point, Real> computeBoundingBall() const override;
+  Ball computeBoundingBall() const override;
 
 protected:
   /// Compute the outward normal vector of the edge (2D)
