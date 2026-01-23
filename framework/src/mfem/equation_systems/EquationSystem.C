@@ -284,6 +284,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
   _h_blocks = nullptr;
+  trueRHS.SyncFromBlocks();
   trueRHS = 0.0;
 
   for (const auto i : index_range(_test_var_names))
