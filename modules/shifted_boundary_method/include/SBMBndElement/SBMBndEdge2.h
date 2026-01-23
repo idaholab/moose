@@ -11,9 +11,6 @@
 
 #include "SBMBndElementBase.h"
 
-class Ball;
-class LineSegment;
-
 /// Derived class for 2-node edge elements
 class SBMBndEdge2 : public SBMBndElementBase
 {

@@ -9,11 +9,7 @@
 
 #pragma once
 
-class LineSegment;
-
 #include "SBMBndElementBase.h"
-
-class Ball;
 
 /// Derived class for 3-node triangular elements (Tri3)
 class SBMBndTri3 : public SBMBndElementBase

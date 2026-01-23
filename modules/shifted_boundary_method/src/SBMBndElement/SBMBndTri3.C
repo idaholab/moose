@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndTri3.h"
-#include "Ball.h"
 #include "LineSegment.h"
+#include "Ball.h"
 
 SBMBndTri3::SBMBndTri3(const Elem * elem) : SBMBndElementBase(elem)
 {

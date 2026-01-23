@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndEdge2.h"
-#include "Ball.h"
 #include "LineSegment.h"
+#include "Ball.h"
 
 SBMBndEdge2::SBMBndEdge2(const Elem * elem) : SBMBndElementBase(elem)
 {
