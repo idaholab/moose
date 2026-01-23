@@ -397,7 +397,7 @@ EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rh
   // This uses dummy arguments
   // for the vectors
   FormLinearSystem(_jacobian, x, rhs);
-};
+}
 
 void
 EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
@@ -440,7 +440,7 @@ void
 CopyVec(const mfem::Vector & x, mfem::Vector & y)
 {
   y = x;
-};
+}
 
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
