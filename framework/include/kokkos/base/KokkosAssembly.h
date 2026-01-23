@@ -19,9 +19,7 @@
 
 class FEProblemBase;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -520,5 +518,4 @@ private:
   const Assembly _assembly_device;
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

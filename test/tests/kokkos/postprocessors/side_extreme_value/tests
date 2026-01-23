@@ -1,0 +1,41 @@
+[Tests]
+  design = 'KokkosSideExtremeValue.md'
+  issues = '#30655'
+
+  [side_extreme]
+    requirement = 'The Kokkos system shall compute the extreme (min/max) values over a side'
+    [nonlinear_variable]
+      type = 'CSVDiff'
+      input = 'kokkos_nonlinear_variable.i'
+      csvdiff = 'kokkos_nonlinear_variable_out.csv'
+      detail = 'for a nonlinear variable,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [nonlinear_variable_proxy]
+      type = 'CSVDiff'
+      input = 'kokkos_nonlinear_variable_proxy.i'
+      csvdiff = 'kokkos_nonlinear_variable_proxy_out.csv'
+      detail = 'for a nonlinear variable using a proxy variable,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [aux_nodal]
+      type = 'CSVDiff'
+      input = 'kokkos_aux_nodal.i'
+      csvdiff = 'kokkos_aux_nodal_out.csv'
+      detail = 'for an auxiliary nodal variable,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [aux_elemental]
+      type = 'CSVDiff'
+      input = 'kokkos_aux_nodal.i'
+      csvdiff = 'kokkos_aux_elemental_out.csv'
+      cli_args = 'AuxVariables/aux/family=MONOMIAL Outputs/file_base=kokkos_aux_elemental_out'
+      detail = 'for an auxiliary elemental variable.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

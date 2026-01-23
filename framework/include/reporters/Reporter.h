@@ -50,6 +50,14 @@ public:
   static InputParameters validParams();
   Reporter(const MooseObject * moose_object);
   virtual ~Reporter() = default;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  Reporter(const Reporter & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   virtual void store(nlohmann::json & json) const;
 
   /**

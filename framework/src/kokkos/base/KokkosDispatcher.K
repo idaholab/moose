@@ -9,9 +9,7 @@
 
 #include "KokkosDispatcher.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 DispatcherRegistry &
@@ -23,5 +21,4 @@ DispatcherRegistry::getRegistry()
   return *registry;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

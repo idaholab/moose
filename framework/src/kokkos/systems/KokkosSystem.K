@@ -17,9 +17,7 @@
 
 #include "libmesh/system.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 System::System(SystemBase & system)
@@ -436,9 +434,6 @@ System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 void
 System::setActiveSolutionTags(const std::set<TagID> & tags)
 {
-  if (!_active_variables.size())
-    return;
-
   std::set<TagID> active_solution_tags;
 
   for (auto tag : tags)
@@ -571,5 +566,4 @@ System::operator()(const ThreadID tid) const
   getVectorQpGrad(info, qp_offset + qp, var, tag) = grad;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

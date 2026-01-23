@@ -17,9 +17,7 @@
 
 using ThreadID = dof_id_type;
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -73,5 +71,4 @@ protected:
   ThreadID _strides[10];
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

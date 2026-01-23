@@ -13,9 +13,7 @@
 #include "KokkosMaterialPropertyDecl.h"
 #include "KokkosDatum.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 template <typename T, unsigned int dimension>
@@ -86,5 +84,4 @@ MaterialPropertyValue<T, 0>::operator=(const MaterialPropertyValue<T, 0> & value
   return *this;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

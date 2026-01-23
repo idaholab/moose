@@ -40,6 +40,13 @@ public:
 
   virtual ~VectorPostprocessor() = default;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  VectorPostprocessor(const VectorPostprocessor & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * Returns the name of the VectorPostprocessor.
    */

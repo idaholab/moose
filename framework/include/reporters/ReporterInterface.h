@@ -25,6 +25,13 @@ public:
   static InputParameters validParams();
   ReporterInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ReporterInterface(const ReporterInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
 protected:
   ///@{
   /**

@@ -15,9 +15,7 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -54,5 +52,4 @@ KernelBase::KernelBase(const KernelBase & object)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

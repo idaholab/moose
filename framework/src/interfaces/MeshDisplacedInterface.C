@@ -23,3 +23,11 @@ MeshDisplacedInterface::MeshDisplacedInterface(const InputParameters & params)
 {
   _mdi_feproblem.notifyWhenMeshDisplaces(this);
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+MeshDisplacedInterface::MeshDisplacedInterface(const MeshDisplacedInterface & object,
+                                               const Moose::Kokkos::FunctorCopy &)
+  : _mdi_feproblem(object._mdi_feproblem)
+{
+}
+#endif

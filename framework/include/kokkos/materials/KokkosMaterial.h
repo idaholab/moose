@@ -26,9 +26,7 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -265,5 +263,4 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

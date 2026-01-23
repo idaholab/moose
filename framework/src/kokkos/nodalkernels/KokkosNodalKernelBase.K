@@ -9,9 +9,7 @@
 
 #include "KokkosNodalKernelBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -42,5 +40,4 @@ NodalKernelBase::NodalKernelBase(const NodalKernelBase & object)
 {
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

@@ -17,9 +17,7 @@
 
 #include "AuxKernelBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -323,5 +321,4 @@ AuxKernel::setNodeSolution(const Real value,
   sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, 0, var_num), tag) = value;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

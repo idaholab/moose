@@ -12,9 +12,7 @@
 #include "SystemBase.h"
 #include "FEProblemBase.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 void
@@ -82,5 +80,4 @@ Variable::init(const std::vector<Real> & values, CoupleableKey)
   _default_value = values;
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

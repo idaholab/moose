@@ -15,9 +15,7 @@
 #include "MaterialPropertyInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -42,5 +40,4 @@ public:
   KernelBase(const KernelBase & object);
 };
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

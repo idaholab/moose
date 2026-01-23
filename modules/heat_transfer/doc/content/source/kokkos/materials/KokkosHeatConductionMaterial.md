@@ -5,7 +5,7 @@
 This is the Kokkos version of [HeatConductionMaterial](HeatConductionMaterial.md). See the original document for details.
 
 !alert note
-Kokkos-MOOSE does not support functions yet. Therefore, [!param](/Materials/HeatConductionMaterial/thermal_conductivity_temperature_function) and [!param](/Materials/HeatConductionMaterial/specific_heat_temperature_function) in the original [HeatConductionMaterial.md] are not available in the Kokkos version.
+Kokkos-MOOSE does not fully support functions yet. Therefore, [!param](/Materials/HeatConductionMaterial/thermal_conductivity_temperature_function) and [!param](/Materials/HeatConductionMaterial/specific_heat_temperature_function) are not available.
 
 ## Example Syntax
 

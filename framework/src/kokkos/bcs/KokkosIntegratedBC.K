@@ -9,9 +9,7 @@
 
 #include "KokkosIntegratedBC.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -72,5 +70,4 @@ IntegratedBC::computeJacobian()
   }
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

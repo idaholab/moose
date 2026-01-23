@@ -1,0 +1,24 @@
+[Tests]
+  design = 'ElementExtremeValue.md'
+  issues = '#30655'
+
+  [elemental_extreme]
+    requirement = 'The Kokkos system shall compute the value of an elemental field variable at the point where'
+    [value]
+      type = 'Exodiff'
+      input = 'kokkos_element_extreme_value.i'
+      exodiff = 'kokkos_element_extreme_value_out.e'
+      detail = 'the variable reaches the extreme (max/min) value and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [proxy]
+      type = 'CSVDiff'
+      input = 'kokkos_element_proxy_extreme_value.i'
+      csvdiff = 'kokkos_element_proxy_extreme_value_out.csv'
+      detail = 'the proxy variable reaches the extreme (max/min) value.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

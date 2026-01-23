@@ -9,9 +9,7 @@
 
 #include "KokkosFunction.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -51,5 +49,4 @@ Function::~Function()
   _wrapper_host->freeFunction();
 }
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

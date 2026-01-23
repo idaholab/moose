@@ -9,9 +9,7 @@
 
 #include "KokkosKernelGrad.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 InputParameters
@@ -23,5 +21,4 @@ KernelGrad::validParams()
 
 KernelGrad::KernelGrad(const InputParameters & parameters) : Kernel(parameters) {}
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

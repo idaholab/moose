@@ -11,9 +11,7 @@
 
 #include "KokkosReferenceWrapper.h"
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 
 /**
@@ -61,5 +59,4 @@ public:
 // Mimic MOOSE convention
 using PostprocessorValue = Scalar<const PostprocessorValue>;
 
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos

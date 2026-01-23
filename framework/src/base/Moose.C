@@ -192,6 +192,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_mesh_division",            MeshDivision,              false);
   registerMooseObjectTask("add_user_object",              UserObject,                false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
+
   appendDeprecatedMooseObjectTask("add_user_object",      Corrector);
   registerMooseObjectTask("add_corrector",                Corrector,                 false);
   appendDeprecatedMooseObjectTask("add_user_object",      MeshModifier);
@@ -200,6 +201,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_postprocessor",            Postprocessor,             false);
   registerMooseObjectTask("add_vector_postprocessor",     VectorPostprocessor,       false);
   registerMooseObjectTask("add_reporter",                 Reporter,                  false);
+
   registerMooseObjectTask("add_positions",                Positions,                 false);
   registerMooseObjectTask("add_times",                    Times,                     false);
 
@@ -696,8 +698,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // UserObject and some derived classes
   registerSyntax("AddUserObjectAction", "UserObjects/*");
   syntax.registerSyntaxType("UserObjects/*", "UserObjectName");
+
   registerSyntax("AddCorrectorAction", "Correctors/*");
   syntax.registerSyntaxType("Correctors/*", "UserObjectName");
+
   registerSyntax("AddMeshModifiersAction", "MeshModifiers/*");
   syntax.registerSyntaxType("MeshModifiers/*", "UserObjectName");
 

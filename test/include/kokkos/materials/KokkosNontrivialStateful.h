@@ -17,17 +17,14 @@ public:
   NotTriviallyCopyable & operator=(const NotTriviallyCopyable &) { return *this; }
 };
 
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 template <>
 struct ArrayDeepCopy<NotTriviallyCopyable>
 {
   static constexpr bool value = true;
 };
-} // namespace Kokkos
-} // namespace Moose
+} // namespace Moose::Kokkos
 
 class KokkosNontrivialStateful : public Moose::Kokkos::Material
 {

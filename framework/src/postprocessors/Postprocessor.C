@@ -16,8 +16,7 @@
 InputParameters
 Postprocessor::validParams()
 {
-  InputParameters params = UserObject::validParams();
-  params += OutputInterface::validParams();
+  InputParameters params = OutputInterface::validParams();
   params += NonADFunctorInterface::validParams();
 
   params.addParamNamesToGroup("outputs", "Advanced");
@@ -34,6 +33,18 @@ Postprocessor::Postprocessor(const MooseObject * moose_object)
     _pp_moose_object(*moose_object)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+Postprocessor::Postprocessor(const Postprocessor & object, const Moose::Kokkos::FunctorCopy & key)
+  : OutputInterface(object, key),
+    NonADFunctorInterface(object, key),
+    Moose::FunctorBase<Real>(object, key),
+    _pp_name(object._pp_name),
+    _current_value(object._current_value),
+    _pp_moose_object(object._pp_moose_object)
+{
+}
+#endif
 
 const PostprocessorValue &
 Postprocessor::declareValue(const MooseObject & moose_object)
