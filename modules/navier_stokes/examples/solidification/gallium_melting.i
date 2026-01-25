@@ -357,7 +357,6 @@ Ny = 50
   # Time-stepping parameters
   start_time = 0.0
   end_time = 200.0
-  num_steps = 2
 
   [TimeStepper]
     type = IterationAdaptiveDT

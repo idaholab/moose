@@ -34,7 +34,7 @@ where the Ergun coefficient is $C_F = 0.55$ and $\rho_l$ is the density of the l
 This material is compatible with [PINSFVMomentumFriction.md] for the non standard (simplified) formulation
 which multiplies the incoming Forchheimer coefficient by the velocity magnitude times velocity component;
 it is *incompatible* with the standard Forchheimer formulation which also multiplies with density over two. Thus the user should
-set the parameter "standard_friction_formulation = false"
+set the parameter "standard_friction_formulation = false" in this kernel or the flow physics.
 
 !syntax parameters /FunctorMaterials/INSFVMushyPorousFrictionFunctorMaterial
 
