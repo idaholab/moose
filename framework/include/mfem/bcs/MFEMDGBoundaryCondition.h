@@ -30,6 +30,7 @@ public:
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const std::string & getTrialVariableName() const { return _test_var_name; }
+
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   int _fe_order;

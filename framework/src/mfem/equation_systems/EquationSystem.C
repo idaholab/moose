@@ -123,7 +123,7 @@ EquationSystem::AddDGKernel(std::shared_ptr<MFEMDGKernel> kernel)
   {
     auto kernel_field_map =
         std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>>();
-    _dg_kernels_map.Register(test_var_name, std::move(kernel_field_map));    
+    _dg_kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
   // Register new kernels map if not present for the test/trial variable
   // pair
@@ -132,7 +132,7 @@ EquationSystem::AddDGKernel(std::shared_ptr<MFEMDGKernel> kernel)
     auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMDGKernel>>>();
     _dg_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
   }
-  _dg_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));  
+  _dg_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
 }
 
 void
@@ -155,9 +155,8 @@ EquationSystem::AddDGBC(std::shared_ptr<MFEMDGBoundaryCondition> bc)
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>();
     _dg_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
   }
-  _dg_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));  
+  _dg_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc));
 }
-
 
 void
 EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
@@ -542,7 +541,7 @@ EquationSystem::BuildLinearForms()
     auto lf = _lfs.GetShared(test_var_name);
     ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
-    
+
     // same with the dg stuff
     ApplyDomainDGLFIntegrators(test_var_name, lf, _dg_kernels_map);
     ApplyBoundaryDGLFIntegrators(test_var_name, lf, _dg_bc_map);
@@ -591,9 +590,9 @@ EquationSystem::BuildBilinearForms()
 
     // and the dg stuff too
     ApplyDomainDGBLFIntegrators<mfem::ParBilinearForm>(
-      test_var_name, test_var_name, blf, _dg_kernels_map);
+        test_var_name, test_var_name, blf, _dg_kernels_map);
     ApplyBoundaryDGBLFIntegrators<mfem::ParBilinearForm>(
-      test_var_name, test_var_name, blf, _dg_bc_map);
+        test_var_name, test_var_name, blf, _dg_bc_map);
     // Assemble
     blf->Assemble();
   }

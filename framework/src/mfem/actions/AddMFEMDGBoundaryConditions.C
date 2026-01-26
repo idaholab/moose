@@ -17,8 +17,7 @@ InputParameters
 AddMFEMDGBoundaryConditions::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription(
-      "Add in DG Kernel on the boundary");
+  params.addClassDescription("Add in DG Kernel on the boundary");
   return params;
 }
 
