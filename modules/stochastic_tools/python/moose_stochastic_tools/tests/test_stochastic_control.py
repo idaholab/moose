@@ -524,7 +524,7 @@ class TestStochasticControlRun(unittest.TestCase):
             qoi = rep[len(StochasticControl.qoi_storage_name) + 1 :].replace(":", "/")
             self.assertIn(qoi, qois)
             ind = qois.index(qoi)
-            return y_expected[:, ind]
+            return y_expected[:, ind].tolist()
 
         control.wait = mock.MagicMock()
         control.get_reporter = mock.MagicMock(side_effect=mock_reporter_value)
