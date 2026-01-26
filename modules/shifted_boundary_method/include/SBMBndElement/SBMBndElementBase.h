@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseMesh.h"
+#include "LineSegment.h"
 
 enum class IntersectionType
 {
@@ -19,7 +20,6 @@ enum class IntersectionType
 };
 
 class Ball;
-class LineSegment;
 
 /// Abstract base class for SBM boundary elements
 class SBMBndElementBase
@@ -34,7 +34,7 @@ public:
   /**
    * Check if the given line segment intersects this boundary element.
    */
-  virtual bool intercepted(const LineSegment & line_segment) const = 0;
+  virtual bool intersect(const LineSegment & line_segment) const = 0;
 
   /// Getter for the underlying element
   const Elem & elem() const { return *_elem; }

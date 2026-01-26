@@ -19,9 +19,6 @@ using namespace libMesh;
  *
  * - In 2D: represents a circle
  * - In 3D: represents a sphere
- *
- * Intended for bounding / broad-phase operations rather than
- * a full geometric surface representation.
  */
 class Ball
 {

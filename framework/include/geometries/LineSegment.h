@@ -88,6 +88,11 @@ public:
    */
   Real length() const { return (_p0 - _p1).norm(); }
 
+  /**
+   * normal vector of the line segment
+   */
+  Point normal() const;
+
 private:
   bool closest_point(const Point & p, bool clamp_to_segment, Point & closest_p) const;
 

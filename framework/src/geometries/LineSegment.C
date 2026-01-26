@@ -140,21 +140,38 @@ LineSegment::intersect(const LineSegment & l, Point & intersect_p) const
 
   RealVectorValue v = a.cross(b);
 
-  // Check for parallel lines
-  if (std::abs(v.norm()) < 1.e-10 && std::abs(c.cross(a).norm()) < 1.e-10)
+  const auto tol = 1.e-10;
+
+  // Parallel lines check
+  if (v.norm() < tol)
   {
-    // TODO: The lines are co-linear but more work is needed to determine and intersection point
-    //       it could be the case that the line segments don't lie on the same line or overlap only
-    //       a bit
+    // Parallel but not collinear: no intersection
+    if (c.cross(a).norm() >= tol)
+      return false;
+
+    // Collinear: segments overlap if any endpoint lies on the other segment
+    const bool overlap = this->contains_point(l._p0) || this->contains_point(l._p1) ||
+                         l.contains_point(_p0) || l.contains_point(_p1);
+
+    if (!overlap)
+      return false;
+
+    // Pick a deterministic intersection point on the overlap
+    if (this->contains_point(l._p0))
+      intersect_p = l._p0;
+    else if (this->contains_point(l._p1))
+      intersect_p = l._p1;
+    else if (l.contains_point(_p0))
+      intersect_p = _p0;
+    else
+      intersect_p = _p1;
+
     return true;
   }
 
   // Check that the lines are coplanar
   Real concur = c * (a.cross(b));
   if (std::abs(concur) > 1.e-10)
-    return false;
-
-  if (v.is_zero())
     return false;
 
   Real s = (c.cross(b) * v) / (v * v);
@@ -257,4 +274,16 @@ to_json(nlohmann::json & json, const LineSegment & l)
 {
   to_json(json["start"], l.start());
   to_json(json["end"], l.end());
+}
+
+Point
+LineSegment::normal() const
+{
+  const auto tangent = _p1 - _p0;
+
+  // Rotate 90 degrees counter-clockwise (2D)
+  Point n(-tangent(1), tangent(0), 0.0);
+  n /= n.norm();
+
+  return n;
 }

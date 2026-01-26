@@ -54,13 +54,13 @@ TEST(SBMBndElementTest, Edge2Normal)
   Point a(0.5, -1.0, 0.0);
   Point b(0.5, 1.0, 0.0);
   LineSegment line_segment_ab(a, b);
-  EXPECT_TRUE(bnd_edge.intercepted(line_segment_ab));
+  EXPECT_TRUE(bnd_edge.intersect(line_segment_ab));
 
   // Line parallel, no intercept
   Point c(0.0, 1.0, 0.0);
   Point d(1.0, 1.0, 0.0);
   LineSegment line_segment_cd(c, d);
-  EXPECT_FALSE(bnd_edge.intercepted(line_segment_cd));
+  EXPECT_FALSE(bnd_edge.intersect(line_segment_cd));
 
   // Check distance vector
   Point pt(0.5, 1.0, 0.0);
@@ -91,13 +91,13 @@ TEST(SBMBndElementTest, Tri3Normal)
   Point a(0.3, 0.3, -1.0);
   Point b(0.3, 0.3, 1.0);
   LineSegment line_segment_ab(a, b);
-  EXPECT_TRUE(bnd_tri.intercepted(line_segment_ab));
+  EXPECT_TRUE(bnd_tri.intersect(line_segment_ab));
 
   // Line away from triangle
   Point c(2.0, 2.0, -1.0);
   Point d(2.0, 2.0, 1.0);
   LineSegment line_segment_cd(c, d);
-  EXPECT_FALSE(bnd_tri.intercepted(line_segment_cd));
+  EXPECT_FALSE(bnd_tri.intersect(line_segment_cd));
 
   // Check distance vector roughly in +Z
   Point pt(0.3, 0.3, 1.0);
@@ -128,13 +128,13 @@ TEST(SBMBndElementTest, Edge2NormalTilted)
   Point a(0.5, 0.0, 0.0);
   Point b(0.5, 1.0, 0.0);
   LineSegment line_segment_ab(a, b);
-  EXPECT_TRUE(bnd_edge.intercepted(line_segment_ab));
+  EXPECT_TRUE(bnd_edge.intersect(line_segment_ab));
 
   // Line outside
   Point c(1.5, 1.0, 0.0);
   Point d(1.5, 2.0, 0.0);
   LineSegment line_segment_cd(c, d);
-  EXPECT_FALSE(bnd_edge.intercepted(line_segment_cd));
+  EXPECT_FALSE(bnd_edge.intersect(line_segment_cd));
 
   // Check distance vector direction
   Point pt(0.5, 0.0, 0.0); // Point below edge
@@ -169,13 +169,13 @@ TEST(SBMBndElementTest, Tri3NormalTilted)
   Point a(0.3, 0.3, -1.0);
   Point b(0.3, 0.3, 2.0);
   LineSegment line_segment_ab(a, b);
-  EXPECT_TRUE(bnd_tri.intercepted(line_segment_ab));
+  EXPECT_TRUE(bnd_tri.intersect(line_segment_ab));
 
   // Line away from triangle
   Point c(2.0, 2.0, -1.0);
   Point d(2.0, 2.0, 2.0);
   LineSegment line_segment_cd(c, d);
-  EXPECT_FALSE(bnd_tri.intercepted(line_segment_cd));
+  EXPECT_FALSE(bnd_tri.intersect(line_segment_cd));
 
   // Check distance vector
   Point pt(2.0, 0.0, 2.0);

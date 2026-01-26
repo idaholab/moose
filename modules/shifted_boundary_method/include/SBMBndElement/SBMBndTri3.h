@@ -10,16 +10,17 @@
 #pragma once
 
 #include "SBMBndElementBase.h"
+#include "Triangle.h"
 
 /// Derived class for 3-node triangular elements (Tri3)
-class SBMBndTri3 : public SBMBndElementBase
+class SBMBndTri3 : public SBMBndElementBase, public Triangle
 {
 public:
   /// Constructor
   explicit SBMBndTri3(const Elem * elem);
 
   /// Check if a line segment intersects this triangle
-  bool intercepted(const LineSegment & line_segment) const override;
+  bool intersect(const LineSegment & line_segment) const override;
 
   /**
    * Compute the bounding ball (sphere) of the triangle

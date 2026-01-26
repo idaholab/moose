@@ -8,10 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndTri3.h"
-#include "LineSegment.h"
 #include "Ball.h"
 
-SBMBndTri3::SBMBndTri3(const Elem * elem) : SBMBndElementBase(elem)
+SBMBndTri3::SBMBndTri3(const Elem * elem)
+  : SBMBndElementBase(elem), Triangle(elem->point(0), elem->point(1), elem->point(2))
 {
   mooseAssert(elem->type() == TRI3, "Element must be of type TRI3");
 }
@@ -19,17 +19,7 @@ SBMBndTri3::SBMBndTri3(const Elem * elem) : SBMBndElementBase(elem)
 const Point
 SBMBndTri3::computeNormal() const
 {
-  const auto & p0 = _elem->point(0);
-  const auto & p1 = _elem->point(1);
-  const auto & p2 = _elem->point(2);
-
-  const auto v1 = p1 - p0;
-  const auto v2 = p2 - p0;
-
-  auto n = v1.cross(v2);
-  n /= n.norm();
-
-  return n;
+  return Triangle::normal();
 }
 
 Ball
@@ -59,49 +49,8 @@ SBMBndTri3::computeBoundingBall() const
 }
 
 bool
-SBMBndTri3::intercepted(const LineSegment & line_segment) const
+SBMBndTri3::intersect(const LineSegment & line_segment) const
 {
-  const auto & a = line_segment.start();
-  const auto & b = line_segment.end();
-
-  // (a) Build basic vectors and choose a robust tolerance
-  const Point dir = b - a;
-  const Point v0 = _elem->point(0);
-  const Point v1 = _elem->point(1);
-  const Point v2 = _elem->point(2);
-
-  const Point edge1 = v1 - v0;
-  const Point edge2 = v2 - v0;
-  constexpr Real eps = libMesh::TOLERANCE;
-
-  // (b) Test for parallel or degenerate configuration
-  const Point pvec = dir.cross(edge2);
-  const Real det = edge1 * pvec;
-  if (std::abs(det) < eps)
-    return false; // ray nearly parallel to triangle
-
-  const Real inv_det = 1.0 / det;
-
-  // (c) Compute barycentric coordinate u and check 0 <= u <= 1
-  const Point tvec = a - v0;
-  const Real u = (tvec * pvec) * inv_det;
-  if (!MooseUtils::absoluteFuzzyGreaterEqual(u, 0.0, eps) ||
-      !MooseUtils::absoluteFuzzyLessEqual(u, 1.0, eps))
-    return false;
-
-  // (d) Compute barycentric coordinate v and check 0 <= v and u + v <= 1
-  const Point qvec = tvec.cross(edge1);
-  const Real v = (dir * qvec) * inv_det;
-  if (!MooseUtils::absoluteFuzzyGreaterEqual(v, 0.0, eps) ||
-      !MooseUtils::absoluteFuzzyLessEqual(u + v, 1.0, eps))
-    return false;
-
-  // (e) Locate intersection along line segment (0 <= t <= 1 constrains to a--b)
-  const Real t = (edge2 * qvec) * inv_det;
-  if (!MooseUtils::absoluteFuzzyGreaterEqual(t, 0.0, eps) ||
-      !MooseUtils::absoluteFuzzyLessEqual(t, 1.0, eps))
-    return false;
-
-  // (f) Intersection lies inside both the triangle and the segment
-  return true;
+  Point p;
+  return Triangle::intersect(line_segment, p);
 }
