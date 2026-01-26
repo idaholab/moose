@@ -23,8 +23,13 @@ protected:
   virtual void init() override;
   virtual void check() const override;
 
+  virtual bool supportsPassiveTransport() const { return false; }
+
   // Numerical flux user object names
   std::vector<UserObjectName> _numerical_flux_names;
+
+  /// Passive transport variables on the connected flow channels
+  std::vector<VariableName> _passives_names;
 
 public:
   static InputParameters validParams();
