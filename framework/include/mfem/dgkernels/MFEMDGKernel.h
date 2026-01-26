@@ -40,7 +40,6 @@ protected:
   mfem::ConstantCoefficient _zero;
   mfem::real_t _sigma;
   mfem::real_t _kappa;
-
 };
 
 #endif
