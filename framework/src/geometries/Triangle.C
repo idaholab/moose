@@ -9,9 +9,8 @@
 
 #include "Triangle.h"
 #include "LineSegment.h"
-#include "MooseUtils.h"
 
-#include "libmesh/elem.h"
+using libMesh::Point;
 
 Triangle::Triangle(const Point & p0, const Point & p1, const Point & p2) : _p0(p0), _p1(p1), _p2(p2)
 {

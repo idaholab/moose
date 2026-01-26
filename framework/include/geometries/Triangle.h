@@ -11,12 +11,6 @@
 
 #include "libmesh/point.h"
 
-// forward declarations
-namespace libMesh
-{
-class Elem;
-}
-
 class LineSegment;
 
 /**
@@ -26,20 +20,20 @@ class Triangle
 {
 public:
   Triangle() = default;
-  Triangle(const Point & p0, const Point & p1, const Point & p2);
+  Triangle(const libMesh::Point & p0, const libMesh::Point & p1, const libMesh::Point & p2);
 
   virtual ~Triangle() = default;
 
   /**
    * Normal vector of the triangle.
    */
-  Point normal() const;
+  libMesh::Point normal() const;
 
   /**
    * Check if a line segment intersects this triangle.
    */
-  bool intersect(const LineSegment & l, Point & intersect_p) const;
+  bool intersect(const LineSegment & l, libMesh::Point & intersect_p) const;
 
 private:
-  Point _p0, _p1, _p2;
+  libMesh::Point _p0, _p1, _p2;
 };
