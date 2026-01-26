@@ -30,6 +30,10 @@ SIMPLESolveBase::validParams()
   params.addParam<std::vector<SolverSystemName>>(
       "passive_scalar_systems", {}, "The solver system for each scalar advection equation.");
   params.addParam<std::vector<SolverSystemName>>(
+      "pm_radiation_systems",
+      {},
+      "The solver system for each participating media radiation equation.");
+  params.addParam<std::vector<SolverSystemName>>(
       "turbulence_systems", {}, "The solver system for each surrogate turbulence equation.");
 
   /*
@@ -286,6 +290,57 @@ SIMPLESolveBase::validParams()
       "passive_scalar Equation");
 
   /*
+   * Parameters to control the solution of each participating media radiation equation
+   */
+  params.addParam<std::vector<Real>>(
+      "pm_radiation_equation_relaxation",
+      std::vector<Real>(),
+      "The relaxation which should be used for the participating media radiation "
+      "equations. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+
+  params.addParam<MultiMooseEnum>(
+      "pm_radiation_petsc_options",
+      Moose::PetscSupport::getCommonPetscFlags(),
+      "Singleton PETSc options for the participating media radiation equation(s)");
+  params.addParam<MultiMooseEnum>(
+      "pm_radiation_petsc_options_iname",
+      Moose::PetscSupport::getCommonPetscKeys(),
+      "Names of PETSc name/value pairs for the participating media radiation equation(s)");
+  params.addParam<std::vector<std::string>>(
+      "pm_radiation_petsc_options_value",
+      "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\" for the "
+      "participating media radiation equation(s)");
+  params.addParam<std::vector<Real>>("pm_radiation_absolute_tolerance",
+                                     std::vector<Real>(),
+                                     "The absolute tolerance(s) on the normalized residual(s) of "
+                                     "the participating media radiation equation(s).");
+  params.addRangeCheckedParam<Real>(
+      "pm_radiation_l_tol",
+      1e-5,
+      "0.0<=pm_radiation_l_tol & pm_radiation_l_tol<1.0",
+      "The relative tolerance on the normalized residual in the "
+      "linear solver of the participating media radiation equation(s).");
+  params.addRangeCheckedParam<Real>(
+      "pm_radiation_l_abs_tol",
+      1e-10,
+      "0.0<pm_radiation_l_abs_tol",
+      "The absolute tolerance on the normalized residual in the "
+      "linear solver of the participating media radiation equation(s).");
+  params.addParam<unsigned int>("pm_radiation_l_max_its",
+                                10000,
+                                "The maximum allowed iterations in the linear solver of the "
+                                "participating media radiation equation.");
+
+  params.addParamNamesToGroup(
+      "pm_radiation_systems pm_radiation_equation_relaxation pm_radiation_petsc_options "
+      "pm_radiation_petsc_options_iname "
+      "pm_radiation_petsc_options_value pm_radiation_petsc_options_value "
+      "pm_radiation_absolute_tolerance "
+      "pm_radiation_l_tol pm_radiation_l_abs_tol pm_radiation_l_max_its",
+      "pm_radiation Equation");
+
+  /*
    * Parameters to control the solution of each turbulence system
    */
   params.addParam<std::vector<Real>>("turbulence_equation_relaxation",
@@ -384,6 +439,11 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _passive_scalar_equation_relaxation(
         getParam<std::vector<Real>>("passive_scalar_equation_relaxation")),
     _passive_scalar_l_abs_tol(getParam<Real>("passive_scalar_l_abs_tol")),
+    _pm_radiation_system_names(getParam<std::vector<SolverSystemName>>("pm_radiation_systems")),
+    _has_pm_radiation_systems(!_pm_radiation_system_names.empty()),
+    _pm_radiation_equation_relaxation(
+        getParam<std::vector<Real>>("pm_radiation_equation_relaxation")),
+    _pm_radiation_l_abs_tol(getParam<Real>("pm_radiation_l_abs_tol")),
     _turbulence_system_names(getParam<std::vector<SolverSystemName>>("turbulence_systems")),
     _has_turbulence_systems(!_turbulence_system_names.empty()),
     _turbulence_equation_relaxation(getParam<std::vector<Real>>("turbulence_equation_relaxation")),
@@ -396,6 +456,8 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _solid_energy_absolute_tolerance(getParam<Real>("solid_energy_absolute_tolerance")),
     _passive_scalar_absolute_tolerance(
         getParam<std::vector<Real>>("passive_scalar_absolute_tolerance")),
+    _pm_radiation_absolute_tolerance(
+        getParam<std::vector<Real>>("pm_radiation_absolute_tolerance")),
     _turbulence_absolute_tolerance(getParam<std::vector<Real>>("turbulence_absolute_tolerance")),
     _num_iterations(getParam<unsigned int>("num_iterations")),
     _continue_on_max_its(getParam<bool>("continue_on_max_its")),
@@ -488,6 +550,51 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
                                   "solid_energy_l_max_its",
                                   "solid_energy_absolute_tolerance",
                                   "solid_energy_equation_relaxation"},
+                                 false);
+
+  // We check for input errors with regards to the participating media radiation equations. At the
+  // same time, we set up the corresponding system numbers
+  if (_has_pm_radiation_systems)
+  {
+    if (_pm_radiation_system_names.size() != _pm_radiation_equation_relaxation.size())
+      paramError("pm_radiation_equation_relaxation",
+                 "The number of equation relaxation parameters does not match the number of "
+                 "participating media radiation equations!");
+    if (_pm_radiation_system_names.size() != _pm_radiation_absolute_tolerance.size())
+      paramError("pm_radiation_absolute_tolerance",
+                 "The number of absolute tolerances does not match the number of "
+                 "participating media radiation equations!");
+  }
+  if (_has_pm_radiation_systems)
+  {
+    const auto & pm_radiation_petsc_options =
+        getParam<MultiMooseEnum>("pm_radiation_petsc_options");
+    const auto & pm_radiation_petsc_pair_options = getParam<MooseEnumItem, std::string>(
+        "pm_radiation_petsc_options_iname", "pm_radiation_petsc_options_value");
+    Moose::PetscSupport::addPetscFlagsToPetscOptions(
+        pm_radiation_petsc_options, "", *this, _pm_radiation_petsc_options);
+    Moose::PetscSupport::addPetscPairsToPetscOptions(pm_radiation_petsc_pair_options,
+                                                     _problem.mesh().dimension(),
+                                                     "",
+                                                     *this,
+                                                     _pm_radiation_petsc_options);
+
+    _pm_radiation_linear_control.real_valued_data["rel_tol"] = getParam<Real>("pm_radiation_l_tol");
+    _pm_radiation_linear_control.real_valued_data["abs_tol"] =
+        getParam<Real>("pm_radiation_l_abs_tol");
+    _pm_radiation_linear_control.int_valued_data["max_its"] =
+        getParam<unsigned int>("pm_radiation_l_max_its");
+  }
+  else
+    checkDependentParameterError("pm_radiation_systems",
+                                 {"pm_radiation_petsc_options",
+                                  "pm_radiation_petsc_options_iname",
+                                  "pm_radiation_petsc_options_value",
+                                  "pm_radiation_l_tol",
+                                  "pm_radiation_l_abs_tol",
+                                  "pm_radiation_l_max_its",
+                                  "pm_radiation_equation_relaxation",
+                                  "pm_radiation_absolute_tolerance"},
                                  false);
 
   // We check for input errors with regards to the passive scalar equations. At the same time, we
