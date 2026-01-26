@@ -321,7 +321,7 @@ MFEMProblem::addDGKernel(const std::string & kernel_name,
   FEProblemBase::addUserObject(kernel_name, name, parameters);
   const UserObject * kernel_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMDGKernel*>(kernel_uo)!=nullptr)
+  if (dynamic_cast<const MFEMDGKernel *>(kernel_uo) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMDGKernel>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMDGKernel>(object_ptr);
@@ -352,7 +352,7 @@ MFEMProblem::addDGBoundaryCondition(const std::string & bc_name,
   FEProblemBase::addUserObject(bc_name, name, parameters);
   const UserObject * bc_uo = &(getUserObjectBase(name));
 
-  if (dynamic_cast<const MFEMDGBoundaryCondition*>(bc_uo)!=nullptr)
+  if (dynamic_cast<const MFEMDGBoundaryCondition *>(bc_uo) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMDGBoundaryCondition>(name).getSharedPtr();
     auto kernel = std::dynamic_pointer_cast<MFEMDGBoundaryCondition>(object_ptr);
@@ -371,7 +371,6 @@ MFEMProblem::addDGBoundaryCondition(const std::string & bc_name,
   else
   {
     mooseError("Unsupported bc of type '", bc_name, "' and name '", name, "' detected.");
-
   }
 }
 

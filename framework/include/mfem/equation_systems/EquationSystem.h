@@ -162,18 +162,20 @@ protected:
       const std::string & trial_var_name,
       const std::string & test_var_name,
       std::shared_ptr<FormType> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>> & bc_map,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>> &
+          bc_map,
       std::optional<mfem::real_t> scale_factor = std::nullopt);
-  
+
   void ApplyDomainDGLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGKernel>>>> & kernels_map);
-  
+
   void ApplyBoundaryDGLFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
-      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>> & bc_map);
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMDGBoundaryCondition>>>> &
+          bc_map);
 
   /// Names of all trial variables of kernels and boundary conditions
   /// added to this EquationSystem.
@@ -350,7 +352,8 @@ EquationSystem::ApplyDomainDGBLFIntegrators(
       mfem::BilinearFormIntegrator * integ = kernel->createBFIntegrator();
       if (integ != nullptr)
       {
-        mooseAssert( !kernel->isSubdomainRestricted(), "AddInteriorFaceIntegrator doesn't have an overload for this case " );
+        mooseAssert(!kernel->isSubdomainRestricted(),
+                    "AddInteriorFaceIntegrator doesn't have an overload for this case ");
         form->AddInteriorFaceIntegrator(std::move(integ));
       }
     }
@@ -417,13 +420,13 @@ EquationSystem::ApplyDomainDGLFIntegrators(
       mfem::LinearFormIntegrator * integ = kernel->createLFIntegrator();
       if (integ != nullptr)
       {
-        mooseAssert( !kernel->isSubdomainRestricted(), "AddInteriorFaceIntegrator doesn't have an overload for this case " );
+        mooseAssert(!kernel->isSubdomainRestricted(),
+                    "AddInteriorFaceIntegrator doesn't have an overload for this case ");
         form->AddInteriorFaceIntegrator(std::move(integ));
       }
     }
   }
 }
-
 
 } // namespace Moose::MFEM
 
