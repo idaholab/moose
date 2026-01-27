@@ -14,7 +14,7 @@
 
 /**
  * \f[
- * (k \vec \nabla u, \vec \nabla v)
+ * (k(u) \vec \nabla u, \vec \nabla v)
  * \f]
  */
 class MFEMNLDiffusionKernel : public MFEMKernel
