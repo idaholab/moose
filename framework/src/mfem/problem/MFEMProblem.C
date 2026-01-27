@@ -116,6 +116,7 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 {
   getProblemData().jacobian_solver =
       addObject<MFEMSolverBase>(user_object_name, name, parameters).front();
+  getProblemData().eqn_system->setEigensolve(getProblemData().jacobian_solver->isEigensolver());
 }
 
 void
