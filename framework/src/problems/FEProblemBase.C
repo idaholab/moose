@@ -6754,6 +6754,9 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 
   TIME_SECTION("checkExceptionAndStopSolve", 5);
 
+  // Our ranks need to all be here in sync
+  parallel_object_only();
+
   // See if any processor had an exception.  If it did, get back the
   // processor that the exception occurred on.
   unsigned int processor_id;
