@@ -33,6 +33,14 @@ public:
   };
 
   /**
+   * Type definition for a variant that represents the datatypes for entries within the list that
+   * represents the region in postfix notation. This can be a surface reference, a region
+   * type, or halfspace
+   */
+  typedef std::variant<std::reference_wrapper<const CSGSurface>, RegionType, CSGSurface::Halfspace>
+      PostfixTokenVariant;
+
+  /**
    * Default Constructor
    */
   CSGRegion();
@@ -70,11 +78,20 @@ public:
   virtual ~CSGRegion() = default;
 
   /**
-   * @brief gets the string representation of the region
+   * @brief gets the string representation of the region, which involves converting
+   *        region representation from postfix to infix notation
    *
    * @return string representation of the region
    */
-  const std::string & toString() const { return _region_str; }
+  const std::string toString() const;
+
+  /**
+   * @brief converts postfix token from PostfixTokenVariant to string representation
+   *
+   * @param token postfix token of type PostfixTokenVariant
+   * @return string representation of postfix token
+   */
+  const std::string postfixTokenToString(const PostfixTokenVariant & token) const;
 
   /**
    * @brief Get the region type
@@ -113,6 +130,25 @@ public:
   bool operator!=(const CSGRegion & other) const;
 
 protected:
+  /**
+   * @brief Get the list of postfix tokens associated with the region
+   *
+   * @return list of tokens that define the region in postfix notation
+   */
+  const std::vector<PostfixTokenVariant> & getPostfixTokens() const { return _postfix_tokens; }
+
+  /**
+   * @brief Iterate through postfix tokens and check if next region operator matches the given
+   * operator
+   *
+   * @param region_op_string string representing the region operator for comparison
+   * @param postfix_token_index  index in _postfix_tokens to start region operator comparisons
+   * @return true if next region operator in _postfix_tokens matches region_op_string, false
+   * otherwise
+   */
+  bool nextRegionOpIsIdentical(const std::string & region_op_string,
+                               unsigned int postfix_token_index) const;
+
   /// String representation of region - defaults to empty string
   std::string _region_str;
 
@@ -121,6 +157,9 @@ protected:
 
   /// Surface list associated with the region
   std::vector<std::reference_wrapper<const CSGSurface>> _surfaces;
+
+  /// List of tokens representing the region in postfix notation
+  std::vector<PostfixTokenVariant> _postfix_tokens;
 };
 
 /**

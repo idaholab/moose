@@ -16,6 +16,8 @@ CSGRegion::CSGRegion()
 {
   _region_str = "";
   _region_type = "EMPTY";
+  _surfaces.clear();
+  _postfix_tokens.clear();
 }
 
 // halfspace constructor
@@ -24,6 +26,10 @@ CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Halfspace halfsp
   _region_type = "HALFSPACE";
   _region_str = ((halfspace == CSGSurface::Halfspace::POSITIVE) ? "+" : "-") + surf.getName();
   _surfaces.push_back(surf);
+
+  // (halfspace surf) in postfix is represented as (surf halfspace)
+  _postfix_tokens.push_back(surf);
+  _postfix_tokens.push_back(halfspace);
 }
 
 // intersection and union constructor
@@ -44,6 +50,14 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
   auto b_string = stripRegionString(region_b.toString(), op);
 
   _region_str = "(" + a_string + op + b_string + ")";
+  // (region_a region_type region_b) in postfix is represented as (region_a region_b region_type)
+  _postfix_tokens.insert(_postfix_tokens.end(),
+                         region_a.getPostfixTokens().begin(),
+                         region_a.getPostfixTokens().end());
+  _postfix_tokens.insert(_postfix_tokens.end(),
+                         region_b.getPostfixTokens().begin(),
+                         region_b.getPostfixTokens().end());
+  _postfix_tokens.push_back(getRegionType());
   const auto & a_surfs = region_a.getSurfaces();
   const auto & b_surfs = region_b.getSurfaces();
   _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
@@ -65,13 +79,137 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
     else
       _region_str = "~(" + region.toString() + ")";
     _surfaces = region.getSurfaces();
+    // (complement region) in postfix is represented as (region complement)
+    _postfix_tokens = region.getPostfixTokens();
+    _postfix_tokens.push_back(getRegionType());
   }
   else if (getRegionType() == RegionType::EMPTY)
   {
     // reset the region and make it empty
     _region_str = "";
     _surfaces.clear();
+    _postfix_tokens.clear();
   }
+}
+
+const std::string
+CSGRegion::toString() const
+{
+  // Return an empty string if no postfix tokens are defined
+  if (_postfix_tokens.empty())
+    return "";
+
+  // Define maps to conert halfspace and region operator names to their symbols
+  std::map<std::string, std::string> halfspace_to_symbol = {{"halfspace::POSITIVE", "+"},
+                                                            {"halfspace::NEGATIVE", "-"}};
+  std::map<std::string, std::string> region_op_to_symbol = {{"regionOperator::INTERSECTION", "&"},
+                                                            {"regionOperator::UNION", "|"},
+                                                            {"regionOperator::COMPLEMENT", "~"}};
+
+  // Define which region operators are unary. This will set how many pop operations are needed to
+  // build the region string
+  std::set<std::string> unary_region_ops = {"regionOperator::COMPLEMENT"};
+
+  // Build the region string using a stack, iterating through each token within _postfix_tokens
+  std::stack<std::string> postfix_stack;
+  for (auto i : index_range(_postfix_tokens))
+  {
+    const auto & postfix_token_string = postfixTokenToString(_postfix_tokens[i]);
+    if (postfix_token_string.find("::") == std::string::npos)
+      // For surfaces, push the surface name to the stack
+      postfix_stack.push(postfix_token_string);
+    else
+    {
+      std::string region_string;
+      if (postfix_token_string.find("halfspace::") != std::string::npos)
+      {
+        // For halfspaces, pop the value from the stack, update region string, and push back
+        region_string = halfspace_to_symbol[postfix_token_string] + postfix_stack.top();
+        postfix_stack.pop();
+      }
+      else
+      {
+        const auto & region_op_symbol = region_op_to_symbol[postfix_token_string];
+        // For region operators, pop 1 or 2 values from the stack, update the region string, and
+        // push back
+        if (unary_region_ops.count(postfix_token_string))
+        {
+          region_string = postfix_stack.top();
+          postfix_stack.pop();
+          if (region_string[0] == '(')
+            region_string = region_op_symbol + region_string;
+          else
+            region_string = region_op_symbol + "(" + region_string + ")";
+        }
+        else
+        {
+          auto region_string_b = postfix_stack.top();
+          postfix_stack.pop();
+          auto region_string_a = postfix_stack.top();
+          postfix_stack.pop();
+          region_string = region_string_a + " " + region_op_symbol + " " + region_string_b;
+          // Skip putting parentheses around the region string if the next region operator in the
+          // postfix token list is identical
+          if (!nextRegionOpIsIdentical(postfix_token_string, i + 1))
+            region_string = "(" + region_string + ")";
+        }
+      }
+      postfix_stack.push(region_string);
+    }
+  }
+
+  // Top of stack should now have region string we desire
+  return postfix_stack.top();
+}
+
+const std::string
+CSGRegion::postfixTokenToString(const PostfixTokenVariant & token) const
+{
+  // Lambda function to return all variant types as strings
+  return std::visit(
+      [](auto && arg) -> std::string
+      {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, std::reference_wrapper<const CSGSurface>>)
+        {
+          // For surfaces, return the surface name
+          const CSGSurface & surf = arg.get();
+          return surf.getName();
+        }
+        else if constexpr (std::is_same_v<T, RegionType>)
+        {
+          // For region types, return the name of the region type prepended with "regionOperator::"
+          RegionType region_type = arg;
+          if (region_type == CSGRegion::RegionType::INTERSECTION)
+            return "regionOperator::INTERSECTION";
+          else if (region_type == CSGRegion::RegionType::UNION)
+            return "regionOperator::UNION";
+          else
+            return "regionOperator::COMPLEMENT";
+        }
+        else // if constexpr (std::is_same_v<T, CSGSurface::Halfspace>)
+        {
+          // For halfspaces, return the direction of the halfspace prepended with "halfspace::"
+          CSGSurface::Halfspace halfspace = arg;
+          return std::string("halfspace::") +
+                 std::string((halfspace == CSGSurface::Halfspace::POSITIVE) ? "POSITIVE"
+                                                                            : "NEGATIVE");
+        }
+      },
+      token);
+}
+
+bool
+CSGRegion::nextRegionOpIsIdentical(const std::string & region_op_string,
+                                   unsigned int postfix_token_index) const
+{
+  for (unsigned int i = postfix_token_index; i < _postfix_tokens.size(); ++i)
+  {
+    const auto & postfix_token_string = postfixTokenToString(_postfix_tokens[i]);
+    if (postfix_token_string.find("regionOperator::") != std::string::npos)
+      return (postfix_token_string == region_op_string);
+  }
+  return false;
 }
 
 CSGRegion &

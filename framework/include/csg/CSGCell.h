@@ -122,7 +122,7 @@ public:
    *
    * @return std::string string representation of the cell region
    */
-  const std::string & getRegionAsString() const { return _region.toString(); }
+  const std::string getRegionAsString() const { return _region.toString(); }
 
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
