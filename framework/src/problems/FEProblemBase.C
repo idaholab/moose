@@ -496,6 +496,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _max_scalar_order(INVALID_ORDER),
     _has_time_integrator(false),
     _has_exception(false),
+    _termination_exception(false),
     _parallel_barrier_messaging(getParam<bool>("parallel_barrier_messaging")),
     _verbose_setup(getParam<MooseEnum>("verbose_setup")),
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
@@ -6757,6 +6758,13 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
   // processor that the exception occurred on.
   unsigned int processor_id;
 
+  _communicator.maxloc(_termination_exception, processor_id);
+
+  if (_termination_exception)
+  {
+    libmesh_terminate(); // Just continue terminating, but in sync
+  }
+
   _communicator.maxloc(_has_exception, processor_id);
 
   if (_has_exception)
@@ -7484,6 +7492,21 @@ FEProblemBase::handleException(const std::string & calling_method)
     // So for uniformity of behavior across serial/parallel, we will choose to abort here and always
     // produce a non-zero exit code
     mooseError(create_exception_message("libMesh::PetscSolverException", e));
+  }
+  catch (const libMesh::TerminationException & e)
+  {
+    // If we're terminating, from a mooseError or from anything else
+    // that ought to be nearly unhandleable, then we need to keep
+    // terminating, not just set a different sort of exception that
+    // higher-level code might erroneously think it can just relax a
+    // timestep or something and try again.
+    //
+    // But we might need to terminate via exception on all
+    // processors, because if we're doing stack unwinding on one rank
+    // (whether we're going to be caught or if we're in a compiler
+    // that does stack unwinding regardless) we should be doing it on
+    // all ranks to ensure that we're in sync in parallel.
+    _termination_exception = true;
   }
   catch (const std::exception & e)
   {

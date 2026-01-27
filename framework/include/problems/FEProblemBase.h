@@ -3250,6 +3250,10 @@ protected:
   /// Whether or not an exception has occurred
   bool _has_exception;
 
+  /// Whether or not the program is terminating with an unrecoverable
+  /// exception
+  bool _termination_exception;
+
   /// Whether or not information about how many transfers have completed is printed
   bool _parallel_barrier_messaging;
 
