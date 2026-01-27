@@ -64,6 +64,9 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
+  // Set whether the current solve is for an eigenvalue problem
+  void setEigensolve(const bool is_eigensolve) { _is_eigensolve = is_eigensolve; }
+
 protected:
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
@@ -124,6 +127,11 @@ protected:
                                 mfem::BlockVector & trueRHS);
   /// Compute Jacobian matrix at the provided vector of true DoFs of trial variables
   void FormJacobianMatrix(const mfem::Vector & u);
+
+  /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
+  virtual void FormEigensolverMatrix(mfem::OperatorHandle & op,
+                                     mfem::BlockVector & trueX,
+                                     mfem::BlockVector & trueRHS);
 
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
@@ -221,6 +229,7 @@ protected:
   mfem::Array<int> _block_true_offsets;
   // Boolean indicating if EquationSystem contains nonlinear integrators
   bool _non_linear = false;
+  bool _is_eigensolve;
 
 private:
   friend class EquationSystemProblemOperator;
