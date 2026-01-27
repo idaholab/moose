@@ -78,12 +78,19 @@ public:
   virtual ~CSGRegion() = default;
 
   /**
-   * @brief gets the string representation of the region, which involves converting
+   * @brief gets the infix string representation of the region, which involves converting
    *        region representation from postfix to infix notation
    *
-   * @return string representation of the region
+   * @return infix string representation of the region
    */
-  const std::string toString() const;
+  const std::string toInfixString() const;
+
+  /**
+   * @brief gets the postfix string representation of the region
+   *
+   * @return postfix representation of the region
+   */
+  const std::string toPostfixString() const;
 
   /**
    * @brief converts postfix token from PostfixTokenVariant to string representation

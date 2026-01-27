@@ -20,20 +20,21 @@ namespace CSG
 {
 
 // helper function to setup the regions used for the cells in all tests
-std::tuple<CSGRegion, CSGRegion, std::string>
+std::tuple<CSGRegion, CSGRegion, std::string, std::string>
 setupRegions()
 {
   static CSG::CSGSphere sphere("sphere_surf", 1.0);
   auto region1 = -sphere;
   auto region2 = +sphere;
-  std::string reg_str = "-sphere_surf";
-  return std::make_tuple(region1, region2, reg_str);
+  std::string reg_str_infix = "-sphere_surf";
+  std::string reg_str_postfix = "sphere_surf halfspace::NEGATIVE";
+  return std::make_tuple(region1, region2, reg_str_infix, reg_str_postfix);
 }
 
 // Test each type of CSGCell constructor
 TEST(CSGCellTest, testVoidCell)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
   std::string name = "void_cell";
   CSGCell cell(name, region1);
 
@@ -42,12 +43,13 @@ TEST(CSGCellTest, testVoidCell)
   ASSERT_EQ("VOID", cell.getFillType());
   ASSERT_EQ("", cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str, cell.getRegionAsString());
+  ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixString());
 }
 
 TEST(CSGCellTest, testMaterialCell)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
   std::string name = "mat_cell";
   std::string matname = "matname";
   CSGCell cell(name, matname, region1);
@@ -57,12 +59,13 @@ TEST(CSGCellTest, testMaterialCell)
   ASSERT_EQ("CSG_MATERIAL", cell.getFillType());
   ASSERT_EQ(matname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str, cell.getRegionAsString());
+  ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixString());
 }
 
 TEST(CSGCellTest, testUniverseCell)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
   std::string name = "univ_cell";
   std::string uname = "new_univ";
   const CSGUniverse univ(uname);
@@ -73,13 +76,14 @@ TEST(CSGCellTest, testUniverseCell)
   ASSERT_EQ("UNIVERSE", cell.getFillType());
   ASSERT_EQ(uname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str, cell.getRegionAsString());
+  ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixString());
 }
 
 // tests CSGCell::getFillUniverse and CSGCell::getFillMaterial
 TEST(CSGCellTest, testGetFill)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
   std::string cellname = "cellname";
 
   // get fill for void cell - expect errors for both methods
@@ -116,7 +120,7 @@ TEST(CSGCellTest, testGetFill)
 // Test equality operators
 TEST(CSGCellTest, testCellEquality)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
 
   // identical void cells
   CSGCell vcell1("void_cell", region1);
@@ -174,7 +178,7 @@ TEST(CSGCellTest, testCellEquality)
 /// CSGCell::setName
 TEST(CSGCellTest, testSetName)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
   CSGCell cell("first_name", region1);
   cell.setName("new_name");
   ASSERT_EQ("new_name", cell.getName());
@@ -183,7 +187,7 @@ TEST(CSGCellTest, testSetName)
 /// CSGCell::updateRegion
 TEST(CSGCellTest, testUpdateRegion)
 {
-  auto [region1, region2, reg_str] = setupRegions();
+  auto [region1, region2, reg_str_infix, reg_str_postfix] = setupRegions();
   CSGCell cell("cellname", region1);
   cell.updateRegion(region2);
   ASSERT_EQ(region2, cell.getRegion());

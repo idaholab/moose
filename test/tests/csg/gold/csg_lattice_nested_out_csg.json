@@ -3,17 +3,26 @@
     "sq1_square_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
-      "region": "(+sq1_surf_plus_x & -sq1_surf_minus_x & -sq1_surf_plus_y & +sq1_surf_minus_y)"
+      "region_infix":
+          "(+sq1_surf_plus_x & -sq1_surf_minus_x & -sq1_surf_plus_y & +sq1_surf_minus_y)",
+      "region_postfix":
+          "sq1_surf_plus_x halfspace::POSITIVE sq1_surf_minus_x halfspace::NEGATIVE regionOperator::INTERSECTION sq1_surf_plus_y halfspace::NEGATIVE regionOperator::INTERSECTION sq1_surf_minus_y halfspace::POSITIVE regionOperator::INTERSECTION"
     },
     "sq2_square_cell": {
       "fill": "lat1_lattice",
       "filltype": "LATTICE",
-      "region": "(+sq2_surf_plus_x & -sq2_surf_minus_x & -sq2_surf_plus_y & +sq2_surf_minus_y)"
+      "region_infix":
+          "(+sq2_surf_plus_x & -sq2_surf_minus_x & -sq2_surf_plus_y & +sq2_surf_minus_y)",
+      "region_postfix":
+          "sq2_surf_plus_x halfspace::POSITIVE sq2_surf_minus_x halfspace::NEGATIVE regionOperator::INTERSECTION sq2_surf_plus_y halfspace::NEGATIVE regionOperator::INTERSECTION sq2_surf_minus_y halfspace::POSITIVE regionOperator::INTERSECTION"
     },
     "sq3_square_cell": {
       "fill": "lat2_lattice",
       "filltype": "LATTICE",
-      "region": "(+sq3_surf_plus_x & -sq3_surf_minus_x & -sq3_surf_plus_y & +sq3_surf_minus_y)"
+      "region_infix":
+          "(+sq3_surf_plus_x & -sq3_surf_minus_x & -sq3_surf_plus_y & +sq3_surf_minus_y)",
+      "region_postfix":
+          "sq3_surf_plus_x halfspace::POSITIVE sq3_surf_minus_x halfspace::NEGATIVE regionOperator::INTERSECTION sq3_surf_plus_y halfspace::NEGATIVE regionOperator::INTERSECTION sq3_surf_minus_y halfspace::POSITIVE regionOperator::INTERSECTION"
     }
   },
   "lattices": {

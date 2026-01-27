@@ -606,11 +606,13 @@ CSGBase::generateOutput() const
   for (const CSGCell & c : all_cells)
   {
     const auto & cell_name = c.getName();
-    const auto & cell_region = c.getRegionAsString();
+    const auto & cell_region_infix = c.getRegionAsInfixString();
+    const auto & cell_region_postfix = c.getRegionAsPostfixString();
     const auto & cell_filltype = c.getFillType();
     const auto & fill_name = c.getFillName();
     csg_json["cells"][cell_name]["filltype"] = cell_filltype;
-    csg_json["cells"][cell_name]["region"] = cell_region;
+    csg_json["cells"][cell_name]["region_infix"] = cell_region_infix;
+    csg_json["cells"][cell_name]["region_postfix"] = cell_region_postfix;
     csg_json["cells"][cell_name]["fill"] = fill_name;
   }
 

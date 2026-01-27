@@ -3,11 +3,31 @@
     "cube_box_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
-      "region":
-          "(+inf_square_surf_plus_x & -inf_square_surf_minus_x & -inf_square_surf_plus_y & +inf_square_surf_minus_y & -cube_surf_plus_z & +cube_surf_minus_z)"
+      "region_infix":
+          "(+inf_square_surf_plus_x & -inf_square_surf_minus_x & -inf_square_surf_plus_y & +inf_square_surf_minus_y & -cube_surf_plus_z & +cube_surf_minus_z)",
+      "region_postfix":
+          "inf_square_surf_plus_x halfspace::POSITIVE inf_square_surf_minus_x halfspace::NEGATIVE regionOperator::INTERSECTION inf_square_surf_plus_y halfspace::NEGATIVE regionOperator::INTERSECTION inf_square_surf_minus_y halfspace::POSITIVE regionOperator::INTERSECTION cube_surf_plus_z halfspace::NEGATIVE regionOperator::INTERSECTION cube_surf_minus_z halfspace::POSITIVE regionOperator::INTERSECTION"
     }
   },
   "surfaces": {
+    "cube_surf_minus_z": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": -2.5
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "cube_surf_plus_z": {
+      "coefficients": {
+        "a": 0.0,
+        "b": 0.0,
+        "c": 1.0,
+        "d": 2.5
+      },
+      "type": "CSG::CSGPlane"
+    },
     "inf_square_surf_minus_x": {
       "coefficients": {
         "a": -1.0,
@@ -26,15 +46,6 @@
       },
       "type": "CSG::CSGPlane"
     },
-    "cube_surf_minus_z": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 0.0,
-        "c": 1.0,
-        "d": -2.5
-      },
-      "type": "CSG::CSGPlane"
-    },
     "inf_square_surf_plus_x": {
       "coefficients": {
         "a": -1.0,
@@ -50,15 +61,6 @@
         "b": 1.0,
         "c": 0.0,
         "d": 2.0
-      },
-      "type": "CSG::CSGPlane"
-    },
-    "cube_surf_plus_z": {
-      "coefficients": {
-        "a": 0.0,
-        "b": 0.0,
-        "c": 1.0,
-        "d": 2.5
       },
       "type": "CSG::CSGPlane"
     }

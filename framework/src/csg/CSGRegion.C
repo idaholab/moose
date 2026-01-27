@@ -79,7 +79,7 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
 }
 
 const std::string
-CSGRegion::toString() const
+CSGRegion::toInfixString() const
 {
   // Return an empty string if no postfix tokens are defined
   if (_postfix_tokens.empty())
@@ -146,6 +146,16 @@ CSGRegion::toString() const
 
   // Top of stack should now have region string we desire
   return postfix_stack.top();
+}
+
+const std::string
+CSGRegion::toPostfixString() const
+{
+  std::string postfix_string = "";
+  for (auto it = _postfix_tokens.begin(); it != _postfix_tokens.end(); ++it)
+    postfix_string +=
+        postfixTokenToString(*it) + (std::next(it) != _postfix_tokens.end() ? " " : "");
+  return postfix_string;
 }
 
 const std::string
@@ -255,7 +265,7 @@ bool
 CSGRegion::operator==(const CSGRegion & other) const
 {
   const bool region_type_eq = this->getRegionType() == other.getRegionType();
-  const bool region_str_eq = this->toString() == other.toString();
+  const bool region_str_eq = this->toInfixString() == other.toInfixString();
   if (region_type_eq && region_str_eq)
   {
     const auto & all_surfs = getSurfaces();
