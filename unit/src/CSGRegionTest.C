@@ -116,30 +116,6 @@ TEST(CSGRegionTest, testRegionErrors)
   }
 }
 
-// Tests stripRegionString function
-TEST(CSGRegionTest, testStripRegionString)
-{
-  // strip - single operator intersection (with and without white space padding)
-  {
-    std::string reg_str_valid = "((s1 & s2) & s3)";
-    std::string exp_str_strip = "s1 & s2 & s3";
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, " & "));
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, "&"));
-  }
-  // strip - single operator union (with and without white space padding)
-  {
-    std::string reg_str_valid = "((s1 | s2) | s3)";
-    std::string exp_str_strip = "s1 | s2 | s3";
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, " | "));
-    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, "|"));
-  }
-  // strip - mixed operators (won't strip)
-  {
-    std::string reg_str_valid = "(s1 & s2 & (s3 | s4))";
-    ASSERT_EQ(reg_str_valid, stripRegionString(reg_str_valid, " & "));
-  }
-}
-
 // Tests == and != operators
 TEST(CSGRegionTest, testEquality)
 {

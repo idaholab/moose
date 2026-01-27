@@ -162,16 +162,6 @@ protected:
   std::vector<PostfixTokenVariant> _postfix_tokens;
 };
 
-/**
- * @brief strip the leading and trailing parentheses from the string
- * if only the specified operator is present in the string
- *
- * @param region_str region string representation to simplify
- * @param op operator to consider
- * @return region string with () removed if applicable
- */
-const std::string stripRegionString(std::string region_str, std::string op);
-
 /// Operation overloads for operation based region construction
 
 /// Overload for creating a region from the positive half-space (+) of a surface

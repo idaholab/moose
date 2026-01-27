@@ -14,7 +14,6 @@ namespace CSG
 
 CSGRegion::CSGRegion()
 {
-  _region_str = "";
   _region_type = "EMPTY";
   _surfaces.clear();
   _postfix_tokens.clear();
@@ -24,7 +23,6 @@ CSGRegion::CSGRegion()
 CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Halfspace halfspace)
 {
   _region_type = "HALFSPACE";
-  _region_str = ((halfspace == CSGSurface::Halfspace::POSITIVE) ? "+" : "-") + surf.getName();
   _surfaces.push_back(surf);
 
   // (halfspace surf) in postfix is represented as (surf halfspace)
@@ -45,11 +43,6 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
     mooseError("Region operation " + getRegionTypeString() +
                " cannot be performed on an empty region.");
 
-  std::string op = (getRegionType() == RegionType::UNION) ? " | " : " & ";
-  auto a_string = stripRegionString(region_a.toString(), op);
-  auto b_string = stripRegionString(region_b.toString(), op);
-
-  _region_str = "(" + a_string + op + b_string + ")";
   // (region_a region_type region_b) in postfix is represented as (region_a region_b region_type)
   _postfix_tokens.insert(_postfix_tokens.end(),
                          region_a.getPostfixTokens().begin(),
@@ -73,11 +66,6 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
 
   if (getRegionType() == RegionType::COMPLEMENT)
   {
-    // no change to surfaces, but update string
-    if (region.toString()[0] == '(')
-      _region_str = "~" + region.toString();
-    else
-      _region_str = "~(" + region.toString() + ")";
     _surfaces = region.getSurfaces();
     // (complement region) in postfix is represented as (region complement)
     _postfix_tokens = region.getPostfixTokens();
@@ -85,8 +73,6 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
   }
   else if (getRegionType() == RegionType::EMPTY)
   {
-    // reset the region and make it empty
-    _region_str = "";
     _surfaces.clear();
     _postfix_tokens.clear();
   }
@@ -226,42 +212,6 @@ CSGRegion::operator|=(const CSGRegion & other_region)
   if (this != &other_region)
     *this = CSGRegion(*this, other_region, "UNION");
   return *this;
-}
-
-const std::string
-stripRegionString(std::string region_str, std::string op)
-{
-  // add expected spacing around operator if not provided
-  if (op == "|")
-    op = " | ";
-  if (op == "&")
-    op = " & ";
-
-  std::vector<std::string> ops_list = {" | ", " & ", "~"};
-  if (op.compare(" | ") && op.compare(" & "))
-  { // compare() returns non zero if strings are not equal
-    mooseError(
-        "Region string can only be simplified based on intersection (&) and union (|) operations.");
-  }
-
-  // find if there are any operators in string already that are not the op of interest
-  // if not, then remove parentheses:
-  bool remove_par = true; // assume parentheses can be removed unless otherwise
-  for (auto opi : ops_list)
-    if (opi != op)
-      // only look for strings that are not of the current op type
-      if (region_str.find(opi) != std::string::npos)
-      {
-        remove_par = false;
-        break;
-      }
-
-  if (remove_par)
-    region_str.erase(std::remove_if(region_str.begin(),
-                                    region_str.end(),
-                                    [](char c) { return c == '(' || c == ')'; }),
-                     region_str.end());
-  return region_str;
 }
 
 // Operators for region construction
