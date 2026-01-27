@@ -789,8 +789,8 @@ SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
 void
 SubProblem::setCurrentBoundaryID(BoundaryID bid, const THREAD_ID tid)
 {
-  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
-    assembly(tid, nl_sys_num).setCurrentBoundaryID(bid);
+  for (const auto sys_num : make_range(numSolverSystems()))
+    assembly(tid, sys_num).setCurrentBoundaryID(bid);
 }
 
 unsigned int
