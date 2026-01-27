@@ -78,6 +78,7 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
 
   getProblemData().jacobian_solver = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
+  getProblemData().eqn_system->setEigensolve(getProblemData().jacobian_solver->isEigensolver());
 }
 
 void

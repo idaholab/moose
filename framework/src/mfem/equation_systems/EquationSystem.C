@@ -240,19 +240,46 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   mooseAssert(_test_var_names.size() == _trial_var_names.size(),
               "Number of test and trial variables must be the same for block matrix assembly.");
 
-  switch (_assembly_level)
+  if (_assembly_level == mfem::AssemblyLevel::LEGACY)
   {
-    case mfem::AssemblyLevel::LEGACY:
-      FormSystemMatrix(op, trueX, trueRHS);
-      break;
-    default:
-      mooseAssert(_test_var_names.size() == 1,
-                  "Non-legacy assembly is only supported for single-variable systems");
+    if (_is_eigensolve)
+    {
       mooseAssert(
+            _test_var_names.size() == 1 && (_test_var_names.size() == _trial_var_names.size()) && (_test_var_names.at(0) == _trial_var_names.at(0)),
+            "Eigensolve is only supported for single-variable, square systems");
+
+      FormEigensolverMatrix(op, trueX, trueRHS);
+    }
+    else
+      FormSystemMatrix(op, trueX, trueRHS);
+  }
+  else
+  {
+    mooseAssert(_test_var_names.size() == 1 &&
           _test_var_names.size() == _trial_var_names.size(),
           "Non-legacy assembly is only supported for single test and trial variable systems");
-      FormSystemOperator(op, trueX, trueRHS);
+    mooseAssert(!_is_eigensolve,
+                  "Eigensolve is not supported for non-legacy assembly");
+
+    FormSystemOperator(op, trueX, trueRHS);
   }
+}
+
+void
+EquationSystem::FormEigensolverMatrix(mfem::OperatorHandle & op,
+                                        mfem::BlockVector & /*trueX*/,
+                                        mfem::BlockVector & /*trueRHS*/)
+{
+  mooseAssert(_lfs.size() == 0, "Eigenvalue problems cannot contain linear forms");
+
+  auto & test_var_name = _test_var_names.at(0);
+  auto blf = _blfs.Get(test_var_name);
+  
+  blf->EliminateEssentialBCDiag(_ess_tdof_lists.at(0), 1.0);
+  blf->Finalize();
+
+  op.Reset(blf->ParallelAssemble());
+  //blf->SetOperatorOwner(false);
 }
 
 void

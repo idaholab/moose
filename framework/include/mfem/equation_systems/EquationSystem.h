@@ -62,6 +62,9 @@ public:
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
+  // Set whether the current solve is for an eigenvalue problem
+  void setEigensolve(const bool is_eigensolve) { _is_eigensolve = is_eigensolve; }
+
 protected:
   /// Add test variable to EquationSystem.
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
@@ -112,6 +115,11 @@ protected:
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+
+  /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
+  virtual void FormEigensolverMatrix(mfem::OperatorHandle & op,
+                                     mfem::BlockVector & trueX,
+                                     mfem::BlockVector & trueRHS);
 
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
@@ -188,6 +196,8 @@ protected:
   mutable mfem::OperatorHandle _jacobian;
 
   mfem::AssemblyLevel _assembly_level;
+
+  bool _is_eigensolve;
 
 private:
   friend class EquationSystemProblemOperator;
