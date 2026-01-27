@@ -7354,6 +7354,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     // calling the system's stopSolve() method, it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
+  }
   catch (...)
   {
     mooseError("Unexpected exception type");
@@ -7603,6 +7607,10 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
     // calling the system's stopSolve() method, it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
+  }
   catch (...)
   {
     mooseError("Unexpected exception type");
@@ -7762,6 +7770,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
     // calling the system's stopSolve() method, it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
+  }
   catch (...)
   {
     mooseError("Unexpected exception type");
@@ -7839,6 +7851,10 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
   catch (MooseException & e)
   {
     mooseError("Irrecoverable exception: " + std::string(e.what()));
+  }
+  catch (libMesh::TerminationException &)
+  {
+    throw; // We're dying; carry on.
   }
   catch (...)
   {
