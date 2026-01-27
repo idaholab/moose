@@ -21,6 +21,9 @@ public:
 
   virtual void addMooseObjects() override;
 
+protected:
+  virtual bool supportsPassiveTransport() const override { return true; }
+
 public:
   static InputParameters validParams();
 };

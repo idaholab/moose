@@ -10,6 +10,8 @@
 #include "ADBoundaryFlux3EqnGhostBase.h"
 #include "ADNumericalFlux3EqnBase.h"
 
+#include "libmesh/elem.h"
+
 InputParameters
 ADBoundaryFlux3EqnGhostBase::validParams()
 {
@@ -38,6 +40,11 @@ ADBoundaryFlux3EqnGhostBase::calcFlux(unsigned int iside,
                                       const RealVectorValue & /*normal*/,
                                       std::vector<ADReal> & flux) const
 {
-  const std::vector<ADReal> U2 = getGhostCellSolution(U1);
+  const Elem * elem = _subproblem.mesh().elemPtr(ielem);
+  const Elem * side_elem = elem->build_side_ptr(iside).release();
+  const Point side_center_point = side_elem->vertex_average();
+  delete side_elem;
+
+  const std::vector<ADReal> U2 = getGhostCellSolution(U1, side_center_point);
   flux = _numerical_flux.getFlux(iside, ielem, true, U1, U2, _normal);
 }

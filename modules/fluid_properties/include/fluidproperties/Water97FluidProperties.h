@@ -276,6 +276,16 @@ public:
   unsigned int inRegion(Real pressure, Real temperature) const;
 
   /**
+   * Determines the phase region that the given pressure and enthaply values
+   * lie in.
+   *
+   * @param pressure water pressure (Pa)
+   * @param enthalpy water enthalpy (J/kg)
+   * @return region phase region index
+   */
+  unsigned int inRegionPH(Real pressure, Real enthalpy) const;
+
+  /**
    * Provides the correct subregion index for a (P,T) point in
    * region 3. From Revised Supplementary Release on Backward Equations for
    * Specific Volume as a Function of Pressure and Temperature v(p,T)
@@ -683,16 +693,6 @@ protected:
    */
   template <typename T>
   T tempXY(const T & pressure, subregionEnum xy) const;
-
-  /**
-   * Determines the phase region that the given pressure and enthaply values
-   * lie in.
-   *
-   * @param pressure water pressure (Pa)
-   * @param enthalpy water enthalpy (J/kg)
-   * @return region phase region index
-   */
-  unsigned int inRegionPH(Real pressure, Real enthalpy) const;
 
   /**
    * Provides the correct subregion index for a (P,h) point in

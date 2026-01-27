@@ -616,43 +616,48 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
   Real p273 = vaporPressure(273.15);
   Real p623 = vaporPressure(623.15);
 
+  if (enthalpy < h_from_p_T(pressure, 273.15))
+    mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
+
   if (pressure >= p273 && pressure <= p623)
   {
-    if (enthalpy >= h_from_p_T(pressure, 273.15) &&
-        enthalpy <= h_from_p_T(pressure, vaporTemperature(pressure)))
+    // Use region 1 definition of h_from_p_T to get the lower bound
+    if (enthalpy <=
+        _Rw * _T_star[0] *
+            dgamma1_dtau(pressure / _p_star[0], _T_star[0] / vaporTemperature(pressure)))
       region = 1;
-    else if (enthalpy > h_from_p_T(pressure, vaporTemperature(pressure)) &&
-             enthalpy <= h_from_p_T(pressure, 1073.15))
+    // Use region 2 definition of h_from_p_T to get the upper bound
+    else if (enthalpy <=
+             _Rw * _T_star[1] *
+                 dgamma2_dtau(pressure / _p_star[1], _T_star[1] / vaporTemperature(pressure)))
+      region = 4;
+    else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
-    else if (enthalpy > h_from_p_T(pressure, 1073.15) && enthalpy <= h_from_p_T(pressure, 2273.15))
+    else if (enthalpy <= h_from_p_T(pressure, 2273.15))
       region = 5;
     else
       mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
   }
   else if (pressure > p623 && pressure <= 50.0e6)
   {
-    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, 623.15))
+    if (enthalpy <= h_from_p_T(pressure, 623.15))
       region = 1;
-    else if (enthalpy > h_from_p_T(pressure, 623.15) &&
-             enthalpy <= h_from_p_T(pressure, b23T(pressure)))
+    else if (enthalpy <= h_from_p_T(pressure, b23T(pressure)))
       region = 3;
-    else if (enthalpy > h_from_p_T(pressure, b23T(pressure)) &&
-             enthalpy <= h_from_p_T(pressure, 1073.15))
+    else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
-    else if (enthalpy > h_from_p_T(pressure, 1073.15) && enthalpy <= h_from_p_T(pressure, 2273.15))
+    else if (enthalpy <= h_from_p_T(pressure, 2273.15))
       region = 5;
     else
       mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
   }
   else if (pressure > 50.0e6 && pressure <= 100.0e6)
   {
-    if (enthalpy >= h_from_p_T(pressure, 273.15) && enthalpy <= h_from_p_T(pressure, 623.15))
+    if (enthalpy <= h_from_p_T(pressure, 623.15))
       region = 1;
-    else if (enthalpy > h_from_p_T(pressure, 623.15) &&
-             enthalpy <= h_from_p_T(pressure, b23T(pressure)))
+    else if (enthalpy <= h_from_p_T(pressure, b23T(pressure)))
       region = 3;
-    else if (enthalpy > h_from_p_T(pressure, b23T(pressure)) &&
-             enthalpy <= h_from_p_T(pressure, 1073.15))
+    else if (enthalpy <= h_from_p_T(pressure, 1073.15))
       region = 2;
     else
       mooseException("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
@@ -780,10 +785,37 @@ Water97FluidProperties::T_from_p_h_ad(const ADReal & pressure, const ADReal & en
       break;
     }
 
-    case 5:
-      mooseError("temperature_from_ph() not implemented for region 5");
+    case 4:
+      return vaporTemperature_ad(pressure);
       break;
 
+    case 5:
+    {
+      Real T_min = 1073.15;
+      Real T_max = 2273.15;
+      Real T_find = 0.;
+      Real T_error = 1.0;
+
+      // Bisection solve
+      while (T_error > libMesh::TOLERANCE)
+      {
+        T_find = 0.5 * (T_min + T_max);
+        Real h_find = h_from_p_T(pressure.value(), T_find);
+
+        if (h_find > enthalpy.value())
+          T_max = T_find;
+        else
+          T_min = T_find;
+
+        T_error = std::abs((T_max - T_min) / T_find);
+      }
+      if (!_allow_imperfect_jacobians)
+        mooseDoOnce(
+            mooseWarning("The derivatives for T_from_p_h_ad are currently neglected, set to 0."));
+      temperature = T_find;
+
+      break;
+    }
     default:
       mooseError("inRegionPH() has given an incorrect region");
   }

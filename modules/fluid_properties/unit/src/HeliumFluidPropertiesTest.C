@@ -37,6 +37,7 @@ TEST_F(HeliumFluidPropertiesTest, thermalConductivity)
   REL_TEST(_fp->k_from_v_e(v, e), 1.8651584722911332e-01, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->k_from_p_T(p, T), 1.8651584722911332e-01, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->k_from_v_e, v, e, REL_TOL_DERIVATIVE);
 }
 
 /**
@@ -52,6 +53,7 @@ TEST_F(HeliumFluidPropertiesTest, viscosity)
   REL_TEST(_fp->mu_from_v_e(v, e), 2.4061901685126415e-05, REL_TOL_SAVED_VALUE);
   REL_TEST(_fp->mu_from_p_T(p, T), 2.4061901685126415e-05, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
+  DERIV_TEST(_fp->mu_from_v_e, v, e, REL_TOL_DERIVATIVE);
 }
 
 /**
@@ -110,6 +112,11 @@ TEST_F(HeliumFluidPropertiesTest, specificInternalEnergy)
   ABS_TEST(_fp->e_from_p_T(p, T), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
   ABS_TEST(_fp->e_from_p_rho(p, rho), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
+
+  const Real v = 1. / rho;
+  const Real h = _fp->h_from_p_T(p, T);
+  ABS_TEST(_fp->e_from_v_h(v, h), 1.2254485499999998e6, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->e_from_v_h, v, h, REL_TOL_DERIVATIVE);
 }
 
 /**

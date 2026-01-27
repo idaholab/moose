@@ -31,3 +31,15 @@ The viscous drag force density is computed as
 F = \frac{f \rho u |u| A}{2 D_h} \,,
 
 where $f$ is the Darcy friction factor and $D_h$ is the hydraulic diameter.
+
+## Passive Transport id=passive_transport
+
+Optionally, equations may be added to model the passive transport of scalar quantities $y$,
+corresponding to some amount per unit volume, where "amount" may be a mass or a number
+of particles, for example:
+
+!equation
+\pd{y A}{t} + \pd{y u A}{x} = 0 \,.
+
+Each scalar quantity $y$ advects with the carrier fluid velocity $u$ without
+providing any feedback to the flow.

@@ -1,17 +1,17 @@
 # Idaho National Laboratory
 
-!style halign=center
-www.inl.gov
+### [www.inl.gov](https://inl.gov)
 
 !---
 
 ### Established in 2005, INL is the lead nuclear energy R&D laboratory for the Department of Energy
 
-#### "Establish a world-class capability in the modeling and simulation of advanced energy systems..." style=color:grey;
+!style halign=center color=grey
+"Establish a world-class capability in the modeling and simulation of advanced energy systems..."
 
 !---
 
-- INL is the one of the largest employers in Idaho with 6,200 employees and 478 interns
+- INL is the one of the largest employers in Idaho with over 6,000 employees and 500 interns
 - In 2024 the INL budget was over $2 billion
 
 !---

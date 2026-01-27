@@ -29,13 +29,11 @@ ADBoundaryFlux3EqnGhostWall::ADBoundaryFlux3EqnGhostWall(const InputParameters &
 }
 
 std::vector<ADReal>
-ADBoundaryFlux3EqnGhostWall::getGhostCellSolution(const std::vector<ADReal> & U1) const
+ADBoundaryFlux3EqnGhostWall::getGhostCellSolution(const std::vector<ADReal> & U1,
+                                                  const Point & /*point*/) const
 {
-  std::vector<ADReal> U_ghost(THMVACE1D::N_FLUX_INPUTS);
-  U_ghost[THMVACE1D::RHOA] = U1[THMVACE1D::RHOA];
+  std::vector<ADReal> U_ghost = U1;
   U_ghost[THMVACE1D::RHOUA] = -U1[THMVACE1D::RHOUA];
-  U_ghost[THMVACE1D::RHOEA] = U1[THMVACE1D::RHOEA];
-  U_ghost[THMVACE1D::AREA] = U1[THMVACE1D::AREA];
 
   return U_ghost;
 }
