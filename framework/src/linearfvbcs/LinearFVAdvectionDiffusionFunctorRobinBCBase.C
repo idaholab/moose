@@ -32,9 +32,11 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryValue() const
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
   const auto state = determineState();
+  const auto old_state = Moose::oldState();
 
   const auto alpha = getAlpha(face, state);
-  const auto beta = getBeta(face, state);
+  // we have to lag this to avoid recursive calls
+  const auto beta = getBeta(face, old_state);
   const auto gamma = getGamma(face, state);
 
   const auto phi = _var.getElemValue(*elem_info, state);
