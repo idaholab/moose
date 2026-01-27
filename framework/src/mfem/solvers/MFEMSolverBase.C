@@ -56,6 +56,7 @@ template void MFEMSolverBase::setPreconditioner(mfem::GMRESSolver &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
+template void MFEMSolverBase::setPreconditioner(mfem::HypreLOBPCG &);
 
 template void MFEMSolverBase::setPreconditioner(mfem::patched::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::patched::HyprePCG &);
