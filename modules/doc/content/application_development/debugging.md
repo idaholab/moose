@@ -51,7 +51,7 @@ gdb --args ./yourapp-dbg -i inputfile.i
 
 (On Linux this will generally work, without the need for `sudo`)
 
-Once this is done, your executable will be loaded but won't start running.  This is an opportune time to set breakpoints.  We usually recommend setting a breakpoint on `MPI_Abort` using the `b` command:
+Once this is done, your executable will be loaded but won't start running.  This is an opportune time to set breakpoints.  We usually recommend setting a breakpoint on `MPI_Abort` using the `b` command (see the [#common-breakpoints] section for other commonly used breakpoints):
 
 ```
 b MPI_Abort
@@ -70,6 +70,49 @@ p variablename
 ```
 
 You can learn about the full set of commands by using `help` or looking at any number of tutorials online.
+
+## Common breakpoints, .gdbinit, and .lldbinit id=common-breakpoints
+
+In addition to `MPI_Abort`, some other useful breakpoints are
+
+- `PetscError` for errors reported by PETSc
+- `TIMPI:report_error` for errors reported by TIMPI
+- `libMesh::MacroFunctions::report_error` for errors reported by libMesh
+
+It is oftentimes preferrable to set these breakpoints in an "init" file once and for all. That is useful to avoid having to repeatedly setting the same breakpoints manually in every debugging session, which is critical when starting debugging sessions in parallel with a large number of MPI processes (see for example [#actually-parallel-debugging]).
+
+The user-level init files are located at `$HOME/.gdbinit` for `gdb`, and at `$HOME/.lldbinit` for `lldb`. You can create an init file if one does not exist. A common init file incorporating the above breakpoints would look like
+
+```
+set breakpoint pending on
+set pagination off
+set debuginfod enabled off
+b MPI_Abort
+b PetscError
+b TIMPI::report_error
+b libMesh::MacroFunctions::report_error
+~
+```
+
+For users using advanced toolings such as UBSanitizer, AddressSanitizer, and ThreadSanitizer, the following breakpoints may come in handy
+
+```
+# Common
+b __sanitizer::Die
+b __sanitizer::Report
+
+# UBSan
+b __ubsan::ScopedReport::~ScopedReport
+b __ubsan::Diag::~Diag
+
+# ASan
+b __asan_report_error
+b __asan::ReportGenericError
+
+# TSan
+b __tsan::ReportRace
+b __tsan::OutputReport
+```
 
 ## Parallel Debugging
 
@@ -141,6 +184,8 @@ mpirun -n 4 ./yourapp-dbg -i inputfile.i --start-in-debugger "sudo lldb -o 'brea
 
 The above command will set breakpoints that halt on thrown exceptions. Replace `break set -E C++` with `b MPI_Abort` to break on MOOSE errors. The `-o cont` option will automatically run the app after the breakpoints are set.
 
+Note that if the desired breakpoints have been set in the init files (see the [#common-breakpoints] section), there's no need to set them again through the command line.
+
 #### 2. Launch your application and tell it to wait so you can manually attach a debugger
 
 This is going to be used in cases where you need to debug using LOTS of MPI processes, but you don't want a terminal window for each one.  This is also handy if you're working on a cluster that doesn't have any way of doing X-forwarding for option #1 to work.  The idea is to launch your application and have it wait during the initialization phase so you have time to attach a debugger manually to one of the processes.
@@ -177,3 +222,34 @@ sudo lldb -p 53405
 (`gdb` has a similar mechanism, see its docs)
 
 That will launch `lldb` and attach to my running program.  Attaching to the program "pauses" it - allowing me to set breakpoints and then use the `c` command to tell it to continue.
+
+### Common Linux `ptrace` restrictions that break GDB during parallel debugging
+
+On many Linux systems, GDB relies on the ptrace API to control a process (launch it under the debugger, attach to an already-running PID, read memory/registers, etc.). If the kernel or your security policy restricts ptrace, GDB will fail with errors like:
+
+- ptrace: Operation not permitted
+- Cannot attach to process <pid>
+- Could not attach to process. If your uid matches the uid of the target process, check the setting of /proc/sys/kernel/yama/ptrace_scope
+- warning: process ... is already being traced (when something else is attached)
+
+The most common cause is Ubuntu/Debian’s Yama LSM setting kernel.yama.ptrace_scope, which tightens attach rules to reduce the risk of one process spying on another.
+
+To fix the issue, first check the current setting
+
+```
+cat /proc/sys/kernel/yama/ptrace_scope
+```
+
+Common values you’ll see:
+
+- 0: classic behavior (least restrictive)
+- 1: “restricted" `ptrace` (common default on Ubuntu; only allow tracing of descendant processes unless explicitly permitted)
+- 2/3: increasingly restrictive (rare on desktops, more common on hardened systems)
+
+You can temporarily relax the Yama restrictions using
+
+```
+sudo sysctl kernel.yama.ptrace_scope=0
+```
+
+which will take effect until reboot.
