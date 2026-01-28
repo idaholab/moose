@@ -77,39 +77,39 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 %environment
     if [ -d "{{ MINIFORGE_DIR }}" ]; then
-        export PATH={{ MINIFORGE_DIR }}/bin:$PATH
+        export PATH="{{ MINIFORGE_DIR }}/bin:$PATH"
     fi
     if [ -d "{{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}" ]; then
         source activate {{ MINIFORGE_DIR }}/envs/{{ MOOSE_CONDA_ENV_NAME }}
     fi
 
-    export PATH=/opt/code-server/bin:$PATH
+    export PATH="/opt/code-server/bin:$PATH"
 
-    export WASP_DIR={{ WASP_DIR }}
-    export PATH=${WASP_DIR}/bin:$PATH
+    export WASP_DIR="{{ WASP_DIR }}"
+    export PATH="${WASP_DIR}/bin:$PATH"
 
 {%- if WITH_MFEM %}
     if [ -d "{{ CONDUIT_DIR }}" ]; then
-        export CONDUIT_DIR={{ CONDUIT_DIR }}
+        export CONDUIT_DIR="{{ CONDUIT_DIR }}"
     fi
     if [ -d "{{ MFEM_DIR }}" ]; then
-        export MFEM_DIR={{ MFEM_DIR }}
+        export MFEM_DIR="{{ MFEM_DIR }}"
     fi
 {%- endif %}
 
 {% if WITHOUT_PYTORCH is not defined %}
     if [ -d "{{ LIBTORCH_DIR }}" ]; then
-        export LIBTORCH_DIR={{ LIBTORCH_DIR }}
+        export LIBTORCH_DIR="{{ LIBTORCH_DIR }}"
     fi
     if [ -d "{{ NEML2_DIR }}" ]; then
-        export NEML2_DIR={{ NEML2_DIR }}
+        export NEML2_DIR="{{ NEML2_DIR }}"
     fi
 {%- endif %}
 
 {% if PROFILING is defined %}
     # For profiling
-    export GPERF_DIR={{ GPERF_DIR }}
-    export PATH={{ PPROF_DIR }}/bin:$PATH
+    export GPERF_DIR="{{ GPERF_DIR }}"
+    export PATH="{{ PPROF_DIR }}/bin:$PATH"
     export METHOD=oprof
 {%- endif %}
 
@@ -120,16 +120,16 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     set -o pipefail
 
     # Load jinja vars
-    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
-    MINIFORGE_DIR={{ MINIFORGE_DIR }}
-    MOOSE_CONDA_ENV_NAME={{ MOOSE_CONDA_ENV_NAME }}
-    MOOSE_TOOLS_VERSION={{ MOOSE_TOOLS_VERSION }}
-    CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
-    WASP_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ WASP_BUILD_SCRIPT }}
-    WASP_DIR={{ WASP_DIR }}
-    WASP_GIT_SHA={{ WASP_GIT_SHA }}
-    WASP_GIT_REMOTE={{ WASP_GIT_REMOTE }}
-    export MOOSE_JOBS={{ MOOSE_JOBS }}
+    ROOT_BUILD_DIR="{{ ROOT_BUILD_DIR }}"
+    MINIFORGE_DIR="{{ MINIFORGE_DIR }}"
+    MOOSE_CONDA_ENV_NAME="{{ MOOSE_CONDA_ENV_NAME }}"
+    MOOSE_TOOLS_VERSION="{{ MOOSE_TOOLS_VERSION }}"
+    CONDA_ALT_CHANNEL="{{ CONDA_ALT_CHANNEL }}"
+    WASP_BUILD_SCRIPT="${ROOT_BUILD_DIR}/{{ WASP_BUILD_SCRIPT }}"
+    WASP_DIR="{{ WASP_DIR }}"
+    WASP_GIT_SHA="{{ WASP_GIT_SHA }}"
+    WASP_GIT_REMOTE="{{ WASP_GIT_REMOTE }}"
+    export MOOSE_JOBS="{{ MOOSE_JOBS }}"
 
     # Pinned versions
     CODE_SERVER_VERSION=4.108.0
@@ -146,8 +146,8 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
         # we need to have a clean tmpdir for it to store state (which,
         # for some reason, /tmp doesn't work for this in fakeroot?)
-        export TMPDIR=${ROOT_BUILD_DIR}/tmpdir
-        mkdir $TMPDIR
+        export TMPDIR="${ROOT_BUILD_DIR}/tmpdir"
+        mkdir "$TMPDIR"
     # Special runtime setup for MPICH
     else
         # Required at configure time for MFEM checking petsc
@@ -156,10 +156,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Install code-server
     CODE_SERVER_FILE=code-server-${CODE_SERVER_VERSION}-amd64.rpm
-    cd ${ROOT_BUILD_DIR}
-    curl -fOL https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}
-    rpm -i ${CODE_SERVER_FILE}
-    rm ${CODE_SERVER_FILE}
+    cd "$ROOT_BUILD_DIR"
+    curl -fOL "https://github.com/coder/code-server/releases/download/v${CODE_SERVER_VERSION}/${CODE_SERVER_FILE}"
+    rpm -i "$CODE_SERVER_FILE"
+    rm "$CODE_SERVER_FILE"
 
     # Setup directory for code-server extensions. The extensions folder can be
     # filled by other applications as they wish to have extensions auto installed
@@ -168,7 +168,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     # Download extensions for code-server, currently just moose language support
     MOOSE_LANGUAGE_SUPPORT_VERSION=1.5.2
     cd /opt/code-server/extensions
-    curl -L -O https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix
+    curl -L -O "https://github.com/idaholab/moose-language-support/releases/download/v${MOOSE_LANGUAGE_SUPPORT_VERSION}/moose-language-support-${MOOSE_LANGUAGE_SUPPORT_VERSION}.vsix"
 
     # Setup permissions for the code server extras
     find /opt/code-server -type d -exec chmod 755 {} +
@@ -177,7 +177,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Need to expose cuda compat libs when using mpich with cuda to run mpicc
     if [ -n "$CUDA_DIR" ] && ! which ompi_info &> /dev/null; then
-        export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+        export LD_LIBRARY_PATH="${CUDA_DIR}/compat:${LD_LIBRARY_PATH}"
     fi
 
     # Default optimization flags
@@ -188,12 +188,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
-    cd ${ROOT_BUILD_DIR}
-    mkdir -p ${WASP_DIR}/logs
-    WASP_SRC_DIR=${ROOT_BUILD_DIR}/wasp
-    git clone ${WASP_GIT_REMOTE} ${WASP_SRC_DIR}
-    cd ${WASP_SRC_DIR}
-    git checkout ${WASP_GIT_SHA}
+    cd "$ROOT_BUILD_DIR"
+    mkdir -p "${WASP_DIR}/logs"
+    WASP_SRC_DIR="${ROOT_BUILD_DIR}/wasp"
+    git clone "$WASP_GIT_REMOTE" "$WASP_SRC_DIR"
+    cd "$WASP_SRC_DIR"
+    git checkout "$WASP_GIT_SHA"
     git submodule update --init --recursive
     WASP_SRC_DIR="$WASP_SRC_DIR" "$WASP_BUILD_SCRIPT" \
         -DCMAKE_INSTALL_PREFIX:STRING="$WASP_DIR" \
@@ -203,12 +203,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export WASP_DIR
 
     # Install miniforge in MINIFORGE_DIR
-    cd ${ROOT_BUILD_DIR}
-    MINIFORGE_SCRIPT=${ROOT_BUILD_DIR}/miniforge3.sh
-    curl -L https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -o ${MINIFORGE_SCRIPT}
-    bash ${MINIFORGE_SCRIPT} -b -p ${MINIFORGE_DIR}
-    rm ${MINIFORGE_SCRIPT}
-    export PATH=${MINIFORGE_DIR}/bin:$PATH
+    cd "$ROOT_BUILD_DIR"
+    MINIFORGE_SCRIPT="${ROOT_BUILD_DIR}/miniforge3.sh"
+    curl -L "https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh" -o "$MINIFORGE_SCRIPT"
+    bash "$MINIFORGE_SCRIPT" -b -p "$MINIFORGE_DIR"
+    rm "$MINIFORGE_SCRIPT"
+    export PATH="${MINIFORGE_DIR}/bin:$PATH"
     conda update -yq --all
 
 {% if WITHOUT_PYTORCH is not defined %}
@@ -216,7 +216,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     dnf install -y ninja-build
 
     # Figure out compiler and version to see if we build torch or use prebuilt torch
-    COMPILER=$(mpicxx -show | awk '{ print $1 }')
+    COMPILER="$(mpicxx -show | awk '{ print $1 }')"
     # For filling compiler flags when building pytorch
     PYTORCH_CFLAGS=("${OPTFLAGS[@]}")
     PYTORCH_CXXFLAGS=("${OPTFLAGS[@]}" "-w")
@@ -237,17 +237,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         exit 1
     fi
 
-    LIBTORCH_DIR={{ LIBTORCH_DIR }}
+    LIBTORCH_DIR="{{ LIBTORCH_DIR }}"
     # Clone pytorch for build
-    cd ${ROOT_BUILD_DIR}
-    git clone --branch v${PYTORCH_VERSION} --single-branch --recursive https://github.com/pytorch/pytorch
-    PYTORCH_DIR=${ROOT_BUILD_DIR}/pytorch
+    cd "$ROOT_BUILD_DIR"
+    git clone --branch "v${PYTORCH_VERSION}" --single-branch --recursive https://github.com/pytorch/pytorch
+    PYTORCH_DIR="${ROOT_BUILD_DIR}/pytorch"
 
     # Create a temporary python environment for building pytorch
     PYTORCH_CONDA_ENV=pytorch_build
-    conda create -yq -n ${PYTORCH_CONDA_ENV} python=3.14
-    source activate ${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}
-    pip3 install --no-cache -r ${PYTORCH_DIR}/requirements.txt
+    conda create -yq -n "$PYTORCH_CONDA_ENV" python=3.14
+    source activate "${MINIFORGE_DIR}/envs/${PYTORCH_CONDA_ENV}"
+    pip3 install --no-cache -r "${PYTORCH_DIR}/requirements.txt"
 
     # Need BLAS and LAPACK libs for torch in neml2
     dnf install -y openblas-devel
@@ -261,9 +261,9 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
     fi
     # Build and install pytorch
-    mkdir -p $LIBTORCH_DIR/logs
-    PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
-    mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
+    mkdir -p "${LIBTORCH_DIR}/logs"
+    PYTORCH_BUILD_DIR="${ROOT_BUILD_DIR}/pytorch_build"
+    mkdir "$PYTORCH_BUILD_DIR" && cd "$PYTORCH_BUILD_DIR"
     env \
         CC= \
         CXX= \
@@ -285,30 +285,30 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DCMAKE_CXX_FLAGS="${PYTORCH_CXXFLAGS[*]}" \
             "${PYTORCH_FLAGS[@]}" \
             "${PYTORCH_DIR}" 2>&1 | tee "${LIBTORCH_DIR}/logs/cmake.log"
-    cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee "${LIBTORCH_DIR}/logs/build.log"
+    cmake --build . --target install -- -j "$MOOSE_JOBS" 2>&1 | tee "${LIBTORCH_DIR}/logs/build.log"
 
     # Cleanup the python build environment
     source deactivate
-    conda env remove -y -n ${PYTORCH_CONDA_ENV}
-    rm -rf ${PYTORCH_DIR} ${PYTORCH_BUILD_DIR}
+    conda env remove -y -n "$PYTORCH_CONDA_ENV"
+    rm -rf "$PYTORCH_DIR" "$PYTORCH_BUILD_DIR"
 
     export LIBTORCH_DIR
-    cd ${ROOT_BUILD_DIR}
+    cd "$ROOT_BUILD_DIR"
 
     # TODO: Use a separate WITH_NEML2 for this stuff, or something like that
     # neml2 variables
-    NEML2_GIT_SHA={{ NEML2_GIT_SHA }}
-    NEML2_GIT_REMOTE={{ NEML2_GIT_REMOTE }}
-    NEML2_DIR={{ NEML2_DIR }}
-    NEML2_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}
+    NEML2_GIT_SHA="{{ NEML2_GIT_SHA }}"
+    NEML2_GIT_REMOTE="{{ NEML2_GIT_REMOTE }}"
+    NEML2_DIR="{{ NEML2_DIR }}"
+    NEML2_BUILD_SCRIPT="${ROOT_BUILD_DIR}/{{ NEML2_BUILD_SCRIPT }}"
 
     # Build and install neml2
-    cd ${ROOT_BUILD_DIR}
-    mkdir -p ${NEML2_DIR}/logs
-    NEML2_SRC_DIR=${ROOT_BUILD_DIR}/neml2
-    git clone ${NEML2_GIT_REMOTE} ${NEML2_SRC_DIR}
-    cd ${NEML2_SRC_DIR}
-    git checkout ${NEML2_GIT_SHA}
+    cd "$ROOT_BUILD_DIR"
+    mkdir -p "${NEML2_DIR}/logs"
+    NEML2_SRC_DIR="${ROOT_BUILD_DIR}/neml2"
+    git clone "$NEML2_GIT_REMOTE" "$NEML2_SRC_DIR"
+    cd "$NEML2_SRC_DIR"
+    git checkout "$NEML2_GIT_SHA"
     git submodule update --init --recursive
 {% if PROFILING is defined %}
     METHODS="oprof"
@@ -317,51 +317,51 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- endif %}
     env \
         METHODS="$METHODS" \
-        NEML2_SRC_DIR=${NEML2_SRC_DIR} \
-        NEML2_DIR=${NEML2_DIR} \
-        ${NEML2_BUILD_SCRIPT} \
+        NEML2_SRC_DIR="$NEML2_SRC_DIR" \
+        NEML2_DIR="$NEML2_DIR" \
+        "$NEML2_BUILD_SCRIPT" \
             --skip-submodule-update \
             -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
-            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${NEML2_DIR}/logs/build.log
-    rm -rf ${NEML2_SRC_DIR}
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee "${NEML2_DIR}/logs/build.log"
+    rm -rf "$NEML2_SRC_DIR"
 {%- endif %}
 
 {%- if WITH_MFEM %}
     # Load MFEM jinja variables
-    CONDUIT_GIT_SHA={{ CONDUIT_GIT_SHA }}
-    CONDUIT_GIT_REMOTE={{ CONDUIT_GIT_REMOTE }}
-    CONDUIT_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ CONDUIT_BUILD_SCRIPT }}
-    CONDUIT_DIR={{ CONDUIT_DIR }}
-    MFEM_BUILD_SCRIPT=${ROOT_BUILD_DIR}/{{ MFEM_BUILD_SCRIPT }}
-    MFEM_DIR={{ MFEM_DIR }}
-    MFEM_GIT_SHA={{ MFEM_GIT_SHA }}
-    MFEM_GIT_REMOTE={{ MFEM_GIT_REMOTE }}
+    CONDUIT_GIT_SHA="{{ CONDUIT_GIT_SHA }}"
+    CONDUIT_GIT_REMOTE="{{ CONDUIT_GIT_REMOTE }}"
+    CONDUIT_BUILD_SCRIPT="${ROOT_BUILD_DIR}/{{ CONDUIT_BUILD_SCRIPT }}"
+    CONDUIT_DIR="{{ CONDUIT_DIR }}"
+    MFEM_BUILD_SCRIPT="${ROOT_BUILD_DIR}/{{ MFEM_BUILD_SCRIPT }}"
+    MFEM_DIR="{{ MFEM_DIR }}"
+    MFEM_GIT_SHA="{{ MFEM_GIT_SHA }}"
+    MFEM_GIT_REMOTE="{{ MFEM_GIT_REMOTE }}"
 
     # Clone conduit
-    cd ${ROOT_BUILD_DIR}
-    git clone $CONDUIT_GIT_REMOTE
-    CONDUIT_SRC_DIR=${ROOT_BUILD_DIR}/conduit
-    cd ${CONDUIT_SRC_DIR}
-    git checkout $CONDUIT_GIT_SHA
+    cd "$ROOT_BUILD_DIR"
+    git clone "$CONDUIT_GIT_REMOTE"
+    CONDUIT_SRC_DIR="${ROOT_BUILD_DIR}/conduit"
+    cd "${CONDUIT_SRC_DIR}"
+    git checkout "$CONDUIT_GIT_SHA"
     git submodule update --init
 
     # Clone MFEM
-    cd ${ROOT_BUILD_DIR}
-    git clone $MFEM_GIT_REMOTE
-    MFEM_SRC_DIR=${ROOT_BUILD_DIR}/mfem
-    cd ${MFEM_SRC_DIR}
-    git checkout $MFEM_GIT_SHA
+    cd "$ROOT_BUILD_DIR"
+    git clone "$MFEM_GIT_REMOTE"
+    MFEM_SRC_DIR="${ROOT_BUILD_DIR}/mfem"
+    cd "$MFEM_SRC_DIR"
+    git checkout "$MFEM_GIT_SHA"
 
     # Install conduit
-    mkdir -p ${CONDUIT_DIR}/logs
+    mkdir -p "${CONDUIT_DIR}/logs"
     IFS=' ' read -r -a CONDUIT_OPTIONS <<< "{{ CONDUIT_OPTIONS }}"
     env \
-        CONDUIT_DIR=${CONDUIT_DIR} \
-        CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} \
-        ${CONDUIT_BUILD_SCRIPT} \
+        CONDUIT_DIR="$CONDUIT_DIR" \
+        CONDUIT_SRC_DIR="$CONDUIT_SRC_DIR" \
+        "$CONDUIT_BUILD_SCRIPT" \
             -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
             -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
-            "${CONDUIT_OPTIONS[@]}" 2>&1 | tee ${CONDUIT_DIR}/logs/build.log
+            "${CONDUIT_OPTIONS[@]}" 2>&1 | tee "${CONDUIT_DIR}/logs/build.log"
 
     # Load mfem options, split by word so that globbing works correctly
     IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
@@ -370,24 +370,24 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         MFEM_OPTIONS+=("-DMFEM_USE_CUDA=ON" "-DCUDA_ARCH=sm_80")
         # Expose the compat libraries if we haven't already
         if [[ "$LD_LIBRARY_PATH" != *"${CUDA_DIR}/compat"* ]]; then
-            export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
+            export LD_LIBRARY_PATH="${CUDA_DIR}/compat:${LD_LIBRARY_PATH}"
         fi
         # Expose the cuda headers if we haven't already
         if [[ "$CPATH" != *"${CUDA_DIR}/include"* ]]; then
-            export CPATH=${CUDA_DIR}/include:${CPATH}
+            export CPATH="${CUDA_DIR}/include:${CPATH}"
         fi
     fi
 
     # Install MFEM
-    mkdir -p ${MFEM_DIR}/logs
+    mkdir -p "${MFEM_DIR}/logs"
     env \
-        MFEM_DIR=${MFEM_DIR} \
-        MFEM_SRC_DIR=${MFEM_SRC_DIR} \
-        CONDUIT_DIR=${CONDUIT_DIR} \
-        ${MFEM_BUILD_SCRIPT} \
+        MFEM_DIR="$MFEM_DIR" \
+        MFEM_SRC_DIR="$MFEM_SRC_DIR" \
+        CONDUIT_DIR="$CONDUIT_DIR" \
+        "$MFEM_BUILD_SCRIPT" \
             -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
             -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
-            "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
+            "${MFEM_OPTIONS[@]}" 2>&1 | tee "${MFEM_DIR}/logs/build.log"
 
 {%- endif %}
 
@@ -395,12 +395,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     conda config --env --add channels https://conda.software.inl.gov/public
     # Add an alt channel if given
     if [ -n "$CONDA_ALT_CHANNEL" ]; then
-        conda config --env --add channels ${CONDA_ALT_CHANNEL}
+        conda config --env --add channels "$CONDA_ALT_CHANNEL"
     fi
     # Create list of Conda Packages to install
-    CONDA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
+    CONDA_PACKAGES=("moose-tools=${MOOSE_TOOLS_VERSION}")
     # Install packages
-    conda create -yq -n moose python=${PYTHON_VERSION} ${CONDA_PACKAGES}
+    conda create -yq -n moose python="$PYTHON_VERSION" "${CONDA_PACKAGES[@]}"
     # Needed for coverage
     source activate moose
     pip3 --no-cache install lcov-cobertura
@@ -410,54 +410,54 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
 {% if PROFILING is defined %}
     # Install gperftools
-    GPERF_DIR={{ GPERF_DIR }}
-    cd ${ROOT_BUILD_DIR}
-    mkdir -p ${GPERF_DIR}/logs
-    git clone -b gperftools-${GPERFTOOLS_VERSION} --single-branch https://github.com/gperftools/gperftools.git
-    GPERFTOOLS_SRC=${ROOT_BUILD_DIR}/gperftools
-    cd ${GPERFTOOLS_SRC}
-    ./autogen.sh 2>&1 | tee ${GPERF_DIR}/logs/autogen.log
-    ./configure --prefix=${GPERF_DIR} --enable-frame-pointers 2>&1 | tee ${GPERF_DIR}/logs/configure.log
-    make -j ${MOOSE_JOBS} 2>&1 | tee ${GPERF_DIR}/logs/build.log
-    make install 2>&1 | tee ${GPERF_DIR}/logs/install.log
+    GPERF_DIR="{{ GPERF_DIR }}"
+    cd "$ROOT_BUILD_DIR"
+    mkdir -p "${GPERF_DIR}/logs"
+    git clone -b "gperftools-${GPERFTOOLS_VERSION}" --single-branch https://github.com/gperftools/gperftools.git
+    GPERFTOOLS_SRC="${ROOT_BUILD_DIR}/gperftools"
+    cd "${GPERFTOOLS_SRC}"
+    ./autogen.sh 2>&1 | tee "${GPERF_DIR}/logs/autogen.log"
+    ./configure --prefix="$GPERF_DIR" --enable-frame-pointers 2>&1 | tee "${GPERF_DIR}/logs/configure.log"
+    make -j "${MOOSE_JOBS}" 2>&1 | tee "${GPERF_DIR}/logs/build.log"
+    make install 2>&1 | tee "${GPERF_DIR}/logs/install.log"
     cd ~
-    rm -rf ${GPERFTOOLS_SRC}
+    rm -rf "$GPERFTOOLS_SRC"
 
     # Install go for building pprof; to be removed
-    GO_TAR=${ROOT_BUILD_DIR}/go.tar.gz
-    curl -L https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -o ${GO_TAR}
-    tar -C ${ROOT_BUILD_DIR} -xf ${GO_TAR}
-    rm -rf ${GO_TAR}
-    export PATH=${ROOT_BUILD_DIR}/go/bin:${PATH}
-    export GOPATH=${ROOT_BUILD_DIR}/gopath
-    mkdir ${GOPATH}
+    GO_TAR="${ROOT_BUILD_DIR}/go.tar.gz"
+    curl -L "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o "$GO_TAR"
+    tar -C "$ROOT_BUILD_DIR" -xf "$GO_TAR"
+    rm -rf "$GO_TAR"
+    export PATH="${ROOT_BUILD_DIR}/go/bin:${PATH}"
+    export GOPATH="${ROOT_BUILD_DIR}/gopath"
+    mkdir "$GOPATH"
 
     # Install pprof
     PPROF_VERSION=a0b0bb1d4134f37be44de6c328680339b0fc13ad
-    PPROF_DIR={{ PPROF_DIR }}
-    mkdir -p ${PPROF_DIR}/logs
-    GOBIN=${PPROF_DIR}/bin go install github.com/google/pprof@${PPROF_VERSION} | tee ${PPROF_DIR}/logs/configure.log
+    PPROF_DIR="{{ PPROF_DIR }}"
+    mkdir -p "${PPROF_DIR}/logs"
+    GOBIN="${PPROF_DIR}/bin" go install "github.com/google/pprof@${PPROF_VERSION}" 2>&1 | tee "${PPROF_DIR}/logs/configure.log"
 
     # Remove go now that pprof is installed
     go clean -cache -modcache
-    rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
+    rm -rf "$GOPATH" "${ROOT_BUILD_DIR}/go"
 {%- endif %}
 
     # Build and add pythonfmu only with GCC
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
     if [ "$COMPILER" == "g++" ]; then
-        cd ${ROOT_BUILD_DIR}
+        cd "${ROOT_BUILD_DIR}"
         git clone https://github.com/NTNU-IHB/PythonFMU.git
         cd PythonFMU/
         bash build_unix.sh
-        cd ${ROOT_BUILD_DIR}/PythonFMU
+        cd "${ROOT_BUILD_DIR}/PythonFMU"
         pip install .
     fi
 
     # Clean up
     conda clean -ya
     dnf clean all
-    rm -rf ${ROOT_BUILD_DIR}
+    rm -rf "$ROOT_BUILD_DIR"
 
 %files
     # code-server helpers
