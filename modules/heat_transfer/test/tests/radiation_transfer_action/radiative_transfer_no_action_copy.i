@@ -92,6 +92,12 @@
     centroid_partitioner_direction = x
     input = split_inner_right
   [../]
+
+  [delete_others]
+    type = BoundaryDeletionGenerator
+    input = 'split_inner_top'
+    boundary_names = 'inner_bottom inner_top inner_left inner_right'
+  []
 []
 
 [Variables]
@@ -165,6 +171,15 @@
     boundary = 'inner_left_0 inner_left_1
                 inner_right_0 inner_right_1'
   [../]
+
+  [radiation_field]
+    type = LinearFVGrayLambert
+    variable = temperature
+    temperature_radiation = 1200
+    coeff_diffusion = 5.
+    surface_radiation_object_name = gray_lambert
+    boundary = 'inner_bottom_0 inner_bottom_1'
+  []
 []
 
 # [Postprocessors]
@@ -180,11 +195,20 @@
   solve_type = 'NEWTON'
   petsc_options_iname = '-energy_system_pc_type -energy_system_pc_factor_shift_type -snes_linesearch_damping'
   petsc_options_value = 'hypre boomeramg 0.8'
-  l_abs_tol = 1e-14
-  l_tol = 1e-14
+  l_abs_tol = 1e-20
+  l_tol = 1e-20
   nl_abs_tol = 1e-14
+  nl_forced_its = 10
+  multi_system_fixed_point=true
+  multi_system_fixed_point_convergence=linear
 []
-
+[Convergence]
+  [linear]
+    type = IterationCountConvergence
+    max_iterations = 70
+    converge_at_max_iterations = true
+  []
+[]
 [Outputs]
   exodus = true
 []
