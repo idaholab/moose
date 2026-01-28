@@ -79,9 +79,9 @@ In addition to `MPI_Abort`, some other useful breakpoints are
 - `TIMPI:report_error` for errors reported by TIMPI
 - `libMesh::MacroFunctions::report_error` for errors reported by libMesh
 
-It is oftentimes preferrable to set these breakpoints in an "init" file once and for all. That is useful to avoid having to repeatedly setting the same breakpoints manually in every debugging session, which is critical when starting debugging sessions in parallel with a large number of MPI processes (see for example [#actually-parallel-debugging]).
+It is oftentimes preferable to set these breakpoints in an "init" file once and for all. This is useful to avoid having to repeatedly setting the same breakpoints manually in every debugging session and is critical when starting debugging sessions in parallel with a large number of MPI processes (see for example [#actually-parallel-debugging]).
 
-The user-level init files are located at `$HOME/.gdbinit` for `gdb`, and at `$HOME/.lldbinit` for `lldb`. You can create an init file if one does not exist. A common init file incorporating the above breakpoints would look like
+The user-level init files are located at `$HOME/.gdbinit` for `gdb`, and at `$HOME/.lldbinit` for `lldb`. You can create an init file if one does not exist. A common init file incorporating the above breakpoints would look like:
 
 ```
 set breakpoint pending on
@@ -94,7 +94,7 @@ b libMesh::MacroFunctions::report_error
 ~
 ```
 
-For users using advanced toolings such as UBSanitizer, AddressSanitizer, and ThreadSanitizer, the following breakpoints may come in handy
+For users using advanced tooling, such as UBSanitizer, AddressSanitizer, and ThreadSanitizer, the following breakpoints may come in handy:
 
 ```
 # Common
@@ -232,9 +232,9 @@ On many Linux systems, GDB relies on the ptrace API to control a process (launch
 - Could not attach to process. If your uid matches the uid of the target process, check the setting of /proc/sys/kernel/yama/ptrace_scope
 - warning: process ... is already being traced (when something else is attached)
 
-The most common cause is Ubuntu/Debian’s Yama LSM setting kernel.yama.ptrace_scope, which tightens attach rules to reduce the risk of one process spying on another.
+The most common cause is Ubuntu/Debian’s Yama LSM setting `kernel.yama.ptrace_scope`, which tightens attach rules to reduce the risk of one process spying on another.
 
-To fix the issue, first check the current setting
+To fix the issue, first check the current setting:
 
 ```
 cat /proc/sys/kernel/yama/ptrace_scope
