@@ -20,6 +20,9 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::LinearFVAdvectionDiffusionFunctorR
     const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters)
 {
+  // For beta calculation which is lagged
+  // TODO: consider linear iteration lagging vs time iteration lagging
+  _var.sys().needSolutionState(1, Moose::SolutionIterationType::Nonlinear);
 }
 
 Real
@@ -32,7 +35,7 @@ LinearFVAdvectionDiffusionFunctorRobinBCBase::computeBoundaryValue() const
                                ? _current_face_info->elemInfo()
                                : _current_face_info->neighborInfo();
   const auto state = determineState();
-  const auto old_state = Moose::oldState();
+  const auto old_state = Moose::previousNonlinearState();
 
   const auto alpha = getAlpha(face, state);
   // we have to lag this to avoid recursive calls
