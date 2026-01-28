@@ -116,6 +116,7 @@
 #include "BoundaryNodeIntegrityCheckThread.h"
 #include "BoundaryElemIntegrityCheckThread.h"
 #include "NodalBCBase.h"
+#include "ArrayNodalKernel.h"
 #include "MortarUserObject.h"
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
@@ -150,6 +151,46 @@ bool
 sortMooseVariables(const MooseVariableFEBase * a, const MooseVariableFEBase * b)
 {
   return a->number() < b->number();
+}
+
+void
+addArrayNodalKernelComponentCoupling(const NonlinearSystemBase & nl, CouplingMatrix & cm)
+{
+  const auto & nodal_kernels = nl.getNodalKernelWarehouse().getObjects(/*tid=*/0);
+  if (nodal_kernels.empty())
+    return;
+
+  for (const auto & kernel : nodal_kernels)
+  {
+    if (!kernel || !kernel->enabled())
+      continue;
+
+    const auto * const array_kernel = dynamic_cast<const ArrayNodalKernel *>(kernel.get());
+    if (!array_kernel)
+      continue;
+
+    std::vector<std::pair<unsigned int, unsigned int>> coupling;
+    array_kernel->getJacobianComponentCoupling(coupling);
+    if (coupling.empty())
+      continue;
+
+    const unsigned int base = array_kernel->variable().number();
+    const unsigned int count = array_kernel->variable().count();
+    for (const auto & entry : coupling)
+    {
+      if (entry.first >= count || entry.second >= count)
+        mooseError("ArrayNodalKernel '",
+                   array_kernel->name(),
+                   "' requested Jacobian component coupling (",
+                   entry.first,
+                   ", ",
+                   entry.second,
+                   ") but the variable has ",
+                   count,
+                   " components.");
+      cm(base + entry.first, base + entry.second) = 1;
+    }
+  }
 }
 } // namespace
 
@@ -6524,6 +6565,9 @@ FEProblemBase::init()
           break;
       }
     }
+
+    if (cm && n_vars)
+      addArrayNodalKernelComponentCoupling(*nl, *cm);
 
     nl->dofMap()._dof_coupling = cm.get();
 

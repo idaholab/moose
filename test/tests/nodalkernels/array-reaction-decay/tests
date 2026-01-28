@@ -31,4 +31,12 @@
       detail = 'show a correct automatic differentiation generated Jacobian.'
     []
   []
+
+  [intra_variable_coupling]
+    type = PetscJacobianTester
+    input = coupled.i
+    run_sim = true
+    detail = 'The system shal assemble show a correct hand-coded Jacobian for intra-variable coupling'
+    cli_args = 'Outputs/active=""'
+  []
 []
