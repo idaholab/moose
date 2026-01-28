@@ -312,6 +312,24 @@ MooseLinearVariableFV<OutputType>::evaluate(const FaceArg & face, const StateArg
     return Moose::FV::interpolate(*this, face, state);
   else if (auto * bc_pointer = this->getBoundaryCondition(*fi->boundaryIDs().begin()))
   {
+    // Not current value, don't call the BC!
+    if (state.state != 0)
+    {
+      // TODO: 2 term boundary expansion, same need as for the current state
+      if (face_type == FaceInfo::VarFaceNeighbors::BOTH)
+        return Moose::FV::interpolate(*this, face, state);
+      else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
+      {
+        const auto & elem_info = this->_mesh.elemInfo(fi->elemPtr()->id());
+        return getElemValue(elem_info, state);
+      }
+      else
+      {
+        const auto & elem_info = this->_mesh.elemInfo(fi->neighborPtr()->id());
+        return getElemValue(elem_info, state);
+      }
+    }
+
     mooseAssert(fi->boundaryIDs().size() == 1, "We should only have one boundary on every face.");
     bc_pointer->setupFaceData(fi, face_type);
     return bc_pointer->computeBoundaryValue();
