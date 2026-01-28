@@ -3,14 +3,71 @@
     "pin1_cell_radial_0_axial_0": {
       "fill": "rgmb_region_1",
       "filltype": "CSG_MATERIAL",
-      "region":
-          "(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5 & +pin1_axial_plane_0 & -pin1_axial_plane_1)"
+      "region_infix":
+          "(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5 & +pin1_axial_plane_0 & -pin1_axial_plane_1)",
+      "region_postfix": [
+        "pin1_radial_duct_0_surf_0",
+        "halfspace::POSITIVE",
+        "pin1_radial_duct_0_surf_1",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_2",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_3",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_4",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_5",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_axial_plane_0",
+        "halfspace::POSITIVE",
+        "pin1_axial_plane_1",
+        "halfspace::NEGATIVE",
+        "regionOperator::INTERSECTION",
+        "regionOperator::INTERSECTION"
+      ]
     },
     "pin1_void_cell": {
       "fill": "",
       "filltype": "VOID",
-      "region":
-          "((((~(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5) & +pin1_axial_plane_0) & -pin1_axial_plane_1) | -pin1_axial_plane_0) | +pin1_axial_plane_1)"
+      "region_infix":
+          "((~(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5) & +pin1_axial_plane_0 & -pin1_axial_plane_1) | -pin1_axial_plane_0 | +pin1_axial_plane_1)",
+      "region_postfix": [
+        "pin1_radial_duct_0_surf_0",
+        "halfspace::POSITIVE",
+        "pin1_radial_duct_0_surf_1",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_2",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_3",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_4",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_radial_duct_0_surf_5",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "regionOperator::COMPLEMENT",
+        "pin1_axial_plane_0",
+        "halfspace::POSITIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_axial_plane_1",
+        "halfspace::NEGATIVE",
+        "regionOperator::INTERSECTION",
+        "pin1_axial_plane_0",
+        "halfspace::NEGATIVE",
+        "regionOperator::UNION",
+        "pin1_axial_plane_1",
+        "halfspace::POSITIVE",
+        "regionOperator::UNION"
+      ]
     }
   },
   "surfaces": {
