@@ -14,42 +14,36 @@
             "solution_invalidity": {
                 "solution_invalidity": [
                     {
-                        "converged_counts": 0,
                         "message": "initial: warning",
                         "object_type": "WarningUserObject",
                         "timestep_counts": 0,
                         "total_counts": 4
                     },
                     {
-                        "converged_counts": 0,
                         "message": "tbegin: warning",
                         "object_type": "WarningUserObject",
                         "timestep_counts": 2,
                         "total_counts": 6
                     },
                     {
-                        "converged_counts": 0,
                         "message": "jacobian: warning",
                         "object_type": "WarningUserObject",
                         "timestep_counts": 0,
                         "total_counts": 4
                     },
                     {
-                        "converged_counts": 0,
                         "message": "residual: warning",
                         "object_type": "WarningUserObject",
                         "timestep_counts": 2,
                         "total_counts": 8
                     },
                     {
-                        "converged_counts": 2,
                         "message": "tend: warning",
                         "object_type": "WarningUserObject",
                         "timestep_counts": 2,
                         "total_counts": 6
                     },
                     {
-                        "converged_counts": 2,
                         "message": "final: warning",
                         "object_type": "WarningUserObject",
                         "timestep_counts": 0,
