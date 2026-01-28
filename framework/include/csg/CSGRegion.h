@@ -86,11 +86,11 @@ public:
   const std::string toInfixString() const;
 
   /**
-   * @brief gets the postfix string representation of the region
+   * @brief gets the list of postfix tokens of the region in string representation
    *
-   * @return postfix representation of the region
+   * @return list of postfix tokens that represent the region
    */
-  const std::string toPostfixString() const;
+  const std::vector<std::string> toPostfixStringList() const;
 
   /**
    * @brief converts postfix token from PostfixTokenVariant to string representation

@@ -20,14 +20,14 @@ namespace CSG
 {
 
 // helper function to setup the regions used for the cells in all tests
-std::tuple<CSGRegion, CSGRegion, std::string, std::string>
+std::tuple<CSGRegion, CSGRegion, std::string, std::vector<std::string>>
 setupRegions()
 {
   static CSG::CSGSphere sphere("sphere_surf", 1.0);
   auto region1 = -sphere;
   auto region2 = +sphere;
   std::string reg_str_infix = "-sphere_surf";
-  std::string reg_str_postfix = "sphere_surf halfspace::NEGATIVE";
+  std::vector<std::string> reg_str_postfix{"sphere_surf", "halfspace::NEGATIVE"};
   return std::make_tuple(region1, region2, reg_str_infix, reg_str_postfix);
 }
 
@@ -44,7 +44,7 @@ TEST(CSGCellTest, testVoidCell)
   ASSERT_EQ("", cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
   ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
-  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixStringList());
 }
 
 TEST(CSGCellTest, testMaterialCell)
@@ -60,7 +60,7 @@ TEST(CSGCellTest, testMaterialCell)
   ASSERT_EQ(matname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
   ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
-  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixStringList());
 }
 
 TEST(CSGCellTest, testUniverseCell)
@@ -77,7 +77,7 @@ TEST(CSGCellTest, testUniverseCell)
   ASSERT_EQ(uname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
   ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
-  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixStringList());
 }
 
 // tests CSGCell::getFillUniverse and CSGCell::getFillMaterial

@@ -93,7 +93,7 @@ Below is an example [!ac](JSON) surface output for a model with a `CSG::CSGPlane
 The cells output contains the following information:
 
 - `region_infix`: the infix (human readable) string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
-- `region_postfix`: the postfix (also known as Reverse Polish) notation string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
+- `region_postfix`: list of strings representing the postfix (also known as Reverse Polish) notation of the equation of boolean operators (listed below) and surface names that defines the cell region
 - `filltype`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"`)
 - `fill`: for `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"` `filltype`, the name of the fill object (if `"VOID"` type, then name is an empty string `""`)
 

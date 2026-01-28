@@ -148,14 +148,13 @@ CSGRegion::toInfixString() const
   return postfix_stack.top();
 }
 
-const std::string
-CSGRegion::toPostfixString() const
+const std::vector<std::string>
+CSGRegion::toPostfixStringList() const
 {
-  std::string postfix_string = "";
-  for (auto it = _postfix_tokens.begin(); it != _postfix_tokens.end(); ++it)
-    postfix_string +=
-        postfixTokenToString(*it) + (std::next(it) != _postfix_tokens.end() ? " " : "");
-  return postfix_string;
+  std::vector<std::string> postfix_string_list;
+  for (const auto & token : _postfix_tokens)
+    postfix_string_list.push_back(postfixTokenToString(token));
+  return postfix_string_list;
 }
 
 const std::string

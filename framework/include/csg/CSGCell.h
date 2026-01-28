@@ -127,9 +127,13 @@ public:
   /**
    * @brief Get the postfix string representation of the cell region
    *
-   * @return std::string postfix string representation of the cell region
+   * @return std::vector<std::string> list of postfix tokens of the cell region in string
+   *                                  representation
    */
-  const std::string getRegionAsPostfixString() const { return _region.toPostfixString(); }
+  const std::vector<std::string> getRegionAsPostfixStringList() const
+  {
+    return _region.toPostfixStringList();
+  }
 
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
