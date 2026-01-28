@@ -18,7 +18,6 @@
 #include "ComputeFDResidualFunctor.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
-#include "SolutionInvalidity.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
 
@@ -149,10 +148,6 @@ NonlinearSystem::solve()
       _fe_problem.needsPreviousNewtonIteration())
     _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
-  // reset solution invalid counter for the time step
-  if (!_time_integrators.empty())
-    _app.solutionInvalidity().resetSolutionInvalidTimeStep();
-
   if (shouldEvaluatePreSMOResidual())
   {
     TIME_SECTION("nlPreSMOResidual", 3, "Computing Pre-SMO Residual");
@@ -206,9 +201,6 @@ NonlinearSystem::solve()
 
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
-
-  // Accumulate only the occurence of solution invalid warnings for each time step
-  _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(_fe_problem.timeStep());
 
   // determine whether solution invalid occurs in the converged solution
   checkInvalidSolution();
@@ -346,7 +338,11 @@ NonlinearSystem::converged()
 {
   if (_fe_problem.hasException() || _fe_problem.getFailNextNonlinearConvergenceCheck())
     return false;
-  if (!_fe_problem.acceptInvalidSolution())
+  // When not computing the residual (for example at the beginning of a time step),
+  // we may be in the process of counting invalid solution warnings, so the call to
+  // acceptInvalidSolution() would fail due to lack of parallel synchronization
+  // TODO: think of a better solution
+  if (_app.solutionInvalidity().hasSynced() && !_fe_problem.acceptInvalidSolution())
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
     return false;

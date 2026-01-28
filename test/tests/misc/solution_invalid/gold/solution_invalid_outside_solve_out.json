@@ -1,0 +1,58 @@
+{
+    "reporters": {
+        "solution_invalidity": {
+            "type": "SolutionInvalidityReporter",
+            "values": {
+                "solution_invalidity": {
+                    "type": "SolutionInvalidity const*"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "message": "initial: warning",
+                        "object_type": "WarningUserObject",
+                        "timestep_counts": 0,
+                        "total_counts": 4
+                    },
+                    {
+                        "message": "tbegin: warning",
+                        "object_type": "WarningUserObject",
+                        "timestep_counts": 2,
+                        "total_counts": 6
+                    },
+                    {
+                        "message": "jacobian: warning",
+                        "object_type": "WarningUserObject",
+                        "timestep_counts": 0,
+                        "total_counts": 4
+                    },
+                    {
+                        "message": "residual: warning",
+                        "object_type": "WarningUserObject",
+                        "timestep_counts": 2,
+                        "total_counts": 8
+                    },
+                    {
+                        "message": "tend: warning",
+                        "object_type": "WarningUserObject",
+                        "timestep_counts": 2,
+                        "total_counts": 6
+                    },
+                    {
+                        "message": "final: warning",
+                        "object_type": "WarningUserObject",
+                        "timestep_counts": 0,
+                        "total_counts": 2
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 3
+        }
+    ]
+}

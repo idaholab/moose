@@ -2,9 +2,36 @@
   type = GeneratedMesh
   dim = 2
   nx = 2
-  ny = 2
+  ny = 1
   xmax = 1
   ymax = 1
+[]
+
+[UserObjects]
+  [initial]
+    type = WarningUserObject
+    execute_on = INITIAL
+  []
+  [tbegin]
+    type = WarningUserObject
+    execute_on = TIMESTEP_BEGIN
+  []
+  [jacobian]
+    type = WarningUserObject
+    execute_on = NONLINEAR
+  []
+  [residual]
+    type = WarningUserObject
+    execute_on = LINEAR
+  []
+  [tend]
+    type = WarningUserObject
+    execute_on = TIMESTEP_END
+  []
+  [final]
+    type = WarningUserObject
+    execute_on = FINAL
+  []
 []
 
 [Variables]
@@ -12,25 +39,10 @@
   []
 []
 
-# Sets solution invalid using the SolutionInvalidInterface, as diffusivity exceeds the set threshold.
-[Materials]
-  [filter]
-    type = NonsafeMaterial
-    diffusivity = 0.5
-    threshold = 0.3
-    invalid_after_time = 1
-  []
-[]
-
 [Kernels]
-  [du_dt]
-    type = TimeDerivative
-    variable = u
-  []
   [diffusion]
-    type = MatDiffusion
+    type = Diffusion
     variable = u
-    diffusivity = diffusivity
   []
 []
 
@@ -51,17 +63,17 @@
 
 [Problem]
   type = FEProblem
-  allow_invalid_solution = true
-  immediately_print_invalid_solution = false
 []
 
 [Executioner]
+  # type = Steady
   type = Transient
-  num_steps = 3
-  error_on_dtmin = false
+  num_steps = 2
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu superlu_dist'
+
+  nl_abs_tol = 1e-10
 []
 
 [Reporters]
@@ -71,9 +83,9 @@
 []
 
 [Outputs]
-  file_base = 'solution_invalid_recover'
   [out]
     type = JSON
+    execute_on = 'FINAL'
     execute_system_information_on = none
   []
 []

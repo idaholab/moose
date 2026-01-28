@@ -1763,7 +1763,6 @@ NonlinearSystemBase::residualSetup()
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
     _fe_problem.residualSetup();
-  _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 }
 
 void
@@ -1988,7 +1987,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
   _app.solutionInvalidity().syncIteration();
-  _app.solutionInvalidity().solutionInvalidAccumulation();
+  _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
 }
 
 void
@@ -2843,7 +2842,6 @@ NonlinearSystemBase::jacobianSetup()
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
     _fe_problem.jacobianSetup();
-  _app.solutionInvalidity().resetSolutionInvalidCurrentIteration();
 }
 
 void
@@ -3221,7 +3219,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
   _app.solutionInvalidity().syncIteration();
-  _app.solutionInvalidity().solutionInvalidAccumulation();
+  _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
 }
 
 void
