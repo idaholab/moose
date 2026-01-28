@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -7,8 +8,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from moosefmu import configure_fmu_logging
 import moose_fmu_tester
+from moosefmu import configure_fmu_logging
 
 """
 Run a basic simulation of a MOOSE-generated FMU via fmpy.simulate_fmu.
@@ -37,7 +38,7 @@ if __name__ == "__main__":
     logger = configure_fmu_logging(debug=FMU_DEBUG_LOGGING, logger_name=__name__)
 
     # Provide your own MOOSE command for non testing senarios
-    cmd = "/home/lim2/rod_data/projects/worktrees/moose-fmi/test/moose_test-opt -i fum_diffusion.i"  # moose_fmu_tester.test_controller()
+    cmd = moose_fmu_tester.test_controller() #"/home/lim2/rod_data/projects/worktrees/moose-fmi/test/moose_test-opt -i fum_diffusion.i"
 
     t0, t1, dt = 0, 1, 0.5
     moose_filename = "MooseTest.fmu"

@@ -7,7 +7,6 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import contextlib
 import logging
 import os
 import shutil
@@ -16,9 +15,8 @@ import time
 
 import numpy as np
 import pandas as pd
-import logging
-import time
-import shutil
+from fmpy import extract, instantiate_fmu, read_model_description, simulate_fmu
+from fmpy.simulation import apply_start_values
 
 
 # Helper for testing the MOOSE FMU via the RunApp command_proxy option

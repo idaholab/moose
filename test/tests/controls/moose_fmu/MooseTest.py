@@ -7,10 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+from moosefmu import Moose2FMU
+from pythonfmu.default_experiment import DefaultExperiment
 from pythonfmu.enums import Fmi2Causality, Fmi2Variability
 from pythonfmu.variables import Real, String
-from pythonfmu.default_experiment import DefaultExperiment
-from moosefmu import Moose2FMU
 
 
 class MooseTest(Moose2FMU):
@@ -68,7 +68,8 @@ class MooseTest(Moose2FMU):
         self.logger.info("MooseTest instance created.")
 
     def do_step(self, current_time: float, step_size: float) -> bool:
-        """Advance the FMU by a single macro step.
+        """
+        Advance the FMU by a single macro step.
 
         The body of ``do_step`` showcases the canonical Moose2FMU workflow:
 
@@ -80,7 +81,6 @@ class MooseTest(Moose2FMU):
         Returning ``True`` signals to the master algorithm that the step
         completed successfully; ``False`` indicates a fatal integration error.
         """
-
         # Set a controllable ``Real`` parameter as boundary condition whenever
         # the host provides both the name and value of a target controllable.
         if self.BC_info:

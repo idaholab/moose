@@ -27,7 +27,7 @@ import shlex
 import time
 from typing import Dict, Iterable, Optional, Set, Tuple, Union
 
-from moosecontrol import MooseControl, SubprocessSocketRunner
+from moosecontrol import MooseControl
 
 
 class Moose2FMU(Fmi2Slave):
@@ -212,7 +212,7 @@ class Moose2FMU(Fmi2Slave):
                 # object and a postprocessor backend so users do not need extra
                 # blocks in their input files.
                 if signal in ["INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"]:
-                    moose_dt = self.control.getDT()
+                    moose_dt = self.control.get_dt()
 
                     self.logger.debug(
                         "moose_time=%.6f -> current_time=%.6f -> "
