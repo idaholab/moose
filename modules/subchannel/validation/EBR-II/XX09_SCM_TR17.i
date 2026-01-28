@@ -115,7 +115,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   fp = sodium
   n_blocks = 1
   P_out = ${P_out}
-  CT = 2.6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -124,11 +123,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
-  # Heat Transfer Correlations
   pin_HTC_closure = 'gnielinski'
-  duct_HTC_closure = 'gnielinski'
-  # friction model
   friction_closure = 'cheng'
+  mixing_closure = 'cheng_todreas'
 []
 
 [SCMClosures]
@@ -137,6 +134,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   []
   [gnielinski]
     type = SCMHTCGnielinski
+  []
+  [cheng_todreas]
+    type = SCMMixingChengTodreas
+    CT = 2.6
   []
 []
 
