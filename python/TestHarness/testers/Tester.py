@@ -469,26 +469,6 @@ class Tester(MooseObject, OutputInterface):
         """ return number of slots to use for this tester """
         return self.getThreads(options) * self.getProcs(options)
 
-    def hasOpenMPI(self):
-        """ return whether we have openmpi for execution
-
-        The hacky way to do this is look for "ompi_info" (which only comes
-        with openmpi), and then if it does exist make sure that "mpiexec" is
-        in the same directory.
-
-        We could probably move this somewhere so that it's not called multiple
-        times, but I don't think that's a concern because the PATH should be
-        very hot in cache and it's nice to keep this method local to where
-        it's actually used.
-        """
-        which_ompi_info = shutil.which('ompi_info')
-        if which_ompi_info is None: # no ompi_info
-            return False
-        which_mpiexec = shutil.which('mpiexec')
-        if which_mpiexec is None: # no mpiexec
-            return False
-        return Path(which_mpiexec).parent.absolute() == Path(which_ompi_info).parent.absolute()
-
     def getCommand(self, options):
         """
         Return the command that the Tester wants ran
