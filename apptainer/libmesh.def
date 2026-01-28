@@ -10,8 +10,10 @@
 
 {#- Optional jinja arguments                                                                  -#}
 {#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
+{#- MARCH: Compiler architecture (-mtune=...); default: x86-64-v3                             -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
 {#- METHODS: Methods to build (defaults to all methods)                                       -#}
+{#- MTUNE: Compiler tuning (-mtune=...); default: unset                                       -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 
 {#- The within-container build directory to use                                               -#}
@@ -25,6 +27,11 @@
 
 {#- The script used to install libmesh                                                        -#}
 {%- set LIBMESH_BUILD_SCRIPT = 'update_and_rebuild_libmesh.sh' -%}
+
+{#- Defaults for MARCH and MTUNE                                                              -#}
+{%- if MARCH is not defined %}
+{%- set MARCH = 'x86-64-v3' -%}
+{%- endif %}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -62,6 +69,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
     fi
 
+    # Default optimization flags
+    OPTFLAGS=("-march={{ MARCH }}")
+{%- if MTUNE is defined %}
+    OPTFLAGS+=("-mtune={{ MTUNE }}")
+{%- endif %}
+
     # Don't build VTK for clang 16; 9.2.6 currently doesn't build for clang 16.
     # VTK 9.3 does build for clang 16, but it diffs horribly due to a few bugs
     if ! $CC --version | grep --quiet "clang version 16"; then
@@ -91,8 +104,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
             -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT \
             -DVTK_GROUP_ENABLE_Qt::STRING=NO \
             -DVTK_GROUP_ENABLE_Views:STRING=NO \
-            -DVTK_GROUP_ENABLE_Web:STRING=NO 2>&1 | tee ${VTK_DIR}/logs/cmake.log
-        make install -j ${MOOSE_JOBS} 2>&1 | tee ${VTK_DIR}/logs/install.log
+            -DVTK_GROUP_ENABLE_Web:STRING=NO \
+            -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee "${VTK_DIR}/logs/cmake.log"
+        make install -j "${MOOSE_JOBS}" 2>&1 | tee "${VTK_DIR}/logs/install.log"
         export VTKINCLUDE_DIR
         export VTKLIB_DIR
     fi
@@ -104,13 +119,27 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     git checkout ${LIBMESH_GIT_SHA}
     git submodule update --init --recursive
 
+    # Load libmesh options, split by word so that globbing works correctly
+    IFS=' ' read -r -a LIBMESH_OPTIONS <<< "{{ LIBMESH_OPTIONS }}"
+
     # Build libMesh
     umask 022
     cd ${ROOT_BUILD_DIR}
     mkdir -p ${LIBMESH_DIR}/logs
-    METHODS="{{ METHODS or "opt dbg oprof devel" }}"
-    LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR} LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/{{ LIBMESH_BUILD_SCRIPT }} \
-        {{ LIBMESH_OPTIONS }} --skip-submodule-update 2>&1 | tee ${LIBMESH_DIR}/logs/build.log
+    env \
+        LIBMESH_SRC_DIR="${LIBMESH_SRC_DIR}" \
+        LIBMESH_DIR="${LIBMESH_DIR}" \
+        MOOSE_JOBS="${MOOSE_JOBS}" \
+        METHODS="{{ METHODS or "opt dbg oprof devel" }}" \
+        "./scripts/{{ LIBMESH_BUILD_SCRIPT }}" \
+            --skip-submodule-update \
+            CFLAGS="${OPTFLAGS[*]}" \
+            CXXFLAGS="${OPTFLAGS[*]}" \
+            FCFLAGS="${OPTFLAGS[*]}" \
+            libmesh_CFLAGS="${OPTFLAGS[*]}" \
+            libmesh_CXXFLAGS="${OPTFLAGS[*]}" \
+            libmesh_FCFLAGS="${OPTFLAGS[*]}" \
+            "${LIBMESH_OPTIONS[@]}" 2>&1 | tee "${LIBMESH_DIR}/logs/build.log"
 
     # Fix possibly bad permissions
     chmod -R o=u-w,g=u-w ${LIBMESH_DIR}

@@ -17,6 +17,8 @@
 {#- MFEM_OPTIONS: Options to pass to mfem build                                               -#}
 {#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the builds                                          -#}
+{#- MARCH: Compiler architecture (-mtune=...); default: x86-64-v3                             -#}
+{#- MTUNE: Compiler tuning (-mtune=...); default: unset                                       -#}
 {#- PROFILING: Set to anything to build for profiling (add gperftools)                        -#}
 {#- SKIP_FINGERPRINTS: Set to skip fingerprint verification                                   -#}
 {#- WITH_MFEM: Whether or not to build mfem (default: 1 to build, 0 to not build)             -#}
@@ -60,6 +62,11 @@
 
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/moose-dev' -%}
+
+{#- Defaults for MARCH and MTUNE                                                              -#}
+{%- if MARCH is not defined %}
+{%- set MARCH = 'x86-64-v3' -%}
+{%- endif %}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
@@ -173,6 +180,12 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         export LD_LIBRARY_PATH=${CUDA_DIR}/compat:${LD_LIBRARY_PATH}
     fi
 
+    # Default optimization flags
+    OPTFLAGS=("-march={{ MARCH }}")
+{%- if MTUNE is defined %}
+    OPTFLAGS+=("-mtune={{ MTUNE }}")
+{%- endif %}
+
     # Build and install wasp
     # This is redundant; hopefully we can use the one from conda in the future
     cd ${ROOT_BUILD_DIR}
@@ -182,8 +195,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     cd ${WASP_SRC_DIR}
     git checkout ${WASP_GIT_SHA}
     git submodule update --init --recursive
-    WASP_SRC_DIR=${WASP_SRC_DIR} ${WASP_BUILD_SCRIPT} -D CMAKE_INSTALL_PREFIX:STRING=${WASP_DIR} 2>&1 | tee ${WASP_DIR}/logs/build.log
-    rm -rf ${WASP_SRC_DIR}
+    WASP_SRC_DIR="$WASP_SRC_DIR" "$WASP_BUILD_SCRIPT" \
+        -DCMAKE_INSTALL_PREFIX:STRING="$WASP_DIR" \
+        -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+        -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee "${WASP_DIR}/logs/build.log"
+    rm -rf "$WASP_SRC_DIR"
     export WASP_DIR
 
     # Install miniforge in MINIFORGE_DIR
@@ -201,12 +217,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Figure out compiler and version to see if we build torch or use prebuilt torch
     COMPILER=$(mpicxx -show | awk '{ print $1 }')
-    # Explicitly silence all warnings because the build is loud (>5MB of output...)
-    BUILD_PYTORCH_CCXXFLAGS=("-w")
-    BUILD_PYTORCH_FLAGS=()
+    # For filling compiler flags when building pytorch
+    PYTORCH_CFLAGS=("${OPTFLAGS[@]}")
+    PYTORCH_CXXFLAGS=("${OPTFLAGS[@]}" "-w")
+    PYTORCH_FLAGS=()
     if [ "$COMPILER" == "g++" ]; then
-        BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
-        if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
+        PYTORCH_CXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
+        if [[ "$(gcc --version)" =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
             GCC_VERSION="${BASH_REMATCH[0]}"
         else
             echo "Failed to parse GCC version"
@@ -214,7 +231,7 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
         fi
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
-        BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
+        PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
     else
         echo "Unknown compiler $COMPILER"
         exit 1
@@ -239,28 +256,36 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     if [ -n "$CUDA_DIR" ]; then
         # 7.0 V100 (sawtooth), 8.0 A100 (hoodoo), 8.6 A2 (milangpubuild), 8.9 L4 (rod, cone)
         export TORCH_CUDA_ARCH_LIST="7.0;8.0;8.6;8.9"
-        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
+        PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=ON" "-DCUDA_TOOLKIT_ROOT_DIR=${CUDA_DIR}")
     else
-        BUILD_PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
+        PYTORCH_FLAGS+=("-DUSA_CUDA:BOOL=OFF")
     fi
     # Build and install pytorch
     mkdir -p $LIBTORCH_DIR/logs
     PYTORCH_BUILD_DIR=${ROOT_BUILD_DIR}/pytorch_build
     mkdir ${PYTORCH_BUILD_DIR} && cd ${PYTORCH_BUILD_DIR}
-    CC= CXX= F77= F90= FC= CFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" CXXFLAGS="${BUILD_PYTORCH_CCXXFLAGS[*]}" cmake \
-        -GNinja \
-        -DBUILD_SHARED_LIBS:BOOL=ON \
-        -DCMAKE_BUILD_TYPE:STRING=Release \
-        -DCMAKE_INSTALL_PREFIX:PATH=${LIBTORCH_DIR} \
-        -DBUILD_PYTHON:BOOL=OFF \
-        -DUSE_BLAS:BOOL=ON \
-        -DBLAS:STRING=OpenBLAS \
-        -DUSE_LAPACK:BOOL=ON \
-        -DUSE_MPI:BOOL=OFF \
-        -DUSE_SYSTEM_NCCL:BOOL=ON \
-        "${BUILD_PYTORCH_FLAGS[@]}" \
-        ${PYTORCH_DIR} 2>&1 | tee ${LIBTORCH_DIR}/logs/cmake.log
-    cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee ${LIBTORCH_DIR}/logs/build.log
+    env \
+        CC= \
+        CXX= \
+        F77= \
+        F90= \
+        FC= \
+        cmake \
+            -GNinja \
+            -DBUILD_SHARED_LIBS:BOOL=ON \
+            -DCMAKE_BUILD_TYPE:STRING=Release \
+            -DCMAKE_INSTALL_PREFIX:PATH="${LIBTORCH_DIR}" \
+            -DBUILD_PYTHON:BOOL=OFF \
+            -DUSE_BLAS:BOOL=ON \
+            -DBLAS:STRING=OpenBLAS \
+            -DUSE_LAPACK:BOOL=ON \
+            -DUSE_MPI:BOOL=OFF \
+            -DUSE_SYSTEM_NCCL:BOOL=ON \
+            -DCMAKE_C_FLAGS="${PYTORCH_CFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${PYTORCH_CXXFLAGS[*]}" \
+            "${PYTORCH_FLAGS[@]}" \
+            "${PYTORCH_DIR}" 2>&1 | tee "${LIBTORCH_DIR}/logs/cmake.log"
+    cmake --build . --target install -- -j ${MOOSE_JOBS} 2>&1 | tee "${LIBTORCH_DIR}/logs/build.log"
 
     # Cleanup the python build environment
     source deactivate
@@ -290,7 +315,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 {%- else %}
     METHODS="opt devel dbg"
 {%- endif %}
-    METHODS="$METHODS" NEML2_SRC_DIR=${NEML2_SRC_DIR} NEML2_DIR=${NEML2_DIR} ${NEML2_BUILD_SCRIPT} --skip-submodule-update 2>&1 | tee ${NEML2_DIR}/logs/build.log
+    env \
+        METHODS="$METHODS" \
+        NEML2_SRC_DIR=${NEML2_SRC_DIR} \
+        NEML2_DIR=${NEML2_DIR} \
+        ${NEML2_BUILD_SCRIPT} \
+            --skip-submodule-update \
+            -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" 2>&1 | tee ${NEML2_DIR}/logs/build.log
     rm -rf ${NEML2_SRC_DIR}
 {%- endif %}
 
@@ -322,7 +354,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Install conduit
     mkdir -p ${CONDUIT_DIR}/logs
-    CONDUIT_DIR=${CONDUIT_DIR} CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} ${CONDUIT_BUILD_SCRIPT} {{ CONDUIT_OPTIONS }} 2>&1 | tee ${CONDUIT_DIR}/logs/build.log
+    IFS=' ' read -r -a CONDUIT_OPTIONS <<< "{{ CONDUIT_OPTIONS }}"
+    env \
+        CONDUIT_DIR=${CONDUIT_DIR} \
+        CONDUIT_SRC_DIR=${CONDUIT_SRC_DIR} \
+        ${CONDUIT_BUILD_SCRIPT} \
+            -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
+            "${CONDUIT_OPTIONS[@]}" 2>&1 | tee ${CONDUIT_DIR}/logs/build.log
 
     # Load mfem options, split by word so that globbing works correctly
     IFS=' ' read -r -a MFEM_OPTIONS <<< "{{ MFEM_OPTIONS }}"
@@ -341,7 +380,14 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Install MFEM
     mkdir -p ${MFEM_DIR}/logs
-    MFEM_DIR=${MFEM_DIR} MFEM_SRC_DIR=${MFEM_SRC_DIR} CONDUIT_DIR=${CONDUIT_DIR} ${MFEM_BUILD_SCRIPT} "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
+    env \
+        MFEM_DIR=${MFEM_DIR} \
+        MFEM_SRC_DIR=${MFEM_SRC_DIR} \
+        CONDUIT_DIR=${CONDUIT_DIR} \
+        ${MFEM_BUILD_SCRIPT} \
+            -DCMAKE_C_FLAGS="${OPTFLAGS[*]}" \
+            -DCMAKE_CXX_FLAGS="${OPTFLAGS[*]}" \
+            "${MFEM_OPTIONS[@]}" 2>&1 | tee ${MFEM_DIR}/logs/build.log
 
 {%- endif %}
 
