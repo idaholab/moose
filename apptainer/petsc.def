@@ -5,6 +5,8 @@
 {#- PETSC_GIT_REMOTE: The git remote to use to get PETSc                                      -#}
 
 {#- Optional jinja arguments                                                                  -#}
+{#- MARCH: Compiler architecture (-mtune=...); default: x86-64-v3                             -#}
+{#- MTUNE: Compiler tuning (-mtune=...); default: unset                                       -#}
 {#- MOOSE_JOBS: Number of jobs to pass to the PETSc build script                              -#}
 {#- MPI_FLAVOUR: The flavour of MPI to use (options: mpich, openmpi; default: mpich)          -#}
 {#- PETSC_OPTIONS: Options to pass to the PETSc build script                                  -#}
@@ -16,6 +18,11 @@
 
 {#- The installation location for PETSc                                                       -#}
 {%- set PETSC_DIR = '/opt/petsc' -%}
+
+{#- Defaults for MARCH and MTUNE                                                              -#}
+{%- if MARCH is not defined %}
+{%- set MARCH = 'x86-64-v3' -%}
+{%- endif %}
 
 {%- if MPI_FLAVOUR is not defined %}
 {%- set MPI_FLAVOUR = 'mpich' -%}
@@ -73,9 +80,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Load PETSc options, split by word so that globbing works correctly
     IFS=' ' read -r -a PETSC_OPTIONS <<< "{{ PETSC_OPTIONS }}"
+
+    # Default optimization flags
+    OPTFLAGS=("-march={{ MARCH }}")
+{%- if MTUNE is defined %}
+    OPTFLAGS+=("-mtune={{ MTUNE }}")
+{%- endif %}
 {%- if PROFILING is defined %}
-    # Flags needed for profiling
-    PETSC_OPTIONS+=("--CFLAGS=-fno-omit-frame-pointer" "--CXX_CXXFLAGS=-fno-omit-frame-pointer" "--FFLAGS=-fno-omit-frame-pointer")
+    # Flags needed for profiling; petsc prefers that you add to
+    # [C,CXX,F]OPTFLAGS instead of [C,CXX,F]FLAGS because it
+    # appends some flags of its own
+    OPTFLAGS+=("-fno-omit-frame-pointer")
 {%- endif %}
 
     if [ -n "$CUDA_DIR" ]; then
@@ -89,8 +104,18 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     umask 022
     cd ${ROOT_BUILD_DIR}
     mkdir -p ${PETSC_DIR}/logs
-    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} PETSC_SRC_DIR=${PETSC_SRC_DIR} ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh \
-        "${PETSC_OPTIONS[@]}" 2>&1 | tee ${PETSC_DIR}/logs/build.log
+    env \
+        MOOSE_JOBS="{{ MOOSE_JOBS }}" \
+        PETSC_PREFIX="${PETSC_DIR}" \
+        PETSC_SRC_DIR="${PETSC_SRC_DIR}" \
+        ${ROOT_BUILD_DIR}/scripts/update_and_rebuild_petsc.sh \
+            --with-cc="$CC" \
+            --with-cxx="$CXX" \
+            --with-fc="$FC" \
+            COPTFLAGS="${OPTFLAGS[*]}" \
+            CXXOPTFLAGS="${OPTFLAGS[*]}" \
+            FOPTFLAGS="${OPTFLAGS[*]}" \
+            "${PETSC_OPTIONS[@]}" 2>&1 | tee "${PETSC_DIR}/logs/build.log"
 
 {%- if MPI_FLAVOUR == "openmpi" %}
     # If we're using openmpi, we need to allow running as root
