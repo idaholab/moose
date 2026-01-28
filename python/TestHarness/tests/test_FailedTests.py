@@ -24,7 +24,9 @@ class TestHarnessTester(TestHarnessTestCase):
             # Has failing tests; failed test is output and so is failed test summary
             out = self.runTests(*args, '-i', 'always_bad', exit_code=128, **kwargs).output
             self.assertRegex(out, r'tests/test_harness.always_ok.*?OK')
-            self.assertRegex(out, r'tests/test_harness.always_bad.*?FAILED \(CODE 1\)')
+            self.assertRegex(
+                out, r"tests/test_harness.always_bad.*?FAILED \(EXIT CODE 1 != 0\)"
+            )
             self.assertIn('Failed Tests:', out)
 
             # Re-run failed tests
@@ -32,7 +34,10 @@ class TestHarnessTester(TestHarnessTestCase):
             # Verify the passing test is not present
             self.assertNotRegex(out, r'tests/test_harness.always_ok.*?OK')
             # Verify the caveat represents a previous result
-            self.assertRegex(out, r'tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: CODE 1\] FAILED \(CODE 1\)')
+            self.assertRegex(
+                out,
+                r"tests/test_harness.always_bad.*?\[PREVIOUS RESULTS: EXIT CODE 1 != 0\] FAILED \(EXIT CODE 1 != 0\)",
+            )
 
             # Does not having failing tests; failed tests summary not printed
             out = self.runTests(*args, "-i", "always_ok").output

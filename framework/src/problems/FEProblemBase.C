@@ -3359,7 +3359,7 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
 
   params.set<MooseEnum>("order") = type.order.get_order();
   params.set<MooseEnum>("family") = "SCALAR";
-  params.set<std::vector<Real>>("scaling") = {1};
+  params.set<std::vector<Real>>("scaling") = std::vector<Real>{1};
   if (active_subdomains)
     for (const SubdomainID & id : *active_subdomains)
       params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));

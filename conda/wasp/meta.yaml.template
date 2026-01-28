@@ -101,5 +101,5 @@ about:
     access, validation, and analysis of ascii text files.
 extra:
   recipe-maintainers:
-    - milljm
+    - cticenhour
     - loganharbour

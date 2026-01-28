@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2025.10.21" %}
+{% set version = "2026.01.27" %}
 
 package:
   name: moose-tools
@@ -117,6 +117,5 @@ about:
 
 extra:
   recipe-maintainers:
-    - milljm
     - cticenhour
     - loganharbour

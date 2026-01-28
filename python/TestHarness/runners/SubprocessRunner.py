@@ -92,10 +92,12 @@ class SubprocessRunner(Runner):
 
         timer.start('runner_run')
 
-        # Setup the memory checking thread if psutil is available
-        if psutil is not None:
-            self.memory_thread = Thread(target=self._runMemoryThread)
-            self.memory_thread.start()
+        # Setup the memory checking thread if psutil is available;
+        # disabled until it is no longer a performance hit on
+        # python 3.14 (see #32243)
+        # if psutil is not None:
+        #     self.memory_thread = Thread(target=self._runMemoryThread)
+        #     self.memory_thread.start()
 
     @staticmethod
     def getProcessMemory(process) -> Optional[int]:

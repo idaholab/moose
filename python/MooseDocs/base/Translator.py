@@ -298,9 +298,9 @@ class Translator(mixins.ConfigObject):
         """Helper to check the loaded extensions."""
         available = [e.__module__ for e in self.__extensions]
         messages = []
-        for ext in extension._Extension__requires:
-            if ext.__name__ not in available:
-                msg = "The {} extension is required but not included.".format(ext.__name__)
+        for name in extension._Extension__requires:
+            if name not in available:
+                msg = f"The {name} extension is required but not included."
                 messages.append(msg)
 
         if messages:

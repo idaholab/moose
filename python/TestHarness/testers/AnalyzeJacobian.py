@@ -58,7 +58,6 @@ class AnalyzeJacobian(FileTester):
             self.addCaveats('skipped (no numpy)')
             return False
 
-
     def getCommand(self, options):
         specs = self.specs
         # Create the command line string to run
@@ -82,8 +81,12 @@ class AnalyzeJacobian(FileTester):
 
         return command
 
-
     def processResults(self, moose_dir, options, exit_code, runner_output):
+        if parent_out := super().processResults(
+            moose_dir, options, exit_code, runner_output
+        ):
+            return parent_out
+
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
@@ -91,10 +94,7 @@ class AnalyzeJacobian(FileTester):
             if (out_ok and exit_code != 0):
                 reason = 'OUT FOUND BUT CRASH'
             elif (not out_ok):
-                reason = 'NO EXPECTED OUT'
-        if reason == '':
-            if exit_code != 0:
-                reason = 'CRASH'
+                reason = "NO EXPECTED OUT"
 
         if reason != '':
             self.setStatus(self.fail, reason)

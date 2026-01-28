@@ -210,7 +210,8 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   fi
 
   # Step 3: Configure NEML2
-  source $SCRIPT_DIR/configure_neml2.sh
+  # shellcheck disable=SC1091
+  source "$SCRIPT_DIR/configure_neml2.sh"
   if [[ "${FAST}" != true  ]] ; then
     echo
     echo "****************************************************************************************************"
@@ -223,6 +224,7 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
                     "-DNEML2_CONTRIB_PARALLEL=${NEML2_JOBS}" \
                     "-Dtimpi_BUILD_TYPE=${METHOD}" \
                     "${EXTRA_ARGS[@]}"
+    # shellcheck disable=SC2181
     if [[ $? -ne 0 ]] ; then
       echo "Error: Failed to configure NEML2"
       exit 1
@@ -236,6 +238,7 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   echo "****************************************************************************************************"
   echo
   build_neml2 "${NEML2_BUILD_DIR}" "${NEML2_JOBS}"
+  # shellcheck disable=SC2181
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to build NEML2"
     exit 1
@@ -248,12 +251,14 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
   echo "****************************************************************************************************"
   echo
   install_neml2 "${NEML2_BUILD_DIR}" "${NEML2_DIR}"
+  # shellcheck disable=SC2181
   if [[ $? -ne 0 ]] ; then
     echo "Error: Failed to install NEML2"
     exit 1
   fi
 done
 
+# shellcheck disable=SC2181
 if [[ $? -eq 0 ]]; then
   echo
   echo "****************************************************************************************************"

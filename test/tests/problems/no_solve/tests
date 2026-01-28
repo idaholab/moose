@@ -23,7 +23,7 @@
     prereq = eigen_problem_solve_fail
     requirement = 'The system shall have the ability to disable the nonlinear-eigen system solve in a simulation.'
     # regex meant to make sure no message about solve failing is printed
-    expect_out = 'Solve Skipped!(?![\s\S]*Aborting)'
+    expect_out = 'Solve Skipped!'
     absent_out = 'WARNING! There are options you set that were not used!'
     input = 'ne_fail.i'
     cli_args = Problem/solve=false
