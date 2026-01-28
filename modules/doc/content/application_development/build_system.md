@@ -65,7 +65,7 @@ as a suffix like: `something-$METHOD`. The valid options are:
 !alert! note
 When developing your own application, it is generally advised to start from the `devel` build, as it
 offers a reasonable balance between speed and debugging checks. When an error cannot be easily addressed
-with the information provided by the `devel` build, a `dbg` execetubale can be built for use in debuggers.
+with the information provided by the `devel` build, a `dbg` executable can be built for use in debuggers.
 See [this page](application_development/debugging.md) for instructions on running the `dbg` executable
 with a debugger. When performance issues are encountered, and the information provided by the [PerfGraph.md]
 system is insufficient, an `oprof` executable can be used together with profiling tools to gather more
