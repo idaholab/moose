@@ -1460,7 +1460,7 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
     std::string error_string = "";
 
     // Verify another processor's IDs against the global map on rank 0
-    const auto check_ids = [this, &global_map, &error_suffix, &error_string](
+    const auto check_ids = [&global_map, &error_suffix, &error_string](
                                processor_id_type pid, const std::vector<RayID> & ids)
     {
       for (const RayID id : ids)
