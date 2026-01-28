@@ -80,6 +80,8 @@ Use the finite volume approximation (on cell C):
 
 !---
 
+!!code-1
+
 ## Approximating the Reaction and Source Terms
 
 For a finite volume variable, there is only one quadrature point and it is the cell centroid. This form
@@ -88,6 +90,8 @@ is very similar to the one used in the FEM routines (We always use a test functi
 !listing framework/src/fvkernels/FVReaction.C re=ADReal\sFVReaction::computeQpResidual.*?^}
 
 !---
+
+!!code-1-end
 
 ## Approximating the Diffusion Term
 
@@ -188,11 +192,15 @@ From the two equations:
 
 !---
 
+!!code-2
+
 ## Approximating the Diffusion Term
 
 !listing framework/src/fvkernels/FVDiffusion.C re=ADReal\sFVDiffusion::computeQpResidual.*?^}
 
 !---
+
+!!code-2-end
 
 ## Approximating the Advection Term
 
@@ -248,11 +256,15 @@ Common interpolation method for $u_f$:
 
 !---
 
+!!code-3
+
 ## Approximating the Advection Term
 
 !listing framework/src/fvkernels/FVAdvection.C re=ADReal\sFVAdvection::computeQpResidual.*?^}
 
 !---
+
+!!code-3-end
 
 ## Example Input File
 

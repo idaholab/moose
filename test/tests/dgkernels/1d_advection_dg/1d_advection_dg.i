@@ -30,19 +30,19 @@
     variable = u
   []
   [adv_u]
-    implicit = false
     type = ConservativeAdvection
     variable = u
     velocity = '1 0 0'
+    implicit = false
   []
 []
 
 [DGKernels]
   [dg_advection_u]
-    implicit = false
     type = DGConvection
     variable = u
     velocity = '1 0 0'
+    implicit = false
   []
 []
 

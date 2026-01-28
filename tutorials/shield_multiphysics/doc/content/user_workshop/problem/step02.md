@@ -44,7 +44,9 @@ Block restriction is a common feature of MOOSE objects, introduced by setting
 block = 'concrete'
 ```
 
-!listing step02_coef_diffusion/step2.i
+In this example, we limit the heat conduction equation to the concrete and aluminum blocks.
+
+!listing step02_coef_diffusion/step2.i block=Kernels
 
 !---
 
@@ -61,4 +63,4 @@ moose-opt -i step2.i
 ## Step 2: Result
 
 !media shield_multiphysics/results/step02.png
-       alt=Temperature field for the shielding, produced by running the simulation above. 
+       alt=Temperature field for the shielding, produced by running the simulation above.
