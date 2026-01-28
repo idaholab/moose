@@ -69,7 +69,7 @@ function configure_libmesh()
                --with-future-timpi-dir="${LIBMESH_DIR}" \
                INSTALL="${INSTALL_BINARY}" \
                "${EXTRA_ARGS[@]}" \
-               $*
+               "$@"
   local RETURN_CODE=$?
 
   # Restore unbound variable checks
