@@ -72,6 +72,35 @@ protected:
                       const Real field_relaxation = 1.0,
                       const Real min_value_limiter = std::numeric_limits<Real>::min());
 
+  /// Aggregated storage for residuals, tolerances, and indices used in convergence checks
+  struct ResidualStorage
+  {
+    /// (linear iterations, normalized residual) entries in the order used by NS::FV::converged()
+    std::vector<std::pair<unsigned int, Real>> ns_residuals;
+    /// Absolute tolerances matching ns_residuals
+    std::vector<Real> ns_abs_tols;
+    /// Indices of momentum equations in ns_residuals
+    std::vector<std::size_t> momentum_indices;
+    /// Index of the pressure equation in ns_residuals
+    std::size_t pressure_index = Moose::invalid_size_t;
+    /// Index of the energy equation in ns_residuals
+    std::size_t energy_index = Moose::invalid_size_t;
+    /// Index of the solid energy equation in ns_residuals
+    std::size_t solid_energy_index = Moose::invalid_size_t;
+    /// Indices of active scalar equations in ns_residuals
+    std::vector<std::size_t> active_scalar_indices;
+    /// Indices of turbulence surrogate equations in ns_residuals
+    std::vector<std::size_t> turbulence_indices;
+    /// This will be an initial indicator if we have something to solve.
+    /// If we dont have anything we just set this to true.
+    bool converged = false;
+  };
+
+  /**
+   * Build residual/tolerance vectors and associated indices for all enabled systems.
+   */
+  ResidualStorage setupResidualStorage() const;
+
   /// Solve an equation which contains the solid energy conservation.
   std::pair<unsigned int, Real> solveSolidEnergy();
 
@@ -113,6 +142,15 @@ protected:
 
   /// Shortcut to every linear system that we solve for here
   std::vector<LinearSystem *> _systems_to_solve;
+
+  /// Flags controlling which systems are actively solved (can be used with restart to freeze flow)
+  const bool _should_solve_momentum;
+  const bool _should_solve_pressure;
+  const bool _should_solve_energy;
+  const bool _should_solve_solid_energy;
+  const bool _should_solve_turbulence;
+  const bool _should_solve_passive_scalars;
+  const bool _should_solve_active_scalars;
 
   // ************************ Active Scalar Variables ************************ //
 

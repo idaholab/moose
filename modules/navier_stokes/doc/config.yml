@@ -4,6 +4,10 @@ Content:
     - modules/fluid_properties/doc/content
     - modules/heat_transfer/doc/content
     - modules/ray_tracing/doc/content
+    - utility:
+        root_dir: ${MOOSE_DIR}/modules/doc/content
+        content:
+            - application_usage/restart_recover.md
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
