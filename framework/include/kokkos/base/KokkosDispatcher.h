@@ -507,3 +507,11 @@ private:
 #define registerKokkosPostprocessor(app, classname) registerKokkosReducer(app, classname)
 #define registerKokkosPostprocessorAliased(app, classname, alias)                                  \
   registerKokkosReducerAliased(app, classname, alias)
+
+#define registerKokkosVectorPostprocessor(app, classname) registerKokkosReducer(app, classname)
+#define registerKokkosVectorPostprocessorAliased(app, classname, alias)                            \
+  registerKokkosReducerAliased(app, classname, alias)
+
+#define registerKokkosReporter(app, classname) registerKokkosReducer(app, classname)
+#define registerKokkosReporterAliased(app, classname, alias)                                       \
+  registerKokkosReducerAliased(app, classname, alias)
