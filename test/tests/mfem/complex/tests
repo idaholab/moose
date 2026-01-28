@@ -6,7 +6,6 @@
     input = complex.i
     xmldiff = 'OutputData/Complex2DQuad/Run0/Run0.pvd
                 OutputData/Complex2DQuad/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM on a 2D mesh with quadrilateral elements. This test is equivalent to MFEM Example 22.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -18,7 +17,6 @@
     input = complex.i
     xmldiff = 'OutputData/Complex2DTri/Run0/Run0.pvd
                 OutputData/Complex2DTri/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     cli_args = 'Mesh/file=../mesh/star.mesh '
                'Mesh/serial_refine=1 '
                'FESpaces/H1FESpace/fec_order=SECOND '

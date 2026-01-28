@@ -1,7 +1,5 @@
 # DivField
 
-!syntax description /Kernels/DivField
-
 ## Overview
 
 !style halign=left
