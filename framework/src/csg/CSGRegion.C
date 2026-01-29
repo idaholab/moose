@@ -78,7 +78,7 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
   }
 }
 
-const std::string
+std::string
 CSGRegion::toInfixString() const
 {
   // Return an empty string if no postfix tokens are defined
@@ -148,16 +148,17 @@ CSGRegion::toInfixString() const
   return postfix_stack.top();
 }
 
-const std::vector<std::string>
+std::vector<std::string>
 CSGRegion::toPostfixStringList() const
 {
   std::vector<std::string> postfix_string_list;
+  postfix_string_list.reserve(_postfix_tokens.size());
   for (const auto & token : _postfix_tokens)
     postfix_string_list.push_back(postfixTokenToString(token));
   return postfix_string_list;
 }
 
-const std::string
+std::string
 CSGRegion::postfixTokenToString(const PostfixTokenVariant & token) const
 {
   // Lambda function to return all variant types as strings
@@ -200,7 +201,7 @@ CSGRegion::nextRegionOpIsIdentical(const std::string & region_op_string,
 {
   for (unsigned int i = postfix_token_index; i < _postfix_tokens.size(); ++i)
   {
-    const auto & postfix_token_string = postfixTokenToString(_postfix_tokens[i]);
+    const auto postfix_token_string = postfixTokenToString(_postfix_tokens[i]);
     if (postfix_token_string.find("regionOperator::") != std::string::npos)
       return (postfix_token_string == region_op_string);
   }

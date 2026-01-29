@@ -122,7 +122,7 @@ public:
    *
    * @return std::string infix string representation of the cell region
    */
-  const std::string getRegionAsInfixString() const { return _region.toInfixString(); }
+  std::string getRegionAsInfixString() const { return _region.toInfixString(); }
 
   /**
    * @brief Get the postfix string representation of the cell region
@@ -130,7 +130,7 @@ public:
    * @return std::vector<std::string> list of postfix tokens of the cell region in string
    *                                  representation
    */
-  const std::vector<std::string> getRegionAsPostfixStringList() const
+  std::vector<std::string> getRegionAsPostfixStringList() const
   {
     return _region.toPostfixStringList();
   }
