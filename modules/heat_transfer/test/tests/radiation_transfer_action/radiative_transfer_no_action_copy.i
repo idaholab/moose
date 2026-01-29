@@ -1,6 +1,6 @@
 [Problem]
   kernel_coverage_check = false
-  linear_sys_names = 'energy_system'
+  linear_sys_names = 'energy_system u_system v_system p_system'
 []
 
 [Mesh]
@@ -10,9 +10,9 @@
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1.3 1.9'
-    ix = '3 3 3'
+    ix = '9 9 9'
     dy = '2 1.2 0.9'
-    iy = '3 3 3'
+    iy = '9 9 9'
     subdomain_id = '0 1 0
                     4 5 2
                     0 3 0'
@@ -98,14 +98,45 @@
     input = 'split_inner_top'
     boundary_names = 'inner_bottom inner_top inner_left inner_right'
   []
+
+  [delete_block5]
+    type = BlockDeletionGenerator
+    input = 'delete_others'
+    block = '5'
+  []
 []
 
 [Variables]
   [temperature]
     type = MooseLinearVariableFVReal
     solver_sys = 'energy_system'
-    initial_condition = 1200
-    block = 0
+    initial_condition = 200
+  []
+  [vel_x]
+    type = MooseLinearVariableFVReal
+    solver_sys = 'u_system'
+    initial_condition = 0
+  []
+  [vel_y]
+    type = MooseLinearVariableFVReal
+    solver_sys = 'v_system'
+    initial_condition = 0
+  []
+  [pressure]
+    type = MooseLinearVariableFVReal
+    solver_sys = 'p_system'
+    initial_condition = 0
+  []
+[]
+
+[UserObjects]
+  [rc]
+    type = RhieChowMassFlux
+    u = vel_x
+    v = vel_y
+    pressure = pressure
+    rho = 1
+    p_diffusion_kernel = p_diffusion
   []
 []
 
@@ -113,8 +144,14 @@
   [temp_conduction]
     type = LinearFVDiffusion
     diffusion_coeff = 5.
-    block = 0
     variable = temperature
+  []
+
+  [p_diffusion]
+    type = LinearFVAnisotropicDiffusion
+    variable = pressure
+    diffusion_tensor = Ainv
+    use_nonorthogonal_correction = false
   []
 []
 
@@ -134,7 +171,7 @@
                   1 1 1'
     temperature = temperature
     view_factor_object_name = view_factor
-    execute_on = 'LINEAR TIMESTEP_END'
+    execute_on = 'LINEAR TIMESTEP_BEGIN TIMESTEP_END NONLINEAR'
   [../]
 
   [./view_factor]
@@ -171,44 +208,121 @@
     boundary = 'inner_left_0 inner_left_1
                 inner_right_0 inner_right_1'
   [../]
-
-  [radiation_field]
-    type = LinearFVGrayLambert
-    variable = temperature
-    temperature_radiation = 1200
-    coeff_diffusion = 5.
-    surface_radiation_object_name = gray_lambert
-    boundary = 'inner_bottom_0 inner_bottom_1'
-  []
 []
 
-# [Postprocessors]
-#   [./average_T_inner_right]
-#     type = SideAverageValue
-#     variable = temperature
-#     boundary = inner_right
-#   [../]
-# []
+[Postprocessors]
+  [./inner_right_1_rad]
+    type = GrayLambertSurfaceRadiationPP
+    surface_radiation_object_name = gray_lambert
+    return_type = RADIOSITY
+    boundary = inner_left_1
+  [../]
+  # [sum]
+  #   type = ParsedPostprocessor
+  #   expression = 'bottom1_left1 + bottom1_left0 + bottom1_right0 + bottom1_right1 + bottom1_bottom1 +
+  #                 bottom1_bottom0 + bottom1_top0+ bottom1_top1+ bottom1_top2'
+  #   pp_names = 'bottom1_left1 bottom1_left0 bottom1_right0 bottom1_right1 bottom1_bottom1
+  #                 bottom1_bottom0 bottom1_top0 bottom1_top1 bottom1_top2 '
+  # []
+  # [bottom1_left1]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_left_1
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_left0]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_left_0
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_right0]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_right_0
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_right1]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_right_1
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_bottom1]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_bottom_1
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_bottom0]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_bottom_0
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_top0]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_top_0
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_top1]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_top_1
+  #   view_factor_object_name = view_factor
+  # []
+  # [bottom1_top2]
+  #   type = ViewFactorPP
+  #   from_boundary = inner_bottom_1
+  #   to_boundary = inner_top_2
+  #   view_factor_object_name = view_factor
+  # []
+[]
 
 [Executioner]
-  type = Steady
-  solve_type = 'NEWTON'
-  petsc_options_iname = '-energy_system_pc_type -energy_system_pc_factor_shift_type -snes_linesearch_damping'
-  petsc_options_value = 'hypre boomeramg 0.8'
-  l_abs_tol = 1e-20
-  l_tol = 1e-20
-  nl_abs_tol = 1e-14
-  nl_forced_its = 10
-  multi_system_fixed_point=true
-  multi_system_fixed_point_convergence=linear
+  # type = Steady
+  # solve_type = 'NEWTON'
+  # petsc_options_iname = '-energy_system_pc_type -energy_system_pc_factor_shift_type -snes_linesearch_damping'
+  # petsc_options_value = 'hypre boomeramg 0.8'
+  # l_abs_tol = 1e-20
+  # l_tol = 1e-20
+  # nl_abs_tol = 1e-14
+  # nl_forced_its = 200
+  # nl_rel_tol = 1e-14
+  # multi_system_fixed_point=true
+  # multi_system_fixed_point_convergence=linear
+
+  # # To get better view factors
+  # [Quadrature]
+  #   side_order = FIRST
+  # []
+  type = SIMPLE
+  num_iterations = 200
+  should_solve_momentum = false
+  should_solve_pressure = false
+  energy_system = 'energy_system'
+  energy_l_abs_tol = 1e-11
+  energy_l_tol = 1e-6
+  energy_equation_relaxation = 0.8
+  energy_field_relaxation = 0.8
+  energy_absolute_tolerance = 1e-10
+  energy_petsc_options_iname = '-pc_type -pc_hypre_type'
+  energy_petsc_options_value = 'hypre boomeramg'
+  print_fields = false
+  continue_on_max_its = true
+
+  rhie_chow_user_object = 'rc'
+  momentum_systems = 'u_system v_system'
+  pressure_system = 'p_system'
 []
-[Convergence]
-  [linear]
-    type = IterationCountConvergence
-    max_iterations = 70
-    converge_at_max_iterations = true
-  []
-[]
+# [Convergence]
+#   [linear]
+#     type = IterationCountConvergence
+#     max_iterations = 150
+#     converge_at_max_iterations = true
+#   []
+# []
 [Outputs]
   exodus = true
 []
