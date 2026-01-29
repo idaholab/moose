@@ -86,6 +86,8 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
+        params.addParam("expect_exit_code", 0, "An integer exit code to expect from the test")
+        params.addParam("should_crash", False, "Deprecated parameter; implies expect_exit_code=1")
 
         params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
         params.addParam('dynamic_capabilities', False, "Whether or not to do a capability check that supports dynamic application loading")
@@ -244,6 +246,14 @@ class Tester(MooseObject, OutputInterface):
 
         # The validation classes the user specified
         self._validation_classes = self.parameters()['_validation_classes']
+
+        # Set deprecated "should_crash", see #32257
+        if params.isParamSetByUser("should_crash"):
+            if params.isParamSetByUser("expect_exit_code"):
+                raise RuntimeError(
+                    "Cannot use both should_crash and expect_exit_code; use only expect_exit_code"
+                )
+            params["expect_exit_code"] = 1 if params["should_crash"] else 0
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -529,7 +539,12 @@ class Tester(MooseObject, OutputInterface):
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
         """ method to process the results of a finished tester """
-        return
+        if self.specs["expect_exit_code"] != exit_code:
+            reason = f'EXIT CODE {exit_code} != {self.specs["expect_exit_code"]}'
+            self.setStatus(self.fail, str(reason))
+            return f"\n\nExit Code: {exit_code}"
+
+        return ""
 
     def hasRedirectedOutput(self, options):
         """ return bool on tester having redirected output """

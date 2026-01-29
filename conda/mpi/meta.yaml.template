@@ -96,7 +96,9 @@ outputs:
         - zlib
         - m4
       run_constrained:
-        - python >=3.10,<3.14
+        # If modified, also update conda/tools/conda_build_config.yaml
+        # and conda/wasp/conda_build_config.yaml
+        - python >=3.10,<3.15
     test:
       commands:
         - test -f $PREFIX/etc/conda/activate.d/activate_zzz_moose-mpi-base.sh
@@ -109,7 +111,9 @@ outputs:
   - name: moose-python
     requirements:
       run:
-        - python >=3.10,<3.14
+        # If modified, also update conda/tools/conda_build_config.yaml
+        # and conda/wasp/conda_build_config.yaml
+        - python >=3.10,<3.15
         - packaging
         - paramiko
         - requests
@@ -152,6 +156,6 @@ about:
 
 extra:
   recipe-maintainers:
-    - milljm
     - cticenhour
+    - loganharbour
 

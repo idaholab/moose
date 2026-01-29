@@ -5,7 +5,7 @@
 # As well as any directions pertaining to modifying those files.
 # ALSO: Follow the directions in scripts/tests/versioner_hashes.yaml
 {% set build = 0 %}
-{% set version = "2025.11.25_c144a6e" %}
+{% set version = "2026.01.27_502d428" %}
 
 package:
   name: moose-libmesh
@@ -59,5 +59,5 @@ about:
 
 extra:
   recipe-maintainers:
-    - milljm
     - cticenhour
+    - loganharbour

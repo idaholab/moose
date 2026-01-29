@@ -1565,3 +1565,31 @@ fe70eeddb66f8e8f63484fea0d33ed7a67b1d8cb: #31650: update petsc, libmesh, mfem; a
   wasp:
     full_version: 2025.09.19_02960f1_0
     hash: 0320f16
+7fb22db6c7419980774cf3009c6191ff2d9eb3ac: # 31935
+  libmesh:
+    full_version: 2026.01.27_502d428_0
+    hash: c72d5c4
+  libmesh-vtk:
+    full_version: 9.5.2_0
+    hash: 6804f54
+  moose-dev:
+    full_version: 2026.01.27
+    hash: 97a6061
+  mpi:
+    full_version: 2026.01.27
+    hash: 8ce4d65
+  petsc:
+    full_version: 3.24.3_0
+    hash: 21e17c6
+  pprof:
+    full_version: 2026.01.11_71be6bf
+    hash: 2e7209c
+  seacas:
+    full_version: 2025.10.14_0
+    hash: a948f18
+  tools:
+    full_version: 2026.01.27
+    hash: 419db47
+  wasp:
+    full_version: 2025.09.19_02960f1_1
+    hash: f0e7230

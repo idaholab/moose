@@ -96,7 +96,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     # see #30641
-    should_crash = true
+    expect_exit_code = 1
     # Testing output
     max_parallel = 1
     errors = 'StringThatWillNotBePresentInOutput'

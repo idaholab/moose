@@ -56,22 +56,6 @@ operator<<(std::ostream & os, const std::tuple<T...> & tup)
   return os << "]";
 }
 
-/// Application abort macro. Uses MPI_Abort if available, std::abort otherwise
-#if defined(LIBMESH_HAVE_MPI)
-#define MOOSE_ABORT                                                                                \
-  do                                                                                               \
-  {                                                                                                \
-    MPI_Abort(libMesh::GLOBAL_COMM_WORLD, 1);                                                      \
-    std::abort();                                                                                  \
-  } while (0)
-#else
-#define MOOSE_ABORT                                                                                \
-  do                                                                                               \
-  {                                                                                                \
-    std::abort();                                                                                  \
-  } while (0)
-#endif
-
 #define mooseDoOnce(do_this)                                                                       \
   do                                                                                               \
   {                                                                                                \

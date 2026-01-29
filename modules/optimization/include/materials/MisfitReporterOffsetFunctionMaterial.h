@@ -26,7 +26,7 @@ class MisfitReporterOffsetFunctionMaterialTempl : public ReporterOffsetFunctionM
 public:
   static InputParameters validParams();
 
-  MisfitReporterOffsetFunctionMaterialTempl<is_ad>(const InputParameters & parameters);
+  MisfitReporterOffsetFunctionMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

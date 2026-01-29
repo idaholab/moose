@@ -9,7 +9,7 @@ function set_libmesh_env(){
           FORTRANFLAGS DEBUG_FFLAGS DEBUG_FORTRANFLAGS
 
     if [[ "$(uname)" == Darwin ]]; then
-        if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+        if [[ $HOST == arm64-apple-darwin* ]]; then
             CTUNING="-march=armv8.3-a -I${PREFIX:?}/include"
             export LIBRARY_PATH="${PREFIX:?}/lib"
         else
@@ -33,10 +33,8 @@ function set_libmesh_env(){
     export HYDRA_LAUNCHER=fork
     export INSTALL_BINARY="${SRC_DIR:?}/build-aux/install-sh -C"
 
-    if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
-        LDFLAGS="-L${PREFIX:?}/lib -Wl,-S,-rpath,${PREFIX:?}/lib"
-    else
-        export LDFLAGS="-Wl,-S"
+    if [[ $HOST == arm64-apple-darwin* ]]; then
+        export LDFLAGS="-L${PREFIX:?}/lib -Wl,-rpath,${PREFIX:?}/lib"
     fi
 }
 

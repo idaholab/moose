@@ -189,10 +189,10 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         # The method for spawning processes changed to "spawn" for macOS in python 3.9. Currently,
         # MooseDocs does not work with this combination.
         # Ints are used for the second comparison because simple string comparison is inadequate against 3.9 for >= 3.10
-        if (platform.python_version_tuple()[0] >= '3') and (int(platform.python_version_tuple()[1]) >= 9) and (platform.system() == 'Darwin'):
-            self._ctx = multiprocessing.get_context('fork')
-        else:
-            self._ctx = multiprocessing.get_context()
+        # In Python 3.14, multiprocessing changed the default context to forkserver.
+        # It appears this change causes issues unpickling the executioner
+        # Future work would be to transition to static worker functions so that the executioner is not pickled
+        self._ctx = multiprocessing.get_context("fork")
 
         # A lock used prior to caching items or during directory creation to prevent race conditions
         self._lock = self._ctx.Lock()
@@ -481,8 +481,11 @@ class ParallelQueue(Executioner):
             page_queue.put(node.uid)
 
         # Create Processes for each thread that reads the data and updates the Queue objects
+        procs = []
         for i in range(num_threads):
-            self._ctx.Process(target=target, args=(page_queue, output_queue)).start()
+            p = self._ctx.Process(target=target, args=(page_queue, output_queue))
+            p.start()
+            procs.append(p)
 
         # Extract the data from the output Queue object and update Page object attributes
         for i in range(len(nodes)):
@@ -493,6 +496,12 @@ class ParallelQueue(Executioner):
 
         for i in range(num_threads):
             page_queue.put(ParallelQueue.STOP)
+
+        # Ensure workers exit before queues are cleaned up
+        for p in procs:
+            p.join()
+        output_queue.close()
+        page_queue.close()
 
     def _read_target(self, qin, qout):
         """Function for calling self.read with Queue objects."""

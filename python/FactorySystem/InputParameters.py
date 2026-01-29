@@ -15,6 +15,7 @@ class InputParameters:
         self.substitute = {}
         self.required = set()
         self.private = set()
+        self.set_by_user = set()
         self.group = {}
 
     def addRequiredParam(self, name, *args):
@@ -50,6 +51,13 @@ class InputParameters:
             return True
         else:
             return False
+
+    def setParamByUser(self, key, value):
+        self[key] = value
+        self.set_by_user.add(key)
+
+    def isParamSetByUser(self, key):
+        return key in self.set_by_user
 
     def __contains__(self, item):
         return item in self.desc

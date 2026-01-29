@@ -1,7 +1,12 @@
 #!/bin/bash
 
-PROMPT_COMMAND='if [[ $(type -t set_prompt) != function ]]; then source /.singularity.d/set_prompt.bash; fi; set_prompt'
+# Enable autocompletion
+if [ -f /etc/profile.d/bash_completion.sh ]; then
+    source /etc/profile.d/bash_completion.sh
+fi
 
+# Setup prompt command
+PROMPT_COMMAND='if [[ $(type -t set_prompt) != function ]]; then source /.singularity.d/set_prompt.bash; fi; set_prompt'
 set_prompt () {
     if [ -n "${CUSTOM_PROMPT}" ]; then
         PS1="${CUSTOM_PROMPT}"
@@ -37,7 +42,8 @@ set_prompt () {
     PS1+="${GREEN}\\h${WHITE}: "
 
     # Add the git branch you are working on if in a git repo
-    local BRANCH="$(git branch 2>/dev/null | sed -n 's/* \(.*\)/\1/p')"
+    local BRANCH=
+    BRANCH="$(git branch 2>/dev/null | sed -n 's/* \(.*\)/\1/p')"
     if [[ ! -z "${BRANCH}" ]]; then
         PS1+="${PURPLE}(${BRANCH}) "
     fi
@@ -52,3 +58,11 @@ set_prompt () {
     # and reset the text color to the default.
     PS1+="${GREEN}\\\$${RESET} "
 }
+
+# Load user's custom bashrc if requested. Defaults to
+# ~/.bashrc_apptainer, but can be customized by setting
+# the variable MOOSE_BASHRC
+MOOSE_BASHRC="${MOOSE_BASHRC:-${HOME}/.bashrc_apptainer}"
+if test -f "$MOOSE_BASHRC"; then
+    source "$MOOSE_BASHRC"
+fi
