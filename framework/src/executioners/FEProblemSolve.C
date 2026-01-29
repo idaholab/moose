@@ -396,11 +396,12 @@ FEProblemSolve::initialSetup()
   MultiSystemSolveObject::initialSetup();
   convergenceSetup();
   // Keep track of the solution warnings from the setup
+  // before a count reset at the beginning of the time step
   if (!_app.isRecovering())
   {
     _app.solutionInvalidity().syncIteration();
-    _app.solutionInvalidity().solutionInvalidAccumulation();
-    _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(0);
+    _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
+    _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(0);
   }
 }
 

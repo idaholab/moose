@@ -108,9 +108,6 @@ protected:
   Moose::PCSideType _pc_side;
   /// KSP norm type
   Moose::MooseKSPNormType _ksp_norm;
-
-  /// Boolean to see if solution is invalid
-  bool _solution_is_invalid;
 };
 
 inline const NumericVector<Number> * const &
