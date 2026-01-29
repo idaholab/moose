@@ -24,12 +24,15 @@ HomogenizedTotalLagrangianStressDivergence::validParams()
   params.renameCoupledVar(
       "scalar_variable", "macro_var", "Optional scalar field with the macro gradient");
 
+  params.addParam<bool>("off_diagonal_jacobian", true, "Include the off diagonal parts of the constraint Jacobian");
+
   return params;
 }
 
 HomogenizedTotalLagrangianStressDivergence::HomogenizedTotalLagrangianStressDivergence(
     const InputParameters & parameters)
-  : HomogenizationInterface<TotalLagrangianStressDivergence>(parameters)
+  : HomogenizationInterface<TotalLagrangianStressDivergence>(parameters),
+    _use_off_diagonal(getParam<bool>("off_diagonal_jacobian"))
 {
 }
 
@@ -149,6 +152,9 @@ void
 HomogenizedTotalLagrangianStressDivergence::computeScalarOffDiagJacobian(
     const unsigned int jvar_num)
 {
+  if (!_use_off_diagonal)
+    return;
+
   // ONLY assemble the contribution from _alpha component, which is connected with _var
   // The other components are handled by other kernel instances with other _alpha
   if (jvar_num != _var.number())
@@ -187,6 +193,9 @@ void
 HomogenizedTotalLagrangianStressDivergence::computeOffDiagJacobianScalarLocal(
     const unsigned int svar_num)
 {
+  if (!_use_off_diagonal)
+    return;
+
   // Just in case, skip any other scalar variables
   if (svar_num != _kappa_var)
     return;

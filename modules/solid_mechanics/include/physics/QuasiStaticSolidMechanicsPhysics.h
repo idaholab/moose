@@ -166,6 +166,8 @@ protected:
   // Other homogenization info
   MultiMooseEnum _constraint_types;
   std::vector<FunctionName> _targets;
+  // Use the off diagonal scalar jacobian for the homogenization system
+  bool _lk_h_off_jac;
 };
 
 template <typename T, typename T2>
