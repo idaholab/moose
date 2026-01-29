@@ -16,6 +16,7 @@
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
+#include "MFEMMeshFactory.h"
 #include "libmesh/string_to_enum.h"
 
 #include <vector>
@@ -55,11 +56,7 @@ MFEMProblem::initialSetup()
 void
 MFEMProblem::setMesh()
 {
-  // TODO: Handle case where _mesh is not an MFEMMesh and we need to
-  // construct the parmesh ourselves.
-  mooseAssert(ExternalProblem::mesh().type() == "MFEMMesh",
-              "Please choose the MFEMMesh mesh type for an MFEMProblem\n");
-  auto pmesh = static_cast<MFEMMesh &>(_mesh).getMFEMParMeshPtr();
+  auto pmesh = buildMFEMMesh(_mesh);
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();
