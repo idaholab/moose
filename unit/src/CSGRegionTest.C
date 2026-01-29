@@ -47,8 +47,8 @@ TEST(CSGRegionTest, testRegionOperators)
   {
     std::string pos_string_infix = "+s1";
     std::string neg_string_infix = "-s2";
-    std::vector<std::string> pos_string_postfix{"s1", "halfspace::POSITIVE"};
-    std::vector<std::string> neg_string_postfix{"s2", "halfspace::NEGATIVE"};
+    std::vector<std::string> pos_string_postfix{"s1", "+"};
+    std::vector<std::string> neg_string_postfix{"s2", "-"};
     ASSERT_EQ(CSGRegion::RegionType::HALFSPACE, pos_half.getRegionType());
     ASSERT_EQ(CSGRegion::RegionType::HALFSPACE, neg_half.getRegionType());
     ASSERT_EQ(pos_string_infix, pos_half.toInfixString());
@@ -59,8 +59,7 @@ TEST(CSGRegionTest, testRegionOperators)
   // intersections
   {
     std::string inter_string_infix = "(+s1 & -s2)";
-    std::vector<std::string> inter_string_postfix = {
-        "s1", "halfspace::POSITIVE", "s2", "halfspace::NEGATIVE", "regionOperator::INTERSECTION"};
+    std::vector<std::string> inter_string_postfix = {"s1", "+", "s2", "-", "&"};
     ASSERT_EQ(CSGRegion::RegionType::INTERSECTION, inter.getRegionType());
     ASSERT_EQ(CSGRegion::RegionType::INTERSECTION, new_reg_int.getRegionType());
     ASSERT_EQ(inter_string_infix, inter.toInfixString());
@@ -71,8 +70,7 @@ TEST(CSGRegionTest, testRegionOperators)
   // unions
   {
     std::string union_string_infix = "(+s1 | -s2)";
-    std::vector<std::string> union_string_postfix = {
-        "s1", "halfspace::POSITIVE", "s2", "halfspace::NEGATIVE", "regionOperator::UNION"};
+    std::vector<std::string> union_string_postfix = {"s1", "+", "s2", "-", "|"};
     ASSERT_EQ(CSGRegion::RegionType::UNION, uni.getRegionType());
     ASSERT_EQ(CSGRegion::RegionType::UNION, new_reg_uni.getRegionType());
     ASSERT_EQ(union_string_infix, uni.toInfixString());
@@ -87,12 +85,7 @@ TEST(CSGRegionTest, testRegionOperators)
   // complement
   {
     std::string comp_string_infix = "~(+s1 & -s2)";
-    std::vector<std::string> comp_string_postfix = {"s1",
-                                                    "halfspace::POSITIVE",
-                                                    "s2",
-                                                    "halfspace::NEGATIVE",
-                                                    "regionOperator::INTERSECTION",
-                                                    "regionOperator::COMPLEMENT"};
+    std::vector<std::string> comp_string_postfix = {"s1", "+", "s2", "-", "&", "~"};
     ASSERT_EQ(CSGRegion::RegionType::COMPLEMENT, complement.getRegionType());
     ASSERT_EQ(comp_string_infix, complement.toInfixString());
     ASSERT_EQ(comp_string_postfix, complement.toPostfixStringList());
