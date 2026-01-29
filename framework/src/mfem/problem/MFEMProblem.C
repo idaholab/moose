@@ -161,7 +161,7 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
     }
     else
       mooseError("Cannot add boundary condition with name '" + name +
-                 "' because there is no corresponding equation system.");     
+                 "' because there is no corresponding equation system.");
   }
   else
   {

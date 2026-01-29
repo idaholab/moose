@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "MFEMDGKernel.h"
+
 // all this class needs to do differently is to implement createBFIntegrator
 class MFEMDGDiffusionKernel : public MFEMDGKernel
 {
