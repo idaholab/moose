@@ -187,6 +187,13 @@ SIMPLESolveBase::validParams()
                                     "0.0<energy_l_abs_tol",
                                     "The absolute tolerance on the normalized residual in the "
                                     "linear solver of the energy equation.");
+  params.addRangeCheckedParam<Real>(
+      "energy_field_relaxation",
+      1.0,
+      "0.0<energy_field_relaxation<=1.0",
+      "The relaxation which should be used for the energy field. (=1 for no relaxation, "
+      "diagonal dominance will still be enforced)");
+
   params.addRangeCheckedParam<unsigned int>(
       "energy_l_max_its",
       10000,
@@ -432,6 +439,7 @@ SIMPLESolveBase::SIMPLESolveBase(Executioner & ex)
     _has_energy_system(isParamValid("energy_system")),
     _energy_equation_relaxation(getParam<Real>("energy_equation_relaxation")),
     _energy_l_abs_tol(getParam<Real>("energy_l_abs_tol")),
+    _energy_field_relaxation(getParam<Real>("energy_field_relaxation")),
     _has_solid_energy_system(_has_energy_system && isParamValid("solid_energy_system")),
     _solid_energy_l_abs_tol(getParam<Real>("solid_energy_l_abs_tol")),
     _passive_scalar_system_names(getParam<std::vector<SolverSystemName>>("passive_scalar_systems")),
