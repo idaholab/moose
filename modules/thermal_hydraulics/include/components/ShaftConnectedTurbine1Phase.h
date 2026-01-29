@@ -29,6 +29,7 @@ public:
 
 protected:
   virtual void check() const override;
+  virtual bool supportsPassiveTransport() const override { return false; }
   virtual void buildVolumeJunctionUserObject() override;
 
   /// Turbine inlet

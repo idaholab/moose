@@ -20,9 +20,7 @@ public:
   JunctionParallelChannels1Phase(const InputParameters & params);
 
 protected:
-  /**
-   * Builds user object for computing and storing the fluxes
-   */
+  virtual bool supportsPassiveTransport() const override { return false; }
   virtual void buildVolumeJunctionUserObject() override;
 
 public:
