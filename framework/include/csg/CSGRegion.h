@@ -25,11 +25,11 @@ public:
   /// Enum for representing region types, defined to match _region_type MooseEnum
   enum class RegionType
   {
-    EMPTY = 0,
-    HALFSPACE = 1,
-    COMPLEMENT = 2,
-    INTERSECTION = 3,
-    UNION = 4
+    EMPTY,
+    HALFSPACE,
+    COMPLEMENT,
+    INTERSECTION,
+    UNION
   };
 
   /**
@@ -39,6 +39,15 @@ public:
    */
   typedef std::variant<std::reference_wrapper<const CSGSurface>, RegionType, CSGSurface::Halfspace>
       PostfixTokenVariant;
+
+  /**
+   * @return The symbol associated with the given region type
+   */
+  static char regionSymbol(const RegionType region_type);
+  /**
+   * @return The symbol associated with the given halfspace
+   */
+  static char halfspaceSymbol(const CSGSurface::Halfspace halfspace);
 
   /**
    * Default Constructor
@@ -148,13 +157,13 @@ protected:
    * @brief Iterate through postfix tokens and check if next region operator matches the given
    * operator
    *
-   * @param region_op_string string representing the region operator for comparison
-   * @param postfix_token_index  index in _postfix_tokens to start region operator comparisons
+   * @param region the region type
+   * @param postfix_token_index index in _postfix_tokens to start  region operator comparisons
    * @return true if next region operator in _postfix_tokens matches region_op_string, false
    * otherwise
    */
-  bool nextRegionOpIsIdentical(const std::string & region_op_string,
-                               unsigned int postfix_token_index) const;
+  bool nextRegionOpIsIdentical(const RegionType region,
+                               const std::size_t postfix_token_index) const;
 
   /// String representation of region - defaults to empty string
   std::string _region_str;

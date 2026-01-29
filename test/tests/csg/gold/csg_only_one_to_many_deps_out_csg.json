@@ -6,7 +6,7 @@
       "region_infix": "-inner_surf_copy_1",
       "region_postfix": [
         "inner_surf_copy_1",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "cell_inner1_copy_2": {
@@ -15,7 +15,7 @@
       "region_infix": "-inner_surf_copy_1",
       "region_postfix": [
         "inner_surf_copy_1",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "cell_inner2_copy_1": {
@@ -24,7 +24,7 @@
       "region_infix": "+inner_surf_copy_1",
       "region_postfix": [
         "inner_surf_copy_1",
-        "halfspace::POSITIVE"
+        "+"
       ]
     },
     "cell_inner2_copy_2": {
@@ -33,7 +33,7 @@
       "region_infix": "+inner_surf_copy_1",
       "region_postfix": [
         "inner_surf_copy_1",
-        "halfspace::POSITIVE"
+        "+"
       ]
     },
     "cell_lat_fill_copy_1": {
@@ -42,7 +42,7 @@
       "region_infix": "-lattice_surf_copy_1",
       "region_postfix": [
         "lattice_surf_copy_1",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "cell_lat_fill_copy_2": {
@@ -51,7 +51,7 @@
       "region_infix": "-lattice_surf_copy_1",
       "region_postfix": [
         "lattice_surf_copy_1",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "cell_outer_copy_1": {
@@ -60,7 +60,7 @@
       "region_infix": "+outer_surf_copy_1",
       "region_postfix": [
         "outer_surf_copy_1",
-        "halfspace::POSITIVE"
+        "+"
       ]
     },
     "cell_outer_copy_2": {
@@ -69,7 +69,7 @@
       "region_infix": "+outer_surf_copy_1",
       "region_postfix": [
         "outer_surf_copy_1",
-        "halfspace::POSITIVE"
+        "+"
       ]
     },
     "cell_univ_fill_copy_1": {
@@ -78,7 +78,7 @@
       "region_infix": "-outer_surf_copy_1",
       "region_postfix": [
         "outer_surf_copy_1",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "cell_univ_fill_copy_2": {
@@ -87,7 +87,7 @@
       "region_infix": "-outer_surf_copy_1",
       "region_postfix": [
         "outer_surf_copy_1",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "cell_void_copy_1": {
@@ -96,7 +96,7 @@
       "region_infix": "+lattice_surf_copy_1",
       "region_postfix": [
         "lattice_surf_copy_1",
-        "halfspace::POSITIVE"
+        "+"
       ]
     },
     "cell_void_copy_2": {
@@ -105,7 +105,7 @@
       "region_infix": "+lattice_surf_copy_1",
       "region_postfix": [
         "lattice_surf_copy_1",
-        "halfspace::POSITIVE"
+        "+"
       ]
     }
   },
