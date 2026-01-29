@@ -5,7 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
+//* https://www.gnu.org/licenses/lgpl-2.1.html*/
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -85,17 +85,21 @@ protected:
                                 mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
-
   /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
+  /// Build non-linear action forms
+  virtual void BuildNonLinearActionForms();
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms();
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
+  // Reassemble the Jacobian matrix/Operator (Assuming Gridfunction dependant Operator)
+  virtual void ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs);
+  virtual void UpdateJacobian() const;
 
   /// Form linear system and jacobian operator based on on- and off-diagonal bilinear form
   /// contributions, populate solution and RHS vectors of true DoFs, and apply constraints.
@@ -130,6 +134,11 @@ protected:
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
+  void ApplyDomainNLAFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
@@ -140,6 +149,12 @@ protected:
       std::optional<mfem::real_t> scale_factor = std::nullopt);
 
   void ApplyBoundaryLFIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+          integrated_bc_map);
+
+  void ApplyBoundaryNLAFIntegrators(
       const std::string & test_var_name,
       std::shared_ptr<mfem::ParLinearForm> form,
       NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
@@ -167,8 +182,8 @@ protected:
   NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   NamedFieldsMap<mfem::ParLinearForm> _lfs;
   NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
-  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>>
-      _mblfs; // named according to trial variable
+  NamedFieldsMap<mfem::ParLinearForm> _nlAs;
+  NamedFieldsMap<NamedFieldsMap<mfem::ParMixedBilinearForm>> _mblfs; // named according to trial var
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
@@ -185,9 +200,17 @@ protected:
   /// Named according to test variable.
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMEssentialBC>>> _essential_bc_map;
 
+  // Operator handle for the jacobian matrix
   mutable mfem::OperatorHandle _jacobian;
-
   mfem::AssemblyLevel _assembly_level;
+
+  // Temporary vectors used for non-linear action
+  // assembly process
+  mutable mfem::BlockVector _trueBlockSol, _blockForces, _blockResidual;
+  Moose::MFEM::GridFunctions * _gfuncs;
+  mfem::Array<int> * _block_true_offsets = NULL;
+  mfem::Array<int> empty_tdof;
+  bool _non_linear = false;
 
 private:
   friend class EquationSystemProblemOperator;
@@ -246,6 +269,29 @@ EquationSystem::ApplyDomainLFIntegrators(
   }
 }
 
+inline void
+EquationSystem::ApplyDomainNLAFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+{
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::LinearFormIntegrator * integ = kernel->createNLAIntegrator();
+      if (integ)
+      {
+        _non_linear = true;
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
 template <class FormType>
 void
 EquationSystem::ApplyBoundaryBLFIntegrators(
@@ -293,6 +339,31 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 
       if (integ)
       {
+        bc->isBoundaryRestricted()
+            ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
+            : form->AddBoundaryIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+inline void
+EquationSystem::ApplyBoundaryNLAFIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>> &
+        integrated_bc_map)
+{
+  if (integrated_bc_map.Has(test_var_name) &&
+      integrated_bc_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto bcs = integrated_bc_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & bc : bcs)
+    {
+      mfem::LinearFormIntegrator * integ = bc->createNLAIntegrator();
+      if (integ)
+      {
+        _non_linear = true;
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(std::move(integ), bc->getBoundaryMarkers())
             : form->AddBoundaryIntegrator(std::move(integ));

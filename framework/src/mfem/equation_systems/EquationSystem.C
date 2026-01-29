@@ -5,7 +5,7 @@
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
+//* https://www.gnu.org/licenses/lgpl-2.1.html */
 
 #ifdef MOOSE_MFEM_ENABLED
 
@@ -15,7 +15,14 @@
 namespace Moose::MFEM
 {
 
-EquationSystem::~EquationSystem() { DeleteAllBlocks(); }
+EquationSystem::~EquationSystem()
+{
+  if (_gfuncs != NULL)
+    delete _gfuncs;
+  if (_block_true_offsets != NULL)
+    delete _block_true_offsets;
+  DeleteAllBlocks();
+}
 
 void
 EquationSystem::DeleteAllBlocks()
@@ -159,6 +166,22 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
   for (auto & eliminated_var_name : _eliminated_var_names)
     _eliminated_variables.Register(eliminated_var_name,
                                    gridfunctions.GetShared(eliminated_var_name));
+
+  // Get a reference to the GridFunctions
+  _gfuncs = new Moose::MFEM::GridFunctions(gridfunctions);
+
+  // Build the temporary BlockVectors
+  _block_true_offsets = new mfem::Array<int>(_trial_var_names.size() + 1);
+  (*_block_true_offsets)[0] = 0;
+
+  for (unsigned I = 0; I < _trial_var_names.size(); I++)
+  {
+    (*_block_true_offsets)[I + 1] = _gfuncs->Get(_trial_var_names.at(I))->ParFESpace()->TrueVSize();
+  }
+  _block_true_offsets->PartialSum();
+  _trueBlockSol.Update(*_block_true_offsets);
+  _blockForces.Update(*_block_true_offsets);
+  _blockResidual.Update(*_block_true_offsets);
 }
 
 void
@@ -323,6 +346,35 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 }
 
 void
+EquationSystem::ReassembleJacobian(mfem::BlockVector & x, mfem::BlockVector & rhs)
+{
+  // Reassemble all the Forms
+  for (const auto I : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(I);
+    _blfs.GetShared(test_var_name)->Update();
+    _blfs.GetShared(test_var_name)->Assemble();
+    if (_mblfs.Has(test_var_name))
+    {
+      for (const auto J : index_range(_coupled_var_names))
+      {
+        auto coupled_var_name = _coupled_var_names.at(J);
+        if (_mblfs.Get(test_var_name)->Has(coupled_var_name))
+        {
+          _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Update();
+          _mblfs.GetShared(test_var_name)->GetShared(coupled_var_name)->Assemble();
+        }
+      }
+    }
+  }
+
+  // Form the system matrix
+  // This uses dummy arguments
+  // for the vectors
+  FormLinearSystem(_jacobian, x, rhs);
+}
+
+void
 EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS)
 {
   height = trueX.Size();
@@ -331,10 +383,89 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 }
 
 void
-EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+EquationSystem::UpdateJacobian() const
 {
-  _jacobian->Mult(x, residual);
-  x.HostRead();
+
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto blf = _blfs.Get(test_var_name);
+    blf->Update();
+    blf->Assemble();
+  }
+
+  // Form off-diagonal blocks
+  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  {
+    auto test_var_name = _test_var_names.at(i);
+    for (unsigned int j = 0; j < _test_var_names.size(); j++)
+    {
+      auto trial_var_name = _test_var_names.at(j);
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        mblf->Update();
+        mblf->Assemble();
+      }
+    }
+  }
+}
+
+void
+CopyVec(const mfem::Vector & x, mfem::Vector & y)
+{
+  y = x;
+}
+
+void
+EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
+{
+  static_cast<mfem::Vector &>(_trueBlockSol) = sol;
+  for (unsigned int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    _trueBlockSol.GetBlock(i).SyncAliasMemory(_trueBlockSol);
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
+  }
+
+  if (_non_linear)
+  {
+    _blockResidual = 0.0;
+    UpdateJacobian();
+
+    for (unsigned int i = 0; i < _test_var_names.size(); i++)
+    {
+      auto & test_var_name = _test_var_names.at(i);
+      int offset = _blockResidual.GetBlock(i).Size();
+      mfem::Vector b(offset);
+
+      auto lf = _lfs.GetShared(test_var_name);
+      lf->Assemble();
+      lf->ParallelAssemble(b);
+      b.SyncAliasMemory(b);
+
+      auto nlf = _nlAs.GetShared(test_var_name);
+      nlf->Assemble();
+      nlf->ParallelAssemble(_blockResidual.GetBlock(i));
+
+      _blockResidual.GetBlock(i) -= b;
+      _blockResidual.GetBlock(i) *= -1;
+
+      _blockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
+      _blockResidual.GetBlock(i).SyncAliasMemory(_blockResidual);
+    }
+
+    residual = static_cast<mfem::Vector &>(_blockResidual);
+    const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _blockResidual);
+    residual *= -1.0;
+  }
+  else
+  {
+    residual = 0.0;
+    _jacobian->Mult(sol, residual);
+  }
+
+  sol.HostRead();
   residual.HostRead();
 }
 
@@ -382,6 +513,26 @@ EquationSystem::BuildLinearForms()
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
+}
+
+void
+EquationSystem::BuildNonLinearActionForms()
+{
+  // Register non-linear Action forms
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    _nlAs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
+    _nlAs.GetRef(test_var_name) = 0.0;
+  }
+
+  for (auto & test_var_name : _test_var_names)
+  {
+    // Apply kernels
+    auto nlA = _nlAs.GetShared(test_var_name);
+    ApplyDomainNLAFIntegrators(test_var_name, nlA, _kernels_map);
+    ApplyBoundaryNLAFIntegrators(test_var_name, nlA, _integrated_bc_map);
+  }
 }
 
 void
@@ -452,6 +603,7 @@ EquationSystem::BuildEquationSystem()
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
+  BuildNonLinearActionForms();
 }
 
 } // namespace Moose::MFEM
