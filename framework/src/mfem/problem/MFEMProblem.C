@@ -14,6 +14,7 @@
 #include "MFEMIndicator.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
+#include "MFEMMeshFactory.h"
 #include "MFEMExecutedObject.h"
 #include "MFEMVectorUtils.h"
 #include "MFEMFESpaceHierarchy.h"
@@ -108,12 +109,7 @@ MFEMProblem::execute(const ExecFlagType & exec_type)
 void
 MFEMProblem::setMesh()
 {
-  // TODO: Handle case where _mesh is not an MFEMMesh and we need to
-  // construct the parmesh ourselves.
-  auto * mfem_mesh = dynamic_cast<MFEMMesh *>(&_mesh);
-  mooseAssert(mfem_mesh,
-              "The mesh for an MFEMProblem must be MFEMFileMesh or MFEMMeshGeneratorMesh.");
-  auto pmesh = mfem_mesh->getMFEMParMeshPtr();
+  auto pmesh = buildMFEMMesh(_mesh);
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
   getProblemData().num_procs = pmesh->GetNRanks();
