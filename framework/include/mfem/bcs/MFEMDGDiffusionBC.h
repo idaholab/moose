@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMIntegratedBC.h"
+#include "MFEMDGBoundaryCondition.h"
 
 class MFEMDGDiffusionBC : public MFEMDGBoundaryCondition
 {
@@ -25,9 +25,6 @@ public:
 
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
-
-protected:
-  // mfem::VectorCoefficient & _vec_coef;
 };
 
 #endif
