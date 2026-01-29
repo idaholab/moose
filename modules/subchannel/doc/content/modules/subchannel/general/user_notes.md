@@ -13,12 +13,16 @@ index, in white numbers the fuel-pin index and in red numbers the gap index. For
 
 ### Square lattice
 
+!! Intentional comment to provide extra spacing
+
 !media subchannel/getting_started/square_index.png
     style=width:60%;margin-bottom:2%;margin:auto;
     id=sindex
     caption=Square Lattice subchannel index notation, in a $5 \times 5$ sub-assembly.
 
 ### Triangular lattice
+
+!! Intentional comment to provide extra spacing
 
 !media subchannel/getting_started/hex_index.png
     style=width:60%;margin-bottom:2%;margin:auto;

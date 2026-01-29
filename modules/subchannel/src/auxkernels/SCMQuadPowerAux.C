@@ -13,7 +13,6 @@
 #include "SCM.h"
 
 registerMooseObject("SubChannelApp", SCMQuadPowerAux);
-registerMooseObjectRenamed("SubChannelApp", QuadPowerAux, "06/30/2025 24:00", SCMQuadPowerAux);
 
 InputParameters
 SCMQuadPowerAux::validParams()
