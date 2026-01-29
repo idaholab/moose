@@ -117,11 +117,11 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
 }
 
 void
-PMCMCBase::proposeSamples(const unsigned int seed_value)
+PMCMCBase::proposeSamples(const unsigned int seed_value, std::size_t & rn_ind)
 {
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     for (unsigned int i = 0; i < _priors.size(); ++i)
-      _new_samples[j][i] = _priors[i]->quantile(getRand(seed_value));
+      _new_samples[j][i] = _priors[i]->quantile(getRandStateless(rn_ind++, seed_value));
 }
 
 void
@@ -134,35 +134,38 @@ PMCMCBase::sampleSetUp(const SampleMode /*mode*/)
   unsigned int seed_value = _t_step > 0 ? (_t_step - 1) : 0;
 
   // Filling the new_samples vector of vectors with new proposal samples
-  proposeSamples(seed_value);
+  std::size_t rn_ind = 0;
+  proposeSamples(seed_value, rn_ind);
 
   // Draw random numbers to facilitate decision making later on
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-    _rnd_vec[j] = getRand(seed_value);
+    _rnd_vec[j] = getRandStateless(rn_ind++, seed_value);
 }
 
 void
 PMCMCBase::randomIndex(const unsigned int & upper_bound,
                        const unsigned int & exclude,
                        const unsigned int & seed,
+                       std::size_t & rn_ind,
                        unsigned int & req_index)
 {
   req_index = exclude;
   while (req_index == exclude)
-    req_index = getRandl(seed, 0, upper_bound);
+    req_index = getRandlStateless(rn_ind++, 0, upper_bound, seed);
 }
 
 void
 PMCMCBase::randomIndexPair(const unsigned int & upper_bound,
                            const unsigned int & exclude,
                            const unsigned int & seed,
+                           std::size_t & rn_ind,
                            unsigned int & req_index1,
                            unsigned int & req_index2)
 {
-  randomIndex(upper_bound, exclude, seed, req_index1);
+  randomIndex(upper_bound, exclude, seed, rn_ind, req_index1);
   req_index2 = req_index1;
   while (req_index1 == req_index2)
-    randomIndex(upper_bound, exclude, seed, req_index2);
+    randomIndex(upper_bound, exclude, seed, rn_ind, req_index2);
 }
 
 void
