@@ -61,8 +61,24 @@ ComputeBlockOrientationByMisorientation::execute()
     for (unsigned int j = 0; j < 3; ++j)
       rot_mat(i, j) = rot(i, j);
 
+  // SVD-based projection to SO(3)
+  Eigen::JacobiSVD<Eigen::Matrix<Real, 3, 3>> svd(
+      rot_mat, Eigen::ComputeFullU | Eigen::ComputeFullV);
+
+  Eigen::Matrix<Real, 3, 3> U = svd.matrixU();
+  Eigen::Matrix<Real, 3, 3> V = svd.matrixV();
+
+  // Enforce proper rotation (det = +1)
+  Eigen::Matrix<Real, 3, 3> R = U * V.transpose();
+  if (R.determinant() < 0.0)
+  {
+    Eigen::Matrix<Real, 3, 3> D = Eigen::Matrix<Real, 3, 3>::Identity();
+    D(2, 2) = -1.0;
+    R = U * D * V.transpose();
+  }
+  
   // compute Quaternion from rotation matrix
-  Eigen::Quaternion<Real> q(rot_mat);
+  Eigen::Quaternion<Real> q(R);
 
   // compute EulerAngle from Quaternion
   EulerAngles ea = EulerAngles(q);
