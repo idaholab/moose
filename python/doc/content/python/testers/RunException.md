@@ -12,9 +12,6 @@ Test configuration options are specified in the `tests` file.
 
 - `expect_assert`: DEBUG and DEVEL MODE ONLY: A regular expression that must occur in the output. (Test may terminate unexpectedly and be considered passing)
 
-- `should_crash`: Indicates that the test is expected to crash or otherwise terminate early. Defaults to True
-
-
 Tests with an `expect_assert` parameter will only be run in DEBUG and DEVEL mode, not in OPT mode.
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 
