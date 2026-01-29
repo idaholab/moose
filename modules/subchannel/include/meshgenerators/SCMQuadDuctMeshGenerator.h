@@ -12,12 +12,12 @@
 #include "MeshGenerator.h"
 
 /**
- * Mesh generator for hexagonal duct
+ * Mesh generator for a square/rectangular duct around a square-lattice subassembly.
  */
-class SCMTriDuctMeshGenerator : public MeshGenerator
+class SCMQuadDuctMeshGenerator : public MeshGenerator
 {
 public:
-  SCMTriDuctMeshGenerator(const InputParameters & parameters);
+  SCMQuadDuctMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -33,16 +33,15 @@ protected:
   /**
    * calculate the x-y coordinates of the corner points for the duct cross section.
    */
-  void ductCorners(std::vector<Point> & corners, Real flat_to_flat, const Point & center) const;
+  void
+  ductCorners(std::vector<Point> & corners, Real half_x, Real half_y, const Point & center) const;
 
   /**
    * calculates the points around the duct cross section boundary (perpendicular to z axis) using
    * assembly parameters.
    */
-  void ductXsec(std::vector<Point> & xsec,
-                const std::vector<Point> & corners,
-                unsigned int nrings,
-                Real pitch) const;
+  void ductXsec(
+      std::vector<Point> & xsec, unsigned int nx, unsigned int ny, Real pitch, Real side_gap) const;
 
   /**
    * Calculates all the point/node positions that will be used to form elements
@@ -51,7 +50,6 @@ protected:
   void ductPoints(std::vector<Point> & points,
                   const std::vector<Point> & xsec,
                   const std::vector<Real> & z_layers) const;
-
   /**
    * Calculates the groups of points/nodes that comprise each element in the
    * duct mesh.  The groups are identified by indices into the points vector
@@ -80,20 +78,16 @@ protected:
   const unsigned int _n_cells;
   /// axial location of nodes
   std::vector<Real> _z_grid;
-  /// unheated length of the fuel Pin at the entry of the assembly
   const Real _unheated_length_entry;
-  /// heated length of the fuel Pin
   const Real _heated_length;
-  /// unheated length of the fuel Pin at the exit of the assembly
   const Real _unheated_length_exit;
   /// block index
   const unsigned int _block_id;
-  /// Distance between the neighbor fuel pins, pitch
+  /// lattice geometry
   const Real _pitch;
-  /// number of rings of fuel pins
-  const unsigned int _n_rings;
-  /// the distance between flat surfaces of the duct facing each other
-  const Real _flat_to_flat;
+  const unsigned int _nx;
+  const unsigned int _ny;
+  const Real _side_gap;
 
 public:
   static InputParameters validParams();

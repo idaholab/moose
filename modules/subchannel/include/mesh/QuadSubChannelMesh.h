@@ -8,9 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-
 #include "SubChannelMesh.h"
 #include "SubChannelEnums.h"
+#include <map>    //
+#include <vector> // (already implied, but fine to be explicit)
 
 /**
  * Creates the mesh of subchannels in a quadrilateral lattice.
@@ -34,15 +35,32 @@ public:
   }
 
   /**
-   * Duct functions not applicable to quad channel
-   *
-   * Over-writing to avoid abstract template definition in this class
+   * Function that gets the channel node from the duct node
    */
-  ///@{
-  virtual Node * getDuctNodeFromChannel(Node *) override { return nullptr; }
-  virtual Node * getChannelNodeFromDuct(Node *) override { return nullptr; }
-  virtual const std::vector<Node *> getDuctNodes() const override { return std::vector<Node *>(); }
-  ///@}
+  void setChannelToDuctMaps(const std::vector<Node *> & duct_nodes);
+
+  /**
+   * Function that gets the duct node from the channel node
+   */
+  virtual Node * getDuctNodeFromChannel(Node * channel_node) override
+  {
+    auto it = _chan_to_duct_node_map.find(channel_node);
+    return (it == _chan_to_duct_node_map.end()) ? nullptr : it->second;
+  }
+
+  /**
+   * Function that gets the channel node from the duct node
+   */
+  virtual Node * getChannelNodeFromDuct(Node * duct_node) override
+  {
+    auto it = _duct_node_to_chan_map.find(duct_node);
+    return (it == _duct_node_to_chan_map.end()) ? nullptr : it->second;
+  }
+
+  /**
+   * Function that return the vector with the maps to the nodes
+   */
+  virtual const std::vector<Node *> getDuctNodes() const override { return _duct_nodes; }
 
   virtual unsigned int getNumOfChannels() const override
   {
@@ -54,7 +72,10 @@ public:
   }
   virtual unsigned int getNumOfPins() const override { return processor_id() == 0 ? _n_pins : 0; }
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
-  virtual bool ductMeshExist() const override { return false; }
+
+  // ---- FIX: this must reflect whether duct nodes exist ----
+  virtual bool ductMeshExist() const override { return _duct_mesh_exist; }
+
   virtual const std::pair<unsigned int, unsigned int> &
   getGapChannels(unsigned int i_gap) const override
   {
@@ -147,6 +168,13 @@ protected:
   std::vector<std::vector<Real>> _gij_map;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
+
+  // ---- ADD: duct bookkeeping ----
+  std::vector<Node *> _duct_nodes;
+  std::map<Node *, Node *> _chan_to_duct_node_map;
+  std::map<Node *, Node *> _duct_node_to_chan_map;
+  bool _duct_mesh_exist = false;
+
   /// Flag that informs the solver whether there is a Pin Mesh or not
   bool _pin_mesh_exist;
 
