@@ -127,9 +127,14 @@ ifeq ($(XFEM),yes)
         SOLID_MECHANICS             := yes
 endif
 
+ifeq ($(CHEMICAL_REACTIONS),yes)
+        FLUID_PROPERTIES            := yes
+endif
+
 ifeq ($(FLUID_PROPERTIES),yes)
         MISC                        := yes
 endif
+
 
 # The complete list of all moose modules
 MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_transfer level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport solid_properties stochastic_tools solid_mechanics thermal_hydraulics xfem"
@@ -146,12 +151,6 @@ GEN_REVISION  := no
 # The modules that follow do not have any dependencies, so they're just
 # ordered alphabetically.
 
-ifeq ($(CHEMICAL_REACTIONS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
-  APPLICATION_NAME   := chemical_reactions
-  SUFFIX             := cr
-  include $(FRAMEWORK_DIR)/app.mk
-endif
 
 ifeq ($(ELECTROMAGNETICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/electromagnetics
@@ -238,6 +237,14 @@ ifeq ($(FLUID_PROPERTIES),yes)
   APPLICATION_NAME   := fluid_properties
   DEPEND_MODULES     := misc
   SUFFIX             := fp
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+# Depends on fluid_properties
+ifeq ($(CHEMICAL_REACTIONS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
+  APPLICATION_NAME   := chemical_reactions
+  SUFFIX             := cr
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
