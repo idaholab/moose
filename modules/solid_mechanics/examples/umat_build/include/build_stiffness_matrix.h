@@ -9,7 +9,9 @@
 
 #pragma once
 
+#include "libmesh/ignore_warnings.h"
 #include <Eigen/Eigen>
+#include "libmesh/restore_warnings.h"
 
 /**
  * build a 6x6 representation of the stiffness tensor in C from the
