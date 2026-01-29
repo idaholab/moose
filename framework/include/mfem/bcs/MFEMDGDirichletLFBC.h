@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include "MFEMIntegratedBC.h"
+#include "MFEMDGBoundaryCondition.h"
 
 class MFEMDGDirichletLFBC : public MFEMDGBoundaryCondition
 {

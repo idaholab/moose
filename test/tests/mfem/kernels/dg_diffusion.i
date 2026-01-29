@@ -43,10 +43,11 @@
   []
 []
 
-[DGBoundaryConditions]
+[BCs]
   [dg_diff_bc]
     type = MFEMDGDiffusionBC
     variable = concentration
+    sigma = -1.0
   []
   [dg_diff_lf_bc]
     type = MFEMDGDirichletLFBC

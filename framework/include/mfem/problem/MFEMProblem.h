@@ -136,10 +136,6 @@ public:
                    const std::string & name,
                    InputParameters & parameters) override;
 
-  void addDGBoundaryCondition(const std::string & kernel_name,
-                              const std::string & name,
-                              InputParameters & parameters);
-
   /**
    * Adds a real component kernel to the parent MFEMComplexKernel.
    */
