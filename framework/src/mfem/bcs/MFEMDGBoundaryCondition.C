@@ -15,7 +15,7 @@ InputParameters
 MFEMDGBoundaryCondition::validParams()
 {
   InputParameters params = MFEMBoundaryCondition::validParams();
-  params.registerBase("MFEMDGBoundaryCondition");
+  params.registerBase("BoundaryCondition");
   params.addParam<VariableName>("variable",
                                 "Variable labelling the weak form this kernel is added to");
   params.addParam<mfem::real_t>("sigma", -1.0, "One of the DG penalty params. Typically +/- 1.0");
