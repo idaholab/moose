@@ -4,7 +4,7 @@
   [gallium_melting]
     type = RunApp
     input = 'gallium_melting.i'
-    cli_args = "Nx=20 Ny=10"
+    cli_args = "Nx=20 Ny=10 Executioner/num_steps=10"
     requirement = 'The system shall be able to simulate the melting of gallium.'
     heavy = true
   []

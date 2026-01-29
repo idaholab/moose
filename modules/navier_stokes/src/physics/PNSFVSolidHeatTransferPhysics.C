@@ -345,16 +345,23 @@ PNSFVSolidHeatTransferPhysics::processThermalConductivity()
         if (getProblem().hasFunctorWithType<ADRealVectorValue>(_thermal_conductivity_name[i],
                                                                /*thread_id=*/0))
           have_vector = true;
-        else
+        else if (getProblem().hasFunctor(_thermal_conductivity_name[i],
+                                         /*thread_id=*/0))
           paramError("thermal_conductivity_solid",
                      "We only allow functor of type (AD)Real or (AD)RealVectorValue for thermal "
                      "conductivity! Functor '" +
                          _thermal_conductivity_name[i] + "' is not of the requested type.");
+        else
+          // If another Physics is creating this functor, we could be running into an order of
+          // creation problem
+          paramWarning("thermal_conductivity_solid",
+                       "Functor '" + _thermal_conductivity_name[i] +
+                           "' was not found in the Problem. Did you mispell it?");
       }
     }
   }
 
-  if (have_vector == have_scalar)
+  if (have_vector && (have_vector == have_scalar))
     paramError("thermal_conductivity_solid",
                "The entries on thermal conductivity shall either be scalars or vectors, mixing "
                "them is not supported!");

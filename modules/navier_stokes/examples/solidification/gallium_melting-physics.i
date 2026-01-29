@@ -81,6 +81,8 @@ Ny = 50
         # Friction
         friction_types = "Darcy Forchheimer"
         friction_coeffs = "Darcy_coefficient Forchheimer_coefficient"
+        # See documentation for INSFVMushyPorousFrictionFunctorMaterial
+        standard_friction_formulation = false
 
         # Boussinesq
         boussinesq_approximation = true
@@ -109,6 +111,7 @@ Ny = 50
         energy_wall_functors = '${T_hot} ${T_cold} 0 0'
 
         energy_advection_interpolation = '${advected_interp_method}'
+        energy_scaling = 1e-4
       []
     []
     [TwoPhaseMixture]
@@ -181,16 +184,20 @@ Ny = 50
 
   [TimeStepper]
     type = IterationAdaptiveDT
-    optimal_iterations = 10
+    # Raise time step often but not by as much
+    # There's a rough spot for convergence near 10% fluid fraction
+    optimal_iterations = 15
+    growth_factor = 1.5
     dt = 0.1
   []
 
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  nl_rel_tol = 1e-2
-  nl_abs_tol = 1e-4
+  nl_rel_tol = 1e-6
   nl_max_its = 30
+
+  line_search = 'none'
 []
 
 [Postprocessors]

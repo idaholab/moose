@@ -608,10 +608,13 @@ WCNSFVFlowPhysics::addMomentumBoussinesqKernels()
 
   for (const auto d : make_range(dimension()))
   {
-    params.set<MooseEnum>("momentum_component") = NS::directions[d];
-    params.set<NonlinearVariableName>("variable") = _velocity_names[d];
+    if (getParam<RealVectorValue>("gravity")(d) != 0)
+    {
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      params.set<NonlinearVariableName>("variable") = _velocity_names[d];
 
-    getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+      getProblem().addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+    }
   }
 }
 
