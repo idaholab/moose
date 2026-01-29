@@ -27,7 +27,7 @@ import shlex
 import time
 from typing import Dict, Iterable, Optional, Set, Tuple, Union
 
-from MooseControl import MooseControl
+from moosecontrol import MooseControl, SubprocessSocketRunner
 
 
 class Moose2FMU(Fmi2Slave):
@@ -127,9 +127,11 @@ class Moose2FMU(Fmi2Slave):
         """Initialize MooseControl after the FMU enters simulation mode."""
         # Setup MooseControl
         cmd = shlex.split(self.moose_command)
-        self.control = MooseControl(
-            moose_command=cmd, moose_control_name=self.server_name
+        runner = SubprocessSocketRunner(
+            command=cmd,
+            moose_control_name=self.server_name,
         )
+        self.control = MooseControl(runner, verbose=False)
         self.control.initialize()
 
         return True
@@ -193,14 +195,14 @@ class Moose2FMU(Fmi2Slave):
 
         signal: Optional[str] = None
 
-        while self.control.isProcessRunning():
+        while self.control.runner.is_process_running():
             flag = self.get_flag_with_retries(parsed_allowed_flags, self.max_retries)
             if not flag:
                 self.logger.error(f"Failed to fast-forward to {current_time}")
                 self.control.finalize()
                 return None, None
 
-            moose_time = self.control.getTime()
+            moose_time = self.control.get_time()
 
             if flag in parsed_allowed_flags:
                 signal = flag
@@ -246,7 +248,7 @@ class Moose2FMU(Fmi2Slave):
 
     def ensure_control_listening(self) -> bool:
         """Verify the MooseControl server is listening before proceeding."""
-        if self.control.isListening():
+        if self.control.runner.is_listening():
             return True
 
         self.logger.error("MOOSE is not listening")
@@ -304,8 +306,8 @@ class Moose2FMU(Fmi2Slave):
             if awaited is None:
                 return False
 
-        self.control.setControllableReal(path, value)
-        self.control.setContinue()
+        self.control.set_real(path, value)
+        self.control.set_continue()
         self._controllable_real_cache[path] = value
         self.logger.info("Set controllable real '%s' to %s", path, value)
         return True
@@ -402,13 +404,13 @@ class Moose2FMU(Fmi2Slave):
 
         if normalized_type == "real":
             converted = tuple(float(entry) for entry in raw_values)
-            setter = self.control.setControllableVectorReal
+            setter = self.control.set_vector_real
         elif normalized_type == "int":
             converted = tuple(int(entry) for entry in raw_values)
-            setter = self.control.setControllableVectorInt
+            setter = self.control.set_vector_int
         else:
             converted = tuple(str(entry) for entry in raw_values)
-            setter = self.control.setControllableVectorString
+            setter = self.control.set_vector_string
 
         cache_key = (path, normalized_type)
         cached = self._controllable_vector_cache.get(cache_key)
@@ -431,7 +433,7 @@ class Moose2FMU(Fmi2Slave):
                 return False
 
         setter(path, list(converted))
-        self.control.setContinue()
+        self.control.set_continue()
         self._controllable_vector_cache[cache_key] = converted
         self.logger.info(
             "Set controllable vector '%s' (%s) to %s",
@@ -448,7 +450,7 @@ class Moose2FMU(Fmi2Slave):
         wait_seconds: float = 0.5,
     ) -> Optional[str]:
         """
-        Poll ``getWaitingFlag`` and retry before giving up.
+        Poll ``get_waiting_flag`` and retry before giving up.
 
         Parameters
         ----------
@@ -469,7 +471,7 @@ class Moose2FMU(Fmi2Slave):
         result: Optional[str] = None
         while retries < max_retries:
             try:
-                result = self.control.getWaitingFlag()
+                result = self.control.get_waiting_flag()
                 if result:
                     normalized = result.strip().upper()
                     if normalized_allowed and normalized not in normalized_allowed:
@@ -538,7 +540,7 @@ class Moose2FMU(Fmi2Slave):
         if flag_value is None:
             return None
 
-        postprocessor_value = self.control.getPostprocessor(postprocessor_name)
+        postprocessor_value = self.control.get_postprocessor(postprocessor_name)
         self.logger.debug(
             "Retrieved Postprocessor value %s from MOOSE at flag %s",
             postprocessor_value,
@@ -576,7 +578,7 @@ class Moose2FMU(Fmi2Slave):
         if flag_value is None:
             return None
 
-        reporter_value = self.control.getReporterValue(reporter_name)
+        reporter_value = self.control.get_reporter(reporter_name)
         self.logger.debug(
             f"Retrieved Reporter value {reporter_value} from MOOSE at flag {flag_value}"
         )
@@ -598,7 +600,7 @@ class Moose2FMU(Fmi2Slave):
     def _skip_flag(self, flag: str):
         """Acknowledge a flag and allow the MOOSE execution to continue."""
         self.control.wait(flag)
-        self.control.setContinue()
+        self.control.set_continue()
 
     def _combine_flags(
         self,
@@ -668,6 +670,22 @@ class Moose2FMU(Fmi2Slave):
             )
             return False
 
-        self.control.setControllableReal(path, next_time)
+        self.control.set_real(path, next_time)
         self._controllable_real_cache[path] = next_time
         return True
+
+    def terminate(self) -> bool:
+        self.logger.info("Moose2FMU.terminate called; shutting down MooseControl.")
+        control = getattr(self, "control", None)
+        if control is None:
+            return True
+
+        try:
+            control.wait()
+            control.set_terminate()
+            control.finalize()
+        except Exception as exc:
+            self.logger.warning("Finalize failed; forcing cleanup: %s", exc)
+            control.cleanup()
+        return True
+

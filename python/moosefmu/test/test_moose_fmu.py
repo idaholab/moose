@@ -46,7 +46,7 @@ class TestMoose2FMU(unittest.TestCase):
             def __init__(self):
                 self.calls = 0
 
-            def getWaitingFlag(self):
+            def get_waiting_flag(self):
                 self.calls += 1
                 return " READY " if self.calls >= 2 else None
 
@@ -74,7 +74,7 @@ class TestMoose2FMU(unittest.TestCase):
             def __init__(self):
                 self._responses = iter(["foo", "READY"])
 
-            def getWaitingFlag(self):
+            def get_waiting_flag(self):
                 calls["waiting"] += 1
                 return next(self._responses)
 
@@ -99,7 +99,7 @@ class TestMoose2FMU(unittest.TestCase):
             def __init__(self):
                 self.calls = 0
 
-            def getWaitingFlag(self):
+            def get_waiting_flag(self):
                 self.calls += 1
                 return None
 
@@ -125,7 +125,7 @@ class TestMoose2FMU(unittest.TestCase):
             def __init__(self):
                 self.calls = 0
 
-            def getWaitingFlag(self):
+            def get_waiting_flag(self):
                 self.calls += 1
                 if self.calls < 2:
                     raise RuntimeError("temporary failure")
@@ -149,10 +149,10 @@ class TestMoose2FMU(unittest.TestCase):
                 self.set_calls = []
                 self.continue_calls = 0
 
-            def setControllableReal(self, path, value):
+            def set_real(self, path, value):
                 self.set_calls.append((path, value))
 
-            def setContinue(self):
+            def set_continue(self):
                 self.continue_calls += 1
 
         slave.control = Control()
@@ -176,16 +176,16 @@ class TestMoose2FMU(unittest.TestCase):
                 self.calls = []
                 self.continue_calls = 0
 
-            def setControllableVectorReal(self, path, value):
+            def set_vector_real(self, path, value):
                 self.calls.append(("real", path, value))
 
-            def setControllableVectorInt(self, path, value):
+            def set_vector_int(self, path, value):
                 self.calls.append(("int", path, value))
 
-            def setControllableVectorString(self, path, value):
+            def set_vector_string(self, path, value):
                 self.calls.append(("string", path, value))
 
-            def setContinue(self):
+            def set_continue(self):
                 self.continue_calls += 1
 
         slave.control = Control()
@@ -228,16 +228,16 @@ class TestMoose2FMU(unittest.TestCase):
         slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
-            def setControllableVectorReal(self, path, value):
+            def set_vector_real(self, path, value):
                 pass
 
-            def setControllableVectorInt(self, path, value):
+            def set_vector_int(self, path, value):
                 pass
 
-            def setControllableVectorString(self, path, value):
+            def set_vector_string(self, path, value):
                 pass
 
-            def setContinue(self):
+            def set_continue(self):
                 pass
 
         slave.control = Control()
@@ -270,10 +270,10 @@ class TestMoose2FMU(unittest.TestCase):
             def wait(self, flag):
                 self.waited.append(flag)
 
-            def setControllableReal(self, path, value):
+            def set_real(self, path, value):
                 self.set_calls.append((path, value))
 
-            def setContinue(self):
+            def set_continue(self):
                 self.continue_calls += 1
 
         slave.control = Control()
@@ -305,10 +305,10 @@ class TestMoose2FMU(unittest.TestCase):
             def wait(self, flag):
                 self.waited.append(flag)
 
-            def setControllableReal(self, path, value):
+            def set_real(self, path, value):
                 self.set_calls.append((path, value))
 
-            def setContinue(self):
+            def set_continue(self):
                 pass
 
         slave.control = Control()
@@ -336,7 +336,7 @@ class TestMoose2FMU(unittest.TestCase):
             def wait(self, flag):
                 self.waited.append(flag)
 
-            def getPostprocessor(self, name):
+            def get_postprocessor(self, name):
                 return 7.0
 
             def finalize(self):
@@ -371,8 +371,11 @@ class TestMoose2FMU(unittest.TestCase):
         parsed_iterable = slave._parse_flags(["Ready", " done ", ""])
         self.assertEqual(parsed_iterable, {"READY", "DONE"})
 
-    @mock.patch("MooseFMU.MOOSE2FMU.MooseControl")
-    def test_exit_initialization_mode_rebuilds_command(self, mock_control):
+    @mock.patch("moosefmu.moose2fmu.SubprocessSocketRunner")
+    @mock.patch("moosefmu.moose2fmu.MooseControl")
+    def test_exit_initialization_mode_rebuilds_command(
+        self, mock_control, mock_runner
+        ):
         """exit_initialization_mode should rebuild the configured command."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
@@ -389,40 +392,48 @@ class TestMoose2FMU(unittest.TestCase):
             "custom_input.i",
         ]
 
-        mock_control.assert_called_once_with(
-            moose_command=expected_command,
+        mock_runner.assert_called_once_with(
+            command=expected_command,
             moose_control_name=slave.server_name,
         )
+        mock_control.assert_called_once()
+        args, kwargs = mock_control.call_args
+        self.assertEqual(args[0], mock_runner.return_value)
         mock_control.return_value.initialize.assert_called_once_with()
 
     def test_sync_with_moose_success(self):
         """sync_with_moose should align times and return the trigger flag."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
+        class Runner:
+            def __init__(self):
+                self._running_checks = iter([True, True])
+
+            def is_process_running(self):
+                try:
+                    return next(self._running_checks)
+                except StopIteration:
+                    return False
+
         class Control:
             def __init__(self):
                 self._times = iter([0.0, 1.0005])
                 self.wait_calls = []
                 self.continue_calls = 0
-                self._running_checks = iter([True, True])
+                self.runner = Runner()
 
-            def getTime(self):
+
+            def get_time(self):
                 return next(self._times)
 
             def wait(self, flag):
                 self.wait_calls.append(flag)
 
-            def setContinue(self):
+            def set_continue(self):
                 self.continue_calls += 1
 
             def getTimeStepSize(self):
                 return 5e-4
-
-            def isProcessRunning(self):
-                try:
-                    return next(self._running_checks)
-                except StopIteration:
-                    return False
 
         slave.control = Control()
 
@@ -444,13 +455,17 @@ class TestMoose2FMU(unittest.TestCase):
         """Control listening status should be checked before continuing."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
-        class Control:
+        class Runner:
             def __init__(self, listening: bool):
                 self._listening = listening
-                self.finalized = False
 
-            def isListening(self):
+            def is_listening(self):
                 return self._listening
+
+        class Control:
+            def __init__(self, listening: bool):
+                self.runner = Runner(listening)
+                self.finalized = False
 
             def finalize(self):
                 self.finalized = True
@@ -487,10 +502,10 @@ class TestMoose2FMU(unittest.TestCase):
             def wait(self, flag):
                 self.waited.append(flag)
 
-            def getPostprocessor(self, name):
+            def get_postprocessor(self, name):
                 return {"temp": 42.0}[name]
 
-            def setContinue(self):
+            def set_continue(self):
                 self.continue_calls += 1
 
             def finalize(self):
@@ -546,10 +561,10 @@ class TestMoose2FMU(unittest.TestCase):
             def wait(self, flag):
                 self.waited.append(flag)
 
-            def getReporterValue(self, name):
+            def get_reporter(self, name):
                 return {"flux": 3.14}[name]
 
-            def setContinue(self):
+            def set_continue(self):
                 self.continue_calls += 1
 
             def finalize(self):

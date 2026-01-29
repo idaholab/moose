@@ -128,6 +128,6 @@ class MooseTest(Moose2FMU):
 
             self.logger.info("Information sync complete!")
             # resume MOOSE simulation after sync
-            self.control.setContinue()
+            self.control.set_continue()
 
         return True
