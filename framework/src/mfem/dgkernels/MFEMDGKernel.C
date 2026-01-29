@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDGKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMDGKernel);
 
