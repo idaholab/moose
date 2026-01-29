@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "MFEMDGKernel.h"
+
 // all this class needs to do differently is to implement createLFIntegrator
 class MFEMDGDirichletLFKernel : public MFEMDGKernel
 {
