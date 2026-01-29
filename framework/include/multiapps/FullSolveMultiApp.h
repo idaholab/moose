@@ -51,6 +51,8 @@ protected:
 private:
   /// Switch to tell executioner to keep going despite app solve not converging
   const bool _ignore_diverge;
+  /// Switch to tell the systems or not to update the old solution using the unrestored solution (the one we 'kept during restore')
+  const bool _update_old_state_when_keeping_solution_during_restore;
 
   std::vector<Executioner *> _executioners;
 };

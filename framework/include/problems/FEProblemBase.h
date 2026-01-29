@@ -572,6 +572,11 @@ public:
 
   virtual void copySolutionsBackwards();
 
+  /// Prevents the copy of the solution vector to the old solution vector in each system.
+  /// Old -> Older is still performed
+  /// This is useful for MultiApps fixed point iterations
+  void skipNextForwardSolutionCopyToOld();
+
   /**
    * Advance all of the state holding vectors / datastructures so that we can move to the next
    * timestep.
@@ -596,6 +601,13 @@ public:
    * @param iteration_type the type of iteration for which old/older states are needed
    */
   void needSolutionState(unsigned int oldest_needed, Moose::SolutionIterationType iteration_type);
+
+  /**
+   * Whether we need up to old (1) or older (2) solution states for a given type of iteration
+   * @param oldest_needed oldest solution state needed
+   * @param iteration_type the type of iteration for which old/older states are needed
+   */
+  bool hasSolutionState(unsigned int state, Moose::SolutionIterationType iteration_type) const;
 
   /**
    * Output the current step.
