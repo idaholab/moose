@@ -713,7 +713,8 @@ LinearAssemblySegregatedSolve::solve()
                                                          *_energy_system,
                                                          _energy_equation_relaxation,
                                                          _energy_linear_control,
-                                                         _energy_l_abs_tol);
+                                                         _energy_l_abs_tol,
+                                                         _energy_field_relaxation);
 
         if (_has_pm_radiation_systems && _should_solve_pm_radiation)
         {

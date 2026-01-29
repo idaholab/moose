@@ -139,6 +139,9 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _energy_l_abs_tol;
 
+    /// The user-defined relaxation parameter(s) for the energy field
+  const Real _energy_field_relaxation;
+
   // ************************ Solid Energy Eq Variables *********************** //
 
   /// Boolean for easy check if a solid energy system shall be solved or not
