@@ -7,12 +7,11 @@
     xmldiff = 'OutputData/CurlCurl/Run0/Run0.pvd
                 OutputData/CurlCurl/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a definite Maxwell problem with Nedelec elements of the first kind using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
-    platform = 'linux'
   []
   [MFEMDiffusion]
     type = XMLDiff
@@ -143,7 +142,7 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
-  []  
+  []
   [MFEMLinearElasticity]
     type = XMLDiff
     input = linearelasticity.i
@@ -161,12 +160,11 @@
     xmldiff = 'OutputData/Gravity/Run0/Run0.pvd
                 OutputData/Gravity/Run0/Cycle000001/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a linear elasticity problem for a beam deformed under gravitational loads using MFEM.'
-    capabilities = 'mfem'
+    capabilities = 'mfem & platform=linux'
     compute_devices = 'cpu' # schemadiff with cuda
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     max_threads = 1
-    platform = 'linux'
   []
   [MFEMIrrotational]
     type = CSVDiff
