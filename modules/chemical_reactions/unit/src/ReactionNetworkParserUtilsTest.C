@@ -168,6 +168,57 @@ TEST(ReactionNetworkParserUtilsTest, multiple_reactions)
   EXPECT_EQ(reaction2.hasMetaData("this"), false);
 }
 
+TEST(ReactionNetworkParserUtilsTest, non_unique_species)
+{
+  // Simple
+  auto reactions = ReactionNetworkUtils::parseReactionNetwork(
+      "A - A + A -> -B\nD(aq) + E+ -> F + 2.1F - 1.1G", false);
+  auto reaction = reactions[0];
+  EXPECT_EQ(reaction.getSpecies()[0], "A");
+  EXPECT_EQ(reaction.getSpecies()[1], "A");
+  EXPECT_EQ(reaction.getSpecies()[2], "A");
+  EXPECT_EQ(reaction.getSpecies()[3], "B");
+  EXPECT_EQ(reaction.getUniqueSpecies()[0], "A");
+  EXPECT_EQ(reaction.getUniqueSpecies()[1], "B");
+  EXPECT_EQ(reaction.getReactantSpecies()[0], "A");
+  EXPECT_EQ(reaction.getUniqueReactantSpecies()[0], "A");
+  EXPECT_EQ(reaction.getUniqueReactantSpecies().size(), 1);
+  EXPECT_EQ(reaction.getProductSpecies()[0], "B");
+  EXPECT_EQ(reaction.getUniqueProductSpecies()[0], "B");
+  EXPECT_EQ(reaction.getStoichiometricCoefficients()[0], 1);
+  EXPECT_EQ(reaction.getStoichiometricCoefficients()[1], -1);
+  EXPECT_EQ(reaction.getStoichiometricCoefficients()[3], -1);
+  EXPECT_EQ(reaction.getUniqueStoichiometricCoefficients()["A"], 1);
+  EXPECT_EQ(reaction.getUniqueStoichiometricCoefficients()["B"], 1);
+  EXPECT_EQ(reaction.hasMetaData("this"), false);
+  auto reaction2 = reactions[1];
+  EXPECT_EQ(reaction2.getSpecies()[0], "D(aq)");
+  EXPECT_EQ(reaction2.getSpecies()[1], "E+");
+  EXPECT_EQ(reaction2.getSpecies()[2], "F");
+  EXPECT_EQ(reaction2.getSpecies()[3], "F");
+  EXPECT_EQ(reaction2.getSpecies()[4], "G");
+  EXPECT_EQ(reaction2.getUniqueSpecies()[0], "D(aq)");
+  EXPECT_EQ(reaction2.getUniqueSpecies()[1], "E+");
+  EXPECT_EQ(reaction2.getUniqueSpecies()[2], "F");
+  EXPECT_EQ(reaction2.getUniqueSpecies()[3], "G");
+  EXPECT_EQ(reaction2.getReactantSpecies()[0], "D(aq)");
+  EXPECT_EQ(reaction2.getReactantSpecies()[1], "E+");
+  EXPECT_EQ(reaction2.getProductSpecies()[0], "F");
+  EXPECT_EQ(reaction2.getProductSpecies()[2], "G");
+  EXPECT_EQ(reaction2.getUniqueProductSpecies()[0], "F");
+  EXPECT_EQ(reaction2.getUniqueProductSpecies()[1], "G");
+  EXPECT_EQ(reaction2.getStoichiometricCoefficients()[0], 1);
+  EXPECT_EQ(reaction2.getStoichiometricCoefficients()[1], 1);
+  EXPECT_EQ(reaction2.getStoichiometricCoefficients()[2], 1);
+  EXPECT_EQ(reaction2.getStoichiometricCoefficients()[3], 2.1);
+  EXPECT_EQ(reaction2.getStoichiometricCoefficients()[4], -1.1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["D(aq)"], 1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["E+"], 1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["F"], -3.1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["G"], 1.1);
+  EXPECT_EQ(reaction2.hasMetaData("this"), false);
+}
+
 TEST(ReactionNetworkParserUtilsTest, metadata)
 {
   // One double term
