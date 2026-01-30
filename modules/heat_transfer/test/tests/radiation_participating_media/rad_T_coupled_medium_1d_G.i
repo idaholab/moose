@@ -1,6 +1,6 @@
-# The test gurantees that the P1 radiation model in the Linear FV system using the Newton solver
-# can be used with MultiApps to relax the solution update via relaxation to improve convergence
-# of the coupled energy and radiative systems.
+# The test gurantees that the P1 radiation model in the Linear FV system using the simple
+# multi-linear system solver can be used with MultiApps to relax the solution update via
+# relaxation to improve convergence of the coupled energy and radiative systems.
 # This simulation is a 1D test with Dirichlet BCs on the left and right of the domain. Marshak BCs are
 # applied at the boundaries for G.
 
@@ -95,7 +95,7 @@ l_wall_temp = 300.0
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
+  solve_type = 'Linear'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   l_abs_tol = 1e-16

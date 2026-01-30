@@ -90,7 +90,7 @@ l_wall_temp = 300.0
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
+  solve_type = 'Linear'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   l_abs_tol = 1e-14
