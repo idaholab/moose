@@ -246,12 +246,12 @@ Reaction::getUniqueStoichiometricCoefficients() const
   for (const auto & term : reactants)
   {
     const auto term_str = term.species + term.state.value_or("") + term.charge.value_or("");
-    terms_gathered[term_str] += term.coefficient;
+    terms_gathered[term_str] -= term.coefficient;
   }
   for (const auto & term : products)
   {
     const auto term_str = term.species + term.state.value_or("") + term.charge.value_or("");
-    terms_gathered[term_str] -= term.coefficient;
+    terms_gathered[term_str] += term.coefficient;
   }
   return terms_gathered;
 }
