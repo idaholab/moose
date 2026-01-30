@@ -208,6 +208,26 @@ Reaction::getSpecies() const
   return species;
 }
 
+std::vector<VariableName>
+Reaction::getUniqueSpecies() const
+{
+  std::vector<VariableName> species;
+  std::set<Term> terms_gathered;
+  for (const auto & term : reactants)
+    if (terms_gathered.find(term) == terms_gathered.end())
+    {
+      species.push_back(term.species + term.state.value_or("") + term.charge.value_or(""));
+      terms_gathered.insert(term);
+    }
+  for (const auto & term : products)
+    if (terms_gathered.find(term) == terms_gathered.end())
+    {
+      species.push_back(term.species + term.state.value_or("") + term.charge.value_or(""));
+      terms_gathered.insert(term);
+    }
+  return species;
+}
+
 std::vector<Real>
 Reaction::getStoichiometricCoefficients() const
 {
@@ -219,6 +239,23 @@ Reaction::getStoichiometricCoefficients() const
   return coeffs;
 }
 
+std::map<VariableName, Real>
+Reaction::getUniqueStoichiometricCoefficients() const
+{
+  std::map<VariableName, Real> terms_gathered;
+  for (const auto & term : reactants)
+  {
+    const auto term_str = term.species + term.state.value_or("") + term.charge.value_or("");
+    terms_gathered[term_str] += term.coefficient;
+  }
+  for (const auto & term : products)
+  {
+    const auto term_str = term.species + term.state.value_or("") + term.charge.value_or("");
+    terms_gathered[term_str] -= term.coefficient;
+  }
+  return terms_gathered;
+}
+
 std::vector<VariableName>
 Reaction::getReactantSpecies() const
 {
@@ -228,12 +265,40 @@ Reaction::getReactantSpecies() const
   return species;
 }
 
+std::vector<VariableName>
+Reaction::getUniqueReactantSpecies() const
+{
+  std::vector<VariableName> species;
+  std::set<Term> terms_gathered;
+  for (const auto & term : reactants)
+    if (terms_gathered.find(term) == terms_gathered.end())
+    {
+      species.push_back(term.species + term.state.value_or("") + term.charge.value_or(""));
+      terms_gathered.insert(term);
+    }
+  return species;
+}
+
 std::vector<std::string>
 Reaction::getProductSpecies() const
 {
   std::vector<std::string> species;
   for (const auto & term : products)
     species.push_back(term.species + term.state.value_or("") + term.charge.value_or(""));
+  return species;
+}
+
+std::vector<std::string>
+Reaction::getUniqueProductSpecies() const
+{
+  std::vector<std::string> species;
+  std::set<Term> terms_gathered;
+  for (const auto & term : products)
+    if (terms_gathered.find(term) == terms_gathered.end())
+    {
+      species.push_back(term.species + term.state.value_or("") + term.charge.value_or(""));
+      terms_gathered.insert(term);
+    }
   return species;
 }
 
