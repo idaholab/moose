@@ -406,52 +406,16 @@ class TestHarness:
         # want to probe for configuration options
         if self.options.no_capabilities:
             checks['compiler'] = set(['ALL'])
-            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch', 'mfem', 'kokkos']:
-                checks[f'{prefix}_version'] = 'N/A'
-            for var in ['library_mode', 'mesh_mode', 'unique_ids', 'vtk',
-                        'tecplot', 'dof_id_bytes', 'petsc_debug', 'curl',
-                        'threading', 'superlu', 'mumps', 'strumpack',
-                        'parmetis', 'chaco', 'party', 'ptscotch',
-                        'slepc', 'unique_id', 'boost', 'fparser_jit',
-                        'libpng', 'libtorch', 'libtorch_version',
-                        'installation_type', 'mfem', 'kokkos']:
+            for var in ['library_mode',
+                        'installation_type']:
                 checks[var] = set(['ALL'])
         else:
             def get_option(*args, **kwargs):
                 return util.getCapabilityOption(self.options._capabilities, *args, **kwargs)
 
             checks['compiler'] = get_option('compiler', to_set=True)
-            checks['petsc_version'] = get_option('petsc', from_version=True)
-            checks['petsc_debug'] = get_option('petsc_debug', from_type=bool, to_set=True)
-            checks['slepc_version'] = get_option('slepc', from_version=True)
-            checks['slepc'] = get_option('slepc', from_version=True, to_set=True, to_bool=True)
-            checks['exodus_version'] = get_option('exodus', from_version=True)
-            checks['vtk_version'] = get_option('vtk', from_version=True)
-            checks['vtk'] = get_option('vtk', from_version=True, to_set=True, to_bool=True)
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
             checks['mesh_mode'] = get_option('mesh_mode', from_type=str, to_set=True)
-            checks['unique_ids'] = get_option('unique_id', from_type=bool, to_set=True)
-            checks['unique_id'] = checks['unique_ids']
-            checks['tecplot'] = get_option('tecplot', from_type=bool, to_set=True)
-            checks['dof_id_bytes'] = get_option('dof_id_bytes', from_type=int, to_set=True, no_all=True)
-
-            threading = None
-            threads = get_option('threads', from_type=bool)
-            if threads:
-                threading = next((name for name in ['tbb', 'openmp'] if get_option(name, from_type=bool)), 'pthreads')
-            checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
-
-            for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',
-                         'ptscotch', 'boost', 'curl', 'mfem', 'kokkos']:
-                checks[name] = get_option(name, from_type=bool, to_set=True)
-
-            checks['libpng'] = get_option('libpng', from_type=bool, to_set=True)
-
-            fparser = get_option('fparser')
-            checks['fparser_jit'] = set(sorted(['ALL', 'TRUE' if fparser == 'jit' else 'FALSE']))
-
-            checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
-            checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
@@ -460,9 +424,6 @@ class TestHarness:
 
             option_set = set(['ALL', 'DISTRIBUTED'])
             checks['mesh_mode'] = option_set
-
-        method = set(['ALL', self.options.method.upper()])
-        checks['method'] = method
 
         # This is so we can easily pass checks around to any scheduler plugin
         self.options._checks = checks

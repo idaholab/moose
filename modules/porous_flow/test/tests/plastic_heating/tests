@@ -3,7 +3,6 @@
     type = 'CSVDiff'
     input = 'tensile01.i'
     csvdiff = 'tensile01.csv'
-    threading = '!pthreads'
     requirement = "PorousFlow shall model heat generated from plastic deformation, including tensile failure"
     issues = '#13155'
     design = 'porous_flow/tests/plastic_heating/plastic_heating_tests.md PorousFlowPlasticHeatEnergy.md'
@@ -12,7 +11,6 @@
     type = 'CSVDiff'
     input = 'compressive01.i'
     csvdiff = 'compressive01.csv'
-    threading = '!pthreads'
     requirement = "PorousFlow shall model heat generated from plastic deformation, including compressive failure"
     issues = '#13155'
     design = 'porous_flow/tests/plastic_heating/plastic_heating_tests.md PorousFlowPlasticHeatEnergy.md'
@@ -21,7 +19,6 @@
     type = 'CSVDiff'
     input = 'shear01.i'
     csvdiff = 'shear01.csv'
-    threading = '!pthreads'
     requirement = "PorousFlow shall model heat generated from plastic deformation, including shear failure"
     issues = '#13155'
     design = 'porous_flow/tests/plastic_heating/plastic_heating_tests.md PorousFlowPlasticHeatEnergy.md'
