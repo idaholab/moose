@@ -17,7 +17,7 @@ import datetime
 import getpass
 import argparse
 import typing
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, namedtuple
 from typing import Tuple, Optional
 
 from socket import gethostname
@@ -27,6 +27,7 @@ from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 from . import util
 from . import RaceChecker
+from .mpi_config import get_mpi_config, build_hwloc_topo
 import pyhit
 
 # Directory the test harness is in
@@ -466,6 +467,9 @@ class TestHarness:
 
         # This is so we can easily pass checks around to any scheduler plugin
         self.options._checks = checks
+
+        # Store the mpi configuration we have discovered
+        self.options._mpi_config = get_mpi_config()
 
         # Initialize the scheduler
         self.initialize()
@@ -1247,6 +1251,9 @@ class TestHarness:
         methodgroup.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='Test the <app_name>-dbg binary')
         methodgroup.add_argument('--devel', action='store_const', dest='method', const='devel', help='Test the <app_name>-devel binary')
         methodgroup.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='Test the <app_name>-oprof binary')
+
+        envgroup = parser.add_argument_group('Environment Options', 'Control the runtime environment')
+        envgroup.add_argument('--disable-mpi-options', action='store_true', dest='disable_mpi_options', help='Disable automated MPI environment options')
 
         screengroup = parser.add_argument_group('On-screen Output', 'Control the on-screen output')
         screengroup.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
