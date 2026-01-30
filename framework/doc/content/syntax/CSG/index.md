@@ -97,15 +97,15 @@ The cells output contains the following information:
 - `filltype`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"`)
 - `fill`: for `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"` `filltype`, the name of the fill object (if `"VOID"` type, then name is an empty string `""`)
 
-| Boolean Operator    | Infix String Representation | Postfix String Representation  |
-|---------------------|-----------------------------|--------------------------------|
-| positive half-space | `+`                         | `halfspace::POSITIVE`          |
-| negative half-space | `-`                         | `halfspace::NEGATIVE`          |
-| union               | `|`                         | `regionOperator::UNION`        |
-| intersection        | `&`                         | `regionOperator::INTERSECTION` |
-| complement          | `~`                         | `regionOperator::COMPLEMENT`   |
+| Boolean Operator    | Symbol Representation in Region Output |
+|---------------------|----------------------------------------|
+| positive half-space | `+`                                    |
+| negative half-space | `-`                                    |
+| union               | `|`                                    |
+| intersection        | `&`                                    |
+| complement          | `~`                                    |
 
-Internally, CSGBase represents each cell region in postfix notation (also known as Reverse Polish notation). While an infix representation of the region may be easier to conceptualize, postfix notation may be more useful for conversion steps to downstream Monte Carlo codes, as this representation does not rely on symbols to represent boolean operators. Additionally, postfix notation provides an unambiguous precedence ruleset for these boolean operators without having to parse through groupings of parentheses.
+Internally, CSGBase represents each cell region in postfix notation (also known as Reverse Polish notation). While an infix representation of the region may be easier to conceptualize, postfix notation may be more useful for conversion steps to downstream Monte Carlo codes, as this representation provides an unambiguous precedence ruleset for boolean operators without having to parse through groupings of parentheses.
 An example of a cell defined as the space inside a box made of six planes and filled with a solid material is below:
 
 !listing csg_only_chained_out_csg.json start="cells" end="surfaces"
