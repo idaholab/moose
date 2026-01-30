@@ -5,7 +5,6 @@
     csvdiff = 'test_out.csv'
     rel_err = 1e-8
     allow_test_objects = true
-    threading = '!pthreads'
     capabilities = 'saline'
     requirement = "The system shall be able to leverage the Saline submodule to compute composed "
                   "salt fluid properties"

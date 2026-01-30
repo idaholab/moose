@@ -5,7 +5,6 @@
     exodiff = '1d_aefv_square_wave_none_out.e'
     abs_zero = 1e-4
     rel_err = 5e-5
-    threading = '!pthreads'
     restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
@@ -20,7 +19,6 @@
     cli_args = 'UserObjects/lslope/scheme=minmod Outputs/Exodus/file_base=1d_aefv_square_wave_minmod_out'
     abs_zero = 1e-4
     rel_err = 5e-5
-    threading = '!pthreads'
     restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
@@ -35,7 +33,6 @@
     cli_args = 'UserObjects/lslope/scheme=mc Outputs/Exodus/file_base=1d_aefv_square_wave_mc_out'
     abs_zero = 1e-4
     rel_err = 5e-5
-    threading = '!pthreads'
     restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
@@ -50,7 +47,6 @@
     cli_args = 'UserObjects/lslope/scheme=superbee Outputs/Exodus/file_base=1d_aefv_square_wave_superbee_out'
     abs_zero = 1e-4
     rel_err = 5e-5
-    threading = '!pthreads'
     restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
     requirement = 'The system shall provide classes to use an RDG spatial discretization'
@@ -64,7 +60,6 @@
     exodiff = 'block_restrictable_out.e'
     abs_zero = 1e-4
     rel_err = 5e-5
-    threading = '!pthreads'
     restep = false # ExplicitRK2-derived time integrators have undefined behavior when timesteps fail
 
     requirement = 'The system shall allow RDG user objects to be block-restrictable.'
@@ -77,7 +72,6 @@
     input = 'rdgP0.i'
     csvdiff = 'rdgP0_out_tracer_0011.csv'
     abs_zero = 1.0E-5
-    threading = '!pthreads'
     requirement = "The system, with 1D RDG, shall allow arbitrary 1D velocities to be specified."
     issues = '#12346'
     design = 'porous_flow/numerical_diffusion.md'

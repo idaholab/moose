@@ -5,7 +5,6 @@
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
-    threading = '!pthreads'
     requirement = 'The system shall be able to compute fluid properties with a stiffened gas model using a conservative variable set.'
   []
 []
