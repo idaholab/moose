@@ -91,6 +91,8 @@ protected:
     std::vector<std::size_t> active_scalar_indices;
     /// Indices of turbulence surrogate equations in ns_residuals
     std::vector<std::size_t> turbulence_indices;
+    /// Indices of participating media radiation equations in ns_residuals
+    std::vector<std::size_t> pm_radiation_indices;
     /// This will be an initial indicator if we have something to solve.
     /// If we dont have anything we just set this to true.
     bool converged = false;
@@ -131,6 +133,9 @@ protected:
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
   std::vector<LinearSystem *> _passive_scalar_systems;
 
+  /// Pointer(s) to the system(s) corresponding to the participting media radiation equation(s)
+  std::vector<LinearSystem *> _pm_radiation_systems;
+
   /// Pointer(s) to the system(s) corresponding to the active scalar equation(s)
   std::vector<LinearSystem *> _active_scalar_systems;
 
@@ -151,6 +156,7 @@ protected:
   const bool _should_solve_turbulence;
   const bool _should_solve_passive_scalars;
   const bool _should_solve_active_scalars;
+  const bool _should_solve_pm_radiation;
 
   // ************************ Active Scalar Variables ************************ //
 
