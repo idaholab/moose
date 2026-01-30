@@ -2443,8 +2443,14 @@ MooseApp::checkReservedCapability(const std::string & capability)
 {
   // The list of these capabilities should match those within
   // Tester.checkRunnableBase() in the TestHarness
-  static const std::set<std::string> reserved{
-      "scale_refine", "valgrind", "recover", "heavy", "mpi_procs", "num_threads", "compute_device"};
+  static const std::set<std::string> reserved{"scale_refine",
+                                              "valgrind",
+                                              "recover",
+                                              "heavy",
+                                              "mpi_procs",
+                                              "num_threads",
+                                              "compute_device",
+                                              "restep"};
   if (reserved.count(capability))
     ::mooseError("MooseApp::addCapability(): The capability \"",
                  capability,
