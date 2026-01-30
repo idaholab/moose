@@ -5,9 +5,9 @@
 # the solid side and Dirichlet CHT for the fluid side. Temperatures are set at the solid and
 # fluid boundaries.
 ### Benchmark sources:
-### https://doi.org/10.1016/j.compfluid.2018.06.016
-### https://doi.org/10.1016/0017-9310(74)90087-8
+### https://hal.science/hal-02070285/document
 
+nx = 10
 Tw_left = 1.0
 Tw_right = 0.0
 sigma = 5.670374419e-8
@@ -30,7 +30,7 @@ advected_interp_method = 'upwind'
   [salt_mesh]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 10
+    nx = ${nx}
     xmin = 0
     xmax = 1
     subdomain_ids = 0
@@ -38,7 +38,7 @@ advected_interp_method = 'upwind'
   [solid_mesh]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 10
+    nx = ${nx}
     xmin = 1
     xmax = 2
     subdomain_ids = 1
@@ -115,6 +115,19 @@ advected_interp_method = 'upwind'
     solver_sys = 'solid_energy_system'
     initial_condition = ${fparse Tw_left/2}
     block = 'solid'
+  []
+[]
+
+[Postprocessors]
+  [T_fluid_iface]
+    type = ElementalVariableValue
+    variable = T_fluid
+    elementid = ${fparse nx-1}
+  []
+  [T_solid_iface]
+    type = ElementalVariableValue
+    variable = T_solid
+    elementid = ${fparse nx}
   []
 []
 
