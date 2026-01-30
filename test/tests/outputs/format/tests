@@ -9,7 +9,6 @@
     # e.g. out.e.2.0 and out.e.2.1, so this test will only pass if you
     # run it on one processor.
     max_parallel = 1
-    min_parallel = 1
     issues = '#920'
     design = 'Nemesis.md'
     requirement = 'The system shall support Nemesis output.'
