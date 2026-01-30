@@ -22,10 +22,7 @@ TriSubChannelMesh::validParams()
   return params;
 }
 
-TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
-  : SubChannelMesh(params), _pin_mesh_exist(false), _duct_mesh_exist(false)
-{
-}
+TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params) : SubChannelMesh(params) {}
 
 TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
   : SubChannelMesh(other_mesh),
@@ -36,9 +33,6 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _hwire(other_mesh._hwire),
     _duct_to_pin_gap(other_mesh._duct_to_pin_gap),
     _nodes(other_mesh._nodes),
-    _duct_nodes(other_mesh._duct_nodes),
-    _chan_to_duct_node_map(other_mesh._chan_to_duct_node_map),
-    _duct_node_to_chan_map(other_mesh._duct_node_to_chan_map),
     _gap_to_chan_map(other_mesh._gap_to_chan_map),
     _gap_to_pin_map(other_mesh._gap_to_pin_map),
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
@@ -53,11 +47,8 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _gap_type(other_mesh._gap_type),
     _gap_pairs_sf(other_mesh._gap_pairs_sf),
     _chan_pairs_sf(other_mesh._chan_pairs_sf),
-    _pin_to_chan_map(other_mesh._pin_to_chan_map),
-    _pin_mesh_exist(other_mesh._pin_mesh_exist),
-    _duct_mesh_exist(other_mesh._duct_mesh_exist)
+    _pin_to_chan_map(other_mesh._pin_to_chan_map)
 {
-  _subchannel_position = other_mesh._subchannel_position;
 }
 
 std::unique_ptr<MooseMesh>
@@ -181,7 +172,7 @@ TriSubChannelMesh::pinIndex(const Point & p) const
 
   std::vector<Point> positions;
   Point center(0, 0);
-  this->rodPositions(positions, _n_rings, _pitch, center);
+  this->pinPositions(positions, _n_rings, _pitch, center);
   for (unsigned int i = 0; i < _npins; i++)
   {
     Real x_dist = positions[i](0) - p(0);
@@ -198,7 +189,7 @@ TriSubChannelMesh::pinIndex(const Point & p) const
 }
 
 void
-TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
+TriSubChannelMesh::pinPositions(std::vector<Point> & positions,
                                 unsigned int nrings,
                                 Real pitch,
                                 Point center)
@@ -262,44 +253,4 @@ TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
       theta = theta + dtheta;
     } // j
   }   // i
-}
-
-void
-TriSubChannelMesh::setChannelToDuctMaps(const std::vector<Node *> & duct_nodes)
-{
-  const Real tol = 1e-10;
-  for (size_t i = 0; i < duct_nodes.size(); i++)
-  {
-    int min_chan = 0;
-    Real min_dist = std::numeric_limits<double>::max();
-    Point ductpos((*duct_nodes[i])(0), (*duct_nodes[i])(1), 0);
-    for (size_t j = 0; j < _subchannel_position.size(); j++)
-    {
-      Point chanpos(_subchannel_position[j][0], _subchannel_position[j][1], 0);
-      auto dist = (chanpos - ductpos).norm();
-      if (dist < min_dist)
-      {
-        min_dist = dist;
-        min_chan = j;
-      }
-    }
-
-    Node * chan_node = nullptr;
-    for (auto cn : _nodes[min_chan])
-    {
-      if (std::abs((*cn)(2) - (*duct_nodes[i])(2)) < tol)
-      {
-        chan_node = cn;
-        break;
-      }
-    }
-
-    if (chan_node == nullptr)
-      mooseError("failed to find matching channel node for duct node");
-
-    _duct_node_to_chan_map[duct_nodes[i]] = chan_node;
-    _chan_to_duct_node_map[chan_node] = duct_nodes[i];
-  }
-
-  _duct_nodes = duct_nodes;
 }

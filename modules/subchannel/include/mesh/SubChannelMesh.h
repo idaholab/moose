@@ -10,6 +10,9 @@
 #pragma once
 
 #include <vector>
+#include <utility> // std::pair
+#include <map>
+
 #include "MooseMesh.h"
 #include "SubChannelEnums.h"
 
@@ -65,22 +68,22 @@ public:
   /**
    * Get the subchannel mesh node for a given channel index and elevation index
    */
-  virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const = 0;
+  virtual Node * getChannelNode(unsigned int i_chan, unsigned int iz) const = 0;
 
   /**
    * Get the pin mesh node for a given pin index and elevation index
    */
-  virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const = 0;
+  virtual Node * getPinNode(unsigned int i_pin, unsigned int iz) const = 0;
 
   /**
    * Function that gets the channel node from the duct node
    */
-  virtual Node * getChannelNodeFromDuct(Node * channel_node) = 0;
+  Node * getChannelNodeFromDuct(Node * duct_node) const;
 
   /**
    * Function that gets the duct node from the channel node
    */
-  virtual Node * getDuctNodeFromChannel(Node * channel_node) = 0;
+  Node * getDuctNodeFromChannel(Node * channel_node) const;
 
   /**
    * Return the number of channels per layer
@@ -90,12 +93,12 @@ public:
   /**
    * Return if Pin Mesh exists or not
    */
-  virtual bool pinMeshExist() const = 0;
+  bool pinMeshExist() const { return _pin_mesh_exist; }
 
   /**
    * Return if Duct Mesh exists or not
    */
-  virtual bool ductMeshExist() const = 0;
+  bool ductMeshExist() const { return _duct_mesh_exist; }
 
   /**
    * Return the number of gaps per layer
@@ -188,9 +191,18 @@ public:
   virtual Real getGapWidth(unsigned int axial_index, unsigned int gap_index) const = 0;
 
   /**
-   * Function that return the vector with the maps to the nodes if they exist
+   * Function that returns the vector with the duct nodes
+   *
    */
-  virtual const std::vector<Node *> getDuctNodes() const = 0;
+  const std::vector<Node *> & getDuctNodes() const { return _duct_nodes; }
+
+  /**
+   * Function that sets the channel-to-duct maps
+   */
+  void setChannelToDuctMaps(const std::vector<Node *> & duct_nodes);
+
+  bool _pin_mesh_exist = false;
+  bool _duct_mesh_exist = false;
 
 protected:
   /// unheated length of the fuel Pin at the entry of the assembly
@@ -199,32 +211,46 @@ protected:
   Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
+
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
   std::vector<std::vector<Real>> _k_grid;
+
+  /// A list of all mesh nodes that form the (elements of) the duct
+  /// mesh that surrounds the pins/subchannels.
+  std::vector<Node *> _duct_nodes;
+
+  /// Maps between channel nodes and duct nodes
+  std::map<Node *, Node *> _chan_to_duct_node_map;
+  std::map<Node *, Node *> _duct_node_to_chan_map;
+
   /// axial location of the spacers
   std::vector<Real> _spacer_z;
   /// form loss coefficient of the spacers
   std::vector<Real> _spacer_k;
+
   /// axial location of blockage (inlet, outlet) [m]
   std::vector<Real> _z_blockage;
   /// index of subchannels affected by blockage
   std::vector<unsigned int> _index_blockage;
   /// area reduction of subchannels affected by blockage
   std::vector<Real> _reduction_blockage;
+
   /// Lateral form loss coefficient
   Real _kij;
   /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;
+
   /// number of axial cells
   unsigned int _n_cells;
 
 public:
   /// x,y coordinates of the subchannel centroids
   std::vector<std::vector<Real>> _subchannel_position;
+
   static InputParameters validParams();
 
   /**

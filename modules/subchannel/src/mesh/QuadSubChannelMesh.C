@@ -24,10 +24,7 @@ QuadSubChannelMesh::validParams()
   return params;
 }
 
-QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params)
-  : SubChannelMesh(params), _duct_mesh_exist(false), _pin_mesh_exist(false)
-{
-}
+QuadSubChannelMesh::QuadSubChannelMesh(const InputParameters & params) : SubChannelMesh(params) {}
 
 QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
   : SubChannelMesh(other_mesh),
@@ -47,14 +44,8 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
     _pin_to_chan_map(other_mesh._pin_to_chan_map),
     _sign_id_crossflow_map(other_mesh._sign_id_crossflow_map),
     _gij_map(other_mesh._gij_map),
-    _subch_type(other_mesh._subch_type),
-    _duct_nodes(other_mesh._duct_nodes),
-    _chan_to_duct_node_map(other_mesh._chan_to_duct_node_map),
-    _duct_node_to_chan_map(other_mesh._duct_node_to_chan_map),
-    _duct_mesh_exist(other_mesh._duct_mesh_exist),
-    _pin_mesh_exist(other_mesh._pin_mesh_exist)
+    _subch_type(other_mesh._subch_type)
 {
-  _subchannel_position = other_mesh._subchannel_position;
   if (_nx < 2 && _ny < 2)
     mooseError(name(),
                ": The number of subchannels cannot be less than 2 in both directions (x and y). "
@@ -135,51 +126,4 @@ QuadSubChannelMesh::generatePinCenters(
   for (unsigned int iy = 0; iy < ny - 1; iy++)
     for (unsigned int ix = 0; ix < nx - 1; ix++)
       pin_centers.push_back(Point(pitch * ix - offset_x, pitch * iy - offset_y, elev));
-}
-
-void
-QuadSubChannelMesh::setChannelToDuctMaps(const std::vector<Node *> & duct_nodes)
-{
-  const Real tol = 1e-10;
-
-  _duct_nodes.clear();
-  _chan_to_duct_node_map.clear();
-  _duct_node_to_chan_map.clear();
-
-  for (size_t i = 0; i < duct_nodes.size(); i++)
-  {
-    int min_chan = 0;
-    Real min_dist = std::numeric_limits<double>::max();
-    Point ductpos((*duct_nodes[i])(0), (*duct_nodes[i])(1), 0.0);
-
-    for (size_t j = 0; j < _subchannel_position.size(); j++)
-    {
-      Point chanpos(_subchannel_position[j][0], _subchannel_position[j][1], 0.0);
-      const Real dist = (chanpos - ductpos).norm();
-      if (dist < min_dist)
-      {
-        min_dist = dist;
-        min_chan = static_cast<int>(j);
-      }
-    }
-
-    Node * chan_node = nullptr;
-    for (auto cn : _nodes[min_chan])
-    {
-      if (std::abs((*cn)(2) - (*duct_nodes[i])(2)) < tol)
-      {
-        chan_node = cn;
-        break;
-      }
-    }
-
-    if (chan_node == nullptr)
-      mooseError("failed to find matching channel node for duct node");
-
-    _duct_node_to_chan_map[duct_nodes[i]] = chan_node;
-    _chan_to_duct_node_map[chan_node] = duct_nodes[i];
-  }
-
-  _duct_nodes = duct_nodes;
-  _duct_mesh_exist = true;
 }

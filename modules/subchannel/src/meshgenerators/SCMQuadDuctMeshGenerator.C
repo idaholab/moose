@@ -19,16 +19,24 @@ InputParameters
 SCMQuadDuctMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("Creates a mesh of 1D duct cells around a square-lattice subassembly");
+  params.addClassDescription("Creates a mesh of 2D duct cells around a square-lattice subassembly");
   params.addRequiredParam<MeshGeneratorName>("input", "The corresponding subchannel mesh");
-  params.addParam<unsigned int>("block_id", 2, "Domain Index");
+  params.addParam<unsigned int>("block_id", 2, "Subdomain id for the duct mesh cells");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
   params.addRequiredParam<Real>("heated_length", "Heated length [m]");
   params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
-  params.addRequiredParam<Real>("pitch", "Pitch [m]");
-  params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
-  params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
+  params.addRangeCheckedParam<Real>("pitch", "pitch > 0", "Lattice pitch (must be positive)");
+  params.addRangeCheckedParam<unsigned int>(
+      "nx",
+      "nx > 1",
+      "Number of channels in the x direction for the subchannel assembly. Must be more than 1 to "
+      "built a duct[-]");
+  params.addRangeCheckedParam<unsigned int>(
+      "ny",
+      "ny > 1",
+      "Number of channels in the y direction for the subchannel assembly. Must be more than 1 to "
+      "built a duct[-]");
   params.addRequiredParam<Real>("side_gap",
                                 "Gap between duct wall and outer pin lattice: distance(edge pin "
                                 "center, duct wall) = pitch/2 + side_gap [m]");
@@ -50,29 +58,20 @@ SCMQuadDuctMeshGenerator::SCMQuadDuctMeshGenerator(const InputParameters & param
 {
   SubChannelMesh::generateZGrid(
       _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
-
-  if (_pitch <= 0.0)
-    mooseError(name(), ": 'pitch' must be > 0.");
-
-  if (_nx < 2 || _ny < 2)
-    mooseError(name(), ": 'nx' and 'ny' must both be >= 2.");
 }
 
 std::unique_ptr<MeshBase>
 SCMQuadDuctMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh_base = std::move(_input);
-  if (!mesh_base)
-    mooseError("SCMQuadDuctMeshGenerator has to be connected to a sub channel mesh generator.");
-
   mesh_base->set_mesh_dimension(3);
 
-  std::vector<Point> xsec;
-  ductXsec(xsec, _nx, _ny, _pitch, _side_gap);
+  std::vector<Point> cross_sec;
+  ductCrossSec(cross_sec, _nx, _ny, _pitch, _side_gap);
   std::vector<Point> points;
-  ductPoints(points, xsec, _z_grid);
+  ductPoints(points, cross_sec, _z_grid);
   std::vector<std::vector<size_t>> elem_point_indices;
-  ductElems(elem_point_indices, _z_grid.size(), xsec.size());
+  ductElems(elem_point_indices, _z_grid.size(), cross_sec.size());
   std::vector<Node *> duct_nodes;
   buildDuct(mesh_base, duct_nodes, points, elem_point_indices, _block_id);
   mesh_base->subdomain_name(_block_id) = name();
@@ -108,10 +107,13 @@ SCMQuadDuctMeshGenerator::ductCorners(std::vector<Point> & corners,
 }
 
 void
-SCMQuadDuctMeshGenerator::ductXsec(
-    std::vector<Point> & xsec, unsigned int nx, unsigned int ny, Real pitch, Real side_gap) const
+SCMQuadDuctMeshGenerator::ductCrossSec(std::vector<Point> & cross_sec,
+                                       unsigned int nx,
+                                       unsigned int ny,
+                                       Real pitch,
+                                       Real side_gap) const
 {
-  xsec.clear();
+  cross_sec.clear();
 
   const Real half_x = 0.5 * (nx - 1) * pitch + side_gap;
   const Real half_y = 0.5 * (ny - 1) * pitch + side_gap;
@@ -131,14 +133,14 @@ SCMQuadDuctMeshGenerator::ductXsec(
     else
       x = x0 + i * pitch; // aligned with subchannel x grid
 
-    xsec.emplace_back(x, -half_y, 0.0);
+    cross_sec.emplace_back(x, -half_y, 0.0);
   }
 
   // ---- Right edge (x = +half_x): (ny-2) points, bottom -> top (exclude corners) ----
   for (unsigned int j = 1; j + 1 < ny; ++j)
   {
     const Real y = y0 + j * pitch; // aligned with subchannel y grid
-    xsec.emplace_back(half_x, y, 0.0);
+    cross_sec.emplace_back(half_x, y, 0.0);
   }
 
   // ---- Top edge (y = +half_y): nx points, right -> left ----
@@ -154,7 +156,7 @@ SCMQuadDuctMeshGenerator::ductXsec(
     else
       x = x0 + ii * pitch;
 
-    xsec.emplace_back(x, half_y, 0.0);
+    cross_sec.emplace_back(x, half_y, 0.0);
   }
 
   // ---- Left edge (x = -half_x): (ny-2) points, top -> bottom (exclude corners) ----
@@ -162,7 +164,7 @@ SCMQuadDuctMeshGenerator::ductXsec(
   {
     const unsigned int jj = ny - 1 - j;
     const Real y = y0 + jj * pitch; // aligned with subchannel y grid
-    xsec.emplace_back(-half_x, y, 0.0);
+    cross_sec.emplace_back(-half_x, y, 0.0);
   }
 
   // Total points: 2*nx + 2*ny - 4
@@ -170,13 +172,14 @@ SCMQuadDuctMeshGenerator::ductXsec(
 
 void
 SCMQuadDuctMeshGenerator::ductPoints(std::vector<Point> & points,
-                                     const std::vector<Point> & xsec,
+                                     const std::vector<Point> & cross_sec,
                                      const std::vector<Real> & z_layers) const
 {
-  points.resize(xsec.size() * z_layers.size());
+  points.resize(cross_sec.size() * z_layers.size());
   for (size_t i = 0; i < z_layers.size(); i++)
-    for (size_t j = 0; j < xsec.size(); j++)
-      points[ductPointIndex(xsec.size(), i, j)] = Point(xsec[j](0), xsec[j](1), z_layers[i]);
+    for (size_t j = 0; j < cross_sec.size(); j++)
+      points[ductPointIndex(cross_sec.size(), i, j)] =
+          Point(cross_sec[j](0), cross_sec[j](1), z_layers[i]);
 }
 
 void
@@ -208,15 +211,30 @@ SCMQuadDuctMeshGenerator::buildDuct(std::unique_ptr<MeshBase> & mesh,
                                     const std::vector<std::vector<size_t>> & elem_point_indices,
                                     SubdomainID block) const
 {
+  // Create mesh nodes for all duct points and keep a local index -> Node* map
+  duct_nodes.clear();
   duct_nodes.reserve(points.size());
   for (const auto & p : points)
     duct_nodes.push_back(mesh->add_point(p));
 
+  // Create QUAD4 surface elements using libMesh factory style
   for (const auto & elem_indices : elem_point_indices)
   {
-    auto elem = mesh->add_elem(new Quad4());
+    mooseAssert(elem_indices.size() == 4,
+                "Expected 4 node indices per element when building QUAD4 elements.");
+
+    auto elem = Elem::build(ElemType::QUAD4);
     elem->subdomain_id() = block;
-    for (unsigned int i = 0; i < elem_indices.size(); i++)
-      elem->set_node(i, duct_nodes[elem_indices[i]]);
+
+    // Set the 4 nodes of the QUAD4
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+      const auto idx = elem_indices[i];
+      mooseAssert(idx < duct_nodes.size(), "Element node index out of range.");
+      elem->set_node(i, duct_nodes[idx]);
+    }
+
+    // Hand ownership to the mesh
+    mesh->add_elem(elem.release());
   }
 }
