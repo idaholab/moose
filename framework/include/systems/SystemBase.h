@@ -972,6 +972,12 @@ public:
    */
   void sizeVariableMatrixData();
 
+  /**
+   * Skip the next copy from the solution vector to the old solution vector
+   * old -> older is still performed
+   */
+  void skipNextSolutionToOldCopy() { _skip_next_solution_to_old_copy = true; }
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
@@ -1084,6 +1090,8 @@ private:
   std::array<std::vector<NumericVector<Number> *>, 3> _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
+  /// Whether to skip the next copy from the solution to the old vector
+  bool _skip_next_solution_to_old_copy;
 };
 
 inline bool

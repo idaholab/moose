@@ -448,7 +448,12 @@ ParameterStudyAction::act()
 
       // batch-keep-solution
       if (_multiapp_mode == 3)
+      {
         params.set<bool>("keep_solution_during_restore") = true;
+        // Conceptually all these runs are not 'sequential in time' (moving along a transient)
+        // but rather simply restarted from the same solution
+        params.set<bool>("update_old_solution_when_keeping_solution_during_restore") = false;
+      }
       // batch-no-restore
       else if (_multiapp_mode == 4)
         params.set<bool>("no_restore") = true;

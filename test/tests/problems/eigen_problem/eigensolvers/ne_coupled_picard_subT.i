@@ -58,9 +58,12 @@
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp
-    keep_solution_during_restore = true
     input_files = ne_coupled_picard_subT_sub.i
     execute_on = timestep_end
+    keep_solution_during_restore = true
+    # The choice does not matter here, but conceptually there is no need to override
+    # the old solution when the subapp is an Eigenvalue solve
+    update_old_solution_when_keeping_solution_during_restore = false
   [../]
 []
 

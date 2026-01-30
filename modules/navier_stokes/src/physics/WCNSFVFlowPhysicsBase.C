@@ -139,8 +139,8 @@ WCNSFVFlowPhysicsBase::WCNSFVFlowPhysicsBase(const InputParameters & parameters)
                                 ? getParam<NonlinearVariableName>("fluid_temperature_variable")
                                 : NS::T_fluid),
     _density_name(getParam<MooseFunctorName>("density")),
-    _density_gravity_name(isParamValid("density_gravity")
-                              ? getParam<MooseFunctorName>("density_gravity")
+    _density_gravity_name(isParamValid("density_for_gravity_terms")
+                              ? getParam<MooseFunctorName>("density_for_gravity_terms")
                               : getParam<MooseFunctorName>("density")),
     _dynamic_viscosity_name(getParam<MooseFunctorName>("dynamic_viscosity")),
     _include_symmetrized_viscous_stress(getParam<bool>("include_symmetrized_viscous_stress")),

@@ -82,7 +82,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _max_var_n_dofs_per_node(0),
     _automatic_scaling(false),
     _verbose(false),
-    _solution_states_initialized(false)
+    _solution_states_initialized(false),
+    _skip_next_solution_to_old_copy(false)
 {
 }
 
@@ -1289,8 +1290,9 @@ SystemBase::copyOldSolutions()
   const auto states =
       _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
-    for (unsigned int i = states - 1; i > 0; --i)
+    for (unsigned int i = states - 1; i > uint(_skip_next_solution_to_old_copy); --i)
       solutionState(i) = solutionState(i - 1);
+  _skip_next_solution_to_old_copy = false;
 
   if (solutionUDotOld())
     *solutionUDotOld() = *solutionUDot();
