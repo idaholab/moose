@@ -124,7 +124,7 @@ sigma = 5.670374419e-8
 
 [Executioner]
   type = Steady
-  solve_type = 'NEWTON'
+  solve_type = 'Linear' #'NEWTON'
   petsc_options_iname = '-energy_system_pc_type -energy_system_pc_factor_shift_type -radiation_system_pc_type -radiation_system_pc_factor_shift_type'
   petsc_options_value = 'hypre boomeramg hypre boomeramg'
   l_abs_tol = 1e-14
