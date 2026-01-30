@@ -12,8 +12,7 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds contributions from a external source term discretized using the finite volume
- * method to a linear system.
+ * Kernel that adds the contributions from the participating media radiation external source.
  */
 class LinearFVP1TemperatureSourceSink : public LinearFVElementalKernel
 {
