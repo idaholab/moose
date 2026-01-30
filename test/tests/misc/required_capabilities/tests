@@ -4,34 +4,30 @@
   [not_supported_registered]
     type = RunException
     input = input.i
-    chaco = false
-    cli_args = '--required-capabilities chaco'
-    expect_err = 'Required capabilities \'chaco\' not fulfilled\.'
+    cli_args = '--required-capabilities test_false'
+    expect_err = 'Required capabilities \'test_false\' not fulfilled\.'
     expect_exit_code = 77
     requirement = 'The system shall not start a simulation if a requested capability is registered as false.'
   []
   [negative_not_supported_registered]
     type = RunApp
     input = input.i
-    chaco = false
-    cli_args = '--required-capabilities !chaco'
+    cli_args = '--required-capabilities !test_false'
     expect_out = 'Solve Converged!'
     requirement = 'The system shall start a simulation if a capability requested to not be present is registered as false.'
   []
   [false_compare_registered]
     type = RunException
     input = input.i
-    chaco = false
-    cli_args = '--required-capabilities chaco>10'
-    expect_err = 'Required capabilities \'chaco>10\' not fulfilled\.'
+    cli_args = "--required-capabilities 'test_one & test_one>1'"
+    expect_err = 'Required capabilities \'test_one & test_one>1\' not fulfilled\.'
     expect_exit_code = 77
     requirement = 'The system shall not start a simulation if a requested capability is not registered.'
   []
   [negative_false_compare_registered]
     type = RunApp
     input = input.i
-    chaco = false
-    cli_args = '--required-capabilities !(chaco>10)'
+    cli_args = "--required-capabilities '!(test_one & test_one>1)'"
     expect_out = 'Solve Converged!'
     requirement = 'The system shall start a simulation if a capability in a negate comparison is not registered.'
   []

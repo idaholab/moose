@@ -117,6 +117,9 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
   Registry::registerObjectsTo(f, {"MooseTestApp"});
   Registry::registerActionsTo(af, {"MooseTestApp"});
 
+  addCapability("test_false", false, "Capability with a value of false for testing");
+  addCapability("test_one", "1", "Capability with a value of 1 for testing");
+
   if (use_test_objs)
   {
     auto & syntax = s; // for resiterSyntax macros

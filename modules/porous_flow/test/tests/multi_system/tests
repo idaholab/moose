@@ -9,7 +9,7 @@
                 Preconditioning/active=SMP_porous Preconditioning/SMP_porous/nl_sys=nl0"
     csvdiff = 'flow_and_mecha_out.csv'
     threading = '!pthreads'
-    method = 'opt'
+    capabilities = 'method=opt'
     requirement = "The system shall be able to use a fully coupled nonlinear system approach to solving porous media - solid mechanics coupled problems."
   []
   [multi_system_flow_mecha]

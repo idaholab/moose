@@ -1161,6 +1161,14 @@ MooseApp::registerCapabilities()
 #endif
   }
   {
+    const auto doc = "POSIX Threads API";
+#ifdef LIBMESH_HAVE_PTHREAD
+    haveCapability("pthread", doc);
+#else
+    libmeshMissingCapability("pthread", doc, "--with-thread-model=tbb,pthread,openmp,auto,none");
+#endif
+  }
+  {
     const auto doc = "oneAPI Threading Building Blocks (TBB) API";
 #ifdef LIBMESH_HAVE_TBB_API
     haveCapability("tbb", doc);
