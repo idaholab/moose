@@ -181,7 +181,7 @@ TriSubChannelMesh::pinIndex(const Point & p) const
 
   std::vector<Point> positions;
   Point center(0, 0);
-  this->rodPositions(positions, _n_rings, _pitch, center);
+  this->pinPositions(positions, _n_rings, _pitch, center);
   for (unsigned int i = 0; i < _npins; i++)
   {
     Real x_dist = positions[i](0) - p(0);
@@ -198,7 +198,7 @@ TriSubChannelMesh::pinIndex(const Point & p) const
 }
 
 void
-TriSubChannelMesh::rodPositions(std::vector<Point> & positions,
+TriSubChannelMesh::pinPositions(std::vector<Point> & positions,
                                 unsigned int nrings,
                                 Real pitch,
                                 Point center)

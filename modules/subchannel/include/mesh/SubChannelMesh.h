@@ -10,6 +10,8 @@
 #pragma once
 
 #include <vector>
+#include <utility> // std::pair
+
 #include "MooseMesh.h"
 #include "SubChannelEnums.h"
 
@@ -65,22 +67,22 @@ public:
   /**
    * Get the subchannel mesh node for a given channel index and elevation index
    */
-  virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const = 0;
+  virtual Node * getChannelNode(unsigned int i_chan, unsigned int iz) const = 0;
 
   /**
    * Get the pin mesh node for a given pin index and elevation index
    */
-  virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const = 0;
+  virtual Node * getPinNode(unsigned int i_pin, unsigned int iz) const = 0;
 
   /**
    * Function that gets the channel node from the duct node
    */
-  virtual Node * getChannelNodeFromDuct(Node * channel_node) = 0;
+  virtual Node * getChannelNodeFromDuct(Node * duct_node) const = 0;
 
   /**
    * Function that gets the duct node from the channel node
    */
-  virtual Node * getDuctNodeFromChannel(Node * channel_node) = 0;
+  virtual Node * getDuctNodeFromChannel(Node * channel_node) const = 0;
 
   /**
    * Return the number of channels per layer
@@ -199,32 +201,38 @@ protected:
   Real _heated_length;
   /// unheated length of the fuel Pin at the exit of the assembly
   Real _unheated_length_exit;
+
   /// axial location of nodes
   std::vector<Real> _z_grid;
   /// axial form loss coefficient per computational cell
   std::vector<std::vector<Real>> _k_grid;
+
   /// axial location of the spacers
   std::vector<Real> _spacer_z;
   /// form loss coefficient of the spacers
   std::vector<Real> _spacer_k;
+
   /// axial location of blockage (inlet, outlet) [m]
   std::vector<Real> _z_blockage;
   /// index of subchannels affected by blockage
   std::vector<unsigned int> _index_blockage;
   /// area reduction of subchannels affected by blockage
   std::vector<Real> _reduction_blockage;
+
   /// Lateral form loss coefficient
   Real _kij;
   /// Distance between the neighbor fuel pins, pitch
   Real _pitch;
   /// fuel Pin diameter
   Real _pin_diameter;
+
   /// number of axial cells
   unsigned int _n_cells;
 
 public:
   /// x,y coordinates of the subchannel centroids
   std::vector<std::vector<Real>> _subchannel_position;
+
   static InputParameters validParams();
 
   /**
