@@ -15,4 +15,11 @@
     block = '12'
     refinement = '1'
   []
+  # added to preserve the old gold file when all blocks were merged into block 0
+  [change_block_names]
+    type = RenameBlockGenerator
+    input = blockToMesh
+    old_block = '1 12 2 3 5 6'
+    new_block = '0 0  0 0 0 0'
+  []
 []
