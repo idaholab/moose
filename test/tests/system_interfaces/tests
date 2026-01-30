@@ -129,7 +129,7 @@
        input = input.i
        min_parallel = 2
        max_parallel = 2
-       boost = true
+       capabilities = 'boost'
 
        detail = "BOOST."
     []

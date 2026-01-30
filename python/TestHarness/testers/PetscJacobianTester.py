@@ -28,12 +28,16 @@ class PetscJacobianTester(RunApp):
         params.addParam('turn_off_exodus_output', True, "Whether to set exodus=false in Outputs")
         params.addParam('only_final_jacobian', False, "Check only final Jacobian comparison.")
 
-        # override default values
-        params.valid['valgrind'] = 'NONE'
-        params.valid['petsc_version'] = ['>=3.9.4']
-        params.valid['method'] = ['OPT']
+        # Disable with valgrind
+        params.valid["valgrind"] = "NONE"
+        # Require opt mode
+        if params["capabilities"]:
+            params["capabilities"] = "(" + params["capabilities"] + ") & "
+        params["capabilities"] += "method=opt"
+        # No recover or restep
         params['recover'] = False
         params['restep'] = False
+
         return params
 
     def __init__(self, name, params):

@@ -118,12 +118,6 @@ class RunApp(Tester):
             self.setStatus(self.skip)
             return False
 
-        if self.specs.isValid('min_threads') or self.specs.isValid('max_threads'):
-            if 'NONE' in options._checks['threading'] and self.getThreads(options) > 1:
-                self.addCaveats('threading_model=None')
-                self.setStatus(self.skip)
-                return False
-
         devices_lower = [x.lower() for x in self.specs['compute_devices']]
         if options.compute_device not in devices_lower:
             self.addCaveats(f'{options.compute_device} not in compute devices')
@@ -171,9 +165,9 @@ class RunApp(Tester):
         if self.specs['no_additional_cli_args']:
             return 1
 
-        #Set number of threads to be used lower bound
+        # Set number of threads to be used lower bound
         nthreads = max(options.nthreads, int(self.specs['min_threads']))
-        #Set number of threads to be used upper bound
+        # Set number of threads to be used upper bound
         nthreads = min(nthreads, int(self.specs['max_threads']))
 
         if nthreads > options.nthreads:
