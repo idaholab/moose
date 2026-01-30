@@ -854,6 +854,7 @@ class Tester(MooseObject, OutputInterface):
                     [options.valgrind_mode.lower(), "Performing valgrind testing"],
                 )
             augment("recover", [options.enable_recover, "Recover testing"])
+            augment("restep", [options.enable_restep, "Restep testing"])
             augment(
                 "heavy",
                 [options.all_tests or options.heavy_tests, "Running with heavy tests"],
