@@ -67,6 +67,8 @@ advected_interp_method = 'upwind'
     paired_block = 'salt'
     new_boundary = interface
   []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
