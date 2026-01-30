@@ -28,8 +28,6 @@ class RunException(RunApp):
 
         # By default, should expect exit code 1
         params["expect_exit_code"] = 1
-        # Set deprecated value for consistency, see #32257
-        params["should_crash"] = True
 
         return params
 
