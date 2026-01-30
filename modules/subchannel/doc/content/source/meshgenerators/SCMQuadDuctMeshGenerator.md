@@ -6,9 +6,7 @@
 
 !! Intentional comment to provide extra spacing
 
-This mesh generator creates the mesh were the variables associated with the duct live.
-
-## Example Input File Syntax
+This mesh generator creates the mesh (Quad4) where the variables associated with the duct live.
 
 !syntax parameters /Mesh/SCMQuadDuctMeshGenerator
 

@@ -140,29 +140,39 @@ QuadSubChannelMesh::generatePinCenters(
 void
 QuadSubChannelMesh::setChannelToDuctMaps(const std::vector<Node *> & duct_nodes)
 {
+  // Tolerance for matching axial (z) coordinates
   const Real tol = 1e-10;
 
+  // Clear any existing duct to channel mappings
   _duct_nodes.clear();
   _chan_to_duct_node_map.clear();
   _duct_node_to_chan_map.clear();
 
+  // Loop over all duct wall nodes
   for (size_t i = 0; i < duct_nodes.size(); i++)
   {
+    // Identify the subchannel whose x,y center is closest to this duct node
     int min_chan = 0;
     Real min_dist = std::numeric_limits<double>::max();
+
+    // Duct node position projected into the x_y plane
     Point ductpos((*duct_nodes[i])(0), (*duct_nodes[i])(1), 0.0);
 
     for (size_t j = 0; j < _subchannel_position.size(); j++)
     {
+      // Subchannel center position in the x_y plane
       Point chanpos(_subchannel_position[j][0], _subchannel_position[j][1], 0.0);
+
       const Real dist = (chanpos - ductpos).norm();
       if (dist < min_dist)
       {
         min_dist = dist;
-        min_chan = static_cast<int>(j);
+        min_chan = static_cast<unsigned int>(j);
       }
     }
 
+    // Within the selected subchannel, find the channel node
+    // that lies at the same axial (z) location as the duct node
     Node * chan_node = nullptr;
     for (auto cn : _nodes[min_chan])
     {
@@ -173,13 +183,30 @@ QuadSubChannelMesh::setChannelToDuctMaps(const std::vector<Node *> & duct_nodes)
       }
     }
 
+    // Fail if no matching channel node was found at this z-level
     if (chan_node == nullptr)
       mooseError("failed to find matching channel node for duct node");
 
+    // Store bidirectional mapping between duct and channel nodes
     _duct_node_to_chan_map[duct_nodes[i]] = chan_node;
     _chan_to_duct_node_map[chan_node] = duct_nodes[i];
   }
 
+  // Cache the duct nodes and mark the duct mesh as available
   _duct_nodes = duct_nodes;
   _duct_mesh_exist = true;
+}
+
+Node *
+QuadSubChannelMesh::getDuctNodeFromChannel(Node * channel_node) const
+{
+  auto it = _chan_to_duct_node_map.find(channel_node);
+  return (it == _chan_to_duct_node_map.end()) ? nullptr : it->second;
+}
+
+Node *
+QuadSubChannelMesh::getChannelNodeFromDuct(Node * duct_node) const
+{
+  auto it = _duct_node_to_chan_map.find(duct_node);
+  return (it == _duct_node_to_chan_map.end()) ? nullptr : it->second;
 }

@@ -81,7 +81,7 @@ SCMDetailedTriSubChannelMeshGenerator::SCMDetailedTriSubChannelMeshGenerator(
   Real dist0 = 0.0;
   // the indicator used while setting _gap_to_chan_map array
   std::vector<std::pair<unsigned int, unsigned int>> gap_fill;
-  TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
+  TriSubChannelMesh::pinPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
   _nrods = _pin_position.size();
   // assign the pins to the corresponding rings
   unsigned int k = 0; // initialize the fuel Pin counter index

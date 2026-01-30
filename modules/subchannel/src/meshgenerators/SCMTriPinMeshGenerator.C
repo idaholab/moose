@@ -62,7 +62,7 @@ SCMTriPinMeshGenerator::generate()
   mesh_base->set_mesh_dimension(3);
 
   // Defining the Pin positions
-  TriSubChannelMesh::rodPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
+  TriSubChannelMesh::pinPositions(_pin_position, _n_rings, _pitch, Point(0, 0));
   auto _nrods = _pin_position.size();
 
   // Reserving memory in the mesh
