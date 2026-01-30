@@ -15,7 +15,16 @@ timed will be reported.
 ## Install Google's gperftools
 
 If your environment package from the MOOSE installation process has included Google's gperftools,
-you can skip this step.
+you can skip this step. Note that our build recommendations are different depending on whether you
+are mostly interested in CPU vs memory profiling. For the former we recommend using libunwind for
+tracing stacks because it can burrow into libraries which were built without frame pointers enabled,
+giving a more complete picture of program execution. However, for memory profiling we have noted
+an order of magnitude increase in runtime when using libunwind for stack tracking compared to using
+frame pointers.
+
+
+### gperftools installation targeting CPU profiling
+
 To install Google's gperftools on your own, perform the commands:
 
 ```
@@ -23,49 +32,24 @@ cd $HOME
 git clone git@github.com:gperftools/gperftools.git
 cd gperftools
 ./autogen.sh
-./configure --prefix=$PWD/installed --enable-frame-pointers
+./configure --prefix=$PWD/installed --enable-libunwind
 make -j$MOOSE_JOBS
 make install
 ```
 
-The configuration option +--enable-frame-pointers+ is important for not
-degrading the performance when +gperftools+ is linked and profiling is
-turned on in calculations. It is important to note that if libunwind is linked
-into gperftools, then libunwind will be used to unwind stacktraces, which in our
-experience, is orders of magnitude slower than the builtin stack-unwinding capability
-of gperftools, at least when performing memory profiling.
-[This page](https://github.com/gperftools/gperftools/blob/master/INSTALL) has more explanations about this option.
 After this, gperftools is installed under +$HOME/gperftools/installed+ that you can let the environmental variable +GPERF_DIR+ point to.
 You could install gperftools in a different folder if desired.
-When compiling PETSc, you will need to add two configuration options to make use of this
 
-```
-cd moose
-scripts/update_and_rebuild_petsc.sh --CFLAGS=-fno-omit-frame-pointer --CXX_CXXFLAGS=-fno-omit-frame-pointer
-```
-
-libMesh automatically adds `-fno-omit-frame-pointer` to `METHOD=oprof` builds. However, if you want
-to do profiling with other methods (e.g. `opt`, which will not give line number information), both
-libMesh and MOOSE should be built with `CXXFLAGS=-fno-omit-frame-pointer`. (On a related node, MOOSE
+When building libMesh, ensure that the `METHODS` environment variable is either empty
+(in which case the script will build `opt`, `oprof`, `devel`, and `dbg` methods), or that `METHODS`
+contains `oprof` (or not if you wish to profile with another method like `opt`; just know in that
+case that you will not have line information due to missing `-g` from the compiler flags). Note that MOOSE
 will error if the user attempts to compile with either `METHOD=devel` or `METHOD=dbg` and with a
 non-empty `GPERF_DIR` as those methods add assertions that will make the resulting profiles
-misleading). When building libMesh, ensure that the `METHODS` environment variable is either empty
-(in which case the script will build `opt`, `oprof`, `devel`, and `dbg` methods), or that `METHODS`
-contains `oprof` (or not if you wish to profile with another method and have specified
-`CXXFLAGS=-fno-omit-frame-pointer`).
+misleading.
 
-```
-scripts/update_and_rebuild_libmesh.sh
-```
-
-WASP must also be built:
-
-```
-scripts/update_and_rebuild_wasp.sh
-```
-
-Finally, when building MOOSE, you set the GPERF_DIR environment variable to the location of a
-gperftools installation (i.e. $GPERF_DIR/lib/libprofiler.so should exist).  Then you compile MOOSE
+When building MOOSE, you must set the GPERF_DIR environment variable to the location of a
+gperftools installation (i.e. $GPERF_DIR/lib/libprofiler.so should exist). Then you compile MOOSE
 like normal - it should look something like this:
 
 ```
@@ -89,6 +73,34 @@ go install github.com/google/pprof@latest
 ```
 
 and then ensure that `$GOPATH/bin` (by default `$HOME/go/bin`) is in your `PATH` variable.
+
+### gperftools installation targeting memory profiling
+
+For memory profiling we suggest building gperftools slightly differently as we noted earlier that
+we've observed substantially increased run-time when doing memory profiling with gperftools relying
+on libunwind.
+
+```
+cd $HOME
+git clone git@github.com:gperftools/gperftools.git
+cd gperftools
+./autogen.sh
+./configure --prefix=$PWD/installed --enable-frame-pointers
+make -j$MOOSE_JOBS
+make install
+```
+
+Since stack unwinding will rely on using frame pointers, when compiling PETSc, you will need to add
+two configuration options for frame pointer support
+
+```
+cd moose
+scripts/update_and_rebuild_petsc.sh --CFLAGS=-fno-omit-frame-pointer --CXX_CXXFLAGS=-fno-omit-frame-pointer
+```
+
+libMesh automatically adds `-fno-omit-frame-pointer` to `METHOD=oprof` builds. However, if you want
+to do profiling with other methods like `opt`, both
+libMesh and MOOSE should be built with `CXXFLAGS=-fno-omit-frame-pointer`.
 
 ### CPU Profiling
 
