@@ -273,8 +273,8 @@ bool
 CSGRegion::operator==(const CSGRegion & other) const
 {
   const bool region_type_eq = this->getRegionType() == other.getRegionType();
-  const bool region_str_eq = this->toInfixString() == other.toInfixString();
-  if (region_type_eq && region_str_eq)
+  const bool region_eq = this->toPostfixStringList() == other.toPostfixStringList();
+  if (region_type_eq && region_eq)
   {
     const auto & all_surfs = getSurfaces();
     const auto & other_surfs = other.getSurfaces();
