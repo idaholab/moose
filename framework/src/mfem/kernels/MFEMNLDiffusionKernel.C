@@ -19,9 +19,9 @@ MFEMNLDiffusionKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("Adds the domain integrator for integrating the non-linear action"
-                             "$(k(u)\\vec\\nabla v, \\vec\\nabla v)_\Omega$"
+                             "$(k(u)\\vec\\nabla v, \\vec\\nabla v)_\\Omega$"
                              "Adds the domain integrator to an MFEM problem for the bilinear form "
-                             "$((k(u)\\vec\\nabla v, \\vec\\nabla v)_\Omega + (k'(u) v, "
+                             "$(k(u)\\vec\\nable v, \\vec\\nabla v)_\\Omega + (k'(u) v, "
                              "\\vec\\nabla u \\vec\\nabla v)_\\Omega$ "
                              "The above terms arises from the weak form of the non-linear operator "
                              "$- \\vec\\nabla \\cdot ( k(u) \\vec\\nabla u)$.");
