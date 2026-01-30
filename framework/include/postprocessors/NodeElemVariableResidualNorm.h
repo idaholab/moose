@@ -12,29 +12,16 @@
 #include "VariableResidualNormBase.h"
 
 /**
- * Computes a discrete norm for a block-restricted variable residual.
+ * Computes the residual norm (absolute value) of a NodeElem residual for a variable.
  */
-class DiscreteVariableResidualNorm : public VariableResidualNormBase
+class NodeElemVariableResidualNorm : public VariableResidualNormBase
 {
 public:
   static InputParameters validParams();
 
-  /// Type of discrete norm
-  enum class NormType
-  {
-    l_1 = 0,
-    l_2 = 1,
-    l_inf = 2
-  };
-
-  DiscreteVariableResidualNorm(const InputParameters & parameters);
+  NodeElemVariableResidualNorm(const InputParameters & parameters);
 
 protected:
   virtual std::vector<dof_id_type> getCurrentElemDofIndices() const override;
   virtual void computeNorm() override;
-
-  /// Type of norm to compute
-  const NormType _norm_type;
-  /// If true, correct mesh-size bias in norm
-  const bool _correct_mesh_bias;
 };

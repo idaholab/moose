@@ -93,7 +93,6 @@
   start_time = 0
   dt = 0.01
   num_steps = 5
-  abort_on_solve_fail = true
 
   solve_type = 'PJFNK'
   line_search = 'basic'
