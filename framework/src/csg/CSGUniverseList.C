@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGUniverseList.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -50,6 +51,7 @@ CSGUniverse &
 CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> universe)
 {
   auto name = universe->getName();
+  CSGUtils::checkValidCSGName(name);
   auto [it, inserted] = _universes.emplace(name, std::move(universe));
   if (!inserted)
     mooseError("Universe with name " + name + " already exists in geometry.");

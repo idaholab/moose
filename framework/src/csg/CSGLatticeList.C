@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGLatticeList.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -37,6 +38,7 @@ CSGLattice &
 CSGLatticeList::addLattice(std::unique_ptr<CSGLattice> lattice)
 {
   auto name = lattice->getName();
+  CSGUtils::checkValidCSGName(name);
   auto [it, inserted] = _lattices.emplace(name, std::move(lattice));
   if (!inserted)
     mooseError("Lattice with name " + name + " already exists in geometry.");

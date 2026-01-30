@@ -93,13 +93,6 @@ protected:
   CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf);
 
   /**
-   * @brief check surface name for disallowed characters and symbols
-   *
-   * @param name name of surface to check
-   */
-  void checkValidSurfaceName(const std::string & name) const;
-
-  /**
    * @brief rename the specified surface
    *
    * @param name new name of surface

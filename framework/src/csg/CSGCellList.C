@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGCellList.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -18,6 +19,7 @@ CSGCell &
 CSGCellList::addCell(std::unique_ptr<CSGCell> cell)
 {
   auto name = cell->getName();
+  CSGUtils::checkValidCSGName(name);
   auto [it, inserted] = _cells.emplace(name, std::move(cell));
   if (!inserted)
     mooseError("Cell with name " + name + " already exists in geometry.");

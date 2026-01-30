@@ -67,7 +67,7 @@ TEST(CSGBaseTest, testGetAllSurfaces)
   ASSERT_EQ(2, all_surfs.size());
 }
 
-/// tests CSGSurfaceList::checkValidSurfaceName
+/// tests CSGUtils::checkValidCSGName
 TEST(CSGBaseTest, testValidSurfaceName)
 {
   // initialize a CSGBase object
@@ -84,32 +84,32 @@ TEST(CSGBaseTest, testValidSurfaceName)
   {
     Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr1]()
                                    { csg_obj->addSurface(std::move(surf_ptr1)); },
-                                   "Detected whitespace in surface name");
+                                   "Detected whitespace in CSG component");
   }
   {
     Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr2]()
                                    { csg_obj->addSurface(std::move(surf_ptr2)); },
-                                   "Invalid symbol in surface name");
+                                   "Invalid symbol in CSG component");
   }
   {
     Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr3]()
                                    { csg_obj->addSurface(std::move(surf_ptr3)); },
-                                   "Invalid symbol in surface name");
+                                   "Invalid symbol in CSG component");
   }
   {
     Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr4]()
                                    { csg_obj->addSurface(std::move(surf_ptr4)); },
-                                   "Invalid symbol in surface name");
+                                   "Invalid symbol in CSG component");
   }
   {
     Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr5]()
                                    { csg_obj->addSurface(std::move(surf_ptr5)); },
-                                   "Invalid symbol in surface name");
+                                   "Invalid symbol in CSG component");
   }
   {
     Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr6]()
                                    { csg_obj->addSurface(std::move(surf_ptr6)); },
-                                   "Invalid symbol in surface name");
+                                   "Invalid symbol in CSG component");
   }
 }
 
