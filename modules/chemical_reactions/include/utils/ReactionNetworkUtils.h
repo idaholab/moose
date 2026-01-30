@@ -54,11 +54,13 @@ struct Reaction
   std::vector<VariableName> getUniqueSpecies() const;
 
   /// Get the stoeichiometric coefficients for each species in the reaction
+  /// The sign used matches the sign in the reaction equation.
   std::vector<Real> getStoichiometricCoefficients() const;
   /// Get the stoeichiometric coefficients for each unique species in the reaction
   /// Note: if a species is both a reactant and a product,
-  /// the coefficient will be the difference between its reactant and product coefficients
-  /// Note: this means all products' coefficients are negative, unlike in getStoichiometricCoefficients()
+  /// the coefficient will be the difference between its product and reactor coefficients
+  /// Note: this means all coefficients for reactants that are not products are negative,
+  /// unlike in getStoichiometricCoefficients()
   std::map<VariableName, Real> getUniqueStoichiometricCoefficients() const;
 
   /// Get all reactant species involved in the reaction (on LHS)

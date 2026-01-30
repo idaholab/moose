@@ -188,8 +188,8 @@ TEST(ReactionNetworkParserUtilsTest, non_unique_species)
   EXPECT_EQ(reaction.getStoichiometricCoefficients()[0], 1);
   EXPECT_EQ(reaction.getStoichiometricCoefficients()[1], -1);
   EXPECT_EQ(reaction.getStoichiometricCoefficients()[3], -1);
-  EXPECT_EQ(reaction.getUniqueStoichiometricCoefficients()["A"], 1);
-  EXPECT_EQ(reaction.getUniqueStoichiometricCoefficients()["B"], 1);
+  EXPECT_EQ(reaction.getUniqueStoichiometricCoefficients()["A"], -1);
+  EXPECT_EQ(reaction.getUniqueStoichiometricCoefficients()["B"], -1);
   EXPECT_EQ(reaction.hasMetaData("this"), false);
   auto reaction2 = reactions[1];
   EXPECT_EQ(reaction2.getSpecies()[0], "D(aq)");
@@ -212,10 +212,10 @@ TEST(ReactionNetworkParserUtilsTest, non_unique_species)
   EXPECT_EQ(reaction2.getStoichiometricCoefficients()[2], 1);
   EXPECT_EQ(reaction2.getStoichiometricCoefficients()[3], 2.1);
   EXPECT_EQ(reaction2.getStoichiometricCoefficients()[4], -1.1);
-  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["D(aq)"], 1);
-  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["E+"], 1);
-  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["F"], -3.1);
-  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["G"], 1.1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["D(aq)"], -1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["E+"], -1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["F"], 3.1);
+  EXPECT_EQ(reaction2.getUniqueStoichiometricCoefficients()["G"], -1.1);
   EXPECT_EQ(reaction2.hasMetaData("this"), false);
 }
 
