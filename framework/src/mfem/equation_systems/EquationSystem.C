@@ -53,13 +53,14 @@ EquationSystem::SetTrialVariableNames()
 {
   // If a coupled variable has an equation associated with it,
   // add it to the set of trial variables.
+  for (const auto & test_var_name : _test_var_names)
+    if (VectorContainsName(_coupled_var_names, test_var_name))
+      _trial_var_names.push_back(test_var_name);
+
+  // Otherwise, add it to the set of eliminated variables.
   for (const auto & coupled_var_name : _coupled_var_names)
-  {
-    if (VectorContainsName(_test_var_names, coupled_var_name))
-      _trial_var_names.push_back(coupled_var_name);
-    else
+    if (!VectorContainsName(_test_var_names, coupled_var_name))
       _eliminated_var_names.push_back(coupled_var_name);
-  }
 }
 
 void
