@@ -27,7 +27,7 @@ setupRegions()
   auto region1 = -sphere;
   auto region2 = +sphere;
   std::string reg_str_infix = "-sphere_surf";
-  std::vector<std::string> reg_str_postfix{"sphere_surf", "halfspace::NEGATIVE"};
+  std::vector<std::string> reg_str_postfix{"sphere_surf", "-"};
   return std::make_tuple(region1, region2, reg_str_infix, reg_str_postfix);
 }
 

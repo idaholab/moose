@@ -147,7 +147,7 @@ CSGRegion::toInfixString() const
       else
       {
         const auto region = std::get<RegionType>(token);
-        const auto symbol = regionSymbol(region);
+        const std::string symbol{regionSymbol(region)};
         if (region == RegionType::COMPLEMENT)
         {
           region_string = postfix_stack.top();
@@ -193,7 +193,7 @@ CSGRegion::postfixTokenToString(const PostfixTokenVariant & token) const
 {
   // Lambda function to return all variant types as strings
   return std::visit(
-      [this](auto && arg) -> std::string
+      [](auto && arg) -> std::string
       {
         using T = std::decay_t<decltype(arg)>;
         if constexpr (std::is_same_v<T, std::reference_wrapper<const CSGSurface>>)

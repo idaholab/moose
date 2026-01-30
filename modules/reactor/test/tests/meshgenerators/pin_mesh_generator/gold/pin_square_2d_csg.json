@@ -6,7 +6,7 @@
       "region_infix": "-pin1_radial_ring_0",
       "region_postfix": [
         "pin1_radial_ring_0",
-        "halfspace::NEGATIVE"
+        "-"
       ]
     },
     "pin1_cell_radial_1": {
@@ -15,11 +15,11 @@
       "region_infix": "(-pin1_radial_ring_1 & ~(-pin1_radial_ring_0))",
       "region_postfix": [
         "pin1_radial_ring_1",
-        "halfspace::NEGATIVE",
+        "-",
         "pin1_radial_ring_0",
-        "halfspace::NEGATIVE",
-        "regionOperator::COMPLEMENT",
-        "regionOperator::INTERSECTION"
+        "-",
+        "~",
+        "&"
       ]
     },
     "pin1_cell_radial_2": {
@@ -28,11 +28,11 @@
       "region_infix": "(-pin1_radial_ring_2 & ~(-pin1_radial_ring_1))",
       "region_postfix": [
         "pin1_radial_ring_2",
-        "halfspace::NEGATIVE",
+        "-",
         "pin1_radial_ring_1",
-        "halfspace::NEGATIVE",
-        "regionOperator::COMPLEMENT",
-        "regionOperator::INTERSECTION"
+        "-",
+        "~",
+        "&"
       ]
     },
     "pin1_cell_radial_3": {
@@ -42,20 +42,20 @@
           "((+pin1_radial_duct_3_surf_0 & +pin1_radial_duct_3_surf_1 & +pin1_radial_duct_3_surf_2 & +pin1_radial_duct_3_surf_3) & ~(-pin1_radial_ring_2))",
       "region_postfix": [
         "pin1_radial_duct_3_surf_0",
-        "halfspace::POSITIVE",
+        "+",
         "pin1_radial_duct_3_surf_1",
-        "halfspace::POSITIVE",
-        "regionOperator::INTERSECTION",
+        "+",
+        "&",
         "pin1_radial_duct_3_surf_2",
-        "halfspace::POSITIVE",
-        "regionOperator::INTERSECTION",
+        "+",
+        "&",
         "pin1_radial_duct_3_surf_3",
-        "halfspace::POSITIVE",
-        "regionOperator::INTERSECTION",
+        "+",
+        "&",
         "pin1_radial_ring_2",
-        "halfspace::NEGATIVE",
-        "regionOperator::COMPLEMENT",
-        "regionOperator::INTERSECTION"
+        "-",
+        "~",
+        "&"
       ]
     },
     "pin1_void_cell": {
@@ -65,17 +65,17 @@
           "~(+pin1_radial_duct_3_surf_0 & +pin1_radial_duct_3_surf_1 & +pin1_radial_duct_3_surf_2 & +pin1_radial_duct_3_surf_3)",
       "region_postfix": [
         "pin1_radial_duct_3_surf_0",
-        "halfspace::POSITIVE",
+        "+",
         "pin1_radial_duct_3_surf_1",
-        "halfspace::POSITIVE",
-        "regionOperator::INTERSECTION",
+        "+",
+        "&",
         "pin1_radial_duct_3_surf_2",
-        "halfspace::POSITIVE",
-        "regionOperator::INTERSECTION",
+        "+",
+        "&",
         "pin1_radial_duct_3_surf_3",
-        "halfspace::POSITIVE",
-        "regionOperator::INTERSECTION",
-        "regionOperator::COMPLEMENT"
+        "+",
+        "&",
+        "~"
       ]
     }
   },
