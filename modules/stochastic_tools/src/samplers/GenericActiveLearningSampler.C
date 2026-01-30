@@ -69,10 +69,11 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
 
 void
 GenericActiveLearningSampler::fillVector(std::vector<Real> & vector,
-                                         const unsigned int & seed_value)
+                                         const unsigned int & seed_value,
+                                         std::size_t & rn_ind)
 {
   for (unsigned int i = 0; i < _distributions.size(); ++i)
-    vector[i] = _distributions[i]->quantile(getRand(seed_value));
+    vector[i] = _distributions[i]->quantile(getRandStateless(rn_ind++, seed_value));
 }
 
 const std::vector<std::vector<Real>> &
@@ -90,10 +91,11 @@ GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 
   /* If step is 1, randomly generate the samples.
   Else, generate the samples informed by the GP from the reporter "sorted_indices" */
+  std::size_t rn_ind = 0;
   for (dof_id_type i = 0; i < _num_parallel_proposals; ++i)
   {
     if (_t_step <= 1)
-      fillVector(_new_samples[i], _t_step);
+      fillVector(_new_samples[i], _t_step, rn_ind);
     else
       _new_samples[i] = _inputs_all[_sorted_indices[i]];
   }
@@ -101,7 +103,7 @@ GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   /* Finally, generate several new samples randomly for the GP to try and pass it to the
   reporter */
   for (dof_id_type i = 0; i < _num_tries; ++i)
-    fillVector(_inputs_all[i], _t_step);
+    fillVector(_inputs_all[i], _t_step, rn_ind);
 }
 
 Real

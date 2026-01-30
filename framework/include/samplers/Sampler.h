@@ -20,6 +20,7 @@
 #include "MultiApp.h"
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
+#include "MooseRandomStateless.h"
 
 /**
  * This is the base class for Samplers as used within the Stochastic Tools module.
@@ -195,6 +196,32 @@ protected:
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
   /**
+   * Return the n-th random number from the stateless generator for a given seed index.
+   * @param n Zero-based index into the stateless random sequence
+   * @param index The stateless generator index (seed), defaults to zero
+   */
+  Real getRandStateless(std::size_t n, unsigned int index = 0) const;
+
+  /**
+   * Return the n-th bounded integer random number from the stateless generator.
+   * @param n Zero-based index into the stateless random sequence
+   * @param lower Lower bound (inclusive)
+   * @param upper Upper bound (exclusive)
+   * @param index The stateless generator index (seed), defaults to zero
+   */
+  unsigned int getRandlStateless(std::size_t n,
+                                 unsigned int lower,
+                                 unsigned int upper,
+                                 unsigned int index = 0) const;
+
+  /**
+   * Advance the stateless generator by a fixed count.
+   * @param index The stateless generator index (seed)
+   * @param count Number of RNG calls to skip
+   */
+  void advanceStatelessGenerator(unsigned int index, std::size_t count);
+
+  /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
    * @param col_index The column index of sample value to compute.
@@ -332,6 +359,7 @@ private:
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
+  std::vector<std::unique_ptr<MooseRandomStateless>> _generators_stateless;
 
   /// Number of rows for this processor
   dof_id_type _n_local_rows;

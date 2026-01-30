@@ -12,6 +12,7 @@
 #include "Sampler.h"
 #include "TransientInterface.h"
 #include "Distribution.h"
+#include <cstddef>
 
 /**
  * A base class used to perform Parallel Markov Chain Monte Carlo (MCMC) sampling
@@ -76,8 +77,9 @@ protected:
   /**
    * Fill in the _new_samples vector of vectors (happens within sampleSetUp)
    * @param seed_value The seed for the random number generator
+   * @param rn_ind The stateless RNG index to advance
    */
-  virtual void proposeSamples(const unsigned int seed_value);
+  virtual void proposeSamples(const unsigned int seed_value, std::size_t & rn_ind);
 
   // See Sampler.h for description
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
@@ -90,11 +92,13 @@ protected:
    * @param upper_bound The upper bound provided
    * @param exclude The index to be excluded from sampling
    * @param seed The seed of the random number generator
+   * @param rn_ind The stateless RNG index to advance
    * @param req_index The required index to be filled
    */
   void randomIndex(const unsigned int & upper_bound,
                    const unsigned int & exclude,
                    const unsigned int & seed,
+                   std::size_t & rn_ind,
                    unsigned int & req_index);
 
   /**
@@ -102,12 +106,14 @@ protected:
    * @param upper_bound The upper bound provided
    * @param exclude The index to be excluded from sampling
    * @param seed The seed of the random number generator
+   * @param rn_ind The stateless RNG index to advance
    * @param req_index1 The required index 1 to be filled
    * @param req_index2 The required index 2 to be filled
    */
   void randomIndexPair(const unsigned int & upper_bound,
                        const unsigned int & exclude,
                        const unsigned int & seed,
+                       std::size_t & rn_ind,
                        unsigned int & req_index1,
                        unsigned int & req_index2);
 

@@ -39,10 +39,11 @@ BayesianActiveLearningSampler::BayesianActiveLearningSampler(const InputParamete
 
 void
 BayesianActiveLearningSampler::fillVector(std::vector<Real> & vector,
-                                          const unsigned int & seed_value)
+                                          const unsigned int & seed_value,
+                                          std::size_t & rn_ind)
 {
   for (unsigned int i = 0; i < _priors.size(); ++i)
-    vector[i] = _priors[i]->quantile(getRand(seed_value));
+    vector[i] = _priors[i]->quantile(getRandStateless(rn_ind++, seed_value));
 }
 
 const std::vector<std::vector<Real>> &
@@ -58,7 +59,7 @@ BayesianActiveLearningSampler::getVarSampleTries() const
 }
 
 void
-BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
+BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value, std::size_t & rn_ind)
 {
   /* If step is 1, randomly generate the samples.
   Else, generate the samples informed by the GP from the reporter "sorted_indices" */
@@ -66,9 +67,9 @@ BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
   {
     if (_t_step <= 1)
     {
-      fillVector(_new_samples[i], seed_value);
+      fillVector(_new_samples[i], seed_value, rn_ind);
       if (_var_prior)
-        _new_var_samples[i] = _var_prior->quantile(getRand(seed_value));
+        _new_var_samples[i] = _var_prior->quantile(getRandStateless(rn_ind++, seed_value));
     }
     else
     {
@@ -82,8 +83,8 @@ BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
   reporter */
   for (dof_id_type i = 0; i < _num_tries; ++i)
   {
-    fillVector(_inputs_test[i], seed_value);
+    fillVector(_inputs_test[i], seed_value, rn_ind);
     if (_var_prior)
-      _var_test[i] = _var_prior->quantile(getRand(seed_value));
+      _var_test[i] = _var_prior->quantile(getRandStateless(rn_ind++, seed_value));
   }
 }
