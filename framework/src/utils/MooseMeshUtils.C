@@ -832,6 +832,9 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
       // make a deep copy so that mutiple meshes' destructors don't segfault at program termination
       auto copy = elem->build(elem->type());
 
+      // Keep the subdomain id
+      copy->subdomain_id() = elem->subdomain_id();
+
       // index of node in the copy element must be managed manually as there is no intelligent
       // insert method
       dof_id_type copy_n_index = 0;
