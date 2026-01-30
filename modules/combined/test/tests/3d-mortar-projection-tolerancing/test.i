@@ -193,7 +193,7 @@ thermal_expansion_coeff = 6.66e-6
     cylinder_axis_point_1 = '0 0 0'
     cylinder_axis_point_2 = '0 0 1'
     use_displaced_mesh = true
-    quadrature = SECOND
+    polynomial_basis_order_for_integration = SECOND
   []
 []
 
