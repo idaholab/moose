@@ -4,7 +4,6 @@
     input = 'coarse.i'
     csvdiff = 'coarse_csv_xmass_0011.csv'
     abs_zero = 1E-7
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a coarse mesh in 2D'
@@ -16,7 +15,6 @@
     input = 'coarse_3D.i'
     csvdiff = 'coarse_3D_csv_xmass_0021.csv'
     abs_zero = 1E-7
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a coarse mesh in 3D'
@@ -28,7 +26,6 @@
     exodiff = 'fine_steady_out.e'
     abs_zero = 1E-7
     max_parallel = 1 # without the influence of a time derivative, MOOSE believes the porepressure in the ultra-low permeability matrix can be almost anything: the residual are swamped by the residuals in the fracture
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
@@ -41,7 +38,6 @@
     cli_args = 'Executioner/end_time=0.02'
     prereq = fine_steady
     abs_zero = 1E-7
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a fracture embedded in a porous matrix, using a fine mesh'
@@ -53,7 +49,6 @@
     exodiff = 'fine_thick_fracture_steady_out.e'
     abs_zero = 1E-7
     max_parallel = 1 # without the influence of a time derivative, MOOSE believes the porepressure in the ultra-low permeability matrix can be almost anything: the residual are swamped by the residuals in the fracture
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to find the steady-state solution for flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
@@ -66,7 +61,6 @@
     cli_args = 'Executioner/end_time=0.02'
     prereq = fine_thick_fracture_steady
     abs_zero = 1E-7
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'PorousFlow shall be able to simulate flow and solute transport along a finite-sized fracture embedded in a porous matrix, using a fine mesh'
@@ -76,7 +70,6 @@
     input = 'diffusion.i'
     exodiff = 'diffusion_out.e'
     abs_zero = 1E-5
-    threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
     requirement = 'The system shall be able to simulate diffusion along fracture embedded in a porous matrix'

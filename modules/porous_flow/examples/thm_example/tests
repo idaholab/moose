@@ -7,7 +7,6 @@
     abs_zero = 1E-4
     heavy = true
     max_time = 1000
-    threading = '!pthreads'
     issues = '#11110'
     design = 'thm_example.md'
     requirement = 'An example of a 2-phase THM benchmark problem shall be demonstrated in PorousFlow'
@@ -20,7 +19,6 @@
     abs_zero = 1E-4
     heavy = true
     max_time = 1000
-    threading = '!pthreads'
     issues = '#15922'
     design = 'thmc_example.md'
     requirement = 'An example of a 2-phase THMC problem shall be demonstrated in PorousFlow'
