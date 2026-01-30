@@ -67,52 +67,6 @@ TEST(CSGBaseTest, testGetAllSurfaces)
   ASSERT_EQ(2, all_surfs.size());
 }
 
-/// tests CSGUtils::checkValidCSGName
-TEST(CSGBaseTest, testValidSurfaceName)
-{
-  // initialize a CSGBase object
-  auto csg_obj = std::make_unique<CSG::CSGBase>();
-  // make two surfaces with invalid names
-  std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("surf ", 1.0);
-  std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("-surf", 1.0);
-  std::unique_ptr<CSG::CSGSphere> surf_ptr3 = std::make_unique<CSG::CSGSphere>("s+urf", 1.0);
-  std::unique_ptr<CSG::CSGSphere> surf_ptr4 = std::make_unique<CSG::CSGSphere>("su~rf", 1.0);
-  std::unique_ptr<CSG::CSGSphere> surf_ptr5 = std::make_unique<CSG::CSGSphere>("sur&f", 1.0);
-  std::unique_ptr<CSG::CSGSphere> surf_ptr6 = std::make_unique<CSG::CSGSphere>("surf|", 1.0);
-
-  // error should be raised when adding these six surfaces to csg_obj
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr1]()
-                                   { csg_obj->addSurface(std::move(surf_ptr1)); },
-                                   "Detected whitespace in CSG component");
-  }
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr2]()
-                                   { csg_obj->addSurface(std::move(surf_ptr2)); },
-                                   "Invalid symbol in CSG component");
-  }
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr3]()
-                                   { csg_obj->addSurface(std::move(surf_ptr3)); },
-                                   "Invalid symbol in CSG component");
-  }
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr4]()
-                                   { csg_obj->addSurface(std::move(surf_ptr4)); },
-                                   "Invalid symbol in CSG component");
-  }
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr5]()
-                                   { csg_obj->addSurface(std::move(surf_ptr5)); },
-                                   "Invalid symbol in CSG component");
-  }
-  {
-    Moose::UnitUtils::assertThrows([&csg_obj, &surf_ptr6]()
-                                   { csg_obj->addSurface(std::move(surf_ptr6)); },
-                                   "Invalid symbol in CSG component");
-  }
-}
-
 /// tests CSG[Base/SurfaceList]::renameSurface
 TEST(CSGBaseTest, testRenameSurface)
 {

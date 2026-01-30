@@ -13,7 +13,6 @@
 #include "CSGXCylinder.h"
 #include "CSGYCylinder.h"
 #include "CSGZCylinder.h"
-#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -49,7 +48,6 @@ CSGSurface &
 CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
 {
   auto surf_name = surf->getName();
-  CSGUtils::checkValidCSGName(surf_name);
   auto [it, inserted] = _surfaces.emplace(surf_name, std::move(surf));
   if (!inserted)
     mooseError("Surface with name " + surf_name + " already exists in geometry.");

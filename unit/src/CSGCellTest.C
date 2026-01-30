@@ -43,8 +43,8 @@ TEST(CSGCellTest, testVoidCell)
   ASSERT_EQ("VOID", cell.getFillType());
   ASSERT_EQ("", cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
-  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixStringList());
+  ASSERT_EQ(reg_str_infix, cell.getRegion().toInfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegion().toPostfixStringList());
 }
 
 TEST(CSGCellTest, testMaterialCell)
@@ -59,8 +59,8 @@ TEST(CSGCellTest, testMaterialCell)
   ASSERT_EQ("CSG_MATERIAL", cell.getFillType());
   ASSERT_EQ(matname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
-  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixStringList());
+  ASSERT_EQ(reg_str_infix, cell.getRegion().toInfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegion().toPostfixStringList());
 }
 
 TEST(CSGCellTest, testUniverseCell)
@@ -76,8 +76,8 @@ TEST(CSGCellTest, testUniverseCell)
   ASSERT_EQ("UNIVERSE", cell.getFillType());
   ASSERT_EQ(uname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str_infix, cell.getRegionAsInfixString());
-  ASSERT_EQ(reg_str_postfix, cell.getRegionAsPostfixStringList());
+  ASSERT_EQ(reg_str_infix, cell.getRegion().toInfixString());
+  ASSERT_EQ(reg_str_postfix, cell.getRegion().toPostfixStringList());
 }
 
 // tests CSGCell::getFillUniverse and CSGCell::getFillMaterial

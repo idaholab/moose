@@ -117,24 +117,6 @@ public:
    */
   const CSGRegion & getRegion() const { return _region; }
 
-  /**
-   * @brief Get the infix string representation of the cell region
-   *
-   * @return std::string infix string representation of the cell region
-   */
-  std::string getRegionAsInfixString() const { return _region.toInfixString(); }
-
-  /**
-   * @brief Get the postfix string representation of the cell region
-   *
-   * @return std::vector<std::string> list of postfix tokens of the cell region in string
-   *                                  representation
-   */
-  std::vector<std::string> getRegionAsPostfixStringList() const
-  {
-    return _region.toPostfixStringList();
-  }
-
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
 

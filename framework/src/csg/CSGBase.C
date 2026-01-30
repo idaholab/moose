@@ -606,8 +606,8 @@ CSGBase::generateOutput() const
   for (const CSGCell & c : all_cells)
   {
     const auto & cell_name = c.getName();
-    const auto & cell_region_infix = c.getRegionAsInfixString();
-    const auto & cell_region_postfix = c.getRegionAsPostfixStringList();
+    const auto & cell_region_infix = c.getRegion().toInfixString();
+    const auto & cell_region_postfix = c.getRegion().toPostfixStringList();
     const auto & cell_filltype = c.getFillType();
     const auto & fill_name = c.getFillName();
     csg_json["cells"][cell_name]["filltype"] = cell_filltype;

@@ -9,8 +9,6 @@
 
 #include "CSGRegion.h"
 
-#include "libmesh/string_to_enum.h"
-
 namespace CSG
 {
 
