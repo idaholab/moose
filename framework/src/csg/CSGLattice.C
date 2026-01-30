@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGLattice.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -17,6 +18,7 @@ CSGLattice::CSGLattice(const std::string & name,
                        const std::optional<OuterVariant> & outer)
   : _name(name), _lattice_type(lattice_type), _outer_type("VOID"), _outer_universe(nullptr)
 {
+  CSGUtils::checkValidCSGName(name);
   // Handle the outer variant if provided
   if (outer.has_value())
   {

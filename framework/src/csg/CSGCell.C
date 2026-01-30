@@ -10,6 +10,7 @@
 #include "CSGCell.h"
 #include "CSGUniverse.h"
 #include "CSGLattice.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -17,24 +18,28 @@ namespace CSG
 CSGCell::CSGCell(const std::string & name, const CSGRegion & region)
   : _name(name), _fill_name(""), _region(region)
 {
+  CSGUtils::checkValidCSGName(name);
   _fill_type = "VOID";
 }
 
 CSGCell::CSGCell(const std::string & name, const std::string & mat_name, const CSGRegion & region)
   : _name(name), _fill_name(mat_name), _region(region)
 {
+  CSGUtils::checkValidCSGName(name);
   _fill_type = "CSG_MATERIAL";
 }
 
 CSGCell::CSGCell(const std::string & name, const CSGUniverse * univ, const CSGRegion & region)
   : _name(name), _fill_name(""), _region(region), _fill_universe(univ)
 {
+  CSGUtils::checkValidCSGName(name);
   _fill_type = "UNIVERSE";
 }
 
 CSGCell::CSGCell(const std::string & name, const CSGLattice * lattice, const CSGRegion & region)
   : _name(name), _fill_name(""), _region(region), _fill_lattice(lattice)
 {
+  CSGUtils::checkValidCSGName(name);
   _fill_type = "LATTICE";
 }
 

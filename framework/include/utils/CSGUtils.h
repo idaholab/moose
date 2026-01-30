@@ -25,4 +25,11 @@ namespace CSGUtils
 CSG::CSGRegion
 getInnerRegion(const std::vector<std::reference_wrapper<const CSG::CSGSurface>> & surfaces,
                const libMesh::Point & origin);
+
+/**
+ * Check name of CSG component for disallowed characters and symbols
+ *
+ * @param name name of CSG component to check
+ */
+void checkValidCSGName(const std::string & name);
 }

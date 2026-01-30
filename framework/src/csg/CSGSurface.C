@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGSurface.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -15,6 +16,7 @@ namespace CSG
 CSGSurface::CSGSurface(const std::string & name, const std::string & surf_type)
   : _name(name), _surface_type(surf_type)
 {
+  CSGUtils::checkValidCSGName(name);
 }
 
 CSGSurface::Halfspace
