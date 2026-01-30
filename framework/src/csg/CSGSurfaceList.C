@@ -48,10 +48,29 @@ CSGSurface &
 CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
 {
   auto surf_name = surf->getName();
+  checkValidSurfaceName(surf_name);
   auto [it, inserted] = _surfaces.emplace(surf_name, std::move(surf));
   if (!inserted)
     mooseError("Surface with name " + surf_name + " already exists in geometry.");
   return *it->second;
+}
+
+void
+CSGSurfaceList::checkValidSurfaceName(const std::string & name) const
+{
+  // Check if invalid symbol is present in the surface name. These include whitespaces and symbols
+  // for halfspaces and region operators
+  const std::regex invalid_symbols(R"([\+\-~|& ])");
+  std::smatch matches;
+
+  if (std::regex_search(name, matches, invalid_symbols))
+  {
+    char matched_char = name[matches.position(0)];
+    if (matched_char == ' ')
+      mooseError("Detected whitespace in surface name ", name, ". This is not allowed.");
+    else
+      mooseError("Invalid symbol in surface name ", name, ": ", matched_char);
+  }
 }
 
 void
