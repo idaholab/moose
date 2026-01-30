@@ -874,6 +874,10 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
       target_mesh->add_elem(copy.release());
     }
   }
+
+  // Move subdomain names
+  for (const auto sbd_id : target_block_ids)
+    target_mesh->subdomain_name(sbd_id) = source_mesh->subdomain_name(sbd_id);
 }
 
 void
