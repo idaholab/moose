@@ -23,6 +23,19 @@ struct Term
   // State is between parenthesis
   std::optional<std::string> state;
   std::optional<std::string> charge;
+
+  // We don't compare the coefficient on purpose, to lump terms with different coefficients
+  // together
+  // NOTE: if you have a need to differentiate terms by terms by coefficients, you'll have
+  // to create a custom comparator
+  friend bool operator<(const Term & a, const Term & b) noexcept
+  {
+    if (a.species != b.species)
+      return a.species < b.species;
+    if (a.state != b.state)
+      return a.state < b.state;
+    return a.charge < b.charge;
+  }
 };
 
 using TermList = std::vector<Term>;
@@ -36,15 +49,27 @@ struct Reaction
 
   /// Get all species involved in the reaction
   std::vector<VariableName> getSpecies() const;
+  /// Get all unique species involved in the reaction
+  /// Note: a species will only appear once even if both a reactant and a product
+  std::vector<VariableName> getUniqueSpecies() const;
 
   /// Get the stoeichiometric coefficients for each species in the reaction
   std::vector<Real> getStoichiometricCoefficients() const;
+  /// Get the stoeichiometric coefficients for each unique species in the reaction
+  /// Note: if a species is both a reactant and a product,
+  /// the coefficient will be the difference between its reactant and product coefficients
+  /// Note: this means all products' coefficients are negative, unlike in getStoichiometricCoefficients()
+  std::map<VariableName, Real> getUniqueStoichiometricCoefficients() const;
 
   /// Get all reactant species involved in the reaction (on LHS)
   std::vector<VariableName> getReactantSpecies() const;
+  /// Get all unique reactant species involved in the reaction (on LHS)
+  std::vector<VariableName> getUniqueReactantSpecies() const;
 
   /// Get all product species involved in the reaction (on RHS)
   std::vector<std::string> getProductSpecies() const;
+  /// Get all unique product species involved in the reaction (on RHS)
+  std::vector<std::string> getUniqueProductSpecies() const;
 
   /// Whether the reaction has the metadata with the given type
   template <typename T>
