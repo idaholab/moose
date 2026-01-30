@@ -23,7 +23,7 @@ public:
 
 protected:
   virtual void computeQpResidual(RealEigenVector & residual) override;
-  virtual RealEigenVector computeQpJacobian() override;
+  virtual void computeQpJacobian() override;
 
   /// Time derivative of u
   const ArrayVariableValue & _u_dot;
