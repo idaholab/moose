@@ -18,18 +18,18 @@
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 2
-  [../]
+  []
 []
 
 [Executioner]
