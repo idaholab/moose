@@ -5,7 +5,8 @@
 ## Overview
 
 The `BlockToMeshConverterGenerator` moves one (or more) blocks from a mesh to form a new mesh object.
-This does not erase/delete the blocks from the original mesh. The new mesh has only one block (unnamed with ID 0)
+This does not erase/delete the blocks from the original mesh. The new mesh keeps the original mesh block ids
+and names.
 
 !alert note
 No sidesets are preserved in or added to the new mesh
