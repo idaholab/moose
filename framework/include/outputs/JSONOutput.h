@@ -42,6 +42,6 @@ private:
 };
 
 template <>
-void dataStore(std::ostream & stream, nlohmann::json & json, void * context);
+void dataStore(std::ostream & stream, nlohmann::json & json, std::any context);
 template <>
-void dataLoad(std::istream & stream, nlohmann::json & json, void * context);
+void dataLoad(std::istream & stream, nlohmann::json & json, std::any context);

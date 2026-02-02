@@ -142,7 +142,7 @@ protected:
    */
   template <typename T, typename... Args>
   ManagedValue<T> declareManagedRestartableDataWithContext(const std::string & data_name,
-                                                           void * context,
+                                                           std::any context,
                                                            Args &&... args);
 
   /**
@@ -170,8 +170,9 @@ protected:
    * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename... Args>
-  T &
-  declareRestartableDataWithContext(const std::string & data_name, void * context, Args &&... args);
+  T & declareRestartableDataWithContext(const std::string & data_name,
+                                        std::any context,
+                                        Args &&... args);
 
   /**
    * Declare a piece of data as "recoverable" and initialize it.
@@ -219,7 +220,7 @@ protected:
   template <typename T, typename... Args>
   T & declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
                                                       const std::string & object_name,
-                                                      void * context,
+                                                      std::any context,
                                                       Args &&... args);
 
   /**
@@ -267,7 +268,7 @@ private:
    */
   template <typename T, typename... Args>
   RestartableData<T> & declareRestartableDataHelper(const std::string & data_name,
-                                                    void * context,
+                                                    std::any context,
                                                     Args &&... args) const;
 };
 
@@ -281,7 +282,7 @@ Restartable::declareRestartableData(const std::string & data_name, Args &&... ar
 template <typename T, typename... Args>
 Restartable::ManagedValue<T>
 Restartable::declareManagedRestartableDataWithContext(const std::string & data_name,
-                                                      void * context,
+                                                      std::any context,
                                                       Args &&... args)
 {
   auto & data_ptr =
@@ -299,7 +300,7 @@ Restartable::getRestartableData(const std::string & data_name) const
 template <typename T, typename... Args>
 T &
 Restartable::declareRestartableDataWithContext(const std::string & data_name,
-                                               void * context,
+                                               std::any context,
                                                Args &&... args)
 {
   return declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...).set();
@@ -308,7 +309,7 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
 template <typename T, typename... Args>
 RestartableData<T> &
 Restartable::declareRestartableDataHelper(const std::string & data_name,
-                                          void * context,
+                                          std::any context,
                                           Args &&... args) const
 {
   const auto full_name = restartableName(data_name);
@@ -339,7 +340,7 @@ template <typename T, typename... Args>
 T &
 Restartable::declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
                                                              const std::string & object_name,
-                                                             void * context,
+                                                             std::any context,
                                                              Args &&... args)
 {
   std::string old_name = _restartable_name;

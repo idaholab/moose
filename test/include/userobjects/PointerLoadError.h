@@ -20,7 +20,7 @@ public:
 /// Store but no Load!
 template <>
 inline void
-dataStore(std::ostream & stream, TypeWithNoLoad *& v, void * context)
+dataStore(std::ostream & stream, TypeWithNoLoad *& v, std::any context)
 {
   dataStore(stream, v->_i, context);
 }

@@ -61,8 +61,8 @@ protected:
 template <>
 void dataStore(std::ostream & stream,
                DiscreteNucleationInserterBase::NucleusLocation & nl,
-               void * context);
+               std::any context);
 template <>
 void dataLoad(std::istream & stream,
               DiscreteNucleationInserterBase::NucleusLocation & nl,
-              void * context);
+              std::any context);

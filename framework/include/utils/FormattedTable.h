@@ -27,13 +27,13 @@ class ExodusII_IO;
 }
 
 template <>
-void dataStore(std::ostream & stream, FormattedTable & table, void * context);
+void dataStore(std::ostream & stream, FormattedTable & table, std::any context);
 template <>
-void dataLoad(std::istream & stream, FormattedTable & v, void * context);
+void dataLoad(std::istream & stream, FormattedTable & v, std::any context);
 template <>
-void dataStore(std::ostream & stream, TableValueBase *& value, void * context);
+void dataStore(std::ostream & stream, TableValueBase *& value, std::any context);
 template <>
-void dataLoad(std::istream & stream, TableValueBase *& value, void * context);
+void dataLoad(std::istream & stream, TableValueBase *& value, std::any context);
 
 class TableValueBase
 {
@@ -48,7 +48,7 @@ public:
 
   virtual void print(std::ostream & os) const = 0;
 
-  virtual void store(std::ostream & stream, void * context) = 0;
+  virtual void store(std::ostream & stream, std::any context) = 0;
 };
 
 std::ostream & operator<<(std::ostream & os, const TableValueBase & value);
@@ -68,9 +68,9 @@ public:
 
   virtual void print(std::ostream & os) const override { os << this->_value; };
 
-  virtual void store(std::ostream & stream, void * context) override;
+  virtual void store(std::ostream & stream, std::any context) override;
   static void
-  load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+  load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, std::any context);
 
 private:
   T _value;
@@ -85,7 +85,7 @@ TableValue<bool>::print(std::ostream & os) const
 
 template <typename T>
 void
-TableValue<T>::store(std::ostream & stream, void * context)
+TableValue<T>::store(std::ostream & stream, std::any context)
 {
   std::string type = typeid(T).name();
   ::dataStore(stream, type, context);
@@ -96,7 +96,7 @@ template <typename T>
 void
 TableValue<T>::load(std::istream & stream,
                     std::shared_ptr<TableValueBase> & value_base,
-                    void * context)
+                    std::any context)
 {
   T value;
   ::dataLoad(stream, value, context);
@@ -323,8 +323,8 @@ private:
   bool _column_names_unsorted = true;
 
   friend void
-  dataStore<FormattedTable>(std::ostream & stream, FormattedTable & table, void * context);
-  friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, void * context);
+  dataStore<FormattedTable>(std::ostream & stream, FormattedTable & table, std::any context);
+  friend void dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, std::any context);
 };
 
 template <typename T>
@@ -415,10 +415,10 @@ FormattedTable::getLastData(const std::string & name) const
 }
 
 template <>
-void dataStore(std::ostream & stream, FormattedTable & table, void * context);
+void dataStore(std::ostream & stream, FormattedTable & table, std::any context);
 template <>
-void dataLoad(std::istream & stream, FormattedTable & v, void * context);
+void dataLoad(std::istream & stream, FormattedTable & v, std::any context);
 template <>
-void dataStore(std::ostream & stream, TableValueBase *& value, void * context);
+void dataStore(std::ostream & stream, TableValueBase *& value, std::any context);
 template <>
-void dataLoad(std::istream & stream, TableValueBase *& value, void * context);
+void dataLoad(std::istream & stream, TableValueBase *& value, std::any context);

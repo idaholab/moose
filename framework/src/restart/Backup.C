@@ -8,11 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Backup.h"
-
 #include "DataIO.h"
 
 void
-dataStore(std::ostream & stream, Backup & backup, void * context)
+dataStore(std::ostream & stream, Backup & backup, std::any context)
 {
   mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
@@ -22,7 +21,7 @@ dataStore(std::ostream & stream, Backup & backup, void * context)
 }
 
 void
-dataLoad(std::istream & stream, Backup & backup, void * context)
+dataLoad(std::istream & stream, Backup & backup, std::any context)
 {
   mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
@@ -32,7 +31,7 @@ dataLoad(std::istream & stream, Backup & backup, void * context)
 }
 
 void
-dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context)
+dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::any context)
 {
   bool has_value = backup != nullptr;
   dataStore(stream, has_value, nullptr);
@@ -41,7 +40,7 @@ dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * contex
 }
 
 void
-dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context)
+dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, std::any context)
 {
   bool has_value;
   dataLoad(stream, has_value, nullptr);

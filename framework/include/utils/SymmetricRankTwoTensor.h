@@ -489,10 +489,10 @@ private:
   std::array<T, N> _vals;
 
   template <class T2>
-  friend void dataStore(std::ostream &, SymmetricRankTwoTensorTempl<T2> &, void *);
+  friend void dataStore(std::ostream &, SymmetricRankTwoTensorTempl<T2> &, std::any);
 
   template <class T2>
-  friend void dataLoad(std::istream &, SymmetricRankTwoTensorTempl<T2> &, void *);
+  friend void dataLoad(std::istream &, SymmetricRankTwoTensorTempl<T2> &, std::any);
   template <class T2>
   friend class SymmetricRankFourTensorTempl;
 };

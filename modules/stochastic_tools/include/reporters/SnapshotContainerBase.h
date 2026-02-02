@@ -71,5 +71,5 @@ protected:
   const unsigned int _nonlinear_system_number;
 };
 
-void dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context);
-void dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context);
+void dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, std::any context);
+void dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, std::any context);

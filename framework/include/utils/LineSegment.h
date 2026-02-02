@@ -94,7 +94,7 @@ private:
   Point _p0, _p1;
 };
 
-void dataStore(std::ostream & stream, LineSegment & l, void * context);
-void dataLoad(std::istream & stream, LineSegment & l, void * context);
+void dataStore(std::ostream & stream, LineSegment & l, std::any context);
+void dataLoad(std::istream & stream, LineSegment & l, std::any context);
 
 void to_json(nlohmann::json & json, const LineSegment & l);

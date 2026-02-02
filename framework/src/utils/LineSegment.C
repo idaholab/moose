@@ -236,14 +236,14 @@ LineSegment::set(const Point & p0, const Point & p1)
 }
 
 void
-dataStore(std::ostream & stream, LineSegment & l, void * context)
+dataStore(std::ostream & stream, LineSegment & l, std::any context)
 {
   dataStore(stream, l.start(), context);
   dataStore(stream, l.end(), context);
 }
 
 void
-dataLoad(std::istream & stream, LineSegment & l, void * context)
+dataLoad(std::istream & stream, LineSegment & l, std::any context)
 {
   Point p0;
   dataLoad(stream, p0, context);

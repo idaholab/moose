@@ -79,8 +79,8 @@ public:
   ///@}
 
   ///@{ Implement loadHelper and storeHelper for easier data (de)serialization
-  void dataStore(std::ostream & stream, void * context);
-  void dataLoad(std::istream & stream, void * context);
+  void dataStore(std::ostream & stream, std::any context);
+  void dataLoad(std::istream & stream, std::any context);
   ///@}
 
   ///@{ iterators for begin and end of this container
@@ -402,7 +402,7 @@ MultiIndex<T>::assign(const size_type & shape, T value)
 
 template <class T>
 void
-MultiIndex<T>::dataStore(std::ostream & stream, void * context)
+MultiIndex<T>::dataStore(std::ostream & stream, std::any context)
 {
   ::dataStore(stream, _shape, context);
   ::dataStore(stream, _data, context);
@@ -410,7 +410,7 @@ MultiIndex<T>::dataStore(std::ostream & stream, void * context)
 
 template <class T>
 void
-MultiIndex<T>::dataLoad(std::istream & stream, void * context)
+MultiIndex<T>::dataLoad(std::istream & stream, std::any context)
 {
   ::dataLoad(stream, _shape, context);
   ::dataLoad(stream, _data, context);
@@ -495,14 +495,14 @@ MultiIndex<T>::flatIndex(const size_type & indices) const
 
 template <class T>
 void
-dataStore(std::ostream & stream, MultiIndex<T> & mi, void * context)
+dataStore(std::ostream & stream, MultiIndex<T> & mi, std::any context)
 {
   mi.dataStore(stream, context);
 }
 
 template <class T>
 void
-dataLoad(std::istream & stream, MultiIndex<T> & mi, void * context)
+dataLoad(std::istream & stream, MultiIndex<T> & mi, std::any context)
 {
   mi.dataLoad(stream, context);
 }

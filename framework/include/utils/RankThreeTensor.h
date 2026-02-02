@@ -19,6 +19,8 @@
 
 #include "metaphysicl/raw_type.h"
 
+#include <any>
+
 namespace libMesh
 {
 template <typename>
@@ -219,10 +221,10 @@ protected:
   void fillGeneralFromInputVector(const std::vector<T> & input);
 
   template <class T2>
-  friend void dataStore(std::ostream &, RankThreeTensorTempl<T2> &, void *);
+  friend void dataStore(std::ostream &, RankThreeTensorTempl<T2> &, std::any);
 
   template <class T2>
-  friend void dataLoad(std::istream &, RankThreeTensorTempl<T2> &, void *);
+  friend void dataLoad(std::istream &, RankThreeTensorTempl<T2> &, std::any);
 
   template <class T2>
   friend class RankTwoTensorTempl;

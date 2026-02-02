@@ -94,11 +94,11 @@ to_json(nlohmann::json & json, const PerfGraphReporter::PerfGraphJSON & perf_gra
 }
 
 void
-dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, void *)
+dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, std::any)
 {
 }
 
 void
-dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, void *)
+dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, std::any)
 {
 }

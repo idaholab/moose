@@ -431,11 +431,11 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _mesh_divisions(/*threaded=*/true),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "material_props", &_mesh, _material_prop_registry, *this)),
+        "material_props", {&_mesh}, _material_prop_registry, *this)),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "bnd_material_props", &_mesh, _material_prop_registry, *this)),
+        "bnd_material_props", {&_mesh}, _material_prop_registry, *this)),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh, _material_prop_registry, *this)),
+        "neighbor_material_props", {&_mesh}, _material_prop_registry, *this)),
 #ifdef MOOSE_KOKKOS_ENABLED
     _kokkos_material_props(
         declareRestartableDataWithContext<Moose::Kokkos::MaterialPropertyStorage>(

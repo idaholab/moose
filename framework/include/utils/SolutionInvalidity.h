@@ -138,8 +138,8 @@ public:
   /// Whether the solution invalidity has synchronized iteration counts across MPI processes
   bool hasSynced() const { return _has_synced; }
 
-  friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
-  friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
+  friend void dataStore(std::ostream &, SolutionInvalidity &, std::any);
+  friend void dataLoad(std::istream &, SolutionInvalidity &, std::any);
 
 private:
   /// Mutex for locking access to the invalid counts
@@ -180,9 +180,9 @@ private:
 // datastore and dataload for recover
 void dataStore(std::ostream & stream,
                SolutionInvalidity::TimestepCounts & timestep_counts,
-               void * context);
+               std::any context);
 void dataLoad(std::istream & stream,
               SolutionInvalidity::TimestepCounts & timestep_counts,
-              void * context);
-void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context);
-void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context);
+              std::any context);
+void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, std::any context);
+void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, std::any context);

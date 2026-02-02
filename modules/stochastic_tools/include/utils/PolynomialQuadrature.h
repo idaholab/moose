@@ -35,7 +35,7 @@ class Polynomial
 public:
   Polynomial() {}
   virtual ~Polynomial() = default;
-  virtual void store(std::ostream & stream, void * context) const;
+  virtual void store(std::ostream & stream, std::any context) const;
   virtual void store(nlohmann::json & json) const;
   virtual Real compute(const unsigned int order, const Real x, const bool normalize = true) const;
   /// Computes the mth derivative of polynomial: d^mP_n/dx^m
@@ -59,7 +59,7 @@ class Legendre : public Polynomial
 {
 public:
   Legendre(const Real lower_bound, const Real upper_bound);
-  virtual void store(std::ostream & stream, void * context) const override;
+  virtual void store(std::ostream & stream, std::any context) const override;
   virtual void store(nlohmann::json & json) const override;
 
   /// Legendre polynomial using static function then scales by <P_n^2> = 1 / (2n+1)
@@ -97,7 +97,7 @@ class Hermite : public Polynomial
 {
 public:
   Hermite(const Real mu, const Real sig);
-  virtual void store(std::ostream & stream, void * context) const override;
+  virtual void store(std::ostream & stream, std::any context) const override;
   virtual void store(nlohmann::json & json) const override;
 
   /// Hermite polynomial using static function then scales by <P_n^2> = n!
@@ -280,8 +280,8 @@ clenshaw_curtis(const unsigned int order, std::vector<Real> & points, std::vecto
 template <>
 void dataStore(std::ostream & stream,
                std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
-               void * context);
+               std::any context);
 template <>
 void dataLoad(std::istream & stream,
               std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
-              void * context);
+              std::any context);

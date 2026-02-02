@@ -696,7 +696,7 @@ Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
 } // namespace libMesh
 
 void
-dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
+dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, std::any context)
 {
   mooseAssert(ray, "Null ray");
   mooseAssert(context, "Missing RayTracingStudy context");
@@ -721,10 +721,10 @@ dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
 }
 
 void
-dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
+dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, std::any context)
 {
-  mooseAssert(context, "Missing RayTracingStudy context");
-  RayTracingStudy * study = static_cast<RayTracingStudy *>(context);
+  mooseAssert(context.has_value(), "Missing RayTracingStudy context");
+  RayTracingStudy * study = std::any_cast<RayTracingStudy *>(context);
 
   RayID id;
   loadHelper(stream, id, context);

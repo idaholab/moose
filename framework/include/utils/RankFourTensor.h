@@ -26,6 +26,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+#include <any>
 
 using libMesh::tuple_of;
 namespace libMesh
@@ -521,10 +522,10 @@ protected:
   void fillGeneralOrthotropicFromInputVector(const std::vector<T> & input);
 
   template <class T2>
-  friend void dataStore(std::ostream &, RankFourTensorTempl<T2> &, void *);
+  friend void dataStore(std::ostream &, RankFourTensorTempl<T2> &, std::any);
 
   template <class T2>
-  friend void dataLoad(std::istream &, RankFourTensorTempl<T2> &, void *);
+  friend void dataLoad(std::istream &, RankFourTensorTempl<T2> &, std::any);
 
   template <typename T2>
   friend class RankTwoTensorTempl;

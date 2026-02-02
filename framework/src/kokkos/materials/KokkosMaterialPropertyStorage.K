@@ -174,7 +174,7 @@ MaterialPropertyStorage::copy()
 } // namespace Moose::Kokkos
 
 void
-dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context)
+dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, std::any context)
 {
   auto & base = static_cast<MaterialPropertyStorage &>(storage);
 
@@ -227,7 +227,7 @@ dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storag
 }
 
 void
-dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, void * context)
+dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, std::any context)
 {
   auto & base = static_cast<MaterialPropertyStorage &>(storage);
 

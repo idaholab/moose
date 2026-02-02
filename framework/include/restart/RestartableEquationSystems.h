@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <any>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -186,22 +187,24 @@ private:
   std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
 };
 
-void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems & res, void *);
+void dataStore(std::ostream & stream, RestartableEquationSystems & res, std::any);
+void dataLoad(std::istream & stream, RestartableEquationSystems & res, std::any);
 
 void dataStore(std::ostream & stream,
                RestartableEquationSystems::EquationSystemsHeader & header,
-               void *);
+               std::any);
+void dataLoad(std::istream & stream,
+              RestartableEquationSystems::EquationSystemsHeader & header,
+              std::any);
+
+void dataStore(std::ostream & stream, RestartableEquationSystems::SystemHeader & header, std::any);
+void dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & header, std::any);
+
 void
-dataLoad(std::istream & stream, RestartableEquationSystems::EquationSystemsHeader & header, void *);
+dataStore(std::ostream & stream, RestartableEquationSystems::VariableHeader & header, std::any);
+void dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader & header, std::any);
 
-void dataStore(std::ostream & stream, RestartableEquationSystems::SystemHeader & header, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & header, void *);
-
-void dataStore(std::ostream & stream, RestartableEquationSystems::VariableHeader & header, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader & header, void *);
-
-void dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *);
-void dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *);
+void dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, std::any);
+void dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, std::any);
 
 void to_json(nlohmann::json & json, const RestartableEquationSystems & res);

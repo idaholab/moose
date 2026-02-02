@@ -12,13 +12,14 @@
 #include "GeneralRegistry.h"
 #include "MooseTypes.h"
 
+#include <any>
 #include <mutex>
 
 // Forward Declarations
 class PerfGraph;
 class PerfGraphLivePrint;
 class PerfNode;
-void dataStore(std::ostream &, PerfGraph &, void *);
+void dataStore(std::ostream &, PerfGraph &, std::any);
 
 namespace moose
 {
@@ -172,11 +173,13 @@ private:
   /// This is only here so that PerfGraph can access readSectionInfo
   friend PerfGraph;
   // For accessing _id_to_section_info when storing the PerfGraph
-  friend void ::dataStore(std::ostream &, PerfGraph &, void *);
+  friend void ::dataStore(std::ostream &, PerfGraph &, std::any);
 };
 
 }
 }
 
-void dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
-void dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
+void
+dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, std::any context);
+void
+dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, std::any context);

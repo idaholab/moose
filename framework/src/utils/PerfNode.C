@@ -55,7 +55,7 @@ PerfNode::childrenMemory() const
 }
 
 void
-dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void *)
+dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, std::any)
 {
   // We store the name instead of the ID because the ID could change in recover
   std::string name = moose::internal::getPerfGraphRegistry().sectionInfo(node->id())._name;
@@ -76,12 +76,12 @@ dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void *)
 }
 
 void
-dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, void * perf_graph)
+dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, std::any perf_graph)
 {
   std::string name;
   // When we recursively add children, we grab the name before recursing into
   // dataLoad(), so only load the name if we're on the root
-  if (node.get() == &static_cast<PerfGraph *>(perf_graph)->rootNode())
+  if (node.get() == &std::any_cast<PerfGraph *>(perf_graph)->rootNode())
     dataLoad(stream, name, nullptr);
 
   std::chrono::steady_clock::duration total_time;

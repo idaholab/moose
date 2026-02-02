@@ -760,14 +760,14 @@ private:
 };
 
 template <>
-void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, std::any context);
 template <>
-void dataStore(std::ostream & stream, BoundingBox & bbox, void * context);
+void dataStore(std::ostream & stream, BoundingBox & bbox, std::any context);
 
 template <>
-void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context);
+void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, std::any context);
 template <>
-void dataLoad(std::istream & stream, BoundingBox & bbox, void * context);
+void dataLoad(std::istream & stream, BoundingBox & bbox, std::any context);
 
 template <>
 struct enable_bitmask_operators<FeatureFloodCount::Status>

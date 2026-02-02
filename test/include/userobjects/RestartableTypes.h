@@ -25,37 +25,37 @@ public:
 
 template <>
 inline void
-dataStore(std::ostream & stream, Dummy *& v, void * context)
+dataStore(std::ostream & stream, Dummy *& v, std::any context)
 {
   dataStore(stream, v->_i, context);
 }
 
 template <>
 inline void
-dataLoad(std::istream & stream, Dummy *& v, void * context)
+dataLoad(std::istream & stream, Dummy *& v, std::any context)
 {
   dataLoad(stream, v->_i, context);
 }
 
 template <>
 inline void
-dataStore(std::ostream & stream, Dummy & v, void * context)
+dataStore(std::ostream & stream, Dummy & v, std::any context)
 {
   dataStore(stream, v._i, context);
 }
 
 template <>
 inline void
-dataLoad(std::istream & stream, Dummy & v, void * context)
+dataLoad(std::istream & stream, Dummy & v, std::any context)
 {
   dataLoad(stream, v._i, context);
 }
 
 template <>
 inline void
-dataStore(std::ostream & stream, DummyNeedingContext & v, void * context)
+dataStore(std::ostream & stream, DummyNeedingContext & v, std::any context)
 {
-  int & context_int = *(static_cast<int *>(context));
+  int & context_int = *(std::any_cast<int *>(context));
 
   int value = v._i + context_int;
 
@@ -64,9 +64,9 @@ dataStore(std::ostream & stream, DummyNeedingContext & v, void * context)
 
 template <>
 inline void
-dataLoad(std::istream & stream, DummyNeedingContext & v, void * context)
+dataLoad(std::istream & stream, DummyNeedingContext & v, std::any context)
 {
-  int & context_int = *(static_cast<int *>(context));
+  int & context_int = *(std::any_cast<int *>(context));
 
   int value = 0;
 

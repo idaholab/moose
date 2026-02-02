@@ -578,7 +578,7 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
 }
 
 void
-dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
+dataStore(std::ostream & stream, MaterialPropertyStorage & storage, std::any context)
 {
   // Store the material property ID -> name map for mapping back
   const auto & registry = storage.getMaterialPropertyRegistry();
@@ -641,7 +641,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * conte
 }
 
 void
-dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
+dataLoad(std::istream & stream, MaterialPropertyStorage & storage, std::any context)
 {
   storage._restartable_map.clear();
 
@@ -881,7 +881,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * contex
 }
 
 void
-dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, void *)
+dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, std::any)
 {
   dataStore(stream, record.declarers, nullptr);
   dataStore(stream, record.type, nullptr);
@@ -890,7 +890,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, v
 }
 
 void
-dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, void *)
+dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, std::any)
 {
   dataLoad(stream, record.declarers, nullptr);
   dataLoad(stream, record.type, nullptr);

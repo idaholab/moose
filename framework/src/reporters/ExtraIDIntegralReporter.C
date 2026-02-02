@@ -90,11 +90,11 @@ to_json(nlohmann::json & json, const ExtraIDIntegralReporter::ExtraIDData & extr
   }
 }
 void
-dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, void *)
+dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, std::any)
 {
 }
 
 void
-dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, void *)
+dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, std::any)
 {
 }

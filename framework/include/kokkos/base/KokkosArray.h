@@ -956,7 +956,7 @@ ArrayBase<T, dimension, index_type>::operator=(const T & scalar)
 
 template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 void
-dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array, void * context)
+dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array, std::any context)
 {
   using ::dataStore;
 
@@ -1000,7 +1000,7 @@ dataStore(std::ostream & stream, Array<T, dimension, index_type, layout> & array
 
 template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
 void
-dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array, void * context)
+dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array, std::any context)
 {
   using ::dataLoad;
 

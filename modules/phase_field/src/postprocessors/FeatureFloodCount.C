@@ -29,7 +29,7 @@
 
 template <>
 void
-dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void * context)
+dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, std::any context)
 {
   /**
    * Note that _local_ids is not stored here. It's not needed for restart, and not needed
@@ -52,7 +52,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
 
 template <>
 void
-dataStore(std::ostream & stream, BoundingBox & bbox, void * context)
+dataStore(std::ostream & stream, BoundingBox & bbox, std::any context)
 {
   storeHelper(stream, bbox.min(), context);
   storeHelper(stream, bbox.max(), context);
@@ -60,7 +60,7 @@ dataStore(std::ostream & stream, BoundingBox & bbox, void * context)
 
 template <>
 void
-dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void * context)
+dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, std::any context)
 {
   /**
    * Note that _local_ids is not loaded here. It's not needed for restart, and not needed
@@ -83,7 +83,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
 
 template <>
 void
-dataLoad(std::istream & stream, BoundingBox & bbox, void * context)
+dataLoad(std::istream & stream, BoundingBox & bbox, std::any context)
 {
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);

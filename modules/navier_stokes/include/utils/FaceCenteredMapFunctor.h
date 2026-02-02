@@ -123,7 +123,7 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const NodeArg &, const StateArg &) cons
 
 template <typename T, typename Map>
 inline void
-dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, std::any context)
 {
   Map & m_map = m;
   dataStore(stream, m_map, context);
@@ -131,7 +131,7 @@ dataStore(std::ostream & stream, FaceCenteredMapFunctor<T, Map> & m, void * cont
 
 template <typename T, typename Map>
 inline void
-dataLoad(std::istream & stream, FaceCenteredMapFunctor<T, Map> & m, void * context)
+dataLoad(std::istream & stream, FaceCenteredMapFunctor<T, Map> & m, std::any context)
 {
   Map & m_map = m;
   dataLoad(stream, m_map, context);

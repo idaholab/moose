@@ -91,7 +91,7 @@ public:
   template <typename T, typename... Args>
   T & restoreData(const std::string & data_name,
                   const THREAD_ID tid = 0,
-                  void * const context = nullptr,
+                  const std::any = {},
                   Args &&... args);
 
   ///@{
@@ -219,7 +219,7 @@ template <typename T, typename... Args>
 T &
 RestartableDataReader::restoreData(const std::string & data_name,
                                    const THREAD_ID tid /* = 0 */,
-                                   void * const context /* = nullptr */,
+                                   const std::any context /* = nullptr */,
                                    Args &&... args)
 {
   std::unique_ptr<RestartableDataValue> T_data =

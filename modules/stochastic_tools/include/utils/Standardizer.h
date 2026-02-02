@@ -42,7 +42,7 @@ public:
   void computeSet(const RealEigenMatrix & input);
 
   /// Helper for dataStore
-  void storeHelper(std::ostream & stream, void * context) const;
+  void storeHelper(std::ostream & stream, std::any context) const;
 
   /// Returns the standardized (centered and scaled) of the provided input
   void getStandardized(RealEigenMatrix & input) const;
@@ -64,6 +64,8 @@ protected:
 } // StochasticTools namespace
 
 template <>
-void dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, void * context);
+void
+dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, std::any context);
 template <>
-void dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, void * context);
+void
+dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, std::any context);

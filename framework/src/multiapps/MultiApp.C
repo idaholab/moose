@@ -1520,10 +1520,10 @@ MultiApp::position(unsigned int app) const
 }
 
 void
-dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
+dataStore(std::ostream & stream, SubAppBackups & backups, std::any context)
 {
-  MultiApp * multi_app = static_cast<MultiApp *>(context);
-  mooseAssert(multi_app, "Not set");
+  mooseAssert(context.has_value(), "Not set");
+  MultiApp * multi_app = std::any_cast<MultiApp *>(context);
 
   multi_app->backup();
 
@@ -1531,10 +1531,10 @@ dataStore(std::ostream & stream, SubAppBackups & backups, void * context)
 }
 
 void
-dataLoad(std::istream & stream, SubAppBackups & backups, void * context)
+dataLoad(std::istream & stream, SubAppBackups & backups, std::any context)
 {
-  MultiApp * multi_app = static_cast<MultiApp *>(context);
-  mooseAssert(multi_app, "Not set");
+  mooseAssert(context.has_value(), "Not set");
+  MultiApp * multi_app = std::any_cast<MultiApp *>(context);
 
   dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 

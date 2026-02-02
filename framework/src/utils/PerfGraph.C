@@ -508,7 +508,7 @@ PerfGraph::updateMaxMemory(const std::size_t current_memory)
 }
 
 void
-dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
+dataStore(std::ostream & stream, PerfGraph & perf_graph, std::any)
 {
   // We need to store the registry id -> section info map so that we can add
   // registered sections that may not be added yet during recover
@@ -522,7 +522,7 @@ dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
 }
 
 void
-dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
+dataLoad(std::istream & stream, PerfGraph & perf_graph, std::any)
 {
   // Load in all of the recovered sections and register those that do not exist yet
   std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;

@@ -54,13 +54,13 @@ SnapshotContainerBase::execute()
 }
 
 void
-dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, void * context)
+dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, std::any context)
 {
   storeHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
 
 void
-dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, void * context)
+dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, std::any context)
 {
   loadHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }

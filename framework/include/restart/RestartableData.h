@@ -36,7 +36,7 @@ public:
    * @param name The full (unique) name for this piece of data.
    * @param context 'typeless' pointer to user-specific data.
    */
-  RestartableDataValue(const std::string & name, void * const context);
+  RestartableDataValue(const std::string & name, const std::any context);
 
   /**
    * Destructor.
@@ -62,12 +62,12 @@ public:
   /**
    * A context pointer for helping with load / store.
    */
-  void * context() { return _context; }
+  std::any context() { return _context; }
 
   /**
    * @return Whether or not the data has context set.
    */
-  bool hasContext() const { return _context != nullptr; }
+  bool hasContext() const { return _context.has_value(); }
 
   /**
    * Helper that protects access to setDeclared() to only MooseApp
@@ -194,7 +194,7 @@ protected:
   const std::string _name;
 
   /// A context pointer for helping with load and store
-  void * const _context;
+  const std::any _context;
 
 private:
   /// Whether or not this data has been declared (true) or only retreived (false)
@@ -225,7 +225,7 @@ public:
    * @param arg Forwarded arguments that are passed to the constructor of the data.
    */
   template <typename... Params>
-  RestartableData(const std::string & name, void * const context, Params &&... args)
+  RestartableData(const std::string & name, const std::any context, Params &&... args)
     : RestartableDataValue(name, context),
       _value(std::make_unique<T>(std::forward<Params>(args)...))
   {

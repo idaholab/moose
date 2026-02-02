@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <any>
 #include <memory>
 #include <vector>
 #include <utility>
@@ -17,9 +18,9 @@
 template <class T>
 class UniqueStorage;
 template <typename T>
-void storeHelper(std::ostream & stream, UniqueStorage<T> &, void *);
+void storeHelper(std::ostream & stream, UniqueStorage<T> &, std::any);
 template <typename T>
-void loadHelper(std::istream & stream, UniqueStorage<T> &, void *);
+void loadHelper(std::istream & stream, UniqueStorage<T> &, std::any);
 
 /**
  * Storage container that stores a vector of unique pointers of T,
@@ -185,8 +186,8 @@ private:
     return const_cast<std::unique_ptr<T> &>(std::as_const(*this).pointerValue(i));
   }
 
-  friend void storeHelper<>(std::ostream & stream, UniqueStorage<T> &, void *);
-  friend void loadHelper<>(std::istream & stream, UniqueStorage<T> &, void *);
+  friend void storeHelper<>(std::ostream & stream, UniqueStorage<T> &, std::any);
+  friend void loadHelper<>(std::istream & stream, UniqueStorage<T> &, std::any);
 
   /// The underlying data
   values_type _values;

@@ -634,5 +634,5 @@ private:
   mutable std::optional<std::string> _cli_args_param;
 };
 
-void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);
-void dataLoad(std::istream & stream, SubAppBackups & backups, void * context);
+void dataStore(std::ostream & stream, SubAppBackups & backups, std::any context);
+void dataLoad(std::istream & stream, SubAppBackups & backups, std::any context);

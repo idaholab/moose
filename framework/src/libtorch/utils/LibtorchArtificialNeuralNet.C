@@ -159,7 +159,9 @@ to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const 
 template <>
 void
 dataStore<Moose::LibtorchArtificialNeuralNet>(
-    std::ostream & stream, std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn, void * context)
+    std::ostream & stream,
+    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+    std::any context)
 {
   std::string n(nn->name());
   dataStore(stream, n, context);
@@ -197,7 +199,9 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
 template <>
 void
 dataLoad<Moose::LibtorchArtificialNeuralNet>(
-    std::istream & stream, std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn, void * context)
+    std::istream & stream,
+    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+    std::any context)
 {
   std::string name;
   dataLoad(stream, name, context);
@@ -241,7 +245,7 @@ void
 dataStore<Moose::LibtorchArtificialNeuralNet const>(
     std::ostream & /*stream*/,
     Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
-    void * /*context*/)
+    std::any /*context*/)
 {
 }
 
@@ -250,7 +254,7 @@ void
 dataLoad<Moose::LibtorchArtificialNeuralNet const>(
     std::istream & /*stream*/,
     Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
-    void * /*context*/)
+    std::any /*context*/)
 {
 }
 

@@ -239,7 +239,7 @@ to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SidesetInfo>
 }
 
 void
-dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * context)
+dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, std::any context)
 {
   storeHelper(stream, sideset_info.id, context);
   storeHelper(stream, sideset_info.name, context);
@@ -247,7 +247,7 @@ dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * co
 }
 
 void
-dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * context)
+dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, std::any context)
 {
   loadHelper(stream, sideset_info.id, context);
   loadHelper(stream, sideset_info.name, context);
@@ -385,7 +385,7 @@ to_json(nlohmann::json & json, const std::map<SubdomainID, MeshInfo::SubdomainIn
 }
 
 void
-dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
+dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, std::any context)
 {
   storeHelper(stream, subdomain_info.id, context);
   storeHelper(stream, subdomain_info.name, context);
@@ -393,7 +393,7 @@ dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & subdomain_info, void 
 }
 
 void
-dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & subdomain_info, void * context)
+dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & subdomain_info, std::any context)
 {
   loadHelper(stream, subdomain_info.id, context);
   loadHelper(stream, subdomain_info.name, context);
