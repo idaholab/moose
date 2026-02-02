@@ -62,9 +62,9 @@ class Moose2FMU(Fmi2Slave):
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
         self.moose_time: Real = 0.0
-        self.start_time: Real = (0.0,)
-        self.stop_time: Real = (0.0,)
-        self.tolerance: Real = (1.0e-3,)
+        self.start_time: Real = 0.0
+        self.stop_time: Real = 0.0
+        self.tolerance: Real = 1.0e-3
 
         # Default synchronization and data retrieval flags
         self._default_sync_flags: Set[str] = {"INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"}
@@ -204,8 +204,9 @@ class Moose2FMU(Fmi2Slave):
 
             moose_time = self.control.get_time()
 
-            if flag in parsed_allowed_flags:
-                signal = flag
+            normalized_flag = flag.strip().upper()
+            if normalized_flag in parsed_allowed_flags:
+                signal = normalized_flag
 
                 # Set next time in MOOSE, ensuring MOOSE has data available for all
                 # FMU times (optional). To-do: need MooseControl to create a time
@@ -224,7 +225,7 @@ class Moose2FMU(Fmi2Slave):
                     )
 
                     if moose_dt > step_size:
-                        logging.info(
+                        self.logging.info(
                             "moose_dt (%s) must be <= step_size (%s).",
                             moose_dt,
                             step_size,
@@ -232,7 +233,7 @@ class Moose2FMU(Fmi2Slave):
                         return None, None
 
             if abs(moose_time - current_time) < self.dt_tolerance:
-                self.logger.debug("Captured synchronization flag '%s'", flag)
+                self.logger.debug("Captured synchronization flag '%s'", normalized_flag)
                 self.logger.debug(
                     "The current time is %s, the moose time is %s",
                     current_time,
@@ -489,6 +490,11 @@ class Moose2FMU(Fmi2Slave):
                                 result,
                                 exc,
                             )
+                        retries += 1
+                        self.logger.info(
+                            f"Waiting {wait_seconds} seconds before retrying..."
+                        )
+                        time.sleep(wait_seconds)
                         continue
                     self.logger.info(
                         f"Successfully got flag '{result}' after {retries} retries."
