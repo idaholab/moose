@@ -227,10 +227,8 @@ Sampler::getGlobalSamples()
 
   _next_local_row_requires_state_restore = true;
   restoreGeneratorState();
-  sampleSetUp(SampleMode::GLOBAL);
   DenseMatrix<Real> output(_n_rows, _n_cols);
   computeSampleMatrix(output);
-  sampleTearDown(SampleMode::GLOBAL);
   return output;
 }
 
@@ -255,9 +253,7 @@ Sampler::getLocalSamples()
 
   _next_local_row_requires_state_restore = true;
   restoreGeneratorState();
-  sampleSetUp(SampleMode::LOCAL);
   computeLocalSampleMatrix(output);
-  sampleTearDown(SampleMode::LOCAL);
   return output;
 }
 
@@ -269,7 +265,6 @@ Sampler::getNextLocalRow()
   if (_next_local_row_requires_state_restore)
   {
     restoreGeneratorState();
-    sampleSetUp(SampleMode::LOCAL);
     advanceGeneratorsInternal(_next_local_row * _n_cols);
     _next_local_row_requires_state_restore = false;
 
@@ -290,7 +285,6 @@ Sampler::getNextLocalRow()
   if (_next_local_row == _local_row_end)
   {
     advanceGeneratorsInternal((_n_rows - _local_row_end) * _n_cols);
-    sampleTearDown(SampleMode::LOCAL);
     _next_local_row = _local_row_begin;
     _next_local_row_requires_state_restore = true;
   }

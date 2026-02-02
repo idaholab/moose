@@ -15,9 +15,7 @@
 /**
  * A class used to perform Monte Carlo Sampling
  *
- * WARNING! This Sampler manages the generators advancement for parallel operation manually. All the
- *          calls to get random values from the generators occur in sampleSetUp. At the end of
- *          sampleSetUp all the generators should be in the final state.
+ * WARNING! This Sampler manages the generators advancement for parallel operation manually.
  */
 class LatinHypercubeSampler : public Sampler
 {
@@ -27,11 +25,13 @@ public:
   LatinHypercubeSampler(const InputParameters & parameters);
 
 protected:
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual void computeSampleMatrix(DenseMatrix<Real> & matrix) override;
+  virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix) override;
+  virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data) override;
 
   /**
-   * Advance stateless RNGs once per execute to match the sampleSetUp usage pattern.
+   * Advance stateless RNGs once per execute to match the sampling usage pattern.
    */
   virtual void executeTearDown() override;
 
@@ -39,6 +39,8 @@ protected:
   std::vector<Distribution const *> _distributions;
 
 private:
+  void buildProbabilities(const Sampler::SampleMode mode);
+
   /**
    * Shuffle helper using stateless RNGs for reproducible, index-based permutations.
    */
@@ -50,6 +52,12 @@ private:
 
   // toggle for local/global data access in computeSample
   bool _is_local;
+
+  // Guard to avoid rebuilding probabilities during matrix construction.
+  bool _building_matrix = false;
+
+  // Track whether probabilities are ready for row iteration.
+  bool _probabilities_ready = false;
 
   // Track whether stateless RNGs should be advanced at execute tear down.
   bool _stateless_advance_pending = false;

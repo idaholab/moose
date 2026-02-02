@@ -46,12 +46,9 @@ LatinHypercubeSampler::LatinHypercubeSampler(const InputParameters & parameters)
 }
 
 void
-LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
+LatinHypercubeSampler::buildProbabilities(const Sampler::SampleMode mode)
 {
-  // All calls to the generators occur in here. Calls to the random number generators
-  // (i.e., getRand) are complete by the end of this function.
-
-  // Flag to indicate what vector index to use in computeSample method
+  // Flag to indicate what vector index to use in computeSample method.
   _is_local = mode == Sampler::SampleMode::LOCAL;
 
   const Real bin_size = 1. / getNumberOfRows();
@@ -97,18 +94,52 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
 Real
 LatinHypercubeSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  // NOTE: All calls to generators (getRand, etc.) occur in sampleSetup
   auto row = _is_local ? row_index - getLocalRowBegin() : row_index;
   return _distributions[col_index]->quantile(_probabilities[col_index][row]);
+}
+
+void
+LatinHypercubeSampler::computeSampleMatrix(DenseMatrix<Real> & matrix)
+{
+  _building_matrix = true;
+  buildProbabilities(Sampler::SampleMode::GLOBAL);
+  Sampler::computeSampleMatrix(matrix);
+  _probabilities_ready = false;
+  _building_matrix = false;
+}
+
+void
+LatinHypercubeSampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
+{
+  _building_matrix = true;
+  buildProbabilities(Sampler::SampleMode::LOCAL);
+  Sampler::computeLocalSampleMatrix(matrix);
+  _probabilities_ready = false;
+  _building_matrix = false;
+}
+
+void
+LatinHypercubeSampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
+{
+  if (!_building_matrix && !_probabilities_ready)
+  {
+    buildProbabilities(Sampler::SampleMode::LOCAL);
+    _probabilities_ready = true;
+  }
+
+  Sampler::computeSampleRow(i, data);
+
+  if (!_building_matrix && i + 1 == getLocalRowEnd())
+    _probabilities_ready = false;
 }
 
 void
 LatinHypercubeSampler::executeTearDown()
 {
   /**
-   * Advance stateless RNG streams once per execute after sampleSetUp usage.
+   * Advance stateless RNG streams once per execute after probability generation.
    *
-   * sampleSetUp generates n_rows draws per column (for bin selection) and
+   * Probability generation draws n_rows per column (for bin selection) and
    * a Fisher-Yates shuffle that consumes (n_rows - 1) integer draws. We advance
    * both stateless streams here to mirror the sampler's execute-time progression.
    */
@@ -120,7 +151,7 @@ LatinHypercubeSampler::executeTearDown()
   if (n_rows == 0 || n_cols == 0)
     return;
 
-  // Advance the per-column bin RNG and shuffle RNG to match sampleSetUp usage.
+  // Advance the per-column bin RNG and shuffle RNG to match probability generation.
   const auto shuffle_count = n_rows > 0 ? n_rows - 1 : 0;
   for (const auto col : make_range(n_cols))
   {

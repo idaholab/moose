@@ -75,16 +75,15 @@ public:
 
 protected:
   /**
-   * Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+   * Fill in the _new_samples vector of vectors for the current step.
    * @param seed_value The seed for the random number generator
    * @param rn_ind The stateless RNG index to advance
    */
   virtual void proposeSamples(const unsigned int seed_value, std::size_t & rn_ind);
 
-  // See Sampler.h for description
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-
-  // See Sampler.h for description
+  /**
+   * Return the sample for the given row and column.
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /**
@@ -151,6 +150,9 @@ protected:
   std::vector<Real> _rnd_vec;
 
 private:
+  /// Refresh stored samples and random draws for the current step.
+  void updateSamples();
+
   /**
    * Generates combinations of the new samples with the experimental configurations
    */

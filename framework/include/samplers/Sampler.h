@@ -229,17 +229,6 @@ protected:
    */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
 
-  ///@{
-  /**
-   * Setup method called prior and after looping through distributions.
-   *
-   * These methods should not be called directly, each is automatically called by the public
-   * getGlobalSamples() or getLocalSamples() methods.
-   */
-  virtual void sampleSetUp(const SampleMode /*mode*/) {}
-  virtual void sampleTearDown(const SampleMode /*mode*/) {}
-  ///@}
-
   // The following methods are advanced methods that should not be needed by application developers,
   // but exist for special cases.
 

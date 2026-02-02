@@ -36,10 +36,6 @@ public:
 
 protected:
   /**
-   * Gather all the samples, including stateless RNG proposals.
-   */
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-  /**
    * Return the sample for the given row and column.
    */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
@@ -72,6 +68,9 @@ protected:
   std::vector<std::vector<Real>> _new_samples;
 
 private:
+  /// Refresh stored samples for the current step.
+  void updateSamples();
+
   /// Number of samples to propose in each iteration (not all are sent for subApp evals)
   const unsigned int _num_tries;
 
