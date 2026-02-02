@@ -6,6 +6,7 @@
     input = '1species.i'
     exodiff = '1species_out.e'
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with a single species with a shorthand action syntax.'
   [../]
   [1species_physics]
     type = 'Exodiff'
@@ -20,12 +21,14 @@
     exodiff = '1species_out.e'
     prereq = 1species
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with a single species.'
   [../]
   [./2species]
     type = 'Exodiff'
     input = '2species.i'
     exodiff = '2species_out.e'
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution with a shorthand action syntax.'
   [../]
   [./2species_without_action]
     type = 'Exodiff'
@@ -33,6 +36,7 @@
     exodiff = '2species_out.e'
     prereq = 2species
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution.'
   [../]
   [./2species_eqaux]
     type = 'Exodiff'
@@ -40,11 +44,13 @@
     exodiff = '2species_out.e'
     prereq = 2species_without_action
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution using auxiliary field variables for the equilibrium constants.'
   [../]
   [./2species_with_density]
     type = 'Exodiff'
     input = '2species_with_density.i'
     exodiff = '2species_with_density_out.e'
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution coupled with advection using the Darcy equation.'
   [../]
   [2species_with_density_physics]
     type = 'Exodiff'
@@ -57,11 +63,13 @@
     type = CSVDiff
     input = water_dissociation.i
     csvdiff = water_dissociation_out.csv
+    requirement = 'The system shall be able to solve for the dissociation of water into gas using a chemical reaction network formulation.'
   [../]
   [./co2_h2o]
     type = CSVDiff
     input = co2_h2o.i
     csvdiff = co2_h2o_out.csv
+    requirement = 'The system shall be able to solve for the aqueous equilibrium of the dissolution of carbon dioxide in water.'
   [../]
   [co2_h2o_physics]
     type = CSVDiff
@@ -74,5 +82,6 @@
     type = CSVDiff
     input = calcium_bicarbonate.i
     csvdiff = calcium_bicarbonate_out.csv
+    requirement = 'The system shall be able to solve for the aqueous equilibrium of dissolution of calcium and bi-carbonate in water.'
   [../]
 []
