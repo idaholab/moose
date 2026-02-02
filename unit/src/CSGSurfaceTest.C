@@ -292,4 +292,73 @@ TEST(CSGSurfaceTest, testSetName)
   ASSERT_EQ("new_name", sph.getName());
 }
 
+/// tests CSGUtils::checkValidCSGName
+TEST(CSGSurfaceTest, testValidSurfaceName)
+{
+  // Define 6 surface names that are invalid
+  std::string invalid_name1 = "surf ";
+  std::string invalid_name2 = "-surf";
+  std::string invalid_name3 = "s+urf";
+  std::string invalid_name4 = "su~rf";
+  std::string invalid_name5 = "sur&f";
+  std::string invalid_name6 = "surf|";
+  Real r = 1.0;
+
+  // error should be raised when creating surfaces with invalid characters in the name
+  {
+    Moose::UnitUtils::assertThrows(
+        [&invalid_name1, &r]()
+        {
+          std::unique_ptr<CSG::CSGSphere> surf_ptr =
+              std::make_unique<CSG::CSGSphere>(invalid_name1, r);
+        },
+        "Detected whitespace in CSG component");
+  }
+  {
+    Moose::UnitUtils::assertThrows(
+        [&invalid_name2, &r]()
+        {
+          std::unique_ptr<CSG::CSGSphere> surf_ptr =
+              std::make_unique<CSG::CSGSphere>(invalid_name2, r);
+        },
+        "Invalid symbol in CSG component");
+  }
+  {
+    Moose::UnitUtils::assertThrows(
+        [&invalid_name3, &r]()
+        {
+          std::unique_ptr<CSG::CSGSphere> surf_ptr =
+              std::make_unique<CSG::CSGSphere>(invalid_name3, r);
+        },
+        "Invalid symbol in CSG component");
+  }
+  {
+    Moose::UnitUtils::assertThrows(
+        [&invalid_name4, &r]()
+        {
+          std::unique_ptr<CSG::CSGSphere> surf_ptr =
+              std::make_unique<CSG::CSGSphere>(invalid_name4, r);
+        },
+        "Invalid symbol in CSG component");
+  }
+  {
+    Moose::UnitUtils::assertThrows(
+        [&invalid_name5, &r]()
+        {
+          std::unique_ptr<CSG::CSGSphere> surf_ptr =
+              std::make_unique<CSG::CSGSphere>(invalid_name5, r);
+        },
+        "Invalid symbol in CSG component");
+  }
+  {
+    Moose::UnitUtils::assertThrows(
+        [&invalid_name6, &r]()
+        {
+          std::unique_ptr<CSG::CSGSphere> surf_ptr =
+              std::make_unique<CSG::CSGSphere>(invalid_name6, r);
+        },
+        "Invalid symbol in CSG component");
+  }
+}
+
 } // namespace CSG
