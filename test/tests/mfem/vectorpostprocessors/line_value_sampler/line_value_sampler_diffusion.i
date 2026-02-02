@@ -108,13 +108,13 @@
 []
 
 [VectorPostprocessors]
-  [./line_sample]
+  [line_sample]
     type = MFEMLineValueSampler
     variable = 'concentration'
     start_point = '2.125 0 -2.375'
     end_point = '2.125 0 2.625'
     num_points = 11
-  [../]
+  []
 []
 
 [Executioner]

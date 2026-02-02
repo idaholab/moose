@@ -107,13 +107,13 @@
 []
 
 [VectorPostprocessors]
-  [./line_sample]
+  [line_sample]
     type = MFEMLineValueSampler
     variable = 'e_field'
     start_point = '1 1 -1'
     end_point = '1 1 1'
     num_points = 11
-  [../]
+  []
 []
 
 
