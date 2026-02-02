@@ -371,8 +371,11 @@ class TestMoose2FMU(unittest.TestCase):
         parsed_iterable = slave._parse_flags(["Ready", " done ", ""])
         self.assertEqual(parsed_iterable, {"READY", "DONE"})
 
+    @mock.patch("moosefmu.moose2fmu.SubprocessSocketRunner")
     @mock.patch("moosefmu.moose2fmu.MooseControl")
-    def test_exit_initialization_mode_rebuilds_command(self, mock_control):
+    def test_exit_initialization_mode_rebuilds_command(
+        self, mock_control, mock_runner
+        ):
         """exit_initialization_mode should rebuild the configured command."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
