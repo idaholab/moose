@@ -120,4 +120,14 @@
     design = "DensityScaling.md"
     issues = "#32116"
   []
+  [explicit_stasis]
+    type = CSVDiff
+    input = explicit_stasis.i
+    csvdiff = explicit_stasis_out.csv
+    requirement = "When using the explicit central difference time integration scheme in solid mechanics
+                   it shall be possible to jump forward in time, and during this jump, velocity = 0 = acceleration"
+    restep = false # ExplicitMixedOrder cannot handle repeating a timestep
+    design = "ExplicitMixedOrderStasis.md"
+    issues = "#32092"
+  []
 []
