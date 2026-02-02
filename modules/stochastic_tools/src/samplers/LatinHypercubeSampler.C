@@ -189,7 +189,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
     std::size_t rn_ind = 0;
     for (std::size_t i = n_global - 1; i > 0; --i)
     {
-      const auto j = getRandlStateless(rn_ind++, 0, i, seed_index);
+      const auto j = getRandlShuffleStateless(rn_ind++, n_global, seed_index);
       // Local Fisher-Yates swap.
       MooseUtils::swap(data, i, j, nullptr);
     }
@@ -215,7 +215,7 @@ LatinHypercubeSampler::shuffleStateless(std::vector<Real> & data,
     std::size_t rn_ind = 0;
     for (std::size_t idx0 = n_global - 1; idx0 > 0; --idx0)
     {
-      const auto idx1 = getRandlStateless(rn_ind++, 0, idx0, seed_index);
+      const auto idx1 = getRandlShuffleStateless(rn_ind++, n_global, seed_index);
 
       auto idx0_offset_iter = std::prev(std::upper_bound(offsets.begin(), offsets.end(), idx0));
       auto idx0_rank = std::distance(offsets.begin(), idx0_offset_iter);

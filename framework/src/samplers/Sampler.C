@@ -397,6 +397,13 @@ Sampler::getRandlStateless(std::size_t n,
   return _generators_stateless[index]->randl(n, lower, upper);
 }
 
+std::size_t
+Sampler::getRandlShuffleStateless(std::size_t n, std::size_t size, unsigned int index) const
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
+  return _generators_stateless[index]->randlShuffle(n, size);
+}
+
 void
 Sampler::advanceStatelessGenerator(unsigned int index, std::size_t count)
 {
