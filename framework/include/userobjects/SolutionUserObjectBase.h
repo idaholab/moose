@@ -16,6 +16,7 @@
 namespace libMesh
 {
 class ExodusII_IO;
+class Nemesis_IO;
 class EquationSystems;
 class System;
 class MeshFunction;
@@ -392,7 +393,7 @@ protected:
    */
   void readBlockIdMapFromExodusII();
 
-  /// File type to read (0 = xda; 1 = ExodusII)
+  /// File type to read (0 = xda; 1 = ExodusII, 2 = xdr, 3 = Nemesis)
   MooseEnum _file_type;
 
   /// The XDA or ExodusII file that is being read
@@ -439,6 +440,9 @@ protected:
 
   /// Pointer to the libMesh::ExodusII used to read the files
   std::unique_ptr<libMesh::ExodusII_IO> _exodusII_io;
+
+  /// Pointer to the libMesh::Nemesis_IO used to read the files
+  std::unique_ptr<libMesh::Nemesis_IO> _nemesis_io;
 
   /// Pointer to the serial solution vector
   std::unique_ptr<NumericVector<Number>> _serialized_solution;

@@ -28,6 +28,7 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/exodusII_io_helper.h"
+#include "libmesh/nemesis_io.h"
 #include "libmesh/enum_xdr_mode.h"
 #include "libmesh/string_to_enum.h"
 
@@ -39,7 +40,7 @@ SolutionUserObjectBase::validParams()
 
   // Add required parameters
   params.addRequiredParam<MeshFileName>(
-      "mesh", "The name of the mesh file (must be xda/xdr or exodusII file).");
+      "mesh", "The name of the mesh file (must be xda/xdr, exodusII or nemesis file).");
   params.addParam<std::vector<std::string>>(
       "system_variables",
       std::vector<std::string>(),
@@ -116,7 +117,7 @@ Threads::spin_mutex SolutionUserObjectBase::_solution_user_object_mutex;
 
 SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _file_type(MooseEnum("xda=0 exodusII=1 xdr=2")),
+    _file_type(MooseEnum("xda=0 exodusII=1 xdr=2 nemesis=3")),
     _mesh_file(getParam<MeshFileName>("mesh")),
     _es_file(getParam<FileName>("es")),
     _system_name(getParam<std::string>("system")),
@@ -225,11 +226,20 @@ SolutionUserObjectBase::readExodusII()
   if (_system_name == "")
     _system_name = "SolutionUserObjectSystem";
 
-  // Read the Exodus file
-  _exodusII_io = std::make_unique<libMesh::ExodusII_IO>(*_mesh);
-  _exodusII_io->read(_mesh_file);
+  // Read the Exodus or Nemesis file
+  if (_file_type == "exodusII")
+  {
+    _exodusII_io = std::make_unique<libMesh::ExodusII_IO>(*_mesh);
+    _exodusII_io->read(_mesh_file);
+    _exodus_times = &_exodusII_io->get_time_steps();
+  }
+  else
+  {
+    _nemesis_io = std::make_unique<libMesh::Nemesis_IO>(*_mesh);
+    _nemesis_io->read(_mesh_file);
+    _exodus_times = &_nemesis_io->get_time_steps();
+  }
   readBlockIdMapFromExodusII();
-  _exodus_times = &_exodusII_io->get_time_steps();
 
   if (isParamValid("timestep"))
   {
@@ -511,6 +521,13 @@ SolutionUserObjectBase::initialSetup()
     readXda();
   }
 
+  // nemesis mesh file supplied
+  else if (MooseUtils::hasExtension(_mesh_file, "xdr"))
+  {
+    _file_type = "nemesis";
+    readExodusII();
+  }
+
   // Produce an error for an unknown file type
   else
     mooseError(
@@ -576,7 +593,7 @@ SolutionUserObjectBase::initialSetup()
   }
 
   // If the start time is not the same as in the exodus file, we may need this on INITIAL
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
     updateExodusTimeInterpolation();
 
   // Set initialization flag
@@ -628,9 +645,8 @@ SolutionUserObjectBase::updateExodusTimeInterpolation()
 bool
 SolutionUserObjectBase::updateExodusBracketingTimeIndices()
 {
-  if (_file_type != 1)
-    mooseError("In SolutionUserObjectBase, getTimeInterpolationData only applicable for exodusII "
-               "file type");
+  if (_file_type != 1 && _file_type != 3)
+    mooseError("getTimeInterpolationData only applicable for exodusII or Nemesis file type");
 
   int old_index1 = _exodus_index1;
   int old_index2 = _exodus_index2;
@@ -796,7 +812,7 @@ SolutionUserObjectBase::pointValue(Real libmesh_dbg_var(t),
   Real val = evalMeshFunction(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -848,7 +864,7 @@ SolutionUserObjectBase::discontinuousPointValue(
       evalMultiValuedMeshFunction(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -966,7 +982,7 @@ SolutionUserObjectBase::pointValueGradient(Real libmesh_dbg_var(t),
   RealGradient val = evalMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -1018,7 +1034,7 @@ SolutionUserObjectBase::discontinuousPointValueGradient(
       evalMultiValuedMeshFunctionGradient(pt, local_var_index, 1, subdomain_ids);
 
   // Interpolate
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     mooseAssert(t == _interpolation_time,
                 "Time passed into value() must match time at last call to timestepSetup()");
@@ -1048,7 +1064,7 @@ Real
 SolutionUserObjectBase::directValue(dof_id_type dof_index) const
 {
   Real val = (*_serialized_solution)(dof_index);
-  if (_file_type == 1 && _interpolate_times)
+  if ((_file_type == 1 || _file_type == 3) && _interpolate_times)
   {
     Real val2 = (*_serialized_solution2)(dof_index);
     val = val + (val2 - val) * _interpolation_factor;
@@ -1295,7 +1311,7 @@ void
 SolutionUserObjectBase::readBlockIdMapFromExodusII()
 {
 #ifdef LIBMESH_HAVE_EXODUS_API
-  libMesh::ExodusII_IO_Helper & exio_helper = _exodusII_io->get_exio_helper();
+  libMesh::ExodusII_IO_Helper & exio_helper = _file_type == "exodusII" ? _exodusII_io->get_exio_helper() : _nemesis_io->get_nemesisio_helper();
   const auto & id_to_block = exio_helper.id_to_block_names;
   _block_name_to_id.clear();
   _block_id_to_name.clear();
