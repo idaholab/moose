@@ -10,7 +10,6 @@
 #pragma once
 
 #include "Sampler.h"
-#include <cstddef>
 
 /**
  * A class used to perform Monte Carlo Sampling

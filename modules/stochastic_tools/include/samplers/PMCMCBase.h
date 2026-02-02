@@ -12,7 +12,6 @@
 #include "Sampler.h"
 #include "TransientInterface.h"
 #include "Distribution.h"
-#include <cstddef>
 
 /**
  * A base class used to perform Parallel Markov Chain Monte Carlo (MCMC) sampling

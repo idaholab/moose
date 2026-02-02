@@ -12,7 +12,6 @@
 #include "Sampler.h"
 #include "TransientInterface.h"
 #include "Distribution.h"
-#include <cstddef>
 
 /**
  * A generic sampler to support parallel active learning
