@@ -24,7 +24,6 @@ TERM_COLS = 80
 class Options:
     term_format: str = DEFAULT_FORMAT
     timing: bool = False
-    extra_info: bool = False
     term_cols: int = TERM_COLS
     colored: bool = True
 
@@ -209,12 +208,6 @@ class TestFormatResult(unittest.TestCase):
         result = self.formatResult(entry={'caveats': caveats}, options={'term_format': 'cn', 'term_cols': 40})
         c, n = result.split(' ')
         self.assertEqual(c, f'[{",".join([caveat]*5)},...]')
-        self.assertEqual(n, TEST_NAME)
-
-        # With caveats not last but extra info, they are not shortened
-        result = self.formatResult(entry={'caveats': caveats}, options={'term_format': 'cn', 'extra_info': True})
-        c, n = result.split(' ')
-        self.assertEqual(c, caveats_joined)
         self.assertEqual(n, TEST_NAME)
 
         # With caveats last, they are not shortened

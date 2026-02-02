@@ -236,8 +236,6 @@ AppFactory::reg(const std::string & name)
 
   _name_to_build_info[name] = std::make_unique<AppFactoryBuildInfo<T>>();
 
-  // The naming of this message is important; it is used by
-  // the TestHarness to parse application types
   Moose::Capabilities::getCapabilityRegistry().add(
       name, true, "MOOSE application " + name + " is available.");
 }

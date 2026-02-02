@@ -2487,7 +2487,9 @@ MooseApp::checkReservedCapability(const std::string & capability)
                                               "mpi_procs",
                                               "num_threads",
                                               "compute_device",
-                                              "restep"};
+                                              "restep",
+                                              "machine",
+                                              "library_mode"};
   if (reserved.count(capability))
     ::mooseError("MooseApp::addCapability(): The capability \"",
                  capability,

@@ -150,12 +150,6 @@
     requirement = "The system shall supply the necessary resources a test requires, and report when these resources are insufficient to run said test"
     issues = '#10272'
   []
-  [extra_info]
-    type = PythonUnitTest
-    input = test_ExtraInfo.py
-    requirement = "The system shall print all caveats pertaining to the test involved"
-    issues = '#10272'
-  []
   [parser_errors]
     type = PythonUnitTest
     input = test_ParserErrors.py

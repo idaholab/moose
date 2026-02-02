@@ -156,11 +156,6 @@ class Tester(MooseObject, OutputInterface):
             [],
             "A list of initialized submodules for which this test requires.",
         )
-        params.addParam(
-            "required_applications",
-            [],
-            "A list of required registered applications that are in the executable.",
-        )
         params.addParam("check_input", False, "Check for correct input file syntax")
         params.addParam(
             "display_required",
@@ -799,12 +794,6 @@ class Tester(MooseObject, OutputInterface):
         code."""
         return exit_code == 0
 
-    def getCapability(self, options, name):
-        if options._capabilities is None:
-            raise Exception("Capabilities are not available")
-        value = options._capabilities.get(name)
-        return None if value is None else value[0]
-
     # need something that will tell  us if we should try to read the result
 
     def checkRunnableBase(self, options):
@@ -982,14 +971,6 @@ class Tester(MooseObject, OutputInterface):
             if not os.path.isfile(os.path.join(self.specs["base_dir"], file)):
                 reasons["depend_files"] = "DEPEND FILES"
 
-        # Check to see if we have the required application names
-        for var in self.specs["required_applications"]:
-            if var.upper() not in checks["registered_apps"]:
-                reasons["required_applications"] = (
-                    "App %s not registered in executable" % var
-                )
-                break
-
         # Check to make sure required submodules are initialized
         for var in self.specs["required_submodule"]:
             if var not in checks["submodules"]:
@@ -1075,10 +1056,7 @@ class Tester(MooseObject, OutputInterface):
 
             # Reasons we wish to silence tests
             if "deleted" in reasons.keys():
-                if options.extra_info:
-                    self.setStatus(self.deleted)
-                else:
-                    self.setStatus(self.silent)
+                self.setStatus(self.silent)
             elif (
                 "heavy" in reasons.keys()
                 and options.heavy_tests

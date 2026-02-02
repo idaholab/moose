@@ -365,21 +365,16 @@ class TestHarness:
                 sys.path.append(exe_python_dir)
 
         # Load capabilities if they're needed
-        required_capabilities = self.options.only_tests_that_require
-        if isinstance(required_capabilities, str):
-            required_capabilities = [required_capabilities]
         self.options._capabilities, self.options._required_capabilities = (
             self.getCapabilities(
                 self.options,
                 self.executable,
                 self.libmesh_dir,
-                required_capabilities,
             )
         )
 
         checks = {}
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
-        checks['registered_apps'] = util.getRegisteredApps(self.options._capabilities)
 
         # The TestHarness doesn't strictly require the existence of an app
         # in order to run. Here we allow the user to select whether they
@@ -415,8 +410,7 @@ class TestHarness:
     def getCapabilities(
             options: argparse.Namespace,
             executable: Optional[str],
-            libmesh_dir: Optional[str],
-            only_tests_that_require: Optional[list[str]]
+            libmesh_dir: Optional[str]
         ) -> Tuple[dict, list[Tuple[str, bool]]]:
         required = []
 
@@ -430,7 +424,7 @@ class TestHarness:
             import pycapabilities
 
             with util.ScopedTimer(0.5, 'Parsing application capabilities'):
-               capabilities = util.getCapabilities(executable)
+               capabilities = copy.deepcopy(util.getCapabilities(executable))
 
         # Agument capabilities with options
         def augment(key, value, doc):
@@ -439,13 +433,13 @@ class TestHarness:
                     f"Capability {key} is defined by the app, but it is a reserved "
                     "dynamic test harness capability. This is an application bug."
                 )
-            capabilities[key] = [value, doc]
+            capabilities[key] = [False if value is None else value, doc]
         # NOTE: If you add to this list, add the capability name as a reserved
         # capability within MooseApp::checkReservedCapability()
         augment(
             "scale_refine",
             options.scaling,
-            "The number of refinements to do when scaling",
+            "Whether or not scaling is enabled",
         )
         if options.valgrind_mode == "":
             augment("valgrind", False, "Not running with valgrind")
@@ -466,6 +460,7 @@ class TestHarness:
         augment("machine", util.getMachine(), "Machine type")
         if options.minimal_capabilities:
             augment("platform", util.getPlatform(), "Operating system")
+            augment("installation_type", "in_tree", "Installation type")
         else:
             augment(
                 "library_mode",
@@ -479,10 +474,13 @@ class TestHarness:
         # to perform a check to see if the capability check in the tester
         # changes if we change these value(s)
         required = []
-        if only_tests_that_require:
+        required_capabilities = options.only_tests_that_require
+        if isinstance(required_capabilities, str):
+            required_capabilities = [required_capabilities]
+        if required_capabilities:
             required = TestHarness.buildRequiredCapabilities(
                 list(capabilities.keys()),
-                required
+                required_capabilities
             )
 
         return capabilities, required
@@ -1261,7 +1259,6 @@ class TestHarness:
 
         screengroup = parser.add_argument_group('On-screen Output', 'Control the on-screen output')
         screengroup.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
-        screengroup.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
         screengroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='Only show the result of every test (even failed output)')
         screengroup.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
         screengroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Show the output of every test')

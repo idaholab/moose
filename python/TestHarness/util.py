@@ -139,10 +139,10 @@ def formatResult(
         f_caveats = '[' + caveats + ']' # +1 space created later by join
         character_count = len_result() + len(f_caveats) + 1
 
-        # If caveats are the last items the user wants printed, or -e (extra_info) is
-        # called, allow caveats to consume available character count beyond options.term_cols.
+        # If caveats are the last items the user wants printed, allow caveats to
+        # consume available character count beyond options.term_cols.
         # Else, we trim caveats:
-        if term_format[-1] != 'c' and not options.extra_info and character_count > options.term_cols:
+        if term_format[-1] != "c" and character_count > options.term_cols:
             over_by_amount = character_count - options.term_cols
             f_caveats = '[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]'
 
@@ -180,13 +180,8 @@ def formatJobResult(
     if status_message:
         status_message = joint_status.message if joint_status.message else joint_status.status
 
-        # Add caveats with extra info
-        if job.isPass() and options.extra_info:
-            for check in options._checks.keys():
-                if job.specs.isValid(check) and not 'ALL' in job.specs[check]:
-                    job.addCaveats(check)
         # Format failed messages
-        elif job.isFail():
+        if job.isFail():
             status_message = f'FAILED ({status_message})'
     # Otherwise, just use the status itself
     else:
@@ -256,13 +251,6 @@ def getCapabilities(exe):
         print(e.stdout)
         sys.exit(1)
     return parseMOOSEJSON(output, '--show-capabilities')
-
-def getCapability(exe, name):
-    """
-    Get the value of a capability from a MOOSE application
-    """
-    value = getCapabilities(exe).get(name)
-    return None if value is None else value[0]
 
 def getCapabilityOption(supported: dict,
                         name: str,
@@ -354,18 +342,6 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
         raise Exception(f'Failed to find JSON header and footer from {context}')
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
-
-
-def getRegisteredApps(capabilities: dict) -> list[str]:
-    """Get a list of registered applications."""
-    apps = []
-    for value, doc in capabilities.values():
-        search = re.search(r"MOOSE application ([a-zA-Z0-9_]+) is available.", doc)
-        if search:
-            assert value is True
-            apps.append(search[1])
-    return apps
-
 
 def checkOutputForPattern(output, re_pattern):
     """
