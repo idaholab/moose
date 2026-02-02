@@ -230,7 +230,9 @@ EquationSystem::ApplyEssentialBCs()
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
-    mfem::ParGridFunction & trial_gf = *_var_ess_constraints.at(i);
+    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    _global_ess_markers = 0;
 
     // Make sure we update the size, if this mesh has changed recently for instance
     trial_gf.Update();
@@ -238,12 +240,17 @@ EquationSystem::ApplyEssentialBCs()
     // Initial guess for non-linear problems (initial condition or the previous time step solution)
     trial_gf = _gfuncs->GetRef(trial_var_name);
 
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
-    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the global_ess_markers array
-    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    if (!_is_eigensolve)
+    {
+      // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+      // essential boundaries to the global_ess_markers array
+      ApplyEssentialBC(trial_var_name, trial_gf, _global_ess_markers);
+      trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(i));
+    }
+    else
+    {
+      trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
+    }
   }
 }
 
@@ -272,9 +279,10 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   {
     if (_is_eigensolve)
     {
-      mooseAssert(
-            _test_var_names.size() == 1 && (_test_var_names.size() == _trial_var_names.size()) && (_test_var_names.at(0) == _trial_var_names.at(0)),
-            "Eigensolve is only supported for single-variable, square systems");
+      mooseAssert(_test_var_names.size() == 1 &&
+                      (_test_var_names.size() == _trial_var_names.size()) &&
+                      (_test_var_names.at(0) == _trial_var_names.at(0)),
+                  "Eigensolve is only supported for single-variable, square systems");
 
       FormEigensolverMatrix(op, trueX, trueRHS);
     }
@@ -283,11 +291,9 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   }
   else
   {
-    mooseAssert(_test_var_names.size() == 1 &&
-          _test_var_names.size() == _trial_var_names.size(),
-          "Non-legacy assembly is only supported for single test and trial variable systems");
-    mooseAssert(!_is_eigensolve,
-                  "Eigensolve is not supported for non-legacy assembly");
+    mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+                "Non-legacy assembly is only supported for single test and trial variable systems");
+    mooseAssert(!_is_eigensolve, "Eigensolve is not supported for non-legacy assembly");
 
     FormSystemOperator(op, trueX, trueRHS);
   }
@@ -295,19 +301,15 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
 
 void
 EquationSystem::FormEigensolverMatrix(mfem::OperatorHandle & op,
-                                        mfem::BlockVector & /*trueX*/,
-                                        mfem::BlockVector & /*trueRHS*/)
+                                      mfem::BlockVector & /*trueX*/,
+                                      mfem::BlockVector & /*trueRHS*/)
 {
-  mooseAssert(_lfs.size() == 0, "Eigenvalue problems cannot contain linear forms");
-
   auto & test_var_name = _test_var_names.at(0);
   auto blf = _blfs.Get(test_var_name);
-  
-  blf->EliminateEssentialBCDiag(_ess_tdof_lists.at(0), 1.0);
-  blf->Finalize();
 
+  blf->EliminateEssentialBCDiag(_global_ess_markers, 1.0);
+  blf->Finalize();
   op.Reset(blf->ParallelAssemble());
-  //blf->SetOperatorOwner(false);
 }
 
 void
