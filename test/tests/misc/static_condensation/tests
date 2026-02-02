@@ -35,9 +35,8 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestStaticCondensation
-    capabilities = "method!=dbg"
+    capabilities = 'method!=dbg & installation_type=in_tree'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     valgrind = 'none'
     max_threads = 1
   []

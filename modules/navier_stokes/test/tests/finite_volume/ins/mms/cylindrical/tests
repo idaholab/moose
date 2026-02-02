@@ -19,7 +19,6 @@
     min_parallel = 2
     requirement = 'The system shall recover the manufactured analytic solution for an axisymmetric FV solve of the Navier Stokes equations with space-dependent material properties and the symmetric stress tensor without the bulk term.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
   []
   [rz-viscous-source-physics]
     type = PythonUnitTest
@@ -29,6 +28,5 @@
     min_parallel = 2
     requirement = 'Physics system syntax shall recover the manufactured axisymmetric solution when the automatic RZ viscous source term is enabled.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
   []
 []

@@ -7,7 +7,6 @@
     test_case = TestDiffusion1D
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -17,7 +16,6 @@
     test_case = TestDiffusion1DNeumann
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain using Neumann boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -27,7 +25,6 @@
     test_case = TestDiffusion2DOrthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -37,7 +34,6 @@
     test_case = TestDiffusion2DNonorthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -47,7 +43,6 @@
     test_case = TestDiffusion2DOrthogonalNeumann
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh for Neumann boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -57,7 +52,6 @@
     test_case = TestDiffusion2DNonorthogonalNeumann
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh for Neumann boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -67,7 +61,6 @@
     test_case = TestDiffusion2DRZOrthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on an orthogonal mesh in cylindrical coordinate system.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []
@@ -77,7 +70,6 @@
     test_case = TestDiffusion2DRZNonorthogonal
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on nonorthogonal mesh in cylindrical coordinate system.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method=opt'
   []

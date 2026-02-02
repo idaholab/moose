@@ -1230,6 +1230,43 @@ MooseApp::registerCapabilities()
     addCapability("platform", "unix", doc);
 #endif
   }
+
+  // Installation type (in tree or installed)
+  {
+    // Try to find the path to the running executable
+    std::optional<std::string> executable_path;
+    {
+      Moose::ScopedThrowOnError scoped_throw_on_error;
+      try
+      {
+        executable_path = Moose::getExec();
+      }
+      catch (const MooseException &)
+      {
+      }
+    }
+
+    if (!executable_path)
+      mooseDoOnce(mooseWarning("Failed to determine executable path"));
+    else
+    {
+      // Try to follow all symlinks to get the real path
+      std::error_code ec;
+      const auto resolved_path =
+          std::filesystem::weakly_canonical(std::filesystem::path(*executable_path), ec);
+      if (ec)
+        mooseDoOnce(mooseWarning("Failed to determine executable path:\n\n", ec.message()));
+      else
+      {
+        // If the binary is in a folder "bin", we'll consider it installed.
+        // This isn't the best check, but it works with how we currently
+        // install applications in app.mk
+        const auto value =
+            resolved_path.parent_path().filename() == "bin" ? "relocated" : "in_tree";
+        addCapability("installation_type", value, "The installation type of the application.");
+      }
+    }
+  }
 }
 
 MooseApp::~MooseApp()

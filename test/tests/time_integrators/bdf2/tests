@@ -30,7 +30,6 @@
       input = test.py
       test_case = TestNonlinearFV
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
     []
     [linear]
       detail = 'linear implementation.'
@@ -38,7 +37,6 @@
       input = test.py
       test_case = TestLinearFV
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
     []
   []
 []

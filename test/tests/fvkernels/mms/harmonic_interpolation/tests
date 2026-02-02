@@ -10,7 +10,6 @@
       detail = 'when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a regular tri mesh.'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
-      installation_type = in_tree # see #26480
       capabilities = 'method!=dbg'
     []
     [quads]
@@ -20,7 +19,6 @@
       detail = 'when using a simple arithmetic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
-      installation_type = in_tree # see #26480
       capabilities = 'method!=dbg'
     []
   []
@@ -33,7 +31,6 @@
       detail = 'close to second order convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a regular tri mesh.'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
-      installation_type = in_tree # see #26480
       capabilities = 'method!=dbg'
     []
     [quads]
@@ -43,7 +40,6 @@
       detail = 'second order convergence, when using a simple harmonic average to determine the face values of discontinuous diffusion coefficients on a quad mesh.'
       required_python_packages = 'pandas matplotlib'
       valgrind = none
-      installation_type = in_tree # see #26480
       capabilities = 'method!=dbg'
     []
   []

@@ -26,9 +26,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestMonomialTri
-      capabilities = "method!=dbg"
+      capabilities = 'method!=dbg'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
       valgrind = 'none'
       detail = 'simplex elements with a monomial basis for the interior variable,'
     []
@@ -36,9 +35,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestMonomialQuad
-      capabilities = "method!=dbg"
+      capabilities = 'method!=dbg'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
       valgrind = 'none'
       detail = 'tensor-product elements with a monomial basis for the interior variable,'
     []
@@ -46,9 +44,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestLagrangeTri
-      capabilities = "method!=dbg"
+      capabilities = 'method!=dbg'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
       valgrind = 'none'
       detail = 'simplex elements with a L2 lagrange basis for the interior variable,'
     []
@@ -56,9 +53,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestLagrangeQuad
-      capabilities = "method!=dbg"
+      capabilities = 'method!=dbg'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
       valgrind = 'none'
       detail = 'tensor-product elements with a L2 lagrange basis for the interior variable,'
     []
@@ -66,9 +62,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestHierarchicTri
-      capabilities = "method!=dbg"
+      capabilities = 'method!=dbg'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
       valgrind = 'none'
       detail = 'simplex elements with a L2 hierarchic basis for the interior variable, and'
     []
@@ -76,9 +71,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestHierarchicQuad
-      capabilities = "method!=dbg"
+      capabilities = 'method!=dbg'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
       valgrind = 'none'
       detail = 'tensor-product elements with a L2 hierarchic basis for the interior variable.'
     []

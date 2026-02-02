@@ -6,66 +6,60 @@
     type = Exodiff
     input = image_2d.i
     exodiff = image_2d_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall include the ability to define a function based on a 2D image and "
                   "initialize a nodal variable."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [2d_elemental]
     # Test ability to read in a single 20x20 image
     type = Exodiff
     input = image_2d_elemental.i
     exodiff = image_2d_elemental_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall include the ability to define a function based on a 2D image and "
                   "initialize a elemental variable."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [3d]
     # Test ability to read in stack of 20x20 images
     type = Exodiff
     input = image_3d.i
     exodiff = image_3d_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall include the ability to define a function based on a stack of images "
                   "and initialize a nodal variable."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [3d_subset]
     # Test ability to read a subset of of 20x20 image stack
     type = Exodiff
     input = image_3d_subset.i
     exodiff = image_3d_subset_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall include the ability to define a function based on a subset stack of "
                   "images and initialize a nodal variable."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [threshold]
     # Test the ability to threshold the image
     type = Exodiff
     input = threshold.i
     exodiff = threshold_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall allow the image data within the ImageFunction object to be set as one of two "
                   "values based on a threshold value."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [threshold_adapt]
     # Test the ability to threshold the image and adapt
     type = Exodiff
     input = threshold_adapt.i
     exodiff = threshold_adapt_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of initializing a variable from image data and perform "
                   "initial adaptivity based on the data."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [threshold_adapt_parallel]
     # Test the ability to threshold the image and adapt
@@ -75,12 +69,11 @@
     cli_args = Outputs/exodus=true
     min_parallel = 3
     max_parallel = 3
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     recover = false
     requirement = "The system shall be capable of initializing a variable from image data and perform "
                   "initial adaptivity based on the data, in parallel."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [threshold_adapt_parallel_check_files]
     # Test the ability to threshold the image and adapt
@@ -111,89 +104,81 @@
     type = Exodiff
     input = shift_and_scale.i
     exodiff = shift_and_scale_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of shifting and scaling the supplied "
                   "image data to the ImageFunction object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [subset]
     # Test the image may be a subset of the domain
     type = Exodiff
     input = subset.i
     exodiff = subset_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of operating on domains that are larger "
                   "than the image size in the ImageFunction object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [flip]
     # Test the flipping feature
     type = Exodiff
     input = flip.i
     exodiff = flip_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of flipping image data along the vertical "
                   "axis in the ImageFunction object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [flip_dual]
     # Tests the flipping and images on subdomains
     type = Exodiff
     input = flip_dual.i
     exodiff = flip_dual_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of flipping image data along vertical "
                   "axis and shifting the origin using the ImageFunction object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [flip_quad]
     # Tests the flipping and images on subdomains
     type = Exodiff
     input = flip_quad.i
     exodiff = flip_quad_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of flipping image data along vertical and "
                   "horizontal axis within the ImageFunction object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [crop]
     # Tests ability for mesh to be a subset of image
     type = Exodiff
     input = crop.i
     exodiff = crop_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     requirement = "The system shall be capable of operating on domains that are "
                   "smaller than the image size within the ImageFunction object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [image_mesh_3d]
     # Tests ability to read a stack of 3D images into a Mesh
     type = Exodiff
     input = image_mesh_3d.i
     exodiff = image_mesh_3d_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     design = 'source/mesh/ImageMesh.md'
     requirement = "The system shall be capable of generating a 3D mesh based on a stack of "
                   "2D images using the ImageMesh object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [image_mesh_2d]
     # Tests ability to read a 2D image into a Mesh
     type = Exodiff
     input = image_mesh_2d.i
     exodiff = image_mesh_2d_out.e
-    capabilities = 'vtk'
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'vtk & machine=x86_64'
     design = 'source/mesh/ImageMesh.md'
     requirement = "The system shall be capable of generating a 2D mesh based on an image using the ImageMesh object."
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
   [moose_logo]
     # Tests ability to shift and scale separately

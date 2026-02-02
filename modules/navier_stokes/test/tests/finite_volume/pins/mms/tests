@@ -9,7 +9,6 @@
     capabilities = 'method!=dbg'
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [rc-no-diffusion]
     type = PythonUnitTest
@@ -19,7 +18,6 @@
     capabilities = 'method!=dbg'
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [rc-no-diffusion-strong-bc]
     type = PythonUnitTest
@@ -29,7 +27,6 @@
     capabilities = 'method!=dbg'
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [rc-2d]
     type = PythonUnitTest
@@ -40,6 +37,5 @@
     min_parallel = 16
     required_python_packages = 'pandas matplotlib'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 []

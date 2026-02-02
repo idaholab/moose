@@ -35,7 +35,6 @@
       test_case = TestFVOneVarDiffusionInterface
       detail = 'with an interfacing object'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
     []
     [without-ik]
       type = PythonUnitTest
@@ -43,7 +42,6 @@
       test_case = TestFVNoInterface
       detail = 'without an interfacing object'
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
     []
   []
   [harmonic]
@@ -55,7 +53,6 @@
     input = test.py
     test_case = TestFVOneVarDiffusionInterfaceHarmonic
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
   []
   [resid_and_jac]
     requirement = 'The system shall be able to compute the residual and Jacobian together for a finite volume interface kernel.'

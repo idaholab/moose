@@ -8,7 +8,6 @@
     test_case = TestDiffusion1DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 1D steady diffusion equation, which shall be solved numerically using a linear finite volume system with Robin boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -18,7 +17,6 @@
     test_case = TestAdvection1DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 1D steady advection equation, which shall be solved numerically in a linear finite volume system with Robin boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -28,7 +26,6 @@
     test_case = TestDiffusion2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically using a linear finite volume system with Robin boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -38,7 +35,6 @@
     test_case = TestAdvection2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically using a linear finite volume system with Robin boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -48,7 +44,6 @@
     test_case = TestDiffusion2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically on non-orthogonal cells using a linear finite volume system with Robin boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
 
@@ -58,7 +53,6 @@
     test_case = TestAdvection2DRobin
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically on non-orthogonal cells using a linear finite volume system with Robin boundary conditions.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
 []

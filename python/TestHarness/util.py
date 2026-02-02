@@ -218,22 +218,17 @@ def formatJobResult(
 # it messes up the trac output.
 # supports weirded html for more advanced coloring schemes. \verbatim<r>,<g>,<y>,<b>\endverbatim All colors are bolded.
 
-def getPlatforms():
-    # We'll use uname to figure this out.  platform.uname() is available on all platforms
-    #   while os.uname() is not (See bugs.python.org/issue8080).
-    # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
-    platforms = set(['ALL'])
+
+def getPlatform():
     raw_uname = platform.uname()
     if raw_uname[0].upper() == 'DARWIN':
-        platforms.add('DARWIN')
-    else:
-        platforms.add(raw_uname[0].upper())
-    return platforms
+        return "darwin"
+    return raw_uname[0].lower()
+
 
 def getMachine():
-    machine = set(['ALL'])
-    machine.add(platform.machine().upper())
-    return machine
+    return platform.machine().lower()
+
 
 def outputHeader(header, ending=True):
     """
@@ -317,36 +312,23 @@ def checkCapabilities(supported: dict, requested: str, certain):
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
     # We need to detect this condition
-    shared_option = set(['ALL'])
-
     libtool = os.path.join(libmesh_dir, "contrib", "bin", "libtool")
-    f = open(libtool, "r")
+    with open(libtool, "r") as f:
+        for line in f:
+            try:
+                (key, value) = line.rstrip().split("=", 2)
+            except Exception:
+                continue
 
-    found = False
-    for line in f:
-        try:
-            (key, value) = line.rstrip().split("=", 2)
-        except Exception as e:
-            continue
+            if key == "build_libtool_libs":
+                if value == "yes":
+                    return "dynamic"
+                if value == "no":
+                    return "static"
 
-        if key == 'build_libtool_libs':
-            if value == 'yes':
-                shared_option.add('DYNAMIC')
-                found = True
-                break
-            if value == 'no':
-                shared_option.add('STATIC')
-                found = True
-                break
-
-    f.close()
-
-    if not found:
-        # Neither no nor yes?  Not possible!
-        print("Error! Could not determine whether shared libraries were built.")
-        exit(1)
-
-    return shared_option
+    # Neither no nor yes?  Not possible!
+    print("Error! Could not determine whether shared libraries were built.")
+    exit(1)
 
 def getInitializedSubmodules(root_dir):
     """
@@ -363,18 +345,6 @@ def getInitializedSubmodules(root_dir):
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
     return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
 
-def checkInstalled(executable, app_name):
-    """
-    Read resource file and determine if binary was relocated
-    """
-    option_set = set(['ALL'])
-    if executable:
-        resource_content = readResourceFile(executable, app_name)
-    else:
-        resource_content = {}
-    option_set.add(resource_content.get('installation_type', 'ALL').upper())
-    return option_set
-
 def parseMOOSEJSON(output: str, context: str) -> dict:
     try:
         output = output.split('**START JSON DATA**\n')[1]
@@ -385,24 +355,17 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
 
-def readResourceFile(exe, app_name):
-    resource_path = os.path.join(os.path.dirname(os.path.abspath(exe)),
-                                 f'{app_name}.yaml')
-    if os.path.exists(resource_path):
-        try:
-            with open(resource_path, 'r', encoding='utf-8') as stream:
-                return yaml.safe_load(stream)
-        except yaml.YAMLError:
-            print(f'resource file parse failure: {resource_path}')
-            sys.exit(1)
-    return {}
 
-def getRegisteredApps(exe, app_name):
-    """
-    Gets a list of registered applications
-    """
-    resource_content = readResourceFile(exe, app_name)
-    return resource_content.get('registered_apps', [])
+def getRegisteredApps(capabilities: dict) -> list[str]:
+    """Get a list of registered applications."""
+    apps = []
+    for value, doc in capabilities.values():
+        search = re.search(r"MOOSE application ([a-zA-Z0-9_]+) is available.", doc)
+        if search:
+            assert value is True
+            apps.append(search[1])
+    return apps
+
 
 def checkOutputForPattern(output, re_pattern):
     """

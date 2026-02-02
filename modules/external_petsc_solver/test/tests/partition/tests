@@ -11,8 +11,7 @@
     min_parallel = 2
     max_parallel = 2
     allow_warnings = true
-    capabilities = 'petsc>=3.8.0'
-    library_mode = 'DYNAMIC'
+    capabilities = 'petsc>=3.8.0 & library_mode=dynamic'
   []
 
   [2D_3]
@@ -24,8 +23,7 @@
     min_parallel = 3
     max_parallel = 3
     allow_warnings = true
-    capabilities = 'petsc>=3.8.0'
-    library_mode = 'DYNAMIC'
+    capabilities = 'petsc>=3.8.0 & library_mode=dynamic'
   []
 
   [2D_4]
@@ -37,8 +35,7 @@
     min_parallel = 4
     max_parallel = 4
     allow_warnings = true
-    capabilities = 'petsc>=3.8.0'
-    library_mode = 'DYNAMIC'
+    capabilities = 'petsc>=3.8.0 & library_mode=dynamic'
   []
 
   [2D_6]
@@ -50,7 +47,6 @@
     min_parallel = 6
     max_parallel = 6
     allow_warnings = true
-    capabilities = 'petsc>=3.8.0'
-    library_mode = 'DYNAMIC'
+    capabilities = 'petsc>=3.8.0 & library_mode=dynamic'
   []
 []

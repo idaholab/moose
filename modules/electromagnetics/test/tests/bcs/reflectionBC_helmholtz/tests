@@ -7,6 +7,6 @@
     design = 'EMRobinBC.md'
     issues = '#21098'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
   []
 []

@@ -17,7 +17,9 @@ class TestHarnessTester(TestHarnessTestCase):
         Test which only runs if binary is installed
         """
         mock_check_installed.return_value = set(['ALL', 'INSTALLED'])
-        out = self.runTests('-i', 'install_type', '-c', no_capabilities=False).output
+        out = self.runTests(
+            "-i", "install_type", "-c", minimal_capabilities=True
+        ).output
         self.assertRegex(out, r'tests\/test_harness\.in_tree_type[\s.]+\[TEST REQUIRES "IN_TREE" BINARY\]\s+SKIP')
         self.assertRegex(out, r'tests\/test_harness\.installed_type[\s.]+OK')
         self.assertRegex(out, r'tests\/test_harness\.all_type[\s.]+OK')
@@ -28,7 +30,9 @@ class TestHarnessTester(TestHarnessTestCase):
         Test which only runs if binary is in_tree
         """
         mock_check_installed.return_value = set(['ALL', 'IN_TREE'])
-        out = self.runTests('-i', 'install_type', '-c', no_capabilities=False).output
+        out = self.runTests(
+            "-i", "install_type", "-c", minimal_capabilities=True
+        ).output
         self.assertRegex(out, r'tests\/test_harness\.in_tree_type[\s.]+OK')
         self.assertRegex(out, r'tests\/test_harness\.installed_type[\s.]+\[TEST REQUIRES "INSTALLED" BINARY\]\s+SKIP')
         self.assertRegex(out, r'tests\/test_harness\.all_type[\s.]+OK')

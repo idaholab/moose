@@ -46,30 +46,35 @@ class TestRequireCapability(TestHarnessTestCase):
         Test that the test harness will set the _required_capabilities option
         """
         # No capabilities set, can't run
-        with self.assertRaisesRegex(SystemExit, 'Cannot use --only-tests-that-require with --no-capabilities'):
-            self.runTests('--only-tests-that-require', 'petsc', no_capabilities=True)
+        with self.assertRaisesRegex(
+            SystemExit,
+            "Cannot use --only-tests-that-require with --minimal-capabilities",
+        ):
+            self.runTests(
+                "--only-tests-that-require", "petsc", minimal_capabilities=True
+            )
 
         # Not registered
         with self.assertRaisesRegex(SystemExit, 'Required capability "foo" is not registered'):
-            self.runTests('--only-tests-that-require', 'foo', no_capabilities=False)
+            self.runTests("--only-tests-that-require", "foo", minimal_capabilities=True)
 
         # Is registered and is set
         res = self.runTests(
-            '--only-tests-that-require',
-            'moosetestapp',
-            no_capabilities=False,
-            run=False
+            "--only-tests-that-require",
+            "moosetestapp",
+            minimal_capabilities=True,
+            run=False,
         )
         self.assertEqual(res.harness.options._required_capabilities, [('moosetestapp', False)])
 
         # Multiple
         res = self.runTests(
-            '--only-tests-that-require',
-            'moosetestapp',
-            '--only-tests-that-require',
-            '!compiler',
-            no_capabilities=False,
-            run=False
+            "--only-tests-that-require",
+            "moosetestapp",
+            "--only-tests-that-require",
+            "!compiler",
+            minimal_capabilities=True,
+            run=False,
         )
         self.assertEqual(
             res.harness.options._required_capabilities,
@@ -94,7 +99,7 @@ class TestRequireCapability(TestHarnessTestCase):
             args = []
             for v in require_capabilities:
                 args += ['--only-tests-that-require', v]
-            res = self.runTests(*args, tests=tests, no_capabilities=False)
+            res = self.runTests(*args, tests=tests, minimal_capabilities=True)
             job = self.getJobWithName(res.harness, test_name)
             if skip:
                 self.assertEqual(job.getStatus(), StatusSystem.skip)

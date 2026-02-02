@@ -16,7 +16,7 @@
       valgrind = none
       recover = false
       # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
+      capabilities = 'installation_type=in_tree'
     []
     [Newton]
       detail = " matrix free hessian and Newton algorithm"
@@ -29,7 +29,7 @@
       max_threads = 1
       recover = false
       # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
+      capabilities = 'installation_type=in_tree'
     []
   []
 []

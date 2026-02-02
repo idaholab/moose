@@ -8,7 +8,6 @@
     requirement = 'The system shall display first order convergence with regular face averaging in an advection diffusion problem.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    installation_type = in_tree # see #26480
     capabilities = 'method!=dbg'
   []
   [skewcorrected]
@@ -18,7 +17,6 @@
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion term in an advection diffusion problem.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    installation_type = in_tree # see #26480
     capabilities = 'method!=dbg'
   []
   [skewcorrected-advection]
@@ -28,7 +26,6 @@
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion and advection terms in an advection diffusion problem.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    installation_type = in_tree # see #26480
     capabilities = 'method!=dbg'
   []
 []

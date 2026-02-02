@@ -61,13 +61,16 @@ class TestHarnessTestCase(unittest.TestCase):
         self.addCleanup(patcher.stop)
         self.mock_run_cmd = patcher.start()
 
-    def runTests(self, *args,
-                 tmp_output: bool = True,
-                 no_capabilities: bool = True,
-                 capture_results: bool = True,
-                 exit_code: int = 0,
-                 run: bool = True,
-                 tests: Optional[dict[str, dict]] = None) -> RunTestsResult:
+    def runTests(
+        self,
+        *args,
+        tmp_output: bool = True,
+        minimal_capabilities: bool = False,
+        capture_results: bool = True,
+        exit_code: int = 0,
+        run: bool = True,
+        tests: Optional[dict[str, dict]] = None,
+    ) -> RunTestsResult:
         """
         Helper for running tests
 
@@ -75,13 +78,13 @@ class TestHarnessTestCase(unittest.TestCase):
             Command line arguments to pass to the test harness
         Keyword arguments:
             tmp_output: Set to store output separately using the -o option in a temp directory
-            no_capabilities: Set to run without capabilities (--no-capabilities)
+            minimal_capabilities: Set to run with minimal capabilities (--minimal-capabilities)
             capture_results: Set to capture on-screen results
             exit_code: Exit code to check against
             tests: Test spec (dict of str -> params) to run instead
         """
         argv = ['unused'] + list(args) + ['--term-format', 'njCst']
-        if no_capabilities:
+        if minimal_capabilities:
             argv += ['--no-capabilities']
 
         test_root = TEST_DIR

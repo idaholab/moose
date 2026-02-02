@@ -8,7 +8,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a Newton solver with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     capabilities = 'method!=dbg'
   []
   [newton-deviatoric]
@@ -18,7 +17,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a Newton solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     capabilities = 'method!=dbg'
   []
   [snl]
@@ -28,7 +26,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver, with the nonlinear finite volume discretization, with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     capabilities = 'method!=dbg'
   []
   [snl-deviatoric]
@@ -38,7 +35,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver, with the nonlinear finite volume discretization, with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     capabilities = 'method!=dbg'
   []
   [sl]
@@ -48,7 +44,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver with space-dependent viscosity without the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method!=dbg'
   []
@@ -59,7 +54,6 @@
     min_parallel = 4
     requirement = 'The system shall be able to converge to analytic solutions using a SIMPLE solver with space-dependent viscosity with the inclusion of the deviatoric stress tensor.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808
     capabilities = 'method!=dbg'
   []

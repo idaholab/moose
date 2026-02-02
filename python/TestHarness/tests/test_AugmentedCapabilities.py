@@ -33,7 +33,9 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 if case.params:
                     test_spec[test_name].update(case.params)
 
-            result = self.runTests(*cli_args, tests=test_spec, no_capabilities=False)
+            result = self.runTests(
+                *cli_args, tests=test_spec, minimal_capabilities=True
+            )
             harness = result.harness
 
             for i, options in enumerate(cases):

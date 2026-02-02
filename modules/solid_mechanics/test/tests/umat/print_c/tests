@@ -5,7 +5,8 @@
     type = 'RunApp'
     input = 'print_c.i'
     cli_args = "Materials/active='umat'"
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     expect_out = 'stran 0 = -?0.0000000\nstran 1 = -?0.0000000\nstran 2 = -?0.0000000\nstran 3 = '
                  '0.0000000\nstran 4 = -?0.0000000\nstran 5 = -?0.0000000\ndstran 0 = '
@@ -29,8 +30,6 @@
                   'STRAN, DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, '
                   'DFGRD1, NOEL, NPT, and KINC, when a single element is subjected to axial loading. '
                   'Values are checked against verified references '
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [print_compare_c]
     type = 'Exodiff'
@@ -39,8 +38,8 @@
     exodiff = 'print_compare_c_out.e'
     requirement = 'The system shall generate identical numerical results regardless of whether the UMAT '
                   'interface is written in Fortran or C. Generation of reference results.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    # installation_type=in_tree: see #25279
+    capabilities = 'installation_type=in_tree'
   []
   [print_compare_f]
     type = 'Exodiff'
@@ -49,8 +48,8 @@
     exodiff = 'print_compare_c_out.e'
     requirement = 'The system shall generate identical numerical results regardless of whether the UMAT '
                   'interface is written in Fortran or C. Verification.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    # installation_type=in_tree: see #25279
+    capabilities = 'installation_type=in_tree'
   []
   [print_eigen]
     type = 'RunApp'
@@ -59,7 +58,7 @@
     expect_out = 'Eigenvalues 0 769.231\nEigenvalues 1 2500\nEigenvalues 2 769.231\nEigenvalues 3 '
                  '384.615\nEigenvalues 4 384.615\nEigenvalues 5 384.615\n'
     requirement = 'The system shall allow for the correct use of Eigen matrices in C UMAT functions.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    # installation_type=in_tree: see #25279
+    capabilities = 'installation_type=in_tree'
   []
 []

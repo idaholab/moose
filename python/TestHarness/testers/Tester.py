@@ -109,29 +109,14 @@ class Tester(MooseObject, OutputInterface):
             "A list of micro architectures for which this test will run on. ('ALL', 'X86_64', 'ARM64')",
         )
         params.addParam(
-            "compiler",
-            ["ALL"],
-            "A list of compilers for which this test is valid on. ('ALL', 'GCC', 'INTEL', 'CLANG')",
-        )
-        params.addParam(
             "mesh_mode",
             ["ALL"],
             "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')",
         )
         params.addParam(
-            "library_mode",
-            ["ALL"],
-            "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')",
-        )
-        params.addParam(
             "recover", True, "A test that runs with '--recover' mode enabled"
         )
         params.addParam("restep", True, "A test that can run with --test-restep")
-        params.addParam(
-            "installation_type",
-            ["ALL"],
-            "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')",
-        )
         params.addParam(
             "expect_exit_code", 0, "An integer exit code to expect from the test"
         )
@@ -275,10 +260,13 @@ class Tester(MooseObject, OutputInterface):
     capability_params: list[Tuple[str, Optional[str]]] = [
         ("boost", "boost"),
         ("chaco", "chaco"),
+        ("compiler", "compiler"),
         ("dof_id_bytes", "dof_id_bytes"),
         ("exodus_version", "exodus"),
         ("fparser_jit", "fparser"),
+        ("installation_type", "installation_type"),
         ("libpng", "libpng"),
+        ("library_mode", "library_mode"),
         ("libtorch", "libtorch"),
         ("libtorch_version", "libtorch"),
         ("min_ad_size", "ad_size"),
@@ -829,41 +817,22 @@ class Tester(MooseObject, OutputInterface):
         reasons = {}
         checks = options._checks
 
+        assert isinstance(options._capabilities, dict)
+
         # augment capabilities of the application with specs of the current tester
-        if options._capabilities is not None:
-            capabilities = options._capabilities.copy()
+        capabilities = options._capabilities.copy()
 
-            def augment(key, val_doc):
-                if key in capabilities:
-                    raise ValueError(
-                        f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug."
-                    )
-                capabilities[key] = val_doc
-
-            # NOTE: If you add to this list, add the capability name as a reserved
-            # capability within MooseApp::checkReservedCapability()
-            augment(
-                "scale_refine",
-                [options.scaling, "The number of refinements to do when scaling"],
-            )
-            if options.valgrind_mode == "":
-                augment("valgrind", [False, "Not running with valgrind"])
-            else:
-                augment(
-                    "valgrind",
-                    [options.valgrind_mode.lower(), "Performing valgrind testing"],
+        def augment(key, val_doc):
+            if key in capabilities:
+                raise ValueError(
+                    f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug."
                 )
-            augment("recover", [options.enable_recover, "Recover testing"])
-            augment("restep", [options.enable_restep, "Restep testing"])
-            augment(
-                "heavy",
-                [options.all_tests or options.heavy_tests, "Running with heavy tests"],
-            )
-            augment("mpi_procs", [self.getProcs(options), "Number of MPI processes"])
-            augment("num_threads", [self.getThreads(options), "Number of threads"])
-            augment("compute_device", [options.compute_device, "Compute device"])
-        else:
-            capabilities = None
+            capabilities[key] = val_doc
+
+        # NOTE: If you add to this list, add the capability name as a reserved
+        # capability within MooseApp::checkReservedCapability()
+        augment("mpi_procs", [self.getProcs(options), "Number of MPI processes"])
+        augment("num_threads", [self.getThreads(options), "Number of threads"])
 
         # If something has already deemed this test a failure
         if self.isFail():
@@ -972,11 +941,7 @@ class Tester(MooseObject, OutputInterface):
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = [
-            "platform",
-            "machine",
-            "compiler",
             "mesh_mode",
-            "library_mode",
         ]
 
         for check in local_checks:
@@ -1005,16 +970,6 @@ class Tester(MooseObject, OutputInterface):
                     + ", ".join(test_platforms)
                 )
 
-        # Check for binary location
-        if (
-            self.specs["installation_type"]
-            and self.specs["installation_type"][0].upper()
-            not in checks["installation_type"]
-        ):
-            reasons["installation_type"] = (
-                f'test requires "{self.specs["installation_type"][0]}" binary'
-            )
-
         # Check for heavy tests
         if options.all_tests or options.heavy_tests:
             if not self.specs["heavy"] and options.heavy_tests:
@@ -1026,12 +981,6 @@ class Tester(MooseObject, OutputInterface):
         for file in self.specs["depend_files"]:
             if not os.path.isfile(os.path.join(self.specs["base_dir"], file)):
                 reasons["depend_files"] = "DEPEND FILES"
-
-        # We extract the registered apps only if we need them
-        if self.specs["required_applications"] and checks["registered_apps"] is None:
-            checks["registered_apps"] = util.getRegisteredApps(
-                self.specs["executable"], self.specs["app_name"]
-            )
 
         # Check to see if we have the required application names
         for var in self.specs["required_applications"]:

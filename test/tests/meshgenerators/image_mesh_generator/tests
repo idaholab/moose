@@ -29,10 +29,9 @@
       type = Exodiff
       input = image_3d.i
       exodiff = image_3d_out.e
-      capabilities = 'vtk'
+      # machine=x86_64: #26848; clang 16 apple silicon not compatible
+      capabilities = 'vtk & machine=x86_64'
       detail = "3D images."
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
     []
   []
 []
