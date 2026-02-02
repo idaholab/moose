@@ -5,7 +5,8 @@
 ## Overview
 
 This class performs accurate interpolation of scalar and vector quantities at a
-set of specified points using MFEM's `FindPointsGSLIB` `gslib` interpolation.
+set of specified points using MFEM's
+[`FindPointsGSLIB`](https://mfem.org/howto/findpts/) `gslib` interpolation.
 
 ## Example Input File Syntax
 
