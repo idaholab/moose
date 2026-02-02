@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#32288'
+  design = 'SolutionUserObject.md'
+
+  [discontinuous_value_solution_uo_p1]
+    type = 'RunApp'
+    input = 'discontinuous_value_solution_uo_p1.i'
+    cli_args = "Outputs/nemesis=true Outputs/exodus=false"
+    requirement = 'The system shall be capable of writing out a solution file with both continuous and discontinuous fields for the purpose of verifying that ability to read those solutions back into a new simulation.'
+  []
+  [discontinuous_value_solution_uo_p2]
+    type = 'CSVDiff'
+    input = 'discontinuous_value_solution_uo_p2.i'
+    cli_args = "UserObjects/soln/nemesis=true"
+    csvdiff = 'discontinuous_value_solution_uo_p2.csv'
+    prereq = discontinuous_value_solution_uo_p1
+    requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
+  []
+
+  [write_nemesis_multiple_vars]
+    type = RunApp
+    input = "write_nemesis_initial.i"
+    # Create more than 1 timestep and more than 1 variable
+    cli_args = "Outputs/nemesis=true Outputs/exodus=false
+                AuxVariables/var1/initial_condition=2 AuxVariables/var2/initial_condition=1
+                AuxKernels/v1/type=FunctionAux AuxKernels/v1/variable=var1 AuxKernels/v1/function='2+t'
+                AuxKernels/v2/type=FunctionAux AuxKernels/v2/variable=var2 AuxKernels/v2/function='1+t'
+                Executioner/type=Transient Executioner/num_steps=10"
+    issues = "#31238"
+    requirement = "The system shall be capable of writing out an nemesis file with multiple variables."
+  []
+  [read_nemesis_multiple_vars]
+    type = Exodiff
+    input = "read_nemesis_multiple_vars.i"
+    cli_args = "UserObjects/soln/mesh=write_nemesis_initial_out.e UserObjects/soln/nemesis=true"
+    exodiff = "read_nemesis_multiple_vars_out.e"
+    prereq = "write_nemesis_multiple_vars"
+    issues = "#31238 #31747 #31767"
+    requirement = "The system shall be able to read in multiple variables from a previous nemesis file, loaded separately from the mesh file, leveraging caching and time step interpolation."
+  []
+[]
