@@ -67,7 +67,7 @@ def moose_fmu_step_by_step(
     *,
     rtol: float = 1e-6,
     atol: float = 1e-9,
-    time_tol: float | None = None,  # None -> auto dt/2
+    time_tol: float | None = None,  # None -> 1e-15
     step_csv: str = "run_fmu_step_by_step.csv",
 ):
     """Manual FMI 2.0 run + comparison with baseline CSV produced by simulate_moose_fmu()."""
