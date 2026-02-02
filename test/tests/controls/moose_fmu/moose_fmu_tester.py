@@ -7,11 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import logging
+import contextlib
 import os
 import shutil
 import sys
-import time
 
 import numpy as np
 import pandas as pd

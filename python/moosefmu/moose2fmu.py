@@ -27,7 +27,7 @@ import shlex
 import time
 from typing import Dict, Iterable, Optional, Set, Tuple, Union
 
-from moosecontrol import MooseControl
+from moosecontrol import MooseControl, SubprocessSocketRunner
 
 
 class Moose2FMU(Fmi2Slave):
