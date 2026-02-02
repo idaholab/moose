@@ -14,9 +14,8 @@
 #include "MFEMSolverBase.h"
 
 /**
- * Base class for eigensolvers. It needs to be templated due to the Hypre eigensolvers not deriving from mfem::HypreSolver.
+ * Base class for eigensolvers.
  */
-template <typename T>
 class MFEMEigensolverBase : public MFEMSolverBase
 {
 public:
@@ -24,26 +23,23 @@ public:
 
   MFEMEigensolverBase(const InputParameters & parameters);
 
-  /// Updates the solver with the given bilinear form and essential dof list.
-  virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
+  /// Retrieves the preconditioner userobject if present, sets the member pointer to
+  /// said object if still unset, and sets the solver to use this preconditioner.
+  template <typename T>
+  void setPreconditioner(T & solver);
+
+  /// Sets the operator for the eigensolver in derived classes
+  virtual void setOperator(mfem::Operator & op) = 0;
 
   /// Returns whether or not this solver is an eigensolver
   virtual bool isEigensolver() const override { return true; }
 
-  /// Solves the eigenvalue problem
-  virtual void Solve() override { _eigensolver->Solve(); }
+  /// Retrieves the computed eigenvalues
+  virtual void GetEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const = 0;
 
 protected:
-
-  /// Override in derived classes to construct and set the solver options.
-  virtual void constructSolver(const InputParameters &) override;
-
-  /// Eigensolver to be used for the problem
-  std::unique_ptr<T> _eigensolver;
-
   /// Mass matrix for eigensolver
   std::unique_ptr<mfem::HypreParMatrix> _M;
-
 };
 
 #endif

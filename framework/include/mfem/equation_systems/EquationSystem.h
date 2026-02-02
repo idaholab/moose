@@ -65,6 +65,9 @@ public:
   // Set whether the current solve is for an eigenvalue problem
   void setEigensolve(const bool is_eigensolve) { _is_eigensolve = is_eigensolve; }
 
+  // Retrieve the global essential boundary markers
+  mfem::Array<int> & getGlobalEssMarkers() { return _global_ess_markers; }
+
 protected:
   /// Add test variable to EquationSystem.
   virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
@@ -181,6 +184,7 @@ protected:
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
+  mfem::Array<int> _global_ess_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
   /// Arrays to store kernels to act on each component of weak form.
