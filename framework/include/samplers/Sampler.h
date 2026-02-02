@@ -259,6 +259,20 @@ protected:
   virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data);
 
   /**
+   * Return the number of stateless RNG draws to advance for the given seed index.
+   * Override in samplers that manage stateless sequences explicitly.
+   */
+  virtual std::size_t getStatelessAdvanceCount(unsigned int /*seed_index*/) const
+  {
+    return static_cast<std::size_t>(_n_rows) * _n_cols;
+  }
+
+  /**
+   * Hook for clearing any per-execute stateless advancement bookkeeping.
+   */
+  virtual void finalizeStatelessAdvance() {}
+
+  /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
    *
    * TODO: This should be updated if the If the random number generator is updated to type that

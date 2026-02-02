@@ -29,10 +29,8 @@ protected:
   virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix) override;
   virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data) override;
 
-  /**
-   * Advance stateless RNGs once per execute to match the sampling usage pattern.
-   */
-  virtual void executeTearDown() override;
+  virtual std::size_t getStatelessAdvanceCount(unsigned int seed_index) const override;
+  virtual void finalizeStatelessAdvance() override;
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;

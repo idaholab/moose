@@ -199,6 +199,8 @@ public:
     _randl_generator.advance(count);
     for (auto & [range, gen] : _randlb_generators)
       gen.advance(count);
+    for (auto & [size, gen] : _randlshuffle_generators)
+      gen.advance(count);
     _advance_count += count;
   }
 

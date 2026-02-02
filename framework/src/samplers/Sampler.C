@@ -185,11 +185,20 @@ Sampler::setNumberOfRandomSeeds(std::size_t n_seeds)
 void
 Sampler::execute()
 {
-  const bool advance_stateless =
-      _auto_advance_generators && _current_execute_flag != EXEC_PRE_MULTIAPP_SETUP;
+  const bool advance_stateless = _current_execute_flag != EXEC_PRE_MULTIAPP_SETUP;
+  const auto advance_stateless_generators = [this](const bool finalize)
+  {
+    for (unsigned int i = 0; i < _generators_stateless.size(); ++i)
+    {
+      const auto count = getStatelessAdvanceCount(i);
+      if (count > 0)
+        _generators_stateless[i]->advance(count);
+    }
+    if (finalize)
+      finalizeStatelessAdvance();
+  };
   if (advance_stateless && !_has_executed)
-    for (const auto & gen : _generators_stateless)
-      gen->advance(_n_rows * _n_cols);
+    advance_stateless_generators(false);
 
   executeSetUp();
   if (_needs_reinit)
@@ -203,8 +212,7 @@ Sampler::execute()
   saveGeneratorState();
 
   if (advance_stateless && _has_executed)
-    for (const auto & gen : _generators_stateless)
-      gen->advance(_n_rows * _n_cols);
+    advance_stateless_generators(true);
 
   executeTearDown();
   _has_executed = true;

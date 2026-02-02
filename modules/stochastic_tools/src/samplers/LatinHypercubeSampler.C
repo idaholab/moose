@@ -133,33 +133,30 @@ LatinHypercubeSampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
     _probabilities_ready = false;
 }
 
-void
-LatinHypercubeSampler::executeTearDown()
+std::size_t
+LatinHypercubeSampler::getStatelessAdvanceCount(unsigned int seed_index) const
 {
-  /**
-   * Advance stateless RNG streams once per execute after probability generation.
-   *
-   * Probability generation draws n_rows per column (for bin selection) and
-   * a Fisher-Yates shuffle that consumes (n_rows - 1) integer draws. We advance
-   * both stateless streams here to mirror the sampler's execute-time progression.
-   */
   if (!_stateless_advance_pending)
-    return;
+    return 0;
 
   const auto n_rows = static_cast<std::size_t>(getNumberOfRows());
   const auto n_cols = getNumberOfCols();
   if (n_rows == 0 || n_cols == 0)
-    return;
+    return 0;
 
-  // Advance the per-column bin RNG and shuffle RNG to match probability generation.
+  if (seed_index < n_cols)
+    return n_rows;
+
   const auto shuffle_count = n_rows > 0 ? n_rows - 1 : 0;
-  for (const auto col : make_range(n_cols))
-  {
-    advanceStatelessGenerator(col, n_rows);
-    if (shuffle_count > 0)
-      advanceStatelessGenerator(col + n_cols, shuffle_count);
-  }
+  if (seed_index < 2 * n_cols)
+    return shuffle_count;
 
+  return 0;
+}
+
+void
+LatinHypercubeSampler::finalizeStatelessAdvance()
+{
   _stateless_advance_pending = false;
 }
 
