@@ -328,6 +328,7 @@ protected:
    * Updates the times for interpolating ExodusII data
    */
   void updateExodusTimeInterpolation();
+  void updateNemesisTimeInterpolation();
 
   /**
    * Updates the time indices to interpolate between for ExodusII data
@@ -506,6 +507,9 @@ protected:
 
   /// transformations (rotations, translation, scales) are performed in this order
   MultiMooseEnum _transformation_order;
+
+  /// Whether the solution file is a nemesis file
+  const bool _nemesis;
 
   /// True if initial_setup has executed
   bool _initialized;
