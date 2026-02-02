@@ -17,6 +17,9 @@
 #include "CoefficientManager.h"
 #include "MFEMSolverBase.h"
 #include "MFEMRefinementMarker.h"
+#include "MFEMEigensolverBase.h"
+#include <fstream>
+#include <iostream>
 
 /// Base problem data struct.
 struct MFEMProblemData
