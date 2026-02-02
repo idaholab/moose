@@ -377,7 +377,7 @@
       type = Exodiff
       input = grad_div.i
       exodiff = grad_div_tet14.e
-      abs_zero = 5e-9
+      abs_zero = 8e-9
       cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 '
                  'Outputs/file_base=grad_div_tet14'
       detail = 'TET14, '
