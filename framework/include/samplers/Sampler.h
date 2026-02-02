@@ -213,9 +213,8 @@ protected:
                                  unsigned int lower,
                                  unsigned int upper,
                                  unsigned int index = 0) const;
-  std::size_t getRandlShuffleStateless(std::size_t n,
-                                       std::size_t size,
-                                       unsigned int index = 0) const;
+  std::size_t
+  getRandlShuffleStateless(std::size_t n, std::size_t size, unsigned int index = 0) const;
 
   /**
    * Advance the stateless generator by a fixed count.
