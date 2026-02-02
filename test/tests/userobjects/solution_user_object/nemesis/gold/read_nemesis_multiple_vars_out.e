@@ -1,0 +1,1 @@
+../../gold/read_exodus_multiple_vars_out.e
