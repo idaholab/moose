@@ -20,6 +20,7 @@
     cli_args = "Materials/active='elasticity_tensor temp_dependent_elasticity_tensor stress "
                "prefactor_material_block heat density'"
     exodiff = 'gap_heat_transfer_umat_out.e'
+    capabilities = 'installation_type=in_tree'
     requirement = 'The system shall avoid regression in a simple thermomechanical problem where '
                   'temperature is a variable, which is used as a reference for verification of the '
                   'UMAT interface'
