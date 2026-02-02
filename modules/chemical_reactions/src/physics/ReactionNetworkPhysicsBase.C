@@ -59,8 +59,10 @@ ReactionNetworkPhysicsBase::ReactionNetworkPhysicsBase(const InputParameters & p
     checkVectorParamsSameLength<VariableName, MooseFunctorName>("solver_variables",
                                                                 "additional_source_functors");
   if (isParamValid("initial_conditions"))
-    checkVectorParamsSameLength<VariableName, FunctionName>("solver_variables",
-                                                            "initial_conditions");
+    checkVectorParamsSameLength<VariableName, MooseFunctorName>("solver_variables",
+                                                                "initial_conditions");
+  if (isParamValid("equation_scaling"))
+    checkVectorParamsSameLength<VariableName, Real>("solver_variables", "equation_scaling");
 
   addRequiredPhysicsTask("add_ic");
   addRequiredPhysicsTask("add_variable");
@@ -93,7 +95,10 @@ ReactionNetworkPhysicsBase::addSolverVariables()
     const std::string variable_type = "MooseVariable";
     InputParameters params = getFactory().getValidParams(variable_type);
     params.set<MooseEnum>("order") = getParam<MooseEnum>("variable_order");
-    params.set<Real>("scaling") = getParam<std::vector<Real>>("equation_scaling")[i];
+    if (isParamValid("equation_scaling"))
+      // all our variables have a single component
+      params.set<std::vector<Real>>("scaling") = {
+          getParam<std::vector<Real>>("equation_scaling")[i]};
     assignBlocks(params, _blocks);
     params.set<SolverSystemName>("solver_sys") = getSolverSystem(var_name);
 

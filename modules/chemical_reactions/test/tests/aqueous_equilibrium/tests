@@ -15,6 +15,22 @@
     rel_err = 1e-5
     requirement = 'The system shall be able to use a shorthand physics syntax to create a single species aqueous equilibrium reactions simulation.'
   []
+  [1species_physics_variables]
+    type = 'Exodiff'
+    prereq = '1species_physics'
+    input = '1species_physics.i'
+    cli_args = "Variables/active=''
+                Physics/AqueousReactionsEquilibrium/all/initial_conditions=1e-2
+                Physics/AqueousReactionsEquilibrium/all/equation_scaling=1
+                BCs/left_inflow/type=DirichletBC
+                BCs/left_inflow/variable=a
+                BCs/left_inflow/boundary=left
+                BCs/left_inflow/value=1e-1
+                Outputs/file_base='1species_var_out'"
+    exodiff = '1species_var_out.e'
+    rel_err = 1e-5
+    requirement = 'The system shall be able to use a shorthand physics syntax to create a single species aqueous equilibrium reactions simulation, and have the Physics create the variable.'
+  []
   [./1species_without_action]
     type = 'Exodiff'
     input = '1species_without_action.i'
