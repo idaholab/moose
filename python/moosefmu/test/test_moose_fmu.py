@@ -373,9 +373,7 @@ class TestMoose2FMU(unittest.TestCase):
 
     @mock.patch("moosefmu.moose2fmu.SubprocessSocketRunner")
     @mock.patch("moosefmu.moose2fmu.MooseControl")
-    def test_exit_initialization_mode_rebuilds_command(
-        self, mock_control, mock_runner
-        ):
+    def test_exit_initialization_mode_rebuilds_command(self, mock_control, mock_runner):
         """exit_initialization_mode should rebuild the configured command."""
         slave = _DummyMoose(instance_name="test", guid="1234")
 
@@ -421,7 +419,6 @@ class TestMoose2FMU(unittest.TestCase):
                 self.wait_calls = []
                 self.continue_calls = 0
                 self.runner = Runner()
-
 
             def get_time(self):
                 return next(self._times)
