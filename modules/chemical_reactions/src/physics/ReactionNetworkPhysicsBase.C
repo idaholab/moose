@@ -53,11 +53,6 @@ ReactionNetworkPhysicsBase::ReactionNetworkPhysicsBase(const InputParameters & p
     saveAuxVariableName(var_name);
 
   // Parameter checking
-  if (isParamSetByUser("additional_source_coefs"))
-    checkParamsBothSetOrNotSet("source_functors", "additional_source_coefs");
-  if (isParamValid("additional_source_functors"))
-    checkVectorParamsSameLength<VariableName, MooseFunctorName>("solver_variables",
-                                                                "additional_source_functors");
   if (isParamValid("initial_conditions"))
     checkVectorParamsSameLength<VariableName, MooseFunctorName>("solver_variables",
                                                                 "initial_conditions");

@@ -22,6 +22,8 @@
     cli_args = "Variables/active=''
                 Physics/AqueousReactionsEquilibrium/all/initial_conditions=1e-2
                 Physics/AqueousReactionsEquilibrium/all/equation_scaling=1
+                Physics/AqueousReactionsEquilibrium/all/verbose=true
+                Physics/AqueousReactionsEquilibrium/all/reactions='2a -> pa2 [K=10]'
                 BCs/left_inflow/type=DirichletBC
                 BCs/left_inflow/variable=a
                 BCs/left_inflow/boundary=left
