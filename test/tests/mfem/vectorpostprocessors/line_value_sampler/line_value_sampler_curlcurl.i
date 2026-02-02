@@ -4,7 +4,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../../mesh/small_fichera.mesh
-  dim = 3
 []
 
 [Problem]

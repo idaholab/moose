@@ -3,7 +3,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../../mesh/mug.e
-  dim = 3
 []
 
 [Problem]
