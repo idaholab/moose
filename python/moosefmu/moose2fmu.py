@@ -675,6 +675,7 @@ class Moose2FMU(Fmi2Slave):
         return True
 
     def terminate(self) -> bool:
+        """Shut down the underlying MooseControl instance."""
         self.logger.info("Moose2FMU.terminate called; shutting down MooseControl.")
         control = getattr(self, "control", None)
         if control is None:
@@ -688,4 +689,3 @@ class Moose2FMU(Fmi2Slave):
             self.logger.warning("Finalize failed; forcing cleanup: %s", exc)
             control.cleanup()
         return True
-
