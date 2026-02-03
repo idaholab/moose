@@ -50,6 +50,11 @@ SolutionUserObjectBase::validParams()
                         false,
                         "Whether the file is Nemesis file, which cannot be differentiated from "
                         "exodusII solely by the extension extension");
+  params.addParam<bool>(
+      "force_replicated_source_mesh",
+      false,
+      "Whether to force the serialization of the source mesh. This can be useful for discontinuous "
+      "variables or if the partitioning of the source mesh and the current mesh are different");
 
   // When using XDA/XDR files the following must be defined
   params.addParam<FileName>(
@@ -148,6 +153,7 @@ SolutionUserObjectBase::SolutionUserObjectBase(const InputParameters & parameter
     _r1(RealTensorValue()),
     _transformation_order(getParam<MultiMooseEnum>("transformation_order")),
     _nemesis(getParam<bool>("nemesis")),
+    _force_replicated_source(getParam<bool>("force_replicated_source_mesh")),
     _initialized(false)
 {
   // form rotation matrices with the specified angles
@@ -549,7 +555,7 @@ SolutionUserObjectBase::initialSetup()
     return;
 
   // Create a libmesh::Mesh object for storing the loaded data.
-  if (!_fe_problem.mesh().isDistributedMesh() || (_file_type == 1))
+  if (!_fe_problem.mesh().isDistributedMesh() || (_file_type == 1) || _force_replicated_source)
     _mesh = std::make_unique<ReplicatedMesh>(_communicator);
   else
     _mesh = std::make_unique<DistributedMesh>(_communicator);
