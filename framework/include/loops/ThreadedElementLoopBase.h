@@ -202,6 +202,15 @@ protected:
    * type of loop where the logic will be different is when projecting stateful material properties
    */
   virtual bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const;
+
+  /**
+   * Check whether there are any active interface kernels on the given boundaries
+   *
+   * @note Loops derived from ThreadedElementLoopBase that may execute on externel sides _must_
+   * override this method.
+   * @param boundary_ids Boundaries to check
+   */
+  virtual bool hasActiveInterfaceKernel(const std::vector<BoundaryID> & boundary_ids) const;
 };
 
 template <typename RangeType>
@@ -301,7 +310,16 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             postInternalSide(elem, side);
           }
           else
+          {
+            if (hasActiveInterfaceKernel(boundary_ids))
+              mooseException("Element ",
+                             elem->id(),
+                             " on side ",
+                             side,
+                             " is missing a neighbor (hence identified as an external side) but "
+                             "has interface kernel(s) defined on the boundary.");
             onExternalSide(elem, side);
+          }
         } // sides
 
         postElement(elem);
@@ -452,6 +470,14 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
     return elem_p_level > neighbor_p_level;
 
   return elem.id() < neighbor.id();
+}
+
+template <typename RangeType>
+bool
+ThreadedElementLoopBase<RangeType>::hasActiveInterfaceKernel(
+    const std::vector<BoundaryID> & /*boundary_ids*/) const
+{
+  return false;
 }
 
 template <typename RangeType>

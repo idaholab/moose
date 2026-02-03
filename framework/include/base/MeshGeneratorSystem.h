@@ -172,11 +172,6 @@ public:
   static std::string mainMeshGeneratorName() { return "main"; };
 
   /**
-   * @return Whether any of our mesh generators were of type \p BreakMeshByBlockGenerator
-   */
-  bool hasBreakMeshByBlockGenerator() const { return _has_bmbb; }
-
-  /**
    * @return Whether or not data driven generation is enabled in the app
    */
   bool hasDataDrivenAllowed() const;
@@ -280,9 +275,6 @@ private:
 
   /// The name of the data driven generator, if any
   std::optional<std::string> _data_driven_generator_name;
-
-  /// Whether any of the mesh generators are a \p BreakMeshByBlockGenerator
-  bool _has_bmbb;
 
   /// Whether to print the names of the mesh generators being executed or not
   bool _verbose;
