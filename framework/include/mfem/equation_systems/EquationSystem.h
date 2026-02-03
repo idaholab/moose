@@ -20,6 +20,7 @@
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
+#include "MFEMEigensolverBase.h"
 
 namespace Moose::MFEM
 {
@@ -57,6 +58,9 @@ public:
                                   GridFunctions & gridfunctions,
                                   ComplexGridFunctions & cmplx_gridfunctions);
 
+  /// Update eigenvectors from solution after eigensolve                                
+  virtual void RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver);
+
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
@@ -64,9 +68,6 @@ public:
 
   // Set whether the current solve is for an eigenvalue problem
   void setEigensolve(const bool is_eigensolve) { _is_eigensolve = is_eigensolve; }
-
-  // Get whether the current solve is for an eigenvalue problem
-  bool isEigensolve() const { return _is_eigensolve; }
 
   // Retrieve the global essential boundary markers
   mfem::Array<int> & getGlobalEssMarkers() { return _global_ess_markers; }
