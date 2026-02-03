@@ -33,11 +33,4 @@ MFEMEigensolverBase::MFEMEigensolverBase(const InputParameters & parameters)
 {
 }
 
-template <typename T>
-void
-MFEMEigensolverBase::setPreconditioner(T & solver)
-{
-  // Add preconditioner options
-}
-
 #endif
