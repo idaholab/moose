@@ -65,6 +65,9 @@ public:
   // Set whether the current solve is for an eigenvalue problem
   void setEigensolve(const bool is_eigensolve) { _is_eigensolve = is_eigensolve; }
 
+  // Get whether the current solve is for an eigenvalue problem
+  bool isEigensolve() const { return _is_eigensolve; }
+
   // Retrieve the global essential boundary markers
   mfem::Array<int> & getGlobalEssMarkers() { return _global_ess_markers; }
 
