@@ -21,7 +21,7 @@ from moosefmu import (
 from moosefmu import configure_fmu_logging
 import math
 import pandas as pd
-import moose_fmu_tester
+import moose_fmu_tester_pyfmi
 
 """
 Couple a toy FMU (Dahlquist test equation y'(t) = k * y) with a MOOSE FMU and
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     moose_instance.enterInitializationMode()
 
     # Provide your own MOOSE command for non testing senarios
-    moose_command = moose_fmu_tester.test_controller()
+    moose_command = moose_fmu_tester_pyfmi.test_controller()
 
     apply_start_values(
         fmu=moose_instance,

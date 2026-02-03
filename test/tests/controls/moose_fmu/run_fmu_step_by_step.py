@@ -9,7 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from moosefmu import configure_fmu_logging
-import moose_fmu_tester
+import moose_fmu_tester_pyfmi
 
 """
 Drive a MOOSE-generated FMU step-by-step (manual do_step loop).
@@ -34,14 +34,14 @@ if __name__ == "__main__":
     logger = configure_fmu_logging(debug=FMU_DEBUG_LOGGING, logger_name=__name__)
 
     # Provide your own MOOSE command for non testing senarios
-    cmd = moose_fmu_tester.test_controller()
+    cmd = moose_fmu_tester_pyfmi.test_controller()
 
     t0, t1, dt = 0, 1, 0.5
     moose_filename = "MooseTest.fmu"
     flag = "MULTIAPP_FIXED_POINT_END"
 
-    result2 = moose_fmu_tester.moose_fmu_step_by_step(
+    result2 = moose_fmu_tester_pyfmi.moose_fmu_step_by_step(
         moose_filename, t0, t1, dt, flag, cmd
     )
     logger.info("Results from fmu step by step:")
-    moose_fmu_tester.print_result(result2)
+    moose_fmu_tester_pyfmi.print_result(result2)
