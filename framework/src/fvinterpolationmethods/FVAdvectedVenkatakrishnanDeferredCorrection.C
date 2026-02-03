@@ -33,8 +33,9 @@ FVAdvectedVenkatakrishnanDeferredCorrection::FVAdvectedVenkatakrishnanDeferredCo
     _deferred_correction_factor(getParam<Real>("deferred_correction_factor"))
 {
   const DeviceData data{_deferred_correction_factor};
-  setAdvectedSystemContributionCalculator(buildAdvectedSystemContributionCalculatorLimited<
-                                          FVAdvectedVenkatakrishnanDeferredCorrection>(data));
+  setAdvectedSystemContributionCalculator(
+      buildAdvectedSystemContributionCalculatorLimited<FVAdvectedVenkatakrishnanDeferredCorrection>(
+          data));
   setAdvectedFaceValueInterpolator(
       buildAdvectedFaceValueInterpolatorLimited<FVAdvectedVenkatakrishnanDeferredCorrection>(data));
 }
@@ -129,8 +130,8 @@ FVAdvectedVenkatakrishnanDeferredCorrection::advectedInterpolateValue(
     const VectorValue<Real> * const neighbor_grad,
     const Real mass_flux)
 {
-  const auto result =
-      advectedInterpolate(data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result = advectedInterpolate(
+      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   const Real phi_matrix =
       result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
   return phi_matrix - result.rhs_face_value;

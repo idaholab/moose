@@ -26,10 +26,8 @@ public:
   {
   };
 
-  static Real interpolate(const DeviceData &,
-                          const FaceInfo & face,
-                          Real elem_value,
-                          Real neighbor_value);
+  static Real
+  interpolate(const DeviceData &, const FaceInfo & face, Real elem_value, Real neighbor_value);
 
   static AdvectedSystemContribution advectedInterpolate(const DeviceData &,
                                                         const FaceInfo & face,

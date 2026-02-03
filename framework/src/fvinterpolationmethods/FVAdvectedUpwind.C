@@ -64,8 +64,8 @@ FVAdvectedUpwind::advectedInterpolateValue(const FaceInfo & face,
                                            const VectorValue<Real> * neighbor_grad,
                                            Real mass_flux) const
 {
-  const auto result =
-      advectedInterpolate(DeviceData{}, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result = advectedInterpolate(
+      DeviceData{}, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
 
@@ -78,7 +78,7 @@ FVAdvectedUpwind::advectedInterpolateValue(const DeviceData & data,
                                            const VectorValue<Real> * neighbor_grad,
                                            Real mass_flux)
 {
-  const auto result =
-      advectedInterpolate(data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result = advectedInterpolate(
+      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
