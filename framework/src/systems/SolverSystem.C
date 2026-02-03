@@ -21,8 +21,7 @@ SolverSystem::SolverSystem(SubProblem & subproblem,
   : SystemBase(subproblem, fe_problem, name, var_kind),
     _current_solution(nullptr),
     _pc_side(Moose::PCS_DEFAULT),
-    _ksp_norm(Moose::KSPN_UNPRECONDITIONED),
-    _solution_is_invalid(false)
+    _ksp_norm(Moose::KSPN_UNPRECONDITIONED)
 {
 }
 

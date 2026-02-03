@@ -67,7 +67,6 @@
 [Reporters]
   [solution_invalidity]
     type = SolutionInvalidityReporter
-    execute_on = FINAL
   []
 []
 
