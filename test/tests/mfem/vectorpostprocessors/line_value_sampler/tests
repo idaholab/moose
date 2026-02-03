@@ -1,4 +1,6 @@
 [Tests]
+  design = 'MFEMLineValueSampler.md'
+  issues = '#31249'
   [MFEMLineValueSamplerDiffusion]
     type = CSVDiff
     input = line_value_sampler_diffusion.i

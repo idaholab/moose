@@ -1,4 +1,6 @@
 [Tests]
+  design = 'MFEMPointValueSampler.md'
+  issues = '#31249'
   [MFEMPointValueSamplerDiffusion]
     type = CSVDiff
     input = point_value_sampler_diffusion.i
