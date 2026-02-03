@@ -141,7 +141,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     {
       mooseError("MFEM variable ",
                  test_var_name,
-                 " requested by equation system during initialisation was "
+                 " requested by equation system during initialization was "
                  "not found in gridfunctions");
     }
     // Store pointers to test FESpaces
@@ -154,7 +154,7 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     {
       mooseError("MFEM variable ",
                  trial_var_name,
-                 " requested by equation system during initialisation was "
+                 " requested by equation system during initialization was "
                  "not found in gridfunctions");
     }
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
@@ -237,6 +237,8 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueX,
                                  mfem::BlockVector & trueRHS)
 {
+  mooseAssert(_test_var_names.size() == _trial_var_names.size(),
+              "Number of test and trial variables must be the same for block matrix assembly.");
 
   switch (_assembly_level)
   {
@@ -302,6 +304,7 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 
       if (test_var_name == trial_var_name)
       {
+        mooseAssert(i == j, "Trial and test variables must have the same ordering.");
         aux_lf = *_lfs.Get(test_var_name);
         auto blf = _blfs.Get(test_var_name);
         blf->FormLinearSystem(

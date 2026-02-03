@@ -25,7 +25,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   // Set operator size and block structure for trial spaces
   _block_true_offsets_trial.SetSize(_cmplx_trial_variables.size() + 1);
   _block_true_offsets_trial[0] = 0;
-  for (unsigned int ind = 0; ind < _cmplx_trial_variables.size(); ++ind)
+  for (const auto ind : index_range(_cmplx_trial_variables))
   {
     _block_true_offsets_trial[ind + 1] =
         2 * _cmplx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
@@ -35,7 +35,7 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
   // Set operator size and block structure for test spaces
   _block_true_offsets_test.SetSize(_cmplx_test_variables.size() + 1);
   _block_true_offsets_test[0] = 0;
-  for (unsigned int ind = 0; ind < _cmplx_test_variables.size(); ++ind)
+  for (const auto ind : index_range(_cmplx_trial_variables))
   {
     _block_true_offsets_test[ind + 1] =
         2 * _cmplx_test_variables.at(ind)->ParFESpace()->TrueVSize();
