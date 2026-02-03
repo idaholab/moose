@@ -69,7 +69,7 @@ MFEMHypreFGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
 
     _solver.reset(lor_solver);
   }
-  else if (getMFEMProblem().getProblemData().eqn_system->isEigensolve())
+  else if (getMFEMProblem().is_eigenproblem)
   {
     auto solver = new mfem::HypreFGMRES(*a.ParallelAssemble());
     solver->SetTol(getParam<mfem::real_t>("l_tol"));

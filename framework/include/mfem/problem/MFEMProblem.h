@@ -368,6 +368,7 @@ public:
    * The numeric representation currently active for this problem.
    */
   NumericType num_type;
+  const bool is_eigenproblem;
 
 protected:
   /**

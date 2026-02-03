@@ -53,7 +53,7 @@ MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
 
   _eigensolver = std::make_unique<mfem::HypreLOBPCG>(getMFEMProblem().getComm());
 
-  _eigensolver->SetNumModes(getParam<int>("num_modes"));
+  _eigensolver->SetNumModes(_num_modes);
   _eigensolver->SetRandomSeed(getParam<int>("random_seed"));
   _eigensolver->SetMaxIter(getParam<int>("l_max_its"));
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
