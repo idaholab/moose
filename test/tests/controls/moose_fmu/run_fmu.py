@@ -12,7 +12,7 @@ import moose_fmu_tester_pyfmi
 from moosefmu import configure_fmu_logging
 
 """
-Run a basic simulation of a MOOSE-generated FMU via fmpy.simulate_fmu.
+Run a basic simulation of a MOOSE-generated FMU via pyfmi.simulate_fmu.
 
 Notes on time stepping and end-time alignment
 --------------------------------------------
@@ -22,11 +22,6 @@ Notes on time stepping and end-time alignment
 - If you need a different dt or exact alignment at the final time (t1), either:
   (a) rebuild the FMU with the desired dt with DefaultExperiment, or
   (b) drive the FMU step-by-step (manual do_step loop) instead of simulate_fmu.
-
-- simulate_fmu integrates *up to* stop_time but does not necessarily perform a
-  do_step exactly at stop_time. As a result, the last reported fmu_time can be
-  slightly less than stop_time. If exact synchronization at t1 matters, use the
-  step-by-step approach or choose a smaller dt so fmu_time is closer to t1.
 """
 
 
