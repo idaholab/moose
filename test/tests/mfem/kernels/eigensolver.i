@@ -7,6 +7,8 @@
 
 [Problem]
   type = MFEMProblem
+  eigenproblem = true
+  num_modes = 5
 []
 
 [FESpaces]
@@ -53,7 +55,6 @@
   coefficient = 1.0
   l_tol = 1e-8
   l_max_its = 200
-  num_modes = 5
   random_seed = 75
 []
 

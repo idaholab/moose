@@ -407,6 +407,14 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
     gridfunctions.Get(_trial_var_names.at(i))->Distribute(&(trueX.GetBlock(i)));
 }
 
+void 
+EquationSystem::RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver)
+{
+  mfem::Array<mfem::real_t> eigenvalues;
+  eigensolver->GetEigenvalues(eigenvalues);
+
+}
+
 void
 EquationSystem::BuildLinearForms()
 {
