@@ -549,12 +549,10 @@ SolutionUserObjectBase::initialSetup()
     return;
 
   // Create a libmesh::Mesh object for storing the loaded data.
-  // Several aspects of SolutionUserObjectBase won't work with a DistributedMesh:
-  // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
-  // .) We don't know if directValue will be used, which may request
-  //    a value on a Node we don't have.
-  // We force the Mesh used here to be a ReplicatedMesh.
-  _mesh = std::make_unique<ReplicatedMesh>(_communicator);
+  if (!_fe_problem.mesh().isDistributedMesh() || (_file_type == 1))
+    _mesh = std::make_unique<ReplicatedMesh>(_communicator);
+  else
+    _mesh = std::make_unique<DistributedMesh>(_communicator);
 
   // ExodusII mesh file supplied
   if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true) ||
