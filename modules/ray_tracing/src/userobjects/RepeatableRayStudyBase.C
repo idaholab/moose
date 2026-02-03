@@ -205,73 +205,92 @@ RepeatableRayStudyBase::verifyReplicatedRays()
       "private param '_define_rays_replicated' == true.";
 
   // First, verify that our _rays have unique IDs beacuse we will do mapping based on Ray ID
-  verifyUniqueRayIDs(_rays.begin(),
-                     _rays.end(),
-                     /* global = */ false,
-                     "in _rays after calling defineRays()." + error_suffix);
+  try
+  {
+    verifyUniqueRayIDs(_rays.begin(),
+                       _rays.end(),
+                       /* global = */ false,
+                       "in _rays after calling defineRays()." + error_suffix);
+  }
+  catch (...)
+  {
+    _fe_problem.handleException("verifyReplicatedRays");
+  }
+  _fe_problem.checkExceptionAndStopSolve(/*print_message=*/false);
 
   // Tag for sending rays from rank 0 -> all other ranks
   const auto tag = comm().get_unique_tag();
 
-  // Send a copy of the rays on rank 0 to all other processors for verification
-  if (_pid == 0)
+  try
   {
-    std::vector<Parallel::Request> requests(n_processors() - 1);
-    auto request_it = requests.begin();
-
-    for (processor_id_type pid = 0; pid < n_processors(); ++pid)
-      if (pid != 0)
-        comm().send_packed_range(
-            pid, parallelStudy(), _rays.begin(), _rays.end(), *request_it++, tag);
-
-    Parallel::wait(requests);
-  }
-  // All other processors will receive and verify that their rays match the rays on rank 0
-  else
-  {
-    // Map of RayID -> Ray for comparison from the Rays on rank 0 to the local rays
-    std::unordered_map<RayID, const Ray *> ray_map;
-    ray_map.reserve(_rays.size());
-    for (const auto & ray : _rays)
-      ray_map.emplace(ray->id(), ray.get());
-
-    // Receive the duplicated rays from rank 0
-    std::vector<std::shared_ptr<Ray>> rank_0_rays;
-    rank_0_rays.reserve(_rays.size());
-    comm().receive_packed_range(
-        0, parallelStudy(), std::back_inserter(rank_0_rays), (std::shared_ptr<Ray> *)nullptr, tag);
-
-    // The sizes better match
-    if (rank_0_rays.size() != _rays.size())
-      mooseError("The size of _rays on rank ",
-                 _pid,
-                 " does not match the size of rays on rank 0.",
-                 error_suffix);
-
-    // Make sure we have a matching local ray for each ray from rank 0
-    for (const auto & ray : rank_0_rays)
+    // Send a copy of the rays on rank 0 to all other processors for verification
+    if (_pid == 0)
     {
-      const auto find = ray_map.find(ray->id());
-      if (find == ray_map.end())
-        mooseError("A Ray was found on rank ",
-                   _pid,
-                   " with an ID that does not exist on rank 0.",
-                   error_suffix,
-                   "\n\n",
-                   ray->getInfo());
+      std::vector<Parallel::Request> requests(n_processors() - 1);
+      auto request_it = requests.begin();
 
-      const Ray * root_ray = find->second;
-      if (*root_ray != *ray)
-      {
-        mooseError("A Ray was found on rank ",
+      for (processor_id_type pid = 0; pid < n_processors(); ++pid)
+        if (pid != 0)
+          comm().send_packed_range(
+              pid, parallelStudy(), _rays.begin(), _rays.end(), *request_it++, tag);
+
+      Parallel::wait(requests);
+    }
+    // All other processors will receive and verify that their rays match the rays on rank 0
+    else
+    {
+      // Map of RayID -> Ray for comparison from the Rays on rank 0 to the local rays
+      std::unordered_map<RayID, const Ray *> ray_map;
+      ray_map.reserve(_rays.size());
+      for (const auto & ray : _rays)
+        ray_map.emplace(ray->id(), ray.get());
+
+      // Receive the duplicated rays from rank 0
+      std::vector<std::shared_ptr<Ray>> rank_0_rays;
+      rank_0_rays.reserve(_rays.size());
+      comm().receive_packed_range(0,
+                                  parallelStudy(),
+                                  std::back_inserter(rank_0_rays),
+                                  (std::shared_ptr<Ray> *)nullptr,
+                                  tag);
+
+      // The sizes better match
+      if (rank_0_rays.size() != _rays.size())
+        mooseError("The size of _rays on rank ",
                    _pid,
-                   " that does not exist on rank 0.",
-                   error_suffix,
-                   "\n\nLocal ray:\n\n",
-                   ray->getInfo(),
-                   "\n\nRank 0 ray:\n\n",
-                   root_ray->getInfo());
+                   " does not match the size of rays on rank 0.",
+                   error_suffix);
+
+      // Make sure we have a matching local ray for each ray from rank 0
+      for (const auto & ray : rank_0_rays)
+      {
+        const auto find = ray_map.find(ray->id());
+        if (find == ray_map.end())
+          mooseError("A Ray was found on rank ",
+                     _pid,
+                     " with an ID that does not exist on rank 0.",
+                     error_suffix,
+                     "\n\n",
+                     ray->getInfo());
+
+        const Ray * root_ray = find->second;
+        if (*root_ray != *ray)
+        {
+          mooseError("A Ray was found on rank ",
+                     _pid,
+                     " that does not exist on rank 0.",
+                     error_suffix,
+                     "\n\nLocal ray:\n\n",
+                     ray->getInfo(),
+                     "\n\nRank 0 ray:\n\n",
+                     root_ray->getInfo());
+        }
       }
     }
   }
+  catch (...)
+  {
+    _fe_problem.handleException("verifyReplicatedRays");
+  }
+  _fe_problem.checkExceptionAndStopSolve(/*print_message=*/false);
 }
