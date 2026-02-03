@@ -528,6 +528,7 @@ void
 WCNSLinearFVFlowPhysics::addWallsBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
+  bool has_symmetry_bc = false;
 
   for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
   {
@@ -550,6 +551,7 @@ WCNSLinearFVFlowPhysics::addWallsBC()
     }
     else if (momentum_wall_type == "symmetry")
     {
+      has_symmetry_bc = true;
       {
         const std::string bc_type = "LinearFVVelocitySymmetryBC";
         InputParameters params = getFactory().getValidParams(bc_type);
@@ -580,13 +582,28 @@ WCNSLinearFVFlowPhysics::addWallsBC()
 
   if (getParam<bool>("pressure_two_term_bc_expansion"))
   {
-    const std::string bc_type = "LinearFVExtrapolatedPressureBC";
-    InputParameters params = getFactory().getValidParams(bc_type);
-    params.set<std::vector<BoundaryName>>("boundary") = _wall_boundaries;
-    params.set<LinearVariableName>("variable") = _pressure_name;
-    params.set<bool>("use_two_term_expansion") = true;
-    getProblem().addLinearFVBC(
-        bc_type, _pressure_name + "_extrapolation_" + Moose::stringify(_wall_boundaries), params);
+    if (!has_symmetry_bc)
+    {
+      const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+      InputParameters params = getFactory().getValidParams(bc_type);
+      params.set<std::vector<BoundaryName>>("boundary") = _wall_boundaries;
+      params.set<LinearVariableName>("variable") = _pressure_name;
+      params.set<bool>("use_two_term_expansion") = true;
+      getProblem().addLinearFVBC(
+          bc_type, _pressure_name + "_extrapolation_" + Moose::stringify(_wall_boundaries), params);
+    }
+    else
+      for (const auto & [boundary_name, momentum_wall_type] : _momentum_wall_types)
+        if (momentum_wall_type != "symmetry")
+        {
+          const std::string bc_type = "LinearFVExtrapolatedPressureBC";
+          InputParameters params = getFactory().getValidParams(bc_type);
+          params.set<std::vector<BoundaryName>>("boundary") = {boundary_name};
+          params.set<LinearVariableName>("variable") = _pressure_name;
+          params.set<bool>("use_two_term_expansion") = true;
+          getProblem().addLinearFVBC(
+              bc_type, _pressure_name + "_extrapolation_" + boundary_name, params);
+        }
   }
 }
 
