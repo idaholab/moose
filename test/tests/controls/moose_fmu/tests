@@ -6,7 +6,7 @@
     requirement = 'The system shall support'
     [create_fmu]
       type = RunCommand
-      command = 'pythonfmu build -f MooseTest.py'
+      command = 'python build_moose_fmu.py'
       required_python_packages = 'pythonfmu'
       detail = 'creating a MOOSE FMU from the Moose2FMU base class.'
       platform = 'linux'
@@ -17,7 +17,7 @@
       input = fmu_diffusion.i
       csvdiff = run_fmu.csv
       command_proxy = run_fmu.py
-      required_python_packages = 'fmpy pandas numpy'
+      required_python_packages = 'pyfmi pandas numpy'
       prereq = 'moosefmu/create_fmu'
       recover = false
       restep = false
@@ -30,7 +30,7 @@
       input = fmu_diffusion.i
       csvdiff = run_fmu_step_by_step.csv
       command_proxy = run_fmu_step_by_step.py
-      required_python_packages = 'fmpy pandas numpy'
+      required_python_packages = 'pyfmi pandas numpy'
       prereq = 'moosefmu/create_fmu'
       recover = false
       restep = false
@@ -43,7 +43,7 @@
       input = fmu_diffusion.i
       csvdiff = run_fmu_connection.csv
       command_proxy = run_fmu_connection.py
-      required_python_packages = 'fmpy pandas matplotlib'
+      required_python_packages = 'pyfmi pandas matplotlib'
       prereq = 'moosefmu/create_fmu'
       recover = false
       restep = false
