@@ -13,6 +13,8 @@
 
 registerMooseObject("StochasticToolsTestApp", MaterialReaction);
 
+registerMooseObjectReplaced("StochasticToolsTestApp", MaterialReaction, "01/01/2027 00:00", MatReaction);
+
 InputParameters
 MaterialReaction::validParams()
 {
