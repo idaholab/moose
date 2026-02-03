@@ -93,8 +93,10 @@ public:
                     const Moose::StateArg & state) const;
 
   private:
-    /// Sorry for the alignas: we need max alignment so any POD payload can live here safely.
-    /// This storage lets us pass interpolation parameters without holding a host pointer.
+    /// Sorry for the alignas: without max alignment this byte buffer would be 1-byte aligned,
+    /// and placing data with stricter alignment (e.g., double or VectorValue) would be
+    /// undefined behavior. This storage lets us pass interpolation parameters without a host
+    /// pointer while staying safely aligned for any trivially-copyable data.
     alignas(std::max_align_t) unsigned char _storage[handle_storage_bytes] = {};
 
     /// Function pointer that performs the interpolation
@@ -168,8 +170,10 @@ public:
                     Real mass_flux) const;
 
   private:
-    /// Sorry for the alignas: we need max alignment so any POD payload can live here safely.
-    /// This storage lets us pass interpolation parameters without holding a host pointer.
+    /// Sorry for the alignas: without max alignment this byte buffer would be 1-byte aligned,
+    /// and placing data with stricter alignment (e.g., double or VectorValue) would be
+    /// undefined behavior. This storage lets us pass interpolation parameters without a host
+    /// pointer while staying safely aligned for any trivially-copyable data.
     alignas(std::max_align_t) unsigned char _storage[handle_storage_bytes] = {};
     Eval eval = nullptr;
     bool _needs_gradients = false;
@@ -250,8 +254,10 @@ public:
                                           Real mass_flux) const;
 
   private:
-    /// Sorry for the alignas: we need max alignment so any POD payload can live here safely.
-    /// This storage lets us pass interpolation parameters without holding a host pointer.
+    /// Sorry for the alignas: without max alignment this byte buffer would be 1-byte aligned,
+    /// and placing data with stricter alignment (e.g., double or VectorValue) would be
+    /// undefined behavior. This storage lets us pass interpolation parameters without a host
+    /// pointer while staying safely aligned for any trivially-copyable data.
     alignas(std::max_align_t) unsigned char _storage[handle_storage_bytes] = {};
     Eval eval = nullptr;
     bool _needs_gradients = false;
@@ -261,13 +267,14 @@ public:
   /**
    * @return The face interpolation callable associated with this user object.
    */
-  const FaceInterpolator & faceInterpolator() const { return _face_interpolator; }
+  FaceInterpolator faceInterpolator() const { return _face_interpolator; }
 
-  const AdvectedValueInterpolator & advectedFaceValueInterpolator() const
+  AdvectedValueInterpolator advectedFaceValueInterpolator() const
   {
     return _advected_face_value_interpolator;
   }
-  const AdvectedSystemContributionCalculator & advectedSystemContributionCalculator() const
+
+  AdvectedSystemContributionCalculator advectedSystemContributionCalculator() const
   {
     return _advected_system_contribution_calculator;
   }

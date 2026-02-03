@@ -69,14 +69,13 @@ FVAdvectedMinmodWeightBased::advectedInterpolateValue(const FaceInfo & face,
                                                       const VectorValue<Real> * neighbor_grad,
                                                       Real mass_flux) const
 {
-  const auto result =
-      advectedInterpolate(DeviceData{_limit_to_linear, _blending_factor},
-                          face,
-                          elem_value,
-                          neighbor_value,
-                          elem_grad,
-                          neighbor_grad,
-                          mass_flux);
+  const auto result = advectedInterpolate(DeviceData{_limit_to_linear, _blending_factor},
+                                          face,
+                                          elem_value,
+                                          neighbor_value,
+                                          elem_grad,
+                                          neighbor_grad,
+                                          mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
 
@@ -103,10 +102,8 @@ FVAdvectedMinmodWeightBased::advectedInterpolate(const DeviceData & data,
   const VectorValue<Real> grad_upwind =
       upwind_mask * (*elem_grad) + downwind_mask * (*neighbor_grad);
 
-  const auto r_f = Moose::FV::rFBranchless(phi_upwind,
-                                           phi_downwind,
-                                           grad_upwind,
-                                           face.dCN() * (2.0 * upwind_mask - 1.0));
+  const auto r_f = Moose::FV::rFBranchless(
+      phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
   const Real beta = std::max(Real(0.0), std::min(Real(1.0), r_f));
 
   // Geometric weight associated with the upwind cell for this face.
@@ -142,7 +139,7 @@ FVAdvectedMinmodWeightBased::advectedInterpolateValue(const DeviceData & data,
                                                       const VectorValue<Real> * neighbor_grad,
                                                       Real mass_flux)
 {
-  const auto result =
-      advectedInterpolate(data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
+  const auto result = advectedInterpolate(
+      data, face, elem_value, neighbor_value, elem_grad, neighbor_grad, mass_flux);
   return result.weights_matrix.first * elem_value + result.weights_matrix.second * neighbor_value;
 }
