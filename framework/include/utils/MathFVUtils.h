@@ -16,6 +16,8 @@
 #include "MooseFunctor.h"
 #include "libmesh/compare_types.h"
 #include "libmesh/elem.h"
+#include <cmath>
+#include <limits>
 #include <tuple>
 
 template <typename>
@@ -454,6 +456,26 @@ rF(const Scalar & phiC, const Scalar & phiD, const Vector & gradC, const RealVec
     return 1e6 * MathUtils::sign(gradC * dCD) + zero_vec * gradC;
 
   return 2. * gradC * dCD / (phiD - phiC) - 1.;
+}
+
+/**
+ * Branchless variant of rF specialized for Real.
+ *
+ * This avoids control-flow branches by stabilizing the denominator with a signed epsilon.
+ * The sign is biased toward the gradient direction when the denominator is near zero.
+ */
+inline Real
+rFBranchless(const Real phiC,
+             const Real phiD,
+             const VectorValue<Real> & gradC,
+             const RealVectorValue & dCD)
+{
+  const Real denom = phiD - phiC;
+  const Real grad_dot = gradC * dCD;
+  const Real eps = 1e-10;
+  const Real denom_sign = std::copysign(1.0, denom + 1e-300 * grad_dot);
+  const Real safe = denom + denom_sign * eps;
+  return 2.0 * grad_dot / safe - 1.0;
 }
 
 /**

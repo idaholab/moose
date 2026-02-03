@@ -21,6 +21,15 @@ public:
 
   FVHarmonicAverage(const InputParameters & params);
 
+  struct DeviceData
+  {
+  };
+
+  static Real interpolate(const DeviceData &,
+                          const FaceInfo & face,
+                          Real elem_value,
+                          Real neighbor_value);
+
   /**
    * Harmonic-mean interpolation using FaceInfo's geometric weight.
    * @param face The face being interpolated.

@@ -91,11 +91,8 @@ class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
 class UserObject;
-<<<<<<< HEAD
 class UserObjectBase;
-=======
 class FVInterpolationMethod;
->>>>>>> c34b146535 (Make sure we register the new syntax and put it in the warehouse. (#31965))
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
 class Convergence;

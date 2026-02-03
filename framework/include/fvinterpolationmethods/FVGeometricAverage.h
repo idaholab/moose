@@ -22,6 +22,31 @@ public:
 
   FVGeometricAverage(const InputParameters & params);
 
+  struct DeviceData
+  {
+  };
+
+  static Real interpolate(const DeviceData &,
+                          const FaceInfo & face,
+                          Real elem_value,
+                          Real neighbor_value);
+
+  static AdvectedSystemContribution advectedInterpolate(const DeviceData &,
+                                                        const FaceInfo & face,
+                                                        Real,
+                                                        Real,
+                                                        const VectorValue<Real> *,
+                                                        const VectorValue<Real> *,
+                                                        Real);
+
+  static Real advectedInterpolateValue(const DeviceData &,
+                                       const FaceInfo & face,
+                                       Real elem_value,
+                                       Real neighbor_value,
+                                       const VectorValue<Real> *,
+                                       const VectorValue<Real> *,
+                                       Real);
+
   /**
    * Interpolate using FaceInfo's geometric weight.
    * @param face The face being interpolated.
