@@ -27,8 +27,8 @@ EquationSystemProblemOperator::Solve()
   BuildEquationSystemOperator();
 
   if (GetEquationSystem()->GetTestVarNames().size() > 1 &&
-      (_problem_data.jacobian_solver->isLOR() || _problem_data.jacobian_solver->isEigensolver()))
-    mooseError("The LOR method and eigensolvers are only supported for single-variable systems");
+      (_problem_data.jacobian_solver->isLOR() || _problem.is_eigenproblem))
+    mooseError("The LOR method and eigenproblems are only supported for single-variable systems");
 
   _problem_data.jacobian_solver->updateSolver(
       *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
