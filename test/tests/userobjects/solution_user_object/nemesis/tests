@@ -11,7 +11,7 @@
   [discontinuous_value_solution_uo_p2]
     type = 'CSVDiff'
     input = 'discontinuous_value_solution_uo_p2.i'
-    cli_args = "UserObjects/soln/nemesis=true"
+    cli_args = "UserObjects/soln/nemesis=true UserObjects/soln/force_replicated_source_mesh=true"
     csvdiff = 'discontinuous_value_solution_uo_p2.csv'
     prereq = discontinuous_value_solution_uo_p1
     requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'

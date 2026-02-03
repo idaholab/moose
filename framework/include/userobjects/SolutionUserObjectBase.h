@@ -511,6 +511,9 @@ protected:
   /// Whether the solution file is a nemesis file
   const bool _nemesis;
 
+  /// Whether to force the source mesh to be replicated
+  const bool _force_replicated_source;
+
   /// True if initial_setup has executed
   bool _initialized;
 
