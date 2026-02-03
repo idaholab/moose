@@ -10,9 +10,6 @@
 #pragma once
 
 #include "FVInterpolationMethod.h"
-#include "Limiter.h"
-
-#include <memory>
 
 /**
  * Van Leer interpolation for advected quantities that blends between upwind and the
@@ -28,6 +25,28 @@ public:
   static InputParameters validParams();
 
   FVAdvectedVanLeerWeightBased(const InputParameters & params);
+
+  struct DeviceData
+  {
+    bool limit_to_linear = true;
+    Real blending_factor = 1.0;
+  };
+
+  static AdvectedSystemContribution advectedInterpolate(const DeviceData & data,
+                                                        const FaceInfo & face,
+                                                        Real elem_value,
+                                                        Real neighbor_value,
+                                                        const VectorValue<Real> * elem_grad,
+                                                        const VectorValue<Real> * neighbor_grad,
+                                                        Real mass_flux);
+
+  static Real advectedInterpolateValue(const DeviceData & data,
+                                       const FaceInfo & face,
+                                       Real elem_value,
+                                       Real neighbor_value,
+                                       const VectorValue<Real> * elem_grad,
+                                       const VectorValue<Real> * neighbor_grad,
+                                       Real mass_flux);
 
   /**
    * Compute the matrix weights for the advected face value.
@@ -63,8 +82,6 @@ public:
                                 Real mass_flux) const;
 
 private:
-  /// Van Leer limiter used to compute the blending coefficient.
-  const std::unique_ptr<Moose::FV::Limiter<Real>> _limiter;
   /// Whether to clamp the blending to be no more downwind-biased than linear.
   const bool _limit_to_linear;
   /// Scales the high-order blending strength (0 = upwind, 1 = full limited blending).
