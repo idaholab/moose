@@ -12,12 +12,12 @@
 #include "MeshGenerator.h"
 
 /**
- * Mesh generator for hexagonal duct
+ * Mesh generator for a square/rectangular duct around a square-lattice subassembly.
  */
-class SCMTriDuctMeshGenerator : public MeshGenerator
+class SCMQuadDuctMeshGenerator : public MeshGenerator
 {
 public:
-  SCMTriDuctMeshGenerator(const InputParameters & parameters);
+  SCMQuadDuctMeshGenerator(const InputParameters & parameters);
   static InputParameters validParams();
   std::unique_ptr<MeshBase> generate() override;
 
@@ -30,21 +30,25 @@ protected:
   size_t
   ductPointIndex(unsigned int points_per_layer, unsigned int layer, unsigned int point) const;
 
-  /// @brief Computes the x-y corner coordinates of the duct cross-section
+  /// @brief Computes the x-y corner coordinates of a rectangular duct cross-section
   /// @param corners Output vector containing the duct corner points
-  /// @param flat_to_flat Flat-to-flat distance of the duct
+  /// @param half_x Half-width of the duct in the x-direction
+  /// @param half_y Half-width of the duct in the y-direction
   /// @param center Center point of the duct cross-section
-  void ductCorners(std::vector<Point> & corners, Real flat_to_flat, const Point & center) const;
+  void
+  ductCorners(std::vector<Point> & corners, Real half_x, Real half_y, const Point & center) const;
 
-  /// @brief Generates the points along the duct cross-section sides
+  /// @brief Generates the points along the rectangular duct cross-section boundary
   /// @param cross_sec Output vector of cross-section boundary points
-  /// @param corners Corner points defining the duct geometry
-  /// @param nrings Number of rings of the assembly. (Rings of pins around central pin)
-  /// @param pitch Spacing between adjacent pins/subchannel centroids
+  /// @param nx Number of boundary divisions in the x-direction
+  /// @param ny Number of boundary divisions in the y-direction
+  /// @param pitch Spacing between adjacent boundary points
+  /// @param side_gap Gap between the duct wall and surrounding geometry
   void ductCrossSec(std::vector<Point> & cross_sec,
-                    const std::vector<Point> & corners,
-                    unsigned int nrings,
-                    Real pitch) const;
+                    unsigned int nx,
+                    unsigned int ny,
+                    Real pitch,
+                    Real side_gap) const;
 
   /// @brief Computes all 3D point locations used to construct the duct mesh
   /// @param points Output vector of 3D point locations
@@ -80,18 +84,14 @@ protected:
   const unsigned int _n_cells;
   /// axial location of nodes
   std::vector<Real> _z_grid;
-  /// unheated length of the fuel Pin at the entry of the assembly
   const Real _unheated_length_entry;
-  /// heated length of the fuel Pin
   const Real _heated_length;
-  /// unheated length of the fuel Pin at the exit of the assembly
   const Real _unheated_length_exit;
   /// block index
   const unsigned int _block_id;
-  /// Distance between the neighbor fuel pins, pitch
+  /// lattice geometry
   const Real _pitch;
-  /// number of rings of fuel pins
-  const unsigned int _n_rings;
-  /// the distance between flat surfaces of the duct facing each other
-  const Real _flat_to_flat;
+  const unsigned int _nx;
+  const unsigned int _ny;
+  const Real _side_gap;
 };
