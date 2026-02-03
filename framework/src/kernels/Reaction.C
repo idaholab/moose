@@ -42,6 +42,9 @@ template <bool is_ad>
 Real
 ReactionTempl<is_ad>::computeQpJacobian()
 {
+  mooseAssert(!is_ad,
+              "In ADReaction, computeQpJacobian should not be called. Check computeJacobian "
+              "implementation.");
   return _test[_i][_qp] * _rate * _phi[_j][_qp];
 }
 

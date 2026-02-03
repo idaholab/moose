@@ -12,8 +12,8 @@
     input = 'mat_reaction.i'
     difference_tol = 1e-7
     design = 'MatReaction.md'
-    requirement = 'The system shall calculate the correct Jacobian of MatReaction.'
-  [../]
+    requirement = 'The system shall calculate the correct hand-coded Jacobian for a steady-state diffusion-reaction problem.'
+  []
   [ad_mat_reaction]
     type = 'Exodiff'
     input = 'mat_reaction.i'
@@ -28,6 +28,6 @@
     difference_tol = 1e-7
     cli_args = 'AD=AD'
     design = 'ADMatReaction.md'
-    requirement = 'The system shall calculate the correct Jacobian of ADMatReaction using automatic differentiation.'
-  [../]
+    requirement = 'The system shall calculate the correct Jacobian via automatic differentiation for a steady-state diffusion-reaction problem.'
+  []
 []

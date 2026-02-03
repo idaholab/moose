@@ -39,7 +39,10 @@ template <bool is_ad>
 Real
 CoefReactionTempl<is_ad>::computeQpJacobian()
 {
-  return _coef * _test[_i][_qp] * _rate * _phi[_j][_qp];
+  mooseAssert(!is_ad,
+              "In ADCoefReaction, computeQpJacobian should not be called. Check computeJacobian "
+              "implementation.");
+  return _coef * ReactionTempl<is_ad>::computeQpJacobian();
 }
 
 template class CoefReactionTempl<false>;
