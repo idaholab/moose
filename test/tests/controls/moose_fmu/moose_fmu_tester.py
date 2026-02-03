@@ -110,7 +110,8 @@ def moose_fmu_step_by_step(
             diffused = fmu.getReal([vrs["diffused"]])[0]
             rep_value = fmu.getReal([vrs["rep_value"]])[0]
             print(
-                f"fmu_time={t:.3f} -> moose_time={moose_time:.6f} -> diffused={diffused:.6f} -> rep_value={rep_value:.6f}"
+                f"fmu_time={t:.3f} -> moose_time={moose_time:.6f} ->"
+                "diffused={diffused:.6f} -> rep_value={rep_value:.6f}"
             )
             rows.append((t, moose_time, diffused, rep_value))
 
@@ -215,7 +216,7 @@ def moose_fmu_time(
 
 
 def print_result(result):
-
+    """Pretty-print FMU time, moose_time, diffused, and rep_value rows."""
     fmu_time = result["time"]
     dt = result["moose_time"]
     diff_u = result["diffused"]
@@ -223,5 +224,6 @@ def print_result(result):
 
     for ti, di, diff, rep in zip(fmu_time, dt, diff_u, rep_value):
         print(
-            f"fmu_time={ti:.1f} -> moose_time={di:.5f} -> diffused={diff:.5f} -> rep_value={rep:.5f} "
+            f"fmu_time={ti:.1f} -> moose_time={di:.5f} ->"
+            "diffused={diff:.5f} -> rep_value={rep:.5f} "
         )

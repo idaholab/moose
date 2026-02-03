@@ -16,15 +16,15 @@ import pandas as pd
 from pyfmi import load_fmu
 
 
-# Helper for testing the MOOSE FMU via the RunApp command_proxy option
 def test_controller(user_cmd: str | None = None):
+    """Return the command used to launch MOOSE, or exit if it is unavailable."""
     # Get the command we should run
     # You'll hit this if you don't run a RunApp-derived Tester or
     # don't run it with the "command_proxy" option
     if user_cmd:
         return user_cmd
     RUNAPP_COMMAND = os.environ.get("RUNAPP_COMMAND")
-    #RUNAPP_COMMAND = "/data/lim2/projects/worktrees/moose-fmi/test/moose_test-opt -i fmu_diffusion.i"
+
     if RUNAPP_COMMAND is None:
         sys.exit("Missing expected command variable RUNAPP_COMMAND")
 
@@ -50,11 +50,10 @@ def _initialize_moose_fmu(model, t0: float, t1: float, flag: str, cmd: str) -> N
 def _finalize_moose_fmu(model) -> None:
      with contextlib.suppress(Exception):
          model.terminate()
-    # with contextlib.suppress(Exception):
-    #     model.free_instance()
 
 
 def simulate_moose_fmu(moose_filename, t0, t1, dt, flag, cmd, *, debug_logging=True):
+    """Run the FMU with a fixed step size and write results to run_fmu.csv."""
     model = _load_moose_fmu(moose_filename, debug_logging=debug_logging)
 
     try:
@@ -102,7 +101,12 @@ def moose_fmu_step_by_step(
     time_tol: float | None = None,  # None -> 1e-15
     step_csv: str = "run_fmu_step_by_step.csv",
 ):
-    """Manual FMI 2.0 run + comparison with baseline CSV produced by simulate_moose_fmu()."""
+    """
+    Manual FMI 2.0 run.
+
+    Comparison with baseline CSV produced
+    by simulate_moose_fmu().
+    """
     if time_tol is None:
         time_tol = 1e-15
 
@@ -121,7 +125,8 @@ def moose_fmu_step_by_step(
             diffused = float(model.get("diffused"))
             rep_value = float(model.get("rep_value"))
             print(
-                f"fmu_time={t:.3f} -> moose_time={moose_time:.6f} -> diffused={diffused:.6f} -> rep_value={rep_value:.6f}"
+                f"fmu_time={t:.3f} -> moose_time={moose_time:.6f} -> "
+                "diffused={diffused:.6f} -> rep_value={rep_value:.6f}"
             )
             rows.append((t, moose_time, diffused, rep_value))
 
@@ -193,7 +198,7 @@ def moose_fmu_time(
 
 
 def print_result(result):
-
+    """Pretty-print FMU time, moose_time, diffused, and rep_value rows."""
     fmu_time = result["time"]
     dt = result["moose_time"]
     diff_u = result["diffused"]
@@ -201,5 +206,6 @@ def print_result(result):
 
     for ti, di, diff, rep in zip(fmu_time, dt, diff_u, rep_value):
         print(
-            f"fmu_time={ti:.1f} -> moose_time={di:.5f} -> diffused={diff:.5f} -> rep_value={rep:.5f} "
+            f"fmu_time={ti:.1f} -> moose_time={di:.5f} -> "
+            "diffused={diff:.5f} -> rep_value={rep:.5f} "
         )
