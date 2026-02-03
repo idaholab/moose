@@ -42,14 +42,14 @@
 [Preconditioner]
   [boomeramg]
     type = MFEMHypreBoomerAMG
-    print_level = 2
+    print_level = 0
   []
 []
 
 [Solver]
   type = MFEMHypreLOBPCG
   preconditioner = boomeramg
-  print_level = 2
+  print_level = 0
   coefficient = 1.0
   l_tol = 1e-8
   l_max_its = 200

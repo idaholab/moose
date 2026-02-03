@@ -23,11 +23,6 @@ public:
 
   MFEMEigensolverBase(const InputParameters & parameters);
 
-  /// Retrieves the preconditioner userobject if present, sets the member pointer to
-  /// said object if still unset, and sets the solver to use this preconditioner.
-  template <typename T>
-  void setPreconditioner(T & solver);
-
   /// Sets the operator for the eigensolver in derived classes
   virtual void setOperator(mfem::Operator & op) = 0;
 
