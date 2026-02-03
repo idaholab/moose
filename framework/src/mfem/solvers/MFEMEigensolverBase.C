@@ -22,14 +22,13 @@ MFEMEigensolverBase::validParams()
   params.addParam<int>("l_max_its", 10000, "Set the maximum number of iterations.");
   params.addParam<int>("print_level", 2, "Set the solver verbosity.");
   params.addParam<int>("random_seed", 123, "Set the random seed for the solver.");
-  params.addParam<int>("num_modes", 1, "Set the number of lowest eigenmodes to compute.");
   params.addParam<UserObjectName>("preconditioner", "Optional choice of preconditioner to use.");
 
   return params;
 }
 
 MFEMEigensolverBase::MFEMEigensolverBase(const InputParameters & parameters)
-  : MFEMSolverBase(parameters)
+  : MFEMSolverBase(parameters), _num_modes(getMFEMProblem().getParam<int>("num_modes"))
 {
 }
 

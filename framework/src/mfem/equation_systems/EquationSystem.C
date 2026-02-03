@@ -403,6 +403,14 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
   }
 }
 
+void 
+EquationSystem::RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver)
+{
+  mfem::Array<mfem::real_t> eigenvalues;
+  eigensolver->GetEigenvalues(eigenvalues);
+
+}
+
 void
 EquationSystem::BuildLinearForms()
 {

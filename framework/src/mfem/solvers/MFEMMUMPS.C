@@ -45,7 +45,7 @@ MFEMMUMPS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
   {
     mooseError("MUMPS solver does not support LOR solve");
   }
-  else if (getMFEMProblem().getProblemData().eqn_system->isEigensolve())
+  else if (getMFEMProblem().is_eigenproblem)
   {
     auto solver = new mfem::MUMPSSolver(*a.ParallelAssemble());
     solver->SetPrintLevel(getParam<int>("print_level"));

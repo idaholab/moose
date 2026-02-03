@@ -34,8 +34,8 @@ EquationSystemProblemOperator::Solve()
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
   if (GetEquationSystem()->GetTestVarNames().size() > 1 &&
-      (_problem_data.jacobian_solver->isLOR() || _problem_data.jacobian_solver->isEigensolver()))
-    mooseError("The LOR method and eigensolvers are only supported for single-variable systems");
+      (_problem_data.jacobian_solver->isLOR() || _problem.is_eigenproblem))
+    mooseError("The LOR method and eigenproblems are only supported for single-variable systems");
 
   _problem_data.jacobian_solver->updateSolver(
       *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
@@ -46,20 +46,17 @@ EquationSystemProblemOperator::Solve()
   {
     eigensolver->setOperator(*GetEquationSystem());
     eigensolver->Solve();
-    mfem::Array<mfem::real_t> eigenvalues;
-    eigensolver->GetEigenvalues(eigenvalues);
-    for (int i = 0; i < eigenvalues.Size(); ++i)
-      std::cout << "Eigenvalue " << i << ": " << eigenvalues[i] << std::endl;
+    GetEquationSystem()->RecoverEigenproblemSolution(eigensolver.get());
   }
   else
   {
     _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
     _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
     _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+    GetEquationSystem()->RecoverFEMSolution(
+      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
   }
 
-  GetEquationSystem()->RecoverFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 }
 
 } // namespace Moose::MFEM
