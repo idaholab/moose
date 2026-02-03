@@ -48,6 +48,8 @@ EquationSystemProblemOperator::Solve()
     eigensolver->Solve();
     mfem::Array<mfem::real_t> eigenvalues;
     eigensolver->GetEigenvalues(eigenvalues);
+    for (int i = 0; i < eigenvalues.Size(); ++i)
+      std::cout << "Eigenvalue " << i << ": " << eigenvalues[i] << std::endl;
   }
   else
   {
