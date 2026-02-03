@@ -25,6 +25,27 @@ public:
 
   FVAdvectedVenkatakrishnanDeferredCorrection(const InputParameters & params);
 
+  struct DeviceData
+  {
+    Real deferred_correction_factor = 1.0;
+  };
+
+  static AdvectedSystemContribution advectedInterpolate(const DeviceData & data,
+                                                        const FaceInfo & face,
+                                                        Real elem_value,
+                                                        Real neighbor_value,
+                                                        const VectorValue<Real> * elem_grad,
+                                                        const VectorValue<Real> * neighbor_grad,
+                                                        Real mass_flux);
+
+  static Real advectedInterpolateValue(const DeviceData & data,
+                                       const FaceInfo & face,
+                                       Real elem_value,
+                                       Real neighbor_value,
+                                       const VectorValue<Real> * elem_grad,
+                                       const VectorValue<Real> * neighbor_grad,
+                                       Real mass_flux);
+
   /**
    * @return The cell-gradient limiter used by this interpolation method.
    */

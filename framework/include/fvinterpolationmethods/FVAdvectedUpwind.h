@@ -21,6 +21,26 @@ public:
 
   FVAdvectedUpwind(const InputParameters & params);
 
+  struct DeviceData
+  {
+  };
+
+  static AdvectedSystemContribution advectedInterpolate(const DeviceData &,
+                                                        const FaceInfo & face,
+                                                        Real,
+                                                        Real,
+                                                        const VectorValue<Real> *,
+                                                        const VectorValue<Real> *,
+                                                        Real mass_flux);
+
+  static Real advectedInterpolateValue(const DeviceData &,
+                                       const FaceInfo & face,
+                                       Real elem_value,
+                                       Real neighbor_value,
+                                       const VectorValue<Real> *,
+                                       const VectorValue<Real> *,
+                                       Real mass_flux);
+
   /**
    * Return the (elem, neighbor) interpolation weights for the advected quantity.
    * @param face The face being interpolated.

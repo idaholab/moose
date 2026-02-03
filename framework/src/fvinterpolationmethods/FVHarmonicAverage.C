@@ -26,13 +26,23 @@ FVHarmonicAverage::validParams()
 
 FVHarmonicAverage::FVHarmonicAverage(const InputParameters & params) : FVInterpolationMethod(params)
 {
-  setFaceInterpolator(buildFaceInterpolator<FVHarmonicAverage>());
+  const DeviceData data{};
+  setFaceInterpolator(buildFaceInterpolator<FVHarmonicAverage>(data));
 }
 
 Real
 FVHarmonicAverage::interpolate(const FaceInfo & face,
                                const Real elem_value,
                                const Real neighbor_value) const
+{
+  return interpolate(DeviceData{}, face, elem_value, neighbor_value);
+}
+
+Real
+FVHarmonicAverage::interpolate(const DeviceData &,
+                               const FaceInfo & face,
+                               const Real elem_value,
+                               const Real neighbor_value)
 {
   mooseAssert(face.neighborPtr(),
               "Harmonic interpolation is intended for internal faces with a neighbor.");
