@@ -1,4 +1,11 @@
 {
+    "app_name": "main",
+    "current_time": "Tue Feb  3 10:52:59 2026",
+    "executable": "/Users/behnpa/projects/moose/modules/stochastic_tools/stochastic_tools-devel",
+    "executable_time": "Mon Feb  2 14:42:04 2026",
+    "libmesh_version": "",
+    "moose_version": "git commit 7cc471e238 on 2026-02-02",
+    "petsc_version": "3.24.2",
     "reporters": {
         "cv_scores": {
             "type": "CrossValidationScores",
@@ -9,14 +16,15 @@
             }
         }
     },
+    "slepc_version": "3.24.0",
     "time_steps": [
         {
             "cv_scores": {
                 "surrogate": [
                     [
-                        0.5624168879709655,
-                        0.4074370702456288,
-                        0.4084045946012922
+                        0.5624168879710433,
+                        0.4074370702456359,
+                        0.40840459460128775
                     ]
                 ]
             },

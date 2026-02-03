@@ -1,4 +1,11 @@
 {
+    "app_name": "main",
+    "current_time": "Tue Feb  3 11:20:13 2026",
+    "executable": "/Users/behnpa/projects/moose/modules/stochastic_tools/stochastic_tools-opt",
+    "executable_time": "Tue Feb  3 11:17:38 2026",
+    "libmesh_version": "",
+    "moose_version": "git commit 5e8e17c8c0 on 2026-02-02",
+    "petsc_version": "3.24.2",
     "reporters": {
         "pc_max_res": {
             "type": "EvaluateSurrogate",
@@ -15,11 +22,11 @@
             "values": {
                 "pc_max_MEAN": {
                     "stat": "MEAN",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "pc_max_STDDEV": {
                     "stat": "STDDEV",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 }
             }
         },
@@ -38,29 +45,30 @@
             "values": {
                 "pr_max_res_pr_max_MEAN": {
                     "stat": "MEAN",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "pr_max_res_pr_max_STDDEV": {
                     "stat": "STDDEV",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 }
             }
         }
     },
+    "slepc_version": "3.24.0",
     "time_steps": [
         {
             "pc_max_res": {
                 "pc_max": [
-                    301.1904762681637,
-                    301.1904762681637,
-                    301.1904762681637,
-                    301.1904762681637,
-                    301.1904762681637
+                    301.19047606554284,
+                    301.19047606554284,
+                    301.19047606554284,
+                    301.19047606554284,
+                    301.19047606554284
                 ]
             },
             "pc_max_stats": {
                 "pc_max_MEAN": [
-                    301.1904762681637,
+                    301.19047606554284,
                     []
                 ],
                 "pc_max_STDDEV": [
@@ -70,20 +78,20 @@
             },
             "pr_max_res": {
                 "pr_max": [
-                    293.68332732478854,
-                    302.8881519543555,
-                    306.34870043778216,
-                    313.9057274853894,
-                    290.86164495690565
+                    302.80592693638255,
+                    311.7235575245105,
+                    305.6422585817286,
+                    297.18957639892994,
+                    290.1926129229697
                 ]
             },
             "pr_max_stats": {
                 "pr_max_res_pr_max_MEAN": [
-                    301.5375104318442,
+                    301.5107864729042,
                     []
                 ],
                 "pr_max_res_pr_max_STDDEV": [
-                    9.40221876470318,
+                    8.213115306759304,
                     []
                 ]
             },

@@ -1,4 +1,11 @@
 {
+    "app_name": "main",
+    "current_time": "Tue Feb  3 10:52:56 2026",
+    "executable": "/Users/behnpa/projects/moose/modules/stochastic_tools/stochastic_tools-devel",
+    "executable_time": "Mon Feb  2 14:42:04 2026",
+    "libmesh_version": "",
+    "moose_version": "git commit 7cc471e238 on 2026-02-02",
+    "petsc_version": "3.24.2",
     "reporters": {
         "results": {
             "type": "StochasticReporter",
@@ -34,37 +41,38 @@
             "values": {
                 "results_results:T_avg:value_MEAN": {
                     "stat": "MEAN",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "results_results:T_avg:value_STDDEV": {
                     "stat": "STDDEV",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "results_results:q_left:value_MEAN": {
                     "stat": "MEAN",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 },
                 "results_results:q_left:value_STDDEV": {
                     "stat": "STDDEV",
-                    "type": "std::pair<double, std::vector<double> >"
+                    "type": "std::pair<double, std::vector<double>>"
                 }
             }
         }
     },
+    "slepc_version": "3.24.0",
     "time_steps": [
         {
             "results": {
                 "results:T_avg:value": [
-                    290.0493845242595,
-                    248.6050947481139,
-                    192.0301321316896,
-                    131.58596857841474,
-                    272.5977017632619,
-                    212.76355765830587,
-                    151.82993831123738,
-                    191.70332294603384,
-                    148.04326716479108,
-                    155.07004432808066
+                    180.970498231759,
+                    186.77299405490697,
+                    197.0053655171391,
+                    215.40003462020954,
+                    185.682935141512,
+                    261.83909498848243,
+                    282.81444132345075,
+                    152.97264223595582,
+                    146.25042603151772,
+                    158.59660772133176
                 ],
                 "results:converged": [
                     true,
@@ -79,45 +87,45 @@
                     true
                 ],
                 "results:q_left:value": [
-                    324.27838280823414,
-                    278.95232322012805,
-                    107.37667968314861,
-                    99.3833233984007,
-                    281.57633634305506,
-                    182.60721896502028,
-                    112.2623447967543,
-                    125.51199465235003,
-                    114.6937641007055,
-                    169.10791450427786
+                    163.62985233891993,
+                    135.0380161988157,
+                    118.2024665090661,
+                    250.7064554559185,
+                    126.00262639000827,
+                    231.43480086197377,
+                    312.2032010050218,
+                    117.77503681450906,
+                    110.76319363303185,
+                    176.01622380603533
                 ]
             },
             "stats": {
                 "results_results:T_avg:value_MEAN": [
-                    199.42784121541888,
+                    196.83050398662652,
                     [
-                        172.4194543916743,
-                        227.45755683125793
+                        175.40762969585856,
+                        220.023677363556
                     ]
                 ],
                 "results_results:T_avg:value_STDDEV": [
-                    55.53057128319956,
+                    45.19692855239753,
                     [
-                        35.73264905596605,
-                        64.78429485236896
+                        21.34078338534027,
+                        55.55781216355007
                     ]
                 ],
                 "results_results:q_left:value_MEAN": [
-                    179.57502824720748,
+                    174.17718730133,
                     [
-                        138.96130933930553,
-                        223.43024101745672
+                        141.9400313435624,
+                        209.8372174936287
                     ]
                 ],
                 "results_results:q_left:value_STDDEV": [
-                    84.7510259100363,
+                    68.70980971351503,
                     [
-                        54.29352893810827,
-                        98.00828658688752
+                        37.44975440503061,
+                        84.23293687552481
                     ]
                 ]
             },
