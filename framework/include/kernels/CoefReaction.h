@@ -21,7 +21,7 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  Real computeQpJacobian() override;
+  virtual Real computeQpJacobian() override;
 
   /// input parameter multiplied by the reaction kernel
   const Real _coef;
