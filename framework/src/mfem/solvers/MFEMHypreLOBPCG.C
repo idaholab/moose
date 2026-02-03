@@ -37,7 +37,7 @@ MFEMHypreLOBPCG::constructSolver(const InputParameters &)
 }
 
 void
-MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & /*tdofs*/)
+MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 {
   if (_lor)
     mooseError("Eigensolver cannot use LOR method");
@@ -60,10 +60,11 @@ MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & /*td
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
 
-  // mfem::HypreBoomerAMG * amg = new mfem::HypreBoomerAMG(*a.ParallelAssemble());
-  // amg->SetPrintLevel(0);
-  //_eigensolver->SetPreconditioner(*amg);
-  setPreconditioner(*_eigensolver);
+  if (_preconditioner)
+  {
+    _preconditioner->updateSolver(a, tdofs);
+    setPreconditioner(static_cast<mfem::HypreLOBPCG &>(*_eigensolver));
+  }
 
   _M.reset(m->ParallelAssemble());
   _eigensolver->SetMassMatrix(*_M);
