@@ -27,6 +27,7 @@ ADVolumeJunction1PhaseBC::validParams()
   params.addRequiredCoupledVar("rhoA", "Flow channel variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Flow channel variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Flow channel variable: rho*E*A");
+  params.addRequiredCoupledVar("passives_times_area", "Passive transport solution variables");
 
   params.addClassDescription(
       "Adds boundary fluxes for flow channels connected to a 1-phase volume junction");
@@ -69,6 +70,10 @@ ADVolumeJunction1PhaseBC::getFlowChannelIndexMapping() const
   jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhoA_jvar, THMVACE1D::MASS));
   jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhouA_jvar, THMVACE1D::MOMENTUM));
   jvar_map.insert(std::pair<unsigned int, unsigned int>(_rhoEA_jvar, THMVACE1D::ENERGY));
+  const auto n_passives = coupledComponents("passives_times_area");
+  for (const auto i : make_range(n_passives))
+    jvar_map.insert(std::pair<unsigned int, unsigned int>(coupled("passives_times_area", i),
+                                                          THMVACE1D::N_FLUX_OUTPUTS + i));
 
   return jvar_map;
 }

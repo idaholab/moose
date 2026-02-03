@@ -57,8 +57,8 @@ ADVolumeJunctionBaseUserObject::ADVolumeJunctionBaseUserObject(const InputParame
 void
 ADVolumeJunctionBaseUserObject::initialSetup()
 {
-  _n_flux_eq = _flow_variable_names.size();
-  _n_scalar_eq = _scalar_variable_names.size();
+  _n_flux_eq = getFlowChannelVariables().size();
+  _n_scalar_eq = getJunctionVariables().size();
 
   _scalar_dofs.resize(_n_scalar_eq);
   _cached_junction_var_values.resize(_n_scalar_eq);
@@ -139,10 +139,9 @@ ADVolumeJunctionBaseUserObject::storeConnectionData()
 
   // Get flow channel Dofs and basic function values
   _flow_channel_dofs[c].clear();
-  for (unsigned int j = 0; j < _n_flux_eq; j++)
+  const auto & flow_channel_vars = getFlowChannelVariables();
+  for (const auto & var : flow_channel_vars)
   {
-    MooseVariable * var = getVar(_flow_variable_names[j], 0);
-
     auto && dofs = var->dofIndices();
     for (unsigned int k = 0; k < dofs.size(); k++)
       _flow_channel_dofs[c].push_back(dofs[k]);
@@ -192,6 +191,15 @@ ADVolumeJunctionBaseUserObject::getFlux(const unsigned int & connection_index) c
 
   checkValidConnectionIndex(connection_index);
   return _flux[connection_index];
+}
+
+std::vector<const MooseVariableBase *>
+ADVolumeJunctionBaseUserObject::getFlowChannelVariables() const
+{
+  std::vector<const MooseVariableBase *> vars(_flow_variable_names.size());
+  for (const auto i : index_range(_flow_variable_names))
+    vars[i] = getVar(_flow_variable_names[i], 0);
+  return vars;
 }
 
 std::vector<const MooseVariableBase *>

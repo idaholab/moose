@@ -20,6 +20,7 @@ public:
   Pump1Phase(const InputParameters & params);
 
 protected:
+  virtual bool supportsPassiveTransport() const override { return false; }
   virtual void buildVolumeJunctionUserObject() override;
 
   /// Pump head [m]
