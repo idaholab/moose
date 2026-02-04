@@ -9,6 +9,7 @@
 
 #include "CSGUniverse.h"
 #include "CSGUtils.h"
+#include "MooseError.h"
 
 namespace CSG
 {
@@ -95,6 +96,17 @@ bool
 CSGUniverse::operator!=(const CSGUniverse & other) const
 {
   return !(*this == other);
+}
+
+void
+CSGUniverse::applyTransformation(TransformationType type, const std::vector<Real> & values)
+{
+  // Assert valid input as a safety measure
+  // Main validation is done in CSGBase::applyTransformation
+  mooseAssert(isValidTransformationValue(type, values),
+              "Invalid transformation values for transformation type " +
+                  getTransofrmationTypeString(type) + " on universe " + getName());
+  _transformations.emplace_back(type, values);
 }
 
 } // namespace CSG

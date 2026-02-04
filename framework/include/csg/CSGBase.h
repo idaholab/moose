@@ -14,7 +14,9 @@
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
 #include "CSGLatticeList.h"
+#include "CSGTransformation.h"
 #include "nlohmann/json.h"
+#include <variant>
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -22,6 +24,16 @@
 
 namespace CSG
 {
+
+/**
+ * Define a variant type that can hold references to different CSG object types
+ */
+typedef std::variant<std::reference_wrapper<const CSGSurface>,
+                     std::reference_wrapper<const CSGCell>,
+                     std::reference_wrapper<const CSGUniverse>,
+                     std::reference_wrapper<const CSGRegion>,
+                     std::reference_wrapper<const CSGLattice>>
+    CSGObjectVariant;
 
 /**
  * CSGBase creates an internal representation of a Constructive Solid Geometry (CSG)
@@ -461,6 +473,18 @@ public:
 
   /// Operator overload for checking if two CSGBase objects are not equal
   bool operator!=(const CSGBase & other) const;
+
+  /**
+   * @brief Apply a transformation to a CSG object
+   *
+   * @param csg_object The CSG object to transform (Surface, Cell, Universe, Region, or Lattice)
+   * @param type The type of transformation to apply
+   * @param values The transformation values (3 values for any transformation type)
+   * @return CSGObjectVariant The transformed object
+   */
+  void applyTransformation(const CSGObjectVariant & csg_object,
+                           TransformationType type,
+                           const std::vector<Real> & values);
 
 private:
   /**

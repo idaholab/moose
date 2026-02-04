@@ -365,6 +365,95 @@ CSGBase::setLatticeUniverses(
 }
 
 void
+CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
+                             TransformationType type,
+                             const std::vector<Real> & values)
+{
+  // Validate the transformation values
+  if (!isValidTransformationValue(type, values))
+    mooseError("Invalid transformation values provided for transformation type ",
+               getTransformationTypeString(type));
+
+  // Use std::visit to handle each type in the variant
+  std::visit(
+      [&](const auto & obj)
+      {
+        using T = std::decay_t<decltype(obj.get())>;
+
+        // Handle each CSG object type differently because each needs to check that it exists in
+        // this base instance
+        if constexpr (std::is_same_v<T, CSGCell>)
+        {
+          const CSGCell & cell = obj.get();
+          if (!checkCellInBase(cell))
+            mooseError("Cannot apply transformation to cell ",
+                       cell.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGCell & mutable_cell = _cell_list.getCell(cell.getName());
+          mutable_cell.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGSurface>)
+        {
+          const CSGSurface & surface = obj.get();
+          if (!checkSurfaceInBase(surface))
+            mooseError("Cannot apply transformation to surface ",
+                       surface.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGSurface & mutable_surface = _surface_list.getSurface(surface.getName());
+          mutable_surface.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGUniverse>)
+        {
+          const CSGUniverse & universe = obj.get();
+          if (!checkUniverseInBase(universe))
+            mooseError("Cannot apply transformation to universe ",
+                       universe.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGUniverse & mutable_universe = _universe_list.getUniverse(universe.getName());
+          mutable_universe.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGLattice>)
+        {
+          const CSGLattice & lattice = obj.get();
+          if (!checkLatticeInBase(lattice))
+            mooseError("Cannot apply transformation to lattice ",
+                       lattice.getName(),
+                       " that is not in this CSGBase instance.");
+
+          // Get non-const reference and apply transformation
+          CSGLattice & mutable_lattice = _lattice_list.getLattice(lattice.getName());
+          mutable_lattice.applyTransformation(type, values);
+        }
+        else if constexpr (std::is_same_v<T, CSGRegion>)
+        {
+          // iterate on the surfaces of the region and apply the transformation to those surfaces
+          const CSGRegion & region = obj.get();
+          const auto & surfaces = region.getSurfaces();
+          for (const CSGSurface & surface : surfaces)
+          {
+            if (!checkSurfaceInBase(surface))
+              mooseError("Cannot apply transformation to region with surface ",
+                         surface.getName(),
+                         " that is not in this CSGBase instance.");
+
+            // Get non-const reference and apply transformation
+            CSGSurface & mutable_surface = _surface_list.getSurface(surface.getName());
+            mutable_surface.applyTransformation(type, values);
+          }
+        }
+        else
+          mooseError("Transformation not yet implemented for this object type: ", typeid(T).name());
+      },
+      csg_object);
+}
+
+void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 {
   joinSurfaceList(base->getSurfaceList());
@@ -683,5 +772,4 @@ CSGBase::operator!=(const CSGBase & other) const
 {
   return !(*this == other);
 }
-
 } // namespace CSG

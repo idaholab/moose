@@ -81,6 +81,17 @@ CSGCell::getFillLattice() const
     return *_fill_lattice;
 }
 
+void
+CSGCell::applyTransformation(TransformationType type, const std::vector<Real> & values)
+{
+  // Assert valid input as a safety measure
+  // Main validation is done in CSGBase::applyTransformation
+  mooseAssert(isValidTransformationValue(type, values),
+              "Invalid transformation values for transformation type " +
+                  getTransofrmationTypeString(type) + " on cell " + getName());
+  _transformations.emplace_back(type, values);
+}
+
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {

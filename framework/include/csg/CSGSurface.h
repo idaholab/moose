@@ -14,6 +14,7 @@
 #endif
 
 #include "MooseApp.h"
+#include "CSGTransformation.h"
 
 namespace CSG
 {
@@ -93,6 +94,24 @@ public:
    */
   const std::string & getName() const { return _name; }
 
+  /**
+   * @brief apply a transformation to a surface
+   *
+   * @param type type of transformation to apply
+   * @param values values for the transformation (3 values for any transformation type)
+   */
+  void applyTransformation(TransformationType type, const std::vector<Real> & values);
+
+  /**
+   * @brief Get the list of transformations applied to this surface
+   *
+   * @return const reference to the list of transformations
+   */
+  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  {
+    return _transformations;
+  }
+
   /// Operator overload for checking if two CSGSurface objects are equal
   bool operator==(const CSGSurface & other) const;
 
@@ -117,6 +136,9 @@ protected:
   /// Type of surface that is being represented
   /// string is taken directly from the surface class name
   const std::string _surface_type;
+
+  /// list of transformations applied to the surface (type, value) in the order they are applied
+  std::vector<std::pair<TransformationType, std::vector<Real>>> _transformations;
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;

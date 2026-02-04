@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGCellList.h"
+#include "CSGTransformation.h"
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -115,6 +116,19 @@ protected:
   // name needs to be managed at the CSGUniverseList level
   void setName(const std::string & name) { _name = name; }
 
+  /// Apply a transformation to the universe (accessed through CSGBase)
+  void applyTransformation(TransformationType type, const std::vector<Real> & values);
+
+  /**
+   * @brief Get the list of transformations applied to this universe
+   *
+   * @return const reference to the list of transformations
+   */
+  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  {
+    return _transformations;
+  }
+
   /// Name of universe
   std::string _name;
 
@@ -123,6 +137,9 @@ protected:
 
   /// whether or not this universe is the root universe
   bool _is_root;
+
+  /// list of transformations applied to the universe (type, value) in the order they are applied
+  std::vector<std::pair<TransformationType, std::vector<Real>>> _transformations;
 
   // CSGUniverseList needs to be friend to access setName()
   friend class CSGUniverseList;

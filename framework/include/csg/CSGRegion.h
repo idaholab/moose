@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGSurface.h"
+#include "CSGTransformation.h"
 #include "MooseEnum.h"
 
 namespace CSG
