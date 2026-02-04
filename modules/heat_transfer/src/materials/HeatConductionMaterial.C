@@ -22,6 +22,7 @@ HeatConductionMaterialTempl<is_ad>::validParams()
   InputParameters params = Material::validParams();
 
   params.addCoupledVar("temp", "Coupled Temperature");
+  params.deprecateCoupledVar("temp", "temperature", "01/12/2027");
 
   params.addParam<Real>("thermal_conductivity", "The thermal conductivity value");
   params.addParam<FunctionName>("thermal_conductivity_temperature_function",
