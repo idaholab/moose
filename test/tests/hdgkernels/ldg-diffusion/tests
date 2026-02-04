@@ -25,7 +25,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestLagrangeTri
-      capabilities = 'method!=dbg'
+      # installation_type=in_tree: see #25279
+      capabilities = 'method!=dbg & installation_type=in_tree'
       required_python_packages = 'pandas matplotlib'
       valgrind = 'none'
       detail = 'simplex elements and'
@@ -34,7 +35,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestLagrangeQuad
-      capabilities = 'method!=dbg'
+      # installation_type=in_tree: see #25279
+      capabilities = 'method!=dbg & installation_type=in_tree'
       required_python_packages = 'pandas matplotlib'
       valgrind = 'none'
       detail = 'tensor-product elements.'
@@ -46,7 +48,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestRTTri
-      capabilities = 'method!=dbg'
+      # installation_type=in_tree: see #25279
+      capabilities = 'method!=dbg & installation_type=in_tree'
       required_python_packages = 'pandas matplotlib'
       valgrind = 'none'
       detail = 'simplex elements and'
@@ -55,7 +58,8 @@
       type = PythonUnitTest
       input = test.py
       test_case = TestRTQuad
-      capabilities = 'method!=dbg'
+      # installation_type=in_tree: see #25279
+      capabilities = 'method!=dbg & installation_type=in_tree'
       required_python_packages = 'pandas matplotlib'
       valgrind = 'none'
       detail = 'tensor-product elements.'

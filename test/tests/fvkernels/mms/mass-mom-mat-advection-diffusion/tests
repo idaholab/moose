@@ -13,7 +13,9 @@
     test_case = TestMassMomdAvectionDiffusion
     requirement = 'The system shall exhibit second order convergence for the unknown in a coupled mass and momentum-type two equation system.'
     min_parallel = 2
+    max_parallel = 2
     required_python_packages = 'pandas matplotlib'
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
 []

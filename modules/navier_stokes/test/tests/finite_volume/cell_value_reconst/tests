@@ -7,8 +7,10 @@
     test_case = TestWellerReconstruction
     requirement = "The system shall be able to use Weller's reconstruction method to build cell "
                   "vector values from face fluxes with a second order convergence."
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     required_python_packages = 'pandas matplotlib'
     min_parallel = 2
+    max_parallel = 2
   []
 []

@@ -8,7 +8,8 @@
     requirement = 'The system shall display first order convergence, when averaging face side neighbors to compute face midpoint values during gradient reconstruction.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
   [skewcorrected]
     type = PythonUnitTest
@@ -17,6 +18,7 @@
     requirement = 'The system shall display second order convergence, when skewness-corrected averaging to compute face midpoint values during gradient reconstruction.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
 []

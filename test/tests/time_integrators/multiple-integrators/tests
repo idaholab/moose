@@ -13,6 +13,8 @@
     input = test.py
     test_case = TestMultipleTimeIntegrators
     required_python_packages = 'pandas matplotlib'
+    # installation_type=in_tree: see #25279
+    capabilities = 'installation_type=in_tree'
     prereq = test
   []
   [jac]

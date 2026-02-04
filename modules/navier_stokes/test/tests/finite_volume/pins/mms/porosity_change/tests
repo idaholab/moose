@@ -6,8 +6,10 @@
     input = test.py
     test_case = TestRC
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 1D channel with a continuously varying porosity and produce second order convergence for all variables.'
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
+    max_parallel = 8
     required_python_packages = 'pandas matplotlib'
   []
   [2D_continuous_porosity]
@@ -15,8 +17,10 @@
     input = test.py
     test_case = TestRC_2D
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 2D channel with a continuously varying porosity and produce second order convergence for all variables.'
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 16
+    max_parallel = 16
     required_python_packages = 'pandas matplotlib'
   []
   [pressure-corrected]
@@ -24,8 +28,10 @@
     input = test.py
     test_case = TestPressureCorrected
     requirement = 'The system shall show second order convergence for all variables when the porosity is interpolated and reconstructed multiple times and when a correction is applied to the pressure interpolation.'
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
+    max_parallel = 8
     required_python_packages = 'pandas matplotlib'
   []
   [pressure-corrected-action]
@@ -33,8 +39,10 @@
     input = test.py
     test_case = TestPressureCorrectedAction
     requirement = 'The system shall show second order convergence for all variables when using porosity reconstructions and friction corrections together with NSFV action syntax.'
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
+    max_parallel = 8
     required_python_packages = 'pandas matplotlib'
   []
   [pressure-corrected-jac]

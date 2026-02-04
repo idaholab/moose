@@ -5,8 +5,10 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = Test2DRCWalls
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
+    max_parallel = 8
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall exhibit second order convergence for all variables in a Cartesian, no-slip, channel-flow problem using a Rhie-Chow interpolation, including body forces, and two term boundary expansion for gradient and extrapolated boundary face value computation.'
   []
@@ -14,8 +16,10 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = Test2DRCSymmetry
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
+    max_parallel = 8
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall exhibit second order convergence for all variables in a Cartesian, no-slip, channel-flow problem with a symmetry axis using a Rhie-Chow interpolation, including body forces, and two term boundary expansion for gradient and extrapolated boundary face value computation.'
   []
@@ -23,8 +27,10 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = Test2DRZRCSymmetry
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
+    max_parallel = 8
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall exhibit second order convergence for all variables in an axisymmetric, no-slip, channel-flow problem using a Rhie-Chow interpolation, including body forces, and two term boundary expansion for gradient and extrapolated boundary face value computation.'
   []

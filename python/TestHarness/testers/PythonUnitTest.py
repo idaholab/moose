@@ -34,11 +34,6 @@ class PythonUnitTest(RunApp):
         params["max_parallel"] = 1
         params["max_threads"] = 1
 
-        # Doesn't currently support installed tests; see #25279
-        if params["capabilities"]:
-            params["capabilities"] = "(" + params["capabilities"] + ") & "
-        params["capabilities"] += "installation_type=in_tree"
-
         return params
 
     def __init__(self, name, params):

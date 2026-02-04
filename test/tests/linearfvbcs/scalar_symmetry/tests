@@ -9,7 +9,8 @@
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 1D steady diffusion equation, which shall be solved numerically using a linear finite volume system with symmetry boundary condition.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 
   [advection-1d-symmetry]
@@ -19,7 +20,8 @@
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 1D steady advection equation, which shall be solved numerically in a linear finite volume system with symmetry boundary condition.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 
   [diffusion-2d-symmetry]
@@ -29,7 +31,8 @@
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically using a linear finite volume system with symmetry boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 
   [advection-2d-symmetry]
@@ -39,7 +42,8 @@
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically using a linear finite volume system with symmetry boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 
   [diffusion-2d-symmetry-nonorthogonal]
@@ -49,7 +53,8 @@
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady diffusion equation, which shall be solved numerically on nonorthogonal cells using a linear finite volume system with symmetry boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 
   [advection-2d-symmetry-nonorthogonal]
@@ -59,6 +64,7 @@
     requirement = 'The system shall display second-order convergence with respect to a manufactured solution for the 2D steady advection equation, which shall be solved numerically on nonorthogonal cells using a linear finite volume system with symmetry boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 []

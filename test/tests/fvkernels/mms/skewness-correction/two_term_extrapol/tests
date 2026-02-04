@@ -8,6 +8,7 @@
     requirement = 'The system shall display first order convergence when using a skew-corrected average-based face-interpolation together with extrapolated BCs.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
 []

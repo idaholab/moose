@@ -8,7 +8,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-1d-cd_neumann]
     type = PythonUnitTest
@@ -17,7 +18,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a one-dimensional domain using Neumann boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-2d-orthogonal]
     type = PythonUnitTest
@@ -26,7 +28,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-2d-nonorthogonal]
     type = PythonUnitTest
@@ -35,7 +38,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-2d-orthogonal_neumann]
     type = PythonUnitTest
@@ -44,7 +48,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional orthogonal mesh for Neumann boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-2d-nonorthogonal_neumann]
     type = PythonUnitTest
@@ -53,7 +58,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on a two-dimensional nonorthogonal mesh for Neumann boundary conditions.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-2d-rz]
     type = PythonUnitTest
@@ -62,7 +68,8 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on an orthogonal mesh in cylindrical coordinate system.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
   [mms-diffusion-2d-rz-nonorthogonal]
     type = PythonUnitTest
@@ -71,6 +78,7 @@
     requirement = 'The system shall display second-order convergence for diffusion problems with a central differencing scheme solved using a linear finite volume system on nonorthogonal mesh in cylindrical coordinate system.'
     required_python_packages = 'pandas matplotlib'
     max_threads = 1 # see libmesh issue #3808
-    capabilities = 'method=opt'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method=opt & installation_type=in_tree'
   []
 []

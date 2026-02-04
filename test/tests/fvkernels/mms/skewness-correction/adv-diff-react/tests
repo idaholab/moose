@@ -8,7 +8,8 @@
     requirement = 'The system shall display first order convergence with regular face averaging in an advection diffusion problem.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
   [skewcorrected]
     type = PythonUnitTest
@@ -17,7 +18,8 @@
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion term in an advection diffusion problem.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
   [skewcorrected-advection]
     type = PythonUnitTest
@@ -26,6 +28,7 @@
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion and advection terms in an advection diffusion problem.'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
 []

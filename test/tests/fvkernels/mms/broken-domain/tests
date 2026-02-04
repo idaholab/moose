@@ -8,6 +8,7 @@
     valgrind = none
     design = 'FVInterfaceKernels/index.md FVBCs/index.md'
     issues = '#16756'
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
 []

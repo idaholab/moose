@@ -27,8 +27,10 @@
     test_case = TestSteadyAdapt
     requirement = 'The system shall display second order convergence when there is some skewness due to mismatch between cell levels.'
     min_parallel = 16
+    max_parallel = 16
     required_python_packages = 'pandas matplotlib'
     heavy = true
-    capabilities = 'method!=dbg'
+    # installation_type=in_tree: see #25279
+    capabilities = 'method!=dbg & installation_type=in_tree'
   []
 []
