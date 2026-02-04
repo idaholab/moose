@@ -49,7 +49,7 @@ public:
 
   void registerPeriodicBCs(MFEMPeriodicByVector &);
 
-  mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh&);
+  mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh &);
 
   /**
    * Clones the mesh.
