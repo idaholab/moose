@@ -17,11 +17,11 @@
 namespace
 {
 size_t
-mfem_index(const size_t i_dim,
-           const size_t i_point,
-           const size_t num_dims,
-           const size_t num_points,
-           const mfem::Ordering::Type ordering)
+MFEMIndex(const size_t i_dim,
+          const size_t i_point,
+          const size_t num_dims,
+          const size_t num_points,
+          const mfem::Ordering::Type ordering)
 {
   if (ordering == mfem::Ordering::byNODES)
   {
@@ -34,9 +34,9 @@ mfem_index(const size_t i_dim,
 }
 
 mfem::Vector
-points_to_mfem_vector(const std::vector<Point> & points,
-                      const unsigned int num_dims,
-                      const mfem::Ordering::Type ordering)
+pointsToMFEMVector(const std::vector<Point> & points,
+                   const unsigned int num_dims,
+                   const mfem::Ordering::Type ordering)
 {
   const unsigned int num_points = points.size();
   mfem::Vector mfem_points(num_points * num_dims);
@@ -44,7 +44,7 @@ points_to_mfem_vector(const std::vector<Point> & points,
   {
     for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
     {
-      const size_t idx = mfem_index(i_dim, i_point, num_dims, num_points, ordering);
+      const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
 
       mfem_points(idx) = points[i_point](i_dim);
     }
@@ -54,7 +54,7 @@ points_to_mfem_vector(const std::vector<Point> & points,
 }
 
 void
-mfem_vector_to_postprocessor_points(
+MFEMVectorToPostprocessorPoints(
     const mfem::Vector & mfem_points,
     std::vector<std::reference_wrapper<VectorPostprocessorValue>> & points,
     const unsigned int num_dims,
@@ -65,7 +65,7 @@ mfem_vector_to_postprocessor_points(
   {
     for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
     {
-      const size_t idx = mfem_index(i_dim, i_point, num_dims, num_points, ordering);
+      const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
 
       points[i_dim].get()[i_point] = mfem_points(idx);
     }
@@ -93,7 +93,7 @@ MFEMValueSamplerBase::MFEMValueSamplerBase(const InputParameters & parameters,
     _finder(this->comm().get()),
     _points_ordering(getParam<MooseEnum>("point_ordering") == "NODES" ? mfem::Ordering::byNODES
                                                                       : mfem::Ordering::byVDIM),
-    _points(points_to_mfem_vector(
+    _points(pointsToMFEMVector(
         points, this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension(), _points_ordering)),
     _interp_vals(points.size()),
     _var_name(getParam<VariableName>("variable")),
@@ -157,7 +157,7 @@ MFEMValueSamplerBase::finalize()
   _points.HostReadWrite();
 
   const auto mesh_dim = this->getMFEMProblem().mesh().getMFEMParMesh().SpaceDimension();
-  mfem_vector_to_postprocessor_points(_points, _declared_points, mesh_dim, _points_ordering);
+  MFEMVectorToPostprocessorPoints(_points, _declared_points, mesh_dim, _points_ordering);
   const auto val_dims = _var.VectorDim();
   const auto num_points = _declared_points[0].get().size();
   const auto val_fespace_ordering = _var.FESpace()->GetOrdering();
@@ -165,7 +165,7 @@ MFEMValueSamplerBase::finalize()
   {
     for (size_t i_point = 0; i_point < num_points; i_point++)
     {
-      const auto mfem_idx = mfem_index(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
+      const auto mfem_idx = MFEMIndex(i_dim, i_point, val_dims, num_points, val_fespace_ordering);
       _declared_vals[i_dim].get()[i_point] = _interp_vals[mfem_idx];
     }
   }
