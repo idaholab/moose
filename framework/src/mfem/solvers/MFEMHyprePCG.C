@@ -70,7 +70,7 @@ MFEMHyprePCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
 
     _solver.reset(lor_solver);
   }
-  else if (getMFEMProblem().is_eigenproblem)
+  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
   {
     auto solver = new mfem::HyprePCG(*a.ParallelAssemble());
     solver->SetTol(getParam<mfem::real_t>("l_tol"));
