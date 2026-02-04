@@ -74,7 +74,7 @@ MFEMHypreBoomerAMG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & t
 
     _solver.reset(lor_solver);
   }
-  else if (getMFEMProblem().is_eigenproblem)
+  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
   {
     auto solver = new mfem::HypreBoomerAMG(*a.ParallelAssemble());
     solver->SetTol(getParam<mfem::real_t>("l_tol"));
