@@ -34,7 +34,8 @@ EquationSystemProblemOperator::Solve()
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
   if (GetEquationSystem()->GetTestVarNames().size() > 1 &&
-      (_problem_data.jacobian_solver->isLOR() || _problem.is_eigenproblem))
+      (_problem_data.jacobian_solver->isLOR() || dynamic_cast<MFEMEigensolverBase *>(
+                                                    &_problem)))
     mooseError("The LOR method and eigenproblems are only supported for single-variable systems");
 
   _problem_data.jacobian_solver->updateSolver(
