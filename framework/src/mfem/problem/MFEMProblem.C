@@ -30,15 +30,12 @@ MFEMProblem::validParams()
                              "using the MFEM finite element library.");
   MooseEnum numeric_types("real complex", "real");
   params.addParam<MooseEnum>("numeric_type", numeric_types, "Number type used for the problem");
-  params.addParam<bool>("eigenproblem", false, "Whether the problem to be solved is an eigenproblem");
-  params.addParam<int>("num_modes", 1, "Set the number of lowest eigenmodes to compute.");
 
   return params;
 }
 
 MFEMProblem::MFEMProblem(const InputParameters & params)
-  : ExternalProblem(params), num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))},
-    is_eigenproblem{getParam<bool>("eigenproblem")}
+  : ExternalProblem(params), num_type{static_cast<int>(getParam<MooseEnum>("numeric_type"))}
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
@@ -81,10 +78,6 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
   auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
 
   getProblemData().jacobian_solver = std::dynamic_pointer_cast<MFEMSolverBase>(object_ptr);
-      
-  if (is_eigenproblem && !getProblemData().jacobian_solver->isEigensolver())
-    mooseError("The selected solver '" + name +
-               "' is not an eigensolver, but the problem is marked as an eigenproblem.");
 }
 
 void
@@ -207,12 +200,6 @@ MFEMProblem::addVariable(const std::string & var_type,
     getProblemData().time_derivative_map.addTimeDerivativeAssociation(var_name,
                                                                       time_derivative_var_name);
     addGridFunction(var_type, time_derivative_var_name, parameters);
-  }
-  
-  if (is_eigenproblem)
-  {
-    for (int i = 0; i < getParam<int>("num_modes"); ++i)
-      addGridFunction(var_type, var_name + "_" + std::to_string(i), parameters);
   }
 }
 

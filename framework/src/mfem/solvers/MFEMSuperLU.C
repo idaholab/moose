@@ -42,7 +42,7 @@ MFEMSuperLU::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
   {
     mooseError("SuperLU solver does not support LOR solve");
   }
-  else if (getMFEMProblem().is_eigenproblem)
+  else if (dynamic_cast<MFEMEigenproblem *>(&getMFEMProblem()))
   {
     mfem::SuperLUSolver * solver = new mfem::SuperLUSolver(getMFEMProblem().getComm());
     mfem::SuperLURowLocMatrix * Arow = new mfem::SuperLURowLocMatrix(*a.ParallelAssemble());
