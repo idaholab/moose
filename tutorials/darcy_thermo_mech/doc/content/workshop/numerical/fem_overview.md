@@ -405,7 +405,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !col! width=20%
 
-!listing test/tests/kernels/ad_simple_diffusion/ad_simple_diffusion.i block=Kernels link=False
+!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/advection Kernels/force link=False
 
 !col-end!
 
@@ -417,7 +417,7 @@ $\quad$
 
 !col! width=20%
 
-!listing test/tests/bcs/1d_neumann/1d_neumann.i block=BCs link=False
+!listing test/tests/bcs/conservative_advection_bc/no_upwinding_2D.i block=BCs link=False
 
 !col-end!
 
@@ -429,7 +429,7 @@ $\quad$
 
 !col! width=20%
 
-!listing test/tests/auxkernels/advection_flux/advection_flux_fe.i block=Kernels remove=Kernels/udot Kernels/vdot Kernels/v_advec link=False
+!listing bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/diffusion Kernels/force link=False
 
 !col-end!
 
@@ -441,7 +441,7 @@ $\quad$
 
 !col! width=20%
 
-!listing test/tests/bcs/nodal_normals/circle_tris.i block=Kernels remove=Kernels/diff link=False
+!listing bcs/conservative_advection_bc/no_upwinding_2D.i block=Kernels remove=Kernels/udot Kernels/advection Kernels/diffusion link=False
 
 !col-end!
 
