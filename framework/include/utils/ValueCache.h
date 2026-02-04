@@ -26,9 +26,9 @@
 template <typename T>
 class ValueCache;
 template <typename T>
-void dataStore(std::ostream & stream, ValueCache<T> & c, std::any context);
+void dataStore(std::ostream & stream, ValueCache<T> & c, Moose::AnyPointer context);
 template <typename T>
-void dataLoad(std::istream & stream, ValueCache<T> & c, std::any context);
+void dataLoad(std::istream & stream, ValueCache<T> & c, Moose::AnyPointer context);
 
 /**
  * ValueCache is a generic helper template to implement an unstructured data
@@ -98,8 +98,8 @@ protected:
   /// bounding box (updated upon insertion)
   std::vector<std::pair<Real, Real>> _bbox;
 
-  friend void dataStore<T>(std::ostream & stream, ValueCache<T> & c, std::any context);
-  friend void dataLoad<T>(std::istream & stream, ValueCache<T> & c, std::any context);
+  friend void dataStore<T>(std::ostream & stream, ValueCache<T> & c, Moose::AnyPointer context);
+  friend void dataLoad<T>(std::istream & stream, ValueCache<T> & c, Moose::AnyPointer context);
 };
 
 template <typename T>
@@ -301,14 +301,14 @@ ValueCache<T>::kdtree_get_bbox(BBOX & bb) const
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, ValueCache<T> & c, std::any context)
+dataStore(std::ostream & stream, ValueCache<T> & c, Moose::AnyPointer context)
 {
   storeHelper(stream, c._location_data, context);
 }
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, ValueCache<T> & c, std::any context)
+dataLoad(std::istream & stream, ValueCache<T> & c, Moose::AnyPointer context)
 {
   loadHelper(stream, c._location_data, context);
   c.rebuildTree();

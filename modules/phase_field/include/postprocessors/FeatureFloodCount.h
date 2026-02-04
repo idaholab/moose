@@ -14,6 +14,7 @@
 #include "InfixIterator.h"
 #include "MooseVariableDependencyInterface.h"
 #include "BoundaryRestrictable.h"
+#include "AnyPointer.h"
 
 #include <iterator>
 #include <list>
@@ -760,14 +761,18 @@ private:
 };
 
 template <>
-void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, std::any context);
+void dataStore(std::ostream & stream,
+               FeatureFloodCount::FeatureData & feature,
+               Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, BoundingBox & bbox, std::any context);
+void dataStore(std::ostream & stream, BoundingBox & bbox, Moose::AnyPointer context);
 
 template <>
-void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, std::any context);
+void dataLoad(std::istream & stream,
+              FeatureFloodCount::FeatureData & feature,
+              Moose::AnyPointer context);
 template <>
-void dataLoad(std::istream & stream, BoundingBox & bbox, std::any context);
+void dataLoad(std::istream & stream, BoundingBox & bbox, Moose::AnyPointer context);
 
 template <>
 struct enable_bitmask_operators<FeatureFloodCount::Status>

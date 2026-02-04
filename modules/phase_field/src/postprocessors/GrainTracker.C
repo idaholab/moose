@@ -25,7 +25,9 @@
 
 template <>
 void
-dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, std::any context)
+dataStore(std::ostream & stream,
+          GrainTracker::PartialFeatureData & feature,
+          Moose::AnyPointer context)
 {
   storeHelper(stream, feature.boundary_intersection, context);
   storeHelper(stream, feature.id, context);
@@ -35,7 +37,9 @@ dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, std
 
 template <>
 void
-dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, std::any context)
+dataLoad(std::istream & stream,
+         GrainTracker::PartialFeatureData & feature,
+         Moose::AnyPointer context)
 {
   loadHelper(stream, feature.boundary_intersection, context);
   loadHelper(stream, feature.id, context);
@@ -410,7 +414,7 @@ GrainTracker::broadcastAndUpdateGrainData()
                    });
 
     std::ostringstream oss;
-    dataStore(oss, root_feature_data, this);
+    dataStore(oss, root_feature_data, Moose::AnyPointer(this));
     send_buffer[0].assign(oss.str());
   }
 
@@ -428,7 +432,7 @@ GrainTracker::broadcastAndUpdateGrainData()
     iss.str(recv_buffer[0]);
     iss.clear();
 
-    dataLoad(iss, root_feature_data, this);
+    dataLoad(iss, root_feature_data, Moose::AnyPointer(this));
 
     for (const auto & partial_data : root_feature_data)
     {

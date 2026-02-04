@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ElementUserObject.h"
+#include "AnyPointer.h"
 
 /**
  * This UserObject manages the insertion and expiration of nuclei in the simulation
@@ -61,8 +62,8 @@ protected:
 template <>
 void dataStore(std::ostream & stream,
                DiscreteNucleationInserterBase::NucleusLocation & nl,
-               std::any context);
+               Moose::AnyPointer context);
 template <>
 void dataLoad(std::istream & stream,
               DiscreteNucleationInserterBase::NucleusLocation & nl,
-              std::any context);
+              Moose::AnyPointer context);

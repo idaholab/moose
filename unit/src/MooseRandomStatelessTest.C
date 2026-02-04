@@ -325,11 +325,11 @@ TEST(MooseRandomStateless, restore)
   old_rngs[1]->advance(44);
 
   std::ostringstream oss;
-  dataStore(oss, old_rngs, this);
+  dataStore(oss, old_rngs, Moose::AnyPointer(this));
 
   std::vector<std::unique_ptr<MooseRandomStateless>> new_rngs;
   std::istringstream iss(oss.str());
-  dataLoad(iss, new_rngs, this);
+  dataLoad(iss, new_rngs, Moose::AnyPointer(this));
 
   for (const auto i : index_range(old_rngs))
   {

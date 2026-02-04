@@ -109,6 +109,6 @@ public:
 
 // Used for Restart
 template <>
-void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, std::any context);
+void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, Moose::AnyPointer context);
 template <>
-void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, std::any context);
+void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, Moose::AnyPointer context);

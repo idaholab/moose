@@ -58,9 +58,9 @@ template <typename T1, typename T2>
 class Map;
 
 template <typename T1, typename T2>
-void dataStore(std::ostream & stream, Map<T1, T2> & map, std::any context);
+void dataStore(std::ostream & stream, Map<T1, T2> & map, Moose::AnyPointer context);
 template <typename T1, typename T2>
-void dataLoad(std::istream & stream, Map<T1, T2> & map, std::any context);
+void dataLoad(std::istream & stream, Map<T1, T2> & map, Moose::AnyPointer context);
 
 /**
  * The Kokkos wrapper class for standard map.
@@ -231,8 +231,8 @@ private:
    */
   Array<dof_id_type> _offset;
 
-  friend void dataStore<T1, T2>(std::ostream &, Map<T1, T2> &, std::any);
-  friend void dataLoad<T1, T2>(std::istream &, Map<T1, T2> &, std::any);
+  friend void dataStore<T1, T2>(std::ostream &, Map<T1, T2> &, Moose::AnyPointer);
+  friend void dataLoad<T1, T2>(std::istream &, Map<T1, T2> &, Moose::AnyPointer);
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
@@ -318,7 +318,7 @@ Map<T1, T2>::find(const T1 & key) const
 
 template <typename T1, typename T2>
 void
-dataStore(std::ostream & stream, Map<T1, T2> & map, std::any context)
+dataStore(std::ostream & stream, Map<T1, T2> & map, Moose::AnyPointer context)
 {
   using ::dataStore;
 
@@ -330,7 +330,7 @@ dataStore(std::ostream & stream, Map<T1, T2> & map, std::any context)
 
 template <typename T1, typename T2>
 void
-dataLoad(std::istream & stream, Map<T1, T2> & map, std::any context)
+dataLoad(std::istream & stream, Map<T1, T2> & map, Moose::AnyPointer context)
 {
   using ::dataLoad;
 

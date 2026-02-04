@@ -406,13 +406,13 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
 }
 
 void
-dataStore(std::ostream & stream, RestartableEquationSystems & res, std::any)
+dataStore(std::ostream & stream, RestartableEquationSystems & res, Moose::AnyPointer)
 {
   res.store(stream);
 }
 
 void
-dataLoad(std::istream & stream, RestartableEquationSystems & res, std::any)
+dataLoad(std::istream & stream, RestartableEquationSystems & res, Moose::AnyPointer)
 {
   res.load(stream);
 }
@@ -420,7 +420,7 @@ dataLoad(std::istream & stream, RestartableEquationSystems & res, std::any)
 void
 dataStore(std::ostream & stream,
           RestartableEquationSystems::EquationSystemsHeader & header,
-          std::any)
+          Moose::AnyPointer)
 {
   dataStore(stream, header.systems, nullptr);
   dataStore(stream, header.data_size, nullptr);
@@ -429,14 +429,16 @@ dataStore(std::ostream & stream,
 void
 dataLoad(std::istream & stream,
          RestartableEquationSystems::EquationSystemsHeader & header,
-         std::any)
+         Moose::AnyPointer)
 {
   dataLoad(stream, header.systems, nullptr);
   dataLoad(stream, header.data_size, nullptr);
 }
 
 void
-dataStore(std::ostream & stream, RestartableEquationSystems::SystemHeader & header, std::any)
+dataStore(std::ostream & stream,
+          RestartableEquationSystems::SystemHeader & header,
+          Moose::AnyPointer)
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.type, nullptr);
@@ -445,7 +447,9 @@ dataStore(std::ostream & stream, RestartableEquationSystems::SystemHeader & head
 }
 
 void
-dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & header, std::any)
+dataLoad(std::istream & stream,
+         RestartableEquationSystems::SystemHeader & header,
+         Moose::AnyPointer)
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.type, nullptr);
@@ -454,20 +458,26 @@ dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & heade
 }
 
 void
-dataStore(std::ostream & stream, RestartableEquationSystems::VariableHeader & header, std::any)
+dataStore(std::ostream & stream,
+          RestartableEquationSystems::VariableHeader & header,
+          Moose::AnyPointer)
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.type, nullptr);
 }
 void
-dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader & header, std::any)
+dataLoad(std::istream & stream,
+         RestartableEquationSystems::VariableHeader & header,
+         Moose::AnyPointer)
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.type, nullptr);
 }
 
 void
-dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, std::any)
+dataStore(std::ostream & stream,
+          RestartableEquationSystems::VectorHeader & header,
+          Moose::AnyPointer)
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.projections, nullptr);
@@ -475,7 +485,9 @@ dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & head
   dataStore(stream, header.variable_offset, nullptr);
 }
 void
-dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, std::any)
+dataLoad(std::istream & stream,
+         RestartableEquationSystems::VectorHeader & header,
+         Moose::AnyPointer)
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.projections, nullptr);

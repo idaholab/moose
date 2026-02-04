@@ -91,7 +91,7 @@ public:
   template <typename T, typename... Args>
   T & restoreData(const std::string & data_name,
                   const THREAD_ID tid = 0,
-                  const std::any = {},
+                  const Moose::AnyPointer = {},
                   Args &&... args);
 
   ///@{
@@ -219,7 +219,7 @@ template <typename T, typename... Args>
 T &
 RestartableDataReader::restoreData(const std::string & data_name,
                                    const THREAD_ID tid /* = 0 */,
-                                   const std::any context /* = nullptr */,
+                                   const Moose::AnyPointer context /* = nullptr */,
                                    Args &&... args)
 {
   std::unique_ptr<RestartableDataValue> T_data =

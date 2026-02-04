@@ -142,7 +142,7 @@ protected:
    */
   template <typename T, typename... Args>
   ManagedValue<T> declareManagedRestartableDataWithContext(const std::string & data_name,
-                                                           std::any context,
+                                                           Moose::AnyPointer context,
                                                            Args &&... args);
 
   /**
@@ -171,7 +171,7 @@ protected:
    */
   template <typename T, typename... Args>
   T & declareRestartableDataWithContext(const std::string & data_name,
-                                        std::any context,
+                                        Moose::AnyPointer context,
                                         Args &&... args);
 
   /**
@@ -220,7 +220,7 @@ protected:
   template <typename T, typename... Args>
   T & declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
                                                       const std::string & object_name,
-                                                      std::any context,
+                                                      Moose::AnyPointer context,
                                                       Args &&... args);
 
   /**
@@ -268,7 +268,7 @@ private:
    */
   template <typename T, typename... Args>
   RestartableData<T> & declareRestartableDataHelper(const std::string & data_name,
-                                                    std::any context,
+                                                    Moose::AnyPointer context,
                                                     Args &&... args) const;
 };
 
@@ -282,7 +282,7 @@ Restartable::declareRestartableData(const std::string & data_name, Args &&... ar
 template <typename T, typename... Args>
 Restartable::ManagedValue<T>
 Restartable::declareManagedRestartableDataWithContext(const std::string & data_name,
-                                                      std::any context,
+                                                      Moose::AnyPointer context,
                                                       Args &&... args)
 {
   auto & data_ptr =
@@ -300,7 +300,7 @@ Restartable::getRestartableData(const std::string & data_name) const
 template <typename T, typename... Args>
 T &
 Restartable::declareRestartableDataWithContext(const std::string & data_name,
-                                               std::any context,
+                                               Moose::AnyPointer context,
                                                Args &&... args)
 {
   return declareRestartableDataHelper<T>(data_name, context, std::forward<Args>(args)...).set();
@@ -309,7 +309,7 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
 template <typename T, typename... Args>
 RestartableData<T> &
 Restartable::declareRestartableDataHelper(const std::string & data_name,
-                                          std::any context,
+                                          Moose::AnyPointer context,
                                           Args &&... args) const
 {
   const auto full_name = restartableName(data_name);
@@ -340,7 +340,7 @@ template <typename T, typename... Args>
 T &
 Restartable::declareRestartableDataWithObjectNameWithContext(const std::string & data_name,
                                                              const std::string & object_name,
-                                                             std::any context,
+                                                             Moose::AnyPointer context,
                                                              Args &&... args)
 {
   std::string old_name = _restartable_name;

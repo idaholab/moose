@@ -234,14 +234,14 @@ JSONOutput::output()
 
 template <>
 void
-dataStore(std::ostream & stream, nlohmann::json & json, std::any /*context*/)
+dataStore(std::ostream & stream, nlohmann::json & json, Moose::AnyPointer /*context*/)
 {
   stream << json;
 }
 
 template <>
 void
-dataLoad(std::istream & stream, nlohmann::json & json, std::any /*context*/)
+dataLoad(std::istream & stream, nlohmann::json & json, Moose::AnyPointer /*context*/)
 {
   stream >> json;
 }

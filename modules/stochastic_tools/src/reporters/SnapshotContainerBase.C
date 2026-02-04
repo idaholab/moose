@@ -23,8 +23,8 @@ SnapshotContainerBase::validParams()
 
 SnapshotContainerBase::SnapshotContainerBase(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _accumulated_data(
-        declareRestartableDataWithContext<Snapshots>("accumulated_snapshots", (void *)&comm())),
+    _accumulated_data(declareRestartableDataWithContext<Snapshots>("accumulated_snapshots",
+                                                                   Moose::AnyPointer(&comm()))),
     _nonlinear_system_number(
         _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
 {
@@ -54,13 +54,13 @@ SnapshotContainerBase::execute()
 }
 
 void
-dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, std::any context)
+dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, Moose::AnyPointer context)
 {
   storeHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
 
 void
-dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, std::any context)
+dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, Moose::AnyPointer context)
 {
   loadHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }

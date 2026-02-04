@@ -11,7 +11,7 @@
 #include "DataIO.h"
 
 void
-dataStore(std::ostream & stream, Backup & backup, std::any context)
+dataStore(std::ostream & stream, Backup & backup, Moose::AnyPointer context)
 {
   mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
@@ -21,7 +21,7 @@ dataStore(std::ostream & stream, Backup & backup, std::any context)
 }
 
 void
-dataLoad(std::istream & stream, Backup & backup, std::any context)
+dataLoad(std::istream & stream, Backup & backup, Moose::AnyPointer context)
 {
   mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
@@ -31,7 +31,7 @@ dataLoad(std::istream & stream, Backup & backup, std::any context)
 }
 
 void
-dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::any context)
+dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context)
 {
   bool has_value = backup != nullptr;
   dataStore(stream, has_value, nullptr);
@@ -40,7 +40,7 @@ dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::any cont
 }
 
 void
-dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, std::any context)
+dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context)
 {
   bool has_value;
   dataLoad(stream, has_value, nullptr);

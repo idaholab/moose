@@ -148,7 +148,7 @@ GeometricCutUserObject::threadJoin(const UserObject & y)
 // custom data load and data store methods for structs with std::vector members
 template <>
 inline void
-dataStore(std::ostream & stream, Xfem::CutFace & cf, std::any context)
+dataStore(std::ostream & stream, Xfem::CutFace & cf, Moose::AnyPointer context)
 {
   dataStore(stream, cf._face_id, context);
   dataStore(stream, cf._face_edge, context);
@@ -157,7 +157,7 @@ dataStore(std::ostream & stream, Xfem::CutFace & cf, std::any context)
 
 template <>
 inline void
-dataLoad(std::istream & stream, Xfem::CutFace & cf, std::any context)
+dataLoad(std::istream & stream, Xfem::CutFace & cf, Moose::AnyPointer context)
 {
   dataLoad(stream, cf._face_id, context);
   dataLoad(stream, cf._face_edge, context);
@@ -166,7 +166,7 @@ dataLoad(std::istream & stream, Xfem::CutFace & cf, std::any context)
 
 template <>
 inline void
-dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, std::any context)
+dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, Moose::AnyPointer context)
 {
   dataStore(stream, gmei._elem_cut_edges, context);
   dataStore(stream, gmei._elem_cut_nodes, context);
@@ -176,7 +176,7 @@ dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, std::any con
 
 template <>
 inline void
-dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, std::any context)
+dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, Moose::AnyPointer context)
 {
   dataLoad(stream, gmei._elem_cut_edges, context);
   dataLoad(stream, gmei._elem_cut_nodes, context);
@@ -186,7 +186,7 @@ dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, std::any cont
 
 template <>
 inline void
-dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo3D & gmei, std::any context)
+dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo3D & gmei, Moose::AnyPointer context)
 {
   dataStore(stream, gmei._elem_cut_faces, context);
   dataStore(stream, gmei._frag_cut_faces, context);
@@ -195,7 +195,7 @@ dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo3D & gmei, std::any con
 
 template <>
 inline void
-dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo3D & gmei, std::any context)
+dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo3D & gmei, Moose::AnyPointer context)
 {
   dataLoad(stream, gmei._elem_cut_faces, context);
   dataLoad(stream, gmei._frag_cut_faces, context);
@@ -208,8 +208,8 @@ GeometricCutUserObject::serialize(std::string & serialized_buffer)
   // stream for serializing the _marked_elems_2d and _marked_elems_3d data structures to a byte
   // stream
   std::ostringstream oss;
-  dataStore(oss, _marked_elems_2d, this);
-  dataStore(oss, _marked_elems_3d, this);
+  dataStore(oss, _marked_elems_2d, Moose::AnyPointer(this));
+  dataStore(oss, _marked_elems_3d, Moose::AnyPointer(this));
 
   // Populate the passed in string pointer with the string stream's buffer contents
   serialized_buffer.assign(oss.str());
@@ -238,8 +238,8 @@ GeometricCutUserObject::deserialize(std::vector<std::string> & serialized_buffer
     // Load the communicated data into temporary structures
     std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo2D>> other_marked_elems_2d;
     std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo3D>> other_marked_elems_3d;
-    dataLoad(iss, other_marked_elems_2d, this);
-    dataLoad(iss, other_marked_elems_3d, this);
+    dataLoad(iss, other_marked_elems_2d, Moose::AnyPointer(this));
+    dataLoad(iss, other_marked_elems_3d, Moose::AnyPointer(this));
 
     // merge the data in with the current processor's data
     _marked_elems_2d.insert(other_marked_elems_2d.begin(), other_marked_elems_2d.end());

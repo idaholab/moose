@@ -3567,7 +3567,7 @@ MooseApp::createRecoverablePerfGraph()
 
   auto perf_graph =
       std::make_unique<RestartableData<PerfGraph>>("perf_graph",
-                                                   this,
+                                                   Moose::AnyPointer(this),
                                                    type() + " (" + name() + ')',
                                                    *this,
                                                    getParam<bool>("perf_graph_live_all"),

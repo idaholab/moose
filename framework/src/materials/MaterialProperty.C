@@ -10,19 +10,19 @@
 #include "MaterialProperty.h"
 
 void
-dataStore(std::ostream & stream, PropertyValue & p, std::any)
+dataStore(std::ostream & stream, PropertyValue & p, Moose::AnyPointer)
 {
   p.store(stream);
 }
 
 void
-dataLoad(std::istream & stream, PropertyValue & p, std::any)
+dataLoad(std::istream & stream, PropertyValue & p, Moose::AnyPointer)
 {
   p.load(stream);
 }
 
 void
-dataStore(std::ostream & stream, MaterialProperties & v, std::any context)
+dataStore(std::ostream & stream, MaterialProperties & v, Moose::AnyPointer context)
 {
   std::size_t prop_size = v.size();
   dataStore(stream, prop_size, context);
@@ -32,7 +32,7 @@ dataStore(std::ostream & stream, MaterialProperties & v, std::any context)
 }
 
 void
-dataLoad(std::istream & stream, MaterialProperties & v, std::any context)
+dataLoad(std::istream & stream, MaterialProperties & v, Moose::AnyPointer context)
 {
   std::size_t prop_size;
   dataLoad(stream, prop_size, context);

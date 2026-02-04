@@ -112,7 +112,9 @@ protected:
  */
 template <>
 inline void
-dataLoad(std::istream & stream, std::map<dof_id_type, PenetrationInfo *> & m, std::any context)
+dataLoad(std::istream & stream,
+         std::map<dof_id_type, PenetrationInfo *> & m,
+         Moose::AnyPointer context)
 {
   std::map<dof_id_type, PenetrationInfo *>::iterator it = m.begin();
   std::map<dof_id_type, PenetrationInfo *>::iterator end = m.end();

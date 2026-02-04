@@ -287,12 +287,17 @@ protected:
 } // StochasticTools namespac
 
 template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, std::any context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, std::any context);
-
+void
+dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, Moose::AnyPointer context);
 template <>
 void
-dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, std::any context);
+dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, Moose::AnyPointer context);
+
 template <>
-void dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, std::any context);
+void dataStore(std::ostream & stream,
+               StochasticTools::GaussianProcess & gp_utils,
+               Moose::AnyPointer context);
+template <>
+void dataLoad(std::istream & stream,
+              StochasticTools::GaussianProcess & gp_utils,
+              Moose::AnyPointer context);

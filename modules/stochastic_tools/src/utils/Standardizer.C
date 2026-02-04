@@ -109,7 +109,7 @@ Standardizer::getScaled(RealEigenMatrix & input) const
 
 /// Helper for dataStore
 void
-Standardizer::storeHelper(std::ostream & stream, std::any context) const
+Standardizer::storeHelper(std::ostream & stream, Moose::AnyPointer context) const
 {
   unsigned int n = _mean.size();
   dataStore(stream, n, context);
@@ -123,14 +123,18 @@ Standardizer::storeHelper(std::ostream & stream, std::any context) const
 
 template <>
 void
-dataStore(std::ostream & stream, StochasticTools::Standardizer & standardizer, std::any context)
+dataStore(std::ostream & stream,
+          StochasticTools::Standardizer & standardizer,
+          Moose::AnyPointer context)
 {
   standardizer.storeHelper(stream, context);
 }
 
 template <>
 void
-dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, std::any context)
+dataLoad(std::istream & stream,
+         StochasticTools::Standardizer & standardizer,
+         Moose::AnyPointer context)
 {
   unsigned int n;
   dataLoad(stream, n, context);

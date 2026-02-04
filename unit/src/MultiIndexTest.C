@@ -257,7 +257,7 @@ TEST(MultiIndexTest, dataStoreLoad)
 
   // Serialize
   std::ostringstream oss;
-  dataStore(oss, mindex, this);
+  dataStore(oss, mindex, Moose::AnyPointer(this));
 
   // Pour oss into iss
   std::string ostring = oss.str();
@@ -268,7 +268,7 @@ TEST(MultiIndexTest, dataStoreLoad)
   for (it = mindex.begin(); it != it_end; ++it)
     (*it).second = 0.0;
 
-  dataLoad(iss, mindex, this);
+  dataLoad(iss, mindex, Moose::AnyPointer(this));
 
   // check the values
   for (unsigned int j0 = 0; j0 < shape[0]; ++j0)

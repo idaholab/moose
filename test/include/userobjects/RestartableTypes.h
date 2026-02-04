@@ -10,6 +10,7 @@
 #pragma once
 
 #include "GeneralUserObject.h"
+#include "AnyPointer.h"
 
 class Dummy
 {
@@ -25,37 +26,37 @@ public:
 
 template <>
 inline void
-dataStore(std::ostream & stream, Dummy *& v, std::any context)
+dataStore(std::ostream & stream, Dummy *& v, Moose::AnyPointer context)
 {
   dataStore(stream, v->_i, context);
 }
 
 template <>
 inline void
-dataLoad(std::istream & stream, Dummy *& v, std::any context)
+dataLoad(std::istream & stream, Dummy *& v, Moose::AnyPointer context)
 {
   dataLoad(stream, v->_i, context);
 }
 
 template <>
 inline void
-dataStore(std::ostream & stream, Dummy & v, std::any context)
+dataStore(std::ostream & stream, Dummy & v, Moose::AnyPointer context)
 {
   dataStore(stream, v._i, context);
 }
 
 template <>
 inline void
-dataLoad(std::istream & stream, Dummy & v, std::any context)
+dataLoad(std::istream & stream, Dummy & v, Moose::AnyPointer context)
 {
   dataLoad(stream, v._i, context);
 }
 
 template <>
 inline void
-dataStore(std::ostream & stream, DummyNeedingContext & v, std::any context)
+dataStore(std::ostream & stream, DummyNeedingContext & v, Moose::AnyPointer context)
 {
-  int & context_int = *(std::any_cast<int *>(context));
+  int & context_int = *(context.get_if<int>());
 
   int value = v._i + context_int;
 
@@ -64,9 +65,9 @@ dataStore(std::ostream & stream, DummyNeedingContext & v, std::any context)
 
 template <>
 inline void
-dataLoad(std::istream & stream, DummyNeedingContext & v, std::any context)
+dataLoad(std::istream & stream, DummyNeedingContext & v, Moose::AnyPointer context)
 {
-  int & context_int = *(std::any_cast<int *>(context));
+  int & context_int = *(context.get_if<int>());
 
   int value = 0;
 

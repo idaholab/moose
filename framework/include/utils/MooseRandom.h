@@ -173,8 +173,10 @@ private:
   std::unordered_map<std::size_t, std::pair<mt_state, mt_state>> _states;
 
   // for restart capability
-  friend void dataStore<MooseRandom>(std::ostream & stream, MooseRandom & v, std::any context);
-  friend void dataLoad<MooseRandom>(std::istream & stream, MooseRandom & v, std::any context);
+  friend void
+  dataStore<MooseRandom>(std::ostream & stream, MooseRandom & v, Moose::AnyPointer context);
+  friend void
+  dataLoad<MooseRandom>(std::istream & stream, MooseRandom & v, Moose::AnyPointer context);
 
   /// Flag to make certain that saveState is called prior to restoreState
   bool _saved = false;
@@ -182,13 +184,13 @@ private:
 
 template <>
 inline void
-dataStore(std::ostream & stream, MooseRandom & v, std::any context)
+dataStore(std::ostream & stream, MooseRandom & v, Moose::AnyPointer context)
 {
   storeHelper(stream, v._states, context);
 }
 template <>
 inline void
-dataLoad(std::istream & stream, MooseRandom & v, std::any context)
+dataLoad(std::istream & stream, MooseRandom & v, Moose::AnyPointer context)
 {
   loadHelper(stream, v._states, context);
 }

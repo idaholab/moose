@@ -24,7 +24,7 @@ const std::string DEFAULT_CSV_DELIMITER = ",";
 
 template <>
 void
-dataStore(std::ostream & stream, FormattedTable & table, std::any context)
+dataStore(std::ostream & stream, FormattedTable & table, Moose::AnyPointer context)
 {
   table.fillEmptyValues();
   storeHelper(stream, table._data, context);
@@ -36,7 +36,7 @@ dataStore(std::ostream & stream, FormattedTable & table, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, FormattedTable & table, std::any context)
+dataLoad(std::istream & stream, FormattedTable & table, Moose::AnyPointer context)
 {
   loadHelper(stream, table._data, context);
   loadHelper(stream, table._align_widths, context);
@@ -47,14 +47,18 @@ dataLoad(std::istream & stream, FormattedTable & table, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, std::any context)
+dataStore(std::ostream & stream,
+          std::shared_ptr<TableValueBase> & value_base,
+          Moose::AnyPointer context)
 {
   value_base->store(stream, context);
 }
 
 template <>
 void
-dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, std::any context)
+dataLoad(std::istream & stream,
+         std::shared_ptr<TableValueBase> & value_base,
+         Moose::AnyPointer context)
 {
   std::string type;
   dataLoad(stream, type, context);
@@ -96,9 +100,6 @@ dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, st
 
   else if (type == typeid(char).name())
     TableValue<char>::load(stream, value_base, context);
-
-  else if (type == typeid(char *).name())
-    TableValue<char *>::load(stream, value_base, context);
 
   else if (type == typeid(std::string).name())
     TableValue<std::string>::load(stream, value_base, context);

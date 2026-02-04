@@ -66,7 +66,9 @@ PerfGraphRegistry::actuallyRegisterSection(const std::string & section_name,
 }
 
 void
-dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, std::any context)
+dataStore(std::ostream & stream,
+          moose::internal::PerfGraphSectionInfo & info,
+          Moose::AnyPointer context)
 {
   dataStore(stream, info._id, context);
   dataStore(stream, info._name, context);
@@ -76,7 +78,9 @@ dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, s
 }
 
 void
-dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, std::any context)
+dataLoad(std::istream & stream,
+         moose::internal::PerfGraphSectionInfo & info,
+         Moose::AnyPointer context)
 {
   dataLoad(stream, info._id, context);
   dataLoad(stream, info._name, context);

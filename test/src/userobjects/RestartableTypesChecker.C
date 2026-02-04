@@ -57,16 +57,16 @@ RestartableTypesChecker::execute()
   /**
    * Serialize
    */
-  dataStore(oss, _real_data, this);
-  dataStore(oss, _vector_data, this);
-  dataStore(oss, _vector_vector_data, this);
-  dataStore(oss, _pointer_data, this);
-  dataStore(oss, _custom_data, this);
-  dataStore(oss, _set_data, this);
-  dataStore(oss, _map_data, this);
-  dataStore(oss, _dense_vector_data, this);
-  dataStore(oss, _dense_matrix_data, this);
-  dataStore(oss, _raw_parameters, this);
+  dataStore(oss, _real_data, Moose::AnyPointer(this));
+  dataStore(oss, _vector_data, Moose::AnyPointer(this));
+  dataStore(oss, _vector_vector_data, Moose::AnyPointer(this));
+  dataStore(oss, _pointer_data, Moose::AnyPointer(this));
+  dataStore(oss, _custom_data, Moose::AnyPointer(this));
+  dataStore(oss, _set_data, Moose::AnyPointer(this));
+  dataStore(oss, _map_data, Moose::AnyPointer(this));
+  dataStore(oss, _dense_vector_data, Moose::AnyPointer(this));
+  dataStore(oss, _dense_matrix_data, Moose::AnyPointer(this));
+  dataStore(oss, _raw_parameters, Moose::AnyPointer(this));
 
   send_buffers[0] = oss.str();
 
@@ -93,16 +93,16 @@ RestartableTypesChecker::execute()
     clearTypes();
 
     // Now load the values
-    dataLoad(iss, _real_data, this);
-    dataLoad(iss, _vector_data, this);
-    dataLoad(iss, _vector_vector_data, this);
-    dataLoad(iss, _pointer_data, this);
-    dataLoad(iss, _custom_data, this);
-    dataLoad(iss, _set_data, this);
-    dataLoad(iss, _map_data, this);
-    dataLoad(iss, _dense_vector_data, this);
-    dataLoad(iss, _dense_matrix_data, this);
-    dataLoad(iss, _raw_parameters, this);
+    dataLoad(iss, _real_data, Moose::AnyPointer(this));
+    dataLoad(iss, _vector_data, Moose::AnyPointer(this));
+    dataLoad(iss, _vector_vector_data, Moose::AnyPointer(this));
+    dataLoad(iss, _pointer_data, Moose::AnyPointer(this));
+    dataLoad(iss, _custom_data, Moose::AnyPointer(this));
+    dataLoad(iss, _set_data, Moose::AnyPointer(this));
+    dataLoad(iss, _map_data, Moose::AnyPointer(this));
+    dataLoad(iss, _dense_vector_data, Moose::AnyPointer(this));
+    dataLoad(iss, _dense_matrix_data, Moose::AnyPointer(this));
+    dataLoad(iss, _raw_parameters, Moose::AnyPointer(this));
 
     // Finally confirm that the data is sane
     checkData();

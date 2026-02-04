@@ -508,7 +508,7 @@ PerfGraph::updateMaxMemory(const std::size_t current_memory)
 }
 
 void
-dataStore(std::ostream & stream, PerfGraph & perf_graph, std::any)
+dataStore(std::ostream & stream, PerfGraph & perf_graph, Moose::AnyPointer)
 {
   // We need to store the registry id -> section info map so that we can add
   // registered sections that may not be added yet during recover
@@ -522,7 +522,7 @@ dataStore(std::ostream & stream, PerfGraph & perf_graph, std::any)
 }
 
 void
-dataLoad(std::istream & stream, PerfGraph & perf_graph, std::any)
+dataLoad(std::istream & stream, PerfGraph & perf_graph, Moose::AnyPointer)
 {
   // Load in all of the recovered sections and register those that do not exist yet
   std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
@@ -542,5 +542,5 @@ dataLoad(std::istream & stream, PerfGraph & perf_graph, std::any)
 
   // Recursively load all of the nodes; this will append information to matching nodes
   // and will create new nodes for section paths that do not exist
-  dataLoad(stream, perf_graph._root_node, &perf_graph);
+  dataLoad(stream, perf_graph._root_node, Moose::AnyPointer(&perf_graph));
 }

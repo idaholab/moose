@@ -578,7 +578,7 @@ MaterialPropertyStorage::initProps(const THREAD_ID tid,
 }
 
 void
-dataStore(std::ostream & stream, MaterialPropertyStorage & storage, std::any context)
+dataStore(std::ostream & stream, MaterialPropertyStorage & storage, Moose::AnyPointer context)
 {
   // Store the material property ID -> name map for mapping back
   const auto & registry = storage.getMaterialPropertyRegistry();
@@ -641,7 +641,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage & storage, std::any con
 }
 
 void
-dataLoad(std::istream & stream, MaterialPropertyStorage & storage, std::any context)
+dataLoad(std::istream & stream, MaterialPropertyStorage & storage, Moose::AnyPointer context)
 {
   storage._restartable_map.clear();
 
@@ -815,7 +815,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, std::any cont
 
     for (std::size_t i_elem = 0; i_elem < num_elems; ++i_elem)
     {
-      const Elem * elem;
+      Elem * elem;
       dataLoad(stream, elem, context);
       mooseAssert(elem, "Null element");
 
@@ -881,7 +881,7 @@ dataLoad(std::istream & stream, MaterialPropertyStorage & storage, std::any cont
 }
 
 void
-dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, std::any)
+dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, Moose::AnyPointer)
 {
   dataStore(stream, record.declarers, nullptr);
   dataStore(stream, record.type, nullptr);
@@ -890,7 +890,7 @@ dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, s
 }
 
 void
-dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, std::any)
+dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, Moose::AnyPointer)
 {
   dataLoad(stream, record.declarers, nullptr);
   dataLoad(stream, record.type, nullptr);

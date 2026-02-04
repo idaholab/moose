@@ -280,6 +280,10 @@ struct GrainDistance
 };
 
 template <>
-void dataStore(std::ostream & stream, GrainTracker::PartialFeatureData & feature, std::any context);
+void dataStore(std::ostream & stream,
+               GrainTracker::PartialFeatureData & feature,
+               Moose::AnyPointer context);
 template <>
-void dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, std::any context);
+void dataLoad(std::istream & stream,
+              GrainTracker::PartialFeatureData & feature,
+              Moose::AnyPointer context);

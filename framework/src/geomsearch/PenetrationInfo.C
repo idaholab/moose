@@ -155,9 +155,9 @@ PenetrationInfo::~PenetrationInfo() { delete _side; }
 
 template <>
 void
-dataStore(std::ostream & stream, PenetrationInfo *& pinfo, std::any context)
+dataStore(std::ostream & stream, PenetrationInfo *& pinfo, Moose::AnyPointer context)
 {
-  if (!context.has_value())
+  if (!context.hasValue())
     mooseError("Can only store PenetrationInfo objects using a MooseMesh context!");
 
   if (pinfo)
@@ -207,9 +207,9 @@ dataStore(std::ostream & stream, PenetrationInfo *& pinfo, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, PenetrationInfo *& pinfo, std::any context)
+dataLoad(std::istream & stream, PenetrationInfo *& pinfo, Moose::AnyPointer context)
 {
-  if (!context.has_value())
+  if (!context.hasValue())
     mooseError("Can only load PenetrationInfo objects using a MooseMesh context!");
 
   // First, see if this is supposed to be NULL

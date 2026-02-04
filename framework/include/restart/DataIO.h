@@ -20,6 +20,7 @@
 #include "ColumnMajorMatrix.h"
 #include "UniqueStorage.h"
 #include "TwoVector.h"
+#include "AnyPointer.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
@@ -35,7 +36,6 @@
 #include <list>
 #include <iostream>
 #include <map>
-#include <any>
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
@@ -59,130 +59,134 @@ class Point;
  * Scalar helper routine
  */
 template <typename P>
-inline void storeHelper(std::ostream & stream, P & data, std::any context);
+inline void storeHelper(std::ostream & stream, P & data, Moose::AnyPointer context);
 
 /**
  * Vector helper routine
  */
 template <typename P>
-inline void storeHelper(std::ostream & stream, std::vector<P> & data, std::any context);
+inline void storeHelper(std::ostream & stream, std::vector<P> & data, Moose::AnyPointer context);
 
 /**
  * Shared pointer helper routine
  */
 template <typename P>
-inline void storeHelper(std::ostream & stream, std::shared_ptr<P> & data, std::any context);
+inline void
+storeHelper(std::ostream & stream, std::shared_ptr<P> & data, Moose::AnyPointer context);
 
 /**
  * Unique pointer helper routine
  */
 template <typename P>
-inline void storeHelper(std::ostream & stream, std::unique_ptr<P> & data, std::any context);
+inline void
+storeHelper(std::ostream & stream, std::unique_ptr<P> & data, Moose::AnyPointer context);
 
 /**
  * Set helper routine
  */
 template <typename P>
-inline void storeHelper(std::ostream & stream, std::set<P> & data, std::any context);
+inline void storeHelper(std::ostream & stream, std::set<P> & data, Moose::AnyPointer context);
 
 /**
  * Map helper routine
  */
 template <typename P, typename Q>
-inline void storeHelper(std::ostream & stream, std::map<P, Q> & data, std::any context);
+inline void storeHelper(std::ostream & stream, std::map<P, Q> & data, Moose::AnyPointer context);
 
 /**
  * Unordered_map helper routine
  */
 template <typename P, typename Q>
-inline void storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, std::any context);
+inline void
+storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, Moose::AnyPointer context);
 
 /**
  * Optional helper routine
  */
 template <typename P>
-inline void storeHelper(std::ostream & stream, std::optional<P> & data, std::any context);
+inline void storeHelper(std::ostream & stream, std::optional<P> & data, Moose::AnyPointer context);
 
 /**
  * HashMap helper routine
  */
 template <typename P, typename Q>
-inline void storeHelper(std::ostream & stream, HashMap<P, Q> & data, std::any context);
+inline void storeHelper(std::ostream & stream, HashMap<P, Q> & data, Moose::AnyPointer context);
 
 /**
  * UniqueStorage helper routine
  */
 template <typename T>
-inline void storeHelper(std::ostream & stream, UniqueStorage<T> & data, std::any context);
+inline void storeHelper(std::ostream & stream, UniqueStorage<T> & data, Moose::AnyPointer context);
 
 /**
  * Scalar helper routine
  */
 template <typename P>
-inline void loadHelper(std::istream & stream, P & data, std::any context);
+inline void loadHelper(std::istream & stream, P & data, Moose::AnyPointer context);
 
 /**
  * Vector helper routine
  */
 template <typename P>
-inline void loadHelper(std::istream & stream, std::vector<P> & data, std::any context);
+inline void loadHelper(std::istream & stream, std::vector<P> & data, Moose::AnyPointer context);
 
 /**
  * Shared Pointer helper routine
  */
 template <typename P>
-inline void loadHelper(std::istream & stream, std::shared_ptr<P> & data, std::any context);
+inline void loadHelper(std::istream & stream, std::shared_ptr<P> & data, Moose::AnyPointer context);
 
 /**
  * Unique Pointer helper routine
  */
 template <typename P>
-inline void loadHelper(std::istream & stream, std::unique_ptr<P> & data, std::any context);
+inline void loadHelper(std::istream & stream, std::unique_ptr<P> & data, Moose::AnyPointer context);
 
 /**
  * Set helper routine
  */
 template <typename P>
-inline void loadHelper(std::istream & stream, std::set<P> & data, std::any context);
+inline void loadHelper(std::istream & stream, std::set<P> & data, Moose::AnyPointer context);
 
 /**
  * Map helper routine
  */
 template <typename P, typename Q>
-inline void loadHelper(std::istream & stream, std::map<P, Q> & data, std::any context);
+inline void loadHelper(std::istream & stream, std::map<P, Q> & data, Moose::AnyPointer context);
 
 /**
  * Unordered_map helper routine
  */
 template <typename P, typename Q>
-inline void loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, std::any context);
+inline void
+loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, Moose::AnyPointer context);
 
 /**
  * Optional helper routine
  */
 template <typename P>
-inline void loadHelper(std::istream & stream, std::optional<P> & data, std::any context);
+inline void loadHelper(std::istream & stream, std::optional<P> & data, Moose::AnyPointer context);
 
 /**
  * Hashmap helper routine
  */
 template <typename P, typename Q>
-inline void loadHelper(std::istream & stream, HashMap<P, Q> & data, std::any context);
+inline void loadHelper(std::istream & stream, HashMap<P, Q> & data, Moose::AnyPointer context);
 
 /**
  * UniqueStorage helper routine
  */
 template <typename T>
-inline void loadHelper(std::istream & stream, UniqueStorage<T> & data, std::any context);
+inline void loadHelper(std::istream & stream, UniqueStorage<T> & data, Moose::AnyPointer context);
 
 template <typename T>
-inline void dataStore(std::ostream & stream, T & v, std::any /*context*/);
+inline void dataStore(std::ostream & stream, T & v, Moose::AnyPointer /*context*/);
 
 // DO NOT MODIFY THE NEXT LINE - It is used by MOOSEDocs
 // *************** Global Store Declarations *****************
 template <typename T>
 inline void
-dataStore(std::ostream & stream, T & v, std::any /*context*/)
+dataStore(std::ostream & stream, T & v, Moose::AnyPointer /*context*/)
 {
 #ifdef LIBMESH_HAVE_CXX11_TYPE_TRAITS
   static_assert(std::is_polymorphic<T>::value == false,
@@ -200,18 +204,18 @@ dataStore(std::ostream & stream, T & v, std::any /*context*/)
 
 template <typename T>
 inline void
-dataStore(std::ostream & /*stream*/, T *& /*v*/, std::any /*context*/)
+dataStore(std::ostream & /*stream*/, T *& /*v*/, Moose::AnyPointer /*context*/)
 {
   mooseError("Attempting to store a raw pointer type: \"",
              libMesh::demangle(typeid(T).name()),
              " *\" as restartable data!\nWrite a custom dataStore() template specialization!\n\n");
 }
 
-void dataStore(std::ostream & stream, Point & p, std::any context);
+void dataStore(std::ostream & stream, Point & p, Moose::AnyPointer context);
 
 template <typename T, typename U>
 inline void
-dataStore(std::ostream & stream, std::pair<T, U> & p, std::any context)
+dataStore(std::ostream & stream, std::pair<T, U> & p, Moose::AnyPointer context)
 {
   storeHelper(stream, p.first, context);
   storeHelper(stream, p.second, context);
@@ -219,7 +223,7 @@ dataStore(std::ostream & stream, std::pair<T, U> & p, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::vector<T> & v, std::any context)
+dataStore(std::ostream & stream, std::vector<T> & v, Moose::AnyPointer context)
 {
   // First store the size of the vector
   unsigned int size = v.size();
@@ -231,7 +235,7 @@ dataStore(std::ostream & stream, std::vector<T> & v, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::shared_ptr<T> & v, std::any context)
+dataStore(std::ostream & stream, std::shared_ptr<T> & v, Moose::AnyPointer context)
 {
   T * tmp = v.get();
 
@@ -240,7 +244,7 @@ dataStore(std::ostream & stream, std::shared_ptr<T> & v, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::unique_ptr<T> & v, std::any context)
+dataStore(std::ostream & stream, std::unique_ptr<T> & v, Moose::AnyPointer context)
 {
   T * tmp = v.get();
 
@@ -249,7 +253,7 @@ dataStore(std::ostream & stream, std::unique_ptr<T> & v, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::set<T> & s, std::any context)
+dataStore(std::ostream & stream, std::set<T> & s, Moose::AnyPointer context)
 {
   // First store the size of the set
   unsigned int size = s.size();
@@ -267,7 +271,7 @@ dataStore(std::ostream & stream, std::set<T> & s, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::list<T> & l, std::any context)
+dataStore(std::ostream & stream, std::list<T> & l, Moose::AnyPointer context)
 {
   // First store the size of the set
   unsigned int size = l.size();
@@ -285,7 +289,7 @@ dataStore(std::ostream & stream, std::list<T> & l, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::deque<T> & l, std::any context)
+dataStore(std::ostream & stream, std::deque<T> & l, Moose::AnyPointer context)
 {
   // First store the size of the container
   unsigned int size = l.size();
@@ -303,7 +307,7 @@ dataStore(std::ostream & stream, std::deque<T> & l, std::any context)
 
 template <typename T, typename U>
 inline void
-dataStore(std::ostream & stream, std::map<T, U> & m, std::any context)
+dataStore(std::ostream & stream, std::map<T, U> & m, Moose::AnyPointer context)
 {
   // First store the size of the map
   unsigned int size = m.size();
@@ -324,7 +328,7 @@ dataStore(std::ostream & stream, std::map<T, U> & m, std::any context)
 
 template <typename T, typename U>
 inline void
-dataStore(std::ostream & stream, std::unordered_map<T, U> & m, std::any context)
+dataStore(std::ostream & stream, std::unordered_map<T, U> & m, Moose::AnyPointer context)
 {
   // First store the size of the map
   unsigned int size = m.size();
@@ -345,7 +349,7 @@ dataStore(std::ostream & stream, std::unordered_map<T, U> & m, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::unordered_set<T> & s, std::any context)
+dataStore(std::ostream & stream, std::unordered_set<T> & s, Moose::AnyPointer context)
 {
   // First store the size of the set
   std::size_t size = s.size();
@@ -357,7 +361,7 @@ dataStore(std::ostream & stream, std::unordered_set<T> & s, std::any context)
 
 template <typename T>
 inline void
-dataStore(std::ostream & stream, std::optional<T> & m, std::any context)
+dataStore(std::ostream & stream, std::optional<T> & m, Moose::AnyPointer context)
 {
   bool has_value = m.has_value();
   dataStore(stream, has_value, nullptr);
@@ -368,7 +372,7 @@ dataStore(std::ostream & stream, std::optional<T> & m, std::any context)
 
 template <typename T, typename U>
 inline void
-dataStore(std::ostream & stream, HashMap<T, U> & m, std::any context)
+dataStore(std::ostream & stream, HashMap<T, U> & m, Moose::AnyPointer context)
 {
   // First store the size of the map
   unsigned int size = m.size();
@@ -389,7 +393,7 @@ dataStore(std::ostream & stream, HashMap<T, U> & m, std::any context)
 
 template <typename T, int Rows, int Cols>
 void
-dataStore(std::ostream & stream, Eigen::Matrix<T, Rows, Cols> & v, std::any context)
+dataStore(std::ostream & stream, Eigen::Matrix<T, Rows, Cols> & v, Moose::AnyPointer context)
 {
   auto m = cast_int<unsigned int>(v.rows());
   dataStore(stream, m, context);
@@ -405,40 +409,40 @@ dataStore(std::ostream & stream, Eigen::Matrix<T, Rows, Cols> & v, std::any cont
 
 template <typename T>
 void
-dataStore(std::ostream & stream, GenericTwoVector<T> & v, std::any context)
+dataStore(std::ostream & stream, GenericTwoVector<T> & v, Moose::AnyPointer context)
 {
   dataStore(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)
 template <>
-void dataStore(std::ostream & stream, Real & v, std::any context);
+void dataStore(std::ostream & stream, Real & v, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, std::string & v, std::any context);
+void dataStore(std::ostream & stream, std::string & v, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, VariableName & v, std::any context);
+void dataStore(std::ostream & stream, VariableName & v, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, UserObjectName & v, std::any context);
+void dataStore(std::ostream & stream, UserObjectName & v, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, bool & v, std::any context);
+void dataStore(std::ostream & stream, bool & v, Moose::AnyPointer context);
 // Vectors of bools are special
 // https://en.wikipedia.org/w/index.php?title=Sequence_container_(C%2B%2B)&oldid=767869909#Specialization_for_bool
 template <>
-void dataStore(std::ostream & stream, std::vector<bool> & v, std::any context);
+void dataStore(std::ostream & stream, std::vector<bool> & v, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, const Elem *& e, std::any context);
+void dataStore(std::ostream & stream, const Elem *& e, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, const Node *& n, std::any context);
+void dataStore(std::ostream & stream, const Node *& n, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, Elem *& e, std::any context);
+void dataStore(std::ostream & stream, Elem *& e, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, Node *& n, std::any context);
+void dataStore(std::ostream & stream, Node *& n, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, std::stringstream & s, std::any context);
+void dataStore(std::ostream & stream, std::stringstream & s, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, ADReal & dn, std::any context);
+void dataStore(std::ostream & stream, ADReal & dn, Moose::AnyPointer context);
 template <>
-void dataStore(std::ostream & stream, libMesh::Parameters & p, std::any context);
+void dataStore(std::ostream & stream, libMesh::Parameters & p, Moose::AnyPointer context);
 
 template <>
 /**
@@ -453,11 +457,11 @@ template <>
  */
 void dataStore(std::ostream & stream,
                std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
-               std::any context);
+               Moose::AnyPointer context);
 
 template <std::size_t N>
 inline void
-dataStore(std::ostream & stream, std::array<ADReal, N> & dn, std::any context)
+dataStore(std::ostream & stream, std::array<ADReal, N> & dn, Moose::AnyPointer context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataStore(stream, dn[i], context);
@@ -465,7 +469,7 @@ dataStore(std::ostream & stream, std::array<ADReal, N> & dn, std::any context)
 
 template <std::size_t N>
 inline void
-dataStore(std::ostream & stream, ADReal (&dn)[N], std::any context)
+dataStore(std::ostream & stream, ADReal (&dn)[N], Moose::AnyPointer context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataStore(stream, dn[i], context);
@@ -473,7 +477,7 @@ dataStore(std::ostream & stream, ADReal (&dn)[N], std::any context)
 
 template <typename T>
 void
-dataStore(std::ostream & stream, libMesh::NumericVector<T> & v, std::any context)
+dataStore(std::ostream & stream, libMesh::NumericVector<T> & v, Moose::AnyPointer context)
 {
   v.close();
 
@@ -487,11 +491,11 @@ dataStore(std::ostream & stream, libMesh::NumericVector<T> & v, std::any context
 }
 
 template <>
-void dataStore(std::ostream & stream, Vec & v, std::any context);
+void dataStore(std::ostream & stream, Vec & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataStore(std::ostream & stream, DenseVector<T> & v, std::any context)
+dataStore(std::ostream & stream, DenseVector<T> & v, Moose::AnyPointer context)
 {
   unsigned int m = v.size();
   dataStore(stream, m, nullptr);
@@ -503,52 +507,52 @@ dataStore(std::ostream & stream, DenseVector<T> & v, std::any context)
 }
 
 template <typename T>
-void dataStore(std::ostream & stream, libMesh::TensorValue<T> & v, std::any context);
+void dataStore(std::ostream & stream, libMesh::TensorValue<T> & v, Moose::AnyPointer context);
 
 template <typename T>
-void dataStore(std::ostream & stream, libMesh::DenseMatrix<T> & v, std::any context);
+void dataStore(std::ostream & stream, libMesh::DenseMatrix<T> & v, Moose::AnyPointer context);
 
 template <typename T>
-void dataStore(std::ostream & stream, libMesh::VectorValue<T> & v, std::any context);
+void dataStore(std::ostream & stream, libMesh::VectorValue<T> & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataStore(std::ostream & stream, RankTwoTensorTempl<T> & rtt, std::any context)
+dataStore(std::ostream & stream, RankTwoTensorTempl<T> & rtt, Moose::AnyPointer context)
 {
   dataStore(stream, rtt._coords, context);
 }
 
 template <typename T>
 void
-dataStore(std::ostream & stream, RankThreeTensorTempl<T> & rtt, std::any context)
+dataStore(std::ostream & stream, RankThreeTensorTempl<T> & rtt, Moose::AnyPointer context)
 {
   dataStore(stream, rtt._vals, context);
 }
 
 template <typename T>
 void
-dataStore(std::ostream & stream, RankFourTensorTempl<T> & rft, std::any context)
+dataStore(std::ostream & stream, RankFourTensorTempl<T> & rft, Moose::AnyPointer context)
 {
   dataStore(stream, rft._vals, context);
 }
 
 template <typename T>
 void
-dataStore(std::ostream & stream, SymmetricRankTwoTensorTempl<T> & srtt, std::any context)
+dataStore(std::ostream & stream, SymmetricRankTwoTensorTempl<T> & srtt, Moose::AnyPointer context)
 {
   dataStore(stream, srtt._vals, context);
 }
 
 template <typename T>
 void
-dataStore(std::ostream & stream, SymmetricRankFourTensorTempl<T> & srft, std::any context)
+dataStore(std::ostream & stream, SymmetricRankFourTensorTempl<T> & srft, Moose::AnyPointer context)
 {
   dataStore(stream, srft._vals, context);
 }
 
 template <typename T>
 void
-dataStore(std::ostream & stream, ColumnMajorMatrixTempl<T> & cmm, std::any context)
+dataStore(std::ostream & stream, ColumnMajorMatrixTempl<T> & cmm, Moose::AnyPointer context)
 {
   dataStore(stream, cmm._values, context);
 }
@@ -557,7 +561,7 @@ dataStore(std::ostream & stream, ColumnMajorMatrixTempl<T> & cmm, std::any conte
 // *************** Global Load Declarations *****************
 template <typename T>
 inline void
-dataLoad(std::istream & stream, T & v, std::any /*context*/)
+dataLoad(std::istream & stream, T & v, Moose::AnyPointer /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
   mooseAssert(!stream.bad(), "Failed to load");
@@ -565,16 +569,17 @@ dataLoad(std::istream & stream, T & v, std::any /*context*/)
 
 template <typename T>
 void
-dataLoad(std::istream & /*stream*/, T *& /*v*/, std::any /*context*/)
+dataLoad(std::istream & /*stream*/, T *& /*v*/, Moose::AnyPointer /*context*/)
 {
-  mooseError("Attempting to load a raw pointer type: \"",
-             libMesh::demangle(typeid(T).name()),
-             " *\" as restartable data!\nWrite a custom dataLoad() template specialization!\n\n");
+  static_assert(Moose::always_false<T>,
+                "Attempting to load a raw pointer type as restartable data!\nWrite a custom "
+                "dataLoad() template specialization or make sure you wrapped the pointer in "
+                "Moose::AnyPointer(...)!\n\n");
 }
 
 template <typename T, typename U>
 inline void
-dataLoad(std::istream & stream, std::pair<T, U> & p, std::any context)
+dataLoad(std::istream & stream, std::pair<T, U> & p, Moose::AnyPointer context)
 {
   loadHelper(stream, p.first, context);
   loadHelper(stream, p.second, context);
@@ -582,7 +587,7 @@ dataLoad(std::istream & stream, std::pair<T, U> & p, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::vector<T> & v, std::any context)
+dataLoad(std::istream & stream, std::vector<T> & v, Moose::AnyPointer context)
 {
   // First read the size of the vector
   unsigned int size = 0;
@@ -596,7 +601,7 @@ dataLoad(std::istream & stream, std::vector<T> & v, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::shared_ptr<T> & v, std::any context)
+dataLoad(std::istream & stream, std::shared_ptr<T> & v, Moose::AnyPointer context)
 {
   T * tmp = v.get();
 
@@ -605,7 +610,7 @@ dataLoad(std::istream & stream, std::shared_ptr<T> & v, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::unique_ptr<T> & v, std::any context)
+dataLoad(std::istream & stream, std::unique_ptr<T> & v, Moose::AnyPointer context)
 {
   T * tmp = v.get();
 
@@ -614,7 +619,7 @@ dataLoad(std::istream & stream, std::unique_ptr<T> & v, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::set<T> & s, std::any context)
+dataLoad(std::istream & stream, std::set<T> & s, Moose::AnyPointer context)
 {
   // First read the size of the set
   unsigned int size = 0;
@@ -630,7 +635,7 @@ dataLoad(std::istream & stream, std::set<T> & s, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::list<T> & l, std::any context)
+dataLoad(std::istream & stream, std::list<T> & l, Moose::AnyPointer context)
 {
   // First read the size of the set
   unsigned int size = 0;
@@ -646,7 +651,7 @@ dataLoad(std::istream & stream, std::list<T> & l, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::deque<T> & l, std::any context)
+dataLoad(std::istream & stream, std::deque<T> & l, Moose::AnyPointer context)
 {
   // First read the size of the container
   unsigned int size = 0;
@@ -662,7 +667,7 @@ dataLoad(std::istream & stream, std::deque<T> & l, std::any context)
 
 template <typename T, typename U>
 inline void
-dataLoad(std::istream & stream, std::map<T, U> & m, std::any context)
+dataLoad(std::istream & stream, std::map<T, U> & m, Moose::AnyPointer context)
 {
   m.clear();
 
@@ -682,7 +687,7 @@ dataLoad(std::istream & stream, std::map<T, U> & m, std::any context)
 
 template <typename T, typename U>
 inline void
-dataLoad(std::istream & stream, std::unordered_map<T, U> & m, std::any context)
+dataLoad(std::istream & stream, std::unordered_map<T, U> & m, Moose::AnyPointer context)
 {
   m.clear();
 
@@ -702,7 +707,7 @@ dataLoad(std::istream & stream, std::unordered_map<T, U> & m, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::unordered_set<T> & s, std::any context)
+dataLoad(std::istream & stream, std::unordered_set<T> & s, Moose::AnyPointer context)
 {
   s.clear();
 
@@ -721,7 +726,7 @@ dataLoad(std::istream & stream, std::unordered_set<T> & s, std::any context)
 
 template <typename T>
 inline void
-dataLoad(std::istream & stream, std::optional<T> & m, std::any context)
+dataLoad(std::istream & stream, std::optional<T> & m, Moose::AnyPointer context)
 {
   bool has_value;
   dataLoad(stream, has_value, nullptr);
@@ -737,7 +742,7 @@ dataLoad(std::istream & stream, std::optional<T> & m, std::any context)
 
 template <typename T, typename U>
 inline void
-dataLoad(std::istream & stream, HashMap<T, U> & m, std::any context)
+dataLoad(std::istream & stream, HashMap<T, U> & m, Moose::AnyPointer context)
 {
   // First read the size of the map
   unsigned int size = 0;
@@ -755,7 +760,7 @@ dataLoad(std::istream & stream, HashMap<T, U> & m, std::any context)
 
 template <typename T, int Rows, int Cols>
 void
-dataLoad(std::istream & stream, Eigen::Matrix<T, Rows, Cols> & v, std::any context)
+dataLoad(std::istream & stream, Eigen::Matrix<T, Rows, Cols> & v, Moose::AnyPointer context)
 {
   unsigned int m = 0;
   dataLoad(stream, m, context);
@@ -773,32 +778,40 @@ dataLoad(std::istream & stream, Eigen::Matrix<T, Rows, Cols> & v, std::any conte
 
 template <typename T>
 void
-dataLoad(std::istream & stream, GenericTwoVector<T> & v, std::any context)
+dataLoad(std::istream & stream, GenericTwoVector<T> & v, Moose::AnyPointer context)
 {
   dataLoad(stream, static_cast<Eigen::Matrix<T, 2, 1> &>(v), context);
 }
 
 // Specializations (defined in .C)
 template <>
-void dataLoad(std::istream & stream, Real & v, std::any /*context*/);
+void dataLoad(std::istream & stream, Real & v, Moose::AnyPointer /*context*/);
 template <>
-void dataLoad(std::istream & stream, std::string & v, std::any /*context*/);
+void dataLoad(std::istream & stream, std::string & v, Moose::AnyPointer /*context*/);
 template <>
-void dataLoad(std::istream & stream, VariableName & v, std::any /*context*/);
+void dataLoad(std::istream & stream, VariableName & v, Moose::AnyPointer /*context*/);
 template <>
-void dataLoad(std::istream & stream, UserObjectName & v, std::any /*context*/);
+void dataLoad(std::istream & stream, UserObjectName & v, Moose::AnyPointer /*context*/);
 template <>
-void dataLoad(std::istream & stream, bool & v, std::any /*context*/);
+void dataLoad(std::istream & stream, bool & v, Moose::AnyPointer /*context*/);
 // Vectors of bools are special
 // https://en.wikipedia.org/w/index.php?title=Sequence_container_(C%2B%2B)&oldid=767869909#Specialization_for_bool
 template <>
-void dataLoad(std::istream & stream, std::vector<bool> & v, std::any /*context*/);
+void dataLoad(std::istream & stream, std::vector<bool> & v, Moose::AnyPointer /*context*/);
 template <>
-void dataLoad(std::istream & stream, std::stringstream & s, std::any context);
+void dataLoad(std::istream & stream, const Elem *& e, Moose::AnyPointer context);
 template <>
-void dataLoad(std::istream & stream, ADReal & dn, std::any context);
+void dataLoad(std::istream & stream, const Node *& n, Moose::AnyPointer context);
 template <>
-void dataLoad(std::istream & stream, libMesh::Parameters & p, std::any context);
+void dataLoad(std::istream & stream, Elem *& e, Moose::AnyPointer context);
+template <>
+void dataLoad(std::istream & stream, Node *& n, Moose::AnyPointer context);
+template <>
+void dataLoad(std::istream & stream, std::stringstream & s, Moose::AnyPointer context);
+template <>
+void dataLoad(std::istream & stream, ADReal & dn, Moose::AnyPointer context);
+template <>
+void dataLoad(std::istream & stream, libMesh::Parameters & p, Moose::AnyPointer context);
 template <>
 /**
  * Loads an owned numeric vector.
@@ -819,11 +832,11 @@ template <>
  */
 void dataLoad(std::istream & stream,
               std::unique_ptr<libMesh::NumericVector<libMesh::Number>> & v,
-              std::any context);
+              Moose::AnyPointer context);
 
 template <std::size_t N>
 inline void
-dataLoad(std::istream & stream, std::array<ADReal, N> & dn, std::any context)
+dataLoad(std::istream & stream, std::array<ADReal, N> & dn, Moose::AnyPointer context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataLoad(stream, dn[i], context);
@@ -831,7 +844,7 @@ dataLoad(std::istream & stream, std::array<ADReal, N> & dn, std::any context)
 
 template <std::size_t N>
 inline void
-dataLoad(std::istream & stream, ADReal (&dn)[N], std::any context)
+dataLoad(std::istream & stream, ADReal (&dn)[N], Moose::AnyPointer context)
 {
   for (std::size_t i = 0; i < N; ++i)
     dataLoad(stream, dn[i], context);
@@ -839,7 +852,7 @@ dataLoad(std::istream & stream, ADReal (&dn)[N], std::any context)
 
 template <typename T>
 void
-dataLoad(std::istream & stream, libMesh::NumericVector<T> & v, std::any context)
+dataLoad(std::istream & stream, libMesh::NumericVector<T> & v, Moose::AnyPointer context)
 {
   numeric_index_type size = v.local_size();
   for (numeric_index_type i = v.first_local_index(); i < v.first_local_index() + size; i++)
@@ -852,11 +865,11 @@ dataLoad(std::istream & stream, libMesh::NumericVector<T> & v, std::any context)
 }
 
 template <>
-void dataLoad(std::istream & stream, Vec & v, std::any context);
+void dataLoad(std::istream & stream, Vec & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataLoad(std::istream & stream, DenseVector<T> & v, std::any context)
+dataLoad(std::istream & stream, DenseVector<T> & v, Moose::AnyPointer context)
 {
   unsigned int n = 0;
   dataLoad(stream, n, nullptr);
@@ -870,52 +883,52 @@ dataLoad(std::istream & stream, DenseVector<T> & v, std::any context)
 }
 
 template <typename T>
-void dataLoad(std::istream & stream, libMesh::TensorValue<T> & v, std::any context);
+void dataLoad(std::istream & stream, libMesh::TensorValue<T> & v, Moose::AnyPointer context);
 
 template <typename T>
-void dataLoad(std::istream & stream, libMesh::DenseMatrix<T> & v, std::any context);
+void dataLoad(std::istream & stream, libMesh::DenseMatrix<T> & v, Moose::AnyPointer context);
 
 template <typename T>
-void dataLoad(std::istream & stream, libMesh::VectorValue<T> & v, std::any context);
+void dataLoad(std::istream & stream, libMesh::VectorValue<T> & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataLoad(std::istream & stream, RankTwoTensorTempl<T> & rtt, std::any context)
+dataLoad(std::istream & stream, RankTwoTensorTempl<T> & rtt, Moose::AnyPointer context)
 {
   dataLoad(stream, rtt._coords, context);
 }
 
 template <typename T>
 void
-dataLoad(std::istream & stream, RankThreeTensorTempl<T> & rtt, std::any context)
+dataLoad(std::istream & stream, RankThreeTensorTempl<T> & rtt, Moose::AnyPointer context)
 {
   dataLoad(stream, rtt._vals, context);
 }
 
 template <typename T>
 void
-dataLoad(std::istream & stream, RankFourTensorTempl<T> & rft, std::any context)
+dataLoad(std::istream & stream, RankFourTensorTempl<T> & rft, Moose::AnyPointer context)
 {
   dataLoad(stream, rft._vals, context);
 }
 
 template <typename T>
 void
-dataLoad(std::istream & stream, SymmetricRankTwoTensorTempl<T> & rtt, std::any context)
+dataLoad(std::istream & stream, SymmetricRankTwoTensorTempl<T> & rtt, Moose::AnyPointer context)
 {
   dataLoad(stream, rtt._vals, context);
 }
 
 template <typename T>
 void
-dataLoad(std::istream & stream, SymmetricRankFourTensorTempl<T> & rft, std::any context)
+dataLoad(std::istream & stream, SymmetricRankFourTensorTempl<T> & rft, Moose::AnyPointer context)
 {
   dataLoad(stream, rft._vals, context);
 }
 
 template <typename T>
 void
-dataLoad(std::istream & stream, ColumnMajorMatrixTempl<T> & cmm, std::any context)
+dataLoad(std::istream & stream, ColumnMajorMatrixTempl<T> & cmm, Moose::AnyPointer context)
 {
   dataLoad(stream, cmm._values, context);
 }
@@ -923,7 +936,7 @@ dataLoad(std::istream & stream, ColumnMajorMatrixTempl<T> & cmm, std::any contex
 // Scalar Helper Function
 template <typename P>
 inline void
-storeHelper(std::ostream & stream, P & data, std::any context)
+storeHelper(std::ostream & stream, P & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -931,7 +944,7 @@ storeHelper(std::ostream & stream, P & data, std::any context)
 // Vector Helper Function
 template <typename P>
 inline void
-storeHelper(std::ostream & stream, std::vector<P> & data, std::any context)
+storeHelper(std::ostream & stream, std::vector<P> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -939,7 +952,7 @@ storeHelper(std::ostream & stream, std::vector<P> & data, std::any context)
 // std::shared_ptr Helper Function
 template <typename P>
 inline void
-storeHelper(std::ostream & stream, std::shared_ptr<P> & data, std::any context)
+storeHelper(std::ostream & stream, std::shared_ptr<P> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -947,7 +960,7 @@ storeHelper(std::ostream & stream, std::shared_ptr<P> & data, std::any context)
 // std::unique Helper Function
 template <typename P>
 inline void
-storeHelper(std::ostream & stream, std::unique_ptr<P> & data, std::any context)
+storeHelper(std::ostream & stream, std::unique_ptr<P> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -955,7 +968,7 @@ storeHelper(std::ostream & stream, std::unique_ptr<P> & data, std::any context)
 // Set Helper Function
 template <typename P>
 inline void
-storeHelper(std::ostream & stream, std::set<P> & data, std::any context)
+storeHelper(std::ostream & stream, std::set<P> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -963,7 +976,7 @@ storeHelper(std::ostream & stream, std::set<P> & data, std::any context)
 // Map Helper Function
 template <typename P, typename Q>
 inline void
-storeHelper(std::ostream & stream, std::map<P, Q> & data, std::any context)
+storeHelper(std::ostream & stream, std::map<P, Q> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -971,7 +984,7 @@ storeHelper(std::ostream & stream, std::map<P, Q> & data, std::any context)
 // Unordered_map Helper Function
 template <typename P, typename Q>
 inline void
-storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, std::any context)
+storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -979,7 +992,7 @@ storeHelper(std::ostream & stream, std::unordered_map<P, Q> & data, std::any con
 // Optional Helper Function
 template <typename P>
 inline void
-storeHelper(std::ostream & stream, std::optional<P> & data, std::any context)
+storeHelper(std::ostream & stream, std::optional<P> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -987,7 +1000,7 @@ storeHelper(std::ostream & stream, std::optional<P> & data, std::any context)
 // HashMap Helper Function
 template <typename P, typename Q>
 inline void
-storeHelper(std::ostream & stream, HashMap<P, Q> & data, std::any context)
+storeHelper(std::ostream & stream, HashMap<P, Q> & data, Moose::AnyPointer context)
 {
   dataStore(stream, data, context);
 }
@@ -1000,7 +1013,7 @@ storeHelper(std::ostream & stream, HashMap<P, Q> & data, std::any context)
  */
 template <typename T>
 inline void
-storeHelper(std::ostream & stream, UniqueStorage<T> & data, std::any context)
+storeHelper(std::ostream & stream, UniqueStorage<T> & data, Moose::AnyPointer context)
 {
   std::size_t size = data.size();
   dataStore(stream, size, nullptr);
@@ -1015,7 +1028,7 @@ storeHelper(std::ostream & stream, UniqueStorage<T> & data, std::any context)
 // Scalar Helper Function
 template <typename P>
 inline void
-loadHelper(std::istream & stream, P & data, std::any context)
+loadHelper(std::istream & stream, P & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1023,7 +1036,7 @@ loadHelper(std::istream & stream, P & data, std::any context)
 // Vector Helper Function
 template <typename P>
 inline void
-loadHelper(std::istream & stream, std::vector<P> & data, std::any context)
+loadHelper(std::istream & stream, std::vector<P> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1031,7 +1044,7 @@ loadHelper(std::istream & stream, std::vector<P> & data, std::any context)
 // std::shared_ptr Helper Function
 template <typename P>
 inline void
-loadHelper(std::istream & stream, std::shared_ptr<P> & data, std::any context)
+loadHelper(std::istream & stream, std::shared_ptr<P> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1039,7 +1052,7 @@ loadHelper(std::istream & stream, std::shared_ptr<P> & data, std::any context)
 // Unique Pointer Helper Function
 template <typename P>
 inline void
-loadHelper(std::istream & stream, std::unique_ptr<P> & data, std::any context)
+loadHelper(std::istream & stream, std::unique_ptr<P> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1047,7 +1060,7 @@ loadHelper(std::istream & stream, std::unique_ptr<P> & data, std::any context)
 // Set Helper Function
 template <typename P>
 inline void
-loadHelper(std::istream & stream, std::set<P> & data, std::any context)
+loadHelper(std::istream & stream, std::set<P> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1055,7 +1068,7 @@ loadHelper(std::istream & stream, std::set<P> & data, std::any context)
 // Map Helper Function
 template <typename P, typename Q>
 inline void
-loadHelper(std::istream & stream, std::map<P, Q> & data, std::any context)
+loadHelper(std::istream & stream, std::map<P, Q> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1063,7 +1076,7 @@ loadHelper(std::istream & stream, std::map<P, Q> & data, std::any context)
 // Unordered_map Helper Function
 template <typename P, typename Q>
 inline void
-loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, std::any context)
+loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1071,7 +1084,7 @@ loadHelper(std::istream & stream, std::unordered_map<P, Q> & data, std::any cont
 // Optional Helper Function
 template <typename P>
 inline void
-loadHelper(std::istream & stream, std::optional<P> & data, std::any context)
+loadHelper(std::istream & stream, std::optional<P> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1079,7 +1092,7 @@ loadHelper(std::istream & stream, std::optional<P> & data, std::any context)
 // HashMap Helper Function
 template <typename P, typename Q>
 inline void
-loadHelper(std::istream & stream, HashMap<P, Q> & data, std::any context)
+loadHelper(std::istream & stream, HashMap<P, Q> & data, Moose::AnyPointer context)
 {
   dataLoad(stream, data, context);
 }
@@ -1093,7 +1106,7 @@ loadHelper(std::istream & stream, HashMap<P, Q> & data, std::any context)
  */
 template <typename T>
 inline void
-loadHelper(std::istream & stream, UniqueStorage<T> & data, std::any context)
+loadHelper(std::istream & stream, UniqueStorage<T> & data, Moose::AnyPointer context)
 {
   std::size_t size;
   dataLoad(stream, size, nullptr);
@@ -1103,7 +1116,7 @@ loadHelper(std::istream & stream, UniqueStorage<T> & data, std::any context)
     loadHelper(stream, data.pointerValue(i), context);
 }
 
-void dataLoad(std::istream & stream, Point & p, std::any context);
+void dataLoad(std::istream & stream, Point & p, Moose::AnyPointer context);
 
 #ifndef TIMPI_HAVE_STRING_PACKING
 /**
@@ -1140,13 +1153,13 @@ public:
     return get_string_len(in) + size_bytes;
   }
 
-  static unsigned int packable_size(const std::basic_string<T> & s, const std::any)
+  static unsigned int packable_size(const std::basic_string<T> & s, const Moose::AnyPointer)
   {
     return s.size() + size_bytes;
   }
 
   template <typename Iter>
-  static void pack(const std::basic_string<T> & b, Iter data_out, const std::any)
+  static void pack(const std::basic_string<T> & b, Iter data_out, const Moose::AnyPointer)
   {
     unsigned int string_len = b.size();
     for (unsigned int i = 0; i != size_bytes; ++i)
@@ -1158,7 +1171,7 @@ public:
     std::copy(b.begin(), b.end(), data_out);
   }
 
-  static std::basic_string<T> unpack(typename std::vector<T>::const_iterator in, std::any)
+  static std::basic_string<T> unpack(typename std::vector<T>::const_iterator in, Moose::AnyPointer)
   {
     unsigned int string_len = get_string_len(in);
 

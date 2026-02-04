@@ -36,8 +36,8 @@ RepeatableRayStudyBase::RepeatableRayStudyBase(const InputParameters & parameter
                                 : false),
     _claim_after_define_rays(getParam<bool>("_claim_after_define_rays")),
     _should_define_rays(declareRestartableData<bool>("should_define_rays", true)),
-    _local_rays(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("local_rays", this)),
+    _local_rays(declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>(
+        "local_rays", Moose::AnyPointer(this))),
     _claim_rays(*this,
                 _rays,
                 _local_rays,

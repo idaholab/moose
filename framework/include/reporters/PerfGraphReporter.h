@@ -10,6 +10,11 @@
 #pragma once
 
 #include "GeneralReporter.h"
+#include "AnyPointer.h"
+#include "nlohmann/json.h"
+
+#include <cstddef>
+#include <vector>
 
 class PerfNode;
 class PerfGraph;
@@ -64,6 +69,6 @@ void to_json(nlohmann::json & json, const PerfGraphReporter::PerfGraphJSON & per
  * graph to the current PerfGraph.
  */
 ///@{
-void dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, std::any);
-void dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, std::any);
+void dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, Moose::AnyPointer);
+void dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, Moose::AnyPointer);
 ///@}

@@ -9,9 +9,10 @@
 
 #pragma once
 
+#include "AnyPointer.h"
+
 #include <sstream>
 #include <memory>
-#include <any>
 
 /**
  * Helper class to hold streams for Backup and Restore operations.
@@ -22,7 +23,7 @@ struct Backup
   std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
 };
 
-void dataStore(std::ostream & stream, Backup & backup, std::any context);
-void dataLoad(std::istream & stream, Backup & backup, std::any context);
-void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::any context);
-void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, std::any context);
+void dataStore(std::ostream & stream, Backup & backup, Moose::AnyPointer context);
+void dataLoad(std::istream & stream, Backup & backup, Moose::AnyPointer context);
+void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context);
+void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context);

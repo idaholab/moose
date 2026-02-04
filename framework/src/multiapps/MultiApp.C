@@ -305,7 +305,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _keep_aux_solution_during_restore(getParam<bool>("keep_aux_solution_during_restore")),
     _no_restore(getParam<bool>("no_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
-    _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", this)),
+    _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups",
+                                                                      Moose::AnyPointer(this))),
     _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),
     _init_timer(registerTimedSection("init", 3, "Initializing MultiApp")),
     _backup_timer(registerTimedSection("backup", 3, "Backing Up MultiApp")),
@@ -1520,10 +1521,10 @@ MultiApp::position(unsigned int app) const
 }
 
 void
-dataStore(std::ostream & stream, SubAppBackups & backups, std::any context)
+dataStore(std::ostream & stream, SubAppBackups & backups, Moose::AnyPointer context)
 {
-  mooseAssert(context.has_value(), "Not set");
-  MultiApp * multi_app = std::any_cast<MultiApp *>(context);
+  mooseAssert(context.hasValue(), "Not set");
+  MultiApp * multi_app = context.get_if<MultiApp>();
 
   multi_app->backup();
 
@@ -1531,10 +1532,10 @@ dataStore(std::ostream & stream, SubAppBackups & backups, std::any context)
 }
 
 void
-dataLoad(std::istream & stream, SubAppBackups & backups, std::any context)
+dataLoad(std::istream & stream, SubAppBackups & backups, Moose::AnyPointer context)
 {
-  mooseAssert(context.has_value(), "Not set");
-  MultiApp * multi_app = std::any_cast<MultiApp *>(context);
+  mooseAssert(context.hasValue(), "Not set");
+  MultiApp * multi_app = context.get_if<MultiApp>();
 
   dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 

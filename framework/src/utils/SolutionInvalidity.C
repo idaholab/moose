@@ -333,7 +333,7 @@ SolutionInvalidity::transientTable(unsigned int & step_interval) const
 void
 dataStore(std::ostream & stream,
           SolutionInvalidity::TimestepCounts & timestep_counts,
-          std::any context)
+          Moose::AnyPointer context)
 {
   dataStore(stream, timestep_counts.timestep_index, context);
   dataStore(stream, timestep_counts.counts, context);
@@ -343,14 +343,16 @@ dataStore(std::ostream & stream,
 void
 dataLoad(std::istream & stream,
          SolutionInvalidity::TimestepCounts & timestep_counts,
-         std::any context)
+         Moose::AnyPointer context)
 {
   dataLoad(stream, timestep_counts.timestep_index, context);
   dataLoad(stream, timestep_counts.counts, context);
 }
 
 void
-dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, std::any context)
+dataStore(std::ostream & stream,
+          SolutionInvalidity & solution_invalidity,
+          Moose::AnyPointer context)
 {
   solution_invalidity.syncIteration();
 
@@ -379,7 +381,7 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, std::
 }
 
 void
-dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, std::any context)
+dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, Moose::AnyPointer context)
 {
   if (solution_invalidity.processor_id() != 0)
     return;

@@ -41,11 +41,11 @@ void to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_
  */
 ///@{
 void
-dataStore(std::ostream &, const SolutionInvalidity *&, void *)
+dataStore(std::ostream &, const SolutionInvalidity *&, Moose::AnyPointer)
 {
 }
 void
-dataLoad(std::istream &, const SolutionInvalidity *&, void *)
+dataLoad(std::istream &, const SolutionInvalidity *&, Moose::AnyPointer)
 {
 }
 ///@}

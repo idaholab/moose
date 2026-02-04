@@ -161,7 +161,7 @@ void
 dataStore<Moose::LibtorchArtificialNeuralNet>(
     std::ostream & stream,
     std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
-    std::any context)
+    Moose::AnyPointer context)
 {
   std::string n(nn->name());
   dataStore(stream, n, context);
@@ -201,7 +201,7 @@ void
 dataLoad<Moose::LibtorchArtificialNeuralNet>(
     std::istream & stream,
     std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
-    std::any context)
+    Moose::AnyPointer context)
 {
   std::string name;
   dataLoad(stream, name, context);
@@ -245,7 +245,7 @@ void
 dataStore<Moose::LibtorchArtificialNeuralNet const>(
     std::ostream & /*stream*/,
     Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
-    std::any /*context*/)
+    Moose::AnyPointer /*context*/)
 {
 }
 
@@ -254,7 +254,7 @@ void
 dataLoad<Moose::LibtorchArtificialNeuralNet const>(
     std::istream & /*stream*/,
     Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
-    std::any /*context*/)
+    Moose::AnyPointer /*context*/)
 {
 }
 

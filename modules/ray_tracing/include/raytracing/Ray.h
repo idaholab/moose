@@ -19,7 +19,7 @@
 // libMesh Includes
 #include "libmesh/parallel.h"
 
-#include <any>
+#include "AnyPointer.h"
 
 // Forward declarations
 namespace libMesh
@@ -732,8 +732,10 @@ private:
   // Allows for testing of equality methods
   friend class TestRayLots;
   // Data helpers needs to be able to access the internal methods for a Ray for store/load
-  friend void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, std::any context);
-  friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, std::any context);
+  friend void
+  dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
+  friend void
+  dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
 };
 
 bool
@@ -774,5 +776,5 @@ public:
 
 } // namespace libMesh
 
-void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, std::any context);
-void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, std::any context);
+void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
+void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);

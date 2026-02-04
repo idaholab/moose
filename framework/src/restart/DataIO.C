@@ -26,14 +26,14 @@ using namespace libMesh;
 
 template <>
 void
-dataStore(std::ostream & stream, Real & v, std::any /*context*/)
+dataStore(std::ostream & stream, Real & v, Moose::AnyPointer /*context*/)
 {
   stream.write((char *)&v, sizeof(v));
 }
 
 template <>
 void
-dataStore(std::ostream & stream, std::string & v, std::any /*context*/)
+dataStore(std::ostream & stream, std::string & v, Moose::AnyPointer /*context*/)
 {
   // Write the size of the string
   unsigned int size = v.size();
@@ -45,7 +45,7 @@ dataStore(std::ostream & stream, std::string & v, std::any /*context*/)
 
 template <>
 void
-dataStore(std::ostream & stream, VariableName & v, std::any context)
+dataStore(std::ostream & stream, VariableName & v, Moose::AnyPointer context)
 {
   auto & name = static_cast<std::string &>(v);
   dataStore(stream, name, context);
@@ -53,7 +53,7 @@ dataStore(std::ostream & stream, VariableName & v, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, UserObjectName & v, std::any context)
+dataStore(std::ostream & stream, UserObjectName & v, Moose::AnyPointer context)
 {
   auto & name = static_cast<std::string &>(v);
   dataStore(stream, name, context);
@@ -61,14 +61,14 @@ dataStore(std::ostream & stream, UserObjectName & v, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, bool & v, std::any /*context*/)
+dataStore(std::ostream & stream, bool & v, Moose::AnyPointer /*context*/)
 {
   stream.write((char *)&v, sizeof(v));
 }
 
 template <>
 void
-dataStore(std::ostream & stream, std::vector<bool> & v, std::any context)
+dataStore(std::ostream & stream, std::vector<bool> & v, Moose::AnyPointer context)
 {
   for (bool b : v)
     dataStore(stream, b, context);
@@ -76,28 +76,28 @@ dataStore(std::ostream & stream, std::vector<bool> & v, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, RankTwoTensor & rtt, std::any context)
+dataStore(std::ostream & stream, RankTwoTensor & rtt, Moose::AnyPointer context)
 {
   dataStore(stream, rtt._coords, context);
 }
 
 template <>
 void
-dataStore(std::ostream & stream, RankThreeTensor & rtht, std::any context)
+dataStore(std::ostream & stream, RankThreeTensor & rtht, Moose::AnyPointer context)
 {
   dataStore(stream, rtht._vals, context);
 }
 
 template <>
 void
-dataStore(std::ostream & stream, RankFourTensor & rft, std::any context)
+dataStore(std::ostream & stream, RankFourTensor & rft, Moose::AnyPointer context)
 {
   dataStore(stream, rft._vals, context);
 }
 
 template <>
 void
-dataStore(std::ostream & stream, ADReal & dn, std::any context)
+dataStore(std::ostream & stream, ADReal & dn, Moose::AnyPointer context)
 {
   dataStore(stream, dn.value(), context);
 
@@ -116,7 +116,7 @@ dataStore(std::ostream & stream, ADReal & dn, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, const Elem *& e, std::any context)
+dataStore(std::ostream & stream, const Elem *& e, Moose::AnyPointer context)
 {
   // TODO: Write out the unique ID of this elem
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -133,7 +133,7 @@ dataStore(std::ostream & stream, const Elem *& e, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, const Node *& n, std::any context)
+dataStore(std::ostream & stream, const Node *& n, Moose::AnyPointer context)
 {
   // TODO: Write out the unique ID of this node
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -150,7 +150,7 @@ dataStore(std::ostream & stream, const Node *& n, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, Elem *& e, std::any context)
+dataStore(std::ostream & stream, Elem *& e, Moose::AnyPointer context)
 {
   // TODO: Write out the unique ID of this elem
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -167,7 +167,7 @@ dataStore(std::ostream & stream, Elem *& e, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, Node *& n, std::any context)
+dataStore(std::ostream & stream, Node *& n, Moose::AnyPointer context)
 {
   // TODO: Write out the unique ID of this node
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -184,7 +184,7 @@ dataStore(std::ostream & stream, Node *& n, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, std::stringstream & s, std::any /* context */)
+dataStore(std::ostream & stream, std::stringstream & s, Moose::AnyPointer /* context */)
 {
   const std::string & s_str = s.str();
 
@@ -196,7 +196,7 @@ dataStore(std::ostream & stream, std::stringstream & s, std::any /* context */)
 
 template <typename T>
 void
-dataStore(std::ostream & stream, TensorValue<T> & v, std::any context)
+dataStore(std::ostream & stream, TensorValue<T> & v, Moose::AnyPointer context)
 {
   for (const auto i : make_range(Moose::dim))
     for (const auto j : make_range(Moose::dim))
@@ -206,12 +206,12 @@ dataStore(std::ostream & stream, TensorValue<T> & v, std::any context)
     }
 }
 
-template void dataStore(std::ostream & stream, TensorValue<Real> & v, std::any context);
-template void dataStore(std::ostream & stream, TensorValue<ADReal> & v, std::any context);
+template void dataStore(std::ostream & stream, TensorValue<Real> & v, Moose::AnyPointer context);
+template void dataStore(std::ostream & stream, TensorValue<ADReal> & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataStore(std::ostream & stream, DenseMatrix<T> & v, std::any context)
+dataStore(std::ostream & stream, DenseMatrix<T> & v, Moose::AnyPointer context)
 {
   unsigned int m = v.m();
   unsigned int n = v.n();
@@ -225,12 +225,12 @@ dataStore(std::ostream & stream, DenseMatrix<T> & v, std::any context)
     }
 }
 
-template void dataStore(std::ostream & stream, DenseMatrix<Real> & v, std::any context);
-template void dataStore(std::ostream & stream, DenseMatrix<ADReal> & v, std::any context);
+template void dataStore(std::ostream & stream, DenseMatrix<Real> & v, Moose::AnyPointer context);
+template void dataStore(std::ostream & stream, DenseMatrix<ADReal> & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataStore(std::ostream & stream, VectorValue<T> & v, std::any context)
+dataStore(std::ostream & stream, VectorValue<T> & v, Moose::AnyPointer context)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
   // won't work.
@@ -241,11 +241,11 @@ dataStore(std::ostream & stream, VectorValue<T> & v, std::any context)
   }
 }
 
-template void dataStore(std::ostream & stream, VectorValue<Real> & v, std::any context);
-template void dataStore(std::ostream & stream, VectorValue<ADReal> & v, std::any context);
+template void dataStore(std::ostream & stream, VectorValue<Real> & v, Moose::AnyPointer context);
+template void dataStore(std::ostream & stream, VectorValue<ADReal> & v, Moose::AnyPointer context);
 
 void
-dataStore(std::ostream & stream, Point & p, std::any context)
+dataStore(std::ostream & stream, Point & p, Moose::AnyPointer context)
 {
   for (const auto i : make_range(Moose::dim))
   {
@@ -256,7 +256,7 @@ dataStore(std::ostream & stream, Point & p, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, libMesh::Parameters & p, std::any context)
+dataStore(std::ostream & stream, libMesh::Parameters & p, Moose::AnyPointer context)
 {
   // First store the size of the map
   unsigned int size = p.n_parameters();
@@ -297,7 +297,7 @@ template <>
 void
 dataStore(std::ostream & stream,
           std::unique_ptr<libMesh::NumericVector<Number>> & v,
-          std::any context)
+          Moose::AnyPointer context)
 {
   // Classes may declare unique pointers to vectors as restartable data and never actually create
   // vector instances. This happens for example in the `TimeIntegrator` class where subvector
@@ -307,8 +307,8 @@ dataStore(std::ostream & stream,
   if (!have_vector)
     return;
 
-  mooseAssert(context.has_value(), "Needs a context of the communicator");
-  const auto & comm = *std::any_cast<const libMesh::Parallel::Communicator *>(context);
+  mooseAssert(context.hasValue(), "Needs a context of the communicator");
+  const auto & comm = context.get<const libMesh::Parallel::Communicator>();
   mooseAssert(&comm == &v->comm(), "Inconsistent communicator");
 
   if (v->type() == GHOSTED)
@@ -341,14 +341,14 @@ dataStore(std::ostream & stream,
 
 template <>
 void
-dataLoad(std::istream & stream, Real & v, std::any /*context*/)
+dataLoad(std::istream & stream, Real & v, Moose::AnyPointer /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
 }
 
 template <>
 void
-dataLoad(std::istream & stream, std::string & v, std::any /*context*/)
+dataLoad(std::istream & stream, std::string & v, Moose::AnyPointer /*context*/)
 {
   // Read the size of the string
   unsigned int size = 0;
@@ -363,7 +363,7 @@ dataLoad(std::istream & stream, std::string & v, std::any /*context*/)
 
 template <>
 void
-dataLoad(std::istream & stream, VariableName & v, std::any context)
+dataLoad(std::istream & stream, VariableName & v, Moose::AnyPointer context)
 {
   auto & name = static_cast<std::string &>(v);
   dataLoad(stream, name, context);
@@ -371,7 +371,7 @@ dataLoad(std::istream & stream, VariableName & v, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, UserObjectName & v, std::any context)
+dataLoad(std::istream & stream, UserObjectName & v, Moose::AnyPointer context)
 {
   auto & name = static_cast<std::string &>(v);
   dataLoad(stream, name, context);
@@ -379,14 +379,14 @@ dataLoad(std::istream & stream, UserObjectName & v, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, bool & v, std::any /*context*/)
+dataLoad(std::istream & stream, bool & v, Moose::AnyPointer /*context*/)
 {
   stream.read((char *)&v, sizeof(v));
 }
 
 template <>
 void
-dataLoad(std::istream & stream, std::vector<bool> & v, std::any context)
+dataLoad(std::istream & stream, std::vector<bool> & v, Moose::AnyPointer context)
 {
   for (bool b : v)
     dataLoad(stream, b, context);
@@ -394,7 +394,7 @@ dataLoad(std::istream & stream, std::vector<bool> & v, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, ADReal & dn, std::any context)
+dataLoad(std::istream & stream, ADReal & dn, Moose::AnyPointer context)
 {
   dataLoad(stream, dn.value(), context);
 
@@ -415,12 +415,12 @@ dataLoad(std::istream & stream, ADReal & dn, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, const Elem *& e, std::any context)
+dataLoad(std::istream & stream, const Elem *& e, Moose::AnyPointer context)
 {
-  if (!context.has_value())
+  if (!context.hasValue())
     mooseError("Can only load Elem objects using a mesh context!");
 
-  auto * mesh = std::any_cast<libMesh::MeshBase *>(context);
+  auto * mesh = context.get_if<libMesh::MeshBase>();
 
   // TODO: Write out the unique ID of this element
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -435,12 +435,12 @@ dataLoad(std::istream & stream, const Elem *& e, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, const Node *& n, std::any context)
+dataLoad(std::istream & stream, const Node *& n, Moose::AnyPointer context)
 {
-  if (!context.has_value())
+  if (!context.hasValue())
     mooseError("Can only load Node objects using a mesh context!");
 
-  auto * mesh = std::any_cast<libMesh::MeshBase *>(context);
+  auto * mesh = context.get_if<libMesh::MeshBase>();
 
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -455,12 +455,12 @@ dataLoad(std::istream & stream, const Node *& n, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, Elem *& e, std::any context)
+dataLoad(std::istream & stream, Elem *& e, Moose::AnyPointer context)
 {
-  if (!context.has_value())
+  if (!context.hasValue())
     mooseError("Can only load Elem objects using a mesh context!");
 
-  auto * mesh = std::any_cast<libMesh::MeshBase *>(context);
+  auto * mesh = context.get_if<libMesh::MeshBase>();
 
   // TODO: Write out the unique ID of this element
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -475,12 +475,12 @@ dataLoad(std::istream & stream, Elem *& e, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, Node *& n, std::any context)
+dataLoad(std::istream & stream, Node *& n, Moose::AnyPointer context)
 {
-  if (!context.has_value())
+  if (!context.hasValue())
     mooseError("Can only load Node objects using a mesh context!");
 
-  auto * mesh = std::any_cast<libMesh::MeshBase *>(context);
+  auto * mesh = context.get_if<libMesh::MeshBase>();
 
   // TODO: Write out the unique ID of this nodeent
   dof_id_type id = libMesh::DofObject::invalid_id;
@@ -495,7 +495,7 @@ dataLoad(std::istream & stream, Node *& n, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, std::stringstream & s, std::any /* context */)
+dataLoad(std::istream & stream, std::stringstream & s, Moose::AnyPointer /* context */)
 {
   size_t s_size = 0;
   stream.read((char *)&s_size, sizeof(s_size));
@@ -510,7 +510,7 @@ dataLoad(std::istream & stream, std::stringstream & s, std::any /* context */)
 
 template <typename T>
 void
-dataLoad(std::istream & stream, TensorValue<T> & v, std::any context)
+dataLoad(std::istream & stream, TensorValue<T> & v, Moose::AnyPointer context)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
   // won't work.
@@ -523,12 +523,12 @@ dataLoad(std::istream & stream, TensorValue<T> & v, std::any context)
     }
 }
 
-template void dataLoad(std::istream & stream, TensorValue<Real> & v, std::any context);
-template void dataLoad(std::istream & stream, TensorValue<ADReal> & v, std::any context);
+template void dataLoad(std::istream & stream, TensorValue<Real> & v, Moose::AnyPointer context);
+template void dataLoad(std::istream & stream, TensorValue<ADReal> & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataLoad(std::istream & stream, DenseMatrix<T> & v, std::any context)
+dataLoad(std::istream & stream, DenseMatrix<T> & v, Moose::AnyPointer context)
 {
   unsigned int m = 0, n = 0;
   stream.read((char *)&m, sizeof(m));
@@ -543,12 +543,12 @@ dataLoad(std::istream & stream, DenseMatrix<T> & v, std::any context)
     }
 }
 
-template void dataLoad(std::istream & stream, DenseMatrix<Real> & v, std::any context);
-template void dataLoad(std::istream & stream, DenseMatrix<ADReal> & v, std::any context);
+template void dataLoad(std::istream & stream, DenseMatrix<Real> & v, Moose::AnyPointer context);
+template void dataLoad(std::istream & stream, DenseMatrix<ADReal> & v, Moose::AnyPointer context);
 
 template <typename T>
 void
-dataLoad(std::istream & stream, VectorValue<T> & v, std::any context)
+dataLoad(std::istream & stream, VectorValue<T> & v, Moose::AnyPointer context)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
   // won't work.
@@ -560,11 +560,11 @@ dataLoad(std::istream & stream, VectorValue<T> & v, std::any context)
   }
 }
 
-template void dataLoad(std::istream & stream, VectorValue<Real> & v, std::any context);
-template void dataLoad(std::istream & stream, VectorValue<ADReal> & v, std::any context);
+template void dataLoad(std::istream & stream, VectorValue<Real> & v, Moose::AnyPointer context);
+template void dataLoad(std::istream & stream, VectorValue<ADReal> & v, Moose::AnyPointer context);
 
 void
-dataLoad(std::istream & stream, Point & p, std::any context)
+dataLoad(std::istream & stream, Point & p, Moose::AnyPointer context)
 {
   for (const auto i : make_range(Moose::dim))
   {
@@ -576,7 +576,7 @@ dataLoad(std::istream & stream, Point & p, std::any context)
 
 template <>
 void
-dataLoad(std::istream & stream, libMesh::Parameters & p, std::any context)
+dataLoad(std::istream & stream, libMesh::Parameters & p, Moose::AnyPointer context)
 {
   p.clear();
 
@@ -616,7 +616,7 @@ template <>
 void
 dataLoad(std::istream & stream,
          std::unique_ptr<libMesh::NumericVector<Number>> & v,
-         std::any context)
+         Moose::AnyPointer context)
 {
   bool have_vector;
   dataLoad(stream, have_vector, context);
@@ -624,8 +624,8 @@ dataLoad(std::istream & stream,
   if (!have_vector)
     return;
 
-  mooseAssert(context.has_value(), "Needs a context of the communicator");
-  const auto & comm = *std::any_cast<const libMesh::Parallel::Communicator *>(context);
+  mooseAssert(context.hasValue(), "Needs a context of the communicator");
+  const auto & comm = context.get<const libMesh::Parallel::Communicator>();
   if (v)
     mooseAssert(&comm == &v->comm(), "Inconsistent communicator");
 
@@ -665,7 +665,7 @@ dataLoad(std::istream & stream,
 
 template <>
 void
-dataLoad(std::istream & stream, Vec & v, std::any context)
+dataLoad(std::istream & stream, Vec & v, Moose::AnyPointer context)
 {
   PetscInt local_size;
   LibmeshPetscCallA(PETSC_COMM_WORLD, VecGetLocalSize(v, &local_size));
@@ -679,7 +679,7 @@ dataLoad(std::istream & stream, Vec & v, std::any context)
 
 template <>
 void
-dataStore(std::ostream & stream, Vec & v, std::any context)
+dataStore(std::ostream & stream, Vec & v, Moose::AnyPointer context)
 {
   PetscInt local_size;
   LibmeshPetscCallA(PETSC_COMM_WORLD, VecGetLocalSize(v, &local_size));

@@ -21,7 +21,7 @@
 
 // C++ includes
 #include <iomanip>
-#include <any>
+#include "AnyPointer.h"
 
 /**
  * This class defines a Tensor that can change its shape.  This means
@@ -331,9 +331,9 @@ protected:
   std::vector<T> _values;
 
   template <typename T2>
-  friend void dataStore(std::ostream &, ColumnMajorMatrixTempl<T2> &, std::any);
+  friend void dataStore(std::ostream &, ColumnMajorMatrixTempl<T2> &, Moose::AnyPointer);
   template <typename T2>
-  friend void dataLoad(std::istream &, ColumnMajorMatrixTempl<T2> &, std::any);
+  friend void dataLoad(std::istream &, ColumnMajorMatrixTempl<T2> &, Moose::AnyPointer);
 };
 
 template <typename T>

@@ -328,7 +328,7 @@ GaussianProcess::vecToMap(
 
 template <>
 void
-dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, std::any context)
+dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, Moose::AnyPointer context)
 {
   // Store the L matrix as opposed to the full matrix to avoid compounding
   // roundoff error and decomposition error
@@ -338,7 +338,7 @@ dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, std::any 
 
 template <>
 void
-dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, std::any context)
+dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, Moose::AnyPointer context)
 {
   RealEigenMatrix L;
   dataLoad(stream, L, context);
@@ -347,7 +347,9 @@ dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, std::any c
 
 template <>
 void
-dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, std::any context)
+dataStore(std::ostream & stream,
+          StochasticTools::GaussianProcess & gp_utils,
+          Moose::AnyPointer context)
 {
   dataStore(stream, gp_utils.hyperparamMap(), context);
   dataStore(stream, gp_utils.hyperparamVectorMap(), context);
@@ -365,7 +367,9 @@ dataStore(std::ostream & stream, StochasticTools::GaussianProcess & gp_utils, st
 
 template <>
 void
-dataLoad(std::istream & stream, StochasticTools::GaussianProcess & gp_utils, std::any context)
+dataLoad(std::istream & stream,
+         StochasticTools::GaussianProcess & gp_utils,
+         Moose::AnyPointer context)
 {
   dataLoad(stream, gp_utils.hyperparamMap(), context);
   dataLoad(stream, gp_utils.hyperparamVectorMap(), context);

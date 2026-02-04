@@ -28,7 +28,7 @@
 
 #include <petscsys.h>
 #include <vector>
-#include <any>
+#include "AnyPointer.h"
 
 // Forward declarations
 class MooseEnum;
@@ -1372,12 +1372,12 @@ private:
   static constexpr Real identityCoords[N2] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
   template <class T2>
-  friend void dataStore(std::ostream &, RankTwoTensorTempl<T2> &, std::any);
+  friend void dataStore(std::ostream &, RankTwoTensorTempl<T2> &, Moose::AnyPointer);
 
   using libMesh::TensorValue<T>::_coords;
 
   template <class T2>
-  friend void dataLoad(std::istream &, RankTwoTensorTempl<T2> &, std::any);
+  friend void dataLoad(std::istream &, RankTwoTensorTempl<T2> &, Moose::AnyPointer);
   template <class T2>
   friend class RankFourTensorTempl;
   template <class T2>
