@@ -6,8 +6,7 @@
 []
 
 [Problem]
-  type = MFEMProblem
-  eigenproblem = true
+  type = MFEMEigenproblem
   num_modes = 5
 []
 
@@ -51,7 +50,7 @@
 [Solver]
   type = MFEMHypreLOBPCG
   preconditioner = boomeramg
-  print_level = 0
+  print_level = 1
   coefficient = 1.0
   l_tol = 1e-8
   l_max_its = 200
