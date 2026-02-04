@@ -494,15 +494,20 @@ CSGBase::checkRegionSurfaces(const CSGRegion & region) const
   auto & surfs = region.getSurfaces();
   for (const CSGSurface & s : surfs)
   {
-    auto sname = s.getName();
-    // if there is no surface by this name at all, there will be an error from getSurface
-    const auto & list_surf = _surface_list.getSurface(s.getName());
-    // if there is a surface by the same name, check that it is actually the surface being used
-    // (ie same surface points to same location in memory)
-    if (&s != &list_surf)
-      mooseError("Region is being set with a surface named " + sname +
+    if (!checkSurfaceInBase(s))
+      mooseError("Region is being set with a surface named " + s.getName() +
                  " that is different from the surface of the same name in the CSGBase instance.");
   }
+}
+
+bool
+CSGBase::checkSurfaceInBase(const CSGSurface & surface) const
+{
+  auto name = surface.getName();
+  // if no surface by this name exists, an error will be produced by getSurface
+  auto & list_surf = _surface_list.getSurface(name);
+  // return whether that the surface in the list is the same as the surface provided (in memory)
+  return &surface == &list_surf;
 }
 
 bool

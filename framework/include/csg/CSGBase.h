@@ -600,6 +600,9 @@ private:
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;
 
+  // check that surface being accessed is a part of this CSGBase instance
+  bool checkSurfaceInBase(const CSGSurface & surface) const;
+
   // check that cell being accessed is a part of this CSGBase instance
   bool checkCellInBase(const CSGCell & cell) const;
 
