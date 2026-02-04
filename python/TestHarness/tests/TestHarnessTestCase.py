@@ -19,6 +19,7 @@ from mock import patch
 from copy import deepcopy
 from TestHarness import TestHarness
 from TestHarness import util
+from TestHarness import capability_util
 from TestHarness.schedulers.Job import Job
 import pyhit
 
@@ -30,10 +31,10 @@ class TestHarnessTestCase(unittest.TestCase):
     """
     TestCase class for running TestHarness commands.
     """
-    # Cache for util.getCapabilities
+    # Cache for util.getAppCapabilities
     CAPABILITIES_CACHE = {}
-    # Original method for util.getCapabilities to call during the patch
-    ORIG_GET_CAPABILITIES = util.getCapabilities
+    # Original method for util.getAppCapabilities to call during the patch
+    ORIG_GET_APP_CAPABILITIES = capability_util.getAppCapabilities
     # Cache for runTestsCached()
     RUN_TESTS_CACHED_CACHE: dict[str, 'RunTestsResult'] = {}
 
@@ -51,13 +52,16 @@ class TestHarnessTestCase(unittest.TestCase):
         # with the same arguments more than once. The first time with
         # a given exe, it'll run the app. Every time after
         # that, it'll use the cache
-        def get_capabilities_cached(exe):
+        def get_app_capabilities_cached(exe):
             cache = TestHarnessTestCase.CAPABILITIES_CACHE
             if exe not in cache:
-                result = TestHarnessTestCase.ORIG_GET_CAPABILITIES(exe)
+                result = TestHarnessTestCase.ORIG_GET_APP_CAPABILITIES(exe)
                 cache[exe] = result
             return cache[exe]
-        patcher = patch.object(util, 'getCapabilities', wraps=get_capabilities_cached)
+
+        patcher = patch.object(
+            capability_util, "getAppCapabilities", wraps=get_app_capabilities_cached
+        )
         self.addCleanup(patcher.stop)
         self.mock_run_cmd = patcher.start()
 

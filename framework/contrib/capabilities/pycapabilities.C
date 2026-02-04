@@ -137,7 +137,11 @@ addCapabilities(CapabilityUtils::Registry & registry, PyObject * capabilities_di
       {
         auto enumeration_string = PyUnicode_AsUTF8(enumeration_item_obj);
         if (!enumeration_string)
+        {
+          Py_DECREF(enumeration_item_obj);
+          Py_DECREF(enumeration_iter);
           return type_error("'enumeration' value is not a string");
+        }
         enumeration.emplace_back(enumeration_string);
         Py_DECREF(enumeration_item_obj);
       }
@@ -233,30 +237,37 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
 {
   // Parse arguments
   const char * requirement = nullptr;
-  PyObject * extra_capabilities = Py_None;
-  static const char * kwlist[] = {"requirement", "extra_capabilities", nullptr};
-  if (!PyArg_ParseTupleAndKeywords(
-          args, kwargs, "s|O", const_cast<char **>(kwlist), &requirement, &extra_capabilities))
-    return returnPythonError(
-        PyExc_ValueError,
-        "Capabilities.check(requirement: str, extra_capabilities: Optional[dict] = None)");
+  PyObject * add_capabilities = Py_None;
+  PyObject * negate_capabilities = Py_None;
+  static const char * kwlist[] = {
+      "requirement", "add_capabilities", "negate_capabilities", nullptr};
+  if (!PyArg_ParseTupleAndKeywords(args,
+                                   kwargs,
+                                   "s|OO",
+                                   const_cast<char **>(kwlist),
+                                   &requirement,
+                                   &add_capabilities,
+                                   &negate_capabilities))
+    return returnPythonError(PyExc_ValueError,
+                             "Capabilities.check(requirement: str, add_capabilities: "
+                             "Optional[dict] = None, negate_capabilities: Iterable[str]] = None)");
 
-  // Possible copy of the registry, needed when we want to add extra capabilities
+  // Possible copy of the registry for when we need to augment it
   std::unique_ptr<CapabilityUtils::Registry> registry_copy;
 
   // If adding extra capabilities, copy construct the registry and add
   // the extra capabilities to the copy
-  if (extra_capabilities != Py_None)
+  if (add_capabilities != Py_None)
   {
-    if (!PyDict_Check(extra_capabilities))
-      returnPythonError(PyExc_TypeError, "extra_capabilities must be a dict");
+    if (!PyDict_Check(add_capabilities))
+      return returnPythonError(PyExc_TypeError, "add_capabilities must be a dict");
 
     registry_copy = std::make_unique<CapabilityUtils::Registry>();
     *registry_copy = self->state->registry;
 
     try
     {
-      addCapabilities(*registry_copy, extra_capabilities);
+      addCapabilities(*registry_copy, add_capabilities);
     }
     catch (const CapabilityUtils::CapabilityException & e)
     {
@@ -270,8 +281,64 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
     }
   }
 
-  // Use the copied registry (with extra values) if extra capabilities
-  // provided, otherwise use the stateful registry
+  // If negating capabilities, copy construct (if not already)
+  // the registry and negate the capability values
+  if (negate_capabilities != Py_None)
+  {
+    if (!registry_copy)
+    {
+      registry_copy = std::make_unique<CapabilityUtils::Registry>();
+      *registry_copy = self->state->registry;
+    }
+
+    auto iter = PyObject_GetIter(negate_capabilities);
+    if (!iter)
+      returnPythonError(PyExc_TypeError, "'negate_capabilities' not iterable");
+
+    PyObject * obj;
+    while ((obj = PyIter_Next(iter)))
+    {
+      auto name_obj = PyUnicode_AsUTF8(obj);
+      if (!name_obj)
+      {
+        Py_DECREF(obj);
+        return returnPythonError(PyExc_TypeError, "'negate_capabilities' entry not a string");
+      }
+      const std::string name = name_obj;
+      Py_DECREF(obj);
+
+      auto capability_ptr = query(*registry_copy, name);
+
+      try
+      {
+        // If the capability exists, negate it (set to false)
+        if (capability_ptr)
+          capability_ptr->negateValue();
+        // If it doesn't exist, just add it
+        else
+          CapabilityUtils::add(*registry_copy, name, false, "Negated capability");
+      }
+      catch (const CapabilityUtils::CapabilityException & e)
+      {
+        PyErr_SetString(CapabilityExceptionObject, e.what());
+        Py_DECREF(iter);
+        return nullptr;
+      }
+      catch (const std::exception & e)
+      {
+        PyErr_SetString(PyExc_RuntimeError, e.what());
+        Py_DECREF(iter);
+        return nullptr;
+      }
+    }
+
+    Py_DECREF(iter);
+    if (PyErr_Occurred())
+      return nullptr;
+  }
+
+  // Use the copied registry if we're adding and/or negating capabilities,
+  // otherwise use the stored registry
   auto & registry = registry_copy ? *registry_copy : self->state->registry;
 
   // Run the check

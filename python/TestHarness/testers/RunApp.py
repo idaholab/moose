@@ -10,6 +10,7 @@
 import re, os, shutil
 from Tester import Tester
 from TestHarness import util, TestHarness
+from TestHarness.capability_util import addAugmentedCapability
 from shlex import quote
 from typing import Optional
 import json
@@ -470,25 +471,23 @@ class RunApp(Tester):
         augmented_capabilities = super().getAugmentedCapabilities(options)
 
         def augment_capability(*args, **kwargs):
-            util.addAugmentedCapability(
+            addAugmentedCapability(
                 options._capabilities.values, augmented_capabilities, *args, **kwargs
             )
 
-        # NOTE: If you add to this list, add the capability name to
-        # Moose::reserved_augmented_capabilities in Capabilities.C
+        # NOTE: If you add to this list, add in Capabilities.C to
+        # Moose::reserved_augmented_capabilities
         augment_capability(
             "mpi_procs",
             self.getProcs(options),
             "Number of MPI processes",
-            None,
-            True,
+            explicit=True,
         )
         augment_capability(
             "num_threads",
             self.getThreads(options),
             "Number of threads",
-            None,
-            True,
+            explicit=True,
         )
 
         return augmented_capabilities

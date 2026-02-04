@@ -15,74 +15,55 @@ from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness import TestHarness
 from TestHarness.StatusSystem import StatusSystem
-from TestHarness.util import getPlatform
+from TestHarness.util import getPlatform, getMachine
+from TestHarness.capability_util import parseRequiredCapabilities
 
-
+MACHINE = getMachine()
+PLATFORM = getPlatform()
 class TestRequireCapability(TestHarnessTestCase):
     """Test the --only-tests-that-require option."""
 
-    def testTestHarnessBuildRequiredCapabilities(self):
-        """Test TestHarness.buildRequiredCapabilities()."""
-        # Not registered
-        with self.assertRaisesRegex(
-            SystemExit, 'Required capability "bar" is not registered'
-        ):
-            TestHarness.buildRequiredCapabilities(["foo"], ["bar"])
-
-        # True value -> false augmented value
-        res = TestHarness.buildRequiredCapabilities(["foo"], ["foo"])
-        self.assertEqual(res, [("foo", False)])
-
-        # False value -> true augmented value
-        res = TestHarness.buildRequiredCapabilities(["foo"], ["!foo"])
-        self.assertEqual(res, [("foo", True)])
-
+    def testParseRequiredCapabilities(self):
+        """Test TestHarness.capability_util.parseRequiredCapabilities()."""
         # Has stripping
-        res = TestHarness.buildRequiredCapabilities(["foo"], ["  foo "])
-        self.assertEqual(len(res), 1)
-        self.assertEqual(res[0][0], "foo")
+        self.assertEqual(parseRequiredCapabilities([" foo", "bar  "]), ["foo", "bar"])
 
-        # Multiple
-        res = TestHarness.buildRequiredCapabilities(["foo", "bar"], ["foo", "!bar"])
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res[0], ("foo", False))
-        self.assertEqual(res[1], ("bar", True))
+        # Unallowed characters
+        with self.assertRaisesRegex(
+            ValueError, r"Capability 'foo!=\?' has unallowed characters"
+        ):
+            parseRequiredCapabilities(["foo!=?"])
+
+        # Works
+        self.assertEqual(parseRequiredCapabilities(["foo", "bar"]), ["foo", "bar"])
 
     def testTestHarnessOptions(self):
         """Test that the test harness will set the _required_capabilities option."""
-        # Not registered
-        with self.assertRaisesRegex(
-            SystemExit, 'Required capability "foo" is not registered'
-        ):
-            self.runTests("--only-tests-that-require", "foo", minimal_capabilities=True)
-
-        # Is registered and is set
+        # Single
         res = self.runTests(
             "--only-tests-that-require",
             "platform",
             minimal_capabilities=True,
             run=False,
         )
-        self.assertEqual(
-            res.harness.options._required_capabilities, [("platform", False)]
-        )
+        self.assertEqual(res.harness.options._required_capabilities, ["platform"])
 
         # Multiple
         res = self.runTests(
             "--only-tests-that-require",
-            "platform",
+            "hpc",
             "--only-tests-that-require",
-            "installation_type",
+            "machine",
             minimal_capabilities=True,
             run=False,
         )
         self.assertEqual(
             res.harness.options._required_capabilities,
-            [("platform", False), ("installation_type", False)],
+            ["hpc", "machine"],
         )
 
     def testTesterSkip(self):
-        """Test the Tester skipping tests based on --required-capabilities."""
+        """Test the Tester skipping tests with --only-tests-that-require."""
 
         def run_test(skip, require_capabilities, test_capabilities=None):
             test_name = "test"
@@ -106,35 +87,30 @@ class TestRequireCapability(TestHarnessTestCase):
             job = self.getJobWithName(res.harness, test_name)
             if skip:
                 self.assertEqual(job.getStatus(), StatusSystem.skip)
-                self.assertEqual(
-                    job.getCaveats(), set(["Missing required capabilities"])
-                )
+                self.assertEqual(job.getCaveats(), set(["!" + ", !".join(skip)]))
             else:
                 self.assertEqual(job.getStatus(), StatusSystem.finished)
 
-        # Capability is not in the test spec capabilities
-        run_test(True, ["platform"])
-        run_test(True, ["platform"], "machine")
-
-        # Capability is in the test spec capabilities
-        run_test(False, ["installation_type"], "installation_type=in_tree")
-
-        # Test spec has complex capabilities and still runs
+        # Single requirement, test has no capabilities
+        run_test(["foo"], ["foo"])
+        # Single requirement, test has capabilities but not the right one
+        run_test(["foo"], ["foo"], f"machine={MACHINE}")
+        # Single requirement, test has capabilities and the right one
+        run_test([], ["machine"], f"machine={MACHINE}")
+        # Single requirement, test has capabilities and the right one
+        run_test([], ["machine"], f"machine={MACHINE}")
+        # Two requirements, test has no capabilities
+        run_test(["foo", "bar"], ["foo", "bar"])
+        # Two requirements, test has one of them
+        run_test(["foo"], ["machine", "foo"], f"machine={MACHINE}")
+        # Two requirements, test has both of them
         run_test(
-            False,
-            ["installation_type"],
-            f"installation_type=in_tree & platform={getPlatform()}",
+            [], ["machine", "platform"], f"machine={MACHINE} & platform={PLATFORM}"
         )
-
-        # Multiple --only-tests-that-require
-        run_test(
-            False, ["installation_type", "platform"], "installation_type & platform"
-        )
-        run_test(
-            False,
-            ["installation_type", "platform"],
-            "installation_type & platform & compute_device",
-        )
+        # Requirement from a Tester augmented capability
+        # (mpi_procs is added in RunApp)
+        run_test(["mpi_procs"], ["mpi_procs"], f"machine={MACHINE}")
+        run_test([], ["mpi_procs"], "mpi_procs=1")
 
 
 if __name__ == "__main__":

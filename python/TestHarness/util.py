@@ -13,11 +13,9 @@ from mooseutils import colorText
 from collections import OrderedDict
 from dataclasses import dataclass
 import json
-import yaml
-import sys
 import threading
 import typing
-from typing import Optional, Union
+from typing import Optional
 import time
 
 ## Run a command and return the output, or ERROR: + output if retcode != 0
@@ -235,117 +233,6 @@ def outputHeader(header, ending=True):
     begin_sep = '#' * 80
     end_sep = f'{begin_sep}\n' if ending else ''
     return f'{begin_sep}\n{header}\n{end_sep}'
-
-def getCapabilities(exe):
-    """
-    Get capabilities JSON and compare it to the required capabilities
-    """
-    assert exe
-    try:
-        cmd = f'{exe} --show-capabilities'
-        output = runCommand(cmd, force_mpi_command=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f'ERROR: Failed to parse the application capabilities!')
-        print(f'Command ran: {cmd}\n')
-        print(outputHeader(f'Failed command output'))
-        print(e.stdout)
-        sys.exit(1)
-    return parseMOOSEJSON(output, '--show-capabilities')
-
-class CapabilityException(Exception):
-    """Exception for when a capability check fails."""
-
-    pass
-
-
-def checkCapabilities(
-    capabilities: "pycapabilities.Capabilities",
-    required: str,
-    extra: dict,
-    certain: bool,
-):
-    """
-    Check a capability requirement against known capabilities.
-
-    Arguments:
-    ---------
-    capabilities : pycapabilities.Capabilities
-        The built application capabilities.
-    required : str
-        The capability expression to check.
-    extra : dict
-        Extra capabilities to add to the registry during the check.
-    certain : bool
-        If True, don't allow a possible pass.
-    """
-    import pycapabilities
-
-    try:
-        status, _, _ = capabilities.check(required, extra)
-    except pycapabilities.CapabilityException as e:
-        raise CapabilityException(e)
-
-    success = status == pycapabilities.CERTAIN_PASS or (
-        status == pycapabilities.POSSIBLE_PASS and not certain
-    )
-    return success
-
-
-def addAugmentedCapability(
-    capabilities: dict,
-    augmented_capabilities: dict,
-    name: str,
-    value: Optional[Union[bool, str, int]],
-    doc: str,
-    enumeration: Optional[list[str]] = None,
-    explicit: Optional[bool] = None,
-):
-    """Append a runtime augmented capability."""
-    assert isinstance(capabilities, dict)
-    assert isinstance(name, str)
-    assert isinstance(value, (bool, str, int, type(None)))
-    assert isinstance(doc, str)
-    assert isinstance(enumeration, (list, type(None)))
-    assert isinstance(explicit, (bool, type(None)))
-
-    # Names must be lowercase
-    name = name.lower()
-
-    # Allow "none" to mean a bool capability with value False
-    if value is None:
-        value = False
-    # String values must be lowercase
-    elif isinstance(value, str):
-        value = value.lower()
-
-    if isinstance(enumeration, list):
-        assert isinstance(value, (str)), "Enumeration only valid for str capabilities"
-        assert all(
-            isinstance(v, str) for v in enumeration
-        ), "Enumeration values not strs"
-        enumeration = [v.lower() for v in enumeration]
-
-    if name in capabilities:
-        raise ValueError(
-            f"Capability {name} is defined by the app, but it is a reserved "
-            "dynamic test harness capability. This is an application bug."
-        )
-    if name in augmented_capabilities:
-        raise ValueError(
-            f"Capability {name} is already defined as an augmented capability."
-        )
-
-    entry = {
-        "doc": doc,
-        "value": value,
-    }
-    if enumeration is not None:
-        entry["enumeration"] = enumeration
-    if explicit is not None:
-        entry["explicit"] = explicit
-
-    augmented_capabilities[name] = entry
-
 
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off

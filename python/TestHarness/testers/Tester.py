@@ -11,6 +11,7 @@ import re, os, sys, shutil, json, importlib.util, inspect
 import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
+from TestHarness.capability_util import CapabilityException, checkAppCapabilities
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
 from FactorySystem.MooseObject import MooseObject
 from FactorySystem.InputParameters import InputParameters
@@ -791,6 +792,77 @@ class Tester(MooseObject, OutputInterface):
         assert self.specs["capabilities"], "Shouldn't run without capabilities"
         return {}
 
+    def checkCapabilities(self, options) -> Optional[str]:
+        """
+        Perform a check of the capabilities and required capabilities.
+
+        Returns
+        -------
+        Optional[str]:
+            A reason the check failed, if any.
+
+        """
+        if not self.specs["capabilities"]:
+            # If this test has no capabilities, it will not depend
+            # on anything in --only-tests-that-require
+            if options._required_capabilities:
+                return f"!{', !'.join(options._required_capabilities)}"
+            return None
+
+        # Add in augmented capabilities with options that are specific
+        # to this test (mpi_procs, num_threads, etc)
+        self._augmented_capabilities = self.getAugmentedCapabilities(options)
+
+        # Try to check the capabilities; this could fail if the
+        # capabilities string is bad or if the registry is bad
+        try:
+            present = checkAppCapabilities(
+                options._capabilities,
+                self.specs["capabilities"],
+                bool(self.specs["dynamic_capabilities"]),
+                add_capabilities=self._augmented_capabilities,
+            )
+        # Check failed, so add an error message to the Tester
+        # that has a file:line link to the "capabilities" param
+        except CapabilityException as e:
+            self.setStatus(self.error, "INVALID CAPABILITIES")
+            node = self.specs["_node"]
+            output = ""
+            if (filename := node.filename("capabilities")) or (
+                filename := node.filename()
+            ):
+                output += f"{filename}:"
+                if (line := node.line("capabilities")) or (line := node.line()):
+                    output += f"{line}:\n"
+                if fullpath := node.fullpath:
+                    output += f"{fullpath[1:]}/capabilities:\n"
+            output += f"{e}\n"
+            self.appendOutput(output)
+            return None
+
+        # Capabilities are missing
+        if not present:
+            return f"Need {self.specs['capabilities']}"
+
+        # Check required capabilities
+        if options._required_capabilities:
+            missing = []
+            for value in options._required_capabilities:
+                present = checkAppCapabilities(
+                    options._capabilities,
+                    self.specs["capabilities"],
+                    True,
+                    add_capabilities=self._augmented_capabilities,
+                    negate_capabilities=[value],
+                )
+                if present:
+                    missing.append(value)
+
+            if missing:
+                return f"!{', !'.join(missing)}"
+
+        return None
+
     # need something that will tell  us if we should try to read the result
     def checkRunnableBase(self, options):
         """
@@ -875,59 +947,8 @@ class Tester(MooseObject, OutputInterface):
             reasons["restep"] = "NO RESTEP"
 
         # Check for supported capabilities
-        capabilities_present = None
-        if self.specs["capabilities"]:
-            # Add in augmented capabilities with options that are specific
-            # to this test (mpi_procs, num_threads, etc)
-            self._augmented_capabilities = self.getAugmentedCapabilities(options)
-
-            try:
-                capabilities_present = util.checkCapabilities(
-                    options._capabilities,
-                    self.specs["capabilities"],
-                    self._augmented_capabilities,
-                    self.specs["dynamic_capabilities"],
-                )
-            except util.CapabilityException as e:
-                self.setStatus(self.error, "INVALID CAPABILITIES")
-                node = self.specs["_node"]
-                output = ""
-                if (filename := node.filename("capabilities")) or (
-                    filename := node.filename()
-                ):
-                    output += f"{filename}:"
-                    if (line := node.line("capabilities")) or (line := node.line()):
-                        output += f"{line}:\n"
-                    if fullpath := node.fullpath:
-                        output += f"{fullpath[1:]}/capabilities:\n"
-                output += f"{e}\n"
-                self.appendOutput(output)
-            else:
-                if not capabilities_present:
-                    reasons["missing_capabilities"] = (
-                        "Needs: " + self.specs["capabilities"]
-                    )
-
-        # Check for required capabilities
-        if options._required_capabilities:
-            assert capabilities is not None
-
-            missing = False
-            if capabilities_present is not None:
-                modified_capabilities = deepcopy(capabilities)
-                for k, v in options._required_capabilities:
-                    assert k in capabilities
-                    modified_capabilities[k][0] = v
-
-                modified_present = util.checkCapabilities(
-                    modified_capabilities, self.specs["capabilities"], certain=True
-                )[0]
-                missing = capabilities_present != modified_present
-
-            if not missing:
-                reasons["missing_required_capabilities"] = (
-                    "Missing required capabilities"
-                )
+        if capabilities_reason := self.checkCapabilities(options):
+            reasons["capabilities"] = capabilities_reason
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = [

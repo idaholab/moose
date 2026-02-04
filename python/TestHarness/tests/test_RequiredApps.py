@@ -42,7 +42,7 @@ class TestHarnessTester(TestHarnessTestCase):
         )
 
         out = result.output
-        self.assertRegex(out, r"test\.test[\s.]+\[NEEDS: FOOAPP\]\s+SKIP")
+        self.assertRegex(out, r"test\.test[\s.]+\[NEED FOOAPP\]\s+SKIP")
 
         self.checkStatus(result.harness, skipped=1)
 

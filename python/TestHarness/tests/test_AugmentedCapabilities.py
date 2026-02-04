@@ -19,23 +19,87 @@ from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness import TestHarness
 from TestHarness.util import getMachine, getPlatform
-
+from TestHarness.capability_util import addAugmentedCapability
 
 class TestAugmentedCapabilities(TestHarnessTestCase):
     """Test the augmentation of capabilities from the run time options."""
+
+    def testAddAugmentedCapability(self):
+        """Test TestHarness.capability_util.addAugmentedCapability."""
+        # Name converts to lowercase
+        augmented = {}
+        addAugmentedCapability({}, augmented, "FOO", None, "doc")
+        self.assertIn("foo", augmented)
+
+        # String value converts to lowercase
+        augmented = {}
+        addAugmentedCapability({}, augmented, "foo", "FOO", "doc")
+        self.assertEqual(augmented["foo"]["value"], "foo")
+
+        # Enumeration can only be used for string capabilities
+        with self.assertRaisesRegex(
+            AssertionError, "Enumeration only valid for str capabilities"
+        ):
+            addAugmentedCapability({}, {}, "foo", True, "doc", enumeration=["foo"])
+        with self.assertRaisesRegex(
+            AssertionError, "Enumeration only valid for str capabilities"
+        ):
+            addAugmentedCapability({}, {}, "foo", 0, "doc", enumeration=["foo"])
+
+        # Enumeration converted to lower
+        augmented = {}
+        addAugmentedCapability(
+            {}, augmented, "foo", "value", "doc", enumeration=["VALUE"]
+        )
+        self.assertEqual(augmented["foo"]["enumeration"], ["value"])
+
+        # Name already exists in main capabilities
+        with self.assertRaisesRegex(ValueError, "Capability foo is defined by the app"):
+            addAugmentedCapability({"foo": None}, {}, "foo", None, "doc")
+
+        # Name already exists in augmented capabilities
+        with self.assertRaisesRegex(
+            ValueError, "Capability foo is already defined as an augmented capability."
+        ):
+            addAugmentedCapability({}, {"foo": None}, "foo", None, "doc")
+
+        # Build a bool value
+        for value, expected_value in [(None, False), (False, False), (True, True)]:
+            augmented = {}
+            addAugmentedCapability({}, augmented, "foo", value, "somedoc")
+            self.assertEqual(
+                augmented, {"foo": {"doc": "somedoc", "value": expected_value}}
+            )
+
+        # Build a int value
+        for explicit in [None, False, True]:
+            augmented = {}
+            kwargs = {}
+            if explicit is not None:
+                kwargs["explicit"] = explicit
+            addAugmentedCapability({}, augmented, "foo", 1, "somedoc", **kwargs)
+            expected = {"foo": {"doc": "somedoc", "value": 1, **kwargs}}
+            self.assertEqual(augmented, expected)
+
+        # Build a string value
+        for enumeration in [None, ["bar", "baz"]]:
+            for explicit in [None, False, True]:
+                augmented = {}
+                kwargs = {}
+                if explicit is not None:
+                    kwargs["explicit"] = explicit
+                if enumeration is not None:
+                    kwargs["enumeration"] = enumeration
+                addAugmentedCapability({}, augmented, "foo", "bar", "somedoc", **kwargs)
+                expected = {"foo": {"doc": "somedoc", "value": "bar", **kwargs}}
+                self.assertEqual(augmented, expected)
 
     def testGetCapabilitiesMinimal(self):
         """Test TestHarness.getCapabilities() with --minimal-capabilities."""
         default_options = Namespace()
         default_options.minimal_capabilities = True
-        default_options.scaling = None
-        default_options.valgrind_mode = ""
-        default_options.enable_recover = None
-        default_options.enable_restep = None
-        default_options.all_tests = None
-        default_options.heavy_tests = None
-        default_options.compute_device = None
         default_options.only_tests_that_require = None
+        default_options.hpc = None
 
         def test_get_capabilities(
             check_capabilities: list[Tuple[str, Any]],
@@ -46,17 +110,18 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             for key, value in kwargs.items():
                 setattr(options, key, value)
 
-            capabilities, required_capabilities = TestHarness.getCapabilities(
-                options, None, None
+            capabilities, augmented_capabilities, required_capabilities = (
+                TestHarness.getCapabilities(options, None, None)
             )
-            self.assertIsInstance(capabilities, dict)
+            self.assertIsInstance(capabilities.values, dict)
+            self.assertIsInstance(augmented_capabilities, dict)
             self.assertIsInstance(required_capabilities, list)
             for capability, value in check_capabilities:
-                self.assertIn(capability, capabilities)
-                entry = capabilities[capability]
-                self.assertIsInstance(entry, list)
-                self.assertIsInstance(entry[1], str)
-                self.assertEqual(entry[0], value)
+                self.assertIn(capability, capabilities.values)
+                self.assertIn(capability, augmented_capabilities)
+                entry = capabilities.values[capability]
+                self.assertEqual(entry, augmented_capabilities[capability])
+                self.assertEqual(entry["value"], value)
             if check_required_capabilities is None:
                 self.assertEqual(len(required_capabilities), 0)
             else:
@@ -68,52 +133,24 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
 
         # Default case
         check_capabilities = [
-            ("scale_refine", False),
-            ("valgrind", False),
-            ("recover", False),
-            ("restep", False),
-            ("heavy", False),
-            ("compute_device", False),
+            ("hpc", False),
             ("machine", getMachine()),
             ("platform", getPlatform()),
-            ("installation_type", "in_tree"),
         ]
         test_get_capabilities(check_capabilities)
 
-        # -s, --scale
-        test_get_capabilities([("scale_refine", True)], scaling=True)
-
-        # --valgrind, --valgrind-heavy
-        test_get_capabilities([("valgrind", "normal")], valgrind_mode="NORMAL")
-        test_get_capabilities([("valgrind", "heavy")], valgrind_mode="HEAVY")
-
-        # --recover
-        test_get_capabilities([("recover", True)], enable_recover=True)
-
-        # --restep
-        test_get_capabilities([("restep", True)], enable_restep=True)
-
-        # --all-tests or --heavy
-        test_get_capabilities([("heavy", True)], all_tests=True)
-        test_get_capabilities([("heavy", True)], heavy_tests=True)
-
-        # --compute-device
-        test_get_capabilities([("compute_device", "foo")], compute_device="foo")
+        # --hpc
+        test_get_capabilities([("hpc", True)], hpc="foo")
 
         # --only-tests-that-require
         test_get_capabilities(
             [],
-            check_required_capabilities=[("platform", False)],
-            only_tests_that_require="platform",
-        )
-        test_get_capabilities(
-            [],
-            check_required_capabilities=[("platform", True)],
-            only_tests_that_require="!platform",
+            check_required_capabilities=[("machine", False)],
+            only_tests_that_require="machine",
         )
 
     def test(self):
-        """Test the augmentation of capabilities."""
+        """Test the augmentation of capabilities live."""
 
         @dataclass
         class TestCase:
@@ -130,7 +167,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                     "type": "RunApp",
                     "input": "unused",
                     "should_execute": False,
-                    "capabilities": f'"platform & {case.capabilities}"',
+                    "capabilities": f'"{case.capabilities}"',
                 }
                 if case.params:
                     test_spec[test_name].update(case.params)
@@ -152,41 +189,12 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                     job.getStatus(), job.skip if case.skip else job.finished
                 )
 
-        # Basic choices that match a command line option
-        for option in ["valgrind", "recover", "heavy", "restep"]:
-            # Option isn't set: capability '!option' will be ran and capability 'option' won't
-            run((f"!{option}", False), (option, True))
-            # Option is set: capability 'option' will be ran and capability '!option' won't
-            params = {"heavy": True} if option == "heavy" else {}
-            run(
-                (f"{option}", False, params),
-                (f"!{option}", True, params),
-                cli_args=[f"--{option}"],
-            )
+        # Augmented capability from TestHarness
+        bad_machine = "arm64" if getMachine() == "x86_64" else "arm64"
+        run((f"machine={bad_machine}", True), (f"machine={getMachine()}", False))
 
-        # Machine
-        run(("machine=foo", True), (f"machine={getMachine()}", False))
-
-        # Platform
-        run(("platform=foo", True), (f"platform={getPlatform()}", False))
-
-        # Installation type
-        run(("installation_type=installed", True), ("installation_type=in_tree", False))
-
-        # MPI procs
-        run(("mpi_procs>1", True), ("mpi_procs=1", False))
-        run(("mpi_procs>1", False), ("mpi_procs=1", True), cli_args=["-p", "2"])
-
-        # Num threads
-        run(("num_threads>1", True), ("num_threads=1", False))
-        run(
-            ("num_threads>1", False),
-            ("num_threads=1", True),
-            cli_args=["--n-threads", "2"],
-        )
-
-        # Device
-        run(("compute_device=cpu", False), ("compute_device=foo", True))
+        # Augmented capability from Tester (RunApp)
+        run(("mpi_procs=1", False), ("mpi_procs=2", True))
 
 
 if __name__ == "__main__":

@@ -42,9 +42,9 @@
     requirement = "The system shall support the output of single-lined test results with a user configurable format string"
     issues = '#30755'
   []
-  [min_ad_size]
+  [ad_size]
     type = PythonUnitTest
-    input = test_MinADSize.py
+    input = test_ADSize.py
     requirement = "The system shall restrict tests based on the available dual number derivative vector size"
   []
   [cyclic]

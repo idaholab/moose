@@ -83,7 +83,7 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 # capabilities python bindings
 #
 CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/capabilities
-capabilities_srcfiles := $(CAPABILITIES_DIR)/capabilities.C $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
+pycapabilities_srcfiles := $(CAPABILITIES_DIR)/pycapabilities.C $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
 
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
@@ -233,14 +233,14 @@ hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) $(CXXFLAGS) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB) $(hit_pad_LDFLAGS))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
-capabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)
-capabilities_LIB          := $(CAPABILITIES_DIR)/$(capabilities_LIBNAME)
-capabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/utils
-capabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
+pycapabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)
+pycapabilities_LIB          := $(CAPABILITIES_DIR)/$(pycapabilities_LIBNAME)
+pycapabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/utils
+pycapabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
 
-capabilities $(capabilities_LIB) : $(capabilities_srcfiles)
-	@echo "Building and linking $(capabilities_LIB)..."
-	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) $(LDFLAGS) -o $(capabilities_LIB))'
+pycapabilities $(pypycapabilities_LIB) : $(pycapabilities_srcfiles)
+	@echo "Building and linking $(pycapabilities_LIB)..."
+	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(pycapabilities_srcfiles) $(pycapabilities_COMPILEFLAGS) $(pycapabilities_LDFLAGS) $(LDFLAGS) -o $(pycapabilities_LIB))'
 
 #
 # gtest
@@ -559,7 +559,7 @@ prebuild:: | $(moose_config)
 	@-python3 $(FRAMEWORK_DIR)/../scripts/premake.py
 
 wasp_submodule_status $(moose_revision_header) $(moose_LIB): | prebuild
-moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(capabilities_LIB)
+moose: wasp_submodule_status $(moose_revision_header) $(moose_LIB) $(pycapabilities_LIB)
 
 # Check for support for process substitution, and if supported, we delete a known warning on MacOS from
 # the output because it is printed thousands of times
@@ -683,15 +683,15 @@ install_exodiff: all
 	@mkdir -p $(bin_install_dir)
 	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
-install_python:: $(pyhit_LIB) $(capabilities_LIB)
+install_python:: $(pyhit_LIB) $(pycapabilities_LIB)
 	@echo "Installing python utilities"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
 	@echo "Installing python library $(pyhit_LIB)"
 	@cp -f $(pyhit_LIB) $(python_install_dir)/
-	@echo "Installing python library $(capabilities_LIB)"
-	@cp -f $(capabilities_LIB) $(python_install_dir)/
+	@echo "Installing python library $(pycapabilities_LIB)"
+	@cp -f $(pycapabilities_LIB) $(python_install_dir)/
 
 install_harness: install_python
 	@echo "Installing TestHarness"

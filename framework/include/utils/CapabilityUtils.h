@@ -107,10 +107,8 @@ public:
    * @return Whether or not the capability is explicit.
    *
    * Explicit implies that the capability cannot be compared as a boolean.
-   *
-   * This is only valid for non-bool valued capabilities.
    */
-  bool getExplicit() const;
+  bool getExplicit() const { return _explicit; }
 
   /**
    * @return The enumeration, if set.
@@ -143,6 +141,15 @@ public:
    * This is only valid for string-valued capabilities.
    */
   Capability & setEnumeration(std::vector<std::string> && enumeration);
+
+  /**
+   * Negate a Capability value.
+   *
+   * This should only be used by the TestHarness when it
+   * needs to augment capabilities to check on if a check
+   * depeneds on a capability or not.
+   */
+  void negateValue();
 
   /**
    * @return The boolean capability value if it is a boolean.
@@ -197,8 +204,8 @@ private:
   /// The value the capability is set to
   CapabilityValue _value;
   /// Whether or not this capability must be compared explicitly
-  /// (not as a boolean check); only for non-bool values
-  std::optional<bool> _explicit;
+  /// (not as a boolean check)
+  bool _explicit;
   /// Possible enumeration for the capability, if any (string capabilities only)
   std::optional<std::vector<std::string>> _enumeration;
 };
@@ -214,7 +221,10 @@ typedef std::tuple<CheckState, std::string, std::string> Result;
  *
  * Will convert the capability name to lowercase.
  */
+///@{
 const Capability * query(const Registry & registry, std::string capability);
+Capability * query(Registry & registry, std::string capability);
+///@}
 
 /**
  * Add a capability to the registry.
@@ -237,7 +247,7 @@ Capability & add(Registry & registry,
  * @param capabilities The registry that contains the capabilities
  *
  * This method is exposed to Python within the capabilities_check method in
- * framework/contrib/capabilities/capabilities.C. This external method is used
+ * framework/contrib/capabilities/pycapabilities.C. This external method is used
  * significantly by the TestHarness to check capabilities for individual test specs.
  *
  * Additionally, this method is used by the MooseApp command line option

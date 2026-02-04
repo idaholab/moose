@@ -27,6 +27,8 @@ from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 from . import util
 from . import RaceChecker
+from TestHarness.capability_util import addAugmentedCapability, getAppCapabilities, parseRequiredCapabilities
+
 import pyhit
 
 # Directory the test harness is in
@@ -400,10 +402,10 @@ class TestHarness:
 
     @staticmethod
     def getCapabilities(
-            options: argparse.Namespace,
-            executable: Optional[str],
-            libmesh_dir: Optional[str]
-        ) -> Tuple["pycapabilities.Capabilities", dict, list[Tuple[str, bool]]]:
+        options: argparse.Namespace,
+        executable: Optional[str],
+        libmesh_dir: Optional[str],
+    ) -> Tuple["pycapabilities.Capabilities", dict, list[str]]:
         """
         Get the application capabilities.
 
@@ -434,19 +436,17 @@ class TestHarness:
             assert executable, "Executable not set for capabilities"
 
             with util.ScopedTimer(0.5, 'Parsing application capabilities'):
-               app_capabilities = util.getCapabilities(executable)
-
+               app_capabilities = getAppCapabilities(executable)
 
         augmented_capabilities = {}
 
         def augment(*args, **kwargs):
-            util.addAugmentedCapability(
+            addAugmentedCapability(
                 app_capabilities, augmented_capabilities, *args, **kwargs
             )
 
         # NOTE: If you add to this list, add in Capabilities.C to
-        # Moose::reserved_augmented_capabilities or
-        # Moose::reserved_replaced_capabilities
+        # Moose::reserved_augmented_capabilities
         augment("hpc", options.hpc is not None, "TestHarness --hpc option")
         augment(
             "machine",
@@ -486,10 +486,10 @@ class TestHarness:
         if isinstance(required_capabilities, str):
             required_capabilities = [required_capabilities]
         if required_capabilities:
-            required = TestHarness.buildRequiredCapabilities(
-                list(capabilities.values.keys()),
-                required_capabilities
-            )
+            try:
+                required = parseRequiredCapabilities(required_capabilities)
+            except Exception as e:
+                TestHarness.errorExit(f'--only-tests-that-require: {e}')
 
         return capabilities, augmented_capabilities, required
 
@@ -1234,7 +1234,7 @@ class TestHarness:
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match the given regular expression')
-        filtergroup.add_argument('--only-tests-that-require', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
+        filtergroup.add_argument('--only-tests-that-require', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
@@ -1441,26 +1441,6 @@ class TestHarness:
             if host in hostname:
                 return config
         return None
-
-    @staticmethod
-    def buildRequiredCapabilities(registered: list[str],
-                                  required: list[str]) -> list[Tuple[str, bool]]:
-        """
-        Helper for setting up the required capabilities.
-        """
-        assert isinstance(registered, list)
-        assert isinstance(required, list)
-
-        result = []
-        for v in required:
-            assert isinstance(v, str)
-            v = v.strip()
-            is_false = v[0] == '!'
-            capability = v[1:] if is_false else v
-            if capability not in registered:
-                TestHarness.errorExit(f'Required capability "{capability}" is not registered')
-            result.append((capability, is_false))
-        return result
 
     @staticmethod
     def errorExit(*args):

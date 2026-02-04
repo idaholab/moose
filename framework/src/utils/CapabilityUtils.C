@@ -12,6 +12,7 @@
 #include "CapabilityUtils.h"
 #include "MooseStringUtils.h"
 #include <regex>
+#include <utility>
 
 namespace CapabilityUtils
 {
@@ -19,12 +20,8 @@ namespace CapabilityUtils
 Capability::Capability(const std::string_view name,
                        const CapabilityValue & value,
                        const std::string_view doc)
-  : _name(name), _doc(doc), _value(value)
+  : _name(name), _doc(doc), _value(value), _explicit(false)
 {
-  // By default, allow boolean comparisons for non-bool values
-  if (!hasBoolValue())
-    _explicit = false;
-
   // Check name validity
   if (getName().empty())
     throw CapabilityException("Capability has empty name");
@@ -42,15 +39,6 @@ Capability::Capability(const std::string_view name,
           "String capability '" + getName() + "': value '" + *string_ptr +
           "' has unallowed characters; allowed characters = 'a-z, 0-9, _, ., -'");
   }
-}
-
-bool
-Capability::getExplicit() const
-{
-  if (hasBoolValue())
-    throw CapabilityException("Capability::getExplicit(): Capability '" + getName() +
-                              "' is bool-valued and cannot be queried as explicit");
-  return *_explicit;
 }
 
 const std::optional<std::vector<std::string>> &
@@ -100,8 +88,8 @@ Capability::setEnumeration(std::vector<std::string> && enumeration)
   }
 
   if (enumeration.empty())
-    throw CapabilityException(
-        "Capability::setEnumeration(): Enumeration is empty for capability '" + getName() + "'");
+    throw CapabilityException("Capability::setEnumeration(): Enumeration is empty for '" +
+                              getName() + "'");
 
   for (const auto & value : enumeration)
     if (!std::regex_match(value, std::regex("[a-z0-9_-]+")))
@@ -122,6 +110,14 @@ Capability::setEnumeration(std::vector<std::string> && enumeration)
                               " value not within enumeration");
 
   return *this;
+}
+
+void
+Capability::negateValue()
+{
+  _explicit = false;
+  _enumeration.reset();
+  _value = false;
 }
 
 const bool *
@@ -178,6 +174,12 @@ query(const Registry & registry, std::string capability)
   if (const auto it = registry.find(capability); it != registry.end())
     return &it->second;
   return nullptr;
+}
+
+Capability *
+query(Registry & registry, std::string capability)
+{
+  return const_cast<Capability *>(query(std::as_const(registry), capability));
 }
 
 Capability &

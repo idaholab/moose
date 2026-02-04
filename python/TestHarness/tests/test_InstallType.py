@@ -24,48 +24,22 @@ def buildTestSpecs(**kwargs) -> dict:
 class TestHarnessTester(TestHarnessTestCase):
     """Test using installation_type in capabilities."""
 
-    def testInstalledGood(self):
-        """Test a installation_type=installed spec and the app is installed."""
+    def testGood(self):
+        """Test a installation_type=in_tree spec and the app is in tree."""
         out = self.runTests(
             "--no-color",
-            extra_capabilities={"installation_type": ["installed", "unused doc"]},
-            tests=buildTestSpecs(capabilities="installation_type=installed"),
-            minimal_capabilities=True,
+            tests=buildTestSpecs(capabilities="installation_type=in_tree"),
         ).output
         self.assertRegex(out, r"test\.test[\s.]+OK")
 
-    def testInstalledSkip(self):
-        """Test a installation_type=installed spec and the app is in tree."""
+    def testSkip(self):
+        """Test a installation_type=relocated spec and the app is in tree."""
         out = self.runTests(
             "--no-color",
-            extra_capabilities={"installation_type": ["in_tree", "unused doc"]},
-            tests=buildTestSpecs(capabilities="installation_type=installed"),
-            minimal_capabilities=True,
+            tests=buildTestSpecs(capabilities="installation_type=relocated"),
         ).output
         self.assertRegex(
-            out, r"test\.test[\s.]+\[NEEDS: INSTALLATION_TYPE=INSTALLED\]\s+SKIP"
-        )
-
-    def testInTreeGood(self):
-        """Test a installation_type=in_tree spec and the app is installed."""
-        out = self.runTests(
-            "--no-color",
-            extra_capabilities={"installation_type": ["in_tree", "unused doc"]},
-            tests=buildTestSpecs(capabilities="installation_type=in_tree"),
-            minimal_capabilities=True,
-        ).output
-        self.assertRegex(out, r"test\.test[\s.]+OK")
-
-    def testInTreeSkip(self):
-        """Test a installation_type=in_tree spec and the app is installed."""
-        out = self.runTests(
-            "--no-color",
-            extra_capabilities={"installation_type": ["installed", "unused doc"]},
-            tests=buildTestSpecs(capabilities="installation_type=in_tree"),
-            minimal_capabilities=True,
-        ).output
-        self.assertRegex(
-            out, r"test\.test[\s.]+\[NEEDS: INSTALLATION_TYPE=IN_TREE\]\s+SKIP"
+            out, r"test\.test[\s.]+\[NEED INSTALLATION_TYPE=RELOCATED\]\s+SKIP"
         )
 
 

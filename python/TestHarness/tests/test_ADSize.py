@@ -27,11 +27,11 @@ class TestHarnessTester(TestHarnessTestCase):
     def getADSize(self) -> int:
         """Get the application's AD size."""
         harness = self.runTests(tests=buildTestSpecs(), run=False).harness
-        ad_size = harness.options._capabilities["ad_size"][0]
+        ad_size = harness.options._capabilities.values["ad_size"]["value"]
         assert isinstance(ad_size, int)
         return ad_size
 
-    def testSkipLive(self):
+    def testSkip(self):
         """Test skipping when the ad_size is too small with a live app."""
         ad_size = self.getADSize()
         bad_ad_size = ad_size + 1
@@ -40,11 +40,9 @@ class TestHarnessTester(TestHarnessTestCase):
             tests=buildTestSpecs(capabilities=f"ad_size>{bad_ad_size}"),
             minimal_capabilities=False,
         ).output
-        self.assertRegex(
-            out, rf"test\.test[\s.]+\[NEEDS: AD_SIZE>{bad_ad_size}\]\s+SKIP"
-        )
+        self.assertRegex(out, rf"test\.test[\s.]+\[NEED AD_SIZE>{bad_ad_size}\]\s+SKIP")
 
-    def testGoodLive(self):
+    def testGood(self):
         """Test running when the ad_size is large enough with a live app."""
         ad_size = self.getADSize()
         good_ad_size = ad_size - 1
@@ -52,32 +50,6 @@ class TestHarnessTester(TestHarnessTestCase):
             "--no-color",
             tests=buildTestSpecs(capabilities=f"ad_size>{good_ad_size}"),
             minimal_capabilities=False,
-        ).output
-        self.assertRegex(out, r"test\.test[\s.]+OK")
-
-    def testSkip(self):
-        """Test skipping when the ad_size is too small without an app."""
-        ad_size = 10
-        bad_ad_size = ad_size + 1
-        out = self.runTests(
-            "--no-color",
-            extra_capabilities={"ad_size": [ad_size, "unused doc"]},
-            tests=buildTestSpecs(capabilities=f"ad_size>{bad_ad_size}"),
-            minimal_capabilities=True,
-        ).output
-        self.assertRegex(
-            out, rf"test\.test[\s.]+\[NEEDS: AD_SIZE>{bad_ad_size}\]\s+SKIP"
-        )
-
-    def testGood(self):
-        """Test running when the ad_size is large enough without an app."""
-        ad_size = 10
-        good_ad_size = ad_size - 1
-        out = self.runTests(
-            "--no-color",
-            extra_capabilities={"ad_size": [ad_size, "unused doc"]},
-            tests=buildTestSpecs(capabilities=f"ad_size>{good_ad_size}"),
-            minimal_capabilities=True,
         ).output
         self.assertRegex(out, r"test\.test[\s.]+OK")
 
