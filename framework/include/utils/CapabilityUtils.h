@@ -17,6 +17,9 @@
 #include <sstream>
 #include <tuple>
 #include <map>
+#include <vector>
+#include <optional>
+#include <string_view>
 
 /**
  * Shared code for the Capabilities Registry and the python bindings to the Capabilities system.
@@ -72,11 +75,160 @@ enum CheckState
 };
 
 /// A capability can have a bool, int, or string value
-typedef std::variant<bool, int, std::string> Type;
+typedef std::variant<bool, int, std::string> CapabilityValue;
+
+/**
+ * An entry for a single capability.
+ */
+class Capability
+{
+public:
+  Capability() = delete;
+  Capability(const std::string_view name,
+             const CapabilityValue & value,
+             const std::string_view doc);
+
+  /**
+   * @return The name of the capability.
+   */
+  const std::string & getName() const { return _name; }
+
+  /**
+   * @return The documentation string.
+   */
+  const std::string & getDoc() const { return _doc; }
+
+  /**
+   * @return The capability value.
+   */
+  const CapabilityValue & getValue() const { return _value; }
+
+  /**
+   * @return Whether or not the capability is explicit.
+   *
+   * Explicit implies that the capability cannot be compared as a boolean.
+   *
+   * This is only valid for non-bool valued capabilities.
+   */
+  bool getExplicit() const;
+
+  /**
+   * @return The enumeration, if set.
+   *
+   * This is only valid for string valued capabilities.
+   */
+  const std::optional<std::vector<std::string>> & getEnumeration() const;
+
+  /**
+   * @return Whether or not the capability has the given enumeration \p value.
+   *
+   * This is only valid for string-valued capabilities.
+   *
+   * If the capability has no enumerations, this will always return true.
+   */
+  bool hasEnumeration(const std::string & value) const;
+
+  /**
+   * Set the capability to be explicit.
+   *
+   * Explicit implies that the capability cannot be compared as a boolean.
+   *
+   * This is only valid for non-bool valued capabilities.
+   */
+  Capability & setExplicit();
+
+  /**
+   * Set the enumeration (allowed values) for the capability.
+   *
+   * This is only valid for string-valued capabilities.
+   */
+  Capability & setEnumeration(std::vector<std::string> && enumeration);
+
+  /**
+   * @return The boolean capability value if it is a boolean.
+   */
+  const bool * queryBoolValue() const;
+  /**
+   * @return The integer capability value if it is an integer.
+   */
+  const int * queryIntValue() const;
+  /**
+   * @return The string capability value if it is a string.
+   */
+  const std::string * queryStringValue() const;
+
+  /**
+   * @return Whether or not the capability value is a boolean.
+   */
+  bool hasBoolValue() const { return queryBoolValue(); }
+
+  /**
+   * @return Whether or not the capability value is an integer.
+   */
+  bool hasIntValue() const { return queryIntValue(); }
+
+  /**
+   * @return Whether or not the capability value is a string.
+   */
+  bool hasStringValue() const { return queryStringValue(); }
+
+  /**
+   * @return The capability value as a string.
+   */
+  std::string valueToString() const;
+
+  /**
+   * @return The capability as a string in the form of "name=value".
+   */
+  std::string toString() const;
+
+  /**
+   * @return The enumeration as a string of comma separated values.
+   *
+   * This is only valid for a capability that has an enumeration.
+   */
+  std::string enumerationToString() const;
+
+private:
+  /// The name of capability
+  std::string _name;
+  /// Description for the capability
+  std::string _doc;
+  /// The value the capability is set to
+  CapabilityValue _value;
+  /// Whether or not this capability must be compared explicitly
+  /// (not as a boolean check); only for non-bool values
+  std::optional<bool> _explicit;
+  /// Possible enumeration for the capability, if any (string capabilities only)
+  std::optional<std::vector<std::string>> _enumeration;
+};
+
+/// The registry that stores the registered capabilities
+typedef std::map<std::string, Capability, std::less<>> Registry;
+
 /// Result from a capability check: the state, the reason, and the documentation
 typedef std::tuple<CheckState, std::string, std::string> Result;
-/// The registry that stores the registered capabilities
-typedef std::map<std::string, std::pair<Type, std::string>> Registry;
+
+/**
+ * Query a Capability.
+ *
+ * Will convert the capability name to lowercase.
+ */
+const Capability * query(const Registry & registry, std::string capability);
+
+/**
+ * Add a capability to the registry.
+ *
+ * @param registry The registry
+ * @param capability The name of the capability
+ * @param value The value of the capability
+ * @param doc The documentation string
+ * @return The capability
+ */
+Capability & add(Registry & registry,
+                 const std::string_view name,
+                 const CapabilityUtils::CapabilityValue & value,
+                 const std::string_view doc);
 
 /**
  * Checks if a set of requirements is satisified by the given capability registry

@@ -784,9 +784,7 @@ class Job(OutputInterface):
 
     def getOutputDirectory(self):
         """ Get the directory for output for this job """
-        if not self.options.output_dir:
-            return self.getTestDir()
-        return os.path.join(self.options.output_dir, self.getTestName()[:-len(self.getTestNameShort())-1])
+        return self.__tester.getOutputDirectory(self.options)
 
     def createOutputDirectory(self):
         """ Create the output directory for this job, if needed """
@@ -804,13 +802,13 @@ class Job(OutputInterface):
                         self.setStatus(self.error, f'DIRECTORY CREATION FAILURE')
                         self.appendOutput(f'Failed to create Job directory {output_dir}')
 
-    def getOutputPathPrefix(self):
+    def getOutputPathPrefix(self) -> str:
         """
         Returns a file prefix that is unique to this job
 
         Should be used for all TestHarness produced files for this job
         """
-        return os.path.join(self.getOutputDirectory(), self.getTestNameForFile())
+        return self.__tester.getOutputPathPrefix(self.options)
 
     def hasSeperateOutput(self):
         """

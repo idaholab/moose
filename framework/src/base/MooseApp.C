@@ -56,6 +56,7 @@
 #include "FEProblemBase.h"
 #include "Parser.h"
 #include "CSGBase.h"
+#include "Capabilities.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -189,6 +190,10 @@ MooseApp::validParams()
       "--required-capabilities",
       "A list of conditions that is checked against the registered capabilities (see "
       "--show-capabilities). The executable will terminate early if the conditions are not met.");
+  params.addCommandLineParam<std::string>(
+      "testharness_capabilities",
+      "--testharness-capabilities",
+      "Path to JSON from the TestHarness that contains capabilities to be appended.");
   params.addCommandLineParam<std::string>(
       "check_capabilities",
       "--check-capabilities",
@@ -942,10 +947,14 @@ MooseApp::registerCapabilities()
           Moose::stringify(MOOSE_AD_MAX_DOFS_PER_ELEM) +
           ". Complex simulations with many variables or contact problems may require larger "
           "values. Reconfigure MOOSE with the --with-derivative-size=<n> option in the root of the "
-          "repository.");
+          "repository.")
+      .setExplicit();
+
   {
     const std::string method = QUOTE(METHOD);
-    addCapability("method", method, "The executable was built with METHOD=\"" + method + "\"");
+    addCapability("method", method, "The executable was built with METHOD=\"" + method + "\"")
+        .setExplicit()
+        .setEnumeration({"opt", "oprof", "devel", "dbg"});
   }
 
   {
@@ -1121,17 +1130,21 @@ MooseApp::registerCapabilities()
 #endif
   }
 
+  {
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-  addCapability("fparser", "jit", "FParser enabled with just in time compilation support.");
+    const auto value = "jit";
+    const auto doc = "FParser enabled with just in time compilation support.";
 #else
-  addCapability("fparser", "byte_code", "FParser enabled.");
+    const auto value = "byte_code";
+    const auto doc = "FParser enabled.";
 #endif
 #else
-  addCapability("fparser",
-                false,
-                "FParser is disabled, libMesh was likely configured with --disable-fparser.");
+    const auto value = false;
+    const auto doc = "FParser is disabled, libMesh was likely configured with --disable-fparser.";
 #endif
+    addCapability("fparser", value, doc);
+  }
 
 #ifdef LIBMESH_HAVE_DLOPEN
   addCapability(
@@ -1187,48 +1200,56 @@ MooseApp::registerCapabilities()
   }
 
   {
-    const auto doc = "libMesh default mesh mode";
 #ifdef LIBMESH_ENABLE_PARMESH
-    addCapability("mesh_mode", "distributed", doc);
+    const auto value = "distributed";
 #else
-    addCapability("mesh_mode", "replicated", doc);
+    const auto value = "replicated";
 #endif
+    addCapability("mesh_mode", value, "libMesh default mesh mode")
+        .setExplicit()
+        .setEnumeration({"distributed", "replicated"});
   }
 
   addCapability("dof_id_bytes",
                 static_cast<int>(sizeof(dof_id_type)),
                 "Degree of freedom (DOF) identifiers use " + Moose::stringify(sizeof(dof_id_type)) +
                     " bytes for storage. This is controlled by the "
-                    "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.");
+                    "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.")
+      .setExplicit();
 
   // compiler
   {
-    const auto doc = "Compiler used to build the MOOSE framework.";
+    auto doc = "Compiler used to build the MOOSE framework.";
 #if defined(__INTEL_LLVM_COMPILER)
-    addCapability("compiler", "intel", doc);
+    const auto value = "intel";
 #elif defined(__clang__)
-    addCapability("compiler", "clang", doc);
+    const auto value = "clang";
 #elif defined(__GNUC__) || defined(__GNUG__)
-    addCapability("compiler", "gcc", doc);
+    const auto value = "gcc";
 #elif defined(_MSC_VER)
-    addCapability("compiler", "msvc", doc);
+    const auto value = "msvc";
 #else
-    addCapability("compiler", false, "Unknown compiler");
+    const auto value = "unknown";
 #endif
+    addCapability("compiler", value, doc)
+        .setExplicit()
+        .setEnumeration({"intel", "clang", "gcc", "msvc", "unknown"});
   }
 
   // OS related
   {
-    const auto doc = "Operating system this executable is running on.";
 #ifdef __APPLE__
-    addCapability("platform", "darwin", doc);
+    const auto value = "darwin";
 #elif __WIN32__
-    addCapability("platform", "win32", doc);
+    const auto value = "win32";
 #elif __linux__
-    addCapability("platform", "linux", doc);
+    const auto value = "linux";
 #elif __unix__ // all unices not caught above
-    addCapability("platform", "unix", doc);
+    const auto value = "unix";
 #endif
+    addCapability("platform", value, "Operating system this executable is running on.")
+        .setExplicit()
+        .setEnumeration({"darwin", "win32", "linux", "unix"});
   }
 
   // Installation type (in tree or installed)
@@ -1263,7 +1284,9 @@ MooseApp::registerCapabilities()
         // install applications in app.mk
         const auto value =
             resolved_path.parent_path().filename() == "bin" ? "relocated" : "in_tree";
-        addCapability("installation_type", value, "The installation type of the application.");
+        addCapability("installation_type", value, "The installation type of the application.")
+            .setExplicit()
+            .setEnumeration({"relocated", "in_tree"});
       }
     }
   }
@@ -1404,6 +1427,28 @@ MooseApp::setupOptions()
   if (libMesh::command_line_value("--n-threads", 1) > 1)
     mooseError("You specified --n-threads > 1, but there is no threading model active!");
 #endif
+
+  // Augment capabilities from the TestHarness
+  if (isParamValid("testharness_capabilities"))
+  {
+    const auto & file_path = getParam<std::string>("testharness_capabilities");
+
+    std::ifstream file(file_path);
+    if (!file)
+      mooseError("--testharness-capabilities: Could not open '", file_path, "'");
+
+    nlohmann::json root;
+    try
+    {
+      file >> root;
+      Moose::Capabilities::getCapabilityRegistry().augment(root, {});
+    }
+    catch (const std::exception & e)
+    {
+      mooseError(
+          "--testharness-capabilities: Failed to load capabilities '", file_path, "':\n", e.what());
+    }
+  }
 
   // Build a minimal running application, ignoring the input file.
   if (getParam<bool>("minimal"))
@@ -2473,27 +2518,6 @@ MooseApp::runInputs()
   }
 
   return false;
-}
-
-void
-MooseApp::checkReservedCapability(const std::string & capability)
-{
-  // The list of these capabilities should match those within
-  // Tester.checkRunnableBase() in the TestHarness
-  static const std::set<std::string> reserved{"scale_refine",
-                                              "valgrind",
-                                              "recover",
-                                              "heavy",
-                                              "mpi_procs",
-                                              "num_threads",
-                                              "compute_device",
-                                              "restep",
-                                              "machine",
-                                              "library_mode"};
-  if (reserved.count(capability))
-    ::mooseError("MooseApp::addCapability(): The capability \"",
-                 capability,
-                 "\" is reserved and may not be registered by an application.");
 }
 
 void
@@ -3721,20 +3745,19 @@ MooseApp::outputMachineReadableData(const std::string & param,
     mooseError("Unable to open file `", filename, "` for writing ", param, " data to it.");
 }
 
-void
-MooseApp::addCapability(const std::string & capability,
-                        CapabilityUtils::Type value,
-                        const std::string & doc)
+CapabilityUtils::Capability &
+MooseApp::addCapability(const std::string_view capability,
+                        const CapabilityUtils::CapabilityValue & value,
+                        const std::string_view doc)
 {
-  checkReservedCapability(capability);
-  Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
-}
+  auto & cap = Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
 
-void
-MooseApp::addCapability(const std::string & capability, const char * value, const std::string & doc)
-{
-  checkReservedCapability(capability);
-  Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
+  if (Moose::reserved_augmented_capabilities.count(cap.getName()))
+    ::mooseError("MooseApp::addCapability(): The capability \"",
+                 cap.getName(),
+                 "\" is reserved and may not be registered by an application.");
+
+  return cap;
 }
 
 #ifdef MOOSE_MFEM_ENABLED
@@ -3750,9 +3773,12 @@ MooseApp::setMFEMDevice(const std::string & device_string, Moose::PassKey<MFEMPr
     _mfem_device->Print(Moose::out);
   }
   else if (!device_string.empty() && string_set != _mfem_devices)
-    mooseError("Attempted to configure with MFEM devices '",
+    mooseError("Attempted to configure with "
+               "MFEM devices '",
                MooseUtils::join(string_set, " "),
-               "', but we have already configured the MFEM device object with the devices '",
+               "', but we have already "
+               "configured the MFEM device "
+               "object with the devices '",
                MooseUtils::join(_mfem_devices, " "),
                "'");
 }

@@ -36,7 +36,7 @@
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
-#include "Capabilities.h"
+#include "CapabilityUtils.h"
 #include "MoosePassKey.h"
 #include "SystemInfo.h"
 #include "Syntax.h"
@@ -1163,13 +1163,18 @@ protected:
                                  const std::string & start_marker,
                                  const std::string & end_marker,
                                  const std::string & data) const;
-  ///@{ register a new capability
-  static void addCapability(const std::string & capability,
-                            CapabilityUtils::Type value,
-                            const std::string & doc);
-  static void
-  addCapability(const std::string & capability, const char * value, const std::string & doc);
-  //@}
+
+  /**
+   * Register a capability.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static CapabilityUtils::Capability & addCapability(const std::string_view capability,
+                                                     const CapabilityUtils::CapabilityValue & value,
+                                                     const std::string_view doc);
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;
@@ -1518,12 +1523,6 @@ private:
    * @return a Boolean value used to indicate whether the application should exit early
    */
   bool runInputs();
-
-  /**
-   * Helper that reports an error if the given capability is reserved and
-   * should not be added via addCapability().
-   */
-  static void checkReservedCapability(const std::string & capability);
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>

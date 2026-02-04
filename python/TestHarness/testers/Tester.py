@@ -99,16 +99,6 @@ class Tester(MooseObject, OutputInterface):
 
         # Test Filters
         params.addParam(
-            "platform",
-            ["ALL"],
-            "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')",
-        )
-        params.addParam(
-            "machine",
-            ["ALL"],
-            "A list of micro architectures for which this test will run on. ('ALL', 'X86_64', 'ARM64')",
-        )
-        params.addParam(
             "mesh_mode",
             ["ALL"],
             "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')",
@@ -231,9 +221,6 @@ class Tester(MooseObject, OutputInterface):
 
         # HPC
         params.addParam(
-            "hpc", True, "Set to false to not run with HPC schedulers (PBS and slurm)"
-        )
-        params.addParam(
             "hpc_mem_per_cpu", "Memory requirement per CPU to use for HPC submission"
         )
 
@@ -247,7 +234,7 @@ class Tester(MooseObject, OutputInterface):
             params.addParam(
                 param,
                 None,
-                f"Deprecated parameter; {help}" "with 'capabilities' param instead",
+                f"Deprecated parameter; {help} with 'capabilities' param instead",
             )
 
         return params
@@ -259,11 +246,13 @@ class Tester(MooseObject, OutputInterface):
         ("dof_id_bytes", "dof_id_bytes"),
         ("exodus_version", "exodus"),
         ("fparser_jit", "fparser"),
+        ("hpc", "hpc"),
         ("installation_type", "installation_type"),
         ("libpng", "libpng"),
         ("library_mode", "library_mode"),
         ("libtorch", "libtorch"),
         ("libtorch_version", "libtorch"),
+        ("machine", "machine"),
         ("min_ad_size", "ad_size"),
         ("max_ad_size", "ad_size"),
         ("method", "method"),
@@ -272,6 +261,7 @@ class Tester(MooseObject, OutputInterface):
         ("parmetis", "parmetis"),
         ("petsc_version", "petsc"),
         ("petsc_debug", "petsc_debug"),
+        ("platform", "platform"),
         ("pthreads", "threads"),
         ("ptscotch", "ptscotch"),
         ("slepc", "slepc"),
@@ -434,6 +424,8 @@ class Tester(MooseObject, OutputInterface):
                 "'capability' param instead; " + ", ".join(entries)
             )
             raise RuntimeError(message)
+
+        self._augmented_capabilities: Optional[dict] = None
 
     def getStatus(self):
         return self.test_status.getStatus()
@@ -794,8 +786,12 @@ class Tester(MooseObject, OutputInterface):
         code."""
         return exit_code == 0
 
-    # need something that will tell  us if we should try to read the result
+    def getAugmentedCapabilities(self, options) -> dict:
+        """Augment capabilities of the application with tester specs."""
+        assert self.specs["capabilities"], "Shouldn't run without capabilities"
+        return {}
 
+    # need something that will tell  us if we should try to read the result
     def checkRunnableBase(self, options):
         """
         Method to check for caveats that would prevent this tester from
@@ -805,23 +801,6 @@ class Tester(MooseObject, OutputInterface):
         """
         reasons = {}
         checks = options._checks
-
-        assert isinstance(options._capabilities, dict)
-
-        # augment capabilities of the application with specs of the current tester
-        capabilities = options._capabilities.copy()
-
-        def augment(key, val_doc):
-            if key in capabilities:
-                raise ValueError(
-                    f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug."
-                )
-            capabilities[key] = val_doc
-
-        # NOTE: If you add to this list, add the capability name as a reserved
-        # capability within MooseApp::checkReservedCapability()
-        augment("mpi_procs", [self.getProcs(options), "Number of MPI processes"])
-        augment("num_threads", [self.getThreads(options), "Number of threads"])
 
         # If something has already deemed this test a failure
         if self.isFail():
@@ -898,14 +877,36 @@ class Tester(MooseObject, OutputInterface):
         # Check for supported capabilities
         capabilities_present = None
         if self.specs["capabilities"]:
-            assert capabilities is not None
-            capabilities_present = util.checkCapabilities(
-                capabilities,
-                self.specs["capabilities"],
-                certain=self.specs["dynamic_capabilities"],
-            )[0]
-            if not capabilities_present:
-                reasons["missing_capabilities"] = "Needs: " + self.specs["capabilities"]
+            # Add in augmented capabilities with options that are specific
+            # to this test (mpi_procs, num_threads, etc)
+            self._augmented_capabilities = self.getAugmentedCapabilities(options)
+
+            try:
+                capabilities_present = util.checkCapabilities(
+                    options._capabilities,
+                    self.specs["capabilities"],
+                    self._augmented_capabilities,
+                    self.specs["dynamic_capabilities"],
+                )
+            except util.CapabilityException as e:
+                self.setStatus(self.error, "INVALID CAPABILITIES")
+                node = self.specs["_node"]
+                output = ""
+                if (filename := node.filename("capabilities")) or (
+                    filename := node.filename()
+                ):
+                    output += f"{filename}:"
+                    if (line := node.line("capabilities")) or (line := node.line()):
+                        output += f"{line}:\n"
+                    if fullpath := node.fullpath:
+                        output += f"{fullpath[1:]}/capabilities:\n"
+                output += f"{e}\n"
+                self.appendOutput(output)
+            else:
+                if not capabilities_present:
+                    reasons["missing_capabilities"] = (
+                        "Needs: " + self.specs["capabilities"]
+                    )
 
         # Check for required capabilities
         if options._required_capabilities:
@@ -1137,3 +1138,20 @@ class Tester(MooseObject, OutputInterface):
         """Get environment variables that should be augmented while running."""
         # Explicitly set OMP_NUM_THREADS to the number of threads
         return {"OMP_NUM_THREADS": f"{self.getThreads(options)}"}
+
+    def getOutputPathPrefix(self, options) -> str:
+        """
+        Returns a file prefix that is unique to this test
+
+        Should be used for all TestHarness produced files for this test
+        """
+        return os.path.join(self.getOutputDirectory(options), self.getTestNameForFile())
+
+    def getOutputDirectory(self, options):
+        """Get the directory for output for this job"""
+        if not options.output_dir:
+            return self.getTestDir()
+        return os.path.join(
+            options.output_dir,
+            self.getTestName()[: -len(self.getTestNameShort()) - 1],
+        )

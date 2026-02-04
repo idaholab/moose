@@ -11,112 +11,331 @@
 #include <Python.h>
 
 #include "CapabilityUtils.h"
-#include <string>
 
-static PyObject *
-capabilities_check(PyObject *self, PyObject *args)
+#include <memory>
+
+/*******************************************************************************/
+/* Python capabilities.CapabilityException                                     */
+/*******************************************************************************/
+
+static PyObject * CapabilityExceptionObject;
+
+/*******************************************************************************/
+/* Python capabilities helpers                                                 */
+/*******************************************************************************/
+
+void
+setPythonError(PyObject * exc, const std::string & message)
 {
-  // function arguments
-  const char *requirement;
-  PyObject *capdict;
-  if (!PyArg_ParseTuple(args, "sO", &requirement, &capdict))
-  {
-    PyErr_SetString(PyExc_ValueError,
-                    "capabilities.check requires two arguments, a requirements string and a "
-                    "dictionary with string keys and tuple values.");
-    return nullptr;
-  }
+  PyErr_SetString(exc, message.c_str());
+}
 
-  // make sure argument 2 is a dictionary
-  if (!PyDict_Check(capdict))
-  {
-    PyErr_SetString(PyExc_ValueError, "The second argument must be a dictionary.");
-    return nullptr;
-  }
+PyObject *
+returnPythonError(PyObject * exc, const std::string & message)
+{
+  setPythonError(exc, message);
+  return nullptr;
+}
 
-  // map to be populated
-  CapabilityUtils::Registry capabilities;
+/// Add capabilities to a Registry given a python dict representation
+static void
+addCapabilities(CapabilityUtils::Registry & registry, PyObject * capabilities_dict)
+{
+  if (!PyDict_Check(capabilities_dict))
+    return setPythonError(PyExc_ValueError, "Capabilities item must be a dictionary");
 
-  // get dictionary items
-  PyObject *items = PyDict_Items(capdict);
-  Py_ssize_t len = PyList_Size(items);
+  auto items = PyDict_Items(capabilities_dict);
+  const auto len = PyList_Size(items);
   for (Py_ssize_t i = 0; i < len; ++i)
   {
-    PyObject *item = PyList_GetItem(items, i);
-    // check if the item is a tuple
-    if (!PyTuple_Check(item) || PyTuple_Size(item) != 2)
-    {
-      PyErr_SetString(PyExc_ValueError,
-                      "Items of the capability dictionary myst be tuples (internal error).");
-      return nullptr;
-    }
-
-    PyObject *key_obj = PyTuple_GetItem(item, 0);
-    PyObject * value_doc = PyTuple_GetItem(item, 1);
+    auto item = PyList_GetItem(items, i);
+    auto item_key_obj = PyTuple_GetItem(item, 0);
+    auto item_value_obj = PyTuple_GetItem(item, 1);
 
     // ensure key is a string
-    if (!PyUnicode_Check(key_obj))
-    {
-      PyErr_SetString(PyExc_ValueError, "The dictionary keys must be strings.");
-      return nullptr;
-    }
-    const std::string key(PyUnicode_AsUTF8(key_obj));
+    auto name_string = PyUnicode_AsUTF8(item_key_obj);
+    if (!name_string)
+      return setPythonError(PyExc_TypeError, "The capability dictionary keys must be strings.");
+    const std::string name(name_string);
 
-    // split value_doc into value and doc string
-    if (!PyList_Check(value_doc) || PyList_Size(value_doc) != 2)
-    {
-      PyErr_SetString(PyExc_ValueError, "The dictionary values must be lists of length two.");
-      return nullptr;
-    }
-    PyObject * value = PyList_GetItem(value_doc, 0);
-    PyObject * doc_obj = PyList_GetItem(value_doc, 1);
+    // error helpers
+    const auto error_prefix = [&name]() { return "Capability '" + name + "': "; };
+    const auto type_error = [&error_prefix](const auto & message)
+    { return setPythonError(PyExc_TypeError, error_prefix() + message); };
+    const auto value_error = [&error_prefix](const auto & message)
+    { return setPythonError(PyExc_ValueError, error_prefix() + message); };
+    const auto key_error = [&error_prefix](const auto & message)
+    { return setPythonError(PyExc_KeyError, error_prefix() + message); };
 
-    // make sure doc is a string
-    if (!PyUnicode_Check(doc_obj))
-    {
-      PyErr_SetString(
-          PyExc_ValueError,
-          "The second list item in the dictionary values must be strings (documentation).");
-      return nullptr;
-    }
-    const std::string doc = PyUnicode_AsUTF8(doc_obj);
+    // check value dict
+    if (!PyDict_Check(item_value_obj))
+      return type_error("value is not a dictionary");
 
-    // determine value type
-    if (PyBool_Check(value))
-      capabilities[key] = {bool(PyObject_IsTrue(value)), doc};
-    else if (PyLong_Check(value))
-      capabilities[key] = {static_cast<int>(PyLong_AsLong(value)), doc};
-    else if (PyUnicode_Check(value))
-      capabilities[key] = {std::string(PyUnicode_AsUTF8(value)), doc};
+    // Helper for getting a key from the value dict
+    const auto query_key = [&item_value_obj](const auto & key)
+    {
+      const auto key_obj = PyUnicode_FromString(key);
+      return PyDict_Contains(item_value_obj, key_obj) ? PyDict_GetItem(item_value_obj, key_obj)
+                                                      : nullptr;
+    };
+
+    // 'doc' value
+    std::string doc;
+    if (auto doc_obj = query_key("doc"))
+    {
+      if (auto doc_string = PyUnicode_AsUTF8(doc_obj))
+        doc = doc_string;
+      else
+        return type_error("value 'doc' not a string");
+    }
     else
+      return key_error("missing key 'doc'");
+
+    // 'value' value
+    CapabilityUtils::CapabilityValue value;
+    if (auto value_obj = query_key("value"))
     {
-      PyErr_SetString(PyExc_ValueError, "The capability values must be Bool, Number, or Str.");
+      if (value_obj == Py_True)
+        value = true;
+      else if (value_obj == Py_False)
+        value = false;
+      else if (PyLong_Check(value_obj))
+        value = static_cast<int>(PyLong_AsLong(value_obj));
+      else if (auto value_string = PyUnicode_AsUTF8(value_obj))
+      {
+        value = std::string(value_string);
+      }
+      else
+        return setPythonError(PyExc_TypeError, error_prefix() + "value 'value' of unexpected type");
+    }
+    else
+      return key_error("missing key 'value'");
+
+    // add capability, checking for errors
+    auto & capability = CapabilityUtils::add(registry, name, value, doc);
+
+    // 'explicit' value
+    if (auto explicit_compare_obj = query_key("explicit"))
+    {
+      if (explicit_compare_obj == Py_True)
+        capability.setExplicit();
+      else if (explicit_compare_obj != Py_False)
+        return type_error("'explicit' value not a bool");
+    }
+
+    // enumeration entry
+    if (const auto enumeration_obj = query_key("enumeration"))
+    {
+      auto enumeration_iter = PyObject_GetIter(enumeration_obj);
+      if (!enumeration_iter)
+        return value_error("'enumeration' value not iterable");
+
+      std::vector<std::string> enumeration;
+
+      PyObject * enumeration_item_obj;
+      while ((enumeration_item_obj = PyIter_Next(enumeration_iter)))
+      {
+        auto enumeration_string = PyUnicode_AsUTF8(enumeration_item_obj);
+        if (!enumeration_string)
+          return type_error("'enumeration' value is not a string");
+        enumeration.emplace_back(enumeration_string);
+        Py_DECREF(enumeration_item_obj);
+      }
+      Py_DECREF(enumeration_iter);
+      if (PyErr_Occurred())
+        return value_error("failed to iterate through 'enumeration'");
+
+      capability.setEnumeration(std::move(enumeration));
+    }
+  }
+}
+
+/*******************************************************************************/
+/* Python capabilities.Capabilities object                                     */
+/*******************************************************************************/
+
+/// C++ state stored with a capabilities.Capabilities object
+struct CapabilitiesState
+{
+  CapabilityUtils::Registry registry;
+};
+
+/// Python state stored with a capabilities.Capabilities object
+typedef struct
+{
+  PyObject_HEAD CapabilitiesState * state;
+  PyObject * values;
+} CapabilitiesObject;
+
+/// Instantiate CapabilitiesState for a capabilities.Capabilities object
+static PyObject *
+Capabilities_new(PyTypeObject * type, PyObject * /* args */, PyObject * /* kwds */)
+{
+  auto * self = (CapabilitiesObject *)type->tp_alloc(type, 0);
+  if (!self)
+    return nullptr;
+
+  self->state = nullptr;
+  try
+  {
+    self->state = new CapabilitiesState();
+  }
+  catch (const std::bad_alloc &)
+  {
+    Py_DECREF(self);
+    PyErr_NoMemory();
+    return nullptr;
+  }
+  return (PyObject *)self;
+}
+
+/// capabilities.Capabilities.__init__()
+static int
+Capabilities_init(CapabilitiesObject * self, PyObject * args, PyObject * /* kwds */)
+{
+  // Parse arguments
+  PyObject * capabilities_dict = nullptr;
+  if (!PyArg_ParseTuple(args, "O!", &PyDict_Type, &capabilities_dict))
+  {
+    PyErr_SetString(PyExc_TypeError, "Capabilities expects a single dict argument");
+    return -1;
+  }
+
+  // Store the provided dict
+  Py_INCREF(capabilities_dict);
+  self->values = capabilities_dict;
+
+  // Clear registry on new init
+  self->state->registry.clear();
+
+  // Add each capability in the dict to the C++ Registry
+  try
+  {
+    addCapabilities(self->state->registry, capabilities_dict);
+  }
+  catch (const CapabilityUtils::CapabilityException & e)
+  {
+    PyErr_SetString(CapabilityExceptionObject, e.what());
+    return -1;
+  }
+  catch (const std::exception & e)
+  {
+    PyErr_SetString(PyExc_RuntimeError, e.what());
+    return -1;
+  }
+
+  return PyErr_Occurred() ? -1 : 0;
+}
+
+/// capabilities.Capabilities.check()
+static PyObject *
+Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs)
+{
+  // Parse arguments
+  const char * requirement = nullptr;
+  PyObject * extra_capabilities = Py_None;
+  static const char * kwlist[] = {"requirement", "extra_capabilities", nullptr};
+  if (!PyArg_ParseTupleAndKeywords(
+          args, kwargs, "s|O", const_cast<char **>(kwlist), &requirement, &extra_capabilities))
+    return returnPythonError(
+        PyExc_ValueError,
+        "Capabilities.check(requirement: str, extra_capabilities: Optional[dict] = None)");
+
+  // Possible copy of the registry, needed when we want to add extra capabilities
+  std::unique_ptr<CapabilityUtils::Registry> registry_copy;
+
+  // If adding extra capabilities, copy construct the registry and add
+  // the extra capabilities to the copy
+  if (extra_capabilities != Py_None)
+  {
+    if (!PyDict_Check(extra_capabilities))
+      returnPythonError(PyExc_TypeError, "extra_capabilities must be a dict");
+
+    registry_copy = std::make_unique<CapabilityUtils::Registry>();
+    *registry_copy = self->state->registry;
+
+    try
+    {
+      addCapabilities(*registry_copy, extra_capabilities);
+    }
+    catch (const CapabilityUtils::CapabilityException & e)
+    {
+      PyErr_SetString(CapabilityExceptionObject, e.what());
+      return nullptr;
+    }
+    catch (const std::exception & e)
+    {
+      PyErr_SetString(PyExc_RuntimeError, e.what());
       return nullptr;
     }
   }
 
+  // Use the copied registry (with extra values) if extra capabilities
+  // provided, otherwise use the stateful registry
+  auto & registry = registry_copy ? *registry_copy : self->state->registry;
+
+  // Run the check
   try
   {
-    // call capabilities C++ code with capabilities map
-    auto [status, message, doc] = CapabilityUtils::check(requirement, capabilities);
+    auto [status, message, doc] = CapabilityUtils::check(requirement, registry);
     return Py_BuildValue("(NNN)",
                          PyLong_FromLong(status),
                          PyUnicode_FromString(message.c_str()),
                          PyUnicode_FromString(doc.c_str()));
   }
+  catch (const CapabilityUtils::CapabilityException & e)
+  {
+    PyErr_SetString(CapabilityExceptionObject, e.what());
+    return nullptr;
+  }
   catch (const std::exception & e)
   {
-    PyErr_SetString(PyExc_ValueError, e.what());
+    PyErr_SetString(PyExc_RuntimeError, e.what());
     return nullptr;
   }
 }
 
-static PyMethodDef CapabilitiesMethods[] = {
-    {"check",
-     capabilities_check,
-     METH_VARARGS,
-     "Check a requirement against a capabilities dictionary."},
-    {nullptr, nullptr, 0, nullptr}};
+/// capabilities.Capabilities destruction
+static void
+Capabilities_dealloc(CapabilitiesObject * self)
+{
+  Py_XDECREF(self->values);
+  delete self->state;
+  self->state = nullptr;
+  Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+/// capabilities.Capabilities definition of methods
+static PyMethodDef Capabilities_methods[] = {{"check",
+                                              (PyCFunction)Capabilities_check,
+                                              METH_VARARGS | METH_KEYWORDS,
+                                              "Check a capability expression."},
+                                             {nullptr, nullptr, 0, nullptr}};
+
+/// capabilities.Capabilities definition of members
+static PyMemberDef Capabilities_members[] = {{"values",
+                                              Py_T_OBJECT_EX,
+                                              offsetof(CapabilitiesObject, values),
+                                              Py_READONLY,
+                                              "Capabilities dictionary"},
+                                             {nullptr}};
+
+/// capabilities.Capabilities definition
+static PyTypeObject CapabilitiesType = {
+    PyVarObject_HEAD_INIT(nullptr, 0).tp_name = "capabilities.Capabilities",
+    .tp_basicsize = sizeof(CapabilitiesObject),
+    .tp_itemsize = 0,
+    .tp_dealloc = (destructor)Capabilities_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = "Python representation of a MOOSE capability registry.",
+    .tp_methods = Capabilities_methods,
+    .tp_members = Capabilities_members,
+    .tp_init = (initproc)Capabilities_init,
+    .tp_new = Capabilities_new};
+
+/*******************************************************************************/
+/* Python capabilities module                                                  */
+/*******************************************************************************/
 
 PyDoc_STRVAR(capabilities_doc, "Interface to the Moose::Capabilities system.");
 
@@ -125,17 +344,38 @@ static struct PyModuleDef capabilitiesmodule = {
     "capabilities",   /* name of module */
     capabilities_doc, /* module documentation, may be nullptr */
     -1,               /* size of per-interpreter state of the module,
-                         or -1 if the module keeps state in global variables. */
-    CapabilitiesMethods};
+                         or -1 if the module keeps state in global variables. */};
 
 PyMODINIT_FUNC
 PyInit_capabilities(void)
 {
+  if (PyType_Ready(&CapabilitiesType) < 0)
+    return nullptr;
+
   auto module = PyModule_Create(&capabilitiesmodule);
+
+  // CapabilityException
+  CapabilityExceptionObject =
+      PyErr_NewException("capabilities.CapabilityException", PyExc_Exception, nullptr);
+  if (!CapabilityExceptionObject)
+  {
+    Py_DECREF(module);
+    return nullptr;
+  }
+  Py_INCREF(CapabilityExceptionObject);
+  PyModule_AddObject(
+      module, "CapabilityException", CapabilityExceptionObject); // steals a ref to CustomError
+
+  // CheckState constants
   PyModule_AddIntConstant(module, "CERTAIN_FAIL", 0);
   PyModule_AddIntConstant(module, "POSSIBLE_FAIL", 1);
   PyModule_AddIntConstant(module, "UNKNOWN", 2);
   PyModule_AddIntConstant(module, "POSSIBLE_PASS", 3);
   PyModule_AddIntConstant(module, "CERTAIN_PASS", 4);
+
+  // Capabilities object
+  Py_INCREF(&CapabilitiesType);
+  PyModule_AddObject(module, "Capabilities", (PyObject *)&CapabilitiesType);
+
   return module;
 }

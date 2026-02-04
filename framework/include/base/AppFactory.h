@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "MooseApp.h"
-#include "Capabilities.h"
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -214,6 +213,11 @@ private:
    */
   std::size_t getAppParamsID(const InputParameters & params) const;
 
+  /**
+   * Register an application name as a capability.
+   */
+  void registerAppCapability(const std::string & app_name);
+
   /// Private constructor for singleton pattern
   AppFactory() {}
 
@@ -236,6 +240,5 @@ AppFactory::reg(const std::string & name)
 
   _name_to_build_info[name] = std::make_unique<AppFactoryBuildInfo<T>>();
 
-  Moose::Capabilities::getCapabilityRegistry().add(
-      name, true, "MOOSE application " + name + " is available.");
+  registerAppCapability(name);
 }

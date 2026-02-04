@@ -11,13 +11,221 @@
 
 #include "CapabilityUtils.h"
 #include "MooseStringUtils.h"
-#include <vector>
+#include <regex>
 
 namespace CapabilityUtils
 {
 
+Capability::Capability(const std::string_view name,
+                       const CapabilityValue & value,
+                       const std::string_view doc)
+  : _name(name), _doc(doc), _value(value)
+{
+  // By default, allow boolean comparisons for non-bool values
+  if (!hasBoolValue())
+    _explicit = false;
+
+  // Check name validity
+  if (getName().empty())
+    throw CapabilityException("Capability has empty name");
+  if (!std::regex_match(getName(), std::regex("[a-z0-9_-]+")))
+    throw CapabilityException(
+        "Capability '" + getName() +
+        "': Name has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
+
+  // String value validity
+  if (const auto string_ptr = queryStringValue())
+  {
+    const std::regex string_regex("[a-z0-9_.-]+");
+    if (!std::regex_match(*string_ptr, string_regex))
+      throw CapabilityException(
+          "String capability '" + getName() + "': value '" + *string_ptr +
+          "' has unallowed characters; allowed characters = 'a-z, 0-9, _, ., -'");
+  }
+}
+
+bool
+Capability::getExplicit() const
+{
+  if (hasBoolValue())
+    throw CapabilityException("Capability::getExplicit(): Capability '" + getName() +
+                              "' is bool-valued and cannot be queried as explicit");
+  return *_explicit;
+}
+
+const std::optional<std::vector<std::string>> &
+Capability::getEnumeration() const
+{
+  if (!hasStringValue())
+    throw CapabilityException("Capability::getEnumeration(): Capability '",
+                              getName(),
+                              "' is not string-valued and cannot have an enumeration");
+  return _enumeration;
+}
+
+bool
+Capability::hasEnumeration(const std::string & value) const
+{
+  const auto & enumeration_ptr = getEnumeration();
+  if (!enumeration_ptr)
+    return true;
+  return std::find(enumeration_ptr->begin(), enumeration_ptr->end(), value) !=
+         enumeration_ptr->end();
+}
+
+Capability &
+Capability::setExplicit()
+{
+  if (hasBoolValue())
+    throw CapabilityException("Capability::setExplicit(): Capability '" + getName() +
+                              "' is bool-valued and cannot be set as explicit");
+  _explicit = true;
+  return *this;
+}
+
+Capability &
+Capability::setEnumeration(std::vector<std::string> && enumeration)
+{
+  const auto string_ptr = queryStringValue();
+  if (!string_ptr)
+    throw CapabilityException("Capability::setEnumeration(): Capability '" + getName() +
+                              "' is not string-valued and cannot have an enumeration");
+
+  if (_enumeration)
+  {
+    if (*_enumeration == enumeration)
+      return *this;
+    throw CapabilityException("Capability::setEnumeration(): Capability '" + getName() +
+                              "' already has an enumeration set");
+  }
+
+  if (enumeration.empty())
+    throw CapabilityException(
+        "Capability::setEnumeration(): Enumeration is empty for capability '" + getName() + "'");
+
+  for (const auto & value : enumeration)
+    if (!std::regex_match(value, std::regex("[a-z0-9_-]+")))
+      throw CapabilityException("Capability::setEnumeration(): Enumeration value '" + value +
+                                "' for capability '" + getName() + "'" +
+                                " has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
+
+  for (auto it = enumeration.begin(); it != enumeration.end(); ++it)
+    if (std::find(std::next(it), enumeration.end(), *it) != enumeration.end())
+      throw CapabilityException("Capability::setEnumeration(): Enumeration value '" + *it +
+                                "' for capability '" + getName() + "'" +
+                                " provided multiple times");
+
+  _enumeration = std::move(enumeration);
+
+  if (!hasEnumeration(*string_ptr))
+    throw CapabilityException("Capability::setEnumeration(): Capability " + toString() +
+                              " value not within enumeration");
+
+  return *this;
+}
+
+const bool *
+Capability::queryBoolValue() const
+{
+  return std::get_if<bool>(&_value);
+}
+
+const int *
+Capability::queryIntValue() const
+{
+  return std::get_if<int>(&_value);
+}
+
+const std::string *
+Capability::queryStringValue() const
+{
+  return std::get_if<std::string>(&_value);
+}
+
+std::string
+Capability::valueToString() const
+{
+  if (const auto bool_ptr = queryBoolValue())
+    return *bool_ptr ? "true" : "false";
+  if (const auto string_ptr = queryStringValue())
+    return *string_ptr;
+  if (const auto int_ptr = queryIntValue())
+    return std::to_string(*int_ptr);
+  throw CapabilityException("Capability::valueToString(): Invalid type");
+}
+
+std::string
+Capability::toString() const
+{
+  return getName() + "=" + valueToString();
+}
+
+std::string
+Capability::enumerationToString() const
+{
+  const auto & enumeration_ptr = getEnumeration();
+  if (!enumeration_ptr)
+    throw CapabilityException("Capability::enumerationToString(): Capability '",
+                              getName(),
+                              "' does not have an enumeration");
+  return MooseUtils::stringJoin(*enumeration_ptr, ", ");
+}
+
+const Capability *
+query(const Registry & registry, std::string capability)
+{
+  capability = MooseUtils::toLower(capability);
+  if (const auto it = registry.find(capability); it != registry.end())
+    return &it->second;
+  return nullptr;
+}
+
+Capability &
+get(Registry & registry, const std::string_view capability)
+{
+  if (const auto it = registry.find(capability); it != registry.end())
+    return it->second;
+  throw CapabilityException("Capability '" + std::string(capability) + "' not registered");
+}
+
+Capability &
+add(Registry & registry,
+    const std::string_view name,
+    const CapabilityUtils::CapabilityValue & value,
+    const std::string_view doc)
+{
+  auto it_pair = registry.lower_bound(name);
+  if (it_pair != registry.end() && it_pair->first == name)
+  {
+    auto & capability = it_pair->second;
+    if (capability.getValue() != value || capability.getDoc() != doc)
+      throw CapabilityException("Capability '" + std::string(name) +
+                                "' already exists and is not equal");
+    return capability;
+  }
+
+  return registry
+      .emplace_hint(it_pair,
+                    std::piecewise_construct,
+                    std::forward_as_tuple(name),
+                    std::forward_as_tuple(name, value, doc))
+      ->second;
+}
+
+[[noreturn]] void
+checkException(const peg::SemanticValues & vs,
+               const std::string & message,
+               const std::optional<CapabilityUtils::Capability> capability = {})
+{
+  std::string msg = "Capability statement '" + vs.token_to_string() + "': ";
+  if (capability)
+    msg += "capability '" + capability->toString() + "' ";
+  msg += message;
+  throw CapabilityException(msg);
+}
+
 Result
-check(std::string requirements, const Registry & app_capabilities)
+check(std::string requirements, const Registry & registry)
 {
   using namespace peg;
 
@@ -34,7 +242,7 @@ check(std::string requirements, const Registry & app_capabilities)
   if (requirements.length() == 0)
     return {CapabilityUtils::CERTAIN_PASS, "Empty requirements", ""};
 
-  parser parser(R"(
+  static parser parser(R"(
     Expression    <-  _ Bool _ LogicOperator _ Expression / Bool _
     Bool          <-  Comparison / '!' Bool / '!' Identifier / Identifier / '(' _ Expression _ ')'
     Comparison    <-  Identifier _ Operator _ Version / Identifier _ Operator _ String
@@ -66,10 +274,9 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 1: // Number
         return std::vector<int>{std::any_cast<int>(vs[0])};
-
-      default:
-        throw CapabilityException("Unknown Number match");
     }
+
+    checkException(vs, "unknown number match.");
   };
 
   enum LogicOperator
@@ -85,7 +292,7 @@ check(std::string requirements, const Registry & app_capabilities)
       return OP_AND;
     if (op == "|")
       return OP_OR;
-    throw CapabilityException("Unknown logic operator.");
+    checkException(vs, "unknown logic operator.");
   };
 
   enum Operator
@@ -113,29 +320,29 @@ check(std::string requirements, const Registry & app_capabilities)
       return OP_NOT_EQ;
     if (op == "=" || op == "==")
       return OP_EQ;
-    throw CapabilityException("Unknown operator '", op, "'.");
+    checkException(vs, "unknown operator.");
   };
 
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
   parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
 
-  parser["Comparison"] = [&app_capabilities](const SemanticValues & vs)
+  parser["Comparison"] = [&registry](const SemanticValues & vs)
   {
     const auto left = std::any_cast<std::string>(vs[0]);
     const auto op = std::any_cast<Operator>(vs[1]);
 
     // check existence
-    const auto it = app_capabilities.find(left);
-    if (it == app_capabilities.end())
+    const auto capability_ptr = query(registry, left);
+    if (!capability_ptr)
       // return an unknown if the capability does not exist, this is important as it
       // stays unknown upon negation
       return CheckState::UNKNOWN;
 
     // capability is registered by the app
-    const auto & [app_value, doc] = it->second;
+    const auto & capability = *capability_ptr;
 
     // explicitly false causes any comparison to fail
-    if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
+    if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
       return CheckState::CERTAIN_FAIL;
 
     // comparator
@@ -159,32 +366,32 @@ check(std::string requirements, const Registry & app_capabilities)
       return false;
     };
 
+    // version comparison
+    std::vector<int> app_value_version;
+
     switch (vs.choice())
     {
       case 0: // Identifier _ Operator _ Version
       {
         // int comparison
         const auto right = std::any_cast<std::vector<int>>(vs[2]);
-        if (std::holds_alternative<int>(app_value))
+        if (const auto int_ptr = capability.queryIntValue())
         {
           if (right.size() != 1)
-            throw CapabilityException("Expected an integer value in comparison");
+            checkException(vs, "cannot be compared to a version.", capability);
 
-          return comp(op, std::get<int>(app_value), right[0]) ? CheckState::CERTAIN_PASS
-                                                              : CheckState::CERTAIN_FAIL;
+          return comp(op, *int_ptr, right[0]) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
         }
 
-        // version comparison
-        std::vector<int> app_value_version;
+        const auto string_ptr = capability.queryStringValue();
+        if (!string_ptr)
+          checkException(vs,
+                         "cannot be compared to a " +
+                             std::string(right.size() == 1 ? "number" : "version_number") + ".",
+                         capability);
 
-        if (!std::holds_alternative<std::string>(app_value))
-          throw CapabilityException(
-              right.size() == 1 ? "Cannot compare capability " + left + " to a number."
-                                : "Cannot compare capability " + left + " to a version number.");
-
-        if (!MooseUtils::tokenizeAndConvert(
-                std::get<std::string>(app_value), app_value_version, "."))
-          throw CapabilityException("Expected a version number.");
+        if (!MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
+          checkException(vs, "cannot be compared to a version.", capability);
 
         // compare versions
         return comp(op, app_value_version, right) ? CheckState::CERTAIN_PASS
@@ -193,22 +400,45 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 1: // Identifier _ Operator _ String
       {
-        const auto right = std::any_cast<std::string>(vs[2]);
-        // the app value has to be a string
-        if (!std::holds_alternative<std::string>(app_value))
-          throw CapabilityException("Unexpected comparison to a string.");
+        // here we would check for valid options and throw if not valid
+        const auto right = MooseUtils::toLower(std::any_cast<std::string>(vs[2]));
+        // the capability value has to be a string
+        const auto string_ptr = capability.queryStringValue();
+        if (!string_ptr)
+          checkException(vs, "cannot be compared to a string.", capability);
 
-        return comp(op, std::get<std::string>(app_value), MooseUtils::toLower(right))
-                   ? CheckState::CERTAIN_PASS
-                   : CheckState::CERTAIN_FAIL;
+        // If this capability has an enumeration, make sure a valid choice is used
+        if (!capability.hasEnumeration(right))
+          checkException(vs,
+                         "'" + right + "' invalid for capability '" + left +
+                             "'; valid values: " + capability.enumerationToString());
+
+        // Capability is a version
+        if (MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
+          checkException(vs, "cannot be compared to a string.", capability);
+
+        return comp(op, *string_ptr, right) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
       }
     }
 
-    throw CapabilityException("Failed comparison.");
+    checkException(vs, "failed comparison.", capability);
   };
 
-  parser["Bool"] = [&app_capabilities](const SemanticValues & vs)
+  parser["Bool"] = [&registry](const SemanticValues & vs)
   {
+    // Helper for erroring of a capability doesn't support a boolean
+    const auto check_explicit = [&vs](const CapabilityUtils::Capability & capability)
+    {
+      if (capability.getExplicit())
+      {
+        std::string message = "capability '" + capability.getName() +
+                              "' requires a value and cannot be used in a boolean expression";
+        if (capability.hasStringValue() && capability.getEnumeration())
+          message += "; valid values: " + capability.enumerationToString();
+        checkException(vs, message);
+      }
+    };
+
     switch (vs.choice())
     {
       case 0: // Comparison
@@ -232,12 +462,12 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 2: // '!' Identifier
       {
-        const auto it = app_capabilities.find(std::any_cast<std::string>(vs[0]));
-        if (it != app_capabilities.end())
+        if (const auto capability_ptr = query(registry, std::any_cast<std::string>(vs[0])))
         {
-          const auto app_value = it->second.first;
-          if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
-            return CheckState::CERTAIN_PASS;
+          const auto & capability = *capability_ptr;
+          if (const auto bool_ptr = capability.queryBoolValue())
+            return *bool_ptr ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS;
+          check_explicit(capability);
           return CheckState::CERTAIN_FAIL;
         }
         return CheckState::POSSIBLE_PASS;
@@ -245,12 +475,12 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 3: // Identifier
       {
-        const auto it = app_capabilities.find(std::any_cast<std::string>(vs[0]));
-        if (it != app_capabilities.end())
+        if (const auto capability_ptr = query(registry, std::any_cast<std::string>(vs[0])))
         {
-          const auto app_value = it->second.first;
-          if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
-            return CheckState::CERTAIN_FAIL;
+          const auto & capability = *capability_ptr;
+          if (const auto bool_ptr = capability.queryBoolValue())
+            return *bool_ptr ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+          check_explicit(capability);
           return CheckState::CERTAIN_PASS;
         }
         return CheckState::POSSIBLE_FAIL;

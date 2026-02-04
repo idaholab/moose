@@ -20,6 +20,10 @@ Capabilities that are known _not_ to be supported should be explicitly registere
 
 When adding additional capabilities within your derived applications, you should utilize the
 `addCapability()` methods on `MooseApp` within `registerApps()` in your application.
+The `addCapability()` method returns a `Capability &`, to which you may also call:
+
+- `Capability::setExplicit()`: Set the capability to be explicit, which means that it cannot be used as a boolean in a check. That is, it must be compared explicitly with an equality or inequality operator. This is only valud for non-boolean valued capabilities.
+- `Capability::setEnumeration()`: Set a list of allowed values for the capability. This is only valid for string-valued capabilities.
 
 For example:
 
@@ -37,6 +41,17 @@ YourApp::registerApps()
 
   // Add a versioned capability
   addCapability("cool_library", "1.2.3", "Cool library is available");
+
+  // Add a capability with an enumeration
+  {
+#ifdef VALUE_IS_FOO
+    const auto value = "foo";
+#else
+    const auto value = "bar";
+#endif
+    addCapability("cool_value", value, "Something that is foo and bar");
+      .setEnumeration({"foo", "bar"});
+  }
 
   registerApp(YourApp);
 }

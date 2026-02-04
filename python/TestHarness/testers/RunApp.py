@@ -11,6 +11,8 @@ import re, os, shutil
 from Tester import Tester
 from TestHarness import util, TestHarness
 from shlex import quote
+from typing import Optional
+import json
 
 class RunApp(Tester):
 
@@ -234,9 +236,11 @@ class RunApp(Tester):
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
 
-        # add required capabilities
-        if specs['capabilities']:
-            cli_args.append('--required-capabilities="' + quote(specs['capabilities'])+'"')
+        if specs["capabilities"]:
+            cli_args += [
+                '--required-capabilities="' + quote(specs["capabilities"]) + '"',
+                f"--testharness-capabilities={self.getCapabilitiesFilePath(options)}",
+            ]
 
         if options.distributed_mesh and '--distributed-mesh' not in cli_args:
             # The user has passed the parallel-mesh option to the test harness
@@ -461,3 +465,47 @@ class RunApp(Tester):
             if self.specs.isValid(param):
                 return True
         return super().needFullOutput(options)
+
+    def getAugmentedCapabilities(self, options) -> dict:
+        augmented_capabilities = super().getAugmentedCapabilities(options)
+
+        def augment_capability(*args, **kwargs):
+            util.addAugmentedCapability(
+                options._capabilities.values, augmented_capabilities, *args, **kwargs
+            )
+
+        # NOTE: If you add to this list, add the capability name to
+        # Moose::reserved_augmented_capabilities in Capabilities.C
+        augment_capability(
+            "mpi_procs",
+            self.getProcs(options),
+            "Number of MPI processes",
+            None,
+            True,
+        )
+        augment_capability(
+            "num_threads",
+            self.getThreads(options),
+            "Number of threads",
+            None,
+            True,
+        )
+
+        return augmented_capabilities
+
+    def getCapabilitiesFilePath(self, options) -> str:
+        return f"{self.getOutputPathPrefix(options)}_testharness_capabilities.json"
+
+    def prepare(self, options):
+        super().prepare(options)
+
+        # Dump the augmented capabilities, if any
+        if self.specs["capabilities"]:
+            # Capabilities from this Tester's specs in addition
+            # to capabilities from the global options
+            capabilities = (
+                self._augmented_capabilities | options._augmented_capabilities
+            )
+            capabilities_file = self.getCapabilitiesFilePath(options)
+            with open(capabilities_file, "w") as f:
+                json.dump(capabilities, f)

@@ -18,6 +18,14 @@
 namespace Moose
 {
 
+const std::set<std::string> reserved_augmented_capabilities{// TestHarness.getCapabilities()
+                                                            "hpc",
+                                                            "machine",
+                                                            "library_mode",
+                                                            // RunApp.getAugmentedCapabilities()
+                                                            "mpi_procs",
+                                                            "num_threads"};
+
 Capabilities &
 Capabilities::getCapabilityRegistry()
 {
@@ -29,51 +37,35 @@ Capabilities::getCapabilityRegistry()
   return *capability_registry;
 }
 
-void
-Capabilities::add(const std::string & raw_capability,
-                  CapabilityUtils::Type value,
-                  const std::string & doc)
+CapabilityUtils::Capability &
+Capabilities::add(const std::string_view capability,
+                  const CapabilityUtils::CapabilityValue & value,
+                  const std::string_view doc)
 {
-  const auto capability = MooseUtils::toLower(raw_capability);
-  if (std::holds_alternative<std::string>(value))
-    value = MooseUtils::toLower(std::get<std::string>(value));
-
-  auto it_pair = _capability_registry.lower_bound(capability);
-  if (it_pair == _capability_registry.end() || it_pair->first != capability ||
-      it_pair->second.first == value)
-    _capability_registry.emplace_hint(it_pair, capability, std::make_pair(value, doc));
-  else
-    mooseError("Capability '",
-               capability,
-               "' was already registered with a different value. ('",
-               Moose::stringify(it_pair->second.first),
-               "' instead of '",
-               Moose::stringify(value),
-               "')");
-}
-
-void
-Capabilities::add(const std::string & capability, const char * value, const char * doc)
-{
-  add(capability, std::string(value), std::string(doc));
+  try
+  {
+    return CapabilityUtils::add(_capability_registry, capability, value, doc);
+  }
+  catch (const std::exception & e)
+  {
+    mooseError(e.what());
+  }
 }
 
 std::string
 Capabilities::dump() const
 {
   nlohmann::json root;
-  for (const auto & [capability, value_doc] : _capability_registry)
+  for (const auto & [name, capability] : _capability_registry)
   {
-    const auto & value = value_doc.first;
-    const auto & doc = value_doc.second;
-    if (std::holds_alternative<bool>(value))
-      root[capability] = {std::get<bool>(value), doc};
-    else if (std::holds_alternative<int>(value))
-      root[capability] = {std::get<int>(value), doc};
-    else if (std::holds_alternative<std::string>(value))
-      root[capability] = {std::get<std::string>(value), doc};
-    else
-      mooseError("Unknown type in capabilities registry");
+    auto & entry = root[name];
+    std::visit([&entry](const auto & v) { entry["value"] = v; }, capability.getValue());
+    entry["doc"] = capability.getDoc();
+    if (capability.hasStringValue())
+      if (const auto & enumeration_ptr = capability.getEnumeration())
+        entry["enumeration"] = *enumeration_ptr;
+    if (!capability.hasBoolValue())
+      entry["explicit"] = capability.getExplicit();
   }
   return root.dump(2);
 }
@@ -81,8 +73,35 @@ Capabilities::dump() const
 CapabilityUtils::Result
 Capabilities::check(const std::string & requested_capabilities) const
 {
-  const auto result = CapabilityUtils::check(requested_capabilities, _capability_registry);
-  return result;
+  return CapabilityUtils::check(requested_capabilities, _capability_registry);
+}
+
+void
+Capabilities::augment(const nlohmann::json & input, const Moose::PassKey<MooseApp>)
+{
+  for (const auto & [name_json, entry] : input.items())
+  {
+    const std::string name = name_json;
+
+    const std::string doc = entry["doc"];
+
+    CapabilityUtils::CapabilityValue value;
+    const auto & value_json = entry["value"];
+    if (value_json.is_boolean())
+      value = value_json.get<bool>();
+    else if (value_json.is_number_integer())
+      value = value_json.get<int>();
+    else
+      value = value_json.get<std::string>();
+
+    auto & capability = CapabilityUtils::add(_capability_registry, name, value, doc);
+
+    if (entry.contains("explicit") && entry["explicit"].get<bool>())
+      capability.setExplicit();
+
+    if (entry.contains("enumeration"))
+      capability.setEnumeration(entry["enumeration"].get<std::vector<std::string>>());
+  }
 }
 
 } // namespace Moose

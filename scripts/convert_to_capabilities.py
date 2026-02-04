@@ -197,6 +197,7 @@ class SpecModifier:
             "libpng",
             "libtorch",
             "mfem",
+            "hpc",
             # Not enabled yet
             # "recover",
             # "restep",

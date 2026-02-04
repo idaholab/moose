@@ -40,6 +40,8 @@ class SchemaDiff(RunApp):
         return super().getOutputFiles(options) + self.specs['schemadiff']
 
     def prepare(self, options):
+        super().prepare(options)
+
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
 

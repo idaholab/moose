@@ -17,7 +17,7 @@ import datetime
 import getpass
 import argparse
 import typing
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, namedtuple
 from typing import Tuple, Optional
 
 from socket import gethostname
@@ -365,36 +365,28 @@ class TestHarness:
                 sys.path.append(exe_python_dir)
 
         # Load capabilities if they're needed
-        self.options._capabilities, self.options._required_capabilities = (
-            self.getCapabilities(
-                self.options,
-                self.executable,
-                self.libmesh_dir,
-            )
+        (
+            self.options._capabilities,
+            self.options._augmented_capabilities,
+            self.options._required_capabilities,
+        ) = self.getCapabilities(
+            self.options,
+            self.executable,
+            self.libmesh_dir,
         )
 
         checks = {}
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
 
-        # The TestHarness doesn't strictly require the existence of an app
-        # in order to run. Here we allow the user to select whether they
-        # want to probe for configuration options
+        # Setup mesh_mode check
         if self.options.minimal_capabilities:
-            for var in ['mesh_mode']:
-                checks[var] = set(['ALL'])
+            checks["mesh_mode"] = set(['ALL'])
         else:
-            def get_option(*args, **kwargs):
-                return util.getCapabilityOption(
-                    self.options._capabilities, *args, **kwargs
-                )
-
-            checks['mesh_mode'] = get_option('mesh_mode', from_type=str, to_set=True)
-
-        # Override the MESH_MODE option if using the '--distributed-mesh'
-        # or (deprecated) '--parallel-mesh' option.
+            mesh_mode = self.options._capabilities.values["mesh_mode"]["value"]
+            checks['mesh_mode'] = set(['ALL', mesh_mode.upper()])
+        # Override with '--distributed-mesh'
         if self.options.distributed_mesh or not self.options.cli_args is None and \
                self.options.cli_args.find('--distributed-mesh') != -1:
-
             option_set = set(['ALL', 'DISTRIBUTED'])
             checks['mesh_mode'] = option_set
 
@@ -411,62 +403,78 @@ class TestHarness:
             options: argparse.Namespace,
             executable: Optional[str],
             libmesh_dir: Optional[str]
-        ) -> Tuple[dict, list[Tuple[str, bool]]]:
+        ) -> Tuple["pycapabilities.Capabilities", dict, list[Tuple[str, bool]]]:
+        """
+        Get the application capabilities.
+
+        Arguments:
+        ---------
+        options : argparse.Namespace
+            The TestHarness options.
+        executable : Optional[str]
+            Path to the executable; needed when not --minimal-capabilities.
+        libmesh_dir : Optional[str]
+            libMesh directory; needed when not --minimal-capabilities.
+
+        Returns:
+        -------
+        pycapabilities.Capabilities:
+            Built Capabilities object with app + augmented capabilities.
+        dict:
+            The augmented capabilities.
+        list[Tuple[str, bool]]]:
+            The capabilities when --only-tests-that-require.
+        """
+        import pycapabilities
+
         required = []
+        app_capabilities: dict = {}
 
-        if options.minimal_capabilities:
-            capabilities = {}
-        else:
-            assert executable
-
-            # Make sure capabilities are available early; this will exit
-            # if we fail
-            import pycapabilities
+        if not options.minimal_capabilities:
+            assert executable, "Executable not set for capabilities"
 
             with util.ScopedTimer(0.5, 'Parsing application capabilities'):
-               capabilities = copy.deepcopy(util.getCapabilities(executable))
+               app_capabilities = util.getCapabilities(executable)
 
-        # Agument capabilities with options
-        def augment(key, value, doc):
-            if key in capabilities:
-                raise ValueError(
-                    f"Capability {key} is defined by the app, but it is a reserved "
-                    "dynamic test harness capability. This is an application bug."
-                )
-            capabilities[key] = [False if value is None else value, doc]
-        # NOTE: If you add to this list, add the capability name as a reserved
-        # capability within MooseApp::checkReservedCapability()
-        augment(
-            "scale_refine",
-            options.scaling,
-            "Whether or not scaling is enabled",
-        )
-        if options.valgrind_mode == "":
-            augment("valgrind", False, "Not running with valgrind")
-        else:
-            augment(
-                "valgrind",
-                options.valgrind_mode.lower(),
-                "Performing valgrind testing",
+
+        augmented_capabilities = {}
+
+        def augment(*args, **kwargs):
+            util.addAugmentedCapability(
+                app_capabilities, augmented_capabilities, *args, **kwargs
             )
-        augment("recover", options.enable_recover, "Recover testing")
-        augment("restep", options.enable_restep, "Restep testing")
+
+        # NOTE: If you add to this list, add in Capabilities.C to
+        # Moose::reserved_augmented_capabilities or
+        # Moose::reserved_replaced_capabilities
+        augment("hpc", options.hpc is not None, "TestHarness --hpc option")
         augment(
-            "heavy",
-            options.all_tests or options.heavy_tests,
-            "Running with heavy tests",
+            "machine",
+            util.getMachine(),
+            "Machine type",
+            ["x86_64", "arm64"],
+            True
         )
-        augment("compute_device", options.compute_device, "Compute device")
-        augment("machine", util.getMachine(), "Machine type")
         if options.minimal_capabilities:
-            augment("platform", util.getPlatform(), "Operating system")
-            augment("installation_type", "in_tree", "Installation type")
+            augment(
+                "platform",
+                util.getPlatform(),
+                "Operating system",
+                None,
+                True
+            )
         else:
             augment(
                 "library_mode",
                 util.getSharedOption(libmesh_dir),
-                "libMesh library mode"
+                "libMesh library mode",
+                ["dynamic", "static"],
+                True
             )
+
+        # Build the capabilities.Capabilities object
+        all_capabilities = app_capabilities | augmented_capabilities
+        capabilities = pycapabilities.Capabilities(all_capabilities)
 
         # Setup the required capabilities, if any. From the capabilities
         # given by the user, we form the value that we should set them to
@@ -479,11 +487,11 @@ class TestHarness:
             required_capabilities = [required_capabilities]
         if required_capabilities:
             required = TestHarness.buildRequiredCapabilities(
-                list(capabilities.keys()),
+                list(capabilities.values.keys()),
                 required_capabilities
             )
 
-        return capabilities, required
+        return capabilities, augmented_capabilities, required
 
     """
     Recursively walks the current tree looking for tests to run
