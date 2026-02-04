@@ -44,4 +44,12 @@ bool isValidTransformationValue(TransformationType type, const std::vector<Real>
  */
 const std::string getTransformationTypeString(TransformationType type);
 
+/**
+ * Convert a vector of transformation pairs to a vector with string representations for types.
+ * @param transformations Vector of transformation pairs with enum types
+ * @return Vector of transformation pairs with string representations for types
+ */
+std::vector<std::pair<std::string, std::vector<Real>>> convertTransformationsToString(
+    const std::vector<std::pair<TransformationType, std::vector<Real>>> & transformations);
+
 } // namespace CSG

@@ -693,6 +693,11 @@ CSGBase::generateOutput() const
     csg_json["surfaces"][surf_name] = {{"type", s.getSurfaceType()}, {"coefficients", {}}};
     for (const auto & c : coeffs)
       csg_json["surfaces"][surf_name]["coefficients"][c.first] = c.second;
+    // include any information about transformations if present
+    const auto & transformations = s.getTransformations();
+    if (transformations.size() > 0)
+      csg_json["surfaces"][surf_name]["transformations"] =
+          convertTransformationsToString(transformations);
   }
 
   // Print out cell information
@@ -708,6 +713,11 @@ CSGBase::generateOutput() const
     csg_json["cells"][cell_name]["region_infix"] = cell_region_infix;
     csg_json["cells"][cell_name]["region_postfix"] = cell_region_postfix;
     csg_json["cells"][cell_name]["fill"] = fill_name;
+    // include any information about transformations if present
+    const auto & transformations = c.getTransformations();
+    if (transformations.size() > 0)
+      csg_json["cells"][cell_name]["transformations"] =
+          convertTransformationsToString(transformations);
   }
 
   // Print out universe information
@@ -721,6 +731,11 @@ CSGBase::generateOutput() const
       csg_json["universes"][univ_name]["cells"].push_back(c.getName());
     if (u.isRoot())
       csg_json["universes"][univ_name]["root"] = u.isRoot();
+    // include any information about transformations if present
+    const auto & transformations = u.getTransformations();
+    if (transformations.size() > 0)
+      csg_json["universes"][univ_name]["transformations"] =
+          convertTransformationsToString(transformations);
   }
 
   // print out lattice information if lattices exist
@@ -746,6 +761,11 @@ CSGBase::generateOutput() const
         csg_json["lattices"][lat_name]["attributes"][attr.first] = attr.second;
       // write the map of universe names: list of lists
       csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNameMap();
+      // include any information about transformations if present
+      const auto & transformations = lat.getTransformations();
+      if (transformations.size() > 0)
+        csg_json["lattices"][lat_name]["transformations"] =
+            convertTransformationsToString(transformations);
     }
   }
 

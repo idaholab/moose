@@ -54,4 +54,20 @@ getTransformationTypeString(TransformationType type)
   enum_copy = static_cast<int>(type);
   return std::string(enum_copy);
 }
+
+std::vector<std::pair<std::string, std::vector<Real>>>
+convertTransformationsToString(
+    const std::vector<std::pair<TransformationType, std::vector<Real>>> & transformations)
+{
+  std::vector<std::pair<std::string, std::vector<Real>>> result;
+  result.reserve(transformations.size());
+
+  for (const auto & transform_pair : transformations)
+  {
+    result.emplace_back(getTransformationTypeString(transform_pair.first), transform_pair.second);
+  }
+
+  return result;
+}
+
 } // namespace CSG
