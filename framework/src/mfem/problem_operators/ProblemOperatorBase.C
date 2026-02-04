@@ -30,14 +30,14 @@ ProblemOperatorBase::SetGridFunctions()
   // Set operator size and block structure for trial spaces
   _block_true_offsets_trial.SetSize(_trial_variables.size() + 1);
   _block_true_offsets_trial[0] = 0;
-  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
+  for (const auto ind : index_range(_trial_variables))
     _block_true_offsets_trial[ind + 1] = _trial_variables.at(ind)->ParFESpace()->TrueVSize();
   _block_true_offsets_trial.PartialSum();
 
   // Set operator size and block structure for test spaces
   _block_true_offsets_test.SetSize(_test_variables.size() + 1);
   _block_true_offsets_test[0] = 0;
-  for (unsigned int ind = 0; ind < _test_variables.size(); ++ind)
+  for (const auto ind : index_range(_test_variables))
     _block_true_offsets_test[ind + 1] = _test_variables.at(ind)->ParFESpace()->TrueVSize();
   _block_true_offsets_test.PartialSum();
 
@@ -70,7 +70,7 @@ ProblemOperatorBase::Init(mfem::BlockVector & X)
 void
 ProblemOperatorBase::SetTrialVariablesFromTrueVectors()
 {
-  for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
+  for (const auto ind : index_range(_trial_variables))
   {
     auto * const trial_var = _trial_variables.at(ind);
 
