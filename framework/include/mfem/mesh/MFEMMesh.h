@@ -50,7 +50,7 @@ public:
 
   void registerPeriodicBCs(MFEMPeriodicByVector &);
 
-  mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh&);
+  mfem::Mesh applyPeriodicBoundaryByTranslation(mfem::Mesh &);
 
   /**
    * Returns true if mesh displacement is required.

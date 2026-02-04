@@ -98,7 +98,8 @@ MFEMMesh::buildMesh()
   // Build the MFEM ParMesh from a serial MFEM mesh
   mfem::Mesh mfem_ser_mesh = buildSerialMFEMMesh();
 
-  if (_periodic) {
+  if (_periodic)
+  {
     mfem_ser_mesh = applyPeriodicBoundaryByTranslation(mfem_ser_mesh);
   }
 
@@ -173,7 +174,8 @@ MFEMMesh::registerPeriodicBCs(MFEMPeriodicByVector & bc)
 }
 
 mfem::Mesh
-MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh& input) {
+MFEMMesh::applyPeriodicBoundaryByTranslation(mfem::Mesh & input)
+{
   std::vector<mfem::Vector> translations(input.SpaceDimension());
 
   // // error checking. Demand that the z array is set by the user
