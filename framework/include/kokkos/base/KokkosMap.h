@@ -114,6 +114,17 @@ public:
     return *_map_host;
   }
   /**
+   * Clear the underlying data
+   */
+  void clear()
+  {
+    get().clear();
+
+    _keys.destroy();
+    _values.destroy();
+    _offset.destroy();
+  }
+  /**
    * Call host map's operator[]
    * @param key The key
    * @returns The writeable reference of the value
