@@ -1229,7 +1229,16 @@ public:
     else
       return this->operator[](i0);
   }
-
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type * idx) const
+  {
+    return operator()(idx[0]);
+  }
   /**
    * Device BLAS operations
    */
@@ -1368,6 +1377,16 @@ public:
         return this->operator[](i0 * _s[0] + i1);
     }
   }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type * idx) const
+  {
+    return operator()(idx[0], idx[1]);
+  }
 #endif
 };
 
@@ -1492,6 +1511,16 @@ public:
       else
         return this->operator[](i0 * _s[0] + i1 * _s[1] + i2);
     }
+  }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type * idx) const
+  {
+    return operator()(idx[0], idx[1], idx[2]);
   }
 #endif
 };
@@ -1631,6 +1660,16 @@ public:
       else
         return this->operator[](i0 * _s[0] + i1 * _s[1] + i2 * _s[2] + i3);
     }
+  }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type * idx) const
+  {
+    return operator()(idx[0], idx[1], idx[2], idx[3]);
   }
 #endif
 };
@@ -1782,6 +1821,16 @@ public:
       else
         return this->operator[](i0 * _s[0] + i1 * _s[1] + i2 * _s[2] + i3 * _s[3] + i4);
     }
+  }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type * idx) const
+  {
+    return operator()(idx[0], idx[1], idx[2], idx[3], idx[4]);
   }
 #endif
 };
