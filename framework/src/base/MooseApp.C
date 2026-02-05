@@ -1133,10 +1133,10 @@ MooseApp::registerCapabilities()
   {
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-    const auto value = "jit";
+    const std::string value = "jit";
     const auto doc = "FParser enabled with just in time compilation support.";
 #else
-    const auto value = "byte_code";
+    const std::string value = "byte_code";
     const auto doc = "FParser enabled.";
 #endif
 #else
@@ -1201,9 +1201,9 @@ MooseApp::registerCapabilities()
 
   {
 #ifdef LIBMESH_ENABLE_PARMESH
-    const auto value = "distributed";
+    const std::string value = "distributed";
 #else
-    const auto value = "replicated";
+    const std::string value = "replicated";
 #endif
     addCapability("mesh_mode", value, "libMesh default mesh mode")
         .setExplicit()
@@ -1219,17 +1219,17 @@ MooseApp::registerCapabilities()
 
   // compiler
   {
-    auto doc = "Compiler used to build the MOOSE framework.";
+    const auto doc = "Compiler used to build the MOOSE framework.";
 #if defined(__INTEL_LLVM_COMPILER)
-    const auto value = "intel";
+    const std::string value = "intel";
 #elif defined(__clang__)
-    const auto value = "clang";
+    const std::string value = "clang";
 #elif defined(__GNUC__) || defined(__GNUG__)
-    const auto value = "gcc";
+    const std::string value = "gcc";
 #elif defined(_MSC_VER)
-    const auto value = "msvc";
+    const std::string value = "msvc";
 #else
-    const auto value = "unknown";
+    const std::string value = "unknown";
 #endif
     addCapability("compiler", value, doc)
         .setExplicit()
@@ -1239,13 +1239,13 @@ MooseApp::registerCapabilities()
   // OS related
   {
 #ifdef __APPLE__
-    const auto value = "darwin";
+    const std::string value = "darwin";
 #elif __WIN32__
-    const auto value = "win32";
+    const std::string value = "win32";
 #elif __linux__
-    const auto value = "linux";
+    const std::string value = "linux";
 #elif __unix__ // all unices not caught above
-    const auto value = "unix";
+    const std::string value = "unix";
 #endif
     addCapability("platform", value, "Operating system this executable is running on.")
         .setExplicit()
