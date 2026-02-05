@@ -52,6 +52,8 @@ public:
    * eliminated-variable constraints, and populate the true-DoF vectors used by the solve.
    */
   void FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
+  /// Build eigenproblem system, with essential boundary conditions accounted for
+  virtual void BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS);
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
   /// Get Jacobian at the provided vector of true DoFs of trial variables
@@ -61,7 +63,7 @@ public:
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
   /// Update eigenvectors from solution after eigensolve                                
-  virtual void RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver);
+  virtual void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver);
 
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
@@ -136,9 +138,10 @@ protected:
   void FormJacobianMatrix(const mfem::Vector & u);
 
   /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
-  virtual void FormEigensolverMatrix(mfem::OperatorHandle & op,
-                                     mfem::BlockVector & trueX,
-                                     mfem::BlockVector & trueRHS);
+  virtual void FormEigenproblemMatrix(mfem::OperatorHandle & op);
+
+  /// Form mass matrix for the eigensolver with Dirichlet BC elimination.
+  virtual void FormMassMatrix(mfem::OperatorHandle & op);
 
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
@@ -242,6 +245,7 @@ protected:
 private:
   friend class EquationSystemProblemOperator;
   friend class ::MFEMProblemSolve;
+  friend class EquationSystemEigenproblemOperator;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };

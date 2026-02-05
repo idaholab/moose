@@ -26,11 +26,18 @@ public:
   /// Sets the operator for the eigensolver in derived classes
   virtual void setOperator(mfem::Operator & op) = 0;
 
-  /// Returns whether or not this solver is an eigensolver
-  virtual bool isEigensolver() const override { return true; }
+  /// Sets the mass matrix for the eigensolver in derived classes
+  virtual void setMassMatrix(mfem::Operator & mass) = 0;
 
   /// Retrieves the computed eigenvalues
-  virtual void GetEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const = 0;
+  virtual void getEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const = 0;
+
+  /// Retrieves the computed eigenvector corresponding to the given index
+  virtual const mfem::HypreParVector & getEigenvector(int index) const = 0;
+
+  /// Updates the solver with the given bilinear form and essential dof list, in case an LOR or algebraic solver is needed.
+  virtual void updateSolver(mfem::ParBilinearForm &, mfem::Array<int> &) override {};
+
 
 protected:
   /// Mass matrix for eigensolver
