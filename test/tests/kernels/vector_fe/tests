@@ -246,12 +246,16 @@
       type = Exodiff
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_tet14.e
-      cli_args = 'Mesh/gmg/elem_type=TET14 '
-                 'Outputs/file_base=coupled_electrostatics_tet14'
+      # Note: we use a stronger preconditioning and solve method to get more consistent answers across platforms
+      # Tet14 issues
+      cli_args = "Mesh/gmg/elem_type=TET14
+                  Outputs/file_base=coupled_electrostatics_tet14
+                  Executioner/solve_type=PJFNK
+                  Executioner/nl_forced_its=5
+                  Executioner/petsc_options_iname='-pc_type -pc_factor_shift_type'
+                  Executioner/petsc_options_value='lu NONZERO'"
       abs_zero = 1e-7
       detail = 'TET14, '
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
     []
     [tri6]
       type = Exodiff
