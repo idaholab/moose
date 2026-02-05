@@ -87,24 +87,18 @@
       detail = "selectively stitching 'hole' meshes into the final mesh"
     []
     [nested]
-      type = 'Exodiff'
+      type = 'JSONDiff'
       input = 'xydelaunay_nested.i'
-      cli_args = '--mesh-only'
-      exodiff = 'xydelaunay_nested_in.e'
+      jsondiff = 'xydelaunay_nested_out.json'
       recover = false
       detail = "allowing deep nesting of triangulations within triangulations"
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
     []
     [smoothed]
-      type = 'Exodiff'
+      type = 'CSVDiff'
       input = 'xydelaunay_smoothed.i'
-      cli_args = '--mesh-only'
-      exodiff = 'xydelaunay_smoothed_in.e'
+      csvdiff = 'xydelaunay_smoothed_out_average_q_0001.csv'
       recover = false
       detail = "with optional Laplacian mesh smoothing."
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
     []
     [area_func]
       type = 'Exodiff'
