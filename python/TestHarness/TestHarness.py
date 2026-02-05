@@ -415,7 +415,7 @@ class TestHarness:
         options: argparse.Namespace,
         executable: Optional[str],
         libmesh_dir: Optional[str],
-    ) -> Tuple[Capabilities, dict, list[str]]:
+    ) -> Tuple["Capabilities", dict, list[str]]:
         """
         Get the application capabilities.
 

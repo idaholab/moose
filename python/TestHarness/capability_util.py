@@ -41,7 +41,7 @@ class CapabilityException(Exception):
 
 
 def checkAppCapabilities(
-    capabilities: Capabilities,
+    capabilities: "Capabilities",
     required: str,
     certain: bool,
     add_capabilities: Optional[dict] = None,
