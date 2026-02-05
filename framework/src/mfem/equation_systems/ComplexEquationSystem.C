@@ -22,7 +22,7 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
     {
       mooseError("MFEM complex variable ",
                  test_var_name,
-                 " requested by equation system during initialisation was "
+                 " requested by equation system during initialization was "
                  "not found in gridfunctions");
     }
     // Store pointers to test FESpaces
