@@ -250,17 +250,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
 
   if (_assembly_level == mfem::AssemblyLevel::LEGACY)
   {
-    if (_is_eigensolve)
-    {
-      mooseAssert(_test_var_names.size() == 1 &&
-                      (_test_var_names.size() == _trial_var_names.size()) &&
-                      (_test_var_names.at(0) == _trial_var_names.at(0)),
-                  "Eigensolve is only supported for single-variable, square systems");
-
-      FormEigensolverMatrix(op, trueX, trueRHS);
-    }
-    else
-      FormSystemMatrix(op, trueX, trueRHS);
+    FormSystemMatrix(op, trueX, trueRHS);
   }
   else
   {
@@ -273,9 +263,7 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::FormEigensolverMatrix(mfem::OperatorHandle & op,
-                                      mfem::BlockVector & /*trueX*/,
-                                      mfem::BlockVector & /*trueRHS*/)
+EquationSystem::FormEigenproblemMatrix(mfem::OperatorHandle & op)
 {
   auto & test_var_name = _test_var_names.at(0);
   auto blf = _blfs.Get(test_var_name);
@@ -283,6 +271,19 @@ EquationSystem::FormEigensolverMatrix(mfem::OperatorHandle & op,
   blf->EliminateEssentialBCDiag(_global_ess_markers, 1.0);
   blf->Finalize();
   op.Reset(blf->ParallelAssemble());
+}
+
+void
+EquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
+{
+  mfem::ConstantCoefficient one(1.0);
+  mfem::ParBilinearForm * m = new mfem::ParBilinearForm(_test_pfespaces.at(0));
+  m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+  m->Assemble();
+  //// Shift the eigenvalue corresponding to eliminated dofs to a large value
+  m->EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
+  m->Finalize();
+  op.Reset(m->ParallelAssemble());
 }
 
 void
@@ -377,6 +378,20 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 }
 
 void
+EquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS)
+{
+  mooseAssert(_test_var_names.size() == 1 &&
+                (_test_var_names.size() == _trial_var_names.size()) &&
+                (_test_var_names.at(0) == _trial_var_names.at(0)),
+            "Eigensolve is only supported for single-variable, square systems");
+
+  height = trueX.Size();
+  width = trueX.Size();
+  FormEigenproblemMatrix(_jacobian);
+  FormMassMatrix(massRHS);
+}
+
+void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
   _jacobian->Mult(x, residual);
@@ -404,11 +419,17 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
 }
 
 void 
-EquationSystem::RecoverEigenproblemSolution(MFEMEigensolverBase * eigensolver)
+EquationSystem::RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
-  eigensolver->GetEigenvalues(eigenvalues);
-
+  eigensolver->getEigenvalues(eigenvalues);
+  
+  for (int i = 0; i<eigenvalues.Size(); ++i)
+  {
+    auto & trial_var_name = _trial_var_names.at(0);
+    gridfunctions.Get(trial_var_name + "_" + std::to_string(i))->Distribute(eigensolver->getEigenvector(i));
+  }
+  
 }
 
 void

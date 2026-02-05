@@ -34,23 +34,6 @@ MFEMHypreLOBPCG::MFEMHypreLOBPCG(const InputParameters & parameters)
 void
 MFEMHypreLOBPCG::constructSolver(const InputParameters &)
 {
-}
-
-void
-MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
-{
-  if (_lor)
-    mooseError("Eigensolver cannot use LOR method");
-
-  mfem::ConstantCoefficient one(1.0);
-  mfem::ParBilinearForm * m = new mfem::ParBilinearForm(a.ParFESpace());
-  m->AddDomainIntegrator(new mfem::MassIntegrator(one));
-  m->Assemble();
-  // Shift the eigenvalue corresponding to eliminated dofs to a large value
-  m->EliminateEssentialBCDiag(getMFEMProblem().getProblemData().eqn_system->getGlobalEssMarkers(),
-                              std::numeric_limits<mfem::real_t>::min());
-  m->Finalize();
-
   _eigensolver = std::make_unique<mfem::HypreLOBPCG>(getMFEMProblem().getComm());
 
   _eigensolver->SetNumModes(_num_modes);
@@ -60,14 +43,20 @@ MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
 
+}
+
+void
+MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs)
+{
+  if (_lor)
+    mooseError("Eigensolver cannot use LOR method");
+
   if (_preconditioner)
   {
     _preconditioner->updateSolver(a, tdofs);
     setPreconditioner(static_cast<mfem::HypreLOBPCG &>(*_eigensolver));
   }
 
-  _M.reset(m->ParallelAssemble());
-  _eigensolver->SetMassMatrix(*_M);
 }
 
 #endif
