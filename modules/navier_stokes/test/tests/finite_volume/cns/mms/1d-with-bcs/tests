@@ -184,8 +184,7 @@
       input = 'straight-channel-hllc.i'
       exodiff = straight-channel-hllc_out.e
       detail = 'when the source has a cell-centered volumetric discretization'
-      # installation_type=in_tree: see #25279
-      capabilities = 'method!=dbg & installation_type=in_tree'
+      capabilities = 'method!=dbg'
     []
   []
   [sources_give_hllc_problems_regular]
@@ -197,8 +196,7 @@
       exodiff = 'regular-straight-channel_out.e'
       detail = 'conservation of mass when no sources are present'
       cli_args = "FVKernels/inactive='drag'"
-      # installation_type=in_tree: see #25279
-      capabilities = 'method!=dbg & installation_type=in_tree'
+      capabilities = 'method!=dbg'
     []
     [non_conserved]
       input = 'regular-straight-channel.i'
@@ -206,8 +204,7 @@
       detail = 'violation of conservation of mass when sources are present'
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources_out'
-      # installation_type=in_tree: see #25279
-      capabilities = 'method!=dbg & installation_type=in_tree'
+      capabilities = 'method!=dbg'
     []
     [non_conserved_finer]
       input = 'regular-straight-channel.i'
@@ -215,8 +212,7 @@
       detail = 'lesser violation of conservation of mass when sources are present and the mesh is refined'
       type = Exodiff
       cli_args = 'Outputs/file_base=regular-straight-channel-sources-nx-150_out Mesh/gen_mesh/nx=150'
-      # installation_type=in_tree: see #25279
-      capabilities = 'method!=dbg & installation_type=in_tree'
+      capabilities = 'method!=dbg'
     []
   []
   [pwcnsfv]
