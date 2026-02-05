@@ -87,23 +87,27 @@ heated_length = 1.0
 []
 
 [SubChannel]
-    type = QuadSubChannel1PhaseProblem
-    fp = water
-    n_blocks = 1
-    beta = 0.006
-    CT = 2.6
-    compute_density = true
-    compute_viscosity = true
-    compute_power = true
-    P_out = ${P_out}
-    verbose_subchannel = true
-    deformation = true
+  type = QuadSubChannel1PhaseProblem
+  fp = water
+  n_blocks = 1
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
+  P_out = ${P_out}
+  verbose_subchannel = true
+  deformation = true
   friction_closure = 'MATRA'
+  mixing_closure ='constant_beta'
 []
 
 [SCMClosures]
   [MATRA]
     type = SCMFrictionMATRA
+  []
+  [constant_beta]
+    type = SCMMixingConstantBeta
+    beta = 0.006
+    CT = 2.6
   []
 []
 

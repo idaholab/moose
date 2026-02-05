@@ -23,6 +23,8 @@ The subchannel equations are derived by integrating and averaging the conservati
 
 ### Mass conservation equation
 
+!! Intentional comment to provide extra spacing
+
 \begin{equation}
 \label{mass-conservation-equation}
 \frac{d\rho_i}{dt} V_i +\Delta \dot{m_i}+\sum_{j} w_{ij} = 0,
@@ -31,6 +33,8 @@ The subchannel equations are derived by integrating and averaging the conservati
 where *i* is the subchannel index and *j* the index of the neighbor subchannel. $\Delta$ refers to the difference between the inlet and outlet of the control volume in the axial direction. $\dot{m_i}[kg/sec]$ is the mass flow rate of subchannel *i* in the axial direction.  $w_{ij}[kg/sec]$ is the diversion crossflow in the lateral direction from subchannel *i* to neighboring subchannel *j*, resulting from local pressure differences between the two subchannels.
 
 ### Axial momentum conservation equation
+
+!! Intentional comment to provide extra spacing
 
 \begin{equation}
 \label{conservation-axial-momentum}
@@ -42,6 +46,8 @@ In addition to the temporal term in the left hand side there is the change of mo
 
 ### Lateral momentum conservation equation
 
+!! Intentional comment to provide extra spacing
+
 \begin{equation}
 \label{lateral-momentum}
 \frac{dw_{ij}}{dt} L_{ij} + \frac{L_{ij}}{\Delta Z} \Delta (w_{ij} \bar{U}) = - S_{ij}  \Delta P_{ij} + Friction_{ij}
@@ -50,6 +56,8 @@ In addition to the temporal term in the left hand side there is the change of mo
 Here $g_{ij}$ is the gap between subchannels *i,j* and $\Delta Z$ the height of the control volume. Lateral pressure gradient ($\Delta P_{ij} / L_{ij}$) across the subchannels and/or forced mixing between subchannels owing to mixing vanes and spacer grids is the driving force behind diversion crossflow $w_{ij}$. $L_{ij}$ is the distance between the centers of subchannels *i,j*. $\bar{U_{ij}}$ is the average axial velocity of the two subchannels. The overall friction loss term $Friction_{ij}$ encompasses all the viscous effects and form losses associated with momentum exchange between the fluid and the wall due to the fluid motion through the gap.
 
 ### Enthalpy conservation equation
+
+!! Intentional comment to provide extra spacing
 
 \begin{equation}
 \label{enthalpy-conservation}
@@ -64,6 +72,8 @@ For a single-phase fluid, dissipation due to viscous stresses can be neglected a
 
 ### Axial direction friction term
 
+!! Intentional comment to provide extra spacing
+
 \begin{equation}
 Friction_i = -\frac{1}{2} K_i \frac{\dot{m_i} |\dot{m_i}|}{S_{i} \rho_i }
 \end{equation}
@@ -72,6 +82,8 @@ where $K_{i} = [\frac{f_w}{Dhy_i} \Delta Z + k_i]$ is an overall axial loss coef
 
 ### Lateral direction friction term
 
+!! Intentional comment to provide extra spacing
+
 \begin{equation}
 Friction_{ij}  =  -\frac{1}{2} g_{ij} \Delta Z K_{ij} \rho_{} |u_{ij}| u_{ij} = - \frac{1}{2}K_{ij} \frac{w_{ij}|w_{ij}|}{S_{ij} \rho^\star}.
 \end{equation}
@@ -79,6 +91,8 @@ Friction_{ij}  =  -\frac{1}{2} g_{ij} \Delta Z K_{ij} \rho_{} |u_{ij}| u_{ij} = 
 where $K_{ij}$ is an overall loss coefficient encompassing lateral concentrated form and friction losses and $S_{ij}$ the lateral flow area between subchannel *i* and subchannel *j*: $S_{ij} = \Delta Z g_{ij}$, $\rho^*$ is the donor cell density.
 
 ### Friction factor
+
+!! Intentional comment to provide extra spacing
 
 The MATRA based friction factor for assemblies with bare pins in a quadrilateral lattice [!cite](KIT) is presented below.
 
@@ -100,6 +114,8 @@ Additional friction factor models are implemented as follows:
 
 ### Turbulent momentum transfer
 
+!! Intentional comment to provide extra spacing
+
 The transfer of axial momentum due to turbulence is modelled as follows:
 
 \begin{equation}
@@ -110,6 +126,8 @@ where $C_{T}$ is a turbulent modeling parameter.
 
 ### Turbulent enthalpy transfer
 
+!! Intentional comment to provide extra spacing
+
 The transfer of enthalpy due to turbulence is modelled as follows:
 
 \begin{equation}
@@ -117,6 +135,8 @@ h_{ij}' = \sum_{j} w_{ij}'\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 \end{equation}
 
 ### Turbulent crossflow
+
+!! Intentional comment to provide extra spacing
 
 \begin{equation}
 w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=\beta g_{ij} \bar{G}.
@@ -131,6 +151,8 @@ where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient 
 - Triangular assembly with wire-wrapped pins: Hydrodynamic models and correlations for bare and wire-wrapped hexagonal rod bundles—bundle friction factors, subchannel friction factors and mixing parameters, Cheng and Todreas [!cite](cheng1986hydrodynamic).
 
 ### Calibrated parameter values
+
+!! Intentional comment to provide extra spacing
 
 $\beta$ has been calibrated for quadrilateral assemblies using data from the 2x3 air-water facility that was operated by Kumamoto university. The purpose of that facility was to quantify the effects of mixing and void drift [!cite](SADATOMI). In these experiments, the turbulent mixing rates and the fluctuations of static pressure difference between subchannels were measured. The author derived a way to use the die concentration measurements, in order to calculate  the turbulent mixing rates ($w_{ij}'$) between subchannels [!cite](SADATOMI2).
 
@@ -268,17 +290,25 @@ Once the main flow variables converge in a block, the enthalpy conservation equa
 
 ### Algorithm variations
 
+!! Intentional comment to provide extra spacing
+
 There are three variations [!cite](kyriakopoulos2022development), [!cite](kyriakopoulos2023demonstration) of the algorithm presented above. There should be no appreciable differences between the results of the algorithms when the time/spacial discretization scheme is converged.
 
 #### Explicit
+
+!! Intentional comment to provide extra spacing
 
 This is the default algorithm, where the unknown flow variables are calculated in an explicit manner through their governing equations. The variables are updated sequantially from block inlet to block outlet except for pressure which is updated from block outlet to block inlet. Blocks are solved sequentially from assembly inlet to assembly outlet.
 
 #### Implicit segregated
 
+!! Intentional comment to provide extra spacing
+
 In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method.
 
 #### Implicit
+
+!! Intentional comment to provide extra spacing
 
 In this case, the governing mass, axial momentum and crossflow momentum  conservation equations are recast in matrix form and combined into a single system. The system of all the subchannel equations looks like this:
 
@@ -310,6 +340,8 @@ As soon as the big matrix is constructed, the solver will calculate cross-flow r
 
 #### 1. Fast scale estimates
 
+!! Intentional comment to provide extra spacing
+
 From the axial- and cross-momentum rows, the code forms quick, diagonally preconditioned estimates:
 \begin{equation}
 \begin{aligned}
@@ -321,6 +353,8 @@ From the axial- and cross-momentum rows, the code forms quick, diagonally precon
 with small safeguards $\varepsilon_p,\varepsilon_W\sim 10^{-10}$ to avoid division by zero. Using $\hat{\mathbf W}$, the per-channel crossflow sum $\sum_{j} w_{ij}$ is assembled into a vector $\mathrm{sumw_{ij}}_{\mathrm{loc}}$.
 
 #### 2. Crossflow relaxation parameter
+
+!! Intentional comment to provide extra spacing
 
 Two guarded scalars are computed:
 
@@ -342,6 +376,8 @@ r = \frac{r_{\mathrm{base}}}{\max(S_{\max}, \varepsilon)} + 0.5,\qquad \varepsil
 The +0.5 offset biases toward mild under-relaxation.
 
 #### 3. Crossflow resistance inflation
+
+!! Intentional comment to provide extra spacing
 
 A cross-coupling resistance is estimated and smoothed:
 \begin{equation}
@@ -378,6 +414,8 @@ thereby increasing diagonal dominance and improving conditioning for the crossfl
 
 #### 4. Per-equation under-relaxation
 
+!! Intentional comment to provide extra spacing
+
 Classical linear under-relaxation is applied automatically and separately to each equation $f\in\{\mathbf m,\mathbf p,\mathbf W\}$ using factors
 \begin{equation}
 \alpha_m=1.0,\qquad \alpha_p=1.0,\qquad \alpha_W=0.1.
@@ -392,5 +430,7 @@ M_{ff} &\leftarrow \frac{1}{\alpha_f} M_{ff}, \\
 This standard construction ensures that solving the modified linear system yields the *under-relaxed* update for equation $f$. In practice, only $\mathbf W$ is strongly damped, while $\mathbf m$ and $\mathbf p$ can be solved without additional damping. This relaxation happens inside the temperature loop.
 
 #### 5. Net effect
+
+!! Intentional comment to provide extra spacing
 
 The combination of (i) safeguarded scale estimation, (ii) adaptive, time smoothed, and piecewise snapped added crossflow resistance, and (iii) selective under-relaxation produces a more diagonally dominant and robust nested solve that tolerates rapid changes in crossflow while preserving good convergence properties for mass flow and pressure.

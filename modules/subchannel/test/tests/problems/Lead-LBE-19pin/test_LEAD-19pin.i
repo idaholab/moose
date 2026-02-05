@@ -33,7 +33,6 @@ P_out = 1.0e5 # Pa
   fp = LEAD
   n_blocks = 1
   P_out = 1.0e5
-  CT = 1.0
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -45,14 +44,16 @@ P_out = 1.0e5 # Pa
   verbose_multiapps = true
   verbose_subchannel = true
   interpolation_scheme = upwind
-
-  # friction model
   friction_closure = 'cheng'
+  mixing_closure = 'Kim_and_Chung'
 []
 
 [SCMClosures]
   [cheng]
     type = SCMFrictionUpdatedChengTodreas
+  []
+  [Kim_and_Chung]
+    type = SCMMixingKimAndChung
   []
 []
 
