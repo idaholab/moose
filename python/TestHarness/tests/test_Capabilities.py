@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Test the augmentation of capabilities from the run time options."""
+"""Test the use of capabilites in the TestHarness."""
 
 import unittest
 from argparse import Namespace
@@ -18,11 +18,12 @@ from typing import Any, Optional, Tuple
 from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness import TestHarness
-from TestHarness.util import getMachine, getPlatform
 from TestHarness.capability_util import addAugmentedCapability
+from TestHarness.util import getMachine, getPlatform
+
 
 class TestAugmentedCapabilities(TestHarnessTestCase):
-    """Test the augmentation of capabilities from the run time options."""
+    """Test the use of capabilites in the TestHarness."""
 
     def testAddAugmentedCapability(self):
         """Test TestHarness.capability_util.addAugmentedCapability."""
@@ -149,19 +150,85 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             only_tests_that_require="machine",
         )
 
+    @dataclass
+    class CapabilityTestCase:
+        """Define a test case for a capability test."""
+
+        capabilities: str
+        skip: bool
+        params: Optional[dict] = None
+
+    def runCapabilityTest(
+        self, *cases: tuple, cli_args: Optional[list[str]] = None, exit_code: int = 0
+    ) -> Tuple[TestHarnessTestCase.RunTestsResult, list]:
+        """Run a capability test."""
+        if cli_args is None:
+            cli_args = []
+
+        test_spec = {}
+        for i, options in enumerate(cases):
+            case = self.CapabilityTestCase(*options)
+            test_name = f"test{i}"
+            test_spec[test_name] = {
+                "type": "RunApp",
+                "input": "unused",
+                "should_execute": False,
+                "capabilities": f'"{case.capabilities}"',
+            }
+            if case.params:
+                test_spec[test_name].update(case.params)
+
+        result = self.runTests(
+            *cli_args,
+            tests=test_spec,
+            minimal_capabilities=False,
+            exit_code=exit_code,
+        )
+        harness = result.harness
+
+        jobs = []
+        for i, options in enumerate(cases):
+            case = self.CapabilityTestCase(*options)
+            test_name = f"test{i}"
+            job = [
+                j for j in harness.finished_jobs if j.getTestNameShort() == test_name
+            ][0]
+            self.assertEqual(job.getStatus(), job.skip if case.skip else job.finished)
+            jobs.append(job)
+
+        return result, jobs
+
     def test(self):
-        """Test the augmentation of capabilities live."""
+        """Test filtering tests using capabilities."""
+        app_capabilities = self.runTests(run=False).harness.options._capabilities.values
 
-        @dataclass
-        class TestCase:
-            capabilities: str
-            skip: bool
-            params: Optional[dict] = None
+        # Capability matched
+        self.runCapabilityTest(
+            (f"compiler={app_capabilities['compiler']['value']}", False)
+        )
 
-        def run(*cases: tuple, cli_args: Optional[list[str]] = []) -> dict:
+        # Capability not matched
+        _, jobs = self.runCapabilityTest(("compiler=unknown", True))
+        self.assertIn("Need compiler=unknown", jobs[0].getTester().getCaveats())
+
+        # Bad parse, with error message in Tester status
+        result, jobs = self.runCapabilityTest(("!", True), exit_code=132)
+        self.assertEqual(jobs[0].getTester().getStatus(), jobs[0].error)
+        self.assertEqual(jobs[0].getTester().getStatusMessage(), "INVALID CAPABILITIES")
+        message = (
+            f"{result.test_spec_file}:6:\n"
+            "Tests/test0/capabilities:\n"
+            "Unable to parse requested capabilities '!'."
+        )
+        self.assertIn(message, jobs[0].getTester().getOutput())
+
+    def testAugmented(self):
+        """Test filtering tests using augmented application capabilities."""
+
+        def run(*cases: tuple, cli_args: Optional[list[str]] = []):
             test_spec = {}
             for i, options in enumerate(cases):
-                case = TestCase(*options)
+                case = self.CapabilityTestCase(*options)
                 test_name = f"test{i}"
                 test_spec[test_name] = {
                     "type": "RunApp",
@@ -178,7 +245,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             harness = result.harness
 
             for i, options in enumerate(cases):
-                case = TestCase(*options)
+                case = self.CapabilityTestCase(*options)
                 test_name = f"test{i}"
                 job = [
                     j
@@ -191,10 +258,12 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
 
         # Augmented capability from TestHarness
         bad_machine = "arm64" if getMachine() == "x86_64" else "arm64"
-        run((f"machine={bad_machine}", True), (f"machine={getMachine()}", False))
+        self.runCapabilityTest(
+            (f"machine={bad_machine}", True), (f"machine={getMachine()}", False)
+        )
 
         # Augmented capability from Tester (RunApp)
-        run(("mpi_procs=1", False), ("mpi_procs=2", True))
+        self.runCapabilityTest(("mpi_procs=1", False), ("mpi_procs=2", True))
 
 
 if __name__ == "__main__":

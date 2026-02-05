@@ -23,7 +23,10 @@ from TestHarness import capability_util
 from TestHarness.schedulers.Job import Job
 import pyhit
 
-MOOSE_DIR = os.getenv('MOOSE_DIR')
+MOOSE_DIR_ENV = os.getenv("MOOSE_DIR")
+assert MOOSE_DIR_ENV is not None
+MOOSE_DIR = str(MOOSE_DIR_ENV)
+assert isinstance(MOOSE_DIR, str)
 MOOSE_EXE = 'moose_test-opt'
 TEST_DIR = os.path.join(MOOSE_DIR, 'test')
 
@@ -46,6 +49,8 @@ class TestHarnessTestCase(unittest.TestCase):
         results: Optional[dict] = None
         # TestHarness that was ran
         harness: Optional[TestHarness] = None
+        # Test specification file, if using the "tests" option
+        test_spec_file: Optional[str] = None
 
     def setUp(self):
         # Wrap getCapabilities so that we don't call the application
@@ -108,17 +113,17 @@ class TestHarnessTestCase(unittest.TestCase):
 
             # Setup test spec directory if we're building one on the fly
             if test_spec:
-                test_root = c
+                test_root = str(c)
 
                 # Spec goes within the 'test' directory
-                test_dir = os.path.join(c, 'test')
+                test_dir = os.path.join(test_root, "test")
                 os.mkdir(test_dir)
 
                 test_harness_build_kwargs['skip_testroot'] = True
 
                 # Write the test spec
-                test_spec_file = os.path.join(test_dir, 'tests')
-                with open(test_spec_file, 'w') as f:
+                result.test_spec_file = os.path.join(test_dir, "tests")
+                with open(result.test_spec_file, "w") as f:
                     f.write(test_spec)
 
                 # Link the moose-exe so that it can be found
