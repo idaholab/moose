@@ -753,7 +753,7 @@ clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
 	@rm -rf $(app_KOKKOS_LIB) $(app_KOKKOS_OBJECTS) $(app_KOKKOS_DEPS) $(app_KOKKOS_UNITY_SRC_FILES)
-	@rm -rf $(APPLICATION_DIR)/build
+	@rm -rf $(APPLICATION_DIR)/build $(pycapabilities_LIB)
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could
