@@ -117,12 +117,23 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
   Registry::registerObjectsTo(f, {"MooseTestApp"});
   Registry::registerActionsTo(af, {"MooseTestApp"});
 
-  addCapability("test_false", false, "Capability with a value of false for testing");
-  addCapability("test_one", "1", "Capability with a value of 1 for testing");
-
   if (use_test_objs)
   {
     auto & syntax = s; // for resiterSyntax macros
+
+    addCapability("test_false", false, "For testing: value false");
+    addCapability("test_one", 1, "For testing: value 1");
+    addCapability("test_two_explicit", 2, "For testing: value 2 explicit").setExplicit();
+    addCapability("test_string", "string", "For testing: value string");
+    addCapability("test_string_explicit", "string", "For testing: value string explicit")
+        .setExplicit();
+    addCapability("test_string_enum", "string", "For testing: value string with enum")
+        .setEnumeration({"string", "foo"});
+    addCapability(
+        "test_string_enum_explicit", "string", "For testing: value string explicit with enum")
+        .setEnumeration({"string", "foo"})
+        .setExplicit();
+    addCapability("test_version", "2.0.0", "For testing: version string");
 
     registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
     registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
