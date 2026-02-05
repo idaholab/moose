@@ -34,10 +34,11 @@ TimeSequenceStepper::init()
 void
 TimeSequenceStepper::step()
 {
+  TimeSequenceStepperBase::step();
+
   // Get the times again in case there are new ones
   const auto & times = _times.getTimes();
-  if (!std::includes(_time_sequence.begin(), _time_sequence.end(), times.begin(), times.end()))
-    setupSequence(times);
-
-  TimeSequenceStepperBase::step();
+  if (_times.isDynamicTimeSequence())
+    if (!std::includes(_time_sequence.begin(), _time_sequence.end(), times.begin(), times.end()))
+      setupSequence(times);
 }

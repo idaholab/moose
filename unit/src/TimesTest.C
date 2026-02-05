@@ -15,7 +15,7 @@ TEST(TimesTest, getUninitialized)
 {
   std::vector<Real> times_vec = {};
   const Real current_time = 0;
-  Times times(times_vec, current_time);
+  Times times(times_vec, current_time, /*is_dynamic*/ false);
 
   try
   {
@@ -34,7 +34,7 @@ TEST(TimesTest, unsorted)
 {
   std::vector<Real> times_vec = {3.0, 2.0, 1.0};
   const Real current_time = 0;
-  Times times(times_vec, current_time);
+  Times times(times_vec, current_time, /*is_dynamic*/ false);
 
   try
   {
@@ -63,7 +63,7 @@ TEST(TimesTest, getters)
 {
   std::vector<Real> times_vec = {0.2, 0.8, 1.2};
   const Real current_time = 0;
-  Times times(times_vec, current_time);
+  Times times(times_vec, current_time, /*is_dynamic*/ false);
 
   // Test getters
   EXPECT_EQ(times.getTimes()[0], 0.2);

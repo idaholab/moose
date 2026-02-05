@@ -12,8 +12,8 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 
-Times::Times(std::vector<Real> & times, const Real & current_time)
-  : _times(times), _current_time(current_time)
+Times::Times(std::vector<Real> & times, const Real & current_time, bool is_dynamic)
+  : _times(times), _current_time(current_time), _dynamic_time_sequence(is_dynamic)
 {
 }
 

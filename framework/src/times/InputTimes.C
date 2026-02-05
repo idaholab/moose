@@ -25,7 +25,9 @@ InputTimes::validParams()
   return params;
 }
 
-InputTimes::InputTimes(const InputParameters & parameters) : TimesReporter(parameters)
+InputTimes::InputTimes(const InputParameters & parameters)
+  : TimesReporter(parameters),
+    _input_times(isParamValid("times") ? getParam<std::vector<Real>>("times") : std::vector<Real>())
 {
   _times = _input_times;
 }

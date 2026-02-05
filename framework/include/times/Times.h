@@ -26,7 +26,7 @@ using libMesh::Real;
 class Times
 {
 public:
-  Times(std::vector<Real> & times, const Real & current_time);
+  Times(std::vector<Real> & times, const Real & current_time, bool is_dynamic);
 
   /// Getter for the full times vector
   const std::vector<Real> & getTimes() const;
@@ -55,6 +55,7 @@ public:
   ///                         or return instead the largest Real number (from std::numeric_limits)
   Real getNextTime(const Real current_time, const bool error_if_no_next) const;
 
+  /// Whether the sequence of times might change during the simulation
   bool isDynamicTimeSequence() const { return _dynamic_time_sequence; };
 
 protected:
@@ -67,4 +68,7 @@ protected:
 private:
   /// A reference to current time, used by getCurrentTime()
   const Real & _current_time;
+
+  /// whether the time sequence is set dynamically
+  const bool _dynamic_time_sequence;
 };

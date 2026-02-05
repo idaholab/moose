@@ -138,6 +138,9 @@ TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
   if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
     paramError("time_sequence", "Time points must be in strictly ascending order.");
 
+  // Updating the sequence means replacing the current sequence
+  _time_sequence.clear();
+
   _time_sequence.push_back(start_time);
   for (unsigned int j = 0; j < times.size(); ++j)
   {

@@ -95,6 +95,6 @@ TimesInterface::getDefaultTimesObject(const std::string & input, bool allow_unso
 
 TimesInterface::DefaultTimes::DefaultTimes(const std::vector<Real> & times,
                                            const FEProblemBase & fe_problem)
-  : Times(_default_times, fe_problem.time()), _default_times(times)
+  : Times(_default_times, fe_problem.time(), /*is dynamic*/ false), _default_times(times)
 {
 }

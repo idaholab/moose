@@ -32,6 +32,10 @@ TimesReporter::validParams()
   params.suppressParameter<MaterialPropertyName>("prop_getter_suffix");
   params.suppressParameter<bool>("use_interpolated_state");
 
+  params.addParam<bool>("dynamic_time_sequence",
+                        true,
+                        "Whether the time sequence is dynamic and thus needs to be updated");
+
   params.registerBase("Times");
   return params;
 }
@@ -41,7 +45,8 @@ TimesReporter::TimesReporter(const InputParameters & parameters)
     // Times will be replicated on every rank
     Times(declareValueByName<std::vector<Real>, ReporterVectorContext<Real>>(
               "times", REPORTER_MODE_REPLICATED),
-          _fe_problem.time()),
+          _fe_problem.time(),
+          getParam<bool>("dynamic_time_sequence")),
     _need_broadcast(getParam<bool>("auto_broadcast")),
     _need_sort(getParam<bool>("auto_sort")),
     _need_unique(getParam<bool>("unique_times")),
