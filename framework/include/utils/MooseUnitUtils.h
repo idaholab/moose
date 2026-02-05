@@ -67,14 +67,14 @@ throwsWithMessage(Func && fn, const std::string_view message, const char * file,
 {
   static_assert(std::is_base_of_v<std::exception, ExceptionType>, "Not an exception");
 
-  std::unique_ptr<Moose::ScopedThrowOnError> scoped_throw_on_error;
-  if constexpr (set_throw_on_error)
-    scoped_throw_on_error = std::make_unique<Moose::ScopedThrowOnError>();
-
   std::ostringstream error;
 
   try
   {
+    std::unique_ptr<Moose::ScopedThrowOnError> scoped_throw_on_error;
+    if constexpr (set_throw_on_error)
+      scoped_throw_on_error = std::make_unique<Moose::ScopedThrowOnError>();
+
     fn();
 
     error << "Expected exception of type " << libMesh::demangle(typeid(ExceptionType).name())
