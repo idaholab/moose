@@ -10,9 +10,9 @@
     type = CartesianMeshGenerator
     dim = 2
     dx = '1 1.3 1.9'
-    ix = '9 9 9'
+    ix = '15 15 15'
     dy = '2 1.2 0.9'
-    iy = '9 9 9'
+    iy = '15 15 15'
     subdomain_id = '0 1 0
                     4 5 2
                     0 3 0'
@@ -298,14 +298,14 @@
   #   side_order = FIRST
   # []
   type = SIMPLE
-  num_iterations = 200
+  num_iterations = 1000
   should_solve_momentum = false
   should_solve_pressure = false
   energy_system = 'energy_system'
   energy_l_abs_tol = 1e-11
-  energy_l_tol = 1e-6
-  energy_equation_relaxation = 0.8
-  energy_field_relaxation = 0.8
+  energy_l_tol = 1e-11
+  energy_equation_relaxation = 0.9
+  energy_field_relaxation = 0.95
   energy_absolute_tolerance = 1e-10
   energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   energy_petsc_options_value = 'hypre boomeramg'
