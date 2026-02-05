@@ -9,6 +9,7 @@
     # installation_type=in_tree: see #25279
     capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 4
+    max_parallel = 4
     required_python_packages = 'pandas matplotlib'
     valgrind = 'none'
     max_threads = 1
@@ -34,6 +35,7 @@
     # installation_type=in_tree: see #25279
     capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 4
+    max_parallel = 4
     required_python_packages = 'pandas matplotlib'
     valgrind = 'none'
     max_threads = 1
@@ -46,6 +48,7 @@
     # installation_type=in_tree: see #25279
     capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 4
+    max_parallel = 4
     required_python_packages = 'pandas matplotlib'
     valgrind = 'none'
     max_threads = 1
