@@ -58,4 +58,7 @@ SIMPLESolve::checkIntegrity()
   if (_has_active_scalar_systems && _should_solve_active_scalars)
     for (const auto system : _active_scalar_systems)
       checkTimeKernels(*system);
+  if (_has_pm_radiation_systems)
+    for (const auto system : _pm_radiation_systems)
+      checkTimeKernels(*system);
 }

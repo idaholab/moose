@@ -178,6 +178,30 @@ protected:
   /// it needs to be scaled with a representative flux.
   const Real _passive_scalar_l_abs_tol;
 
+  // ************************ Participating Media Radiation Variables ************************ //
+
+  /// The names of the participating media radiation systems
+  const std::vector<SolverSystemName> & _pm_radiation_system_names;
+
+  /// Boolean for easy check if participating media radiation systems shall be solved or not
+  const bool _has_pm_radiation_systems;
+
+  // The number(s) of the system(s) corresponding to the participating media radiation equation(s)
+  std::vector<unsigned int> _pm_radiation_system_numbers;
+
+  /// The user-defined relaxation parameter(s) for the participating media radiation equation(s)
+  const std::vector<Real> _pm_radiation_equation_relaxation;
+
+  /// Options which hold the petsc settings for the participating media radiation equation(s)
+  Moose::PetscSupport::PetscOptions _pm_radiation_petsc_options;
+
+  /// Options for the linear solver of the participating media radiation equation(s)
+  SIMPLESolverConfiguration _pm_radiation_linear_control;
+
+  /// Absolute linear tolerance for the participating media radiation equation(s). We need to store this, because
+  /// it needs to be scaled with a representative flux.
+  const Real _pm_radiation_l_abs_tol;
+
   // ************************ Turbulence Variables ************************ //
 
   /// The names of the turbulence systems
@@ -224,6 +248,9 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in passive scalars
   const std::vector<Real> _passive_scalar_absolute_tolerance;
+
+  /// The user-defined absolute tolerance for determining the convergence in participating media radiation
+  const std::vector<Real> _pm_radiation_absolute_tolerance;
 
   /// The user-defined absolute tolerance for determining the convergence turbulence variables
   const std::vector<Real> _turbulence_absolute_tolerance;
