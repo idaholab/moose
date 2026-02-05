@@ -32,7 +32,7 @@ requirements:
     - {{ black }}
     - {{ clang_format }}
     - {{ clang_tools }}
-    - coverage
+    - coverage 7.13.2
     - deepdiff
     - git-lfs <3.5.1
     - gitpython
