@@ -1282,7 +1282,7 @@ MooseApp::registerCapabilities()
         // If the binary is in a folder "bin", we'll consider it installed.
         // This isn't the best check, but it works with how we currently
         // install applications in app.mk
-        const auto value =
+        const std::string value =
             resolved_path.parent_path().filename() == "bin" ? "relocated" : "in_tree";
         addCapability("installation_type", value, "The installation type of the application.")
             .setExplicit()
