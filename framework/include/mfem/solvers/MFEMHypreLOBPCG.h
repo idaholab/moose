@@ -27,16 +27,25 @@ public:
   virtual void updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs) override;
 
   /// Sets the operator for the eigensolver
-  virtual void setOperator(mfem::Operator & op) override { _eigensolver->SetOperator(op); };
+  virtual void setOperator(mfem::Operator & op) override { _eigensolver->SetOperator(op); }
+
+  /// Sets the mass matrix for the eigensolver
+  virtual void setMassMatrix(mfem::Operator & mass) override { _eigensolver->SetMassMatrix(mass); }
 
   /// Solves the eigenvalue problem
   virtual void Solve() override { _eigensolver->Solve(); }
 
   /// Retrieves the computed eigenvalues
-  virtual void GetEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const override
+  virtual void getEigenvalues(mfem::Array<mfem::real_t> & eigenvalues) const override
   {
     _eigensolver->GetEigenvalues(eigenvalues);
-  };
+  }
+
+  /// Retrieves the computed eigenvector corresponding to the given index
+  virtual const mfem::HypreParVector & getEigenvector(int index) const override
+  {
+    return _eigensolver->GetEigenvector(index);
+  }
 
 protected:
   /// Override in derived classes to construct and set the solver options.

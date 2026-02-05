@@ -33,30 +33,18 @@ EquationSystemProblemOperator::Solve()
 {
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
-  if (GetEquationSystem()->GetTestVarNames().size() > 1 &&
-      (_problem_data.jacobian_solver->isLOR() || dynamic_cast<MFEMEigensolverBase *>(
-                                                    &_problem)))
-    mooseError("The LOR method and eigenproblems are only supported for single-variable systems");
+  if (GetEquationSystem()->GetTestVarNames().size() > 1)
+    mooseError("The LOR method is only supported for single-variable systems");
 
   _problem_data.jacobian_solver->updateSolver(
       *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
       GetEquationSystem()->_ess_tdof_lists.at(0));
 
-  if (auto eigensolver =
-          std::dynamic_pointer_cast<MFEMEigensolverBase>(_problem_data.jacobian_solver))
-  {
-    eigensolver->setOperator(*GetEquationSystem());
-    eigensolver->Solve();
-    GetEquationSystem()->RecoverEigenproblemSolution(eigensolver.get());
-  }
-  else
-  {
-    _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
-    _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-    _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
-    GetEquationSystem()->RecoverFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
-  }
+  _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
+  _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
+  _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+  GetEquationSystem()->RecoverFEMSolution(
+    _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 
 }
 

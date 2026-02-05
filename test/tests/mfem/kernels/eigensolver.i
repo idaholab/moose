@@ -50,7 +50,7 @@
 [Solver]
   type = MFEMHypreLOBPCG
   preconditioner = boomeramg
-  print_level = 1
+  print_level = 0
   coefficient = 1.0
   l_tol = 1e-8
   l_max_its = 200
@@ -65,7 +65,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/Eigensolver
     vtk_format = ASCII
   []
 []

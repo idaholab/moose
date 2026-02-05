@@ -38,9 +38,6 @@ public:
   /// Returns whether or not this solver (or its preconditioner) uses LOR
   bool isLOR() const { return _lor || (_preconditioner && _preconditioner->isLOR()); }
 
-  /// Returns whether or not this solver is an eigensolver
-  virtual bool isEigensolver() const { return false; }
-
   /// For eigensolvers, this method calls the underlying Solve method
   virtual void Solve() { mooseError("Solve method not used in this solver type."); }
 
