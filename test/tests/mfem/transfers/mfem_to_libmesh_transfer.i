@@ -70,9 +70,18 @@
 []
 
 [MultiApps]
-  [sub]
+  [mfem_app]
     type = FullSolveMultiApp
     input_files = mfem_diffusion.i
-    execute_on = 'INITIAL'
+    execute_on = 'TIMESTEP_END'
+  []
+[]
+
+[Transfers]
+  [transfer_from_mfem]
+    type = MultiAppMFEMlibMeshGeneralFieldTransfer
+    source_variable = concentration
+    variable = mfem_scalar_var
+    from_multi_app = mfem_app
   []
 []
