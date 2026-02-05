@@ -301,9 +301,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             postInternalSide(elem, side);
           }
           else
-          {
             onExternalSide(elem, side);
-          }
         } // sides
 
         postElement(elem);
