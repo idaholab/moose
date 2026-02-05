@@ -21,10 +21,9 @@ from typing import Optional, Tuple
 import mooseutils
 from FactorySystem.InputParameters import InputParameters
 from FactorySystem.MooseObject import MooseObject
-from pycapabilities import CapabilityException
 
 from TestHarness import OutputInterface
-from TestHarness.capability_util import checkAppCapabilities
+from TestHarness.capability_util import CapabilityException, checkAppCapabilities
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
 

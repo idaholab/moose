@@ -12,9 +12,10 @@
 import re
 import subprocess
 import sys
-from typing import Iterable, Optional, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Union
 
-import pycapabilities
+if TYPE_CHECKING:
+    from pycapabilities import Capabilities
 
 from TestHarness.util import outputHeader, parseMOOSEJSON, runCommand
 
@@ -35,8 +36,12 @@ def getAppCapabilities(executable: str) -> dict:
     return parseMOOSEJSON(output, "--show-capabilities")
 
 
+class CapabilityException(Exception):
+    """Exception for a capability initialization or evaluation error."""
+
+
 def checkAppCapabilities(
-    capabilities: pycapabilities.Capabilities,
+    capabilities: Capabilities,
     required: str,
     certain: bool,
     add_capabilities: Optional[dict] = None,
@@ -62,11 +67,21 @@ def checkAppCapabilities(
         Capabilities to negate in the registry during the check.
 
     """
-    status, _, _ = capabilities.check(
-        required,
-        add_capabilities=add_capabilities,
-        negate_capabilities=negate_capabilities,
-    )
+    # This is one of the few places where we actually
+    # load the pycapabilities module and that is
+    # intentional as it can trigger a build
+    import pycapabilities
+
+    try:
+        status, _, _ = capabilities.check(
+            required,
+            add_capabilities=add_capabilities,
+            negate_capabilities=negate_capabilities,
+        )
+    # Re-cast this exception as one that doesn't
+    # need the pycapabilities module to use
+    except pycapabilities.CapabilityException as e:
+        raise CapabilityException(e)
 
     return status == pycapabilities.CheckState.CERTAIN_PASS or (
         status == pycapabilities.CheckState.POSSIBLE_PASS and not certain

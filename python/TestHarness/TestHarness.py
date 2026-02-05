@@ -24,13 +24,15 @@ import sys
 import typing
 from collections import defaultdict, namedtuple
 from socket import gethostname
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
 import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
-from pycapabilities import Capabilities
+
+if TYPE_CHECKING:
+    from pycapabilities import Capabilities
 
 from TestHarness import RaceChecker, util
 from TestHarness.capability_util import (
@@ -435,8 +437,6 @@ class TestHarness:
         list[Tuple[str, bool]]]:
             The capabilities when --only-tests-that-require.
         """
-        import pycapabilities
-
         required = []
         app_capabilities: dict = {}
 
@@ -480,9 +480,14 @@ class TestHarness:
                 True
             )
 
+        # This is one of the few places where we actually
+        # load the pycapabilities module and that is
+        # intentional as it can trigger a build
+        from pycapabilities import Capabilities
+
         # Build the capabilities.Capabilities object
         all_capabilities = app_capabilities | augmented_capabilities
-        capabilities = pycapabilities.Capabilities(all_capabilities)
+        capabilities = Capabilities(all_capabilities)
 
         # Setup the required capabilities, if any. From the capabilities
         # given by the user, we form the value that we should set them to
