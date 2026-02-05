@@ -70,7 +70,6 @@ class TestHarnessTestCase(unittest.TestCase):
         *args,
         tmp_output: bool = True,
         minimal_capabilities: bool = False,
-        extra_capabilities: Optional[dict] = None,
         capture_results: bool = True,
         exit_code: int = 0,
         run: bool = True,
@@ -131,9 +130,9 @@ class TestHarnessTestCase(unittest.TestCase):
             stdout = StringIO()
             try:
                 with redirect_stdout(stdout):
-                    result.harness = TestHarness.build(argv, 'moose_test', MOOSE_DIR, **test_harness_build_kwargs)
-                    if extra_capabilities is not None:
-                        result.harness.options._capabilities.update(extra_capabilities)
+                    result.harness = TestHarness.build(
+                        argv, "moose_test", MOOSE_DIR, **test_harness_build_kwargs
+                    )
                     if run:
                         result.harness.findAndRunTests()
             except SystemExit as e:
