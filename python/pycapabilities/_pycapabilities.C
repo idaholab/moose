@@ -9,7 +9,16 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include <structmember.h>
+
+#if PY_VERSION_HEX < 0x030C0000 /* < 3.12 */
+#include "structmember.h"
+#ifndef Py_T_OBJECT_EX
+#define Py_T_OBJECT_EX T_OBJECT_EX
+#endif
+#ifndef Py_READONLY
+#define Py_READONLY READONLY
+#endif
+#endif
 
 #include "CapabilityUtils.h"
 
