@@ -41,4 +41,5 @@ protected:
   // const Moose::Functor<Real> & _eps_boundary;
   /// User object to compute the net heat flux at the boundary
   const GrayLambertSurfaceRadiationBase & _glsr_uo;
+  bool _reconstruct_emission;
 };

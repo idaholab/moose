@@ -25,6 +25,10 @@ LinearFVGrayLambert::validParams()
   // params.addParam<MooseFunctorName>("boundary_emissivity", 1.0, "Emissivity of the boundary.");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",
                                           "Name of the GrayLambertSurfaceRadiationBase UO");
+  params.addParam<bool>(
+      "reconstruct_emission",
+      true,
+      "Flag to apply constant heat flux on sideset or reconstruct emission by T^4 law.");
 
   return params;
 }
@@ -34,7 +38,8 @@ LinearFVGrayLambert::LinearFVGrayLambert(const InputParameters & parameters)
     _temperature_radiation(getFunctor<Real>("temperature_radiation")),
     _coeff_diffusion(getFunctor<Real>("coeff_diffusion")),
     // _eps_boundary(getFunctor<Real>("boundary_emissivity")),
-    _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name"))
+    _glsr_uo(getUserObject<GrayLambertSurfaceRadiationBase>("surface_radiation_object_name")),
+    _reconstruct_emission(getParam<bool>("reconstruct_emission"))
 {
 }
 
@@ -48,6 +53,9 @@ LinearFVGrayLambert::getAlpha(Moose::FaceArg face, Moose::StateArg state) const
 Real
 LinearFVGrayLambert::getBeta(Moose::FaceArg face, Moose::StateArg state) const
 {
+  if (!_reconstruct_emission)
+    return 0.;
+
   const auto & all_face_bids = _current_face_info->boundaryIDs();
   const auto & all_bc_bids = boundaryIDs();
   std::set<BoundaryID> current_bid;
@@ -76,9 +84,10 @@ LinearFVGrayLambert::getGamma(Moose::FaceArg face, Moose::StateArg /*state*/) co
   if (current_bid.size() != 1)
     paramError("boundary", std::to_string(current_bid.size()) + " boundaries overlap. This is not currently supported");
 
+  if (!_reconstruct_emission)
+    return _glsr_uo.getSurfaceHeatFluxDensity(*current_bid.begin());
+
   Real eps = _glsr_uo.getSurfaceEmissivity(*current_bid.begin());
-
   const auto gamma = -eps * _glsr_uo.getSurfaceIrradiation((*current_bid.begin()));
-
   return gamma;
 }
