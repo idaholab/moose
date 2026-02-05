@@ -12,7 +12,7 @@
 #include "LinearFVElementalKernel.h"
 
 /**
- * Kernel that adds the contributions from the participating media radiation external source.
+ * Kernel that adds the volumetric source contribution from the participating media radiation.
  */
 class LinearFVP1TemperatureSourceSink : public LinearFVElementalKernel
 {

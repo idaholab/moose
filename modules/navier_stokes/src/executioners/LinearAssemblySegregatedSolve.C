@@ -717,8 +717,6 @@ LinearAssemblySegregatedSolve::solve()
 
         if (_has_pm_radiation_systems && _should_solve_pm_radiation)
         {
-          //_problem.execute(EXEC_NONLINEAR); ??
-
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
           Moose::PetscSupport::petscSetOptions(_pm_radiation_petsc_options, solver_params);

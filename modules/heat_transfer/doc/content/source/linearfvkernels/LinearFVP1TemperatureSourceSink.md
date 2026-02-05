@@ -18,6 +18,10 @@ where:
 -  $\sigma$ is the Stefan-Boltzmann constant (SI units (W/m$^2$/K$^4$))
 -  $T$ is the fluid medium temperature (SI units (K))
 
+!alert note
+This kernel assumes the solver variable is the medium temperature. It is not yet compatible with
+enthalpy variable solvers.
+
 ## Example Input File Syntax
 
 !listing test/tests/radiation_participating_media/rad_T_coupled_medium_1d.i block=LinearFVKernels
