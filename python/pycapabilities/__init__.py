@@ -10,18 +10,19 @@
 """
 Interface to the Moose::Capabilities system.
 
-This will first attempt to load the built library from this
-directory (if it was built during the normal MOOSE build
-previously). If that import fails, it run "make capabilities"
-within the MOOSE source test directory to build it and then
-will attempt to import it again.
+This module will attempt to build the pycapabilities
+library if it has not already been built.
 """
 
 import os
 import subprocess
 
+# First try to import the built library from this directory,
+# which might have been built during a MOOSE app build or
+# individually with "make pycapabilities" in a MOOSE app dir
 try:
     from . import _pycapabilities
+# If the already-built import fails, attempt to build it
 except ImportError:
     moose_dir = os.getenv(
         "MOOSE_DIR",
