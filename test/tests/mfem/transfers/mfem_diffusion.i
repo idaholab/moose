@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ./square_out.e
+  file = ./square_quad.e
 []
 
 [Problem]
