@@ -48,6 +48,7 @@
     refine_boundary = false
     desired_area = 0.05
     smooth_triangulation = true
+    output_subdomain_id = 2
   []
   [triang_3]
     type = XYDelaunayGenerator
@@ -59,6 +60,7 @@
     refine_boundary = false
     desired_area = 0.1
     # smooth_triangulation = false # default
+    output_subdomain_id = 3
   []
   [triang_4]
     type = XYDelaunayGenerator
@@ -70,5 +72,45 @@
     refine_boundary = true
     desired_area = 0.2
     smooth_triangulation = true
+    output_subdomain_id = 4
   []
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[AuxVariables]
+  [qual]
+    order = CONSTANT
+    family = MONOMIAL
+    [AuxKernel]
+      type = ElementQualityAux
+      variable = 'qual'
+      metric = 'ASPECT_RATIO'
+    []
+  []
+[]
+
+[MeshDivisions]
+  [block_div]
+    type = SubdomainsDivision
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[VectorPostprocessors]
+  [average_q]
+    type = MeshDivisionFunctorReductionVectorPostprocessor
+    reduction = 'average'
+    mesh_division = block_div
+    functors = 'qual'
+  []
+[]
+
+[Outputs]
+  csv = true
 []

@@ -71,3 +71,23 @@
     desired_area = 0.2
   []
 []
+
+[Executioner]
+  type = Steady
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Reporters/mesh_info]
+  type = MeshInfo
+  items = 'num_nodes subdomains subdomain_elems sidesets sideset_elems'
+[]
+
+[Outputs]
+  [out]
+    type = JSON
+    execute_system_information_on = 'NONE'
+  []
+[]
