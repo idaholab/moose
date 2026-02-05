@@ -83,7 +83,7 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 # capabilities python bindings
 #
 PYCAPABILITIES_DIR ?= $(MOOSE_DIR)/python/pycapabilities
-pycapabilities_srcfiles := $(PYCAPABILITIES_DIR)/_pycapabilities.c $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
+pycapabilities_srcfiles := $(PYCAPABILITIES_DIR)/_pycapabilities.C $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
 
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
