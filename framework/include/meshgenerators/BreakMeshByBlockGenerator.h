@@ -33,25 +33,22 @@ private:
   /// given the primary and secondary blocks this method return the appropriate
   /// boundary id and name
   void findBoundaryName(const MeshBase & mesh,
-                        const subdomain_id_type & primaryBlockID,
-                        const subdomain_id_type & secondaryBlockID,
+                        subdomain_id_type primaryBlockID,
+                        subdomain_id_type secondaryBlockID,
                         BoundaryName & boundary_name,
-                        const boundary_id_type & boundaryID,
+                        boundary_id_type boundaryID,
                         BoundaryInfo & boundary_info);
 
+  /// A container holding (boundary name, boundary ID) associations.
   std::set<std::pair<std::string, BoundaryID>> _bName_bID_set;
-
-  /// this method finds the first free boundary id
-  BoundaryID findFreeBoundaryId(const MeshBase & mesh);
 
   /// this method generate the boundary name by assembling subdomain names
   BoundaryName generateBoundaryName(const MeshBase & mesh,
-                                    const subdomain_id_type & primaryBlockID,
-                                    const subdomain_id_type & secondaryBlockID);
+                                    subdomain_id_type primaryBlockID,
+                                    subdomain_id_type secondaryBlockID);
 
   /// this method save the boundary name/id pair
-  void mapBoundaryIdAndBoundaryName(const boundary_id_type & boundaryID,
-                                    const std::string & boundaryName);
+  void mapBoundaryIdAndBoundaryName(boundary_id_type boundaryID, const std::string & boundaryName);
 
   /// generate the new boundary interface
   void addInterface(MeshBase & mesh);

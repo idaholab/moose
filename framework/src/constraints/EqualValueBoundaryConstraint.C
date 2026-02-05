@@ -104,7 +104,7 @@ EqualValueBoundaryConstraint::populateSecondaryNodes()
   if (isParamValid("secondary"))
   {
     const auto & secondary_bnd = getParam<BoundaryName>("secondary");
-    const auto secondary_nodes = _mesh.getNodeList(_mesh.getBoundaryID(secondary_bnd));
+    const auto & secondary_nodes = _mesh.getNodeList(_mesh.getBoundaryID(secondary_bnd));
 
     for (const auto & nid : secondary_nodes)
       if (_mesh.nodeRef(nid).processor_id() == _subproblem.processor_id())

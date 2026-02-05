@@ -31,7 +31,7 @@ BreakMeshByBlockGenerator::validParams()
   params.addParam<std::string>(
       "interface_name",
       "interface",
-      "the name of the new interface. Cannot be used whit `split_interface=true`");
+      "the name of the new interface. Cannot be used with `split_interface=true`");
   params.addParam<bool>("split_interface",
                         true,
                         "If true, it creates a "
@@ -95,33 +95,10 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
                "are specified.");
 }
 
-boundary_id_type
-BreakMeshByBlockGenerator::findFreeBoundaryId(const MeshBase & mesh)
-{
-  const std::set<boundary_id_type> & currentBoundaryIds =
-      mesh.get_boundary_info().get_boundary_ids();
-  bool freeBoundaryNotFound = true;
-  boundary_id_type freeId;
-  for (freeId = 0; freeId < std::numeric_limits<boundary_id_type>::max(); freeId++)
-  {
-    if (currentBoundaryIds.count(freeId) == 0)
-    {
-      // bid is not in the set, boundaryID is free
-      freeBoundaryNotFound = false;
-      break;
-    }
-  }
-
-  if (freeBoundaryNotFound)
-    mooseError("Too many boundaries. Maximum limit exceeded!");
-
-  return freeId;
-}
-
 BoundaryName
 BreakMeshByBlockGenerator::generateBoundaryName(const MeshBase & mesh,
-                                                const subdomain_id_type & primaryBlockID,
-                                                const subdomain_id_type & secondaryBlockID)
+                                                subdomain_id_type primaryBlockID,
+                                                subdomain_id_type secondaryBlockID)
 {
   std::string primary_block_name = mesh.subdomain_name(primaryBlockID);
   std::string secondary_block_name = mesh.subdomain_name(secondaryBlockID);
@@ -134,7 +111,7 @@ BreakMeshByBlockGenerator::generateBoundaryName(const MeshBase & mesh,
 }
 
 void
-BreakMeshByBlockGenerator::mapBoundaryIdAndBoundaryName(const boundary_id_type & boundaryID,
+BreakMeshByBlockGenerator::mapBoundaryIdAndBoundaryName(boundary_id_type boundaryID,
                                                         const std::string & boundaryName)
 {
   _bName_bID_set.insert(std::pair<std::string, int>(boundaryName, boundaryID));
@@ -142,10 +119,10 @@ BreakMeshByBlockGenerator::mapBoundaryIdAndBoundaryName(const boundary_id_type &
 
 void
 BreakMeshByBlockGenerator::findBoundaryName(const MeshBase & mesh,
-                                            const subdomain_id_type & primaryBlockID,
-                                            const subdomain_id_type & secondaryBlockID,
+                                            subdomain_id_type primaryBlockID,
+                                            subdomain_id_type secondaryBlockID,
                                             BoundaryName & boundaryName,
-                                            const boundary_id_type & boundaryID,
+                                            boundary_id_type boundaryID,
                                             BoundaryInfo & boundary_info)
 {
   boundaryName = generateBoundaryName(mesh, primaryBlockID, secondaryBlockID);
@@ -296,6 +273,8 @@ BreakMeshByBlockGenerator::generate()
 
         // Check if this node is exactly at the boundary between two blocks
         // If it is a junction between more than two blocks, we do not split it
+        // For the block_pairs option, only nodes shared by the specified block pairs are newly
+        // created.
         if (sets_blocks_for_this_node.size() == 2)
         {
           // Get the two block IDs from the set
