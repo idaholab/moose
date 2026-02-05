@@ -1622,7 +1622,7 @@ MooseApp::setupOptions()
     _perf_graph.disableLivePrint();
     const auto & capabilities = getParam<std::string>("check_capabilities");
     auto [status, reason, doc] = Moose::Capabilities::getCapabilityRegistry().check(capabilities);
-    const bool pass = status == CapabilityUtils::CERTAIN_PASS;
+    const bool pass = status == Moose::CapabilityUtils::CERTAIN_PASS;
     _console << "Capabilities '" << capabilities << "' are " << (pass ? "" : "not ") << "fulfilled."
              << std::endl;
     _ready_to_exit = true;
@@ -1651,7 +1651,7 @@ MooseApp::setupOptions()
       const auto required_capabilities = getParam<std::string>("required_capabilities");
       auto [status, reason, doc] =
           Moose::Capabilities::getCapabilityRegistry().check(required_capabilities);
-      if (status < CapabilityUtils::UNKNOWN)
+      if (status < Moose::CapabilityUtils::UNKNOWN)
       {
         mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
         _ready_to_exit = true;
@@ -1659,7 +1659,7 @@ MooseApp::setupOptions()
         _exit_code = 77;
         return;
       }
-      if (status == CapabilityUtils::UNKNOWN)
+      if (status == Moose::CapabilityUtils::UNKNOWN)
         mooseError("Required capabilities '",
                    required_capabilities,
                    "' are not specific enough. A comparison test is performed on an undefined "
@@ -3745,19 +3745,19 @@ MooseApp::outputMachineReadableData(const std::string & param,
     mooseError("Unable to open file `", filename, "` for writing ", param, " data to it.");
 }
 
-CapabilityUtils::Capability &
+Moose::CapabilityUtils::Capability &
 MooseApp::addCapability(const std::string_view capability,
-                        const CapabilityUtils::CapabilityValue & value,
+                        const Moose::CapabilityUtils::CapabilityValue & value,
                         const std::string_view doc)
 {
-  auto & cap = Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
-
-  if (Moose::reserved_augmented_capabilities.count(cap.getName()))
-    ::mooseError("MooseApp::addCapability(): The capability \"",
-                 cap.getName(),
-                 "\" is reserved and may not be registered by an application.");
-
-  return cap;
+  try
+  {
+    return Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
+  }
+  catch (const std::exception & e)
+  {
+    ::mooseError("MooseApp::addCapability(): ", e.what());
+  }
 }
 
 #ifdef MOOSE_MFEM_ENABLED

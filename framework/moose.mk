@@ -240,7 +240,7 @@ pycapabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
 
 pycapabilities $(pycapabilities_LIB) : $(pycapabilities_srcfiles)
 	@echo "Building and linking $(pycapabilities_LIB)..."
-	@bash -c '(cd "$(PYCAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(pycapabilities_srcfiles) $(pycapabilities_COMPILEFLAGS) $(pycapabilities_LDFLAGS) $(LDFLAGS) -o $(pycapabilities_LIB))'
+	@bash -c '(cd "$(PYCAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DFOR_PYCAPABILITIES -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(pycapabilities_srcfiles) $(pycapabilities_COMPILEFLAGS) $(pycapabilities_LDFLAGS) $(LDFLAGS) -o $(pycapabilities_LIB))'
 
 #
 # gtest

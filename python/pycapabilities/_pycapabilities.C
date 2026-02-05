@@ -15,6 +15,10 @@
 
 #include <memory>
 
+using Moose::CapabilityUtils::CapabilityException;
+using Moose::CapabilityUtils::CapabilityRegistry;
+using Moose::CapabilityUtils::CapabilityValue;
+
 /*******************************************************************************/
 /* Python pycapabilities module definition                                     */
 /*******************************************************************************/
@@ -53,7 +57,7 @@ returnPythonError(PyObject * exc, const std::string & message)
 
 /// Add capabilities to a Registry given a python dict representation
 static void
-addCapabilities(CapabilityUtils::Registry & registry, PyObject * capabilities_dict)
+addCapabilities(CapabilityRegistry & registry, PyObject * capabilities_dict)
 {
   if (!PyDict_Check(capabilities_dict))
     return setPythonError(PyExc_ValueError, "Capabilities item must be a dictionary");
@@ -106,7 +110,7 @@ addCapabilities(CapabilityUtils::Registry & registry, PyObject * capabilities_di
       return key_error("missing key 'doc'");
 
     // 'value' value
-    CapabilityUtils::CapabilityValue value;
+    CapabilityValue value;
     if (auto value_obj = query_key("value"))
     {
       if (value_obj == Py_True)
@@ -126,7 +130,7 @@ addCapabilities(CapabilityUtils::Registry & registry, PyObject * capabilities_di
       return key_error("missing key 'value'");
 
     // add capability, checking for errors
-    auto & capability = CapabilityUtils::add(registry, name, value, doc);
+    auto & capability = registry.add(name, value, doc);
 
     // 'explicit' value
     if (auto explicit_compare_obj = query_key("explicit"))
@@ -213,11 +217,12 @@ CheckState_enum(PyObject * module)
     Py_DECREF(tmp);                                                                                \
   } while (0)
 
-  ADD_MEMBER(members, "CERTAIN_FAIL", CapabilityUtils::CheckState::CERTAIN_FAIL);
-  ADD_MEMBER(members, "POSSIBLE_FAIL", CapabilityUtils::CheckState::POSSIBLE_FAIL);
-  ADD_MEMBER(members, "UNKNOWN", CapabilityUtils::CheckState::UNKNOWN);
-  ADD_MEMBER(members, "POSSIBLE_PASS", CapabilityUtils::CheckState::POSSIBLE_PASS);
-  ADD_MEMBER(members, "CERTAIN_PASS", CapabilityUtils::CheckState::CERTAIN_PASS);
+  using Moose::CapabilityUtils::CheckState;
+  ADD_MEMBER(members, "CERTAIN_FAIL", CheckState::CERTAIN_FAIL);
+  ADD_MEMBER(members, "POSSIBLE_FAIL", CheckState::POSSIBLE_FAIL);
+  ADD_MEMBER(members, "UNKNOWN", CheckState::UNKNOWN);
+  ADD_MEMBER(members, "POSSIBLE_PASS", CheckState::POSSIBLE_PASS);
+  ADD_MEMBER(members, "CERTAIN_PASS", CheckState::CERTAIN_PASS);
 #undef ADD_MEMBER
 
   checkstate = PyObject_CallFunctionObjArgs(IntEnum, name, members, nullptr);
@@ -246,7 +251,7 @@ done:
 /// C++ state stored with a pycapabilities.Capabilities object
 struct CapabilitiesState
 {
-  CapabilityUtils::Registry registry;
+  CapabilityRegistry registry;
 };
 
 /// Python state stored with a pycapabilities.Capabilities object
@@ -302,7 +307,7 @@ Capabilities_init(CapabilitiesObject * self, PyObject * args, PyObject * /* kwds
   {
     addCapabilities(self->state->registry, capabilities_dict);
   }
-  catch (const CapabilityUtils::CapabilityException & e)
+  catch (const CapabilityException & e)
   {
     PyErr_SetString(CapabilityExceptionObject, e.what());
     return -1;
@@ -338,7 +343,7 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
                              "Optional[dict] = None, negate_capabilities: Iterable[str]] = None)");
 
   // Possible copy of the registry for when we need to augment it
-  std::unique_ptr<CapabilityUtils::Registry> registry_copy;
+  std::unique_ptr<CapabilityRegistry> registry_copy;
 
   // If adding extra capabilities, copy construct the registry and add
   // the extra capabilities to the copy
@@ -347,14 +352,14 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
     if (!PyDict_Check(add_capabilities))
       return returnPythonError(PyExc_TypeError, "add_capabilities must be a dict");
 
-    registry_copy = std::make_unique<CapabilityUtils::Registry>();
+    registry_copy = std::make_unique<CapabilityRegistry>();
     *registry_copy = self->state->registry;
 
     try
     {
       addCapabilities(*registry_copy, add_capabilities);
     }
-    catch (const CapabilityUtils::CapabilityException & e)
+    catch (const CapabilityException & e)
     {
       PyErr_SetString(CapabilityExceptionObject, e.what());
       return nullptr;
@@ -372,7 +377,7 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
   {
     if (!registry_copy)
     {
-      registry_copy = std::make_unique<CapabilityUtils::Registry>();
+      registry_copy = std::make_unique<CapabilityRegistry>();
       *registry_copy = self->state->registry;
     }
 
@@ -392,7 +397,7 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
       const std::string name = name_obj;
       Py_DECREF(obj);
 
-      auto capability_ptr = query(*registry_copy, name);
+      auto capability_ptr = registry_copy->query(name);
 
       try
       {
@@ -401,9 +406,9 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
           capability_ptr->negateValue();
         // If it doesn't exist, just add it
         else
-          CapabilityUtils::add(*registry_copy, name, false, "Negated capability");
+          registry_copy->add(name, false, "Negated capability");
       }
-      catch (const CapabilityUtils::CapabilityException & e)
+      catch (const CapabilityException & e)
       {
         PyErr_SetString(CapabilityExceptionObject, e.what());
         Py_DECREF(iter);
@@ -437,7 +442,7 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
   // Run the check
   try
   {
-    auto [status, message, doc] = CapabilityUtils::check(requirement, registry);
+    auto [status, message, doc] = registry.check(requirement);
 
     PyObject * checkstate = PyObject_GetAttrString(m, "CheckState");
     if (!checkstate)
@@ -451,7 +456,7 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
                          PyUnicode_FromString(message.c_str()),
                          PyUnicode_FromString(doc.c_str()));
   }
-  catch (const CapabilityUtils::CapabilityException & e)
+  catch (const CapabilityException & e)
   {
     PyErr_SetString(CapabilityExceptionObject, e.what());
     return nullptr;

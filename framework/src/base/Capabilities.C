@@ -18,13 +18,14 @@
 namespace Moose
 {
 
-const std::set<std::string> reserved_augmented_capabilities{// TestHarness.getCapabilities()
-                                                            "hpc",
-                                                            "machine",
-                                                            "library_mode",
-                                                            // RunApp.getAugmentedCapabilities()
-                                                            "mpi_procs",
-                                                            "num_threads"};
+const std::set<std::string> Capabilities::reserved_augmented_capabilities{
+    // TestHarness.getCapabilities()
+    "hpc",
+    "machine",
+    "library_mode",
+    // RunApp.getAugmentedCapabilities()
+    "mpi_procs",
+    "num_threads"};
 
 Capabilities &
 Capabilities::getCapabilityRegistry()
@@ -42,21 +43,21 @@ Capabilities::add(const std::string_view capability,
                   const CapabilityUtils::CapabilityValue & value,
                   const std::string_view doc)
 {
-  try
-  {
-    return CapabilityUtils::add(_capability_registry, capability, value, doc);
-  }
-  catch (const std::exception & e)
-  {
-    mooseError(e.what());
-  }
+  auto & cap = _capability_registry.add(capability, value, doc);
+
+  if (reserved_augmented_capabilities.count(cap.getName()))
+    throw CapabilityUtils::CapabilityException(
+        "The capability \"" + cap.getName() +
+        "\" is reserved and may not be registered by an application.");
+
+  return cap;
 }
 
 std::string
 Capabilities::dump() const
 {
   nlohmann::json root;
-  for (const auto & [name, capability] : _capability_registry)
+  for (const auto & [name, capability] : _capability_registry.getRegistry())
   {
     auto & entry = root[name];
     std::visit([&entry](const auto & v) { entry["value"] = v; }, capability.getValue());
@@ -70,14 +71,14 @@ Capabilities::dump() const
   return root.dump(2);
 }
 
-CapabilityUtils::Result
+CapabilityUtils::CapabilityRegistry::Result
 Capabilities::check(const std::string & requested_capabilities) const
 {
-  return CapabilityUtils::check(requested_capabilities, _capability_registry);
+  return _capability_registry.check(requested_capabilities);
 }
 
 void
-Capabilities::augment(const nlohmann::json & input, const Moose::PassKey<MooseApp>)
+Capabilities::augment(const nlohmann::json & input, const Capabilities::AugmentPassKey)
 {
   for (const auto & [name_json, entry] : input.items())
   {
@@ -94,7 +95,7 @@ Capabilities::augment(const nlohmann::json & input, const Moose::PassKey<MooseAp
     else
       value = value_json.get<std::string>();
 
-    auto & capability = CapabilityUtils::add(_capability_registry, name, value, doc);
+    auto & capability = _capability_registry.add(name, value, doc);
 
     if (entry.contains("explicit") && entry["explicit"].get<bool>())
       capability.setExplicit();

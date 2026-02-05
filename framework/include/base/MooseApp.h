@@ -84,6 +84,12 @@ class MemoryPool;
 }
 #endif
 
+#ifdef MOOSE_UNIT_TEST
+// forward declare unit tests
+#include "gtest/gtest.h"
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
+#endif
+
 /**
  * Base class for MOOSE-based applications
  *
@@ -1121,6 +1127,10 @@ public:
 #endif
 
 protected:
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddCapability);
+#endif
+
   /**
    * Helper method for dynamic loading of objects
    */
@@ -1172,9 +1182,10 @@ protected:
    * @param doc The documentation string
    * @return The capability
    */
-  static CapabilityUtils::Capability & addCapability(const std::string_view capability,
-                                                     const CapabilityUtils::CapabilityValue & value,
-                                                     const std::string_view doc);
+  static Moose::CapabilityUtils::Capability &
+  addCapability(const std::string_view capability,
+                const Moose::CapabilityUtils::CapabilityValue & value,
+                const std::string_view doc);
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;

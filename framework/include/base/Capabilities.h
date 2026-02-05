@@ -11,19 +11,13 @@
 
 #include "CapabilityUtils.h"
 
-#include "MoosePassKey.h"
-
 #include "nlohmann/json_fwd.h"
 
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
 #include "gtest/gtest.h"
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, boolTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, intTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, stringTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, versionTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, multipleTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, parseFail);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
+class CapabilitiesTest;
 #endif
 
 class MooseApp;
@@ -64,7 +58,19 @@ public:
   std::string dump() const;
 
   /// check if the given required capabilities are fulfilled, returns a bool, a reason, and a verbose documentation
-  CapabilityUtils::Result check(const std::string & requested_capabilities) const;
+  CapabilityUtils::CapabilityRegistry::Result
+  check(const std::string & requested_capabilities) const;
+
+  /// Passkey for augment()
+  class AugmentPassKey
+  {
+    friend MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    FRIEND_TEST(::CapabilitiesTest, augment);
+#endif
+    AugmentPassKey() {}
+    AugmentPassKey(const AugmentPassKey &) {}
+  };
 
   /**
    * Augment the capabilities with the given input capabilities.
@@ -73,7 +79,7 @@ public:
    * from the TestHarness and thus is only allowed to be used by
    * the MooseApp.
    */
-  void augment(const nlohmann::json & input, const Moose::PassKey<MooseApp>);
+  void augment(const nlohmann::json & input, const AugmentPassKey);
 
   ///@{ Don't allow creation through copy/move construction or assignment
   Capabilities(Capabilities const &) = delete;
@@ -83,26 +89,20 @@ public:
   Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
-protected:
+private:
+#ifdef MOOSE_UNIT_TEST
+  friend class ::CapabilitiesTest;
+#endif
+
   /**
    * Capability registry. The capabilities registered here can be dumped using the
    * --show-capabilities command line option. Capabilities are used by the test harness
    * to conditionally enable/disable tests that rely on optional capabilities.
    */
-  CapabilityUtils::Registry _capability_registry;
+  CapabilityUtils::CapabilityRegistry _capability_registry;
 
-private:
   // Private constructor for singleton pattern
   Capabilities() {}
-
-#ifdef MOOSE_UNIT_TEST
-  FRIEND_TEST(::CapabilitiesTest, boolTest);
-  FRIEND_TEST(::CapabilitiesTest, intTest);
-  FRIEND_TEST(::CapabilitiesTest, stringTest);
-  FRIEND_TEST(::CapabilitiesTest, versionTest);
-  FRIEND_TEST(::CapabilitiesTest, multipleTest);
-  FRIEND_TEST(::CapabilitiesTest, parseFail);
-#endif
 };
 
 } // namespace Moose

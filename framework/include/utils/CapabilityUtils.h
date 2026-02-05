@@ -21,10 +21,17 @@
 #include <optional>
 #include <string_view>
 
+#ifdef MOOSE_UNIT_TEST
+// forward declare unit tests
+#include "gtest/gtest.h"
+class GTEST_TEST_CLASS_NAME_(CapabilityTest, capabilityNegateValue);
+class CapabilitiesTest;
+#endif
+
 /**
  * Shared code for the Capabilities Registry and the python bindings to the Capabilities system.
  */
-namespace CapabilityUtils
+namespace Moose::CapabilityUtils
 {
 
 class CapabilityException : public std::runtime_error
@@ -139,16 +146,18 @@ public:
    *
    * This is only valid for string-valued capabilities.
    */
-  Capability & setEnumeration(std::vector<std::string> && enumeration);
+  Capability & setEnumeration(const std::vector<std::string> & enumeration);
 
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
   /**
    * Negate a Capability value.
    *
-   * This should only be used by the TestHarness when it
-   * needs to augment capabilities to check on if a check
-   * depeneds on a capability or not.
+   * This should only be used by pycapabilities via the
+   * TestHarness when it needs to augment capabilities
+   * to check on if a check depeneds on a capability or not.
    */
-  void negateValue();
+  inline void negateValue();
+#endif
 
   /**
    * @return The boolean capability value if it is a boolean.
@@ -196,6 +205,10 @@ public:
   std::string enumerationToString() const;
 
 private:
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(::CapabilityTest, capabilityNegateValue);
+#endif
+
   /// The name of capability
   std::string _name;
   /// Description for the capability
@@ -209,63 +222,107 @@ private:
   std::optional<std::vector<std::string>> _enumeration;
 };
 
-/// The registry that stores the registered capabilities
-typedef std::map<std::string, Capability, std::less<>> Registry;
-
-/// Result from a capability check: the state, the reason, and the documentation
-typedef std::tuple<CheckState, std::string, std::string> Result;
-
 /**
- * Query a Capability.
+ * Registry of capabilities that checks capability requirements.
  *
- * Will convert the capability name to lowercase.
+ * This registry is used both within MOOSE (in framework/src/base/Capabilities.C)
+ * and within the python interface (in python/pycapabilities/_pycapabilities.C).
  */
-///@{
-const Capability * query(const Registry & registry, std::string capability);
-Capability * query(Registry & registry, std::string capability);
-///@}
+class CapabilityRegistry
+{
+public:
+  /// Result from a capability check: the state, the reason, and the documentation
+  using Result = std::tuple<CheckState, std::string, std::string>;
 
-/**
- * Add a capability to the registry.
- *
- * @param registry The registry
- * @param capability The name of the capability
- * @param value The value of the capability
- * @param doc The documentation string
- * @return The capability
- */
-Capability & add(Registry & registry,
-                 const std::string_view name,
-                 const CapabilityUtils::CapabilityValue & value,
-                 const std::string_view doc);
+  /// Type for the registry
+  using RegistryType = std::map<std::string, Capability, std::less<>>;
 
-/**
- * Checks if a set of requirements is satisified by the given capability registry
- *
- * @param requirements The requirement string
- * @param capabilities The registry that contains the capabilities
- *
- * This method is exposed to Python within the capabilities_check method in
- * framework/contrib/capabilities/pycapabilities.C. This external method is used
- * significantly by the TestHarness to check capabilities for individual test specs.
- *
- * Additionally, this method is used by the MooseApp command line option
- * "--required-capabilities ...".
- *
- * Requirements can use comparison operators (>,<,>=,<=,=!,=), where the name of
- * the capability must always be on the left hand side. Comparisons can be performed
- * on strings "compiler!=GCC" (which are case insensitive), integer numbers
- * "ad_size>=50", and version numbers "petsc>3.8.0". The state of a boolean
- * valued capability can be tested by just specifying the capability name "chaco".
- * This check can be inverted using the ! operator as "!chaco".
- *
- * The logic operators & and | can be used to chain multiple checks as
- * "thermochimica & thermochimica>1.0". Parenthesis can be used to build
- * complex logic expressions.
- *
- * See the description for CheckState for more information on why a
- * certain state would be returned.
- */
-Result check(std::string requirements, const Registry & capabilities);
+  /**
+   * Add a capability.
+   *
+   * @param registry The registry
+   * @param capability The name of the capability
+   * @param value The value of the capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  Capability & add(const std::string_view name,
+                   const CapabilityUtils::CapabilityValue & value,
+                   const std::string_view doc);
+
+  /**
+   * Query a Capability.
+   *
+   * Will convert the capability name to lowercase.
+   */
+  ///@{
+  const Capability * query(std::string capability) const;
+  Capability * query(std::string capability);
+  ///@}
+
+  /**
+   * Get a capability.
+   *
+   * Will not convert the capability name to lowercase.
+   */
+  Capability & get(const std::string_view capability);
+
+  /**
+   * Get the underlying registry.
+   */
+  const RegistryType & getRegistry() const { return _registry; }
+
+  /**
+   * Checks if a set of requirements is satisified by the capabilities
+   *
+   * @param capabilities The registry that contains the capabilities
+   * @param requirements The requirement string
+   *
+   * This method is exposed to Python within pycapabilities.Capabilities.check in
+   * python/pycapabilities/_pycapabilities.C. This external method is used
+   * significantly by the TestHarness to check capabilities for individual test specs.
+   *
+   * Additionally, this method is used by the MooseApp command line option
+   * "--required-capabilities ...".
+   *
+   * Requirements can use comparison operators (>,<,>=,<=,=!,=), where the name of
+   * the capability must always be on the left hand side. Comparisons can be performed
+   * on strings "compiler!=GCC" (which are case insensitive), integer numbers
+   * "ad_size>=50", and version numbers "petsc>3.8.0". The state of a boolean
+   * valued capability can be tested by just specifying the capability name "chaco".
+   * This check can be inverted using the ! operator as "!chaco".
+   *
+   * The logic operators & and | can be used to chain multiple checks as
+   * "thermochimica & thermochimica>1.0". Parenthesis can be used to build
+   * complex logic expressions.
+   *
+   * See the description for CheckState for more information on why a
+   * certain state would be returned.
+   */
+  Result check(std::string requirements) const;
+
+  /**
+   * Clear the registry.
+   */
+  void clear() { _registry.clear(); }
+
+private:
+#ifdef MOOSE_UNIT_TEST
+  friend class ::CapabilitiesTest;
+#endif
+
+  /// Registry storage
+  RegistryType _registry;
+};
+
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+void
+Capability::negateValue()
+{
+  _explicit = false;
+  _enumeration.reset();
+  _value = false;
+}
+#endif
 
 } // namespace CapabilityUtils
