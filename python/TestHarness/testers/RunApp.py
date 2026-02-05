@@ -12,7 +12,6 @@ from Tester import Tester
 from TestHarness import util, TestHarness
 from TestHarness.capability_util import addAugmentedCapability
 from shlex import quote
-from typing import Optional
 import json
 
 class RunApp(Tester):
