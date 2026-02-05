@@ -13,6 +13,10 @@ import unittest
 
 import pycapabilities
 
+CERTAIN_FAIL = pycapabilities.CheckState.CERTAIN_FAIL
+POSSIBLE_FAIL = pycapabilities.CheckState.POSSIBLE_FAIL
+POSSIBLE_PASS = pycapabilities.CheckState.POSSIBLE_PASS
+CERTAIN_PASS = pycapabilities.CheckState.CERTAIN_PASS
 
 class TestCapabilities(unittest.TestCase):
     """Test capabilities module."""
@@ -117,27 +121,31 @@ class TestCapabilities(unittest.TestCase):
 
         capabilities = pycapabilities.Capabilities(cap)
 
-        def check(req: str, status):
-            self.assertEqual(capabilities.check(req)[0], status)
+        def check(req: str, expect_status: pycapabilities.CheckState):
+            status, reason, doc = capabilities.check(req)
+            self.assertIsInstance(status, pycapabilities.CheckState)
+            self.assertIsInstance(reason, str)
+            self.assertIsInstance(doc, str)
+            self.assertEqual(expect_status, status)
 
         # unknown
-        check("!unknown", pycapabilities.POSSIBLE_PASS)
+        check("!unknown", POSSIBLE_PASS)
 
         # booleans
-        check("!bool_true", pycapabilities.CERTAIN_FAIL)
-        check("!bool_false", pycapabilities.CERTAIN_PASS)
+        check("!bool_true", CERTAIN_FAIL)
+        check("!bool_false", CERTAIN_PASS)
 
         # ints
-        check("int=1", pycapabilities.CERTAIN_PASS)
-        check("int>0", pycapabilities.CERTAIN_PASS)
-        check("int=2", pycapabilities.CERTAIN_FAIL)
-        check("int<0", pycapabilities.CERTAIN_FAIL)
-        check("int", pycapabilities.CERTAIN_PASS)
+        check("int=1", CERTAIN_PASS)
+        check("int>0", CERTAIN_PASS)
+        check("int=2", CERTAIN_FAIL)
+        check("int<0", CERTAIN_FAIL)
+        check("int", CERTAIN_PASS)
 
         # strings
-        check("string=string", pycapabilities.CERTAIN_PASS)
-        check("string=foo", pycapabilities.CERTAIN_FAIL)
-        check("string", pycapabilities.CERTAIN_PASS)
+        check("string=string", CERTAIN_PASS)
+        check("string=foo", CERTAIN_FAIL)
+        check("string", CERTAIN_PASS)
 
         # Explicit capabilities raise
         for name in ["int_explicit", "string_explicit", "string_enumerated_explicit"]:
@@ -164,8 +172,8 @@ class TestCapabilities(unittest.TestCase):
                 capabilities.check(f"{name}=bar")
 
         # Combined requirements
-        check("bool_true & !bool_true", pycapabilities.CERTAIN_FAIL)
-        check("int>0 & (foo | string=string)", pycapabilities.CERTAIN_PASS)
+        check("bool_true & !bool_true", CERTAIN_FAIL)
+        check("int>0 & (foo | string=string)", CERTAIN_PASS)
 
     def testCapabilitiesCheckAdd(self):
         """Test pycapabilities.Capabilities.check with add_capabilities."""
@@ -173,11 +181,11 @@ class TestCapabilities(unittest.TestCase):
         capabilities = pycapabilities.Capabilities(caps)
 
         # Normal behavior, capability is added
-        self.assertEqual(capabilities.check("added")[0], pycapabilities.POSSIBLE_FAIL)
+        self.assertEqual(capabilities.check("added")[0], POSSIBLE_FAIL)
         add = {"added": {"doc": "doc", "value": "added"}}
         self.assertEqual(
             capabilities.check("orig & added", add_capabilities=add)[0],
-            pycapabilities.CERTAIN_PASS,
+            CERTAIN_PASS,
         )
 
         # Bad arguments
@@ -200,28 +208,28 @@ class TestCapabilities(unittest.TestCase):
         # One capability is set false
         self.assertEqual(
             capabilities.check("!cap1 & cap2=cap2", negate_capabilities=["cap1"])[0],
-            pycapabilities.CERTAIN_PASS,
+            CERTAIN_PASS,
         )
         # Both capabilities are set false
         self.assertEqual(
             capabilities.check("!cap1 & !cap2", negate_capabilities=["cap1", "cap2"])[
                 0
             ],
-            pycapabilities.CERTAIN_PASS,
+            CERTAIN_PASS,
         )
         # Capability is added
         self.assertEqual(
             capabilities.check(
                 "cap1=cap1 & cap2=cap2 & !cap3", negate_capabilities=["cap3"]
             )[0],
-            pycapabilities.CERTAIN_PASS,
+            CERTAIN_PASS,
         )
         # One capability is set false, one is added
         self.assertEqual(
             capabilities.check(
                 "cap1=cap1 & !cap2 & !cap3", negate_capabilities=["cap2", "cap3"]
             )[0],
-            pycapabilities.CERTAIN_PASS,
+            CERTAIN_PASS,
         )
 
         # Bad arguments
@@ -250,7 +258,7 @@ class TestCapabilities(unittest.TestCase):
                 add_capabilities=add,
                 negate_capabilities=negate,
             )[0],
-            pycapabilities.CERTAIN_PASS,
+            CERTAIN_PASS,
         )
 
 

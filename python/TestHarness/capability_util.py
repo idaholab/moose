@@ -14,6 +14,8 @@ import subprocess
 import sys
 from typing import Iterable, Optional, Union
 
+import pycapabilities
+
 from TestHarness.util import outputHeader, parseMOOSEJSON, runCommand
 
 
@@ -33,14 +35,8 @@ def getAppCapabilities(executable: str) -> dict:
     return parseMOOSEJSON(output, "--show-capabilities")
 
 
-class CapabilityException(Exception):
-    """Exception for when a capability check fails."""
-
-    pass
-
-
 def checkAppCapabilities(
-    capabilities: "pycapabilities.Capabilities",
+    capabilities: pycapabilities.Capabilities,
     required: str,
     certain: bool,
     add_capabilities: Optional[dict] = None,
@@ -66,19 +62,14 @@ def checkAppCapabilities(
         Capabilities to negate in the registry during the check.
 
     """
-    import pycapabilities
+    status, _, _ = capabilities.check(
+        required,
+        add_capabilities=add_capabilities,
+        negate_capabilities=negate_capabilities,
+    )
 
-    try:
-        status, _, _ = capabilities.check(
-            required,
-            add_capabilities=add_capabilities,
-            negate_capabilities=negate_capabilities,
-        )
-    except pycapabilities.CapabilityException as e:
-        raise CapabilityException(e)
-
-    return status == pycapabilities.CERTAIN_PASS or (
-        status == pycapabilities.POSSIBLE_PASS and not certain
+    return status == pycapabilities.CheckState.CERTAIN_PASS or (
+        status == pycapabilities.CheckState.POSSIBLE_PASS and not certain
     )
 
 

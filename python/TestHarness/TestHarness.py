@@ -1,35 +1,43 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://mooseframework.inl.gov
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
-import sys
+import argparse
+import copy
+import datetime
+import errno
+import getpass
+import inspect
+import json
+import os
 import platform
-import os, re, inspect, errno, copy, json
-import subprocess
+import re
 import shutil
 import socket
-import datetime
-import getpass
-import argparse
+import subprocess
+import sys
 import typing
 from collections import defaultdict, namedtuple
-from typing import Tuple, Optional
-
 from socket import gethostname
+from typing import Optional, Tuple
 
+import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
-from . import util
-from . import RaceChecker
-from TestHarness.capability_util import addAugmentedCapability, getAppCapabilities, parseRequiredCapabilities
+from pycapabilities import Capabilities
 
-import pyhit
+from TestHarness import RaceChecker, util
+from TestHarness.capability_util import (
+    addAugmentedCapability,
+    getAppCapabilities,
+    parseRequiredCapabilities,
+)
 
 # Directory the test harness is in
 testharness_dir = os.path.dirname(os.path.realpath(__file__))
@@ -405,7 +413,7 @@ class TestHarness:
         options: argparse.Namespace,
         executable: Optional[str],
         libmesh_dir: Optional[str],
-    ) -> Tuple["pycapabilities.Capabilities", dict, list[str]]:
+    ) -> Tuple[Capabilities, dict, list[str]]:
         """
         Get the application capabilities.
 

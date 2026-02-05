@@ -15,7 +15,20 @@
 #include <memory>
 
 /*******************************************************************************/
-/* Python capabilities.CapabilityException                                     */
+/* Python pycapabilities module definition                                     */
+/*******************************************************************************/
+
+PyDoc_STRVAR(capabilities_doc, "Interface to the Moose::Capabilities system.");
+
+static struct PyModuleDef pycapabilitiesmodule = {
+    PyModuleDef_HEAD_INIT,
+    "capabilities",   /* name of module */
+    capabilities_doc, /* module documentation, may be nullptr */
+    -1,               /* size of per-interpreter state of the module,
+                         or -1 if the module keeps state in global variables. */};
+
+/*******************************************************************************/
+/* Python pycapabilities.CapabilityException                                   */
 /*******************************************************************************/
 
 static PyObject * CapabilityExceptionObject;
@@ -155,23 +168,94 @@ addCapabilities(CapabilityUtils::Registry & registry, PyObject * capabilities_di
 }
 
 /*******************************************************************************/
-/* Python capabilities.Capabilities object                                     */
+/* Python pycapabilities.CheckState enum                                       */
 /*******************************************************************************/
 
-/// C++ state stored with a capabilities.Capabilities object
+static int
+CheckState_enum(PyObject * module)
+{
+  int rc = -1;
+
+  PyObject * enum_mod = nullptr;
+  PyObject * IntEnum = nullptr;
+  PyObject * name = nullptr;
+  PyObject * members = nullptr;
+  PyObject * checkstate = nullptr;
+
+  enum_mod = PyImport_ImportModule("enum");
+  if (!enum_mod)
+    goto done;
+
+  IntEnum = PyObject_GetAttrString(enum_mod, "IntEnum");
+  if (!IntEnum)
+    goto done;
+
+  name = PyUnicode_FromString("CheckState");
+  if (!name)
+    goto done;
+
+  members = PyDict_New();
+  if (!members)
+    goto done;
+
+#define ADD_MEMBER(dict, key, value_long)                                                          \
+  do                                                                                               \
+  {                                                                                                \
+    PyObject * tmp = PyLong_FromLong((value_long));                                                \
+    if (!tmp)                                                                                      \
+      goto done;                                                                                   \
+    if (PyDict_SetItemString((dict), (key), tmp) < 0)                                              \
+    {                                                                                              \
+      Py_DECREF(tmp);                                                                              \
+      goto done;                                                                                   \
+    }                                                                                              \
+    Py_DECREF(tmp);                                                                                \
+  } while (0)
+
+  ADD_MEMBER(members, "CERTAIN_FAIL", CapabilityUtils::CheckState::CERTAIN_FAIL);
+  ADD_MEMBER(members, "POSSIBLE_FAIL", CapabilityUtils::CheckState::POSSIBLE_FAIL);
+  ADD_MEMBER(members, "UNKNOWN", CapabilityUtils::CheckState::UNKNOWN);
+  ADD_MEMBER(members, "POSSIBLE_PASS", CapabilityUtils::CheckState::POSSIBLE_PASS);
+  ADD_MEMBER(members, "CERTAIN_PASS", CapabilityUtils::CheckState::CERTAIN_PASS);
+#undef ADD_MEMBER
+
+  checkstate = PyObject_CallFunctionObjArgs(IntEnum, name, members, nullptr);
+  if (!checkstate)
+    goto done;
+
+  if (PyModule_AddObject(module, "CheckState", checkstate) < 0)
+    goto done;
+  checkstate = NULL;
+
+  rc = 0;
+
+done:
+  Py_XDECREF(enum_mod);
+  Py_XDECREF(IntEnum);
+  Py_XDECREF(name);
+  Py_XDECREF(members);
+  Py_XDECREF(checkstate);
+  return rc;
+}
+
+/*******************************************************************************/
+/* Python pycapabilities.Capabilities object                                   */
+/*******************************************************************************/
+
+/// C++ state stored with a pycapabilities.Capabilities object
 struct CapabilitiesState
 {
   CapabilityUtils::Registry registry;
 };
 
-/// Python state stored with a capabilities.Capabilities object
+/// Python state stored with a pycapabilities.Capabilities object
 typedef struct
 {
   PyObject_HEAD CapabilitiesState * state;
   PyObject * values;
 } CapabilitiesObject;
 
-/// Instantiate CapabilitiesState for a capabilities.Capabilities object
+/// Instantiate CapabilitiesState for a pycapabilities.Capabilities object
 static PyObject *
 Capabilities_new(PyTypeObject * type, PyObject * /* args */, PyObject * /* kwds */)
 {
@@ -193,7 +277,7 @@ Capabilities_new(PyTypeObject * type, PyObject * /* args */, PyObject * /* kwds 
   return (PyObject *)self;
 }
 
-/// capabilities.Capabilities.__init__()
+/// pycapabilities.Capabilities.__init__()
 static int
 Capabilities_init(CapabilitiesObject * self, PyObject * args, PyObject * /* kwds */)
 {
@@ -231,7 +315,7 @@ Capabilities_init(CapabilitiesObject * self, PyObject * args, PyObject * /* kwds
   return PyErr_Occurred() ? -1 : 0;
 }
 
-/// capabilities.Capabilities.check()
+/// pycapabilities.Capabilities.check()
 static PyObject *
 Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs)
 {
@@ -341,12 +425,28 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
   // otherwise use the stored registry
   auto & registry = registry_copy ? *registry_copy : self->state->registry;
 
+  // Get a CheckState enum
+  PyObject * m = PyState_FindModule(&pycapabilitiesmodule);
+  if (!m)
+  {
+    PyErr_SetString(PyExc_RuntimeError, "module not initialized");
+    return nullptr;
+  }
+
   // Run the check
   try
   {
     auto [status, message, doc] = CapabilityUtils::check(requirement, registry);
+
+    PyObject * checkstate = PyObject_GetAttrString(m, "CheckState");
+    if (!checkstate)
+      return nullptr;
+
+    PyObject * checkstate_obj = PyObject_CallFunction(checkstate, "l", status);
+    Py_DECREF(checkstate);
+
     return Py_BuildValue("(NNN)",
-                         PyLong_FromLong(status),
+                         checkstate_obj,
                          PyUnicode_FromString(message.c_str()),
                          PyUnicode_FromString(doc.c_str()));
   }
@@ -362,7 +462,7 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
   }
 }
 
-/// capabilities.Capabilities destruction
+/// pycapabilities.Capabilities destruction
 static void
 Capabilities_dealloc(CapabilitiesObject * self)
 {
@@ -372,14 +472,14 @@ Capabilities_dealloc(CapabilitiesObject * self)
   Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-/// capabilities.Capabilities definition of methods
+/// pycapabilities.Capabilities definition of methods
 static PyMethodDef Capabilities_methods[] = {{"check",
                                               (PyCFunction)Capabilities_check,
                                               METH_VARARGS | METH_KEYWORDS,
                                               "Check a capability expression."},
                                              {nullptr, nullptr, 0, nullptr}};
 
-/// capabilities.Capabilities definition of members
+/// pycapabilities.Capabilities definition of members
 static PyMemberDef Capabilities_members[] = {{"values",
                                               Py_T_OBJECT_EX,
                                               offsetof(CapabilitiesObject, values),
@@ -387,9 +487,9 @@ static PyMemberDef Capabilities_members[] = {{"values",
                                               "Capabilities dictionary"},
                                              {nullptr}};
 
-/// capabilities.Capabilities definition
+/// pycapabilities.Capabilities definition
 static PyTypeObject CapabilitiesType = {
-    PyVarObject_HEAD_INIT(nullptr, 0).tp_name = "capabilities.Capabilities",
+    PyVarObject_HEAD_INIT(nullptr, 0).tp_name = "pycapabilities.Capabilities",
     .tp_basicsize = sizeof(CapabilitiesObject),
     .tp_itemsize = 0,
     .tp_dealloc = (destructor)Capabilities_dealloc,
@@ -401,29 +501,20 @@ static PyTypeObject CapabilitiesType = {
     .tp_new = Capabilities_new};
 
 /*******************************************************************************/
-/* Python capabilities module                                                  */
+/* Python pycapabilities module init                                           */
 /*******************************************************************************/
 
-PyDoc_STRVAR(capabilities_doc, "Interface to the Moose::Capabilities system.");
-
-static struct PyModuleDef capabilitiesmodule = {
-    PyModuleDef_HEAD_INIT,
-    "capabilities",   /* name of module */
-    capabilities_doc, /* module documentation, may be nullptr */
-    -1,               /* size of per-interpreter state of the module,
-                         or -1 if the module keeps state in global variables. */};
-
 PyMODINIT_FUNC
-PyInit_capabilities(void)
+PyInit__pycapabilities(void)
 {
   if (PyType_Ready(&CapabilitiesType) < 0)
     return nullptr;
 
-  auto module = PyModule_Create(&capabilitiesmodule);
+  auto module = PyModule_Create(&pycapabilitiesmodule);
 
   // CapabilityException
   CapabilityExceptionObject =
-      PyErr_NewException("capabilities.CapabilityException", PyExc_Exception, nullptr);
+      PyErr_NewException("pycapabilities.CapabilityException", PyExc_Exception, nullptr);
   if (!CapabilityExceptionObject)
   {
     Py_DECREF(module);
@@ -433,12 +524,12 @@ PyInit_capabilities(void)
   PyModule_AddObject(
       module, "CapabilityException", CapabilityExceptionObject); // steals a ref to CustomError
 
-  // CheckState constants
-  PyModule_AddIntConstant(module, "CERTAIN_FAIL", 0);
-  PyModule_AddIntConstant(module, "POSSIBLE_FAIL", 1);
-  PyModule_AddIntConstant(module, "UNKNOWN", 2);
-  PyModule_AddIntConstant(module, "POSSIBLE_PASS", 3);
-  PyModule_AddIntConstant(module, "CERTAIN_PASS", 4);
+  // CheckState enum
+  if (CheckState_enum(module) < 0)
+  {
+    Py_DECREF(module);
+    return nullptr;
+  }
 
   // Capabilities object
   Py_INCREF(&CapabilitiesType);

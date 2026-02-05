@@ -7,18 +7,26 @@
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil, json, importlib.util, inspect
-import mooseutils
-from TestHarness import OutputInterface, util
-from TestHarness.StatusSystem import StatusSystem
-from TestHarness.capability_util import CapabilityException, checkAppCapabilities
-from TestHarness.validation import ValidationCase, ValidationCaseClasses
-from FactorySystem.MooseObject import MooseObject
-from FactorySystem.InputParameters import InputParameters
-from pathlib import Path
+import importlib.util
+import inspect
+import json
+import os
+import re
+import shutil
+import sys
 from dataclasses import dataclass
-from copy import deepcopy
-from typing import Optional, Tuple, Union
+from pathlib import Path
+from typing import Optional, Tuple
+
+import mooseutils
+from FactorySystem.InputParameters import InputParameters
+from FactorySystem.MooseObject import MooseObject
+from pycapabilities import CapabilityException
+
+from TestHarness import OutputInterface
+from TestHarness.capability_util import checkAppCapabilities
+from TestHarness.StatusSystem import StatusSystem
+from TestHarness.validation import ValidationCase, ValidationCaseClasses
 
 
 class Tester(MooseObject, OutputInterface):

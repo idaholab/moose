@@ -82,8 +82,8 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 #
 # capabilities python bindings
 #
-CAPABILITIES_DIR ?= $(MOOSE_DIR)/framework/contrib/pycapabilities
-pycapabilities_srcfiles := $(CAPABILITIES_DIR)/pycapabilities.C $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
+PYCAPABILITIES_DIR ?= $(MOOSE_DIR)/python/pycapabilities
+pycapabilities_srcfiles := $(PYCAPABILITIES_DIR)/_pycapabilities.c $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
 
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
@@ -233,14 +233,14 @@ hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) $(CXXFLAGS) -I$(HIT_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB) $(hit_pad_LDFLAGS))'
 	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
-pycapabilities_LIBNAME      := capabilities.$(PYMOD_EXTENSION)
-pycapabilities_LIB          := $(CAPABILITIES_DIR)/$(pycapabilities_LIBNAME)
+pycapabilities_LIBNAME      := _pycapabilities.$(PYMOD_EXTENSION)
+pycapabilities_LIB          := $(PYCAPABILITIES_DIR)/$(pycapabilities_LIBNAME)
 pycapabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/utils
 pycapabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
 
 pycapabilities $(pycapabilities_LIB) : $(pycapabilities_srcfiles)
 	@echo "Building and linking $(pycapabilities_LIB)..."
-	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(pycapabilities_srcfiles) $(pycapabilities_COMPILEFLAGS) $(pycapabilities_LDFLAGS) $(LDFLAGS) -o $(pycapabilities_LIB))'
+	@bash -c '(cd "$(PYCAPABILITIES_DIR)" && $(libmesh_UNDERLYING_CXX) -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(pycapabilities_srcfiles) $(pycapabilities_COMPILEFLAGS) $(pycapabilities_LDFLAGS) $(LDFLAGS) -o $(pycapabilities_LIB))'
 
 #
 # gtest
@@ -690,8 +690,6 @@ install_python:: $(pyhit_LIB) $(pycapabilities_LIB)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
 	@echo "Installing python library $(pyhit_LIB)"
 	@cp -f $(pyhit_LIB) $(python_install_dir)/
-	@echo "Installing python library $(pycapabilities_LIB)"
-	@cp -f $(pycapabilities_LIB) $(python_install_dir)/
 
 install_harness: install_python
 	@echo "Installing TestHarness"
