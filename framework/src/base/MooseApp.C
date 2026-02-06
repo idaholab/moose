@@ -1269,28 +1269,35 @@ MooseApp::registerCapabilities()
       }
     }
 
-    if (!executable_path)
-      mooseDoOnce(mooseWarning("Failed to determine executable path"));
-    else
+    std::string value = "unknown";
+
+    if (executable_path)
     {
       // Try to follow all symlinks to get the real path
       std::error_code ec;
       const auto resolved_path =
           std::filesystem::weakly_canonical(std::filesystem::path(*executable_path), ec);
       if (ec)
-        mooseDoOnce(mooseWarning("Failed to determine executable path:\n\n", ec.message()));
+        mooseDoOnce(mooseWarning("Failed to resolve executable path '",
+                                 *executable_path,
+                                 "':\n",
+                                 ec.message(),
+                                 "\n\nSetting capability installation_type=unknown"));
       else
       {
         // If the binary is in a folder "bin", we'll consider it installed.
         // This isn't the best check, but it works with how we currently
         // install applications in app.mk
-        const auto value =
-            resolved_path.parent_path().filename() == "bin" ? "relocated" : "in_tree";
-        addStringCapability("installation_type", value, "The installation type of the application.")
-            .setExplicit()
-            .setEnumeration({"relocated", "in_tree"});
+        value = resolved_path.parent_path().filename() == "bin" ? "relocated" : "in_tree";
       }
     }
+    else
+      mooseDoOnce(mooseWarning(
+          "Failed to determine executable path; setting capability installation_type=unknown"));
+
+    addStringCapability("installation_type", value, "The installation type of the application.")
+        .setExplicit()
+        .setEnumeration({"in_tree", "relocated", "unknown"});
   }
 }
 
