@@ -1,0 +1,14 @@
+[Tests]
+  design = 'MultiAppMFEMlibMeshGeneralFieldTransfer.md'
+  issues = '#31982'
+  [MFEMtolibMeshTransferH1Quad]
+    type = CSVDiff
+    input = libmesh_parent.i
+    csvdiff = 'libmesh_parent_out.csv'
+    requirement = 'The system shall have the ability to transfer MFEM solutions to libMesh for scalar LAGRANGE variables defined on quads.'
+    abs_zero = 1e-8
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+[]

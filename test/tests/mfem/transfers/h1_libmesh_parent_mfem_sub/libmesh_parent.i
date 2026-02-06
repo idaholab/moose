@@ -59,6 +59,7 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Postprocessors]
@@ -72,8 +73,8 @@
 [MultiApps]
   [mfem_app]
     type = FullSolveMultiApp
-    input_files = mfem_diffusion.i
-    execute_on = 'TIMESTEP_END'
+    input_files = mfem_sub.i
+    execute_on = 'INITIAL'
   []
 []
 
