@@ -46,7 +46,7 @@
 []
 
 [Outputs]
-  file_base = 'libmesh_parent_mfem_sub_quads'
+  file_base = 'libmesh_parent_scalar_mfem_sub_quads'
   exodus = true
   csv = true
 []
@@ -62,7 +62,7 @@
 [MultiApps]
   [mfem_app]
     type = FullSolveMultiApp
-    input_files = mfem_sub.i
+    input_files = mfem_sub_scalar.i
     execute_on = 'INITIAL'
   []
 []
