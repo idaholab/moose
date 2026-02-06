@@ -512,10 +512,7 @@ MaterialPropertyStorage::setProps(const unsigned int state)
 }
 
 template <typename Context>
-void dataStore(std::ostream & stream,
-               MaterialPropertyStorage::PropRecord & record,
-               Context context);
+void
+dataStore(std::ostream & stream, MaterialPropertyStorage::PropRecord & record, Context context);
 template <typename Context>
-void dataLoad(std::istream & stream,
-              MaterialPropertyStorage::PropRecord & record,
-              Context context);
+void dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, Context context);

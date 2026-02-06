@@ -149,7 +149,8 @@ protected:
                                                                       Args &&... args);
 
   /**
-   * Declares a piece of "managed" restartable data and initialize it (pointer version - deprecated).
+   * Declares a piece of "managed" restartable data and initialize it (pointer version -
+   * deprecated).
    *
    * Here, "managed" restartable data means that the caller can destruct this data
    * upon destruction of the return value of this method. Therefore, this
@@ -188,7 +189,8 @@ protected:
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param context Context reference that will be passed to the load and store functions (preferred)
+   * @param context Context reference that will be passed to the load and store functions
+   * (preferred)
    * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename Context, typename... Args>
@@ -204,7 +206,8 @@ protected:
    * NOTE: This returns a _reference_!  Make sure you store it in a _reference_!
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
-   * @param context Context pointer that will be passed to the load and store functions (deprecated - use reference overload)
+   * @param context Context pointer that will be passed to the load and store functions (deprecated
+   * - use reference overload)
    * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename Context, typename... Args>
@@ -268,7 +271,8 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param object_name A supplied name for the object that is declaring this data.
-   * @param context Context reference that will be passed to the load and store functions (preferred)
+   * @param context Context reference that will be passed to the load and store functions
+   * (preferred)
    * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename Context, typename... Args>
@@ -286,7 +290,8 @@ protected:
    *
    * @param data_name The name of the data (usually just use the same name as the member variable)
    * @param object_name A supplied name for the object that is declaring this data.
-   * @param context Context pointer that will be passed to the load and store functions (deprecated - use reference overload)
+   * @param context Context pointer that will be passed to the load and store functions (deprecated
+   * - use reference overload)
    * @param args Arguments to forward to the constructor of the data
    */
   template <typename T, typename Context, typename... Args>
@@ -424,8 +429,8 @@ Restartable::declareRestartableDataHelper(const std::string & data_name,
   // If it's already in use, the App will return a reference to the existing instance and we'll
   // return that one instead. We might refactor this to have the app create the RestartableData
   // at a later date.
-  auto data_ptr =
-      std::make_unique<RestartableData<T, Context>>(full_name, context, std::forward<Args>(args)...);
+  auto data_ptr = std::make_unique<RestartableData<T, Context>>(
+      full_name, context, std::forward<Args>(args)...);
   auto & restartable_data_ref = static_cast<RestartableData<T, Context> &>(
       registerRestartableDataOnApp(std::move(data_ptr), _restartable_tid));
 

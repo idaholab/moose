@@ -3565,13 +3565,13 @@ MooseApp::createRecoverablePerfGraph()
 {
   registerRestartableNameWithFilter("perf_graph", Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
-  auto perf_graph =
-      std::make_unique<RestartableData<PerfGraph, MooseApp *>>("perf_graph",
-                                                               this,
-                                                               type() + " (" + name() + ')',
-                                                               *this,
-                                                               getParam<bool>("perf_graph_live_all"),
-                                                               !getParam<bool>("disable_perf_graph_live"));
+  auto perf_graph = std::make_unique<RestartableData<PerfGraph, MooseApp *>>(
+      "perf_graph",
+      this,
+      type() + " (" + name() + ')',
+      *this,
+      getParam<bool>("perf_graph_live_all"),
+      !getParam<bool>("disable_perf_graph_live"));
 
   return dynamic_cast<RestartableData<PerfGraph, MooseApp *> &>(
              registerRestartableData(std::move(perf_graph), 0, false))

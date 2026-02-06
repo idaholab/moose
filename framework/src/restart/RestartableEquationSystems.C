@@ -433,7 +433,8 @@ dataStore(std::ostream & stream,
   dataStore(stream, header.data_size, nullptr);
 }
 
-template void dataStore(std::ostream &, RestartableEquationSystems::EquationSystemsHeader &, void *);
+template void
+dataStore(std::ostream &, RestartableEquationSystems::EquationSystemsHeader &, void *);
 
 template <typename Context>
 void

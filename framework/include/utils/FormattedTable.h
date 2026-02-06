@@ -69,7 +69,8 @@ public:
   virtual void print(std::ostream & os) const override { os << this->_value; };
 
   virtual void store(std::ostream & stream, void * context) override;
-  static void load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+  static void
+  load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
 
 private:
   T _value;
@@ -93,7 +94,9 @@ TableValue<T>::store(std::ostream & stream, void * context)
 
 template <typename T>
 void
-TableValue<T>::load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context)
+TableValue<T>::load(std::istream & stream,
+                    std::shared_ptr<TableValueBase> & value_base,
+                    void * context)
 {
   T value;
   ::dataLoad(stream, value, context);

@@ -191,8 +191,6 @@ private:
 };
 
 template <typename Context>
-void
-dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, Context context);
+void dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, Context context);
 template <typename Context>
-void
-dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, Context context);
+void dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, Context context);

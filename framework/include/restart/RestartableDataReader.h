@@ -222,8 +222,8 @@ RestartableDataReader::restoreData(const std::string & data_name,
                                    Context context /* = nullptr */,
                                    Args &&... args)
 {
-  std::unique_ptr<RestartableDataValue> T_data =
-      std::make_unique<RestartableData<T, Context>>(data_name, context, std::forward<Args>(args)...);
+  std::unique_ptr<RestartableDataValue> T_data = std::make_unique<RestartableData<T, Context>>(
+      data_name, context, std::forward<Args>(args)...);
   auto & value = restoreData(data_name, std::move(T_data), tid);
   auto T_value = dynamic_cast<RestartableData<T, Context> *>(&value);
   mooseAssert(T_value, "Bad cast");

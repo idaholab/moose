@@ -399,7 +399,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
     Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
-    _req(declareManagedRestartableDataWithContext<RestartableEquationSystems>("equation_systems", _mesh, _mesh.getMesh())),
+    _req(declareManagedRestartableDataWithContext<RestartableEquationSystems>(
+        "equation_systems", _mesh, _mesh.getMesh())),
     _initialized(false),
     _solve(getParam<bool>("solve")),
     _transient(false),

@@ -29,9 +29,7 @@
 
 template <typename Context>
 void
-dataStore(std::ostream & stream,
-          FeatureFloodCount::FeatureData & feature,
-          Context context)
+dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, Context context)
 {
   /**
    * Note that _local_ids is not stored here. It's not needed for restart, and not needed

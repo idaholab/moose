@@ -761,20 +761,16 @@ private:
 };
 
 template <typename Context>
-void
-dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, Context context);
+void dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, Context context);
 
 template <typename Context>
-void
-dataStore(std::ostream & stream, BoundingBox & bbox, Context context);
+void dataStore(std::ostream & stream, BoundingBox & bbox, Context context);
 
 template <typename Context>
-void
-dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, Context context);
+void dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, Context context);
 
 template <typename Context>
-void
-dataLoad(std::istream & stream, BoundingBox & bbox, Context context);
+void dataLoad(std::istream & stream, BoundingBox & bbox, Context context);
 
 template <>
 struct enable_bitmask_operators<FeatureFloodCount::Status>

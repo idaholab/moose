@@ -49,7 +49,8 @@ dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Context conte
 }
 
 template void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context);
-template void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::nullptr_t context);
+template void
+dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::nullptr_t context);
 
 template <typename Context>
 void
@@ -65,4 +66,5 @@ dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Context contex
 }
 
 template void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context);
-template void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, std::nullptr_t context);
+template void
+dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, std::nullptr_t context);

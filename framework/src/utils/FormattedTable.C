@@ -58,8 +58,11 @@ dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, C
   value_base->store(stream, context);
 }
 
-template void dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
-template void dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, std::nullptr_t context);
+template void
+dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+template void dataStore(std::ostream & stream,
+                        std::shared_ptr<TableValueBase> & value_base,
+                        std::nullptr_t context);
 
 template <typename Context>
 void
@@ -113,8 +116,11 @@ dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, Co
     mooseError("Unsupported table value type ", demangle(type.c_str()));
 }
 
-template void dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
-template void dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, std::nullptr_t context);
+template void
+dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
+template void dataLoad(std::istream & stream,
+                       std::shared_ptr<TableValueBase> & value_base,
+                       std::nullptr_t context);
 
 void
 FormattedTable::close()

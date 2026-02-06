@@ -23,8 +23,8 @@ SnapshotContainerBase::validParams()
 
 SnapshotContainerBase::SnapshotContainerBase(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _accumulated_data(declareRestartableDataWithContext<Snapshots>("accumulated_snapshots",
-                                                                   comm())),
+    _accumulated_data(
+        declareRestartableDataWithContext<Snapshots>("accumulated_snapshots", comm())),
     _nonlinear_system_number(
         _fe_problem.nlSysNum(getParam<NonlinearSystemName>("nonlinear_system_name")))
 {

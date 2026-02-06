@@ -21,7 +21,6 @@
 #include "UniqueStorage.h"
 #include "TwoVector.h"
 #include "AnyPointer.h"
-#include "DataIOContext.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
@@ -613,7 +612,7 @@ dataStore(std::ostream & stream, const Moose::LibtorchArtificialNeuralNet * cons
 
 template <typename Context>
 inline void
-dataLoad(std::istream & stream, const Moose::LibtorchArtificialNeuralNet * & ptr, Context)
+dataLoad(std::istream & stream, const Moose::LibtorchArtificialNeuralNet *& ptr, Context)
 {
   // Load the sentinel and set to nullptr - will be reconstructed later
   char null_flag;
@@ -634,10 +633,6 @@ template <typename T, typename Context>
 inline void
 dataLoad(std::istream & stream, std::vector<T> & v, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context>,
-                "Vector element type requires a different context type for loading. "
-                "For example, std::vector<Elem*> requires MeshBase* context.");
-
   // First read the size of the vector
   unsigned int size = 0;
   dataLoad(stream, size, nullptr);
@@ -688,8 +683,6 @@ template <typename T, typename Context>
 inline void
 dataLoad(std::istream & stream, std::set<T> & s, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context>,
-                "Set element type requires a different context type for loading.");
 
   // First read the size of the set
   unsigned int size = 0;
@@ -707,8 +700,6 @@ template <typename T, typename Context>
 inline void
 dataLoad(std::istream & stream, std::list<T> & l, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context>,
-                "List element type requires a different context type for loading.");
 
   // First read the size of the set
   unsigned int size = 0;
@@ -726,8 +717,6 @@ template <typename T, typename Context>
 inline void
 dataLoad(std::istream & stream, std::deque<T> & l, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context>,
-                "Deque element type requires a different context type for loading.");
 
   // First read the size of the container
   unsigned int size = 0;
@@ -745,9 +734,6 @@ template <typename T, typename U, typename Context>
 inline void
 dataLoad(std::istream & stream, std::map<T, U> & m, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context> &&
-                    Moose::context_compatible_v<Moose::required_load_context_t<U>, Context>,
-                "Map key or value type requires a different context type for loading.");
 
   m.clear();
 
@@ -769,9 +755,6 @@ template <typename T, typename U, typename Context>
 inline void
 dataLoad(std::istream & stream, std::unordered_map<T, U> & m, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context> &&
-                    Moose::context_compatible_v<Moose::required_load_context_t<U>, Context>,
-                "Unordered_map key or value type requires a different context type for loading.");
 
   m.clear();
 
@@ -793,8 +776,6 @@ template <typename T, typename Context>
 inline void
 dataLoad(std::istream & stream, std::unordered_set<T> & s, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context>,
-                "Unordered_set element type requires a different context type for loading.");
 
   s.clear();
 
@@ -815,8 +796,6 @@ template <typename T, typename Context>
 inline void
 dataLoad(std::istream & stream, std::optional<T> & m, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context>,
-                "Optional value type requires a different context type for loading.");
 
   bool has_value;
   dataLoad(stream, has_value, nullptr);
@@ -834,9 +813,6 @@ template <typename T, typename U, typename Context>
 inline void
 dataLoad(std::istream & stream, HashMap<T, U> & m, Context context)
 {
-  static_assert(Moose::context_compatible_v<Moose::required_load_context_t<T>, Context> &&
-                    Moose::context_compatible_v<Moose::required_load_context_t<U>, Context>,
-                "HashMap key or value type requires a different context type for loading.");
 
   // First read the size of the map
   unsigned int size = 0;

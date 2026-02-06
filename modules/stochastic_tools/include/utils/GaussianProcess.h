@@ -315,7 +315,7 @@ template <typename Context>
 void
 dataStore(std::ostream & stream, GaussianProcess & gp_utils, Context context)
 {
-  using ::dataStore;  // Bring global dataStore into scope for ADL
+  using ::dataStore; // Bring global dataStore into scope for ADL
   dataStore(stream, gp_utils.hyperparamMap(), context);
   dataStore(stream, gp_utils.hyperparamVectorMap(), context);
   dataStore(stream, gp_utils.covarType(), context);
@@ -334,7 +334,7 @@ template <typename Context>
 void
 dataLoad(std::istream & stream, GaussianProcess & gp_utils, Context context)
 {
-  using ::dataLoad;  // Bring global dataLoad into scope for ADL
+  using ::dataLoad; // Bring global dataLoad into scope for ADL
   dataLoad(stream, gp_utils.hyperparamMap(), context);
   dataLoad(stream, gp_utils.hyperparamVectorMap(), context);
   dataLoad(stream, gp_utils.covarType(), context);

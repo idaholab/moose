@@ -207,9 +207,8 @@ void dataStore(std::ostream & stream,
                RestartableEquationSystems::SystemHeader & header,
                Context context);
 template <typename Context>
-void dataLoad(std::istream & stream,
-              RestartableEquationSystems::SystemHeader & header,
-              Context context);
+void
+dataLoad(std::istream & stream, RestartableEquationSystems::SystemHeader & header, Context context);
 
 template <typename Context>
 void dataStore(std::ostream & stream,
@@ -225,8 +224,7 @@ void dataStore(std::ostream & stream,
                RestartableEquationSystems::VectorHeader & header,
                Context context);
 template <typename Context>
-void dataLoad(std::istream & stream,
-              RestartableEquationSystems::VectorHeader & header,
-              Context context);
+void
+dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, Context context);
 
 void to_json(nlohmann::json & json, const RestartableEquationSystems & res);

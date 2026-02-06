@@ -183,10 +183,7 @@ private:
 }
 
 template <typename Context>
-void dataStore(std::ostream & stream,
-               moose::internal::PerfGraphSectionInfo & info,
-               Context context);
+void
+dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, Context context);
 template <typename Context>
-void dataLoad(std::istream & stream,
-              moose::internal::PerfGraphSectionInfo & info,
-              Context context);
+void dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, Context context);

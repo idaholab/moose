@@ -60,7 +60,8 @@ dataStore(std::ostream & stream, DummyNeedingContext & v, Context context)
                 "DummyNeedingContext requires an int& context for serialization");
 
   // Context is int& or int*, dereference appropriately
-  int & context_int = [&]() -> int & {
+  int & context_int = [&]() -> int &
+  {
     if constexpr (std::is_pointer_v<Context>)
       return *context;
     else
@@ -79,7 +80,8 @@ dataLoad(std::istream & stream, DummyNeedingContext & v, Context context)
                 "DummyNeedingContext requires an int& context for deserialization");
 
   // Context is int& or int*, dereference appropriately
-  int & context_int = [&]() -> int & {
+  int & context_int = [&]() -> int &
+  {
     if constexpr (std::is_pointer_v<Context>)
       return *context;
     else
