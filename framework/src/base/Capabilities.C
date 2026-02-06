@@ -282,7 +282,7 @@ Capabilities::registerMooseCapabilities()
     add_string_capability(
         "method", method, "The executable was built with METHOD=\"" + method + "\"")
         .setExplicit()
-        .setEnumeration({"opt", "oprof", "devel", "dbg"});
+        .setEnumeration({"dbg", "devel", "oprof", "opt"});
   }
 
   {
@@ -565,7 +565,7 @@ Capabilities::registerMooseCapabilities()
 #endif
     add_string_capability("compiler", value, doc)
         .setExplicit()
-        .setEnumeration({"intel", "clang", "gcc", "msvc", "unknown"});
+        .setEnumeration({"clang", "gcc", "intel", "msvc", "unknown"});
   }
 
   // OS related
