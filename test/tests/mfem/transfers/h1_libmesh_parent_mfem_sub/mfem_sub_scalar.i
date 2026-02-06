@@ -13,33 +13,12 @@
     fec_type = H1
     fec_order = FIRST
   []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
-    fec_order = FIRST
-  []
 []
 
 [Variables]
   [temperature]
     type = MFEMVariable
     fespace = H1FESpace
-  []
-[]
-
-[AuxVariables]
-  [concentration_gradient]
-    type = MFEMVariable
-    fespace = HCurlFESpace
-  []
-[]
-
-[AuxKernels]
-  [grad]
-    type = MFEMGradAux
-    variable = concentration_gradient
-    source = temperature
-    execute_on = TIMESTEP_END
   []
 []
 
