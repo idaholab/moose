@@ -107,42 +107,4 @@ Standardizer::getScaled(RealEigenMatrix & input) const
   input = input.array().rowwise() / stdev.transpose().array();
 }
 
-/// Helper for dataStore
-void
-Standardizer::storeHelper(std::ostream & stream, Moose::AnyPointer context) const
-{
-  unsigned int n = _mean.size();
-  dataStore(stream, n, context);
-  for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _mean[ii], context);
-  for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _stdev[ii], context);
-}
-
 } // StochasticTools namespace
-
-template <>
-void
-dataStore(std::ostream & stream,
-          StochasticTools::Standardizer & standardizer,
-          Moose::AnyPointer context)
-{
-  standardizer.storeHelper(stream, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream,
-         StochasticTools::Standardizer & standardizer,
-         Moose::AnyPointer context)
-{
-  unsigned int n;
-  dataLoad(stream, n, context);
-  std::vector<Real> mean(n);
-  std::vector<Real> stdev(n);
-  for (unsigned int ii = 0; ii < n; ++ii)
-    dataLoad(stream, mean[ii], context);
-  for (unsigned int ii = 0; ii < n; ++ii)
-    dataLoad(stream, stdev[ii], context);
-  standardizer.set(mean, stdev);
-}

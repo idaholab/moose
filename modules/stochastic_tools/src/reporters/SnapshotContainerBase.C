@@ -53,14 +53,24 @@ SnapshotContainerBase::execute()
   _accumulated_data.addPointer(collectSnapshot());
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, Moose::AnyPointer context)
+dataStore(std::ostream & stream, SnapshotContainerBase::Snapshots & v, Context context)
 {
   storeHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
 
+template <typename Context>
 void
-dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, Moose::AnyPointer context)
+dataLoad(std::istream & stream, SnapshotContainerBase::Snapshots & v, Context context)
 {
   loadHelper(stream, static_cast<UniqueStorage<NumericVector<Number>> &>(v), context);
 }
+
+// Explicit instantiations for common context types
+template void dataStore(std::ostream &,
+                        SnapshotContainerBase::Snapshots &,
+                        const libMesh::Parallel::Communicator *);
+template void dataLoad(std::istream &,
+                       SnapshotContainerBase::Snapshots &,
+                       const libMesh::Parallel::Communicator *);

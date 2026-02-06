@@ -27,11 +27,11 @@
 #include <algorithm>
 #include <limits>
 
-template <>
+template <typename Context>
 void
 dataStore(std::ostream & stream,
           FeatureFloodCount::FeatureData & feature,
-          Moose::AnyPointer context)
+          Context context)
 {
   /**
    * Note that _local_ids is not stored here. It's not needed for restart, and not needed
@@ -52,17 +52,17 @@ dataStore(std::ostream & stream,
   storeHelper(stream, feature._boundary_intersection, context);
 }
 
-template <>
+template <typename Context>
 void
-dataStore(std::ostream & stream, BoundingBox & bbox, Moose::AnyPointer context)
+dataStore(std::ostream & stream, BoundingBox & bbox, Context context)
 {
   storeHelper(stream, bbox.min(), context);
   storeHelper(stream, bbox.max(), context);
 }
 
-template <>
+template <typename Context>
 void
-dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, Moose::AnyPointer context)
+dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, Context context)
 {
   /**
    * Note that _local_ids is not loaded here. It's not needed for restart, and not needed
@@ -83,9 +83,9 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, Moose:
   loadHelper(stream, feature._boundary_intersection, context);
 }
 
-template <>
+template <typename Context>
 void
-dataLoad(std::istream & stream, BoundingBox & bbox, Moose::AnyPointer context)
+dataLoad(std::istream & stream, BoundingBox & bbox, Context context)
 {
   loadHelper(stream, bbox.min(), context);
   loadHelper(stream, bbox.max(), context);
@@ -1093,9 +1093,9 @@ FeatureFloodCount::serialize(std::string & serialized_buffer, unsigned int var_n
 
   // Serialize everything
   if (var_num == invalid_id)
-    dataStore(oss, _partial_feature_sets, Moose::AnyPointer(this));
+    dataStore(oss, _partial_feature_sets, this);
   else
-    dataStore(oss, _partial_feature_sets[var_num], Moose::AnyPointer(this));
+    dataStore(oss, _partial_feature_sets[var_num], this);
 
   // Populate the passed in string pointer with the string stream's buffer contents
   serialized_buffer.assign(oss.str());
@@ -1130,9 +1130,9 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
 
     // Load the gathered data into the data structure.
     if (var_num == invalid_id)
-      dataLoad(iss, _partial_feature_sets, Moose::AnyPointer(this));
+      dataLoad(iss, _partial_feature_sets, this);
     else
-      dataLoad(iss, _partial_feature_sets[var_num], Moose::AnyPointer(this));
+      dataLoad(iss, _partial_feature_sets[var_num], this);
   }
 }
 

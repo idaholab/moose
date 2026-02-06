@@ -11,7 +11,6 @@
 
 #include "PublicRestartable.h"
 #include "StochasticToolsApp.h"
-#include "AnyPointer.h"
 
 /**
  * An interface class which manages the model data save and load functionalities from moose objects
@@ -68,13 +67,6 @@ private:
    */
   PublicRestartable _model_restartable;
 };
-
-template <>
-void
-dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, Moose::AnyPointer context);
-template <>
-void
-dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, Moose::AnyPointer context);
 
 template <typename T, typename... Args>
 T &
