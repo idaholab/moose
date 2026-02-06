@@ -18,6 +18,46 @@
 
 registerMooseObject("MooseApp", MultiAppMFEMlibMeshGeneralFieldTransfer);
 
+namespace Moose::MFEM
+{
+size_t
+MFEMIndex(const size_t i_dim,
+          const size_t i_point,
+          const size_t num_dims,
+          const size_t num_points,
+          const mfem::Ordering::Type ordering)
+{
+  if (ordering == mfem::Ordering::byNODES)
+  {
+    return i_dim * num_points + i_point;
+  }
+  else // ordering == mfem::Ordering::byVDIM
+  {
+    return i_point * num_dims + i_dim;
+  }
+}
+
+mfem::Vector
+pointsToMFEMVector(const std::vector<Point> & points,
+                   const unsigned int num_dims,
+                   const mfem::Ordering::Type ordering)
+{
+  const unsigned int num_points = points.size();
+  mfem::Vector mfem_points(num_points * num_dims);
+  for (unsigned int i_point = 0; i_point < num_points; i_point++)
+  {
+    for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
+    {
+      const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
+
+      mfem_points(idx) = points[i_point](i_dim);
+    }
+  }
+
+  return mfem_points;
+}
+}
+
 InputParameters
 MultiAppMFEMlibMeshGeneralFieldTransfer::validParams()
 {
@@ -82,9 +122,12 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::transfer(FEProblemBase & to_problem, FE
   // Send from MFEM problem to libMesh problem
   if (!to_mfem_problem_ptr && from_mfem_problem_ptr)
   {
+    auto & mfem_mesh = from_mfem_problem_ptr->mesh().getMFEMParMesh();
+    mfem_mesh.EnsureNodes();
+    _mfem_interpolator.Setup(mfem_mesh);    
     for (unsigned v = 0; v < numToVar(); ++v)
     {
-      setlibMeshSolutionValues(v);
+      setlibMeshSolutionValuesFromMFEM(v, *from_mfem_problem_ptr);
       // Populate target points to pass to GSLib using MultiAppGeneralFieldTransfer::extractOutgoingPoints
       // interpolate using gslib
       // setSolutionVectorValues(i, dofobject_to_valsvec, interp_caches);
@@ -101,7 +144,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::transfer(FEProblemBase & to_problem, FE
 }
 
 void
-MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValues(const unsigned int var_index)
+MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem)
 {
   /// The target variables
   std::vector<MooseVariableFieldBase *> _to_variables;  
@@ -115,7 +158,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValues(const unsigned
 
   // get libMesh and MFEM variables
   const auto & var_name = getToVarName(var_index);  
-  // auto & from_var = from_mfem_problem_ptr->getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
+  auto & from_var = from_problem.getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
   for (const auto problem_id : index_range(_to_problems))
   {
     // auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
@@ -124,7 +167,6 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValues(const unsigned
     // NOTE: we would expect to set variables from the displaced equation system here
     // auto & es = getEquationSystem(*_to_problems[problem_id], false);
     auto & es = _to_problems[problem_id]->es();
-
     // libMesh system
     System * to_sys = find_sys(es, var_name);
 
@@ -136,34 +178,42 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValues(const unsigned
     auto & fe_type = _to_variables[var_index]->feType();
     bool is_nodal = _to_variables[var_index]->isNodal();   
 
+    std::vector<Point> outgoing_libmesh_points;
+    // Populate set of points 
     // TODO: this currently assumes nodal
     for (const auto & node : to_mesh.local_node_ptr_range())
     {
       // Skip this node if the variable has no dofs at it.
       if (node->n_dofs(sys_num, var_num) < 1)
+        continue;      
+      outgoing_libmesh_points.push_back(*node);
+    }
+    
+    // Perform interpolation
+    const mfem::Ordering::Type ordering = mfem::Ordering::byVDIM;
+    mfem::Vector outgoing_mfem_points = Moose::MFEM::pointsToMFEMVector(outgoing_libmesh_points,
+                  to_mesh.mesh_dimension(),
+                  ordering);
+    _mfem_interpolator.FindPoints(outgoing_mfem_points, ordering);
+    mfem::Vector interp_vals;
+    _mfem_interpolator.Interpolate(from_var, interp_vals);
+    
+    unsigned int mfem_point_index = 0;
+    for (const auto & node : to_mesh.local_node_ptr_range())
+    {
+      // Skip this node if the variable has no dofs at it.
+      if (node->n_dofs(sys_num, var_num) < 1)
         continue;
-        // cacheOutgoingPointInfo(
-        //     (*_to_transforms[global_i_to])(*node), node->id(), i_to, outgoing_points);        
-    // for (const auto & val_pair : dofobject_to_val)
-    // {
-      // const auto dof_object_id = val_pair.first;
       const auto dof_object_id = node->id();
       const DofObject * dof_object = nullptr;
-      if (is_nodal)
-        dof_object = to_mesh.node_ptr(dof_object_id);
-      else
-        dof_object = to_mesh.elem_ptr(dof_object_id);
-
-      // _mfem_interpolator.Setup(mfem_mesh);
-      // _mfem_interpolator.FindPoints(_libmesh_points, mfem::Ordering::byVDIM);
-      // _mfem_interpolator.Interpolate(_mfem_var, _interp_vals);
-
+      dof_object = to_mesh.node_ptr(dof_object_id);
       const auto dof = dof_object->dof_number(sys_num, var_num, 0);
       // const auto val = val_pair.second.interp;
       // const auto val = findpoint(*node);
-      const auto val = 1;
+      const auto val = interp_vals[mfem_point_index];
 
       to_sys->solution->set(dof, val);
+      mfem_point_index++;
     }
     to_sys->solution->close();
     // Sync local solutions
