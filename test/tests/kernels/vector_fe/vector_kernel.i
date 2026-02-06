@@ -81,8 +81,8 @@
 [Executioner]
   type = Steady
   solve_type = LINEAR
-  petsc_options_iname = -pc_type
-  petsc_options_value = lu
+  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_rtol'
+  petsc_options_value = '   hypre            ams     1e-10'
 []
 
 [Outputs]

@@ -375,6 +375,10 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 {
   bool auto_advance = autoAdvance();
 
+  // Start new TIMESTEP_BEGIN section for solution invalidity
+  _app.solutionInvalidity().resetIterationOccurences();
+  _app.solutionInvalidity().resetTimeStepOccurences();
+
   _executioner.preSolve();
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
 
@@ -415,6 +419,12 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     convergence.preExecute();
   }
 
+  // Keep track of the solution warnings from the TIMESTEP_BEGIN phase before:
+  // - the count reset at the beginning of each iteration of the solve
+  // - the output on TIMESTEP_BEGIN
+  _app.solutionInvalidity().syncIteration();
+  _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
+
   // Perform output for timestep begin
   _problem.outputStep(EXEC_TIMESTEP_BEGIN);
 
@@ -433,6 +443,9 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (!_inner_solve->solve())
   {
     _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_NONLINEAR;
+
+    // Keep track of the solution warnings from the solve
+    _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
 
     // Perform the output of the current, failed time step (this only occurs if desired)
     _problem.outputStep(EXEC_FAILED);
@@ -459,17 +472,25 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
       _xfem_update_count = 0;
     }
 
+    // Start new TIMESTEP_END section for solution invalidity
+    // We have to restart the current iteration count to avoid double counting
+    _app.solutionInvalidity().resetIterationOccurences();
+
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
     _problem.execTransfers(EXEC_TIMESTEP_END);
     if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
-    {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-      return false;
-    }
+
+    // Keep track of the solution warnings from the TIMESTEP_END phase
+    _app.solutionInvalidity().syncIteration();
+    _app.solutionInvalidity().accumulateIterationIntoTimeStepOccurences();
+    _app.solutionInvalidity().accumulateTimeStepIntoTotalOccurences(_problem.timeStep());
   }
 
+  if (_fixed_point_status == MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP)
+    return false;
   if (_fail_step)
   {
     _fail_step = false;

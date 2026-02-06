@@ -30,7 +30,8 @@ SolutionInvalidity::SolutionInvalidity(MooseApp & app)
     _solution_invalidity_registry(moose::internal::getSolutionInvalidityRegistry()),
     _has_synced(true),
     _has_solution_warning(false),
-    _has_solution_error(false)
+    _has_solution_error(false),
+    _has_recorded_issue(false)
 {
 }
 
@@ -64,8 +65,15 @@ SolutionInvalidity::hasInvalidSolution() const
   return hasInvalidSolutionWarning() || hasInvalidSolutionError();
 }
 
+bool
+SolutionInvalidity::hasEverHadSolutionIssue() const
+{
+  mooseAssert(_has_synced, "Has not synced");
+  return _has_recorded_issue;
+}
+
 void
-SolutionInvalidity::resetSolutionInvalidCurrentIteration()
+SolutionInvalidity::resetIterationOccurences()
 {
   // Zero current counts
   for (auto & entry : _counts)
@@ -73,7 +81,7 @@ SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 }
 
 void
-SolutionInvalidity::resetSolutionInvalidTimeStep()
+SolutionInvalidity::resetTimeStepOccurences()
 {
   // Reset that we have synced because we're on a new iteration
   _has_synced = false;
@@ -83,14 +91,14 @@ SolutionInvalidity::resetSolutionInvalidTimeStep()
 }
 
 void
-SolutionInvalidity::solutionInvalidAccumulation()
+SolutionInvalidity::accumulateIterationIntoTimeStepOccurences()
 {
   for (auto & entry : _counts)
     entry.current_timestep_counts += entry.current_counts;
 }
 
 void
-SolutionInvalidity::solutionInvalidAccumulationTimeStep(const unsigned int timestep_index)
+SolutionInvalidity::accumulateTimeStepIntoTotalOccurences(const unsigned int timestep_index)
 {
   for (auto & entry : _counts)
     if (entry.current_timestep_counts)
@@ -104,19 +112,6 @@ SolutionInvalidity::solutionInvalidAccumulationTimeStep(const unsigned int times
 }
 
 void
-SolutionInvalidity::computeTotalCounts()
-{
-  mooseAssert(_has_synced, "Has not synced");
-
-  for (auto & entry : _counts)
-  {
-    entry.total_counts = 0;
-    for (auto & time_counts : entry.timestep_counts)
-      entry.total_counts += time_counts.counts;
-  }
-}
-
-void
 SolutionInvalidity::print(const ConsoleStream & console) const
 {
   console << "\nSolution Invalid Warnings:\n";
@@ -127,7 +122,10 @@ void
 SolutionInvalidity::printHistory(const ConsoleStream & console,
                                  unsigned int & timestep_interval_size) const
 {
-  console << "\nSolution Invalid Warnings History:\n";
+  if (hasInvalidSolutionError())
+    console << "\nSolution Invalid History:\n";
+  else
+    console << "\nWarnings History:\n";
   transientTable(timestep_interval_size).print(console);
 }
 
@@ -198,6 +196,10 @@ SolutionInvalidity::syncIteration()
   comm().max(_has_solution_warning);
   comm().max(_has_solution_error);
 
+  // Keep track of any occurence
+  if (_has_solution_warning || _has_solution_error)
+    _has_recorded_issue = true;
+
   // We've now synced
   _has_synced = true;
 }
@@ -258,7 +260,7 @@ SolutionInvalidity::transientTable(unsigned int & step_interval) const
 {
   mooseAssert(_has_synced, "Has not synced");
 
-  TimeTable vtable({"Object", "Time", "Stepinterval Count", "Total Count"}, 4);
+  TimeTable vtable({"Object", "Step", "Interval Count", "Total Count"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object information

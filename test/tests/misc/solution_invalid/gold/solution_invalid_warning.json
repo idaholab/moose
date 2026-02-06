@@ -14,7 +14,6 @@
             "solution_invalidity": {
                 "solution_invalidity": [
                     {
-                        "converged_counts": 16,
                         "message": "Solution invalid warning!",
                         "object_type": "NonsafeMaterial",
                         "timestep_counts": 48,

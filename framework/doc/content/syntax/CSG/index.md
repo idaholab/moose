@@ -92,18 +92,20 @@ Below is an example [!ac](JSON) surface output for a model with a `CSG::CSGPlane
 
 The cells output contains the following information:
 
-- `region`: the string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
+- `region_infix`: the infix (human readable) string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
+- `region_postfix`: list of strings representing the postfix (also known as Reverse Polish) notation of the equation of boolean operators (listed below) and surface names that defines the cell region
 - `filltype`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"`)
 - `fill`: for `"CSG_MATERIAL"`, `"UNIVERSE"`, or `"LATTICE"` `filltype`, the name of the fill object (if `"VOID"` type, then name is an empty string `""`)
 
-| Boolean Operator   | String Representation |
-|--------------------|-----------------------|
-| positive half-space | `+`                   |
-| negative half-space | `-`                   |
-| union              | `|`                   |
-| intersection       | `&`                   |
-| complement         | `~`                   |
+| Boolean Operator    | Symbol Representation in Region Output |
+|---------------------|----------------------------------------|
+| positive half-space | `+`                                    |
+| negative half-space | `-`                                    |
+| union               | `|`                                    |
+| intersection        | `&`                                    |
+| complement          | `~`                                    |
 
+Internally, CSGBase represents each cell region in postfix notation (also known as Reverse Polish notation). While an infix representation of the region may be easier to conceptualize, postfix notation may be more useful for conversion steps to downstream Monte Carlo codes, as this representation provides an unambiguous precedence ruleset for boolean operators without having to parse through groupings of parentheses.
 An example of a cell defined as the space inside a box made of six planes and filled with a solid material is below:
 
 !listing csg_only_chained_out_csg.json start="cells" end="surfaces"

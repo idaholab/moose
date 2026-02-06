@@ -31,4 +31,22 @@ getInnerRegion(const std::vector<std::reference_wrapper<const CSGSurface>> & sur
   }
   return inner_region;
 }
+
+void
+checkValidCSGName(const std::string & name)
+{
+  // Check if invalid symbol is present in the name. These include whitespaces and symbols
+  // for halfspaces and region operators
+  const std::regex invalid_symbols(R"([\+\-~|& ])");
+  std::smatch matches;
+
+  if (std::regex_search(name, matches, invalid_symbols))
+  {
+    char matched_char = name[matches.position(0)];
+    if (matched_char == ' ')
+      mooseError("Detected whitespace in CSG component with name ", name, ". This is not allowed.");
+    else
+      mooseError("Invalid symbol in CSG component with name ", name, ": ", matched_char);
+  }
+}
 }

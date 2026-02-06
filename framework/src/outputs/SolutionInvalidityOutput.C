@@ -22,14 +22,15 @@ SolutionInvalidityOutput::validParams()
 {
   InputParameters params = Output::validParams();
 
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL, EXEC_FAILED};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
 
   params.addParam<unsigned int>("solution_invalidity_timestep_interval",
                                 1,
                                 "The number of time steps to group together in the table reporting "
-                                "the solution invalidity occurrences.");
+                                "the warnings and solution invalidity occurrences.");
 
-  params.addClassDescription("Controls output of the time history of solution invalidity object");
+  params.addClassDescription("Controls output of the time history of regular warnings and solution "
+                             "invalidity errors and warnings");
 
   return params;
 }
@@ -48,6 +49,11 @@ SolutionInvalidityOutput::shouldOutput()
   // Note: if this happens in other cases, we should just sync if solutionInvalidity is not synced
   if (_problem_ptr->getCurrentExecuteOnFlag() == EXEC_FAILED)
     _solution_invalidity.syncIteration();
+  // At the known end of a simulation, always output the total summary if anything happened
+  if (_problem_ptr->getCurrentExecuteOnFlag() == EXEC_FAILED ||
+      _problem_ptr->getCurrentExecuteOnFlag() == EXEC_FINAL)
+    return Output::shouldOutput() && _solution_invalidity.hasEverHadSolutionIssue();
+  // At other points, we check the current state of the simulation
   return Output::shouldOutput() && _solution_invalidity.hasInvalidSolution();
 }
 
@@ -56,8 +62,7 @@ SolutionInvalidityOutput::output()
 {
   if (isParamSetByUser("solution_invalidity_timestep_interval"))
     mooseInfo("Set Outputs/solution_invalidity_history=false to silence the default Solution "
-              "Invalid Warnings History "
-              "table above.");
+              "Invalid Warnings History table above.");
   _console << '\n';
   _solution_invalidity.printHistory(_console, _timestep_interval);
   _console << std::flush;

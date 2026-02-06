@@ -360,4 +360,70 @@
       detail = 'and QUAD9.'
     []
   []
+  [grad_div]
+    design = 'DivDivField.md VectorDivPenaltyDirichletBC.md '
+             'ElementVectorL2Error.md ElementHDivSemiError.md ElementHDivError.md'
+    issues = '#32233'
+    requirement = 'The system shall be capable of modeling a grad-div problem '
+                  'in H(div) using the following Raviart-Thomas elements: '
+    [hex27]
+      type = Exodiff
+      input = grad_div.i
+      exodiff = grad_div_hex27.e
+      cli_args = 'Outputs/file_base=grad_div_hex27'
+      detail = 'HEX27, '
+    []
+    [tet14]
+      type = Exodiff
+      input = grad_div.i
+      exodiff = grad_div_tet14.e
+      abs_zero = 8e-9
+      cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 '
+                 'Outputs/file_base=grad_div_tet14'
+      detail = 'TET14, '
+      machine = X86_64
+    []
+    [tri6]
+      type = Exodiff
+      input = grad_div.i
+      exodiff = grad_div_tri6.e
+      abs_zero = 5e-5
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI6 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Executioner/petsc_options_value="hypre ams 1e-14 preconditioned" '
+                 'Outputs/file_base=grad_div_tri6'
+      detail = 'TRI6, '
+    []
+    [tri7]
+      type = Exodiff
+      input = grad_div.i
+      exodiff = grad_div_tri7.e
+      abs_zero = 5e-5
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=TRI7 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Executioner/petsc_options_value="hypre ams 1e-14 preconditioned" '
+                 'Outputs/file_base=grad_div_tri7'
+      detail = 'TRI7, '
+    []
+    [quad8]
+      type = Exodiff
+      input = grad_div.i
+      exodiff = grad_div_quad8.e
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD8 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Executioner/petsc_options_value="hypre ams 1e-14 preconditioned" '
+                 'Outputs/file_base=grad_div_quad8'
+      detail = 'QUAD8, '
+    []
+    [quad9]
+      type = Exodiff
+      input = grad_div.i
+      exodiff = grad_div_quad9.e
+      cli_args = 'Mesh/gmg/dim=2 Mesh/gmg/elem_type=QUAD9 '
+                 'BCs/sides/boundary="top bottom left right" '
+                 'Executioner/petsc_options_value="hypre ams 1e-14 preconditioned" '
+                 'Outputs/file_base=grad_div_quad9'
+      detail = 'and QUAD9.'
+    []
+  []
 []

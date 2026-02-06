@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGUniverse.h"
+#include "CSGUtils.h"
 
 namespace CSG
 {
@@ -17,6 +18,7 @@ CSGUniverse::CSGUniverse(const std::string & name, bool is_root) : _name(name), 
 CSGUniverse::CSGUniverse(const std::string & name, std::vector<CSGCell *> & cells, bool is_root)
   : _name(name), _is_root(is_root)
 {
+  CSGUtils::checkValidCSGName(name);
   for (auto cell : cells)
     addCell(*cell);
 }
