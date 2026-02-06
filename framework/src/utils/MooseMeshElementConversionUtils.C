@@ -239,16 +239,24 @@ polyhedronElemSplitter(MeshBase & mesh,
 
   // Split the polygon using its tetrahedralization
   const auto poly = dynamic_cast<C0Polyhedron *>(elem);
+  Node * v_avg_node = nullptr;
+  // Currently the only extra node ever use to tetrahedralize
+  if (dynamic_cast<C0Polyhedron *>(elem))
+    v_avg_node =
+        mesh.add_point(elem->vertex_average(), mesh.max_node_id() + elem_id, elem->processor_id());
+
   std::vector<Elem *> elems_Tet4;
   for (const auto tri_i : make_range(poly->n_subelements()))
   {
     const auto tri_indices = poly->subelement(tri_i);
 
     auto new_elem = std::make_unique<Tet4>();
-    new_elem->set_node(0, const_cast<Node *>(elem->node_ptr(tri_indices[0])));
-    new_elem->set_node(1, const_cast<Node *>(elem->node_ptr(tri_indices[1])));
-    new_elem->set_node(2, const_cast<Node *>(elem->node_ptr(tri_indices[2])));
-    new_elem->set_node(3, const_cast<Node *>(elem->node_ptr(tri_indices[3])));
+    for (const auto i : make_range(4))
+      if (tri_indices[i] >= 0)
+        new_elem->set_node(i, const_cast<Node *>(elem->node_ptr(tri_indices[i])));
+      else
+        new_elem->set_node(i, v_avg_node);
+
     new_elem->subdomain_id() = elem->subdomain_id();
     elems_Tet4.push_back(mesh.add_elem(std::move(new_elem)));
     converted_elems_ids.push_back(elems_Tet4.back()->id());
@@ -264,11 +272,9 @@ polyhedronElemSplitter(MeshBase & mesh,
   }
 
   // Retain element extra integers
-  for (unsigned int i = 0; i < elem->n_nodes(); i++)
+  for (const auto i : make_range(poly->n_subelements()))
     for (unsigned int j = 0; j < n_elem_extra_ids; j++)
-    {
       elems_Tet4[i]->set_extra_integer(j, exist_extra_ids[j]);
-    }
 }
 
 std::vector<unsigned int>
