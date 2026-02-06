@@ -10,6 +10,7 @@
 #include "VolumeJunction1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
+#include "THMNames.h"
 
 registerMooseObject("ThermalHydraulicsApp", VolumeJunction1Phase);
 
@@ -34,6 +35,20 @@ VolumeJunction1Phase::validParams()
   params.addParam<Real>("scaling_factor_rhovV", 1.0, "Scaling factor for rho*v*V [-]");
   params.addParam<Real>("scaling_factor_rhowV", 1.0, "Scaling factor for rho*w*V [-]");
   params.addParam<Real>("scaling_factor_rhoEV", 1.0, "Scaling factor for rho*E*V [-]");
+
+  params.addParam<Real>("p_ref", 101.325e3, "Reference pressure [Pa]");
+  params.addParam<Real>("T_ref", 273.15, "Reference temperature [K]");
+  params.addParam<Real>("vel_ref", 1.0, "Reference velocity [m/s]");
+  params.addParam<Real>("p_rel_step_tol", 1e-5, "Pressure relative step tolerance");
+  params.addParam<Real>("T_rel_step_tol", 1e-5, "Temperature relative step tolerance");
+  params.addParam<Real>("vel_rel_step_tol", 1e-5, "Velocity relative step tolerance");
+  params.addParam<Real>("mass_res_tol", 1e-5, "Mass equation normalized residual tolerance");
+  params.addParam<Real>(
+      "momentum_res_tol", 1e-5, "Momentum equation normalized residual tolerance");
+  params.addParam<Real>("energy_res_tol", 1e-5, "Energy equation normalized residual tolerance");
+  params.addParamNamesToGroup("p_ref T_ref vel_ref p_rel_step_tol T_rel_step_tol vel_rel_step_tol "
+                              "mass_res_tol momentum_res_tol energy_res_tol",
+                              "ComponentsConvergence parameters");
 
   params.addParam<Real>("K", 0., "Form loss factor [-]");
   params.addParam<Real>("A_ref", "Reference area [m^2]");
@@ -285,6 +300,98 @@ VolumeJunction1Phase::addMooseObjects()
     params.set<std::vector<Real>>("prop_values") = {};
     getTHMProblem().addMaterial(class_name, genName(name(), "dummy_mat"), params);
   }
+
+  // Add variable step post-processors for ComponentsConvergence
+  addVolumeJunction1PhaseFunctorMaterial();
+  const std::vector<std::pair<VariableName, Real>> var_norm_pairs = {
+      {"p", getParam<Real>("p_ref")},
+      {"T", getParam<Real>("T_ref")},
+      {"vel_x", getParam<Real>("vel_ref")},
+      {"vel_y", getParam<Real>("vel_ref")},
+      {"vel_z", getParam<Real>("vel_ref")}};
+  for (const auto & var_norm_pair : var_norm_pairs)
+  {
+    addNonlinearStepFunctorMaterial(THM::functorMaterialPropertyName<false>(var_norm_pair.first),
+                                    var_norm_pair.first + "_step",
+                                    false);
+    addMaximumFunctorPostprocessor(var_norm_pair.first + "_step",
+                                   genName(name(), var_norm_pair.first + "_rel_step"),
+                                   var_norm_pair.second,
+                                   getSubdomainNames());
+  }
+
+  // Add residual norm post-processors for ComponentsConvergence
+  const std::vector<std::pair<VariableName, std::string>> var_eq_pairs{{"rhoV", "mass"},
+                                                                       {"rhouV", "x_mom"},
+                                                                       {"rhovV", "y_mom"},
+                                                                       {"rhowV", "z_mom"},
+                                                                       {"rhoEV", "energy"}};
+  for (const auto & var_eq_pair : var_eq_pairs)
+    addResidualNormPostprocessor(var_eq_pair.first, var_eq_pair.second);
+
+  // Add the nonlinear Convergence
+  addMultiPostprocessorConvergence({genName(name(), "p_rel_step"),
+                                    genName(name(), "T_rel_step"),
+                                    genName(name(), "vel_x_rel_step"),
+                                    genName(name(), "vel_y_rel_step"),
+                                    genName(name(), "vel_z_rel_step"),
+                                    genName(name(), "mass_res"),
+                                    genName(name(), "x_mom_res"),
+                                    genName(name(), "y_mom_res"),
+                                    genName(name(), "z_mom_res"),
+                                    genName(name(), "energy_res")},
+                                   {"step: p",
+                                    "step: T",
+                                    "step: x-vel",
+                                    "step: y-vel",
+                                    "step: z-vel",
+                                    "res.: mass.",
+                                    "res.: x-mom.",
+                                    "res.: y-mom.",
+                                    "res.: z-mom.",
+                                    "res.: energy"},
+                                   {getParam<Real>("p_rel_step_tol"),
+                                    getParam<Real>("T_rel_step_tol"),
+                                    getParam<Real>("vel_rel_step_tol"),
+                                    getParam<Real>("vel_rel_step_tol"),
+                                    getParam<Real>("vel_rel_step_tol"),
+                                    getParam<Real>("mass_res_tol"),
+                                    getParam<Real>("momentum_res_tol"),
+                                    getParam<Real>("momentum_res_tol"),
+                                    getParam<Real>("momentum_res_tol"),
+                                    getParam<Real>("energy_res_tol")});
+}
+
+Convergence *
+VolumeJunction1Phase::getNonlinearConvergence() const
+{
+  return &getTHMProblem().getConvergence(nonlinearConvergenceName());
+}
+
+void
+VolumeJunction1Phase::addVolumeJunction1PhaseFunctorMaterial()
+{
+  const std::string class_name = "VolumeJunction1PhaseFunctorMaterial";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.applyParameters(parameters());
+  params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+  params.set<UserObjectName>("fluid_properties") = _fp_name;
+  getTHMProblem().addFunctorMaterial(class_name, genName(name(), "fmat"), params);
+}
+
+void
+VolumeJunction1Phase::addResidualNormPostprocessor(const VariableName & variable,
+                                                   const std::string & equation)
+{
+  const std::string class_name = "VolumeJunction1PhaseResidual";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.applyParameters(parameters());
+  params.set<VariableName>("variable") = variable;
+  params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+  params.set<UserObjectName>("fluid_properties") = _fp_name;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR_CONVERGENCE;
+  params.set<std::vector<OutputName>>("outputs") = {"none"};
+  getTHMProblem().addPostprocessor(class_name, genName(name(), equation + "_res"), params);
 }
 
 std::string
