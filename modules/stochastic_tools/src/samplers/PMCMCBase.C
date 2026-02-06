@@ -79,7 +79,7 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
   else if (isParamValid("num_columns"))
   {
     _confg_values.resize(getParam<unsigned int>("num_columns"));
-    for (unsigned int i = 0; i < _confg_values.size(); ++i)
+    for (const auto i : index_range(_confg_values))
       _confg_values[i] = reader.getData(i);
   }
   else
@@ -117,15 +117,15 @@ PMCMCBase::PMCMCBase(const InputParameters & parameters)
 }
 
 void
-PMCMCBase::proposeSamples(const unsigned int seed_value)
+PMCMCBase::proposeSamples(const unsigned int seed_value, std::size_t & rn_ind)
 {
-  for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-    for (unsigned int i = 0; i < _priors.size(); ++i)
-      _new_samples[j][i] = _priors[i]->quantile(getRand(seed_value));
+  for (const auto j : make_range(_num_parallel_proposals))
+    for (const auto i : index_range(_priors))
+      _new_samples[j][i] = _priors[i]->quantile(getRandStateless(rn_ind++, seed_value));
 }
 
 void
-PMCMCBase::sampleSetUp(const SampleMode /*mode*/)
+PMCMCBase::updateSamples()
 {
   if (_t_step < 1 || _check_step == _t_step)
     return;
@@ -134,35 +134,38 @@ PMCMCBase::sampleSetUp(const SampleMode /*mode*/)
   unsigned int seed_value = _t_step > 0 ? (_t_step - 1) : 0;
 
   // Filling the new_samples vector of vectors with new proposal samples
-  proposeSamples(seed_value);
+  std::size_t rn_ind = 0;
+  proposeSamples(seed_value, rn_ind);
 
   // Draw random numbers to facilitate decision making later on
-  for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
-    _rnd_vec[j] = getRand(seed_value);
+  for (const auto j : make_range(_num_parallel_proposals))
+    _rnd_vec[j] = getRandStateless(rn_ind++, seed_value);
 }
 
 void
 PMCMCBase::randomIndex(const unsigned int & upper_bound,
                        const unsigned int & exclude,
                        const unsigned int & seed,
+                       std::size_t & rn_ind,
                        unsigned int & req_index)
 {
   req_index = exclude;
   while (req_index == exclude)
-    req_index = getRandl(seed, 0, upper_bound);
+    req_index = getRandlStateless(rn_ind++, 0, upper_bound, seed);
 }
 
 void
 PMCMCBase::randomIndexPair(const unsigned int & upper_bound,
                            const unsigned int & exclude,
                            const unsigned int & seed,
+                           std::size_t & rn_ind,
                            unsigned int & req_index1,
                            unsigned int & req_index2)
 {
-  randomIndex(upper_bound, exclude, seed, req_index1);
+  randomIndex(upper_bound, exclude, seed, rn_ind, req_index1);
   req_index2 = req_index1;
   while (req_index1 == req_index2)
-    randomIndex(upper_bound, exclude, seed, req_index2);
+    randomIndex(upper_bound, exclude, seed, rn_ind, req_index2);
 }
 
 void
@@ -171,13 +174,13 @@ PMCMCBase::combineWithExperimentalConfig()
   unsigned int index1;
   int index2 = -1;
   std::vector<Real> tmp;
-  for (unsigned int i = 0; i < _num_parallel_proposals * _confg_values[0].size(); ++i)
+  for (const auto i : make_range(_num_parallel_proposals * _confg_values[0].size()))
   {
     index1 = i % _num_parallel_proposals;
     if (index1 == 0)
       ++index2;
     tmp = _new_samples[index1];
-    for (unsigned int j = 0; j < _confg_values.size(); ++j)
+    for (const auto j : index_range(_confg_values))
       tmp.push_back(_confg_values[j][index2]);
     _new_samples_confg[i] = tmp;
   }
@@ -217,8 +220,10 @@ Real
 PMCMCBase::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   if (_t_step < 1)
-    for (unsigned int i = 0; i < _num_parallel_proposals; ++i)
+    for (const auto i : make_range(_num_parallel_proposals))
       _new_samples[i] = _initial_values;
+  else
+    updateSamples();
 
   // Combine the proposed samples with experimental configurations
   combineWithExperimentalConfig();

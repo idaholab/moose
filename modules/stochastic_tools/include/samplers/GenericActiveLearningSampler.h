@@ -34,17 +34,19 @@ public:
   dof_id_type getNumParallelProposals() const { return _num_parallel_proposals; }
 
 protected:
-  /// Gather all the samples
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-  /// Return the sample for the given row and column
+  /**
+   * Return the sample for the given row and column.
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /**
    * Fill in the provided vector with random samples given the distributions
    * @param vector The vector to be filled
    * @param seed_value The seed value to generate random numbers
+   * @param rn_ind The stateless RNG index to advance
    */
-  virtual void fillVector(std::vector<Real> & vector, const unsigned int & seed_value);
+  virtual void
+  fillVector(std::vector<Real> & vector, const unsigned int & seed_value, std::size_t & rn_ind);
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
@@ -65,6 +67,9 @@ protected:
   std::vector<std::vector<Real>> _new_samples;
 
 private:
+  /// Refresh stored samples for the current step.
+  void updateSamples();
+
   /// Number of samples to propose in each iteration (not all are sent for subApp evals)
   const unsigned int _num_tries;
 

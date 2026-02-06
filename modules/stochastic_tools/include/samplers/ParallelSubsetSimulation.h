@@ -37,8 +37,10 @@ public:
   virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
 
 protected:
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
+  virtual void computeSampleMatrix(DenseMatrix<Real> & matrix) override;
+  virtual void computeLocalSampleMatrix(DenseMatrix<Real> & matrix) override;
+  virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data) override;
 
   /// Number of samples per subset
   const unsigned int & _num_samplessub;
@@ -80,6 +82,8 @@ protected:
   bool _is_sampling_completed;
 
 private:
+  void updateSamples(const Sampler::SampleMode mode);
+
   /// Storage for the previously accepted sample inputs across all the subsets
   std::vector<std::vector<Real>> _inputs_sto;
 

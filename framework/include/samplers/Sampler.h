@@ -20,6 +20,7 @@
 #include "MultiApp.h"
 #include "VectorPostprocessorInterface.h"
 #include "ReporterInterface.h"
+#include "MooseRandomStateless.h"
 
 /**
  * This is the base class for Samplers as used within the Stochastic Tools module.
@@ -195,23 +196,40 @@ protected:
   uint32_t getRandl(unsigned int index, uint32_t lower, uint32_t upper);
 
   /**
+   * Return the n-th random number from the stateless generator for a given seed index.
+   * @param n Zero-based index into the stateless random sequence
+   * @param index The stateless generator index (seed), defaults to zero
+   */
+  Real getRandStateless(std::size_t n, unsigned int index = 0) const;
+
+  /**
+   * Return the n-th bounded integer random number from the stateless generator.
+   * @param n Zero-based index into the stateless random sequence
+   * @param lower Lower bound (inclusive)
+   * @param upper Upper bound (exclusive)
+   * @param index The stateless generator index (seed), defaults to zero
+   */
+  unsigned int getRandlStateless(std::size_t n,
+                                 unsigned int lower,
+                                 unsigned int upper,
+                                 unsigned int index = 0) const;
+  std::size_t
+  getRandlShuffleStateless(std::size_t n, std::size_t size, unsigned int index = 0) const;
+
+  /**
+   * Advance the stateless generator by a fixed count.
+   * @param index The stateless generator index (seed)
+   * @param count Number of RNG calls to skip
+   */
+  void advanceStatelessGenerator(unsigned int index, std::size_t count);
+
+  /**
    * Base class must override this method to supply the sample distribution data.
    * @param row_index The row index of sample value to compute.
    * @param col_index The column index of sample value to compute.
    * @return The value for the given row and column.
    */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) = 0;
-
-  ///@{
-  /**
-   * Setup method called prior and after looping through distributions.
-   *
-   * These methods should not be called directly, each is automatically called by the public
-   * getGlobalSamples() or getLocalSamples() methods.
-   */
-  virtual void sampleSetUp(const SampleMode /*mode*/) {}
-  virtual void sampleTearDown(const SampleMode /*mode*/) {}
-  ///@}
 
   // The following methods are advanced methods that should not be needed by application developers,
   // but exist for special cases.
@@ -238,6 +256,20 @@ protected:
    * getGlobalSamples(), getLocalSamples(), or getNextLocalRow() methods.
    */
   virtual void computeSampleRow(dof_id_type i, std::vector<Real> & data);
+
+  /**
+   * Return the number of stateless RNG draws to advance for the given seed index.
+   * Override in samplers that manage stateless sequences explicitly.
+   */
+  virtual std::size_t getStatelessAdvanceCount(unsigned int /*seed_index*/) const
+  {
+    return static_cast<std::size_t>(_n_rows) * _n_cols;
+  }
+
+  /**
+   * Hook for clearing any per-execute stateless advancement bookkeeping.
+   */
+  virtual void finalizeStatelessAdvance() {}
 
   /**
    * Method for advancing the random number generator(s) by the supplied number or calls to rand().
@@ -332,6 +364,7 @@ private:
 
   /// Random number generator, don't give users access. Control it via the interface from this class.
   MooseRandom _generator;
+  std::vector<std::unique_ptr<MooseRandomStateless>> _generators_stateless;
 
   /// Number of rows for this processor
   dof_id_type _n_local_rows;

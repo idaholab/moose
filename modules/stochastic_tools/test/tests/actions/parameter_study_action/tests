@@ -168,7 +168,7 @@
     [true]
       type = JSONDiff
       input = monte_carlo.i
-      cli_args = 'ParameterStudy/output_type=json
+      cli_args = 'ParameterStudy/output_type=none
                   ParameterStudy/show_study_objects=true
                   --color off'
       jsondiff = monte_carlo_json.json
@@ -225,7 +225,7 @@
     [json]
       type = JSONDiff
       input = monte_carlo.i
-      cli_args = 'ParameterStudy/output_type=json
+      cli_args = 'ParameterStudy/output_type=none
                   ParameterStudy/show_study_objects=true
                   --color off'
       jsondiff = monte_carlo_json.json
