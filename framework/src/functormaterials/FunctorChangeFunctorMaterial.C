@@ -47,6 +47,12 @@ FunctorChangeFunctorMaterialTempl<is_ad>::FunctorChangeFunctorMaterialTempl(
     _take_absolute_value(getParam<bool>("take_absolute_value")),
     _prop_name(getParam<std::string>("prop_name"))
 {
+  // Request the previous fixed point solution be saved for the relevant systems
+  if (_fe_problem.hasAuxiliaryVariable(getParam<MooseFunctorName>("functor")))
+    _fe_problem.needsPreviousMultiAppFixedPointIterationAuxiliary(true);
+  if (_fe_problem.hasSolverVariable(getParam<MooseFunctorName>("functor")))
+    _fe_problem.needsPreviousMultiAppFixedPointIterationSolver(true);
+
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   addFunctorProperty<GenericReal<is_ad>>(
       _prop_name,
