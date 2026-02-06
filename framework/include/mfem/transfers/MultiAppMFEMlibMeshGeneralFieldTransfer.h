@@ -43,7 +43,7 @@ protected:
   std::vector<AuxVariableName> _to_var_names;
 
   void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
-  void setlibMeshSolutionValues(const unsigned int var_index);
+  void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);
 
   void checkSiblingsTransferSupported() const override;
 };
