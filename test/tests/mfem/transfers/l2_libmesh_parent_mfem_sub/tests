@@ -2,21 +2,21 @@
   design = 'MultiAppMFEMlibMeshGeneralFieldTransfer.md'
   issues = '#31982'
   requirement = 'The system shall have the ability to transfer MFEM solutions to libMesh for '
-  [MFEMtolibMeshTransferH1Quad]
+  [MFEMtolibMeshTransferL2Quad]
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_quads.csv'
-    detail = ' scalar LAGRANGE variables defined on quads, '
+    detail = ' constant MONOMIAL variables defined on quads, '
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
     compute_devices = 'cpu cuda'
   []
-  [MFEMtolibMeshTransferH1Tri]
+  [MFEMtolibMeshTransferL2Tri]
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
-    requirement = 'and scalar LAGRANGE variables defined on tris.'
+    requirement = 'and constant MONOMIAL variables defined on tris.'
     abs_zero = 1e-8
     capabilities = 'mfem'
     recover = false
