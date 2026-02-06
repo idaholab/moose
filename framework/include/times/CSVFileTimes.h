@@ -10,12 +10,12 @@
 #pragma once
 
 // Moose includes
-#include "Times.h"
+#include "TimesReporter.h"
 
 /**
  * Times from a file
  */
-class CSVFileTimes : public Times
+class CSVFileTimes : public TimesReporter
 {
 public:
   static InputParameters validParams();

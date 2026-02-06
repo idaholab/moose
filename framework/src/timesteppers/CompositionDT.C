@@ -259,6 +259,7 @@ CompositionDT::step()
 void
 CompositionDT::acceptStep()
 {
+  // NOTE: this also takes care of updating the time step sequences
   actOnTimeSteppers([](auto & ts) { ts.acceptStep(); });
 }
 

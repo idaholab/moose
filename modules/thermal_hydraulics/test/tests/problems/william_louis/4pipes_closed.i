@@ -207,6 +207,8 @@ cfl = 0.95
   [csv]
     type = CSV
     show = 'p_pipe1_048 p_pipe2_052 p_pipe3_048 p_pipe4_043'
+    sync_only = true
+    sync_times = output_times
   []
   [console]
     type = Console
