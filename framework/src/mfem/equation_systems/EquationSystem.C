@@ -202,12 +202,20 @@ EquationSystem::ApplyEssentialBCs()
   {
     const auto & trial_var_name = _trial_var_names.at(i);
     mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
-    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
-    global_ess_markers = 0;
-    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
-    // essential boundaries to the global_ess_markers array
-    ApplyEssentialBC(trial_var_name, trial_gf, global_ess_markers);
-    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    _global_ess_markers.SetSize(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    _global_ess_markers = 0;
+
+    if (!_is_eigensolve)
+    {
+      // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+      // essential boundaries to the global_ess_markers array
+      ApplyEssentialBC(trial_var_name, trial_gf, _global_ess_markers);
+      trial_gf.ParFESpace()->GetEssentialTrueDofs(_global_ess_markers, _ess_tdof_lists.at(i));
+    }
+    else
+    {
+      trial_gf.ParFESpace()->GetParMesh()->MarkExternalBoundaries(_global_ess_markers);
+    }
   }
 }
 
@@ -240,19 +248,42 @@ EquationSystem::FormLinearSystem(mfem::OperatorHandle & op,
   mooseAssert(_test_var_names.size() == _trial_var_names.size(),
               "Number of test and trial variables must be the same for block matrix assembly.");
 
-  switch (_assembly_level)
+  if (_assembly_level == mfem::AssemblyLevel::LEGACY)
   {
-    case mfem::AssemblyLevel::LEGACY:
-      FormSystemMatrix(op, trueX, trueRHS);
-      break;
-    default:
-      mooseAssert(_test_var_names.size() == 1,
-                  "Non-legacy assembly is only supported for single-variable systems");
-      mooseAssert(
-          _test_var_names.size() == _trial_var_names.size(),
-          "Non-legacy assembly is only supported for single test and trial variable systems");
-      FormSystemOperator(op, trueX, trueRHS);
+    FormSystemMatrix(op, trueX, trueRHS);
   }
+  else
+  {
+    mooseAssert(_test_var_names.size() == 1 && _test_var_names.size() == _trial_var_names.size(),
+                "Non-legacy assembly is only supported for single test and trial variable systems");
+    mooseAssert(!_is_eigensolve, "Eigensolve is not supported for non-legacy assembly");
+
+    FormSystemOperator(op, trueX, trueRHS);
+  }
+}
+
+void
+EquationSystem::FormEigenproblemMatrix(mfem::OperatorHandle & op)
+{
+  auto & test_var_name = _test_var_names.at(0);
+  auto blf = _blfs.Get(test_var_name);
+
+  blf->EliminateEssentialBCDiag(_global_ess_markers, 1.0);
+  blf->Finalize();
+  op.Reset(blf->ParallelAssemble());
+}
+
+void
+EquationSystem::FormMassMatrix(mfem::OperatorHandle & op)
+{
+  mfem::ConstantCoefficient one(1.0);
+  mfem::ParBilinearForm * m = new mfem::ParBilinearForm(_test_pfespaces.at(0));
+  m->AddDomainIntegrator(new mfem::MassIntegrator(one));
+  m->Assemble();
+  //// Shift the eigenvalue corresponding to eliminated dofs to a large value
+  m->EliminateEssentialBCDiag(_global_ess_markers, std::numeric_limits<mfem::real_t>::min());
+  m->Finalize();
+  op.Reset(m->ParallelAssemble());
 }
 
 void
@@ -347,6 +378,20 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 }
 
 void
+EquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS)
+{
+  mooseAssert(_test_var_names.size() == 1 &&
+                (_test_var_names.size() == _trial_var_names.size()) &&
+                (_test_var_names.at(0) == _trial_var_names.at(0)),
+            "Eigensolve is only supported for single-variable, square systems");
+
+  height = trueX.Size();
+  width = trueX.Size();
+  FormEigenproblemMatrix(_jacobian);
+  FormMassMatrix(massRHS);
+}
+
+void
 EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
 {
   _jacobian->Mult(x, residual);
@@ -371,6 +416,20 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
     trueX.GetBlock(i).SyncAliasMemory(trueX);
     gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
+}
+
+void 
+EquationSystem::RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver)
+{
+  mfem::Array<mfem::real_t> eigenvalues;
+  eigensolver->getEigenvalues(eigenvalues);
+  
+  for (int i = 0; i<eigenvalues.Size(); ++i)
+  {
+    auto & trial_var_name = _trial_var_names.at(0);
+    gridfunctions.Get(trial_var_name + "_" + std::to_string(i))->Distribute(eigensolver->getEigenvector(i));
+  }
+  
 }
 
 void

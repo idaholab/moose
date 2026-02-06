@@ -20,6 +20,7 @@
 #include "MFEMKernel.h"
 #include "MFEMMixedBilinearFormKernel.h"
 #include "ScaleIntegrator.h"
+#include "MFEMEigensolverBase.h"
 
 namespace Moose::MFEM
 {
@@ -47,6 +48,8 @@ public:
                     mfem::AssemblyLevel assembly_level);
   /// Build linear system, with essential boundary conditions accounted for
   virtual void BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & trueRHS);
+  /// Build eigenproblem system, with essential boundary conditions accounted for
+  virtual void BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS);
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
   /// Compute J = M + grad_H(u)
@@ -57,10 +60,19 @@ public:
                                   GridFunctions & gridfunctions,
                                   ComplexGridFunctions & cmplx_gridfunctions);
 
+  /// Update eigenvectors from solution after eigensolve                                
+  virtual void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver);
+
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
   const std::vector<std::string> & GetTrialVarNames() const { return _trial_var_names; }
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
+
+  // Set whether the current solve is for an eigenvalue problem
+  void setEigensolve(const bool is_eigensolve) { _is_eigensolve = is_eigensolve; }
+
+  // Retrieve the global essential boundary markers
+  mfem::Array<int> & getGlobalEssMarkers() { return _global_ess_markers; }
 
 protected:
   /// Add test variable to EquationSystem.
@@ -112,6 +124,12 @@ protected:
   virtual void FormSystemMatrix(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS);
+
+  /// Form HypreParMatrix matrix operator for the eigensolver with Dirichlet BC elimination.
+  virtual void FormEigenproblemMatrix(mfem::OperatorHandle & op);
+
+  /// Form mass matrix for the eigensolver with Dirichlet BC elimination.
+  virtual void FormMassMatrix(mfem::OperatorHandle & op);
 
   /**
    * Template method for applying BilinearFormIntegrators on domains from kernels to a BilinearForm,
@@ -173,6 +191,7 @@ protected:
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
   std::vector<mfem::Array<int>> _ess_tdof_lists;
+  mfem::Array<int> _global_ess_markers;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
   /// Arrays to store kernels to act on each component of weak form.
@@ -189,8 +208,11 @@ protected:
 
   mfem::AssemblyLevel _assembly_level;
 
+  bool _is_eigensolve;
+
 private:
   friend class EquationSystemProblemOperator;
+  friend class EquationSystemEigenproblemOperator;
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 };
