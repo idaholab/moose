@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2026.01.27" %}
+{% set version = "2026.02.05" %}
 
 package:
   name: moose-tools
@@ -32,7 +32,7 @@ requirements:
     - {{ black }}
     - {{ clang_format }}
     - {{ clang_tools }}
-    - coverage
+    - coverage 7.13.2
     - deepdiff
     - git-lfs <3.5.1
     - gitpython
