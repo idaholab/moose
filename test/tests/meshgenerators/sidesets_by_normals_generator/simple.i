@@ -5,7 +5,7 @@
   []
 
   [./generate_sidesets]
-    type = AllSideSetsByNormalsGenerator
+    type = SideSetsFromAllNormalsGenerator
     input = fmg
   []
 []

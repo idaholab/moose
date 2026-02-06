@@ -16,12 +16,12 @@
  * Note: This algorithm may not work well with meshes containing curved faces.
  * Several sidesets may be created in that case. Use sensibly!
  */
-class AllSideSetsByNormalsGenerator : public SideSetsGeneratorBase
+class SideSetsFromAllNormalsGenerator : public SideSetsGeneratorBase
 {
 public:
   static InputParameters validParams();
 
-  AllSideSetsByNormalsGenerator(const InputParameters & parameters);
+  SideSetsFromAllNormalsGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
