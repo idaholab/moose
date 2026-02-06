@@ -208,8 +208,6 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const 
       const DofObject * dof_object = nullptr;
       dof_object = to_mesh.node_ptr(dof_object_id);
       const auto dof = dof_object->dof_number(sys_num, var_num, 0);
-      // const auto val = val_pair.second.interp;
-      // const auto val = findpoint(*node);
       const auto val = interp_vals[mfem_point_index];
 
       to_sys->solution->set(dof, val);
