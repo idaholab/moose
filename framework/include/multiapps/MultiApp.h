@@ -634,5 +634,7 @@ private:
   mutable std::optional<std::string> _cli_args_param;
 };
 
-void dataStore(std::ostream & stream, SubAppBackups & backups, Moose::AnyPointer context);
-void dataLoad(std::istream & stream, SubAppBackups & backups, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, SubAppBackups & backups, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, SubAppBackups & backups, Context context);

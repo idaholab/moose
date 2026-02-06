@@ -23,7 +23,11 @@ struct Backup
   std::unique_ptr<std::stringstream> data = std::make_unique<std::stringstream>();
 };
 
-void dataStore(std::ostream & stream, Backup & backup, Moose::AnyPointer context);
-void dataLoad(std::istream & stream, Backup & backup, Moose::AnyPointer context);
-void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context);
-void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, Backup & backup, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, Backup & backup, Context context);
+template <typename Context>
+void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Context context);

@@ -184,11 +184,15 @@ private:
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;
 
-  friend void dataStore(std::ostream &, const std::unique_ptr<PerfNode> &, Moose::AnyPointer);
-  friend void dataLoad(std::istream &, const std::unique_ptr<PerfNode> &, Moose::AnyPointer);
+  template <typename Context>
+  friend void dataStore(std::ostream &, const std::unique_ptr<PerfNode> &, Context);
+  template <typename Context>
+  friend void dataLoad(std::istream &, const std::unique_ptr<PerfNode> &, Context);
 };
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, Moose::AnyPointer context);
+dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, Context context);
+template <typename Context>
 void
-dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, Moose::AnyPointer context);
+dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, Context context);

@@ -139,8 +139,10 @@ public:
   /// Whether the solution invalidity has synchronized iteration counts across MPI processes
   bool hasSynced() const { return _has_synced; }
 
-  friend void dataStore(std::ostream &, SolutionInvalidity &, Moose::AnyPointer);
-  friend void dataLoad(std::istream &, SolutionInvalidity &, Moose::AnyPointer);
+  template <typename Context>
+  friend void dataStore(std::ostream &, SolutionInvalidity &, Context);
+  template <typename Context>
+  friend void dataLoad(std::istream &, SolutionInvalidity &, Context);
 
 private:
   /// Mutex for locking access to the invalid counts

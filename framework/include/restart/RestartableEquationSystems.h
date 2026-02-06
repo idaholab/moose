@@ -188,35 +188,45 @@ private:
   std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
 };
 
-void dataStore(std::ostream & stream, RestartableEquationSystems & res, Moose::AnyPointer);
-void dataLoad(std::istream & stream, RestartableEquationSystems & res, Moose::AnyPointer);
+template <typename Context>
+void dataStore(std::ostream & stream, RestartableEquationSystems & res, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, RestartableEquationSystems & res, Context context);
 
+template <typename Context>
 void dataStore(std::ostream & stream,
                RestartableEquationSystems::EquationSystemsHeader & header,
-               Moose::AnyPointer);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               RestartableEquationSystems::EquationSystemsHeader & header,
-              Moose::AnyPointer);
+              Context context);
 
+template <typename Context>
 void dataStore(std::ostream & stream,
                RestartableEquationSystems::SystemHeader & header,
-               Moose::AnyPointer);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               RestartableEquationSystems::SystemHeader & header,
-              Moose::AnyPointer);
+              Context context);
 
+template <typename Context>
 void dataStore(std::ostream & stream,
                RestartableEquationSystems::VariableHeader & header,
-               Moose::AnyPointer);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               RestartableEquationSystems::VariableHeader & header,
-              Moose::AnyPointer);
+              Context context);
 
+template <typename Context>
 void dataStore(std::ostream & stream,
                RestartableEquationSystems::VectorHeader & header,
-               Moose::AnyPointer);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               RestartableEquationSystems::VectorHeader & header,
-              Moose::AnyPointer);
+              Context context);
 
 void to_json(nlohmann::json & json, const RestartableEquationSystems & res);

@@ -10,8 +10,9 @@
 #include "Backup.h"
 #include "DataIO.h"
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, Backup & backup, Moose::AnyPointer context)
+dataStore(std::ostream & stream, Backup & backup, Context context)
 {
   mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
@@ -20,8 +21,12 @@ dataStore(std::ostream & stream, Backup & backup, Moose::AnyPointer context)
   dataStore(stream, *backup.data, context);
 }
 
+template void dataStore(std::ostream & stream, Backup & backup, void * context);
+template void dataStore(std::ostream & stream, Backup & backup, std::nullptr_t context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, Backup & backup, Moose::AnyPointer context)
+dataLoad(std::istream & stream, Backup & backup, Context context)
 {
   mooseAssert(backup.header, "Not set");
   mooseAssert(backup.data, "Not set");
@@ -30,8 +35,12 @@ dataLoad(std::istream & stream, Backup & backup, Moose::AnyPointer context)
   dataLoad(stream, *backup.data, context);
 }
 
+template void dataLoad(std::istream & stream, Backup & backup, void * context);
+template void dataLoad(std::istream & stream, Backup & backup, std::nullptr_t context);
+
+template <typename Context>
 void
-dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context)
+dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Context context)
 {
   bool has_value = backup != nullptr;
   dataStore(stream, has_value, nullptr);
@@ -39,8 +48,12 @@ dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPoi
     dataStore(stream, *backup, context);
 }
 
+template void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, void * context);
+template void dataStore(std::ostream & stream, std::unique_ptr<Backup> & backup, std::nullptr_t context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPointer context)
+dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Context context)
 {
   bool has_value;
   dataLoad(stream, has_value, nullptr);
@@ -50,3 +63,6 @@ dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, Moose::AnyPoin
     dataLoad(stream, *backup, context);
   }
 }
+
+template void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, void * context);
+template void dataLoad(std::istream & stream, std::unique_ptr<Backup> & backup, std::nullptr_t context);

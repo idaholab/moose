@@ -19,7 +19,8 @@
 class PerfGraph;
 class PerfGraphLivePrint;
 class PerfNode;
-void dataStore(std::ostream &, PerfGraph &, Moose::AnyPointer);
+template <typename Context>
+void dataStore(std::ostream &, PerfGraph &, Context);
 
 namespace moose
 {
@@ -140,6 +141,10 @@ public:
    */
   std::size_t numSections() const { return size(); }
 
+  /// Access to section info items for serialization (public for dataStore/dataLoad)
+  std::deque<PerfGraphSectionInfo> & sectionItems() { return items(); }
+  const std::deque<PerfGraphSectionInfo> & sectionItems() const { return items(); }
+
 private:
   PerfGraphRegistry();
 
@@ -172,16 +177,16 @@ private:
   friend PerfGraphRegistry & getPerfGraphRegistry();
   /// This is only here so that PerfGraph can access readSectionInfo
   friend PerfGraph;
-  // For accessing _id_to_section_info when storing the PerfGraph
-  friend void ::dataStore(std::ostream &, PerfGraph &, Moose::AnyPointer);
 };
 
 }
 }
 
+template <typename Context>
 void dataStore(std::ostream & stream,
                moose::internal::PerfGraphSectionInfo & info,
-               Moose::AnyPointer context);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               moose::internal::PerfGraphSectionInfo & info,
-              Moose::AnyPointer context);
+              Context context);

@@ -330,10 +330,10 @@ protected:
   unsigned int _n_rows, _n_cols, _n_entries;
   std::vector<T> _values;
 
-  template <typename T2>
-  friend void dataStore(std::ostream &, ColumnMajorMatrixTempl<T2> &, Moose::AnyPointer);
-  template <typename T2>
-  friend void dataLoad(std::istream &, ColumnMajorMatrixTempl<T2> &, Moose::AnyPointer);
+  template <typename T2, typename Context>
+  friend void dataStore(std::ostream &, ColumnMajorMatrixTempl<T2> &, Context);
+  template <typename T2, typename Context>
+  friend void dataLoad(std::istream &, ColumnMajorMatrixTempl<T2> &, Context);
 };
 
 template <typename T>

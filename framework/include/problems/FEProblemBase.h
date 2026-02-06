@@ -2864,7 +2864,7 @@ protected:
 
 private:
   /// The EquationSystems object, wrapped for restart
-  Restartable::ManagedValue<RestartableEquationSystems> _req;
+  Restartable::ManagedValue<RestartableEquationSystems, MooseMesh *> _req;
 
   /**
    * Set the subproblem and system parameters for residual objects and log their addition

@@ -55,7 +55,8 @@ MultiAppNearestNodeTransfer::validParams()
 MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _fixed_meshes(getParam<bool>("fixed_meshes")),
-    _node_map(declareRestartableData<std::map<dof_id_type, Node *>>("node_map")),
+    _node_map(declareRestartableDataWithContext<std::map<dof_id_type, Node *>>(
+        "node_map", _fe_problem.mesh().getMesh())),
     _distance_map(declareRestartableData<std::map<dof_id_type, Real>>("distance_map")),
     _neighbors_cached(declareRestartableData<bool>("neighbors_cached", false)),
     _cached_froms(declareRestartableData<std::map<processor_id_type, std::vector<unsigned int>>>(

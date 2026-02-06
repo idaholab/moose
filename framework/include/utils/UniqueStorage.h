@@ -18,10 +18,10 @@
 
 template <class T>
 class UniqueStorage;
-template <typename T>
-void storeHelper(std::ostream & stream, UniqueStorage<T> &, Moose::AnyPointer);
-template <typename T>
-void loadHelper(std::istream & stream, UniqueStorage<T> &, Moose::AnyPointer);
+template <typename T, typename Context>
+void storeHelper(std::ostream & stream, UniqueStorage<T> &, Context);
+template <typename T, typename Context>
+void loadHelper(std::istream & stream, UniqueStorage<T> &, Context);
 
 /**
  * Storage container that stores a vector of unique pointers of T,
@@ -187,8 +187,10 @@ private:
     return const_cast<std::unique_ptr<T> &>(std::as_const(*this).pointerValue(i));
   }
 
-  friend void storeHelper<>(std::ostream & stream, UniqueStorage<T> &, Moose::AnyPointer);
-  friend void loadHelper<>(std::istream & stream, UniqueStorage<T> &, Moose::AnyPointer);
+  template <typename U, typename Context>
+  friend void storeHelper(std::ostream & stream, UniqueStorage<U> &, Context);
+  template <typename U, typename Context>
+  friend void loadHelper(std::istream & stream, UniqueStorage<U> &, Context);
 
   /// The underlying data
   values_type _values;

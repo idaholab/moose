@@ -405,40 +405,53 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
               "Variable not marked as restored");
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, RestartableEquationSystems & res, Moose::AnyPointer)
+dataStore(std::ostream & stream, RestartableEquationSystems & res, Context /*context*/)
 {
   res.store(stream);
 }
 
+template void dataStore(std::ostream &, RestartableEquationSystems &, void *);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, RestartableEquationSystems & res, Moose::AnyPointer)
+dataLoad(std::istream & stream, RestartableEquationSystems & res, Context /*context*/)
 {
   res.load(stream);
 }
 
+template void dataLoad(std::istream &, RestartableEquationSystems &, void *);
+
+template <typename Context>
 void
 dataStore(std::ostream & stream,
           RestartableEquationSystems::EquationSystemsHeader & header,
-          Moose::AnyPointer)
+          Context /*context*/)
 {
   dataStore(stream, header.systems, nullptr);
   dataStore(stream, header.data_size, nullptr);
 }
 
+template void dataStore(std::ostream &, RestartableEquationSystems::EquationSystemsHeader &, void *);
+
+template <typename Context>
 void
 dataLoad(std::istream & stream,
          RestartableEquationSystems::EquationSystemsHeader & header,
-         Moose::AnyPointer)
+         Context /*context*/)
 {
   dataLoad(stream, header.systems, nullptr);
   dataLoad(stream, header.data_size, nullptr);
 }
 
+template void dataLoad(std::istream &, RestartableEquationSystems::EquationSystemsHeader &, void *);
+
+template <typename Context>
 void
 dataStore(std::ostream & stream,
           RestartableEquationSystems::SystemHeader & header,
-          Moose::AnyPointer)
+          Context /*context*/)
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.type, nullptr);
@@ -446,10 +459,13 @@ dataStore(std::ostream & stream,
   dataStore(stream, header.vectors, nullptr);
 }
 
+template void dataStore(std::ostream &, RestartableEquationSystems::SystemHeader &, void *);
+
+template <typename Context>
 void
 dataLoad(std::istream & stream,
          RestartableEquationSystems::SystemHeader & header,
-         Moose::AnyPointer)
+         Context /*context*/)
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.type, nullptr);
@@ -457,43 +473,59 @@ dataLoad(std::istream & stream,
   dataLoad(stream, header.vectors, nullptr);
 }
 
+template void dataLoad(std::istream &, RestartableEquationSystems::SystemHeader &, void *);
+
+template <typename Context>
 void
 dataStore(std::ostream & stream,
           RestartableEquationSystems::VariableHeader & header,
-          Moose::AnyPointer)
+          Context /*context*/)
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.type, nullptr);
 }
+
+template void dataStore(std::ostream &, RestartableEquationSystems::VariableHeader &, void *);
+
+template <typename Context>
 void
 dataLoad(std::istream & stream,
          RestartableEquationSystems::VariableHeader & header,
-         Moose::AnyPointer)
+         Context /*context*/)
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.type, nullptr);
 }
 
+template void dataLoad(std::istream &, RestartableEquationSystems::VariableHeader &, void *);
+
+template <typename Context>
 void
 dataStore(std::ostream & stream,
           RestartableEquationSystems::VectorHeader & header,
-          Moose::AnyPointer)
+          Context /*context*/)
 {
   dataStore(stream, header.name, nullptr);
   dataStore(stream, header.projections, nullptr);
   dataStore(stream, header.type, nullptr);
   dataStore(stream, header.variable_offset, nullptr);
 }
+
+template void dataStore(std::ostream &, RestartableEquationSystems::VectorHeader &, void *);
+
+template <typename Context>
 void
 dataLoad(std::istream & stream,
          RestartableEquationSystems::VectorHeader & header,
-         Moose::AnyPointer)
+         Context /*context*/)
 {
   dataLoad(stream, header.name, nullptr);
   dataLoad(stream, header.projections, nullptr);
   dataLoad(stream, header.type, nullptr);
   dataLoad(stream, header.variable_offset, nullptr);
 }
+
+template void dataLoad(std::istream &, RestartableEquationSystems::VectorHeader &, void *);
 
 void
 to_json(nlohmann::json & json, const RestartableEquationSystems & res)

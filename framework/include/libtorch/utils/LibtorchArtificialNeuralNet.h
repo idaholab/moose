@@ -125,16 +125,6 @@ void dataLoad<Moose::LibtorchArtificialNeuralNet>(
 // This is needed because the reporter which is used to ouput the neural net parameters to JSON
 // requires a dataStore/dataLoad. However, these functions will be empty due to the fact that
 // we are only interested in the JSON output and we don't want to output everything
-template <>
-void
-dataStore<Moose::LibtorchArtificialNeuralNet const>(std::ostream & stream,
-                                                    Moose::LibtorchArtificialNeuralNet const *& nn,
-                                                    Moose::AnyPointer context);
-
-template <>
-void
-dataLoad<Moose::LibtorchArtificialNeuralNet const>(std::istream & stream,
-                                                   Moose::LibtorchArtificialNeuralNet const *& nn,
-                                                   Moose::AnyPointer context);
+// The template implementations in DataIO.h handle this for all context types
 
 #endif

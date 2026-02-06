@@ -69,6 +69,8 @@ void to_json(nlohmann::json & json, const PerfGraphReporter::PerfGraphJSON & per
  * graph to the current PerfGraph.
  */
 ///@{
-void dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, Moose::AnyPointer);
-void dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, Moose::AnyPointer);
+template <typename Context>
+void dataStore(std::ostream &, PerfGraphReporter::PerfGraphJSON &, Context);
+template <typename Context>
+void dataLoad(std::istream &, PerfGraphReporter::PerfGraphJSON &, Context);
 ///@}

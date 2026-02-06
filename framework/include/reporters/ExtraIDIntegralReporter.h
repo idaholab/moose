@@ -37,5 +37,7 @@ private:
 };
 
 void to_json(nlohmann::json & json, const ExtraIDIntegralReporter::ExtraIDData & extra_id_data);
-void dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, Moose::AnyPointer);
-void dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, Moose::AnyPointer);
+template <typename Context>
+void dataStore(std::ostream &, ExtraIDIntegralReporter::ExtraIDData &, Context);
+template <typename Context>
+void dataLoad(std::istream &, ExtraIDIntegralReporter::ExtraIDData &, Context);

@@ -40,12 +40,14 @@ void to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_
  * initialize what the reporter value in SolutionInvalidityReporter points to.
  */
 ///@{
+template <typename Context>
 void
-dataStore(std::ostream &, const SolutionInvalidity *&, Moose::AnyPointer)
+dataStore(std::ostream &, const SolutionInvalidity *&, Context)
 {
 }
+template <typename Context>
 void
-dataLoad(std::istream &, const SolutionInvalidity *&, Moose::AnyPointer)
+dataLoad(std::istream &, const SolutionInvalidity *&, Context)
 {
 }
 ///@}

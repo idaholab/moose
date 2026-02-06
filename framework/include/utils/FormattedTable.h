@@ -26,14 +26,14 @@ namespace libMesh
 class ExodusII_IO;
 }
 
-template <>
-void dataStore(std::ostream & stream, FormattedTable & table, Moose::AnyPointer context);
-template <>
-void dataLoad(std::istream & stream, FormattedTable & v, Moose::AnyPointer context);
-template <>
-void dataStore(std::ostream & stream, TableValueBase *& value, Moose::AnyPointer context);
-template <>
-void dataLoad(std::istream & stream, TableValueBase *& value, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, FormattedTable & table, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, FormattedTable & v, Context context);
+template <typename Context>
+void dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value, Context context);
 
 class TableValueBase
 {
@@ -48,7 +48,7 @@ public:
 
   virtual void print(std::ostream & os) const = 0;
 
-  virtual void store(std::ostream & stream, Moose::AnyPointer context) = 0;
+  virtual void store(std::ostream & stream, void * context) = 0;
 };
 
 std::ostream & operator<<(std::ostream & os, const TableValueBase & value);
@@ -68,10 +68,8 @@ public:
 
   virtual void print(std::ostream & os) const override { os << this->_value; };
 
-  virtual void store(std::ostream & stream, Moose::AnyPointer context) override;
-  static void load(std::istream & stream,
-                   std::shared_ptr<TableValueBase> & value_base,
-                   Moose::AnyPointer context);
+  virtual void store(std::ostream & stream, void * context) override;
+  static void load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context);
 
 private:
   T _value;
@@ -86,7 +84,7 @@ TableValue<bool>::print(std::ostream & os) const
 
 template <typename T>
 void
-TableValue<T>::store(std::ostream & stream, Moose::AnyPointer context)
+TableValue<T>::store(std::ostream & stream, void * context)
 {
   std::string type = typeid(T).name();
   ::dataStore(stream, type, context);
@@ -95,9 +93,7 @@ TableValue<T>::store(std::ostream & stream, Moose::AnyPointer context)
 
 template <typename T>
 void
-TableValue<T>::load(std::istream & stream,
-                    std::shared_ptr<TableValueBase> & value_base,
-                    Moose::AnyPointer context)
+TableValue<T>::load(std::istream & stream, std::shared_ptr<TableValueBase> & value_base, void * context)
 {
   T value;
   ::dataLoad(stream, value, context);
@@ -323,11 +319,10 @@ private:
   /// Flag indicating that sorting is necessary (used by sortColumns method).
   bool _column_names_unsorted = true;
 
-  friend void dataStore<FormattedTable>(std::ostream & stream,
-                                        FormattedTable & table,
-                                        Moose::AnyPointer context);
-  friend void
-  dataLoad<FormattedTable>(std::istream & stream, FormattedTable & v, Moose::AnyPointer context);
+  template <typename Context>
+  friend void dataStore(std::ostream & stream, FormattedTable & table, Context context);
+  template <typename Context>
+  friend void dataLoad(std::istream & stream, FormattedTable & v, Context context);
 };
 
 template <typename T>
@@ -417,11 +412,11 @@ FormattedTable::getLastData(const std::string & name) const
   return value->set();
 }
 
-template <>
-void dataStore(std::ostream & stream, FormattedTable & table, Moose::AnyPointer context);
-template <>
-void dataLoad(std::istream & stream, FormattedTable & v, Moose::AnyPointer context);
-template <>
-void dataStore(std::ostream & stream, TableValueBase *& value, Moose::AnyPointer context);
-template <>
-void dataLoad(std::istream & stream, TableValueBase *& value, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, FormattedTable & table, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, FormattedTable & v, Context context);
+template <typename Context>
+void dataStore(std::ostream & stream, std::shared_ptr<TableValueBase> & value, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, std::shared_ptr<TableValueBase> & value, Context context);

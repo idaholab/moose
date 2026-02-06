@@ -112,6 +112,11 @@ public:
     throw bad_cast(typeid(T), _type_id, _ptr == nullptr);
   }
 
+  /// Get the raw pointer without type checking. Used when context type is not needed
+  /// (e.g., dataStore which ignores context for many types).
+  void * getRawPtr() noexcept { return _ptr; }
+  const void * getRawPtr() const noexcept { return _ptr; }
+
 private:
   std::type_index _type_id = typeid(void);
   void * _ptr = nullptr;

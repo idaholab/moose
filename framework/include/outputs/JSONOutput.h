@@ -41,7 +41,7 @@ private:
   bool _has_distributed = false;
 };
 
-template <>
-void dataStore(std::ostream & stream, nlohmann::json & json, Moose::AnyPointer context);
-template <>
-void dataLoad(std::istream & stream, nlohmann::json & json, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, nlohmann::json & json, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, nlohmann::json & json, Context context);

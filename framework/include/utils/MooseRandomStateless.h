@@ -268,39 +268,35 @@ private:
   std::size_t _advance_count = 0;
 };
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, MooseRandomStateless & v, Moose::AnyPointer context)
+dataStore(std::ostream & stream, MooseRandomStateless & v, Context context)
 {
   std::size_t count = v.getAdvanceCount();
   storeHelper(stream, count, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, MooseRandomStateless & v, Moose::AnyPointer context)
+dataLoad(std::istream & stream, MooseRandomStateless & v, Context context)
 {
   std::size_t count;
   loadHelper(stream, count, context);
   v.advance(count);
 }
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream,
-          std::unique_ptr<MooseRandomStateless> & v,
-          Moose::AnyPointer context)
+dataStore(std::ostream & stream, std::unique_ptr<MooseRandomStateless> & v, Context context)
 {
   unsigned int seed = v->getSeed();
   storeHelper(stream, seed, context);
   storeHelper(stream, *v, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream,
-         std::unique_ptr<MooseRandomStateless> & v,
-         Moose::AnyPointer context)
+dataLoad(std::istream & stream, std::unique_ptr<MooseRandomStateless> & v, Context context)
 {
   unsigned int seed;
   loadHelper(stream, seed, context);

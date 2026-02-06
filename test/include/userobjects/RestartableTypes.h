@@ -24,55 +24,70 @@ public:
   int _i;
 };
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, Dummy *& v, Moose::AnyPointer context)
+dataStore(std::ostream & stream, Dummy *& v, Context context)
 {
   dataStore(stream, v->_i, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, Dummy *& v, Moose::AnyPointer context)
+dataLoad(std::istream & stream, Dummy *& v, Context context)
 {
   dataLoad(stream, v->_i, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, Dummy & v, Moose::AnyPointer context)
+dataStore(std::ostream & stream, Dummy & v, Context context)
 {
   dataStore(stream, v._i, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, Dummy & v, Moose::AnyPointer context)
+dataLoad(std::istream & stream, Dummy & v, Context context)
 {
   dataLoad(stream, v._i, context);
 }
 
-template <>
+template <typename Context>
 inline void
-dataStore(std::ostream & stream, DummyNeedingContext & v, Moose::AnyPointer context)
+dataStore(std::ostream & stream, DummyNeedingContext & v, Context context)
 {
-  int & context_int = *(context.get_if<int>());
+  static_assert(!std::is_same_v<Context, std::nullptr_t>,
+                "DummyNeedingContext requires an int& context for serialization");
+
+  // Context is int& or int*, dereference appropriately
+  int & context_int = [&]() -> int & {
+    if constexpr (std::is_pointer_v<Context>)
+      return *context;
+    else
+      return context;
+  }();
 
   int value = v._i + context_int;
-
-  dataStore(stream, value, context);
+  dataStore(stream, value, nullptr);
 }
 
-template <>
+template <typename Context>
 inline void
-dataLoad(std::istream & stream, DummyNeedingContext & v, Moose::AnyPointer context)
+dataLoad(std::istream & stream, DummyNeedingContext & v, Context context)
 {
-  int & context_int = *(context.get_if<int>());
+  static_assert(!std::is_same_v<Context, std::nullptr_t>,
+                "DummyNeedingContext requires an int& context for deserialization");
+
+  // Context is int& or int*, dereference appropriately
+  int & context_int = [&]() -> int & {
+    if constexpr (std::is_pointer_v<Context>)
+      return *context;
+    else
+      return context;
+  }();
 
   int value = 0;
-
-  dataLoad(stream, value, context);
-
+  dataLoad(stream, value, nullptr);
   v._i = value - context_int;
 }
 

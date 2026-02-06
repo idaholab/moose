@@ -305,8 +305,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _keep_aux_solution_during_restore(getParam<bool>("keep_aux_solution_during_restore")),
     _no_restore(getParam<bool>("no_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
-    _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups",
-                                                                      Moose::AnyPointer(this))),
+    _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", *this)),
     _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),
     _init_timer(registerTimedSection("init", 3, "Initializing MultiApp")),
     _backup_timer(registerTimedSection("backup", 3, "Backing Up MultiApp")),
@@ -1520,24 +1519,56 @@ MultiApp::position(unsigned int app) const
     return _positions_objs[app]->getPosition(app - _positions_index_offsets[app], false);
 }
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, SubAppBackups & backups, Moose::AnyPointer context)
+dataStore(std::ostream & stream, SubAppBackups & backups, Context context)
 {
-  mooseAssert(context.hasValue(), "Not set");
-  MultiApp * multi_app = context.get_if<MultiApp>();
+  MultiApp * multi_app = nullptr;
+  if constexpr (std::is_same_v<Context, Moose::AnyPointer>)
+  {
+    mooseAssert(context.hasValue(), "Not set");
+    multi_app = context.template get_if<MultiApp>();
+  }
+  else if constexpr (std::is_same_v<Context, void *>)
+    multi_app = reinterpret_cast<MultiApp *>(context);
+  else if constexpr (std::is_convertible_v<Context, MultiApp *>)
+    multi_app = context;
+  else
+    static_assert(Moose::always_false<Context>,
+                  "SubAppBackups requires a MultiApp*, void*, or AnyPointer context");
 
   multi_app->backup();
 
   dataStore(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 }
 
+template void dataStore(std::ostream & stream, SubAppBackups & backups, MultiApp * context);
+template void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);
+template void dataStore(std::ostream & stream, SubAppBackups & backups, Moose::AnyPointer context);
+
+template <typename Context>
 void
-dataLoad(std::istream & stream, SubAppBackups & backups, Moose::AnyPointer context)
+dataLoad(std::istream & stream, SubAppBackups & backups, Context context)
 {
-  mooseAssert(context.hasValue(), "Not set");
-  MultiApp * multi_app = context.get_if<MultiApp>();
+  MultiApp * multi_app = nullptr;
+  if constexpr (std::is_same_v<Context, Moose::AnyPointer>)
+  {
+    mooseAssert(context.hasValue(), "Not set");
+    multi_app = context.template get_if<MultiApp>();
+  }
+  else if constexpr (std::is_same_v<Context, void *>)
+    multi_app = reinterpret_cast<MultiApp *>(context);
+  else if constexpr (std::is_convertible_v<Context, MultiApp *>)
+    multi_app = context;
+  else
+    static_assert(Moose::always_false<Context>,
+                  "SubAppBackups requires a MultiApp*, void*, or AnyPointer context");
 
   dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 
   multi_app->restore();
 }
+
+template void dataLoad(std::istream & stream, SubAppBackups & backups, MultiApp * context);
+template void dataLoad(std::istream & stream, SubAppBackups & backups, void * context);
+template void dataLoad(std::istream & stream, SubAppBackups & backups, Moose::AnyPointer context);

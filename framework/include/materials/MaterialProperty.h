@@ -396,7 +396,8 @@ public:
   {
     friend class MaterialData;
     friend class MaterialPropertyStorage;
-    friend void dataLoad(std::istream &, MaterialPropertyStorage &, Moose::AnyPointer);
+    template <typename Context>
+    friend void dataLoad(std::istream &, MaterialPropertyStorage &, Context);
 
     WriteKey() {}
     WriteKey(const WriteKey &) {}
@@ -503,11 +504,15 @@ private:
   friend class OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>;
 };
 
-void dataStore(std::ostream & stream, PropertyValue & p, Moose::AnyPointer context);
-void dataLoad(std::istream & stream, PropertyValue & p, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, PropertyValue & p, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, PropertyValue & p, Context context);
 
-void dataStore(std::ostream & stream, MaterialProperties & v, Moose::AnyPointer context);
-void dataLoad(std::istream & stream, MaterialProperties & v, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, MaterialProperties & v, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, MaterialProperties & v, Context context);
 
 template <typename T>
 using OptionalMaterialProperty = GenericOptionalMaterialProperty<T, false>;

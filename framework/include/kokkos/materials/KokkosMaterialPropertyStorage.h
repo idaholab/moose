@@ -28,8 +28,10 @@ namespace Moose::Kokkos
  */
 class MaterialPropertyStorage : protected ::MaterialPropertyStorage
 {
-  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, Moose::AnyPointer);
-  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, Moose::AnyPointer);
+  template <typename Context>
+  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, Context);
+  template <typename Context>
+  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, Context);
 
 public:
   /**

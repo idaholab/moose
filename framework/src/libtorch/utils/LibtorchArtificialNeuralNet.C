@@ -240,22 +240,7 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
   torch::load(nn, name);
 }
 
-template <>
-void
-dataStore<Moose::LibtorchArtificialNeuralNet const>(
-    std::ostream & /*stream*/,
-    Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
-    Moose::AnyPointer /*context*/)
-{
-}
-
-template <>
-void
-dataLoad<Moose::LibtorchArtificialNeuralNet const>(
-    std::istream & /*stream*/,
-    Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
-    Moose::AnyPointer /*context*/)
-{
-}
+// dataStore/dataLoad for LibtorchArtificialNeuralNet pointers are now handled
+// by the template versions in DataIO.h (no-op implementations for reporter output)
 
 #endif

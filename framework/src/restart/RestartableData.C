@@ -9,9 +9,8 @@
 
 #include "RestartableData.h"
 
-RestartableDataValue::RestartableDataValue(const std::string & name,
-                                           const Moose::AnyPointer context)
-  : _name(name), _context(context), _declared(false), _loaded(false), _stored(false)
+RestartableDataValue::RestartableDataValue(const std::string & name)
+  : _name(name), _declared(false), _loaded(false), _stored(false)
 {
 }
 
