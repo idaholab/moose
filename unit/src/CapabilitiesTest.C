@@ -34,15 +34,15 @@ using Moose::CapabilityUtils::UNKNOWN;
 TEST(CapabilityTest, capabilityConstructor)
 {
   // empty name
-  CAP_EXPECT_THROW_MSG(Capability("", true, "doc"), "Capability has empty name");
+  CAP_EXPECT_THROW_MSG(Capability("", bool(true), "doc"), "Capability has empty name");
 
   // disallowed characters
   CAP_EXPECT_THROW_MSG(
-      Capability("A!", true, "doc"),
+      Capability("A!", bool(true), "doc"),
       "Capability 'A!': Name has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
 
   // string value has disallowed characters
-  CAP_EXPECT_THROW_MSG(Capability("cap", "A!", "doc"),
+  CAP_EXPECT_THROW_MSG(Capability("cap", std::string("A!"), "doc"),
                        "String capability 'cap': value 'A!' has unallowed characters; allowed "
                        "characters = 'a-z, 0-9, _, ., -'");
 
@@ -50,7 +50,7 @@ TEST(CapabilityTest, capabilityConstructor)
   {
     Capability cap("name", bool(false), "doc");
     EXPECT_EQ(cap.getName(), "name");
-    EXPECT_EQ(cap.getValue(), CapabilityValue{false});
+    EXPECT_EQ(cap.getValue(), CapabilityValue(bool(false)));
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_NE(cap.queryBoolValue(), nullptr);
@@ -68,7 +68,7 @@ TEST(CapabilityTest, capabilityConstructor)
   {
     Capability cap("name", bool(true), "doc");
     EXPECT_EQ(cap.getName(), "name");
-    EXPECT_EQ(cap.getValue(), CapabilityValue{true});
+    EXPECT_EQ(cap.getValue(), CapabilityValue(bool(true)));
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_NE(cap.queryBoolValue(), nullptr);
@@ -86,7 +86,7 @@ TEST(CapabilityTest, capabilityConstructor)
   {
     Capability cap("name", int(1), "doc");
     EXPECT_EQ(cap.getName(), "name");
-    EXPECT_EQ(cap.getValue(), CapabilityValue{1});
+    EXPECT_EQ(cap.getValue(), CapabilityValue(int(1)));
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_EQ(cap.queryBoolValue(), nullptr);
@@ -104,7 +104,7 @@ TEST(CapabilityTest, capabilityConstructor)
   {
     Capability cap("name", std::string("foo"), "doc");
     EXPECT_EQ(cap.getName(), "name");
-    EXPECT_EQ(cap.getValue(), CapabilityValue{"foo"});
+    EXPECT_EQ(cap.getValue(), CapabilityValue(std::string("foo")));
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_EQ(cap.queryBoolValue(), nullptr);
@@ -775,20 +775,20 @@ TEST_F(CapabilitiesTest, augment)
     }
   };
 
-  test_capability("false", false, "false");
-  test_capability("int", 1, "1");
-  test_capability("int_explicit", 1, "1", true);
-  test_capability("string", "string", "string");
+  test_capability("false", bool(false), "false");
+  test_capability("int", int(1), "1");
+  test_capability("int_explicit", int(1), "1", true);
+  test_capability("string", std::string("string"), "string");
   test_capability("string_enum",
-                  "string_enum",
+                  std::string("string_enum"),
                   "string_enum",
                   false,
                   std::vector<std::string>{"string_enum", "foo"});
-  test_capability("string_explicit", "string_explicit", "string_explicit", true);
+  test_capability("string_explicit", std::string("string_explicit"), "string_explicit", true);
   test_capability("string_explicit_enum",
-                  "string_explicit_enum",
+                  std::string("string_explicit_enum"),
                   "string_explicit_enum",
                   true,
                   std::vector<std::string>{"string_explicit_enum", "foo"});
-  test_capability("true", true, "true");
+  test_capability("true", bool(true), "true");
 }
