@@ -610,11 +610,11 @@ Capabilities::registerMooseCapabilities()
       const auto resolved_path =
           std::filesystem::weakly_canonical(std::filesystem::path(*executable_path), ec);
       if (ec)
-        ::mooseWarning("Failed to resolve executable path '",
-                       *executable_path,
-                       "':\n",
-                       ec.message(),
-                       "\n\nSetting capability installation_type=unknown");
+        mooseDoOnce(mooseWarning("Failed to resolve executable path '",
+                                 *executable_path,
+                                 "':\n",
+                                 ec.message(),
+                                 "\n\nSetting capability installation_type=unknown"));
       else
       {
         // If the binary is in a folder "bin", we'll consider it installed.
@@ -624,8 +624,8 @@ Capabilities::registerMooseCapabilities()
       }
     }
     else
-      ::mooseWarning(
-          "Failed to determine executable path; setting capability installation_type=unknown");
+      mooseDoOnce(mooseWarning(
+          "Failed to determine executable path; setting capability installation_type=unknown"));
 
     add_string_capability("installation_type", value, "The installation type of the application.")
         .setExplicit()
