@@ -16,9 +16,6 @@
 #include "libmesh/parallel_elem.h"
 #include "libmesh/parallel_node.h"
 
-// C++ includes
-#include <limits.h>
-
 namespace // Anonymous namespace for helpers
 {
 /**
@@ -56,22 +53,16 @@ EqualValueBoundaryConstraint::validParams()
       "Constraint for enforcing that variables on each side of a boundary are equivalent.");
   params.addParam<unsigned int>(
       "primary",
-      std::numeric_limits<unsigned int>::max(),
       "The ID of the primary node. If no ID is provided, first node of secondary set is chosen.");
-  params.addParam<std::vector<unsigned int>>(
-      "secondary_node_ids", {}, "The IDs of the secondary node");
-  params.addParam<BoundaryName>(
-      "secondary", "NaN", "The boundary ID associated with the secondary side");
+  params.addParam<Point>("primary_node_coord", "Coordinates of the primary node to locate.");
+  params.addParam<std::vector<unsigned int>>("secondary_node_ids", "The IDs of the secondary node");
+  params.addParam<BoundaryName>("secondary", "The boundary ID associated with the secondary side");
   params.addRequiredParam<Real>("penalty", "The penalty used for the boundary term");
   return params;
 }
 
 EqualValueBoundaryConstraint::EqualValueBoundaryConstraint(const InputParameters & parameters)
-  : NodalConstraint(parameters),
-    _primary_node_id(getParam<unsigned int>("primary")),
-    _secondary_node_ids(getParam<std::vector<unsigned int>>("secondary_node_ids")),
-    _secondary_node_set_id(getParam<BoundaryName>("secondary")),
-    _penalty(getParam<Real>("penalty"))
+  : NodalConstraint(parameters), _penalty(getParam<Real>("penalty"))
 {
   updateConstrainedNodes();
 }
@@ -85,56 +76,146 @@ EqualValueBoundaryConstraint::meshChanged()
 void
 EqualValueBoundaryConstraint::updateConstrainedNodes()
 {
-  _primary_node_vector.clear();
+  populateSecondaryNodes();
+  pickPrimaryNode();
+  ghostPrimary();
+}
+
+void
+EqualValueBoundaryConstraint::populateSecondaryNodes()
+{
+  // user provided nothing
+  if (!isParamValid("secondary_node_ids") && !isParamValid("secondary"))
+    paramError("secondary", "Either secondary or secondary_node_ids must be provided.");
+
+  // user provided conflicting params
+  if (isParamValid("secondary_node_ids") && isParamValid("secondary"))
+    paramError("secondary",
+               "Both 'secondary' and 'secondary_node_ids' parameters are set. They are mutually "
+               "exclusive.");
+
+  // Fill in _connected_nodes, which defines local secondary nodes in the base class
+  //
+  // Note that later on when we pick the primary node from the secondary node set, we
+  // will make sure to remove it from _connected_nodes
   _connected_nodes.clear();
 
-  if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id == "NaN"))
-    mooseError("Please specify secondary node ids or boundary id.");
-  else if ((_secondary_node_ids.size() == 0) && (_secondary_node_set_id != "NaN"))
+  // user provided boundary name
+  if (isParamValid("secondary"))
   {
-    std::vector<dof_id_type> nodelist =
-        _mesh.getNodeList(_mesh.getBoundaryID(_secondary_node_set_id));
-    std::vector<dof_id_type>::iterator in;
+    const auto & secondary_bnd = getParam<BoundaryName>("secondary");
+    const auto & secondary_nodes = _mesh.getNodeList(_mesh.getBoundaryID(secondary_bnd));
 
-    // Set primary node to first node of the secondary node set if no primary node id is provided
-    //_primary_node_vector defines primary nodes in the base class
-    if (_primary_node_id == std::numeric_limits<unsigned int>::max())
+    for (const auto & nid : secondary_nodes)
+      if (_mesh.nodeRef(nid).processor_id() == _subproblem.processor_id())
+        _connected_nodes.push_back(nid);
+  }
+  // user provided node ids
+  else if (isParamValid("secondary_node_ids"))
+  {
+    const auto & secondary_node_ids = getParam<std::vector<unsigned int>>("secondary_node_ids");
+    for (const auto & nid : secondary_node_ids)
+      if (_mesh.queryNodePtr(nid) &&
+          _mesh.nodeRef(nid).processor_id() == _subproblem.processor_id())
+        _connected_nodes.push_back(nid);
+  }
+}
+
+void
+EqualValueBoundaryConstraint::pickPrimaryNode()
+{
+  // user provided nothing
+  if (isParamValid("primary") && isParamValid("primary_node_coord"))
+    mooseError(
+        "Both 'primary' and 'primary_node_coord' parameters are set. They are mutually exclusive.");
+
+  dof_id_type primary_node_id = Node::invalid_id;
+
+  // user provided primary node coordinates
+  if (isParamValid("primary_node_coord"))
+    primary_node_id = getPrimaryNodeIDByCoord();
+  // user provided primary node id
+  else if (isParamValid("primary"))
+    primary_node_id = getParam<unsigned int>("primary");
+  // no primary node provided, so we pick one from secondary nodes
+  else
+  {
+    // If the user provided secondary node ids, set primary node to first one
+    if (isParamValid("secondary_node_ids"))
     {
-      in = std::min_element(nodelist.begin(), nodelist.end());
-      dof_id_type node_id = (in == nodelist.end()) ? DofObject::invalid_id : *in;
-      _communicator.min(node_id);
-      _primary_node_vector.push_back(node_id);
+      if (_connected_nodes.size())
+        primary_node_id = _connected_nodes[0];
     }
+    // otherwise, we pick the minimum node id from the secondary node set
     else
-      _primary_node_vector.push_back(_primary_node_id);
-
-    // Fill in _connected_nodes, which defines secondary nodes in the base class
-    for (in = nodelist.begin(); in != nodelist.end(); ++in)
     {
-      if ((*in != _primary_node_vector[0]) &&
-          (_mesh.nodeRef(*in).processor_id() == _subproblem.processor_id()))
-        _connected_nodes.push_back(*in);
+      if (_connected_nodes.size())
+        primary_node_id = (*std::min_element(_connected_nodes.begin(), _connected_nodes.end()));
+      _mesh.comm().min(primary_node_id);
     }
   }
-  else if ((_secondary_node_ids.size() != 0) && (_secondary_node_set_id == "NaN"))
+
+  mooseAssert(primary_node_id != Node::invalid_id, "We should have found a primary node");
+
+  // Remove primary node from secondary nodes
+  auto it = std::find(_connected_nodes.begin(), _connected_nodes.end(), primary_node_id);
+  if (it != _connected_nodes.end())
+    _connected_nodes.erase(it);
+
+  // Store primary node id
+  _primary_node_vector.resize(1);
+  _primary_node_vector[0] = primary_node_id;
+}
+
+dof_id_type
+EqualValueBoundaryConstraint::getPrimaryNodeIDByCoord() const
+{
+  const Real eps = libMesh::TOLERANCE;
+  std::unordered_set<dof_id_type> local_primary_node_ids;
+  const auto & primary_node_coord = getParam<Point>("primary_node_coord");
+
+  // Gather local candidates
+  for (const auto & bnd_node : *_mesh.getBoundaryNodeRange())
   {
-    if (_primary_node_id == std::numeric_limits<unsigned int>::max())
-      _primary_node_vector.push_back(
-          _secondary_node_ids[0]); //_primary_node_vector defines primary nodes in the base class
-
-    // Fill in _connected_nodes, which defines secondary nodes in the base class
-    for (const auto & dof : _secondary_node_ids)
+    if ((*(bnd_node->_node) - primary_node_coord).norm() < eps)
     {
-      if (_mesh.queryNodePtr(dof) &&
-          (_mesh.nodeRef(dof).processor_id() == _subproblem.processor_id()) &&
-          (dof != _primary_node_vector[0]))
-        _connected_nodes.push_back(dof);
+      // The primary node we found should belong to the secondary node set
+      //
+      // Note that we do not immediately break once a match is found because in theory, although it
+      // is extremely unlikely, there could be multiple coinciding nodes on the secondary boundary
+      // that match the provided coordinates. In that case, we would like to emit a meaning error
+      // message.
+      if (std::find(_connected_nodes.begin(), _connected_nodes.end(), bnd_node->_node->id()) !=
+          _connected_nodes.end())
+        local_primary_node_ids.insert(bnd_node->_node->id());
     }
   }
 
+  // Gather all candidates from all ranks
+  const std::vector<dof_id_type> local_node_vec(local_primary_node_ids.begin(),
+                                                local_primary_node_ids.end());
+  std::vector<std::vector<dof_id_type>> gathered_node_vecs;
+  _mesh.comm().allgather(local_node_vec, gathered_node_vecs);
+
+  // Deduplicate
+  std::unordered_set<dof_id_type> global_primary_node_ids;
+  for (const auto & vec : gathered_node_vecs)
+    global_primary_node_ids.insert(vec.begin(), vec.end());
+
+  // Make sure we found one and exactly one
+  if (global_primary_node_ids.size() == 0)
+    mooseError("Couldn't find a node ID for the specified primary_node_coord.");
+  else if (global_primary_node_ids.size() > 1)
+    mooseError("Multiple nodes found for the specified primary_node_coord.");
+
+  return *global_primary_node_ids.begin();
+}
+
+void
+EqualValueBoundaryConstraint::ghostPrimary()
+{
   const auto & node_to_elem_map = _mesh.nodeToElemMap();
   auto node_to_elem_pair = node_to_elem_map.find(_primary_node_vector[0]);
-
   bool found_elems = (node_to_elem_pair != node_to_elem_map.end());
 
   // Add elements connected to primary node to Ghosted Elements.
@@ -178,7 +259,9 @@ EqualValueBoundaryConstraint::updateConstrainedNodes()
                                                   primary_elems_to_ghost.end(),
                                                   libMesh::null_output_iterator<Elem>());
 
-    _mesh.update(); // Rebuild node_to_elem_map
+    // After allgather_packed_range(), rebuild internal connectivity.
+    // This updates ghost nodes/elements across processors and reconstructs node_to_elem_map.
+    _mesh.update();
 
     // Find elems again now that we know they're there
     const auto & new_node_to_elem_map = _mesh.nodeToElemMap();

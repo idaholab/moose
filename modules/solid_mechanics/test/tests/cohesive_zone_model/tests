@@ -18,7 +18,6 @@
                  "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
                  "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_jacobian_small_strain_out Outputs/exodus=true"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The small strain cohesive zone model shall converge quadratically when using the "
                "hand-coded Jacobian"
@@ -34,7 +33,6 @@
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Outputs/file_base=czm_jacobian_total_lagrangian_out "
                  "Outputs/exodus=true"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The finite strain cohesive zone model shall converge quadratically when using the "
                "hand-coded Jacobian"
@@ -45,7 +43,7 @@
       input = 'czm_patch_test_base.i'
       exodiff = czm_small_strain_incremental_out.e
       cli_args = "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
-                 "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2  "
+                 "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2 "
                  " Physics/SolidMechanics/CohesiveZone/czm_ik/strain=SMALL "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
@@ -53,7 +51,6 @@
                  "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
                  "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_small_strain_incremental_out Outputs/exodus=true"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The small strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
@@ -70,7 +67,6 @@
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Outputs/file_base=czm_total_lagrangian_incremental_out "
                  "Outputs/exodus=true"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The finite strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
@@ -84,7 +80,6 @@
       detail = "The system shall allow using multiple CohesiveZoneAction and different cohesive "
                "materials for different boundaries"
       cli_args = "Physics/SolidMechanics/CohesiveZone/strain=FINITE"
-      mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
     []
@@ -96,7 +91,6 @@
                "of the CohesiveZoneAction"
       cli_args = "Physics/SolidMechanics/CohesiveZone/czm_ik_012/strain=FINITE "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik_23/strain=SMALL"
-      mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
     []
@@ -108,7 +102,17 @@
                "blocks of the CohesiveZoneAction"
       cli_args = "Physics/SolidMechanics/CohesiveZone/czm_ik_012/boundary='Block0_Block1' "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik_23/boundary='Block0_Block1'"
-      mesh_mode = 'REPLICATED'
+      recover = false
+      allow_test_objects = true
+    []
+    [boundary_pair_not_found]
+      type = RunException
+      input = 'czm_multiple_action_and_materials.i'
+      expect_err = 'missing a neighbor'
+      detail = "The system shall report an error when we do not have both sides of the boundary defined but also CZM is enabled"
+      cli_args = "Physics/SolidMechanics/CohesiveZone/czm_ik_012/material_output_order=CONSTAN"
+                 "T Physics/SolidMechanics/CohesiveZone/czm_ik_23/material_output_order=FIRST "
+                  "Mesh/split/add_interface_on_two_sides=false"
       recover = false
       allow_test_objects = true
     []
@@ -124,7 +128,6 @@
                  "ion tangent_traction normal_jump tangent_jump'  "
                  "Physics/SolidMechanics/CohesiveZone/material_output_order=FIRST "
                  "Outputs/file_base=czm_multiple_action_common_output_out"
-      mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
     []
@@ -140,7 +143,6 @@
                  "Physics/SolidMechanics/CohesiveZone/czm_ik_23/additional_generate_output='no"
                  "rmal_jump tangent_jump' "
                  "Outputs/file_base=czm_multiple_action_additional_outputs_on_different_block_out"
-      mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
     []
@@ -153,7 +155,6 @@
                  "T Physics/SolidMechanics/CohesiveZone/czm_ik_23/material_output_order=FIRST "
                  "Outputs/file_base=czm_multiple_action_differnt_outputs_orders_on_different_block_ou"
                  "t"
-      mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
     []
@@ -163,7 +164,6 @@
       exodiff = czm_action_3D_small_strain_normal_out.e
       cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t Outputs/out/file_base=czm_action_3D_small_strain_normal_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3'
       detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 3D using the PureElasticTractionSeparation model, and only compute a normal gap under purely normal loading.'
-      mesh_mode = 'REPLICATED'
       recover = false
       abs_zero = 1e-6
     []
@@ -178,7 +178,6 @@
                  "Physics/SolidMechanics/CohesiveZone/czm1/displacements='disp_x disp_y' "
                  "Materials/czm_mat/displacements='disp_x disp_y'"
       detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 2D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the small strain formulation.'
-      mesh_mode = 'REPLICATED'
       recover = false
       abs_zero = 1e-6
     []
@@ -195,7 +194,6 @@
                  "normal_traction tangent_traction jump_x normal_jump tangent_jump' "
                  "Materials/czm_mat/displacements='disp_x'"
       detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 1D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the small strain formulation.'
-      mesh_mode = 'REPLICATED'
       recover = false
     []
     [action_3D_total_lagrangian_normal]
@@ -204,7 +202,6 @@
       exodiff = czm_action_3D_total_lagrangian_normal_out.e
       cli_args = 'BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t Outputs/out/file_base=czm_action_3D_total_lagrangian_normal_out Mesh/msh/nx=2 Mesh/msh/ny=2 Mesh/msh/nz=2 Mesh/msh/dim=3 Physics/SolidMechanics/CohesiveZone/czm1/strain=FINITE'
       detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 3D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the total Lagrangian formulation.'
-      mesh_mode = 'REPLICATED'
       recover = false
       abs_zero = 1e-6
     []
@@ -220,7 +217,6 @@
                  "Materials/czm_mat/displacements='disp_x disp_y'  "
                  "Physics/SolidMechanics/CohesiveZone/czm1/strain=FINITE"
       detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 2D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the total Lagrangian formulation.'
-      mesh_mode = 'REPLICATED'
       recover = false
       abs_zero = 1e-6
     []
@@ -238,7 +234,6 @@
                  "Materials/czm_mat/displacements='disp_x' "
                  "Physics/SolidMechanics/CohesiveZone/czm1/strain=FINITE"
       detail = 'The system shall allow for cohesive zone laws to represent the traction-separation behavior at an interface between two bodies represented by continuum elements in 1D using an elastic traction sepration law, and only compute a normal gap under purely normal loading when using the total Lagrangian formulation.'
-      mesh_mode = 'REPLICATED'
       recover = false
     []
     [czm_incremental_stretch_rotate_total_lagrangian]
@@ -249,7 +244,6 @@
                  "Outputs/file_base=czm_incremental_stretch_rotate_total_lagrangian_out"
       detail = "The CZMInterfaceKernelTotalLagrangian should properly account for large area changes "
                "and interface rotations when using an incremental material."
-      mesh_mode = 'REPLICATED'
       recover = false
       allow_test_objects = true
       capabilities = 'method!=dbg'
@@ -261,7 +255,6 @@
       cli_args = "Outputs/file_base=czm_total_stretch_rotate_total_lagrangian_out"
       detail = "The CZMInterfaceKernelTotalLagrangian should properly account for large area changes "
                "and interface rotations when using a total strain material."
-      mesh_mode = 'REPLICATED'
       recover = false
       capabilities = 'method!=dbg'
     []
@@ -342,7 +335,6 @@
                  "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
                  "Materials/stress/type=ADComputeLinearElasticStress "
                  "Outputs/file_base=czm_jacobian_3DC_out Outputs/exodus=true"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The system shall converge quadratically when using the handcoded Jacobian of the 3DC "
                "traction separation model"
@@ -359,7 +351,6 @@
                  "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
                  "BCs/right_x/function=1*t BCs/right_y/function=0*t BCs/right_z/function=0*t "
                  "Outputs/out/file_base=3DC_normal_load_out"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The 3DC traction separation shall produce only a normal traction when a normal "
                "displacement jump is applied."
@@ -376,7 +367,6 @@
                  "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
                  "BCs/right_x/function=0*t BCs/right_y/function=1*t BCs/right_z/function=0*t "
                  "Executioner/dt=0.25 Outputs/out/file_base=3DC_shear_load_y_out"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The 3DC traction separation shall produce only a shear traction y when a only a "
                "displacement jump along y is applied."
@@ -393,7 +383,6 @@
                  "Materials/czm_mat/maximum_shear_traction=7 Outputs/file_base=czm_jacobian_3DC_out "
                  "BCs/right_x/function=0*t BCs/right_y/function=0*t BCs/right_z/function=1*t "
                  "Executioner/dt=0.25  Outputs/out/file_base=3DC_shear_load_z_out"
-      mesh_mode = 'REPLICATED'
       recover = false
       detail = "The 3DC traction separation shall produce only a shear traction z when a only a "
                "displacement jump along z is applied."
@@ -411,7 +400,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_small_strain'
       exodiff = 'ad_czm_small_strain.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
@@ -422,7 +410,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_small_strain Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
       exodiff = 'ad_czm_small_strain.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "the non-AD solution"
       abs_zero = 1e-6
@@ -439,7 +426,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE'
       exodiff = 'ad_czm_total_lagrangian.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
@@ -450,7 +436,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
       exodiff = 'ad_czm_total_lagrangian.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "the non-AD solution"
       abs_zero = 1e-6

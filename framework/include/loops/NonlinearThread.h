@@ -47,6 +47,7 @@ public:
                           const Elem * lower_d_elem = nullptr) override;
   virtual void onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
+  virtual void onExternalSide(const Elem * elem, unsigned int side) override;
   virtual void postElement(const Elem * /*elem*/) override;
   virtual void post() override;
   bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const override;
@@ -128,7 +129,9 @@ protected:
   /// Return what the loops is meant to compute
   virtual std::string objectType() const { return ""; };
 
+  /// Reference to the underlying NonlinearSystemBase
   NonlinearSystemBase & _nl;
+
   unsigned int _num_cached;
 
   /// Reference to BC storage structures
