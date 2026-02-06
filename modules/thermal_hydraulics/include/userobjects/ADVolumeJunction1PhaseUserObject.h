@@ -38,6 +38,8 @@ public:
 
 protected:
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
+  virtual std::vector<const MooseVariableBase *> getFlowChannelVariables() const override;
+  virtual std::vector<const MooseVariableBase *> getJunctionVariables() const override;
 
   /// Cross-sectional area of connected flow channels
   const ADVariableValue & _A;

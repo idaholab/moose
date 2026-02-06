@@ -17,6 +17,7 @@ void
 TimeDependentEquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->GetTrialVarNames();
+  _test_var_names = GetEquationSystem()->GetTestVarNames();
   TimeDependentProblemOperator::SetGridFunctions();
 }
 

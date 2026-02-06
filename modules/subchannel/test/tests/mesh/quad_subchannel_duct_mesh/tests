@@ -1,0 +1,13 @@
+[Tests]
+  design = 'SCMQuadDuctMeshGenerator.md'
+  issues = '#31406'
+  [test]
+    type = Exodiff
+    input = coords.i
+    exodiff = coords_in.e
+    cli_args = "--mesh-only"
+    recover = false
+    mesh_mode = 'replicated'
+    requirement = 'The system will be able to create a rectangular duct mesh for square subchannel assemblies.'
+  []
+[]

@@ -1,0 +1,24 @@
+[Tests]
+  design = 'MFEMLineValueSampler.md'
+  issues = '#31249'
+  [MFEMLineValueSamplerDiffusion]
+    type = CSVDiff
+    input = line_value_sampler_diffusion.i
+    csvdiff = 'line_value_sampler_diffusion_out_line_sample_0001.csv'
+    requirement = 'The system shall have the ability to interpolate scalars at points along a line using MFEM.'
+    abs_zero = 1e-6
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+  [MFEMLineValueSamplerCurlCurl]
+    type = CSVDiff
+    input = line_value_sampler_curlcurl.i
+    csvdiff = 'line_value_sampler_curlcurl_out_line_sample_0001.csv'
+    requirement = 'The system shall have the ability to interpolate vectors at points along a line using MFEM.'
+    abs_zero = 1e-6
+    capabilities = 'mfem'
+    recover = false
+    compute_devices = 'cpu cuda'
+  []
+[]

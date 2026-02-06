@@ -44,7 +44,7 @@ SCMDetailedTriPinMeshGenerator::generate()
   mesh_base->set_mesh_dimension(3);
 
   std::vector<Point> pin_centers;
-  TriSubChannelMesh::rodPositions(pin_centers, _n_rings, _pitch, Point(0, 0));
+  TriSubChannelMesh::pinPositions(pin_centers, _n_rings, _pitch, Point(0, 0));
 
   _elem_id = mesh_base->n_elem();
   for (auto & ctr : pin_centers)
