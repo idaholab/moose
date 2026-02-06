@@ -55,6 +55,7 @@
 #include <variant>
 
 // Forward declarations
+class AppFactory;
 class Executioner;
 class Executor;
 class NullExecutor;
@@ -1412,13 +1413,6 @@ private:
   void recursivelyCreateExecutors(const std::string & current_executor_name,
                                   std::list<std::string> & possible_roots,
                                   std::list<std::string> & current_branch);
-
-  /**
-   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
-   * Apps and Modules may register additional capabilities in their registerAll
-   * function.
-   */
-  void registerCapabilities();
 
   /**
    * Purge this relationship manager from meshes and DofMaps and finally from us. This method is

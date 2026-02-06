@@ -13,6 +13,8 @@
 
 #include "nlohmann/json_fwd.h"
 
+#include <set>
+
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
 #include "gtest/gtest.h"
@@ -40,7 +42,7 @@ public:
   static Capabilities & getCapabilityRegistry();
 
   /// Capabilities that are reserved and can only be augmented
-  static const std::set<std::string> reserved_augmented_capabilities;
+  static const std::set<std::string, std::less<>> reserved_augmented_capabilities;
 
   /**
    * Add a capability to the registry.
@@ -89,6 +91,17 @@ public:
   Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
+  /**
+   * Register the MOOSE capabilities.
+   *
+   * Called during the construction of the registry.
+   *
+   * Putting this here enforces that only capabilities that
+   * represent context _before_ the app is constructed
+   * can be added.
+   */
+  void registerMooseCapabilities();
+
 private:
 #ifdef MOOSE_UNIT_TEST
   friend class ::CapabilitiesTest;
@@ -102,7 +115,7 @@ private:
   CapabilityUtils::CapabilityRegistry _capability_registry;
 
   // Private constructor for singleton pattern
-  Capabilities() {}
+  Capabilities();
 };
 
 } // namespace Moose
