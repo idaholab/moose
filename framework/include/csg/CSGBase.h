@@ -486,6 +486,42 @@ public:
                            TransformationType type,
                            const std::vector<Real> & values);
 
+  /**
+   * @brief Apply a translation to a CSG object in the specified x, y, and z directions.
+   *
+   * @param csg_object The CSG object to translate (Surface, Cell, Universe, Region, or Lattice)
+   * @param distances size 3 vector with translation distances in x, y, and z directions {x, y, z}
+   */
+  void applyTranslation(const CSGObjectVariant & csg_object, const std::vector<Real> & distances)
+  {
+    applyTransformation(csg_object, TransformationType::TRANSLATION, distances);
+  }
+
+  /**
+   * @brief Apply a rotation to a CSG object using (phi, theta, psi) angle notation (in degrees).
+   *
+   * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
+   * @param angles size 3 vector {phi, theta, psi} with rotation angles in degrees
+   */
+  void applyRotation(const CSGObjectVariant & csg_object, const std::vector<Real> & angles)
+  {
+    applyTransformation(csg_object, TransformationType::ROTATION, angles);
+  }
+
+  /**
+   * @brief Apply a rotation to a CSG object about a specified axis (x, y, z).
+   *
+   * @param csg_object The CSG object to rotate (Surface, Cell, Universe, Region, or Lattice)
+   * @param axis x, y, or z axis about which to rotate
+   * @param angle angle in degrees to rotate about the specified axis
+   */
+  void applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle);
+
+  void applyScaling(const CSGObjectVariant & csg_object, const std::vector<Real> & values)
+  {
+    applyTransformation(csg_object, TransformationType::SCALE, values);
+  }
+
 private:
   /**
    * @brief Get a Surface object by name.

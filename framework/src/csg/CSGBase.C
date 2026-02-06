@@ -448,9 +448,36 @@ CSGBase::applyTransformation(const CSGObjectVariant & csg_object,
           }
         }
         else
-          mooseError("Transformation not yet implemented for this object type: ", typeid(T).name());
+          mooseError("Transformation not implemented for this object type: ", typeid(T).name());
       },
       csg_object);
+}
+
+void
+CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle)
+{
+  // convert axis string to lowercase:
+  std::transform(
+      axis.begin(), axis.end(), axis.begin(), [](unsigned char c) { return std::tolower(c); });
+
+  // convert to the Euler angles (phi, theta, psi) based on axis
+  Real phi = 0.0;
+  Real theta = 0.0;
+  Real psi = 0.0;
+  if (axis == "x")
+    theta = angle;
+  else if (axis == "y")
+  {
+    phi = 90.0;
+    theta = angle;
+    psi = -90.0;
+  }
+  else if (axis == "z")
+    phi = angle;
+  else
+    mooseError("Invalid axis '", axis, "' provided for axis rotation. Must be 'x', 'y', or 'z'.");
+
+  applyTransformation(csg_object, TransformationType::ROTATION, {phi, theta, psi});
 }
 
 void

@@ -19,9 +19,9 @@ namespace CSG
  */
 enum class TransformationType
 {
-  TRANSLATION = 0, ///< Translation in x, y, z directions
-  ROTATION = 1,    ///< Rotation in the form of euler angles (phi, theta, psi)
-  SCALE = 2        ///< Scaling in x, y, z directions
+  TRANSLATION = 0, // Translation in x, y, z directions
+  ROTATION = 1,    // Rotation in the form of euler angles (phi, theta, psi)
+  SCALE = 2        // Scaling in x, y, z directions
 };
 
 /// MooseEnum for transformation types, matching the TransformationType enum values
