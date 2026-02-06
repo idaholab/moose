@@ -11,6 +11,14 @@
       max_threads = 1 # see libmesh issue #3808
       detail = "in a Cartesian coordinate system,"
     []
+    [cartesian-physics]
+      type = 'CSVDiff'
+      input = channel-physics.i
+      csvdiff = 'channel-physics_out_outlet_velocity_profile_0001.csv'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "in a Cartesian coordinate system using the Physics shorthand syntax,"
+    []
     [rz]
       type = 'CSVDiff'
       input = channel.i

@@ -41,6 +41,11 @@ MeshRepairGenerator::validParams()
                         false,
                         "Merge boundaries if they have the same name but different boundary IDs");
 
+  params.addParam<bool>(
+      "renumber_contiguously",
+      false,
+      "Whether to renumber the elements of the mesh so the numbering is contiguous");
+
   return params;
 }
 
@@ -54,7 +59,7 @@ MeshRepairGenerator::MeshRepairGenerator(const InputParameters & parameters)
     _boundary_id_merge(getParam<bool>("merge_boundary_ids_with_same_name"))
 {
   if (!_fix_overlapping_nodes && !_fix_element_orientation && !_elem_type_separation &&
-      !_boundary_id_merge)
+      !_boundary_id_merge && !getParam<bool>("renumber_contiguously"))
     mooseError("No specific item to fix. Are any of the parameters misspelled?");
 }
 
@@ -82,6 +87,15 @@ MeshRepairGenerator::generate()
   // Assign a single boundary ID to boundaries that have the same name
   if (_boundary_id_merge)
     MooseMeshUtils::mergeBoundaryIDsWithSameName(*mesh);
+
+  // Renumber the mesh despite any mesh flag
+  if (getParam<bool>("renumber_contiguously"))
+  {
+    const auto prev_status = mesh->allow_renumbering();
+    mesh->allow_renumbering(true);
+    mesh->renumber_nodes_and_elements();
+    mesh->allow_renumbering(prev_status);
+  }
 
   mesh->set_isnt_prepared();
   return mesh;
