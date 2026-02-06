@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = ./square_quad.e
+  file = ../../mesh/square.e
 []
 
 [Problem]
@@ -21,7 +21,7 @@
 []
 
 [Variables]
-  [concentration]
+  [temperature]
     type = MFEMVariable
     fespace = H1FESpace
   []
@@ -38,30 +38,30 @@
   [grad]
     type = MFEMGradAux
     variable = concentration_gradient
-    source = concentration
+    source = temperature
     execute_on = TIMESTEP_END
   []
 []
 
 [BCs]
-  [bottom]
+  [sides]
     type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = '1'
+    variable = temperature
+    boundary = 'bottom left right top'
     coefficient = 1.0
-  []
-  [top]
-    type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = '3'
   []
 []
 
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = concentration
+    variable = temperature
   []
+  [source]
+    type = MFEMDomainLFKernel
+    variable = temperature
+    coefficient = 2.0
+  []  
 []
 
 [Preconditioner]
