@@ -635,17 +635,43 @@ TEST_F(CapabilitiesTest, add)
                              "\" is reserved and may not be registered by an application.");
 }
 
-/// Test MooseApp::addCapability
-TEST_F(CapabilitiesTest, mooseAppAddCapability)
+/// Test MooseApp::addBoolCapability
+TEST_F(CapabilitiesTest, mooseAppAddBoolCapability)
 {
   // success
-  const auto capability = &MooseApp::addCapability("name", false, "doc");
+  const auto capability = &MooseApp::addBoolCapability("name", false, "doc");
   EXPECT_EQ(_capability_registry->query("name"), capability);
 
   // catch any exceptions and report as a mooseError
   EXPECT_MOOSEERROR_MSG(
-      MooseApp::addCapability("name", true, "doc"),
-      "MooseApp::addCapability(): Capability 'name' already exists and is not equal");
+      MooseApp::addBoolCapability("name", true, "doc"),
+      "MooseApp::addBoolCapability(): Capability 'name' already exists and is not equal");
+}
+
+/// Test MooseApp::addIntCapability
+TEST_F(CapabilitiesTest, mooseAppAddIntCapability)
+{
+  // success
+  const auto capability = &MooseApp::addIntCapability("name", 1, "doc");
+  EXPECT_EQ(_capability_registry->query("name"), capability);
+
+  // catch any exceptions and report as a mooseError
+  EXPECT_MOOSEERROR_MSG(
+      MooseApp::addIntCapability("name", 2, "doc"),
+      "MooseApp::addIntCapability(): Capability 'name' already exists and is not equal");
+}
+
+/// Test MooseApp::addStringCapability
+TEST_F(CapabilitiesTest, mooseAppAddStringCapability)
+{
+  // success
+  const auto capability = &MooseApp::addStringCapability("name", "value", "doc");
+  EXPECT_EQ(_capability_registry->query("name"), capability);
+
+  // catch any exceptions and report as a mooseError
+  EXPECT_MOOSEERROR_MSG(
+      MooseApp::addStringCapability("name", "foo", "doc"),
+      "MooseApp::addStringCapability(): Capability 'name' already exists and is not equal");
 }
 
 /// Test Capabilities::dump

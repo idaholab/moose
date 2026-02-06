@@ -56,9 +56,9 @@ ChemicalReactionsApp::registerApps()
 {
   const std::string doc = "Thermochimica Gibbs energy minimization library support ";
 #ifdef THERMOCHIMICA_ENABLED
-  addCapability("thermochimica", true, doc + "is available.");
+  addBoolCapability("thermochimica", true, doc + "is available.");
 #else
-  addCapability("thermochimica", false, doc + "is not available.");
+  addBoolCapability("thermochimica", false, doc + "is not available.");
 #endif
 
   registerApp(ChemicalReactionsApp);

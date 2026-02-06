@@ -87,7 +87,9 @@ class MemoryPool;
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
 #include "gtest/gtest.h"
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddBoolCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddIntCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddStringCapability);
 #endif
 
 /**
@@ -1128,7 +1130,9 @@ public:
 
 protected:
 #ifdef MOOSE_UNIT_TEST
-  FRIEND_TEST(::CapabilitiesTest, mooseAppAddCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddBoolCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddIntCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddStringCapability);
 #endif
 
   /**
@@ -1175,17 +1179,39 @@ protected:
                                  const std::string & data) const;
 
   /**
-   * Register a capability.
+   * Register a boolean capability.
    *
    * @param capability The name of the capability
-   * @param value The value of the capability
+   * @param value The value of the boolean capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::CapabilityUtils::Capability & addBoolCapability(const std::string_view capability,
+                                                                const bool value,
+                                                                const std::string_view doc);
+
+  /**
+   * Register an integer capability.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the integer capability
    * @param doc The documentation string
    * @return The capability
    */
   static Moose::CapabilityUtils::Capability &
-  addCapability(const std::string_view capability,
-                const Moose::CapabilityUtils::CapabilityValue & value,
-                const std::string_view doc);
+  addIntCapability(const std::string_view capability, const int value, const std::string_view doc);
+
+  /**
+   * Register a string capability.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the string capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::CapabilityUtils::Capability & addStringCapability(const std::string_view capability,
+                                                                  const std::string_view value,
+                                                                  const std::string_view doc);
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;

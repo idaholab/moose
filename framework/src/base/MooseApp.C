@@ -797,47 +797,47 @@ MooseApp::registerCapabilities()
 {
   // helper lambdas
   auto haveCapability = [](const std::string & capability, const std::string & doc)
-  { addCapability(capability, true, doc + " is available."); };
+  { addBoolCapability(capability, true, doc + " is available."); };
 
   auto missingCapability =
       [](const std::string & capability, const std::string & doc, const std::string & help = "")
-  { addCapability(capability, false, doc + " is not available. " + help); };
+  { addBoolCapability(capability, false, doc + " is not available. " + help); };
 
   auto haveCapabilityVersion =
       [](const std::string & capability, const std::string & doc, const std::string & version)
-  { addCapability(capability, version, doc + " version " + version + " is available."); };
+  { addStringCapability(capability, version, doc + " version " + version + " is available."); };
 
   auto petscMissingCapability = [](const std::string & capability, const std::string & doc)
   {
-    addCapability(
+    addBoolCapability(
         capability, false, doc + " is not available. Check your PETSc configure options.");
   };
 
   auto libmeshMissingCapability =
       [](const std::string & capability, const std::string & doc, const std::string & config_option)
   {
-    addCapability(capability,
-                  false,
-                  doc + " is not available. It is controlled by the `" + config_option +
-                      "` libMesh configure option.");
+    addBoolCapability(capability,
+                      false,
+                      doc + " is not available. It is controlled by the `" + config_option +
+                          "` libMesh configure option.");
   };
 
   // register capabilities
   if (_trap_fpe)
-    addCapability("trap_fpe",
-                  true,
-                  "Trapping floating point exceptions is enabled (in debug mode this "
-                  "can be disabled using the --no-trap-fpe option).");
+    addBoolCapability("trap_fpe",
+                      true,
+                      "Trapping floating point exceptions is enabled (in debug mode this "
+                      "can be disabled using the --no-trap-fpe option).");
   else
-    addCapability("trap_fpe",
-                  false,
-                  "Trapping floating point exceptions is not enabled (enable them using "
-                  "the --trap-fpe option or by running a debug mode executable).");
+    addBoolCapability("trap_fpe",
+                      false,
+                      "Trapping floating point exceptions is not enabled (enable them using "
+                      "the --trap-fpe option or by running a debug mode executable).");
 
   {
     const auto doc = "LibTorch machine learning and parallel tensor algebra library";
 #ifdef MOOSE_LIBTORCH_ENABLED
-    addCapability("libtorch", TORCH_VERSION, doc);
+    addStringCapability("libtorch", TORCH_VERSION, doc);
 #else
     missingCapability("libtorch",
                       doc,
@@ -940,7 +940,7 @@ MooseApp::registerCapabilities()
 #endif
   }
 
-  addCapability(
+  addIntCapability(
       "ad_size",
       MOOSE_AD_MAX_DOFS_PER_ELEM,
       "MOOSE was configured and built with a dual number backing store size of " +
@@ -952,7 +952,7 @@ MooseApp::registerCapabilities()
 
   {
     const std::string method = QUOTE(METHOD);
-    addCapability("method", method, "The executable was built with METHOD=\"" + method + "\"")
+    addStringCapability("method", method, "The executable was built with METHOD=\"" + method + "\"")
         .setExplicit()
         .setEnumeration({"opt", "oprof", "devel", "dbg"});
   }
@@ -960,13 +960,13 @@ MooseApp::registerCapabilities()
   {
     const std::string version = QUOTE(LIBMESH_DETECTED_PETSC_VERSION_MAJOR) "." QUOTE(
         LIBMESH_DETECTED_PETSC_VERSION_MINOR) "." QUOTE(LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR);
-    addCapability("petsc", version, "Using PETSc version " + version + ".");
+    addStringCapability("petsc", version, "Using PETSc version " + version + ".");
   }
 
 #ifdef LIBMESH_PETSC_USE_DEBUG
-  addCapability("petsc_debug", true, "PETSc was built with debugging options.");
+  addBoolCapability("petsc_debug", true, "PETSc was built with debugging options.");
 #else
-  addCapability("petsc_debug", false, "PETSc was built without debugging options.");
+  addBoolCapability("petsc_debug", false, "PETSc was built without debugging options.");
 #endif
 
   {
@@ -1133,27 +1133,28 @@ MooseApp::registerCapabilities()
   {
 #ifdef LIBMESH_HAVE_FPARSER
 #ifdef LIBMESH_HAVE_FPARSER_JIT
-    const std::string value = "jit";
+    const auto value = "jit";
     const auto doc = "FParser enabled with just in time compilation support.";
 #else
-    const std::string value = "byte_code";
+    const auto value = "byte_code";
     const auto doc = "FParser enabled.";
 #endif
+    addStringCapability("fparser", value, doc);
 #else
-    const auto value = false;
-    const auto doc = "FParser is disabled, libMesh was likely configured with --disable-fparser.";
+    addBoolCapability("fparser",
+                      false,
+                      "FParser is disabled, libMesh was likely configured with --disable-fparser.");
 #endif
-    addCapability("fparser", value, doc);
   }
 
 #ifdef LIBMESH_HAVE_DLOPEN
-  addCapability(
+  addBoolCapability(
       "dlopen", true, "The dlopen() system call is available to dynamically load libraries.");
 #else
-  addCapability("dlopen",
-                false,
-                "The dlopen() system call is not available. Dynamic library loading is "
-                "not supported on this system.");
+  addBoolCapability("dlopen",
+                    false,
+                    "The dlopen() system call is not available. Dynamic library loading is "
+                    "not supported on this system.");
 #endif
 
   {
@@ -1201,37 +1202,38 @@ MooseApp::registerCapabilities()
 
   {
 #ifdef LIBMESH_ENABLE_PARMESH
-    const std::string value = "distributed";
+    const auto value = "distributed";
 #else
-    const std::string value = "replicated";
+    const auto value = "replicated";
 #endif
-    addCapability("mesh_mode", value, "libMesh default mesh mode")
+    addStringCapability("mesh_mode", value, "libMesh default mesh mode")
         .setExplicit()
         .setEnumeration({"distributed", "replicated"});
   }
 
-  addCapability("dof_id_bytes",
-                static_cast<int>(sizeof(dof_id_type)),
-                "Degree of freedom (DOF) identifiers use " + Moose::stringify(sizeof(dof_id_type)) +
-                    " bytes for storage. This is controlled by the "
-                    "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.")
+  addIntCapability("dof_id_bytes",
+                   static_cast<int>(sizeof(dof_id_type)),
+                   "Degree of freedom (DOF) identifiers use " +
+                       Moose::stringify(sizeof(dof_id_type)) +
+                       " bytes for storage. This is controlled by the "
+                       "--with-dof-id-bytes=<1|2|4|8> libMesh configure option.")
       .setExplicit();
 
   // compiler
   {
     const auto doc = "Compiler used to build the MOOSE framework.";
 #if defined(__INTEL_LLVM_COMPILER)
-    const std::string value = "intel";
+    const auto value = "intel";
 #elif defined(__clang__)
-    const std::string value = "clang";
+    const auto value = "clang";
 #elif defined(__GNUC__) || defined(__GNUG__)
-    const std::string value = "gcc";
+    const auto value = "gcc";
 #elif defined(_MSC_VER)
-    const std::string value = "msvc";
+    const auto value = "msvc";
 #else
-    const std::string value = "unknown";
+    const auto value = "unknown";
 #endif
-    addCapability("compiler", value, doc)
+    addStringCapability("compiler", value, doc)
         .setExplicit()
         .setEnumeration({"intel", "clang", "gcc", "msvc", "unknown"});
   }
@@ -1239,15 +1241,15 @@ MooseApp::registerCapabilities()
   // OS related
   {
 #ifdef __APPLE__
-    const std::string value = "darwin";
+    const auto value = "darwin";
 #elif __WIN32__
-    const std::string value = "win32";
+    const auto value = "win32";
 #elif __linux__
-    const std::string value = "linux";
+    const auto value = "linux";
 #elif __unix__ // all unices not caught above
-    const std::string value = "unix";
+    const auto value = "unix";
 #endif
-    addCapability("platform", value, "Operating system this executable is running on.")
+    addStringCapability("platform", value, "Operating system this executable is running on.")
         .setExplicit()
         .setEnumeration({"darwin", "win32", "linux", "unix"});
   }
@@ -1282,9 +1284,9 @@ MooseApp::registerCapabilities()
         // If the binary is in a folder "bin", we'll consider it installed.
         // This isn't the best check, but it works with how we currently
         // install applications in app.mk
-        const std::string value =
+        const auto value =
             resolved_path.parent_path().filename() == "bin" ? "relocated" : "in_tree";
-        addCapability("installation_type", value, "The installation type of the application.")
+        addStringCapability("installation_type", value, "The installation type of the application.")
             .setExplicit()
             .setEnumeration({"relocated", "in_tree"});
       }
@@ -3746,9 +3748,9 @@ MooseApp::outputMachineReadableData(const std::string & param,
 }
 
 Moose::CapabilityUtils::Capability &
-MooseApp::addCapability(const std::string_view capability,
-                        const Moose::CapabilityUtils::CapabilityValue & value,
-                        const std::string_view doc)
+MooseApp::addBoolCapability(const std::string_view capability,
+                            const bool value,
+                            const std::string_view doc)
 {
   try
   {
@@ -3756,7 +3758,37 @@ MooseApp::addCapability(const std::string_view capability,
   }
   catch (const std::exception & e)
   {
-    ::mooseError("MooseApp::addCapability(): ", e.what());
+    ::mooseError("MooseApp::addBoolCapability(): ", e.what());
+  }
+}
+
+Moose::CapabilityUtils::Capability &
+MooseApp::addIntCapability(const std::string_view capability,
+                           const int value,
+                           const std::string_view doc)
+{
+  try
+  {
+    return Moose::Capabilities::getCapabilityRegistry().add(capability, value, doc);
+  }
+  catch (const std::exception & e)
+  {
+    ::mooseError("MooseApp::addIntCapability(): ", e.what());
+  }
+}
+
+Moose::CapabilityUtils::Capability &
+MooseApp::addStringCapability(const std::string_view capability,
+                              const std::string_view value,
+                              const std::string_view doc)
+{
+  try
+  {
+    return Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
+  }
+  catch (const std::exception & e)
+  {
+    ::mooseError("MooseApp::addStringCapability(): ", e.what());
   }
 }
 
