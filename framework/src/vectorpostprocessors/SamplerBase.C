@@ -25,8 +25,10 @@ SamplerBase::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  MooseEnum sort_options("x y z id");
-  params.addRequiredParam<MooseEnum>("sort_by", sort_options, "What to sort the samples by");
+  params.addRequiredParam<std::string>(
+      "sort_by",
+      "What to sort the samples by. Options are 'x y z id' and the name of any of the sampled "
+      "quantities (= name of the vector created by the vectorpostprocessor).");
 
   // The value from this VPP is naturally already on every processor
   // TODO: Make this not the case!  See #11415
@@ -45,7 +47,7 @@ SamplerBase::SamplerBase(const InputParameters & parameters,
         parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
             ->getMooseApp()
             .getExecutioner())),
-    _sort_by(parameters.get<MooseEnum>("sort_by")),
+    _sort_by(parameters.get<std::string>("sort_by")),
     _x(vpp->declareVector("x")),
     _y(vpp->declareVector("y")),
     _z(vpp->declareVector("z")),
@@ -173,9 +175,31 @@ SamplerBase::finalize()
   for (auto vec_ptr : vec_ptrs)
     _comm.allgather(*vec_ptr, /* identical buffer lengths = */ false);
 
+  // Find the index of the column to sort by
+  unsigned int sort_by_i = 0;
+  if (_sort_by == "x")
+    sort_by_i = 0;
+  else if (_sort_by == "y")
+    sort_by_i = 1;
+  else if (_sort_by == "z")
+    sort_by_i = 2;
+  else if (_sort_by == "id")
+    sort_by_i = 3;
+  else
+  {
+    // Find in 'variable_names'
+    const auto & it = std::find(_variable_names.begin(), _variable_names.end(), _sort_by);
+    if (it != _variable_names.end())
+      sort_by_i = it - _variable_names.begin();
+    else
+      mooseError("Sorting index '" + _sort_by +
+                 "' was not found in x/y/z/id or sampled variable names: " +
+                 Moose::stringify(_variable_names));
+  }
+
   // Now create an index vector by using an indirect sort
   std::vector<std::size_t> sorted_indices;
-  Moose::indirectSort(vec_ptrs[_sort_by]->begin(), vec_ptrs[_sort_by]->end(), sorted_indices);
+  Moose::indirectSort(vec_ptrs[sort_by_i]->begin(), vec_ptrs[sort_by_i]->end(), sorted_indices);
 
   /**
    * We now have one sorted vector. The remaining vectors need to be sorted according to that
