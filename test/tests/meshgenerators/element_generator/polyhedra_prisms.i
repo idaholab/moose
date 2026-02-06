@@ -55,8 +55,66 @@ dx = 2
     subdomain_name = "hexagon_prism"
     subdomain_id = 2
   []
+  [heptagon_prism]
+    type = ElementGenerator
+    input = 'hexagon_prism'
+    nodal_positions = "${fparse 3*dx + 0} -2 0
+                       ${fparse 3*dx + -1} -1 0
+                       ${fparse 3*dx + -1} 0 0
+                       ${fparse 3*dx + -0.5} 0.5 0
+                       ${fparse 3*dx + 0.5} 0.5 0
+                       ${fparse 3*dx + 1} 0 0
+                       ${fparse 3*dx + 1} -1 0
+                       ${fparse 3*dx + 0} -2 1
+                       ${fparse 3*dx + -1} -1 1
+                       ${fparse 3*dx + -1} 0 1
+                       ${fparse 3*dx + -0.5} 0.5 1
+                       ${fparse 3*dx + 0.5} 0.5 1
+                       ${fparse 3*dx + 1} 0 1
+                       ${fparse 3*dx + 1} -1 1"
+
+    element_connectivity = '0 1 2 3 4 5 6; 0 1 8 7; 1 2 9 8; 2 3 10 9; 3 4 11 10; 4 5 12 11; 5 6 13 12; 6 0 7 13; 7 8 9 10 11 12 13'
+    elem_type = "C0POLYHEDRON"
+    subdomain_name = "heptagon_prism"
+    subdomain_id = 3
+  []
+  [octogon_prism]
+    type = ElementGenerator
+    input = 'heptagon_prism'
+    nodal_positions = "${fparse 4*dx + 0.5} -1.5 0
+                       ${fparse 4*dx + -0.5} -1.5 0
+                       ${fparse 4*dx + -1} -1 0
+                       ${fparse 4*dx + -1} 0 0
+                       ${fparse 4*dx + -0.5} 0.5 0
+                       ${fparse 4*dx + 0.5} 0.5 0
+                       ${fparse 4*dx + 1} 0 0
+                       ${fparse 4*dx + 1} -1 0
+                       ${fparse 4*dx + 0.5} -1.5 1
+                       ${fparse 4*dx + -0.5} -1.5 1
+                       ${fparse 4*dx + -1} -1 1
+                       ${fparse 4*dx + -1} 0 1
+                       ${fparse 4*dx + -0.5} 0.5 1
+                       ${fparse 4*dx + 0.5} 0.5 1
+                       ${fparse 4*dx + 1} 0 1
+                       ${fparse 4*dx + 1} -1 1"
+
+    element_connectivity = '0 1 2 3 4 5 6 7; 0 1 9 8; 1 2 10 9; 2 3 11 10; 3 4 12 11; 4 5 13 12; 5 6 14 13; 6 7 15 14; 7 0 8 15; 8 9 10 11 12 13 14 15'
+    elem_type = "C0POLYHEDRON"
+    subdomain_name = "octogon_prism"
+    subdomain_id = 4
+  []
+
   [convert]
     type = ElementsToTetrahedronsConverter
-    input = 'hexagon_prism'
+    input = 'octogon_prism'
+  []
+  [check]
+    type = MeshDiagnosticsGenerator
+    input = 'convert'
+    examine_element_overlap = WARNING
+    examine_element_types = WARNING
+    examine_element_volumes = WARNING
+    examine_nonplanar_sides = INFO
+    check_local_jacobian = WARNING
   []
 []
