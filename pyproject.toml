@@ -5,10 +5,12 @@ include = '''
 (
   ^\/python\/moosecontrol\/.*.py$ |
   ^\/python\/moosepy\/.*.py$ |
+  ^\/python\/moosefmu\/.*.py$ |
   ^\/python\/TestHarness\/resultsstore\/.*.py$ |
   ^\/python\/TestHarness\/resultssummary\/.*.py$ |
   ^\/python\/TestHarness/tests/resultsstore\/.*.py$ |
-  ^\/python\/TestHarness/tests/resultssummary\/.*.py$
+  ^\/python\/TestHarness/tests/resultssummary\/.*.py$ |
+  ^\/test\/tests\/controls\/moose_fmu\/.*.py$
 )
 '''
 
@@ -16,6 +18,7 @@ include = '''
 include = [
   "python/moosecontrol/**/*.py",
   "python/moosepy/**/*.py",
+  "python/moosefmu/**/*.py",
   "python/TestHarness/resultsstore/**/*.py",
   "python/TestHarness/resultssummary/**/*.py",
   "python/TestHarness/tests/resultsstore/**/*.py",

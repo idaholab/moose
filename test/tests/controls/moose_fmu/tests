@@ -1,0 +1,54 @@
+[Tests]
+  issues = '#30912'
+  design = 'syntax/Controls/index.md source/controls/MOOSE_FMU.md'
+
+  [moosefmu]
+    requirement = 'The system shall support'
+    [create_fmu]
+      type = RunCommand
+      command = 'python build_moose_fmu.py'
+      required_python_packages = 'pythonfmu'
+      detail = 'creating a MOOSE FMU from the Moose2FMU base class.'
+      platform = 'linux'
+    []
+
+    [run_fmu]
+      type = CSVDiff
+      input = fmu_diffusion.i
+      csvdiff = run_fmu.csv
+      command_proxy = run_fmu.py
+      required_python_packages = 'pyfmi pandas numpy'
+      prereq = 'moosefmu/create_fmu'
+      recover = false
+      restep = false
+      detail = 'running the created MOOSE FMU using simulate_fmu and verifying its outputs.'
+      valgrind = 'none'
+    []
+
+    [run_fmu_step_by_step]
+      type = CSVDiff
+      input = fmu_diffusion.i
+      csvdiff = run_fmu_step_by_step.csv
+      command_proxy = run_fmu_step_by_step.py
+      required_python_packages = 'pyfmi pandas numpy'
+      prereq = 'moosefmu/create_fmu'
+      recover = false
+      restep = false
+      detail = 'running the created MOOSE FMU step by step and verifying its outputs.'
+      valgrind = 'none'
+    []
+
+    [couple_fmus]
+      type = CSVDiff
+      input = fmu_diffusion.i
+      csvdiff = run_fmu_connection.csv
+      command_proxy = run_fmu_connection.py
+      required_python_packages = 'pyfmi pandas matplotlib'
+      prereq = 'moosefmu/create_fmu'
+      recover = false
+      restep = false
+      detail = 'coupling the MOOSE FMU with other open-source FMUs.'
+      valgrind = 'none'
+    []
+  []
+[]

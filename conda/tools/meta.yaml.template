@@ -34,6 +34,7 @@ requirements:
     - {{ clang_tools }}
     - coverage 7.13.2
     - deepdiff
+    - fmpy
     - git-lfs <3.5.1
     - gitpython
     - graphviz
@@ -82,7 +83,9 @@ test:
   imports:
     - bs4
     - deepdiff
+    - fmpy
     - coverage
+    - deepdiff
     - git
     - jinja2
     - livereload
