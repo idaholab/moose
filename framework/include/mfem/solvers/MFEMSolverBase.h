@@ -12,7 +12,6 @@
 #pragma once
 
 #include "MFEMObject.h"
-#include "MFEMHyprePatch.h"
 
 /**
  * Base class for wrapping mfem::Solver-derived classes.
