@@ -84,11 +84,3 @@
   type = MFEMSteady
   device = cpu
 []
-
-[Outputs]
-  active = ParaViewDataCollection
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
-  []
-[]
