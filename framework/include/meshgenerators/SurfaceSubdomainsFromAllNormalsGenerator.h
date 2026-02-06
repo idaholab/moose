@@ -28,4 +28,6 @@ public:
 protected:
   /// Map from subdomain IDs to the normals of the corresponding boundaries
   std::map<SubdomainID, RealVectorValue> _subdomain_to_normal_map;
+  /// Whether to only use the flood algorithm to group elements, no checks in "previous normals"
+  const bool _flood_only;
 };

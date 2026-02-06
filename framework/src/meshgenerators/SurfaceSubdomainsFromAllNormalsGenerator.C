@@ -30,8 +30,13 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
 {
   InputParameters params = SubdomainsGeneratorBase::validParams();
 
+  params.addParam<bool>(
+      "contiguous_assignments_only",
+      false,
+      "Whether to only group elements in a subdomain using the 'flooding' algorithm");
   // There can be many of them
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
+  // Using normals is the base principle of this mesh generator
   params.addPrivateParam<bool>("_using_normal", true);
 
   params.addClassDescription(
@@ -41,7 +46,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
 
 SurfaceSubdomainsFromAllNormalsGenerator::SurfaceSubdomainsFromAllNormalsGenerator(
     const InputParameters & parameters)
-  : SubdomainsGeneratorBase(parameters)
+  : SubdomainsGeneratorBase(parameters), _flood_only(getParam<bool>("contiguous_assignments_only"))
 {
 }
 
@@ -55,6 +60,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   setup(*mesh);
 
   _visited.clear();
+  unsigned int num_neighborless = 0;
 
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
@@ -66,6 +72,12 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     // Nothing to do with 3D elements
     if (elem->dim() > 2)
       continue;
+    // Likely an issue with the mesh
+    if (_flood_only && elem->n_neighbors() == 0)
+    {
+      num_neighborless++;
+      mooseWarning("Element '" + std::to_string(elem->id()) + "' has no neighbors");
+    }
 
     // Compute the normal
     const auto & p1 = elem->point(0);
@@ -81,12 +93,13 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
 
     // See if we've seen this normal before (linear search)
     const std::map<SubdomainID, RealVectorValue>::value_type * item = nullptr;
-    for (const auto & id_pair : _subdomain_to_normal_map)
-      if (normalsWithinTol(id_pair.second, normal, _normal_tol))
-      {
-        item = &id_pair;
-        break;
-      }
+    if (!_flood_only)
+      for (const auto & id_pair : _subdomain_to_normal_map)
+        if (normalsWithinTol(id_pair.second, normal, _normal_tol))
+        {
+          item = &id_pair;
+          break;
+        }
 
     // Flood with the previously created subdomains and normals
     if (item)
@@ -99,6 +112,10 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
       flood(elem, normal, id);
     }
   }
+
+  if (_flood_only && num_neighborless)
+    mooseWarning("Several subdomains were created for neighborless elements: " +
+                 std::to_string(num_neighborless));
 
   mesh->set_isnt_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
