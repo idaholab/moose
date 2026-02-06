@@ -124,7 +124,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::transfer(FEProblemBase & to_problem, FE
   {
     auto & mfem_mesh = from_mfem_problem_ptr->mesh().getMFEMParMesh();
     mfem_mesh.EnsureNodes();
-    _mfem_interpolator.Setup(mfem_mesh);    
+    _mfem_interpolator.Setup(mfem_mesh);
     for (unsigned v = 0; v < numToVar(); ++v)
     {
       setlibMeshSolutionValuesFromMFEM(v, *from_mfem_problem_ptr);
