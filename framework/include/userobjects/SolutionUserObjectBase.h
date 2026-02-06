@@ -16,6 +16,7 @@
 namespace libMesh
 {
 class ExodusII_IO;
+class Nemesis_IO;
 class EquationSystems;
 class System;
 class MeshFunction;
@@ -327,6 +328,7 @@ protected:
    * Updates the times for interpolating ExodusII data
    */
   void updateExodusTimeInterpolation();
+  void updateNemesisTimeInterpolation();
 
   /**
    * Updates the time indices to interpolate between for ExodusII data
@@ -392,7 +394,7 @@ protected:
    */
   void readBlockIdMapFromExodusII();
 
-  /// File type to read (0 = xda; 1 = ExodusII)
+  /// File type to read (0 = xda; 1 = ExodusII, 2 = xdr, 3 = Nemesis)
   MooseEnum _file_type;
 
   /// The XDA or ExodusII file that is being read
@@ -439,6 +441,9 @@ protected:
 
   /// Pointer to the libMesh::ExodusII used to read the files
   std::unique_ptr<libMesh::ExodusII_IO> _exodusII_io;
+
+  /// Pointer to the libMesh::Nemesis_IO used to read the files
+  std::unique_ptr<libMesh::Nemesis_IO> _nemesis_io;
 
   /// Pointer to the serial solution vector
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
@@ -502,6 +507,12 @@ protected:
 
   /// transformations (rotations, translation, scales) are performed in this order
   MultiMooseEnum _transformation_order;
+
+  /// Whether the solution file is a nemesis file
+  const bool _nemesis;
+
+  /// Whether to force the source mesh to be replicated
+  const bool _force_replicated_source;
 
   /// True if initial_setup has executed
   bool _initialized;
