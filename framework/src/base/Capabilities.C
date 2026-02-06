@@ -17,6 +17,27 @@
 
 #include <vector>
 
+#include "libmesh/libmesh_config.h"
+#include "petscconf.h"
+#include "petscpkg_version.h"
+
+#ifdef MOOSE_LIBTORCH_ENABLED
+#include <torch/version.h>
+#endif
+
+#if __has_include(<torch/xpu.h>)
+#include <torch/xpu.h>
+#define MOOSE_HAVE_XPU 1
+#endif
+
+#ifdef MOOSE_MFEM_ENABLED
+#include "mfem/config/config.hpp"
+#endif
+
+#ifdef LIBMESH_HAVE_NETGEN
+#include "netgen/netgen_version.hpp"
+#endif
+
 namespace Moose
 {
 
@@ -176,7 +197,7 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "MFEM finite element library";
 #ifdef MOOSE_MFEM_ENABLED
-    have_capability("mfem", doc);
+    add_string_capability("mfem", MFEM_VERSION_STRING, doc);
 #else
     missing_capability("mfem",
                        doc,
@@ -226,7 +247,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "NVIDIA GPU parallel computing platform";
 #ifdef PETSC_HAVE_CUDA
-    have_capability("cuda", doc);
+    const std::string version = QUOTE(PETSC_PKG_CUDA_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_CUDA_VERSION_MINOR) "." QUOTE(PETSC_PKG_CUDA_VERSION_SUBMINOR);
+    add_string_capability("cuda", version, doc);
 #else
     missing_capability("cuda", doc, "Add the CUDA bin directory to your path and rebuild PETSc.");
 #endif
@@ -235,7 +258,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "Kokkos performance portability programming ecosystem";
 #ifdef MOOSE_KOKKOS_ENABLED
-    have_capability("kokkos", doc);
+    const std::string version = QUOTE(PETSC_PKG_KOKKOS_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_KOKKOS_VERSION_MINOR) "." QUOTE(PETSC_PKG_KOKKOS_VERSION_SUBMINOR);
+    add_string_capability("kokkos", version, doc);
 #else
     missing_capability(
         "kokkos",
@@ -248,10 +273,12 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "Kokkos support for PETSc";
 #ifdef PETSC_HAVE_KOKKOS
-    have_capability("petsc_kokkos", doc);
+    const std::string version = QUOTE(PETSC_PKG_KOKKOS_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_KOKKOS_VERSION_MINOR) "." QUOTE(PETSC_PKG_KOKKOS_VERSION_SUBMINOR);
+    add_string_capability("petsc_kokkos", version, doc);
 #else
     missing_capability(
-        "kokkos", doc, "Rebuild PETSc with Kokkos support, then rebuild libMesh and MOOSE.");
+        "petsc_kokkos", doc, "Rebuild PETSc with Kokkos support, then rebuild libMesh and MOOSE.");
 #endif
   }
 
@@ -300,7 +327,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "SuperLU direct solver";
 #ifdef LIBMESH_PETSC_HAVE_SUPERLU_DIST
-    have_capability("superlu", doc);
+    const std::string version = QUOTE(PETSC_PKG_SUPERLU_DIST_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_SUPERLU_DIST_VERSION_MINOR) "." QUOTE(PETSC_PKG_SUPERLU_DIST_VERSION_SUBMINOR);
+    add_string_capability("superlu", version, doc);
 #else
     petsc_missing_capability("superlu", doc);
 #endif
@@ -309,7 +338,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "MUltifrontal Massively Parallel sparse direct Solver (MUMPS)";
 #ifdef LIBMESH_PETSC_HAVE_MUMPS
-    have_capability("mumps", doc);
+    const std::string version = QUOTE(PETSC_PKG_MUMPS_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_MUMPS_VERSION_MINOR) "." QUOTE(PETSC_PKG_MUMPS_VERSION_SUBMINOR);
+    add_string_capability("mumps", version, doc);
 #else
     petsc_missing_capability("mumps", doc);
 #endif
@@ -318,7 +349,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "STRUMPACK - STRUctured Matrix PACKage solver library";
 #ifdef LIBMESH_PETSC_HAVE_STRUMPACK
-    have_capability("strumpack", doc);
+    const std::string version = QUOTE(PETSC_PKG_STRUMPACK_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_STRUMPACK_VERSION_MINOR) "." QUOTE(PETSC_PKG_STRUMPACK_VERSION_SUBMINOR);
+    add_string_capability("strumpack", version, doc);
 #else
     petsc_missing_capability("strumpack", doc);
 #endif
@@ -327,7 +360,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "Parmetis partitioning library";
 #if defined(LIBMESH_PETSC_HAVE_PARMETIS) || defined(LIBMESH_HAVE_PARMETIS)
-    have_capability("parmetis", doc);
+    const std::string version = QUOTE(PETSC_PKG_PARMETIS_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_PARMETIS_VERSION_MINOR) "." QUOTE(PETSC_PKG_PARMETIS_VERSION_SUBMINOR);
+    add_string_capability("parmetis", version, doc);
 #else
     petsc_missing_capability("parmetis", doc);
 #endif
@@ -354,7 +389,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "PT-Scotch graph partitioning library";
 #ifdef LIBMESH_PETSC_HAVE_PTSCOTCH
-    have_capability("ptscotch", doc);
+    const std::string version = QUOTE(PETSC_PKG_PTSCOTCH_VERSION_MAJOR) "." QUOTE(
+        PETSC_PKG_PTSCOTCH_VERSION_MINOR) "." QUOTE(PETSC_PKG_PTSCOTCH_VERSION_SUBMINOR);
+    add_string_capability("ptscotch", version, doc);
 #else
     petsc_missing_capability("ptscotch", doc);
 #endif
@@ -385,7 +422,9 @@ Capabilities::registerMooseCapabilities()
   {
     const auto doc = "Netgen meshing library";
 #ifdef LIBMESH_HAVE_NETGEN
-    have_capability("netgen", doc);
+    const std::string version =
+        QUOTE(NETGEN_VERSION_MAJOR) "." QUOTE(NETGEN_VERSION_MINOR) "." QUOTE(NETGEN_VERSION_PATCH);
+    add_string_capability("netgen", version, doc);
 #else
     libmesh_missing_capability("netgen", doc, "--enable-netgen");
 #endif

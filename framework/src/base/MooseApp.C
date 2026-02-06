@@ -74,10 +74,6 @@
 #include <sys/utsname.h> // utsname
 #endif
 
-#ifdef MOOSE_LIBTORCH_ENABLED
-#include <torch/version.h>
-#endif
-
 #if __has_include(<torch/xpu.h>)
 #include <torch/xpu.h>
 #define MOOSE_HAVE_XPU 1
