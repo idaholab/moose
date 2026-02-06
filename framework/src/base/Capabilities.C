@@ -560,8 +560,6 @@ Capabilities::registerMooseCapabilities()
 #elif defined(_MSC_VER)
     const auto value = "msvc";
 #else
-    // This should really be a static assertion, but I don't know
-    // if it's good to break people if we can't determine this...
     mooseDoOnce(mooseWarning("Failed to determine compiler; setting capability compiler=unknown"));
     const auto value = "unknown";
 #endif
@@ -578,12 +576,15 @@ Capabilities::registerMooseCapabilities()
     const auto value = "win32";
 #elif __linux__
     const auto value = "linux";
-#elif __unix__ // all unices not caught above
+#elif __unix__
     const auto value = "unix";
+#else
+    mooseDoOnce(mooseWarning("Failed to determine platform; setting capability platform=unknown"));
+    const auto value = "unknown";
 #endif
     add_string_capability("platform", value, "Operating system this executable is running on.")
         .setExplicit()
-        .setEnumeration({"darwin", "win32", "linux", "unix"});
+        .setEnumeration({"darwin", "linux", "unix", "unknown", "win32"});
   }
 
   // Installation type (in tree or installed)

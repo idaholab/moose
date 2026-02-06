@@ -118,4 +118,11 @@
     expect_out = 'Solve Skipped!'
     requirement = 'The system shall store as a capability the compiler'
   []
+  [platform]
+    type = RunApp
+    input = input.i
+    cli_args = '--required-capabilities=\'platform!=unknown\''
+    expect_out = 'Solve Skipped!'
+    requirement = 'The system shall store as a capability the platform'
+  []
 []
