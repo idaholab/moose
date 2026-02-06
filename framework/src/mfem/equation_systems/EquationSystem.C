@@ -30,8 +30,7 @@ bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
 {
-  auto iter = std::find(the_vector.begin(), the_vector.end(), name);
-  return (iter != the_vector.end());
+  return std::find(the_vector.begin(), the_vector.end(), name) != the_vector.end();
 }
 
 void
@@ -39,6 +38,13 @@ EquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_
 {
   if (!VectorContainsName(_coupled_var_names, coupled_var_name))
     _coupled_var_names.push_back(coupled_var_name);
+}
+
+void
+EquationSystem::AddEliminatedVariableNameIfMissing(const std::string & eliminated_var_name)
+{
+  if (!VectorContainsName(_eliminated_var_names, eliminated_var_name))
+    _eliminated_var_names.push_back(eliminated_var_name);
 }
 
 void
@@ -66,18 +72,18 @@ EquationSystem::SetTrialVariableNames()
 void
 EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  AddTestVariableNameIfMissing(kernel->getTestVariableName());
-  AddCoupledVariableNameIfMissing(kernel->getTrialVariableName());
-  auto trial_var_name = kernel->getTrialVariableName();
-  auto test_var_name = kernel->getTestVariableName();
+  const auto & trial_var_name = kernel->getTrialVariableName();
+  const auto & test_var_name = kernel->getTestVariableName();
+  AddCoupledVariableNameIfMissing(trial_var_name);
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new kernels map if not present for the test variable
   if (!_kernels_map.Has(test_var_name))
   {
     auto kernel_field_map =
         std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
     _kernels_map.Register(test_var_name, std::move(kernel_field_map));
   }
-  // Register new kernels map if not present for the test/trial variable
-  // pair
+  // Register new kernels map if not present for the test/trial variable pair
   if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
   {
     auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
@@ -89,18 +95,18 @@ EquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 void
 EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 {
-  AddTestVariableNameIfMissing(bc->getTestVariableName());
-  AddCoupledVariableNameIfMissing(bc->getTrialVariableName());
-  auto trial_var_name = bc->getTrialVariableName();
-  auto test_var_name = bc->getTestVariableName();
+  const auto & trial_var_name = bc->getTrialVariableName();
+  const auto & test_var_name = bc->getTestVariableName();
+  AddCoupledVariableNameIfMissing(trial_var_name);
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new integrated bc map if not present for the test variable
   if (!_integrated_bc_map.Has(test_var_name))
   {
     auto integrated_bc_field_map = std::make_shared<
         Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
     _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
   }
-  // Register new integrated bc map if not present for the test/trial variable
-  // pair
+  // Register new integrated bc map if not present for the test/trial variable pair
   if (!_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMIntegratedBC>>>();
@@ -112,7 +118,9 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 void
 EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 {
-  auto test_var_name = bc->getTestVariableName();
+  const auto & test_var_name = bc->getTestVariableName();
+  AddTestVariableNameIfMissing(test_var_name);
+  // Register new essential bc map if not present for the test variable
   if (!_essential_bc_map.Has(test_var_name))
   {
     auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMEssentialBC>>>();
@@ -215,21 +223,13 @@ void
 EquationSystem::EliminateCoupledVariables()
 {
   for (const auto & test_var_name : _test_var_names)
-  {
-    auto lf = _lfs.Get(test_var_name);
     for (const auto & eliminated_var_name : _eliminated_var_names)
-    {
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name) &&
           !VectorContainsName(_test_var_names, eliminated_var_name))
       {
-        auto mblf = _mblfs.Get(test_var_name)->Get(eliminated_var_name);
-        // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
-        mfem::Vector lf_prev(lf->Size());
-        mblf->Mult(*_eliminated_variables.Get(eliminated_var_name), lf_prev);
-        *lf -= lf_prev;
+        auto & mblf = *_mblfs.Get(test_var_name)->Get(eliminated_var_name);
+        mblf.AddMult(*_eliminated_variables.Get(eliminated_var_name), *_lfs.Get(test_var_name), -1);
       }
-    }
-  }
 }
 
 void
@@ -439,8 +439,7 @@ EquationSystem::BuildMixedBilinearForms()
       const auto & coupled_var_name = _coupled_var_names.at(j);
       auto mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
                                                                _test_pfespaces.at(i));
-      // Register MixedBilinearForm if kernels exist for it, and assemble
-      // kernels
+      // Register MixedBilinearForm if kernels exist for it, and assemble kernels
       if (_kernels_map.Has(test_var_name) &&
           _kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
           test_var_name != coupled_var_name)
@@ -456,8 +455,7 @@ EquationSystem::BuildMixedBilinearForms()
         test_mblfs->Register(coupled_var_name, mblf);
       }
     }
-    // Register all mixed bilinear form sets associated with a single test
-    // variable
+    // Register all mixed bilinear form sets associated with a single test variable
     _mblfs.Register(test_var_name, test_mblfs);
   }
 }

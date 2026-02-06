@@ -63,10 +63,12 @@ public:
   const std::vector<std::string> & GetTestVarNames() const { return _test_var_names; }
 
 protected:
-  /// Add test variable to EquationSystem.
-  virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
   /// Add coupled variable to EquationSystem.
   virtual void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name);
+  /// Add eliminated variable to EquationSystem.
+  virtual void AddEliminatedVariableNameIfMissing(const std::string & eliminated_var_name);
+  /// Add test variable to EquationSystem.
+  virtual void AddTestVariableNameIfMissing(const std::string & test_var_name);
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
