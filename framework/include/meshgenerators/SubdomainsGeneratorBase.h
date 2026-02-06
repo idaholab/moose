@@ -60,7 +60,13 @@ protected:
    */
   bool elementSatisfiesRequirements(const Elem * const elem,
                                     const Point & desired_normal,
-                                    const Point & face_normal);
+                                    const Point & face_normal) const;
+
+  /**
+   * Get the normal of the 2D element
+   * @param elem pointer to the element
+   */
+  Point get2DElemNormal(const Elem * const elem) const;
 
   /// the mesh to add the subdomains to
   std::unique_ptr<MeshBase> & _input;
