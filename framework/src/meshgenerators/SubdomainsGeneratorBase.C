@@ -96,20 +96,27 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
     return;
 
   _visited[sub_id].insert(elem);
+  const auto elem_normal = get2DElemNormal(elem);
 
-  // Compute the normal
-  const auto & p1 = elem->point(0);
-  const auto & p2 = elem->point(1);
-  const auto & p3 = elem->point(2);
-  auto elem_normal = (p1 - p2).cross(p1 - p3);
-  if (elem_normal.norm_sq() == 0)
+  bool criterion_met = false;
+  if (!_using_normal && elementSatisfiesRequirements(elem, base_normal, elem_normal))
+    criterion_met = true;
+  else if (_using_normal)
   {
-    mooseWarning("Colinear nodes on elements, skipping subdomain assignment for this element");
-    return;
-  }
-  elem_normal = elem_normal.unit();
+    // Base case ok, no need to check neighbors
+    if (elementSatisfiesRequirements(elem, base_normal, elem_normal))
+      criterion_met = true;
 
-  if (!elementSatisfiesRequirements(elem, base_normal, elem_normal))
+    // Try to flood from each side with the same subdomain
+    for (const auto neighbor : make_range(elem->n_sides()))
+      if (elem->neighbor_ptr(neighbor) &&
+          (elem->neighbor_ptr(neighbor)->subdomain_id() == sub_id) &&
+          elementSatisfiesRequirements(
+              elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), elem_normal))
+        criterion_met = true;
+  }
+
+  if (!criterion_met)
     return;
 
   elem->subdomain_id() = sub_id;
@@ -142,7 +149,7 @@ SubdomainsGeneratorBase::elementSubdomainIdInList(
 bool
 SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
                                                       const Point & desired_normal,
-                                                      const Point & face_normal)
+                                                      const Point & face_normal) const
 {
   // Skip if element is not in specified subdomains
   // NOTE: we are checking this twice when calling from flood()
@@ -153,4 +160,22 @@ SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
     return false;
 
   return true;
+}
+
+Point
+SubdomainsGeneratorBase::get2DElemNormal(const Elem * const elem) const
+{
+  mooseAssert(elem->dim() == 2, "Should be a 2D element");
+  mooseAssert(elem->default_order() == FIRST, "Should be a first order element");
+
+  const auto & p1 = elem->point(0);
+  const auto & p2 = elem->point(1);
+  const auto & p3 = elem->point(2);
+  auto elem_normal = (p1 - p2).cross(p1 - p3);
+  if (elem_normal.norm_sq() == 0)
+  {
+    mooseWarning("Colinear nodes on elements, using 0 normal");
+    return elem_normal;
+  }
+  return elem_normal.unit();
 }

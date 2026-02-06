@@ -80,16 +80,7 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
     }
 
     // Compute the normal
-    const auto & p1 = elem->point(0);
-    const auto & p2 = elem->point(1);
-    const auto & p3 = elem->point(2);
-    auto normal = (p1 - p2).cross(p1 - p3);
-    if (normal.norm_sq() == 0)
-    {
-      mooseWarning("Colinear nodes on elements, skipping subdomain assignment for this element");
-      continue;
-    }
-    normal = normal.unit();
+    const auto normal = get2DElemNormal(elem);
 
     // See if we've seen this normal before (linear search)
     const std::map<SubdomainID, RealVectorValue>::value_type * item = nullptr;
