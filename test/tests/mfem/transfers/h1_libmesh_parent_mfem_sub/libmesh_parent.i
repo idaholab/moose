@@ -1,16 +1,5 @@
 [Mesh]
-  [./gmg]
-    type = GeneratedMeshGenerator
-    dim = 2
-    nx = 10
-    ny = 10
-  []
-  [shift_zero_block]
-    type = RenameBlockGenerator
-    old_block = '0'
-    new_block = '1'
-    input = gmg
-  []
+  file = ../../mesh/square.e
 []
 
 [Problem]
@@ -32,17 +21,11 @@
 []
 
 [BCs]
-  [bottom]
+  [sides]
     type = DirichletBC
     variable = libmesh_scalar_var
-    boundary = 1
+    boundary = 'bottom left right top'
     value = 1.0
-  []
-  [top]
-    type = DirichletBC
-    variable = libmesh_scalar_var
-    boundary = 3
-    value = 0.0
   []
 []
 
@@ -51,6 +34,11 @@
     type = Diffusion
     variable = libmesh_scalar_var
   []
+  [source]
+    type = BodyForce
+    variable = libmesh_scalar_var
+    value = 2.0
+  []  
 []
 
 [Executioner]
@@ -58,6 +46,7 @@
 []
 
 [Outputs]
+  file_base = 'libmesh_parent_mfem_sub_quads'
   exodus = true
   csv = true
 []
@@ -81,7 +70,7 @@
 [Transfers]
   [transfer_from_mfem]
     type = MultiAppMFEMlibMeshGeneralFieldTransfer
-    source_variable = concentration
+    source_variable = temperature
     variable = mfem_scalar_var
     from_multi_app = mfem_app
   []
