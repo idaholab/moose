@@ -174,19 +174,35 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const 
     const MeshBase & to_mesh = _to_problems[problem_id]->mesh(_displaced_target_mesh).getMesh();
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
-
     auto & fe_type = _to_variables[var_index]->feType();
     bool is_nodal = _to_variables[var_index]->isNodal();   
 
-    std::vector<Point> outgoing_libmesh_points;
     // Populate set of points 
-    // TODO: this currently assumes nodal
-    for (const auto & node : to_mesh.local_node_ptr_range())
+    std::vector<Point> outgoing_libmesh_points;
+    if (fe_type.order > CONSTANT && !is_nodal)
     {
-      // Skip this node if the variable has no dofs at it.
-      if (node->n_dofs(sys_num, var_num) < 1)
-        continue;      
-      outgoing_libmesh_points.push_back(*node);
+      mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than CONSTANT are not supported.");
+    }
+    else if (is_nodal)
+    {
+      for (const auto & node : to_mesh.local_node_ptr_range())
+      {
+        // Skip this node if the variable has no dofs at it.
+        if (node->n_dofs(sys_num, var_num) < 1)
+          continue;      
+        outgoing_libmesh_points.push_back(*node);
+      }
+    }
+    else // Elemental, constant monomial
+    {
+      for (const auto & elem :
+           as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+      {
+        // Skip this element if the variable has no dofs at it.
+        if (elem->n_dofs(sys_num, var_num) < 1)
+          continue;
+        outgoing_libmesh_points.push_back(elem->vertex_average());      
+      }
     }
     
     // Perform interpolation
@@ -198,24 +214,46 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const 
     mfem::Vector interp_vals;
     _mfem_interpolator.Interpolate(from_var, interp_vals);
     
+    // Update libMesh solution DoFs with interpolated MFEM values
     unsigned int mfem_point_index = 0;
-    for (const auto & node : to_mesh.local_node_ptr_range())
+    if (fe_type.order > CONSTANT && !is_nodal)
     {
-      // Skip this node if the variable has no dofs at it.
-      if (node->n_dofs(sys_num, var_num) < 1)
-        continue;
-      const auto dof_object_id = node->id();
-      const DofObject * dof_object = nullptr;
-      dof_object = to_mesh.node_ptr(dof_object_id);
-      const auto dof = dof_object->dof_number(sys_num, var_num, 0);
-      const auto val = interp_vals[mfem_point_index];
-
-      to_sys->solution->set(dof, val);
-      mfem_point_index++;
+      mooseError("Transfers of non-nodal FEs of between libMesh and MFEM with order higher than CONSTANT are not supported.");
+    }
+    else if (is_nodal)
+    {
+      for (const auto & node : to_mesh.local_node_ptr_range())
+      {
+        // Skip this node if the variable has no dofs at it.
+        if (node->n_dofs(sys_num, var_num) < 1)
+          continue;
+        const auto dof_object_id = node->id();
+        const DofObject * dof_object = to_mesh.node_ptr(dof_object_id);
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = interp_vals[mfem_point_index];
+        to_sys->solution->set(dof, val);
+        mfem_point_index++;
+      }
+    }
+    else // Elemental, constant monomial
+    {
+      for (const auto & elem :
+           as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
+      {
+        // Skip this element if the variable has no dofs at it.
+        if (elem->n_dofs(sys_num, var_num) < 1)
+          continue;
+        const auto dof_object_id = elem->id();
+        const DofObject * dof_object = to_mesh.elem_ptr(dof_object_id);
+        const auto dof = dof_object->dof_number(sys_num, var_num, 0);
+        const auto val = interp_vals[mfem_point_index];
+        to_sys->solution->set(dof, val);
+        mfem_point_index++;     
+      }      
     }
     to_sys->solution->close();
     // Sync local solutions
-    to_sys->update();    
+    to_sys->update();
   }
 }
 
