@@ -48,7 +48,7 @@ TEST(CapabilityTest, capabilityConstructor)
 
   // bool false value
   {
-    Capability cap("name", false, "doc");
+    Capability cap("name", bool(false), "doc");
     EXPECT_EQ(cap.getName(), "name");
     EXPECT_EQ(cap.getValue(), CapabilityValue{false});
     EXPECT_EQ(cap.getDoc(), "doc");
@@ -66,7 +66,7 @@ TEST(CapabilityTest, capabilityConstructor)
 
   // bool true value
   {
-    Capability cap("name", true, "doc");
+    Capability cap("name", bool(true), "doc");
     EXPECT_EQ(cap.getName(), "name");
     EXPECT_EQ(cap.getValue(), CapabilityValue{true});
     EXPECT_EQ(cap.getDoc(), "doc");
@@ -84,7 +84,7 @@ TEST(CapabilityTest, capabilityConstructor)
 
   // int value
   {
-    Capability cap("name", 1, "doc");
+    Capability cap("name", int(1), "doc");
     EXPECT_EQ(cap.getName(), "name");
     EXPECT_EQ(cap.getValue(), CapabilityValue{1});
     EXPECT_EQ(cap.getDoc(), "doc");
@@ -102,7 +102,7 @@ TEST(CapabilityTest, capabilityConstructor)
 
   // string value
   {
-    Capability cap("name", "foo", "doc");
+    Capability cap("name", std::string("foo"), "doc");
     EXPECT_EQ(cap.getName(), "name");
     EXPECT_EQ(cap.getValue(), CapabilityValue{"foo"});
     EXPECT_EQ(cap.getDoc(), "doc");
@@ -123,19 +123,19 @@ TEST(CapabilityTest, capabilityConstructor)
 TEST(CapabilityTest, capabilityEnumeration)
 {
   // can't set an enumeration for a bool
-  CAP_EXPECT_THROW_MSG(Capability("name", false, "doc").setEnumeration({}),
+  CAP_EXPECT_THROW_MSG(Capability("name", bool(false), "doc").setEnumeration({}),
                        "Capability::setEnumeration(): Capability 'name' is not string-valued and "
                        "cannot have an enumeration");
 
   // can't set an enumeration for an int
-  CAP_EXPECT_THROW_MSG(Capability("name", 1, "doc").setEnumeration({}),
+  CAP_EXPECT_THROW_MSG(Capability("name", int(1), "doc").setEnumeration({}),
                        "Capability::setEnumeration(): Capability 'name' is not string-valued and "
                        "cannot have an enumeration");
 
   // check set
   {
     const std::vector<std::string> enumeration{"foo", "bar"};
-    Capability cap("name", "foo", "doc");
+    Capability cap("name", std::string("foo"), "doc");
 
     // initial set
     cap.setEnumeration(enumeration);
@@ -158,35 +158,35 @@ TEST(CapabilityTest, capabilityEnumeration)
   }
 
   // cannot be empty
-  CAP_EXPECT_THROW_MSG(Capability("name", "foo", "doc").setEnumeration({}),
+  CAP_EXPECT_THROW_MSG(Capability("name", std::string("foo"), "doc").setEnumeration({}),
                        "Capability::setEnumeration(): Enumeration is empty for 'name'");
 
   // unallowed characters
   CAP_EXPECT_THROW_MSG(
-      Capability("name", "foo", "doc").setEnumeration({"abc!"}),
+      Capability("name", std::string("foo"), "doc").setEnumeration({"abc!"}),
       "Capability::setEnumeration(): Enumeration value 'abc!' for capability 'name' "
       "has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
   CAP_EXPECT_THROW_MSG(
-      Capability("name", "foo", "doc").setEnumeration({"abc", "def!"}),
+      Capability("name", std::string("foo"), "doc").setEnumeration({"abc", "def!"}),
       "Capability::setEnumeration(): Enumeration value 'def!' for capability 'name' "
       "has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
 
   // duplicates
   CAP_EXPECT_THROW_MSG(
-      Capability("name", "foo", "doc").setEnumeration({"foo", "foo"}),
+      Capability("name", std::string("foo"), "doc").setEnumeration({"foo", "foo"}),
       "Capability::setEnumeration(): Duplicate enumeration 'foo' for capability 'name'");
 
   // value not in enumeration
   CAP_EXPECT_THROW_MSG(
-      Capability("name", "foo", "doc").setEnumeration({"bar"}),
+      Capability("name", std::string("foo"), "doc").setEnumeration({"bar"}),
       "Capability::setEnumeration(): Capability name=foo value not within enumeration");
 
   // getting enumeration for bool capability
-  CAP_EXPECT_THROW_MSG(Capability("name", false, "doc").getEnumeration(),
+  CAP_EXPECT_THROW_MSG(Capability("name", bool(false), "doc").getEnumeration(),
                        "Capability::getEnumeration(): Capability 'name' is not string-valued and "
                        "cannot have an enumeration");
   // getting enumeration for an int capability
-  CAP_EXPECT_THROW_MSG(Capability("name", 1, "doc").getEnumeration(),
+  CAP_EXPECT_THROW_MSG(Capability("name", int(1), "doc").getEnumeration(),
                        "Capability::getEnumeration(): Capability 'name' is not string-valued and "
                        "cannot have an enumeration");
 }
@@ -196,14 +196,14 @@ TEST(CapabilityTest, capabilityExplicit)
 {
   // can't set a bool to be explicit
   CAP_EXPECT_THROW_MSG(
-      Capability("name", false, "doc").setExplicit(),
+      Capability("name", bool(false), "doc").setExplicit(),
       "Capability::setExplicit(): Capability 'name' is bool-valued and cannot be set as explicit");
 
   // int explicit capability
-  EXPECT_TRUE(Capability("name", 1, "doc").setExplicit().getExplicit());
+  EXPECT_TRUE(Capability("name", int(1), "doc").setExplicit().getExplicit());
 
   // string explicit capability
-  EXPECT_TRUE(Capability("name", "foo", "doc").setExplicit().getExplicit());
+  EXPECT_TRUE(Capability("name", std::string("foo"), "doc").setExplicit().getExplicit());
 }
 
 /// Test Moose::CapabilityUtils::Capability::negateValue()
@@ -211,7 +211,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 {
   // negate bool value that is already false
   {
-    Capability cap("name", false, "doc");
+    Capability cap("name", bool(false), "doc");
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_FALSE(cap._enumeration.has_value());
@@ -220,7 +220,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // negate bool value that is not false
   {
-    Capability cap("name", true, "doc");
+    Capability cap("name", bool(true), "doc");
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_FALSE(cap._enumeration.has_value());
@@ -229,7 +229,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // negate int value
   {
-    Capability cap("name", 1, "doc");
+    Capability cap("name", int(1), "doc");
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_FALSE(cap._enumeration.has_value());
@@ -238,7 +238,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // negate int value that is explicit
   {
-    Capability cap("name", 1, "doc");
+    Capability cap("name", int(1), "doc");
     cap.setExplicit();
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
@@ -248,7 +248,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // string value
   {
-    Capability cap("name", "foo", "doc");
+    Capability cap("name", std::string("foo"), "doc");
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_FALSE(cap._enumeration.has_value());
@@ -257,7 +257,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // string value that is explicit
   {
-    Capability cap("name", "foo", "doc");
+    Capability cap("name", std::string("foo"), "doc");
     cap.setExplicit();
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
@@ -267,7 +267,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // string value that has an enumeration
   {
-    Capability cap("name", "foo", "doc");
+    Capability cap("name", std::string("foo"), "doc");
     cap.setEnumeration({"foo"});
     cap.negateValue();
     EXPECT_FALSE(cap.getExplicit());
@@ -277,7 +277,7 @@ TEST(CapabilityTest, capabilityNegateValue)
 
   // string value that has an enumeration and is explicit
   {
-    Capability cap("name", "foo", "doc");
+    Capability cap("name", std::string("foo"), "doc");
     cap.setExplicit();
     cap.setEnumeration({"foo"});
     cap.negateValue();
@@ -297,8 +297,8 @@ TEST(CapabilityTest, capabilityNegateValue)
 TEST(CapabilityRegistryTest, checkBool)
 {
   CapabilityRegistry registry;
-  registry.add("bool", true, "Boolean test capability");
-  registry.add("bool2", false, "Boolean test capability 2");
+  registry.add("bool", bool(true), "Boolean test capability");
+  registry.add("bool2", bool(false), "Boolean test capability 2");
 
   const std::vector<std::pair<std::string, CheckState>> tests = {
       {"bool", CERTAIN_PASS},
@@ -321,7 +321,7 @@ TEST(CapabilityRegistryTest, checkBool)
 TEST(CapabilityRegistryTest, checkInt)
 {
   CapabilityRegistry registry;
-  registry.add("int", 78, "Integer test capability");
+  registry.add("int", int(78), "Integer test capability");
 
   const std::vector<std::string> is_true = {
       "", "=78", "==78", "<=78", ">=78", "<=79", ">=77", "<79", ">77", "!=77", "!=79"};
@@ -351,7 +351,7 @@ TEST(CapabilityRegistryTest, checkInt)
 TEST(CapabilityRegistryTest, checkIntExplicit)
 {
   CapabilityRegistry registry;
-  registry.add("int", 78, "Integer test capability").setExplicit();
+  registry.add("int", int(78), "Integer test capability").setExplicit();
 
   // should still allow as explicit
   CAP_CHECK_EXPECT_EQ("int=78", CERTAIN_PASS);
@@ -370,7 +370,7 @@ TEST(CapabilityRegistryTest, checkIntExplicit)
 TEST(CapabilityRegistryTest, checkString)
 {
   CapabilityRegistry registry;
-  registry.add("string", "clang", "String test capability");
+  registry.add("string", std::string("clang"), "String test capability");
 
   CAP_CHECK_EXPECT_EQ("string", CERTAIN_PASS);
   CAP_CHECK_EXPECT_EQ("!string", CERTAIN_FAIL);
@@ -392,7 +392,8 @@ TEST(CapabilityRegistryTest, checkString)
 TEST(CapabilityRegistryTest, checkEnumeratedString)
 {
   CapabilityRegistry registry;
-  registry.add("string", "clang", "String test capability").setEnumeration({"clang", "gcc"});
+  registry.add("string", std::string("clang"), "String test capability")
+      .setEnumeration({"clang", "gcc"});
 
   // should still allow as a bool
   CAP_CHECK_EXPECT_EQ("string", CERTAIN_PASS);
@@ -411,7 +412,7 @@ TEST(CapabilityRegistryTest, checkEnumeratedString)
 TEST(CapabilityRegistryTest, checkExplicitString)
 {
   CapabilityRegistry registry;
-  registry.add("string", "clang", "String test capability").setExplicit();
+  registry.add("string", std::string("clang"), "String test capability").setExplicit();
 
   // should still allow as explicit
   CAP_CHECK_EXPECT_EQ("string=clang", CERTAIN_PASS);
@@ -430,7 +431,7 @@ TEST(CapabilityRegistryTest, checkExplicitString)
 TEST(CapabilityRegistryTest, checkExplicitEnumeratedString)
 {
   CapabilityRegistry registry;
-  registry.add("string", "clang", "String test capability")
+  registry.add("string", std::string("clang"), "String test capability")
       .setEnumeration({"clang", "gcc"})
       .setExplicit();
 
@@ -455,7 +456,7 @@ TEST(CapabilityRegistryTest, checkExplicitEnumeratedString)
 TEST(CapabilityRegistryTest, checkVersion)
 {
   CapabilityRegistry registry;
-  registry.add("version", "3.2.1", "Version number test capability");
+  registry.add("version", std::string("3.2.1"), "Version number test capability");
 
   const std::vector<std::string> is_true = {"",
                                             ">2.1",
@@ -493,14 +494,15 @@ TEST(CapabilityRegistryTest, checkVersion)
 TEST(CapabilityRegistryTest, checkMultiple)
 {
   CapabilityRegistry registry;
-  registry.add("bool", true, "Multiple capability test bool");
-  registry.add("int", 78, "Multiple capability test int");
-  registry.add("int_explicit", 79, "Multiple capability test int explicit");
-  registry.add("string", "clang", "Multiple capability test string");
-  registry.add("string_explicit", "foo", "Multiple capability test string explicit").setExplicit();
-  registry.add("string_enum", "clang", "Multiple capability test string enum")
+  registry.add("bool", bool(true), "Multiple capability test bool");
+  registry.add("int", int(78), "Multiple capability test int");
+  registry.add("int_explicit", int(79), "Multiple capability test int explicit");
+  registry.add("string", std::string("clang"), "Multiple capability test string");
+  registry.add("string_explicit", std::string("foo"), "Multiple capability test string explicit")
+      .setExplicit();
+  registry.add("string_enum", std::string("clang"), "Multiple capability test string enum")
       .setEnumeration({"clang", "gcc"});
-  registry.add("version", "3.2.1", "Multiple capability test version number");
+  registry.add("version", std::string("3.2.1"), "Multiple capability test version number");
 
   CAP_CHECK_EXPECT_EQ("!doesnotexist & version<4.2.2 &"
                       "int<100 & int>50 & string!=Popel ",
@@ -536,7 +538,7 @@ TEST(CapabilityRegistryTest, checkParseFail)
 TEST(CapabilityRegistryTest, query)
 {
   CapabilityRegistry registry;
-  const auto & capability = registry.add("name", false, "doc");
+  const auto & capability = registry.add("name", bool(false), "doc");
 
   EXPECT_EQ(registry.query("name"), &capability);
   EXPECT_EQ(registry.query("naMe"), &capability);
@@ -550,7 +552,7 @@ TEST(CapabilityRegistryTest, query)
 TEST(CapabilityRegistryTest, get)
 {
   CapabilityRegistry registry;
-  const auto & capability = registry.add("name", false, "doc");
+  const auto & capability = registry.add("name", bool(false), "doc");
 
   EXPECT_EQ(&registry.get("name"), &capability);
   CAP_EXPECT_THROW_MSG(registry.get("naMe"), "Capability 'naMe' not registered");
@@ -564,27 +566,27 @@ TEST(CapabilityRegistryTest, add)
   EXPECT_EQ(registry.getRegistry().size(), 0);
 
   // Add success
-  const auto & capability = registry.add("name", false, "doc");
+  const auto & capability = registry.add("name", bool(false), "doc");
   EXPECT_EQ(registry.getRegistry().size(), 1);
   EXPECT_EQ(&registry.getRegistry().at("name"), &capability);
 
   // Add again with same value, return original
-  registry.add("name", false, "doc");
+  registry.add("name", bool(false), "doc");
   EXPECT_EQ(registry.getRegistry().size(), 1);
   EXPECT_EQ(&registry.getRegistry().at("name"), &capability);
 
   // Add again, different value
-  CAP_EXPECT_THROW_MSG(registry.add("name", true, "doc"),
+  CAP_EXPECT_THROW_MSG(registry.add("name", bool(true), "doc"),
                        "Capability 'name' already exists and is not equal");
-  CAP_EXPECT_THROW_MSG(registry.add("name", 1, "doc"),
+  CAP_EXPECT_THROW_MSG(registry.add("name", int(1), "doc"),
                        "Capability 'name' already exists and is not equal");
-  CAP_EXPECT_THROW_MSG(registry.add("name", "foo", "doc"),
+  CAP_EXPECT_THROW_MSG(registry.add("name", std::string("foo"), "doc"),
                        "Capability 'name' already exists and is not equal");
-  CAP_EXPECT_THROW_MSG(registry.add("name", false, "doc2"),
+  CAP_EXPECT_THROW_MSG(registry.add("name", bool(false), "doc2"),
                        "Capability 'name' already exists and is not equal");
 
   // Add a second
-  const auto & capability2 = registry.add("name2", true, "doc");
+  const auto & capability2 = registry.add("name2", bool(true), "doc");
   EXPECT_EQ(registry.getRegistry().size(), 2);
   EXPECT_EQ(&registry.getRegistry().at("name2"), &capability2);
 }
@@ -621,7 +623,7 @@ TEST_F(CapabilitiesTest, add)
   auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
 
   // success
-  const auto & capability = capabilities.add("name", false, "doc");
+  const auto & capability = capabilities.add("name", bool(false), "doc");
   EXPECT_EQ(_capability_registry->query("name"), &capability);
 
   // already exists
@@ -679,15 +681,17 @@ TEST_F(CapabilitiesTest, dump)
 {
   auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
 
-  capabilities.add("false", false, "false");
-  capabilities.add("true", true, "true");
-  capabilities.add("int", 1, "1");
-  capabilities.add("int_explicit", 1, "1").setExplicit();
-  capabilities.add("string", "string", "string");
-  capabilities.add("string_explicit", "string_explicit", "string_explicit").setExplicit();
-  capabilities.add("string_enum", "string_enum", "string_enum")
+  capabilities.add("false", bool(false), "false");
+  capabilities.add("true", bool(true), "true");
+  capabilities.add("int", int(1), "1");
+  capabilities.add("int_explicit", int(1), "1").setExplicit();
+  capabilities.add("string", std::string("string"), "string");
+  capabilities.add("string_explicit", std::string("string_explicit"), "string_explicit")
+      .setExplicit();
+  capabilities.add("string_enum", std::string("string_enum"), "string_enum")
       .setEnumeration({"string_enum", "foo"});
-  capabilities.add("string_explicit_enum", "string_explicit_enum", "string_explicit_enum")
+  capabilities
+      .add("string_explicit_enum", std::string("string_explicit_enum"), "string_explicit_enum")
       .setExplicit()
       .setEnumeration({"string_explicit_enum", "foo"});
 
@@ -721,7 +725,7 @@ TEST_F(CapabilitiesTest, check)
 {
   auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
 
-  capabilities.add("name", true, "false");
+  capabilities.add("name", bool(true), "false");
   EXPECT_EQ(std::get<0>(capabilities.check("name")), CERTAIN_PASS);
   EXPECT_EQ(std::get<0>(capabilities.check("!name")), CERTAIN_FAIL);
 }
