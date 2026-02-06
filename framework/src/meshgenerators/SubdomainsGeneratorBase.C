@@ -1,0 +1,156 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "SubdomainsGeneratorBase.h"
+#include "InputParameters.h"
+#include "MooseMesh.h"
+#include "MooseMeshUtils.h"
+
+#include "libmesh/mesh_generation.h"
+#include "libmesh/mesh.h"
+#include "libmesh/string_to_enum.h"
+#include "libmesh/quadrature_gauss.h"
+#include "libmesh/point_locator_base.h"
+#include "libmesh/elem.h"
+#include "libmesh/remote_elem.h"
+
+InputParameters
+SubdomainsGeneratorBase::validParams()
+{
+  InputParameters params = MeshGenerator::validParams();
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addRequiredParam<std::vector<SubdomainName>>(
+      "new_subdomain", "The list of subdomain names to create on the supplied subdomain");
+  params.addParam<std::vector<SubdomainName>>(
+      "included_subdomains",
+      "A set of subdomain names or ids an element has to be previously a part of to be moved into "
+      "a new subdomain.");
+
+  // Useful for painting subdomains over 2D surface elements
+  params.addParam<Point>("normal",
+                         Point(),
+                         "If supplied, only faces with normal equal to this, up to "
+                         "normal_tol, will be added to the sidesets specified");
+  params.addRangeCheckedParam<Real>("normal_tol",
+                                    0.1,
+                                    "normal_tol>=0 & normal_tol<=2",
+                                    "If normal is supplied then faces are "
+                                    "only added if face_normal.normal_hat >= "
+                                    "1 - normal_tol, where normal_hat = "
+                                    "normal/|normal|");
+  return params;
+}
+
+SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & parameters)
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _subdomain_names(std::vector<SubdomainName>()),
+    _check_subdomains(isParamValid("included_subdomains")),
+    _included_subdomain_ids(std::vector<subdomain_id_type>()),
+    _using_normal(isParamSetByUser("normal") || isParamValid("_using_normal")),
+    _normal(isParamSetByUser("normal") ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
+                                       : getParam<Point>("normal")),
+    _normal_tol(getParam<Real>("normal_tol"))
+{
+  if (isParamValid("new_subdomain"))
+    _subdomain_names = getParam<std::vector<SubdomainName>>("new_subdomain");
+}
+
+void
+SubdomainsGeneratorBase::setup(MeshBase & mesh)
+{
+  // To know the dimension of the mesh
+  if (!mesh.is_prepared())
+    mesh.prepare_for_use();
+
+  // Get the subdomain ids from the names
+  if (parameters().isParamValid("included_subdomains"))
+  {
+    // check that the subdomains exist in the mesh
+    const auto subdomains = getParam<std::vector<SubdomainName>>("included_subdomains");
+    for (const auto & name : subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(mesh, name))
+        paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
+
+    _included_subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, subdomains);
+  }
+}
+
+void
+SubdomainsGeneratorBase::flood(Elem * const elem,
+                               const Point & base_normal,
+                               const subdomain_id_type & sub_id)
+{
+  if (elem == nullptr || elem == remote_elem ||
+      (_visited[sub_id].find(elem) != _visited[sub_id].end()))
+    return;
+
+  // Skip if element is not in specified subdomains
+  if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+    return;
+
+  _visited[sub_id].insert(elem);
+
+  // Compute the normal
+  const auto & p1 = elem->point(0);
+  const auto & p2 = elem->point(1);
+  const auto & p3 = elem->point(2);
+  auto elem_normal = (p1 - p2).cross(p1 - p3);
+  if (elem_normal.norm_sq() == 0)
+  {
+    mooseWarning("Colinear nodes on elements, skipping subdomain assignment for this element");
+    return;
+  }
+  elem_normal = elem_normal.unit();
+
+  if (!elementSatisfiesRequirements(elem, base_normal, elem_normal))
+    return;
+
+  elem->subdomain_id() = sub_id;
+
+  for (const auto neighbor : make_range(elem->n_sides()))
+  {
+    // Flood to the neighboring elements using the current matching side normal from this
+    // element.
+    flood(elem->neighbor_ptr(neighbor), elem_normal, sub_id);
+  }
+}
+
+bool
+SubdomainsGeneratorBase::normalsWithinTol(const Point & normal_1,
+                                          const Point & normal_2,
+                                          const Real & tol) const
+{
+  return (1.0 - normal_1 * normal_2) <= tol;
+}
+
+bool
+SubdomainsGeneratorBase::elementSubdomainIdInList(
+    const Elem * const elem, const std::vector<subdomain_id_type> & subdomain_id_list) const
+{
+  subdomain_id_type curr_subdomain = elem->subdomain_id();
+  return std::find(subdomain_id_list.begin(), subdomain_id_list.end(), curr_subdomain) !=
+         subdomain_id_list.end();
+}
+
+bool
+SubdomainsGeneratorBase::elementSatisfiesRequirements(const Elem * const elem,
+                                                      const Point & desired_normal,
+                                                      const Point & face_normal)
+{
+  // Skip if element is not in specified subdomains
+  // NOTE: we are checking this twice when calling from flood()
+  if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
+    return false;
+
+  if (_using_normal && !normalsWithinTol(desired_normal, face_normal, _normal_tol))
+    return false;
+
+  return true;
+}
