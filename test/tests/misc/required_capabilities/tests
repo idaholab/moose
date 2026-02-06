@@ -111,4 +111,11 @@
     expect_out = 'Solve Skipped!'
     requirement = 'The system shall store as a capability the installation type, either in tree or relocated'
   []
+  [compiler]
+    type = RunApp
+    input = input.i
+    cli_args = '--required-capabilities=\'compiler!=unknown\''
+    expect_out = 'Solve Skipped!'
+    requirement = 'The system shall store as a capability the compiler'
+  []
 []

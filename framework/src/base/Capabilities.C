@@ -560,6 +560,9 @@ Capabilities::registerMooseCapabilities()
 #elif defined(_MSC_VER)
     const auto value = "msvc";
 #else
+    // This should really be a static assertion, but I don't know
+    // if it's good to break people if we can't determine this...
+    mooseDoOnce(mooseWarning("Failed to determine compiler; setting capability compiler=unknown"));
     const auto value = "unknown";
 #endif
     add_string_capability("compiler", value, doc)
