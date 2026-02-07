@@ -471,11 +471,12 @@ class RunApp(Tester):
 
         def augment_capability(*args, **kwargs):
             addAugmentedCapability(
-                options._capabilities.values, augmented_capabilities, *args, **kwargs
+                options._capabilities, augmented_capabilities, *args, **kwargs
             )
 
-        # NOTE: If you add to this list, add in Capabilities.C to
-        # Moose::reserved_augmented_capabilities
+        # NOTE: If you add to this list, it must be added to
+        # Moose::CapabilityUtils::reserved_augmented_capabilities in
+        # framework/src/utils/CapabilityUtils.C
         augment_capability(
             "mpi_procs",
             self.getProcs(options),

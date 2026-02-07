@@ -18,7 +18,10 @@ from typing import Any, Optional, Tuple
 from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness import TestHarness
-from TestHarness.capability_util import addAugmentedCapability
+from TestHarness.capability_util import (
+    addAugmentedCapability,
+    parseRequiredCapabilities,
+)
 from TestHarness.testers.Tester import Tester
 from TestHarness.util import getMachine, getPlatform
 
@@ -28,49 +31,67 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
 
     def testAddAugmentedCapability(self):
         """Test TestHarness.capability_util.addAugmentedCapability."""
+        from pycapabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
+
+        capabilities = Capabilities({})
+        name = next(iter(AUGMENTED_CAPABILITY_NAMES))
+
         # Name converts to lowercase
         augmented = {}
-        addAugmentedCapability({}, augmented, "FOO", None, "doc")
-        self.assertIn("foo", augmented)
+        addAugmentedCapability(capabilities, augmented, name.upper(), None, "doc")
+        self.assertIn(name, augmented)
 
         # String value converts to lowercase
         augmented = {}
-        addAugmentedCapability({}, augmented, "foo", "FOO", "doc")
-        self.assertEqual(augmented["foo"]["value"], "foo")
+        addAugmentedCapability(capabilities, augmented, name, "FOO", "doc")
+        self.assertEqual(augmented[name]["value"], "foo")
 
         # Enumeration can only be used for string capabilities
         with self.assertRaisesRegex(
             AssertionError, "Enumeration only valid for str capabilities"
         ):
-            addAugmentedCapability({}, {}, "foo", True, "doc", enumeration=["foo"])
+            addAugmentedCapability(
+                capabilities, {}, "foo", True, "doc", enumeration=["foo"]
+            )
         with self.assertRaisesRegex(
             AssertionError, "Enumeration only valid for str capabilities"
         ):
-            addAugmentedCapability({}, {}, "foo", 0, "doc", enumeration=["foo"])
+            addAugmentedCapability(
+                capabilities, {}, "foo", 0, "doc", enumeration=["foo"]
+            )
 
         # Enumeration converted to lower
         augmented = {}
         addAugmentedCapability(
-            {}, augmented, "foo", "value", "doc", enumeration=["VALUE"]
+            capabilities, augmented, name, "value", "doc", enumeration=["VALUE"]
         )
-        self.assertEqual(augmented["foo"]["enumeration"], ["value"])
+        self.assertEqual(augmented[name]["enumeration"], ["value"])
+
+        # Not an augmented capability
+        with self.assertRaisesRegex(
+            ValueError, "Capability foo is not a registered augmented capability name"
+        ):
+            addAugmentedCapability(set("foo"), {}, "foo", None, "doc")
 
         # Name already exists in main capabilities
-        with self.assertRaisesRegex(ValueError, "Capability foo is defined by the app"):
-            addAugmentedCapability({"foo": None}, {}, "foo", None, "doc")
+        with self.assertRaisesRegex(
+            ValueError, rf"Capability {name} is defined by the app"
+        ):
+            addAugmentedCapability(AUGMENTED_CAPABILITY_NAMES, {}, name, None, "doc")
 
         # Name already exists in augmented capabilities
         with self.assertRaisesRegex(
-            ValueError, "Capability foo is already defined as an augmented capability."
+            ValueError,
+            rf"Capability {name} is already defined as an augmented capability.",
         ):
-            addAugmentedCapability({}, {"foo": None}, "foo", None, "doc")
+            addAugmentedCapability(capabilities, {name: None}, name, None, "doc")
 
         # Build a bool value
         for value, expected_value in [(None, False), (False, False), (True, True)]:
             augmented = {}
-            addAugmentedCapability({}, augmented, "foo", value, "somedoc")
+            addAugmentedCapability(capabilities, augmented, name, value, "somedoc")
             self.assertEqual(
-                augmented, {"foo": {"doc": "somedoc", "value": expected_value}}
+                augmented, {name: {"doc": "somedoc", "value": expected_value}}
             )
 
         # Build a int value
@@ -79,8 +100,10 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             kwargs = {}
             if explicit is not None:
                 kwargs["explicit"] = explicit
-            addAugmentedCapability({}, augmented, "foo", 1, "somedoc", **kwargs)
-            expected = {"foo": {"doc": "somedoc", "value": 1, **kwargs}}
+            addAugmentedCapability(
+                capabilities, augmented, name, 1, "somedoc", **kwargs
+            )
+            expected = {name: {"doc": "somedoc", "value": 1, **kwargs}}
             self.assertEqual(augmented, expected)
 
         # Build a string value
@@ -92,8 +115,10 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                     kwargs["explicit"] = explicit
                 if enumeration is not None:
                     kwargs["enumeration"] = enumeration
-                addAugmentedCapability({}, augmented, "foo", "bar", "somedoc", **kwargs)
-                expected = {"foo": {"doc": "somedoc", "value": "bar", **kwargs}}
+                addAugmentedCapability(
+                    capabilities, augmented, name, "bar", "somedoc", **kwargs
+                )
+                expected = {name: {"doc": "somedoc", "value": "bar", **kwargs}}
                 self.assertEqual(augmented, expected)
 
     def testGetCapabilitiesMinimal(self):

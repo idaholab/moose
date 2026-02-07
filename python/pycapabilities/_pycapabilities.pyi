@@ -1,5 +1,12 @@
 from enum import IntEnum
-from typing import Iterable, Optional, Tuple
+from typing import Iterable, Optional, Set, Tuple
+
+AUGMENTED_CAPABILITY_NAMES: Set[str]
+"""
+Capabilities that are reserved and can only be augmented.
+
+Loaded from Moose::CapabilityUtils::augmented_capability_names.
+"""
 
 class CheckState(IntEnum):
     """Return state for a capability check."""

@@ -17,6 +17,15 @@
 namespace Moose::CapabilityUtils
 {
 
+const std::set<std::string, std::less<>> augmented_capability_names{
+    // TestHarness.getCapabilities()
+    "hpc",
+    "machine",
+    "library_mode",
+    // TestHarness.testers.RunApp.getAugmentedCapabilities()
+    "mpi_procs",
+    "num_threads"};
+
 Capability::Capability(const std::string_view name,
                        const CapabilityValue & value,
                        const std::string_view doc)

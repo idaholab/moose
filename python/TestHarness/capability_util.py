@@ -12,7 +12,7 @@
 import re
 import subprocess
 import sys
-from typing import TYPE_CHECKING, Iterable, Optional, Union
+from typing import TYPE_CHECKING, Iterable, Optional, Set, Union
 
 if TYPE_CHECKING:
     from pycapabilities import Capabilities
@@ -89,7 +89,7 @@ def checkAppCapabilities(
 
 
 def addAugmentedCapability(
-    capabilities: dict,
+    app_capabilities: Union["Capabilities", set[str]],
     augmented_capabilities: dict,
     name: str,
     value: Optional[Union[bool, str, int]],
@@ -102,8 +102,8 @@ def addAugmentedCapability(
 
     Arguments:
     ---------
-    capabilities : dict
-        The application's capabilities.
+    app_capabilities : Union["Capabilities", set[str]]
+        The application's Capabilities, or their names.
     augmented_capabilities : dict
         The augmented capabilities to fill add to.
     name : str
@@ -121,12 +121,18 @@ def addAugmentedCapability(
         Whether or not the capability is explicit (non bool-valued capabilites only).
 
     """
-    assert isinstance(capabilities, dict)
+    from pycapabilities import AUGMENTED_CAPABILITY_NAMES, Capabilities
+
+    assert isinstance(app_capabilities, (Capabilities, set))
+    assert isinstance(augmented_capabilities, dict)
     assert isinstance(name, str)
     assert isinstance(value, (bool, str, int, type(None)))
     assert isinstance(doc, str)
     assert isinstance(enumeration, (list, type(None)))
     assert isinstance(explicit, (bool, type(None)))
+
+    if isinstance(app_capabilities, Capabilities):
+        app_capabilities = set(app_capabilities.values)
 
     # Names must be lowercase
     name = name.lower()
@@ -147,7 +153,11 @@ def addAugmentedCapability(
         enumeration = [v.lower() for v in enumeration]
         assert value in enumeration, "Value is not in enumeration"
 
-    if name in capabilities:
+    if name not in AUGMENTED_CAPABILITY_NAMES:
+        raise ValueError(
+            f"Capability {name} is not a registered augmented capability name"
+        )
+    if name in app_capabilities:
         raise ValueError(
             f"Capability {name} is defined by the app, but it is a reserved "
             "dynamic test harness capability. This is an application bug."
@@ -169,16 +179,25 @@ def addAugmentedCapability(
     augmented_capabilities[name] = entry
 
 
-def parseRequiredCapabilities(required: list[str]) -> list[str]:
+def parseRequiredCapabilities(
+    required: list[str], capabilities: "Capabilities"
+) -> list[str]:
     """Parse the required capabilities from --only-tests-that-require."""
     assert isinstance(required, list)
     assert all(isinstance(v, str) for v in required)
+
+    from pycapabilities import AUGMENTED_CAPABILITY_NAMES
 
     result = []
     for entry in required:
         entry = entry.strip()
         if not re.fullmatch(r"[a-z0-9_-]+", entry):
             raise ValueError(f"Capability '{entry}' has unallowed characters")
+        if (cap := capabilities.values.get(entry)) is not None:
+            if cap["value"] is False:
+                raise ValueError(f"Capability '{entry}' is false")
+        elif entry not in AUGMENTED_CAPABILITY_NAMES:
+            raise ValueError(f"Capability '{entry}' is not registered")
         result.append(entry)
 
     return result

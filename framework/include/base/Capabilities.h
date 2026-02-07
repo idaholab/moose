@@ -13,8 +13,6 @@
 
 #include "nlohmann/json_fwd.h"
 
-#include <set>
-
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
 #include "gtest/gtest.h"
@@ -40,9 +38,6 @@ public:
   virtual ~Capabilities() {}
 
   static Capabilities & getCapabilities();
-
-  /// Capabilities that are reserved and can only be augmented
-  static const std::set<std::string, std::less<>> reserved_augmented_capabilities;
 
   /**
    * Add a capability to the registry.

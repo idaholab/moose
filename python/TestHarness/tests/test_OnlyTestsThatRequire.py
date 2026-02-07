@@ -15,51 +15,91 @@ from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness.capability_util import parseRequiredCapabilities
 from TestHarness.StatusSystem import StatusSystem
-from TestHarness.util import getMachine, getPlatform
 
-MACHINE = getMachine()
-PLATFORM = getPlatform()
+
 class TestRequireCapability(TestHarnessTestCase):
-    """Test the --only-tests-that-require option."""
+    # """Test the --only-tests-that-require option."""
+
+    def getAugmentedCapabilityNames(self) -> list[str]:
+        """
+        Get pycapabilities.AUGMENTED_CAPABILITY_NAMES.
+
+        Done here instead of at file level to avoid pycapabilites build.
+        """
+        from pycapabilities import AUGMENTED_CAPABILITY_NAMES
+
+        names = list(AUGMENTED_CAPABILITY_NAMES)
+        self.assertGreater(len(names), 1)
+        return names
 
     def testParseRequiredCapabilities(self):
         """Test TestHarness.capability_util.parseRequiredCapabilities()."""
-        # Has stripping
-        self.assertEqual(parseRequiredCapabilities([" foo", "bar  "]), ["foo", "bar"])
+        from pycapabilities import Capabilities
 
-        # Unallowed characters
+        names = self.getAugmentedCapabilityNames()
+        name1 = names[0]
+        name2 = names[1]
+
+        capabilities = Capabilities(
+            {
+                "appvalue": {"doc": "doc", "value": "foo"},
+                "falsevalue": {"doc": "doc", "value": False},
+            }
+        )
+
+        # success
+        required = parseRequiredCapabilities(["appvalue", name1, name2], capabilities)
+        self.assertEqual(required, ["appvalue", name1, name2])
+
+        # unallowed characters
         with self.assertRaisesRegex(
-            ValueError, r"Capability 'foo!=\?' has unallowed characters"
+            ValueError, "Capability 'fOO!' has unallowed characters"
         ):
-            parseRequiredCapabilities(["foo!=?"])
+            parseRequiredCapabilities(["fOO!"], capabilities)
 
-        # Works
-        self.assertEqual(parseRequiredCapabilities(["foo", "bar"]), ["foo", "bar"])
+        # registered but false
+        with self.assertRaisesRegex(ValueError, "Capability 'falsevalue' is false"):
+            parseRequiredCapabilities(["falsevalue"], capabilities)
+
+        # not registered
+        with self.assertRaisesRegex(ValueError, "Capability 'foo' is not registered"):
+            parseRequiredCapabilities(["foo"], capabilities)
 
     def testTestHarnessOptions(self):
         """Test that the test harness will set the _required_capabilities option."""
         # Single
         res = self.runTests(
             "--only-tests-that-require",
-            "foo",
+            "test_one",
             run=False,
+            minimal_capabilities=False,
         )
         assert res.harness is not None
-        self.assertEqual(res.harness.options._required_capabilities, ["foo"])
+        self.assertEqual(res.harness.options._required_capabilities, ["test_one"])
 
         # Multiple
         res = self.runTests(
             "--only-tests-that-require",
-            "foo",
+            "test_one",
             "--only-tests-that-require",
-            "bar",
+            "test_string",
             run=False,
+            minimal_capabilities=False,
         )
         assert res.harness is not None
         self.assertEqual(
-            res.harness.options._required_capabilities,
-            ["foo", "bar"],
+            res.harness.options._required_capabilities, ["test_one", "test_string"]
         )
+
+        # Catch exceptions with CLI error
+        with self.assertRaisesRegex(
+            SystemExit,
+            "ERROR: --only-tests-that-require: Capability 'fOO!' has unallowed "
+            "characters",
+        ):
+            self.runTests(
+                "--only-tests-that-require", "fOO!", minimal_capabilities=True
+            )
 
     def testTesterSkip(self):
         """Test the Tester skipping tests with --only-tests-that-require."""
@@ -81,7 +121,7 @@ class TestRequireCapability(TestHarnessTestCase):
             res = self.runTests(
                 *args,
                 tests=tests,
-                minimal_capabilities=True,
+                minimal_capabilities=False,
             )
             assert res.harness is not None
             job = self.getJobWithName(res.harness, test_name)
@@ -92,24 +132,20 @@ class TestRequireCapability(TestHarnessTestCase):
                 self.assertEqual(job.getStatus(), StatusSystem.finished)
 
         # Single requirement, test has no capabilities
-        run_test(["foo"], ["foo"])
+        run_test(["test_one"], ["test_one"])
         # Single requirement, test has capabilities but not the right one
-        run_test(["foo"], ["foo"], f"machine={MACHINE}")
+        run_test(["test_one"], ["test_one"], "test_string")
         # Single requirement, test has capabilities and the right one
-        run_test([], ["machine"], f"machine={MACHINE}")
-        # Single requirement, test has capabilities and the right one
-        run_test([], ["machine"], f"machine={MACHINE}")
+        run_test([], ["test_one"], "test_one")
         # Two requirements, test has no capabilities
-        run_test(["foo", "bar"], ["foo", "bar"])
+        run_test(["test_one", "test_two_explicit"], ["test_one", "test_two_explicit"])
         # Two requirements, test has one of them
-        run_test(["foo"], ["machine", "foo"], f"machine={MACHINE}")
+        run_test(["test_string"], ["test_one", "test_string"], "test_one")
         # Two requirements, test has both of them
-        run_test(
-            [], ["machine", "platform"], f"machine={MACHINE} & platform={PLATFORM}"
-        )
+        run_test([], ["test_string", "test_string"], "test_one & test_string")
         # Requirement from a Tester augmented capability
         # (mpi_procs is added in RunApp)
-        run_test(["mpi_procs"], ["mpi_procs"], f"machine={MACHINE}")
+        run_test(["mpi_procs"], ["mpi_procs"], "test_one")
         run_test([], ["mpi_procs"], "mpi_procs=1")
 
 

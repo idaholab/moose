@@ -41,15 +41,6 @@
 namespace Moose
 {
 
-const std::set<std::string, std::less<>> Capabilities::reserved_augmented_capabilities{
-    // TestHarness.getCapabilities()
-    "hpc",
-    "machine",
-    "library_mode",
-    // RunApp.getAugmentedCapabilities()
-    "mpi_procs",
-    "num_threads"};
-
 Capabilities::Capabilities()
 {
   // Register the moose capabilities, just once
@@ -72,7 +63,7 @@ Capabilities::add(const std::string_view capability,
                   const CapabilityUtils::CapabilityValue & value,
                   const std::string_view doc)
 {
-  if (reserved_augmented_capabilities.count(capability))
+  if (CapabilityUtils::augmented_capability_names.count(capability))
     mooseError("The capability \"",
                capability,
                "\" is reserved and may not be registered by an application.");

@@ -24,6 +24,7 @@
 
 #include <memory>
 
+using Moose::CapabilityUtils::augmented_capability_names;
 using Moose::CapabilityUtils::CapabilityException;
 using Moose::CapabilityUtils::CapabilityRegistry;
 using Moose::CapabilityUtils::CapabilityValue;
@@ -182,7 +183,7 @@ addCapabilities(CapabilityRegistry & registry, PyObject * capabilities_dict)
 }
 
 /*******************************************************************************/
-/* Python pycapabilities.CheckState enum                                       */
+/* Python pycapabilities.CheckState: IntEnum                                   */
 /*******************************************************************************/
 
 static int
@@ -251,6 +252,43 @@ done:
   Py_XDECREF(members);
   Py_XDECREF(checkstate);
   return rc;
+}
+
+/*******************************************************************************/
+/* Python pycapabilities.AUGMENTED_CAPABILITY_NAMES: Set[str]                  */
+/*******************************************************************************/
+
+static int
+AUGMENTED_CAPABILITY_NAMES_set(PyObject * module)
+{
+  PyObject * names = PySet_New(nullptr);
+  if (!names)
+    return -1;
+
+  for (const auto & name : augmented_capability_names)
+  {
+    PyObject * s = PyUnicode_FromString(name.c_str());
+    if (!s)
+    {
+      Py_DECREF(names);
+      return -1;
+    }
+    if (PySet_Add(names, s) < 0)
+    {
+      Py_DECREF(s);
+      Py_DECREF(names);
+      return -1;
+    }
+    Py_DECREF(s);
+  }
+
+  if (PyModule_AddObject(module, "AUGMENTED_CAPABILITY_NAMES", names) < 0)
+  {
+    Py_DECREF(names);
+    return -1;
+  }
+
+  return 0;
 }
 
 /*******************************************************************************/
@@ -539,8 +577,15 @@ PyInit__pycapabilities(void)
   PyModule_AddObject(
       module, "CapabilityException", CapabilityExceptionObject); // steals a ref to CustomError
 
-  // CheckState enum
+  // CheckState: IntEnum
   if (CheckState_enum(module) < 0)
+  {
+    Py_DECREF(module);
+    return nullptr;
+  }
+
+  // AUGMENTED_CAPABILITY_NAMES: Set[str]
+  if (AUGMENTED_CAPABILITY_NAMES_set(module) < 0)
   {
     Py_DECREF(module);
     return nullptr;

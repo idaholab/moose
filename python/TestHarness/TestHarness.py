@@ -452,11 +452,12 @@ class TestHarness:
 
         def augment(*args, **kwargs):
             addAugmentedCapability(
-                app_capabilities, augmented_capabilities, *args, **kwargs
+                set(app_capabilities.keys()), augmented_capabilities, *args, **kwargs
             )
 
-        # NOTE: If you add to this list, add in Capabilities.C to
-        # Moose::reserved_augmented_capabilities
+        # NOTE: If you add to this list, it must be added to
+        # Moose::CapabilityUtils::reserved_augmented_capabilities in
+        # framework/src/utils/CapabilityUtils.C
         augment("hpc", options.hpc is not None, "TestHarness --hpc option")
         augment(
             "machine",
@@ -487,9 +488,12 @@ class TestHarness:
         # intentional as it can trigger a build
         from pycapabilities import Capabilities
 
-        # Build the capabilities.Capabilities object
-        all_capabilities = app_capabilities | augmented_capabilities
-        capabilities = Capabilities(all_capabilities)
+        # Build the capabilities.Capabilities object, which
+        # has the application capabilities plus the ones
+        # that we added above. Later on, Tester objects
+        # will append to this with whatever capabilities
+        # they have to augment on a per-test basis
+        capabilities = Capabilities(app_capabilities | augmented_capabilities)
 
         # Setup the required capabilities, if any. From the capabilities
         # given by the user, we form the value that we should set them to
@@ -502,7 +506,9 @@ class TestHarness:
             required_capabilities = [required_capabilities]
         if required_capabilities:
             try:
-                required = parseRequiredCapabilities(required_capabilities)
+                required = parseRequiredCapabilities(
+                    required_capabilities, capabilities
+                )
             except Exception as e:
                 TestHarness.errorExit(f'--only-tests-that-require: {e}')
 

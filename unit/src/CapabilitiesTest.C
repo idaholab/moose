@@ -17,6 +17,7 @@
 #include "nlohmann/json.h"
 
 using Moose::Capabilities;
+using Moose::CapabilityUtils::augmented_capability_names;
 using Moose::CapabilityUtils::Capability;
 using Moose::CapabilityUtils::CapabilityException;
 using Moose::CapabilityUtils::CapabilityRegistry;
@@ -634,7 +635,7 @@ TEST_F(CapabilitiesTest, add)
                         "Capability 'name' already exists and is not equal");
 
   // reserved name
-  for (const auto & name : Capabilities::reserved_augmented_capabilities)
+  for (const auto & name : augmented_capability_names)
     EXPECT_MOOSEERROR_MSG(capabilities.add(name, bool(true), "doc"),
                           "The capability \"" + name +
                               "\" is reserved and may not be registered by an application.");

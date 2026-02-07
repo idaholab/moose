@@ -41,8 +41,18 @@ except ImportError:
         print("ERROR: Failed to import capabilities after building")
         raise RuntimeError("ERROR: Failed to import capabilities after building") from e
 
+AUGMENTED_CAPABILITY_NAMES = _pycapabilities.AUGMENTED_CAPABILITY_NAMES
 Capabilities = _pycapabilities.Capabilities
 CapabilityException = _pycapabilities.CapabilityException
 CheckState = _pycapabilities.CheckState
 
-__all__ = ["Capabilities", "CapabilityException", "CheckState"]
+# Need to add "platform" that can't exist in moose but needs
+# to exist for the TestHarness --minimal-capabilities run
+AUGMENTED_CAPABILITY_NAMES.add("platform")
+
+__all__ = [
+    "AUGMENTED_CAPABILITY_NAMES",
+    "Capabilities",
+    "CapabilityException",
+    "CheckState",
+]

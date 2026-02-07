@@ -20,6 +20,7 @@
 #include <vector>
 #include <optional>
 #include <string_view>
+#include <set>
 
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
@@ -33,6 +34,9 @@ class CapabilitiesTest;
  */
 namespace Moose::CapabilityUtils
 {
+
+/// Capabilities that are reserved and can only be augmented
+extern const std::set<std::string, std::less<>> augmented_capability_names;
 
 class CapabilityException : public std::runtime_error
 {
