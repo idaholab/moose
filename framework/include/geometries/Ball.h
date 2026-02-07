@@ -9,8 +9,11 @@
 
 #pragma once
 
+#include "GeometryBase.h"
 #include "libmesh/point.h"
 #include "libmesh/sphere.h"
+
+class LineSegment;
 
 using namespace libMesh;
 
@@ -20,13 +23,25 @@ using namespace libMesh;
  * - In 2D: represents a circle
  * - In 3D: represents a sphere
  */
-class Ball
+class Ball : public GeometryBase
 {
 public:
   Ball(const Point & c, Real r) : _c(c), _r(r) {}
 
+  ~Ball() override = default;
+
   const Point & center() const { return _c; }
   Real radius() const { return _r; }
+
+  /**
+   * Check if a line segment intersects this ball.
+   */
+  bool intersect(const LineSegment & line_segment) const override;
+
+  /**
+   * return the ball itself
+   */
+  Ball computeBoundingBall() const override;
 
 #if LIBMESH_DIM > 2
   libMesh::Sphere toSphere() const { return libMesh::Sphere(_c, _r); }

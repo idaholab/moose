@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MooseMesh.h"
-#include "LineSegment.h"
 
 enum class IntersectionType
 {
@@ -20,6 +19,8 @@ enum class IntersectionType
 };
 
 class Ball;
+class LineSegment;
+class LineSegment;
 
 /// Abstract base class for SBM boundary elements
 class SBMBndElementBase
@@ -31,16 +32,17 @@ public:
   /// Virtual destructor to ensure proper cleanup in derived classes
   virtual ~SBMBndElementBase() = default;
 
-  /**
-   * Check if the given line segment intersects this boundary element.
-   */
-  virtual bool intersect(const LineSegment & line_segment) const = 0;
-
   /// Getter for the underlying element
   const Elem & elem() const { return *_elem; }
 
   /// Getter for the normal vector
   const Point & normal();
+
+  /**
+   * Check if the given line segment intersects this boundary element.
+   * Delegates to the underlying geometry via dynamic_cast.
+   */
+  bool intersect(const LineSegment & line_segment) const;
 
   /// Getter of expected embedding solving mesh dimension
   /// Because the boundary element is a face of the embedding mesh, its dimension is
@@ -56,10 +58,10 @@ public:
   virtual Point distanceFrom(const Point & pt) const;
 
   /**
-   * Compute the bounding ball (or circle in 2D, sphere in 3D) of this boundary element.
-   * This is a pure virtual function and must be implemented in derived classes.
+   * Compute a bounding ball for this boundary element.
+   * Delegates to the underlying geometry via dynamic_cast.
    */
-  virtual Ball computeBoundingBall() const = 0;
+  Ball computeBoundingBall() const;
 
   /**
    * Compute the length of the element bounding-box diagonal projected onto
@@ -95,6 +97,7 @@ private:
   /// Ensure the normal vector is initialized before use
   void ensureNormalInitialized() const;
 
+  /// flip the normal direction of the boundary element
   void flipNormal() { _normal *= -1; };
 
   friend class SBMSurfaceMeshBuilder;

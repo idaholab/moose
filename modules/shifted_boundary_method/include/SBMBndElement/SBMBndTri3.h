@@ -19,16 +19,9 @@ public:
   /// Constructor
   explicit SBMBndTri3(const Elem * elem);
 
-  /// Check if a line segment intersects this triangle
-  bool intersect(const LineSegment & line_segment) const override;
-
-  /**
-   * Compute the bounding ball (sphere) of the triangle
-   * This function computes an approximate bounding ball of a triangle by taking the triangle's
-   * centroid as the center, and setting the radius to be slightly larger than the farthest vertex
-   * distance from the centroid.
-   */
-  Ball computeBoundingBall() const override;
+  using SBMBndElementBase::normal;
+  using Triangle::computeBoundingBall;
+  using Triangle::intersect;
 
 protected:
   /// Compute the normal vector of the triangle

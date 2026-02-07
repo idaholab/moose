@@ -19,25 +19,8 @@ SBMBndEdge2::SBMBndEdge2(const Elem * elem)
               "points must be equal");
 }
 
-bool
-SBMBndEdge2::intersect(const LineSegment & line_segment) const
-{
-  Point p;
-  return LineSegment::intersect(line_segment, p);
-}
-
 const Point
 SBMBndEdge2::computeNormal() const
 {
   return LineSegment::normal();
-}
-
-Ball
-SBMBndEdge2::computeBoundingBall() const
-{
-  const auto & p1 = _elem->point(0);
-  const auto & p2 = _elem->point(1);
-  const auto center = _elem->vertex_average();
-  const auto radius = 0.5 * (p2 - p1).norm();
-  return Ball(center, radius);
 }

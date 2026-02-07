@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SBMBndElementBase.h"
+#include "Ball.h"
+#include "LineSegment.h"
+#include "Triangle.h"
 #include "libmesh/string_to_enum.h"
 
 SBMBndElementBase::SBMBndElementBase(const Elem * elem) : _elem(elem)
@@ -126,6 +129,28 @@ SBMBndElementBase::getProjectedBoundingBoxDiagonal(const Point & normal_dir) con
   Point tangent_vec = box_vec - normal_box_vec;
 
   return tangent_vec.norm();
+}
+
+bool
+SBMBndElementBase::intersect(const LineSegment & line_segment) const
+{
+  if (const auto * edge = dynamic_cast<const LineSegment *>(this))
+    return edge->intersect(line_segment);
+  if (const auto * tri = dynamic_cast<const Triangle *>(this))
+    return tri->intersect(line_segment);
+
+  mooseError("SBMBndElementBase::intersect: unsupported geometry type");
+}
+
+Ball
+SBMBndElementBase::computeBoundingBall() const
+{
+  if (const auto * edge = dynamic_cast<const LineSegment *>(this))
+    return edge->computeBoundingBall();
+  if (const auto * tri = dynamic_cast<const Triangle *>(this))
+    return tri->computeBoundingBall();
+
+  mooseError("SBMBndElementBase::computeBoundingBall: unsupported geometry type");
 }
 
 void

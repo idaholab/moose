@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DistanceAux.h"
+#include "ElementCentroidToSurfaceDistanceAux.h"
 #include "ShortestDistanceToSurface.h"
 
 // Register the new AuxKernel class name
-registerMooseObject("ShiftedBoundaryMethodApp", DistanceAux);
+registerMooseObject("ShiftedBoundaryMethodApp", ElementCentroidToSurfaceDistanceAux);
 
 InputParameters
-DistanceAux::validParams()
+ElementCentroidToSurfaceDistanceAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
@@ -27,7 +27,8 @@ DistanceAux::validParams()
   return params;
 }
 
-DistanceAux::DistanceAux(const InputParameters & parameters)
+ElementCentroidToSurfaceDistanceAux::ElementCentroidToSurfaceDistanceAux(
+    const InputParameters & parameters)
   : AuxKernel(parameters),
     _distance_to_surface(&getUserObject<ShortestDistanceToSurface>("distance_to_surface"))
 {
@@ -38,7 +39,7 @@ DistanceAux::DistanceAux(const InputParameters & parameters)
 
 // computeValue - Perform distance calculation
 Real
-DistanceAux::computeValue()
+ElementCentroidToSurfaceDistanceAux::computeValue()
 {
   // distance value calculation
   const Point & pt = _current_elem->vertex_average();

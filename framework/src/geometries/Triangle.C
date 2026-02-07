@@ -10,6 +10,8 @@
 #include "Triangle.h"
 #include "LineSegment.h"
 
+#include <cmath>
+
 using libMesh::Point;
 
 Triangle::Triangle(const Point & p0, const Point & p1, const Point & p2) : _p0(p0), _p1(p1), _p2(p2)
@@ -72,4 +74,28 @@ Triangle::intersect(const LineSegment & line_segment, Point & intersect_p) const
   // (f) Intersection lies inside both the triangle and the segment
   intersect_p = a + dir * t;
   return true;
+}
+
+bool
+Triangle::intersect(const LineSegment & line_segment) const
+{
+  libMesh::Point p;
+  return intersect(line_segment, p);
+}
+
+Ball
+Triangle::computeBoundingBall() const
+{
+  const Point centroid = (_p0 + _p1 + _p2) / 3.0;
+
+  Real max_sq_dist = 0.0;
+  for (const auto * p : {&_p0, &_p1, &_p2})
+  {
+    const Real dist_sq = (*p - centroid).norm_sq();
+    if (dist_sq > max_sq_dist)
+      max_sq_dist = dist_sq;
+  }
+
+  const Real radius = std::sqrt(max_sq_dist);
+  return Ball(centroid, radius);
 }

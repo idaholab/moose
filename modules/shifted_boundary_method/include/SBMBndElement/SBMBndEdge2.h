@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SBMBndElementBase.h"
+#include "LineSegment.h"
 
 /// Derived class for 2-node edge elements
 class SBMBndEdge2 : public SBMBndElementBase, public LineSegment
@@ -18,11 +19,9 @@ public:
   /// Constructor
   explicit SBMBndEdge2(const Elem * elem);
 
-  /// Check if a line segment intersects this edge
-  bool intersect(const LineSegment & line_segment) const override;
-
-  /// Compute the bounding ball (circle) of the edge
-  Ball computeBoundingBall() const override;
+  using LineSegment::computeBoundingBall;
+  using LineSegment::intersect;
+  using SBMBndElementBase::normal;
 
 protected:
   /// Compute the outward normal vector of the edge (2D)

@@ -245,6 +245,13 @@ LineSegment::intersect(const LineSegment & l, Point & intersect_p) const
      */
 }
 
+bool
+LineSegment::intersect(const LineSegment & line_segment) const
+{
+  Point p;
+  return intersect(line_segment, p);
+}
+
 void
 LineSegment::set(const Point & p0, const Point & p1)
 {
@@ -286,4 +293,12 @@ LineSegment::normal() const
   n /= n.norm();
 
   return n;
+}
+
+Ball
+LineSegment::computeBoundingBall() const
+{
+  const Point center = 0.5 * (_p0 + _p1);
+  const Real radius = 0.5 * (_p1 - _p0).norm();
+  return Ball(center, radius);
 }
