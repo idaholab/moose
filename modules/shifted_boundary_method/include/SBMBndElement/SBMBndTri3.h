@@ -19,6 +19,7 @@ public:
   /// Constructor
   explicit SBMBndTri3(const Elem * elem);
 
+  // Resolve name ambiguity between base classes.
   using SBMBndElementBase::normal;
   using Triangle::computeBoundingBall;
   using Triangle::intersect;

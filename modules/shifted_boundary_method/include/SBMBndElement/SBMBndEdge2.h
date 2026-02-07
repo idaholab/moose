@@ -19,6 +19,7 @@ public:
   /// Constructor
   explicit SBMBndEdge2(const Elem * elem);
 
+  // Resolve name ambiguity between base classes.
   using LineSegment::computeBoundingBall;
   using LineSegment::intersect;
   using SBMBndElementBase::normal;
