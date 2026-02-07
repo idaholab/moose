@@ -65,18 +65,18 @@ protected:
   std::vector<Point> _centroids;
 
   /// Configures KDTree leaf node size for performance tuning.
-  int _leaf_max_size;
+  const int _leaf_max_size;
 
   /// The name of a mesh saved via MeshGenerator `save_mesh_as` parameter.
-  std::string _bnd_mesh_name;
+  const std::string _bnd_mesh_name;
 
   /// The flag to check the watertightness of the mesh.
-  bool _check_watertightness;
+  const bool _check_watertightness;
 
   /// whether we want to build a kd-tree or not
-  bool _build_kd_tree;
+  const bool _build_kd_tree;
 
 private:
   /// The dimension of the embedding mesh (2D or 3D).
-  unsigned int _dim_embedding_mesh;
+  const unsigned int _dim_embedding_mesh;
 };
