@@ -83,7 +83,7 @@ Boundary2DDelaunayGenerator::Boundary2DDelaunayGenerator(const InputParameters &
     if (_func_level_set->Parse(getParam<std::string>("level_set"), "x,y,z") >= 0)
       mooseError("Invalid function f(x,y,z)\n",
                  _func_level_set,
-                 "\nin CutMeshByLevelSetGenerator ",
+                 "\nin ",
                  name(),
                  ".\n",
                  _func_level_set->ErrorMsg());

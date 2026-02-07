@@ -80,9 +80,6 @@ protected:
   /// A list of included subdomain ids that the element has to be priorly a part of, extracted from the included_subdomains parameter
   std::vector<subdomain_id_type> _included_subdomain_ids;
 
-  /// Map used for the flooding algorithm
-  std::map<subdomain_id_type, std::set<Elem *>> _visited;
-
   /// true if only faces close to "normal" will be added
   bool _using_normal;
 
@@ -95,4 +92,11 @@ protected:
    * where normal_hat = _normal/|_normal|
    */
   const Real _normal_tol;
+
+  /// Map used for the flooding algorithm
+  std::map<subdomain_id_type, std::set<Elem *>> _visited;
+  /// Only visit each element once
+  const bool _flood_only_once;
+  /// Map used when flooding each element once
+  std::set<Elem *> _visited_once;
 };

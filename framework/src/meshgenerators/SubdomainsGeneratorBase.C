@@ -44,6 +44,10 @@ SubdomainsGeneratorBase::validParams()
                                     "only added if face_normal.normal_hat >= "
                                     "1 - normal_tol, where normal_hat = "
                                     "normal/|normal|");
+
+  // Flood parameters
+  params.addParam<bool>("flood_elements_once", false, "Whether to consider elements only once");
+
   return params;
 }
 
@@ -54,9 +58,11 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
     _check_subdomains(isParamValid("included_subdomains")),
     _included_subdomain_ids(std::vector<subdomain_id_type>()),
     _using_normal(isParamSetByUser("normal") || isParamValid("_using_normal")),
-    _normal(isParamSetByUser("normal") ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
-                                       : getParam<Point>("normal")),
-    _normal_tol(getParam<Real>("normal_tol"))
+    _normal(isParamSetByUser("normal")
+                ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
+                : getParam<Point>("normal")),
+    _normal_tol(getParam<Real>("normal_tol")),
+    _flood_only_once(getParam<bool>("flood_elements_once"))
 {
   if (isParamValid("new_subdomain"))
     _subdomain_names = getParam<std::vector<SubdomainName>>("new_subdomain");
@@ -90,6 +96,8 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   if (elem == nullptr || elem == remote_elem ||
       (_visited[sub_id].find(elem) != _visited[sub_id].end()))
     return;
+  if (_flood_only_once && _visited_once.count(elem))
+    return;
 
   // Skip if element is not in specified subdomains
   if (_check_subdomains && !elementSubdomainIdInList(elem, _included_subdomain_ids))
@@ -108,18 +116,22 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
       criterion_met = true;
 
     // Try to flood from each side with the same subdomain
-    for (const auto neighbor : make_range(elem->n_sides()))
-      if (elem->neighbor_ptr(neighbor) &&
-          (elem->neighbor_ptr(neighbor)->subdomain_id() == sub_id) &&
-          elementSatisfiesRequirements(
-              elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), elem_normal))
-        criterion_met = true;
+    if (!criterion_met)
+      for (const auto neighbor : make_range(elem->n_sides()))
+        if (elem->neighbor_ptr(neighbor) &&
+            (elem->neighbor_ptr(neighbor)->subdomain_id() == sub_id) &&
+            elementSatisfiesRequirements(
+                elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), elem_normal))
+          criterion_met = true;
   }
 
   if (!criterion_met)
     return;
 
   elem->subdomain_id() = sub_id;
+
+  // We don't want to remove the element from consideration too early
+  _visited_once.insert(elem);
 
   for (const auto neighbor : make_range(elem->n_sides()))
   {
