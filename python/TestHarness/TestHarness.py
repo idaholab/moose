@@ -404,6 +404,8 @@ class TestHarness:
 
         # This is so we can easily pass checks around to any scheduler plugin
         self.options._checks = checks
+        # So that testers can see if we have an application
+        self.options._app_name = self.app_name
 
         # Initialize the scheduler
         self.initialize()
