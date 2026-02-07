@@ -46,7 +46,14 @@ SubdomainsGeneratorBase::validParams()
                                     "normal/|normal|");
 
   // Flood parameters
+  // NOTE: this can 'cut' paths to re-grouping elements. It is a heuristic and won't always improve
+  // things
   params.addParam<bool>("flood_elements_once", false, "Whether to consider elements only once");
+  params.addParam<bool>("check_painted_neighbor_normals",
+                        false,
+                        "When examining the normal of a 2D element and comparing to the 'painting' "
+                        "normal, also check if the element neighbors in the 'painted' subdomain "
+                        "have a closer normal and accept the element into the new subdomain if so");
 
   return params;
 }
@@ -62,7 +69,8 @@ SubdomainsGeneratorBase::SubdomainsGeneratorBase(const InputParameters & paramet
                 ? Point(getParam<Point>("normal") / getParam<Point>("normal").norm())
                 : getParam<Point>("normal")),
     _normal_tol(getParam<Real>("normal_tol")),
-    _flood_only_once(getParam<bool>("flood_elements_once"))
+    _flood_only_once(getParam<bool>("flood_elements_once")),
+    _check_painted_neighor_normals(getParam<bool>("check_painted_neighbor_normals"))
 {
   if (isParamValid("new_subdomain"))
     _subdomain_names = getParam<std::vector<SubdomainName>>("new_subdomain");
@@ -107,22 +115,17 @@ SubdomainsGeneratorBase::flood(Elem * const elem,
   const auto elem_normal = get2DElemNormal(elem);
 
   bool criterion_met = false;
-  if (!_using_normal && elementSatisfiesRequirements(elem, base_normal, elem_normal))
+  if (elementSatisfiesRequirements(elem, base_normal, elem_normal))
     criterion_met = true;
-  else if (_using_normal)
+  else if (_check_painted_neighor_normals && !criterion_met)
   {
-    // Base case ok, no need to check neighbors
-    if (elementSatisfiesRequirements(elem, base_normal, elem_normal))
-      criterion_met = true;
-
     // Try to flood from each side with the same subdomain
-    if (!criterion_met)
-      for (const auto neighbor : make_range(elem->n_sides()))
-        if (elem->neighbor_ptr(neighbor) &&
-            (elem->neighbor_ptr(neighbor)->subdomain_id() == sub_id) &&
-            elementSatisfiesRequirements(
-                elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), elem_normal))
-          criterion_met = true;
+    for (const auto neighbor : make_range(elem->n_sides()))
+      if (elem->neighbor_ptr(neighbor) &&
+          (elem->neighbor_ptr(neighbor)->subdomain_id() == sub_id) &&
+          elementSatisfiesRequirements(
+              elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), elem_normal))
+        criterion_met = true;
   }
 
   if (!criterion_met)

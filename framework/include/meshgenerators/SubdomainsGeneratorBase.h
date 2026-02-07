@@ -99,4 +99,7 @@ protected:
   const bool _flood_only_once;
   /// Map used when flooding each element once
   std::set<Elem *> _visited_once;
+  /// Additional heuristic: check the element neighbors and if they have already been painted with the subdomain,
+  /// check if their normal is close to the element currently being considered
+  const bool _check_painted_neighor_normals;
 };
