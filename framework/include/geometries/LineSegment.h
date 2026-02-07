@@ -10,7 +10,9 @@
 #pragma once
 
 // MOOSE includes
+#include "Ball.h"
 #include "DataIO.h"
+#include "GeometryBase.h"
 
 #include "json.h"
 #include "libmesh/point.h"
@@ -25,13 +27,13 @@ class Plane;
  * The LineSegment class is used by the LineMaterialSamplerBase class
  * and for some ray tracing stuff.
  */
-class LineSegment
+class LineSegment : public GeometryBase
 {
 public:
   LineSegment() = default;
   LineSegment(const Point & p0, const Point & p1);
 
-  virtual ~LineSegment() = default;
+  ~LineSegment() override = default;
 
   /**
    * Returns the closest point on the LineSegment
@@ -52,9 +54,30 @@ public:
    */
   bool contains_point(const Point & p) const;
 
+  /**
+   * Check if a line segment intersects a plane, and if so, return the intersection point.
+   */
   bool intersect(const libMesh::Plane & pl, Point & intersect_p) const;
 
+  /**
+   * Check if a line segment intersects another line segment, and if so, return the intersection
+   * point.
+   */
   bool intersect(const LineSegment & l1, Point & intersect_p) const;
+
+  /**
+   * Check if a line segment intersects another line segment, without returning the intersection
+   * point.
+   */
+  bool intersect(const LineSegment & line_segment) const override;
+
+  /**
+   * Compute a bounding ball for this line segment.
+   *
+   * The ball is defined by the midpoint of the segment and a radius equal to half the segment
+   * length.
+   */
+  Ball computeBoundingBall() const override;
 
   /**
    * Beginning of the line segment.

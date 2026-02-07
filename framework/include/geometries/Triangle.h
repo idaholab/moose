@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "Ball.h"
+#include "GeometryBase.h"
 #include "libmesh/point.h"
 
 class LineSegment;
@@ -16,13 +18,13 @@ class LineSegment;
 /**
  * Triangle geometry helper.
  */
-class Triangle
+class Triangle : public GeometryBase
 {
 public:
   Triangle() = default;
   Triangle(const libMesh::Point & p0, const libMesh::Point & p1, const libMesh::Point & p2);
 
-  virtual ~Triangle() = default;
+  ~Triangle() override = default;
 
   /**
    * Normal vector of the triangle.
@@ -33,6 +35,16 @@ public:
    * Check if a line segment intersects this triangle.
    */
   bool intersect(const LineSegment & l, libMesh::Point & intersect_p) const;
+
+  /**
+   * Check if a line segment intersects this triangle, without returning the intersection point.
+   */
+  bool intersect(const LineSegment & line_segment) const override;
+
+  /**
+   * Compute a bounding ball for this triangle.
+   */
+  Ball computeBoundingBall() const override;
 
 private:
   libMesh::Point _p0, _p1, _p2;

@@ -13,12 +13,12 @@
 
 class ShortestDistanceToSurface;
 
-class DistanceAux : public AuxKernel
+class ElementCentroidToSurfaceDistanceAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  explicit DistanceAux(const InputParameters & parameters);
+  explicit ElementCentroidToSurfaceDistanceAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

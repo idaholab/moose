@@ -88,7 +88,7 @@ nx = 64
 
 [AuxKernels]
   [dist]
-    type = DistanceAux
+    type = ElementCentroidToSurfaceDistanceAux
     distance_to_surface = distance_to_surface
     variable = distance
     execute_on = 'INITIAL timestep_begin'

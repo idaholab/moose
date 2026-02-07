@@ -1,6 +1,6 @@
-# DistanceAux
+# ElementCentroidToSurfaceDistanceAux
 
-`DistanceAux` outputs the distance from an element centroid to the closest
+`ElementCentroidToSurfaceDistanceAux` outputs the distance from an element centroid to the closest
 surface calculated by a [`ShortestDistanceToSurface`](userobjects/ShortestDistanceToSurface.md)
 user object.
 
@@ -11,10 +11,10 @@ Provide the name of a `ShortestDistanceToSurface` user object through the
 functions or an [`SBMSurfaceMeshBuilder`](userobjects/SBMSurfaceMeshBuilder.md)
 if the distance should be measured to a boundary represented by a mesh file.
 
-!syntax description /AuxKernels/DistanceAux
+!syntax description /AuxKernels/ElementCentroidToSurfaceDistanceAux
 
-!syntax parameters /AuxKernels/DistanceAux
+!syntax parameters /AuxKernels/ElementCentroidToSurfaceDistanceAux
 
-!syntax inputs /AuxKernels/DistanceAux
+!syntax inputs /AuxKernels/ElementCentroidToSurfaceDistanceAux
 
-!syntax children /AuxKernels/DistanceAux
+!syntax children /AuxKernels/ElementCentroidToSurfaceDistanceAux
