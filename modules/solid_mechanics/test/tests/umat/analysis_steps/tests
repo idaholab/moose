@@ -98,7 +98,7 @@
     input = 'elastic_temperature_steps_uo_step_pps.i'
     csvdiff = 'elastic_temperature_steps_uo_step_pps_sync_out.csv'
     # installation_type=in_tree: see #25279
-    capabilities = 'library_mode=dynamic & installation_type=in_tree & installation_type=in_tree'
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to sync output times.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
