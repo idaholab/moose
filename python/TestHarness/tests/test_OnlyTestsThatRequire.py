@@ -13,10 +13,9 @@ import unittest
 
 from TestHarnessTestCase import TestHarnessTestCase
 
-from TestHarness import TestHarness
-from TestHarness.StatusSystem import StatusSystem
-from TestHarness.util import getPlatform, getMachine
 from TestHarness.capability_util import parseRequiredCapabilities
+from TestHarness.StatusSystem import StatusSystem
+from TestHarness.util import getMachine, getPlatform
 
 MACHINE = getMachine()
 PLATFORM = getPlatform()
@@ -42,24 +41,24 @@ class TestRequireCapability(TestHarnessTestCase):
         # Single
         res = self.runTests(
             "--only-tests-that-require",
-            "platform",
-            minimal_capabilities=True,
+            "foo",
             run=False,
         )
-        self.assertEqual(res.harness.options._required_capabilities, ["platform"])
+        assert res.harness is not None
+        self.assertEqual(res.harness.options._required_capabilities, ["foo"])
 
         # Multiple
         res = self.runTests(
             "--only-tests-that-require",
-            "hpc",
+            "foo",
             "--only-tests-that-require",
-            "machine",
-            minimal_capabilities=True,
+            "bar",
             run=False,
         )
+        assert res.harness is not None
         self.assertEqual(
             res.harness.options._required_capabilities,
-            ["hpc", "machine"],
+            ["foo", "bar"],
         )
 
     def testTesterSkip(self):
@@ -84,6 +83,7 @@ class TestRequireCapability(TestHarnessTestCase):
                 tests=tests,
                 minimal_capabilities=True,
             )
+            assert res.harness is not None
             job = self.getJobWithName(res.harness, test_name)
             if skip:
                 self.assertEqual(job.getStatus(), StatusSystem.skip)

@@ -361,7 +361,7 @@ class TestHarness:
         self.writeFailedTest = None
 
         # Parse arguments
-        self.parseCLArgs(argv)
+        self.options: argparse.Namespace = self.parseCLArgs(argv)
 
         # Determine the executable if we have an application
         try:
@@ -1204,7 +1204,7 @@ class TestHarness:
         return self.options.failed_tests or self.options.show_last_run
 
     ## Parse command line options and assign them to self.options
-    def parseCLArgs(self, argv):
+    def parseCLArgs(self, argv) -> argparse.Namespace:
         term_cols = None
         try:
             term_cols = os.get_terminal_size().columns * 7/8
@@ -1323,28 +1323,29 @@ class TestHarness:
         if self.code.decode() in argv:
             del argv[argv.index(self.code.decode())]
             code = False
-        self.options = parser.parse_args(argv[1:])
-        self.options.code = code
+        options = parser.parse_args(argv[1:])
+        options.code = code
 
         # Try to guess the --hpc option if --hpc-host is set
-        if self.options.hpc_host and not self.options.hpc:
-            hpc_host = self.options.hpc_host[0]
+        if options.hpc_host and not options.hpc:
+            hpc_host = options.hpc_host[0]
             hpc_config = TestHarness.queryHPCCluster(hpc_host)
             if hpc_config is not None:
-                self.options.hpc = hpc_config.scheduler
-                print(f'INFO: Setting --hpc={self.options.hpc} for known host {hpc_host}')
+                options.hpc = hpc_config.scheduler
+                print(f'INFO: Setting --hpc={options.hpc} for known host {hpc_host}')
 
         # Convert all list based options of length one to scalars
-        for key, value in list(vars(self.options).items()):
-            if type(value) == list and len(value) == 1:
-                setattr(self.options, key, value[0])
+        for key, value in list(vars(options).items()):
+            if isinstance(value, list) and len(value) == 1:
+                setattr(options, key, value[0])
 
-        self.checkAndUpdateCLArgs()
+        self.checkAndUpdateCLArgs(options)
+
+        return options
 
     ## Called after options are parsed from the command line
     # Exit if options don't make any sense, print warnings if they are merely weird
-    def checkAndUpdateCLArgs(self):
-        opts = self.options
+    def checkAndUpdateCLArgs(self, opts: argparse.Namespace):
         if opts.group == opts.not_group:
             self.errorExit('The group and not_group options cannot specify the same group')
         if opts.valgrind_mode and opts.nthreads > 1:
@@ -1365,7 +1366,7 @@ class TestHarness:
             if os.path.isfile(opts.spec_file):
                 if opts.input_file_name:
                     self.errorExit('Cannot use -i with --spec-file being a file')
-                self.options.input_file_name = os.path.basename(opts.spec_file)
+                opts.input_file_name = os.path.basename(opts.spec_file)
         if opts.verbose and opts.quiet:
             self.errorExit('Do not be an oxymoron with --verbose and --quiet')
         if opts.error and opts.allow_warnings:
@@ -1382,32 +1383,32 @@ class TestHarness:
             self.errorExit('--failed-tests could not detect a previous run')
 
         # Update any keys from the environment as necessary
-        if not self.options.method:
+        if not opts.method:
             if 'METHOD' in os.environ:
-                self.options.method = os.environ['METHOD']
+                opts.method = os.environ['METHOD']
             else:
-                self.options.method = 'opt'
+                opts.method = 'opt'
 
-        if not self.options.valgrind_mode:
-            self.options.valgrind_mode = ''
+        if not opts.valgrind_mode:
+            opts.valgrind_mode = ''
 
         # Set default
-        if not self.options.input_file_name:
-            self.options.input_file_name = 'tests'
+        if not opts.input_file_name:
+            opts.input_file_name = 'tests'
 
         if self.app_name is None:
             print('INFO: Setting --minimal-capabilities because there is not an application')
-            self.options.minimal_capabilities = True
+            opts.minimal_capabilities = True
 
         # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set;
         # disabled for now, see #32243
         # if (
-        #     self.options.max_memory is None
+        #     opts.max_memory is None
         #     and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
         # ):
         #     value = float(MOOSE_MAX_MEMORY)
         #     print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
-        #     self.options.max_memory = value
+        #     opts.max_memory = value
 
     def preRun(self):
         if self.options.json:

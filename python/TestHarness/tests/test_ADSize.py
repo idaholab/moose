@@ -36,9 +36,7 @@ class TestHarnessTester(TestHarnessTestCase):
         ad_size = self.getADSize()
         bad_ad_size = ad_size + 1
         out = self.runTests(
-            "--no-color",
-            tests=buildTestSpecs(capabilities=f"ad_size>{bad_ad_size}"),
-            minimal_capabilities=False,
+            "--no-color", tests=buildTestSpecs(capabilities=f"ad_size>{bad_ad_size}")
         ).output
         self.assertRegex(out, rf"test\.test[\s.]+\[NEED AD_SIZE>{bad_ad_size}\]\s+SKIP")
 
@@ -47,9 +45,7 @@ class TestHarnessTester(TestHarnessTestCase):
         ad_size = self.getADSize()
         good_ad_size = ad_size - 1
         out = self.runTests(
-            "--no-color",
-            tests=buildTestSpecs(capabilities=f"ad_size>{good_ad_size}"),
-            minimal_capabilities=False,
+            "--no-color", tests=buildTestSpecs(capabilities=f"ad_size>{good_ad_size}")
         ).output
         self.assertRegex(out, r"test\.test[\s.]+OK")
 

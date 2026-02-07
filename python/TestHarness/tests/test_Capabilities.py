@@ -185,14 +185,12 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             exit_code=exit_code,
         )
         harness = result.harness
+        assert harness is not None
 
         jobs = []
         for i, options in enumerate(cases):
             case = self.CapabilityTestCase(*options)
-            test_name = f"test{i}"
-            job = [
-                j for j in harness.finished_jobs if j.getTestNameShort() == test_name
-            ][0]
+            job = self.getJobWithName(harness, f"test{i}")
             self.assertEqual(job.getStatus(), job.skip if case.skip else job.finished)
             jobs.append(job)
 
@@ -200,7 +198,9 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
 
     def test(self):
         """Test filtering tests using capabilities."""
-        app_capabilities = self.runTests(run=False).harness.options._capabilities.values
+        harness = self.runTests(run=False).harness
+        assert harness is not None
+        app_capabilities = harness.options._capabilities.values
 
         # Capability matched
         self.runCapabilityTest(
@@ -225,7 +225,10 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
     def testAugmented(self):
         """Test filtering tests using augmented application capabilities."""
 
-        def run(*cases: tuple, cli_args: Optional[list[str]] = []):
+        def run(*cases: tuple, cli_args: Optional[list[str]] = None):
+            if cli_args is None:
+                cli_args = []
+
             test_spec = {}
             for i, options in enumerate(cases):
                 case = self.CapabilityTestCase(*options)
@@ -243,15 +246,11 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 *cli_args, tests=test_spec, minimal_capabilities=True
             )
             harness = result.harness
+            assert harness is not None
 
             for i, options in enumerate(cases):
                 case = self.CapabilityTestCase(*options)
-                test_name = f"test{i}"
-                job = [
-                    j
-                    for j in harness.finished_jobs
-                    if j.getTestNameShort() == test_name
-                ][0]
+                job = self.getJobWithName(harness, f"test{i}")
                 self.assertEqual(
                     job.getStatus(), job.skip if case.skip else job.finished
                 )
