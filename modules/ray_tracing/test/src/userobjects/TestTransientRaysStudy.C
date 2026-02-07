@@ -30,7 +30,7 @@ TestTransientRaysStudy::TestTransientRaysStudy(const InputParameters & parameter
     _boundary_id(_mesh.getBoundaryID(getParam<BoundaryName>("boundary"))),
     _generated_rays(declareRestartableData<bool>("generated_rays", false)),
     _banked_rays(
-        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("banked_rays", this))
+        declareRestartableDataWithContext<std::vector<std::shared_ptr<Ray>>>("banked_rays", *this))
 {
 }
 
