@@ -60,10 +60,12 @@ protected:
 
 // Used for Restart
 template <>
+template <typename Context>
 void dataStore(std::ostream & stream,
                DiscreteNucleationInserterBase::NucleusLocation & nl,
-               Moose::AnyPointer context);
+               Context context);
 template <>
+template <typename Context>
 void dataLoad(std::istream & stream,
               DiscreteNucleationInserterBase::NucleusLocation & nl,
-              Moose::AnyPointer context);
+              Context context);

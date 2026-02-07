@@ -181,16 +181,16 @@ private:
 };
 
 // datastore and dataload for recover
+template <typename Context>
 void dataStore(std::ostream & stream,
                SolutionInvalidity::TimestepCounts & timestep_counts,
-               Moose::AnyPointer context);
+               Context context);
+template <typename Context>
 void dataLoad(std::istream & stream,
               SolutionInvalidity::TimestepCounts & timestep_counts,
-              Moose::AnyPointer context);
+              Context context);
 
-void dataStore(std::ostream & stream,
-               SolutionInvalidity & solution_invalidity,
-               Moose::AnyPointer context);
-void dataLoad(std::istream & stream,
-              SolutionInvalidity & solution_invalidity,
-              Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, Context context);

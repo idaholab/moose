@@ -120,7 +120,7 @@ Legendre::Legendre(const Real lower_bound, const Real upper_bound)
 }
 
 void
-Legendre::store(std::ostream & stream, Moose::AnyPointer context) const
+Legendre::store(std::ostream & stream, Context context) const
 {
   std::string type = "Legendre";
   dataStore(stream, type, context);
@@ -246,7 +246,7 @@ Hermite::innerProduct(const unsigned int order) const
 }
 
 void
-Hermite::store(std::ostream & stream, Moose::AnyPointer context) const
+Hermite::store(std::ostream & stream, Context context) const
 {
   std::string type = "Hermite";
   dataStore(stream, type, context);
@@ -568,7 +568,7 @@ template <>
 void
 dataStore(std::ostream & stream,
           std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
-          Moose::AnyPointer context)
+          Context context)
 {
   ptr->store(stream, context);
 }
@@ -577,7 +577,7 @@ template <>
 void
 dataLoad(std::istream & stream,
          std::unique_ptr<const PolynomialQuadrature::Polynomial> & ptr,
-         Moose::AnyPointer context)
+         Context context)
 {
   std::string poly_type;
   dataLoad(stream, poly_type, context);

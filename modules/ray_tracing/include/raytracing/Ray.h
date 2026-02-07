@@ -732,10 +732,10 @@ private:
   // Allows for testing of equality methods
   friend class TestRayLots;
   // Data helpers needs to be able to access the internal methods for a Ray for store/load
-  friend void
-  dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
-  friend void
-  dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
+  template <typename Context>
+  friend void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Context context);
+  template <typename Context>
+  friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Context context);
 };
 
 bool
@@ -776,5 +776,7 @@ public:
 
 } // namespace libMesh
 
-void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
-void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, Context context);
+template <typename Context>
+void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Context context);

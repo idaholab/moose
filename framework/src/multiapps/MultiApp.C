@@ -1524,18 +1524,13 @@ void
 dataStore(std::ostream & stream, SubAppBackups & backups, Context context)
 {
   MultiApp * multi_app = nullptr;
-  if constexpr (std::is_same_v<Context, Moose::AnyPointer>)
-  {
-    mooseAssert(context.hasValue(), "Not set");
-    multi_app = context.template get_if<MultiApp>();
-  }
-  else if constexpr (std::is_same_v<Context, void *>)
+  if constexpr (std::is_same_v<Context, void *>)
     multi_app = reinterpret_cast<MultiApp *>(context);
   else if constexpr (std::is_convertible_v<Context, MultiApp *>)
     multi_app = context;
   else
     static_assert(Moose::always_false<Context>,
-                  "SubAppBackups requires a MultiApp*, void*, or AnyPointer context");
+                  "SubAppBackups requires a MultiApp* or void* context");
 
   multi_app->backup();
 
@@ -1544,25 +1539,19 @@ dataStore(std::ostream & stream, SubAppBackups & backups, Context context)
 
 template void dataStore(std::ostream & stream, SubAppBackups & backups, MultiApp * context);
 template void dataStore(std::ostream & stream, SubAppBackups & backups, void * context);
-template void dataStore(std::ostream & stream, SubAppBackups & backups, Moose::AnyPointer context);
 
 template <typename Context>
 void
 dataLoad(std::istream & stream, SubAppBackups & backups, Context context)
 {
   MultiApp * multi_app = nullptr;
-  if constexpr (std::is_same_v<Context, Moose::AnyPointer>)
-  {
-    mooseAssert(context.hasValue(), "Not set");
-    multi_app = context.template get_if<MultiApp>();
-  }
-  else if constexpr (std::is_same_v<Context, void *>)
+  if constexpr (std::is_same_v<Context, void *>)
     multi_app = reinterpret_cast<MultiApp *>(context);
   else if constexpr (std::is_convertible_v<Context, MultiApp *>)
     multi_app = context;
   else
     static_assert(Moose::always_false<Context>,
-                  "SubAppBackups requires a MultiApp*, void*, or AnyPointer context");
+                  "SubAppBackups requires a MultiApp* or void* context");
 
   dataLoad(stream, static_cast<std::vector<std::unique_ptr<Backup>> &>(backups), nullptr);
 
@@ -1571,4 +1560,3 @@ dataLoad(std::istream & stream, SubAppBackups & backups, Context context)
 
 template void dataLoad(std::istream & stream, SubAppBackups & backups, MultiApp * context);
 template void dataLoad(std::istream & stream, SubAppBackups & backups, void * context);
-template void dataLoad(std::istream & stream, SubAppBackups & backups, Moose::AnyPointer context);

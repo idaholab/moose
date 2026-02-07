@@ -13,12 +13,12 @@
 
 class FEProblemBase;
 
-void dataStore(std::ostream & stream,
-               Moose::Kokkos::MaterialPropertyStorage & storage,
-               Moose::AnyPointer context);
-void dataLoad(std::istream & stream,
-              Moose::Kokkos::MaterialPropertyStorage & storage,
-              Moose::AnyPointer context);
+template <typename Context>
+void
+dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Context context);
+template <typename Context>
+void
+dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Context context);
 
 namespace Moose::Kokkos
 {

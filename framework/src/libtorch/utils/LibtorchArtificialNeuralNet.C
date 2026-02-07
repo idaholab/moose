@@ -12,6 +12,9 @@
 #include "LibtorchArtificialNeuralNet.h"
 #include "MooseError.h"
 
+#include <iostream>
+#include <string>
+
 namespace Moose
 {
 
@@ -156,12 +159,11 @@ to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const 
 
 }
 
-template <>
+template <typename Context>
 void
-dataStore<Moose::LibtorchArtificialNeuralNet>(
-    std::ostream & stream,
-    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
-    Moose::AnyPointer context)
+dataStore(std::ostream & stream,
+          std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+          Context context)
 {
   std::string n(nn->name());
   dataStore(stream, n, context);
@@ -196,12 +198,11 @@ dataStore<Moose::LibtorchArtificialNeuralNet>(
   torch::save(nn, nn->name());
 }
 
-template <>
+template <typename Context>
 void
-dataLoad<Moose::LibtorchArtificialNeuralNet>(
-    std::istream & stream,
-    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
-    Moose::AnyPointer context)
+dataLoad(std::istream & stream,
+         std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+         Context context)
 {
   std::string name;
   dataLoad(stream, name, context);
@@ -242,5 +243,11 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
 
 // dataStore/dataLoad for LibtorchArtificialNeuralNet pointers are now handled
 // by the template versions in DataIO.h (no-op implementations for reporter output)
+
+// Explicit template instantiations
+template void
+dataStore(std::ostream &, std::shared_ptr<Moose::LibtorchArtificialNeuralNet> &, std::nullptr_t);
+template void
+dataLoad(std::istream &, std::shared_ptr<Moose::LibtorchArtificialNeuralNet> &, std::nullptr_t);
 
 #endif

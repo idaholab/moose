@@ -110,17 +110,15 @@ void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * c
 
 }
 
-template <>
-void dataStore<Moose::LibtorchArtificialNeuralNet>(
-    std::ostream & stream,
-    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
-    Moose::AnyPointer context);
+template <typename Context>
+void dataStore(std::ostream & stream,
+               std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+               Context context);
 
-template <>
-void dataLoad<Moose::LibtorchArtificialNeuralNet>(
-    std::istream & stream,
-    std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
-    Moose::AnyPointer context);
+template <typename Context>
+void dataLoad(std::istream & stream,
+              std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
+              Context context);
 
 // This is needed because the reporter which is used to ouput the neural net parameters to JSON
 // requires a dataStore/dataLoad. However, these functions will be empty due to the fact that

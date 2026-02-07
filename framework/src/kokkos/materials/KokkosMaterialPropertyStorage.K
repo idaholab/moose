@@ -173,8 +173,9 @@ MaterialPropertyStorage::copy()
 
 } // namespace Moose::Kokkos
 
+template <typename Context>
 void
-dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Moose::AnyPointer context)
+dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Context context)
 {
   auto & base = static_cast<MaterialPropertyStorage &>(storage);
 
@@ -226,8 +227,9 @@ dataStore(std::ostream & stream, Moose::Kokkos::MaterialPropertyStorage & storag
   }
 }
 
+template <typename Context>
 void
-dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Moose::AnyPointer context)
+dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage, Context context)
 {
   auto & base = static_cast<MaterialPropertyStorage &>(storage);
 
@@ -262,3 +264,7 @@ dataLoad(std::istream & stream, Moose::Kokkos::MaterialPropertyStorage & storage
       }
   }
 }
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, Moose::Kokkos::MaterialPropertyStorage &, MooseMesh *);
+template void dataLoad(std::istream &, Moose::Kokkos::MaterialPropertyStorage &, MooseMesh *);

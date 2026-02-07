@@ -53,8 +53,8 @@ public:
   class AcquireRayInternalKey
   {
     friend class Parallel::Packing<std::shared_ptr<Ray>>;
-    friend void
-    dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Moose::AnyPointer context);
+    template <typename Context>
+    friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, Context context);
     AcquireRayInternalKey() {}
     AcquireRayInternalKey(const AcquireRayInternalKey &) {}
   };
