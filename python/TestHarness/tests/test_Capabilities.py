@@ -19,6 +19,7 @@ from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness import TestHarness
 from TestHarness.capability_util import addAugmentedCapability
+from TestHarness.testers.Tester import Tester
 from TestHarness.util import getMachine, getPlatform
 
 
@@ -263,6 +264,29 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
 
         # Augmented capability from Tester (RunApp)
         self.runCapabilityTest(("mpi_procs=1", False), ("mpi_procs=2", True))
+
+    def testDeprecatedParams(self):
+        """Test that using a deprecated, now capability param reports an error."""
+        for param, capability in Tester.capability_params:
+            test_spec = {
+                "test": {
+                    "type": "RunApp",
+                    "input": "unused",
+                    "should_execute": False,
+                    param: "foo",
+                }
+            }
+            result = self.runTests(
+                tests=test_spec, exit_code=128, minimal_capabilities=True
+            )
+            message = (
+                f"{result.test_spec_file}:2: Failed to create Tester: The following "
+                "parameters are deprecated and should use the 'capability' param "
+                f"instead; '{param}'"
+            )
+            if capability:
+                message += f" -> capability '{capability}'"
+            self.assertIn(message, result.output)
 
 
 if __name__ == "__main__":
