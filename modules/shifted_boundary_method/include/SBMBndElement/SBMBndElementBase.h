@@ -20,7 +20,6 @@ enum class IntersectionType
 
 class Ball;
 class LineSegment;
-class LineSegment;
 
 /// Abstract base class for SBM boundary elements
 class SBMBndElementBase
