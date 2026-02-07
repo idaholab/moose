@@ -33,7 +33,8 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
   params.addParam<bool>(
       "contiguous_assignments_only",
       false,
-      "Whether to only group elements in a subdomain using the 'flooding' algorithm");
+      "Whether to only group elements in a subdomain using the 'flooding' algorithm. "
+      "We strongly recommend pairing this with the 'flood_elements_once' parameter");
   // There can be many of them
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
   // Using normals is the base principle of this mesh generator
