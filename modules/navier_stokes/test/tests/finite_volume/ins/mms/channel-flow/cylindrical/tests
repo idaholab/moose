@@ -2,48 +2,32 @@
   issues = '#15640'
   design = 'navier_stokes/insfv.md'
   [average]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DAverage
-    # installation_type=in_tree: see #25279
-    capabilities = 'method!=dbg & installation_type=in_tree'
     requirement = 'The system shall be able to solve a problem with channel-flow like boundary conditions in the coordinate system with an average interpolation for the velocity and demonstrate second order convergence in the velocity variables and first order convergence in the pressure variable.'
-    required_python_packages = 'pandas matplotlib'
   []
   [rc]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DRC
-    # installation_type=in_tree: see #25279
-    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
-    max_parallel = 8
     requirement = 'The system shall be able to solve a problem with channel-flow like boundary conditions in the coordinate system with a Rhie-Chow interpolation for the velocity and demonstrate second order convergence in the velocity and pressure variables.'
     heavy = true
-    required_python_packages = 'pandas matplotlib'
-    valgrind = 'none'
   []
   [average-with-temp]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DAverageTemp
-    # installation_type=in_tree: see #25279
-    capabilities = 'method!=dbg & installation_type=in_tree'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in an RZ coordinate system, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable other than the pressure which shall demonstrate first order convergence.'
-    required_python_packages = 'pandas matplotlib'
   []
   [rc-with-temp]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DRCTemp
-    # installation_type=in_tree: see #25279
-    capabilities = 'method!=dbg & installation_type=in_tree'
     min_parallel = 8
-    max_parallel = 8
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in an RZ coordinate system, including energy, using a RC interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = true
-    required_python_packages = 'pandas matplotlib'
-    valgrind = 'none'
     max_time = 600
   []
 []

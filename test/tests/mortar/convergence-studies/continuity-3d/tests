@@ -2,37 +2,33 @@
   design = 'Constraints/index.md'
   issues = '#13080'
   [p1p0]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P1P0'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates '
                   'of 2 and 1 for a mortar solution continuity problem with conforming and '
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a zeroth order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
-    # installation_type=in_tree: see #25279
-    capabilities = 'mumps & method!=dbg & installation_type=in_tree'
+    required_python_packages = 'sympy'
+    capabilities = 'mumps'
     heavy = True
     min_parallel = 2
-    max_parallel = 2
   []
   [p1p1]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P1P1'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates '
                   'of 2 and 2 for a mortar solution continuity problem with conforming and '
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a first order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
-    # installation_type=in_tree: see #25279
-    capabilities = 'mumps & method!=dbg & installation_type=in_tree'
+    required_python_packages = 'sympy'
+    capabilities = 'mumps'
     heavy = True
     min_parallel = 2
-    max_parallel = 2
   []
   [p1p1dual]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P1P1dual'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates '
@@ -40,15 +36,13 @@
                   'non-conforming (HEX8) geometric discretization when using a first order basis for '
                   'the temperature variable and a first order dual basis for the Lagrange '
                   'multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
-    # installation_type=in_tree: see #25279
-    capabilities = 'mumps & method!=dbg & installation_type=in_tree'
+    required_python_packages = 'sympy'
+    capabilities = 'mumps'
     heavy = True
     min_parallel = 2
-    max_parallel = 2
   []
   [p2p0]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P2P0'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates '
@@ -56,30 +50,26 @@
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a zeroth order basis for the Lagrange '
                   'multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
-    # installation_type=in_tree: see #25279
-    capabilities = 'mumps & method!=dbg & installation_type=in_tree'
+    required_python_packages = 'sympy'
+    capabilities = 'mumps'
     heavy = True
     min_parallel = 2
-    max_parallel = 2
   []
   [p2p1]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P2P1'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates '
                   'of 3 and 2 for a mortar solution continuity problem with conforming and '
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a first order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
-    # installation_type=in_tree: see #25279
-    capabilities = 'ad_size>=100 & mumps & method!=dbg & installation_type=in_tree'
+    required_python_packages = 'sympy'
+    capabilities = 'ad_size>=100 & mumps'
     heavy = True
     min_parallel = 2
-    max_parallel = 2
   []
   [p2p2]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P2P2'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates '
@@ -87,11 +77,9 @@
                   'non-conforming (HEX27) geometric discretization when using a second order basis '
                   'for the temperature variable and a second order basis for the Lagrange '
                   'multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
-    # installation_type=in_tree: see #25279
-    capabilities = 'ad_size>=100 & mumps & method!=dbg & installation_type=in_tree'
+    required_python_packages = 'sympy'
+    capabilities = 'ad_size>=100 & mumps'
     heavy = True
     min_parallel = 2
-    max_parallel = 2
   []
 []
