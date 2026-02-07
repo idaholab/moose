@@ -39,7 +39,7 @@ class Capabilities
 public:
   virtual ~Capabilities() {}
 
-  static Capabilities & getCapabilityRegistry();
+  static Capabilities & getCapabilities();
 
   /// Capabilities that are reserved and can only be augmented
   static const std::set<std::string, std::less<>> reserved_augmented_capabilities;
@@ -55,6 +55,20 @@ public:
   CapabilityUtils::Capability & add(const std::string_view capability,
                                     const CapabilityUtils::CapabilityValue & value,
                                     const std::string_view doc);
+
+  /**
+   * Query a capability, if it exists, otherwise nullptr.
+   *
+   * @param capability The name of the capability.
+   */
+  const CapabilityUtils::Capability * query(const std::string & capability) const;
+
+  /**
+   * Get a capability.
+   *
+   * @param capability The name of the capability
+   */
+  const CapabilityUtils::Capability & get(const std::string & capability) const;
 
   /// create a JSON dump of the capabilities registry
   std::string dump() const;

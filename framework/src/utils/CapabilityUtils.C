@@ -197,12 +197,18 @@ CapabilityRegistry::query(std::string capability)
   return const_cast<Capability *>(std::as_const(*this).query(capability));
 }
 
-Capability &
-CapabilityRegistry::get(const std::string_view capability)
+const Capability &
+CapabilityRegistry::get(const std::string & capability) const
 {
-  if (const auto it = _registry.find(capability); it != _registry.end())
-    return it->second;
-  throw CapabilityException("Capability '" + std::string(capability) + "' not registered");
+  if (const auto capability_ptr = query(capability))
+    return *capability_ptr;
+  throw CapabilityException("Capability '" + capability + "' not registered");
+}
+
+Capability &
+CapabilityRegistry::get(const std::string & capability)
+{
+  return const_cast<Capability &>(std::as_const(*this).get(capability));
 }
 
 [[noreturn]] void

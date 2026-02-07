@@ -91,6 +91,7 @@ class MemoryPool;
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddBoolCapability);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddIntCapability);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddStringCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
 #endif
 
 /**
@@ -1134,6 +1135,7 @@ protected:
   FRIEND_TEST(::CapabilitiesTest, mooseAppAddBoolCapability);
   FRIEND_TEST(::CapabilitiesTest, mooseAppAddIntCapability);
   FRIEND_TEST(::CapabilitiesTest, mooseAppAddStringCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddCapability);
 #endif
 
   /**
@@ -1213,6 +1215,24 @@ protected:
   static Moose::CapabilityUtils::Capability & addStringCapability(const std::string_view capability,
                                                                   const std::string_view value,
                                                                   const std::string_view doc);
+
+  /**
+   * Deprecated method for adding a capability.
+   *
+   * It is deprecated due to ambiguity between compilers with
+   * an implicit conversion for CapabilityValue (a variant).
+   *
+   * Use one of add[Bool,Int,String]Capability instead.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::CapabilityUtils::Capability &
+  addCapability(const std::string_view capability,
+                const Moose::CapabilityUtils::CapabilityValue & value,
+                const std::string_view doc);
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;

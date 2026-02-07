@@ -124,12 +124,12 @@ throwsWithMessage(Func && fn, const std::string_view message, const char * file,
 /// Expect that an action throws with a partial message
 #define EXPECT_THROW_MSG_CONTAINS(stmt, exc_type, expected_substr)                                 \
   ::Moose::UnitUtils::throwsWithMessage<exc_type, false, false, false>(                            \
-      [&]() { stmt; }, expected_msg, __FILE__, __LINE__)
+      [&]() { stmt; }, expected_substr, __FILE__, __LINE__)
 
 /// Assert that an action throws with a partial message
 #define ASSERT_THROW_MSG_CONTAINS(stmt, exc_type, expected_substr)                                 \
   ::Moose::UnitUtils::throwsWithMessage<exc_type, false, true, false>(                             \
-      [&]() { stmt; }, expected_msg, __FILE__, __LINE__)
+      [&]() { stmt; }, expected_substr, __FILE__, __LINE__)
 
 /// Expect that a mooseError is thrown with an exact message
 #define EXPECT_MOOSEERROR_MSG(stmt, expected_msg)                                                  \
@@ -137,16 +137,16 @@ throwsWithMessage(Func && fn, const std::string_view message, const char * file,
       [&]() { stmt; }, expected_msg, __FILE__, __LINE__)
 
 /// Assert that an mooseError is thrown with an exact message
-#define ASSERT_MOOSEERROR_MSG(stmt, exc_type, expected_msg)                                        \
+#define ASSERT_MOOSEERROR_MSG(stmt, expected_msg)                                                  \
   ::Moose::UnitUtils::throwsWithMessage<MooseRuntimeError, true, true, true>(                      \
       [&]() { stmt; }, expected_msg, __FILE__, __LINE__)
 
 /// Expect that an mooseError is thrown with a partial message
-#define EXPECT_MOOSEERROR_MSG_CONTAINS(stmt, exc_type, expected_substr)                            \
+#define EXPECT_MOOSEERROR_MSG_CONTAINS(stmt, expected_substr)                                      \
   ::Moose::UnitUtils::throwsWithMessage<MooseRuntimeError, false, false, true>(                    \
-      [&]() { stmt; }, expected_msg, __FILE__, __LINE__)
+      [&]() { stmt; }, expected_substr, __FILE__, __LINE__)
 
 /// Assert that an mooseError is thrown with a partial message
-#define ASSERT_MOOSEERROR_MSG_CONTAINS(stmt, exc_type, expected_substr)                            \
+#define ASSERT_MOOSEERROR_MSG_CONTAINS(stmt, expected_substr)                                      \
   ::Moose::UnitUtils::throwsWithMessage<MooseRuntimeError, false, true, true>(                     \
-      [&]() { stmt; }, expected_msg, __FILE__, __LINE__)
+      [&]() { stmt; }, expected_substr, __FILE__, __LINE__)

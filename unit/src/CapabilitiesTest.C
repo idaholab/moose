@@ -16,6 +16,7 @@
 
 #include "nlohmann/json.h"
 
+using Moose::Capabilities;
 using Moose::CapabilityUtils::Capability;
 using Moose::CapabilityUtils::CapabilityException;
 using Moose::CapabilityUtils::CapabilityRegistry;
@@ -555,8 +556,11 @@ TEST(CapabilityRegistryTest, get)
   const auto & capability = registry.add("name", bool(false), "doc");
 
   EXPECT_EQ(&registry.get("name"), &capability);
-  CAP_EXPECT_THROW_MSG(registry.get("naMe"), "Capability 'naMe' not registered");
+  EXPECT_EQ(&std::as_const(registry).get("name"), &capability);
+  EXPECT_EQ(&registry.get("naMe"), &capability);
+  EXPECT_EQ(&std::as_const(registry).get("naMe"), &capability);
   CAP_EXPECT_THROW_MSG(registry.get("foo"), "Capability 'foo' not registered");
+  CAP_EXPECT_THROW_MSG(std::as_const(registry).get("foo"), "Capability 'foo' not registered");
 }
 
 /// Test Moose::CapabilityUtils::CapabilityRegistry::add
@@ -597,16 +601,15 @@ protected:
   void SetUp() override
   {
     // Setup a temporary registry for testing
-    std::swap(Moose::Capabilities::getCapabilityRegistry()._capability_registry,
-              _old_capability_registry);
-    _capability_registry = &Moose::Capabilities::getCapabilityRegistry()._capability_registry;
+    std::swap(Capabilities::getCapabilities()._capability_registry, _old_capability_registry);
+    _capability_registry = &Capabilities::getCapabilities()._capability_registry;
+    ASSERT_TRUE(Capabilities::getCapabilities()._capability_registry.getRegistry().empty());
   }
 
   void TearDown() override
   {
     // Replace temporary registry for testing with real one
-    std::swap(Moose::Capabilities::getCapabilityRegistry()._capability_registry,
-              _old_capability_registry);
+    std::swap(Capabilities::getCapabilities()._capability_registry, _old_capability_registry);
     _old_capability_registry.clear();
     _capability_registry = nullptr;
   }
@@ -620,7 +623,7 @@ protected:
 /// Test Capabilities::add
 TEST_F(CapabilitiesTest, add)
 {
-  auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
+  auto & capabilities = Capabilities::getCapabilities();
 
   // success
   const auto & capability = capabilities.add("name", bool(false), "doc");
@@ -631,10 +634,33 @@ TEST_F(CapabilitiesTest, add)
                         "Capability 'name' already exists and is not equal");
 
   // reserved name
-  for (const auto & name : Moose::Capabilities::reserved_augmented_capabilities)
+  for (const auto & name : Capabilities::reserved_augmented_capabilities)
     EXPECT_MOOSEERROR_MSG(capabilities.add(name, bool(true), "doc"),
                           "The capability \"" + name +
                               "\" is reserved and may not be registered by an application.");
+}
+
+/// Test Capabilities::query
+TEST_F(CapabilitiesTest, query)
+{
+  auto & capabilities = Capabilities::getCapabilities();
+  const auto & capability = capabilities.add("name", bool(false), "doc");
+
+  EXPECT_EQ(capabilities.query("name"), &capability);
+  EXPECT_EQ(capabilities.query("naMe"), &capability);
+  EXPECT_EQ(capabilities.query("foo"), nullptr);
+}
+
+/// Test Capabilities::get
+TEST_F(CapabilitiesTest, get)
+{
+  auto & capabilities = Capabilities::getCapabilities();
+  const auto & capability = capabilities.add("name", bool(false), "doc");
+
+  EXPECT_EQ(&capabilities.get("name"), &capability);
+  EXPECT_EQ(&capabilities.get("naMe"), &capability);
+  EXPECT_MOOSEERROR_MSG(capabilities.get("foo"),
+                        "Capabilities::get(): Capability 'foo' not registered");
 }
 
 /// Test MooseApp::addBoolCapability
@@ -673,10 +699,38 @@ TEST_F(CapabilitiesTest, mooseAppAddStringCapability)
                         "Capability 'name' already exists and is not equal");
 }
 
+/// Test MooseApp::addCapability
+TEST_F(CapabilitiesTest, mooseAppAddCapability)
+{
+  // can't add, deprecation warning
+  {
+    Moose::ScopedDeprecatedIsError deprecated_is_error(true);
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        MooseApp::addCapability("name", "foo", "doc"),
+        "Deprecated code:\nMooseApp::addCapability() is deprecated (adding capability 'name'); "
+        "use one of MooseApp::add[Bool,Int,String]Capability instead.");
+  }
+
+  // can add, ignore deprecation warning
+  const Capability * capability;
+  {
+    Moose::ScopedDeprecatedIsError deprecated_is_error(false);
+    capability = &MooseApp::addCapability("name", "value", "doc");
+    EXPECT_EQ(_capability_registry->query("name"), capability);
+  }
+
+  // adding the second time gives no deprecation warning
+  {
+    Moose::ScopedDeprecatedIsError deprecated_is_error(true);
+    MooseApp::addCapability("name", "value", "doc");
+    EXPECT_EQ(_capability_registry->query("name"), capability);
+  }
+}
+
 /// Test Capabilities::dump
 TEST_F(CapabilitiesTest, dump)
 {
-  auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
+  auto & capabilities = Capabilities::getCapabilities();
 
   capabilities.add("false", bool(false), "false");
   capabilities.add("true", bool(true), "true");
@@ -720,7 +774,7 @@ TEST_F(CapabilitiesTest, dump)
 /// Test Capabilities::check
 TEST_F(CapabilitiesTest, check)
 {
-  auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
+  auto & capabilities = Capabilities::getCapabilities();
 
   capabilities.add("name", bool(true), "false");
   EXPECT_EQ(std::get<0>(capabilities.check("name")), CERTAIN_PASS);
@@ -730,7 +784,7 @@ TEST_F(CapabilitiesTest, check)
 /// Test Capabilities::augment
 TEST_F(CapabilitiesTest, augment)
 {
-  auto & capabilities = Moose::Capabilities::getCapabilityRegistry();
+  auto & capabilities = Capabilities::getCapabilities();
 
   const nlohmann::json to_augment = {
       {"false", {{"doc", "false"}, {"value", false}}},

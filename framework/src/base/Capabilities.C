@@ -57,7 +57,7 @@ Capabilities::Capabilities()
 }
 
 Capabilities &
-Capabilities::getCapabilityRegistry()
+Capabilities::getCapabilities()
 {
   // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
   // bug in clang's static object destruction when using dynamic library loading.
@@ -84,6 +84,25 @@ Capabilities::add(const std::string_view capability,
   catch (const std::exception & e)
   {
     mooseError(e.what());
+  }
+}
+
+const CapabilityUtils::Capability *
+Capabilities::query(const std::string & capability) const
+{
+  return _capability_registry.query(capability);
+}
+
+const CapabilityUtils::Capability &
+Capabilities::get(const std::string & capability) const
+{
+  try
+  {
+    return _capability_registry.get(capability);
+  }
+  catch (const std::exception & e)
+  {
+    mooseError("Capabilities::get(): ", e.what());
   }
 }
 

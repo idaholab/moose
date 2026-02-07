@@ -251,7 +251,7 @@ public:
                    const std::string_view doc);
 
   /**
-   * Query a Capability.
+   * Query a capability, if it exists, otherwise nullptr.
    *
    * Will convert the capability name to lowercase.
    */
@@ -263,10 +263,12 @@ public:
   /**
    * Get a capability.
    *
-   * Will not convert the capability name to lowercase.
+   * Will convert the capability name to lowercase.
    */
-  Capability & get(const std::string_view capability);
-
+  ///@{
+  const Capability & get(const std::string & capability) const;
+  Capability & get(const std::string & capability);
+  ///@}
   /**
    * Get the underlying registry.
    */
