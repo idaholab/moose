@@ -283,7 +283,7 @@ class SpecModifier:
         # Find [Tests] node
         tests_node = None
         for child in root:
-            if child.name == "Tests":
+            if child.name.lower() == "tests":
                 tests_node = child
                 break
 
