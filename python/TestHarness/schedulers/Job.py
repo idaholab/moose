@@ -426,9 +426,8 @@ class Job(OutputInterface):
             # Sanitize the output from all objects
             self.sanitizeAllOutput()
 
-        # Set the output path if its separate and initialize the output
-        if self.hasSeperateOutput():
-            # Need to potentially create the output directory
+        # Create the output directory if needed
+        if self.options.output_dir:
             self.createOutputDirectory()
 
             # Failed to create the directory
@@ -436,6 +435,8 @@ class Job(OutputInterface):
                 finalize()
                 return
 
+        # Set the output path if its separate and initialize the output
+        if self.hasSeperateOutput():
             # Set the output path for each object
             for name, object in self.getOutputObjects().items():
                 output_path = self.getOutputPathPrefix() + f'.{name}_out.txt'
@@ -788,8 +789,8 @@ class Job(OutputInterface):
 
     def createOutputDirectory(self):
         """ Create the output directory for this job, if needed """
-        if not self.options.output_dir:
-            return
+        assert self.options.output_dir
+
         output_dir = self.getOutputDirectory()
         with Job.mkdir_lock:
             if not os.path.isdir(output_dir):

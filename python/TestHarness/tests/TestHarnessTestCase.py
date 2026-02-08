@@ -7,26 +7,37 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+# ruff: noqa: E402
+
 """Test case and utilities for testing the TestHarness."""
 
 import json
 import os
+import sys
 import tempfile
 import unittest
 from contextlib import nullcontext, redirect_stdout
 from copy import deepcopy
 from dataclasses import dataclass
 from io import StringIO
-from typing import Optional
+from typing import Callable, Optional
+
+from mock import patch
+
+MOOSE_DIR: str = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..")
+)
+
+# Add moose python to path if it doesn't exist
+MOOSE_PYTHON = os.path.join(MOOSE_DIR, "python")
+if MOOSE_PYTHON not in sys.path:
+    sys.path.append(MOOSE_PYTHON)
 
 import pyhit
-from mock import patch
 
 from TestHarness import TestHarness, capability_util
 from TestHarness.schedulers.Job import Job
 
-this_dir = os.path.dirname(__file__)
-MOOSE_DIR: str = os.path.abspath(os.path.join(this_dir, "..", "..", ".."))
 MOOSE_EXE = "moose_test-opt"
 TEST_DIR = os.path.join(MOOSE_DIR, "test")
 
@@ -53,6 +64,8 @@ class TestHarnessTestCase(unittest.TestCase):
         harness: Optional[TestHarness] = None
         # Test specification file, if using the "tests" option
         test_spec_file: Optional[str] = None
+        # The temp directory the test is being ran in, if any
+        tmp_dir: Optional[str] = None
 
     def setUp(self):
         """
@@ -85,6 +98,7 @@ class TestHarnessTestCase(unittest.TestCase):
         exit_code: int = 0,
         run: bool = True,
         tests: Optional[dict[str, dict]] = None,
+        post_run: Optional[Callable[[RunTestsResult], None]] = None,
     ) -> RunTestsResult:
         """
         Run the TestHarness.
@@ -129,6 +143,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
             if tmp_output:
                 argv += ["-o", c]
+                result.tmp_dir = c
 
             # Setup test spec directory if we're building one on the fly
             if test_spec:
@@ -176,6 +191,9 @@ class TestHarnessTestCase(unittest.TestCase):
             if capture_results:
                 with open(result.harness.options.results_file, "r") as f:
                     result.results = json.loads(f.read())
+
+            if post_run:
+                post_run(result)
 
         return result
 

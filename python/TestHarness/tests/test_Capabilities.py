@@ -9,19 +9,20 @@
 
 """Test the use of capabilites in the TestHarness."""
 
+import json
+import os
 import unittest
 from argparse import Namespace
 from copy import deepcopy
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Optional, Tuple
+from shlex import quote
 
 from TestHarnessTestCase import TestHarnessTestCase
 
 from TestHarness import TestHarness
-from TestHarness.capability_util import (
-    addAugmentedCapability,
-    parseRequiredCapabilities,
-)
+from TestHarness.capability_util import addAugmentedCapability
 from TestHarness.testers.Tester import Tester
 from TestHarness.util import getMachine, getPlatform
 
@@ -312,6 +313,116 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
             if capability:
                 message += f" -> capability '{capability}'"
             self.assertIn(message, result.output)
+
+    def testRequiredCapabilities(self):
+        """Test that required and augmented capabilities are set in a RunApp run."""
+
+        def post_run(
+            tmp_dir: bool,
+            test_name: str,
+            has_augmented: bool,
+            capabilities: str,
+            result: TestHarnessTestCase.RunTestsResult,
+        ):
+            assert result.harness is not None
+            job = self.getJobWithName(result.harness, test_name)
+
+            # Should have ran the app with the given capabilities
+            cmd_ran = job.getTester().getCommandRan()
+            self.assertIn(f"--required-capabilities={quote(capabilities)}", cmd_ran)
+
+            capabilities_file = job.getTester().getCapabilitiesFilePath(job.options)
+
+            # No augmented capabilities, shouldn't have a capabilities file
+            if not has_augmented:
+                self.assertFalse(os.path.exists(capabilities_file))
+                return
+
+            # Augmented capabilities file was written, check for it
+            capabilities_file = job.getTester().getCapabilitiesFilePath(job.options)
+            self.assertTrue(os.path.isfile(capabilities_file))
+            if tmp_dir:
+                assert result.tmp_dir is not None
+                self.assertTrue(
+                    Path(capabilities_file).is_relative_to(Path(result.tmp_dir))
+                )
+            else:
+                self.assertTrue(
+                    Path(capabilities_file).is_relative_to(job.getTestDir())
+                )
+            with open(capabilities_file, "r") as f:
+                capabilities = json.load(f)
+            # Should only contain those two capabilities that
+            # we used if we did this right
+            self.assertTrue(len(capabilities), 2)
+            self.assertIn("mpi_procs", capabilities)
+            self.assertIn("library_mode", capabilities)
+
+            # And should have ran the app with the given capabilities
+            # and the augmented capabilities file
+            cmd_ran = job.getTester().getCommandRan()
+            self.assertIn(
+                (
+                    "--required-capabilities='moosetestapp & library_mode=dynamic "
+                    "& mpi_procs=1'"
+                ),
+                cmd_ran,
+            )
+
+        # Run with capabilities from the app, from the TestHarness,
+        # and from RunApp, with the augmented output stored in
+        # the same directory as the test
+        self.runTests(
+            "-i",
+            "capabilities",
+            "--re",
+            "has_augmented",
+            minimal_capabilities=False,
+            post_run=lambda result: post_run(
+                tmp_dir=False,
+                test_name="has_augmented",
+                has_augmented=True,
+                capabilities="moosetestapp & library_mode=dynamic & mpi_procs=1",
+                result=result,
+            ),
+            tmp_output=False,
+        )
+
+        # Run with capabilities from the app, from the TestHarness,
+        # and from RunApp, with the augmented output stored in
+        # a different directory
+        self.runTests(
+            "-i",
+            "capabilities",
+            "--re",
+            "has_augmented",
+            minimal_capabilities=False,
+            post_run=lambda result: post_run(
+                tmp_dir=True,
+                test_name="has_augmented",
+                has_augmented=True,
+                capabilities="moosetestapp & library_mode=dynamic & mpi_procs=1",
+                result=result,
+            ),
+        )
+
+        # Run with capabilities from the app, from the TestHarness,
+        # and from RunApp, with the augmented output stored in
+        # a different directory
+        self.runTests(
+            "-i",
+            "capabilities",
+            "--re",
+            "no_augmented",
+            minimal_capabilities=False,
+            post_run=lambda result: post_run(
+                tmp_dir=True,
+                test_name="no_augmented",
+                has_augmented=False,
+                capabilities="moosetestapp",
+                result=result,
+            ),
+        )
 
 
 if __name__ == "__main__":

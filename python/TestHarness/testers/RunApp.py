@@ -13,6 +13,7 @@ from TestHarness import util, TestHarness
 from TestHarness.capability_util import addAugmentedCapability
 from shlex import quote
 import json
+from typing import Optional
 
 class RunApp(Tester):
 
@@ -83,6 +84,13 @@ class RunApp(Tester):
         for value in params['compute_devices']:
             if value.lower() not in TestHarness.validComputeDevices():
                 raise Exception(f'Unknown device "{value}"')
+
+        # The capabilities file that we need to set with
+        # --testharness-capabilities, if any. This should
+        # only be valid if we have a 'capabilities' spec
+        # and any of those capabilities depend on the
+        # augmented capabilities
+        self._augmented_capabilities_file: Optional[str] = None
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -237,10 +245,17 @@ class RunApp(Tester):
         cli_args = list(specs['cli_args'])
 
         if specs["capabilities"]:
-            cli_args += [
-                '--required-capabilities="' + quote(specs["capabilities"]) + '"',
-                f"--testharness-capabilities={self.getCapabilitiesFilePath(options)}",
-            ]
+            # Check that the app supports the capabilities we think it does
+            cli_args.append(f"--required-capabilities={quote(specs['capabilities'])}")
+
+            # If we have augmented capabilities (capabilities not in the app)
+            # that we checked against, they need to be augmented in the app
+            if self._augmented_capabilities_file is not None:
+                cli_args.append(
+                    f"--testharness-capabilities={quote(self._augmented_capabilities_file)}"
+                )
+        else:
+            assert self._augmented_capabilities_file is None
 
         if options.distributed_mesh and '--distributed-mesh' not in cli_args:
             # The user has passed the parallel-mesh option to the test harness
@@ -505,6 +520,19 @@ class RunApp(Tester):
             capabilities = (
                 self._augmented_capabilities | options._augmented_capabilities
             )
-            capabilities_file = self.getCapabilitiesFilePath(options)
-            with open(capabilities_file, "w") as f:
-                json.dump(capabilities, f)
+
+            # Capture the capabilities that we need to dump, if any.
+            # For now, we'll lazily just see if each of the
+            # augmented capabilities exists in the whole string.
+            store_capabilities = {}
+            for capability, entry in capabilities.items():
+                if capability in self.specs["capabilities"]:
+                    store_capabilities[capability] = entry
+
+            # We have capabilities to store
+            if store_capabilities:
+                self._augmented_capabilities_file = self.getCapabilitiesFilePath(
+                    options
+                )
+                with open(self._augmented_capabilities_file, "w") as f:
+                    json.dump(store_capabilities, f)
