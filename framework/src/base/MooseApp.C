@@ -936,7 +936,7 @@ MooseApp::setupOptions()
     try
     {
       file >> root;
-      Moose::Capabilities::getCapabilities().augment(root, {});
+      Moose::internal::Capabilities::get().augment(root, {});
     }
     catch (const std::exception & e)
     {
@@ -947,20 +947,21 @@ MooseApp::setupOptions()
 
   if (isParamValid("required_capabilities"))
   {
+    using Moose::internal::CapabilityRegistry;
+
     const auto required_capabilities = getParam<std::string>("required_capabilities");
 
-    Moose::CapabilityUtils::CapabilityRegistry::Result result;
+    CapabilityRegistry::CheckResult result;
     try
     {
-      result = Moose::Capabilities::getCapabilities().check(required_capabilities);
+      result = Moose::internal::Capabilities::get().check(required_capabilities);
     }
     catch (const std::exception & e)
     {
       mooseError("--required-capablities: ", e.what());
     }
-    const auto status = std::get<0>(result);
 
-    if (status < Moose::CapabilityUtils::UNKNOWN)
+    if (result.state < CapabilityRegistry::CheckState::UNKNOWN)
     {
       mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
       _ready_to_exit = true;
@@ -968,7 +969,7 @@ MooseApp::setupOptions()
       _exit_code = 77;
       return;
     }
-    if (status == Moose::CapabilityUtils::UNKNOWN)
+    if (result.state == CapabilityRegistry::CheckState::UNKNOWN)
       mooseError("Required capabilities '",
                  required_capabilities,
                  "' are not specific enough. A comparison test is performed on an undefined "
@@ -1141,25 +1142,27 @@ MooseApp::setupOptions()
     outputMachineReadableData("show_capabilities",
                               "**START JSON DATA**\n",
                               "\n**END JSON DATA**",
-                              Moose::Capabilities::getCapabilities().dump());
+                              Moose::internal::Capabilities::get().dump());
     _ready_to_exit = true;
   }
   else if (isParamValid("check_capabilities"))
   {
+    using Moose::internal::CapabilityRegistry;
+
     _perf_graph.disableLivePrint();
     const auto & capabilities = getParam<std::string>("check_capabilities");
 
-    Moose::CapabilityUtils::CapabilityRegistry::Result result;
+    CapabilityRegistry::CheckResult result;
     try
     {
-      result = Moose::Capabilities::getCapabilities().check(capabilities);
+      result = Moose::internal::Capabilities::get().check(capabilities);
     }
     catch (const std::exception & e)
     {
       mooseError("--check-capablities: ", e.what());
     }
 
-    const bool pass = std::get<0>(result) == Moose::CapabilityUtils::CERTAIN_PASS;
+    const bool pass = result.state == CapabilityRegistry::CheckState::CERTAIN_PASS;
     _console << "Capabilities '" << capabilities << "' are " << (pass ? "" : "not ") << "fulfilled."
              << std::endl;
     _ready_to_exit = true;
@@ -3258,36 +3261,36 @@ MooseApp::outputMachineReadableData(const std::string & param,
     mooseError("Unable to open file `", filename, "` for writing ", param, " data to it.");
 }
 
-Moose::CapabilityUtils::Capability &
+Moose::Capability &
 MooseApp::addBoolCapability(const std::string_view capability,
                             const bool value,
                             const std::string_view doc)
 {
-  return Moose::Capabilities::getCapabilities().add(capability, value, doc);
+  return Moose::internal::Capabilities::get().add(capability, value, doc);
 }
 
-Moose::CapabilityUtils::Capability &
+Moose::Capability &
 MooseApp::addIntCapability(const std::string_view capability,
                            const int value,
                            const std::string_view doc)
 {
-  return Moose::Capabilities::getCapabilities().add(capability, value, doc);
+  return Moose::internal::Capabilities::get().add(capability, value, doc);
 }
 
-Moose::CapabilityUtils::Capability &
+Moose::Capability &
 MooseApp::addStringCapability(const std::string_view capability,
                               const std::string_view value,
                               const std::string_view doc)
 {
-  return Moose::Capabilities::getCapabilities().add(capability, std::string(value), doc);
+  return Moose::internal::Capabilities::get().add(capability, std::string(value), doc);
 }
 
-Moose::CapabilityUtils::Capability &
+Moose::Capability &
 MooseApp::addCapability(const std::string_view capability,
-                        const Moose::CapabilityUtils::CapabilityValue & value,
+                        const Moose::Capability::Value & value,
                         const std::string_view doc)
 {
-  auto & capabilities = Moose::Capabilities::getCapabilities();
+  auto & capabilities = Moose::internal::Capabilities::get();
 
   // Warn deprecation on the first time this is added so that we
   // don't get multiple warnings if the app is registered more

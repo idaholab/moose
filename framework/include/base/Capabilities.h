@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "CapabilityUtils.h"
+#include "CapabilityRegistry.h"
 
 #include "nlohmann/json_fwd.h"
 
@@ -22,7 +22,7 @@ class CapabilitiesTest;
 
 class MooseApp;
 
-namespace Moose
+namespace Moose::internal
 {
 
 /**
@@ -35,7 +35,10 @@ namespace Moose
 class Capabilities
 {
 public:
-  static Capabilities & getCapabilities();
+  /**
+   * Get the singleton Capabilities.
+   */
+  static Capabilities & get();
 
   /**
    * Add a capability to the registry.
@@ -45,29 +48,29 @@ public:
    * @param doc The documentation string
    * @return The capability
    */
-  CapabilityUtils::Capability & add(const std::string_view capability,
-                                    const CapabilityUtils::CapabilityValue & value,
-                                    const std::string_view doc);
+  Moose::Capability & add(const std::string_view capability,
+                          const Moose::Capability::Value & value,
+                          const std::string_view doc);
 
   /**
    * Query a capability, if it exists, otherwise nullptr.
    *
    * @param capability The name of the capability.
    */
-  const CapabilityUtils::Capability * query(const std::string & capability) const;
+  const Moose::Capability * query(const std::string & capability) const;
 
   /**
    * Get a capability.
    *
    * @param capability The name of the capability
    */
-  const CapabilityUtils::Capability & get(const std::string & capability) const;
+  const Moose::Capability & get(const std::string & capability) const;
 
   /// create a JSON dump of the capabilities registry
   std::string dump() const;
 
   /// check if the given required capabilities are fulfilled, returns a bool, a reason, and a verbose documentation
-  CapabilityUtils::CapabilityRegistry::Result
+  Moose::internal::CapabilityRegistry::CheckResult
   check(const std::string & requested_capabilities) const;
 
   /// Passkey for augment()
@@ -98,6 +101,11 @@ public:
   Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
+private:
+#ifdef MOOSE_UNIT_TEST
+  friend class ::CapabilitiesTest;
+#endif
+
   /**
    * Register the MOOSE capabilities.
    *
@@ -109,20 +117,15 @@ public:
    */
   void registerMooseCapabilities();
 
-private:
-#ifdef MOOSE_UNIT_TEST
-  friend class ::CapabilitiesTest;
-#endif
-
   /**
    * Capability registry. The capabilities registered here can be dumped using the
    * --show-capabilities command line option. Capabilities are used by the test harness
    * to conditionally enable/disable tests that rely on optional capabilities.
    */
-  CapabilityUtils::CapabilityRegistry _capability_registry;
+  Moose::internal::CapabilityRegistry _capability_registry;
 
   // Private constructor for singleton pattern
   Capabilities();
 };
 
-} // namespace Moose
+} // namespace Moose::internal

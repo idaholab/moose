@@ -490,8 +490,8 @@ class RunApp(Tester):
             )
 
         # NOTE: If you add to this list, it must be added to
-        # Moose::CapabilityUtils::reserved_augmented_capabilities in
-        # framework/src/utils/CapabilityUtils.C
+        # CapabilityRegistry::augmented_capability_names in
+        # framework/src/base/CapabilityRegistry.C
         augment_capability(
             "mpi_procs",
             self.getProcs(options),

@@ -20,14 +20,14 @@
 #endif
 #endif
 
-#include "CapabilityUtils.h"
+#include "CapabilityException.h"
+#include "CapabilityRegistry.h"
 
 #include <memory>
 
-using Moose::CapabilityUtils::augmented_capability_names;
-using Moose::CapabilityUtils::CapabilityException;
-using Moose::CapabilityUtils::CapabilityRegistry;
-using Moose::CapabilityUtils::CapabilityValue;
+using Moose::Capability;
+using Moose::CapabilityException;
+using Moose::internal::CapabilityRegistry;
 
 /*******************************************************************************/
 /* Python pycapabilities module definition                                     */
@@ -120,7 +120,7 @@ addCapabilities(CapabilityRegistry & registry, PyObject * capabilities_dict)
       return key_error("missing key 'doc'");
 
     // 'value' value
-    CapabilityValue value;
+    Capability::Value value;
     if (auto value_obj = query_key("value"))
     {
       if (value_obj == Py_True)
@@ -227,12 +227,11 @@ CheckState_enum(PyObject * module)
     Py_DECREF(tmp);                                                                                \
   } while (0)
 
-  using Moose::CapabilityUtils::CheckState;
-  ADD_MEMBER(members, "CERTAIN_FAIL", CheckState::CERTAIN_FAIL);
-  ADD_MEMBER(members, "POSSIBLE_FAIL", CheckState::POSSIBLE_FAIL);
-  ADD_MEMBER(members, "UNKNOWN", CheckState::UNKNOWN);
-  ADD_MEMBER(members, "POSSIBLE_PASS", CheckState::POSSIBLE_PASS);
-  ADD_MEMBER(members, "CERTAIN_PASS", CheckState::CERTAIN_PASS);
+  ADD_MEMBER(members, "CERTAIN_FAIL", CapabilityRegistry::CheckState::CERTAIN_FAIL);
+  ADD_MEMBER(members, "POSSIBLE_FAIL", CapabilityRegistry::CheckState::POSSIBLE_FAIL);
+  ADD_MEMBER(members, "UNKNOWN", CapabilityRegistry::CheckState::UNKNOWN);
+  ADD_MEMBER(members, "POSSIBLE_PASS", CapabilityRegistry::CheckState::POSSIBLE_PASS);
+  ADD_MEMBER(members, "CERTAIN_PASS", CapabilityRegistry::CheckState::CERTAIN_PASS);
 #undef ADD_MEMBER
 
   checkstate = PyObject_CallFunctionObjArgs(IntEnum, name, members, nullptr);
@@ -265,7 +264,7 @@ AUGMENTED_CAPABILITY_NAMES_set(PyObject * module)
   if (!names)
     return -1;
 
-  for (const auto & name : augmented_capability_names)
+  for (const auto & name : CapabilityRegistry::augmented_capability_names)
   {
     PyObject * s = PyUnicode_FromString(name.c_str());
     if (!s)
@@ -489,19 +488,19 @@ Capabilities_check(CapabilitiesObject * self, PyObject * args, PyObject * kwargs
   // Run the check
   try
   {
-    auto [status, message, doc] = registry.check(requirement);
+    const auto result = registry.check(requirement);
 
     PyObject * checkstate = PyObject_GetAttrString(m, "CheckState");
     if (!checkstate)
       return nullptr;
 
-    PyObject * checkstate_obj = PyObject_CallFunction(checkstate, "l", status);
+    PyObject * checkstate_obj = PyObject_CallFunction(checkstate, "l", result.state);
     Py_DECREF(checkstate);
 
     return Py_BuildValue("(NNN)",
                          checkstate_obj,
-                         PyUnicode_FromString(message.c_str()),
-                         PyUnicode_FromString(doc.c_str()));
+                         PyUnicode_FromString(result.reason.c_str()),
+                         PyUnicode_FromString(result.doc.c_str()));
   }
   catch (const CapabilityException & e)
   {

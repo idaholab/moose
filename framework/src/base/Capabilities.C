@@ -38,7 +38,7 @@
 #include "netgen/netgen_version.hpp"
 #endif
 
-namespace Moose
+namespace Moose::internal
 {
 
 Capabilities::Capabilities()
@@ -48,7 +48,7 @@ Capabilities::Capabilities()
 }
 
 Capabilities &
-Capabilities::getCapabilities()
+Capabilities::get()
 {
   // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
   // bug in clang's static object destruction when using dynamic library loading.
@@ -58,12 +58,12 @@ Capabilities::getCapabilities()
   return *capability_registry;
 }
 
-CapabilityUtils::Capability &
+Moose::Capability &
 Capabilities::add(const std::string_view capability,
-                  const CapabilityUtils::CapabilityValue & value,
+                  const Moose::Capability::Value & value,
                   const std::string_view doc)
 {
-  if (CapabilityUtils::augmented_capability_names.count(capability))
+  if (Moose::internal::CapabilityRegistry::augmented_capability_names.count(capability))
     mooseError("The capability \"",
                capability,
                "\" is reserved and may not be registered by an application.");
@@ -78,13 +78,13 @@ Capabilities::add(const std::string_view capability,
   }
 }
 
-const CapabilityUtils::Capability *
+const Moose::Capability *
 Capabilities::query(const std::string & capability) const
 {
   return _capability_registry.query(capability);
 }
 
-const CapabilityUtils::Capability &
+const Moose::Capability &
 Capabilities::get(const std::string & capability) const
 {
   try
@@ -101,7 +101,7 @@ std::string
 Capabilities::dump() const
 {
   nlohmann::json root;
-  for (const auto & [name, capability] : _capability_registry.getRegistry())
+  for (const auto & [name, capability] : _capability_registry.getRegistry({}))
   {
     auto & entry = root[name];
     std::visit([&entry](const auto & v) { entry["value"] = v; }, capability.getValue());
@@ -115,7 +115,7 @@ Capabilities::dump() const
   return root.dump(2);
 }
 
-CapabilityUtils::CapabilityRegistry::Result
+CapabilityRegistry::CheckResult
 Capabilities::check(const std::string & requested_capabilities) const
 {
   return _capability_registry.check(requested_capabilities);
@@ -130,7 +130,7 @@ Capabilities::augment(const nlohmann::json & input, const Capabilities::AugmentP
 
     const std::string doc = entry["doc"];
 
-    CapabilityUtils::CapabilityValue value;
+    Moose::Capability::Value value;
     const auto & value_json = entry["value"];
     if (value_json.is_boolean())
       value = value_json.get<bool>();

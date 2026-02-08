@@ -36,7 +36,7 @@
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
-#include "CapabilityUtils.h"
+#include "Capability.h"
 #include "MoosePassKey.h"
 #include "SystemInfo.h"
 #include "Syntax.h"
@@ -1189,9 +1189,9 @@ protected:
    * @param doc The documentation string
    * @return The capability
    */
-  static Moose::CapabilityUtils::Capability & addBoolCapability(const std::string_view capability,
-                                                                const bool value,
-                                                                const std::string_view doc);
+  static Moose::Capability & addBoolCapability(const std::string_view capability,
+                                               const bool value,
+                                               const std::string_view doc);
 
   /**
    * Register an integer capability.
@@ -1201,7 +1201,7 @@ protected:
    * @param doc The documentation string
    * @return The capability
    */
-  static Moose::CapabilityUtils::Capability &
+  static Moose::Capability &
   addIntCapability(const std::string_view capability, const int value, const std::string_view doc);
 
   /**
@@ -1212,9 +1212,9 @@ protected:
    * @param doc The documentation string
    * @return The capability
    */
-  static Moose::CapabilityUtils::Capability & addStringCapability(const std::string_view capability,
-                                                                  const std::string_view value,
-                                                                  const std::string_view doc);
+  static Moose::Capability & addStringCapability(const std::string_view capability,
+                                                 const std::string_view value,
+                                                 const std::string_view doc);
 
   /**
    * Deprecated method for adding a capability.
@@ -1229,10 +1229,9 @@ protected:
    * @param doc The documentation string
    * @return The capability
    */
-  static Moose::CapabilityUtils::Capability &
-  addCapability(const std::string_view capability,
-                const Moose::CapabilityUtils::CapabilityValue & value,
-                const std::string_view doc);
+  static Moose::Capability & addCapability(const std::string_view capability,
+                                           const Moose::Capability::Value & value,
+                                           const std::string_view doc);
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;

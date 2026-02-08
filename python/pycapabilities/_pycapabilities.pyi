@@ -9,7 +9,12 @@ Loaded from Moose::CapabilityUtils::augmented_capability_names.
 """
 
 class CheckState(IntEnum):
-    """Return state for a capability check."""
+    """
+    Return state for a capability check.
+
+    This is a direct representation of
+    Moose::internal::CapabilityRegistry::CheckState.
+    """
 
     CERTAIN_FAIL = 0
     """A certain failure."""

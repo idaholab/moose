@@ -7,17 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "CapabilityRegistry.h"
+
+#include "CapabilityException.h"
+#include "MooseStringUtils.h"
+
 #include "peglib.h"
 
-#include "CapabilityUtils.h"
-#include "MooseStringUtils.h"
 #include <regex>
 #include <utility>
 
-namespace Moose::CapabilityUtils
+namespace Moose::internal
 {
 
-const std::set<std::string, std::less<>> augmented_capability_names{
+const std::set<std::string, std::less<>> CapabilityRegistry::augmented_capability_names{
     // TestHarness.getCapabilities()
     "hpc",
     "machine",
@@ -26,151 +29,9 @@ const std::set<std::string, std::less<>> augmented_capability_names{
     "mpi_procs",
     "num_threads"};
 
-Capability::Capability(const std::string_view name,
-                       const CapabilityValue & value,
-                       const std::string_view doc)
-  : _name(name), _doc(doc), _value(value), _explicit(false)
-{
-  // Check name validity
-  if (getName().empty())
-    throw CapabilityException("Capability has empty name");
-  if (!std::regex_match(getName(), std::regex("[a-z0-9_-]+")))
-    throw CapabilityException(
-        "Capability '" + getName() +
-        "': Name has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
-
-  // String value validity
-  if (const auto string_ptr = queryStringValue())
-  {
-    const std::regex string_regex("[a-z0-9_.-]+");
-    if (!std::regex_match(*string_ptr, string_regex))
-      throw CapabilityException(
-          "String capability '" + getName() + "': value '" + *string_ptr +
-          "' has unallowed characters; allowed characters = 'a-z, 0-9, _, ., -'");
-  }
-}
-
-const std::optional<std::vector<std::string>> &
-Capability::getEnumeration() const
-{
-  if (!hasStringValue())
-    throw CapabilityException("Capability::getEnumeration(): Capability '",
-                              getName(),
-                              "' is not string-valued and cannot have an enumeration");
-  return _enumeration;
-}
-
-bool
-Capability::hasEnumeration(const std::string & value) const
-{
-  const auto & enumeration_ptr = getEnumeration();
-  if (!enumeration_ptr)
-    return true;
-  return std::find(enumeration_ptr->begin(), enumeration_ptr->end(), value) !=
-         enumeration_ptr->end();
-}
-
-Capability &
-Capability::setExplicit()
-{
-  if (hasBoolValue())
-    throw CapabilityException("Capability::setExplicit(): Capability '" + getName() +
-                              "' is bool-valued and cannot be set as explicit");
-  _explicit = true;
-  return *this;
-}
-
-Capability &
-Capability::setEnumeration(const std::vector<std::string> & enumeration)
-{
-  static const std::string error_prefix = "Capability::setEnumeration(): ";
-
-  const auto string_ptr = queryStringValue();
-  if (!string_ptr)
-    throw CapabilityException(error_prefix + "Capability '" + getName() +
-                              "' is not string-valued and cannot have an enumeration");
-
-  if (_enumeration)
-  {
-    if (*_enumeration == enumeration)
-      return *this;
-    throw CapabilityException(error_prefix + "Capability '" + getName() +
-                              "' already has an enumeration set");
-  }
-
-  if (enumeration.empty())
-    throw CapabilityException(error_prefix + "Enumeration is empty for '" + getName() + "'");
-
-  for (const auto & value : enumeration)
-    if (!std::regex_match(value, std::regex("[a-z0-9_-]+")))
-      throw CapabilityException(error_prefix + "Enumeration value '" + value +
-                                "' for capability '" + getName() + "'" +
-                                " has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
-
-  for (auto it = enumeration.begin(); it != enumeration.end(); ++it)
-    if (std::find(std::next(it), enumeration.end(), *it) != enumeration.end())
-      throw CapabilityException(error_prefix + "Duplicate enumeration '" + *it +
-                                "' for capability '" + getName() + "'");
-
-  _enumeration = enumeration;
-
-  if (!hasEnumeration(*string_ptr))
-    throw CapabilityException(error_prefix + "Capability " + toString() +
-                              " value not within enumeration");
-
-  return *this;
-}
-
-const bool *
-Capability::queryBoolValue() const
-{
-  return std::get_if<bool>(&_value);
-}
-
-const int *
-Capability::queryIntValue() const
-{
-  return std::get_if<int>(&_value);
-}
-
-const std::string *
-Capability::queryStringValue() const
-{
-  return std::get_if<std::string>(&_value);
-}
-
-std::string
-Capability::valueToString() const
-{
-  if (const auto bool_ptr = queryBoolValue())
-    return *bool_ptr ? "true" : "false";
-  if (const auto string_ptr = queryStringValue())
-    return *string_ptr;
-  if (const auto int_ptr = queryIntValue())
-    return std::to_string(*int_ptr);
-  throw CapabilityException("Capability::valueToString(): Invalid type");
-}
-
-std::string
-Capability::toString() const
-{
-  return getName() + "=" + valueToString();
-}
-
-std::string
-Capability::enumerationToString() const
-{
-  const auto & enumeration_ptr = getEnumeration();
-  if (!enumeration_ptr)
-    throw CapabilityException("Capability::enumerationToString(): Capability '",
-                              getName(),
-                              "' does not have an enumeration");
-  return MooseUtils::stringJoin(*enumeration_ptr, ", ");
-}
-
 Capability &
 CapabilityRegistry::add(const std::string_view name,
-                        const CapabilityUtils::CapabilityValue & value,
+                        const Capability::Value & value,
                         const std::string_view doc)
 {
   auto it_pair = _registry.lower_bound(name);
@@ -223,7 +84,7 @@ CapabilityRegistry::get(const std::string & capability)
 [[noreturn]] void
 checkException(const peg::SemanticValues & vs,
                const std::string & message,
-               const std::optional<CapabilityUtils::Capability> capability = {})
+               const std::optional<Capability> capability = {})
 {
   std::string msg = "Capability statement '" + vs.token_to_string() + "': ";
   if (capability)
@@ -232,7 +93,7 @@ checkException(const peg::SemanticValues & vs,
   throw CapabilityException(msg);
 }
 
-CapabilityRegistry::Result
+CapabilityRegistry::CheckResult
 CapabilityRegistry::check(std::string requirements) const
 {
   using namespace peg;
@@ -248,7 +109,7 @@ CapabilityRegistry::check(std::string requirements) const
       break;
   }
   if (requirements.length() == 0)
-    return {CapabilityUtils::CERTAIN_PASS, "Empty requirements", ""};
+    return {CheckState::CERTAIN_PASS, "Empty requirements", ""};
 
   static parser parser(R"(
     Expression    <-  _ Bool _ LogicOperator _ Expression / Bool _
@@ -435,7 +296,7 @@ CapabilityRegistry::check(std::string requirements) const
   parser["Bool"] = [this](const SemanticValues & vs)
   {
     // Helper for erroring of a capability doesn't support a boolean
-    const auto check_explicit = [&vs](const CapabilityUtils::Capability & capability)
+    const auto check_explicit = [&vs](const Capability & capability)
     {
       if (capability.getExplicit())
       {
@@ -547,13 +408,11 @@ CapabilityRegistry::check(std::string requirements) const
   // (4) Parse
   parser.enable_packrat_parsing(); // Enable packrat parsing.
 
-  CheckState state = CheckState::CERTAIN_FAIL;
-  if (!parser.parse(requirements, state))
+  CheckResult result;
+  result.state = CheckState::CERTAIN_FAIL;
+  if (!parser.parse(requirements, result.state))
     throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
 
-  std::string reason;
-  std::string doc;
-
-  return {state, reason, doc};
+  return result;
 }
 } // namespace CapabilityUtils

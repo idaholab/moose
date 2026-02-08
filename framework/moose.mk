@@ -83,7 +83,7 @@ pyhit_srcfiles  := $(hit_srcdir)/hit.cpp $(hit_srcdir)/lex.cc $(hit_srcdir)/pars
 # capabilities python bindings
 #
 PYCAPABILITIES_DIR ?= $(MOOSE_DIR)/python/pycapabilities
-pycapabilities_srcfiles := $(PYCAPABILITIES_DIR)/_pycapabilities.C $(FRAMEWORK_DIR)/src/utils/CapabilityUtils.C
+pycapabilities_srcfiles := $(PYCAPABILITIES_DIR)/_pycapabilities.C $(FRAMEWORK_DIR)/src/base/Capability.C $(FRAMEWORK_DIR)/src/base/CapabilityRegistry.C
 
 # Making a .la object instead.  This is what you make out of .lo objects...
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
@@ -235,7 +235,7 @@ hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 
 pycapabilities_LIBNAME      := _pycapabilities.$(PYMOD_EXTENSION)
 pycapabilities_LIB          := $(PYCAPABILITIES_DIR)/$(pycapabilities_LIBNAME)
-pycapabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/utils
+pycapabilities_COMPILEFLAGS += $(PYMOD_COMPILEFLAGS) -I$(FRAMEWORK_DIR)/contrib/cpp-peglib/include -I$(FRAMEWORK_DIR)/include/base -I$(FRAMEWORK_DIR)/include/utils
 pycapabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
 
 pycapabilities $(pycapabilities_LIB) : $(pycapabilities_srcfiles)
