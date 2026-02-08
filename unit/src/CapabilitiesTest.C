@@ -191,6 +191,10 @@ TEST(CapabilityTest, capabilityEnumeration)
   CAP_EXPECT_THROW_MSG(Capability("name", int(1), "doc").getEnumeration(),
                        "Capability::getEnumeration(): Capability 'name' is not string-valued and "
                        "cannot have an enumeration");
+  // enumerationToString() without an enumeration
+  CAP_EXPECT_THROW_MSG(
+      Capability("name", std::string("foo"), "doc").enumerationToString(),
+      "Capability::enumerationToString(): Capability 'name' does not have an enumeration");
 }
 
 /// Test Moose::CapabilityUtils::Capability explicit state
@@ -317,6 +321,12 @@ TEST(CapabilityRegistryTest, checkBool)
   CAP_CHECK_EXPECT_ERROR("bool2=>1.0.0", "Capability statement '=>': unknown operator.");
   CAP_CHECK_EXPECT_ERROR("bool=", "Unable to parse requested capabilities 'bool='.");
   CAP_CHECK_EXPECT_ERROR("bool==", "Unable to parse requested capabilities 'bool=='.");
+  CAP_CHECK_EXPECT_ERROR("bool>1",
+                         "Capability statement 'bool>1': capability 'bool=true' cannot be "
+                         "compared to a number.")
+  CAP_CHECK_EXPECT_ERROR("bool>1.1",
+                         "Capability statement 'bool>1.1': capability 'bool=true' cannot be "
+                         "compared to a version number.")
 }
 
 /// Test Moose::CapabilityUtils::CapabilityRegistry::checkfor int capabilities
@@ -490,6 +500,9 @@ TEST(CapabilityRegistryTest, checkVersion)
     CAP_CHECK_EXPECT_EQ("!(version" + c + ")", CERTAIN_PASS);
   }
   CAP_CHECK_EXPECT_ERROR("!version<", "Unable to parse requested capabilities '!version<'.");
+  CAP_CHECK_EXPECT_ERROR("version=foo",
+                         "Capability statement 'version=foo': capability 'version=3.2.1' cannot be "
+                         "compared to a string.");
 }
 
 /// Test Moose::CapabilityUtils::CapabilityRegistry::check for multiple valued requirements

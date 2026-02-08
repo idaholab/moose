@@ -395,7 +395,7 @@ CapabilityRegistry::check(std::string requirements) const
         if (!string_ptr)
           checkException(vs,
                          "cannot be compared to a " +
-                             std::string(right.size() == 1 ? "number" : "version_number") + ".",
+                             std::string(right.size() == 1 ? "number" : "version number") + ".",
                          capability);
 
         if (!MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
