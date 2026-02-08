@@ -11,7 +11,6 @@
                 FluidProperties/tabulated/fluid_property_output_file='fluid_properties.csv'
                 Outputs/file_base=tabulated_pT_out"
     rel_err = 1e-4
-    threading = '!pthreads'
     requirement = 'The system shall be able to generate a tabulation of fluid properties based on pressure and temperature, and use a tabulated interplation of these properties.'
     # Steady solve
     recover = false
@@ -26,7 +25,6 @@
                   FluidProperties/tabulated/fluid_property_file='fluid_properties.csv'
                   Outputs/file_base=tabulated_v_e_out"
       rel_err = 1e-4
-      threading = '!pthreads'
       allow_warnings = true
       prereq = tabulated_bicubic
       detail = 'using a regularly spaced interpolation grid'
@@ -40,7 +38,6 @@
                   Outputs/file_base=tabulated_v_e_logv_out
                   FluidProperties/tabulated/use_log_grid_v=true"
       rel_err = 1e-4
-      threading = '!pthreads'
       allow_warnings = true
       prereq = tabulated_bicubic
       detail = 'using a log-spaced specific volume grid and a regularly spaced grid in specific internal energy'
@@ -58,7 +55,6 @@
                   FluidProperties/tabulated/use_log_grid_e=true
                   Outputs/file_base=tabulated_v_e_loge_out"
       rel_err = 1e-4
-      threading = '!pthreads'
       allow_warnings = true
       prereq = tabulated_bicubic
       detail = 'using a linear specific volume grid and a log-spaced grid in specific internal energy'
@@ -115,7 +111,6 @@
                 FluidProperties/tabulated/fluid_property_ve_file='gold/fluid_properties_out_ve.csv'
                 Outputs/file_base=tabulated_direct_v_e_out"
     rel_err = 1e-4
-    threading = '!pthreads'
     allow_warnings = true
     prereq = 'file_writing/ve'
   []

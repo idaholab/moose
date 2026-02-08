@@ -2,48 +2,43 @@
   design = 'Constraints/index.md'
   issues = '#13080'
   [p2p2]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P2P2'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 3 and 3 for a mortar gap-conductance problem with equal, coarse-secondary, and coarse-primary geometric discretizations when using a second order basis for the temperature variable and a second order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
+    required_python_packages = 'sympy'
     heavy = True
-    capabilities = 'method!=dbg'
   []
   [p2p1]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P2P1'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 3 and 2 for a mortar gap-conductance problem with equal, coarse-secondary, and coarse-primary geometric discretizations when using a second order basis for the temperature variable and a first order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
+    required_python_packages = 'sympy'
     heavy = True
-    capabilities = 'method!=dbg'
   []
   [p2p0]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P2P0'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 2 and 1 for a mortar gap-conductance problem with equal, coarse-secondary, and coarse-primary geometric discretizations when using a second order basis for the temperature variable and a zeroth order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
+    required_python_packages = 'sympy'
     heavy = True
-    capabilities = 'method!=dbg'
   []
   [p1p1]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P1P1'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 2 and 2 for a mortar gap-conductance problem with equal, coarse-secondary, and coarse-primary geometric discretizations when using a first order basis for the temperature variable and a first order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
+    required_python_packages = 'sympy'
     heavy = True
-    capabilities = 'method!=dbg'
   []
   [p1p0]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'lm-spatial.py'
     test_case = 'P1P0'
     requirement = 'The system shall be able to demonstrate asymptotically correct convergence rates of 2 and 1 for a mortar gap-conductance problem with equal, coarse-secondary, and coarse-primary geometric discretizations when using a first order basis for the temperature variable and a zeroth order basis for the Lagrange multiplier.'
-    required_python_packages = 'sympy pandas matplotlib'
+    required_python_packages = 'sympy'
     heavy = True
-    capabilities = 'method!=dbg'
   []
 []

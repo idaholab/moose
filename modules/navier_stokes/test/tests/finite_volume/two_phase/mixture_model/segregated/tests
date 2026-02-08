@@ -16,7 +16,7 @@
     max_threads = 1 # see libmesh issue #3808
     # Times out
     heavy = True
-    method = 'opt'
+    capabilities = 'method=opt'
   []
   [rayleigh-benard_heated]
     type = CSVDiff
@@ -26,7 +26,7 @@
     max_threads = 1 # see libmesh issue #3808
     # Times out
     heavy = True
-    method = 'opt'
+    capabilities = 'method=opt'
   []
   [channel_regular]
     type = CSVDiff

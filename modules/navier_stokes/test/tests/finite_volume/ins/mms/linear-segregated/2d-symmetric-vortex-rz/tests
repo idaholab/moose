@@ -2,25 +2,19 @@
   issues = '#31862'
   design = 'SIMPLE.md LinearFVRZViscousSource.md'
   [const_mat]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestSymmetricVortexRZOrthogonal
-    capabilities = 'method=opt'
     min_parallel = 2
     requirement = 'The system shall solve the Navier Stokes equations with symmetry boundary conditions in RZ coordinates using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order for pressure on an orthogonal grid.'
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808
   []
   [spacedependent_mat]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestSymmetricVortexRZOrthogonalNonconst
-    capabilities = 'method=opt'
     requirement = 'The system shall converge to the manufactured solution for an RZ geometry using a SIMPLE solver with spatially varying density and viscosity when the deviatoric stress terms are enabled.'
     min_parallel = 2
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808
   []
 []

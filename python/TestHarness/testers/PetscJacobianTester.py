@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunApp import RunApp
 import re
@@ -28,16 +28,18 @@ class PetscJacobianTester(RunApp):
         params.addParam('turn_off_exodus_output', True, "Whether to set exodus=false in Outputs")
         params.addParam('only_final_jacobian', False, "Check only final Jacobian comparison.")
 
-        # override default values
-        params.valid['valgrind'] = 'NONE'
-        params.valid['petsc_version'] = ['>=3.9.4']
-        params.valid['method'] = ['OPT']
+        # Disable with valgrind
+        params.valid["valgrind"] = "NONE"
+        # No recover or restep
         params['recover'] = False
         params['restep'] = False
+
         return params
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
+
+        specs = self.specs
 
         self.moose_dir = os.environ.get('MOOSE_DIR',
                                         os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -55,6 +57,11 @@ class PetscJacobianTester(RunApp):
         if not self.specs['run_sim']:
             self.specs['cli_args'].extend(['-snes_type', 'ksponly',
                                 '-ksp_type', 'preonly', '-pc_type', 'none', '-snes_convergence_test', 'skip'])
+
+        # Require opt mode
+        if specs["capabilities"]:
+            specs["capabilities"] = "(" + specs["capabilities"] + ") & "
+        specs["capabilities"] += "method=opt"
 
     def __strToFloat(self, str):
         """ Convert string to float """

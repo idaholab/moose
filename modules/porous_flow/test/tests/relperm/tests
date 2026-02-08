@@ -3,54 +3,45 @@
     type = 'CSVDiff'
     input = 'unity.i'
     csvdiff = 'unity_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./corey1]
     type = 'CSVDiff'
     input = 'corey1.i'
     csvdiff = 'corey1_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./corey2]
     type = 'CSVDiff'
     input = 'corey2.i'
     csvdiff = 'corey2_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./corey3]
     type = 'CSVDiff'
     input = 'corey3.i'
     csvdiff = 'corey3_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./corey4]
     type = 'CSVDiff'
     input = 'corey4.i'
     csvdiff = 'corey4_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./vangenuchten1]
     type = 'CSVDiff'
     input = 'vangenuchten1.i'
     csvdiff = 'vangenuchten1_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./vangenuchten2]
     type = 'CSVDiff'
     input = 'vangenuchten2.i'
     csvdiff = 'vangenuchten2_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./brookscorey1]
     type = 'CSVDiff'
     input = 'brooks_corey1.i'
     csvdiff = 'brooks_corey1_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
   [./brookscorey2]
     type = 'CSVDiff'
     input = 'brooks_corey2.i'
     csvdiff = 'brooks_corey2_out_vpp_0001.csv'
-    threading = '!pthreads'
   [../]
 []

@@ -55,9 +55,9 @@ FluidPropertiesApp::registerApps()
 {
   const std::string doc = "Saline thermophysical fluid properties ";
 #ifdef SALINE_ENABLED
-  addCapability("saline", true, doc + "are available.");
+  addBoolCapability("saline", true, doc + "are available.");
 #else
-  addCapability("saline", false, doc + "are not available.");
+  addBoolCapability("saline", false, doc + "are not available.");
 #endif
 
   registerApp(FluidPropertiesApp);

@@ -36,7 +36,7 @@
       valgrind = none # disabling due to timeouts; tested elsewhere
       detail = 'fourth step,'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
       rel_err = 4e-5
     []
     [05]
@@ -57,7 +57,7 @@
       csvdiff = '06_custom_closures_out.csv'
       cli_args = 'Outputs/csv=true Executioner/num_steps=10'
       # Fails with O(-5) diff on O(-1) value on X86_64 machines
-      machine = ARM64
+      capabilities = 'machine=arm64'
       recover = false
       valgrind = none # disabling due to timeouts; tested elsewhere
       max_parallel = 1

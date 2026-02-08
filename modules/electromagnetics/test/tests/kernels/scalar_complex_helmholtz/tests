@@ -8,6 +8,6 @@
     design = 'FunctionDiffusion.md ADMatReaction.md ADMatCoupledForce.md'
     issues = '#13744'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
   []
 []

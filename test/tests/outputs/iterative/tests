@@ -82,7 +82,7 @@
     # Number of iterations still accumulated after a failed timestep
     restep = false
     # MPI dependent
-    hpc = false
+    capabilities = '!hpc'
 
     requirement = "The system shall support output during linear and non-linear iterations during transient simulations using the CSV format."
   [../]

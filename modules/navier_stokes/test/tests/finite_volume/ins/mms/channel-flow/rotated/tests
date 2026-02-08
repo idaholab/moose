@@ -2,42 +2,34 @@
   issues = '#15640'
   design = 'navier_stokes/insfv.md'
   [plane-poiseuille-average]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPlanePoiseuilleAverage
-    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables on a rotated mesh when using an average interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    required_python_packages = 'pandas matplotlib'
     min_parallel = 8
     heavy = true
   []
   [plane-poiseuille-rc]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPlanePoiseuilleRC
-    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables on a rotated mesh when using an RC interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    required_python_packages = 'pandas matplotlib'
     min_parallel = 8
     heavy = true
   []
   [plane-poiseuille-average-first]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPlanePoiseuilleAverageFirst
-    capabilities = 'method!=dbg'
-    required_python_packages = 'pandas matplotlib'
     min_parallel = 8
     heavy = true
     requirement = 'The system shall demonstrate global second order convergence for velocity variables and first order convergence for the pressure variable on a rotated mesh when using an average interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
   []
   [plane-poiseuille-rc-first]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPlanePoiseuilleRCFirst
-    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables on a rotated mesh when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    required_python_packages = 'pandas matplotlib'
     min_parallel = 8
     heavy = true
   []

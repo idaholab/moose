@@ -20,8 +20,9 @@ from ..base import Extension, components
 from ..base.readers import MarkdownReader
 from ..common import exceptions
 from ..tree import tokens
-from TestHarness import util
+from TestHarness.capability_util import getAppCapabilities
 from . import command, appsyntax
+from typing import Optional
 
 LOG = logging.getLogger(__name__)
 
@@ -84,7 +85,7 @@ class IfElseExtension(command.CommandExtension):
         command.CommandExtension.__init__(self, *args, **kwargs)
 
         # Application capabilities
-        self._capabilities = None
+        self._capabilities: Optional[dict] = None
 
         # Build list of modules for function searching and include this file by default
         self._modules = self.loadModules(self.get('modules'))
@@ -126,7 +127,7 @@ class IfElseExtension(command.CommandExtension):
 
         try:
             LOG.info("Reading MOOSE application capabilities...")
-            self._capabilities = util.getCapabilities(exe)
+            self._capabilities = getAppCapabilities(exe)
         except:
             LOG.error(f'Failed to load capabilities from application {exe}.')
 
@@ -144,8 +145,11 @@ class IfElseExtension(command.CommandExtension):
             msg = "Capabilities are not available"
             LOG.error(msg)
             return False
-        entry = self._capabilities.get(name.lower())
-        return entry is not None and entry[0] != False
+        if entry := self._capabilities.get(name.lower()):
+            assert isinstance(entry, dict), "Capability entry not a dict"
+            assert "value" in entry, "Capability missing value"
+            return entry["value"] is not False
+        return False
 
     def extend(self, reader, renderer):
         self.requires(command)

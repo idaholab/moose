@@ -2,15 +2,11 @@
   issues = '#22970'
   design = 'navier_stokes/insfv.md'
   [weller-reconstruction]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestWellerReconstruction
     requirement = "The system shall be able to use Weller's reconstruction method to build cell "
                   "vector values from face fluxes with a second order convergence."
-    capabilities = 'method!=dbg'
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
     min_parallel = 2
   []
 []

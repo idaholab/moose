@@ -31,7 +31,10 @@ class TestHarnessTester(TestHarnessTestCase):
         # The number of tests in the test spec should be the number provided
         self.assertEqual(len(tests), len(test_spec_results['tests']))
         # Test spec should match
-        self.assertEqual(os.path.join(test_base_path, spec_file), test_spec_results['spec_file'])
+        self.assertEqual(
+            os.path.abspath(os.path.join(test_base_path, spec_file)),
+            test_spec_results["spec_file"],
+        )
 
         for test in tests:
             # Test should be in the results

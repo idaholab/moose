@@ -804,6 +804,20 @@ ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
 
 ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_error_before; }
 
+ScopedDeprecatedIsError::ScopedDeprecatedIsError(const bool deprecated_is_error)
+  : _deprecated_is_error_before(Moose::_deprecated_is_error)
+{
+  mooseAssert(!libMesh::Threads::in_threads, "Cannot be used in threads");
+  Moose::_deprecated_is_error = deprecated_is_error;
+}
+
+ScopedDeprecatedIsError::ScopedDeprecatedIsError() : ScopedDeprecatedIsError(true) {}
+
+ScopedDeprecatedIsError::~ScopedDeprecatedIsError()
+{
+  Moose::_deprecated_is_error = _deprecated_is_error_before;
+}
+
 std::string
 hitMessagePrefix(const hit::Node & node)
 {

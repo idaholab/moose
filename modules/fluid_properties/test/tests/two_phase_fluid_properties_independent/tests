@@ -7,7 +7,6 @@
     csvdiff = 'test_out.csv'
     rel_err = 1e-8
     allow_test_objects = true
-    threading = '!pthreads'
     requirement = 'The system shall be able to mix two independent single-phase fluid properties to form a basic two-phase model.'
   []
   [no_error_on_unimplemented]
@@ -24,7 +23,6 @@
       AuxKernels/T_sat_aux/execute_on=initial
       Outputs/csv=false"
     allow_test_objects = true
-    threading = '!pthreads'
     # this test modifies the checkpoint file causing recovery of 'test' to fail
     prereq = test
     requirement = 'The system shall be able to not error on unimplemented two-phase fluid properties routines if the user requested so.'
@@ -42,7 +40,6 @@
       AuxKernels/T_sat_aux/execute_on=initial"
     expect_err = "The 2-phase fluid properties class 'TwoPhaseFluidPropertiesIndependent' does not allow calling any 2-phase property interfaces"
     allow_test_objects = true
-    threading = '!pthreads'
     requirement = 'The system shall report an error if 2-phase property interfaces are called on a class designed to handle two single-phase fluid properties.'
   []
 []

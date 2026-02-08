@@ -1,120 +1,153 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from TestHarnessTestCase import TestHarnessTestCase
-from TestHarness import TestHarness
-from TestHarness.StatusSystem import StatusSystem
+"""Test the --only-tests-that-require option."""
 
 import unittest
 
+from TestHarnessTestCase import TestHarnessTestCase
+
+from TestHarness.capability_util import parseRequiredCapabilities
+from TestHarness.StatusSystem import StatusSystem
+
+
 class TestRequireCapability(TestHarnessTestCase):
-    def testTestHarnessBuildRequiredCapabilities(self):
+    # """Test the --only-tests-that-require option."""
+
+    def getAugmentedCapabilityNames(self) -> list[str]:
         """
-        Tests TestHarness.buildRequiredCapabilities()
+        Get pycapabilities.AUGMENTED_CAPABILITY_NAMES.
+
+        Done here instead of at file level to avoid pycapabilites build.
         """
-        # Not registered
-        with self.assertRaisesRegex(SystemExit, 'Required capability "bar" is not registered'):
-            TestHarness.buildRequiredCapabilities(['foo'], ['bar'])
+        from pycapabilities import AUGMENTED_CAPABILITY_NAMES
 
-        # True value -> false augmented value
-        res = TestHarness.buildRequiredCapabilities(['foo'], ['foo'])
-        self.assertEqual(res, [('foo', False)])
+        names = list(AUGMENTED_CAPABILITY_NAMES)
+        self.assertGreater(len(names), 1)
+        return names
 
-        # False value -> true augmented value
-        res = TestHarness.buildRequiredCapabilities(['foo'], ['!foo'])
-        self.assertEqual(res, [('foo', True)])
+    def testParseRequiredCapabilities(self):
+        """Test TestHarness.capability_util.parseRequiredCapabilities()."""
+        from pycapabilities import Capabilities
 
-        # Has stripping
-        res = TestHarness.buildRequiredCapabilities(['foo'], ['  foo '])
-        self.assertEqual(len(res), 1)
-        self.assertEqual(res[0][0], 'foo')
+        names = self.getAugmentedCapabilityNames()
+        name1 = names[0]
+        name2 = names[1]
 
-        # Multiple
-        res = TestHarness.buildRequiredCapabilities(['foo', 'bar'], ['foo', '!bar'])
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res[0], ('foo', False))
-        self.assertEqual(res[1], ('bar', True))
+        capabilities = Capabilities(
+            {
+                "appvalue": {"doc": "doc", "value": "foo"},
+                "falsevalue": {"doc": "doc", "value": False},
+            }
+        )
+
+        # success
+        required = parseRequiredCapabilities(["appvalue", name1, name2], capabilities)
+        self.assertEqual(required, ["appvalue", name1, name2])
+
+        # unallowed characters
+        with self.assertRaisesRegex(
+            ValueError, "Capability 'fOO!' has unallowed characters"
+        ):
+            parseRequiredCapabilities(["fOO!"], capabilities)
+
+        # registered but false
+        with self.assertRaisesRegex(ValueError, "Capability 'falsevalue' is false"):
+            parseRequiredCapabilities(["falsevalue"], capabilities)
+
+        # not registered
+        with self.assertRaisesRegex(ValueError, "Capability 'foo' is not registered"):
+            parseRequiredCapabilities(["foo"], capabilities)
 
     def testTestHarnessOptions(self):
-        """
-        Test that the test harness will set the _required_capabilities option
-        """
-        # No capabilities set, can't run
-        with self.assertRaisesRegex(SystemExit, 'Cannot use --only-tests-that-require with --no-capabilities'):
-            self.runTests('--only-tests-that-require', 'petsc', no_capabilities=True)
-
-        # Not registered
-        with self.assertRaisesRegex(SystemExit, 'Required capability "foo" is not registered'):
-            self.runTests('--only-tests-that-require', 'foo', no_capabilities=False)
-
-        # Is registered and is set
+        """Test that the test harness will set the _required_capabilities option."""
+        # Single
         res = self.runTests(
-            '--only-tests-that-require',
-            'moosetestapp',
-            no_capabilities=False,
-            run=False
+            "--only-tests-that-require",
+            "test_one",
+            run=False,
+            minimal_capabilities=False,
         )
-        self.assertEqual(res.harness.options._required_capabilities, [('moosetestapp', False)])
+        assert res.harness is not None
+        self.assertEqual(res.harness.options._required_capabilities, ["test_one"])
 
         # Multiple
         res = self.runTests(
-            '--only-tests-that-require',
-            'moosetestapp',
-            '--only-tests-that-require',
-            '!compiler',
-            no_capabilities=False,
-            run=False
+            "--only-tests-that-require",
+            "test_one",
+            "--only-tests-that-require",
+            "test_string",
+            run=False,
+            minimal_capabilities=False,
         )
+        assert res.harness is not None
         self.assertEqual(
-            res.harness.options._required_capabilities,
-            [('moosetestapp', False), ('compiler', True)]
+            res.harness.options._required_capabilities, ["test_one", "test_string"]
         )
 
+        # Catch exceptions with CLI error
+        with self.assertRaisesRegex(
+            SystemExit,
+            "ERROR: --only-tests-that-require: Capability 'fOO!' has unallowed "
+            "characters",
+        ):
+            self.runTests(
+                "--only-tests-that-require", "fOO!", minimal_capabilities=True
+            )
+
     def testTesterSkip(self):
-        """
-        Test the Tester skipping tests based on --required-capabilities
-        """
+        """Test the Tester skipping tests with --only-tests-that-require."""
+
         def run_test(skip, require_capabilities, test_capabilities=None):
-            test_name = 'test'
+            test_name = "test"
             tests = {
                 test_name: {
-                    'type': 'RunApp',
-                    'input': 'unused',
-                    'should_execute': False,
+                    "type": "RunApp",
+                    "input": "unused",
+                    "should_execute": False,
                 }
             }
             if test_capabilities:
-                tests[test_name]['capabilities'] = f"'{test_capabilities}'"
+                tests[test_name]["capabilities"] = f"'{test_capabilities}'"
             args = []
             for v in require_capabilities:
-                args += ['--only-tests-that-require', v]
-            res = self.runTests(*args, tests=tests, no_capabilities=False)
+                args += ["--only-tests-that-require", v]
+            res = self.runTests(
+                *args,
+                tests=tests,
+                minimal_capabilities=False,
+            )
+            assert res.harness is not None
             job = self.getJobWithName(res.harness, test_name)
             if skip:
                 self.assertEqual(job.getStatus(), StatusSystem.skip)
-                self.assertEqual(job.getCaveats(), set(['Missing required capabilities']))
+                self.assertEqual(job.getCaveats(), set(["!" + ", !".join(skip)]))
             else:
                 self.assertEqual(job.getStatus(), StatusSystem.finished)
 
-        # Capability is not in the test spec capabilities
-        run_test(True, ['moosetestapp'])
-        run_test(True, ['moosetestapp'], 'compiler')
+        # Single requirement, test has no capabilities
+        run_test(["test_one"], ["test_one"])
+        # Single requirement, test has capabilities but not the right one
+        run_test(["test_one"], ["test_one"], "test_string")
+        # Single requirement, test has capabilities and the right one
+        run_test([], ["test_one"], "test_one")
+        # Two requirements, test has no capabilities
+        run_test(["test_one", "test_two_explicit"], ["test_one", "test_two_explicit"])
+        # Two requirements, test has one of them
+        run_test(["test_string"], ["test_one", "test_string"], "test_one")
+        # Two requirements, test has both of them
+        run_test([], ["test_string", "test_string"], "test_one & test_string")
+        # Requirement from a Tester augmented capability
+        # (mpi_procs is added in RunApp)
+        run_test(["mpi_procs"], ["mpi_procs"], "test_one")
+        run_test([], ["mpi_procs"], "mpi_procs=1")
 
-        # Capability is in the test spec capabilities
-        run_test(False, ['moosetestapp'], 'moosetestapp')
 
-        # Test spec has complex capabilities and still runs
-        run_test(False, ['moosetestapp'], 'moosetestapp & compiler')
-
-        # Multiple --only-tests-that-require
-        run_test(False, ['moosetestapp', 'compiler'], 'compiler & moosetestapp')
-        run_test(False, ['moosetestapp', 'compiler'], 'compiler & method & moosetestapp')
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -103,3 +103,21 @@ class PythonUnitTest(RunApp):
             self.addCaveats('hpc apptainer max_cpus=1')
             return 1
         return procs
+
+    def augmentEnvironment(self, options) -> dict:
+        """
+        Get environment variables that should be augmented while running.
+
+        MOOSE_PYTHONUNITTEST_EXECUTABLE is added if an executable is
+        available in the event that the unit test needs to use it. A
+        common use case for this is MMS tests, which use a python
+        unittest to run the moose executable.
+        """
+        environment = super().augmentEnvironment(options)
+
+        if options._app_name is not None:
+            executable = self.specs["executable"]
+            assert executable, "Executable is not set"
+            environment["MOOSE_PYTHONUNITTEST_EXECUTABLE"] = executable
+
+        return environment

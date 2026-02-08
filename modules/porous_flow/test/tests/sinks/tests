@@ -4,7 +4,6 @@
     input = 's01.i'
     csvdiff = 's01.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -14,7 +13,6 @@
     input = 's02.i'
     csvdiff = 's02.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, when the source/sink strength is multiplied by the mobility'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -24,7 +22,6 @@
     input = 's03.i'
     csvdiff = 's03.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, unsaturated flow, when the source/sink strength is multiplied by the relative permeability'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -34,7 +31,6 @@
     input = 's04.i'
     csvdiff = 's04.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a piecewise-linear function of porepressure'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -44,7 +40,6 @@
     input = 's05.i'
     csvdiff = 's05.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a half-gaussian function of porepressure'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -54,7 +49,6 @@
     input = 's06.i'
     csvdiff = 's06.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model source/sink boundary condition for single-phase, single-component flow, when the boundary flux is a half-cubic function of porepressure'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -64,7 +58,6 @@
     input = 's07.i'
     csvdiff = 's07.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, multi-component, fully-saturated flow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -74,7 +67,6 @@
     input = 's08.i'
     csvdiff = 's08.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for multi-phase, multi-component flow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -84,7 +76,6 @@
     input = s09.i
     csvdiff = 's09_mf_0100.csv s09_mf_0050.csv s09_mf_0010.csv'
     abs_zero = 1E-7
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -94,7 +85,6 @@
     input = s09_fully_saturated.i
     csvdiff = 's09_fully_saturated_mf_0100.csv s09_fully_saturated_mf_0050.csv s09_fully_saturated_mf_0010.csv'
     abs_zero = 1E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition that holds porepressures fixed and extracts fluid components from boundaries at a rate prescribed by the flow within the model at the boundary - viz, the sink should behave like a free boundary, and this feature shall be compatible with the fully-saturated formalism within PorousFlow'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -105,7 +95,6 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=left Outputs/file_base=s10_left'
     exodiff = s10_left.e
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the left-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -115,7 +104,6 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=right Outputs/file_base=s10_right'
     exodiff = s10_right.e
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the right-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -125,7 +113,6 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=top Outputs/file_base=s10_top'
     exodiff = s10_top.e
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the top-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -135,7 +122,6 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=bottom Outputs/file_base=s10_bottom'
     exodiff = s10_bottom.e
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the bottom-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -145,7 +131,6 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=front Outputs/file_base=s10_front'
     exodiff = s10_front.e
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the front-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -155,7 +140,6 @@
     input = s10.i
     cli_args = 'BCs/flux/boundary=back Outputs/file_base=s10_back'
     exodiff = s10_back.e
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition for single-phase, single-component, fully-saturated flow, and the source/sink shall remove fluid from the correct node in a mesh: the back-side nodes in this case'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -164,7 +148,6 @@
     type = Exodiff
     input = s11.i
     exodiff = s11.e
-    threading = '!pthreads'
     cli_args = 'BCs/left_T/fluid_phase=0'
     requirement = 'PorousFlow shall be able to inject fluid at user specified temperature.'
     design = 'PorousFlowEnthalpySink.md'
@@ -175,7 +158,6 @@
     input = s11_act.i
     exodiff = s11.e
     prereq = 's11'
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to setup fluid injection at user specified temperature using a simplified syntax.'
     issues = '#15742'
     design = 'PorousFlowEnthalpySink.md PorousFlowSinkBC.md'
@@ -183,7 +165,6 @@
   [./s11_act_too_many_vars]
     type = RunException
     input = s11_act.i
-    threading = '!pthreads'
     cli_args = 'Variables/pp1/initial_condition=3 Kernels/td_pp1/type=TimeDerivative Kernels/td_pp1/variable=pp1 UserObjects/dictator/porous_flow_vars="pp pp1 temp"'
     expect_err = "Number of porous flow variables in simulation is '3', but this BC can be used only with pressure and temperature."
     requirement = 'PorousFlow shall report an error when incorrect number of variables is used when using a simplified enthalpy sink BC syntax.'
@@ -193,7 +174,6 @@
   [./s11_act_too_many_pressure_vars]
     type = RunException
     input = s11_act.i
-    threading = '!pthreads'
     cli_args = 'Variables/pp1/initial_condition=3 Kernels/td_pp1/type=TimeDerivative Kernels/td_pp1/variable=pp1 UserObjects/dictator/porous_flow_vars="pp temp" Modules/PorousFlow/BCs/left/porepressure_var="pp pp1"'
     expect_err = "'porepressure_var' parameter can currently take only a single value"
     requirement = 'PorousFlow shall report an error when more than 2 porepressure variables are specified when using a simplified BC syntax.'
@@ -203,7 +183,6 @@
   [./s11_overspecified_pressure]
     type = RunException
     input = s11.i
-    threading = '!pthreads'
     cli_args = 'AuxVariables/press/initial_condition=3 BCs/left_T/porepressure_var=press BCs/left_T/fluid_phase=0'
     expect_err = "Cannot specify both pressure and pore pressure."
     requirement = 'PorousFlow shall report an error when both external and pore pressures are specified.'
@@ -213,7 +192,6 @@
   [./s11_underspecified_pressure]
     type = RunException
     input = s11.i
-    threading = '!pthreads'
     expect_err = "You have to specify either 'pressure' or 'fluid_phase'."
     requirement = 'PorousFlow shall report an error when neither external and pore pressures are specified.'
     issues = '#15742'
@@ -222,7 +200,6 @@
   [./s11_incorrect_fluid_phase]
     type = RunException
     input = s11.i
-    threading = '!pthreads'
     cli_args = "BCs/left_T/fluid_phase=2"
     expect_err = "Specified 'fluid_phase' is larger than the number of phases available in the simulation \(1\)."
     requirement = 'PorousFlow shall report an error when incorrect fluid phase is specified in a BC for injecting fluid at user specified temperature.'
@@ -233,7 +210,6 @@
     type = CSVDiff
     input = s12.i
     csvdiff = s12.csv
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to inject fluid at user specified pressure and temperature.'
     design = 'PorousFlowEnthalpySink.md'
     issues = '#15742'
@@ -243,7 +219,6 @@
     input = 'injection_production_eg.i'
     csvdiff = 'injection_production_eg_out_pps_0002.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a free boundary condition for multi-phase, multi-component fluids, and a clear example showing how this is possible shall be given'
     issues = '#7333'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -252,7 +227,6 @@
     type = 'CSVDiff'
     input = 'PorousFlowPiecewiseLinearSink_BC_eg1.i'
     csvdiff = 'PorousFlowPiecewiseLinearSink_BC_eg1_out.csv'
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a source/sink boundary condition, and a clear example showing how these boundary conditions can be used to fix porepressures shall be given'
     issues = '#12769'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md porous_flow/sinks.md'
@@ -261,7 +235,6 @@
   [./outflow_except1]
     type = RunException
     input = outflow_except1.i
-    threading = '!pthreads'
     expect_err = "The Dictator declares that the maximum fluid component index is 0, but you have set mass_fraction_component to 1. Remember that indexing starts at 0"
     match_literal = true
     requirement = 'PorousFlow shall report an error for an incorrect mass-fraction specification in PorousFlowOutflowBC'
@@ -272,7 +245,6 @@
     type = RunException
     input = outflow_except2.i
     cli_args = 'Materials/fluid_props/at_nodes=false'
-    threading = '!pthreads'
     expect_err = "PorousFlowOutflowBC: You requested to multiply_by_density, but you have no nodal fluid density Material"
     match_literal = true
     requirement = 'PorousFlow shall report an error if there is no nodal density Material when using PorousFlowOutflowBC'
@@ -283,7 +255,6 @@
     type = RunException
     input = outflow_except2.i
     cli_args = 'Materials/inactive=relperm'
-    threading = '!pthreads'
     expect_err = "PorousFlowOutflowBC: You requested to include the relative permeability, but you have no nodal relative permeability Material"
     match_literal = true
     requirement = 'PorousFlow shall report an error if there is no nodal relative-permeability Material when using PorousFlowOutflowBC'
@@ -294,7 +265,6 @@
     type = RunException
     input = outflow_except2.i
     cli_args = 'Materials/inactive=massfrac'
-    threading = '!pthreads'
     expect_err = "PorousFlowOutflowBC: For flux_type = fluid, you need a nodal mass-fraction Material"
     match_literal = true
     requirement = 'PorousFlow shall report an error if there is no nodal mass-fraction Material when using PorousFlowOutflowBC'
@@ -305,7 +275,6 @@
     type = RunException
     input = outflow_except2.i
     cli_args = 'BCs/outflow/flux_type=heat Materials/inactive=thermal_conductivity'
-    threading = '!pthreads'
     expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a thermal conductivity Material"
     match_literal = true
     requirement = 'PorousFlow shall report an error if there is no thermal conductivity Material when using PorousFlowOutflowBC'
@@ -316,7 +285,6 @@
     type = RunException
     input = outflow_except2.i
     cli_args = 'BCs/outflow/flux_type=heat Materials/fluid_props/compute_enthalpy=false'
-    threading = '!pthreads'
     expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a nodal fluid enthalpy Material"
     match_literal = true
     requirement = 'PorousFlow shall report an error if there is no enthalpy Material when using PorousFlowOutflowBC'
@@ -327,7 +295,6 @@
     type = RunException
     input = outflow_except2.i
     cli_args = 'BCs/outflow/flux_type=heat Materials/inactive=temperature'
-    threading = '!pthreads'
     expect_err = "PorousFlowOutflowBC: For flux_type = heat, you need a temperature Material"
     match_literal = true
     requirement = 'PorousFlow shall report an error if there is no temperature Material when using PorousFlowOutflowBC'
@@ -339,7 +306,6 @@
     input = s13.i
     csvdiff = 's13_csv_mf_0100.csv s13_csv_mf_0050.csv s13_csv_mf_0010.csv'
     abs_zero = 1E-7
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model an outflow boundary condition in single-phase, fully-saturated, multi-component cases'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
@@ -348,7 +314,6 @@
     type = CSVDiff
     input = s14.i
     csvdiff = s14_out.csv
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model an outflow boundary condition in single-phase, fully-saturated, single-component case and record the total mass outflow'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
@@ -357,7 +322,6 @@
     type = CSVDiff
     input = s15.i
     csvdiff = s15_out.csv
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a heat-energy outflow boundary condition in single-phase, fully-saturated, single-component case and record the total heat-energy outflow'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'
@@ -367,7 +331,6 @@
     input = injection_production_eg_outflowBC.i
     csvdiff = injection_production_eg_outflowBC_out_pps_0002.csv
     rel_err = 1.0E-5
-    threading = '!pthreads'
     requirement = 'PorousFlow shall be able to model a free, outflow boundary condition for multi-phase, multi-component fluids'
     issues = '#18037'
     design = 'porous_flow/tests/sinks/sinks_tests.md porous_flow/boundaries.md PorousFlowOutflowBC.md'

@@ -11,7 +11,6 @@
     valgrind = 'NONE'
 
     # HPC runs could lead to a timeout
-    hpc = false
-    capabilities = 'method!=dbg'
+    capabilities = 'method!=dbg & !hpc'
   [../]
 []
