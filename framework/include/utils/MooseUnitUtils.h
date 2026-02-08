@@ -11,6 +11,9 @@
 
 #include "gtest/gtest.h"
 
+#include <filesystem>
+#include <string>
+
 #include "libmesh/utility.h"
 
 #include "MooseUtils.h"
@@ -108,6 +111,26 @@ throwsWithMessage(Func && fn, const std::string_view message, const char * file,
       ::testing::TestPartResult::kNonFatalFailure, file, line, error.str().c_str()) =
       ::testing::Message();
 }
+
+/**
+ * Create a temporary file and delete it upon destruction.
+ */
+class TempFile
+{
+public:
+  TempFile();
+  ~TempFile();
+
+  /**
+   * @return The path to the temporary file.
+   */
+  const std::filesystem::path & path() const { return _path; }
+
+private:
+  static std::filesystem::path generatePath();
+
+  const std::filesystem::path _path;
+};
 
 } // namespace Moose::UnitUtils
 

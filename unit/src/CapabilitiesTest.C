@@ -11,6 +11,7 @@
 
 #include "MooseUnitUtils.h"
 
+#include "AppFactory.h"
 #include "MooseApp.h"
 #include "Capabilities.h"
 
@@ -741,6 +742,157 @@ TEST_F(CapabilitiesTest, mooseAppAddCapability)
   }
 }
 
+/// Test --check-capabilities in MooseApp
+TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
+{
+  auto & capabilities = Capabilities::getCapabilities();
+  capabilities.add("value_true", bool(true), "doc");
+  capabilities.add("value_false", bool(false), "doc");
+
+  // Are fulfilled
+  {
+    auto app =
+        AppFactory::create("MooseUnitApp", {"--check-capabilities='value_true & !value_false'"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 0);
+  }
+
+  // Aren't fulfilled
+  {
+    auto app =
+        AppFactory::create("MooseUnitApp", {"--check-capabilities='!value_true | value_false'"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Exceptions caught as mooseError
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--check-capabilities='foo!?'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--check-capablities: Capability statement '!': unknown operator.");
+  }
+}
+
+/// Test --required-capabilities in MooseApp
+TEST_F(CapabilitiesTest, mooseAppCheckRequiredCapabilities)
+{
+  auto & capabilities = Capabilities::getCapabilities();
+  capabilities.add("value_true", bool(true), "doc");
+  capabilities.add("value_false", bool(false), "doc");
+
+  // Aren't fulfilled
+  {
+    auto app =
+        AppFactory::create("MooseUnitApp", {"--required-capabilities='!value_true | value_false'"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Exceptions caught as mooseError
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo!?'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--required-capablities: Capability statement '!': unknown operator.");
+  }
+
+  // Unknown state
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo>1'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(), "are not specific enough");
+  }
+}
+
+// Set of dumped capabilities that stores a reasonable
+// range of all Capability types
+const nlohmann::json JSON_CAPABILITIES = {
+    {"false", {{"doc", "false"}, {"value", false}}},
+    {"int", {{"doc", "1"}, {"explicit", false}, {"value", 1}}},
+    {"int_explicit", {{"doc", "1"}, {"explicit", true}, {"value", 1}}},
+    {"string", {{"doc", "string"}, {"explicit", false}, {"value", "string"}}},
+    {"string_enum",
+     {{"doc", "string_enum"},
+      {"enumeration", {"string_enum", "foo"}},
+      {"explicit", false},
+      {"value", "string_enum"}}},
+    {"string_explicit",
+     {{"doc", "string_explicit"}, {"explicit", true}, {"value", "string_explicit"}}},
+    {"string_explicit_enum",
+     {{"doc", "string_explicit_enum"},
+      {"enumeration", {"string_explicit_enum", "foo"}},
+      {"explicit", true},
+      {"value", "string_explicit_enum"}}},
+    {"true", {{"doc", "true"}, {"value", true}}}};
+
+/// Test --testharness-capabilities in MooseApp
+TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
+{
+  // Check string that satisfies each entry in JSON_CAPABILITIES
+  const std::string check_capabilities =
+      "--check-capabilities='!false & int & int=1 & int_explicit=1 & string & string=string & "
+      "string_enum & string_enum=string_enum & string_explicit=string_explicit & "
+      "string_explicit_enum=string_explicit_enum & true'";
+
+  // Check fails without augmenting via --testharness-capabilities
+  {
+    auto app = AppFactory::create("MooseUnitApp", {check_capabilities});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Success once adding --testharness-capabilities to augment
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    std::ofstream out(temp_file.path());
+    out << JSON_CAPABILITIES.dump() << std::flush;
+    out.close();
+
+    auto app = AppFactory::create(
+        "MooseUnitApp", {"--testharness-capabilities", temp_file.path(), check_capabilities});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 0);
+  }
+
+  // File doesn't exist
+  {
+    const std::string bad_file = "/testharness/capabilities/no/exist.json";
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", bad_file});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--testharness-capabilities: Could not open \"" + bad_file + "\"");
+  }
+
+  // Bad JSON parse, caught as mooseError
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    std::ofstream out(temp_file.path());
+    out << "{" << std::flush;
+    out.close();
+
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
+                                   "--testharness-capabilities: Failed to load capabilities \"" +
+                                       std::string(temp_file.path()) +
+                                       "\":\n[json.exception.parse_error");
+  }
+
+  // Bad augment, caught as mooseError
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    const nlohmann::json root = {{"name", {{"foo", "bar"}}}};
+    std::ofstream out(temp_file.path());
+    out << root.dump() << std::flush;
+    out.close();
+
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
+                                   "--testharness-capabilities: Failed to load capabilities \"" +
+                                       std::string(temp_file.path()) +
+                                       "\":\n[json.exception.type_error");
+  }
+}
+
 /// Test Capabilities::dump
 TEST_F(CapabilitiesTest, dump)
 {
@@ -763,26 +915,7 @@ TEST_F(CapabilitiesTest, dump)
   const auto dumped = capabilities.dump();
   const auto loaded = nlohmann::json::parse(dumped);
 
-  const nlohmann::json expected = {
-      {"false", {{"doc", "false"}, {"value", false}}},
-      {"int", {{"doc", "1"}, {"explicit", false}, {"value", 1}}},
-      {"int_explicit", {{"doc", "1"}, {"explicit", true}, {"value", 1}}},
-      {"string", {{"doc", "string"}, {"explicit", false}, {"value", "string"}}},
-      {"string_enum",
-       {{"doc", "string_enum"},
-        {"enumeration", {"string_enum", "foo"}},
-        {"explicit", false},
-        {"value", "string_enum"}}},
-      {"string_explicit",
-       {{"doc", "string_explicit"}, {"explicit", true}, {"value", "string_explicit"}}},
-      {"string_explicit_enum",
-       {{"doc", "string_explicit_enum"},
-        {"enumeration", {"string_explicit_enum", "foo"}},
-        {"explicit", true},
-        {"value", "string_explicit_enum"}}},
-      {"true", {{"doc", "true"}, {"value", true}}}};
-
-  EXPECT_EQ(loaded, expected);
+  EXPECT_EQ(loaded, JSON_CAPABILITIES);
 }
 
 /// Test Capabilities::check
@@ -800,26 +933,7 @@ TEST_F(CapabilitiesTest, augment)
 {
   auto & capabilities = Capabilities::getCapabilities();
 
-  const nlohmann::json to_augment = {
-      {"false", {{"doc", "false"}, {"value", false}}},
-      {"int", {{"doc", "1"}, {"explicit", false}, {"value", 1}}},
-      {"int_explicit", {{"doc", "1"}, {"explicit", true}, {"value", 1}}},
-      {"string", {{"doc", "string"}, {"explicit", false}, {"value", "string"}}},
-      {"string_enum",
-       {{"doc", "string_enum"},
-        {"enumeration", {"string_enum", "foo"}},
-        {"explicit", false},
-        {"value", "string_enum"}}},
-      {"string_explicit",
-       {{"doc", "string_explicit"}, {"explicit", true}, {"value", "string_explicit"}}},
-      {"string_explicit_enum",
-       {{"doc", "string_explicit_enum"},
-        {"enumeration", {"string_explicit_enum", "foo"}},
-        {"explicit", true},
-        {"value", "string_explicit_enum"}}},
-      {"true", {{"doc", "true"}, {"value", true}}}};
-
-  capabilities.augment(to_augment, {});
+  capabilities.augment(JSON_CAPABILITIES, {});
 
   const auto test_capability =
       [this](const std::string & name,

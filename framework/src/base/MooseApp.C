@@ -925,11 +925,12 @@ MooseApp::setupOptions()
   // Augment capabilities from the TestHarness
   if (isParamValid("testharness_capabilities"))
   {
-    const auto & file_path = getParam<std::string>("testharness_capabilities");
+    const auto file_path = std::filesystem::absolute(
+        std::filesystem::path(getParam<std::string>("testharness_capabilities")));
 
     std::ifstream file(file_path);
     if (!file)
-      mooseError("--testharness-capabilities: Could not open '", file_path, "'");
+      mooseError("--testharness-capabilities: Could not open ", file_path);
 
     nlohmann::json root;
     try
@@ -940,8 +941,40 @@ MooseApp::setupOptions()
     catch (const std::exception & e)
     {
       mooseError(
-          "--testharness-capabilities: Failed to load capabilities '", file_path, "':\n", e.what());
+          "--testharness-capabilities: Failed to load capabilities ", file_path, ":\n", e.what());
     }
+  }
+
+  if (isParamValid("required_capabilities"))
+  {
+    const auto required_capabilities = getParam<std::string>("required_capabilities");
+
+    Moose::CapabilityUtils::CapabilityRegistry::Result result;
+    try
+    {
+      result = Moose::Capabilities::getCapabilities().check(required_capabilities);
+    }
+    catch (const std::exception & e)
+    {
+      mooseError("--required-capablities: ", e.what());
+    }
+    const auto status = std::get<0>(result);
+
+    if (status < Moose::CapabilityUtils::UNKNOWN)
+    {
+      mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
+      _ready_to_exit = true;
+      // we use code 77 as "skip" in the Testharness
+      _exit_code = 77;
+      return;
+    }
+    if (status == Moose::CapabilityUtils::UNKNOWN)
+      mooseError("Required capabilities '",
+                 required_capabilities,
+                 "' are not specific enough. A comparison test is performed on an undefined "
+                 "capability. Disambiguate this requirement by adding an existence/non-existence "
+                 "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
+                 "or '!unknown | unknown<1.2.3'");
   }
 
   // Build a minimal running application, ignoring the input file.
@@ -1115,8 +1148,18 @@ MooseApp::setupOptions()
   {
     _perf_graph.disableLivePrint();
     const auto & capabilities = getParam<std::string>("check_capabilities");
-    auto [status, reason, doc] = Moose::Capabilities::getCapabilities().check(capabilities);
-    const bool pass = status == Moose::CapabilityUtils::CERTAIN_PASS;
+
+    Moose::CapabilityUtils::CapabilityRegistry::Result result;
+    try
+    {
+      result = Moose::Capabilities::getCapabilities().check(capabilities);
+    }
+    catch (const std::exception & e)
+    {
+      mooseError("--check-capablities: ", e.what());
+    }
+
+    const bool pass = std::get<0>(result) == Moose::CapabilityUtils::CERTAIN_PASS;
     _console << "Capabilities '" << capabilities << "' are " << (pass ? "" : "not ") << "fulfilled."
              << std::endl;
     _ready_to_exit = true;
@@ -1137,30 +1180,6 @@ MooseApp::setupOptions()
     }
 
     _builder.build();
-
-    if (isParamValid("required_capabilities"))
-    {
-      _perf_graph.disableLivePrint();
-
-      const auto required_capabilities = getParam<std::string>("required_capabilities");
-      auto [status, reason, doc] =
-          Moose::Capabilities::getCapabilities().check(required_capabilities);
-      if (status < Moose::CapabilityUtils::UNKNOWN)
-      {
-        mooseInfo("Required capabilities '", required_capabilities, "' not fulfilled.");
-        _ready_to_exit = true;
-        // we use code 77 as "skip" in the Testharness
-        _exit_code = 77;
-        return;
-      }
-      if (status == Moose::CapabilityUtils::UNKNOWN)
-        mooseError("Required capabilities '",
-                   required_capabilities,
-                   "' are not specific enough. A comparison test is performed on an undefined "
-                   "capability. Disambiguate this requirement by adding an existence/non-existence "
-                   "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
-                   "or '!unknown | unknown<1.2.3'");
-    }
 
     // Lambda to check for mutually exclusive parameters
     auto isExclusiveParamSetByUser =
