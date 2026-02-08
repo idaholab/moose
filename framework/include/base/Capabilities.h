@@ -35,8 +35,6 @@ namespace Moose
 class Capabilities
 {
 public:
-  virtual ~Capabilities() {}
-
   static Capabilities & getCapabilities();
 
   /**
