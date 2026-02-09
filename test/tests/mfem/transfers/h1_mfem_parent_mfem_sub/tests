@@ -97,7 +97,7 @@
       prereq = ComplexToSubFromParent/run
       capabilities = 'mfem'
       recover = false
-      detail = 'checking the complex sub-application and parent application outputs against each other.'
+      detail = 'checking the complex sub-application and complex parent application outputs against each other.'
     []
   []
 []
