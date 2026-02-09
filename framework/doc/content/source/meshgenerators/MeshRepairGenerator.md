@@ -18,6 +18,9 @@ The operations currently implemented are:
 
 - merging boundaries with the same name but different boundary IDs.
 
+- renumbering the nodes and elements to have a contiguous ordering.
+
+
 !syntax parameters /Mesh/MeshRepairGenerator
 
 !syntax inputs /Mesh/MeshRepairGenerator
