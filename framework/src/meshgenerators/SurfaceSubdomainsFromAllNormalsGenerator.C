@@ -35,6 +35,12 @@ SurfaceSubdomainsFromAllNormalsGenerator::validParams()
       false,
       "Whether to only group elements in a subdomain using the 'flooding' algorithm. "
       "We strongly recommend pairing this with the 'flood_elements_once' parameter");
+  params.addParam<bool>(
+      "select_max_neighbor_element_subdomains",
+      false,
+      "Whether to perform a final subdomain assignment the element is assigned to the subdomain "
+      "that holds the most neighbors of the element with a similar normal");
+
   // There can be many of them
   params.suppressParameter<std::vector<SubdomainName>>("new_subdomain");
   // Using normals is the base principle of this mesh generator
@@ -64,7 +70,9 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
   unsigned int num_neighborless = 0;
 
   // We'll need to loop over all of the elements to find ones that match this normal.
-  // We can't rely on flood catching them all here...
+  // We can't rely on flood catching them all in one go. We have to flood from multiple elements
+  // in case there are disconnected groups of elements.
+  // Depending on user parameters, we may be "flooding" multiple times the same elements
   for (auto & elem : mesh->element_ptr_range())
   {
     // Nothing to do with edges
@@ -85,25 +93,94 @@ SurfaceSubdomainsFromAllNormalsGenerator::generate()
 
     // See if we've seen this normal before (linear search)
     const std::map<SubdomainID, RealVectorValue>::value_type * item = nullptr;
+    bool sub_id_found = false;
+    SubdomainID sub_id;
     if (!_flood_only)
       for (const auto & id_pair : _subdomain_to_normal_map)
         if (normalsWithinTol(id_pair.second, normal, _normal_tol))
         {
+          sub_id_found = true;
           item = &id_pair;
           break;
         }
+    if (_check_painted_neighor_normals)
+    {
+      std::map<SubdomainID, unsigned int> sub_id_neighbors;
+      // Try to flood from each side with the same subdomain
+      // Look for the neighbor subdomain id with the most neighbors
+      for (const auto neighbor : make_range(elem->n_sides()))
+        if (elem->neighbor_ptr(neighbor) &&
+            _visited_once.find(elem->neighbor_ptr(neighbor)) != _visited_once.end() &&
+            elementSatisfiesRequirements(
+                elem, get2DElemNormal(elem->neighbor_ptr(neighbor)), normal))
+        {
+          sub_id_found = true;
+          sub_id_neighbors[elem->neighbor_ptr(neighbor)->subdomain_id()]++;
+        }
+
+      unsigned int max_of_subid = 0;
+      for (const auto & [key, item] : sub_id_neighbors)
+        if (item >= max_of_subid)
+        {
+          max_of_subid = item;
+          sub_id = key;
+        }
+    }
 
     // Flood with the previously created subdomains and normals
     if (item)
       flood(elem, item->second, item->first);
+    else if (sub_id_found)
+      flood(elem, normal, sub_id);
     // Flood with a new subdomain and the element normal
     else
     {
-      subdomain_id_type id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
-      _subdomain_to_normal_map[id] = normal;
-      flood(elem, normal, id);
+      sub_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
+      _subdomain_to_normal_map[sub_id] = normal;
+      flood(elem, normal, sub_id);
     }
   }
+
+  // Check all elements once with only neighbor averaging
+  if (getParam<bool>("select_max_neighbor_element_subdomains"))
+    for (auto & elem : mesh->element_ptr_range())
+    {
+      // Nothing to do with edges
+      if (elem->n_nodes() < 3)
+        continue;
+      // Nothing to do with 3D elements
+      if (elem->dim() > 2)
+        continue;
+
+      // Compute the normal
+      const auto normal = get2DElemNormal(elem);
+
+      bool sub_id_found = false;
+      SubdomainID sub_id;
+      std::map<SubdomainID, unsigned int> sub_id_neighbors;
+      // Use point neighbors, it's easy for a surface tri3 to be sandwiched into the wrong subdomain
+      std::set<const Elem *> neighbor_set;
+      elem->find_point_neighbors(neighbor_set);
+
+      // Try to flood from each side with the same subdomain
+      // Look for the neighbor subdomain id with the most neighbors
+      for (const auto neighbor : neighbor_set)
+        if (elementSatisfiesRequirements(elem, get2DElemNormal(neighbor), normal))
+        {
+          sub_id_found = true;
+          sub_id_neighbors[neighbor->subdomain_id()]++;
+        }
+
+      unsigned int max_of_subid = 0;
+      for (const auto & [key, item] : sub_id_neighbors)
+        if (item >= max_of_subid)
+        {
+          max_of_subid = item;
+          sub_id = key;
+        }
+      if (sub_id_found)
+        elem->subdomain_id() = sub_id;
+    }
 
   if (_flood_only && num_neighborless)
     mooseWarning("Several subdomains were created for neighborless elements: " +
