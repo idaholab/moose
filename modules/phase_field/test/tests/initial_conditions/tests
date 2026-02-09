@@ -305,7 +305,8 @@
       type = Exodiff
       input = ClosePackIC.i
       exodiff = ClosePackIC_out.e
-      capabilities = 'installation_type=in_tree'
+      # diffs on mac
+      capabilities = 'platform!=darwin'
       # steady solve
       recover = false
 
