@@ -13,6 +13,7 @@
 
 #include "AppFactory.h"
 #include "Capabilities.h"
+#include "CapabilityException.h"
 
 #include "nlohmann/json.h"
 
@@ -297,10 +298,11 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
     out.close();
 
     auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
-    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
-                                   "--testharness-capabilities: Failed to load capabilities \"" +
-                                       std::string(temp_file.path()) +
-                                       "\":\n[json.exception.type_error");
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(),
+        "--testharness-capabilities: Failed to load capabilities \"" +
+            std::string(temp_file.path()) +
+            "\":\nCapabilities::augment: Capability 'name' missing 'doc' entry");
   }
 }
 
@@ -384,4 +386,26 @@ TEST_F(CapabilitiesTest, augment)
                   true,
                   std::vector<std::string>{"string_explicit_enum", "foo"});
   test_capability("true", bool(true), "true");
+}
+
+/// Test Capabilities::augment with a parsing failure
+TEST_F(CapabilitiesTest, augmentParseError)
+{
+  auto & capabilities = Capabilities::get();
+
+  // missing doc
+  {
+    const nlohmann::json root = {{"name", {{"value", false}}}};
+    EXPECT_THROW_MSG(capabilities.augment(root, {}),
+                     Moose::CapabilityException,
+                     "Capabilities::augment: Capability 'name' missing 'doc' entry");
+  }
+
+  // missing value
+  {
+    const nlohmann::json root = {{"name", {{"doc", "foo"}}}};
+    EXPECT_THROW_MSG(capabilities.augment(root, {}),
+                     Moose::CapabilityException,
+                     "Capabilities::augment: Capability 'name' missing 'value' entry");
+  }
 }

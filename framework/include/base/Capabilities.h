@@ -17,6 +17,7 @@
 // forward declare unit tests
 #include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augmentParseError);
 class CapabilitiesTest;
 #endif
 
@@ -79,6 +80,7 @@ public:
     friend MooseApp;
 #ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(::CapabilitiesTest, augment);
+    FRIEND_TEST(::CapabilitiesTest, augmentParseError);
 #endif
     AugmentPassKey() {}
     AugmentPassKey(const AugmentPassKey &) {}

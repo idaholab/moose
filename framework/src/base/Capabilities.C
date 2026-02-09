@@ -12,6 +12,7 @@
 #include "nlohmann/json.h"
 
 #include "Capabilities.h"
+#include "CapabilityException.h"
 #include "MooseUtils.h"
 #include "Conversion.h"
 
@@ -128,24 +129,35 @@ Capabilities::augment(const nlohmann::json & input, const Capabilities::AugmentP
   {
     const std::string name = name_json;
 
-    const std::string doc = entry["doc"];
+    const auto error = [&name](const std::string & message)
+    { throw CapabilityException("Capabilities::augment: Capability '" + name + "' " + message); };
+
+    std::string doc;
+    if (const auto it = entry.find("doc"); it != entry.end())
+      doc = *it;
+    else
+      error("missing 'doc' entry");
 
     Moose::Capability::Value value;
-    const auto & value_json = entry["value"];
-    if (value_json.is_boolean())
-      value = value_json.get<bool>();
-    else if (value_json.is_number_integer())
-      value = value_json.get<int>();
+    if (const auto it = entry.find("value"); it != entry.end())
+    {
+      if (it->is_boolean())
+        value = it->get<bool>();
+      else if (it->is_number_integer())
+        value = it->get<int>();
+      else
+        value = it->get<std::string>();
+    }
     else
-      value = value_json.get<std::string>();
+      error("missing 'value' entry");
 
     auto & capability = _capability_registry.add(name, value, doc);
 
-    if (entry.contains("explicit") && entry["explicit"].get<bool>())
+    if (const auto it = entry.find("explicit"); it != entry.end() && it->get<bool>())
       capability.setExplicit();
 
-    if (entry.contains("enumeration"))
-      capability.setEnumeration(entry["enumeration"].get<std::vector<std::string>>());
+    if (const auto it = entry.find("enumeration"); it != entry.end())
+      capability.setEnumeration(it->get<std::vector<std::string>>());
   }
 }
 
