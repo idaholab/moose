@@ -54,8 +54,9 @@ Output::validParams()
       std::numeric_limits<Real>::max(),
       "wall_time_interval > 0",
       "The target wall time interval (in seconds) at which to output");
-  params.addParam<TimesName>("sync_times",
+  params.addParam<TimesName>("sync_times_object",
                              "Times at which the output and solution is forced to occur");
+  params.deprecateParam("sync_times_object", "sync_times", "12/12/26");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", "Time at which this output object begins to operate");
   params.addParam<Real>("end_time", "Time at which this output object stop operating");
