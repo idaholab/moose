@@ -283,7 +283,7 @@ class TestAugmentedCapabilities(TestHarnessTestCase):
                 )
 
         # Augmented capability from TestHarness
-        bad_machine = "arm64" if getMachine() == "x86_64" else "arm64"
+        bad_machine = "arm64" if getMachine() == "x86_64" else "x86_64"
         self.runCapabilityTest(
             (f"machine={bad_machine}", True), (f"machine={getMachine()}", False)
         )
