@@ -396,7 +396,6 @@
     override_columns = 'p0'
     override_abs_zero = '1e-9'
     override_rel_err = '3e-5'
-    capabilities = 'installation_type=in_tree'
     requirement = 'PorousFlowPeacemanBorehole shall inject fluid at the specified rate in an unsaturated system'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'

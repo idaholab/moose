@@ -8,7 +8,7 @@
     rel_err = 5.0e-4
     min_parallel = 4
     max_parallel = 4
-    capabilities = 'ad_size>=50 & installation_type=in_tree'
+    capabilities = 'ad_size>=50'
     valgrind = 'heavy'
     requirement = 'The contact module shall be able to solve a two-dimensional frictionless problem with Cartesian Lagrange multipliers.'
   []

@@ -23,7 +23,6 @@
                   'be unused'
     prereq = 'frictional_bouncing_block_action_restart_1'
     valgrind = 'heavy'
-    # installation_type=in_tree: see #25279
-    capabilities = 'method!=dbg & installation_type=in_tree'
+    capabilities = 'method!=dbg'
   []
 []

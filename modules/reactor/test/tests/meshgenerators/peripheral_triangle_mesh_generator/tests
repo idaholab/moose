@@ -5,7 +5,6 @@
     type = 'CSVDiff'
     input = 'abtr_tri.i'
     csvdiff = 'abtr_tri.csv'
-    capabilities = 'installation_type=in_tree'
     requirement = 'The system shall generate a triangulation without any refinement without area preservation.'
     recover = false
   []
@@ -15,7 +14,6 @@
     csvdiff = 'abtr_tri_corr.csv'
     cli_args = 'Mesh/tmg/preserve_volumes=true
                 Outputs/file_base=abtr_tri_corr'
-    capabilities = 'installation_type=in_tree'
     requirement = 'The system shall generate a triangulation without any refinement with area preservation.'
     recover = false
   []
