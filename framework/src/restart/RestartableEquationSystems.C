@@ -541,3 +541,7 @@ to_json(nlohmann::json & json, const RestartableEquationSystems & res)
 
   json["loaded_variables"] = loaded_vars;
 }
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, RestartableEquationSystems &, MooseMesh *);
+template void dataLoad(std::istream &, RestartableEquationSystems &, MooseMesh *);

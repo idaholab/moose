@@ -711,3 +711,48 @@ dataStore(std::ostream & stream, Vec & v, Context context)
 
 template void dataStore(std::ostream & stream, Vec & v, void * context);
 template void dataStore(std::ostream & stream, Vec & v, std::nullptr_t context);
+
+// Additional explicit template instantiations for common context types
+// Basic types with std::nullptr_t
+template void dataStore(std::ostream &, Point &, std::nullptr_t);
+template void dataLoad(std::istream &, Point &, std::nullptr_t);
+template void dataStore(std::ostream &, VectorValue<Real> &, std::nullptr_t);
+template void dataLoad(std::istream &, VectorValue<Real> &, std::nullptr_t);
+template void dataStore(std::ostream &, TensorValue<Real> &, std::nullptr_t);
+template void dataLoad(std::istream &, TensorValue<Real> &, std::nullptr_t);
+template void dataStore(std::ostream &, DenseMatrix<Real> &, std::nullptr_t);
+template void dataLoad(std::istream &, DenseMatrix<Real> &, std::nullptr_t);
+
+// ADReal types with std::nullptr_t
+template void dataStore(std::ostream &, VectorValue<ADReal> &, std::nullptr_t);
+template void dataLoad(std::istream &, VectorValue<ADReal> &, std::nullptr_t);
+template void dataStore(std::ostream &, TensorValue<ADReal> &, std::nullptr_t);
+template void dataLoad(std::istream &, TensorValue<ADReal> &, std::nullptr_t);
+template void dataStore(std::ostream &, DenseMatrix<ADReal> &, std::nullptr_t);
+template void dataLoad(std::istream &, DenseMatrix<ADReal> &, std::nullptr_t);
+
+// Basic types with MeshBase*
+template void dataStore(std::ostream &, Real &, libMesh::MeshBase *);
+template void dataLoad(std::istream &, Real &, libMesh::MeshBase *);
+template void dataStore(std::ostream &, Point &, libMesh::MeshBase *);
+template void dataLoad(std::istream &, Point &, libMesh::MeshBase *);
+template void dataStore(std::ostream &, VectorValue<Real> &, libMesh::MeshBase *);
+template void dataLoad(std::istream &, VectorValue<Real> &, libMesh::MeshBase *);
+
+// Elem/Node pointers with MeshBase*
+template void dataStore(std::ostream &, const libMesh::Elem *&, libMesh::MeshBase *);
+template void dataLoad(std::istream &, const libMesh::Elem *&, libMesh::MeshBase *);
+template void dataStore(std::ostream &, const libMesh::Node *&, libMesh::MeshBase *);
+template void dataLoad(std::istream &, const libMesh::Node *&, libMesh::MeshBase *);
+template void dataStore(std::ostream &, libMesh::Elem *&, libMesh::MeshBase *);
+template void dataLoad(std::istream &, libMesh::Elem *&, libMesh::MeshBase *);
+template void dataStore(std::ostream &, libMesh::Node *&, libMesh::MeshBase *);
+template void dataLoad(std::istream &, libMesh::Node *&, libMesh::MeshBase *);
+
+// NumericVector with const Communicator*
+template void dataStore(std::ostream &,
+                        std::unique_ptr<libMesh::NumericVector<Number>> &,
+                        const libMesh::Parallel::Communicator *);
+template void dataLoad(std::istream &,
+                       std::unique_ptr<libMesh::NumericVector<Number>> &,
+                       const libMesh::Parallel::Communicator *);

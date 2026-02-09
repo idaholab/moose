@@ -552,3 +552,7 @@ dataLoad(std::istream & stream, PerfGraph & perf_graph, Context /*context*/)
 
 template void dataLoad(std::istream &, PerfGraph &, void *);
 template void dataLoad(std::istream &, PerfGraph &, std::nullptr_t);
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, PerfGraph &, MooseApp *);
+template void dataLoad(std::istream &, PerfGraph &, MooseApp *);

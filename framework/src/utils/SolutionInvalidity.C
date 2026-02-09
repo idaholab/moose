@@ -428,3 +428,9 @@ dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, Contex
 }
 
 template void dataLoad(std::istream &, SolutionInvalidity &, void *);
+
+// Explicit instantiations for std::nullptr_t context
+template void dataStore(std::ostream &, SolutionInvalidity &, std::nullptr_t);
+template void dataLoad(std::istream &, SolutionInvalidity &, std::nullptr_t);
+template void dataStore(std::ostream &, SolutionInvalidity::TimestepCounts &, std::nullptr_t);
+template void dataLoad(std::istream &, SolutionInvalidity::TimestepCounts &, std::nullptr_t);

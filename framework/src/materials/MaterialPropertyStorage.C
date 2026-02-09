@@ -911,3 +911,9 @@ dataLoad(std::istream & stream, MaterialPropertyStorage::PropRecord & record, Co
 
 template void dataLoad(std::istream &, MaterialPropertyStorage::PropRecord &, void *);
 template void dataLoad(std::istream &, MaterialPropertyStorage::PropRecord &, std::nullptr_t);
+
+// Explicit template instantiations
+template void dataStore(std::ostream &, MaterialPropertyStorage &, MooseMesh *);
+template void dataLoad(std::istream &, MaterialPropertyStorage &, MooseMesh *);
+template void dataStore(std::ostream &, MaterialProperties &, std::nullptr_t);
+template void dataLoad(std::istream &, MaterialProperties &, std::nullptr_t);

@@ -707,7 +707,7 @@ dataLoad(std::istream & stream, std::list<T> & l, Context context)
 
   for (unsigned int i = 0; i < size; i++)
   {
-    T data;
+    T data{};
     loadHelper(stream, data, context);
     l.push_back(std::move(data));
   }
