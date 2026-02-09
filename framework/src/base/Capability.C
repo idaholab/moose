@@ -40,24 +40,12 @@ Capability::Capability(const std::string_view name,
   }
 }
 
-const std::optional<std::vector<std::string>> &
-Capability::getEnumeration() const
-{
-  if (!hasStringValue())
-    throw CapabilityException("Capability::getEnumeration(): Capability '",
-                              getName(),
-                              "' is not string-valued and cannot have an enumeration");
-  return _enumeration;
-}
-
 bool
 Capability::hasEnumeration(const std::string & value) const
 {
-  const auto & enumeration_ptr = getEnumeration();
-  if (!enumeration_ptr)
-    return true;
-  return std::find(enumeration_ptr->begin(), enumeration_ptr->end(), value) !=
-         enumeration_ptr->end();
+  if (_enumeration)
+    return _enumeration->count(value);
+  return true;
 }
 
 Capability &
@@ -71,7 +59,7 @@ Capability::setExplicit()
 }
 
 Capability &
-Capability::setEnumeration(const std::vector<std::string> & enumeration)
+Capability::setEnumeration(const std::set<std::string> & enumeration)
 {
   static const std::string error_prefix = "Capability::setEnumeration(): ";
 
@@ -96,11 +84,6 @@ Capability::setEnumeration(const std::vector<std::string> & enumeration)
       throw CapabilityException(error_prefix + "Enumeration value '" + value +
                                 "' for capability '" + getName() + "'" +
                                 " has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
-
-  for (auto it = enumeration.begin(); it != enumeration.end(); ++it)
-    if (std::find(std::next(it), enumeration.end(), *it) != enumeration.end())
-      throw CapabilityException(error_prefix + "Duplicate enumeration '" + *it +
-                                "' for capability '" + getName() + "'");
 
   _enumeration = enumeration;
 
@@ -132,11 +115,11 @@ Capability::toString() const
 std::string
 Capability::enumerationToString() const
 {
-  const auto & enumeration_ptr = getEnumeration();
-  if (!enumeration_ptr)
-    throw CapabilityException("Capability::enumerationToString(): Capability '",
-                              getName(),
-                              "' does not have an enumeration");
-  return MooseUtils::stringJoin(*enumeration_ptr, ", ");
+  if (_enumeration)
+    return MooseUtils::stringJoin(
+        std::vector<std::string>(_enumeration->begin(), _enumeration->end()), ", ");
+  throw CapabilityException("Capability::enumerationToString(): Capability '",
+                            getName(),
+                            "' does not have an enumeration");
 }
-}
+} // namespace Moose

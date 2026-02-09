@@ -42,7 +42,7 @@ TEST(CapabilityTest, construct)
     EXPECT_EQ(cap.getValue(), Capability::Value(bool(false)));
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
-    EXPECT_NE(cap.queryBoolValue(), nullptr);
+    ASSERT_NE(cap.queryBoolValue(), nullptr);
     EXPECT_EQ(*cap.queryBoolValue(), false);
     EXPECT_EQ(cap.queryIntValue(), nullptr);
     EXPECT_EQ(cap.queryStringValue(), nullptr);
@@ -60,7 +60,7 @@ TEST(CapabilityTest, construct)
     EXPECT_EQ(cap.getValue(), Capability::Value(bool(true)));
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
-    EXPECT_NE(cap.queryBoolValue(), nullptr);
+    ASSERT_NE(cap.queryBoolValue(), nullptr);
     EXPECT_EQ(*cap.queryBoolValue(), true);
     EXPECT_EQ(cap.queryIntValue(), nullptr);
     EXPECT_EQ(cap.queryStringValue(), nullptr);
@@ -79,7 +79,7 @@ TEST(CapabilityTest, construct)
     EXPECT_EQ(cap.getDoc(), "doc");
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_EQ(cap.queryBoolValue(), nullptr);
-    EXPECT_NE(cap.queryIntValue(), nullptr);
+    ASSERT_NE(cap.queryIntValue(), nullptr);
     EXPECT_EQ(*cap.queryIntValue(), 1);
     EXPECT_EQ(cap.queryStringValue(), nullptr);
     EXPECT_FALSE(cap.hasBoolValue());
@@ -98,7 +98,7 @@ TEST(CapabilityTest, construct)
     EXPECT_FALSE(cap.getExplicit());
     EXPECT_EQ(cap.queryBoolValue(), nullptr);
     EXPECT_EQ(cap.queryIntValue(), nullptr);
-    EXPECT_NE(cap.queryStringValue(), nullptr);
+    ASSERT_NE(cap.queryStringValue(), nullptr);
     EXPECT_EQ(*cap.queryStringValue(), "foo");
     EXPECT_FALSE(cap.hasBoolValue());
     EXPECT_FALSE(cap.hasIntValue());
@@ -123,22 +123,25 @@ TEST(CapabilityTest, enumeration)
 
   // check set
   {
-    const std::vector<std::string> enumeration{"foo", "bar"};
+    const std::set<std::string> enumeration{"foo", "bar"};
     Capability cap("name", std::string("foo"), "doc");
 
     // initial set
     cap.setEnumeration(enumeration);
-    EXPECT_EQ(cap.getEnumeration(), enumeration);
+    ASSERT_TRUE(cap.queryEnumeration().has_value());
+    EXPECT_EQ(*cap.queryEnumeration(), enumeration);
     EXPECT_TRUE(cap.hasEnumeration("foo"));
     EXPECT_TRUE(cap.hasEnumeration("bar"));
     EXPECT_FALSE(cap.hasEnumeration("baz"));
 
     // enumeration to string
-    EXPECT_EQ(cap.enumerationToString(), "foo, bar");
+    EXPECT_EQ(cap.enumerationToString(), "bar, foo");
 
     // setting again ignores checks
     cap.setEnumeration(enumeration);
-    EXPECT_EQ(cap.getEnumeration(), enumeration);
+    auto enumeration_ptr = cap.queryEnumeration();
+    ASSERT_TRUE(cap.queryEnumeration().has_value());
+    EXPECT_EQ(*cap.queryEnumeration(), enumeration);
 
     // setting again to a different enumeration not allowed
     CAP_EXPECT_THROW_MSG(
@@ -160,24 +163,15 @@ TEST(CapabilityTest, enumeration)
       "Capability::setEnumeration(): Enumeration value 'def!' for capability 'name' "
       "has unallowed characters; allowed characters = 'a-z, 0-9, _, -'");
 
-  // duplicates
-  CAP_EXPECT_THROW_MSG(
-      Capability("name", std::string("foo"), "doc").setEnumeration({"foo", "foo"}),
-      "Capability::setEnumeration(): Duplicate enumeration 'foo' for capability 'name'");
-
   // value not in enumeration
   CAP_EXPECT_THROW_MSG(
       Capability("name", std::string("foo"), "doc").setEnumeration({"bar"}),
       "Capability::setEnumeration(): Capability name=foo value not within enumeration");
 
-  // getting enumeration for bool capability
-  CAP_EXPECT_THROW_MSG(Capability("name", bool(false), "doc").getEnumeration(),
-                       "Capability::getEnumeration(): Capability 'name' is not string-valued and "
-                       "cannot have an enumeration");
+  // getting enumeration for bool capability, empty
+  EXPECT_FALSE(Capability("name", bool(false), "doc").queryEnumeration().has_value());
   // getting enumeration for an int capability
-  CAP_EXPECT_THROW_MSG(Capability("name", int(1), "doc").getEnumeration(),
-                       "Capability::getEnumeration(): Capability 'name' is not string-valued and "
-                       "cannot have an enumeration");
+  EXPECT_FALSE(Capability("name", int(1), "doc").queryEnumeration().has_value());
   // enumerationToString() without an enumeration
   CAP_EXPECT_THROW_MSG(
       Capability("name", std::string("foo"), "doc").enumerationToString(),

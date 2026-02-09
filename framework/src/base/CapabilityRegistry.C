@@ -290,7 +290,7 @@ CapabilityRegistry::check(std::string requirements) const
       {
         std::string message = "capability '" + capability.getName() +
                               "' requires a value and cannot be used in a boolean expression";
-        if (capability.hasStringValue() && capability.getEnumeration())
+        if (capability.queryEnumeration())
           message += "; valid values: " + capability.enumerationToString();
         checkException(vs, message);
       }

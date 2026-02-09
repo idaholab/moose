@@ -68,9 +68,8 @@ Capabilities::dump() const
     auto & entry = root[name];
     std::visit([&entry](const auto & v) { entry["value"] = v; }, capability.getValue());
     entry["doc"] = capability.getDoc();
-    if (capability.hasStringValue())
-      if (const auto & enumeration_ptr = capability.getEnumeration())
-        entry["enumeration"] = *enumeration_ptr;
+    if (const auto enumeration_ptr = capability.queryEnumeration())
+      entry["enumeration"] = *enumeration_ptr;
     if (!capability.hasBoolValue())
       entry["explicit"] = capability.getExplicit();
   }
@@ -112,7 +111,7 @@ Capabilities::augment(const nlohmann::json & input, const Capabilities::AugmentP
       capability.setExplicit();
 
     if (const auto it = entry.find("enumeration"); it != entry.end())
-      capability.setEnumeration(it->get<std::vector<std::string>>());
+      capability.setEnumeration(it->get<std::set<std::string>>());
   }
 }
 

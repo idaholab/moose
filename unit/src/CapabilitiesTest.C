@@ -180,14 +180,14 @@ const nlohmann::json JSON_CAPABILITIES = {
     {"string", {{"doc", "string"}, {"explicit", false}, {"value", "string"}}},
     {"string_enum",
      {{"doc", "string_enum"},
-      {"enumeration", {"string_enum", "foo"}},
+      {"enumeration", {"foo", "string_enum"}},
       {"explicit", false},
       {"value", "string_enum"}}},
     {"string_explicit",
      {{"doc", "string_explicit"}, {"explicit", true}, {"value", "string_explicit"}}},
     {"string_explicit_enum",
      {{"doc", "string_explicit_enum"},
-      {"enumeration", {"string_explicit_enum", "foo"}},
+      {"enumeration", {"foo", "string_explicit_enum"}},
       {"explicit", true},
       {"value", "string_explicit_enum"}}},
     {"true", {{"doc", "true"}, {"value", true}}}};
@@ -305,12 +305,11 @@ TEST_F(CapabilitiesTest, augment)
 
   capabilities.augment(JSON_CAPABILITIES, {});
 
-  const auto test_capability =
-      [this](const std::string & name,
-             const Capability::Value & value,
-             const std::string & doc,
-             const bool is_explicit = false,
-             const std::optional<std::vector<std::string>> & enumeration = {})
+  const auto test_capability = [this](const std::string & name,
+                                      const Capability::Value & value,
+                                      const std::string & doc,
+                                      const bool is_explicit = false,
+                                      const std::optional<std::set<std::string>> & enumeration = {})
   {
     const auto capability_ptr = _capabilities->query(name);
     EXPECT_NE(capability_ptr, nullptr);
@@ -321,7 +320,7 @@ TEST_F(CapabilitiesTest, augment)
     EXPECT_EQ(capability.getExplicit(), is_explicit);
     if (enumeration)
     {
-      auto & cap_enumeration_ptr = capability.getEnumeration();
+      auto & cap_enumeration_ptr = capability.queryEnumeration();
       EXPECT_TRUE(cap_enumeration_ptr.has_value());
       EXPECT_EQ(*cap_enumeration_ptr, *enumeration);
     }
@@ -335,13 +334,13 @@ TEST_F(CapabilitiesTest, augment)
                   std::string("string_enum"),
                   "string_enum",
                   false,
-                  std::vector<std::string>{"string_enum", "foo"});
+                  std::set<std::string>{"string_enum", "foo"});
   test_capability("string_explicit", std::string("string_explicit"), "string_explicit", true);
   test_capability("string_explicit_enum",
                   std::string("string_explicit_enum"),
                   "string_explicit_enum",
                   true,
-                  std::vector<std::string>{"string_explicit_enum", "foo"});
+                  std::set<std::string>{"string_explicit_enum", "foo"});
   test_capability("true", bool(true), "true");
 }
 

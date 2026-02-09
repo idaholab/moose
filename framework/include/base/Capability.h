@@ -10,9 +10,9 @@
 #pragma once
 
 #include <optional>
+#include <set>
 #include <string>
 #include <variant>
-#include <vector>
 
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
@@ -61,9 +61,9 @@ public:
   /**
    * @return The enumeration, if set.
    *
-   * This is only valid for string valued capabilities.
+   * Only string-valued capabilites can have an enumeration.
    */
-  const std::optional<std::vector<std::string>> & getEnumeration() const;
+  const std::optional<std::set<std::string>> & queryEnumeration() const { return _enumeration; }
 
   /**
    * @return Whether or not the capability has the given enumeration \p value.
@@ -88,7 +88,7 @@ public:
    *
    * This is only valid for string-valued capabilities.
    */
-  Capability & setEnumeration(const std::vector<std::string> & enumeration);
+  Capability & setEnumeration(const std::set<std::string> & enumeration);
 
 #if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
   /**
@@ -161,7 +161,7 @@ private:
   /// (not as a boolean check)
   bool _explicit;
   /// Possible enumeration for the capability, if any (string capabilities only)
-  std::optional<std::vector<std::string>> _enumeration;
+  std::optional<std::set<std::string>> _enumeration;
 };
 
 #if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)

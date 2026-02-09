@@ -158,7 +158,7 @@ addCapabilities(CapabilityRegistry & registry, PyObject * capabilities_dict)
       if (!enumeration_iter)
         return value_error("'enumeration' value not iterable");
 
-      std::vector<std::string> enumeration;
+      std::set<std::string> enumeration;
 
       PyObject * enumeration_item_obj;
       while ((enumeration_item_obj = PyIter_Next(enumeration_iter)))
@@ -170,7 +170,7 @@ addCapabilities(CapabilityRegistry & registry, PyObject * capabilities_dict)
           Py_DECREF(enumeration_iter);
           return type_error("'enumeration' value is not a string");
         }
-        enumeration.emplace_back(enumeration_string);
+        enumeration.insert(enumeration_string);
         Py_DECREF(enumeration_item_obj);
       }
       Py_DECREF(enumeration_iter);
