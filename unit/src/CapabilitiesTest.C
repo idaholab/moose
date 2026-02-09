@@ -27,75 +27,32 @@ class CapabilitiesTest : public ::testing::Test
 protected:
   void SetUp() override
   {
-    // Setup a temporary registry for testing
-    std::swap(Capabilities::get()._capability_registry, _old_capability_registry);
-    _capability_registry = &Capabilities::get()._capability_registry;
-    ASSERT_EQ(Capabilities::get()._capability_registry.size(), 0);
+    // Setup a temporary Capabilities for testing
+    std::swap(Capabilities::get({})._registry, _old_registry);
+    _capabilities = &Capabilities::get({});
+    ASSERT_EQ(Capabilities::get({})._registry.size(), 0);
   }
 
   void TearDown() override
   {
-    // Replace temporary registry for testing with real one
-    std::swap(Capabilities::get()._capability_registry, _old_capability_registry);
-    _old_capability_registry.clear();
-    _capability_registry = nullptr;
+    // Replace temporary Capabilities for testing with real one
+    std::swap(Capabilities::get({})._registry, _old_registry);
+    _old_registry.clear();
+    _capabilities = nullptr;
   }
 
-  /// Pointer to the current registry during a test
-  CapabilityRegistry * _capability_registry = nullptr;
-  /// Temporary storage for the actual registry during tests
-  CapabilityRegistry _old_capability_registry;
+  /// Pointer to the current Capabilities during a test
+  Capabilities * _capabilities = nullptr;
+  /// Temporary storage for the actual Capabilities during tests
+  Capabilities::RegistryType _old_registry;
 };
-
-/// Test Capabilities::add
-TEST_F(CapabilitiesTest, add)
-{
-  auto & capabilities = Capabilities::get();
-
-  // success
-  const auto & capability = capabilities.add("name", bool(false), "doc");
-  EXPECT_EQ(_capability_registry->query("name"), &capability);
-
-  // already exists
-  EXPECT_MOOSEERROR_MSG(capabilities.add("name", bool(true), "doc"),
-                        "Capability 'name' already exists and is not equal");
-
-  // reserved name
-  for (const auto & name : CapabilityRegistry::augmented_capability_names)
-    EXPECT_MOOSEERROR_MSG(capabilities.add(name, bool(true), "doc"),
-                          "The capability \"" + name +
-                              "\" is reserved and may not be registered by an application.");
-}
-
-/// Test Capabilities::query
-TEST_F(CapabilitiesTest, query)
-{
-  auto & capabilities = Capabilities::get();
-  const auto & capability = capabilities.add("name", bool(false), "doc");
-
-  EXPECT_EQ(capabilities.query("name"), &capability);
-  EXPECT_EQ(capabilities.query("naMe"), &capability);
-  EXPECT_EQ(capabilities.query("foo"), nullptr);
-}
-
-/// Test Capabilities::get
-TEST_F(CapabilitiesTest, get)
-{
-  auto & capabilities = Capabilities::get();
-  const auto & capability = capabilities.add("name", bool(false), "doc");
-
-  EXPECT_EQ(&capabilities.get("name"), &capability);
-  EXPECT_EQ(&capabilities.get("naMe"), &capability);
-  EXPECT_MOOSEERROR_MSG(capabilities.get("foo"),
-                        "Capabilities::get(): Capability 'foo' not registered");
-}
 
 /// Test MooseApp::addBoolCapability
 TEST_F(CapabilitiesTest, mooseAppAddBoolCapability)
 {
   // success
   const auto capability = &MooseApp::addBoolCapability("name", false, "doc");
-  EXPECT_EQ(_capability_registry->query("name"), capability);
+  EXPECT_EQ(_capabilities->query("name"), capability);
 
   // exceptions are moose errors
   EXPECT_MOOSEERROR_MSG(MooseApp::addBoolCapability("name", true, "doc"),
@@ -107,7 +64,7 @@ TEST_F(CapabilitiesTest, mooseAppAddIntCapability)
 {
   // success
   const auto capability = &MooseApp::addIntCapability("name", 1, "doc");
-  EXPECT_EQ(_capability_registry->query("name"), capability);
+  EXPECT_EQ(_capabilities->query("name"), capability);
 
   // catch any exceptions and report as a mooseError
   EXPECT_MOOSEERROR_MSG(MooseApp::addIntCapability("name", 2, "doc"),
@@ -119,7 +76,7 @@ TEST_F(CapabilitiesTest, mooseAppAddStringCapability)
 {
   // success
   const auto capability = &MooseApp::addStringCapability("name", "value", "doc");
-  EXPECT_EQ(_capability_registry->query("name"), capability);
+  EXPECT_EQ(_capabilities->query("name"), capability);
 
   // catch any exceptions and report as a mooseError
   EXPECT_MOOSEERROR_MSG(MooseApp::addStringCapability("name", "foo", "doc"),
@@ -143,21 +100,21 @@ TEST_F(CapabilitiesTest, mooseAppAddCapability)
   {
     Moose::ScopedDeprecatedIsError deprecated_is_error(false);
     capability = &MooseApp::addCapability("name", "value", "doc");
-    EXPECT_EQ(_capability_registry->query("name"), capability);
+    EXPECT_EQ(_capabilities->query("name"), capability);
   }
 
   // adding the second time gives no deprecation warning
   {
     Moose::ScopedDeprecatedIsError deprecated_is_error(true);
     MooseApp::addCapability("name", "value", "doc");
-    EXPECT_EQ(_capability_registry->query("name"), capability);
+    EXPECT_EQ(_capabilities->query("name"), capability);
   }
 }
 
 /// Test --check-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
 {
-  auto & capabilities = Capabilities::get();
+  auto & capabilities = Capabilities::get({});
   capabilities.add("value_true", bool(true), "doc");
   capabilities.add("value_false", bool(false), "doc");
 
@@ -188,7 +145,7 @@ TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
 /// Test --required-capabilities in MooseApp
 TEST_F(CapabilitiesTest, mooseAppCheckRequiredCapabilities)
 {
-  auto & capabilities = Capabilities::get();
+  auto & capabilities = Capabilities::get({});
   capabilities.add("value_true", bool(true), "doc");
   capabilities.add("value_false", bool(false), "doc");
 
@@ -309,7 +266,7 @@ TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
 /// Test Capabilities::dump
 TEST_F(CapabilitiesTest, dump)
 {
-  auto & capabilities = Capabilities::get();
+  auto & capabilities = Capabilities::get({});
 
   capabilities.add("false", bool(false), "false");
   capabilities.add("true", bool(true), "true");
@@ -334,7 +291,7 @@ TEST_F(CapabilitiesTest, dump)
 /// Test Capabilities::check
 TEST_F(CapabilitiesTest, check)
 {
-  auto & capabilities = Capabilities::get();
+  auto & capabilities = Capabilities::get({});
 
   capabilities.add("name", bool(true), "false");
   EXPECT_EQ(capabilities.check("name").state, CheckState::CERTAIN_PASS);
@@ -344,7 +301,7 @@ TEST_F(CapabilitiesTest, check)
 /// Test Capabilities::augment
 TEST_F(CapabilitiesTest, augment)
 {
-  auto & capabilities = Capabilities::get();
+  auto & capabilities = Capabilities::get({});
 
   capabilities.augment(JSON_CAPABILITIES, {});
 
@@ -355,7 +312,7 @@ TEST_F(CapabilitiesTest, augment)
              const bool is_explicit = false,
              const std::optional<std::vector<std::string>> & enumeration = {})
   {
-    const auto capability_ptr = _capability_registry->query(name);
+    const auto capability_ptr = _capabilities->query(name);
     EXPECT_NE(capability_ptr, nullptr);
     const auto & capability = *capability_ptr;
     EXPECT_EQ(capability.getName(), name);
@@ -391,7 +348,7 @@ TEST_F(CapabilitiesTest, augment)
 /// Test Capabilities::augment with a parsing failure
 TEST_F(CapabilitiesTest, augmentParseError)
 {
-  auto & capabilities = Capabilities::get();
+  auto & capabilities = Capabilities::get({});
 
   // missing doc
   {

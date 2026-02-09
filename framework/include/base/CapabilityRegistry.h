@@ -11,8 +11,6 @@
 
 #include "Capability.h"
 
-#include "MoosePassKey.h"
-
 #include <map>
 #include <set>
 #include <string>
@@ -37,6 +35,8 @@ class CapabilityRegistry
 public:
   /// Capabilities that are reserved and can only be augmented
   static const std::set<std::string, std::less<>> augmented_capability_names;
+
+  ~CapabilityRegistry() = default;
 
   /// Type for the registry
   using RegistryType = std::map<std::string, Capability, std::less<>>;
@@ -113,18 +113,6 @@ public:
   ///@}
 
   /**
-   * Get the underlying registry.
-   *
-   * Only used by Capabilities to dump the underlying capabilities.
-   */
-  const RegistryType & getRegistry(const PassKey<Capabilities>) const { return _registry; }
-
-  /**
-   * Get the size of the registry.
-   */
-  std::size_t size() const { return _registry.size(); }
-
-  /**
    * Checks if a set of requirements is satisified by the capabilities
    *
    * @param capabilities The registry that contains the capabilities
@@ -153,17 +141,7 @@ public:
    */
   CheckResult check(std::string requirements) const;
 
-#if defined(FOR_PYCAPABILITIES) | defined(MOOSE_UNIT_TEST)
-  /**
-   * Clear the registry.
-   *
-   * Only used by the pycapabilities module to clear the
-   * registry when re-initializing its state.
-   */
-  void clear() { _registry.clear(); }
-#endif
-
-private:
+protected:
 #ifdef MOOSE_UNIT_TEST
   friend class ::CapabilitiesTest;
 #endif

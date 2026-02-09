@@ -224,6 +224,6 @@ AppFactory::getAppParamsID(const InputParameters & params) const
 void
 AppFactory::registerAppCapability(const std::string & app_name)
 {
-  Moose::internal::Capabilities::get().add(
+  Moose::internal::Capabilities::get({}).add(
       MooseUtils::toLower(app_name), true, "MOOSE application " + app_name + " is available.");
 }

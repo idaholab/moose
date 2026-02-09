@@ -936,7 +936,7 @@ MooseApp::setupOptions()
     try
     {
       file >> root;
-      Moose::internal::Capabilities::get().augment(root, {});
+      Moose::internal::Capabilities::get({}).augment(root, {});
     }
     catch (const std::exception & e)
     {
@@ -954,7 +954,7 @@ MooseApp::setupOptions()
     CapabilityRegistry::CheckResult result;
     try
     {
-      result = Moose::internal::Capabilities::get().check(required_capabilities);
+      result = Moose::internal::Capabilities::get({}).check(required_capabilities);
     }
     catch (const std::exception & e)
     {
@@ -1142,7 +1142,7 @@ MooseApp::setupOptions()
     outputMachineReadableData("show_capabilities",
                               "**START JSON DATA**\n",
                               "\n**END JSON DATA**",
-                              Moose::internal::Capabilities::get().dump());
+                              Moose::internal::Capabilities::get({}).dump());
     _ready_to_exit = true;
   }
   else if (isParamValid("check_capabilities"))
@@ -1155,7 +1155,7 @@ MooseApp::setupOptions()
     CapabilityRegistry::CheckResult result;
     try
     {
-      result = Moose::internal::Capabilities::get().check(capabilities);
+      result = Moose::internal::Capabilities::get({}).check(capabilities);
     }
     catch (const std::exception & e)
     {
@@ -2034,6 +2034,21 @@ MooseApp::runInputs()
   }
 
   return false;
+}
+
+Moose::Capability &
+MooseApp::addCapabilityInternal(const std::string_view capability,
+                                const Moose::Capability::Value & value,
+                                const std::string_view doc)
+{
+  try
+  {
+    return Moose::internal::Capabilities::get({}).add(capability, value, doc);
+  }
+  catch (const std::exception & e)
+  {
+    ::mooseError(e.what());
+  }
 }
 
 void
@@ -3266,7 +3281,7 @@ MooseApp::addBoolCapability(const std::string_view capability,
                             const bool value,
                             const std::string_view doc)
 {
-  return Moose::internal::Capabilities::get().add(capability, value, doc);
+  return addCapabilityInternal(capability, value, doc);
 }
 
 Moose::Capability &
@@ -3274,7 +3289,7 @@ MooseApp::addIntCapability(const std::string_view capability,
                            const int value,
                            const std::string_view doc)
 {
-  return Moose::internal::Capabilities::get().add(capability, value, doc);
+  return addCapabilityInternal(capability, value, doc);
 }
 
 Moose::Capability &
@@ -3282,7 +3297,7 @@ MooseApp::addStringCapability(const std::string_view capability,
                               const std::string_view value,
                               const std::string_view doc)
 {
-  return Moose::internal::Capabilities::get().add(capability, std::string(value), doc);
+  return addCapabilityInternal(capability, std::string(value), doc);
 }
 
 Moose::Capability &
@@ -3290,17 +3305,16 @@ MooseApp::addCapability(const std::string_view capability,
                         const Moose::Capability::Value & value,
                         const std::string_view doc)
 {
-  auto & capabilities = Moose::internal::Capabilities::get();
 
   // Warn deprecation on the first time this is added so that we
   // don't get multiple warnings if the app is registered more
   // than once
-  if (!capabilities.query(std::string(capability)))
+  if (!Moose::internal::Capabilities::get({}).query(std::string(capability)))
     ::mooseDeprecated("MooseApp::addCapability() is deprecated (adding capability '",
                       capability,
                       "'); use one of MooseApp::add[Bool,Int,String]Capability instead.");
 
-  return capabilities.add(capability, value, doc);
+  return addCapabilityInternal(capability, value, doc);
 }
 
 #ifdef MOOSE_MFEM_ENABLED

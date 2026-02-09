@@ -42,14 +42,14 @@
 namespace Moose::internal
 {
 
-Capabilities::Capabilities()
+Capabilities::Capabilities() : CapabilityRegistry()
 {
   // Register the moose capabilities, just once
   registerMooseCapabilities();
 }
 
 Capabilities &
-Capabilities::get()
+Capabilities::get(const Capabilities::GetPassKey)
 {
   // We need a naked new here (_not_ a smart pointer or object instance) due to what seems like a
   // bug in clang's static object destruction when using dynamic library loading.
@@ -59,50 +59,11 @@ Capabilities::get()
   return *capability_registry;
 }
 
-Moose::Capability &
-Capabilities::add(const std::string_view capability,
-                  const Moose::Capability::Value & value,
-                  const std::string_view doc)
-{
-  if (Moose::internal::CapabilityRegistry::augmented_capability_names.count(capability))
-    mooseError("The capability \"",
-               capability,
-               "\" is reserved and may not be registered by an application.");
-
-  try
-  {
-    return _capability_registry.add(capability, value, doc);
-  }
-  catch (const std::exception & e)
-  {
-    mooseError(e.what());
-  }
-}
-
-const Moose::Capability *
-Capabilities::query(const std::string & capability) const
-{
-  return _capability_registry.query(capability);
-}
-
-const Moose::Capability &
-Capabilities::get(const std::string & capability) const
-{
-  try
-  {
-    return _capability_registry.get(capability);
-  }
-  catch (const std::exception & e)
-  {
-    mooseError("Capabilities::get(): ", e.what());
-  }
-}
-
 std::string
 Capabilities::dump() const
 {
   nlohmann::json root;
-  for (const auto & [name, capability] : _capability_registry.getRegistry({}))
+  for (const auto & [name, capability] : _registry)
   {
     auto & entry = root[name];
     std::visit([&entry](const auto & v) { entry["value"] = v; }, capability.getValue());
@@ -114,12 +75,6 @@ Capabilities::dump() const
       entry["explicit"] = capability.getExplicit();
   }
   return root.dump(2);
-}
-
-CapabilityRegistry::CheckResult
-Capabilities::check(const std::string & requested_capabilities) const
-{
-  return _capability_registry.check(requested_capabilities);
 }
 
 void
@@ -151,7 +106,7 @@ Capabilities::augment(const nlohmann::json & input, const Capabilities::AugmentP
     else
       error("missing 'value' entry");
 
-    auto & capability = _capability_registry.add(name, value, doc);
+    auto & capability = add(name, value, doc);
 
     if (const auto it = entry.find("explicit"); it != entry.end() && it->get<bool>())
       capability.setExplicit();

@@ -18,61 +18,59 @@
 #include "gtest/gtest.h"
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
 class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augmentParseError);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, check);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, dump);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckCapabilities);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckRequiredCapabilities);
 class CapabilitiesTest;
 #endif
 
+class AppFactory;
 class MooseApp;
 
 namespace Moose::internal
 {
 
 /**
- * This singleton class holds a registry for capabilities supported by the current app.
+ * Holds the public (to MooseApp) facing CapabilityRegistry for storing and checking capabilities.
+ *
  * A capability can refer to an optional library or optional functionality. Capabilities
  * can either be registered as boolean values (present or not), an integer quantity (like
  * the AD backing store size), a string (like the compiler used to build the executable),
  * or a version number (numbers separated by dots, e.g. the petsc version).
  */
-class Capabilities
+class Capabilities : public CapabilityRegistry
 {
 public:
+  /// Passkey for get()
+  class GetPassKey
+  {
+    friend AppFactory;
+    friend MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    friend class ::CapabilitiesTest;
+    FRIEND_TEST(::CapabilitiesTest, augment);
+    FRIEND_TEST(::CapabilitiesTest, augmentParseError);
+    FRIEND_TEST(::CapabilitiesTest, check);
+    FRIEND_TEST(::CapabilitiesTest, dump);
+    FRIEND_TEST(::CapabilitiesTest, mooseAppCheckCapabilities);
+    FRIEND_TEST(::CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+#endif
+    GetPassKey() {}
+    GetPassKey(const GetPassKey &) {}
+  };
+
   /**
    * Get the singleton Capabilities.
-   */
-  static Capabilities & get();
-
-  /**
-   * Add a capability to the registry.
    *
-   * @param capability The name of the capability
-   * @param value The value of the capability
-   * @param doc The documentation string
-   * @return The capability
+   * Only accessible through MooseApp and AppFactory. Addition
+   * of capabilities should be done through the
+   * MooseApp::add[Bool,Int,String]capability() method.
    */
-  Moose::Capability & add(const std::string_view capability,
-                          const Moose::Capability::Value & value,
-                          const std::string_view doc);
-
-  /**
-   * Query a capability, if it exists, otherwise nullptr.
-   *
-   * @param capability The name of the capability.
-   */
-  const Moose::Capability * query(const std::string & capability) const;
-
-  /**
-   * Get a capability.
-   *
-   * @param capability The name of the capability
-   */
-  const Moose::Capability & get(const std::string & capability) const;
+  static Capabilities & get(const GetPassKey);
 
   /// create a JSON dump of the capabilities registry
   std::string dump() const;
-
-  /// check if the given required capabilities are fulfilled, returns a bool, a reason, and a verbose documentation
-  Moose::internal::CapabilityRegistry::CheckResult
-  check(const std::string & requested_capabilities) const;
 
   /// Passkey for augment()
   class AugmentPassKey
@@ -118,13 +116,6 @@ private:
    * can be added.
    */
   void registerMooseCapabilities();
-
-  /**
-   * Capability registry. The capabilities registered here can be dumped using the
-   * --show-capabilities command line option. Capabilities are used by the test harness
-   * to conditionally enable/disable tests that rely on optional capabilities.
-   */
-  Moose::internal::CapabilityRegistry _capability_registry;
 
   // Private constructor for singleton pattern
   Capabilities();

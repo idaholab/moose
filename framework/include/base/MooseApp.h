@@ -1574,6 +1574,20 @@ private:
    */
   bool runInputs();
 
+  /**
+   * Internal method for adding a capability.
+   *
+   * Used to catch exceptions and report them as a mooseError.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::Capability & addCapabilityInternal(const std::string_view capability,
+                                                   const Moose::Capability::Value & value,
+                                                   const std::string_view doc);
+
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
       _restartable_meta_data;

@@ -346,7 +346,8 @@ Capabilities_init(CapabilitiesObject * self, PyObject * args, PyObject * /* kwds
   self->values = capabilities_dict;
 
   // Clear registry on new init
-  self->state->registry.clear();
+  delete self->state;
+  self->state = new CapabilitiesState();
 
   // Add each capability in the dict to the C++ Registry
   try
