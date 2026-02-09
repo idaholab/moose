@@ -263,6 +263,13 @@ TEST(CapabilityRegistryTest, checkMultiple)
   CAP_CHECK_EXPECT_ERROR("(bool", "Unable to parse requested capabilities '(bool'.");
 }
 
+/// Test CapabilityRegistry::check for empty requirements
+TEST(CapabilityRegistryTest, checkEmpty)
+{
+  CapabilityRegistry registry;
+  CAP_CHECK_EXPECT_EQ("", CheckState::CERTAIN_PASS);
+}
+
 /// Test CapabilityRegistry::check for a parse failure
 TEST(CapabilityRegistryTest, checkParseFail)
 {
