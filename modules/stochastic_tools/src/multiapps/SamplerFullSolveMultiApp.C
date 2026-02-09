@@ -468,7 +468,11 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
         values.push_back(Moose::stringifyExact(value));
       }
 
-      args.push_back(vector_param[0] + "='" + MooseUtils::stringJoin(values) + "'");
+      // If there is only one value, do not put quotes around it
+      if (values.size() == 1)
+        args.push_back(vector_param[0] + "=" + values[0]);
+      else
+        args.push_back(vector_param[0] + "='" + MooseUtils::stringJoin(values) + "'");
     }
     // Assign scalar parameters
     else

@@ -32,7 +32,7 @@
       csvdiff = 'parent_multiple_out_storage_0002.csv'
       prereq = parent/single_batch
 
-      detail = 'for multiple parameters, and'
+      detail = 'for multiple parameters,'
     []
 
     [vector]
@@ -51,7 +51,7 @@
       prereq = parent/multiple_normal
       max_parallel = 3
 
-      detail = 'for multiple parameters for a batch of sub-applications.'
+      detail = 'for multiple parameters for a batch of sub-applications,'
     []
 
     [multiple_batch_with_index]
@@ -62,9 +62,20 @@
       prereq = parent/multiple_normal
       max_parallel = 3
 
-      detail = 'for multiple parameters using their global column indexes for a batch of sub-applications.'
+      detail = 'for multiple parameters using their global column indexes for a batch of sub-applications,'
     []
 
+    [input_variable]
+      type = RunApp
+      input = parent_input_variable.i
+      detail = 'for input variables, and'
+    []
+    [input_variable_with_index]
+      type = RunApp
+      input = parent_input_variable.i
+      cli_args = "Controls/cmdline/param_names='var1[0]'"
+      detail = 'for input variables with column index specified.'
+    []
   []
   [wrong_batch_mode]
     type = RunException
