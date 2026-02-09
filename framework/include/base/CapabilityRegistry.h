@@ -14,6 +14,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 
 #ifdef MOOSE_UNIT_TEST
 class CapabilitiesTest;
@@ -99,7 +100,9 @@ public:
    */
   ///@{
   const Capability * query(std::string capability) const;
-  Capability * query(std::string capability);
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+  inline Capability * query(std::string capability);
+#endif
   ///@}
 
   /**
@@ -107,10 +110,7 @@ public:
    *
    * Will convert the capability name to lowercase.
    */
-  ///@{
   const Capability & get(const std::string & capability) const;
-  Capability & get(const std::string & capability);
-  ///@}
 
   /**
    * @return The size of the registry (number of capabilities registered).
@@ -155,4 +155,12 @@ protected:
   RegistryType _registry;
 };
 
-} // namespace CapabilityUtils
+#if defined(MOOSE_UNIT_TEST) || defined(FOR_PYCAPABILITIES)
+Capability *
+CapabilityRegistry::query(std::string capability)
+{
+  return const_cast<Capability *>(std::as_const(*this).query(capability));
+}
+#endif
+
+} // namespace Moose::internal

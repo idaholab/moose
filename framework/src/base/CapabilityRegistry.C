@@ -61,24 +61,12 @@ CapabilityRegistry::query(std::string capability) const
   return nullptr;
 }
 
-Capability *
-CapabilityRegistry::query(std::string capability)
-{
-  return const_cast<Capability *>(std::as_const(*this).query(capability));
-}
-
 const Capability &
 CapabilityRegistry::get(const std::string & capability) const
 {
   if (const auto capability_ptr = query(capability))
     return *capability_ptr;
   throw CapabilityException("Capability '" + capability + "' not registered");
-}
-
-Capability &
-CapabilityRegistry::get(const std::string & capability)
-{
-  return const_cast<Capability &>(std::as_const(*this).get(capability));
 }
 
 [[noreturn]] void
