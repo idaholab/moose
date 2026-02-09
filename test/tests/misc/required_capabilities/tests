@@ -101,7 +101,7 @@
     type = RunException
     input = input.i
     cli_args = '--required-capabilities=\'test_string_enum=bar\''
-    expect_err = "Capability statement 'test_string_enum=bar': 'bar' invalid for capability 'test_string_enum'; valid values: string, foo"
+    expect_err = "Capability statement 'test_string_enum=bar': 'bar' invalid for capability 'test_string_enum'; valid values: foo, string"
     requirement = 'The system shall report an error if using an enumerated capability with a non-enumerated value'
   []
   [installation_type]
