@@ -113,6 +113,11 @@ public:
   ///@}
 
   /**
+   * @return The size of the registry (number of capabilities registered).
+   */
+  std::size_t size() const { return _registry.size(); }
+
+  /**
    * Checks if a set of requirements is satisified by the capabilities
    *
    * @param capabilities The registry that contains the capabilities
