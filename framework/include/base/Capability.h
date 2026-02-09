@@ -104,30 +104,30 @@ public:
   /**
    * @return The boolean capability value if it is a boolean.
    */
-  const bool * queryBoolValue() const;
+  const bool * queryBoolValue() const { return std::get_if<bool>(&_value); }
   /**
    * @return The integer capability value if it is an integer.
    */
-  const int * queryIntValue() const;
+  const int * queryIntValue() const { return std::get_if<int>(&_value); }
   /**
    * @return The string capability value if it is a string.
    */
-  const std::string * queryStringValue() const;
+  const std::string * queryStringValue() const { return std::get_if<std::string>(&_value); }
 
   /**
    * @return Whether or not the capability value is a boolean.
    */
-  bool hasBoolValue() const { return queryBoolValue(); }
+  bool hasBoolValue() const { return std::holds_alternative<bool>(_value); }
 
   /**
    * @return Whether or not the capability value is an integer.
    */
-  bool hasIntValue() const { return queryIntValue(); }
+  bool hasIntValue() const { return std::holds_alternative<int>(_value); }
 
   /**
    * @return Whether or not the capability value is a string.
    */
-  bool hasStringValue() const { return queryStringValue(); }
+  bool hasStringValue() const { return std::holds_alternative<std::string>(_value); }
 
   /**
    * @return The capability value as a string.

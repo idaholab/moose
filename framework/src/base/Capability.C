@@ -111,24 +111,6 @@ Capability::setEnumeration(const std::vector<std::string> & enumeration)
   return *this;
 }
 
-const bool *
-Capability::queryBoolValue() const
-{
-  return std::get_if<bool>(&_value);
-}
-
-const int *
-Capability::queryIntValue() const
-{
-  return std::get_if<int>(&_value);
-}
-
-const std::string *
-Capability::queryStringValue() const
-{
-  return std::get_if<std::string>(&_value);
-}
-
 std::string
 Capability::valueToString() const
 {
