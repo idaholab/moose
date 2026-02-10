@@ -5,6 +5,7 @@
 
 [Problem]
   type = MFEMProblem
+  numeric_type = complex
 []
 
 [FESpaces]
@@ -17,20 +18,21 @@
 
 [Variables]
   [u]
-    type = MFEMVariable
+    type = MFEMComplexVariable
     fespace = H1FESpace
   []
 []
 
 [BCs]
   [bottom]
-    type = MFEMScalarDirichletBC
+    type = MFEMComplexScalarDirichletBC
     variable = u
     boundary = 2
-    coefficient = 1.0
+    coefficient_real = 1
+    coefficient_imag = 1
   []
   [top]
-    type = MFEMScalarDirichletBC
+    type = MFEMComplexScalarDirichletBC
     variable = u
     boundary = 4
   []
@@ -38,22 +40,19 @@
 
 [Kernels]
   [diff]
-    type = MFEMDiffusionKernel
+    type = MFEMComplexKernel
     variable = u
-  []
-[]
-
-[Preconditioner]
-  [boomeramg]
-    type = MFEMHypreBoomerAMG
+    [RealComponent]
+      type = MFEMDiffusionKernel
+    []
+    [ImagComponent]
+      type = MFEMDiffusionKernel
+    []
   []
 []
 
 [Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  l_tol = 1e-16
-  l_max_its = 1000
+  type = MFEMSuperLU
 []
 
 [Executioner]
@@ -64,7 +63,7 @@
   active = ''
   [subapp]
     type = FullSolveMultiApp
-    input_files = parent.i
+    input_files = parent_complex.i
     execute_on = FINAL
   []
 []
@@ -82,7 +81,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/DiffusionSub
+    file_base = OutputData/DiffusionSubComplex
     vtk_format = ASCII
   []
 []

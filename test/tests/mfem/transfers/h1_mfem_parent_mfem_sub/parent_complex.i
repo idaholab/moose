@@ -6,6 +6,7 @@
 [Problem]
   type = MFEMProblem
   solve = false
+  numeric_type = complex
 []
 
 [FESpaces]
@@ -18,7 +19,7 @@
 
 [AuxVariables]
   [u]
-    type = MFEMVariable
+    type = MFEMComplexVariable
     fespace = H1FESpace
   []
 []
@@ -30,7 +31,7 @@
 [MultiApps]
   [subapp]
     type = FullSolveMultiApp
-    input_files = sub.i
+    input_files = sub_complex.i
     execute_on = INITIAL
   []
 []
@@ -47,7 +48,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Diffusion
+    file_base = OutputData/DiffusionComplex
     vtk_format = ASCII
   []
 []
