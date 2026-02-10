@@ -24,9 +24,7 @@ TempFile::~TempFile()
 std::filesystem::path
 TempFile::generatePath()
 {
-  static const std::string chars = "abcdefghijklmnopqrstuvwxyz"
-                                   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                   "0123456789";
+  static const std::string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   static thread_local std::mt19937 generator{std::random_device{}()};
   std::uniform_int_distribution<std::size_t> distribution(0, chars.size() - 1);
   std::string result;
