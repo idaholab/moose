@@ -60,8 +60,9 @@ public:
                                   GridFunctions & gridfunctions,
                                   ComplexGridFunctions & cmplx_gridfunctions);
 
-  /// Update eigenvectors from solution after eigensolve                                
-  virtual void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver);
+  /// Update eigenvectors from solution after eigensolve
+  virtual void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
+                                           MFEMEigensolverBase * eigensolver);
 
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.
