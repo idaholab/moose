@@ -125,6 +125,10 @@ public:
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cmplx_var_ess_constraints;
+
+  private:
+
+    friend class ComplexEquationSystemProblemOperator;
 };
 
 template <class FormType>
