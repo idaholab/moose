@@ -301,12 +301,12 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
-    auto blf = jac_blfs.Get(test_var_name);
-    auto lf = rhs_lfs.Get(test_var_name);
+    auto blf = _blfs.Get(test_var_name);
+    auto lf = _lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
     blf->FormLinearSystem(
-        ess_tdof_lists.at(i), *(var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
