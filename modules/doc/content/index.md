@@ -11,7 +11,7 @@ Multiphysics Object-Oriented Simulation Environment
 
 # An open-source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
-!! intentional to add spacing
+!style! halign=center style=padding-top:20px;margin-left:17%;margin-right:17%
 
 !alert! tip title=MOOSE Announcements Google Group icon=False prefix=False
 
@@ -21,6 +21,8 @@ To join with a Google account, simply click the "Join group" button on the Group
 email to [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com).
 
 !alert-end!
+
+!style-end!
 
 !row!
 !col! small=12 medium=4 large=4 icon=computer
