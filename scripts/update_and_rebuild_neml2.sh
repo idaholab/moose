@@ -25,9 +25,8 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  4. Build NEML2"
   echo "  5. Install NEML2"
   echo
-  echo "NEML2 requires TIMPI, WASP, and libtorch as dependencies. They can be "
+  echo "NEML2 requires WASP and libtorch as dependencies. They can be "
   echo "obtained using the following scripts:"
-  echo "  - TIMPI:    scripts/update_and_rebuild_libmesh.sh"
   echo "  - WASP:     scripts/update_and_rebuild_wasp.sh"
   echo "  - libtorch: scripts/setup_libtorch.sh"
   echo
@@ -35,7 +34,6 @@ if [[ "$#" -eq 1 ]] && [[ "$1" == "--help" ]]; then
   echo "  MOOSE_DIR       The path to the MOOSE directory. Default to the parent directory of this script."
   echo "  LIBMESH_SRC_DIR The path to the libMesh source directory. Default to <MOOSE_DIR>/libmesh."
   echo "  LIBMESH_DIR     The path to the libMesh directory. Default to <LIBMESH_SRC_DIR>/installed."
-  echo "  TIMPI_DIR       The path to the TIMPI directory. Default to <LIBMESH_DIR>."
   echo "  WASP_SRC_DIR    The path to the WASP source directory. Default to <MOOSE_DIR>/framework/contrib/wasp."
   echo "  WASP_DIR        The path to the WASP directory. Default to <WASP_SRC_DIR>/install."
   echo "  LIBTORCH_DIR    The path to the libtorch directory. Default to <MOOSE_DIR>/framework/contrib/libtorch."
@@ -72,11 +70,6 @@ done
 
 # Dependency: libtorch
 export LIBTORCH_DIR=${LIBTORCH_DIR:-${MOOSE_DIR}/framework/contrib/libtorch}
-
-# Dependency: timpi
-LIBMESH_SRC_DIR=${LIBMESH_SRC_DIR:-${MOOSE_DIR}/libmesh}
-LIBMESH_DIR=${LIBMESH_DIR:-${LIBMESH_SRC_DIR}/installed}
-export TIMPI_DIR=${TIMPI_DIR:-${LIBMESH_DIR}}
 
 # Dependency: wasp
 WASP_SRC_DIR=${WASP_SRC_DIR:-${MOOSE_DIR}/framework/contrib/wasp}
@@ -131,7 +124,6 @@ SCRIPT_NAME=$(basename "$0")
 echo "****************************************************************************************************"
 echo "${SCRIPT_NAME} summary:"
 echo "  HIT_SRC_DIR:               ${HIT_SRC_DIR}"
-echo "  TIMPI_DIR:                 ${TIMPI_DIR}"
 echo "  WASP_DIR:                  ${WASP_DIR}"
 echo "  LIBTORCH_DIR:              ${LIBTORCH_DIR}"
 echo "  NEML2_DIR:                 ${NEML2_DIR}"
@@ -146,10 +138,18 @@ echo "**************************************************************************
 # Check that dependencies are available
 if [[ ! -d "${LIBTORCH_DIR}" ]]; then
   echo "Error: The libtorch directory (${LIBTORCH_DIR}) does not exist. Please see --help for more information."
-  exit 1
-fi
-if [[ ! -d "${TIMPI_DIR}" ]]; then
-  echo "Error: The TIMPI directory (${TIMPI_DIR}) does not exist. Please see --help for more information."
+  # Let's try to be nice and offer more help
+  # First see if python is in the environment
+  if command -v python >/dev/null 2>&1; then
+    if TORCH_PY_DIR=$(python -c 'import torch; print(torch.__path__[0])' 2>/dev/null); then
+      TORCH_PY_DIR=${TORCH_PY_DIR%/}
+      if [[ -n "${TORCH_PY_DIR}" ]] && [[ -d "${TORCH_PY_DIR}" ]]; then
+        echo "Found python torch package directory: ${TORCH_PY_DIR}"
+        echo "Hint: If you want to use this installation, set LIBTORCH_DIR before running this script, i.e."
+        echo "  export LIBTORCH_DIR=${TORCH_PY_DIR}"
+      fi
+    fi
+  fi
   exit 1
 fi
 if [[ ! -d "${WASP_DIR}" ]]; then
@@ -174,12 +174,6 @@ fi
 
 # Loop over the methods to configure, build, and install NEML2
 for METHOD in $(echo "$METHODS" | tr ',' ' '); do
-  # Check that timpi is available
-  if [[ ! -f "${TIMPI_DIR}"/lib/libtimpi_${METHOD}.${DYLIB_SUFFIX} ]]; then
-    echo "Error: The TIMPI library (${TIMPI_DIR}/lib/libtimpi_${METHOD}.${DYLIB_SUFFIX}) does not exist. Please build libMesh first."
-    exit 1
-  fi
-
   # Build and install directories
   NEML2_BUILD_DIR=${NEML2_SRC_DIR}/build/${METHOD}
 
@@ -222,7 +216,6 @@ for METHOD in $(echo "$METHODS" | tr ',' ' '); do
                     "${NEML2_BUILD_DIR}" \
                     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" \
                     "-DNEML2_CONTRIB_PARALLEL=${NEML2_JOBS}" \
-                    "-Dtimpi_BUILD_TYPE=${METHOD}" \
                     "${EXTRA_ARGS[@]}"
     # shellcheck disable=SC2181
     if [[ $? -ne 0 ]] ; then
