@@ -92,7 +92,7 @@ LinearFVPhaseChangeSource::computeRightHandSideContribution()
   const Real T      = _var.getElemValue(*_current_elem_info, state);
   const Real s      = std::clamp((T - T_sol) / dT_pc, 0.0, 1.0);
 
-  // df/dT for f(s) = 3s^2 - 2s^3 is 6 s (1 - s) / dT_pc
+  // df/dT for f(s) = 3s^2 - 2s^3 is 6 s (1 - s) / dT_p
   const Real dfdT   = 6.0 * s * (1.0 - s) / dT_pc;
 
   // Apparent heat capacity term rho * L * (df/dT) * T_dot
