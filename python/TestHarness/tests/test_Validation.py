@@ -244,7 +244,7 @@ class TestValidation(TestHarnessTestCase):
         output = test["output"]["job"]
         self.assertIn("Python exception encountered in validation case", output)
         self.assertIn("validation_init_exception.py", output)
-        self.assertIn("raise Exception('foo')", output)
+        self.assertIn('raise Exception("foo")', output)
 
     def testBadPython(self):
         """
