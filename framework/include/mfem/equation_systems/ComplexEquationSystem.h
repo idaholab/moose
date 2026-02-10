@@ -135,6 +135,10 @@ protected:
 
   // Pointer to complex GridFunctions to enable updates during nonlinear iterations
   Moose::MFEM::ComplexGridFunctions * _complex_gfuncs;
+  
+  private:
+
+    friend class ComplexEquationSystemProblemOperator;
 };
 
 template <class FormType>
