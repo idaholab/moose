@@ -9,7 +9,6 @@
       type = CSVDiff
       input = 'air.i'
       csvdiff = 'air_out.csv'
-      threading = '!pthreads'
       detail = 'spline-based table-lookup air fluid properties,'
       capabilities = 'airapp'
     []
@@ -17,7 +16,6 @@
       type = CSVDiff
       input = 'co2.i'
       csvdiff = 'co2_out.csv'
-      threading = '!pthreads'
       detail = 'vapor carbon dioxide fluid properties,'
       capabilities = 'carbondioxideapp'
     []
@@ -25,7 +23,6 @@
       type = CSVDiff
       input = 'helium.i'
       csvdiff = 'helium_out.csv'
-      threading = '!pthreads'
       detail = 'spline-based table-lookup Helium fluid properties,'
       capabilities = 'heliumapp'
     []
@@ -33,7 +30,6 @@
       type = CSVDiff
       input = 'nitrogen.i'
       csvdiff = 'nitrogen_out.csv'
-      threading = '!pthreads'
       detail = 'spline-based table-lookup Nitrogen fluid properties,'
       capabilities = 'nitrogenapp'
     []
@@ -41,7 +37,6 @@
       type = CSVDiff
       input = 'potassium.i'
       csvdiff = 'potassium_out.csv'
-      threading = '!pthreads'
       detail = 'liquid Potassium fluid properties,'
       capabilities = 'potassiumapp'
     []
@@ -49,7 +44,6 @@
       type = CSVDiff
       input = 'sodium.i'
       csvdiff = 'sodium_out.csv'
-      threading = '!pthreads'
       detail = 'liquid Sodium fluid properties.'
       capabilities = 'sodiumapp'
     []

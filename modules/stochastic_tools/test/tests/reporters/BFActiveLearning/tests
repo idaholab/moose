@@ -6,7 +6,6 @@
     [SingleProc_SingleRow_Ufunction]
       type = 'JSONDiff'
       input = main_adam.i
-      min_parallel = 1
       max_parallel = 1
       jsondiff = 'single_proc_single_row_ufunction.json'
       detail = 'a single row in the sampler using the U learning function;'

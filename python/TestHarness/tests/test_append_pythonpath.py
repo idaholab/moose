@@ -1,12 +1,21 @@
-import os
-import sys
-import unittest
-from unittest import mock
-import tempfile
-import shutil
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from TestHarness.TestHarness import readTestRoot, TestHarness
+import os
+import shutil
+import sys
+import tempfile
+import unittest
+
+from TestHarness.TestHarness import TestHarness, readTestRoot
 from TestHarness.tests.TestHarnessTestCase import MOOSE_DIR
+
 
 class TestAppendPythonPath(unittest.TestCase):
     def setUp(self):
@@ -43,7 +52,9 @@ class TestAppendPythonPath(unittest.TestCase):
 
         # Show that missing package with raise an error
         shutil.rmtree(os.path.join(self.dir, new_paths[0]))
-        with self.assertRaisesRegex(FileNotFoundError, f"Could not find .*/{new_paths[0]}"):
+        with self.assertRaisesRegex(
+            FileNotFoundError, f"Could not find .*/{new_paths[0]}"
+        ):
             readTestRoot(testroot_path)
 
     def test_append_pythonpath_from_testroot(self):
@@ -70,7 +81,7 @@ class TestAppendPythonPath(unittest.TestCase):
         # Go into directory and build TestHarness
         os.chdir(self.dir)
         TestHarness.build(
-            ["unused", "--no-capabilities"], "test_harness_test", MOOSE_DIR
+            ["unused", "--minimal-capabilities"], "test_harness_test", MOOSE_DIR
         )
         for path in new_paths_abs:
             self.assertEqual(sys.path.count(path), 1)
@@ -87,9 +98,14 @@ class TestAppendPythonPath(unittest.TestCase):
 
         # Build the TestHarness, which should add to path
         os.chdir(self.dir)
-        TestHarness.build(["unused", "--no-capabilities"], app_name, MOOSE_DIR, skip_testroot=True)
+        TestHarness.build(
+            ["unused", "--minimal-capabilities"],
+            app_name,
+            MOOSE_DIR,
+            skip_testroot=True,
+        )
         self.assertEqual(sys.path.count(os.path.join(self.dir, "python")), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -9,45 +9,89 @@
 
 #pragma once
 
-#include "CapabilityUtils.h"
+#include "CapabilityRegistry.h"
+
+#include "nlohmann/json_fwd.h"
 
 #ifdef MOOSE_UNIT_TEST
 // forward declare unit tests
 #include "gtest/gtest.h"
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, boolTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, intTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, stringTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, versionTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, multipleTest);
-class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, parseFail);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augment);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, augmentParseError);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, check);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, dump);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckCapabilities);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+class CapabilitiesTest;
 #endif
 
-namespace Moose
+class AppFactory;
+class MooseApp;
+
+namespace Moose::internal
 {
 
 /**
- * This singleton class holds a registry for capabilities supported by the current app.
+ * Holds the public (to MooseApp) facing CapabilityRegistry for storing and checking capabilities.
+ *
  * A capability can refer to an optional library or optional functionality. Capabilities
  * can either be registered as boolean values (present or not), an integer quantity (like
  * the AD backing store size), a string (like the compiler used to build the executable),
  * or a version number (numbers separated by dots, e.g. the petsc version).
  */
-class Capabilities
+class Capabilities : public CapabilityRegistry
 {
 public:
-  virtual ~Capabilities() {}
+  /// Passkey for get()
+  class GetPassKey
+  {
+    friend AppFactory;
+    friend MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    friend class ::CapabilitiesTest;
+    FRIEND_TEST(::CapabilitiesTest, augment);
+    FRIEND_TEST(::CapabilitiesTest, augmentParseError);
+    FRIEND_TEST(::CapabilitiesTest, check);
+    FRIEND_TEST(::CapabilitiesTest, dump);
+    FRIEND_TEST(::CapabilitiesTest, mooseAppCheckCapabilities);
+    FRIEND_TEST(::CapabilitiesTest, mooseAppCheckRequiredCapabilities);
+#endif
+    GetPassKey() {}
+    GetPassKey(const GetPassKey &) {}
+  };
 
-  static Capabilities & getCapabilityRegistry();
-
-  /// register a new capability
-  void add(const std::string & capability, CapabilityUtils::Type value, const std::string & doc);
-  void add(const std::string & capability, const char * value, const char * doc);
+  /**
+   * Get the singleton Capabilities.
+   *
+   * Only accessible through MooseApp and AppFactory. Addition
+   * of capabilities should be done through the
+   * MooseApp::add[Bool,Int,String]capability() method.
+   */
+  static Capabilities & get(const GetPassKey);
 
   /// create a JSON dump of the capabilities registry
   std::string dump() const;
 
-  /// check if the given required capabilities are fulfilled, returns a bool, a reason, and a verbose documentation
-  CapabilityUtils::Result check(const std::string & requested_capabilities) const;
+  /// Passkey for augment()
+  class AugmentPassKey
+  {
+    friend MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    FRIEND_TEST(::CapabilitiesTest, augment);
+    FRIEND_TEST(::CapabilitiesTest, augmentParseError);
+#endif
+    AugmentPassKey() {}
+    AugmentPassKey(const AugmentPassKey &) {}
+  };
+
+  /**
+   * Augment the capabilities with the given input capabilities.
+   *
+   * This is used when loading additional capabilities at run time
+   * from the TestHarness and thus is only allowed to be used by
+   * the MooseApp.
+   */
+  void augment(const nlohmann::json & input, const AugmentPassKey);
 
   ///@{ Don't allow creation through copy/move construction or assignment
   Capabilities(Capabilities const &) = delete;
@@ -57,26 +101,24 @@ public:
   Capabilities & operator=(Capabilities &&) = delete;
   ///@}
 
-protected:
-  /**
-   * Capability registry. The capabilities registered here can be dumped using the
-   * --show-capabilities command line option. Capabilities are used by the test harness
-   * to conditionally enable/disable tests that rely on optional capabilities.
-   */
-  std::map<std::string, std::pair<CapabilityUtils::Type, std::string>> _capability_registry;
-
 private:
-  // Private constructor for singleton pattern
-  Capabilities() {}
-
 #ifdef MOOSE_UNIT_TEST
-  FRIEND_TEST(::CapabilitiesTest, boolTest);
-  FRIEND_TEST(::CapabilitiesTest, intTest);
-  FRIEND_TEST(::CapabilitiesTest, stringTest);
-  FRIEND_TEST(::CapabilitiesTest, versionTest);
-  FRIEND_TEST(::CapabilitiesTest, multipleTest);
-  FRIEND_TEST(::CapabilitiesTest, parseFail);
+  friend class ::CapabilitiesTest;
 #endif
+
+  /**
+   * Register the MOOSE capabilities.
+   *
+   * Called during the construction of the registry.
+   *
+   * Putting this here enforces that only capabilities that
+   * represent context _before_ the app is constructed
+   * can be added.
+   */
+  void registerMooseCapabilities();
+
+  // Private constructor for singleton pattern
+  Capabilities();
 };
 
-} // namespace Moose
+} // namespace Moose::internal

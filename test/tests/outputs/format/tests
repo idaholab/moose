@@ -9,7 +9,6 @@
     # e.g. out.e.2.0 and out.e.2.1, so this test will only pass if you
     # run it on one processor.
     max_parallel = 1
-    min_parallel = 1
     issues = '#920'
     design = 'Nemesis.md'
     requirement = 'The system shall support Nemesis output.'
@@ -155,7 +154,6 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall be able to dump input file syntax in JSON format.'
   []
 
@@ -166,7 +164,6 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall be able to dump input file syntax in JSON format and exclude test object syntax.'
     prereq = 'json_full' # added to avoid race condition on JSON dump created
   []
@@ -178,7 +175,6 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall be able to dump a subset of JSON formatted syntax.'
     prereq = 'json_no_test_objects' # added to avoid race condition on JSON dump created
   []
@@ -190,7 +186,6 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall dump line information along with JSON formatted syntax.'
     prereq = 'json_search' # added to avoid race condition on JSON dump created
   []
@@ -202,7 +197,6 @@
     max_buffer_size = -1
     issues = '#12960'
     design = 'JsonInputFileFormatter.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall not include RESIDUAL and JACOBIAN template arguments in the JSON syntax format.'
     prereq = 'json_line_info' # added to avoid race condition on JSON dump created
   []
@@ -214,7 +208,6 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall be able to dump input file (HIT) syntax.'
   []
 
@@ -225,7 +218,6 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    installation_type = in_tree # see #26480
     requirement = 'The system shall be able to dump a subset of input file (HIT) syntax.'
   []
 []

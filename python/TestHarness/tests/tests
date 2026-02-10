@@ -42,9 +42,9 @@
     requirement = "The system shall support the output of single-lined test results with a user configurable format string"
     issues = '#30755'
   []
-  [min_ad_size]
+  [ad_size]
     type = PythonUnitTest
-    input = test_MinADSize.py
+    input = test_ADSize.py
     requirement = "The system shall restrict tests based on the available dual number derivative vector size"
   []
   [cyclic]
@@ -148,12 +148,6 @@
     type = PythonUnitTest
     input = test_Allocations.py
     requirement = "The system shall supply the necessary resources a test requires, and report when these resources are insufficient to run said test"
-    issues = '#10272'
-  []
-  [extra_info]
-    type = PythonUnitTest
-    input = test_ExtraInfo.py
-    requirement = "The system shall print all caveats pertaining to the test involved"
     issues = '#10272'
   []
   [parser_errors]
@@ -304,10 +298,10 @@
     requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
     issues = '#30517'
   []
-  [augmented_capabilities]
+  [capabilities]
     type = PythonUnitTest
-    input = test_AugmentedCapabilities.py
-    requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite.'
+    input = test_Capabilities.py
+    requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite and the application.'
     issues = '#31135'
   []
   [only_tests_that_require]

@@ -5,112 +5,103 @@
     type = 'Exodiff'
     input = 'elastic_temperature_steps.i'
     exodiff = 'elastic_temperature_steps_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [elastic_temperature_steps_uo]
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo.i'
     exodiff = 'elastic_temperature_steps_uo_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_temperature_steps_uo_end_times]
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo_end_times.i'
     exodiff = 'elastic_temperature_steps_uo_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'Outputs/file_base=elastic_temperature_steps_uo_out'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object, to which the user only provides the step end times.'
-    prereq = 'elastic_temperature_steps_uo'  # uses same gold file
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
+    prereq = 'elastic_temperature_steps_uo' # uses same gold file
   []
 
   [elastic_temperature_steps_uo_durations]
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo_durations.i'
     exodiff = 'elastic_temperature_steps_uo_durations_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object, to which the user only provides the step durations.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_temperature_steps_uo_intervals]
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo_intervals.i'
     exodiff = 'elastic_temperature_steps_uo_intervals_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object, to which the user only provides the number of steps and the total time interval.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_temperature_steps_uo_sync]
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo.i'
     exodiff = 'elastic_temperature_steps_uo_sync_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'Outputs/file_base=elastic_temperature_steps_uo_sync_out Functions/top_pull_step2/expression="(t-4.5)/20" UserObjects/step_uo/step_start_times="0 4.5"'
     requirement = 'The system shall ensure that solution synchronization times are enforced by default when employing a user object to determine the steps of the simulation.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [elastic_temperature_steps_uo_input]
     type = 'Exodiff'
     input = 'elastic_temperature_steps_uo.i'
     exodiff = 'elastic_temperature_steps_uo_input_out.e'
     cli_args = 'Materials/umat/analysis_step_user_object=step_uo Outputs/file_base=elastic_temperature_steps_uo_input_out'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to switch boundary conditions according to the controls system using loading steps from a general user object.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_temperature_steps_uo_step_number_pps]
     type = 'CSVDiff'
     input = 'elastic_temperature_steps_uo_step_pps.i'
     csvdiff = 'elastic_temperature_steps_uo_step_pps_out.csv'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to output the current step number as a postprocessor.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [elastic_temperature_steps_uo_step_number_pps_one_based]
     type = 'CSVDiff'
     input = 'elastic_temperature_steps_uo_step_pps.i'
     csvdiff = 'elastic_temperature_steps_uo_step_pps_one_based_out.csv'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to output the current step number as a postprocessor using a one-based index.'
     cli_args = 'Postprocessors/step_number/use_one_based_indexing=true Outputs/file_base=elastic_temperature_steps_uo_step_pps_one_based_out'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_temperature_steps_uo_step_number_pps_sync]
     type = 'CSVDiff'
     input = 'elastic_temperature_steps_uo_step_pps.i'
     csvdiff = 'elastic_temperature_steps_uo_step_pps_sync_out.csv'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as constitutive models, with support for finite strain elastic material models and temperature dependence with the ability to sync output times.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
     cli_args = 'UserObjects/step_uo/set_sync_times=true UserObjects/step_uo/step_start_times="0 2.2 4.5" Outputs/file_base=elastic_temperature_steps_uo_step_pps_sync_out'
-    installation_type = in_tree
   []
 []

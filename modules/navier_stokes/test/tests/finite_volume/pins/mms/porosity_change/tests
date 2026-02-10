@@ -2,48 +2,32 @@
   issues = '#16756 #19472'
   design = 'navier_stokes/pinsfv.md NSFVAction.md'
   [1D_continuous_porosity]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestRC
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 1D channel with a continuously varying porosity and produce second order convergence for all variables.'
-    capabilities = 'method!=dbg'
     min_parallel = 8
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [2D_continuous_porosity]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestRC_2D
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations using a Rhie-Chow interpolation scheme in a 2D channel with a continuously varying porosity and produce second order convergence for all variables.'
-    capabilities = 'method!=dbg'
     min_parallel = 16
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [pressure-corrected]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPressureCorrected
     requirement = 'The system shall show second order convergence for all variables when the porosity is interpolated and reconstructed multiple times and when a correction is applied to the pressure interpolation.'
-    capabilities = 'method!=dbg'
     min_parallel = 8
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [pressure-corrected-action]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPressureCorrectedAction
     requirement = 'The system shall show second order convergence for all variables when using porosity reconstructions and friction corrections together with NSFV action syntax.'
-    capabilities = 'method!=dbg'
     min_parallel = 8
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [pressure-corrected-jac]
     type = 'PetscJacobianTester'

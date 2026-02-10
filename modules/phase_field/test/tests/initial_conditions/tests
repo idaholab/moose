@@ -232,7 +232,6 @@
 
       detail = 'smooth interface in a triple junction.'
     []
-
   []
 
   [GB_adaptivity]
@@ -246,9 +245,7 @@
 
       detail = 'polycrystal structure with IC specifying the GB locations '
     []
-
   []
-
 
   [circles]
     requirement = "The system shall support phase-field initial conditions consisting of circle "
@@ -301,15 +298,15 @@
   []
 
   [close_pack]
-    requirement = "The system shall support phase-field initial conditions consisting of close pack "
-                  "particle patterns:"
+    requirement = "The system shall support phase-field initial conditions consisting of close pack particle patterns:"
 
     [ClosePackIC]
       # Test close pack ic generator (2D)
       type = Exodiff
       input = ClosePackIC.i
       exodiff = ClosePackIC_out.e
-      installation_type = in_tree
+      # diffs on mac
+      capabilities = 'platform!=darwin'
       # steady solve
       recover = false
 

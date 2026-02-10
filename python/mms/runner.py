@@ -62,6 +62,10 @@ def _runner(input_files, num_refinements, *args, **kwargs):
     if csv is None:
         fcsv = input_files[-1].replace('.i', '_out.csv')
 
+    # Get the executable from unit tests
+    if testharness_executable := os.environ.get("MOOSE_PYTHONUNITTEST_EXECUTABLE"):
+        executable = testharness_executable
+
     # Locate the executable
     if executable is None:
         executable = mooseutils.find_moose_executable_recursive(os.getcwd())

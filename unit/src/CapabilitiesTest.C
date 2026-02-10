@@ -7,186 +7,361 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Capabilities.h"
-#include "MooseException.h"
-#include "libmesh/int_range.h"
-
 #include "gtest/gtest.h"
 
-namespace
+#include "MooseUnitUtils.h"
+
+#include "AppFactory.h"
+#include "Capabilities.h"
+#include "CapabilityException.h"
+
+#include "nlohmann/json.h"
+
+using Moose::Capability;
+using Moose::internal::Capabilities;
+using Moose::internal::CapabilityRegistry;
+using CheckState = Moose::internal::CapabilityRegistry::CheckState;
+
+class CapabilitiesTest : public ::testing::Test
 {
-void
-checkError(Moose::Capabilities & capabilities,
-           const std::string & required,
-           const std::string & msg)
+protected:
+  void SetUp() override
+  {
+    // Setup a temporary Capabilities for testing
+    std::swap(Capabilities::get({})._registry, _old_registry);
+    _capabilities = &Capabilities::get({});
+    ASSERT_EQ(Capabilities::get({})._registry.size(), 0);
+  }
+
+  void TearDown() override
+  {
+    // Replace temporary Capabilities for testing with real one
+    std::swap(Capabilities::get({})._registry, _old_registry);
+    _old_registry.clear();
+    _capabilities = nullptr;
+  }
+
+  /// Pointer to the current Capabilities during a test
+  Capabilities * _capabilities = nullptr;
+  /// Temporary storage for the actual Capabilities during tests
+  Capabilities::RegistryType _old_registry;
+};
+
+/// Test MooseApp::addBoolCapability
+TEST_F(CapabilitiesTest, mooseAppAddBoolCapability)
 {
-  EXPECT_THROW(
-      {
-        try
-        {
-          capabilities.check(required);
-        }
-        catch (const CapabilityUtils::CapabilityException & e)
-        {
-          EXPECT_EQ(msg, e.what());
-          throw;
-        }
-      },
-      CapabilityUtils::CapabilityException);
-}
+  // success
+  const auto capability = &MooseApp::addBoolCapability("name", false, "doc");
+  EXPECT_EQ(_capabilities->query("name"), capability);
+
+  // exceptions are moose errors
+  EXPECT_MOOSEERROR_MSG(MooseApp::addBoolCapability("name", true, "doc"),
+                        "Capability 'name' already exists and is not equal");
 }
 
-TEST(CapabilitiesTest, boolTest)
+/// Test MooseApp::addIntCapability
+TEST_F(CapabilitiesTest, mooseAppAddIntCapability)
 {
-  Moose::Capabilities capabilities;
-  std::vector<std::pair<std::string, CapabilityUtils::CheckState>> tests = {
-      {"unittest_bool", CapabilityUtils::CERTAIN_PASS},
-      {"!unittest_bool", CapabilityUtils::CERTAIN_FAIL},
-      {"!unittest_bool2", CapabilityUtils::CERTAIN_PASS},
-      {"unittest_bool2", CapabilityUtils::CERTAIN_FAIL},
-      {"unittest_doesnotexist", CapabilityUtils::POSSIBLE_FAIL},
-      {"!unittest_doesnotexist", CapabilityUtils::POSSIBLE_PASS},
+  // success
+  const auto capability = &MooseApp::addIntCapability("name", 1, "doc");
+  EXPECT_EQ(_capabilities->query("name"), capability);
+
+  // catch any exceptions and report as a mooseError
+  EXPECT_MOOSEERROR_MSG(MooseApp::addIntCapability("name", 2, "doc"),
+                        "Capability 'name' already exists and is not equal");
+}
+
+/// Test MooseApp::addStringCapability
+TEST_F(CapabilitiesTest, mooseAppAddStringCapability)
+{
+  // success
+  const auto capability = &MooseApp::addStringCapability("name", "value", "doc");
+  EXPECT_EQ(_capabilities->query("name"), capability);
+
+  // catch any exceptions and report as a mooseError
+  EXPECT_MOOSEERROR_MSG(MooseApp::addStringCapability("name", "foo", "doc"),
+                        "Capability 'name' already exists and is not equal");
+}
+
+/// Test MooseApp::addCapability
+TEST_F(CapabilitiesTest, mooseAppAddCapability)
+{
+  // can't add, deprecation warning
+  {
+    Moose::ScopedDeprecatedIsError deprecated_is_error(true);
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        MooseApp::addCapability("name", "foo", "doc"),
+        "Deprecated code:\nMooseApp::addCapability() is deprecated (adding capability 'name'); "
+        "use one of MooseApp::add[Bool,Int,String]Capability instead.");
+  }
+
+  // can add, ignore deprecation warning
+  const Capability * capability;
+  {
+    Moose::ScopedDeprecatedIsError deprecated_is_error(false);
+    capability = &MooseApp::addCapability("name", "value", "doc");
+    EXPECT_EQ(_capabilities->query("name"), capability);
+  }
+
+  // adding the second time gives no deprecation warning
+  {
+    Moose::ScopedDeprecatedIsError deprecated_is_error(true);
+    MooseApp::addCapability("name", "value", "doc");
+    EXPECT_EQ(_capabilities->query("name"), capability);
+  }
+}
+
+/// Test --check-capabilities in MooseApp
+TEST_F(CapabilitiesTest, mooseAppCheckCapabilities)
+{
+  auto & capabilities = Capabilities::get({});
+  capabilities.add("value_true", bool(true), "doc");
+  capabilities.add("value_false", bool(false), "doc");
+
+  // Are fulfilled
+  {
+    auto app =
+        AppFactory::create("MooseUnitApp", {"--check-capabilities='value_true & !value_false'"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 0);
+  }
+
+  // Aren't fulfilled
+  {
+    auto app =
+        AppFactory::create("MooseUnitApp", {"--check-capabilities='!value_true | value_false'"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Exceptions caught as mooseError
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--check-capabilities='foo!?'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--check-capablities: Capability statement '!': unknown operator.");
+  }
+}
+
+/// Test --required-capabilities in MooseApp
+TEST_F(CapabilitiesTest, mooseAppCheckRequiredCapabilities)
+{
+  auto & capabilities = Capabilities::get({});
+  capabilities.add("value_true", bool(true), "doc");
+  capabilities.add("value_false", bool(false), "doc");
+
+  // Aren't fulfilled
+  {
+    auto app =
+        AppFactory::create("MooseUnitApp", {"--required-capabilities='!value_true | value_false'"});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Exceptions caught as mooseError
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo!?'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--required-capablities: Capability statement '!': unknown operator.");
+  }
+
+  // Unknown state
+  {
+    auto app = AppFactory::create("MooseUnitApp", {"--required-capabilities='foo>1'"});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(), "are not specific enough");
+  }
+}
+
+// Set of dumped capabilities that stores a reasonable
+// range of all Capability types
+const nlohmann::json JSON_CAPABILITIES = {
+    {"false", {{"doc", "false"}, {"value", false}}},
+    {"int", {{"doc", "1"}, {"explicit", false}, {"value", 1}}},
+    {"int_explicit", {{"doc", "1"}, {"explicit", true}, {"value", 1}}},
+    {"string", {{"doc", "string"}, {"explicit", false}, {"value", "string"}}},
+    {"string_enum",
+     {{"doc", "string_enum"},
+      {"enumeration", {"foo", "string_enum"}},
+      {"explicit", false},
+      {"value", "string_enum"}}},
+    {"string_explicit",
+     {{"doc", "string_explicit"}, {"explicit", true}, {"value", "string_explicit"}}},
+    {"string_explicit_enum",
+     {{"doc", "string_explicit_enum"},
+      {"enumeration", {"foo", "string_explicit_enum"}},
+      {"explicit", true},
+      {"value", "string_explicit_enum"}}},
+    {"true", {{"doc", "true"}, {"value", true}}}};
+
+/// Test --testharness-capabilities in MooseApp
+TEST_F(CapabilitiesTest, mooseAppTestharnessCapabilities)
+{
+  // Check string that satisfies each entry in JSON_CAPABILITIES
+  const std::string check_capabilities =
+      "--check-capabilities='!false & int & int=1 & int_explicit=1 & string & string=string & "
+      "string_enum & string_enum=string_enum & string_explicit=string_explicit & "
+      "string_explicit_enum=string_explicit_enum & true'";
+
+  // Check fails without augmenting via --testharness-capabilities
+  {
+    auto app = AppFactory::create("MooseUnitApp", {check_capabilities});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 77);
+  }
+
+  // Success once adding --testharness-capabilities to augment
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    std::ofstream out(temp_file.path());
+    out << JSON_CAPABILITIES.dump() << std::flush;
+    out.close();
+
+    auto app = AppFactory::create(
+        "MooseUnitApp", {"--testharness-capabilities", temp_file.path(), check_capabilities});
+    app->run();
+    EXPECT_EQ(app->exitCode(), 0);
+  }
+
+  // File doesn't exist
+  {
+    const std::string bad_file = "/testharness/capabilities/no/exist.json";
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", bad_file});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(), "--testharness-capabilities: Could not open \"" + bad_file + "\"");
+  }
+
+  // Bad JSON parse, caught as mooseError
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    std::ofstream out(temp_file.path());
+    out << "{" << std::flush;
+    out.close();
+
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(app->run(),
+                                   "--testharness-capabilities: Failed to load capabilities \"" +
+                                       std::string(temp_file.path()) +
+                                       "\":\n[json.exception.parse_error");
+  }
+
+  // Bad augment, caught as mooseError
+  {
+    Moose::UnitUtils::TempFile temp_file;
+
+    const nlohmann::json root = {{"name", {{"foo", "bar"}}}};
+    std::ofstream out(temp_file.path());
+    out << root.dump() << std::flush;
+    out.close();
+
+    auto app = AppFactory::create("MooseUnitApp", {"--testharness-capabilities", temp_file.path()});
+    EXPECT_MOOSEERROR_MSG_CONTAINS(
+        app->run(),
+        "--testharness-capabilities: Failed to load capabilities \"" +
+            std::string(temp_file.path()) +
+            "\":\nCapabilities::augment: Capability 'name' missing 'doc' entry");
+  }
+}
+
+/// Test Capabilities::dump
+TEST_F(CapabilitiesTest, dump)
+{
+  auto & capabilities = Capabilities::get({});
+
+  capabilities.add("false", bool(false), "false");
+  capabilities.add("true", bool(true), "true");
+  capabilities.add("int", int(1), "1");
+  capabilities.add("int_explicit", int(1), "1").setExplicit();
+  capabilities.add("string", std::string("string"), "string");
+  capabilities.add("string_explicit", std::string("string_explicit"), "string_explicit")
+      .setExplicit();
+  capabilities.add("string_enum", std::string("string_enum"), "string_enum")
+      .setEnumeration({"string_enum", "foo"});
+  capabilities
+      .add("string_explicit_enum", std::string("string_explicit_enum"), "string_explicit_enum")
+      .setExplicit()
+      .setEnumeration({"string_explicit_enum", "foo"});
+
+  const auto dumped = capabilities.dump();
+  const auto loaded = nlohmann::json::parse(dumped);
+
+  EXPECT_EQ(loaded, JSON_CAPABILITIES);
+}
+
+/// Test Capabilities::check
+TEST_F(CapabilitiesTest, check)
+{
+  auto & capabilities = Capabilities::get({});
+
+  capabilities.add("name", bool(true), "false");
+  EXPECT_EQ(capabilities.check("name").state, CheckState::CERTAIN_PASS);
+  EXPECT_EQ(capabilities.check("!name").state, CheckState::CERTAIN_FAIL);
+}
+
+/// Test Capabilities::augment
+TEST_F(CapabilitiesTest, augment)
+{
+  auto & capabilities = Capabilities::get({});
+
+  capabilities.augment(JSON_CAPABILITIES, {});
+
+  const auto test_capability = [this](const std::string & name,
+                                      const Capability::Value & value,
+                                      const std::string & doc,
+                                      const bool is_explicit = false,
+                                      const std::optional<std::set<std::string>> & enumeration = {})
+  {
+    const auto capability_ptr = _capabilities->query(name);
+    EXPECT_NE(capability_ptr, nullptr);
+    const auto & capability = *capability_ptr;
+    EXPECT_EQ(capability.getName(), name);
+    EXPECT_EQ(capability.getValue(), value);
+    EXPECT_EQ(capability.getDoc(), doc);
+    EXPECT_EQ(capability.getExplicit(), is_explicit);
+    if (enumeration)
+    {
+      auto & cap_enumeration_ptr = capability.queryEnumeration();
+      EXPECT_TRUE(cap_enumeration_ptr.has_value());
+      EXPECT_EQ(*cap_enumeration_ptr, *enumeration);
+    }
   };
-  capabilities.add("unittest_bool", true, "Boolean test capability");
-  capabilities.Capabilities::add("unittest_bool2", false, "Boolean test capability 2");
 
-  for (const auto & [requirement, state] : tests)
-    EXPECT_EQ(std::get<0>(capabilities.check(requirement)), state);
-
-  checkError(capabilities, "unittest_bool2=>1.0.0", "Unknown operator '=>'.");
-  checkError(
-      capabilities, "unittest_bool=", "Unable to parse requested capabilities 'unittest_bool='.");
-  checkError(
-      capabilities, "unittest_bool==", "Unable to parse requested capabilities 'unittest_bool=='.");
+  test_capability("false", bool(false), "false");
+  test_capability("int", int(1), "1");
+  test_capability("int_explicit", int(1), "1", true);
+  test_capability("string", std::string("string"), "string");
+  test_capability("string_enum",
+                  std::string("string_enum"),
+                  "string_enum",
+                  false,
+                  std::set<std::string>{"string_enum", "foo"});
+  test_capability("string_explicit", std::string("string_explicit"), "string_explicit", true);
+  test_capability("string_explicit_enum",
+                  std::string("string_explicit_enum"),
+                  "string_explicit_enum",
+                  true,
+                  std::set<std::string>{"string_explicit_enum", "foo"});
+  test_capability("true", bool(true), "true");
 }
 
-TEST(CapabilitiesTest, intTest)
+/// Test Capabilities::augment with a parsing failure
+TEST_F(CapabilitiesTest, augmentParseError)
 {
-  Moose::Capabilities capabilities;
-  capabilities.add("unittest_int", 78, "Integer test capability");
+  auto & capabilities = Capabilities::get({});
 
-  const std::vector<std::string> is_true = {
-      "", "=78", "==78", "<=78", ">=78", "<=79", ">=77", "<79", ">77", "!=77", "!=79"};
-  const std::vector<std::string> is_false = {"!=78", ">=79", "<=77", "<78", ">78", "==77"};
-
-  for (const auto & c : is_true)
+  // missing doc
   {
-    EXPECT_EQ(std::get<0>(capabilities.check("unittest_int" + c)), CapabilityUtils::CERTAIN_PASS);
-    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_int" + c + ")")),
-              CapabilityUtils::CERTAIN_FAIL);
-  }
-  for (const auto & c : is_false)
-  {
-    EXPECT_EQ(std::get<0>(capabilities.check("unittest_int" + c)), CapabilityUtils::CERTAIN_FAIL);
-    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_int" + c + ")")),
-              CapabilityUtils::CERTAIN_PASS);
+    const nlohmann::json root = {{"name", {{"value", false}}}};
+    EXPECT_THROW_MSG(capabilities.augment(root, {}),
+                     Moose::CapabilityException,
+                     "Capabilities::augment: Capability 'name' missing 'doc' entry");
   }
 
-  checkError(
-      capabilities, "unittest_int<", "Unable to parse requested capabilities 'unittest_int<'.");
-  checkError(capabilities, "unittest_int<bla", "Unexpected comparison to a string.");
-  checkError(capabilities, "unittest_int>1.0", "Expected an integer value in comparison");
-}
-
-TEST(CapabilitiesTest, stringTest)
-{
-  Moose::Capabilities capabilities;
-  capabilities.add("unittest_string", "CLanG", "String test capability");
-
-  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string")), CapabilityUtils::CERTAIN_PASS);
-  EXPECT_EQ(std::get<0>(capabilities.check("!unittest_string")), CapabilityUtils::CERTAIN_FAIL);
-
-  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=clang")),
-            CapabilityUtils::CERTAIN_PASS);
-  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=CLANG")),
-            CapabilityUtils::CERTAIN_PASS);
-  EXPECT_EQ(std::get<0>(capabilities.check("unittest_string=gcc")), CapabilityUtils::CERTAIN_FAIL);
-
-  checkError(capabilities,
-             "unittest_string>",
-             "Unable to parse requested capabilities 'unittest_string>'.");
-  checkError(capabilities, "unittest_string>0", "Expected a version number.");
-  checkError(capabilities, "unittest_string>1.0", "Expected a version number.");
-}
-
-TEST(CapabilitiesTest, versionTest)
-{
-  Moose::Capabilities capabilities;
-  capabilities.add("unittest_version", "3.2.1", "Version number test capability");
-
-  const std::vector<std::string> is_true = {"",
-                                            ">2.1",
-                                            ">3.1",
-                                            ">=3.2",
-                                            ">3.2.0",
-                                            ">=3.2.1",
-                                            "<=3.2.1",
-                                            "=3.2.1",
-                                            "==3.2.1",
-                                            "<=3.2.2",
-                                            "<3.2.2",
-                                            "<3.3.2",
-                                            "<4.2.2",
-                                            "<3.3",
-                                            "<4.2",
-                                            "<4"};
-  const std::vector<std::string> is_false = {
-      "<3", "<2", "<=3", "=1.2.3", "=3", "==4", "==3.2", ">4", ">=4", ">=3.3"};
-
-  for (const auto & c : is_true)
+  // missing value
   {
-    EXPECT_EQ(std::get<0>(capabilities.check("unittest_version" + c)),
-              CapabilityUtils::CERTAIN_PASS);
-    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_version" + c + ")")),
-              CapabilityUtils::CERTAIN_FAIL);
+    const nlohmann::json root = {{"name", {{"doc", "foo"}}}};
+    EXPECT_THROW_MSG(capabilities.augment(root, {}),
+                     Moose::CapabilityException,
+                     "Capabilities::augment: Capability 'name' missing 'value' entry");
   }
-  for (const auto & c : is_false)
-  {
-    EXPECT_EQ(std::get<0>(capabilities.check("unittest_version" + c)),
-              CapabilityUtils::CERTAIN_FAIL);
-    EXPECT_EQ(std::get<0>(capabilities.check("!(unittest_version" + c + ")")),
-              CapabilityUtils::CERTAIN_PASS);
-  }
-  checkError(capabilities,
-             "!unittest_version<",
-             "Unable to parse requested capabilities '!unittest_version<'.");
-}
-
-TEST(CapabilitiesTest, multipleTest)
-{
-  using libMesh::index_range;
-  Moose::Capabilities capabilities;
-  capabilities.add("unittest_bool", true, "Multiple capability test bool");
-  capabilities.add("unittest_int", 78, "Multiple capability test int");
-  capabilities.add("unittest_string", "CLanG", "Multiple capability test string");
-  capabilities.add("unittest_version", "3.2.1", "Multiple capability test version number");
-
-  std::vector<std::pair<std::string, CapabilityUtils::CheckState>> tests = {
-      {"!unittest_doesnotexist & unittest_version<4.2.2 &"
-       "unittest_int<100 & unittest_int>50 & unittest_string!=Popel ",
-       CapabilityUtils::POSSIBLE_PASS},
-      {"!unittest_doesnotexist & unittest_version<4.2.2 &"
-       "unittest_int<100 & unittest2_int>50 & unittest_string!=Popel ",
-       CapabilityUtils::UNKNOWN},
-      {"unittest_doesnotexist & unittest_doesnotexist>2.0.1", CapabilityUtils::POSSIBLE_FAIL},
-      {"!unittest_doesnotexist | unittest_doesnotexist<=2.0.1", CapabilityUtils::POSSIBLE_PASS},
-      {"unittest_bool & unittest_int!=78", CapabilityUtils::CERTAIN_FAIL},
-      {"unittest_bool | unittest_int!=78", CapabilityUtils::CERTAIN_PASS},
-      {" !unittest_bool | (unittest_string=gcc | unittest_version<1.0)",
-       CapabilityUtils::CERTAIN_FAIL},
-      {"(unittest_bool & unittest_int=78) & (unittest_string=clang & unittest_version>2.0)",
-       CapabilityUtils::CERTAIN_PASS}};
-
-  for (const auto & [requirement, state] : tests)
-    EXPECT_EQ(std::get<0>(capabilities.check(requirement)), state);
-
-  EXPECT_THROW(capabilities.check("unittest2_bool unittest2_int< unittest2_string==Popel"),
-               std::runtime_error);
-  EXPECT_THROW(capabilities.check("(unittest2_bool"), std::runtime_error);
-}
-
-TEST(CapabilitiesTest, parseFail)
-{
-  Moose::Capabilities capabilities;
-  checkError(capabilities, "foo bar", "Unable to parse requested capabilities 'foo bar'.");
 }

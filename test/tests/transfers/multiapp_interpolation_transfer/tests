@@ -21,12 +21,12 @@
     type = 'Exodiff'
     input = 'fromrestrictedsub_parent.i'
     exodiff = 'fromrestrictedsub_parent_out.e'
-    capabilities = 'platform=darwin' # Object is sensitive and needs to be evaluated #12800
+    # platform=darwin: Object is sensitive and needs to be evaluated #12800
+    # machine=x86_64: #26848; clang 16 apple silicon not compatible
+    capabilities = 'platform=darwin & machine=x86_64'
 
     design = 'transfers/MultiAppGeometricInterpolationTransfer.md'
     issues = '#1879 #12618'
     requirement = "The system shall allow to interpolate block restricted variables from the sub apps to the parent app"
-    # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
   []
 []

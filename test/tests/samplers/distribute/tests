@@ -13,8 +13,7 @@
       detail = "that distributes samples in parallel and"
       python = 3
       required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
-      hpc = false # see #26480
+      capabilities = 'installation_type=in_tree & !hpc' # see #26480
       capture_perf_graph = false
     []
     [plot]
@@ -27,8 +26,7 @@
       python = 3
       required_python_packages = 'pandas matplotlib'
       detail = "demonstrates efficient parallel scaling of memory use."
-      installation_type = in_tree # see #26480
-      hpc = false # see #26480
+      capabilities = 'installation_type=in_tree & !hpc' # see #26480
       capture_perf_graph = false
     []
   []

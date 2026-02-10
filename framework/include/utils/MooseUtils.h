@@ -905,12 +905,6 @@ concatenate(std::vector<T> c1, const T & item)
 }
 
 /**
- * Concatenates \p value into a single string separated by \p separator
- */
-std::string stringJoin(const std::vector<std::string> & values,
-                       const std::string & separator = " ");
-
-/**
  * @return Whether or not \p value begins with \p begin_value
  */
 bool beginsWith(const std::string & value, const std::string & begin_value);

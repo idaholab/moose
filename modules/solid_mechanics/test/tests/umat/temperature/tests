@@ -7,13 +7,12 @@
     input = 'elastic_temperature.i'
     cli_args = "Materials/active='umat'"
     exodiff = 'elastic_temperature_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for finite strain elastic material models and '
                   'temperature dependence'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [elastic_temperature_reference]
     type = 'Exodiff'
@@ -29,13 +28,12 @@
     input = 'elastic_dtemperature.i'
     cli_args = "Materials/active='umat'"
     exodiff = 'elastic_dtemperature_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for finite strain elastic material models and '
                   'temperature dependence, include the temperature step increment'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [elastic_dtemperature_reference]
     type = 'Exodiff'

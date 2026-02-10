@@ -28,7 +28,8 @@ TEST(ParameterRegistryTest, addExists)
   Moose::ParameterRegistry registry;
   const auto add = [&registry]() { registry.add<double>([](double &, const hit::Field &) {}); };
   add();
-  Moose::UnitUtils::assertThrows(add, "Parameter with type 'double' is already registered");
+  EXPECT_MOOSEERROR_MSG(add(),
+                        "ParameterRegistry: Parameter with type 'double' is already registered");
 }
 
 TEST(ParameterRegistryTest, set)
@@ -62,8 +63,8 @@ TEST(ParameterRegistryTest, setNotRegistered)
 
   const std::unique_ptr<const hit::Node> root(hit::parse("file", "value = 1"));
   const auto field = dynamic_cast<const hit::Field *>(root->find("value"));
-  const auto set = [&registry, &field, &param]() { registry.set(param, *field); };
-  Moose::UnitUtils::assertThrows(set, "Parameter type 'double' is not registered");
+  EXPECT_MOOSEERROR_MSG(registry.set(param, *field),
+                        "ParameterRegistry::set(): Parameter type 'double' is not registered");
 }
 
 TEST(ParameterRegistryTest, setCatchMooseError)
@@ -78,6 +79,5 @@ TEST(ParameterRegistryTest, setCatchMooseError)
   const std::unique_ptr<const hit::Node> root(hit::parse("file", "value = 1"));
   const auto field = dynamic_cast<const hit::Field *>(root->find("value"));
 
-  const auto set = [&registry, &field, &param]() { registry.set(param, *field); };
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(set, "foo");
+  EXPECT_MOOSEERROR_MSG(registry.set(param, *field), "foo");
 }

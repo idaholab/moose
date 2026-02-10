@@ -6,24 +6,22 @@
     type = 'Exodiff'
     input = 'linear_strain_hardening.i'
     exodiff = 'linear_strain_hardening_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for stateful properties'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [total_strain_error]
     type = 'RunException'
     input = 'linear_strain_hardening.i'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     expect_err = 'AbaqusUMATStress \'constant\': Incremental strain quantities are not available'
     cli_args = 'Physics/SolidMechanics/QuasiStatic/all/strain=SMALL'
     valgrind = 'NONE'
     requirement = 'The system shall raise an error if a UMAT that requires incremental quantities is being used with a total strain formulation'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic]
@@ -31,13 +29,12 @@
     input = 'elastic.i'
     cli_args = "Materials/active='umat'"
     exodiff = 'elastic_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
                   'Fortran77 as constitutive models, with support for finite strain elastic material '
                   'models'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_small]
@@ -45,13 +42,12 @@
     input = 'elastic.i'
     cli_args = "Materials/active='umat' Physics/SolidMechanics/QuasiStatic/all/strain=SMALL Physics/SolidMechanics/QuasiStatic/all/incremental=true Outputs/file_base=elastic_small"
     exodiff = 'elastic_small.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
                   'Fortran77 as constitutive models, with support for small strain elastic material '
                   'models'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   [elastic_C]
@@ -59,13 +55,12 @@
     input = 'elastic.i'
     cli_args = "Materials/active='umat' Materials/umat/plugin=../../../plugins/elastic2"
     exodiff = 'elastic_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials written in '
                   'C/C++ as constitutive models, with support for finite strain elastic material '
                   'models'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [elastic_reference]
     type = 'Exodiff'
@@ -90,12 +85,11 @@
     input = 'elastic.i'
     cli_args = "Materials/active='umat' Materials/umat/plugin='../../../plugins/elastic_incremental'"
     exodiff = 'elastic_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for incremental strain elastic material models'
     issues = '#18843'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 []

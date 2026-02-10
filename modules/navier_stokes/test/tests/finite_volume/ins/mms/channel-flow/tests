@@ -2,89 +2,64 @@
   issues = '#15640'
   design = 'navier_stokes/insfv.md'
   [1d-average]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test1DAverage
-    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in one dimension with prescribed inlet velocity and outlet pressure and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [2d-average]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DAverage
-    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
-    required_python_packages = 'pandas matplotlib'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [2d-rc]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DRC
-    capabilities = 'method!=dbg'
     min_parallel = 16
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
-    valgrind = 'none'
-    required_python_packages = 'pandas matplotlib'
     max_time = 600
   []
   [2d-rc-approx]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DApproximateRC
-    capabilities = 'method!=dbg'
     min_parallel = 16
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an approximate Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
-    valgrind = 'none'
-    required_python_packages = 'pandas matplotlib'
     max_time = 600
-    installation_type = in_tree
   []
   [plane-poiseuille-rc]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPlanePoiseuilleRC
-    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    required_python_packages = 'pandas matplotlib'
     min_parallel = 16
     heavy = true
   []
   [plane-poiseuille-rc-first]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestPlanePoiseuilleRCFirst
-    capabilities = 'method!=dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    required_python_packages = 'pandas matplotlib'
     min_parallel = 16
     heavy = true
   []
   [2d-average-with-temp]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DAverageTemp
-    capabilities = 'method!=dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = 'true'
-    valgrind = 'none'
-    required_python_packages = 'pandas matplotlib'
   []
   [2d-rc-with-temp]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DRCTemp
-    capabilities = 'method!=dbg'
     min_parallel = 16
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using a Rhie-Chow interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = 'true'
-    valgrind = 'none'
-    required_python_packages = 'pandas matplotlib'
   []
 []

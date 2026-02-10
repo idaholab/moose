@@ -30,20 +30,16 @@
     requirement = 'The system shall be able to solve a diffusion problem with finite volumes with the domain split in half and show first order convergence due to its treatment of coefficient discontinuities both'
     design = 'FVOneVarDiffusionInterface.md'
     [with-ik]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestFVOneVarDiffusionInterface
       detail = 'with an interfacing object'
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
     []
     [without-ik]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestFVNoInterface
       detail = 'without an interfacing object'
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree # see #26480
     []
   []
   [harmonic]
@@ -51,11 +47,9 @@
                   "the domain split in half and show second order convergence due to the harmonic "
                   "interpolation of the diffusion coeffcient"
     design = 'FVOneVarDiffusionInterface.md'
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestFVOneVarDiffusionInterfaceHarmonic
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
   []
   [resid_and_jac]
     requirement = 'The system shall be able to compute the residual and Jacobian together for a finite volume interface kernel.'

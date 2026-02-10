@@ -10,7 +10,7 @@
     # of iterations.  And then the number of residuals is reduced by 1,
     # and this causes CSV diff.
     # Difficult to have consistent solve behavior when running across nodes
-    hpc = false
+    capabilities = '!hpc'
 
     requirement = 'The system shall be capable of outputting the number of Residual evaluations'
     issues = '#2089'

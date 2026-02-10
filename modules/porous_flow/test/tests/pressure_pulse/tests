@@ -4,7 +4,6 @@
     input = 'pressure_pulse_1d.i'
     csvdiff = 'pressure_pulse_1d.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase physics.'
@@ -15,7 +14,6 @@
     prereq = pressure_pulse_1d
     csvdiff = 'pressure_pulse_1d.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase physics, and be able to employ the Action system in such settings.'
@@ -25,7 +23,6 @@
     input = 'pressure_pulse_1d_steady.i'
     csvdiff = 'pressure_pulse_1d_steady.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall find the steady-state distribution resulting from a pressure pulse in 1D using 1 phase physics.'
@@ -36,7 +33,6 @@
     prereq = pressure_pulse_1d_steady
     csvdiff = 'pressure_pulse_1d_steady.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall find the steady-state distribution resulting from a pressure pulse in 1D using 1 phase physics, and be able to employ the Action system in such settings'
@@ -46,7 +42,6 @@
     input = 'pressure_pulse_1d_3comp.i'
     csvdiff = 'pressure_pulse_1d_3comp.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 fluid phase with multiple components.'
@@ -57,7 +52,6 @@
     prereq = pressure_pulse_1d_3comp
     csvdiff = 'pressure_pulse_1d_3comp.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#16841'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 fluid phase with multiple components, and be able to employ the Action system in such simulations.'
@@ -67,7 +61,6 @@
     input = 'pressure_pulse_1d_2phase.i'
     csvdiff = 'pressure_pulse_1d_2phase.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, when one phase has zero saturation.'
@@ -77,7 +70,6 @@
     input = 'pressure_pulse_1d_2phase_monomial.i'
     csvdiff = 'pressure_pulse_1d_2phase.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     prereq = 'pressure_pulse_1d_2phase'
     issues = '#6845 #24381'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
@@ -88,7 +80,6 @@
     input = 'pressure_pulse_1d_2phase_fv.i'
     csvdiff = 'pressure_pulse_1d_2phase_fv.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845 #21275'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, when one phase has zero saturation using FV variables.'
@@ -98,7 +89,6 @@
     input = 'pressure_pulse_1d_2phasePS.i'
     csvdiff = 'pressure_pulse_1d_2phasePS_pp_0011.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with constant capillary pressure.'
@@ -108,7 +98,6 @@
     input = 'pressure_pulse_1d_2phasePS_fv.i'
     csvdiff = 'pressure_pulse_1d_2phasePS_fv_pp_0011.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845 #21275'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with constant capillary pressure using FV variables.'
@@ -118,7 +107,6 @@
     input = 'pressure_pulse_1d_2phasePS_KT.i'
     csvdiff = 'pressure_pulse_1d_2phasePS_KT_pp_0011.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/kt.md'
     requirement = 'The system shall implement Kuzmin-Turek stabilization for multi-phase, multi-component simulations, and illustrate this through the transient evolution of a pressure pulse.'
@@ -128,7 +116,6 @@
     input = 'pressure_pulse_1d_2phasePSVG.i'
     csvdiff = 'pressure_pulse_1d_2phasePSVG_pp_0011.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with van-Genuchten capillary pressure.'
@@ -138,7 +125,6 @@
     input = 'pressure_pulse_1d_2phasePSVG2.i'
     csvdiff = 'pressure_pulse_1d_2phasePSVG2_pp_0011.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 2 fluid phases, with 2 immiscible components, with van-Genuchten capillary pressure and a logarithmic extension.'
@@ -148,7 +134,6 @@
     input = 'pressure_pulse_1d_MD.i'
     csvdiff = 'pressure_pulse_1d_MD.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase in the MD formulation where the primary variable is log(mass-density).'
@@ -158,7 +143,6 @@
     input = 'pressure_pulse_1d_fully_saturated.i'
     csvdiff = 'pressure_pulse_1d_fully_saturated.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow.'
@@ -168,7 +152,6 @@
     input = 'pressure_pulse_1d_3comp_fully_saturated.i'
     csvdiff = 'pressure_pulse_1d_3comp_fully_saturated.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase with 3 components and employing the fully-saturated version of Darcy flow.'
@@ -178,7 +161,6 @@
     input = 'pressure_pulse_1d_fully_saturated_2.i'
     csvdiff = 'pressure_pulse_1d_fully_saturated_2.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D when using 1 fluid phase and employing the fully-saturated version of Darcy flow along with the fully-saturated version of the fluid-mass time derivative.'
@@ -188,7 +170,6 @@
     input = 'pressure_pulse_1d_adaptivity.i'
     csvdiff = 'pressure_pulse_1d_adaptivity_out.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#6845 #14035'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse when mesh adaptivity is included.'
@@ -199,7 +180,6 @@
     cli_args = 'PorousFlowFullySaturated/stabilization=Full Outputs/file_base=2comp_nodens_full_out'
     csvdiff = '2comp_nodens_full_out.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall be able to advect tracers in fully-saturated single-phase systems, using a fluid-volume conservation approach, and be able to use full-upwinding in such settings.'
@@ -210,7 +190,6 @@
     cli_args = 'PorousFlowFullySaturated/stabilization=None Outputs/file_base=2comp_nodens_none_out'
     csvdiff = '2comp_nodens_none_out.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall be able to advect tracers in fully-saturated single-phase systems, using a fluid-volume conservation approach, and be able to use no upwinding in such settings.'
@@ -221,7 +200,6 @@
     cli_args = 'PorousFlowFullySaturated/stabilization=KT Outputs/file_base=2comp_nodens_KT_out'
     csvdiff = '2comp_nodens_KT_out.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall be able to advect tracers in fully-saturated single-phase systems, using a fluid-volume conservation approach, and be able to use KT stabilization in such settings.'
@@ -231,7 +209,6 @@
     input = 'pressure_pulse_1d_fv.i'
     csvdiff = 'pressure_pulse_1d_fv.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#21275'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase physics with FV variables.'
@@ -242,7 +219,6 @@
     prereq = 'pressure_pulse_1d_fv'
     csvdiff = 'pressure_pulse_1d_fv.csv'
     rel_err = 1.0E-5
-    threading = '!pthreads'
     issues = '#21275'
     design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'The system shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase fully-saturated physics with FV variables.'

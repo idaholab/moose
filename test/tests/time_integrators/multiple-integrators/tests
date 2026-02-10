@@ -9,11 +9,9 @@
   []
   [test_accuracy]
     requirement = 'The system shall support having multiple time integrators in the same input file and yield the expected temporal convergence rates for each variable.'
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestMultipleTimeIntegrators
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
     prereq = test
   []
   [jac]

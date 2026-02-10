@@ -426,9 +426,8 @@ class Job(OutputInterface):
             # Sanitize the output from all objects
             self.sanitizeAllOutput()
 
-        # Set the output path if its separate and initialize the output
-        if self.hasSeperateOutput():
-            # Need to potentially create the output directory
+        # Create the output directory if needed
+        if self.options.output_dir:
             self.createOutputDirectory()
 
             # Failed to create the directory
@@ -436,6 +435,8 @@ class Job(OutputInterface):
                 finalize()
                 return
 
+        # Set the output path if its separate and initialize the output
+        if self.hasSeperateOutput():
             # Set the output path for each object
             for name, object in self.getOutputObjects().items():
                 output_path = self.getOutputPathPrefix() + f'.{name}_out.txt'
@@ -784,14 +785,10 @@ class Job(OutputInterface):
 
     def getOutputDirectory(self):
         """ Get the directory for output for this job """
-        if not self.options.output_dir:
-            return self.getTestDir()
-        return os.path.join(self.options.output_dir, self.getTestName()[:-len(self.getTestNameShort())-1])
+        return self.__tester.getOutputDirectory(self.options)
 
     def createOutputDirectory(self):
-        """ Create the output directory for this job, if needed """
-        if not self.options.output_dir:
-            return
+        """Create the output directory for this job, if needed"""
         output_dir = self.getOutputDirectory()
         with Job.mkdir_lock:
             if not os.path.isdir(output_dir):
@@ -804,13 +801,13 @@ class Job(OutputInterface):
                         self.setStatus(self.error, f'DIRECTORY CREATION FAILURE')
                         self.appendOutput(f'Failed to create Job directory {output_dir}')
 
-    def getOutputPathPrefix(self):
+    def getOutputPathPrefix(self) -> str:
         """
         Returns a file prefix that is unique to this job
 
         Should be used for all TestHarness produced files for this job
         """
-        return os.path.join(self.getOutputDirectory(), self.getTestNameForFile())
+        return self.__tester.getOutputPathPrefix(self.options)
 
     def hasSeperateOutput(self):
         """

@@ -4,7 +4,6 @@
     input = '1ph.p_T.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              1.0000000000e\+05  Pa
@@ -34,7 +33,6 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"static":{"T":300.0,"beta":0.[0-9]+,"c":347.[0-9]+,'
                  '"cp":1003.45,"cv":716.[0-9]+,"e":215025.[0-9]+,"h":301035.0,'
                  '"k":0.[0-9]+,"mu":1.823e-05,"p":100000.0,"rho":1.[0-9]+,'
@@ -51,7 +49,6 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     input = '1ph.rho_e.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              8.6010000000e\+04  Pa
@@ -81,7 +78,6 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"static":{"T":299.[0-9]+,"beta":0.[0-9]+,"c":347.[0-9]+,'
                  '"cp":1003.45,"cv":716.[0-9]+,"e":215025.0,"h":301034.[0-9]+,"k":0.[0-9]+,'
                  '"mu":1.823e-05,"p":86009.[0-9]+,"rho":1.0,"s":2465.[0-9]+,"v":1.0}}'
@@ -97,7 +93,6 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     input = '1ph.rho_p.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                              1.0000000000e\+05  Pa
@@ -127,7 +122,6 @@ Volumetric expansion coefficient:              0.002867  1/K'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"static":{"T":348.[0-9]+,"beta":0.[0-9]+,"c":374.[0-9]+,"cp":1003.45,'
                  '"cv":716.[0-9]+,"e":250000.[0-9]+,"h":350000.[0-9]+,"k":0.[0-9]+,'
                  '"mu":1.823e-05,"p":100000.0,"rho":1.0,"s":2573.[0-9]+,"v":1.0}}'
@@ -143,7 +137,6 @@ Volumetric expansion coefficient:              0.002867  1/K'
     input = '1ph.rho_rhou_rhoE.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'Single-phase STATIC properties:
 --------------------------------------------------------------------------------
 Pressure:                                             1  Pa
@@ -192,7 +185,6 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
     cli_args = 'FluidPropertiesInterrogator/json=true'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"stagnation":{"T0":2.[0-9]+,"beta0":0.[0-9]+,"c0":1.[0-9]+,"cp0":2.[0-9]+,'
                  '"cv0":1.[0-9]+,"e0":5.[0-9]+,"h0":7.[0-9]+,"k0":0.[0-9]+,"mu0":1.823e-05,'
                  '"p0":1.[0-9]+,"rho0":0.[0-9]+,"s0":2.[0-9]+,"v0":1.[0-9]+,"vel":1.0},'
@@ -213,7 +205,6 @@ Volumetric expansion coefficient:          0.3333333333  1/K'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -270,7 +261,6 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"2-phase":{"h_lat":688964.[0-9]+,"p_critical":25.0},"liquid":'
                  '{"static":{"T":300.0,"beta":0.[0-9]+,"c":347.[0-9]+,"cp":1003.45,'
                  '"cv":716.[0-9]+,"e":215025.[0-9]+,"h":301035.0,"k":0.[0-9]+,"mu":1.823e-05,'
@@ -293,7 +283,6 @@ Volumetric expansion coefficient:        0.003333333333  1/K'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -348,7 +337,6 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     input = '2ph_ncg_partial_pressure_p_T.i'
     allow_test_objects = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'Mass fraction 0:\s+0.9930237384'
     requirement = "The fluid properties interrogator shall output two-phase and static-state, "
       "single-phase fluid properties for (p, T) input with a two-phase NCG fluid properties object when the NCG mass fraction is not provided."
@@ -363,7 +351,6 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"2-phase":{"h_lat":877840.[0-9]+,"p_critical":25.0},'
                  '"liquid":{"static":{"T":372.[0-9]+,"beta":0.[0-9]+,"c":375.[0-9]+,'
                  '"cp":945.[0-9]+,"cv":675.[0-9]+,"e":251610.[0-9]+,"h":352254.[0-9]+,'
@@ -385,7 +372,6 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = 'Vapor mixture STATIC properties:
 --------------------------------------------------------------------------------
 Mass fraction 0:                                    0.1  -
@@ -416,7 +402,6 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"static":{"T":2547.[0-9]+,"c":997.[0-9]+,"cp":1271.[0-9]+,'
                  '"cv":972.[0-9]+,"e":2477165.[0-9]+,"h":3238782.[0-9]+,"k":0.[0-9]+,'
                  '"mu":1.[0-9]+e-05,"p":904043.[0-9]+,"rho":1.[0-9]+,"s":5966.[0-9]+,"v":0.[0-9]+}}'
@@ -434,7 +419,6 @@ Thermal conductivity:                           0.02568  W/\(m-K\)'
   allow_test_objects = true
   allow_warnings = true
   capabilities = 'method=opt'
-  threading = '!pthreads'
   expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -454,7 +438,6 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"2-phase":{"T_sat":200000.0,"h_lat":459309999.[0-9]+,"p_critical":25.0}}'
 
     requirement = "The fluid properties interrogator shall output two-phase "
@@ -470,7 +453,6 @@ Latent heat of vaporization:           4.5931000000e\+08  J/kg'
   allow_test_objects = true
   allow_warnings = true
   capabilities = 'method=opt'
-  threading = '!pthreads'
   expect_out = 'TWO-PHASE properties:
 --------------------------------------------------------------------------------
 Critical pressure:                                   25  Pa
@@ -491,7 +473,6 @@ Surface tension:                                   1500  N/m'
     allow_test_objects = true
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_out = '{"2-phase":{"h_lat":688964.[0-9]+,"p_critical":25.0,"p_sat":900.0,'
                  '"sigma":1500.0}}'
 
@@ -507,7 +488,6 @@ Surface tension:                                   1500  N/m'
     input = 'err.wrong_fp_type.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_err = "The type of the parameter 'fp' must be derived from type 'SinglePhaseFluidProperties', 'VaporMixtureFluidProperties', or 'TwoPhaseFluidProperties'"
 
     requirement = "The fluid properties interrogator shall throw an error if an
@@ -521,7 +501,6 @@ Surface tension:                                   1500  N/m'
     input = '1ph.rho_e.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_err = "\(rho\,e\) has been specified\; T cannot be specified\."
     cli_args = "FluidPropertiesInterrogator/T=300"
 
@@ -536,7 +515,6 @@ Surface tension:                                   1500  N/m'
     input = 'err.no_params.i'
     allow_warnings = true
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_err = "For one-phase fluid properties\, you must provide one of the following
 combinations of thermodynamic properties:"
 

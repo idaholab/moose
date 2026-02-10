@@ -6,7 +6,6 @@
     cli_args = 'FluidProperties/fp/emit_on_nan=warning'
     allow_test_objects = True
     capabilities = 'dbg'
-    threading = '!pthreads'
 
     requirement = 'The system should produce a warning when a scalar NaN is produced and user required that the execution would not terminate'
     expect_err = "fp: A NaN was produced."
@@ -18,7 +17,6 @@
     cli_args = 'FluidProperties/fp/emit_on_nan=warning Kernels/test_kernel/test_vector_version=true'
     allow_test_objects = True
     capabilities = 'dbg'
-    threading = '!pthreads'
 
     requirement = 'The system should produce a warning when a vector NaN is produced and user required that the execution would not terminate'
     expect_err = "fp: A NaN was produced."
@@ -29,7 +27,6 @@
     input = 'nan_interface.i'
     allow_test_objects = True
     capabilities = 'dbg'
-    threading = '!pthreads'
 
     requirement = 'The system should report an error when a NaN is produced by a computation in DEBUG mode, by default'
     expect_err = "fp: A NaN was produced."
@@ -40,7 +37,6 @@
     input = 'nan_interface.i'
     allow_test_objects = True
     capabilities = 'method=opt'
-    threading = '!pthreads'
     expect_err = 'Aborting as solve did not converge'
 
     requirement = 'The system should not report an error when a NaN is produced by a computation in OPT mode, by default'

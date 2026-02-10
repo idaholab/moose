@@ -6,6 +6,5 @@
     requirement = 'The system shall compute properties for a calorically imperfect but otherwise ideal gas'
     design = 'CaloricallyImperfectGas.md'
     issues = '#20101'
-    threading = '!pthreads'
   []
 []
