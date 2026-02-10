@@ -11,13 +11,14 @@ Multiphysics Object-Oriented Simulation Environment
 
 # An open-source, parallel finite element framework class=center style=font-weight:200;font-size:200%
 
-!alert! tip title=MOOSE Announcements Google Group
+!! intentional to add spacing
+
+!alert! tip title=MOOSE Announcements Google Group icon=False prefix=False
 
 In order to more broadly disseminate the MOOSE newsletter as well as announcements from the
-MOOSE development team, we have decided to re-activate the MOOSE Announcements Google Group.
-Please find information for connecting to it below:
-
-!include help/contact_us.md start=moose-announce end=moose-announce+ include-end=True
+MOOSE development team, we have decided to re-activate the [MOOSE Announcements Google Group](https://groups.google.com/forum/#!forum/moose-announce).
+To join with a Google account, simply click the "Join group" button on the Group page. Others can send an
+email to [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com).
 
 !alert-end!
 
