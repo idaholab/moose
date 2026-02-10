@@ -62,8 +62,9 @@ public:
   /// Update variable from solution vector after solve
   virtual void SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX) const;
 
-  /// Update eigenvectors from solution after eigensolve                                
-  virtual void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver);
+  /// Update eigenvectors from solution after eigensolve
+  virtual void RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
+                                           MFEMEigensolverBase * eigensolver);
 
   // Test variables are associated with linear forms,
   // whereas trial variables are associated with gridfunctions.

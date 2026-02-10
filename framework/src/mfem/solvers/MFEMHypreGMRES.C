@@ -84,7 +84,6 @@ MFEMHypreGMRES::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdofs
 
     _solver.reset(solver);
   }
-
 }
 
 #endif

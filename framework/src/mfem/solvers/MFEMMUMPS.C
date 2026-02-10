@@ -52,7 +52,6 @@ MFEMMUMPS::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
 
     _solver.reset(solver);
   }
-
 }
 
 #endif

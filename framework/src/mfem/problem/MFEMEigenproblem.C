@@ -24,21 +24,18 @@ MFEMEigenproblem::validParams()
   return params;
 }
 
-MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params)
-  : MFEMProblem(params)
-{
-}
+MFEMEigenproblem::MFEMEigenproblem(const InputParameters & params) : MFEMProblem(params) {}
 
 void
 MFEMEigenproblem::addMFEMSolver(const std::string & user_object_name,
-                           const std::string & name,
-                           InputParameters & parameters)
+                                const std::string & name,
+                                InputParameters & parameters)
 {
   FEProblemBase::addUserObject(user_object_name, name, parameters);
   auto object_ptr = getUserObject<MFEMSolverBase>(name).getSharedPtr();
 
   getProblemData().jacobian_solver = std::dynamic_pointer_cast<MFEMEigensolverBase>(object_ptr);
-      
+
   if (!getProblemData().jacobian_solver)
     mooseError("The selected solver '" + name +
                "' is not an eigensolver, but the problem is marked as an eigenproblem.");
@@ -46,15 +43,13 @@ MFEMEigenproblem::addMFEMSolver(const std::string & user_object_name,
 
 void
 MFEMEigenproblem::addVariable(const std::string & var_type,
-                         const std::string & var_name,
-                         InputParameters & parameters)
+                              const std::string & var_name,
+                              InputParameters & parameters)
 {
   addGridFunction(var_type, var_name, parameters);
-  
+
   for (int i = 0; i < getParam<int>("num_modes"); ++i)
     addGridFunction(var_type, var_name + "_" + std::to_string(i), parameters);
 }
-
-
 
 #endif

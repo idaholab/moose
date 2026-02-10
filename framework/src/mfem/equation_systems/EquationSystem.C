@@ -421,10 +421,9 @@ EquationSystem::FormSystem(mfem::BlockVector & trueX, mfem::BlockVector & trueRH
 void
 EquationSystem::BuildEigenproblemJacobian(mfem::BlockVector & trueX, mfem::OperatorHandle & massRHS)
 {
-  mooseAssert(_test_var_names.size() == 1 &&
-                (_test_var_names.size() == _trial_var_names.size()) &&
-                (_test_var_names.at(0) == _trial_var_names.at(0)),
-            "Eigensolve is only supported for single-variable, square systems");
+  mooseAssert(_test_var_names.size() == 1 && (_test_var_names.size() == _trial_var_names.size()) &&
+                  (_test_var_names.at(0) == _trial_var_names.at(0)),
+              "Eigensolve is only supported for single-variable, square systems");
 
   height = trueX.Size();
   width = trueX.Size();
@@ -514,18 +513,19 @@ EquationSystem::SetTrialVariablesFromTrueVectors(const mfem::BlockVector & trueX
   }
 }
 
-void 
-EquationSystem::RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions, MFEMEigensolverBase * eigensolver)
+void
+EquationSystem::RecoverEigenproblemSolution(Moose::MFEM::GridFunctions & gridfunctions,
+                                            MFEMEigensolverBase * eigensolver)
 {
   mfem::Array<mfem::real_t> eigenvalues;
   eigensolver->getEigenvalues(eigenvalues);
-  
-  for (int i = 0; i<eigenvalues.Size(); ++i)
+
+  for (int i = 0; i < eigenvalues.Size(); ++i)
   {
     auto & trial_var_name = _trial_var_names.at(0);
-    gridfunctions.Get(trial_var_name + "_" + std::to_string(i))->Distribute(eigensolver->getEigenvector(i));
+    gridfunctions.Get(trial_var_name + "_" + std::to_string(i))
+        ->Distribute(eigensolver->getEigenvector(i));
   }
-  
 }
 
 void

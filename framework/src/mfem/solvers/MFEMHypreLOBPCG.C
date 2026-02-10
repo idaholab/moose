@@ -42,7 +42,6 @@ MFEMHypreLOBPCG::constructSolver(const InputParameters &)
   _eigensolver->SetTol(getParam<mfem::real_t>("l_tol"));
   _eigensolver->SetPrecondUsageMode(1);
   _eigensolver->SetPrintLevel(getParam<int>("print_level"));
-
 }
 
 void
@@ -56,7 +55,6 @@ MFEMHypreLOBPCG::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> & tdof
     _preconditioner->updateSolver(a, tdofs);
     setPreconditioner(static_cast<mfem::HypreLOBPCG &>(*_eigensolver));
   }
-
 }
 
 #endif

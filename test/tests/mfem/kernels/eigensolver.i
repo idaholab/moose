@@ -66,6 +66,6 @@
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
     file_base = OutputData/Eigensolver
-    vtk_format = ASCII
+    vtk_format = BINARY
   []
 []
