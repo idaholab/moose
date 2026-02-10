@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -20,9 +20,9 @@ camera.SetFocalPoint(0.4270, 0.2643, 0.4744)
 
 clip = chigger.filters.BoxClipper(upper=[1.1, 1.1, 1.1])
 
-reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-mug = chigger.exodus.ExodusResult(reader, camera=camera, cmap='viridis', filters=[clip])
+reader = chigger.exodus.ExodusReader("../input/mug_blocks_out.e")
+mug = chigger.exodus.ExodusResult(reader, camera=camera, cmap="viridis", filters=[clip])
 
-window = chigger.RenderWindow(mug, size=[300,300], test=True)
-window.write('box_clip.png')
+window = chigger.RenderWindow(mug, size=[300, 300], test=True)
+window.write("box_clip.png")
 window.start()

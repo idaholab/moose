@@ -13,23 +13,46 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-production_starts = {} # index into data at which production starts (P_out >= 10.6)
-for i in ['00', '10', '11', '21', '22']:
-    data = np.genfromtxt(r'gold/matrix_app_out_fracture_app0_' + i + '.csv', delimiter=',', names=True)
+production_starts = {}  # index into data at which production starts (P_out >= 10.6)
+for i in ["00", "10", "11", "21", "22"]:
+    data = np.genfromtxt(
+        r"gold/matrix_app_out_fracture_app0_" + i + ".csv", delimiter=",", names=True
+    )
     for ind in range(1, len(data)):
-        if data['P_out'][ind] >= 10.6:
+        if data["P_out"][ind] >= 10.6:
             production_starts[i] = ind
             break
 
-labels = {'00': '20m, 9.2m', '10': '10m, 9.2m', '11': '10m, 4.6m', '21': '5m, 4.6m', '22': '5m, 2.3m'}
-colours = {'00': 'b', '10': 'g', '11': 'r', '21': 'c', '22': 'm'}
+labels = {
+    "00": "20m, 9.2m",
+    "10": "10m, 9.2m",
+    "11": "10m, 4.6m",
+    "21": "5m, 4.6m",
+    "22": "5m, 2.3m",
+}
+colours = {"00": "b", "10": "g", "11": "r", "21": "c", "22": "m"}
 
 plt.figure()
-for i in ['00', '10', '11', '21', '22']:
-    data = np.genfromtxt(r'gold/matrix_app_out_fracture_app0_' + i + '.csv', delimiter=',', names=True)
-    plt.plot(data['time'][1:production_starts[i]+1] / 3600.0, data['TK_out'][1:production_starts[i]+1] - 273, colours[i] + ":")
-    plt.plot(data['time'][production_starts[i]] / 3600.0, data['TK_out'][production_starts[i]] - 273, colours[i] + "o")
-    plt.plot(data['time'][production_starts[i]:] / 3600.0, data['TK_out'][production_starts[i]:] - 273, colours[i], label=labels[i])
+for i in ["00", "10", "11", "21", "22"]:
+    data = np.genfromtxt(
+        r"gold/matrix_app_out_fracture_app0_" + i + ".csv", delimiter=",", names=True
+    )
+    plt.plot(
+        data["time"][1 : production_starts[i] + 1] / 3600.0,
+        data["TK_out"][1 : production_starts[i] + 1] - 273,
+        colours[i] + ":",
+    )
+    plt.plot(
+        data["time"][production_starts[i]] / 3600.0,
+        data["TK_out"][production_starts[i]] - 273,
+        colours[i] + "o",
+    )
+    plt.plot(
+        data["time"][production_starts[i] :] / 3600.0,
+        data["TK_out"][production_starts[i] :] - 273,
+        colours[i],
+        label=labels[i],
+    )
 plt.grid()
 plt.legend()
 plt.title("Production temperature: with heat transfer, various mesh sizes")
@@ -42,9 +65,16 @@ plt.show()
 plt.close()
 
 plt.figure()
-for i in ['00', '10', '11', '21', '22']:
-    data = np.genfromtxt(r'gold/matrix_app_out_fracture_app0_' + i + '.csv', delimiter=',', names=True)
-    plt.plot(data['time'][1:] / 3600.0 / 24.0, data['TK_out'][1:] - 273, colours[i], label=labels[i])
+for i in ["00", "10", "11", "21", "22"]:
+    data = np.genfromtxt(
+        r"gold/matrix_app_out_fracture_app0_" + i + ".csv", delimiter=",", names=True
+    )
+    plt.plot(
+        data["time"][1:] / 3600.0 / 24.0,
+        data["TK_out"][1:] - 273,
+        colours[i],
+        label=labels[i],
+    )
 plt.grid()
 plt.legend()
 plt.title("Production temperature: with heat transfer, various mesh sizes")

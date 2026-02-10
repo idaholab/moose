@@ -14,6 +14,7 @@ from types import ModuleType
 
 from ..common import mixins
 
+
 class Extension(mixins.ConfigObject, mixins.TranslatorObject):
     """
     Base class for creating extensions. An extension is simply a mechanism to allow for
@@ -25,26 +26,42 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
     Inputs:
         kwargs: All key-value pairs are treated as configure options, see ConfigObject.
     """
-    __TRANSLATOR_METHODS__ = ['init', 'initPage',
-                              'preExecute', 'postExecute',
-                              'preRead', 'postRead',
-                              'preTokenize', 'postTokenize',
-                              'preRender', 'postRender',
-                              'preWrite', 'postWrite']
+
+    __TRANSLATOR_METHODS__ = [
+        "init",
+        "initPage",
+        "preExecute",
+        "postExecute",
+        "preRead",
+        "postRead",
+        "preTokenize",
+        "postTokenize",
+        "preRender",
+        "postRender",
+        "preWrite",
+        "postWrite",
+    ]
 
     @staticmethod
     def defaultConfig():
         """Basic Extension configuration options."""
         config = mixins.ConfigObject.defaultConfig()
-        config['active'] = (True, "Toggle for disabling the extension. This only changes "
-                                  "the initial active state, use setActive to control at runtime.")
+        config["active"] = (
+            True,
+            "Toggle for disabling the extension. This only changes "
+            "the initial active state, use setActive to control at runtime.",
+        )
         return config
 
     def __init__(self, **kwargs):
-        mixins.ConfigObject.__init__(self, self.__class__.__name__.split('.')[-1].replace('Extension', '').lower(), **kwargs)
+        mixins.ConfigObject.__init__(
+            self,
+            self.__class__.__name__.split(".")[-1].replace("Extension", "").lower(),
+            **kwargs,
+        )
         mixins.TranslatorObject.__init__(self)
         self.__requires = set()
-        self.__active = self.get('active')
+        self.__active = self.get("active")
 
     @property
     def active(self):

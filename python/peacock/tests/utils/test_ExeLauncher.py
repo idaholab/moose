@@ -13,6 +13,7 @@ from peacock.PeacockException import FileExistsException, BadExecutableException
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -30,5 +31,5 @@ class Tests(Testing.PeacockTester):
             runExe("false", "")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Testing.run_tests()

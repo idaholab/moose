@@ -9,17 +9,23 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testDryRun(self):
         """
         Test that --dry-run returns a passing status
         """
-        out = self.runTests('-i', 'diffs', '--dry-run').output
+        out = self.runTests("-i", "diffs", "--dry-run").output
 
-        self.assertRegex(out, 'test_harness\.exodiff.*?DRY RUN')
-        self.assertRegex(out, 'test_harness\.csvdiff.*?DRY RUN')
+        self.assertRegex(out, "test_harness\.exodiff.*?DRY RUN")
+        self.assertRegex(out, "test_harness\.csvdiff.*?DRY RUN")
 
         # Skipped caveat test which returns skipped instead of 'DRY RUN'
-        out = self.runTests('--no-color', '-i', 'depend_skip_tests', '--dry-run').output
-        self.assertRegex(out, r'tests/test_harness.always_skipped.*? \[ALWAYS SKIPPED\] SKIP')
-        self.assertRegex(out, r'tests/test_harness.needs_always_skipped.*? \[SKIPPED DEPENDENCY\] SKIP')
+        out = self.runTests("--no-color", "-i", "depend_skip_tests", "--dry-run").output
+        self.assertRegex(
+            out, r"tests/test_harness.always_skipped.*? \[ALWAYS SKIPPED\] SKIP"
+        )
+        self.assertRegex(
+            out,
+            r"tests/test_harness.needs_always_skipped.*? \[SKIPPED DEPENDENCY\] SKIP",
+        )

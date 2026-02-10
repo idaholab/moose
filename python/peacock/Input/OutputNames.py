@@ -9,12 +9,14 @@
 
 import os, datetime
 
+
 def csvEnabled(input_tree):
     outputs = input_tree.getBlockInfo("/Outputs")
     if outputs and outputs.included:
         p = outputs.getParamInfo("csv")
         return p.value == "true"
     return False
+
 
 def _getFileBase(outputs, inputfilename):
     """
@@ -34,6 +36,7 @@ def _getFileBase(outputs, inputfilename):
         fname = os.path.splitext(os.path.basename(inputfilename))[0]
     return file_base_set, fname
 
+
 def getPostprocessorFiles(input_tree, inputfilename):
     """
     Get a list of /Postprocessors files that will be written.
@@ -51,6 +54,7 @@ def getPostprocessorFiles(input_tree, inputfilename):
     output_file_names.append("%s.csv" % common_file_base)
 
     return output_file_names
+
 
 def getVectorPostprocessorFiles(input_tree, inputfilename):
     """
@@ -73,6 +77,7 @@ def getVectorPostprocessorFiles(input_tree, inputfilename):
         output_file_names.append("%s_*.csv" % file_base)
     return output_file_names
 
+
 def _getChildFileBase(common_file_base, child):
     """
     Get the file base for outputs.
@@ -87,6 +92,7 @@ def _getChildFileBase(common_file_base, child):
     if file_base_param and file_base_param.value:
         file_base = file_base_param.value
     return file_base
+
 
 def getOutputFiles(input_tree, inputfilename):
     """
@@ -122,8 +128,13 @@ def getOutputFiles(input_tree, inputfilename):
 
         oversample = child.getParamInfo("oversample")
         append_oversample = child.getParamInfo("append_oversample")
-        if oversample and oversample.value != "false" and append_oversample and append_oversample.value != "false":
-            file_base = file_base + '_oversample'
+        if (
+            oversample
+            and oversample.value != "false"
+            and append_oversample
+            and append_oversample.value != "false"
+        ):
+            file_base = file_base + "_oversample"
 
         append_date = child.getParamInfo("append_date")
         if append_date and append_date.value != "false":
@@ -136,6 +147,6 @@ def getOutputFiles(input_tree, inputfilename):
                 except:
                     pass
             file_base = "%s_%s" % (file_base, d_str)
-        output_file_names.append(file_base + '.e')
+        output_file_names.append(file_base + ".e")
 
     return output_file_names

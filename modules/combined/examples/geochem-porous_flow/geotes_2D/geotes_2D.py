@@ -26,12 +26,12 @@ f.close()
 quartzunlike = [x[1] for x in data]
 
 plt.figure()
-plt.plot(time, quartzlike, 'k-', linewidth = 2.0, label = 'QuartzLike')
-plt.plot(time, quartzunlike, 'r-', linewidth = 2.0, label = 'QuartzUnlike')
+plt.plot(time, quartzlike, "k-", linewidth=2.0, label="QuartzLike")
+plt.plot(time, quartzunlike, "r-", linewidth=2.0, label="QuartzUnlike")
 plt.legend()
 plt.ylabel("Precipitate (moles)")
 plt.xlabel("Time (days)")
-plt.title("Minerals precipitated in the heat exchanger");
+plt.title("Minerals precipitated in the heat exchanger")
 plt.savefig("../../doc/content/media/geochemistry/geotes_2D.png")
 
 sys.exit(0)

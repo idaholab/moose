@@ -9,11 +9,13 @@
 
 from enum import Enum
 
+
 class ExtendedEnum(Enum):
     """
     Extension to Enum that allows getting
     all possible enumerations in a list
     """
+
     @classmethod
     def list(cls) -> list:
         """

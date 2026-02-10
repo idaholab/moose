@@ -9,6 +9,7 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testRaceConditions(self):
         """
@@ -16,5 +17,7 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Check for the words 'Diagnostic analysis' which indicate that race conditions exist
-        out = self.runTests('--pedantic-checks', '-i', 'output_clobber_simple', exit_code=133).output
-        self.assertIn('Diagnostic analysis', out)
+        out = self.runTests(
+            "--pedantic-checks", "-i", "output_clobber_simple", exit_code=133
+        ).output
+        self.assertIn("Diagnostic analysis", out)

@@ -17,8 +17,10 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
 from peacock.Input import TimeStepEstimate
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()
@@ -90,5 +92,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(self.total_steps, 8)
         self.assertEqual(self.current_step, 8)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

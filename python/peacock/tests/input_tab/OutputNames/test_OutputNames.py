@@ -13,6 +13,7 @@ from peacock.utils import Testing
 import datetime
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -63,7 +64,9 @@ class Tests(Testing.PeacockTester):
         input_tree = self.create_tree(input_file)
         output_names = OutputNames.getOutputFiles(input_tree, input_file)
         utc = datetime.datetime.utcnow()
-        self.assertEqual(output_names, ["with_date.e", "with_date_%s.e" % utc.strftime("%Y-%m-%d")])
+        self.assertEqual(
+            output_names, ["with_date.e", "with_date_%s.e" % utc.strftime("%Y-%m-%d")]
+        )
 
     def testPostprocessor(self):
         input_file = "../../common/transient.i"
@@ -97,5 +100,6 @@ class Tests(Testing.PeacockTester):
         output_names = OutputNames.getVectorPostprocessorFiles(input_tree, input_file)
         self.assertEqual(output_names, ["time_data_out_line_sample_*.csv"])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

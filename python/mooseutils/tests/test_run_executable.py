@@ -12,22 +12,30 @@ import mock
 import subprocess
 import mooseutils
 
+
 class Test(unittest.TestCase):
-    @mock.patch('subprocess.call')
+    @mock.patch("subprocess.call")
     def testRun(self, subproc):
-        mooseutils.run_executable('command', '-arg', '-arg2')
-        subproc.assert_called_with(['command', '-arg', '-arg2'], encoding='utf-8')
+        mooseutils.run_executable("command", "-arg", "-arg2")
+        subproc.assert_called_with(["command", "-arg", "-arg2"], encoding="utf-8")
 
-    @mock.patch('subprocess.call')
+    @mock.patch("subprocess.call")
     def testRunMPI(self, subproc):
-        mooseutils.run_executable('command', '-arg', '-arg2', mpi=2)
-        subproc.assert_called_with(['mpiexec', '-n', '2', 'command', '-arg', '-arg2'], encoding='utf-8')
+        mooseutils.run_executable("command", "-arg", "-arg2", mpi=2)
+        subproc.assert_called_with(
+            ["mpiexec", "-n", "2", "command", "-arg", "-arg2"], encoding="utf-8"
+        )
 
-    @mock.patch('subprocess.call')
+    @mock.patch("subprocess.call")
     def testRunSupressOutput(self, subproc):
-        mooseutils.run_executable('command', '-arg', '-arg2', suppress_output=True)
-        subproc.assert_called_with(['command', '-arg', '-arg2'], encoding='utf-8',
-                                   stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        mooseutils.run_executable("command", "-arg", "-arg2", suppress_output=True)
+        subproc.assert_called_with(
+            ["command", "-arg", "-arg2"],
+            encoding="utf-8",
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2, buffer=True)

@@ -12,6 +12,7 @@ import chigger
 from peacock.ExodusViewer.plugins.ExodusPlugin import ExodusPlugin
 from .MeshBlockSelectorWidget import MeshBlockSelectorWidget
 
+
 class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
     Widget for controlling the visible blocks/nodesets/sidesets of the mesh.
@@ -31,9 +32,15 @@ class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.setEnabled(False)
 
         # Block, nodeset, and sideset selector widgets
-        self.BlockSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.BLOCK, 'Blocks:')
-        self.SidesetSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.SIDESET, 'Boundaries:')
-        self.NodesetSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.NODESET, 'Nodesets:')
+        self.BlockSelector = MeshBlockSelectorWidget(
+            chigger.exodus.ExodusReader.BLOCK, "Blocks:"
+        )
+        self.SidesetSelector = MeshBlockSelectorWidget(
+            chigger.exodus.ExodusReader.SIDESET, "Boundaries:"
+        )
+        self.NodesetSelector = MeshBlockSelectorWidget(
+            chigger.exodus.ExodusReader.NODESET, "Nodesets:"
+        )
 
         self.MainLayout.addWidget(self.BlockSelector)
         self.MainLayout.addWidget(self.SidesetSelector)

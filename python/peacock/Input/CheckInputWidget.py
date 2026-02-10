@@ -14,12 +14,14 @@ from PyQt5.QtCore import pyqtSignal
 from peacock.base.MooseWidget import MooseWidget
 import os
 
+
 class CheckInputWidget(QWidget, MooseWidget):
     """
     Runs the executable with "--check-input" on the input file and stores the results.
     Signals:
         needInputFile: Emitted when we need the input file. Argument is the path where the input file will be written.
     """
+
     needInputFile = pyqtSignal(str)
 
     def __init__(self, **kwds):
@@ -34,8 +36,12 @@ class CheckInputWidget(QWidget, MooseWidget):
         self.top_layout.addWidget(self.output)
         self.button_layout = WidgetUtils.addLayout()
         self.top_layout.addLayout(self.button_layout)
-        self.hide_button = WidgetUtils.addButton(self.button_layout, self, "Hide", lambda: self.hide())
-        self.check_button = WidgetUtils.addButton(self.button_layout, self, "Check", self._check)
+        self.hide_button = WidgetUtils.addButton(
+            self.button_layout, self, "Hide", lambda: self.hide()
+        )
+        self.check_button = WidgetUtils.addButton(
+            self.button_layout, self, "Check", self._check
+        )
         self.resize(800, 500)
         self.setup()
         self.path = None

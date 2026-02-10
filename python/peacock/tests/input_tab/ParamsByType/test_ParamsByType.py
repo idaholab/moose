@@ -14,6 +14,7 @@ from peacock.Input.ParameterInfo import ParameterInfo
 from peacock.Input.BlockInfo import BlockInfo
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -22,7 +23,16 @@ class Tests(Testing.PeacockTester):
         self.block_list_requested = 0
         self.block_children = ["child0", "child1", "child2"]
 
-    def createParam(self, name, value="", cpp_type="string", options=[], required=False, user_added=False, group="Main"):
+    def createParam(
+        self,
+        name,
+        value="",
+        cpp_type="string",
+        options=[],
+        required=False,
+        user_added=False,
+        group="Main",
+    ):
         p = ParameterInfo(None, name)
         p.value = value
         p.cpp_type = cpp_type
@@ -167,5 +177,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(data[p1_name]["comments"], p1_comment)
         self.assertEqual(data[p1_name]["changed"], True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

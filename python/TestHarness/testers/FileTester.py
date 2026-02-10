@@ -10,6 +10,7 @@
 from RunApp import RunApp
 from TestHarness import util
 
+
 # Classes that derive from this class are expected to write
 # output files. The Tester::getOutputFiles() method should
 # be implemented for all derived classes.
@@ -17,9 +18,17 @@ class FileTester(RunApp):
     @staticmethod
     def validParams():
         params = RunApp.validParams()
-        params.addParam('gold_dir', 'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
-        params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exo/csvdiff comparisons.")
-        params.addParam('rel_err',       5.5e-6, "Relative error value used in exo/csvdiff comparisons.")
+        params.addParam(
+            "gold_dir",
+            "gold",
+            'The directory where the "golden standard" files reside relative to the TEST_DIR: (default: ./gold/)',
+        )
+        params.addParam(
+            "abs_zero", 1e-10, "Absolute zero cutoff used in exo/csvdiff comparisons."
+        )
+        params.addParam(
+            "rel_err", 5.5e-6, "Relative error value used in exo/csvdiff comparisons."
+        )
         return params
 
     def __init__(self, name, params):
@@ -28,5 +37,5 @@ class FileTester(RunApp):
     def prepare(self, options):
         super().prepare(options)
 
-        if self.specs['delete_output_before_running']:
+        if self.specs["delete_output_before_running"]:
             util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))

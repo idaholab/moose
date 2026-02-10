@@ -13,6 +13,7 @@ from peacock.utils import Testing
 import os
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -56,8 +57,11 @@ class Tests(Testing.PeacockTester):
         exe = ExeFinder.recursiveFindFile(start_dir, "really_does_not_exist")
         self.assertEqual(exe, None)
 
-        exe = ExeFinder.recursiveFindFile(start_dir, "really_does_not_exist", problems_dir="peacock")
+        exe = ExeFinder.recursiveFindFile(
+            start_dir, "really_does_not_exist", problems_dir="peacock"
+        )
         self.assertEqual(exe, None)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

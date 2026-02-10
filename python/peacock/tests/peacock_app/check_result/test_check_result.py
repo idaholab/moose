@@ -12,6 +12,7 @@ from peacock.utils import Testing
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -56,8 +57,11 @@ class Tests(Testing.PeacockTester):
 
     def testChangeResultFilename(self):
         app = self.checkTransient()
-        app.main_widget.tab_plugin.InputFileEditorWithMesh.setInputFile("../../common/simple_diffusion.i")
+        app.main_widget.tab_plugin.InputFileEditorWithMesh.setInputFile(
+            "../../common/simple_diffusion.i"
+        )
         self.run_and_check(app, self.diffusion_png)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

@@ -9,14 +9,16 @@
 from PyQt5 import QtCore, QtWidgets
 from peacock.ExodusViewer.plugins.CameraPlugin import CameraPlugin
 
+
 class MeshCameraPlugin(CameraPlugin):
     """
     Adds a Reload Mesh button to the CameraPlugin.
     """
+
     reloadMesh = QtCore.pyqtSignal()
 
     def __init__(self, **kwargs):
-        self.ReloadButton = QtWidgets.QPushButton('Reload Mesh')
+        self.ReloadButton = QtWidgets.QPushButton("Reload Mesh")
         super(MeshCameraPlugin, self).__init__(**kwargs)
         self.MainLayout.addWidget(self.ReloadButton)
 

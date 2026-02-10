@@ -11,11 +11,13 @@
 import unittest
 from MooseDocs.common import exceptions
 
+
 class TestExceptions(unittest.TestCase):
     def testMooseDocsException(self):
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            raise exceptions.MooseDocsException("{}", 'foo')
-        self.assertEqual('foo', str(e.exception))
+            raise exceptions.MooseDocsException("{}", "foo")
+        self.assertEqual("foo", str(e.exception))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

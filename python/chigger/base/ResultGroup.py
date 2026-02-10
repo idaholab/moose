@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .ChiggerResult import ChiggerResult
+
 
 class ResultGroup(ChiggerResult):
     """
@@ -71,5 +72,5 @@ class ResultGroup(ChiggerResult):
             args: The arguments to pass into the class.
             kwargs: Key, value pairs to pass into the class.
         """
-        kwargs.setdefault('renderer', self.getVTKRenderer())
+        kwargs.setdefault("renderer", self.getVTKRenderer())
         self._results.append(result(*args, **kwargs))

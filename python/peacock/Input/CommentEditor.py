@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QWidget, QPlainTextEdit, QSizePolicy
 from peacock.utils import WidgetUtils
 from PyQt5.QtCore import pyqtSignal
 
+
 class CommentEditor(QWidget):
     textChanged = pyqtSignal()
 

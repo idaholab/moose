@@ -11,12 +11,17 @@ from PyQt5.QtCore import pyqtSignal, pyqtSlot, QSettings, QObject
 from PyQt5.QtWidgets import QAction
 from peacock.base.MooseWidget import MooseWidget
 
+
 class RecentlyUsedMenu(QObject, MooseWidget):
     """
     Keeps a list of recently used items, in order of use
     """
+
     selected = pyqtSignal(str)
-    def __init__(self, menu, recent_key, max_recent_key, max_recent_default, *args, **kwds):
+
+    def __init__(
+        self, menu, recent_key, max_recent_key, max_recent_default, *args, **kwds
+    ):
         super(RecentlyUsedMenu, self).__init__(*args, **kwds)
 
         self._recent_key = recent_key
@@ -74,7 +79,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
         if self._values:
             idx = self._indexOf(self._values, value)
             if idx >= 0:
-                self._values = self._values[:idx] + self._values[(idx+1):]
+                self._values = self._values[:idx] + self._values[(idx + 1) :]
                 settings.setValue(self._recent_key, self._values)
                 for action in self._menu.actions():
                     if action.text() == value:
@@ -86,7 +91,7 @@ class RecentlyUsedMenu(QObject, MooseWidget):
         if self._values:
             idx = self._indexOf(self._values, value)
             if idx >= 0:
-                self._values = self._values[:idx] + self._values[(idx+1):]
+                self._values = self._values[:idx] + self._values[(idx + 1) :]
                 self._values.insert(0, value)
             else:
                 self._values.insert(0, value)

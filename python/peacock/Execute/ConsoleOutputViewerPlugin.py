@@ -11,22 +11,25 @@
 from peacock.base.Plugin import Plugin
 from .TerminalTextEdit import TerminalTextEdit
 
+
 class ConsoleOutputViewerPlugin(TerminalTextEdit, Plugin):
     """
     Just adds plugin functionality to the TerminalTextEdit
     """
+
     def __init__(self, **kargs):
         super(ConsoleOutputViewerPlugin, self).__init__(**kargs)
         self.do_scroll = True
         self.vert_bar = self.verticalScrollBar()
         self.vert_bar.valueChanged.connect(self.viewPositionChanged)
-        self._preferences.addInt("execute/terminalFontSize",
-                "Execute output font size",
-                12,
-                1,
-                30,
-                "Set the output font size for the terminal",
-                )
+        self._preferences.addInt(
+            "execute/terminalFontSize",
+            "Execute output font size",
+            12,
+            1,
+            30,
+            "Set the output font size for the terminal",
+        )
         self.onPreferencesSaved()
 
     def onOutputAdded(self, text):
@@ -65,9 +68,11 @@ class ConsoleOutputViewerPlugin(TerminalTextEdit, Plugin):
         """
         self.do_scroll = val == self.vert_bar.maximum()
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
     import sys
+
     qapp = QApplication(sys.argv)
     w = ConsoleOutputViewerPlugin()
     w.append('<span style="color:red;">foo</span>')

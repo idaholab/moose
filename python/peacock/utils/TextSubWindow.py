@@ -8,15 +8,24 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets, QtCore
+
+
 class TextSubWindow(QtWidgets.QTextEdit):
     """
     TextEdit that saves it size when it closes and closes itself if the main widget disappears.
     """
+
     windowClosed = QtCore.pyqtSignal()
 
     def __init__(self):
         super(TextSubWindow, self).__init__()
-        self.setWindowFlags(QtCore.Qt.SubWindow | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinMaxButtonsHint | QtCore.Qt.WindowCloseButtonHint)
+        self.setWindowFlags(
+            QtCore.Qt.SubWindow
+            | QtCore.Qt.CustomizeWindowHint
+            | QtCore.Qt.WindowTitleHint
+            | QtCore.Qt.WindowMinMaxButtonsHint
+            | QtCore.Qt.WindowCloseButtonHint
+        )
         self._size = None
 
     def sizeHint(self, *args):

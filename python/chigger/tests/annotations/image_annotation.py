@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,8 +10,13 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
-moose = chigger.annotations.ImageAnnotation(filename='../../../chigger/logos/moose.png', opacity=0.5,
-                                            scale=0.5, position=[0.5, 0.75])
-window = chigger.RenderWindow(moose, size=[400,400], test=True)
-window.write('image_annotation.png')
+
+moose = chigger.annotations.ImageAnnotation(
+    filename="../../../chigger/logos/moose.png",
+    opacity=0.5,
+    scale=0.5,
+    position=[0.5, 0.75],
+)
+window = chigger.RenderWindow(moose, size=[400, 400], test=True)
+window.write("image_annotation.png")
 window.start()

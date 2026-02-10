@@ -16,18 +16,22 @@ import peacock
 
 class Plugin0(QtWidgets.QWidget, peacock.base.Plugin):
     signal = QtCore.pyqtSignal()
+
     def __init__(self):
         super(Plugin0, self).__init__()
         self.setup()
         self._initialize = False
+
 
 class Plugin1(QtWidgets.QWidget, peacock.base.Plugin):
     def __init__(self):
         super(Plugin1, self).__init__()
         self.setup()
         self._initialize = False
+
     def onSignal(self):
         self._signal_emitted = True
+
 
 class Manager(QtWidgets.QWidget, peacock.base.PluginManager):
     def __init__(self):
@@ -58,6 +62,8 @@ class TestPluginManger(unittest.TestCase):
         self._manager.Plugin0.signal.emit()
         self.assertTrue(self._manager.Plugin1._signal_emitted)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import unittest
+
     unittest.main(module=__name__, verbosity=2)

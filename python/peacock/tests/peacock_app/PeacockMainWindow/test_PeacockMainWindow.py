@@ -13,6 +13,7 @@ from peacock.utils import Testing
 import argparse, os
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -54,5 +55,5 @@ class Tests(Testing.PeacockTester):
         w.tab_plugin.InputFileEditorWithMesh.MeshViewerPlugin._reset()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Testing.run_tests()

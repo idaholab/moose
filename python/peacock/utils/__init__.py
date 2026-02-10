@@ -10,6 +10,7 @@
 import os
 import re
 
+
 def getOptionFilenames(options, base, extensions=[]):
     """
     Return a list of filenames with correct absolute path.

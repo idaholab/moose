@@ -13,6 +13,7 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -85,7 +86,9 @@ class Tests(Testing.PeacockTester):
 
     def testCombined(self):
         e = ExecutableInfo()
-        e.setPath(Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined"))
+        e.setPath(
+            Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined")
+        )
         self.checkPath(e, "/Preconditioning", True, True)
         self.checkPath(e, "/BCs", True, True)
         self.checkPath(e, "/BCs/Pressure", True, True)
@@ -97,5 +100,6 @@ class Tests(Testing.PeacockTester):
         self.checkPath(e, "/AuxVariables/*/InitialCondition", False, False)
         self.checkPath(e, "/Variables/*/InitialCondition", False, False)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

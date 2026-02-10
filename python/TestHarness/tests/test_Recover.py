@@ -9,24 +9,27 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testRecover(self):
         """
         Test that --recover returns two passing statuses (part1 and the OK)
         """
-        output = self.runTests('-i', 'always_ok', '--recover').output
+        output = self.runTests("-i", "always_ok", "--recover").output
 
-        self.assertIn('PART1', output)
-        self.assertIn('RECOVER', output)
+        self.assertIn("PART1", output)
+        self.assertIn("RECOVER", output)
 
         # Assert if not exactly two tests ran and passed
-        self.assertIn('2 passed', output)
-        self.assertIn('0 skipped', output)
-        self.assertIn('0 failed', output)
+        self.assertIn("2 passed", output)
+        self.assertIn("0 skipped", output)
+        self.assertIn("0 failed", output)
 
     def testRecoverPart1Fail(self):
         """
         Test that --recover still checks status on Part1 tests
         """
-        out = self.runTests('-i', 'exception_transient', '--recover', exit_code=128).output
-        self.assertRegex(out, r'test_harness.*?part1.*?FAILED \(EXIT CODE 1 != 0\)')
+        out = self.runTests(
+            "-i", "exception_transient", "--recover", exit_code=128
+        ).output
+        self.assertRegex(out, r"test_harness.*?part1.*?FAILED \(EXIT CODE 1 != 0\)")

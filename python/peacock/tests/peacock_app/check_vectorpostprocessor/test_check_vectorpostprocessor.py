@@ -11,6 +11,7 @@ import unittest
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -19,7 +20,6 @@ class Tests(Testing.PeacockTester):
         self.filename = "check_vectorpostprocessor.png"
         Testing.remove_file(self.filename)
         Testing.clean_files()
-
 
     @unittest.skip("Broken by #12702")
     def testRunResult(self):
@@ -33,7 +33,9 @@ class Tests(Testing.PeacockTester):
             exe_plugin.ExecuteRunnerPlugin.runClicked()
 
             app.main_widget.tab_plugin.setCurrentWidget(vpp_plugin)
-            app.main_widget.tab_plugin.currentChanged.emit(app.main_widget.tab_plugin.currentIndex())
+            app.main_widget.tab_plugin.currentChanged.emit(
+                app.main_widget.tab_plugin.currentIndex()
+            )
 
             # make sure we are finished
             while not self.finished:
@@ -45,5 +47,6 @@ class Tests(Testing.PeacockTester):
             self.assertEqual(len(w.PostprocessorSelectPlugin._groups), 1)
             self.assertEqual(len(w.PostprocessorSelectPlugin._groups[0]._toggles), 7)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

@@ -13,11 +13,13 @@ from peacock.base.MooseWidget import MooseWidget
 from peacock.utils import WidgetUtils
 from .ParamsByGroup import ParamsByGroup
 
+
 class ParamsByType(QWidget, MooseWidget):
     """
     Has a QComboBox for the different allowed types.
     On switching type a new ParamsByGroup is shown.
     """
+
     needBlockList = pyqtSignal(list)
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()
@@ -112,7 +114,11 @@ class ParamsByType(QWidget, MooseWidget):
         t = self.type_table_map.get(type_name)
         if t:
             return t
-        t = ParamsByGroup(self.block, self.type_params_map.get(type_name, self.block.orderedParameters()), self.type_block_map)
+        t = ParamsByGroup(
+            self.block,
+            self.type_params_map.get(type_name, self.block.orderedParameters()),
+            self.type_block_map,
+        )
         t.needBlockList.connect(self.needBlockList)
         t.blockRenamed.connect(self.blockRenamed)
         t.changed.connect(self.changed)

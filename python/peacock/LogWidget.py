@@ -14,6 +14,7 @@ from peacock.base import MooseWidget
 from mooseutils import message
 from xml.sax.saxutils import escape as escape
 
+
 class LogWidget(QWidget, MooseWidget):
     """
     A widget that shows the log.
@@ -24,6 +25,7 @@ class LogWidget(QWidget, MooseWidget):
     the text in the widget.
     Color text is supported.
     """
+
     def __init__(self, **kwds):
         """
         Constructor.
@@ -36,8 +38,12 @@ class LogWidget(QWidget, MooseWidget):
         self.log.setReadOnly(True)
         message.messageEmitter.message.connect(self._write)
         self.button_layout = WidgetUtils.addLayout()
-        self.hide_button = WidgetUtils.addButton(self.button_layout, self, "Hide", lambda: self.hide())
-        self.clear_button = WidgetUtils.addButton(self.button_layout, self, "Clear", lambda: self.log.clear())
+        self.hide_button = WidgetUtils.addButton(
+            self.button_layout, self, "Hide", lambda: self.hide()
+        )
+        self.clear_button = WidgetUtils.addButton(
+            self.button_layout, self, "Clear", lambda: self.log.clear()
+        )
         self.top_layout.addWidget(self.log)
         self.top_layout.addLayout(self.button_layout)
         self.resize(800, 500)
@@ -54,7 +60,9 @@ class LogWidget(QWidget, MooseWidget):
         if not msg:
             return
 
-        msg = msg.encode('utf-8').decode() # make sure if there are bad characters in the message that we can show them.
+        msg = msg.encode(
+            "utf-8"
+        ).decode()  # make sure if there are bad characters in the message that we can show them.
 
         if not color or color == "None":
             color = "white"
@@ -62,6 +70,11 @@ class LogWidget(QWidget, MooseWidget):
             color = str(color)
 
         if msg.find("\n") >= 0:
-            self.log.insertHtml('<div style="color:%s"><pre><code>%s</code></pre></div><br>' % (color.lower(), escape(msg)))
+            self.log.insertHtml(
+                '<div style="color:%s"><pre><code>%s</code></pre></div><br>'
+                % (color.lower(), escape(msg))
+            )
         else:
-            self.log.insertHtml('<div style="color:%s">%s</div><br>' % (color.lower(), escape(msg)))
+            self.log.insertHtml(
+                '<div style="color:%s">%s</div><br>' % (color.lower(), escape(msg))
+            )

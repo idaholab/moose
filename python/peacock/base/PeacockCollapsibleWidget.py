@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -11,6 +11,7 @@
 from PyQt5 import QtCore, QtWidgets
 from peacock.utils import WidgetUtils
 
+
 class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
     """
     A group that contains a title with button that allows for collapsing content.
@@ -21,19 +22,27 @@ class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
 
     ICONSIZE = QtCore.QSize(16, 16)
 
-    def __init__(self, parent=None, title='', collapsed=False, collapsible_layout=QtWidgets.QHBoxLayout, **kwargs):
+    def __init__(
+        self,
+        parent=None,
+        title="",
+        collapsed=False,
+        collapsible_layout=QtWidgets.QHBoxLayout,
+        **kwargs,
+    ):
         super(PeacockCollapsibleWidget, self).__init__(parent)
-
 
         # Group Title Widget
         self._title_widget = QtWidgets.QLabel(title)
-        self._title_widget.setStyleSheet('font-weight:bold;font-size:12pt')
+        self._title_widget.setStyleSheet("font-weight:bold;font-size:12pt")
 
         # "+/-" Button
         self._collapse_button = QtWidgets.QPushButton()
         self._collapse_button.setIconSize(self.ICONSIZE)
         self._collapse_button.setFixedSize(self._collapse_button.iconSize())
-        self._collapse_button.setToolTip("Create python script to reproduce this figure.")
+        self._collapse_button.setToolTip(
+            "Create python script to reproduce this figure."
+        )
         self._collapse_button.setStyleSheet("QPushButton {border:none}")
         self._collapse_button.clicked.connect(self._callbackHideButton)
 
@@ -87,9 +96,9 @@ class PeacockCollapsibleWidget(QtWidgets.QGroupBox):
         """
         self._collapsed = not self._collapsed
         self._collapsible_widget.setHidden(self._collapsed)
-#        PeacockCollapsibleWidget.toggleCollapsed(self._collapsible_layout, self._collapsed)
+        #        PeacockCollapsibleWidget.toggleCollapsed(self._collapsible_layout, self._collapsed)
 
-        name = 'plus.svg' if self._collapsed else 'minus.svg'
+        name = "plus.svg" if self._collapsed else "minus.svg"
         self._collapse_button.setIcon(WidgetUtils.createIcon(name))
 
     @staticmethod

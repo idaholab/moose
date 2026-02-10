@@ -10,6 +10,7 @@
 import tempfile
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testFailedTests(self):
         """
@@ -18,21 +19,23 @@ class TestHarnessTester(TestHarnessTestCase):
         the test which that has failed.
         """
         with tempfile.TemporaryDirectory() as output_dir:
-            args = ['--no-color', '--results-file', 'failed-unittest', '-o', output_dir]
-            kwargs = {'tmp_output': False}
+            args = ["--no-color", "--results-file", "failed-unittest", "-o", output_dir]
+            kwargs = {"tmp_output": False}
 
             # Has failing tests; failed test is output and so is failed test summary
-            out = self.runTests(*args, '-i', 'always_bad', exit_code=128, **kwargs).output
-            self.assertRegex(out, r'tests/test_harness.always_ok.*?OK')
+            out = self.runTests(
+                *args, "-i", "always_bad", exit_code=128, **kwargs
+            ).output
+            self.assertRegex(out, r"tests/test_harness.always_ok.*?OK")
             self.assertRegex(
                 out, r"tests/test_harness.always_bad.*?FAILED \(EXIT CODE 1 != 0\)"
             )
-            self.assertIn('Failed Tests:', out)
+            self.assertIn("Failed Tests:", out)
 
             # Re-run failed tests
-            out = self.runTests(*args, '--failed-tests', exit_code=128, **kwargs).output
+            out = self.runTests(*args, "--failed-tests", exit_code=128, **kwargs).output
             # Verify the passing test is not present
-            self.assertNotRegex(out, r'tests/test_harness.always_ok.*?OK')
+            self.assertNotRegex(out, r"tests/test_harness.always_ok.*?OK")
             # Verify the caveat represents a previous result
             self.assertRegex(
                 out,
@@ -41,4 +44,4 @@ class TestHarnessTester(TestHarnessTestCase):
 
             # Does not having failing tests; failed tests summary not printed
             out = self.runTests(*args, "-i", "always_ok").output
-            self.assertNotIn('Failed Tests:', out)
+            self.assertNotIn("Failed Tests:", out)

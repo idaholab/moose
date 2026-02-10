@@ -18,6 +18,7 @@ from peacock.Input import TimeStepEstimate
 import argparse
 import re
 
+
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
 
@@ -146,5 +147,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(ops.mpi_line.text(), "some args")
         self.assertEqual(ops.threads_line.text(), "other args")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

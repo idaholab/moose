@@ -43,17 +43,39 @@ class VectorPostprocessorViewer(PostprocessorViewer):
 
     @staticmethod
     def commandLineArgs(parser):
-        parser.add_argument('--vectorpostprocessors', '-v', nargs='*', default=[], help="A list of CSV file patterns to open with VectorPostprocessorViewer tab.")
+        parser.add_argument(
+            "--vectorpostprocessors",
+            "-v",
+            nargs="*",
+            default=[],
+            help="A list of CSV file patterns to open with VectorPostprocessorViewer tab.",
+        )
 
-    def __init__(self, plugins=[FigurePlugin, MediaControlPlugin, PostprocessorSelectPlugin, AxesSettingsPlugin, AxisTabsPlugin, OutputPlugin], **kwargs):
-        super(VectorPostprocessorViewer, self).__init__(reader=mooseutils.VectorPostprocessorReader, plugins=plugins, **kwargs)
+    def __init__(
+        self,
+        plugins=[
+            FigurePlugin,
+            MediaControlPlugin,
+            PostprocessorSelectPlugin,
+            AxesSettingsPlugin,
+            AxisTabsPlugin,
+            OutputPlugin,
+        ],
+        **kwargs,
+    ):
+        super(VectorPostprocessorViewer, self).__init__(
+            reader=mooseutils.VectorPostprocessorReader, plugins=plugins, **kwargs
+        )
 
     def initialize(self, options):
         """
         Initialize the manager by appending supplied files from parser.
         """
-        filenames = peacock.utils.getOptionFilenames(options, 'vectorpostprocessors', '.*\*\.csv')
+        filenames = peacock.utils.getOptionFilenames(
+            options, "vectorpostprocessors", ".*\*\.csv"
+        )
         self.onSetFilenames(filenames)
+
 
 def main():
     """
@@ -63,9 +85,10 @@ def main():
     widget.show()
     return widget
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    filenames = ['../../tests/input/vpp2_*.csv']
+    filenames = ["../../tests/input/vpp2_*.csv"]
     widget = main()
     widget.initialize(filenames)
     sys.exit(app.exec_())

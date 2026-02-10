@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,4 +10,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
-result = chigger.exodus.ExodusResult('not correct type, it must be a chigger.ExodusReader')
+
+result = chigger.exodus.ExodusResult(
+    "not correct type, it must be a chigger.ExodusReader"
+)

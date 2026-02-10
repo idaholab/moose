@@ -9,6 +9,7 @@
 
 from PyQt5 import QtCore
 
+
 class PostprocessorDataWidget(QtCore.QObject):
     """
     A wrapper for the VectorPostprocessor/PostprocessorReader classes to allow for automatic reloading.
@@ -33,14 +34,14 @@ class PostprocessorDataWidget(QtCore.QObject):
 
         # Reload Timer
         self._timer = None
-        timer = kwargs.pop('timer', None)
+        timer = kwargs.pop("timer", None)
         if timer != None:
             self._timer = QtCore.QTimer()
             self._timer.timeout.connect(self.load)
             self._timer.setInterval(timer)
 
     def __call__(self, keys, **kwargs):
-        if hasattr(self._reader, 'times'):
+        if hasattr(self._reader, "times"):
             self._reader.update(**kwargs)
         else:
             self._reader.update()
@@ -56,7 +57,7 @@ class PostprocessorDataWidget(QtCore.QObject):
             self._timer.stop()
 
     def times(self):
-        attr = getattr(self._reader, 'times', None)
+        attr = getattr(self._reader, "times", None)
         if attr:
             return attr()
         return []

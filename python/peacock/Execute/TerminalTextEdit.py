@@ -11,11 +11,13 @@
 from PyQt5.QtWidgets import QTextEdit, QMenu, QFileDialog, QSizePolicy
 import mooseutils
 
+
 class TerminalTextEdit(QTextEdit):
     """
     A readonly text edit that replaces terminal codes with appropiate html codes.
     Also uses fixed font.
     """
+
     def __init__(self, **kwds):
         super(TerminalTextEdit, self).__init__(**kwds)
 
@@ -43,7 +45,9 @@ class TerminalTextEdit(QTextEdit):
         """
         Save the contents into a file.
         """
-        fname, other = QFileDialog.getSaveFileName(self, "Choose output", "", "Output file (*.log *.txt)")
+        fname, other = QFileDialog.getSaveFileName(
+            self, "Choose output", "", "Output file (*.log *.txt)"
+        )
         if fname:
             try:
                 with open(fname, "w") as f:
@@ -59,11 +63,15 @@ class TerminalTextEdit(QTextEdit):
         self.setHtml("")
 
     def setFontSize(self, size):
-        self.setStyleSheet("TerminalTextEdit { background: black; color: white; font: %spx}" % size)
+        self.setStyleSheet(
+            "TerminalTextEdit { background: black; color: white; font: %spx}" % size
+        )
+
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication
     import sys
+
     qapp = QApplication(sys.argv)
     w = TerminalTextEdit()
     w.append('<span style="color:red;">foo</span>')

@@ -11,6 +11,7 @@ import os
 import glob
 import platform
 
+
 def recursiveFindFile(current_path, glob_pattern, problems_dir="problems"):
     """
     Finds an executable matching glob_pattern in the current directory.
@@ -44,6 +45,7 @@ def recursiveFindFile(current_path, glob_pattern, problems_dir="problems"):
 
     return None
 
+
 def searchForExe(start_dir=None, methods=None):
     """
     Find a MOOSE based executable with the format *-$METHOD
@@ -59,7 +61,7 @@ def searchForExe(start_dir=None, methods=None):
             methods = [method]
 
     for method in methods:
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             glob_pattern = "*-%s.exe" % method
         else:
             glob_pattern = "*-%s" % method
@@ -71,8 +73,9 @@ def searchForExe(start_dir=None, methods=None):
             print("Found executable: %s" % executable)
             return executable
 
-    print('No executable found for method type(s): %s' % ', '.join(methods))
+    print("No executable found for method type(s): %s" % ", ".join(methods))
     return None
+
 
 def getExecutablePath(options, start_dir=None):
     """

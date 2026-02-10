@@ -13,6 +13,7 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -65,5 +66,6 @@ class Tests(Testing.PeacockTester):
         e.writeInputFile("fsp_test.i")
         self.compareFiles("fsp_test.i", "gold/fsp_test.i")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

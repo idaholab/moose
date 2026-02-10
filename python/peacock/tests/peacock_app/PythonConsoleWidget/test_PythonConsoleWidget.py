@@ -14,6 +14,7 @@ from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -38,5 +39,6 @@ class Tests(Testing.PeacockTester):
         QTest.keyClick(w.input_line, Qt.Key_Return)
         self.assertIn("bar", w.output.toPlainText())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

@@ -18,6 +18,7 @@ POSSIBLE_FAIL = pycapabilities.CheckState.POSSIBLE_FAIL
 POSSIBLE_PASS = pycapabilities.CheckState.POSSIBLE_PASS
 CERTAIN_PASS = pycapabilities.CheckState.CERTAIN_PASS
 
+
 class TestCapabilities(unittest.TestCase):
     """Test capabilities module."""
 

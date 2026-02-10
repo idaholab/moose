@@ -9,6 +9,7 @@
 
 from PyQt5 import QtCore, QtWidgets
 
+
 class PostprocessorTableWidget(QtWidgets.QTabWidget):
     """
     Helper object of having a live table view of postprocessor results.
@@ -37,7 +38,6 @@ class PostprocessorTableWidget(QtWidgets.QTabWidget):
         """
         self._size = self.size()
         super(PostprocessorTableWidget, self).closeEvent(*args)
-
 
     def initialize(self, data):
         """

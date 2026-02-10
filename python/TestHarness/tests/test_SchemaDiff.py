@@ -10,10 +10,19 @@
 import subprocess
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testSchemaDiff(self):
-        output = self.runTests('-i', 'schemadiff', exit_code=129).output
-        self.assertRegex(output, r'test_harness\.schema_jsondiff.*?FAILED \(SCHEMADIFF\)')
-        self.assertRegex(output, r'test_harness\.schema_xmldiff.*?FAILED \(SCHEMADIFF\)')
-        self.assertRegex(output, r'test_harness\.schema_invalid_json.*?FAILED \(LOAD FAILED\)')
-        self.assertRegex(output, r'test_harness\.schema_invalid_xml.*?FAILED \(LOAD FAILED\)')
+        output = self.runTests("-i", "schemadiff", exit_code=129).output
+        self.assertRegex(
+            output, r"test_harness\.schema_jsondiff.*?FAILED \(SCHEMADIFF\)"
+        )
+        self.assertRegex(
+            output, r"test_harness\.schema_xmldiff.*?FAILED \(SCHEMADIFF\)"
+        )
+        self.assertRegex(
+            output, r"test_harness\.schema_invalid_json.*?FAILED \(LOAD FAILED\)"
+        )
+        self.assertRegex(
+            output, r"test_harness\.schema_invalid_xml.*?FAILED \(LOAD FAILED\)"
+        )

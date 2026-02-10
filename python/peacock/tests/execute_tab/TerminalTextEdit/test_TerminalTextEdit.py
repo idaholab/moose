@@ -15,9 +15,11 @@ from mock import patch
 import tempfile
 from peacock.utils import Testing
 
+
 class MockEvent(object):
     def globalPos(self):
         return None
+
 
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
@@ -51,8 +53,8 @@ class Tests(Testing.PeacockTester):
         else:
             return "Clear"
 
-    @patch.object(QMenu, 'exec_')
-    @patch.object(QMenu, 'addAction')
+    @patch.object(QMenu, "exec_")
+    @patch.object(QMenu, "addAction")
     @patch.object(TerminalTextEdit, "save")
     def testContextMenu(self, mock_save, mock_add, mock_exec):
         t = TerminalTextEdit()
@@ -73,5 +75,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(t.toPlainText(), "")
         self.assertEqual(mock_save.call_count, 1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

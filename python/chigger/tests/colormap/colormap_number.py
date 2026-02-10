@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,9 +10,12 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
-reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-mug = chigger.exodus.ExodusResult(reader, variable='diffused', cmap='viridis', cmap_num_colors=2)
+
+reader = chigger.exodus.ExodusReader("../input/mug_blocks_out.e")
+mug = chigger.exodus.ExodusResult(
+    reader, variable="diffused", cmap="viridis", cmap_num_colors=2
+)
 cbar = chigger.exodus.ExodusColorBar(mug)
-window = chigger.RenderWindow(mug, cbar, size=[300,300], test=True)
-window.write('colormap_number.png')
+window = chigger.RenderWindow(mug, cbar, size=[300, 300], test=True)
+window.write("colormap_number.png")
 window.start()

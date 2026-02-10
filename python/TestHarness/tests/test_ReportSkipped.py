@@ -9,6 +9,7 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testSyntax(self):
         """
@@ -16,9 +17,11 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Verify the skipped test _does_ appear
-        output = self.runTests('--no-color', '-i', 'ignore_skipped').output
-        self.assertIn('[ALWAYS SKIPPED] SKIP', output)
+        output = self.runTests("--no-color", "-i", "ignore_skipped").output
+        self.assertIn("[ALWAYS SKIPPED] SKIP", output)
 
         # Verify the skipped test does _not_ appear
-        output = self.runTests('--no-color', '--no-report', '-i', 'ignore_skipped').output
-        self.assertNotIn('[ALWAYS SKIPPED] SKIP', output)
+        output = self.runTests(
+            "--no-color", "--no-report", "-i", "ignore_skipped"
+        ).output
+        self.assertNotIn("[ALWAYS SKIPPED] SKIP", output)

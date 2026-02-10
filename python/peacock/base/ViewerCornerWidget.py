@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtWidgets
 from peacock.utils import WidgetUtils
 from .MooseWidget import MooseWidget
 
+
 class ViewerCornerWidget(QtWidgets.QWidget, MooseWidget):
     """
     Widget for cloning/closing postprocessor tabs.
@@ -32,10 +33,14 @@ class ViewerCornerWidget(QtWidgets.QWidget, MooseWidget):
         self.MainLayout.setSpacing(10)
         self.setLayout(self.MainLayout)
 
-        self.CloseButton = QtWidgets.QPushButton(WidgetUtils.createIcon('close.ico'), 'Close')
-        self.CloneButton = QtWidgets.QPushButton(WidgetUtils.createIcon('copy.ico'), 'Clone')
+        self.CloseButton = QtWidgets.QPushButton(
+            WidgetUtils.createIcon("close.ico"), "Close"
+        )
+        self.CloneButton = QtWidgets.QPushButton(
+            WidgetUtils.createIcon("copy.ico"), "Clone"
+        )
 
-        #self.MainLayout.addStretch()
+        # self.MainLayout.addStretch()
         self.MainLayout.addWidget(self.CloneButton)
         self.MainLayout.addWidget(self.CloseButton)
 

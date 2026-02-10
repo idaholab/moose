@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,6 +10,7 @@
 
 from .ExodusSourceLineSampler import ExodusSourceLineSampler
 from ..base import ChiggerResult
+
 
 class ExodusResultLineSampler(ChiggerResult):
     """
@@ -28,7 +29,9 @@ class ExodusResultLineSampler(ChiggerResult):
         for src in self._exodus_result:
             sources.append(ExodusSourceLineSampler(src, **kwargs))
 
-        super(ExodusResultLineSampler, self).__init__(*sources,
-                                                      renderer=exodus_result.getVTKRenderer(),
-                                                      viewport=exodus_result.getOption('viewport'),
-                                                      **kwargs)
+        super(ExodusResultLineSampler, self).__init__(
+            *sources,
+            renderer=exodus_result.getVTKRenderer(),
+            viewport=exodus_result.getOption("viewport"),
+            **kwargs,
+        )

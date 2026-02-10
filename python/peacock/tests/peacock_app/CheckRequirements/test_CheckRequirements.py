@@ -20,11 +20,14 @@ except ImportError:
 realimport = builtins.__import__
 
 bad_import_name = ""
+
+
 def myimport(name, globals={}, locals={}, fromlist=[], level=-1):
     if name == bad_import_name:
         raise ImportError
     else:
         return realimport(name, globals, locals, fromlist, level)
+
 
 class Tests(unittest.TestCase):
     def setUp(self):
@@ -39,7 +42,7 @@ class Tests(unittest.TestCase):
         self.blockImport("vtk")
         self.assertFalse(CheckRequirements.check_vtk())
 
-    @mock.patch('peacock.CheckRequirements.ErrorObserver')
+    @mock.patch("peacock.CheckRequirements.ErrorObserver")
     def testBadOpenGL(self, mock_err):
         self.assertFalse(CheckRequirements.check_vtk())
 
@@ -67,5 +70,6 @@ class Tests(unittest.TestCase):
     def testGoodRequirements(self):
         self.assertTrue(CheckRequirements.has_requirements())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

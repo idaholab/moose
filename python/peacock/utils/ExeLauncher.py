@@ -12,6 +12,7 @@ import mooseutils
 import subprocess
 import os
 
+
 def runExe(app_path, args, print_errors=True):
     """
     Convience function to run a executable with arguments and return the output
@@ -32,9 +33,11 @@ def runExe(app_path, args, print_errors=True):
 
     proc = None
     try:
-        proc = subprocess.Popen(popen_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(
+            popen_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
     except OSError as e:
-        msg = "Problem running '%s'" % ' '.join(popen_args)
+        msg = "Problem running '%s'" % " ".join(popen_args)
         if print_errors:
             mooseutils.mooseWarning(msg)
         msg += "\nError: %s" % e
@@ -43,10 +46,13 @@ def runExe(app_path, args, print_errors=True):
     data = proc.communicate()
     stdout_data = data[0].decode("utf-8")
     if proc.returncode != 0:
-        msg = "'%s' exited with non zero status %s.\n\n"\
-                "Please make sure your application is built and able to execute the given arguments.\n"\
-                "Working dir: %s\n"\
-                "Output: %s" % (' '.join(popen_args), proc.returncode, os.getcwd(), stdout_data)
+        msg = (
+            "'%s' exited with non zero status %s.\n\n"
+            "Please make sure your application is built and able to execute the given arguments.\n"
+            "Working dir: %s\n"
+            "Output: %s"
+            % (" ".join(popen_args), proc.returncode, os.getcwd(), stdout_data)
+        )
         if print_errors:
             mooseutils.mooseWarning(msg)
         raise BadExecutableException(msg)

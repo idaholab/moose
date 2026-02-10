@@ -19,9 +19,24 @@ import argparse
 import subprocess
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--file", "-f", dest="pyfile", help="File to load tests from. Should be in the current working directory.", required=True)
-parser.add_argument("--buffer", "-b", dest="buffer", action="store_true", help="Buffer stdout")
-parser.add_argument("--verbosity", "-v", dest="verbosity", type=int, default=2, help="Set the verbosity level")
+parser.add_argument(
+    "--file",
+    "-f",
+    dest="pyfile",
+    help="File to load tests from. Should be in the current working directory.",
+    required=True,
+)
+parser.add_argument(
+    "--buffer", "-b", dest="buffer", action="store_true", help="Buffer stdout"
+)
+parser.add_argument(
+    "--verbosity",
+    "-v",
+    dest="verbosity",
+    type=int,
+    default=2,
+    help="Set the verbosity level",
+)
 parser.add_argument("--test", "-t", dest="test", help="Run an individual test")
 
 parsed = parser.parse_args(sys.argv[1:])
@@ -47,7 +62,9 @@ if parsed.test:
         test_to_run = all_tests[parsed.test]
         # Apparently the setupClass/tearDownClass aren't called when running an individual test
         test_to_run.setUpClass()
-        runner = unittest.TextTestRunner(verbosity=parsed.verbosity, buffer=parsed.buffer)
+        runner = unittest.TextTestRunner(
+            verbosity=parsed.verbosity, buffer=parsed.buffer
+        )
         results = runner.run(test_to_run)
         test_to_run.tearDownClass()
         sys.exit(int(not results.wasSuccessful()))

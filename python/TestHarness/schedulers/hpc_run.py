@@ -16,9 +16,9 @@ import os, shlex, subprocess, sys, urllib.parse
 # deal with escaping all kinds of crud as we execute it within a shell.
 # It takes a single argument, which is the url encoded thing to run,
 # decodes it, and runs it.
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print('ERROR: Expected single argument of the encoded command to run')
+        print("ERROR: Expected single argument of the encoded command to run")
         sys.exit(1)
 
     # The command should be encoded on other end with urrllib.parse.quote
@@ -26,16 +26,15 @@ if __name__ == '__main__':
     command = shlex.split(urllib.parse.unquote(encoded_command))
 
     # Try to only print this on rank 0
-    rank = os.environ.get('PMI_RANK') # mpich
+    rank = os.environ.get("PMI_RANK")  # mpich
     if rank is None:
-        rank = os.environ.get('OMPI_COMM_WORLD_RANK') # openmpi
-    if rank == '0' or rank is None:
-        print('Running decoded command:', ' '.join(command), flush=True)
+        rank = os.environ.get("OMPI_COMM_WORLD_RANK")  # openmpi
+    if rank == "0" or rank is None:
+        print("Running decoded command:", " ".join(command), flush=True)
 
     # Run the thing; close_fds=False needed for MPI
-    process = subprocess.run(command,
-                             stdout=sys.stdout,
-                             stderr=sys.stderr,
-                             close_fds=False)
+    process = subprocess.run(
+        command, stdout=sys.stdout, stderr=sys.stderr, close_fds=False
+    )
     # This is a wrapper so just exit with the code of whatever we ran
     sys.exit(process.returncode)

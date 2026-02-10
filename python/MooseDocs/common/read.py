@@ -12,6 +12,7 @@ import sys
 import codecs
 import os
 
+
 def read(filename):
     """
     Reads file using utf-8 encoding.
@@ -25,16 +26,18 @@ def read(filename):
     Inputs:
         filename[str]: The filename to open.
     """
-    with codecs.open(filename, encoding='utf-8') as fid:
+    with codecs.open(filename, encoding="utf-8") as fid:
         content = fid.read()
     return content
+
 
 def write(filename, content):
     """
     Write utf-8 file.
     """
-    with codecs.open(filename, 'w', encoding='utf-8') as fid:
+    with codecs.open(filename, "w", encoding="utf-8") as fid:
         fid.write(content)
+
 
 def get_language(filename):
     """
@@ -45,10 +48,10 @@ def get_language(filename):
         filename[str]: The filename to examine.
     """
     _, ext = os.path.splitext(filename)
-    if ext in ['.C', 'K', '.h', '.cpp', '.hpp']:
-        return 'cpp'
-    elif ext == '.py':
-        return 'python'
-    elif ext == '.i':
-        return 'moose'
-    return 'text'
+    if ext in [".C", "K", ".h", ".cpp", ".hpp"]:
+        return "cpp"
+    elif ext == ".py":
+        return "python"
+    elif ext == ".i":
+        return "moose"
+    return "text"

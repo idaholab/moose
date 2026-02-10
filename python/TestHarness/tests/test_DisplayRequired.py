@@ -10,18 +10,21 @@
 import os
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testDisplayRequired(self):
         """
         Test that the display required is working.
         """
 
-        display = os.getenv('DISPLAY', None)
+        display = os.getenv("DISPLAY", None)
         if display:
-            os.unsetenv('DISPLAY')
+            os.unsetenv("DISPLAY")
 
-        output = self.runTests('--no-color', '-i', 'display_required').output
-        self.assertRegex(output, r'test_harness\.display_required.*? \[NO DISPLAY\] SKIP')
+        output = self.runTests("--no-color", "-i", "display_required").output
+        self.assertRegex(
+            output, r"test_harness\.display_required.*? \[NO DISPLAY\] SKIP"
+        )
 
         if display:
-            os.putenv('DISPLAY', display)
+            os.putenv("DISPLAY", display)

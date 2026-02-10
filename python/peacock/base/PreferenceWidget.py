@@ -9,12 +9,14 @@
 
 from PyQt5 import QtWidgets, QtCore
 
+
 class PreferenceWidget(QtWidgets.QWidget):
     """
     Holds a collection of preferences.
     Signals:
         saved: Emitted when preferences have been saved.
     """
+
     saved = QtCore.pyqtSignal()
 
     def __init__(self, plugins):

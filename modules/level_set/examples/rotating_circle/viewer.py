@@ -11,7 +11,8 @@
 import sys
 import os
 import vtk
-sys.path.append(os.path.abspath('../../python'))
+
+sys.path.append(os.path.abspath("../../python"))
 
 from moose_level_set import lsutils
 

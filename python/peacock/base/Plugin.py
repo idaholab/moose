@@ -12,6 +12,7 @@ import mooseutils
 from .MooseWidget import MooseWidget
 from .Preferences import Preferences
 
+
 class Plugin(MooseWidget):
     """
     A base class for all plugin objects.
@@ -23,7 +24,7 @@ class Plugin(MooseWidget):
     see Manager.py
     """
 
-    def __init__(self, layout='MainLayout', settings_key="", **kwargs):
+    def __init__(self, layout="MainLayout", settings_key="", **kwargs):
         super(Plugin, self).__init__()
 
         # Name of layout that this plugin should be added (see PluginManager.py)
@@ -55,8 +56,8 @@ class Plugin(MooseWidget):
         super(Plugin, self).setup()
 
         for key, widget in self._preferences._widgets.items():
-            name = key.split('/')[-1]
-            name = '_prefCallback{}{}'.format(name[0].upper(), name[1:])
+            name = key.split("/")[-1]
+            name = "_prefCallback{}{}".format(name[0].upper(), name[1:])
             callback = getattr(self, name, None)
             if callback:
                 widget.valueSaved.connect(callback)
@@ -70,10 +71,16 @@ class Plugin(MooseWidget):
         """
         if self is not other:
             for name, signal in self.signals().items():
-                slot_name = 'on' + name[0].upper() + name[1:]
+                slot_name = "on" + name[0].upper() + name[1:]
                 if hasattr(other, slot_name):
-                    mooseutils.mooseDebug('{}.{} --> {}.{}'.format(self.__class__.__name__, name,
-                                                                   other.__class__.__name__, slot_name))
+                    mooseutils.mooseDebug(
+                        "{}.{} --> {}.{}".format(
+                            self.__class__.__name__,
+                            name,
+                            other.__class__.__name__,
+                            slot_name,
+                        )
+                    )
                     signal.connect(getattr(other, slot_name))
 
     def setMainLayoutName(self, name):

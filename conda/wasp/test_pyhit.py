@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-""" Test pyhit """
+"""Test pyhit"""
 import sys
 
-if __name__ == '__main__':
-    print('\n\n\nTEST loading hit library\n')
+if __name__ == "__main__":
+    print("\n\n\nTEST loading hit library\n")
     from pyhit import hit
-    print(f'Successs: {hit.__file__}')
+
+    print(f"Successs: {hit.__file__}")
     sys.exit()

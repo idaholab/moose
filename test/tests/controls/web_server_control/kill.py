@@ -12,8 +12,8 @@ from sys import exit
 
 from testmoosecontrol import TestMooseControl
 
-if __name__ == '__main__':
-    with TestMooseControl('web_server') as control:
+if __name__ == "__main__":
+    with TestMooseControl("web_server") as control:
         control.runner.kill()
 
     exit(control.runner.get_return_code())

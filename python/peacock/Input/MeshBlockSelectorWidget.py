@@ -10,6 +10,7 @@
 from PyQt5 import QtCore, QtWidgets
 import peacock
 
+
 class MeshBlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
     """
     A generic widget for controlling visible blocks, nodesets, and sidesets of the current mesh.

@@ -23,10 +23,14 @@ class DupWalker(object):
 
     def _duperr(self, node):
         if node.type() == hit.NodeType.Section:
-            ntype = 'section'
+            ntype = "section"
         elif node.type() == hit.NodeType.Field:
-            ntype = 'parameter'
-        self.errors.append('{}:{}: duplicate {} "{}"'.format(self._fname, node.line(), ntype, node.fullpath()))
+            ntype = "parameter"
+        self.errors.append(
+            '{}:{}: duplicate {} "{}"'.format(
+                self._fname, node.line(), ntype, node.fullpath()
+            )
+        )
 
     def walk(self, fullpath, path, node):
         if node.type() != hit.NodeType.Field and node.type() != hit.NodeType.Section:
@@ -46,6 +50,7 @@ class InputFile(object):
     Holds the information of an input file.
     Can be empty.
     """
+
     def __init__(self, filename=None, **kwds):
         """
         Constructor.
@@ -91,7 +96,7 @@ class InputFile(object):
             msg = "Input file %s does not have the proper extension" % filename
             raise PeacockException(msg)
 
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             data = f.read()
         self.readInputData(data, filename)
 
@@ -114,8 +119,10 @@ class InputFile(object):
             mooseutils.mooseWarning(msg)
             raise e
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print("Need an input file as argument")
         exit(1)

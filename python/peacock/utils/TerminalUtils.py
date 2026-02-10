@@ -10,15 +10,17 @@
 import re
 import traceback
 
-TERMINAL_TO_HTML_COLOR_MAP = { 30: "black",
-        31: "red",
-        32: "green",
-        33: "yellow",
-        34: "blue",
-        35: "magenta",
-        36: "cyan",
-        37: "white",
-        }
+TERMINAL_TO_HTML_COLOR_MAP = {
+    30: "black",
+    31: "red",
+    32: "green",
+    33: "yellow",
+    34: "blue",
+    35: "magenta",
+    36: "cyan",
+    37: "white",
+}
+
 
 def terminalOutputToHtml(output):
     """
@@ -32,12 +34,13 @@ def terminalOutputToHtml(output):
     html_tmp = html_tmp.replace("<", "&lt;")
     html_tmp = html_tmp.replace(">", "&gt;")
     try:
-        html_tmp = re.sub("\33\[39m", '</span>', html_tmp)
+        html_tmp = re.sub("\33\[39m", "</span>", html_tmp)
         html_tmp = re.sub("(\33\[1m)*\33\[(\d{1,2})m", _startSpan, html_tmp)
     except Exception:
         print("Got exception while trying to convert terminal codes to html:")
         print(traceback.format_exc())
     return html_tmp
+
 
 def _startSpan(match):
     """

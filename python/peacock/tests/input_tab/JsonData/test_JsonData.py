@@ -12,6 +12,7 @@ from peacock.Input.JsonData import JsonData
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -54,5 +55,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(y2.app_path, y.app_path)
         self.assertEqual(y2.json_data, y.json_data)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

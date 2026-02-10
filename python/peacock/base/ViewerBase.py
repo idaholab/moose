@@ -12,6 +12,7 @@ import mooseutils
 from .TabPlugin import TabPlugin
 from .ViewerCornerWidget import ViewerCornerWidget
 
+
 class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
     """
     Base for creating multiple copies of a PluginManager widget.
@@ -30,10 +31,12 @@ class ViewerBase(QtWidgets.QTabWidget, TabPlugin):
             mooseutils.mooseError("The type of manager to create must be supplied.")
 
         # Member variables and class settings
-        self._manager = manager # the manager class to create
-        self._plugins = plugins # the plugin classes (not instances) to created
-        self._count = 0         # the number of tabs created
-        self._data = None       # data to pass to PluginManager::initialize (see 'initialize')
+        self._manager = manager  # the manager class to create
+        self._plugins = plugins  # the plugin classes (not instances) to created
+        self._count = 0  # the number of tabs created
+        self._data = (
+            None  # data to pass to PluginManager::initialize (see 'initialize')
+        )
 
         # Add the corner close/clone buttons
         self.setCornerWidget(ViewerCornerWidget())

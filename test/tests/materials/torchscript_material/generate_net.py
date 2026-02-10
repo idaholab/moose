@@ -11,6 +11,7 @@
 import torch
 import torch.nn as nn
 
+
 class MyNet(nn.Module):
     def __init__(self):
         super(MyNet, self).__init__()
@@ -24,7 +25,9 @@ class MyNet(nn.Module):
         x = self.output_layer(x)
         return x
 
+
 model = MyNet().double()
+
 
 # We need to initialize the parameters like this because the rng
 # might result in slightly different results on different architectures
@@ -32,6 +35,7 @@ def init_weights(m):
     nn.init.constant_(m.weight, 0.1)
     if m.bias is not None:
         nn.init.constant_(m.bias, 0.15)
+
 
 model = MyNet().double()
 model.apply(init_weights)

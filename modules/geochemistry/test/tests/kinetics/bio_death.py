@@ -22,8 +22,13 @@ tim = [0] + [x[0] for x in data]
 biomass = [1] + [x[1] for x in data]
 
 plt.figure(0)
-plt.scatter(tim, biomass, label = 'MOOSE')
-plt.plot([0.1 * i for i in range(100)], [math.exp(-0.5 * 0.1 * i) for i in range(100)], 'k', label = 'Exponential')
+plt.scatter(tim, biomass, label="MOOSE")
+plt.plot(
+    [0.1 * i for i in range(100)],
+    [math.exp(-0.5 * 0.1 * i) for i in range(100)],
+    "k",
+    label="Exponential",
+)
 plt.legend()
 plt.grid()
 plt.xlabel("Time")

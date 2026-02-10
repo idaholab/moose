@@ -11,6 +11,7 @@
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -21,7 +22,7 @@ class Tests(Testing.PeacockTester):
 
     def testInputFileMesh(self):
         exe_file = Testing.find_moose_test_exe()
-        app = self.createPeacockApp(['../../common/transient.i', exe_file])
+        app = self.createPeacockApp(["../../common/transient.i", exe_file])
         tabs = app.main_widget.tab_plugin
         input_plugin = tabs.InputFileEditorWithMesh
         self.assertEqual(str(tabs.tabText(tabs.currentIndex())), input_plugin.tabName())
@@ -32,5 +33,6 @@ class Tests(Testing.PeacockTester):
         vtkwin.onWrite(self.filename)
         self.assertFalse(Testing.gold_diff(self.filename))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

@@ -16,8 +16,10 @@ from peacock.utils import Testing
 from mock import patch
 import os
 
+
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
+
     def setUp(self):
         super(Tests, self).setUp()
         self.test_exe = Testing.find_moose_test_exe()
@@ -114,5 +116,6 @@ class Tests(Testing.PeacockTester):
         self.assertIn("-foo", args)
         self.assertIn("-bar", args)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

@@ -14,8 +14,9 @@ import unittest
 import mooseutils
 
 ROOT_DIR = mooseutils.git_root_dir()
-sys.path.insert(0, os.path.join(ROOT_DIR, 'scripts'))
+sys.path.insert(0, os.path.join(ROOT_DIR, "scripts"))
 from git_news import main
+
 
 class Test(unittest.TestCase):
 
@@ -24,5 +25,6 @@ class Test(unittest.TestCase):
         proc = main()
         self.assertFalse(proc.returncode)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2, buffer=True)

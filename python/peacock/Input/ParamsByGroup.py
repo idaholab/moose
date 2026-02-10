@@ -12,6 +12,7 @@ from PyQt5.QtCore import pyqtSignal
 from peacock.base.MooseWidget import MooseWidget
 from .ParamsTable import ParamsTable
 
+
 def tabSort(val):
     """
     Ugly way to make sure Main group is first followed
@@ -22,6 +23,7 @@ def tabSort(val):
     else:
         return "1111_%s" % val
 
+
 class ParamsByGroup(QTabWidget, MooseWidget):
     """
     Creates tabs for each group in the parameters
@@ -31,6 +33,7 @@ class ParamsByGroup(QTabWidget, MooseWidget):
         blockRenamed[BlockInfo, newname]: The block has been renamed
         changed: A value has changed
     """
+
     needBlockList = pyqtSignal(list)
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()

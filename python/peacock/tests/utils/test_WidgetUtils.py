@@ -13,6 +13,7 @@ from peacock.utils import Testing
 from PyQt5.QtCore import QObject
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -35,5 +36,6 @@ class Tests(Testing.PeacockTester):
         objs.append(QObject(parent=objs[2]))
         WidgetUtils.dumpQObjectTree(objs[0])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

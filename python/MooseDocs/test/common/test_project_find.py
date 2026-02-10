@@ -18,12 +18,21 @@ class TestProjectFind(unittest.TestCase):
         """
         Test that class with h and C files are located.
         """
-        MooseDocs.PROJECT_FILES = ['file0.md', '/path/to/another/file0.md', 'image1.png']
+        MooseDocs.PROJECT_FILES = [
+            "file0.md",
+            "/path/to/another/file0.md",
+            "image1.png",
+        ]
 
-        self.assertEqual(project_find('image1.png'), ['image1.png'])
-        self.assertEqual(project_find('file0.md'), ['file0.md', '/path/to/another/file0.md'])
-        self.assertEqual(project_find('e0.md'), ['file0.md', '/path/to/another/file0.md'])
-        self.assertEqual(project_find('wrong'), [])
+        self.assertEqual(project_find("image1.png"), ["image1.png"])
+        self.assertEqual(
+            project_find("file0.md"), ["file0.md", "/path/to/another/file0.md"]
+        )
+        self.assertEqual(
+            project_find("e0.md"), ["file0.md", "/path/to/another/file0.md"]
+        )
+        self.assertEqual(project_find("wrong"), [])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -9,6 +9,7 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testSyntax(self):
         """
@@ -17,5 +18,5 @@ class TestHarnessTester(TestHarnessTestCase):
 
         # check that parser errors print correctly
         # TODO: Are there more we can test?
-        output = self.runTests('-i', 'parse_errors', exit_code=128).output
-        self.assertIn('duplicate parameter', output)
+        output = self.runTests("-i", "parse_errors", exit_code=128).output
+        self.assertIn("duplicate parameter", output)

@@ -8,6 +8,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .Plugin import Plugin
+
+
 class TabPlugin(Plugin):
     def __init__(self):
         super(TabPlugin, self).__init__()

@@ -15,6 +15,7 @@ from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -42,5 +43,6 @@ class Tests(Testing.PeacockTester):
         self.assertIn("Foo", w.log.toHtml())
         self.assertIn("bar", w.log.toHtml())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

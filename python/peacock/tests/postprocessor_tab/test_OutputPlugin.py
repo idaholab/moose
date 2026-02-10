@@ -14,6 +14,7 @@ from PyQt5 import QtWidgets
 from peacock.PostprocessorViewer.plugins.OutputPlugin import main
 import unittest
 
+
 class TestOutputPlugin(unittest.TestCase):
     """
     Test class for FigureWidget.
@@ -27,7 +28,7 @@ class TestOutputPlugin(unittest.TestCase):
         Creates the GUI.
         """
 
-        filename = '../input/vpp_*.csv'
+        filename = "../input/vpp_*.csv"
         self._control, self._widget = main([filename])
 
     def testLiveTable(self):
@@ -40,14 +41,16 @@ class TestOutputPlugin(unittest.TestCase):
         self.assertTrue(self._control.LiveTable.isVisible())
 
         # Test that data exists
-        self.assertTrue(self._control.LiveTable.currentWidget().item(1,1), "3")
+        self.assertTrue(self._control.LiveTable.currentWidget().item(1, 1), "3")
 
         # Change time
-        self._widget.currentWidget().MediaControlPlugin.BackwardButton.clicked.emit(True)
-        self.assertTrue(self._control.LiveTable.currentWidget().item(1,1), "2")
+        self._widget.currentWidget().MediaControlPlugin.BackwardButton.clicked.emit(
+            True
+        )
+        self.assertTrue(self._control.LiveTable.currentWidget().item(1, 1), "2")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     import unittest
+
     unittest.main(module=__name__, verbosity=2)

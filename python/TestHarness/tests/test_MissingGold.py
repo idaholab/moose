@@ -9,11 +9,12 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testMissingGold(self):
         """
         Test for Missing Gold file
         """
-        out = self.runTests('-i', 'missing_gold', exit_code=128).output
-        self.assertRegex(out, 'test_harness\.exodiff.*?FAILED \(MISSING GOLD FILE\)')
-        self.assertRegex(out, 'test_harness\.csvdiff.*?FAILED \(MISSING GOLD FILE\)')
+        out = self.runTests("-i", "missing_gold", exit_code=128).output
+        self.assertRegex(out, "test_harness\.exodiff.*?FAILED \(MISSING GOLD FILE\)")
+        self.assertRegex(out, "test_harness\.csvdiff.*?FAILED \(MISSING GOLD FILE\)")

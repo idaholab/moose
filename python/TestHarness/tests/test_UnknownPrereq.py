@@ -9,11 +9,14 @@
 
 from TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testUnknownPrereq(self):
         """
         Test for Unknown Prereq
         """
-        out = self.runTests('-i', 'unknown_prereq', exit_code=132).output
+        out = self.runTests("-i", "unknown_prereq", exit_code=132).output
 
-        self.assertRegex(out, r'tests/test_harness.foo.*?FAILED \(unknown dependency non_existent\)')
+        self.assertRegex(
+            out, r"tests/test_harness.foo.*?FAILED \(unknown dependency non_existent\)"
+        )

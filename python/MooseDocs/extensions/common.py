@@ -9,8 +9,10 @@
 
 from . import core, command
 
+
 def make_extension(**kwargs):
     return CommonExtension(**kwargs)
+
 
 class CommonExtension(command.CommandExtension):
     """
@@ -20,8 +22,11 @@ class CommonExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['shortcuts'] = (dict(), "Key-value pairs to insert as shortcuts, this should be " \
-                                       "a dictionary or a dictionary of dictionaries.")
+        config["shortcuts"] = (
+            dict(),
+            "Key-value pairs to insert as shortcuts, this should be "
+            "a dictionary or a dictionary of dictionaries.",
+        )
         return config
 
     def extend(self, reader, renderer):
@@ -29,7 +34,7 @@ class CommonExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         if ast.is_root:
-            shortcuts = self.get('shortcuts', dict())
+            shortcuts = self.get("shortcuts", dict())
             for key, value in shortcuts.items():
                 if isinstance(value, dict):
                     for k, v in value.items():

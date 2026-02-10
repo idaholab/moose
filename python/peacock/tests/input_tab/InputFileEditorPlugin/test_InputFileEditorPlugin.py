@@ -16,6 +16,7 @@ import os
 from mock import patch
 from PyQt5.QtCore import QSettings
 
+
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
 
@@ -130,5 +131,6 @@ class Tests(Testing.PeacockTester):
         val = settings.value(key, type=int)
         self.assertEqual(val, 15)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

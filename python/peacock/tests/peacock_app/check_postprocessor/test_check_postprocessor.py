@@ -12,6 +12,7 @@ from PyQt5.QtCore import Qt
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -38,5 +39,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(len(pp.PostprocessorSelectPlugin._groups), 1)
         self.assertEqual(len(pp.PostprocessorSelectPlugin._groups[0]._toggles), 3)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

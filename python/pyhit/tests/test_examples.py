@@ -11,6 +11,7 @@
 import os
 import unittest
 
+
 class TestExamples(unittest.TestCase):
     def test(self):
 
@@ -20,10 +21,10 @@ class TestExamples(unittest.TestCase):
         import moosetree
 
         # Read the file
-        root = pyhit.load('input.i')
+        root = pyhit.load("input.i")
 
         # Locate and modify "x_max" parameter for the mesh
-        mesh = moosetree.find(root, func=lambda n: n.fullpath == '/Mesh/gen')
+        mesh = moosetree.find(root, func=lambda n: n.fullpath == "/Mesh/gen")
         mesh["x_max"] = 4
 
         # Set the comment on altered parameter
@@ -40,5 +41,6 @@ class TestExamples(unittest.TestCase):
         self.assertIn("x_max = 4", out)
         self.assertIn("Changed from 3 to 4", out)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2)

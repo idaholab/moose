@@ -12,6 +12,7 @@ from threading import Lock
 from typing import Optional
 from TestHarness import OutputInterface, util
 
+
 class Runner(OutputInterface):
     """
     Base class for running a process via a command.
@@ -20,6 +21,7 @@ class Runner(OutputInterface):
     this specialized so that we can either run things locally
     or externally (i.e., PBS, slurm, etc on HPC)
     """
+
     def __init__(self, job, options):
         OutputInterface.__init__(self)
 
@@ -64,7 +66,7 @@ class Runner(OutputInterface):
             self._max_memory = value
 
     def getRunOutput(self):
-        """ Get the OutputInterface object for the actual run """
+        """Get the OutputInterface object for the actual run"""
         return self.run_output
 
     def spawn(self, timer):
@@ -100,14 +102,18 @@ class Runner(OutputInterface):
         # Load the redirected output files, if any
         run_output = self.getRunOutput()
         for file_path in self.job.getTester().getRedirectedOutputFiles(self.options):
-            run_output.appendOutput(util.outputHeader(f'Begin redirected output {file_path}'))
+            run_output.appendOutput(
+                util.outputHeader(f"Begin redirected output {file_path}")
+            )
             if os.access(file_path, os.R_OK):
-                with open(file_path, 'r+b') as f:
+                with open(file_path, "r+b") as f:
                     run_output.appendOutput(self.readOutput(f))
             else:
-                self.job.setStatus(self.job.error, 'FILE TIMEOUT')
-                self.appendOutput(f'File {file_path} unavailable')
-            run_output.appendOutput(util.outputHeader(f'End redirected output {file_path}'))
+                self.job.setStatus(self.job.error, "FILE TIMEOUT")
+                self.appendOutput(f"File {file_path} unavailable")
+            run_output.appendOutput(
+                util.outputHeader(f"End redirected output {file_path}")
+            )
 
     def cleanup(self):
         """
@@ -130,21 +136,21 @@ class Runner(OutputInterface):
 
         Can be overridden.
         """
-        raise Exception('sendSignal not supported for this Runner')
+        raise Exception("sendSignal not supported for this Runner")
 
     def readOutput(self, stream):
         """
         Helper for reading output from a stream, and setting an error state
         if the read failed.
         """
-        output = ''
+        output = ""
         try:
             stream.seek(0)
-            output = stream.read().decode('utf-8')
+            output = stream.read().decode("utf-8")
         except UnicodeDecodeError:
-            self.job.setStatus(self.job.error, 'non-unicode characters in output')
+            self.job.setStatus(self.job.error, "non-unicode characters in output")
         except:
-            self.job.setStatus(self.job.error, 'error reading output')
-        if output and output[-1] != '\n':
-            output += '\n'
+            self.job.setStatus(self.job.error, "error reading output")
+        if output and output[-1] != "\n":
+            output += "\n"
         return output

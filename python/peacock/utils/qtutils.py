@@ -10,6 +10,7 @@
 from mooseutils import message
 from PyQt5 import QtCore
 
+
 def setAppInformation(app_name="peacock", force=False):
     """
     Set the application depending on whether we are testing

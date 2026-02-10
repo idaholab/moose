@@ -10,10 +10,16 @@
 
 import os, sys
 
-if __name__ == '__main__':
-    MOOSE_DIR = os.environ.get('MOOSE_DIR', os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')))
-    sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+if __name__ == "__main__":
+    MOOSE_DIR = os.environ.get(
+        "MOOSE_DIR",
+        os.path.abspath(
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "..")
+        ),
+    )
+    sys.path.append(os.path.join(MOOSE_DIR, "python"))
     from TestHarness import findDepApps
+
     if len(sys.argv) == 2:
         dep_apps = findDepApps(sys.argv[1], False)
         print(dep_apps)

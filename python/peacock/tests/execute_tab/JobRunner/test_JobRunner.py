@@ -12,6 +12,7 @@ from peacock.Execute.JobRunner import JobRunner
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 
+
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
@@ -82,7 +83,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(self.output_count, 4)
         self.assertIn("Time Step 42", self.output)
 
-
     def testRunTerminalCodes(self):
         self.runner.run("printf", ["\33[31mfoo\33[39m\n"])
         self.runner.process.waitForFinished()
@@ -93,5 +93,5 @@ class Tests(Testing.PeacockTester):
         self.assertIn('<span style="color:red;">foo</span>', self.output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Testing.run_tests()

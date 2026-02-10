@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -14,23 +14,27 @@ import time
 import shutil
 
 # Open the result
-shutil.copy('../input/diffusion_1.e', 'new_file.e')
-reader = chigger.exodus.ExodusReader('new_file.e')
-mug = chigger.exodus.ExodusResult(reader, variable='u', range=[0, 1], cmap='viridis')
+shutil.copy("../input/diffusion_1.e", "new_file.e")
+reader = chigger.exodus.ExodusReader("new_file.e")
+mug = chigger.exodus.ExodusResult(reader, variable="u", range=[0, 1], cmap="viridis")
 
 # Create the window
-window = chigger.RenderWindow(mug, size=[600,600], test=True)
+window = chigger.RenderWindow(mug, size=[600, 600], test=True)
 
 # Render the results and write a file
-filenames = ['../input/diffusion_2.e', '../input/diffusion_3.e', '../input/diffusion_4.e']
+filenames = [
+    "../input/diffusion_2.e",
+    "../input/diffusion_3.e",
+    "../input/diffusion_4.e",
+]
 for i in range(4):
-    window.write('new_files_' + str(i) + '.png')
+    window.write("new_files_" + str(i) + ".png")
     window.update()
     # Update the file
     if i < 3:
         time.sleep(1.5)
-        print("{} --> {}".format(filenames[i], 'new_file.e'))
-        shutil.copy(filenames[i], 'new_file.e')
+        print("{} --> {}".format(filenames[i], "new_file.e"))
+        shutil.copy(filenames[i], "new_file.e")
 
 
 window.start()

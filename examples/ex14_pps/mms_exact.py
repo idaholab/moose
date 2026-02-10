@@ -9,7 +9,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mms
-fs,ss = mms.evaluate('-div(grad(u))', 'sin(a*pi*x)', scalars=['a'])
+
+fs, ss = mms.evaluate("-div(grad(u))", "sin(a*pi*x)", scalars=["a"])
 mms.print_fparser(fs)
-mms.print_hit(fs, 'force')
-mms.print_hit(ss, 'exact')
+mms.print_hit(fs, "force")
+mms.print_hit(ss, "exact")

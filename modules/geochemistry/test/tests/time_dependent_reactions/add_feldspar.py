@@ -25,15 +25,15 @@ cm3_Phengite = [x[4] for x in data]
 cm3_Quartz = [x[5] for x in data]
 
 plt.figure()
-plt.plot(feldspar_added, cm3_Kfeldspar, 'k-', linewidth = 2.0, label = 'K-feldspar')
-plt.plot(feldspar_added, cm3_Kaolinit, 'r-', linewidth = 2.0, label = 'Kaolinite')
-plt.plot(feldspar_added, cm3_Muscovite, 'g-', linewidth = 2.0, label = 'Muscovite')
-plt.plot(feldspar_added, cm3_Phengite, 'b-', linewidth = 2.0, label = 'Phengite')
-plt.plot(feldspar_added, cm3_Quartz, 'y-', linewidth = 2.0, label = 'Quartz')
+plt.plot(feldspar_added, cm3_Kfeldspar, "k-", linewidth=2.0, label="K-feldspar")
+plt.plot(feldspar_added, cm3_Kaolinit, "r-", linewidth=2.0, label="Kaolinite")
+plt.plot(feldspar_added, cm3_Muscovite, "g-", linewidth=2.0, label="Muscovite")
+plt.plot(feldspar_added, cm3_Phengite, "b-", linewidth=2.0, label="Phengite")
+plt.plot(feldspar_added, cm3_Quartz, "y-", linewidth=2.0, label="Quartz")
 plt.legend()
 plt.xlabel("K-feldspar added (cm$^{3}$)")
 plt.ylabel("precipitate volume (cm$^{3}$)")
-plt.title("Minerals precipitated");
+plt.title("Minerals precipitated")
 plt.savefig("../../../doc/content/media/geochemistry/add_feldspar.png")
 
 sys.exit(0)

@@ -23,8 +23,8 @@ dis = [x[1] * 1000 for x in data]
 gwb_tim = [0, 6, 12, 18, 24, 30]
 gwb_dis = [0, -2.578, -5.150, -7.714, -10.27, -12.82]
 plt.figure(0)
-plt.plot(tim, dis, 'k-', linewidth = 2.0, label = 'MOOSE')
-plt.plot(gwb_tim, gwb_dis, 'ks', linewidth = 2.0, label = 'GWB')
+plt.plot(tim, dis, "k-", linewidth=2.0, label="MOOSE")
+plt.plot(gwb_tim, gwb_dis, "ks", linewidth=2.0, label="GWB")
 plt.grid()
 plt.legend()
 plt.xlabel("Time (days)")
