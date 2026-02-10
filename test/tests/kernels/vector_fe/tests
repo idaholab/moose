@@ -250,8 +250,6 @@
                  'Outputs/file_base=coupled_electrostatics_tet14'
       abs_zero = 1e-7
       detail = 'TET14, '
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [tri6]
       type = Exodiff
@@ -381,7 +379,6 @@
       cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 '
                  'Outputs/file_base=grad_div_tet14'
       detail = 'TET14, '
-      capabilities = 'machine=x86_64'
     []
     [tri6]
       type = Exodiff
