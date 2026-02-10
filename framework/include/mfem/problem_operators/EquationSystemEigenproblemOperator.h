@@ -19,15 +19,13 @@ namespace Moose::MFEM
 class EquationSystemEigenproblemOperator : public EquationSystemProblemOperator
 {
 public:
-  EquationSystemEigenproblemOperator(MFEMProblem & problem)
-    : EquationSystemProblemOperator(problem)
+  EquationSystemEigenproblemOperator(MFEMProblem & problem) : EquationSystemProblemOperator(problem)
   {
   }
 
   virtual void Solve() override;
 
   mfem::OperatorHandle _mass_rhs;
-
 };
 
 } // namespace Moose::MFEM

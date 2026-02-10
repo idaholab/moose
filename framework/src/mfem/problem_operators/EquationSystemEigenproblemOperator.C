@@ -31,7 +31,6 @@ EquationSystemEigenproblemOperator::Solve()
   eigensolver->setMassMatrix(*_mass_rhs);
   eigensolver->Solve();
   GetEquationSystem()->RecoverEigenproblemSolution(_problem_data.gridfunctions, eigensolver.get());
-
 }
 
 } // namespace Moose::MFEM

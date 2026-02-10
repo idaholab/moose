@@ -52,7 +52,6 @@ MFEMSuperLU::updateSolver(mfem::ParBilinearForm & a, mfem::Array<int> &)
     solver->SetOperator(*Arow);
     _solver.reset(solver);
   }
-
 }
 
 #endif
