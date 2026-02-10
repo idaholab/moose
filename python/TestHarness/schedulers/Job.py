@@ -788,9 +788,7 @@ class Job(OutputInterface):
         return self.__tester.getOutputDirectory(self.options)
 
     def createOutputDirectory(self):
-        """ Create the output directory for this job, if needed """
-        assert self.options.output_dir
-
+        """Create the output directory for this job, if needed"""
         output_dir = self.getOutputDirectory()
         with Job.mkdir_lock:
             if not os.path.isdir(output_dir):

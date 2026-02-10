@@ -1059,10 +1059,6 @@ class Tester(MooseObject, OutputInterface):
             if ".." in self.specs["working_directory"] and options.sep_files:
                 reasons["working_directory"] = "--sep-files enabled"
 
-        # Explicitly skip HPC tests
-        if not self.specs["hpc"] and options.hpc:
-            reasons["hpc"] = "hpc=false"
-
         # Use shell not supported for HPC
         if self.specs["use_shell"] and options.hpc:
             reasons["use_shell"] = "no use_shell with hpc"
