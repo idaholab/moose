@@ -28,10 +28,10 @@ General style guidelines include:
 ## Python File Formatting
 
 [!ac](MOOSE) uses [Black](https://black.readthedocs.io/en/stable/) for formatting all
-Python code in the repository. The application of the format is enforced and checked when the a
-code is contributed, see [framework/contributing.md] for more details. The
+Python code in the repository. The application of the format is enforced and checked when a
+code change is contributed; see [framework/contributing.md] for more details. The
 configuration file for the formatting is provided in the
-[pyproject.toml](https://github.com/idaholab/moose/blob/devel/pyproject.toml) file. If black is
+[pyproject.toml](https://github.com/idaholab/moose/blob/devel/pyproject.toml) file. If `black` is
 installed, the following command will automatically format all python code when ran
 from the root of the [!ac](MOOSE) repository:
 
