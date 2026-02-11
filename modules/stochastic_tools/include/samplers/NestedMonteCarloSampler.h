@@ -22,19 +22,14 @@ public:
   NestedMonteCarloSampler(const InputParameters & parameters);
 
 protected:
-  /// Return the sample for the given row and column
+  /**
+   * Return the sample for the given row and column using stateless RNG indexing.
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
-
-  /// Here we need to precompute rows that might not be assigned to this processor
-  virtual void sampleSetUp(const SampleMode mode) override;
 
   /// Storage for distribution objects to be utilized
   std::vector<const Distribution *> _distributions;
-  /// The loop index for distribution
-  std::vector<std::size_t> _loop_index;
-  /// Helper for determining if a set of columns need to be recomputed:
-  /// if (row_index % _loop_mod[_loop_index[col_index]] == 0)
-  std::vector<dof_id_type> _loop_mod;
-  /// Storage for row data (to be used when not recomputing a column)
-  std::vector<Real> _row_data;
+  /// Helper for determining the target row for the given column index:
+  /// target_row = std::floor(row_index / _col_mod[col_index]) * _col_mod[col_index]
+  std::vector<dof_id_type> _col_mod;
 };

@@ -156,7 +156,7 @@
       type = RunException
       input = errors.i
       expect_err = "The number of entries in the DenseMatrix \([0-9]+\) exceeds the allowed limit of [0-9]+."
-      cli_args = "Samplers/sample/num_rows=1000000000"
+      cli_args = "Samplers/sample/num_rows=20 Samplers/sample/limit_get_global_samples=100"
 
       detail = "if the number of entries in the global sample matrix exceeds the maximum allowed,"
     []
@@ -165,7 +165,7 @@
       input = errors.i
       max_parallel = 1 # the number of local samples changes with number of cores
       expect_err = "The number of entries in the DenseMatrix \([0-9]+\) exceeds the allowed limit of [0-9]+."
-      cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getLocalSamples"
+      cli_args = "Samplers/sample/num_cols=20 Samplers/sample/limit_get_local_samples=100 Postprocessors/test/test_type=getLocalSamples"
 
       detail = "if the number of entries in the local sample matrix exceeds the maximum allowed, and"
     []
@@ -173,7 +173,7 @@
       type = RunException
       input = errors.i
       expect_err = "The number of entries in the std::vector \([0-9]+\) exceeds the allowed limit of [0-9]+."
-      cli_args = "Samplers/sample/num_cols=1000000000 Postprocessors/test/test_type=getNextLocalRow"
+      cli_args = "Samplers/sample/num_cols=101 Samplers/sample/limit_get_next_local_row=100 Postprocessors/test/test_type=getNextLocalRow"
 
       detail = "if the number of entries in the local sample matrix row exceeds the maximum allowed."
     []

@@ -113,7 +113,7 @@ ParallelSubsetSimulation::getSubsetProbability() const
 }
 
 void
-ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
+ParallelSubsetSimulation::updateSamples(const SampleMode mode)
 {
   if (_step <= 1 || _check_step == _step)
     return;
@@ -128,8 +128,8 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
   const unsigned int offset = sub_ind * getNumberOfRows();
 
   // Get and store the accepted samples input across all the procs from the previous step
-  for (dof_id_type j = 0; j < _distributions.size(); ++j)
-    for (dof_id_type ss = 0; ss < getNumberOfRows(); ++ss)
+  for (const auto j : index_range(_distributions))
+    for (const auto ss : make_range(getNumberOfRows()))
       _inputs_sto[j][ss + offset] = Normal::quantile(_distributions[j]->cdf(_inputs[j][ss]), 0, 1);
 
   // Get the accepted sample outputs across all the procs from the previous step
@@ -139,7 +139,7 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     _communicator.allgather(tmp);
   else
     _local_comm.allgather(tmp);
-  for (dof_id_type ss = 0; ss < getNumberOfRows(); ++ss)
+  for (const auto ss : make_range(getNumberOfRows()))
     _outputs_sto[ss + offset] = tmp[ss];
 
   // These are the subsequent subsets which use Markov Chain Monte Carlo sampling scheme
@@ -158,7 +158,7 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     if (sub_ind % _count_max == 0)
     {
       const unsigned int soffset = (sub_ind / _count_max) * getNumberOfRows();
-      for (dof_id_type j = 0; j < _distributions.size(); ++j)
+      for (const auto j : index_range(_distributions))
         _markov_seed[j].assign(_inputs_sorted[j].begin() + soffset + getLocalRowBegin(),
                                _inputs_sorted[j].begin() + soffset + getLocalRowEnd());
     }
@@ -166,7 +166,7 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     // values
     else
     {
-      for (dof_id_type j = 0; j < _distributions.size(); ++j)
+      for (const auto j : index_range(_distributions))
         _markov_seed[j].assign(_inputs_sto[j].begin() + offset + getLocalRowBegin(),
                                _inputs_sto[j].begin() + offset + getLocalRowEnd());
     }
@@ -178,21 +178,44 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     _is_sampling_completed = true;
 }
 
+void
+ParallelSubsetSimulation::computeSampleMatrix(DenseMatrix<Real> & matrix)
+{
+  updateSamples(Sampler::SampleMode::GLOBAL);
+  Sampler::computeSampleMatrix(matrix);
+}
+
+void
+ParallelSubsetSimulation::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
+{
+  updateSamples(Sampler::SampleMode::LOCAL);
+  Sampler::computeLocalSampleMatrix(matrix);
+}
+
+void
+ParallelSubsetSimulation::computeSampleRow(dof_id_type i, std::vector<Real> & data)
+{
+  updateSamples(Sampler::SampleMode::LOCAL);
+  Sampler::computeSampleRow(i, data);
+}
+
 Real
 ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   unsigned int seed_value = _step > 0 ? (_step - 1) * 2 : 0;
+  const auto rn_ind = static_cast<std::size_t>(row_index) * getNumberOfCols() + col_index;
   Real val;
 
   if (_subset == 0)
-    val = getRand(seed_value);
+    val = getRandStateless(rn_ind, seed_value);
   else
   {
     const dof_id_type loc_ind = row_index - getLocalRowBegin();
-    const Real rv = Normal::quantile(getRand(seed_value), _markov_seed[col_index][loc_ind], 1.0);
+    const Real rv = Normal::quantile(
+        getRandStateless(rn_ind, seed_value), _markov_seed[col_index][loc_ind], 1.0);
     const Real acceptance_ratio = std::log(Normal::pdf(rv, 0, 1)) -
                                   std::log(Normal::pdf(_markov_seed[col_index][loc_ind], 0, 1));
-    const Real new_sample = acceptance_ratio > std::log(getRand(seed_value + 1))
+    const Real new_sample = acceptance_ratio > std::log(getRandStateless(rn_ind, seed_value + 1))
                                 ? rv
                                 : _markov_seed[col_index][loc_ind];
     val = Normal::cdf(new_sample, 0, 1);

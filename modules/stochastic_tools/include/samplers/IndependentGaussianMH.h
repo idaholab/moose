@@ -24,7 +24,12 @@ public:
   virtual int decisionStep() const override { return 2; }
 
 protected:
-  virtual void proposeSamples(const unsigned int seed_value) override;
+  /**
+   * Propose new samples using stateless RNG draws.
+   * @param seed_value The seed for the random number generator
+   * @param rn_ind The stateless RNG index to advance
+   */
+  virtual void proposeSamples(const unsigned int seed_value, std::size_t & rn_ind) override;
 
 private:
   /// Reporter value the seed input values for proposing the next set of samples

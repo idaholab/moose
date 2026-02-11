@@ -63,9 +63,15 @@ PODFullSolveMultiApp::preTransfer(Real dt, Real target_time)
           " The most common cause of this error is the wrong setting"
           " of the 'execute_on' flags in the PODFullSolveMultiApp and/or PODReducedBasisTrainer.");
 
+    const bool batch_mode = _mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+                            _mode == StochasticTools::MultiAppMode::BATCH_RESTORE;
     init(base_size,
-         _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
-                                _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
+         rankConfig(processor_id(),
+                    n_processors(),
+                    base_size,
+                    getParam<unsigned int>("min_procs_per_app"),
+                    getParam<unsigned int>("max_procs_per_app"),
+                    batch_mode));
 
     initialSetup();
   }

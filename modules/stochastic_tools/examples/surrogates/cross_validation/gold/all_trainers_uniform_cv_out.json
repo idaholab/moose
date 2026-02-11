@@ -1,67 +1,75 @@
 {
-    "reporters": {
-        "cv_scores": {
-            "type": "CrossValidationScores",
-            "values": {
-                "ann_surr": {
-                    "type": "std::vector<std::vector<double>>"
-                },
-                "gp_surr": {
-                    "type": "std::vector<std::vector<double>>"
-                },
-                "np_surr": {
-                    "type": "std::vector<std::vector<double>>"
-                },
-                "pc_surr": {
-                    "type": "std::vector<std::vector<double>>"
-                },
-                "pr_surr": {
-                    "type": "std::vector<std::vector<double>>"
-                }
-            }
+  "app_name": "main",
+  "current_time": "Wed Feb  4 07:53:53 2026",
+  "executable": "/Users/behnpa/projects/moose/modules/stochastic_tools/stochastic_tools-dbg",
+  "executable_time": "Wed Feb  4 07:50:55 2026",
+  "libmesh_version": "",
+  "moose_version": "git commit 6028d98dde on 2026-02-03",
+  "petsc_version": "3.24.2",
+  "reporters": {
+    "cv_scores": {
+      "type": "CrossValidationScores",
+      "values": {
+        "ann_surr": {
+          "type": "std::vector<std::vector<double>>"
+        },
+        "gp_surr": {
+          "type": "std::vector<std::vector<double>>"
+        },
+        "np_surr": {
+          "type": "std::vector<std::vector<double>>"
+        },
+        "pc_surr": {
+          "type": "std::vector<std::vector<double>>"
+        },
+        "pr_surr": {
+          "type": "std::vector<std::vector<double>>"
         }
-    },
-    "time_steps": [
-        {
-            "cv_scores": {
-                "ann_surr": [
-                    [
-                        68.53775441538957,
-                        34.1827314211616,
-                        17.001818132623303
-                    ]
-                ],
-                "gp_surr": [
-                    [
-                        3.2275356930183645,
-                        6.9382000235754955,
-                        4.1269430459878835
-                    ]
-                ],
-                "np_surr": [
-                    [
-                        8.083719028320633,
-                        9.333672231216491,
-                        7.84142570247793
-                    ]
-                ],
-                "pc_surr": [
-                    [
-                        6.5194195639693016,
-                        9.725551205840329,
-                        7.54828644359101
-                    ]
-                ],
-                "pr_surr": [
-                    [
-                        3.922759001887131,
-                        2.827357814384898,
-                        1.9876099641604004
-                    ]
-                ]
-            },
-            "time": 2.0,
-            "time_step": 2
-        }
-    ]
+      }
+    }
+  },
+  "slepc_version": "3.24.0",
+  "time_steps": [
+    {
+      "cv_scores": {
+        "ann_surr": [
+          [
+            71.24999821657663,
+            39.122211764594056,
+            18.259908832641504
+          ]
+        ],
+        "gp_surr": [
+          [
+            5.741721540852015,
+            4.541333958665172,
+            4.3233885878868135
+          ]
+        ],
+        "np_surr": [
+          [
+            10.229159835857084,
+            6.371010655190136,
+            8.637825775984194
+          ]
+        ],
+        "pc_surr": [
+          [
+            5.638058048558374,
+            6.386565654732218,
+            6.959812984620902
+          ]
+        ],
+        "pr_surr": [
+          [
+            1.5432069575512353,
+            27.06268619164014,
+            7.792128541082714
+          ]
+        ]
+      },
+      "time": 2.0,
+      "time_step": 2
+    }
+  ]
 }

@@ -102,8 +102,13 @@ Sampler::init()
   seed_generator.seed(0, seed);
 
   // See the "secondary" generator that will be used for the random number generation
+  _generators_stateless.resize(_n_seeds);
   for (std::size_t i = 0; i < _n_seeds; ++i)
-    _generator.seed(i, seed_generator.randl(0));
+  {
+    const auto gseed = seed_generator.randl(0);
+    _generator.seed(i, gseed);
+    _generators_stateless[i] = std::make_unique<MooseRandomStateless>(gseed);
+  }
 
   // Save the initial state
   saveGeneratorState();
@@ -180,6 +185,21 @@ Sampler::setNumberOfRandomSeeds(std::size_t n_seeds)
 void
 Sampler::execute()
 {
+  const bool advance_stateless = _current_execute_flag != EXEC_PRE_MULTIAPP_SETUP;
+  const auto advance_stateless_generators = [this](const bool finalize)
+  {
+    for (unsigned int i = 0; i < _generators_stateless.size(); ++i)
+    {
+      const auto count = getStatelessAdvanceCount(i);
+      if (count > 0)
+        _generators_stateless[i]->advance(count);
+    }
+    if (finalize)
+      finalizeStatelessAdvance();
+  };
+  if (advance_stateless && !_has_executed)
+    advance_stateless_generators(false);
+
   executeSetUp();
   if (_needs_reinit)
     reinit();
@@ -190,6 +210,10 @@ Sampler::execute()
     advanceGeneratorsInternal(_n_rows * _n_cols);
   }
   saveGeneratorState();
+
+  if (advance_stateless && _has_executed)
+    advance_stateless_generators(true);
+
   executeTearDown();
   _has_executed = true;
 }
@@ -211,10 +235,8 @@ Sampler::getGlobalSamples()
 
   _next_local_row_requires_state_restore = true;
   restoreGeneratorState();
-  sampleSetUp(SampleMode::GLOBAL);
   DenseMatrix<Real> output(_n_rows, _n_cols);
   computeSampleMatrix(output);
-  sampleTearDown(SampleMode::GLOBAL);
   return output;
 }
 
@@ -239,9 +261,7 @@ Sampler::getLocalSamples()
 
   _next_local_row_requires_state_restore = true;
   restoreGeneratorState();
-  sampleSetUp(SampleMode::LOCAL);
   computeLocalSampleMatrix(output);
-  sampleTearDown(SampleMode::LOCAL);
   return output;
 }
 
@@ -253,7 +273,6 @@ Sampler::getNextLocalRow()
   if (_next_local_row_requires_state_restore)
   {
     restoreGeneratorState();
-    sampleSetUp(SampleMode::LOCAL);
     advanceGeneratorsInternal(_next_local_row * _n_cols);
     _next_local_row_requires_state_restore = false;
 
@@ -274,7 +293,6 @@ Sampler::getNextLocalRow()
   if (_next_local_row == _local_row_end)
   {
     advanceGeneratorsInternal((_n_rows - _local_row_end) * _n_cols);
-    sampleTearDown(SampleMode::LOCAL);
     _next_local_row = _local_row_begin;
     _next_local_row_requires_state_restore = true;
   }
@@ -359,15 +377,46 @@ Sampler::setAutoAdvanceGenerators(const bool state)
 double
 Sampler::getRand(const unsigned int index)
 {
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  mooseAssert(index < _generator.size(), "The seed number index does not exist.");
   return _generator.rand(index);
 }
 
 uint32_t
 Sampler::getRandl(unsigned int index, uint32_t lower, uint32_t upper)
 {
-  mooseAssert(index < _generator.size(), "The seed number index does not exists.");
+  mooseAssert(index < _generator.size(), "The seed number index does not exist.");
   return _generator.randl(index, lower, upper);
+}
+
+Real
+Sampler::getRandStateless(std::size_t n, unsigned int index) const
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
+  return _generators_stateless[index]->rand(n);
+}
+
+unsigned int
+Sampler::getRandlStateless(std::size_t n,
+                           unsigned int lower,
+                           unsigned int upper,
+                           unsigned int index) const
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
+  return _generators_stateless[index]->randl(n, lower, upper);
+}
+
+std::size_t
+Sampler::getRandlShuffleStateless(std::size_t n, std::size_t size, unsigned int index) const
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
+  return _generators_stateless[index]->randlShuffle(n, size);
+}
+
+void
+Sampler::advanceStatelessGenerator(unsigned int index, std::size_t count)
+{
+  mooseAssert(index < _generators_stateless.size(), "The seed number index does not exist.");
+  _generators_stateless[index]->advance(count);
 }
 
 dof_id_type

@@ -54,7 +54,7 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
 }
 
 void
-ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
+ActiveLearningMonteCarloSampler::updateSamples()
 {
   // If we've already done this step, skip
   if (_check_step == _step)
@@ -66,7 +66,7 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 
   // Keep data where the GP failed
   if (_step > 0)
-    for (dof_id_type i = 0; i < _num_batch; ++i)
+    for (const auto i : make_range(_num_batch))
       if (_flag_sample[i])
       {
         _inputs_gp_fails.push_back(_inputs_sto[i]);
@@ -80,9 +80,13 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   // If we don't have enough failed inputs, generate new ones
   if (_inputs_gp_fails.size() < _num_batch)
   {
-    for (dof_id_type i = 0; i < _num_batch; ++i)
-      for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _inputs_sto[i][j] = _distributions[j]->quantile(getRand(_step));
+    const auto n_cols = _distributions.size();
+    for (const auto i : make_range(_num_batch))
+      for (const auto j : index_range(_distributions))
+      {
+        const auto rn_ind = static_cast<std::size_t>(i) * n_cols + j;
+        _inputs_sto[i][j] = _distributions[j]->quantile(getRandStateless(rn_ind, _step));
+      }
   }
   // If we do have enough failed inputs, assign them and clear the tracked ones
   else
@@ -101,5 +105,6 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 Real
 ActiveLearningMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
+  updateSamples();
   return _inputs_sto[row_index][col_index];
 }

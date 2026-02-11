@@ -146,12 +146,46 @@ public:
     const auto range = upper - lower;
 
     auto [it, is_new] = _randlb_generators.try_emplace(
-        range, [&range](mt_state * state) { return rds_iuniform(state, 0, range); }, _seed);
+        range, [range](mt_state * state) { return rds_iuniform(state, 0, range); }, _seed);
 
     if (is_new)
       it->second.advance(_advance_count);
 
     return lower + it->second.evaluate(n);
+  }
+
+  /**
+   * @brief Return a shuffle index in [0, size - n - 1).
+   *
+   * This is intended for Fisher-Yates shuffles where the upper bound shrinks
+   * each step. A generator keyed on the fixed container size is used to avoid
+   * creating a new generator for every shrinking range.
+   *
+   * @param n 0-based shuffle step index
+   * @param size Total size of the shuffled container
+   * @return Index sampled uniformly in [0, size - n - 1)
+   */
+  std::size_t randlShuffle(std::size_t n, std::size_t size) const
+  {
+    mooseAssert(size > 1, "randlShuffle: size must be larger than 1");
+    mooseAssert(n < size - 1, "randlShuffle: n must be less than size - 1");
+
+    auto [it, is_new] = _randlshuffle_generators.try_emplace(
+        size, [size](mt_state * state) { return rds_iuniform(state, 0, size); }, _seed);
+
+    if (is_new)
+      it->second.advance(_advance_count);
+
+    const auto limit = size - n - 1;
+    const auto zone = size - (size % limit);
+    std::size_t k = n;
+    while (true)
+    {
+      const auto v = it->second.evaluate(k);
+      if (v < zone)
+        return v % limit;
+      ++k;
+    }
   }
 
   /**
@@ -164,6 +198,8 @@ public:
     _rand_generator.advance(count);
     _randl_generator.advance(count);
     for (auto & [range, gen] : _randlb_generators)
+      gen.advance(count);
+    for (auto & [size, gen] : _randlshuffle_generators)
       gen.advance(count);
     _advance_count += count;
   }
@@ -262,6 +298,8 @@ private:
   Generator<unsigned int> _randl_generator;
   /// Bounded uniform uint32 (indexed based on bounding range)
   mutable std::unordered_map<unsigned int, Generator<unsigned int>> _randlb_generators;
+  /// Shuffle-specific uniform uint32 (indexed based on fixed container size)
+  mutable std::unordered_map<std::size_t, Generator<unsigned int>> _randlshuffle_generators;
 
   /// The number of counts the generators have advanced
   /// This needs to be kept around for generation of new randlb generators

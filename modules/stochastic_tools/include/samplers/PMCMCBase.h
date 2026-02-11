@@ -74,15 +74,15 @@ public:
 
 protected:
   /**
-   * Fill in the _new_samples vector of vectors (happens within sampleSetUp)
+   * Fill in the _new_samples vector of vectors for the current step.
    * @param seed_value The seed for the random number generator
+   * @param rn_ind The stateless RNG index to advance
    */
-  virtual void proposeSamples(const unsigned int seed_value);
+  virtual void proposeSamples(const unsigned int seed_value, std::size_t & rn_ind);
 
-  // See Sampler.h for description
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-
-  // See Sampler.h for description
+  /**
+   * Return the sample for the given row and column.
+   */
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /**
@@ -90,11 +90,13 @@ protected:
    * @param upper_bound The upper bound provided
    * @param exclude The index to be excluded from sampling
    * @param seed The seed of the random number generator
+   * @param rn_ind The stateless RNG index to advance
    * @param req_index The required index to be filled
    */
   void randomIndex(const unsigned int & upper_bound,
                    const unsigned int & exclude,
                    const unsigned int & seed,
+                   std::size_t & rn_ind,
                    unsigned int & req_index);
 
   /**
@@ -102,12 +104,14 @@ protected:
    * @param upper_bound The upper bound provided
    * @param exclude The index to be excluded from sampling
    * @param seed The seed of the random number generator
+   * @param rn_ind The stateless RNG index to advance
    * @param req_index1 The required index 1 to be filled
    * @param req_index2 The required index 2 to be filled
    */
   void randomIndexPair(const unsigned int & upper_bound,
                        const unsigned int & exclude,
                        const unsigned int & seed,
+                       std::size_t & rn_ind,
                        unsigned int & req_index1,
                        unsigned int & req_index2);
 
@@ -145,6 +149,9 @@ protected:
   std::vector<Real> _rnd_vec;
 
 private:
+  /// Refresh stored samples and random draws for the current step.
+  void updateSamples();
+
   /**
    * Generates combinations of the new samples with the experimental configurations
    */

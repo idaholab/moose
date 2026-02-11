@@ -37,19 +37,20 @@ IndependentGaussianMH::IndependentGaussianMH(const InputParameters & parameters)
 }
 
 void
-IndependentGaussianMH::proposeSamples(const unsigned int seed_value)
+IndependentGaussianMH::proposeSamples(const unsigned int seed_value, std::size_t & rn_ind)
 {
   std::vector<Real> old_sample = (_t_step > decisionStep()) ? _seed_inputs : _initial_values;
   for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
       if (_lower_bound)
-        _new_samples[j][i] = TruncatedNormal::quantile(getRand(seed_value),
+        _new_samples[j][i] = TruncatedNormal::quantile(getRandStateless(rn_ind++, seed_value),
                                                        old_sample[i],
                                                        _std_prop[i],
                                                        (*_lower_bound)[i],
                                                        (*_upper_bound)[i]);
       else
-        _new_samples[j][i] = Normal::quantile(getRand(seed_value), old_sample[i], _std_prop[i]);
+        _new_samples[j][i] =
+            Normal::quantile(getRandStateless(rn_ind++, seed_value), old_sample[i], _std_prop[i]);
     }
 }

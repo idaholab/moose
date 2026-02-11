@@ -27,8 +27,6 @@ public:
   virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
 
 protected:
-  /// Gather all the samples
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
@@ -42,6 +40,9 @@ protected:
   bool _is_sampling_completed = false;
 
 private:
+  /// Refresh stored samples for the current step.
+  void updateSamples();
+
   /// Track the current step of the main App
   const int & _step;
 
