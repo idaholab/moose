@@ -105,9 +105,6 @@ protected:
   /// itself, resetting all dimensions to zero.
   void DeleteJacobianBlocks();
 
-  /// Sets all pointers in _h_blocks to nullptr without deleting any HypreParMatrix
-  void ClearAllBlocks();
-
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 

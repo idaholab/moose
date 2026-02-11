@@ -43,6 +43,7 @@ EquationSystem::DeleteJacobianBlocks()
       if (!_h_blocks.NumRows() || _jacobian_blocks(i, j) != _h_blocks(i, j))
         delete _jacobian_blocks(i, j);
   _jacobian_blocks.DeleteAll();
+}
   
 void EquationSystem::ClearAllBlocks()
 {
