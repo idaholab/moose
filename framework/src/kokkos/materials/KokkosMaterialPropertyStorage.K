@@ -84,7 +84,7 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
                                                const ::MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
-                                               const bool lazy,
+                                               const bool on_demand,
                                                std::shared_ptr<MaterialPropertyBase> shell)
 {
   auto & record = _kokkos_prop_records[prop_name];
@@ -104,17 +104,17 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
     mooseError(ss.str());
   }
 
-  if (record.declarers.size() && record.lazy != lazy)
+  if (record.declarers.size() && record.on_demand != on_demand)
     mooseError("The Kokkos material property '",
                prop_name,
-               "' is being declared by multiple materials, and some of them are declaring it as a "
-               "lazy property while others are not.");
+               "' is being declared by multiple materials, and some of them are declaring it as an "
+               "on-demand property while others are not.");
 
   if (!record.declarers.size())
   {
     record.dims = dims;
     record.bnd = bnd;
-    record.lazy = lazy;
+    record.on_demand = on_demand;
   }
 
   return addKokkosProperty(prop_name, type, 0, declarer, shell);
@@ -137,7 +137,7 @@ MaterialPropertyStorage::allocateKokkosProperties()
     {
       auto & record = _kokkos_prop_records[name];
 
-      if (!record.lazy || _problem.isMatPropRequested(name))
+      if (!record.on_demand || _problem.isMatPropRequested(name))
         for (auto declarer : record.declarers)
         {
           auto & blocks =

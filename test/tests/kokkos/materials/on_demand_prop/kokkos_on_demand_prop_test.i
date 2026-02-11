@@ -49,8 +49,8 @@
 []
 
 [Materials]
-  [lazy]
-    type = KokkosLazyTest
+  [on_demand]
+    type = KokkosOnDemandTest
     prop_names = 'prop1 prop2 prop3 prop4'
   []
 []

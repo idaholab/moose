@@ -110,17 +110,17 @@ See the following source codes of `KokkosStatefulTest` for an example of statefu
 !listing test/src/kokkos/materials/KokkosStatefulTest.K id=kokkos-stateful-mat-source language=cpp
          caption=The `KokkosStatefulTest` source file.
 
-## Lazy Properties
+## On-Demand Properties
 
 In Kokkos-MOOSE, all material property data are stored for each quadrature point, regardless of whether the material properties are stateful or not.
 This is due to the massive parallelization of GPU that prevents storing material properties only for a single element or face.
-If you are unsure whether a material property will be actually requested by another object, you can declare the property as a lazy property with `declareKokkosLazyProperty<type, dimension>(name, dims)`.
-The storage of a lazy property is only allocated when there is any object consuming the property, aiding in reducing the memory usage and computational cost for unused material properties.
+If you are unsure whether a material property will be actually requested by another object, you can declare the property as an on-demand property with `declareKokkosOnDemandProperty<type, dimension>(name, dims)`.
+The storage of an on-demand property is only allocated when there is any object consuming the property, aiding in reducing the memory usage and computational cost for unused material properties.
 
 ## Optional Properties
 
 There is no special method and object for weakly coupled material properties in Kokkos-MOOSE.
-Instead, a material property object will simply evaluate to `false` when it is uninitialized or when it holds a lazy material property not requested by any object.
+Instead, a material property object will simply evaluate to `false` when it is uninitialized or when it holds an on-demand material property not requested by any object.
 You can query the existence of a material property with `hasKokkosMaterialProperty<type, dimension>(name)` and optionally initialize the material property object to reproduce the same behavior with the optional material properties in the original MOOSE.
 
 See the following source codes of `KokkosVarCouplingMaterial` for an example of optional material properties:
@@ -142,7 +142,7 @@ Material property output is not supported by Kokkos-MOOSE yet.
 Analogously to the original MOOSE, Kokkos-MOOSE also creates three copies of materials for element and face material properties, which are distinguished by the combination of boolean flags `_bnd` and `_neighbor`.
 For Kokkos-MOOSE, it is crucial to optimize your material by switching off the declaration and evaluation of material properties that are not used on faces, because of the full storage of material properties.
 You can save a considerable amount of memory as well as computing time by switching off unused material properties.
-You can also leverage lazy material properties to achieve the same effect.
+You can also leverage on-demand material properties to achieve the same effect.
 
 ### Unsupported Material Types
 

@@ -90,7 +90,7 @@ protected:
     return declareKokkosPropertyByName<T, dimension>(prop_name, dims);
   }
   /**
-   * Declare a lazy material property
+   * Declare an on-demand material property
    * @tparam T The property data type
    * @tparam dimension The property dimension
    * @param name The property name or the parameter name containing the property name
@@ -99,13 +99,14 @@ protected:
    */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
-  declareKokkosLazyProperty(const std::string & name, const std::vector<unsigned int> & dims = {})
+  declareKokkosOnDemandProperty(const std::string & name,
+                                const std::vector<unsigned int> & dims = {})
   {
     std::string prop_name = name;
     if (_pars.have_parameter<MaterialPropertyName>(name))
       prop_name = _pars.get<MaterialPropertyName>(name);
 
-    return declareKokkosLazyPropertyByName<T, dimension>(prop_name, dims);
+    return declareKokkosOnDemandPropertyByName<T, dimension>(prop_name, dims);
   }
   /**
    * Declare a material property by property name
@@ -123,8 +124,8 @@ protected:
     return declareKokkosPropertyInternal<T, dimension>(prop_name, dims, false);
   }
   /**
-   * Declare a lazy material property by property name
-   * The lazy property is only allocated when any object requests it
+   * Declare an on-demand material property by property name
+   * The on-demand property is only allocated when any object requests it
    * @tparam T The property data type
    * @tparam dimension The property dimension
    * @param prop_name The property name
@@ -133,8 +134,8 @@ protected:
    */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
-  declareKokkosLazyPropertyByName(const std::string & prop_name,
-                                  const std::vector<unsigned int> & dims = {})
+  declareKokkosOnDemandPropertyByName(const std::string & prop_name,
+                                      const std::vector<unsigned int> & dims = {})
   {
     return declareKokkosPropertyInternal<T, dimension>(prop_name, dims, true);
   }
@@ -210,11 +211,11 @@ private:
    * @tparam dimension The property dimension
    * @param prop_name The property name
    * @param dims The vector containing the size of each dimension
-   * @param lazy Whether the property is a lazy property
+   * @param on_demand Whether the property is an on-demand property
    */
   template <typename T, unsigned int dimension>
   MaterialProperty<T, dimension> declareKokkosPropertyInternal(
-      const std::string & prop_name, const std::vector<unsigned int> & dims, const bool lazy);
+      const std::string & prop_name, const std::vector<unsigned int> & dims, const bool on_demand);
 
   /**
    * Contiguous element IDs this material operates on for element material property evaluation
@@ -231,7 +232,7 @@ template <typename T, unsigned int dimension>
 MaterialProperty<T, dimension>
 MaterialBase::declareKokkosPropertyInternal(const std::string & prop_name,
                                             const std::vector<unsigned int> & dims,
-                                            const bool lazy)
+                                            const bool on_demand)
 {
   static_assert(dimension <= 4, "Up to four-dimensional Kokkos material properties are allowed.");
 
@@ -250,7 +251,7 @@ MaterialBase::declareKokkosPropertyInternal(const std::string & prop_name,
           : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
 
   auto prop = materialData().declareKokkosProperty<T, dimension>(
-      prop_name_modified, dims, this, isBoundaryMaterial(), lazy);
+      prop_name_modified, dims, this, isBoundaryMaterial(), on_demand);
 
   registerPropName(prop_name_modified, false, 0);
 

@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "KokkosLazyTest.h"
+#include "KokkosOnDemandTest.h"
 
-registerKokkosMaterial("MooseTestApp", KokkosLazyTest);
+registerKokkosMaterial("MooseTestApp", KokkosOnDemandTest);
 
 InputParameters
-KokkosLazyTest::validParams()
+KokkosOnDemandTest::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<std::vector<std::string>>("prop_names",
@@ -20,7 +20,7 @@ KokkosLazyTest::validParams()
   return params;
 }
 
-KokkosLazyTest::KokkosLazyTest(const InputParameters & parameters)
+KokkosOnDemandTest::KokkosOnDemandTest(const InputParameters & parameters)
   : Material(parameters), _prop_names(getParam<std::vector<std::string>>("prop_names"))
 {
   unsigned int num_names = _prop_names.size();
@@ -30,5 +30,5 @@ KokkosLazyTest::KokkosLazyTest(const InputParameters & parameters)
   _properties.create(num_names);
 
   for (unsigned int i = 0; i < _num_props; ++i)
-    _properties[i] = declareKokkosLazyProperty<Real>(_prop_names[i]);
+    _properties[i] = declareKokkosOnDemandProperty<Real>(_prop_names[i]);
 }

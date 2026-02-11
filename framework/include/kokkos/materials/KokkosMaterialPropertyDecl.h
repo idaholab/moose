@@ -64,9 +64,9 @@ struct PropRecord
    */
   bool bnd = false;
   /**
-   * Flag whether this property is a lazy property
+   * Flag whether this property is an on-demand property
    */
-  bool lazy = false;
+  bool on_demand = false;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;

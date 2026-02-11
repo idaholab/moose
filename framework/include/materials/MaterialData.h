@@ -165,7 +165,7 @@ public:
    * @param dims The vector containing the size of each dimension
    * @param declarer The Kokkos material declaring the property
    * @param bnd Whether the property is a face property
-   * @param lazy Whether the property is a lazy property
+   * @param on_demand Whether the property is an on-demand property
    * @return The Kokkos material property
    */
   template <typename T, unsigned int dimension>
@@ -174,7 +174,7 @@ public:
                         const std::vector<unsigned int> & dims,
                         const MaterialBase * declarer,
                         const bool bnd,
-                        const bool lazy);
+                        const bool on_demand);
 #endif
 
   /**
@@ -286,7 +286,7 @@ private:
    * @param declarer The Kokkos material declaring the property
    * @param dims The vector containing the size of each dimension
    * @param bnd Whether the property is a face property
-   * @param lazy Whether the property is a lazy property
+   * @param on_demand Whether the property is an on-demand property
    * @param shell The managed pointer containing the instance of the property
    * @return The Kokkos material property
    */
@@ -296,7 +296,7 @@ private:
                               const MaterialBase * declarer,
                               const std::vector<unsigned int> & dims,
                               const bool bnd,
-                              const bool lazy,
+                              const bool on_demand,
                               std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell);
 
   /**
@@ -500,12 +500,12 @@ MaterialData::declareKokkosProperty(const std::string & prop_name,
                                     const std::vector<unsigned int> & dims,
                                     const MaterialBase * declarer,
                                     const bool bnd,
-                                    const bool lazy)
+                                    const bool on_demand)
 {
   auto shell = std::make_shared<Moose::Kokkos::MaterialProperty<T, dimension>>();
 
   auto & prop_base =
-      declareKokkosPropertyHelper(prop_name, typeid(T), declarer, dims, bnd, lazy, shell);
+      declareKokkosPropertyHelper(prop_name, typeid(T), declarer, dims, bnd, on_demand, shell);
   auto prop_cast = dynamic_cast<Moose::Kokkos::MaterialProperty<T, dimension> *>(&prop_base);
 
   if (!prop_cast)

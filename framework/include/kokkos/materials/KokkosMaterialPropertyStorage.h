@@ -82,7 +82,7 @@ public:
    * @param declarer The Kokkos material declaring the property, nullptr if simply reserving the
    * @param dims The vector containing the size of each dimension
    * @param bnd Whether the property is a face property
-   * @param lazy Whether the property is a lazy property
+   * @param on_demand Whether the property is an on-demand property
    * @param shell The managed pointer containing the instance of the property
    * @returns The material property
    */
@@ -91,7 +91,7 @@ public:
                                                const ::MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
-                                               const bool lazy,
+                                               const bool on_demand,
                                                std::shared_ptr<MaterialPropertyBase> shell);
   /**
    * Get a material property

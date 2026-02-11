@@ -11,12 +11,12 @@
 
 #include "KokkosMaterial.h"
 
-class KokkosLazyTest : public Moose::Kokkos::Material
+class KokkosOnDemandTest : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();
 
-  KokkosLazyTest(const InputParameters & parameters);
+  KokkosOnDemandTest(const InputParameters & parameters);
 
   KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const
   {
