@@ -23,63 +23,39 @@
   [mms]
     requirement = 'The system shall show second order convergence in the L2 norm for advection-diffusion with a first order basis using a hybridizable interior penalty discontinuous Galerkin discretization on'
     [monomial_tri]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestMonomialTri
-      capabilities = "method!=dbg"
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
-      valgrind = 'none'
       detail = 'simplex elements with a monomial basis for the interior variable,'
     []
     [monomial_quad]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestMonomialQuad
-      capabilities = "method!=dbg"
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
-      valgrind = 'none'
       detail = 'tensor-product elements with a monomial basis for the interior variable,'
     []
     [lagrange_tri]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestLagrangeTri
-      capabilities = "method!=dbg"
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
-      valgrind = 'none'
       detail = 'simplex elements with a L2 lagrange basis for the interior variable,'
     []
     [lagrange_quad]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestLagrangeQuad
-      capabilities = "method!=dbg"
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
-      valgrind = 'none'
       detail = 'tensor-product elements with a L2 lagrange basis for the interior variable,'
     []
     [hierarchic_tri]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestHierarchicTri
-      capabilities = "method!=dbg"
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
-      valgrind = 'none'
       detail = 'simplex elements with a L2 hierarchic basis for the interior variable, and'
     []
     [hierarchic_quad]
-      type = PythonUnitTest
+      type = MMSTest
       input = test.py
       test_case = TestHierarchicQuad
-      capabilities = "method!=dbg"
-      required_python_packages = 'pandas matplotlib'
-      installation_type = in_tree
-      valgrind = 'none'
       detail = 'tensor-product elements with a L2 hierarchic basis for the interior variable.'
     []
   []

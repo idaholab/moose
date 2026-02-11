@@ -36,7 +36,7 @@
 #include "RestartableDataReader.h"
 #include "Backup.h"
 #include "MooseBase.h"
-#include "Capabilities.h"
+#include "Capability.h"
 #include "MoosePassKey.h"
 #include "SystemInfo.h"
 #include "Syntax.h"
@@ -55,6 +55,7 @@
 #include <variant>
 
 // Forward declarations
+class AppFactory;
 class Executioner;
 class Executor;
 class NullExecutor;
@@ -82,6 +83,15 @@ namespace Moose::Kokkos
 {
 class MemoryPool;
 }
+#endif
+
+#ifdef MOOSE_UNIT_TEST
+// forward declare unit tests
+#include "gtest/gtest.h"
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddBoolCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddIntCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddStringCapability);
+class GTEST_TEST_CLASS_NAME_(CapabilitiesTest, mooseAppAddCapability);
 #endif
 
 /**
@@ -1121,6 +1131,13 @@ public:
 #endif
 
 protected:
+#ifdef MOOSE_UNIT_TEST
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddBoolCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddIntCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddStringCapability);
+  FRIEND_TEST(::CapabilitiesTest, mooseAppAddCapability);
+#endif
+
   /**
    * Helper method for dynamic loading of objects
    */
@@ -1163,13 +1180,58 @@ protected:
                                  const std::string & start_marker,
                                  const std::string & end_marker,
                                  const std::string & data) const;
-  ///@{ register a new capability
-  static void addCapability(const std::string & capability,
-                            CapabilityUtils::Type value,
-                            const std::string & doc);
-  static void
-  addCapability(const std::string & capability, const char * value, const std::string & doc);
-  //@}
+
+  /**
+   * Register a boolean capability.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the boolean capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::Capability & addBoolCapability(const std::string_view capability,
+                                               const bool value,
+                                               const std::string_view doc);
+
+  /**
+   * Register an integer capability.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the integer capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::Capability &
+  addIntCapability(const std::string_view capability, const int value, const std::string_view doc);
+
+  /**
+   * Register a string capability.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the string capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::Capability & addStringCapability(const std::string_view capability,
+                                                 const std::string_view value,
+                                                 const std::string_view doc);
+
+  /**
+   * Deprecated method for adding a capability.
+   *
+   * It is deprecated due to ambiguity between compilers with
+   * an implicit conversion for CapabilityValue (a variant).
+   *
+   * Use one of add[Bool,Int,String]Capability instead.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the capability
+   * @param doc The documentation string
+   * @return The capability
+   */
+  static Moose::Capability & addCapability(const std::string_view capability,
+                                           const Moose::Capability::Value & value,
+                                           const std::string_view doc);
 
   /// The string representation of the type of this object as registered (see registerApp(AppName))
   const std::string _type;
@@ -1372,13 +1434,6 @@ private:
                                   std::list<std::string> & current_branch);
 
   /**
-   * Register all base MooseApp capabilities to the Moose::Capabilities registry.
-   * Apps and Modules may register additional capabilities in their registerAll
-   * function.
-   */
-  void registerCapabilities();
-
-  /**
    * Purge this relationship manager from meshes and DofMaps and finally from us. This method is
    * private because only this object knows when we should remove relationship managers: when we are
    * adding relationship managers to this object's storage, we perform an operator>= comparison
@@ -1520,10 +1575,18 @@ private:
   bool runInputs();
 
   /**
-   * Helper that reports an error if the given capability is reserved and
-   * should not be added via addCapability().
+   * Internal method for adding a capability.
+   *
+   * Used to catch exceptions and report them as a mooseError.
+   *
+   * @param capability The name of the capability
+   * @param value The value of the capability
+   * @param doc The documentation string
+   * @return The capability
    */
-  static void checkReservedCapability(const std::string & capability);
+  static Moose::Capability & addCapabilityInternal(const std::string_view capability,
+                                                   const Moose::Capability::Value & value,
+                                                   const std::string_view doc);
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>

@@ -79,7 +79,7 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
   }
 
   {
-    auto params = _app.getFactory().getValidParams("StitchedMeshGenerator");
+    auto params = _app.getFactory().getValidParams("StitchMeshGenerator");
 
     // order of vector elements matters for this generator
     // here order by: original mesh first, our custom mesh second
@@ -89,7 +89,7 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
         {_sideset_name, sideset_to_stitch}};
 
     // stitch the newly made high-dimensional mesh back to the original mesh
-    addMeshSubgenerator("StitchedMeshGenerator", name() + "_stitched", params);
+    addMeshSubgenerator("StitchMeshGenerator", name() + "_stitched", params);
     _build_mesh = &getMeshByName(name() + "_stitched");
   }
 }

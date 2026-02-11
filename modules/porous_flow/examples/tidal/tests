@@ -3,7 +3,6 @@
     type = CSVDiff
     input = 'earth_tide_fullsat.i'
     csvdiff = 'earth_tide_fullsat_1step.csv'
-    threading = '!pthreads'
     abs_zero = 1E-8
     cli_args = 'Functions/earth_tide_x/expression="-0.5E-8*x" Functions/earth_tide_y/expression="-0.5E-8*y" Functions/earth_tide_z/expression="-1E-8*z" Executioner/dt=1 Executioner/end_time=1 Outputs/file_base=earth_tide_fullsat_1step'
     issues = '#13867'
@@ -14,7 +13,6 @@
     type = CSVDiff
     input = 'barometric_fully_confined.i'
     csvdiff = 'barometric_fully_confined_out.csv'
-    threading = '!pthreads'
     abs_zero = 1E-8
     issues = '#13867'
     design = 'tidal.md'
@@ -24,7 +22,6 @@
     type = CSVDiff
     input = 'atm_tides.i'
     csvdiff = 'atm_tides_10step.csv'
-    threading = '!pthreads'
     abs_zero = 1E-8
     cli_args = 'Executioner/end_time=36000 Outputs/file_base=atm_tides_10step'
     issues = '#13867'
@@ -35,7 +32,6 @@
     type = CSVDiff
     input = 'atm_tides_open_hole.i'
     csvdiff = 'atm_tides_open_hole_3step.csv'
-    threading = '!pthreads'
     abs_zero = 1E-8
     cli_args = 'Executioner/end_time=10800 Outputs/file_base=atm_tides_open_hole_3step'
     issues = '#13867'

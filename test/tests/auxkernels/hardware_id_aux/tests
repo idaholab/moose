@@ -9,7 +9,6 @@
 
     # Note, we never test on multiple nodes
     # so there is no reason to test this on more than one processor
-    min_parallel = 1
     max_parallel = 1
   [../]
 []

@@ -5,7 +5,6 @@
     type = CSVDiff
     input = 'water.i'
     csvdiff = 'water_out.csv'
-    threading = '!pthreads'
     requirement = 'The system shall be able to compute the fluid properties of water and steam following the IAPWS-IF97 formulations.'
   []
 []

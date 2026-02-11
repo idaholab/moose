@@ -8,7 +8,6 @@
     input = 'block-dynamics-aux-vel.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50'
     requirement = 'The contact module shall be able to compute nodal weighted gap distance velocity values via a '
@@ -22,7 +21,6 @@
     input = 'block-dynamics-aux-wear.i'
     rel_err = 1e-3
     abs_zero = 1.0e-4
-    min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50 & method!=dbg'
     valgrind = 'none'
@@ -38,7 +36,6 @@
     input = 'block-dynamics-aux-wear-vel.i'
     rel_err = 1.0e-3
     abs_zero = 5.0e-3
-    min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50 & method=opt'
     heavy = true
@@ -63,7 +60,6 @@
     input = 'frictional-mortar-3d-status.i'
     expect_err = 'tangent_two: MortarFrictionalStateAux auxiliary kernel requires a second tangent '
                  'Lagrange multiplier for three-dimensional problems'
-    min_parallel = 1
     max_parallel = 2
     capabilities = 'ad_size>=100'
     requirement = 'The contact module shall be able to generate an informative error if the nodal frictional status '
@@ -76,7 +72,6 @@
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
-    min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50'
     cli_args = 'Executioner/end_time=0.2 '
@@ -115,7 +110,6 @@
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
     abs_zero = 1.0e-4
-    min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50'
     map = False
@@ -152,7 +146,6 @@
     exodiff = 'block-dynamics-aux-fretting-wear-test-action-quick_out.e'
     input = 'block-dynamics-aux-fretting-wear-test-action.i'
     custom_cmp = block-dynamics-aux-fretting-wear-test-action.cmp
-    min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50'
     map = False

@@ -4,7 +4,5 @@
     input = good.i
     skip = "always skipped"
     heavy = true
-    compiler = non_existent
-    platform = non_existent
   [../]
 []

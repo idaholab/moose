@@ -45,7 +45,6 @@
       type = RunApp
       input = global_vs_local.i
       recover = false
-      min_parallel = 1
       max_parallel = 1
       allow_test_objects = true
       detail = "on a single processor,"
@@ -72,7 +71,6 @@
       type = RunApp
       input = global_vs_local.i
       recover = false
-      min_parallel = 1
       max_parallel = 1
       allow_test_objects = true
       cli_args = 'Samplers/sample/use_rand=true Postprocessors/test/test_type=RAND_GLOBAL_VS_LOCAL'

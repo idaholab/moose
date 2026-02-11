@@ -26,6 +26,8 @@ class XMLDiff(SchemaDiff):
             self.specs['required_python_packages'] += ' xmltodict'
 
     def prepare(self, options):
+        super().prepare(options)
+
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['xmldiff'])
 

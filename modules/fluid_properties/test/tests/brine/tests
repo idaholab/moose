@@ -4,7 +4,6 @@
     input = 'brine.i'
     csvdiff = 'brine_out.csv'
     allow_test_objects = true
-    threading = '!pthreads'
     requirement = 'The system shall compute properties of brine'
     design = 'BrineFluidProperties.md'
     issues = '#6972'
@@ -14,7 +13,6 @@
     input = 'brine_tabulated.i'
     csvdiff = 'brine_out.csv'
     allow_test_objects = true
-    threading = '!pthreads'
     prereq = brine
     requirement = 'The system shall compute properties of brine using tabulated water properties'
     design = 'BrineFluidProperties.md'

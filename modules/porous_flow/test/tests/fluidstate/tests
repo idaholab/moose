@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'waterncg.i'
     exodiff = 'waterncg_liquid.e'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the properties of the liquid phase in a water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
@@ -13,7 +12,6 @@
     input = 'waterncg.i'
     exodiff = 'waterncg_twophase.e'
     cli_args = 'Variables/z/initial_condition=0.25 Outputs/file_base=waterncg_twophase'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
@@ -23,7 +21,6 @@
     input = 'waterncg.i'
     exodiff = 'waterncg_gas.e'
     cli_args = 'Variables/z/initial_condition=0.999 Outputs/file_base=waterncg_gas'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the properties of the gas phase in a water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
@@ -32,7 +29,6 @@
     type = 'CSVDiff'
     input = 'theis.i'
     csvdiff = "theis_csvout.csv"
-    threading = '!pthreads'
     requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
@@ -41,7 +37,6 @@
     type = 'CSVDiff'
     input = 'theis_tabulated.i'
     csvdiff = "theis_tabulated_csvout.csv theis_tabulated_csvout_line_0010.csv"
-    threading = '!pthreads'
     requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
@@ -51,8 +46,6 @@
     type = 'CSVDiff'
     input = 'theis_nonisothermal.i'
     csvdiff = "theis_nonisothermal_out.csv"
-    threading = '!pthreads'
-    installation_type = in_tree
     requirement = 'The system shall evolve a gas phase as a gas component is added in a nonisothermal water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818 #10167'
@@ -61,7 +54,6 @@
     type = 'CSVDiff'
     input = 'brineco2.i'
     csvdiff = 'brineco2.csv'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818'
@@ -70,7 +62,6 @@
     type = 'CSVDiff'
     input = 'brineco2.i'
     csvdiff = 'brineco2.csv'
-    threading = '!pthreads'
     prereq = brineco2
     cli_args = 'AuxVariables/xnacl/family=MONOMIAL AuxVariables/xnacl/order=CONSTANT'
     requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system when Xnacl is an elemental AuxVariable.'
@@ -81,7 +72,6 @@
     type = 'CSVDiff'
     input = 'brineco2_fv.i'
     csvdiff = 'brineco2.csv'
-    threading = '!pthreads'
     prereq = brineco2
     requirement = 'The system shall calculate the solubilities and properties of both the gas and liquid phase in a brine and CO2 system using FV variables.'
     design = 'PorousFlowBrineCO2.md'
@@ -91,7 +81,6 @@
     type = 'CSVDiff'
     input = 'brineco2_2.i'
     csvdiff = 'brineco2_2.csv'
-    threading = '!pthreads'
     requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818'
@@ -100,7 +89,6 @@
     type = 'CSVDiff'
     input = 'brineco2_hightemp.i'
     csvdiff = 'brineco2_hightemp_out.csv'
-    threading = '!pthreads'
     requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase in the high temperature regime.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #11359'
@@ -111,7 +99,6 @@
     csvdiff = "theis_brineco2_csvout.csv theis_brineco2_csvout_line_0028.csv"
     heavy = true
     max_time = 1000
-    threading = '!pthreads'
     requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818'
@@ -120,8 +107,6 @@
     type = 'CSVDiff'
     input = 'theis_brineco2_nonisothermal.i'
     csvdiff = "theis_brineco2_nonisothermal_out.csv"
-    threading = '!pthreads'
-    installation_type = in_tree
     requirement = 'The system shall evolve a gas phase as CO2 is added to a liquid brine phase in a nonisothermal model.'
     design = 'PorousFlowBrineCO2.md'
     issues = '#8818 #10167'
@@ -130,7 +115,6 @@
     type = 'CSVDiff'
     input = 'waterncg_ic.i'
     csvdiff = "waterncg_ic_out.csv"
-    threading = '!pthreads'
     requirement = 'The system shall calculate the initial value of total mass fraction corresponding to the specified gas saturation in a water and NCG system.'
     design = 'PorousFlowFluidStateIC.md'
     issues = '#9377'
@@ -139,7 +123,6 @@
     type = 'CSVDiff'
     input = 'brineco2_ic.i'
     csvdiff = "brineco2_ic_out.csv"
-    threading = '!pthreads'
     requirement = 'The system shall calculate the initial value of total mass fraction corresponding to the specified gas saturation in a brine and CO2 system.'
     design = 'PorousFlowFluidStateIC.md'
     issues = '#9377'
@@ -148,7 +131,6 @@
     type = 'CSVDiff'
     input = 'water_vapor.i'
     csvdiff = 'water_vapor_twophase.csv'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the properties of both the gas and liquid phase in a water-steam system.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
@@ -158,7 +140,6 @@
     input = 'water_vapor.i'
     cli_args = '/Variables/h/initial_condition=5e5 /Outputs/file_base=water_vapor_liquid'
     csvdiff = 'water_vapor_liquid.csv'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the liquid properties in a saturated liquid system.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
@@ -168,7 +149,6 @@
     input = 'water_vapor.i'
     cli_args = '/Variables/h/initial_condition=3e6 /Outputs/file_base=water_vapor_gas'
     csvdiff = 'water_vapor_gas.csv'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the gas properties in a saturated gas system.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
@@ -177,7 +157,6 @@
     type = 'CSVDiff'
     input = 'water_vapor_phasechange.i'
     csvdiff = 'water_vapor_phasechange_out.csv'
-    threading = '!pthreads'
     requirement = 'The system shall evolve a vapor phase as conditions enter the two phase region.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
@@ -186,7 +165,6 @@
     type = 'CSVDiff'
     input = 'water_vapor_tab.i'
     csvdiff = 'water_vapor_twophase_tab.csv'
-    threading = '!pthreads'
     requirement = 'The system shall be able to use tabulated fluid properties in conjunction with another fluid properties object to provide non-tabulated properties.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#27457'
@@ -195,7 +173,6 @@
     type = 'CSVDiff'
     input = 'coldwater_injection.i'
     csvdiff = 'coldwater_injection_csv_line_0007.csv'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the temperature profile in a 1D Avdonin problem.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'
@@ -204,7 +181,6 @@
     type = 'CSVDiff'
     input = 'coldwater_injection_radial.i'
     csvdiff = 'coldwater_injection_radial_csv_line_0005.csv'
-    threading = '!pthreads'
     requirement = 'The system shall calculate the temperature profile in a 1D radial Avdonin problem.'
     design = 'PorousFlowWaterVapor.md'
     issues = '#13108'

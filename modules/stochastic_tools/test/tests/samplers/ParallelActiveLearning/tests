@@ -8,7 +8,6 @@
       input = parallelAL.i
       allow_test_objects = true
       jsondiff = 'al1.json'
-      min_parallel = 1
       max_parallel = 1
       cli_args = "Executioner/num_steps=2"
       detail = 'using a single processor and the Expected Improvment acquisition; '
@@ -29,7 +28,6 @@
       allow_test_objects = true
       jsondiff = 'al_poi.json'
       cli_args = "ParallelAcquisition/expectedimprovement/type='ProbabilityofImprovement' Outputs/file_base='al_poi' Executioner/num_steps=2"
-      min_parallel = 1
       max_parallel = 1
       detail = 'using the Probability of Improvment acquisition; '
     []
@@ -39,7 +37,6 @@
       allow_test_objects = true
       jsondiff = 'al_cov.json'
       cli_args = "ParallelAcquisition/expectedimprovement/type='CoefficientOfVariation' Outputs/file_base='al_cov'"
-      min_parallel = 1
       max_parallel = 1
       detail = 'using the Coefficient of Variation acquisition; '
     []
@@ -49,7 +46,6 @@
       allow_test_objects = true
       jsondiff = 'al_eigf.json'
       cli_args = "ParallelAcquisition/expectedimprovement/type='ExpectedImprovementGlobalFit' Outputs/file_base='al_eigf'"
-      min_parallel = 1
       max_parallel = 1
       detail = 'using the Expected Improvement for Global Fit acquisition; '
     []
@@ -59,7 +55,6 @@
       allow_test_objects = true
       jsondiff = 'al_ufunc.json'
       cli_args = "ParallelAcquisition/expectedimprovement/type='UFunction' Outputs/file_base='al_ufunc'"
-      min_parallel = 1
       max_parallel = 1
       detail = 'using the U-Function acquisition; '
     []
@@ -69,7 +64,6 @@
       allow_test_objects = true
       jsondiff = 'al_ucb.json'
       cli_args = "ParallelAcquisition/expectedimprovement/type='UpperConfidenceBound' Outputs/file_base='al_ucb'"
-      min_parallel = 1
       max_parallel = 1
       detail = 'using the Upper Confidence Bound acquisition.'
     []
@@ -81,7 +75,6 @@
       input = BayesianALTrain.i
       allow_test_objects = true
       jsondiff = 'b_al.json'
-      min_parallel = 1
       max_parallel = 1
       detail = 'using the Bayesian posterior targeted acquisition; '
     []

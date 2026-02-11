@@ -17,7 +17,7 @@
     requirement = 'The system shall correct partial circular boundaries radii to preserve areas by moving all the nodes in the radial direction.'
     recover = false
     # PR #26848. Clang 16 Apple Si is not compatible.
-    machine = X86_64
+    capabilities = 'machine=x86_64'
   []
   [partial_curve_span]
     type = 'Exodiff'

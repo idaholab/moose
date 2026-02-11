@@ -1,158 +1,323 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://mooseframework.inl.gov
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil, json, importlib.util, inspect
+import importlib.util
+import inspect
+import json
+import os
+import re
+import shutil
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional, Tuple
+
 import mooseutils
-from TestHarness import OutputInterface, util
+from FactorySystem.InputParameters import InputParameters
+from FactorySystem.MooseObject import MooseObject
+
+from TestHarness import OutputInterface
+from TestHarness.capability_util import CapabilityException, checkAppCapabilities
 from TestHarness.StatusSystem import StatusSystem
 from TestHarness.validation import ValidationCase, ValidationCaseClasses
-from FactorySystem.MooseObject import MooseObject
-from FactorySystem.InputParameters import InputParameters
-from pathlib import Path
-from dataclasses import dataclass
-from copy import deepcopy
-from typing import Optional
+
 
 class Tester(MooseObject, OutputInterface):
     """
     Base class from which all tester objects are instanced.
     """
+
     @staticmethod
     def validParams():
         params = MooseObject.validParams()
 
         # Common Options
-        params.addRequiredParam('type',   "The type of test of Tester to create for this test.")
-        params.addParam('max_time',       Tester.getDefaultMaxTime(), "The maximum in seconds that the test will be allowed to run.")
-        params.addParam('skip',           "Provide a reason this test will be skipped.")
-        params.addParam('deleted',        "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
-        params.addParam('unique_test_id', "The unique hash given to a test")
+        params.addRequiredParam(
+            "type", "The type of test of Tester to create for this test."
+        )
+        params.addParam(
+            "max_time",
+            Tester.getDefaultMaxTime(),
+            "The maximum in seconds that the test will be allowed to run.",
+        )
+        params.addParam("skip", "Provide a reason this test will be skipped.")
+        params.addParam(
+            "deleted",
+            "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).",
+        )
+        params.addParam("unique_test_id", "The unique hash given to a test")
 
-        params.addParam('heavy',    False, "Set to True if this test should only be run when the '--heavy' option is used.")
-        params.addParam('group',       [], "A list of groups for which this test belongs.")
-        params.addParam('prereq',      [], "A list of prereq tests that need to run successfully before launching this test. When 'prereq = ALL', TestHarness will run this test last. Multiple 'prereq = ALL' tests, or tests that depend on a 'prereq = ALL' test will result in cyclic errors. Naming a test 'ALL' when using 'prereq = ALL' will also result in an error.")
-        params.addParam('skip_checks', False, "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)")
-        params.addParam('scale_refine',    0, "The number of refinements to do when scaling")
-        params.addParam('success_message', 'OK', "The successful message")
+        params.addParam(
+            "heavy",
+            False,
+            "Set to True if this test should only be run when the '--heavy' option is used.",
+        )
+        params.addParam("group", [], "A list of groups for which this test belongs.")
+        params.addParam(
+            "prereq",
+            [],
+            "A list of prereq tests that need to run successfully before launching this test. When 'prereq = ALL', TestHarness will run this test last. Multiple 'prereq = ALL' tests, or tests that depend on a 'prereq = ALL' test will result in cyclic errors. Naming a test 'ALL' when using 'prereq = ALL' will also result in an error.",
+        )
+        params.addParam(
+            "skip_checks",
+            False,
+            "Tells the TestHarness to skip additional checks (This parameter is set automatically by the TestHarness during recovery tests)",
+        )
+        params.addParam(
+            "scale_refine", 0, "The number of refinements to do when scaling"
+        )
+        params.addParam("success_message", "OK", "The successful message")
 
-        params.addParam('cli_args',       [], "Additional arguments to be passed to the test.")
-        params.addParam('use_shell',          False, "Whether to use the shell as the executing program. This has the effect of prepending '/bin/sh -c ' to the command to be run.")
-        params.addParam('allow_test_objects', False, "Allow the use of test objects by adding --allow-test-objects to the command line.")
+        params.addParam(
+            "cli_args", [], "Additional arguments to be passed to the test."
+        )
+        params.addParam(
+            "use_shell",
+            False,
+            "Whether to use the shell as the executing program. This has the effect of prepending '/bin/sh -c ' to the command to be run.",
+        )
+        params.addParam(
+            "allow_test_objects",
+            False,
+            "Allow the use of test objects by adding --allow-test-objects to the command line.",
+        )
 
-        params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
-        params.addParam('max_buffer_size', None, "Bytes allowed in stdout/stderr before it is subjected to being trimmed. Set to -1 to ignore output size restrictions. "
-                                                 "If 'max_buffer_size' is not set, the default value of 'None' triggers a reasonable value (e.g. 100 kB)")
-        params.addParam('parallel_scheduling', False, "Allow all tests in test spec file to run in parallel (adheres to prereq rules).")
+        params.addParam(
+            "valgrind",
+            "NONE",
+            "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.",
+        )
+        params.addParam(
+            "max_buffer_size",
+            None,
+            "Bytes allowed in stdout/stderr before it is subjected to being trimmed. Set to -1 to ignore output size restrictions. "
+            "If 'max_buffer_size' is not set, the default value of 'None' triggers a reasonable value (e.g. 100 kB)",
+        )
+        params.addParam(
+            "parallel_scheduling",
+            False,
+            "Allow all tests in test spec file to run in parallel (adheres to prereq rules).",
+        )
 
         # Test Filters
-        params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
-        params.addParam('machine',       ['ALL'], "A list of micro architectures for which this test will run on. ('ALL', 'X86_64', 'ARM64')")
-        params.addParam('compiler',      ['ALL'], "A list of compilers for which this test is valid on. ('ALL', 'GCC', 'INTEL', 'CLANG')")
-        params.addParam('petsc_version', ['ALL'], "A list of petsc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('slepc_version', [], "A list of slepc versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('exodus_version', ['ALL'], "A list of Exodus versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('vtk_version', ['ALL'], "A list of VTK versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')")
-        params.addParam('min_ad_size',   None, "A minimum AD size for which this test will run")
-        params.addParam('max_ad_size',   None, "A maximum AD size for which this test will run")
-        params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
-        params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
-        params.addParam('unique_ids',    ['ALL'], "Deprecated. Use unique_id instead.")
-        params.addParam('recover',       True,    "A test that runs with '--recover' mode enabled")
-        params.addParam('restep',        True,    "A test that can run with --test-restep")
-        params.addParam('vtk',           ['ALL'], "A test that runs only if VTK is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('tecplot',       ['ALL'], "A test that runs only if Tecplot is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('dof_id_bytes',  ['ALL'], "A test that runs only if libmesh is configured --with-dof-id-bytes = a specific number, e.g. '4', '8'")
-        params.addParam('petsc_debug',   ['ALL'], "{False,True} -> test only runs when PETSc is configured with --with-debugging={0,1}, otherwise test always runs.")
-        params.addParam('curl',          ['ALL'], "A test that runs only if CURL is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('threading',     ['ALL'], "A list of threading models ths tests runs with ('ALL', 'TBB', 'OPENMP', 'PTHREADS', 'NONE')")
-        params.addParam('superlu',       ['ALL'], "A test that runs only if SuperLU is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('mumps',         ['ALL'], "A test that runs only if MUMPS is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('strumpack',     ['ALL'], "A test that runs only if STRUMPACK is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('chaco',         ['ALL'], "A test that runs only if Chaco (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('parmetis',      ['ALL'], "A test that runs only if Parmetis (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('party',         ['ALL'], "A test that runs only if Party (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('ptscotch',      ['ALL'], "A test that runs only if PTScotch (partitioner) is available via PETSc ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('slepc',         ['ALL'], "A test that runs only if SLEPc is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('unique_id',     ['ALL'], "A test that runs only if libmesh is configured with --enable-unique-id ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('fparser_jit',   ['ALL'], "A test that runs only if FParser JIT is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('libtorch',      ['ALL'], "A test that runs only if libtorch is available ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('libtorch_version', ['ALL'], "A list of libtorch versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
-        params.addParam('installation_type',['ALL'], "A test that runs under certain executable installation configurations ('ALL', 'IN_TREE', 'RELOCATED')")
-        params.addParam("expect_exit_code", 0, "An integer exit code to expect from the test")
+        params.addParam(
+            "mesh_mode",
+            ["ALL"],
+            "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')",
+        )
+        params.addParam(
+            "recover", True, "A test that runs with '--recover' mode enabled"
+        )
+        params.addParam("restep", True, "A test that can run with --test-restep")
+        params.addParam(
+            "expect_exit_code", 0, "An integer exit code to expect from the test"
+        )
 
-        params.addParam('capabilities',      "", "A test that only runs if all listed capabilities are supported by the executable")
-        params.addParam('dynamic_capabilities', False, "Whether or not to do a capability check that supports dynamic application loading")
-        params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
-        params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed are set")
-        params.addParam('env_vars_not_set', [], "A test that only runs if all the environment variables listed are not set")
-        params.addParam('should_execute', True, 'Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
-        params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
-        params.addParam('required_applications', [], "A list of required registered applications that are in the executable.")
-        params.addParam('check_input',    False, "Check for correct input file syntax")
-        params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
-        params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
-        params.addParam('boost',         ['ALL'], "A test that runs only if BOOST is detected ('ALL', 'TRUE', 'FALSE')")
-        params.addParam('python',        None, "Restrict the test to s specific version of python (e.g., 3.6 or 3.7.1).")
-        params.addParam('required_python_packages', None, "Test will only run if the supplied python packages exist.")
-        params.addParam('requires', None, "A list of programs required for the test to operate, as tested with shutil.which.")
-        params.addParam("working_directory", None, "When set, TestHarness will enter this directory before running test")
+        params.addParam(
+            "capabilities",
+            "",
+            "A test that only runs if all listed capabilities are supported by the executable",
+        )
+        params.addParam(
+            "dynamic_capabilities",
+            False,
+            "Whether or not to do a capability check that supports dynamic application loading",
+        )
+        params.addParam(
+            "depend_files",
+            [],
+            "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory",
+        )
+        params.addParam(
+            "env_vars",
+            [],
+            "A test that only runs if all the environment variables listed are set",
+        )
+        params.addParam(
+            "env_vars_not_set",
+            [],
+            "A test that only runs if all the environment variables listed are not set",
+        )
+        params.addParam(
+            "should_execute",
+            True,
+            "Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation",
+        )
+        params.addParam(
+            "required_submodule",
+            [],
+            "A list of initialized submodules for which this test requires.",
+        )
+        params.addParam("check_input", False, "Check for correct input file syntax")
+        params.addParam(
+            "display_required",
+            False,
+            "The test requires and active display for rendering (i.e., ImageDiff tests).",
+        )
+        params.addParam(
+            "timing",
+            True,
+            "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).",
+        )
+        params.addParam(
+            "python",
+            None,
+            "Restrict the test to s specific version of python (e.g., 3.6 or 3.7.1).",
+        )
+        params.addParam(
+            "required_python_packages",
+            None,
+            "Test will only run if the supplied python packages exist.",
+        )
+        params.addParam(
+            "requires",
+            None,
+            "A list of programs required for the test to operate, as tested with shutil.which.",
+        )
+        params.addParam(
+            "working_directory",
+            None,
+            "When set, TestHarness will enter this directory before running test",
+        )
 
         # SQA
-        params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
-        params.addParam("design", [], "The list of markdown files that contain the design(s) associated with this test (e.g., '/Markers/index.md /BoxMarker.md').")
-        params.addParam("issues", [], "The list of github issues associated with this test (e.g., '#1234 #4321')")
-        params.addParam("detail", None, "Details of SQA requirement for use within sub-blocks.")
-        params.addParam("validation", False, "Set to True to mark test as a validation problem.")
-        params.addParam("verification", False, "Set to True to mark test as a verification problem.")
-        params.addParam("deprecated", False, "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.")
-        params.addParam("collections", [], "A means for defining a collection of tests for SQA process.")
-        params.addParam("classification", 'functional', "A means for defining a requirement classification for SQA process.")
+        params.addParam(
+            "requirement",
+            None,
+            "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')",
+        )
+        params.addParam(
+            "design",
+            [],
+            "The list of markdown files that contain the design(s) associated with this test (e.g., '/Markers/index.md /BoxMarker.md').",
+        )
+        params.addParam(
+            "issues",
+            [],
+            "The list of github issues associated with this test (e.g., '#1234 #4321')",
+        )
+        params.addParam(
+            "detail", None, "Details of SQA requirement for use within sub-blocks."
+        )
+        params.addParam(
+            "validation", False, "Set to True to mark test as a validation problem."
+        )
+        params.addParam(
+            "verification", False, "Set to True to mark test as a verification problem."
+        )
+        params.addParam(
+            "deprecated",
+            False,
+            "When True the test is no longer considered part SQA process and as such does not include the need for a requirement definition.",
+        )
+        params.addParam(
+            "collections",
+            [],
+            "A means for defining a collection of tests for SQA process.",
+        )
+        params.addParam(
+            "classification",
+            "functional",
+            "A means for defining a requirement classification for SQA process.",
+        )
 
         # HPC
-        params.addParam('hpc', True, 'Set to false to not run with HPC schedulers (PBS and slurm)')
-        params.addParam('hpc_mem_per_cpu', "Memory requirement per CPU to use for HPC submission")
+        params.addParam(
+            "hpc_mem_per_cpu", "Memory requirement per CPU to use for HPC submission"
+        )
 
-        params.addParam("validation_test", None, "List of validation scripts to run with this test")
+        params.addParam(
+            "validation_test", None, "List of validation scripts to run with this test"
+        )
+
+        # Add seach deprecated parameter with a useful docstring
+        for param, capability in Tester.capability_params:
+            help = "use capability '{capability}' " if capability else ""
+            params.addParam(
+                param,
+                None,
+                f"Deprecated parameter; {help} with 'capabilities' param instead",
+            )
 
         return params
+
+    capability_params: list[Tuple[str, Optional[str]]] = [
+        ("boost", "boost"),
+        ("chaco", "chaco"),
+        ("compiler", "compiler"),
+        ("dof_id_bytes", "dof_id_bytes"),
+        ("exodus_version", "exodus"),
+        ("fparser_jit", "fparser"),
+        ("hpc", "hpc"),
+        ("installation_type", "installation_type"),
+        ("libpng", "libpng"),
+        ("library_mode", "library_mode"),
+        ("libtorch", "libtorch"),
+        ("libtorch_version", "libtorch"),
+        ("machine", "machine"),
+        ("min_ad_size", "ad_size"),
+        ("max_ad_size", "ad_size"),
+        ("method", "method"),
+        ("mumps", "mumps"),
+        ("party", "party"),
+        ("parmetis", "parmetis"),
+        ("petsc_version", "petsc"),
+        ("petsc_debug", "petsc_debug"),
+        ("platform", "platform"),
+        ("pthreads", "threads"),
+        ("ptscotch", "ptscotch"),
+        ("slepc", "slepc"),
+        ("slepc_version", "slepc"),
+        ("strumpack", "strumpack"),
+        ("superlu", "superlu"),
+        ("tecplot", "tecplot"),
+        ("threading", None),
+        ("vtk", "vtk"),
+        ("vtk_version", "vtk"),
+    ]
+    """
+    Parameters that are replaced with capabilities.
+
+    This is a list of old param name -> capability name.
+    """
 
     @staticmethod
     def augmentParams(params):
         # Augment our parameters with parameters from the validation test, if we
         # have any validation tests
-        script = params['validation_test']
+        script = params["validation_test"]
         validation_classes = []
         if script:
             # Sanity checks
-            if '..' in script:
-                message = f'validation_test={script} out of test directory'
+            if ".." in script:
+                message = f"validation_test={script} out of test directory"
                 raise ValueError(message)
             path = os.path.abspath(script)
             if not os.path.exists(script):
-                message = f'validation_test={path} not found'
+                message = f"validation_test={path} not found"
                 raise FileNotFoundError(message)
 
             # Load the script; throw an exception here if it fails
             # so that the Parser can report a reasonable error
-            spec = importlib.util.spec_from_file_location('validation_load', path)
+            spec = importlib.util.spec_from_file_location("validation_load", path)
             module = importlib.util.module_from_spec(spec)
             try:
                 spec.loader.exec_module(module)
             except Exception as e:
-                raise ImportError(f'In validation_test={path}:\n{e}')
+                raise ImportError(f"In validation_test={path}:\n{e}")
 
             # Find the classes that are derived from the base validation
             # classes in the module (the user's python script)
             module_classes = inspect.getmembers(module, inspect.isclass)
-            base_classes = [c[1] for c in module_classes if c[1] in ValidationCaseClasses]
+            base_classes = [
+                c[1] for c in module_classes if c[1] in ValidationCaseClasses
+            ]
             other_classes = [c[1] for c in module_classes if c[1] not in base_classes]
             subclasses = [c for c in other_classes if issubclass(c, ValidationCase)]
 
@@ -168,7 +333,9 @@ class Tester(MooseObject, OutputInterface):
                 # parameters from the Tester
                 for key in validation_params.keys():
                     if key in params:
-                        raise Exception(f'Duplicate parameter "{key}" from validation test')
+                        raise Exception(
+                            f'Duplicate parameter "{key}" from validation test'
+                        )
 
                 # Collect the cumulative validation params
                 validation_params += subclass.validParams()
@@ -180,7 +347,7 @@ class Tester(MooseObject, OutputInterface):
 
         # Store the classes that are used in validation so that they
         # can be constructed within the Job at a later time
-        params.addPrivateParam('_validation_classes', validation_classes)
+        params.addPrivateParam("_validation_classes", validation_classes)
 
         return params
 
@@ -197,20 +364,20 @@ class Tester(MooseObject, OutputInterface):
         OutputInterface.__init__(self)
 
         self.specs = params
-        self.joined_out = ''
+        self.joined_out = ""
         self.process = None
         self.__caveats = set([])
 
         # Alternate text we want to print as part of our status instead of the
         # pre-formatted status text (SYNTAX PASS instead of OK for example)
-        self.__tester_message = ''
+        self.__tester_message = ""
 
         # Bool if test can run
         self._runnable = None
 
         # Set up common parameters
-        self.should_execute = self.specs['should_execute']
-        self.check_input = self.specs['check_input']
+        self.should_execute = self.specs["should_execute"]
+        self.check_input = self.specs["check_input"]
 
         if self.specs["allow_test_objects"]:
             self.specs["cli_args"].append("--allow-test-objects")
@@ -244,12 +411,34 @@ class Tester(MooseObject, OutputInterface):
         self.json_metadata: dict[str, Tester.JSONMetadata] = {}
 
         # The validation classes the user specified
-        self._validation_classes = self.parameters()['_validation_classes']
+        self._validation_classes = self.parameters()["_validation_classes"]
+
+        # Check deprecated capability params
+        bad_params = [
+            (param, capability)
+            for param, capability in self.capability_params
+            if params[param] is not None
+        ]
+        if bad_params:
+            entries = [
+                (
+                    f"'{param}'"
+                    + (f" -> capability '{capability}'" if capability else "")
+                )
+                for param, capability in bad_params
+            ]
+            message = (
+                "The following parameters are deprecated and should use the "
+                "'capability' param instead; " + ", ".join(entries)
+            )
+            raise RuntimeError(message)
+
+        self._augmented_capabilities: Optional[dict] = None
 
     def getStatus(self):
         return self.test_status.getStatus()
 
-    def setStatus(self, status, message=''):
+    def setStatus(self, status, message=""):
         self.__tester_message = message
         return self.test_status.setStatus(status)
 
@@ -257,53 +446,57 @@ class Tester(MooseObject, OutputInterface):
         return self.test_status.createStatus()
 
     def getResultsEntry(self, options, create, graceful=False):
-        """ Get the entry in the results storage for this tester """
-        tests = options.results_storage['tests']
+        """Get the entry in the results storage for this tester"""
+        tests = options.results_storage["tests"]
 
         short_name = self.getTestNameShort()
-        test_dir = self.getTestName()[:(-len(short_name) - 1)]
+        test_dir = self.getTestName()[: (-len(short_name) - 1)]
         test_dir_entry = tests.get(test_dir)
         if not test_dir_entry:
             if not create:
                 if graceful:
                     return None, None
-                raise Exception(f'Test folder {test_dir} not in results')
-            tests[test_dir] = {'tests': {}}
+                raise Exception(f"Test folder {test_dir} not in results")
+            tests[test_dir] = {"tests": {}}
             test_dir_entry = tests[test_dir]
 
-        test_name_entry = test_dir_entry['tests'].get(short_name)
-        test_dir_entry['spec_file'] = self.getSpecFile()
+        test_name_entry = test_dir_entry["tests"].get(short_name)
+        test_dir_entry["spec_file"] = self.getSpecFile()
         if not test_name_entry:
             if not create:
                 if graceful:
                     return test_dir_entry, None
-                raise Exception(f'Test {test_dir}/{short_name} not in results')
-            test_dir_entry['tests'][short_name] = {}
-        return test_dir_entry, test_dir_entry['tests'][short_name]
+                raise Exception(f"Test {test_dir}/{short_name} not in results")
+            test_dir_entry["tests"][short_name] = {}
+        return test_dir_entry, test_dir_entry["tests"][short_name]
 
     # Return a tuple (status, message, caveats) for this tester as found
     # in the previous results
     def previousTesterStatus(self, options):
         test_dir_entry, test_entry = self.getResultsEntry(options, False, True)
-        status = (self.test_status.createStatus(), '', '')
+        status = (self.test_status.createStatus(), "", "")
         if test_entry:
-            status_entry = test_entry['status']
-            status = (self.test_status.createStatus(str(status_entry['status'])),
-                      str(status_entry['status_message']),
-                      status_entry['caveats'])
-        return (status)
+            status_entry = test_entry["status"]
+            status = (
+                self.test_status.createStatus(str(status_entry["status"])),
+                str(status_entry["status_message"]),
+                status_entry["caveats"],
+            )
+        return status
 
     def getResults(self, options) -> dict:
         """Get the results dict for this Tester"""
-        results = {'name': self.__class__.__name__,
-                   'command': self.getCommand(options),
-                   'input_file': self.getInputFile()}
+        results = {
+            "name": self.__class__.__name__,
+            "command": self.getCommand(options),
+            "input_file": self.getInputFile(),
+        }
         json_metadata = {}
         for key, value in self.json_metadata.items():
             if value.data:
                 json_metadata[key] = value.data
         if json_metadata:
-            results['json_metadata'] = json_metadata
+            results["json_metadata"] = json_metadata
         return results
 
     def getStatusMessage(self):
@@ -312,34 +505,42 @@ class Tester(MooseObject, OutputInterface):
     # Return a boolean based on current status
     def isNoStatus(self):
         return self.getStatus() == self.no_status
+
     def isSkip(self):
         return self.getStatus() in self.__skipped_statuses
+
     def isQueued(self):
         return self.getStatus() == self.queued
+
     def isSilent(self):
         return self.getStatus() == self.silent
+
     def isPass(self):
         return self.getStatus() == self.success
+
     def isFail(self):
         return self.getStatus() in self.__failed_statuses
+
     def isDiff(self):
         return self.getStatus() == self.diff
+
     def isDeleted(self):
         return self.getStatus() == self.deleted
+
     def isError(self):
         return self.getStatus() == self.error
 
     def getTestName(self):
-        """ return test name """
-        return self.specs['test_name']
+        """return test name"""
+        return self.specs["test_name"]
 
     def getTestNameShort(self):
-        """ return test short name (not including the path) """
-        return self.specs['test_name_short']
+        """return test short name (not including the path)"""
+        return self.specs["test_name_short"]
 
     def getTestNameForFile(self):
-        """ return test short name for file creation ('/' to '.')"""
-        return self.getTestNameShort().replace(os.sep, '.')
+        """return test short name for file creation ('/' to '.')"""
+        return self.getTestNameShort().replace(os.sep, ".")
 
     def appendTestName(self, value):
         """
@@ -347,81 +548,85 @@ class Tester(MooseObject, OutputInterface):
 
         Used when creating duplicate Testers for recover tests.
         """
-        self.specs['test_name'] += value
-        self.specs['test_name_short'] += value
+        self.specs["test_name"] += value
+        self.specs["test_name_short"] += value
 
     def getPrereqs(self):
-        """ return list of prerequisite tests this test depends on """
-        return self.specs['prereq']
+        """return list of prerequisite tests this test depends on"""
+        return self.specs["prereq"]
 
     def getMooseDir(self):
-        """ return moose directory """
-        return self.specs['moose_dir']
+        """return moose directory"""
+        return self.specs["moose_dir"]
 
     def getMoosePythonDir(self):
-        """ return moose directory """
-        return self.specs['moose_python_dir']
+        """return moose directory"""
+        return self.specs["moose_python_dir"]
 
     def getTestDir(self):
-        """ return directory in which this tester is located """
-        if self.specs['working_directory']:
-            return os.path.join(self.specs['test_dir'], self.specs['working_directory'])
-        return self.specs['test_dir']
+        """return directory in which this tester is located"""
+        if self.specs["working_directory"]:
+            return os.path.join(self.specs["test_dir"], self.specs["working_directory"])
+        return self.specs["test_dir"]
 
     def getSpecFile(self):
-        return os.path.join(self.specs['test_dir'], self.specs['spec_file'])
+        return os.path.join(self.specs["test_dir"], self.specs["spec_file"])
 
     def getMinReportTime(self):
-        """ return minimum time elapse before reporting a 'long running' status """
-        return self.specs['min_reported_time']
+        """return minimum time elapse before reporting a 'long running' status"""
+        return self.specs["min_reported_time"]
 
     def getMaxTime(self):
-        """ return maximum time elapse before reporting a 'timeout' status """
-        return float(self.specs['max_time'])
+        """return maximum time elapse before reporting a 'timeout' status"""
+        return float(self.specs["max_time"])
 
     def setMaxTime(self, value):
         """
         Sets the max time for the job
         """
-        self.specs['max_time'] = float(value)
+        self.specs["max_time"] = float(value)
 
     @staticmethod
     def getDefaultMaxTime():
         """
         Gets the default max run time
         """
-        return int(os.getenv('MOOSE_TEST_MAX_TIME', 300))
+        return int(os.getenv("MOOSE_TEST_MAX_TIME", 300))
 
     def getUniqueTestID(self):
-        """ return unique hash for test """
-        return self.specs['unique_test_id'] if self.specs.isValid('unique_test_id') else None
+        """return unique hash for test"""
+        return (
+            self.specs["unique_test_id"]
+            if self.specs.isValid("unique_test_id")
+            else None
+        )
 
     def getRunnable(self, options):
-        """ return bool and cache results, if this test can run """
+        """return bool and cache results, if this test can run"""
         if self._runnable is None:
             self._runnable = self.checkRunnableBase(options)
         return self._runnable
 
     def getInputFile(self):
-        """ return the input file if applicable to this Tester """
+        """return the input file if applicable to this Tester"""
         return None
 
     def getInputFileContents(self):
-        """ return the contents of the input file applicable to this Tester """
+        """return the contents of the input file applicable to this Tester"""
         return None
 
     def getOutputFiles(self, options):
-        """ return the output files if applicable to this Tester """
+        """return the output files if applicable to this Tester"""
         return [v.path for v in self.json_metadata.values()]
 
     def getCheckInput(self):
         return self.check_input
 
     def setValgrindMode(self, mode):
-        """ Increase the alloted time for tests when running with the valgrind option """
-        if mode == 'NORMAL':
+        """Increase the alloted time for tests when running with the valgrind option"""
+        if mode == "NORMAL":
             self.setMaxTime(self.getMaxTime() * 2)
-        elif mode == 'HEAVY':
+        elif mode == "HEAVY":
             self.setMaxTime(self.getMaxTime() * 6)
 
     def checkRunnable(self, options):
@@ -449,19 +654,19 @@ class Tester(MooseObject, OutputInterface):
         return
 
     def getThreads(self, options):
-        """ return number of threads to use for this tester """
+        """return number of threads to use for this tester"""
         return 1
 
     def getProcs(self, options):
-        """ return number of processors to use for this tester """
+        """return number of processors to use for this tester"""
         return 1
 
     def getSlots(self, options):
-        """ return number of slots to use for this tester """
+        """return number of slots to use for this tester"""
         return self.getThreads(options) * self.getProcs(options)
 
     def hasOpenMPI(self):
-        """ return whether we have openmpi for execution
+        """return whether we have openmpi for execution
 
         The hacky way to do this is look for "ompi_info" (which only comes
         with openmpi), and then if it does exist make sure that "mpiexec" is
@@ -472,13 +677,16 @@ class Tester(MooseObject, OutputInterface):
         very hot in cache and it's nice to keep this method local to where
         it's actually used.
         """
-        which_ompi_info = shutil.which('ompi_info')
-        if which_ompi_info is None: # no ompi_info
+        which_ompi_info = shutil.which("ompi_info")
+        if which_ompi_info is None:  # no ompi_info
             return False
-        which_mpiexec = shutil.which('mpiexec')
-        if which_mpiexec is None: # no mpiexec
+        which_mpiexec = shutil.which("mpiexec")
+        if which_mpiexec is None:  # no mpiexec
             return False
-        return Path(which_mpiexec).parent.absolute() == Path(which_ompi_info).parent.absolute()
+        return (
+            Path(which_mpiexec).parent.absolute()
+            == Path(which_ompi_info).parent.absolute()
+        )
 
     def getCommand(self, options):
         """
@@ -525,11 +733,11 @@ class Tester(MooseObject, OutputInterface):
         return
 
     def processResultsCommand(self, moose_dir, options):
-        """ method to return the commands (list) used for processing results """
+        """method to return the commands (list) used for processing results"""
         return []
 
     def processResults(self, moose_dir, options, exit_code, runner_output):
-        """ method to process the results of a finished tester """
+        """method to process the results of a finished tester"""
         if self.specs["expect_exit_code"] != exit_code:
             reason = f'EXIT CODE {exit_code} != {self.specs["expect_exit_code"]}'
             self.setStatus(self.fail, str(reason))
@@ -538,17 +746,24 @@ class Tester(MooseObject, OutputInterface):
         return ""
 
     def hasRedirectedOutput(self, options):
-        """ return bool on tester having redirected output """
-        return (self.specs.isValid('redirect_output') and self.specs['redirect_output'] == True and self.getProcs(options) > 1)
+        """return bool on tester having redirected output"""
+        return (
+            self.specs.isValid("redirect_output")
+            and self.specs["redirect_output"] == True
+            and self.getProcs(options) > 1
+        )
 
     def getRedirectedOutputFiles(self, options):
-        """ return a list of redirected output """
+        """return a list of redirected output"""
         if self.hasRedirectedOutput(options):
-            return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in range(self.getProcs(options))]
+            return [
+                os.path.join(self.getTestDir(), self.name() + ".processor.{}".format(p))
+                for p in range(self.getProcs(options))
+            ]
         return []
 
     def addCaveats(self, *kwargs):
-        """ Add caveat(s) which will be displayed with the final test status """
+        """Add caveat(s) which will be displayed with the final test status"""
         for i in [x for x in kwargs if x]:
             if type(i) == type([]):
                 self.__caveats.update(i)
@@ -557,20 +772,20 @@ class Tester(MooseObject, OutputInterface):
         return self.getCaveats()
 
     def removeCaveat(self, caveat):
-        """ Removes a caveat, which _must_ exist """
+        """Removes a caveat, which _must_ exist"""
         self.__caveats.remove(caveat)
 
     def getCaveats(self):
-        """ Return caveats accumalted by this tester """
+        """Return caveats accumalted by this tester"""
         return self.__caveats
 
     def clearCaveats(self):
-        """ Clear any caveats stored in tester """
+        """Clear any caveats stored in tester"""
         self.__caveats = set([])
         return self.getCaveats()
 
     def mustOutputExist(self, exit_code):
-        """ Whether or not we should check for the output once it has ran
+        """Whether or not we should check for the output once it has ran
 
         We need this because the PBS/slurm Runner objects, which use
         networked file IO, need to wait until the output is available on
@@ -579,14 +794,83 @@ class Tester(MooseObject, OutputInterface):
         code."""
         return exit_code == 0
 
-    def getCapability(self, options, name):
-        if options._capabilities is None:
-            raise Exception('Capabilities are not available')
-        value = options._capabilities.get(name)
-        return None if value is None else value[0]
+    def getAugmentedCapabilities(self, options) -> dict:
+        """Augment capabilities of the application with tester specs."""
+        assert self.specs["capabilities"], "Shouldn't run without capabilities"
+        return {}
+
+    def checkCapabilities(self, options) -> Optional[str]:
+        """
+        Perform a check of the capabilities and required capabilities.
+
+        Returns
+        -------
+        Optional[str]:
+            A reason the check failed, if any.
+
+        """
+        if not self.specs["capabilities"]:
+            # If this test has no capabilities, it will not depend
+            # on anything in --only-tests-that-require
+            if options._required_capabilities:
+                return f"!{', !'.join(options._required_capabilities)}"
+            return None
+
+        # Add in augmented capabilities with options that are specific
+        # to this test (mpi_procs, num_threads, etc)
+        self._augmented_capabilities = self.getAugmentedCapabilities(options)
+
+        # Try to check the capabilities; this could fail if the
+        # capabilities string is bad or if the registry is bad
+        try:
+            present = checkAppCapabilities(
+                options._capabilities,
+                self.specs["capabilities"],
+                bool(self.specs["dynamic_capabilities"]),
+                add_capabilities=self._augmented_capabilities,
+            )
+        # Check failed, so add an error message to the Tester
+        # that has a file:line link to the "capabilities" param
+        except CapabilityException as e:
+            self.setStatus(self.error, "INVALID CAPABILITIES")
+            node = self.specs["_node"]
+            output = ""
+            if (filename := node.filename("capabilities")) or (
+                filename := node.filename()
+            ):
+                output += f"{filename}:"
+                if (line := node.line("capabilities")) or (line := node.line()):
+                    output += f"{line}:\n"
+                if fullpath := node.fullpath:
+                    output += f"{fullpath[1:]}/capabilities:\n"
+            output += f"{e}\n"
+            self.appendOutput(output)
+            return None
+
+        # Capabilities are missing
+        if not present:
+            return f"Need {self.specs['capabilities']}"
+
+        # Check required capabilities
+        if options._required_capabilities:
+            missing = []
+            for value in options._required_capabilities:
+                present = checkAppCapabilities(
+                    options._capabilities,
+                    self.specs["capabilities"],
+                    True,
+                    add_capabilities=self._augmented_capabilities,
+                    negate_capabilities=[value],
+                )
+                if present:
+                    missing.append(value)
+
+            if missing:
+                return f"!{', !'.join(missing)}"
+
+        return None
 
     # need something that will tell  us if we should try to read the result
-
     def checkRunnableBase(self, options):
         """
         Method to check for caveats that would prevent this tester from
@@ -597,48 +881,25 @@ class Tester(MooseObject, OutputInterface):
         reasons = {}
         checks = options._checks
 
-        # augment capabilities of the application with specs of the current tester
-        if options._capabilities is not None:
-            capabilities = options._capabilities.copy()
-            def augment(key, val_doc):
-                if key in capabilities:
-                    raise ValueError(f"Capability {key} is defined by the app, but it is a reserved dynamic test harness capability. This is an application bug.")
-                capabilities[key] = val_doc
-
-            # NOTE: If you add to this list, add the capability name as a reserved
-            # capability within MooseApp::checkReservedCapability()
-            augment('scale_refine', [options.scaling, 'The number of refinements to do when scaling'])
-            if options.valgrind_mode == '':
-                augment('valgrind', [False, 'Not running with valgrind'])
-            else:
-                augment('valgrind', [options.valgrind_mode.lower(), 'Performing valgrind testing'])
-            augment('recover', [options.enable_recover, 'Recover testing'])
-            augment('heavy', [options.all_tests or options.heavy_tests, 'Running with heavy tests'])
-            augment('mpi_procs', [self.getProcs(options), 'Number of MPI processes'])
-            augment('num_threads', [self.getThreads(options), 'Number of threads'])
-            augment('compute_device', [options.compute_device, 'Compute device'])
-        else:
-            capabilities = None
-
         # If something has already deemed this test a failure
         if self.isFail():
             return False
 
         # Check if we only want to run syntax tests
-        if options.check_input and not self.specs['check_input']:
+        if options.check_input and not self.specs["check_input"]:
             self.setStatus(self.silent)
             return False
 
         # Check if we want to exclude syntax tests
-        if options.no_check_input and self.specs['check_input']:
+        if options.no_check_input and self.specs["check_input"]:
             self.setStatus(self.silent)
             return False
 
         # Are we running only tests in a specific group?
-        if options.group != 'ALL' and options.group not in self.specs['group']:
+        if options.group != "ALL" and options.group not in self.specs["group"]:
             self.setStatus(self.silent)
             return False
-        if options.not_group != '' and options.not_group in self.specs['group']:
+        if options.not_group != "" and options.not_group in self.specs["group"]:
             self.setStatus(self.silent)
             return False
 
@@ -649,247 +910,158 @@ class Tester(MooseObject, OutputInterface):
         # If --re then only test matching regexp. Needs to run before other SKIP methods
         # This also needs to be in its own bucket group. We normally print skipped messages.
         # But we do not want to print tests that didn't match regex.
-        if options.reg_exp and not match_regexp.search(self.specs['test_name']):
+        if options.reg_exp and not match_regexp.search(self.specs["test_name"]):
             self.setStatus(self.silent)
             return False
 
         # Short circuit method and run this test if we are ignoring all caveats
-        if options.ignored_caveats == 'all':
+        if options.ignored_caveats == "all":
             # Still, we should abide by the derived classes
             return self.checkRunnable(options)
 
         # Check for deleted tests
-        if self.specs.isValid('deleted'):
-            reasons['deleted'] = str(self.specs['deleted'])
+        if self.specs.isValid("deleted"):
+            reasons["deleted"] = str(self.specs["deleted"])
 
         # Skipped by external means (example: TestHarness part2 with --check-input)
         if self.isSkip() and self.getStatusMessage():
-            reasons['skip'] = self.getStatusMessage()
+            reasons["skip"] = self.getStatusMessage()
         # Test is skipped
-        elif self.specs.type('skip') is bool and self.specs['skip']:
+        elif self.specs.type("skip") is bool and self.specs["skip"]:
             # Backwards compatible (no reason)
-            reasons['skip'] = 'no reason'
-        elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
-            reasons['skip'] = self.specs['skip']
+            reasons["skip"] = "no reason"
+        elif self.specs.type("skip") is not bool and self.specs.isValid("skip"):
+            reasons["skip"] = self.specs["skip"]
         # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
-        elif (options.scaling) and self.specs['scale_refine'] == 0:
+        elif (options.scaling) and self.specs["scale_refine"] == 0:
             self.setStatus(self.silent)
             return False
         # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
-        elif options.valgrind_mode != '':
-            tmp_reason = ''
-            if self.specs['valgrind'].upper() != options.valgrind_mode.upper():
-                tmp_reason = 'Valgrind==' + self.specs['valgrind'].upper()
-            elif int(self.specs['min_threads']) > 1:
-                tmp_reason = 'Valgrind requires non-threaded'
+        elif options.valgrind_mode != "":
+            tmp_reason = ""
+            if self.specs["valgrind"].upper() != options.valgrind_mode.upper():
+                tmp_reason = "Valgrind==" + self.specs["valgrind"].upper()
+            elif int(self.specs["min_threads"]) > 1:
+                tmp_reason = "Valgrind requires non-threaded"
             elif self.specs["check_input"]:
-                tmp_reason = 'check_input==True'
-            if tmp_reason != '':
-                reasons['valgrind'] = tmp_reason
+                tmp_reason = "check_input==True"
+            if tmp_reason != "":
+                reasons["valgrind"] = tmp_reason
         # If we're running in recover mode skip tests that have recover = false
-        elif options.enable_recover and self.specs['recover'] == False:
-            reasons['recover'] = 'NO RECOVER'
-        elif options.enable_restep and self.specs['restep'] == False:
-            reasons['restep'] = 'NO RESTEP'
-
-        # AD size check
-        min_ad_size = self.specs['min_ad_size']
-        max_ad_size = self.specs['max_ad_size']
-        if not None in [min_ad_size, max_ad_size]:
-            ad_size = self.getCapability(options, 'ad_size')
-            assert isinstance(ad_size, int)
-            if min_ad_size is not None and int(min_ad_size) > ad_size:
-                reasons['min_ad_size'] = "Minimum AD size %d needed, but MOOSE is configured with %d" % (int(min_ad_size), ad_size)
-            if max_ad_size is not None and int(max_ad_size) < ad_size:
-                reasons['max_ad_size'] = "Maximum AD size %d needed, but MOOSE is configured with %d" % (int(max_ad_size), ad_size)
-
-        # Check for PETSc versions
-        (petsc_status, petsc_version) = util.checkPetscVersion(checks, self.specs)
-        if not petsc_status:
-            reasons['petsc_version'] = 'using PETSc ' + str(checks['petsc_version']) + ' REQ: ' + petsc_version
-
-        # Check for SLEPc versions
-        (slepc_status, slepc_version) = util.checkSlepcVersion(checks, self.specs)
-        if not slepc_status and len(self.specs['slepc_version']) != 0:
-            if slepc_version != None:
-                reasons['slepc_version'] = 'using SLEPc ' + str(checks['slepc_version']) + ' REQ: ' + slepc_version
-            elif slepc_version == None:
-                reasons['slepc_version'] = 'SLEPc is not installed'
-
-        # Check for ExodusII versions
-        (exodus_status, exodus_version) = util.checkExodusVersion(checks, self.specs)
-        if not exodus_status:
-            if checks['exodus_version'] != None:
-                reasons['exodus_version'] = 'using ExodusII ' + str(checks['exodus_version']) + ' REQ: ' + exodus_version
-            else:
-                reasons['exodus_version'] = 'Exodus version not detected. REQ: ' + exodus_version
-
-        # Check for VTK versions
-        (vtk_status, vtk_version) = util.checkVTKVersion(checks, self.specs)
-        if not vtk_status:
-            if checks['vtk_version'] != None:
-                reasons['vtk_version'] = 'using VTK ' + str(checks['vtk_version']) + ' REQ: ' + vtk_version
-            else:
-                reasons['vtk_version'] = 'VTK version not detected. REQ: ' + vtk_version
-
-        # Check for libtorch version
-        (libtorch_status, libtorch_version) = util.checkLibtorchVersion(checks, self.specs)
-        if not libtorch_status:
-            reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
+        elif options.enable_recover and self.specs["recover"] == False:
+            reasons["recover"] = "NO RECOVER"
+        elif options.enable_restep and self.specs["restep"] == False:
+            reasons["restep"] = "NO RESTEP"
 
         # Check for supported capabilities
-        capabilities_present = None
-        if self.specs['capabilities']:
-            assert capabilities is not None
-            capabilities_present = util.checkCapabilities(capabilities,
-                                                          self.specs['capabilities'],
-                                                          certain=self.specs['dynamic_capabilities'])[0]
-            if not capabilities_present:
-                reasons['missing_capabilities'] = 'Needs: ' + self.specs['capabilities']
-
-        # Check for required capabilities
-        if options._required_capabilities:
-            assert capabilities is not None
-
-            missing = False
-            if capabilities_present is not None:
-                modified_capabilities = deepcopy(capabilities)
-                for k, v in options._required_capabilities:
-                    assert k in capabilities
-                    modified_capabilities[k][0] = v
-
-                modified_present = util.checkCapabilities(modified_capabilities,
-                                                          self.specs['capabilities'],
-                                                          certain=True)[0]
-                missing = capabilities_present != modified_present
-
-            if not missing:
-                reasons['missing_required_capabilities'] = 'Missing required capabilities'
+        if capabilities_reason := self.checkCapabilities(options):
+            reasons["capabilities"] = capabilities_reason
 
         # PETSc and SLEPc is being explicitly checked above
-        local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode',
-                        'unique_ids', 'vtk', 'tecplot', 'petsc_debug', 'curl', 'superlu', 'mumps',
-                        'strumpack', 'unique_id', 'slepc',
-                        'boost', 'fparser_jit', 'parmetis', 'chaco', 'party', 'ptscotch',
-                        'threading', 'libpng', 'libtorch']
+        local_checks = [
+            "mesh_mode",
+        ]
 
         for check in local_checks:
             test_platforms = set()
-            operator_display = '!='
+            operator_display = "!="
             inverse_set = False
             for x in self.specs[check]:
-                if x[0] == '!':
+                if x[0] == "!":
                     if inverse_set:
-                        reasons[check] = 'Multiple Negation Unsupported'
+                        reasons[check] = "Multiple Negation Unsupported"
                     inverse_set = True
-                    operator_display = '=='
-                    x = x[1:] # Strip off the !
+                    operator_display = "=="
+                    x = x[1:]  # Strip off the !
                 x_upper = x.upper()
                 if x_upper in test_platforms:
-                    reasons[x_upper] = 'Duplicate Entry or Negative of Existing Entry'
+                    reasons[x_upper] = "Duplicate Entry or Negative of Existing Entry"
                 test_platforms.add(x.upper())
 
             match_found = len(test_platforms.intersection(checks[check])) > 0
             # Either we didn't find the match when we were using normal "include" logic
             # or we did find the match when we wanted to exclude it
             if inverse_set == match_found:
-                reasons[check] = re.sub(r'\[|\]', '', check).upper() + operator_display + ', '.join(test_platforms)
-
-        # Check for binary location
-        if (self.specs['installation_type'] and
-            self.specs['installation_type'][0].upper() not in checks['installation_type']):
-            reasons['installation_type'] = f'test requires "{self.specs["installation_type"][0]}" binary'
+                reasons[check] = (
+                    re.sub(r"\[|\]", "", check).upper()
+                    + operator_display
+                    + ", ".join(test_platforms)
+                )
 
         # Check for heavy tests
         if options.all_tests or options.heavy_tests:
-            if not self.specs['heavy'] and options.heavy_tests:
-                reasons['heavy'] = 'NOT HEAVY'
-        elif self.specs['heavy']:
-            reasons['heavy'] = 'HEAVY'
-
-        # There should only be one entry in self.specs['dof_id_bytes']
-        for x in self.specs['dof_id_bytes']:
-            if x != 'ALL' and not x in checks['dof_id_bytes']:
-                reasons['dof_id_bytes'] = '--with-dof-id-bytes!=' + x
+            if not self.specs["heavy"] and options.heavy_tests:
+                reasons["heavy"] = "NOT HEAVY"
+        elif self.specs["heavy"]:
+            reasons["heavy"] = "HEAVY"
 
         # Check to make sure depend files exist
-        for file in self.specs['depend_files']:
-            if not os.path.isfile(os.path.join(self.specs['base_dir'], file)):
-                reasons['depend_files'] = 'DEPEND FILES'
-
-        # We extract the registered apps only if we need them
-        if self.specs["required_applications"] and checks["registered_apps"] is None:
-            checks["registered_apps"] = util.getRegisteredApps(self.specs["executable"],
-                                                               self.specs["app_name"])
-
-        # Check to see if we have the required application names
-        for var in self.specs['required_applications']:
-            if var.upper() not in checks["registered_apps"]:
-                reasons['required_applications'] = 'App %s not registered in executable' % var
-                break
+        for file in self.specs["depend_files"]:
+            if not os.path.isfile(os.path.join(self.specs["base_dir"], file)):
+                reasons["depend_files"] = "DEPEND FILES"
 
         # Check to make sure required submodules are initialized
-        for var in self.specs['required_submodule']:
+        for var in self.specs["required_submodule"]:
             if var not in checks["submodules"]:
-                reasons['required_submodule'] = '%s submodule not initialized' % var
+                reasons["required_submodule"] = "%s submodule not initialized" % var
 
         # Check to make sure environment variable exists
-        for var in self.specs['env_vars']:
+        for var in self.specs["env_vars"]:
             if not os.environ.get(var):
-                reasons['env_vars'] = 'ENV VAR NOT SET'
+                reasons["env_vars"] = "ENV VAR NOT SET"
 
-        for var in self.specs['env_vars_not_set']:
+        for var in self.specs["env_vars_not_set"]:
             if os.environ.get(var):
-                reasons['env_vars'] = 'ENV VAR SET'
+                reasons["env_vars"] = "ENV VAR SET"
 
         # Check for display
-        if self.specs['display_required'] and not os.getenv('DISPLAY', False):
-            reasons['display_required'] = 'NO DISPLAY'
+        if self.specs["display_required"] and not os.getenv("DISPLAY", False):
+            reasons["display_required"] = "NO DISPLAY"
 
         # Check python version
-        py_version = self.specs['python']
-        if (py_version is not None):
+        py_version = self.specs["python"]
+        if py_version is not None:
             if isinstance(py_version, int) and (py_version != sys.version_info[0]):
-                reasons['python'] = 'PYTHON != {}'.format(py_version)
-            elif isinstance(py_version, float) and (py_version != float('{}.{}'.format(*sys.version_info[0:2]))):
-                reasons['python'] = 'PYTHON != {}'.format(py_version)
+                reasons["python"] = "PYTHON != {}".format(py_version)
+            elif isinstance(py_version, float) and (
+                py_version != float("{}.{}".format(*sys.version_info[0:2]))
+            ):
+                reasons["python"] = "PYTHON != {}".format(py_version)
             elif isinstance(py_version, str):
-                ver = py_version.split('.')
+                ver = py_version.split(".")
                 if any(sys.version_info[i] != int(v) for i, v in enumerate(ver)):
-                    reasons['python'] = 'PYTHON != {}'.format(py_version)
+                    reasons["python"] = "PYTHON != {}".format(py_version)
 
         # Check python packages
-        py_packages = self.specs['required_python_packages']
+        py_packages = self.specs["required_python_packages"]
         if py_packages is not None:
             missing = mooseutils.check_configuration(py_packages.split(), message=False)
             if missing:
-                reasons['python_packages_required'] = ', '.join(['{}'.format(p) for p in missing])
+                reasons["python_packages_required"] = ", ".join(
+                    ["{}".format(p) for p in missing]
+                )
 
         # Check for programs
-        programs = self.specs['requires']
-        if (programs is not None):
+        programs = self.specs["requires"]
+        if programs is not None:
             missing = []
             for prog in programs.split():
                 if shutil.which(prog) is None:
                     missing.append(prog)
             if missing:
-                reasons['requires'] = ', '.join(['no {}'.format(p) for p in missing])
+                reasons["requires"] = ", ".join(["no {}".format(p) for p in missing])
 
         # Verify working_directory is relative. We'll check to make sure it's available just in time.
-        if self.specs['working_directory']:
-            if self.specs['working_directory'][:1] == os.path.sep:
-                self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
+        if self.specs["working_directory"]:
+            if self.specs["working_directory"][:1] == os.path.sep:
+                self.setStatus(self.fail, "ABSOLUTE PATH DETECTED")
             # We can't offer the option of reading output files outside of initial TestDir
-            if '..' in self.specs['working_directory'] and options.sep_files:
-                reasons['working_directory'] = '--sep-files enabled'
-
-        # Explicitly skip HPC tests
-        if not self.specs['hpc'] and options.hpc:
-            reasons['hpc'] = 'hpc=false'
+            if ".." in self.specs["working_directory"] and options.sep_files:
+                reasons["working_directory"] = "--sep-files enabled"
 
         # Use shell not supported for HPC
-        if self.specs['use_shell'] and options.hpc:
-            reasons['use_shell'] = 'no use_shell with hpc'
+        if self.specs["use_shell"] and options.hpc:
+            reasons["use_shell"] = "no use_shell with hpc"
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
@@ -904,18 +1076,17 @@ class Tester(MooseObject, OutputInterface):
                 if key.lower() not in caveat_list:
                     tmp_reason.append(value)
 
-            flat_reason = ', '.join(tmp_reason)
+            flat_reason = ", ".join(tmp_reason)
             self.addCaveats(flat_reason)
 
             # Reasons we wish to silence tests
-            if 'deleted' in reasons.keys():
-                if options.extra_info:
-                    self.setStatus(self.deleted)
-                else:
-                    self.setStatus(self.silent)
-            elif ('heavy' in reasons.keys()
-                  and options.heavy_tests
-                  and not self.specs['heavy']):
+            if "deleted" in reasons.keys():
+                self.setStatus(self.silent)
+            elif (
+                "heavy" in reasons.keys()
+                and options.heavy_tests
+                and not self.specs["heavy"]
+            ):
                 self.setStatus(self.silent)
 
             # Failed already (cannot run)
@@ -940,38 +1111,40 @@ class Tester(MooseObject, OutputInterface):
         return False
 
     def run(self, options, exit_code, runner_output):
-        output = self.processResults(self.getMooseDir(), options, exit_code, runner_output)
+        output = self.processResults(
+            self.getMooseDir(), options, exit_code, runner_output
+        )
         if output:
-            output = output.rstrip() + '\n\n'
+            output = output.rstrip() + "\n\n"
 
         # Load metadata if it exists
         if not self.isSkip() and self.json_metadata:
-            output += 'Loading JSON metadata...\n'
+            output += "Loading JSON metadata...\n"
             if exit_code == 0:
                 for key, entry in self.json_metadata.items():
                     path = os.path.join(self.getTestDir(), entry.path)
-                    prefix = f'  {key} ({path}): '
+                    prefix = f"  {key} ({path}): "
                     if os.path.isfile(path):
                         try:
-                            with open(path, 'r') as f:
+                            with open(path, "r") as f:
                                 entry.data = json.load(f)
                         except:
-                            output += f'{prefix}cannot be loaded\n'
-                            self.setStatus(self.fail, 'BAD METADATA')
+                            output += f"{prefix}cannot be loaded\n"
+                            self.setStatus(self.fail, "BAD METADATA")
                         else:
-                            output += f'{prefix}loaded\n'
+                            output += f"{prefix}loaded\n"
                     else:
-                        output += f'{prefix}does not exist\n'
-                        self.setStatus(self.fail, 'MISSING METADATA')
+                        output += f"{prefix}does not exist\n"
+                        self.setStatus(self.fail, "MISSING METADATA")
             else:
-                output += '  Not loading due to non-zero exit code\n'
-            output += '\n'
+                output += "  Not loading due to non-zero exit code\n"
+            output += "\n"
 
         # If the tester requested to be skipped at the last minute, report that.
         if self.isSkip():
-            output += f'\nTester skipped, reason: {self.getStatusMessage()}\n'
+            output += f"\nTester skipped, reason: {self.getStatusMessage()}\n"
         elif self.isFail():
-            output += f'\nTester failed, reason: {self.getStatusMessage()}\n'
+            output += f"\nTester failed, reason: {self.getStatusMessage()}\n"
 
         self.setOutput(output)
 
@@ -982,10 +1155,27 @@ class Tester(MooseObject, OutputInterface):
         if options.hpc_scatter_procs:
             procs = self.getProcs(options)
             if procs > 1 and procs <= options.hpc_scatter_procs:
-                return 'scatter'
-        return 'free'
+                return "scatter"
+        return "free"
 
     def augmentEnvironment(self, options) -> dict:
         """Get environment variables that should be augmented while running."""
         # Explicitly set OMP_NUM_THREADS to the number of threads
         return {"OMP_NUM_THREADS": f"{self.getThreads(options)}"}
+
+    def getOutputPathPrefix(self, options) -> str:
+        """
+        Returns a file prefix that is unique to this test
+
+        Should be used for all TestHarness produced files for this test
+        """
+        return os.path.join(self.getOutputDirectory(options), self.getTestNameForFile())
+
+    def getOutputDirectory(self, options):
+        """Get the directory for output for this job"""
+        if not options.output_dir:
+            return self.getTestDir()
+        return os.path.join(
+            options.output_dir,
+            self.getTestName()[: -len(self.getTestNameShort()) - 1],
+        )

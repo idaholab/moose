@@ -324,6 +324,36 @@ private:
 };
 
 /**
+ * Scoped helper for setting Moose::_deprecated_is_error during this scope.
+ *
+ * Cannot be used within threads.
+ */
+class ScopedDeprecatedIsError
+{
+public:
+  /**
+   * Default constructor, which sets Moose::_deprecated_is_error = true
+   */
+  ScopedDeprecatedIsError();
+
+  /**
+   * Specialized constructor, which sets Moose::_deprecated_is_error
+   * based on the argument \p deprecated_is_error
+   */
+  ScopedDeprecatedIsError(const bool deprecated_is_error);
+
+  /**
+   * Destructor, which sets Moose::_deprecated_is_error to what it
+   * was upon construction
+   */
+  ~ScopedDeprecatedIsError();
+
+private:
+  /// The value of Moose::_throw_on_error at construction
+  const bool _deprecated_is_error_before;
+};
+
+/**
  * Get the prefix to be associated with a hit node for a message
  */
 std::string hitMessagePrefix(const hit::Node & node);

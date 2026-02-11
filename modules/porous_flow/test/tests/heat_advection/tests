@@ -3,7 +3,6 @@
     type = RunException
     input = except1.i
     expect_err = "PorousFlowFullySaturatedUpwindHeatAdvection should not be used for multi-phase scenarios as it does not include relative-permeability effects"
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturatedUpwindHeatAdvection.md'
     requirement = 'The system shall produce an error when the kernel describing heat advection by a single-phase fluid is used in a multi-phase situation.'
@@ -12,7 +11,6 @@
     type = CSVDiff
     input = heat_advection_1d_fully_saturated.i
     csvdiff = 'heat_advection_1d_fully_saturated_T_0010.csv heat_advection_1d_fully_saturated_T_0060.csv'
-    threading = '!pthreads'
     issues = '#7984'
     design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid, using no numerical stabilization'
@@ -23,7 +21,6 @@
     prereq = heat_advection_1d_fully_saturated
     cli_args = 'PorousFlowFullySaturated/stabilization=none Outputs/file_base=heat_advection_1d_fully_saturated'
     csvdiff = 'heat_advection_1d_fully_saturated_T_0010.csv heat_advection_1d_fully_saturated_T_0060.csv'
-    threading = '!pthreads'
     issues = '#10426'
     design = 'PorousFlowFullySaturated.md porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid, using no numerical stabilization, and the user should be able to activate this stabilization using the PorousFlow Action system.'
@@ -32,7 +29,6 @@
     type = CSVDiff
     input = heat_advection_1d.i
     csvdiff = 'heat_advection_1d_csv_T_0010.csv heat_advection_1d_csv_T_0060.csv'
-    threading = '!pthreads'
     issues = '#7984'
     design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid, using full-upwinding for numerical stabilization.'
@@ -41,7 +37,6 @@
     type = CSVDiff
     input = heat_advection_1d_fv.i
     csvdiff = 'heat_advection_1d_fv_csv_T_0061.csv'
-    threading = '!pthreads'
     issues = '#7984 #21275'
     design = 'PorousFlowHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid using a finite volume discretization.'
@@ -52,7 +47,6 @@
     prereq = heat_advection_1d
     cli_args = 'Outputs/file_base=heat_advection_1d_csv'
     csvdiff = 'heat_advection_1d_csv_T_0010.csv heat_advection_1d_csv_T_0060.csv'
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturatedUpwindHeatAdvection.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid, using full-upwinding for numerical stabilization, in fully-saturated single-phase systems.'
@@ -63,7 +57,6 @@
     prereq = heat_advection_1d_fullsat
     cli_args = 'PorousFlowFullySaturated/stabilization=Full Outputs/file_base=heat_advection_1d_csv'
     csvdiff = 'heat_advection_1d_csv_T_0010.csv heat_advection_1d_csv_T_0060.csv'
-    threading = '!pthreads'
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md PorousFlowEnergyTimeDerivative.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid, using full-upwinding for numerical stabilization, in fully-saturated single-phase systems, and the user should be able to activate this stabilization using the PorousFlow Action system.'
@@ -72,7 +65,6 @@
     type = CSVDiff
     input = heat_advection_1d_KT.i
     csvdiff = 'heat_advection_1d_KT_T_0010.csv heat_advection_1d_KT_T_0060.csv'
-    threading = '!pthreads'
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall correctly advect heat energy with a moving fluid, using the Kuzmin-Turek for numerical stabilization.'
@@ -83,7 +75,6 @@
     prereq = heat_advection_1d_KT
     cli_args = 'PorousFlowFullySaturated/stabilization=KT Outputs/file_base=heat_advection_1d_KT'
     csvdiff = 'heat_advection_1d_KT_T_0010.csv heat_advection_1d_KT_T_0060.csv'
-    threading = '!pthreads'
     issues = '#10426'
     design = 'PorousFlowFullySaturated.md porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid, and the user should be able to activiate this stabilization using the PorousFlow Action system.'
@@ -95,7 +86,6 @@
     csvdiff = 'heat_advection_1d_KT_threads_T_0010.csv heat_advection_1d_KT_threads_T_0060.csv'
     min_threads = 3
     max_threads = 3
-    threading = '!pthreads'
     issues = '#10426'
     design = 'porous_flow/numerical_diffusion.md porous_flow/kt_worked.md porous_flow/tests/heat_advection/heat_advection_tests.md'
     requirement = 'The system shall implement Kuzmin-Turek stabilization for PorousFlow simulations involving the advection of heat energy in a moving fluid.'

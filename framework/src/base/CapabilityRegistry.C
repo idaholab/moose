@@ -7,17 +7,82 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "CapabilityRegistry.h"
+
+#include "CapabilityException.h"
+#include "MooseStringUtils.h"
+
 #include "peglib.h"
 
-#include "CapabilityUtils.h"
-#include "MooseStringUtils.h"
-#include <vector>
+#include <regex>
+#include <utility>
 
-namespace CapabilityUtils
+namespace Moose::internal
 {
 
-Result
-check(std::string requirements, const Registry & app_capabilities)
+const std::set<std::string, std::less<>> CapabilityRegistry::augmented_capability_names{
+    // TestHarness.getCapabilities()
+    "hpc",
+    "machine",
+    "library_mode",
+    // TestHarness.testers.RunApp.getAugmentedCapabilities()
+    "mpi_procs",
+    "num_threads"};
+
+Capability &
+CapabilityRegistry::add(const std::string_view name,
+                        const Capability::Value & value,
+                        const std::string_view doc)
+{
+  auto it_pair = _registry.lower_bound(name);
+  if (it_pair != _registry.end() && it_pair->first == name)
+  {
+    auto & capability = it_pair->second;
+    if (capability.getValue() != value || capability.getDoc() != doc)
+      throw CapabilityException("Capability '" + std::string(name) +
+                                "' already exists and is not equal");
+    return capability;
+  }
+
+  return _registry
+      .emplace_hint(it_pair,
+                    std::piecewise_construct,
+                    std::forward_as_tuple(name),
+                    std::forward_as_tuple(name, value, doc))
+      ->second;
+}
+
+const Capability *
+CapabilityRegistry::query(std::string capability) const
+{
+  capability = MooseUtils::toLower(capability);
+  if (const auto it = _registry.find(capability); it != _registry.end())
+    return &it->second;
+  return nullptr;
+}
+
+const Capability &
+CapabilityRegistry::get(const std::string & capability) const
+{
+  if (const auto capability_ptr = query(capability))
+    return *capability_ptr;
+  throw CapabilityException("Capability '" + capability + "' not registered");
+}
+
+[[noreturn]] void
+checkException(const peg::SemanticValues & vs,
+               const std::string & message,
+               const std::optional<Capability> capability = {})
+{
+  std::string msg = "Capability statement '" + vs.token_to_string() + "': ";
+  if (capability)
+    msg += "capability '" + capability->toString() + "' ";
+  msg += message;
+  throw CapabilityException(msg);
+}
+
+CapabilityRegistry::CheckResult
+CapabilityRegistry::check(std::string requirements) const
 {
   using namespace peg;
 
@@ -32,9 +97,9 @@ check(std::string requirements, const Registry & app_capabilities)
       break;
   }
   if (requirements.length() == 0)
-    return {CapabilityUtils::CERTAIN_PASS, "Empty requirements", ""};
+    return {CheckState::CERTAIN_PASS, "Empty requirements", ""};
 
-  parser parser(R"(
+  static parser parser(R"(
     Expression    <-  _ Bool _ LogicOperator _ Expression / Bool _
     Bool          <-  Comparison / '!' Bool / '!' Identifier / Identifier / '(' _ Expression _ ')'
     Comparison    <-  Identifier _ Operator _ Version / Identifier _ Operator _ String
@@ -66,10 +131,9 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 1: // Number
         return std::vector<int>{std::any_cast<int>(vs[0])};
-
-      default:
-        throw CapabilityException("Unknown Number match");
     }
+
+    checkException(vs, "unknown number match.");
   };
 
   enum LogicOperator
@@ -85,7 +149,7 @@ check(std::string requirements, const Registry & app_capabilities)
       return OP_AND;
     if (op == "|")
       return OP_OR;
-    throw CapabilityException("Unknown logic operator.");
+    checkException(vs, "unknown logic operator.");
   };
 
   enum Operator
@@ -113,29 +177,29 @@ check(std::string requirements, const Registry & app_capabilities)
       return OP_NOT_EQ;
     if (op == "=" || op == "==")
       return OP_EQ;
-    throw CapabilityException("Unknown operator '", op, "'.");
+    checkException(vs, "unknown operator.");
   };
 
   parser["String"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
   parser["Identifier"] = [](const SemanticValues & vs) { return vs.token_to_string(); };
 
-  parser["Comparison"] = [&app_capabilities](const SemanticValues & vs)
+  parser["Comparison"] = [this](const SemanticValues & vs)
   {
     const auto left = std::any_cast<std::string>(vs[0]);
     const auto op = std::any_cast<Operator>(vs[1]);
 
     // check existence
-    const auto it = app_capabilities.find(left);
-    if (it == app_capabilities.end())
+    const auto capability_ptr = query(left);
+    if (!capability_ptr)
       // return an unknown if the capability does not exist, this is important as it
       // stays unknown upon negation
       return CheckState::UNKNOWN;
 
     // capability is registered by the app
-    const auto & [app_value, doc] = it->second;
+    const auto & capability = *capability_ptr;
 
     // explicitly false causes any comparison to fail
-    if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
+    if (const auto bool_ptr = capability.queryBoolValue(); (bool_ptr && !(*bool_ptr)))
       return CheckState::CERTAIN_FAIL;
 
     // comparator
@@ -159,32 +223,32 @@ check(std::string requirements, const Registry & app_capabilities)
       return false;
     };
 
+    // version comparison
+    std::vector<int> app_value_version;
+
     switch (vs.choice())
     {
       case 0: // Identifier _ Operator _ Version
       {
         // int comparison
         const auto right = std::any_cast<std::vector<int>>(vs[2]);
-        if (std::holds_alternative<int>(app_value))
+        if (const auto int_ptr = capability.queryIntValue())
         {
           if (right.size() != 1)
-            throw CapabilityException("Expected an integer value in comparison");
+            checkException(vs, "cannot be compared to a version.", capability);
 
-          return comp(op, std::get<int>(app_value), right[0]) ? CheckState::CERTAIN_PASS
-                                                              : CheckState::CERTAIN_FAIL;
+          return comp(op, *int_ptr, right[0]) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
         }
 
-        // version comparison
-        std::vector<int> app_value_version;
+        const auto string_ptr = capability.queryStringValue();
+        if (!string_ptr)
+          checkException(vs,
+                         "cannot be compared to a " +
+                             std::string(right.size() == 1 ? "number" : "version number") + ".",
+                         capability);
 
-        if (!std::holds_alternative<std::string>(app_value))
-          throw CapabilityException(
-              right.size() == 1 ? "Cannot compare capability " + left + " to a number."
-                                : "Cannot compare capability " + left + " to a version number.");
-
-        if (!MooseUtils::tokenizeAndConvert(
-                std::get<std::string>(app_value), app_value_version, "."))
-          throw CapabilityException("Expected a version number.");
+        if (!MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
+          checkException(vs, "cannot be compared to a version.", capability);
 
         // compare versions
         return comp(op, app_value_version, right) ? CheckState::CERTAIN_PASS
@@ -193,22 +257,45 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 1: // Identifier _ Operator _ String
       {
-        const auto right = std::any_cast<std::string>(vs[2]);
-        // the app value has to be a string
-        if (!std::holds_alternative<std::string>(app_value))
-          throw CapabilityException("Unexpected comparison to a string.");
+        // here we would check for valid options and throw if not valid
+        const auto right = MooseUtils::toLower(std::any_cast<std::string>(vs[2]));
+        // the capability value has to be a string
+        const auto string_ptr = capability.queryStringValue();
+        if (!string_ptr)
+          checkException(vs, "cannot be compared to a string.", capability);
 
-        return comp(op, std::get<std::string>(app_value), MooseUtils::toLower(right))
-                   ? CheckState::CERTAIN_PASS
-                   : CheckState::CERTAIN_FAIL;
+        // If this capability has an enumeration, make sure a valid choice is used
+        if (!capability.hasEnumeration(right))
+          checkException(vs,
+                         "'" + right + "' invalid for capability '" + left +
+                             "'; valid values: " + capability.enumerationToString());
+
+        // Capability is a version
+        if (MooseUtils::tokenizeAndConvert(*string_ptr, app_value_version, "."))
+          checkException(vs, "cannot be compared to a string.", capability);
+
+        return comp(op, *string_ptr, right) ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
       }
     }
 
-    throw CapabilityException("Failed comparison.");
+    checkException(vs, "failed comparison.", capability);
   };
 
-  parser["Bool"] = [&app_capabilities](const SemanticValues & vs)
+  parser["Bool"] = [this](const SemanticValues & vs)
   {
+    // Helper for erroring of a capability doesn't support a boolean
+    const auto check_explicit = [&vs](const Capability & capability)
+    {
+      if (capability.getExplicit())
+      {
+        std::string message = "capability '" + capability.getName() +
+                              "' requires a value and cannot be used in a boolean expression";
+        if (capability.queryEnumeration())
+          message += "; valid values: " + capability.enumerationToString();
+        checkException(vs, message);
+      }
+    };
+
     switch (vs.choice())
     {
       case 0: // Comparison
@@ -232,12 +319,12 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 2: // '!' Identifier
       {
-        const auto it = app_capabilities.find(std::any_cast<std::string>(vs[0]));
-        if (it != app_capabilities.end())
+        if (const auto capability_ptr = query(std::any_cast<std::string>(vs[0])))
         {
-          const auto app_value = it->second.first;
-          if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
-            return CheckState::CERTAIN_PASS;
+          const auto & capability = *capability_ptr;
+          if (const auto bool_ptr = capability.queryBoolValue())
+            return *bool_ptr ? CheckState::CERTAIN_FAIL : CheckState::CERTAIN_PASS;
+          check_explicit(capability);
           return CheckState::CERTAIN_FAIL;
         }
         return CheckState::POSSIBLE_PASS;
@@ -245,12 +332,12 @@ check(std::string requirements, const Registry & app_capabilities)
 
       case 3: // Identifier
       {
-        const auto it = app_capabilities.find(std::any_cast<std::string>(vs[0]));
-        if (it != app_capabilities.end())
+        if (const auto capability_ptr = query(std::any_cast<std::string>(vs[0])))
         {
-          const auto app_value = it->second.first;
-          if (std::holds_alternative<bool>(app_value) && std::get<bool>(app_value) == false)
-            return CheckState::CERTAIN_FAIL;
+          const auto & capability = *capability_ptr;
+          if (const auto bool_ptr = capability.queryBoolValue())
+            return *bool_ptr ? CheckState::CERTAIN_PASS : CheckState::CERTAIN_FAIL;
+          check_explicit(capability);
           return CheckState::CERTAIN_PASS;
         }
         return CheckState::POSSIBLE_FAIL;
@@ -309,13 +396,11 @@ check(std::string requirements, const Registry & app_capabilities)
   // (4) Parse
   parser.enable_packrat_parsing(); // Enable packrat parsing.
 
-  CheckState state = CheckState::CERTAIN_FAIL;
-  if (!parser.parse(requirements, state))
+  CheckResult result;
+  result.state = CheckState::CERTAIN_FAIL;
+  if (!parser.parse(requirements, result.state))
     throw CapabilityException("Unable to parse requested capabilities '", requirements, "'.");
 
-  std::string reason;
-  std::string doc;
-
-  return {state, reason, doc};
+  return result;
 }
 } // namespace CapabilityUtils

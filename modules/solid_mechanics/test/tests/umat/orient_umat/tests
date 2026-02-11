@@ -4,15 +4,15 @@
     type = 'Exodiff'
     input = 'shear_top_umat.i'
     exodiff = 'shear_top_umat_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [hw_reference_umat_output]
     type = 'RunApp'
     input = 'shear_top_umat.i'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     # output from MOOSE, from timestep 5, diffs from Abaqus output in 6th decimal or so, note order in "umat" order, not MOOSE order
     expect_out = 'STRESS_ 1   -0.1757425\n STRESS_ 2   -0.5954772\n STRESS_ 3   -0.0436915\n STRESS_ 4    0.9835696\n STRESS_ 5    0.0729212\n STRESS_ 6   -0.1727900\n '
@@ -24,8 +24,6 @@
     #             STRAIN_ 1    0.0000123   DSTRAIN_ 1    0.0000037   STRAIN_ 2   -0.0004245   DSTRAIN_ 2   -0.0001052  STRAIN_ 3    0.0001507   DSTRAIN_ 3    0.0000370
     #             STRAIN_ 4    0.0020466   DSTRAIN_ 4    0.0005107   STRAIN_ 5    0.0001513   DSTRAIN_ 5    0.0000383  STRAIN_ 6   -0.0003596   DSTRAIN_ 6   -0.0000896
     #             COORDS_ 1    0.3915195   COORDS_ 2    0.3857086    COORDS_ 3    0.3873709
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 
   # rotated isotropic material module should give the same material (Cauchy) stress as above
@@ -34,10 +32,10 @@
     input = 'shear_top_umat.i'
     exodiff = 'shear_top_umat_out.e'
     prereq = 'hw_reference'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'Materials/umat/orientation="-30. 0. 0."'
-    installation_type = in_tree
   []
   # but the stress computed in the intermediate reference frame should be different
   # values should closely match Abaqus using *ORIENTATION in input file like:
@@ -47,7 +45,8 @@
   [hw_rotated_umat_output]
     type = 'RunApp'
     input = 'shear_top_umat.i'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'Materials/umat/orientation="-30. 0. 0."'
     expect_out = 'STRESS_ 1    0.5677315\n STRESS_ 2   -1.3387362\n STRESS_ 3   -0.0439064\n STRESS_ 4    0.3203801\n STRESS_ 5   -0.0219378\n STRESS_ 6   -0.1868725\n '
@@ -59,7 +58,6 @@
     #             STRAIN_ 1    0.0007858   DSTRAIN_ 1    0.0001968  STRAIN_ 2   -0.0011977    DSTRAIN_ 2   -0.0002982   STRAIN_ 3    0.0001505   DSTRAIN_ 3    0.0000369
     #             STRAIN_ 4    0.0006666   DSTRAIN_ 4    0.0001664  STRAIN_ 5   -0.0000461    DSTRAIN_ 5   -0.0000109   STRAIN_ 6   -0.0003887   DSTRAIN_ 6   -0.0000972
     #             COORDS_ 1    0.3915195   COORDS_ 2    0.3857086   COORDS_ 3    0.3873709
-    installation_type = in_tree
   []
 
   # in this case, zero material model rotation applied, but defining *any* orientation causes the stress to be calculated in the intermediate (rotated) frame
@@ -69,10 +67,10 @@
     input = 'shear_top_umat.i'
     exodiff = 'shear_top_umat_out.e'
     prereq = 'hw_rotated'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'Materials/umat/orientation="0. 0. 0."'
-    installation_type = in_tree
   []
   # but the stress computed in the intermediate reference frame should be different
   # values should closely match Abaqus using *ORIENTATION in input file like:
@@ -82,7 +80,8 @@
   [hw_zero_rotated_umat_output]
     type = 'RunApp'
     input = 'shear_top_umat.i'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'Materials/umat/orientation="0. 0. 0."'
     expect_out = 'STRESS_ 1   -0.1863428\n STRESS_ 2   -0.5846620\n STRESS_ 3   -0.0439064\n STRESS_ 4    0.9857148\n STRESS_ 5    0.0744375\n STRESS_ 6   -0.1728053\n '
@@ -94,7 +93,6 @@
     #             STRAIN_ 1    0.0000012   DSTRAIN_ 1    0.0000010  STRAIN_ 2   -0.0004132   DSTRAIN_ 2   -0.0001024  STRAIN_ 3    0.0001505   DSTRAIN_ 3    0.0000369
     #             STRAIN_ 4    0.0020510   DSTRAIN_ 4    0.0005118  STRAIN_ 5    0.0001544   DSTRAIN_ 5    0.0000391  STRAIN_ 6   -0.0003597   DSTRAIN_ 6   -0.0000896
     #             COORDS_ 1    0.3915195   COORDS_ 2    0.3857086   COORDS_ 3    0.3873709
-    installation_type = in_tree
   []
 
   # spot checked results from using Rashid kinematics to be within ~0.01% at final timestep, about what is expected for the two methods
@@ -102,10 +100,9 @@
     type = 'Exodiff'
     input = 'shear_top_umat.i'
     exodiff = 'shear_top_umat_rashid_out.e'
-    library_mode = 'DYNAMIC'
+    # installation_type=in_tree: see #25279
+    capabilities = 'library_mode=dynamic & installation_type=in_tree'
     valgrind = 'NONE'
     cli_args = 'GlobalParams/decomposition_method=TaylorExpansion Materials/umat/orientation="-30. 0. 0." Outputs/file_base=shear_top_umat_rashid_out'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
 []

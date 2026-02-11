@@ -2,33 +2,25 @@
   issues = '#15640'
   design = 'navier_stokes/insfv.md INSFVMomentumViscousSourceRZ.md'
   [2d-rc-diri]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = Test2DRC
-    capabilities = 'method!=dbg'
     min_parallel = 2
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in 2D cylindrical coordinates, using a Rhie-Chow scheme, dirichlet boundary conditions for both variables, and demonstrate second order convergence for the velocity and pressure.'
-    required_python_packages = 'pandas matplotlib'
     heavy = true
   []
   [rz-viscous-source]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestRZViscousSource
-    capabilities = 'method!=dbg'
     min_parallel = 2
     requirement = 'The system shall recover the manufactured analytic solution for an axisymmetric FV solve of the Navier Stokes equations with space-dependent material properties and the symmetric stress tensor without the bulk term.'
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
   []
   [rz-viscous-source-physics]
-    type = PythonUnitTest
+    type = MMSTest
     input = test.py
     test_case = TestRZViscousSourcePhysics
-    capabilities = 'method!=dbg'
     min_parallel = 2
     requirement = 'Physics system syntax shall recover the manufactured axisymmetric solution when the automatic RZ viscous source term is enabled.'
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree
   []
 []

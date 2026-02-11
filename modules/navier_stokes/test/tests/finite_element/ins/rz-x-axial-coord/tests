@@ -29,7 +29,7 @@
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization,'
       exodiff = 'hand-coded-jac-pipe-flow_out.e'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
     [natural]
       type = 'Exodiff'
@@ -37,7 +37,7 @@
       detail = 'in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via automatic differentiation, with PSPG and SUPG stabilization,'
       exodiff = 'pipe-flow-natural-bc_out.e'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
     [natural_hand]
       type = 'Exodiff'
@@ -45,7 +45,7 @@
       detail = 'and in which the pressure is constrained with natural boundary conditions for the velocity equations on the outlet, using a Jacobian computed via user-provided functions, with PSPG and SUPG stabilization.'
       exodiff = 'hand-coded-jac-pipe-flow-natural-bc_out.e'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
   []
   [rz_traction]
@@ -57,7 +57,7 @@
       exodiff = 'dirichlet-unstabilized-traction.e'
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via automatic differentiation, without PSPG and SUPG stabilization,'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
     [dirichlet_unstablized_hand]
       type = 'Exodiff'
@@ -66,7 +66,7 @@
       exodiff = 'hand-coded-jac-dirichlet-unstabilized-traction.e'
       detail = 'in which the pressure is constrained with a Dirichlet boundary condition on the outlet, using a Jacobian computed via user-provided functions, without PSPG and SUPG stabilization,'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
     [dirichlet]
       type = 'Exodiff'
@@ -89,7 +89,7 @@
       exodiff = 'natural-traction.e'
       cli_args = 'GlobalParams/viscous_form=traction Outputs/file_base=natural-traction'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
     [natural_hand]
       type = 'Exodiff'
@@ -98,7 +98,7 @@
       exodiff = 'natural-hand-traction.e'
       cli_args = 'GlobalParams/laplace=false Kernels/x_momentum/type=INSMomentumTractionFormRZ Kernels/y_momentum/type=INSMomentumTractionFormRZ Outputs/file_base=natural-hand-traction'
       # PR #26848. Clang 16 Apple Si is not compatible.
-      machine = X86_64
+      capabilities = 'machine=x86_64'
     []
   []
 []

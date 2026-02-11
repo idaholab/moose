@@ -280,7 +280,7 @@ Boundary2DDelaunayGenerator::General2DDelaunay(
     for (const auto & elem : hole_mesh_2d->active_element_ptr_range())
       for (const auto & i_side : elem->side_index_range())
         if (elem->neighbor_ptr(i_side) == nullptr)
-          hole_mesh_2d->get_boundary_info().add_side(elem, i_side, mesh_2d_ext_bdry);
+          hole_mesh_2d->get_boundary_info().add_side(elem, i_side, hole_mesh_2d_ext_bdry);
     const auto new_hole_block_id_1d = MooseMeshUtils::getNextFreeSubdomainID(*hole_mesh_2d);
     MooseMeshUtils::createSubdomainFromSidesets(hole_mesh_2d,
                                                 {std::to_string(hole_mesh_2d_ext_bdry)},

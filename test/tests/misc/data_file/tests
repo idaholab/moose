@@ -10,7 +10,7 @@
       cli_args = 'UserObjects/data_file/data_file=README.md'
       expect_out = 'data_file_relative="../../../../framework/data/README.md"'
       detail = 'in-tree builds'
-      installation_type = in_tree
+      capabilities = 'installation_type=in_tree'
     []
     [relocated]
       type = RunApp
@@ -18,7 +18,7 @@
       cli_args = 'UserObjects/data_file/data_file=README.md'
       expect_out = 'data_file_relative_to_binary="../share/moose/data/README.md"'
       detail = 'and in installed builds'
-      installation_type = relocated
+      capabilities = 'installation_type=relocated'
     []
   []
   [param_not_found]
@@ -36,7 +36,7 @@
       cli_args = 'UserObjects/data_file/data_file_by_path=README.md'
       expect_out = 'Using data file \'(.*)/framework/data/README.md\' from moose data(.*)data_file_by_path_relative="../../../../framework/data/README.md"'
       detail = 'in-tree builds'
-      installation_type = in_tree
+      capabilities = 'installation_type=in_tree'
     []
     [relocated]
       type = RunApp
@@ -44,7 +44,7 @@
       cli_args = 'UserObjects/data_file/data_file_by_path=README.md'
       expect_out = 'Using data file \'(.*)/share/moose/data/README.md\' from moose data(.*)data_file_by_path_relative_to_binary="../share/moose/data/README.md"'
       detail = 'and in installed builds'
-      installation_type = relocated
+      capabilities = 'installation_type=relocated'
     []
   []
   [by_path_not_found]
@@ -80,7 +80,7 @@
     input = test.i
     cli_args = 'UserObjects/data_file/data_file=README.md --show-data-params'
     expect_out = 'UserObjects/data_file/data_file = (.*)framework/data/README.md'
-    installation_type = in_tree
+    capabilities = 'installation_type=in_tree'
     requirement = 'The system shall support the output of all consumed data files via a parameter in designated data directories'
   []
   [show_data_paths]
@@ -91,7 +91,7 @@
       cli_args = '--show-data-paths'
       expect_out = 'moose: (.*)/framework/data'
       detail = 'in-tree builds'
-      installation_type = in_tree
+      capabilities = 'installation_type=in_tree'
     []
     [relocated]
       type = RunApp
@@ -99,7 +99,7 @@
       cli_args = '--show-data-paths'
       expect_out = 'moose: (.*)/share/moose/data'
       detail = 'and in installed builds'
-      installation_type = relocated
+      capabilities = 'installation_type=relocated'
     []
   []
 []

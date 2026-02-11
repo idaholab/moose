@@ -7,29 +7,29 @@
     requirement = "The system shall include example input for meshing tutorial ABTR example."
     type = RunApp
     input = 'abtr/abtr.i'
-    cli_args= '--mesh-only --error-deprecated'
+    cli_args = '--mesh-only --error-deprecated'
   []
 
   [hpmr]
     requirement = "The system shall include example input for meshing tutorial HPMR example."
     type = RunApp
     input = 'hpmr/hpmr.i'
-    cli_args= '--mesh-only --error-deprecated'
+    cli_args = '--mesh-only --error-deprecated'
   []
 
   [rgmb_abtr]
     requirement = "The system shall include example input for meshing tutorial RGMB heterogeneous ABTR example."
     type = RunApp
     input = 'rgmb_abtr/rgmb_abtr_het_mesh.i'
-    cli_args= '--mesh-only --error-deprecated'
-    installation_type = in_tree
+    cli_args = '--mesh-only --error-deprecated'
+    capabilities = 'installation_type=in_tree'
   []
 
   [rgmb_empire]
     requirement = "The system shall include example input for meshing tutorial RGMB Empire example."
     type = RunApp
     input = 'rgmb_empire/rgmb_empire.i'
-    cli_args= '--mesh-only --error-deprecated'
-    installation_type = in_tree
+    cli_args = '--mesh-only --error-deprecated'
+    capabilities = 'installation_type=in_tree'
   []
 []

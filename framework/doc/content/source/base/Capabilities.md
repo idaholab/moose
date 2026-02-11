@@ -19,7 +19,12 @@ Capabilities that are known _not_ to be supported should be explicitly registere
 ## Adding capabilities
 
 When adding additional capabilities within your derived applications, you should utilize the
-`addCapability()` methods on `MooseApp` within `registerApps()` in your application.
+`addBoolCapability()`, `addIntCapability()` and `addStringCapability()` methods on `MooseApp`
+within `registerApps()` in your application. These methods return a `Capability &`, to which
+you may also call:
+
+- `Capability::setExplicit()`: Set the capability to be explicit, which means that it cannot be used as a boolean in a check. That is, it must be compared explicitly with an equality or inequality operator. This is only valud for non-boolean valued capabilities.
+- `Capability::setEnumeration()`: Set a list of allowed values for the capability. This is only valid for string-valued capabilities.
 
 For example:
 
@@ -27,16 +32,27 @@ For example:
 void
 YourApp::registerApps()
 {
-  // Add a capability for cool_feature based on a compile-time option
+  // Add a boolean capability for cool_feature based on a compile-time option
   const std::string doc = "Cool feature ";
 #ifdef COOL_FEATURE_ENABLED
-  addCapability("cool_feature", true, doc + "is available.");
+  addBoolCapability("cool_feature", true, doc + "is available.");
 #else
-  addCapability("cool_feature", false, doc + "is not available.");
+  addBoolCapability("cool_feature", false, doc + "is not available.");
 #endif
 
   // Add a versioned capability
-  addCapability("cool_library", "1.2.3", "Cool library is available");
+  addStringCapability("cool_library", "1.2.3", "Cool library is available");
+
+  // Add a capability with an enumeration
+  {
+#ifdef VALUE_IS_FOO
+    const auto value = "foo";
+#else
+    const auto value = "bar";
+#endif
+    addStringCapability("cool_value", value, "Something that is foo or bar");
+      .setEnumeration({"foo", "bar"});
+  }
 
   registerApp(YourApp);
 }

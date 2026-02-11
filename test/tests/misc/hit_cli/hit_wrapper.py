@@ -17,8 +17,11 @@ if not os.path.exists(hit):
     # installed hit
     hit = os.path.abspath(os.path.join(CWD, '../../../../../../bin/hit'))
 if not os.path.exists(hit):
-    print('Failed to locate hit executable.')
-    sys.exit(1)
+    # hit from path
+    hit = shutil.which("hit")
+    if hit is None:
+        print("Failed to locate hit executable.")
+        sys.exit(1)
 
 gold_file = sys.argv[1]
 hit_args = sys.argv[2:]

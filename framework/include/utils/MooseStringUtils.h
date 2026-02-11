@@ -193,4 +193,18 @@ toLower(std::string name)
   std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   return name;
 }
+
+/**
+ * Concatenates \p value into a single string separated by \p separator
+ */
+inline std::string
+stringJoin(const std::vector<std::string> & values, const std::string & separator = " ")
+{
+  std::string combined;
+  for (const auto & value : values)
+    combined += value + separator;
+  if (values.size())
+    combined = combined.substr(0, combined.size() - separator.size());
+  return combined;
+}
 }

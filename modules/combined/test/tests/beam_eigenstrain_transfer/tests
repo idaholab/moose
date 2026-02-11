@@ -23,7 +23,7 @@
       input = 'parent_uo_transfer.i'
       cli_args = "MultiApps/sub/input_files='subapp_err_2.i subapp2_uo_transfer.i' Outputs/csv=false Outputs/exodus=false :Outputs/csv=false :Outputs/exodus=false"
       expect_err = 'LineValueSampler: When calling getValue\(\) on LineValueSampler, only one variable can be provided as input to LineValueSampler.'
-      method='OPT OPROF' # Test triggers an assert before reaching the expected runtime error
+      capabilities = 'method=opt | method=oprof'
       detail = 'and LineValueSampler shall report an error if multiple variables'
                     ' are provided as input to the sampler when it is used with'
                     ' MultiAppUserObjectTransfer.'

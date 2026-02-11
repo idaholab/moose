@@ -951,17 +951,6 @@ globCompare(const std::string & candidate,
   return globCompare(candidate, pattern, c + 1, p + 1);
 }
 
-std::string
-stringJoin(const std::vector<std::string> & values, const std::string & separator)
-{
-  std::string combined;
-  for (const auto & value : values)
-    combined += value + separator;
-  if (values.size())
-    combined = combined.substr(0, combined.size() - separator.size());
-  return combined;
-}
-
 bool
 beginsWith(const std::string & value, const std::string & begin_value)
 {

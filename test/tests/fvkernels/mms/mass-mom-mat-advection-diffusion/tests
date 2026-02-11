@@ -8,13 +8,10 @@
     requirement = 'The system shall be able to solve a coupled mass and momentum-type two equation system, which includes advection and diffusion.'
   []
   [mms]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'test.py'
     test_case = TestMassMomdAvectionDiffusion
     requirement = 'The system shall exhibit second order convergence for the unknown in a coupled mass and momentum-type two equation system.'
     min_parallel = 2
-    required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
-    capabilities = 'method!=dbg'
   []
 []

@@ -64,8 +64,6 @@
     input = 'lps_single.i'
     csvdiff = 'lps_single_out.csv'
     requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using a single model with LPS spherical formulation that increases the porosity due to an external strain.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [lps_single-jac]
     type = 'PetscJacobianTester'
@@ -83,8 +81,6 @@
     input = 'lps_single_split.i'
     csvdiff = 'lps_single_split_out.csv'
     requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using two LPS models with spherical formulations and the same stress exponential that is close to combining the models into a single ADViscoplasticityStressUpdate instance.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [lps_single_split-jac]
     type = 'PetscJacobianTester'
@@ -102,8 +98,6 @@
     input = 'lps_dual.i'
     csvdiff = 'lps_dual_out.csv'
     requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using two LPS models with spherical formulations and two different stress exponents that increases the porosity due to an external strain.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [lps_dual-jac]
     type = 'PetscJacobianTester'
@@ -121,8 +115,6 @@
     input = 'gtn_single.i'
     csvdiff = 'gtn_single_out.csv'
     requirement = 'The ADViscoplasticityStressUpdate class shall compute the viscoplastic response using a single model with GTN formulation that increases the porosity due to an external strain.'
-    # skip test if test is being run out-of-tree. Issue Ref: #25279
-    installation_type = in_tree
   []
   [gtn_single-jac]
     type = 'PetscJacobianTester'
@@ -143,8 +135,6 @@
       csvdiff = 'negative_porosity_zero_out.csv'
       cli_args = 'Outputs/file_base=negative_porosity_zero_out Materials/lps/negative_behavior=ZERO'
       detail = 'by setting the porosity to zero.'
-      # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
     []
     [initial]
       type = CSVDiff
@@ -152,8 +142,6 @@
       csvdiff = 'negative_porosity_initial_out.csv'
       cli_args = 'Outputs/file_base=negative_porosity_initial_out Materials/lps/negative_behavior=INITIAL_CONDITION'
       detail = 'by setting the porosity to the initial condition.'
-      # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
     []
     [exception]
       type = RunException
@@ -161,8 +149,6 @@
       expect_err = 'porosity is negative'
       cli_args = 'Materials/lps/negative_behavior=EXCEPTION'
       detail = 'by throwing an exception.'
-      # skip test if test is being run out-of-tree. Issue Ref: #25279
-      installation_type = in_tree
     []
   []
 []

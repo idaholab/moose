@@ -22,8 +22,11 @@ def run_app(args=[]):
     Exits if the app failed to run for any reason.
     """
     proc = None
-    app_name = mooseutils.find_moose_executable_recursive()
-    args.insert(0, app_name)
+    exe = os.environ.get("MOOSE_PYTHONUNITTEST_EXECUTABLE")
+    if exe is None:
+        print("ERROR: MOOSE_PYTHONUNITTEST_EXECUTABLE not set")
+        sys.exit(1)
+    args.insert(0, exe)
     #  "-options_left 0" is used to stop the debug version of PETSc from printing
     # out WARNING messages that sometime confuse the json parser
     args.insert(1, "-options_left")

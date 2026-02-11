@@ -121,6 +121,16 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
   {
     auto & syntax = s; // for resiterSyntax macros
 
+    addBoolCapability("test_false", false, "For testing: value false");
+    addIntCapability("test_one", 1, "For testing: value 1");
+    addIntCapability("test_two_explicit", 2, "For testing: value 2 explicit").setExplicit();
+    addStringCapability("test_string", "string", "For testing: value string");
+    addStringCapability("test_string_explicit", "string", "For testing: value string explicit")
+        .setExplicit();
+    addStringCapability("test_string_enum", "string", "For testing: value string with enum")
+        .setEnumeration({"string", "foo"});
+    addStringCapability("test_version", "2.0.0", "For testing: version string");
+
     registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
     registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
     registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");

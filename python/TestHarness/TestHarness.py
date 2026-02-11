@@ -1,33 +1,45 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-import sys
+import argparse
+import copy
+import datetime
+import errno
+import getpass
+import inspect
+import json
+import os
 import platform
-import os, re, inspect, errno, copy, json
-import subprocess
+import re
 import shutil
 import socket
-import datetime
-import getpass
-import argparse
+import subprocess
+import sys
 import typing
-from collections import defaultdict, namedtuple, OrderedDict
-from typing import Tuple, Optional
-
+from collections import defaultdict, namedtuple
 from socket import gethostname
+from typing import TYPE_CHECKING, Optional, Tuple
 
+import pyhit
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
-from . import util
-from . import RaceChecker
-import pyhit
+
+if TYPE_CHECKING:
+    from pycapabilities import Capabilities
+
+from TestHarness import RaceChecker, util
+from TestHarness.capability_util import (
+    addAugmentedCapability,
+    getAppCapabilities,
+    parseRequiredCapabilities,
+)
 
 # Directory the test harness is in
 testharness_dir = os.path.dirname(os.path.realpath(__file__))
@@ -349,7 +361,7 @@ class TestHarness:
         self.writeFailedTest = None
 
         # Parse arguments
-        self.parseCLArgs(argv)
+        self.options: argparse.Namespace = self.parseCLArgs(argv)
 
         # Determine the executable if we have an application
         try:
@@ -365,116 +377,142 @@ class TestHarness:
                 sys.path.append(exe_python_dir)
 
         # Load capabilities if they're needed
-        self.options._required_capabilities = []
-        if self.options.no_capabilities:
-            self.options._capabilities = None
-            if self.options.only_tests_that_require:
-                self.errorExit('Cannot use --only-tests-that-require with --no-capabilities')
-        else:
-            assert self.executable
-
-            # Make sure capabilities are available early; this will exit
-            # if we fail
-            import pycapabilities
-
-            with util.ScopedTimer(0.5, 'Parsing application capabilities'):
-                self.options._capabilities = util.getCapabilities(self.executable)
-
-            # Setup the required capabilities, if any. From the capabilities
-            # given by the user, we form the value that we should set them to
-            # when temporarily augmenting the capabilities in a Tester
-            # to perform a check to see if the capability check in the tester
-            # changes if we change these value(s)
-            if self.options.only_tests_that_require:
-                required = self.options.only_tests_that_require
-                if isinstance(required, str):
-                    required = [required]
-                self.options._required_capabilities = self.buildRequiredCapabilities(
-                    list(self.options._capabilities.keys()),
-                    required
-                )
+        (
+            self.options._capabilities,
+            self.options._augmented_capabilities,
+            self.options._required_capabilities,
+        ) = self.getCapabilities(
+            self.options,
+            self.executable,
+            self.libmesh_dir,
+        )
 
         checks = {}
-        checks['platform'] = util.getPlatforms()
-        checks['machine'] = util.getMachine()
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
-        checks['exe_objects'] = None # This gets calculated on demand
-        checks['registered_apps'] = None # This gets extracted on demand
 
-        # The TestHarness doesn't strictly require the existence of an app
-        # in order to run. Here we allow the user to select whether they
-        # want to probe for configuration options
-        if self.options.no_capabilities:
-            checks['compiler'] = set(['ALL'])
-            for prefix in ['petsc', 'slepc', 'vtk', 'libtorch', 'mfem', 'kokkos']:
-                checks[f'{prefix}_version'] = 'N/A'
-            for var in ['library_mode', 'mesh_mode', 'unique_ids', 'vtk',
-                        'tecplot', 'dof_id_bytes', 'petsc_debug', 'curl',
-                        'threading', 'superlu', 'mumps', 'strumpack',
-                        'parmetis', 'chaco', 'party', 'ptscotch',
-                        'slepc', 'unique_id', 'boost', 'fparser_jit',
-                        'libpng', 'libtorch', 'libtorch_version',
-                        'installation_type', 'mfem', 'kokkos']:
-                checks[var] = set(['ALL'])
+        # Setup mesh_mode check
+        if self.options.minimal_capabilities:
+            checks["mesh_mode"] = set(['ALL'])
         else:
-            def get_option(*args, **kwargs):
-                return util.getCapabilityOption(self.options._capabilities, *args, **kwargs)
-
-            checks['compiler'] = get_option('compiler', to_set=True)
-            checks['petsc_version'] = get_option('petsc', from_version=True)
-            checks['petsc_debug'] = get_option('petsc_debug', from_type=bool, to_set=True)
-            checks['slepc_version'] = get_option('slepc', from_version=True)
-            checks['slepc'] = get_option('slepc', from_version=True, to_set=True, to_bool=True)
-            checks['exodus_version'] = get_option('exodus', from_version=True)
-            checks['vtk_version'] = get_option('vtk', from_version=True)
-            checks['vtk'] = get_option('vtk', from_version=True, to_set=True, to_bool=True)
-            checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
-            checks['mesh_mode'] = get_option('mesh_mode', from_type=str, to_set=True)
-            checks['unique_ids'] = get_option('unique_id', from_type=bool, to_set=True)
-            checks['unique_id'] = checks['unique_ids']
-            checks['tecplot'] = get_option('tecplot', from_type=bool, to_set=True)
-            checks['dof_id_bytes'] = get_option('dof_id_bytes', from_type=int, to_set=True, no_all=True)
-
-            threading = None
-            threads = get_option('threads', from_type=bool)
-            if threads:
-                threading = next((name for name in ['tbb', 'openmp'] if get_option(name, from_type=bool)), 'pthreads')
-            checks['threading'] = set(sorted(['ALL', str(threading).upper()]))
-
-            for name in ['superlu', 'mumps', 'strumpack', 'parmetis', 'chaco', 'party',
-                         'ptscotch', 'boost', 'curl', 'mfem', 'kokkos']:
-                checks[name] = get_option(name, from_type=bool, to_set=True)
-
-            checks['libpng'] = get_option('libpng', from_type=bool, to_set=True)
-
-            fparser = get_option('fparser')
-            checks['fparser_jit'] = set(sorted(['ALL', 'TRUE' if fparser == 'jit' else 'FALSE']))
-
-            checks['libtorch'] = get_option('libtorch', from_version=True, to_set=True, to_bool=True)
-            checks['libtorch_version'] = get_option('libtorch', from_version=True, to_none=True)
-
-        # Override the MESH_MODE option if using the '--distributed-mesh'
-        # or (deprecated) '--parallel-mesh' option.
+            mesh_mode = self.options._capabilities.values["mesh_mode"]["value"]
+            checks['mesh_mode'] = set(['ALL', mesh_mode.upper()])
+        # Override with '--distributed-mesh'
         if self.options.distributed_mesh or not self.options.cli_args is None and \
                self.options.cli_args.find('--distributed-mesh') != -1:
-
             option_set = set(['ALL', 'DISTRIBUTED'])
             checks['mesh_mode'] = option_set
 
-        method = set(['ALL', self.options.method.upper()])
-        checks['method'] = method
-
         # This is so we can easily pass checks around to any scheduler plugin
         self.options._checks = checks
+        # So that testers can see if we have an application
+        self.options._app_name = self.app_name
 
         # Initialize the scheduler
         self.initialize()
 
-        # executable is available after initialize
-        if not self.options.no_capabilities:
-            checks['installation_type'] = util.checkInstalled(self.executable, self.app_name)
-
         os.chdir(self._orig_cwd)
+
+    @staticmethod
+    def getCapabilities(
+        options: argparse.Namespace,
+        executable: Optional[str],
+        libmesh_dir: Optional[str],
+    ) -> Tuple["Capabilities", dict, list[str]]:
+        """
+        Get the application capabilities.
+
+        Arguments:
+        ---------
+        options : argparse.Namespace
+            The TestHarness options.
+        executable : Optional[str]
+            Path to the executable; needed when not --minimal-capabilities.
+        libmesh_dir : Optional[str]
+            libMesh directory; needed when not --minimal-capabilities.
+
+        Returns:
+        -------
+        pycapabilities.Capabilities:
+            Built Capabilities object with app + augmented capabilities.
+        dict:
+            The augmented capabilities.
+        list[Tuple[str, bool]]]:
+            The capabilities when --only-tests-that-require.
+        """
+        required = []
+        app_capabilities: dict = {}
+
+        if not options.minimal_capabilities:
+            assert executable, "Executable not set for capabilities"
+
+            with util.ScopedTimer(0.5, 'Parsing application capabilities'):
+               app_capabilities = getAppCapabilities(executable)
+
+        augmented_capabilities = {}
+
+        def augment(*args, **kwargs):
+            addAugmentedCapability(
+                set(app_capabilities.keys()), augmented_capabilities, *args, **kwargs
+            )
+
+        # NOTE: If you add to this list, it must be added to
+        # Moose::CapabilityUtils::reserved_augmented_capabilities in
+        # framework/src/utils/CapabilityUtils.C
+        augment("hpc", options.hpc is not None, "TestHarness --hpc option")
+        augment(
+            "machine",
+            util.getMachine(),
+            "Machine type",
+            ["x86_64", "arm64"],
+            True
+        )
+        if options.minimal_capabilities:
+            augment(
+                "platform",
+                util.getPlatform(),
+                "Operating system",
+                None,
+                True
+            )
+        else:
+            augment(
+                "library_mode",
+                util.getSharedOption(libmesh_dir),
+                "libMesh library mode",
+                ["dynamic", "static"],
+                True
+            )
+
+        # This is one of the few places where we actually
+        # load the pycapabilities module and that is
+        # intentional as it can trigger a build
+        from pycapabilities import Capabilities
+
+        # Build the capabilities.Capabilities object, which
+        # has the application capabilities plus the ones
+        # that we added above. Later on, Tester objects
+        # will append to this with whatever capabilities
+        # they have to augment on a per-test basis
+        capabilities = Capabilities(app_capabilities | augmented_capabilities)
+
+        # Setup the required capabilities, if any. From the capabilities
+        # given by the user, we form the value that we should set them to
+        # when temporarily augmenting the capabilities in a Tester
+        # to perform a check to see if the capability check in the tester
+        # changes if we change these value(s)
+        required = []
+        required_capabilities = options.only_tests_that_require
+        if isinstance(required_capabilities, str):
+            required_capabilities = [required_capabilities]
+        if required_capabilities:
+            try:
+                required = parseRequiredCapabilities(
+                    required_capabilities, capabilities
+                )
+            except Exception as e:
+                TestHarness.errorExit(f'--only-tests-that-require: {e}')
+
+        return capabilities, augmented_capabilities, required
 
     """
     Recursively walks the current tree looking for tests to run
@@ -1174,7 +1212,7 @@ class TestHarness:
         return self.options.failed_tests or self.options.show_last_run
 
     ## Parse command line options and assign them to self.options
-    def parseCLArgs(self, argv):
+    def parseCLArgs(self, argv) -> argparse.Namespace:
         term_cols = None
         try:
             term_cols = os.get_terminal_size().columns * 7/8
@@ -1217,14 +1255,14 @@ class TestHarness:
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match the given regular expression')
-        filtergroup.add_argument('--only-tests-that-require', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
+        filtergroup.add_argument('--only-tests-that-require', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
         capabilitygroup = parser.add_argument_group('Additional Capabilities', 'Enable or disable additional TestHarness capabilities')
         capabilitygroup.add_argument('--capture-perf-graph', action='store_true', help='Capture PerfGraph for RunApp tests via Outputs/perf_graph_json_file')
         capabilitygroup.add_argument('--cli-args', nargs='?', type=str, help='Append the following list of arguments to the command line (encapsulate the command in quotes)')
-        capabilitygroup.add_argument('--no-capabilities', action='store_true', help='Disable Capability checks')
+        capabilitygroup.add_argument('--minimal-capabilities', action='store_true', help='Enable minimal capabilities (do not query an app)')
         capabilitygroup.add_argument('--pedantic-checks', action='store_true', help='Run pedantic checks of the Testers\' file writes looking for race conditions')
         capabilitygroup.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory')
         capabilitygroup.add_argument('--recover', action='store_true', dest='enable_recover', help='Run tests in recover mode')
@@ -1250,7 +1288,6 @@ class TestHarness:
 
         screengroup = parser.add_argument_group('On-screen Output', 'Control the on-screen output')
         screengroup.add_argument('-c', '--no-color', action='store_false', dest='colored', help='Do not show colored output')
-        screengroup.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
         screengroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='Only show the result of every test (even failed output)')
         screengroup.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
         screengroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='Show the output of every test')
@@ -1294,28 +1331,29 @@ class TestHarness:
         if self.code.decode() in argv:
             del argv[argv.index(self.code.decode())]
             code = False
-        self.options = parser.parse_args(argv[1:])
-        self.options.code = code
+        options = parser.parse_args(argv[1:])
+        options.code = code
 
         # Try to guess the --hpc option if --hpc-host is set
-        if self.options.hpc_host and not self.options.hpc:
-            hpc_host = self.options.hpc_host[0]
+        if options.hpc_host and not options.hpc:
+            hpc_host = options.hpc_host[0]
             hpc_config = TestHarness.queryHPCCluster(hpc_host)
             if hpc_config is not None:
-                self.options.hpc = hpc_config.scheduler
-                print(f'INFO: Setting --hpc={self.options.hpc} for known host {hpc_host}')
+                options.hpc = hpc_config.scheduler
+                print(f'INFO: Setting --hpc={options.hpc} for known host {hpc_host}')
 
         # Convert all list based options of length one to scalars
-        for key, value in list(vars(self.options).items()):
-            if type(value) == list and len(value) == 1:
-                setattr(self.options, key, value[0])
+        for key, value in list(vars(options).items()):
+            if isinstance(value, list) and len(value) == 1:
+                setattr(options, key, value[0])
 
-        self.checkAndUpdateCLArgs()
+        self.checkAndUpdateCLArgs(options)
+
+        return options
 
     ## Called after options are parsed from the command line
     # Exit if options don't make any sense, print warnings if they are merely weird
-    def checkAndUpdateCLArgs(self):
-        opts = self.options
+    def checkAndUpdateCLArgs(self, opts: argparse.Namespace):
         if opts.group == opts.not_group:
             self.errorExit('The group and not_group options cannot specify the same group')
         if opts.valgrind_mode and opts.nthreads > 1:
@@ -1336,7 +1374,7 @@ class TestHarness:
             if os.path.isfile(opts.spec_file):
                 if opts.input_file_name:
                     self.errorExit('Cannot use -i with --spec-file being a file')
-                self.options.input_file_name = os.path.basename(opts.spec_file)
+                opts.input_file_name = os.path.basename(opts.spec_file)
         if opts.verbose and opts.quiet:
             self.errorExit('Do not be an oxymoron with --verbose and --quiet')
         if opts.error and opts.allow_warnings:
@@ -1353,32 +1391,32 @@ class TestHarness:
             self.errorExit('--failed-tests could not detect a previous run')
 
         # Update any keys from the environment as necessary
-        if not self.options.method:
+        if not opts.method:
             if 'METHOD' in os.environ:
-                self.options.method = os.environ['METHOD']
+                opts.method = os.environ['METHOD']
             else:
-                self.options.method = 'opt'
+                opts.method = 'opt'
 
-        if not self.options.valgrind_mode:
-            self.options.valgrind_mode = ''
+        if not opts.valgrind_mode:
+            opts.valgrind_mode = ''
 
         # Set default
-        if not self.options.input_file_name:
-            self.options.input_file_name = 'tests'
+        if not opts.input_file_name:
+            opts.input_file_name = 'tests'
 
         if self.app_name is None:
-            print('INFO: Setting --no-capabilities because there is not an application')
-            self.options.no_capabilities = True
+            print('INFO: Setting --minimal-capabilities because there is not an application')
+            opts.minimal_capabilities = True
 
         # Set --max-memory from MOOSE_MAX_MEMORY if --max-memory not set;
         # disabled for now, see #32243
         # if (
-        #     self.options.max_memory is None
+        #     opts.max_memory is None
         #     and (MOOSE_MAX_MEMORY := os.environ.get("MOOSE_MAX_MEMORY")) is not None
         # ):
         #     value = float(MOOSE_MAX_MEMORY)
         #     print(f"INFO: Setting --max-memory={value} MB from MOOSE_MAX_MEMORY")
-        #     self.options.max_memory = value
+        #     opts.max_memory = value
 
     def preRun(self):
         if self.options.json:
@@ -1425,26 +1463,6 @@ class TestHarness:
             if host in hostname:
                 return config
         return None
-
-    @staticmethod
-    def buildRequiredCapabilities(registered: list[str],
-                                  required: list[str]) -> list[Tuple[str, bool]]:
-        """
-        Helper for setting up the required capabilities.
-        """
-        assert isinstance(registered, list)
-        assert isinstance(required, list)
-
-        result = []
-        for v in required:
-            assert isinstance(v, str)
-            v = v.strip()
-            is_false = v[0] == '!'
-            capability = v[1:] if is_false else v
-            if capability not in registered:
-                TestHarness.errorExit(f'Required capability "{capability}" is not registered')
-            result.append((capability, is_false))
-        return result
 
     @staticmethod
     def errorExit(*args):

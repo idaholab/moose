@@ -46,6 +46,8 @@ class RunException(RunApp):
         return RunApp.checkRunnable(self, options)
 
     def prepare(self, options):
+        super().prepare(options)
+
         files = self.getRedirectedOutputFiles(options)
         if files:
             util.deleteFilesAndFolders(self.getTestDir(), files, False)

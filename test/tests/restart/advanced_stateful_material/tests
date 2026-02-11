@@ -9,7 +9,7 @@
     # RunException with some cases will only run in serial, which means if
     # "checkpoint" runs in parallel we'll actually get an error with a
     # processor mismatch instead of the one that we want
-    hpc = false
+    capabilities = '!hpc'
   []
 
   [errors]

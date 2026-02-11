@@ -10,7 +10,10 @@
 import re, os, shutil
 from Tester import Tester
 from TestHarness import util, TestHarness
+from TestHarness.capability_util import addAugmentedCapability
 from shlex import quote
+import json
+from typing import Optional
 
 class RunApp(Tester):
 
@@ -82,6 +85,13 @@ class RunApp(Tester):
             if value.lower() not in TestHarness.validComputeDevices():
                 raise Exception(f'Unknown device "{value}"')
 
+        # The capabilities file that we need to set with
+        # --testharness-capabilities, if any. This should
+        # only be valid if we have a 'capabilities' spec
+        # and any of those capabilities depend on the
+        # augmented capabilities
+        self._augmented_capabilities_file: Optional[str] = None
+
     def getInputFile(self):
         if self.specs.isValid('input'):
             return os.path.join(self.getTestDir(), self.specs['input'].strip())
@@ -117,12 +127,6 @@ class RunApp(Tester):
             self.addCaveats('EXECUTABLE PATTERN')
             self.setStatus(self.skip)
             return False
-
-        if self.specs.isValid('min_threads') or self.specs.isValid('max_threads'):
-            if 'NONE' in options._checks['threading'] and self.getThreads(options) > 1:
-                self.addCaveats('threading_model=None')
-                self.setStatus(self.skip)
-                return False
 
         devices_lower = [x.lower() for x in self.specs['compute_devices']]
         if options.compute_device not in devices_lower:
@@ -171,9 +175,9 @@ class RunApp(Tester):
         if self.specs['no_additional_cli_args']:
             return 1
 
-        #Set number of threads to be used lower bound
+        # Set number of threads to be used lower bound
         nthreads = max(options.nthreads, int(self.specs['min_threads']))
-        #Set number of threads to be used upper bound
+        # Set number of threads to be used upper bound
         nthreads = min(nthreads, int(self.specs['max_threads']))
 
         if nthreads > options.nthreads:
@@ -240,9 +244,18 @@ class RunApp(Tester):
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
 
-        # add required capabilities
-        if specs['capabilities']:
-            cli_args.append('--required-capabilities="' + quote(specs['capabilities'])+'"')
+        if specs["capabilities"]:
+            # Check that the app supports the capabilities we think it does
+            cli_args.append(f"--required-capabilities={quote(specs['capabilities'])}")
+
+            # If we have augmented capabilities (capabilities not in the app)
+            # that we checked against, they need to be augmented in the app
+            if self._augmented_capabilities_file is not None:
+                cli_args.append(
+                    f"--testharness-capabilities={quote(self._augmented_capabilities_file)}"
+                )
+        else:
+            assert self._augmented_capabilities_file is None
 
         if options.distributed_mesh and '--distributed-mesh' not in cli_args:
             # The user has passed the parallel-mesh option to the test harness
@@ -467,3 +480,59 @@ class RunApp(Tester):
             if self.specs.isValid(param):
                 return True
         return super().needFullOutput(options)
+
+    def getAugmentedCapabilities(self, options) -> dict:
+        augmented_capabilities = super().getAugmentedCapabilities(options)
+
+        def augment_capability(*args, **kwargs):
+            addAugmentedCapability(
+                options._capabilities, augmented_capabilities, *args, **kwargs
+            )
+
+        # NOTE: If you add to this list, it must be added to
+        # CapabilityRegistry::augmented_capability_names in
+        # framework/src/base/CapabilityRegistry.C
+        augment_capability(
+            "mpi_procs",
+            self.getProcs(options),
+            "Number of MPI processes",
+            explicit=True,
+        )
+        augment_capability(
+            "num_threads",
+            self.getThreads(options),
+            "Number of threads",
+            explicit=True,
+        )
+
+        return augmented_capabilities
+
+    def getCapabilitiesFilePath(self, options) -> str:
+        return f"{self.getOutputPathPrefix(options)}_testharness_capabilities.json"
+
+    def prepare(self, options):
+        super().prepare(options)
+
+        # Dump the augmented capabilities, if any
+        if self.specs["capabilities"]:
+            # Capabilities from this Tester's specs in addition
+            # to capabilities from the global options
+            capabilities = (
+                self._augmented_capabilities | options._augmented_capabilities
+            )
+
+            # Capture the capabilities that we need to dump, if any.
+            # For now, we'll lazily just see if each of the
+            # augmented capabilities exists in the whole string.
+            store_capabilities = {}
+            for capability, entry in capabilities.items():
+                if capability in self.specs["capabilities"]:
+                    store_capabilities[capability] = entry
+
+            # We have capabilities to store
+            if store_capabilities:
+                self._augmented_capabilities_file = self.getCapabilitiesFilePath(
+                    options
+                )
+                with open(self._augmented_capabilities_file, "w") as f:
+                    json.dump(store_capabilities, f)

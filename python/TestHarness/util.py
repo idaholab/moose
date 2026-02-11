@@ -13,8 +13,6 @@ from mooseutils import colorText
 from collections import OrderedDict
 from dataclasses import dataclass
 import json
-import yaml
-import sys
 import threading
 import typing
 from typing import Optional
@@ -139,10 +137,10 @@ def formatResult(
         f_caveats = '[' + caveats + ']' # +1 space created later by join
         character_count = len_result() + len(f_caveats) + 1
 
-        # If caveats are the last items the user wants printed, or -e (extra_info) is
-        # called, allow caveats to consume available character count beyond options.term_cols.
+        # If caveats are the last items the user wants printed, allow caveats to
+        # consume available character count beyond options.term_cols.
         # Else, we trim caveats:
-        if term_format[-1] != 'c' and not options.extra_info and character_count > options.term_cols:
+        if term_format[-1] != "c" and character_count > options.term_cols:
             over_by_amount = character_count - options.term_cols
             f_caveats = '[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]'
 
@@ -180,13 +178,8 @@ def formatJobResult(
     if status_message:
         status_message = joint_status.message if joint_status.message else joint_status.status
 
-        # Add caveats with extra info
-        if job.isPass() and options.extra_info:
-            for check in options._checks.keys():
-                if job.specs.isValid(check) and not 'ALL' in job.specs[check]:
-                    job.addCaveats(check)
         # Format failed messages
-        elif job.isFail():
+        if job.isFail():
             status_message = f'FAILED ({status_message})'
     # Otherwise, just use the status itself
     else:
@@ -218,130 +211,17 @@ def formatJobResult(
 # it messes up the trac output.
 # supports weirded html for more advanced coloring schemes. \verbatim<r>,<g>,<y>,<b>\endverbatim All colors are bolded.
 
-def getPlatforms():
-    # We'll use uname to figure this out.  platform.uname() is available on all platforms
-    #   while os.uname() is not (See bugs.python.org/issue8080).
-    # Supported platforms are LINUX, DARWIN, ML, MAVERICKS, YOSEMITE, or ALL
-    platforms = set(['ALL'])
+
+def getPlatform():
     raw_uname = platform.uname()
     if raw_uname[0].upper() == 'DARWIN':
-        platforms.add('DARWIN')
-    else:
-        platforms.add(raw_uname[0].upper())
-    return platforms
+        return "darwin"
+    return raw_uname[0].lower()
+
 
 def getMachine():
-    machine = set(['ALL'])
-    machine.add(platform.machine().upper())
-    return machine
+    return platform.machine().lower()
 
-def checkLogicVersionSingle(checks, iversion, package):
-    logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
-    if logic == '' or logic == '=':
-        if version == checks[package]:
-            return True
-        else:
-            return False
-
-    from operator import lt, gt, le, ge
-    ops = {
-      '<': lt,
-      '>': gt,
-      '<=': le,
-      '>=': ge,
-    }
-
-    if ops[logic]([int(x) for x in checks[package].split(".")], [int(x) for x in version.split(".")]):
-        return True
-    return False
-
-def checkVersion(checks, test, package):
-    # This is a cheap tokenizer that will split apart the logic into logic groups separated by && and ||
-    split_versions_and_logic = re.findall(r".*?(?:(?:&&)|(?:\|\|)|(?:\s*$))", test)
-
-    for group in split_versions_and_logic:
-        m = re.search(r'\s*([^\d]*[\d.]*)\s*(\S*)', group)
-        if m:
-            version, logic_op = m.group(1, 2)
-            result = checkLogicVersionSingle(checks, version, package)
-
-            if logic_op == '||':
-                if result:
-                    return True
-            elif logic_op == '&&':
-                if not result:
-                    return False
-            else:
-                return result
-
-# Break down petsc version logic in a new define
-# TODO: find a way to eval() logic instead
-def checkPetscVersion(checks, test):
-    # If any version of petsc works, return true immediately
-    if 'ALL' in set(test['petsc_version']):
-        return (True, None)
-
-    version_string = ' '.join(test['petsc_version'])
-    return (checkVersion(checks, version_string, 'petsc_version'), version_string)
-
-
-# Break down slepc version logic in a new define
-def checkSlepcVersion(checks, test):
-    # User does not require anything
-    if len(test['slepc_version']) == 0:
-       return (False, None)
-    # SLEPc is not installed
-    if checks['slepc_version'] == None:
-       return (False, None)
-    # If any version of SLEPc works, return true immediately
-    if 'ALL' in set(test['slepc_version']):
-        return (True, None)
-
-    version_string = ' '.join(test['slepc_version'])
-    return (checkVersion(checks, version_string, 'slepc_version'), version_string)
-
-# Break down exodus version logic in a new define
-def checkExodusVersion(checks, test):
-    version_string = ' '.join(test['exodus_version'])
-
-    # If any version of Exodus works, return true immediately
-    if 'ALL' in set(test['exodus_version']):
-        return (True, version_string)
-
-    # Exodus not installed or version could not be detected (e.g. old libMesh)
-    if checks['exodus_version'] == None:
-       return (False, version_string)
-
-    return (checkVersion(checks, version_string, 'exodus_version'), version_string)
-
-
-# Break down VTKversion logic in a new define
-def checkVTKVersion(checks, test):
-    version_string = ' '.join(test['vtk_version'])
-
-    # If any version of VTK works, return true immediately
-    if 'ALL' in set(test['vtk_version']):
-        return (True, version_string)
-
-    # VTK not installed or version could not be detected (e.g. old libMesh)
-    if checks['vtk_version'] == None:
-       return (False, version_string)
-
-    return (checkVersion(checks, version_string, 'vtk_version'), version_string)
-
-# Break down libtorch version logic in a new define
-def checkLibtorchVersion(checks, test):
-    version_string = ' '.join(test['libtorch_version'])
-
-    # If any version of libtorch works, return true immediately
-    if 'ALL' in set(test['libtorch_version']):
-        return (True, version_string)
-
-    # libtorch not installed or version could not be detected
-    if checks['libtorch_version'] == None:
-       return (False, version_string)
-
-    return (checkVersion(checks, version_string, 'libtorch_version'), version_string)
 
 def outputHeader(header, ending=True):
     """
@@ -354,107 +234,26 @@ def outputHeader(header, ending=True):
     end_sep = f'{begin_sep}\n' if ending else ''
     return f'{begin_sep}\n{header}\n{end_sep}'
 
-def getCapabilities(exe):
-    """
-    Get capabilities JSON and compare it to the required capabilities
-    """
-    assert exe
-    try:
-        cmd = f'{exe} --show-capabilities'
-        output = runCommand(cmd, force_mpi_command=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f'ERROR: Failed to parse the application capabilities!')
-        print(f'Command ran: {cmd}\n')
-        print(outputHeader(f'Failed command output'))
-        print(e.stdout)
-        sys.exit(1)
-    return parseMOOSEJSON(output, '--show-capabilities')
-
-def getCapability(exe, name):
-    """
-    Get the value of a capability from a MOOSE application
-    """
-    value = getCapabilities(exe).get(name)
-    return None if value is None else value[0]
-
-def getCapabilityOption(supported: dict,
-                        name: str,
-                        from_version: bool = False,
-                        from_type: type = None,
-                        to_set: bool = False,
-                        no_all: bool = False,
-                        to_bool: bool = False,
-                        to_none: bool = False):
-    """
-    Helper for getting the deprecated Tester option given a capability
-    """
-    entry = supported.get(name)
-    if entry is None:
-        raise ValueError(f'Missing capability {name}')
-    else:
-        value = entry[0]
-
-    if from_version and isinstance(value, str):
-        assert re.fullmatch(r'[0-9.]+', value)
-    if from_type is not None:
-        assert isinstance(value, from_type)
-
-    if value and to_bool:
-        value = True
-
-    if to_set:
-        values = [str(value).upper()]
-        if not no_all:
-            values.append('ALL')
-        return set(sorted(values))
-    else:
-        assert not no_all
-    if to_none and not value:
-        return None
-    return value
-
-def checkCapabilities(supported: dict, requested: str, certain):
-    """
-    Get capabilities JSON and compare it to the required capabilities
-    """
-    import pycapabilities
-    [status, message, doc] = pycapabilities.check(requested, supported)
-    success = status == pycapabilities.CERTAIN_PASS or (status == pycapabilities.POSSIBLE_PASS and not certain)
-    return success, message
-
 def getSharedOption(libmesh_dir):
     # Some tests may only run properly with shared libraries on/off
     # We need to detect this condition
-    shared_option = set(['ALL'])
-
     libtool = os.path.join(libmesh_dir, "contrib", "bin", "libtool")
-    f = open(libtool, "r")
+    with open(libtool, "r") as f:
+        for line in f:
+            try:
+                (key, value) = line.rstrip().split("=", 2)
+            except Exception:
+                continue
 
-    found = False
-    for line in f:
-        try:
-            (key, value) = line.rstrip().split("=", 2)
-        except Exception as e:
-            continue
+            if key == "build_libtool_libs":
+                if value == "yes":
+                    return "dynamic"
+                if value == "no":
+                    return "static"
 
-        if key == 'build_libtool_libs':
-            if value == 'yes':
-                shared_option.add('DYNAMIC')
-                found = True
-                break
-            if value == 'no':
-                shared_option.add('STATIC')
-                found = True
-                break
-
-    f.close()
-
-    if not found:
-        # Neither no nor yes?  Not possible!
-        print("Error! Could not determine whether shared libraries were built.")
-        exit(1)
-
-    return shared_option
+    # Neither no nor yes?  Not possible!
+    print("Error! Could not determine whether shared libraries were built.")
+    exit(1)
 
 def getInitializedSubmodules(root_dir):
     """
@@ -471,18 +270,6 @@ def getInitializedSubmodules(root_dir):
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
     return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
 
-def checkInstalled(executable, app_name):
-    """
-    Read resource file and determine if binary was relocated
-    """
-    option_set = set(['ALL'])
-    if executable:
-        resource_content = readResourceFile(executable, app_name)
-    else:
-        resource_content = {}
-    option_set.add(resource_content.get('installation_type', 'ALL').upper())
-    return option_set
-
 def parseMOOSEJSON(output: str, context: str) -> dict:
     try:
         output = output.split('**START JSON DATA**\n')[1]
@@ -492,25 +279,6 @@ def parseMOOSEJSON(output: str, context: str) -> dict:
         raise Exception(f'Failed to find JSON header and footer from {context}')
     except json.decoder.JSONDecodeError:
         raise Exception(f'Failed to parse JSON from {context}')
-
-def readResourceFile(exe, app_name):
-    resource_path = os.path.join(os.path.dirname(os.path.abspath(exe)),
-                                 f'{app_name}.yaml')
-    if os.path.exists(resource_path):
-        try:
-            with open(resource_path, 'r', encoding='utf-8') as stream:
-                return yaml.safe_load(stream)
-        except yaml.YAMLError:
-            print(f'resource file parse failure: {resource_path}')
-            sys.exit(1)
-    return {}
-
-def getRegisteredApps(exe, app_name):
-    """
-    Gets a list of registered applications
-    """
-    resource_content = readResourceFile(exe, app_name)
-    return resource_content.get('registered_apps', [])
 
 def checkOutputForPattern(output, re_pattern):
     """

@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
@@ -20,7 +20,7 @@
   [dynamic_object_loading2]
     type = 'RunApp'
     input = 'dynamic_objects2.i'
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
@@ -36,9 +36,8 @@
     input = 'dynamic_objects.i'
     exodiff = 'dynamic_objects_out.e'
     cli_args = 'Problem/library_name=libphase_field-opt.la'
-    capabilities = 'method=opt' # because the library name is explicitly given
+    capabilities = 'method=opt & library_mode=dynamic' # because the library name is explicitly given
     prereq = 'dynamic_object_restrict_bad'
-    library_mode = 'DYNAMIC'
     group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
@@ -53,7 +52,7 @@
     type = 'Exodiff'
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
@@ -70,9 +69,8 @@
     input = 'dynamic_syntax.i'
     exodiff = 'dynamic_syntax_out.e'
     cli_args = 'Problem/library_name=libphase_field-opt.la'
-    capabilities = 'method=opt' # because the library name is explicitly given
+    capabilities = 'method=opt & library_mode=dynamic' # because the library name is explicitly given
     prereq = 'dynamic_object_loading_syntax'
-    library_mode = 'DYNAMIC'
     group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
@@ -90,7 +88,7 @@
     exodiff = 'dynamic_objects_out.e'
     # Register only some of the objects necessary for running this test
     cli_args = "Problem/object_names='CHMath CHInterface'"
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     prereq = 'dynamic_object_loading'
     group = 'dynamic_loading'
 
@@ -108,7 +106,7 @@
     expect_err = "A '\w+' is not a registered object"
     # Register only some of the objects necessary, not enough for running this test
     cli_args = "Problem/object_names='CHMath'"
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     prereq = 'dynamic_object_restrict'
     group = 'dynamic_loading'
 
@@ -125,7 +123,7 @@
     type = 'RunException'
     input = 'dynamic_wrong_lib.i'
     expect_err = 'We loaded objects from the following libraries.*\n\tlibsolid_mechanics'
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     group = 'dynamic_loading'
 
     # Test must be run with the misc app to test dynamic loading
@@ -141,7 +139,7 @@
     input = 'dynamic_wrong_lib.i'
     expect_err = 'If you are trying to find this object in a dynamically loaded library'
     cli_args = 'Problem/register_objects_from=FooApp'
-    library_mode = 'DYNAMIC'
+    capabilities = 'library_mode=dynamic'
     prereq = 'dynamic_object_loading_wrong_app'
     group = 'dynamic_loading'
 

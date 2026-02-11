@@ -1,14 +1,10 @@
 [Tests]
   [broken-domain]
-    type = PythonUnitTest
+    type = MMSTest
     input = 'test.py'
     test_case = BrokenDomain
     requirement = 'The system shall display second order convergence when applying weakly enforced matching Dirichlet and flux conditions.'
-    required_python_packages = 'pandas matplotlib'
-    valgrind = none
     design = 'FVInterfaceKernels/index.md FVBCs/index.md'
     issues = '#16756'
-    installation_type = in_tree # see #26480
-    capabilities = 'method!=dbg'
   []
 []

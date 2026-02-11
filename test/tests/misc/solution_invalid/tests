@@ -62,7 +62,7 @@
     input = solution_invalid.i
     expect_exit_code = 1
     jsondiff = 'solution_invalid.json'
-    hpc = false # iteration counts can be MPI dependent
+    capabilities = '!hpc' # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file'
@@ -76,7 +76,7 @@
     expect_exit_code = 1
     cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/dtmin=1e-13 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
     jsondiff = 'solution_invalid_transient.json'
-    hpc = false # iteration counts can be MPI dependent
+    capabilities = '!hpc' # iteration counts can be MPI dependent
     restep = false # Test will be repeating its own time steps
     design = 'SolutionInvalidity.md'
     issues = '#22814'
@@ -107,7 +107,7 @@
     expect_exit_code = 1
     cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
     jsondiff = 'solution_invalid_parallel.json'
-    hpc = false # iteration counts can be MPI dependent
+    capabilities = '!hpc' # iteration counts can be MPI dependent
     design = 'SolutionInvalidity.md'
     min_parallel = 3
     max_parallel = 3
@@ -137,7 +137,7 @@
       type = JSONDiff
       input = solution_invalid_recover.i
       jsondiff = 'solution_invalid_checkpoint.json'
-      hpc = false # iteration counts can be MPI dependent
+      capabilities = '!hpc' # iteration counts can be MPI dependent
       # SolutionInvalidityReporter accumulates values, so repeating a timestep makes the object stateful.
       # The object is meant to keep its state across failed timesteps, though.
       restep = false
@@ -196,6 +196,6 @@
 | NonsafeMaterial : Solution invalid warning! | 2-4  |             96 |         240 |
 -------------------------------------------------------------------------------------
   "
-      []
+    []
   []
 []

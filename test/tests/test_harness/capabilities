@@ -1,0 +1,12 @@
+[Tests]
+  [has_augmented]
+    type = RunApp
+    input = good.i
+    capabilities = 'moosetestapp & library_mode=dynamic & mpi_procs=1'
+  []
+  [no_augmented]
+    type = RunApp
+    input = good.i
+    capabilities = 'moosetestapp'
+  []
+[]

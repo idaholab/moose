@@ -3,6 +3,5 @@
     type = 'CSVDiff'
     input = 'GravDensity01.i'
     csvdiff = 'GravDensity01.csv'
-    threading = '!pthreads'
   [../]
 []

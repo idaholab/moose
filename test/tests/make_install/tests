@@ -33,7 +33,7 @@
                  cp ../../testroot ../../../share/moose_test/tests/;
                  mkdir -p ../../../make_install_test'
       use_shell = True
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
 
       detail = 'from a pre-determined user-readable location;'
     []
@@ -44,7 +44,7 @@
       working_directory = '../../../make_install_test'
       no_additional_cli_args = True
       expect_out = 'Directory successfully copied'
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
       prereq = 'test_copy_install/setup_fake_test_structure'
 
       detail = 'copied using a MOOSE-based binary;'
@@ -56,7 +56,7 @@
       input = 'DUMMY'
       should_execute = False
       check_files = 'moose_test/tests/testroot moose_test/tests/version/tests'
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
       max_parallel = 1
       prereq = 'test_copy_install/copy_tests'
 
@@ -69,7 +69,7 @@
       cli_args = "--copy-inputs tests"
       no_additional_cli_args = True
       expect_err = 'The directory \S+ already exists.'
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
       max_parallel = 1
       prereq = 'test_copy_install/check_files'
 
@@ -84,7 +84,7 @@
                  done'
       use_shell = True
       working_directory = '../../../make_install_test/moose_test/tests'
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
       prereq = 'test_copy_install/copy_warn_overwrite'
 
       detail = 'able to link a binary to an installed location;'
@@ -95,7 +95,7 @@
       cli_args = "--run '-v -t --no-color'"
       working_directory = "../../../make_install_test/moose_test/tests"
       no_additional_cli_args = True
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
       max_parallel = 1
       prereq = 'test_copy_install/link_exec_installed'
       expect_out = 'version.print_version_long:(.*)2 passed, 0 skipped, 0 failed'
@@ -108,7 +108,7 @@
       command = 'rm -rf ../../../share/;
                  rm -rf ../../../make_install_test'
       prereq = 'test_copy_install/run'
-      installation_type = IN_TREE
+      capabilities = 'installation_type=in_tree'
 
       detail = 'and cleaned up from a user-readable location.'
     []
