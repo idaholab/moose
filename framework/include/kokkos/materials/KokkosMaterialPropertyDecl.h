@@ -63,6 +63,10 @@ struct PropRecord
    * Flag whether this property is a face property
    */
   bool bnd = false;
+  /**
+   * Flag whether this property is a lazy property
+   */
+  bool lazy = false;
 };
 
 using PropertyStore = std::function<void(std::ostream &, void *)>;
@@ -157,14 +161,6 @@ public:
    */
   virtual void swap(MaterialPropertyBase & prop, StorageKey) = 0;
 
-#ifdef MOOSE_KOKKOS_SCOPE
-  /**
-   * Get whether this property is valid
-   * @returns Whether this property is valid
-   */
-  KOKKOS_FUNCTION operator bool() const { return _id != libMesh::invalid_uint || _default; }
-#endif
-
 protected:
   /**
    * Pointer to the record of this property
@@ -221,6 +217,12 @@ public:
   auto & operator=(const MaterialProperty<T, dimension> & property);
 
 #ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get whether this property is valid
+   * @returns Whether this property is valid
+   */
+  KOKKOS_FUNCTION operator bool() const { return _data.isAlloc() || _default; }
+
   /**
    * Get the property values of a quadrature point
    * @param datum The Datum object of the current thread

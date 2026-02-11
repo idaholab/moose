@@ -29,11 +29,12 @@ MaterialData::declareKokkosPropertyHelper(
     const MaterialBase * declarer,
     const std::vector<unsigned int> & dims,
     const bool bnd,
+    const bool lazy,
     std::shared_ptr<Moose::Kokkos::MaterialPropertyBase> shell)
 {
   auto & storage = Moose::Kokkos::MaterialPropertyStorage::cast(_storage);
 
-  return storage.declareKokkosProperty(prop_name, type, declarer, dims, bnd, shell);
+  return storage.declareKokkosProperty(prop_name, type, declarer, dims, bnd, lazy, shell);
 }
 
 Moose::Kokkos::MaterialPropertyBase &
