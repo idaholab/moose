@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosMaterials/index.md'
+
+  [stateful]
+    type = Exodiff
+    input = 'kokkos_lazy_prop_test.i'
+    exodiff = 'kokkos_lazy_prop_test_out.e'
+    requirement = 'The Kokkos material system shall be able to declare lazy material properties that are only allocated when there is a consumer.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
