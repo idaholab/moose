@@ -26,13 +26,6 @@ EquationSystem::DeleteAllBlocks()
   _h_blocks.DeleteAll();
 }
 
-void EquationSystem::ClearAllBlocks()
-{
-  for (const auto i : make_range(_h_blocks.NumRows()))
-    for (const auto j : make_range(_h_blocks.NumCols()))
-      _h_blocks(i, j) = nullptr;
-}
-
 bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
@@ -297,21 +290,6 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   trueRHS.SyncFromBlocks();
   trueRHS = 0.0;
   
-  // Form diagonal blocks.
-  for (const auto i : index_range(_test_var_names))
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    mfem::Vector aux_x, aux_rhs;
-    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a;
-    trueX.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-  }
-
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
