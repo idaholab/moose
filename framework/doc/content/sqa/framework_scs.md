@@ -1,12 +1,14 @@
 !template load file=sqa/scs.md.template
 
+## C++ File Formatting
+
 [!ac](MOOSE) uses [ClangFormat](https://clang.llvm.org/docs/ClangFormat.html) for formatting all
 C++ code in the repository. The application of the format is enforced and checked when the a
 code is contributed, see [framework/contributing.md] for more details. The
 configuration file for the formatting is provided in the
 [.clang-format](https://github.com/idaholab/moose/blob/devel/.clang-format) file. If clang is
 installed, the following command will automatically format code changed between your current branch
-and the supplied `<branch>` (if omitted, defaults to HEAD).
+and the supplied `<branch>` (if omitted, defaults to HEAD):
 
 ```
 git clang-format [<branch>]
@@ -22,6 +24,20 @@ General style guidelines include:
 -  No spacing on the inside of brackets or parenthesis in expressions
 -  Avoid braces for single statement control statements (i.e for, if, while, etc.)
 -  C++ constructor spacing is demonstrated in the bottom of the example below
+
+## Python File Formatting
+
+[!ac](MOOSE) uses [Black](https://black.readthedocs.io/en/stable/) for formatting all
+Python code in the repository. The application of the format is enforced and checked when the a
+code is contributed, see [framework/contributing.md] for more details. The
+configuration file for the formatting is provided in the
+[pyproject.toml](https://github.com/idaholab/moose/blob/devel/pyproject.toml) file. If black is
+installed, the following command will automatically format all python code when ran
+from the root of the [!ac](MOOSE) repository:
+
+```
+black .
+```
 
 ## File Layout
 
