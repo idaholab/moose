@@ -280,29 +280,6 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
   trueRHS = 0.0;
   trueRHS.SyncToBlocks();
 
-  // Form diagonal blocks.
-  for (const auto i : index_range(_test_var_names))
-  {
-    auto test_var_name = _test_var_names.at(i);
-
-    if ((_cmplx_kernels_map.Has(test_var_name) && _cmplx_kernels_map.Get(test_var_name)->Has(test_var_name)) ||
-        (_cmplx_integrated_bc_map.Has(test_var_name) && _cmplx_integrated_bc_map.Get(test_var_name)->Has(test_var_name)))
-    {
-      auto & test_var_name = _test_var_names.at(i);
-      auto slf = _slfs.Get(test_var_name);
-      auto clf = _clfs.Get(test_var_name);
-      mfem::Vector aux_x, aux_rhs;
-      mfem::OperatorHandle aux_a;
-      slf->FormLinearSystem(
-          _ess_tdof_lists.at(i), *(_cmplx_var_ess_constraints.at(i)), *clf, aux_a, aux_x, aux_rhs);
-      _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
-
-      trueX.GetBlock(i) = aux_x;
-      trueRHS.GetBlock(i) = aux_rhs;
-    }
-  }
-
-  // Form off-diagonal blocks
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
@@ -312,11 +289,20 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 
       mfem::Vector aux_x, aux_rhs;
       mfem::ParComplexLinearForm aux_lf(_test_pfespaces.at(i));
+      mfem::OperatorHandle * aux_a = new mfem::OperatorHandle;
       aux_lf = 0.0;
-      if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
+      if (test_var_name == trial_var_name)
+      {
+        mooseAssert(i == j, "Trial and test variables must have the same ordering.");
+        auto slf = _slfs.Get(test_var_name);
+        auto clf = _clfs.Get(test_var_name);
+        slf->FormLinearSystem(
+            _ess_tdof_lists.at(j), *(_cmplx_var_ess_constraints.at(j)), *clf, *aux_a, aux_x, aux_rhs);
+        trueX.GetBlock(i) = aux_x;
+      }
+      else if (_mslfs.Has(test_var_name) && _mslfs.Get(test_var_name)->Has(trial_var_name))
       {
         auto mslf = _mslfs.Get(test_var_name)->Get(trial_var_name);
-        mfem::OperatorHandle * aux_a = new mfem::OperatorHandle;
         mslf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
                                           *(_cmplx_var_ess_constraints.at(j)),
@@ -324,9 +310,12 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);
-        _h_blocks(i, j) = aux_a->As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
-        trueRHS.GetBlock(i) += aux_rhs;
       }
+      else
+        continue;
+
+      trueRHS.GetBlock(i) += aux_rhs;
+      _h_blocks(i, j) = aux_a->As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
     }
   }
 
