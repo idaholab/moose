@@ -37,7 +37,7 @@ packages:
   # dependers: libmesh, moose-dev
   petsc:
     version: 3.24.3
-    build_number: 0
+    build_number: 1
     conda: conda/petsc
     templates:
       conda/petsc/conda_build_config.yaml.template: conda/petsc/conda_build_config.yaml
@@ -56,7 +56,7 @@ packages:
   # dependers: moose-dev
   libmesh:
     version: 2026.01.27_502d428
-    build_number: 0
+    build_number: 1
     conda: conda/libmesh
     templates:
       conda/libmesh/conda_build_config.yaml.template: conda/libmesh/conda_build_config.yaml
@@ -92,7 +92,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2026.02.05
+    version: 2026.02.11
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
