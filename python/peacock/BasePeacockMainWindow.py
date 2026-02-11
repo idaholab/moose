@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from PyQt5.QtCore import QSettings
@@ -17,6 +17,7 @@ from peacock.utils import WidgetUtils
 from peacock.LogWidget import LogWidget
 import os
 
+
 class BasePeacockMainWindow(QMainWindow, MooseWidget):
     """
     Base class for peacock based apps.
@@ -25,6 +26,7 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
     The real app will need to inherit from this and handle
     any connections between the plugins.
     """
+
     def __init__(self, plugins=[], plugin_base=TabPlugin):
         super(BasePeacockMainWindow, self).__init__()
         self.setObjectName("BasePeacockMainWindow")
@@ -49,39 +51,47 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         """
         for plugin_class in plugins:
             plugin_class.commandLineArgs(parser)
-        parser.add_argument("arguments",
-                type=str,
-                metavar="N",
-                nargs="*",
-                help="Input file and executable can be set without the command line switches")
-        parser.add_argument('--clear-recently-used',
-                dest="clear_recent",
-                action='store_true',
-                help='Clear recently used items')
-        parser.add_argument('--clear-settings',
-                dest="clear_settings",
-                action='store_true',
-                help='Clears all peacock settings.')
-        parser.add_argument('-w', '--working-dir',
-                dest="working_dir",
-                help='Set the initial working directory.')
-        parser.add_argument('-d', '--debug', '--dbg',
-                dest="debug",
-                action='store_true',
-                help='Run Peacock in debug mode. Setting the PEACOCK_DEBUG environment variable will automatically set this.')
+        parser.add_argument(
+            "arguments",
+            type=str,
+            metavar="N",
+            nargs="*",
+            help="Input file and executable can be set without the command line switches",
+        )
+        parser.add_argument(
+            "--clear-recently-used",
+            dest="clear_recent",
+            action="store_true",
+            help="Clear recently used items",
+        )
+        parser.add_argument(
+            "--clear-settings",
+            dest="clear_settings",
+            action="store_true",
+            help="Clears all peacock settings.",
+        )
+        parser.add_argument(
+            "-w",
+            "--working-dir",
+            dest="working_dir",
+            help="Set the initial working directory.",
+        )
+        parser.add_argument(
+            "-d",
+            "--debug",
+            "--dbg",
+            dest="debug",
+            action="store_true",
+            help="Run Peacock in debug mode. Setting the PEACOCK_DEBUG environment variable will automatically set this.",
+        )
         group = parser.add_argument_group("Window size", "Startup window size")
-        group.add_argument('-size',
-                dest='size',
-                nargs=2,
-                help='Size of the window')
-        group.add_argument('-max',
-                dest='max',
-                action='store_true',
-                help='Open in maximized view')
-        group.add_argument('-full',
-                dest='full',
-                action='store_true',
-                help='Open in fullscreen view')
+        group.add_argument("-size", dest="size", nargs=2, help="Size of the window")
+        group.add_argument(
+            "-max", dest="max", action="store_true", help="Open in maximized view"
+        )
+        group.add_argument(
+            "-full", dest="full", action="store_true", help="Open in fullscreen view"
+        )
 
     def _showLog(self):
         """
@@ -186,17 +196,28 @@ class BasePeacockMainWindow(QMainWindow, MooseWidget):
         self._setWindowSize(command_line_options)
         if command_line_options.debug or os.getenv("PEACOCK_DEBUG"):
             from mooseutils import message
+
             message.MOOSE_DEBUG_MODE = True
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys, argparse
     from peacock.ExodusViewer.ExodusViewer import ExodusViewer
     from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from peacock.PostprocessorViewer.VectorPostprocessorViewer import VectorPostprocessorViewer
+    from peacock.PostprocessorViewer.VectorPostprocessorViewer import (
+        VectorPostprocessorViewer,
+    )
     from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
     from peacock.Execute.ExecuteTabPlugin import ExecuteTabPlugin
+
     app = QApplication(sys.argv)
-    plugins = [InputFileEditorWithMesh, ExecuteTabPlugin, ExodusViewer, PostprocessorViewer, VectorPostprocessorViewer]
+    plugins = [
+        InputFileEditorWithMesh,
+        ExecuteTabPlugin,
+        ExodusViewer,
+        PostprocessorViewer,
+        VectorPostprocessorViewer,
+    ]
     parser = argparse.ArgumentParser()
     BasePeacockMainWindow.commandLineArgs(parser, plugins)
     main = BasePeacockMainWindow(plugins=plugins)

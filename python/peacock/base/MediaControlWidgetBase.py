@@ -1,14 +1,15 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from peacock.utils import WidgetUtils
+
 
 class MediaControlWidgetBase(object):
     """
@@ -25,7 +26,7 @@ class MediaControlWidgetBase(object):
         super(MediaControlWidgetBase, self).__init__()
 
         # Initiate time member variables
-        self._times = None #function
+        self._times = None  # function
         self._current_step = -1
         self._num_steps = None
         self._playing = False
@@ -43,20 +44,38 @@ class MediaControlWidgetBase(object):
         self.MainLayout.addLayout(self.ButtonLayout)
 
         # Media control buttons
-        self.__addButton('BeginButton', "Set the simulation to the beginning.", 'begin.ico')
-        self.__addButton('BackwardButton', "Move simulation back one timestep.", 'backward.ico')
-        self.__addButton('PlayButton', "Play through the simulation with time.", 'play.ico')
-        self.__addButton('PauseButton', "Stop playing through the simulation.", 'pause.ico')
-        self.__addButton('ForwardButton', "Move simulation forward one timestep.", 'forward.ico')
-        self.__addButton('EndButton', "Set the simulation to the end.", 'end.ico')
+        self.__addButton(
+            "BeginButton", "Set the simulation to the beginning.", "begin.ico"
+        )
+        self.__addButton(
+            "BackwardButton", "Move simulation back one timestep.", "backward.ico"
+        )
+        self.__addButton(
+            "PlayButton", "Play through the simulation with time.", "play.ico"
+        )
+        self.__addButton(
+            "PauseButton", "Stop playing through the simulation.", "pause.ico"
+        )
+        self.__addButton(
+            "ForwardButton", "Move simulation forward one timestep.", "forward.ico"
+        )
+        self.__addButton("EndButton", "Set the simulation to the end.", "end.ico")
 
         # Move the timestep/time edit boxes to the right side
         self.ButtonLayout.addStretch(1)
 
         # TimeStep display/edit
-        self.__addEditBox('TimeStepDisplay', 'Timestep:', "Set the simulation timestep.", True)
-        self.__addEditBox('TimeDisplay', 'Time:', "Set the simulation time.")
-        self.__addEditBox('FrameDelayDisplay', 'Frame delay:', "Set the delay of playback, in milliseconds.", True, "100")
+        self.__addEditBox(
+            "TimeStepDisplay", "Timestep:", "Set the simulation timestep.", True
+        )
+        self.__addEditBox("TimeDisplay", "Time:", "Set the simulation time.")
+        self.__addEditBox(
+            "FrameDelayDisplay",
+            "Frame delay:",
+            "Set the delay of playback, in milliseconds.",
+            True,
+            "100",
+        )
 
         # Slider
         self.TimeSlider = QtWidgets.QSlider()
@@ -234,7 +253,7 @@ class MediaControlWidgetBase(object):
     def __addButton(self, name, tooltip, icon):
         qobject = QtWidgets.QPushButton(self)
         qobject.setToolTip(tooltip)
-        qobject.clicked.connect(getattr(self, '_callback' + name))
+        qobject.clicked.connect(getattr(self, "_callback" + name))
         qobject.setIcon(WidgetUtils.createIcon(icon))
         qobject.setIconSize(self._icon_size)
         qobject.setFixedSize(qobject.iconSize())
@@ -252,9 +271,11 @@ class MediaControlWidgetBase(object):
         validate.setBottom(0)
         edit.setValidator(validate)
         edit.setToolTip(tooltip)
-        edit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Maximum)
+        edit.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Maximum
+        )
         edit.setText(default)
-        edit.textChanged.connect(getattr(self, '_callback' + name))
+        edit.textChanged.connect(getattr(self, "_callback" + name))
 
         label = QtWidgets.QLabel(label)
         label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
@@ -262,4 +283,4 @@ class MediaControlWidgetBase(object):
         self.ButtonLayout.addWidget(label)
         self.ButtonLayout.addWidget(edit)
         setattr(self, name, edit)
-        setattr(self, name + 'Label', label)
+        setattr(self, name + "Label", label)

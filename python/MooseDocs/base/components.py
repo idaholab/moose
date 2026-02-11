@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 """
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
@@ -14,12 +14,14 @@ and converting tokens to rendered HTML.
 from ..common import exceptions, parse_settings, mixins
 from ..tree import tokens
 
+
 class Component(mixins.TranslatorObject):
     """
     Each extension is made up of components, both for tokenizing and rendering. The components
     provide a means for defining settings as well as other customizable features required for
     translation.
     """
+
     def __init__(self):
         mixins.TranslatorObject.__init__(self)
         self.__extension = None
@@ -34,6 +36,7 @@ class Component(mixins.TranslatorObject):
         Attach the extension the component, this is done by the Translator.
         """
         self.__extension = extension
+
 
 class ReaderComponent(Component, mixins.ReaderObject):
     """
@@ -67,6 +70,7 @@ class ReaderComponent(Component, mixins.ReaderObject):
     The automatic parsing settings may be disable by setting the PARSE_SETTINGS class member
     variable to False in the child object.
     """
+
     RE = None
     PARSE_SETTINGS = True
 
@@ -77,9 +81,15 @@ class ReaderComponent(Component, mixins.ReaderObject):
         the default settings for the component, see core.py for examples.
         """
         settings = dict()
-        settings['style'] = (None, "The style settings that are passed to rendered HTML tag.")
-        settings['class'] = (None, "The class settings to be passed to rendered HTML tag.")
-        settings['id'] = (None, "Identifier to link against this object.")
+        settings["style"] = (
+            None,
+            "The style settings that are passed to rendered HTML tag.",
+        )
+        settings["class"] = (
+            None,
+            "The class settings to be passed to rendered HTML tag.",
+        )
+        settings["id"] = (None, "Identifier to link against this object.")
         return settings
 
     def __init__(self):
@@ -114,10 +124,10 @@ class ReaderComponent(Component, mixins.ReaderObject):
 
         # Define the settings
         defaults = self.defaultSettings()
-        if self.PARSE_SETTINGS and ('settings' in info):
-            settings, _ = parse_settings(defaults, info['settings'])
+        if self.PARSE_SETTINGS and ("settings" in info):
+            settings, _ = parse_settings(defaults, info["settings"])
         else:
-            settings = {k:v[0] for k, v in defaults.items()}
+            settings = {k: v[0] for k, v in defaults.items()}
 
         return self.createToken(parent, info, page, settings)
 
@@ -130,12 +140,12 @@ class ReaderComponent(Component, mixins.ReaderObject):
         called externally.
         """
         out = dict()
-        if settings.get('style', None) is not None:
-            out['style'] = settings['style'].strip()
-        if settings.get('id', None) is not None:
-            out['id'] = settings['id'].strip()
-        if settings.get('class', None) is not None:
-            out['class'] = settings['class'].strip()
+        if settings.get("style", None) is not None:
+            out["style"] = settings["style"].strip()
+        if settings.get("id", None) is not None:
+            out["id"] = settings["id"].strip()
+        if settings.get("class", None) is not None:
+            out["class"] = settings["class"].strip()
         return out
 
     def createToken(self, parent, info, page, settings):
@@ -150,6 +160,7 @@ class ReaderComponent(Component, mixins.ReaderObject):
         """
         raise NotImplementedError("The createToken method is required.")
 
+
 class RenderComponent(Component, mixins.RendererObject):
     """
     RenderComponent objects are used to convert tokens to an output format such as HTML or LaTeX.
@@ -163,6 +174,7 @@ class RenderComponent(Component, mixins.RendererObject):
     formats. For example, the components in core.py have createHTML and createLatex methods to
     work with the HTMLRenderer and the LatexRenderer.
     """
+
     def __init__(self):
         """
         Constructs the object and sets the default settings of the object.

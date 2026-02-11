@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import glob
 import platform
+
 
 def recursiveFindFile(current_path, glob_pattern, problems_dir="problems"):
     """
@@ -44,6 +45,7 @@ def recursiveFindFile(current_path, glob_pattern, problems_dir="problems"):
 
     return None
 
+
 def searchForExe(start_dir=None, methods=None):
     """
     Find a MOOSE based executable with the format *-$METHOD
@@ -59,7 +61,7 @@ def searchForExe(start_dir=None, methods=None):
             methods = [method]
 
     for method in methods:
-        if platform.system() == 'Windows':
+        if platform.system() == "Windows":
             glob_pattern = "*-%s.exe" % method
         else:
             glob_pattern = "*-%s" % method
@@ -71,8 +73,9 @@ def searchForExe(start_dir=None, methods=None):
             print("Found executable: %s" % executable)
             return executable
 
-    print('No executable found for method type(s): %s' % ', '.join(methods))
+    print("No executable found for method type(s): %s" % ", ".join(methods))
     return None
+
 
 def getExecutablePath(options, start_dir=None):
     """

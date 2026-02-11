@@ -1,15 +1,16 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 from .ChiggerObject import ChiggerObject
+
 
 class ChiggerResultBase(ChiggerObject):
     """
@@ -28,20 +29,44 @@ class ChiggerResultBase(ChiggerObject):
     @staticmethod
     def getOptions():
         opt = ChiggerObject.getOptions()
-        opt.add('layer', 1, "The VTK layer within the render window.", vtype=int)
-        opt.add('viewport', [0, 0, 1, 1], "A list given the viewport coordinates [x_min, y_min, "
-                                          "x_max, y_max], in relative position to the entire "
-                                          "window (0 to 1).", vtype=list)
-        opt.add('background', [0, 0, 0], "The background color, only applied when the 'layer' "
-                                         "option is zero. A background result is automatically "
-                                         "added when chigger.RenderWindow is utilized.")
-        opt.add('background2', None, "The second background color, when supplied this creates a "
-                                     "gradient background, only applied when the 'layer' option is "
-                                     "zero. A background result is automatically added when "
-                                     "chigger.RenderWindow is utilized.", vtype=list)
-        opt.add('gradient_background', False, "Enable/disable the use of a gradient background.")
-        opt.add('camera', "The VTK camera to utilize for viewing the results.", vtype=vtk.vtkCamera)
-        opt.add('light', None, "Add a headlight with the supplied intensity.", vtype=float)
+        opt.add("layer", 1, "The VTK layer within the render window.", vtype=int)
+        opt.add(
+            "viewport",
+            [0, 0, 1, 1],
+            "A list given the viewport coordinates [x_min, y_min, "
+            "x_max, y_max], in relative position to the entire "
+            "window (0 to 1).",
+            vtype=list,
+        )
+        opt.add(
+            "background",
+            [0, 0, 0],
+            "The background color, only applied when the 'layer' "
+            "option is zero. A background result is automatically "
+            "added when chigger.RenderWindow is utilized.",
+        )
+        opt.add(
+            "background2",
+            None,
+            "The second background color, when supplied this creates a "
+            "gradient background, only applied when the 'layer' option is "
+            "zero. A background result is automatically added when "
+            "chigger.RenderWindow is utilized.",
+            vtype=list,
+        )
+        opt.add(
+            "gradient_background",
+            False,
+            "Enable/disable the use of a gradient background.",
+        )
+        opt.add(
+            "camera",
+            "The VTK camera to utilize for viewing the results.",
+            vtype=vtk.vtkCamera,
+        )
+        opt.add(
+            "light", None, "Add a headlight with the supplied intensity.", vtype=float
+        )
         return opt
 
     def __init__(self, renderer=None, **kwargs):
@@ -69,26 +94,28 @@ class ChiggerResultBase(ChiggerObject):
         super(ChiggerResultBase, self).update(**kwargs)
 
         # Render layer
-        if self.isOptionValid('layer'):
-            self._vtkrenderer.SetLayer(self.getOption('layer'))
+        if self.isOptionValid("layer"):
+            self._vtkrenderer.SetLayer(self.getOption("layer"))
 
         # Viewport
-        if self.isOptionValid('viewport'):
-            self._vtkrenderer.SetViewport(self.getOption('viewport'))
+        if self.isOptionValid("viewport"):
+            self._vtkrenderer.SetViewport(self.getOption("viewport"))
 
         # Background (only gets applied if layer=0)
-        self._vtkrenderer.SetBackground(self.getOption('background'))
-        if self.isOptionValid('background2'):
-            self._vtkrenderer.SetBackground2(self.getOption('background2'))
+        self._vtkrenderer.SetBackground(self.getOption("background"))
+        if self.isOptionValid("background2"):
+            self._vtkrenderer.SetBackground2(self.getOption("background2"))
 
-        if self.isOptionValid('gradient_background'):
-            self._vtkrenderer.SetGradientBackground(self.getOption('gradient_background'))
+        if self.isOptionValid("gradient_background"):
+            self._vtkrenderer.SetGradientBackground(
+                self.getOption("gradient_background")
+            )
 
         # Camera
-        if self.isOptionValid('camera'):
-            self._vtkrenderer.SetActiveCamera(self.getOption('camera'))
+        if self.isOptionValid("camera"):
+            self._vtkrenderer.SetActiveCamera(self.getOption("camera"))
 
         # Headlight
-        if self.isOptionValid('light'):
+        if self.isOptionValid("light"):
             self._vtklight.SetIntensity(1.5)
             self._vtkrenderer.AddLight(self._vtklight)

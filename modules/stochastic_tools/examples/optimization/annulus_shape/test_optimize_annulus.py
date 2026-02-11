@@ -16,7 +16,8 @@ import numpy as np
 StochasticControl = None
 StochasticRunOptions = None
 
-def tryImportStochasticControl(path = None):
+
+def tryImportStochasticControl(path=None):
     global StochasticControl
     global StochasticRunOptions
 
@@ -35,18 +36,20 @@ def tryImportStochasticControl(path = None):
         return False
     else:
         from moose_stochastic_tools import StochasticControl, StochasticRunOptions
+
         return True
 
 
 if not tryImportStochasticControl():
-    _moose_dir = os.environ.get("MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5)))
+    _moose_dir = os.environ.get(
+        "MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5))
+    )
     _stm_python_path = os.path.abspath(
         os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
     )
     tryImportStochasticControl(_stm_python_path)
 
 if __name__ == "__main__":
-
 
     cmd = os.environ.get("RUNAPP_COMMAND")
     cmd_args = {}
@@ -65,11 +68,15 @@ if __name__ == "__main__":
 
         # Import StochasticControl based on executable location (i.e. from conda)
         if StochasticControl is None:
-            _exec_dir = os.path.dirname(os.path.abspath(shutil.which(cmd_args["executable"])))
+            _exec_dir = os.path.dirname(
+                os.path.abspath(shutil.which(cmd_args["executable"]))
+            )
             _share_dir = os.path.abspath(os.path.join(_exec_dir, "..", "share"))
             _moose_stm_python = os.path.join(_share_dir, "stochastic_tools", "python")
             if not tryImportStochasticControl(_moose_stm_python):
-                raise ModuleNotFoundError("Could not find MOOSE stochastic tools module python utilities.")
+                raise ModuleNotFoundError(
+                    "Could not find MOOSE stochastic tools module python utilities."
+                )
 
     from optimize_annulus import optimize_annulus, cli_args
 

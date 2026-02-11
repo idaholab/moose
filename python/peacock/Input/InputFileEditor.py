@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 from PyQt5.QtWidgets import QWidget, QSizePolicy
@@ -19,6 +19,7 @@ from .BlockEditor import BlockEditor
 from .InputTree import InputTree
 from .ExecutableInfo import ExecutableInfo
 
+
 class InputFileEditor(QWidget, MooseWidget):
     """
     Holds the widget to edit the input file.
@@ -28,6 +29,7 @@ class InputFileEditor(QWidget, MooseWidget):
         inputFileChanged[str]: Emitted when the input file has changed
         blockSelected[BlockInfo, InputTree]: Emitted when a block is selected
     """
+
     blockChanged = pyqtSignal(object, object)
     inputFileChanged = pyqtSignal(str)
     blockSelected = pyqtSignal(object, object)
@@ -41,7 +43,9 @@ class InputFileEditor(QWidget, MooseWidget):
         self.top_layout.addWidget(self.block_tree)
         self.block_tree.blockClicked.connect(self._blockClicked)
         self.block_tree.blockDoubleClicked.connect(self._blockEditorRequested)
-        self.block_tree.changed.connect(lambda block: self.blockChanged.emit(block, self.tree))
+        self.block_tree.changed.connect(
+            lambda block: self.blockChanged.emit(block, self.tree)
+        )
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.block_editor = None
@@ -61,9 +65,13 @@ class InputFileEditor(QWidget, MooseWidget):
             return
 
         self.block_tree.blockSignals(True)
-        self.block_editor = BlockEditor(block, self.tree.app_info.type_to_block_map, parent=self)
+        self.block_editor = BlockEditor(
+            block, self.tree.app_info.type_to_block_map, parent=self
+        )
         self.block_editor.needBlockList.connect(self.onNeedBlockList)
-        self.block_editor.blockChanged.connect(lambda block: self.blockChanged.emit(block, self.tree))
+        self.block_editor.blockChanged.connect(
+            lambda block: self.blockChanged.emit(block, self.tree)
+        )
         self.block_editor.blockRenamed.connect(self.block_tree.renameBlock)
         self.block_editor.cloneBlock.connect(self.block_tree.copyBlock)
         self.block_editor.removeBlock.connect(self.block_tree.removeBlock)
@@ -84,7 +92,7 @@ class InputFileEditor(QWidget, MooseWidget):
         """
         Editing the block is finished.
         """
-        self.block_editor.setParent(None) # Don't know if this is required
+        self.block_editor.setParent(None)  # Don't know if this is required
         self.block_editor = None
 
     def _blockClicked(self, block):
@@ -129,7 +137,9 @@ class InputFileEditor(QWidget, MooseWidget):
             old_tree = self.tree
             self.tree = InputTree(app_info)
             if old_tree.root:
-                self.tree.setInputFileData(old_tree.getInputFileString(), old_tree.input_filename)
+                self.tree.setInputFileData(
+                    old_tree.getInputFileString(), old_tree.input_filename
+                )
             else:
                 self.tree.setInputFile(old_tree.input_filename)
             self.block_tree.setInputTree(self.tree)
@@ -183,9 +193,11 @@ class InputFileEditor(QWidget, MooseWidget):
         except IOError as e:
             mooseutils.mooseWarning("Failed to write input file %s: %s" % (filename, e))
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     import sys
+
     if len(sys.argv) != 3:
         print("Usage: %s <exe> <input file>" % sys.argv[0])
         sys.exit(1)
@@ -195,7 +207,7 @@ if __name__ == "__main__":
     main_win.setCentralWidget(w)
     test_file = sys.argv[2]
     exe_info = ExecutableInfo()
-    #exe_info.clearCache()
+    # exe_info.clearCache()
     exe_info.setPath(sys.argv[1])
     w.executableInfoChanged(exe_info)
     w.setInputFile(test_file)

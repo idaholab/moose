@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 from pyhit import hit
@@ -14,10 +14,12 @@ import mooseutils
 from .InputFile import InputFile
 from . import InputTreeWriter
 
+
 class InputTree(object):
     """
     A tree that represents an input file along with all the available blocks and parameters.
     """
+
     def __init__(self, app_info, **kwds):
         """
         Constructor.
@@ -73,7 +75,7 @@ class InputTree(object):
             c = n.render().strip()[1:].strip()
             comments.append(c)
 
-        return '\n'.join(comments)
+        return "\n".join(comments)
 
     def setInputFileData(self, input_str, filename="String"):
         """
@@ -126,7 +128,9 @@ class InputTree(object):
             self._copyDefaultTree()
             self.root.comments = self._getComments(self.input_file.root_node)
             active = self._readParameters(self.input_file.root_node, "/")
-            for root_node in self.input_file.root_node.children(node_type=hit.NodeType.Section):
+            for root_node in self.input_file.root_node.children(
+                node_type=hit.NodeType.Section
+            ):
                 self._addInputFileNode(root_node, root_node.path() in active)
                 if root_node.path() not in self.root.children_write_first:
                     self.root.children_write_first.append(root_node.path())
@@ -155,7 +159,9 @@ class InputTree(object):
             param_info = self.getParamInfo(path, param_node.path())
             if not param_info:
                 # must be a user added param
-                param_info = self.addUserParam(path, param_node.path(), param_node.raw())
+                param_info = self.addUserParam(
+                    path, param_node.path(), param_node.raw()
+                )
             else:
                 param_info.value = param_node.raw()
             if param_info.name == "active":
@@ -327,9 +333,11 @@ class InputTree(object):
             mooseutils.mooseWarning("Caught exception: %s" % e)
             return True
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
     from ExecutableInfo import ExecutableInfo
+
     if len(sys.argv) < 3:
         print("Usage: <path_to_exe> <path_to_input_file>")
         exit(1)
@@ -339,5 +347,5 @@ if __name__ == '__main__':
     input_file_path = sys.argv[2]
     input_tree = InputTree(exe_info)
     input_tree.setInputFile(input_file_path)
-    #print(input_tree.dump())
+    # print(input_tree.dump())
     print(input_tree.getInputFileString())

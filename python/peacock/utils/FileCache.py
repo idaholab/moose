@@ -1,19 +1,21 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtCore import QSettings, QStandardPaths
 import os
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 import uuid
+
 
 class FileCache(object):
     """
@@ -26,7 +28,9 @@ class FileCache(object):
     changes then the old cache is deleted and the new pickle data is
     added.
     """
+
     VERSION = 1
+
     def __init__(self, settings_key, path, version=1):
         """
         Input:
@@ -58,13 +62,14 @@ class FileCache(object):
             self.dirty = True
             self.no_exist = True
             return
-        if (not self.path_data
-                or self.path_data.get("cache_version") != self.VERSION
-                or self.path_data.get("data_version") != self.data_version
-                or self.stat.st_ctime != self.path_data.get("ctime")
-                or self.stat.st_size != self.path_data.get("size")
-                or not os.path.exists(self.path_data.get("pickle_path"))
-                ):
+        if (
+            not self.path_data
+            or self.path_data.get("cache_version") != self.VERSION
+            or self.path_data.get("data_version") != self.data_version
+            or self.stat.st_ctime != self.path_data.get("ctime")
+            or self.stat.st_size != self.path_data.get("size")
+            or not os.path.exists(self.path_data.get("pickle_path"))
+        ):
             self.dirty = True
             return
         self.dirty = False
@@ -123,12 +128,13 @@ class FileCache(object):
         full_path = os.path.join(cache_dir, filename)
         with open(full_path, "wb") as f:
             pickle.dump(obj, f, protocol=pickle.HIGHEST_PROTOCOL)
-        self.path_data = {"ctime": self.stat.st_ctime,
-                "size": self.stat.st_size,
-                "pickle_path": full_path,
-                "cache_version": self.VERSION,
-                "data_version": self.data_version,
-                }
+        self.path_data = {
+            "ctime": self.stat.st_ctime,
+            "size": self.stat.st_size,
+            "pickle_path": full_path,
+            "cache_version": self.VERSION,
+            "data_version": self.data_version,
+        }
         self.val[self.path] = self.path_data
         self.settings.setValue(self.settings_key, self.val)
         self.dirty = False

@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from .ExodusPlugin import ExodusPlugin
+
 
 class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -37,11 +38,12 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     def __init__(self, **kwargs):
         super(MeshPlugin, self).__init__(**kwargs)
 
-        self._preferences.addBool("exodus/viewMesh",
-                "View the mesh",
-                False,
-                "View the mesh by default",
-                )
+        self._preferences.addBool(
+            "exodus/viewMesh",
+            "View the mesh",
+            False,
+            "View the mesh by default",
+        )
 
         self._transform = chigger.filters.TransformFilter()
         self._extents = None
@@ -59,7 +61,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # Mesh
         self.RepresentationLabel = QtWidgets.QLabel("Representation:")
         self.Representation = QtWidgets.QComboBox()
-        self.ViewMeshToggle = QtWidgets.QCheckBox('View Mesh')
+        self.ViewMeshToggle = QtWidgets.QCheckBox("View Mesh")
 
         # Scale
         self.ScaleXLabel = QtWidgets.QLabel("Scale X:")
@@ -173,9 +175,9 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Update ExodusReaderOptions
         """
         reader_options = dict()
-        reader_options['displacements'] = bool(self.DisplacementToggle.isChecked())
-        reader_options['displacement_magnitude'] = self.DisplacementMagnitude.value()
-        self.DisplacementMagnitude.setEnabled(reader_options['displacements'])
+        reader_options["displacements"] = bool(self.DisplacementToggle.isChecked())
+        reader_options["displacement_magnitude"] = self.DisplacementMagnitude.value()
+        self.DisplacementMagnitude.setEnabled(reader_options["displacements"])
         self.readerOptionsChanged.emit(reader_options)
 
     def updateResultOptions(self):
@@ -183,9 +185,11 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Update ExodusResult options.
         """
         result_options = dict()
-        result_options['representation'] = str(self.Representation.currentText()).lower()
-        result_options['edges'] = self.ViewMeshToggle.isChecked()
-        result_options['edge_color'] = [0, 0, 0]
+        result_options["representation"] = str(
+            self.Representation.currentText()
+        ).lower()
+        result_options["edges"] = self.ViewMeshToggle.isChecked()
+        result_options["edge_color"] = [0, 0, 0]
         self.resultOptionsChanged.emit(result_options)
 
     def updateOptions(self):
@@ -194,7 +198,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
         if scale != [1, 1, 1]:
-            self._transform.setOption('scale', scale)
+            self._transform.setOption("scale", scale)
             self.addFilter.emit(self._transform)
         else:
             self.removeFilter.emit(self._transform)
@@ -238,9 +242,9 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Setup from Representation widget. (protected)
         """
-        qobject.addItem('Surface')
-        qobject.addItem('Wireframe')
-        qobject.addItem('Points')
+        qobject.addItem("Surface")
+        qobject.addItem("Wireframe")
+        qobject.addItem("Points")
         qobject.setCurrentIndex(0)
         qobject.currentIndexChanged.connect(self._callbackRepresentation)
 
@@ -340,10 +344,12 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         scale = [self.ScaleX.value(), self.ScaleY.value(), self.ScaleZ.value()]
         if any([s != 1 for s in scale]):
             options, sub_options = self._transform.options().toScriptString()
-            output['filters'] = ['transform = chigger.filters.TransformFilter()']
-            output['filters'] += ['transform.setOptions({})'.format(', '.join(options))]
+            output["filters"] = ["transform = chigger.filters.TransformFilter()"]
+            output["filters"] += ["transform.setOptions({})".format(", ".join(options))]
             for key, value in sub_options.items():
-                output['filters'] += ['transform.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+                output["filters"] += [
+                    "transform.setOptions({}, {})".format(repr(key), ", ".join(value))
+                ]
 
         return output
 
@@ -355,16 +361,21 @@ def main(size=None):
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
     from peacock.ExodusViewer.plugins.FilePlugin import FilePlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, MeshPlugin])
+
+    widget = ExodusPluginManager(
+        plugins=[lambda: VTKWindowPlugin(size=size), FilePlugin, MeshPlugin]
+    )
     widget.show()
 
     return widget, widget.VTKWindowPlugin
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from peacock.utils import Testing
+
     app = QtWidgets.QApplication(sys.argv)
-    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'displace.e')
-    #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
-    widget, window = main(size=[600,600])
+    filenames = Testing.get_chigger_input_list("mug_blocks_out.e", "displace.e")
+    # filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
+    widget, window = main(size=[600, 600])
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

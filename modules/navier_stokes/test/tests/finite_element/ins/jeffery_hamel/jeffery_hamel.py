@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Solves a 3rd-order ODE associated with Jeffery-Hamel flow.
 # See, for example: F. White, "Viscous Fluid Flow", pp. 168--172 for a
@@ -43,33 +43,38 @@ import numpy as np
 
 # Use fonts that match LaTeX
 from matplotlib import rcParams
-rcParams['font.family'] = 'serif'
-rcParams['font.size'] = 17
-rcParams['font.serif'] = ['Computer Modern Roman']
-rcParams['text.usetex'] = True
+
+rcParams["font.family"] = "serif"
+rcParams["font.size"] = 17
+rcParams["font.serif"] = ["Computer Modern Roman"]
+rcParams["text.usetex"] = True
 
 # Small font size for the legend
 from matplotlib.font_manager import FontProperties
+
 fontP = FontProperties()
-fontP.set_size('x-small')
+fontP.set_size("x-small")
+
 
 # Set up ODEs to be integrated.
 def f(t, y, alpha, Re):
     return [y[1], y[2], -2 * Re * alpha * y[0] * y[1] - 4 * alpha**2 * y[1]]
 
+
 # Set up Jacobian of the ODEs.
 def jac(t, y, alpha, Re):
-    return [[0, 1, 0],
-            [0, 0, 1],
-            [-2 * Re * alpha * y[1],
-             -2 * Re * alpha * y[0] + 4 * alpha**2,
-             0]]
+    return [
+        [0, 1, 0],
+        [0, 0, 1],
+        [-2 * Re * alpha * y[1], -2 * Re * alpha * y[0] + 4 * alpha**2, 0],
+    ]
+
 
 def solve_ode(guess, dt, alpha, Re):
-    '''
+    """
     guess - sets the initial condition for the y[2] component of the solution
     dt - the timestep size to use for the integration routine
-    '''
+    """
     # Set initial conditions.
     y0, t0 = [1, 0, guess], 0
 
@@ -78,7 +83,7 @@ def solve_ode(guess, dt, alpha, Re):
     # The possible method options is 'adams' and 'bdf'.  For this
     # problem, I saw no difference between 6th-order adams and 7-12th
     # order adams...
-    r = ode(f, jac).set_integrator('vode', method='adams', with_jacobian=True, order=6)
+    r = ode(f, jac).set_integrator("vode", method="adams", with_jacobian=True, order=6)
 
     # Set up [alpha, Re] list of parameters which are used by the 'f' and 'jac' functions.
     p = [alpha, Re]
@@ -100,7 +105,7 @@ def solve_ode(guess, dt, alpha, Re):
     second_deriv.append(y0[2])
 
     # Do the time integration
-    while r.successful() and abs(r.t - 1) > dt/2:
+    while r.successful() and abs(r.t - 1) > dt / 2:
         r.integrate(r.t + dt)
         # For debugging purposes, we can print the most recent solution
         # print r.t, r.y
@@ -112,13 +117,12 @@ def solve_ode(guess, dt, alpha, Re):
     return r, timesteps, solution, second_deriv
 
 
-
 ################################################################################
 # Main program
 ################################################################################
 
 # The half-angle size of the wedge (in degrees)
-alpha = 15 * math.pi/180
+alpha = 15 * math.pi / 180
 
 # The Reynolds number (Re = (u_max * r * alpha) / nu)
 Re = 30
@@ -126,8 +130,8 @@ Re = 30
 # Initialize Newton guess and counters
 current_iterate = 0
 max_its = 20
-guess = 0.
-nl_abs_tol = 1.e-13
+guess = 0.0
+nl_abs_tol = 1.0e-13
 
 # The timestep to use when integrating.  Overall, the solutions did
 # not seem to be very sensitive to this choice.
@@ -139,7 +143,7 @@ nl_abs_tol = 1.e-13
 # dt = .0125
 # dt = .00625
 # dt = .003125
-dt = .0015625
+dt = 0.0015625
 # dt = .00078125
 # dt = .000390625
 # dt = .0001953125
@@ -154,13 +158,13 @@ dt = .0015625
 # will get lost in roundoff error.  Might need to depend in some way
 # on the size of the current residual, but luckily the parameter we
 # are differencing with respect to is O(1).
-newton_fd_eps = 1.e-8
+newton_fd_eps = 1.0e-8
 
 # Control plotting/printing of f(theta)
 print_results = True
 plot_results = False
 
-while (current_iterate < max_its):
+while current_iterate < max_its:
     # print('Newton Iteration {}'.format(current_iterate))
 
     # Solve ODE system with current alpha value
@@ -171,10 +175,14 @@ while (current_iterate < max_its):
     # print('  newton_res={}'.format(newton_res))
 
     # Print current solution, residual based on current value of alpha
-    print('{:2d}: guess={:.15e}, |y0(eta=1)| = {:.8e}'.format(current_iterate, guess, abs(newton_res)))
+    print(
+        "{:2d}: guess={:.15e}, |y0(eta=1)| = {:.8e}".format(
+            current_iterate, guess, abs(newton_res)
+        )
+    )
 
     # If the Newton residual is small enough, break out of Newton loop
-    if (abs(newton_res) < nl_abs_tol):
+    if abs(newton_res) < nl_abs_tol:
         break
 
     # We estimate Jacobian by finite differencing, so compute the ODE
@@ -186,7 +194,7 @@ while (current_iterate < max_its):
     # print('  newton_jac={}'.format(newton_jac))
 
     # Compute update
-    dguess = -newton_res/newton_jac
+    dguess = -newton_res / newton_jac
     # print('  alpha={:.15e}'.format(alpha))
 
     # Update the parameter
@@ -197,15 +205,18 @@ while (current_iterate < max_its):
 
 
 # Warn if we got here after using too many iterations.
-if (current_iterate >= max_its):
-    print('\nWarning, max iterates reached before reaching tolerance!\n')
+if current_iterate >= max_its:
+    print("\nWarning, max iterates reached before reaching tolerance!\n")
 
 # Compute the "constant" K for each value of eta.  It turns out it is
 # not actually constant.. but it is fairly close.  We can compute a
 # mean and standard deviation to try and pick the best single value...
 K = []
 for i in xrange(len(timesteps)):
-    K.append(-1. / (4. * alpha * alpha) * (alpha * Re * solution[i]**2 + second_deriv[i]) - solution[i])
+    K.append(
+        -1.0 / (4.0 * alpha * alpha) * (alpha * Re * solution[i] ** 2 + second_deriv[i])
+        - solution[i]
+    )
 
 mean_K = np.mean(K)
 std_K = np.std(K)
@@ -229,22 +240,30 @@ std_K = np.std(K)
 # Interestingly, neither the mean value of the constant nor the
 # standard deviation seems to be affected by the eta discretization
 # much.
-print('mean(K) = {:.11f}, std(K) = {:.11e}'.format(mean_K, std_K))
+print("mean(K) = {:.11f}, std(K) = {:.11e}".format(mean_K, std_K))
 
 # Print all results.  Useful for tabulating values of f(theta).
 if print_results:
-    print('eta'.rjust(22) + ', ' + 'f'.rjust(22) + ', ' + 'f"'.rjust(22))
+    print("eta".rjust(22) + ", " + "f".rjust(22) + ", " + 'f"'.rjust(22))
     for i in xrange(len(timesteps)):
-        print('{:.16e}, {:.16e}, {:.16e}, {:.16e}'.format(timesteps[i], solution[i], second_deriv[i], K[i]))
+        print(
+            "{:.16e}, {:.16e}, {:.16e}, {:.16e}".format(
+                timesteps[i], solution[i], second_deriv[i], K[i]
+            )
+        )
 
 if plot_results:
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.plot(timesteps, solution, color="red", marker="o", linestyle="-", linewidth=2)
-    ax1.set_xlabel(r'$\eta$')
-    ax1.set_ylabel(r'$f(\eta)$')
-    ax1.set_title(r'$\alpha={:.2f}^{{\circ}}$, $\mathrm{{Re}}={:.2f}$'.format(alpha*180/math.pi, Re))
-    plt.savefig('jeffery_hamel.pdf', format='pdf')
+    ax1.set_xlabel(r"$\eta$")
+    ax1.set_ylabel(r"$f(\eta)$")
+    ax1.set_title(
+        r"$\alpha={:.2f}^{{\circ}}$, $\mathrm{{Re}}={:.2f}$".format(
+            alpha * 180 / math.pi, Re
+        )
+    )
+    plt.savefig("jeffery_hamel.pdf", format="pdf")
 
 
 # dt               alpha(degrees)   Re   f''(0)

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Execute.TerminalTextEdit import TerminalTextEdit
 from PyQt5 import QtTest
@@ -15,9 +15,11 @@ from mock import patch
 import tempfile
 from peacock.utils import Testing
 
+
 class MockEvent(object):
     def globalPos(self):
         return None
+
 
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
@@ -51,8 +53,8 @@ class Tests(Testing.PeacockTester):
         else:
             return "Clear"
 
-    @patch.object(QMenu, 'exec_')
-    @patch.object(QMenu, 'addAction')
+    @patch.object(QMenu, "exec_")
+    @patch.object(QMenu, "addAction")
     @patch.object(TerminalTextEdit, "save")
     def testContextMenu(self, mock_save, mock_add, mock_exec):
         t = TerminalTextEdit()
@@ -73,5 +75,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(t.toPlainText(), "")
         self.assertEqual(mock_save.call_count, 1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

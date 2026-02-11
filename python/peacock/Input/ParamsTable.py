@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import functools
 import os
 from PyQt5 import QtWidgets
@@ -13,6 +13,7 @@ from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtCore import pyqtSignal, Qt
 from peacock.base.MooseWidget import MooseWidget
 from .ParameterInfo import ParameterInfo
+
 
 class EditingDelegate(QtWidgets.QStyledItemDelegate):
     """
@@ -24,6 +25,7 @@ class EditingDelegate(QtWidgets.QStyledItemDelegate):
     We also keep the current editor so that if the user wants to quit while
     in the process of editing a cell, we can grab the current text.
     """
+
     startedEditing = pyqtSignal()
 
     def __init__(self, *args, **kwargs):
@@ -35,8 +37,11 @@ class EditingDelegate(QtWidgets.QStyledItemDelegate):
         Override the default implementation to emit a signal and store the created editor.
         """
         self.startedEditing.emit()
-        self.current_editor = super(EditingDelegate, self).createEditor(parent, option, index)
+        self.current_editor = super(EditingDelegate, self).createEditor(
+            parent, option, index
+        )
         return self.current_editor
+
 
 def paramSort(a, b):
     """
@@ -47,17 +52,18 @@ def paramSort(a, b):
     After the required params, the rest of the params
     are sorted normally.
     """
+
     def cmp(a, b):
-        return (a>b)-(a<b)
+        return (a > b) - (a < b)
 
     if a.required and b.required:
         if a.name == "Name":
             return -1
-        elif b.name == "Name" :
+        elif b.name == "Name":
             return 1
         elif a.name == "type":
             return -1
-        elif b.name == "type" :
+        elif b.name == "type":
             return 1
         else:
             return cmp(a.name, b.name)
@@ -91,6 +97,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         blockRenamed[BlockInfo, newname]: The block should be renamed
         changed: Whenever an item has changed.
     """
+
     needBlockList = pyqtSignal(list)
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()
@@ -298,7 +305,9 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
             return self._paramValue(row)
 
     def _openFileDialog(self, param, text, use_extension):
-        (file_name, filter_name) = QtWidgets.QFileDialog.getOpenFileName(self, text, os.getcwd(), "File (*)")
+        (file_name, filter_name) = QtWidgets.QFileDialog.getOpenFileName(
+            self, text, os.getcwd(), "File (*)"
+        )
         if not file_name:
             return
         file_name = os.path.relpath(file_name)
@@ -310,14 +319,15 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self._updateValue(row, append, file_name)
 
     def _createFilenameOption(self, param):
-        cpp_type_map = {"MeshFileName": "Find Mesh File",
-                        "MatrixFileName": "Find Matrix File",
-                "FileNameNoExtension": "Find Base File",
-                }
+        cpp_type_map = {
+            "MeshFileName": "Find Mesh File",
+            "MatrixFileName": "Find Matrix File",
+            "FileNameNoExtension": "Find Base File",
+        }
         text = cpp_type_map.get(param.cpp_type, "Find File")
         button = QtWidgets.QPushButton(text)
         extension = param.cpp_type != "FileNameNoExtension"
-        button.clicked.connect(lambda : self._openFileDialog(param, text, extension))
+        button.clicked.connect(lambda: self._openFileDialog(param, text, extension))
         row = self.findRow(param.name)
         self.setCellWidget(row, 2, button)
 
@@ -349,12 +359,13 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
             name = name_item.text()
             p = name_item.data(Qt.UserRole)
             comments_item = self.item(i, 3)
-            data = {"name": name,
-                    "value": self._paramValue(i),
-                    "comments": comments_item.text(),
-                    "group": p.group_name,
-                    "user_added": p.user_added,
-                    }
+            data = {
+                "name": name,
+                "value": self._paramValue(i),
+                "comments": comments_item.text(),
+                "group": p.group_name,
+                "user_added": p.user_added,
+            }
             data["changed"] = data["value"] != p.default or data["comments"]
             param_data[name] = data
         return param_data
@@ -396,7 +407,9 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         combo.addItems(param.options)
         combo.setCurrentIndex(0)
         append = param.isVectorType()
-        combo.currentTextChanged.connect(lambda text: self._optionSelected(param.name, append, text))
+        combo.currentTextChanged.connect(
+            lambda text: self._optionSelected(param.name, append, text)
+        )
         row = self.findRow(param.name)
         if tooltip:
             combo.setToolTip(tooltip)
@@ -406,7 +419,7 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self.param_watch_blocks[param.name] = watch_blocks
         for b in watch_blocks:
             self.watch_blocks_params.setdefault(b, []).append(param.name)
-        tooltip = "Automatically updates from the following %s" % ' '.join(watch_blocks)
+        tooltip = "Automatically updates from the following %s" % " ".join(watch_blocks)
         self._createOptions(param, tooltip)
 
     def _removeButtonClicked(self, name_item):
@@ -416,7 +429,14 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self.removeRow(row)
         self.changed.emit()
 
-    def createRow(self, param, name_editable=False, value_editable=True, comments_editable=True, index=-1):
+    def createRow(
+        self,
+        param,
+        name_editable=False,
+        value_editable=True,
+        comments_editable=True,
+        index=-1,
+    ):
         """
         Create a row in the table for a param.
         Input:
@@ -469,7 +489,12 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
         self.setItem(row, 3, comments_item)
 
         watch_blocks = self._getChildrenOfNodeOptions(param.cpp_type)
-        if param.cpp_type == "FileName" or param.cpp_type == "MeshFileName" or param.cpp_type == "MatrixFileName" or param.cpp_type == "FileNameNoExtension":
+        if (
+            param.cpp_type == "FileName"
+            or param.cpp_type == "MeshFileName"
+            or param.cpp_type == "MatrixFileName"
+            or param.cpp_type == "FileNameNoExtension"
+        ):
             self._createFilenameOption(param)
         elif watch_blocks:
             self._createBlockWatcher(param, watch_blocks)

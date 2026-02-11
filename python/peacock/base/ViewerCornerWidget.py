@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
 from peacock.utils import WidgetUtils
 from .MooseWidget import MooseWidget
+
 
 class ViewerCornerWidget(QtWidgets.QWidget, MooseWidget):
     """
@@ -32,10 +33,14 @@ class ViewerCornerWidget(QtWidgets.QWidget, MooseWidget):
         self.MainLayout.setSpacing(10)
         self.setLayout(self.MainLayout)
 
-        self.CloseButton = QtWidgets.QPushButton(WidgetUtils.createIcon('close.ico'), 'Close')
-        self.CloneButton = QtWidgets.QPushButton(WidgetUtils.createIcon('copy.ico'), 'Clone')
+        self.CloseButton = QtWidgets.QPushButton(
+            WidgetUtils.createIcon("close.ico"), "Close"
+        )
+        self.CloneButton = QtWidgets.QPushButton(
+            WidgetUtils.createIcon("copy.ico"), "Clone"
+        )
 
-        #self.MainLayout.addStretch()
+        # self.MainLayout.addStretch()
         self.MainLayout.addWidget(self.CloneButton)
         self.MainLayout.addWidget(self.CloseButton)
 

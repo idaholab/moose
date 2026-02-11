@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import peacock
 from PyQt5 import QtWidgets
@@ -13,6 +13,7 @@ from peacock.utils import WidgetUtils
 import mooseutils
 from .PostprocessorPlugin import PostprocessorPlugin
 from .PostprocessorTableWidget import PostprocessorTableWidget
+
 
 class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
     """
@@ -40,7 +41,12 @@ class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
         """
         Return matplotlib scripting information.
         """
-        output = ['', '# Show figure and write pdf', 'plt.show()', 'figure.savefig("output.pdf")']
+        output = [
+            "",
+            "# Show figure and write pdf",
+            "plt.show()",
+            'figure.savefig("output.pdf")',
+        ]
         return output, []
 
     def onAxesModified(self):
@@ -56,7 +62,6 @@ class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
         if self.LiveTable.isVisible():
             self.LiveTable.onTimeChanged(*args)
 
-
     def onDataChanged(self):
         """
         Update the table.
@@ -69,7 +74,7 @@ class OutputPlugin(peacock.base.OutputWidgetBase, PostprocessorPlugin):
         Setup method for python script output button.
         """
         qobject.clicked.connect(self._callbackLiveTableButton)
-        qobject.setIcon(WidgetUtils.createIcon('table.svg'))
+        qobject.setIcon(WidgetUtils.createIcon("table.svg"))
         qobject.setIconSize(self._icon_size)
         qobject.setFixedSize(qobject.iconSize())
         qobject.setToolTip("Show a table of the CSV data for each open file.")
@@ -89,17 +94,25 @@ def main(filenames):
     from .PostprocessorSelectPlugin import PostprocessorSelectPlugin
     from .MediaControlPlugin import MediaControlPlugin
 
-    widget = PostprocessorViewer(mooseutils.VectorPostprocessorReader, timeout=None, plugins=[OutputPlugin, PostprocessorSelectPlugin, MediaControlPlugin])
+    widget = PostprocessorViewer(
+        mooseutils.VectorPostprocessorReader,
+        timeout=None,
+        plugins=[OutputPlugin, PostprocessorSelectPlugin, MediaControlPlugin],
+    )
     widget.onSetFilenames(filenames)
     control = widget.currentWidget().OutputPlugin
     widget.show()
 
     return control, widget
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
-    #control, widget = main(['../../../tests/input/white_elephant_jan_2016.csv', '../../../tests/input/white_elephant_jan_2016.csv'])
-    control, widget = main(['../../../tests/input/vpp_*.csv', '../../../tests/input/vpp2_*.csv'])
+    # control, widget = main(['../../../tests/input/white_elephant_jan_2016.csv', '../../../tests/input/white_elephant_jan_2016.csv'])
+    control, widget = main(
+        ["../../../tests/input/vpp_*.csv", "../../../tests/input/vpp2_*.csv"]
+    )
 
     sys.exit(app.exec_())

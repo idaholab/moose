@@ -1,7 +1,9 @@
 # Import the base class that will be used for all validation cases
 from TestHarness.validation import ValidationCase
+
 # Convenience import for loading app CSV output with pandas
 import pandas as pd
+
 
 # Define the derived test class; the name of this class does not matter,
 # as long as it derives from ValidationCase
@@ -16,8 +18,12 @@ class TestCase(ValidationCase):
     @staticmethod
     def validParams():
         params = ValidationCase.validParams()
-        params.addRequiredParam('validation_lower_bound', 'The upper bound for the data')
-        params.addRequiredParam('validation_upper_bound', 'The lower bound for the data')
+        params.addRequiredParam(
+            "validation_lower_bound", "The upper bound for the data"
+        )
+        params.addRequiredParam(
+            "validation_upper_bound", "The lower bound for the data"
+        )
         return params
 
     # Specific method that is ran once before all "testXXX" methods. Should
@@ -28,20 +34,20 @@ class TestCase(ValidationCase):
         # search for the file, but instead we use getTesterOutputs() to get
         # the paths to the output files that the TestHarness Tester was reading
         # from (in this case, from the CSVDiff)
-        csv_file = self.getTesterOutputs(extension='csv')[0]
+        csv_file = self.getTesterOutputs(extension="csv")[0]
         df = pd.read_csv(csv_file)
 
         # Store the single value from the csv output that we will
         # use within the tests. In this case, just the last value
         # in the MOOSE CSV output.
-        self.value = float(df['value'].iloc[-1])
+        self.value = float(df["value"].iloc[-1])
 
         # Load the lower and upper bounds from the extended parameters.
         # We store these in parameters so that this single validation
         # test case can be utilized across multiple test specifications
         # without needing to define new test scripts.
-        self.lower_bound = float(self.getParam('validation_lower_bound'))
-        self.upper_bound = float(self.getParam('validation_upper_bound'))
+        self.lower_bound = float(self.getParam("validation_lower_bound"))
+        self.upper_bound = float(self.getParam("validation_upper_bound"))
 
     # Define a test case; any defined method that starts with
     # "test" will be ran as a test case
@@ -52,16 +58,23 @@ class TestCase(ValidationCase):
         # we define the bounds here, the data will be checked
         # to be within bounds and will produce a validation
         # failure if it is without of bounds.
-        self.addScalarData('number', self.value, 'Number', 'coolunits',
-                           bounds=(self.lower_bound, self.upper_bound))
+        self.addScalarData(
+            "number",
+            self.value,
+            "Number",
+            "coolunits",
+            bounds=(self.lower_bound, self.upper_bound),
+        )
 
         # Store some arbitrary data. This data isn't particularly
         # meaningful, but it describes storing an arbitrary dictionary.
-        self.addData('useless_dict', {'foo': 'bar'}, 'A useless dictionary')
+        self.addData("useless_dict", {"foo": "bar"}, "A useless dictionary")
 
         # Store some arbitrary vector data. Also not meaningful, but
         # is an example.
-        self.addVectorData('vector',
-                           ([0, 1], 'Position', 'cm'),
-                           ([1, 2], 'Temperature', 'K'),
-                           bounds=(([0, 1], [2, 3])))
+        self.addVectorData(
+            "vector",
+            ([0, 1], "Position", "cm"),
+            ([1, 2], "Temperature", "K"),
+            bounds=(([0, 1], [2, 3])),
+        )

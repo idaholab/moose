@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import unittest
@@ -28,34 +28,35 @@ class TestAxesSettingsPlugin(Testing.PeacockImageTestCase):
         """
         Creates the GUI.
         """
-        self._control, self._widget, self._window = main(['../input/white_elephant_jan_2016.csv'])
+        self._control, self._widget, self._window = main(
+            ["../input/white_elephant_jan_2016.csv"]
+        )
 
     def plot(self):
 
         # Create plot
         select = self._widget.currentWidget().PostprocessorSelectPlugin
-        var = 'air_temp_set_1'
+        var = "air_temp_set_1"
         select._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Checked)
         select._groups[0]._toggles[var].CheckBox.clicked.emit(True)
 
-        var = 'snow_depth_set_1'
+        var = "snow_depth_set_1"
         select._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Checked)
         select._groups[0]._toggles[var].PlotAxis.setCurrentIndex(1)
         select._groups[0]._toggles[var].CheckBox.clicked.emit(True)
-
 
     def testEmpty(self):
         """
         Test that an empty plot is possible.
         """
         ax0, ax1 = self._window.axes()
-        self.assertEqual(ax0.get_xlabel(), '')
-        self.assertEqual(ax0.get_ylabel(), '')
-        self.assertEqual(ax1.get_ylabel(), '')
+        self.assertEqual(ax0.get_xlabel(), "")
+        self.assertEqual(ax0.get_ylabel(), "")
+        self.assertEqual(ax1.get_ylabel(), "")
 
         self.assertFalse(self._control.LegendLocation.isEnabled())
         self.assertFalse(self._control.Legend2Location.isEnabled())
-        self.assertImage('testEmpty.png')
+        self.assertImage("testEmpty.png")
 
     def testTitle(self):
         """
@@ -77,7 +78,7 @@ class TestAxesSettingsPlugin(Testing.PeacockImageTestCase):
         self._control.Legend2.clicked.emit(True)
         self.assertTrue(self._control.LegendLocation.isEnabled())
         self.assertTrue(self._control.Legend2Location.isEnabled())
-        self.assertImage('testLegend.png')
+        self.assertImage("testLegend.png")
 
     def testLegendLocation(self):
         """
@@ -90,7 +91,7 @@ class TestAxesSettingsPlugin(Testing.PeacockImageTestCase):
         self._control.Legend2.setCheckState(QtCore.Qt.Checked)
         self._control.Legend2.clicked.emit(True)
         self._control.Legend2Location.setCurrentIndex(1)
-        self.assertImage('testLegendLocation.png')
+        self.assertImage("testLegendLocation.png")
 
     def testEmptyLegend(self):
         """
@@ -106,15 +107,15 @@ class TestAxesSettingsPlugin(Testing.PeacockImageTestCase):
 
         # Remove lines
         select = self._widget.currentWidget().PostprocessorSelectPlugin
-        var = 'air_temp_set_1'
+        var = "air_temp_set_1"
         select._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Unchecked)
         select._groups[0]._toggles[var].CheckBox.clicked.emit(False)
 
-        var = 'snow_depth_set_1'
+        var = "snow_depth_set_1"
         select._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Unchecked)
         select._groups[0]._toggles[var].PlotAxis.setCurrentIndex(1)
         select._groups[0]._toggles[var].CheckBox.clicked.emit(False)
-        self.assertImage('testEmpty.png')
+        self.assertImage("testEmpty.png")
 
     def testRepr(self):
         """
@@ -138,5 +139,5 @@ class TestAxesSettingsPlugin(Testing.PeacockImageTestCase):
         self.assertIn("axes0.set_title('Title')", output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True)

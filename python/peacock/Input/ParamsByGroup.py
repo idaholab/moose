@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtCore import pyqtSignal
 from peacock.base.MooseWidget import MooseWidget
 from .ParamsTable import ParamsTable
+
 
 def tabSort(val):
     """
@@ -22,6 +23,7 @@ def tabSort(val):
     else:
         return "1111_%s" % val
 
+
 class ParamsByGroup(QTabWidget, MooseWidget):
     """
     Creates tabs for each group in the parameters
@@ -31,6 +33,7 @@ class ParamsByGroup(QTabWidget, MooseWidget):
         blockRenamed[BlockInfo, newname]: The block has been renamed
         changed: A value has changed
     """
+
     needBlockList = pyqtSignal(list)
     blockRenamed = pyqtSignal(object, str)
     changed = pyqtSignal()

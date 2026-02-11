@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Defines Renderer objects that convert AST (from Reader) into an output format."""
 import os
@@ -23,25 +23,30 @@ from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)
 
+
 class Renderer(mixins.ConfigObject, mixins.ComponentObject):
     """
     Base renderer for converting AST to an output format.
     """
 
-    __TRANSLATOR_METHODS__ = ['init',
-                              'initPage',
-                              'render',
-                              'write',
-                              'preExecute', 'postExecute',
-                              'preRender', 'postRender',
-                              'preWrite', 'postWrite']
-
+    __TRANSLATOR_METHODS__ = [
+        "init",
+        "initPage",
+        "render",
+        "write",
+        "preExecute",
+        "postExecute",
+        "preRender",
+        "postRender",
+        "preWrite",
+        "postWrite",
+    ]
 
     #:[str] The name of the method to call on RendererComponent objects.
     METHOD = None
 
     def __init__(self, **kwargs):
-        mixins.ConfigObject.__init__(self, 'renderer', **kwargs)
+        mixins.ConfigObject.__init__(self, "renderer", **kwargs)
         mixins.ComponentObject.__init__(self)
         self.__functions = dict()  # functions on the RenderComponent to call
 
@@ -84,8 +89,10 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
                 src = token.info[0]
             else:
                 line = None
-                src = ''
-            msg = report_error(e, page.source, line, src, traceback.format_exc(), 'RENDER ERROR')
+                src = ""
+            msg = report_error(
+                e, page.source, line, src, traceback.format_exc(), "RENDER ERROR"
+            )
             LOG.error(msg)
 
         if el is not None:
@@ -164,15 +171,15 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         """
         if isinstance(page, pages.Source):
             self._create_directory(page.destination)
-            LOG.debug('WRITE %s-->%s', page.source, page.destination)
-            with codecs.open(page.destination, 'w', encoding='utf-8') as fid:
+            LOG.debug("WRITE %s-->%s", page.source, page.destination)
+            with codecs.open(page.destination, "w", encoding="utf-8") as fid:
                 fid.write(result.write())
 
         elif isinstance(page, pages.File):
             self._create_directory(page.destination)
-            LOG.debug('COPY: %s-->%s', page.source, page.destination)
+            LOG.debug("COPY: %s-->%s", page.source, page.destination)
             if not os.path.exists(page.source):
-                LOG.error('Unknown file: %s', page.source)
+                LOG.error("Unknown file: %s", page.source)
             else:
                 shutil.copyfile(page.source, page.destination)
 
@@ -183,7 +190,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
             pass
 
         else:
-            LOG.error('Unknown Node type: %s', type(page))
+            LOG.error("Unknown Node type: %s", type(page))
 
     def _method(self, component):
         """
@@ -205,7 +212,7 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         with self.translator.executioner._lock:
             dirname = os.path.dirname(location)
             if dirname and not os.path.isdir(dirname):
-                LOG.debug('CREATE DIR %s', dirname)
+                LOG.debug("CREATE DIR %s", dirname)
                 os.makedirs(dirname)
 
     def __getFunction(self, token):
@@ -217,12 +224,14 @@ class Renderer(mixins.ConfigObject, mixins.ComponentObject):
         """
         return self.__functions.get(token.name, None)
 
+
 class HTMLRenderer(Renderer):
     """
     Converts AST into HTML.
     """
-    METHOD = 'createHTML'
-    EXTENSION = '.html'
+
+    METHOD = "createHTML"
+    EXTENSION = ".html"
 
     @staticmethod
     def defaultConfig():
@@ -230,11 +239,14 @@ class HTMLRenderer(Renderer):
         Return the default configuration.
         """
         config = Renderer.defaultConfig()
-        config['favicon'] = (None, "The location of the website favicon.")
-        config['extra-css'] = ([], "List of additional CSS files to include.")
-        config['extra-js'] = ([],"List of additional JS files to include.")
-        config['with_dap'] = (None, "If set, enable DAP (Digital Analytics Program " \
-                              ", see digital.gov/guides/dap) for this agency")
+        config["favicon"] = (None, "The location of the website favicon.")
+        config["extra-css"] = ([], "List of additional CSS files to include.")
+        config["extra-js"] = ([], "List of additional JS files to include.")
+        config["with_dap"] = (
+            None,
+            "If set, enable DAP (Digital Analytics Program "
+            ", see digital.gov/guides/dap) for this agency",
+        )
         return config
 
     def __init__(self, *args, **kwargs):
@@ -243,10 +255,10 @@ class HTMLRenderer(Renderer):
 
     def getRoot(self):
         """Return the result node for inserting rendered html nodes."""
-        root = html.Tag(None, '!DOCTYPE html', close=False)
-        head = html.Tag(root, 'head')
-        html.Tag(head, 'meta', charset="UTF-8", close=False)
-        return html.Tag(root, 'body')
+        root = html.Tag(None, "!DOCTYPE html", close=False)
+        head = html.Tag(root, "head")
+        html.Tag(head, "meta", charset="UTF-8", close=False)
+        return html.Tag(root, "body")
 
     def addJavaScript(self, name, contents, page=None, head=False, **kwargs):
         """
@@ -256,84 +268,109 @@ class HTMLRenderer(Renderer):
         If contents is a javascript file (ends in .js) or is a URL (begins with https), treat
         it as an include. Otherwise, treat it as javascript to be imported.
         """
-        key = (name, 'head_javascript' if head else 'javascript')
+        key = (name, "head_javascript" if head else "javascript")
 
-        tag_key = 'src' if (contents.startswith('http') or contents.endswith('.js')) else 'string'
+        tag_key = (
+            "src"
+            if (contents.startswith("http") or contents.endswith(".js"))
+            else "string"
+        )
         kwargs[tag_key] = contents
 
         # Add a global script to be included in all HTML pages, otherwise add a per-page script
         if page is None:
             self.__global_files[key] = (contents, kwargs)
         else:
-            page.attributes.setdefault('renderer_files', dict())[key] = (contents, kwargs)
+            page.attributes.setdefault("renderer_files", dict())[key] = (
+                contents,
+                kwargs,
+            )
 
     def addCSS(self, name, filename, page=None, **kwargs):
         """
         Add a CSS dependency. Do not attempt to call this function to add a global renderer file,
         i.e., with `page=None`, from within the read/tokenize/render/write methods.
         """
-        key = (name, 'css')
+        key = (name, "css")
 
         # Add a global style sheet to be included in all HTML pages, otherwise add a per-page sheet
         if page is None:
             self.__global_files[key] = (filename, kwargs)
         else:
-            page.attributes.setdefault('renderer_files', dict())[key] = (filename, kwargs)
+            page.attributes.setdefault("renderer_files", dict())[key] = (
+                filename,
+                kwargs,
+            )
 
     def postRender(self, page, result):
         """Insert CSS/JS dependencies into html node tree."""
 
         def rel(path):
             """Helper to create relative paths for js/css dependencies."""
-            if path.startswith('http'):
+            if path.startswith("http"):
                 return path
             return os.path.relpath(path, os.path.dirname(page.local))
 
         # get the parent nodes to tag
         root = result.root
-        head = moosetree.find(root, lambda n: n.name == 'head')
-        body = moosetree.find(root, lambda n: n.name == 'body')
+        head = moosetree.find(root, lambda n: n.name == "head")
+        body = moosetree.find(root, lambda n: n.name == "body")
 
-        favicon = self.get('favicon')
+        favicon = self.get("favicon")
         if favicon:
-            html.Tag(head, 'link', rel="icon", type="image/x-icon", href=rel(favicon), \
-                     sizes="16x16 32x32 64x64 128x128")
+            html.Tag(
+                head,
+                "link",
+                rel="icon",
+                type="image/x-icon",
+                href=rel(favicon),
+                sizes="16x16 32x32 64x64 128x128",
+            )
 
         # Add the DAP Google Analytics script (see digital.gov/guides/dap)
-        with_dap = self.get('with_dap')
+        with_dap = self.get("with_dap")
         if with_dap:
             assert isinstance(with_dap, str)
             html.Tag(
                 body.parent,
-                'script',
-                **{'async': True},
-                type='text/javascript',
-                src=f'https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency={with_dap}',
-                id='_fed_an_ua_tag'
+                "script",
+                **{"async": True},
+                type="text/javascript",
+                src=f"https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency={with_dap}",
+                id="_fed_an_ua_tag",
             )
 
         # Add the extra-css, this is done here to make sure it shows up last
-        files = {**self.__global_files, **page.get('renderer_files', dict())}
-        for i, css in enumerate(self.get('extra-css')):
-            files[('extra-css-{}'.format(i), 'css')] = (css, {})
-        for i, js in enumerate(self.get('extra-js')):
-            self.addJavaScript('extra-js-{}'.format(i), js)
-        for (key, context) in sorted(files, key=(lambda f: f[1])):
+        files = {**self.__global_files, **page.get("renderer_files", dict())}
+        for i, css in enumerate(self.get("extra-css")):
+            files[("extra-css-{}".format(i), "css")] = (css, {})
+        for i, js in enumerate(self.get("extra-js")):
+            self.addJavaScript("extra-js-{}".format(i), js)
+        for key, context in sorted(files, key=(lambda f: f[1])):
             name, kwargs = files.pop((key, context))
-            if context == 'css':
-                html.Tag(head, 'link', href=rel(name), type="text/css", rel="stylesheet", **kwargs)
-            elif context.endswith('javascript'):
-                js_node = head if context == 'head_javascript' else body.parent
-                if 'src' in kwargs:
+            if context == "css":
+                html.Tag(
+                    head,
+                    "link",
+                    href=rel(name),
+                    type="text/css",
+                    rel="stylesheet",
+                    **kwargs,
+                )
+            elif context.endswith("javascript"):
+                js_node = head if context == "head_javascript" else body.parent
+                if "src" in kwargs:
                     kwargs = copy.copy(kwargs)
-                    kwargs['src'] = rel(kwargs['src'])
-                html.Tag(js_node, 'script', type="text/javascript", **kwargs)
+                    kwargs["src"] = rel(kwargs["src"])
+                html.Tag(js_node, "script", type="text/javascript", **kwargs)
+
 
 class MaterializeRenderer(HTMLRenderer):
     """
     Convert AST into HTML using the materialize javascript library (http://materializecss.com).
     """
-    METHOD = 'createMaterialize'
+
+    METHOD = "createMaterialize"
 
     @staticmethod
     def defaultConfig():
@@ -345,18 +382,21 @@ class MaterializeRenderer(HTMLRenderer):
 
     def __init__(self, *args, **kwargs):
         HTMLRenderer.__init__(self, *args, **kwargs)
-        self.__index = False     # page index created
+        self.__index = False  # page index created
 
-        self.addCSS('materialize', "contrib/materialize/materialize.min.css",
-                    media="screen,projection")
-        self.addCSS('prism', "contrib/prism/prism.min.css")
-        self.addCSS('moose', "css/moose.css")
+        self.addCSS(
+            "materialize",
+            "contrib/materialize/materialize.min.css",
+            media="screen,projection",
+        )
+        self.addCSS("prism", "contrib/prism/prism.min.css")
+        self.addCSS("moose", "css/moose.css")
 
-        self.addJavaScript('jquery', "contrib/jquery/jquery.min.js", head=True)
-        self.addJavaScript('materialize', "contrib/materialize/materialize.min.js")
-        self.addJavaScript('clipboard', "contrib/clipboard/clipboard.min.js")
-        self.addJavaScript('prism', "contrib/prism/prism.min.js")
-        self.addJavaScript('init', "js/init.js")
+        self.addJavaScript("jquery", "contrib/jquery/jquery.min.js", head=True)
+        self.addJavaScript("materialize", "contrib/materialize/materialize.min.js")
+        self.addJavaScript("clipboard", "contrib/clipboard/clipboard.min.js")
+        self.addJavaScript("prism", "contrib/prism/prism.min.js")
+        self.addJavaScript("init", "js/init.js")
 
     def update(self, **kwargs):
         """
@@ -369,14 +409,14 @@ class MaterializeRenderer(HTMLRenderer):
     def getRoot(self):
         body = HTMLRenderer.getRoot(self)
 
-        wrap = html.Tag(body, 'div', class_='page-wrap')
-        html.Tag(wrap, 'header')
+        wrap = html.Tag(body, "div", class_="page-wrap")
+        html.Tag(wrap, "header")
 
-        main = html.Tag(wrap, 'main', class_='main')
-        container = html.Tag(main, 'div', class_="container")
+        main = html.Tag(wrap, "main", class_="main")
+        container = html.Tag(main, "div", class_="container")
 
-        row = html.Tag(container, 'div', class_="row")
-        col = html.Tag(row, 'div', class_="moose-content")
+        row = html.Tag(container, "div", class_="row")
+        col = html.Tag(row, "div", class_="moose-content")
 
         return col
 
@@ -395,12 +435,14 @@ class MaterializeRenderer(HTMLRenderer):
             msg = "The component object {} does not have a {} method."
             raise exceptions.MooseDocsException(msg, type(component), self.METHOD)
 
+
 class LatexRenderer(Renderer):
     """
     Renderer for converting AST to LaTeX.
     """
-    METHOD = 'createLatex'
-    EXTENSION = '.tex'
+
+    METHOD = "createLatex"
+    EXTENSION = ".tex"
 
     def __init__(self, *args, **kwargs):
         self._packages = dict()
@@ -419,12 +461,18 @@ class LatexRenderer(Renderer):
         Add a NewDocumentCommand to latex preamble.
         """
         num = 0
-        for match in re.finditer(r'#(?P<num>[0-9]+)', content):
-            num = max(num, int(match.group('num')))
+        for match in re.finditer(r"#(?P<num>[0-9]+)", content):
+            num = max(num, int(match.group("num")))
 
-        args = [latex.Brace(string=cmd, escape=False), latex.Brace(string='m'*num)]
-        self._commands[cmd] = latex.Command(None, 'NewDocumentCommand', args=args, escape=False,
-                                            string=content, start='\n')
+        args = [latex.Brace(string=cmd, escape=False), latex.Brace(string="m" * num)]
+        self._commands[cmd] = latex.Command(
+            None,
+            "NewDocumentCommand",
+            args=args,
+            escape=False,
+            string=content,
+            start="\n",
+        )
 
     def getNewCommands(self):
         """Return the dict of new commands."""
@@ -450,11 +498,13 @@ class LatexRenderer(Renderer):
         """Return the list of preamble strings."""
         return self._preamble
 
+
 class RevealRenderer(HTMLRenderer):
     """
     Convert AST into HTML using the materialize javascript library (http://materializecss.com).
     """
-    METHOD = 'createReveal'
+
+    METHOD = "createReveal"
 
     @staticmethod
     def defaultConfig():
@@ -462,26 +512,30 @@ class RevealRenderer(HTMLRenderer):
         Return the default configuration.
         """
         config = HTMLRenderer.defaultConfig()
-        config['theme'] = ('simple', "The CSS theme to use (simple).")
+        config["theme"] = ("simple", "The CSS theme to use (simple).")
         return config
 
     def __init__(self, *args, **kwargs):
         HTMLRenderer.__init__(self, *args, **kwargs)
-        self.addCSS('reveal', "contrib/reveal/reveal.css")
-        self.addCSS('reveal_theme', "contrib/reveal/{}.css".format(self.get('theme')), id_="theme")
-        self.addCSS('prism', "contrib/prism/prism.min.css")
-        self.addCSS('reveal_css', "css/reveal_moose.css")
+        self.addCSS("reveal", "contrib/reveal/reveal.css")
+        self.addCSS(
+            "reveal_theme",
+            "contrib/reveal/{}.css".format(self.get("theme")),
+            id_="theme",
+        )
+        self.addCSS("prism", "contrib/prism/prism.min.css")
+        self.addCSS("reveal_css", "css/reveal_moose.css")
 
-        self.addJavaScript('reveal', "contrib/reveal/reveal.js")
-        self.addJavaScript('prism', "contrib/prism/prism.min.js")
-        self.addJavaScript('notes', "contrib/reveal/notes.js")
-        self.addJavaScript('reveal_init', "js/reveal_init.js")
+        self.addJavaScript("reveal", "contrib/reveal/reveal.js")
+        self.addJavaScript("prism", "contrib/prism/prism.min.js")
+        self.addJavaScript("notes", "contrib/reveal/notes.js")
+        self.addJavaScript("reveal_init", "js/reveal_init.js")
 
     def getRoot(self):
         body = HTMLRenderer.getRoot(self)
-        div = html.Tag(body, 'div', class_='reveal')
-        slides = html.Tag(div, 'div', class_='slides')
-        return slides#html.Tag(slides, 'section')
+        div = html.Tag(body, "div", class_="reveal")
+        slides = html.Tag(div, "div", class_="slides")
+        return slides  # html.Tag(slides, 'section')
 
     def _method(self, component):
         if hasattr(component, self.METHOD):

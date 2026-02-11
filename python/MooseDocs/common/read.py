@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Utilities for reading files."""
 import sys
 import codecs
 import os
+
 
 def read(filename):
     """
@@ -25,16 +26,18 @@ def read(filename):
     Inputs:
         filename[str]: The filename to open.
     """
-    with codecs.open(filename, encoding='utf-8') as fid:
+    with codecs.open(filename, encoding="utf-8") as fid:
         content = fid.read()
     return content
+
 
 def write(filename, content):
     """
     Write utf-8 file.
     """
-    with codecs.open(filename, 'w', encoding='utf-8') as fid:
+    with codecs.open(filename, "w", encoding="utf-8") as fid:
         fid.write(content)
+
 
 def get_language(filename):
     """
@@ -45,10 +48,10 @@ def get_language(filename):
         filename[str]: The filename to examine.
     """
     _, ext = os.path.splitext(filename)
-    if ext in ['.C', 'K', '.h', '.cpp', '.hpp']:
-        return 'cpp'
-    elif ext == '.py':
-        return 'python'
-    elif ext == '.i':
-        return 'moose'
-    return 'text'
+    if ext in [".C", "K", ".h", ".cpp", ".hpp"]:
+        return "cpp"
+    elif ext == ".py":
+        return "python"
+    elif ext == ".i":
+        return "moose"
+    return "text"

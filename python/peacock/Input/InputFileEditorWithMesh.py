@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 from PyQt5.QtWidgets import QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
 from PyQt5.QtCore import pyqtSignal
@@ -20,6 +20,7 @@ from .InputFileEditorPlugin import InputFileEditorPlugin
 from . import BCHighlighter
 from . import TimeStepEstimate
 
+
 class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
     """
     Takes the InputFileEditor and adds the mesh view along with some controls.
@@ -27,29 +28,33 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         numTimeStepsChanged[int]: The estimated number of time steps has changed.
         inputFileChanged[str]: The path of the new input file
     """
+
     numTimeStepsChanged = pyqtSignal(int)
     inputFileChanged = pyqtSignal(str)
     updateView = pyqtSignal(object, bool)
 
     @staticmethod
     def commandLineArgs(parser):
-        parser.add_argument('-i', "--input-file",
-                dest='input_file',
-                type=str,
-                help='Input file')
+        parser.add_argument(
+            "-i", "--input-file", dest="input_file", type=str, help="Input file"
+        )
 
     def __init__(self, size=None, plugins=None):
         if not plugins:
-            plugins = [lambda: InputFileEditorPlugin(layout='LeftLayout'),
-                       lambda: MeshViewerPlugin(size=size, layout='WindowLayout'),
-                       lambda: BackgroundPlugin(layout='WindowBottomLayout',
-                                                settings_key="input",
-                                                set_result_color=True),
-                       lambda: BlockHighlighterPlugin(layout='WindowBottomLayout'),
-                       lambda: MeshCameraPlugin(layout='WindowBottomLayout')]
+            plugins = [
+                lambda: InputFileEditorPlugin(layout="LeftLayout"),
+                lambda: MeshViewerPlugin(size=size, layout="WindowLayout"),
+                lambda: BackgroundPlugin(
+                    layout="WindowBottomLayout",
+                    settings_key="input",
+                    set_result_color=True,
+                ),
+                lambda: BlockHighlighterPlugin(layout="WindowBottomLayout"),
+                lambda: MeshCameraPlugin(layout="WindowBottomLayout"),
+            ]
 
         super(InputFileEditorWithMesh, self).__init__(plugins=plugins)
-        self.setTabName('Input file')
+        self.setTabName("Input file")
 
         # The layouts for this widget
         self.exe_info = None
@@ -74,14 +79,16 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         self.InputFileEditorPlugin.inputFileChanged.connect(self._updateFromInputFile)
         self.MeshCameraPlugin.reloadMesh.connect(self.onMeshChanged)
 
-        self.fixLayoutWidth('LeftLayout')
+        self.fixLayoutWidth("LeftLayout")
 
     def setupVTKWindow(self):
         """
         Sets up the connections for the VTKWindow based plugin.
         """
-        self.vtkwin = self.MeshViewerPlugin # very important!
-        self.MeshViewerPlugin.needInputFile.connect(self.InputFileEditorPlugin.writeInputFile)
+        self.vtkwin = self.MeshViewerPlugin  # very important!
+        self.MeshViewerPlugin.needInputFile.connect(
+            self.InputFileEditorPlugin.writeInputFile
+        )
         self.updateView.connect(self.MeshViewerPlugin.meshChanged)
         self.MeshViewerPlugin.meshEnabled.connect(self.setViewerEnabled)
 
@@ -94,7 +101,10 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         self.inputFileChanged.emit(path)
         self.updateView.emit(self.InputFileEditorPlugin.tree, True)
-        if not self.InputFileEditorPlugin.tree.app_info.valid() or not self.InputFileEditorPlugin.tree.input_filename:
+        if (
+            not self.InputFileEditorPlugin.tree.app_info.valid()
+            or not self.InputFileEditorPlugin.tree.input_filename
+        ):
             self.numTimeStepsChanged.emit(0)
             return
 
@@ -131,7 +141,9 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
             self.updateView.emit(self.InputFileEditorPlugin.tree, False)
         elif block.path == "/MeshModifiers" or block.path.startswith("/MeshModifiers/"):
             self.updateView.emit(self.InputFileEditorPlugin.tree, False)
-        elif block.path == "/MeshGenerators" or block.path.startswith("/MeshGenerators/"):
+        elif block.path == "/MeshGenerators" or block.path.startswith(
+            "/MeshGenerators/"
+        ):
             self.updateView.emit(self.InputFileEditorPlugin.tree, False)
         elif block.path == "/Executioner" or block.path.startswith("/Executioner/"):
             num_steps = TimeStepEstimate.findTimeSteps(self.InputFileEditorPlugin.tree)
@@ -169,7 +181,9 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         if self.InputFileEditorPlugin.has_changed:
             msg = "You have unsaved changes in your input file, are you sure you want to quit?"
-            reply = QMessageBox.question(self, "Quit?", msg, QMessageBox.Yes, QMessageBox.No)
+            reply = QMessageBox.question(
+                self, "Quit?", msg, QMessageBox.Yes, QMessageBox.No
+            )
             return reply != QMessageBox.No
         return True
 
@@ -237,11 +251,13 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         """
         self.MeshViewerPlugin.useTestObjects(use_test_objs)
 
+
 if __name__ == "__main__":
     import collections
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from ExecutableInfo import ExecutableInfo
     import sys
+
     if len(sys.argv) != 3:
         print("Usage: %s <exe> <input file>" % sys.argv[0])
         sys.exit(1)
@@ -254,11 +270,11 @@ if __name__ == "__main__":
     menubar.setNativeMenuBar(False)
     w.addToMainMenu(menubar)
     exe_info = ExecutableInfo()
-    #exe_info.clearCache()
+    # exe_info.clearCache()
     exe_info.setPath(sys.argv[1])
     w.setInputFile(sys.argv[2])
     w.setEnabled(True)
-    OptionsProxy = collections.namedtuple('Options', 'input_file arguments')
+    OptionsProxy = collections.namedtuple("Options", "input_file arguments")
     w.initialize(OptionsProxy(input_file=sys.argv[2], arguments=[]))
     w.onExecutableInfoChanged(exe_info)
     main_win.show()

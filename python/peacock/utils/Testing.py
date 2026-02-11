@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, contextlib
 from mooseutils.ImageDiffer import ImageDiffer
@@ -18,6 +18,7 @@ from PyQt5 import QtCore, QtWidgets
 from .. import PeacockApp
 import inspect
 
+
 def find_moose_test_exe(dirname="test", exe_base="moose_test"):
     moose_dir = os.environ.get("MOOSE_DIR", "")
     method = os.environ.get("METHOD", "opt")
@@ -28,11 +29,15 @@ def find_moose_test_exe(dirname="test", exe_base="moose_test"):
         raise Exception("%s does not exist" % path)
     return os.path.abspath(path)
 
+
 def get_chigger_input(filename):
     """
     Helper for building path to a ExodusII file for testing Peacock ExodusViewer.
     """
-    return os.path.join(os.environ['MOOSE_DIR'], 'python', 'chigger', 'tests', 'input', filename)
+    return os.path.join(
+        os.environ["MOOSE_DIR"], "python", "chigger", "tests", "input", filename
+    )
+
 
 def get_chigger_input_list(*filenames):
     """
@@ -40,13 +45,15 @@ def get_chigger_input_list(*filenames):
     """
     return [get_chigger_input(x) for x in filenames]
 
+
 @contextlib.contextmanager
 def remember_cwd():
-    curdir= os.getcwd()
+    curdir = os.getcwd()
     try:
         yield
     finally:
         os.chdir(curdir)
+
 
 def gold_diff(filename, allowed=0.95):
     path = os.path.abspath(filename)
@@ -67,6 +74,7 @@ def checkFile(output, gold_file, write_output=False):
         gold_output = f.read()
         return gold_output == output
 
+
 def compareFiles(test_file, gold_file):
     with open(test_file, "r") as f:
         test_output = f.read()
@@ -75,14 +83,17 @@ def compareFiles(test_file, gold_file):
         gold_output = f.read()
     return gold_output == test_output
 
-def set_window_size(vtk_window, size=[640,640]):
+
+def set_window_size(vtk_window, size=[640, 640]):
     vtk_window.setFixedSize(QtCore.QSize(*size))
+
 
 def process_events(t=1):
     start = time.time()
     end = start + t
-    while(time.time() < end):
+    while time.time() < end:
         QtWidgets.QApplication.processEvents()
+
 
 def remove_file(filename):
     try:
@@ -91,16 +102,19 @@ def remove_file(filename):
     except:
         pass
 
+
 def clean_files():
-    for fname in glob.glob('*.csv'):
+    for fname in glob.glob("*.csv"):
         remove_file(fname)
-    for fname in glob.glob('*.e'):
+    for fname in glob.glob("*.e"):
         remove_file(fname)
-    for fname in glob.glob('peacock_*.[ie]'):
+    for fname in glob.glob("peacock_*.[ie]"):
         remove_file(fname)
+
 
 def run_tests():
     unittest.main(verbosity=2)
+
 
 def addQObjectByName(qobject, name, matched):
     if qobject.objectName() == name:
@@ -109,10 +123,12 @@ def addQObjectByName(qobject, name, matched):
     for child in qobject.children():
         addQObjectByName(child, name, matched)
 
+
 def findQObjectsByName(top_qobject, name):
     matched = []
     addQObjectByName(top_qobject, name, matched)
     return matched
+
 
 def addQObjectByType(qobject, name, matched):
     full_name = "%s.%s" % (qobject.__class__.__module__, qobject.__class__.__name__)
@@ -122,10 +138,12 @@ def addQObjectByType(qobject, name, matched):
     for child in qobject.children():
         addQObjectByType(child, name, matched)
 
+
 def findQObjectsByType(top_qobject, type_name):
     matched = []
     addQObjectByType(top_qobject, type_name, matched)
     return matched
+
 
 def setupTestCache(cls):
     """
@@ -150,6 +168,7 @@ def setupTestCache(cls):
             except:
                 pass
 
+
 class PeacockTester(unittest.TestCase):
     def setUp(self):
         self.finished = False
@@ -173,23 +192,38 @@ class PeacockTester(unittest.TestCase):
 
     def createPeacockApp(self, args):
         from peacock import PeacockApp
-        self.app = PeacockApp.PeacockApp(["-size", "1024", "1024", "-w", os.getcwd()] + args)
+
+        self.app = PeacockApp.PeacockApp(
+            ["-size", "1024", "1024", "-w", os.getcwd()] + args
+        )
         process_events(4)
-        self.app.main_widget.tab_plugin.ExecuteTabPlugin.ExecuteRunnerPlugin.runProgress.connect(self.run_finished)
+        self.app.main_widget.tab_plugin.ExecuteTabPlugin.ExecuteRunnerPlugin.runProgress.connect(
+            self.run_finished
+        )
         return self.app
 
     def checkImage(self, filename, allowed=0.95):
-        self.assertTrue(gold_diff(filename, allowed), "Image %s does not match the gold file" % filename)
+        self.assertTrue(
+            gold_diff(filename, allowed),
+            "Image %s does not match the gold file" % filename,
+        )
 
     def checkFile(self, output, gold_file, write_output=False):
-        self.assertTrue(checkFile(output, gold_file, write_output), "Output does not match the gold file %s" % gold_file)
+        self.assertTrue(
+            checkFile(output, gold_file, write_output),
+            "Output does not match the gold file %s" % gold_file,
+        )
 
     def compareFiles(self, test_file, gold_file):
-        self.assertTrue(compareFiles(test_file, gold_file), "%s does not match the gold file %s" % (test_file, gold_file))
+        self.assertTrue(
+            compareFiles(test_file, gold_file),
+            "%s does not match the gold file %s" % (test_file, gold_file),
+        )
 
     def fullPath(self, py_file, basename):
         dirname = os.path.dirname(py_file)
         return os.path.join(dirname, basename)
+
 
 class PeacockImageTestCase(unittest.TestCase):
     """
@@ -205,21 +239,21 @@ class PeacockImageTestCase(unittest.TestCase):
 
         setupTestCache(cls)
 
-        filenames = glob.glob(cls.filename('_*.png'))
+        filenames = glob.glob(cls.filename("_*.png"))
         for fname in filenames:
             os.remove(fname)
 
     @classmethod
     def tearDownClass(cls):
         super(PeacockImageTestCase, cls).tearDownClass()
-        setupTestCache(cls) # cleanup after ourselves
+        setupTestCache(cls)  # cleanup after ourselves
 
     @classmethod
     def filename(cls, basename):
         """
         Return the base name with the class name prefix.
         """
-        return '{}_{}'.format(cls.__name__, basename)
+        return "{}_{}".format(cls.__name__, basename)
 
     def write(self, filename, **kwargs):
         """
@@ -234,12 +268,14 @@ class PeacockImageTestCase(unittest.TestCase):
         Create the supplied image and assert that it is same to the gold standard.
         """
         filename = type(self).filename(basename)
-        goldname = os.path.join('gold', filename)
+        goldname = os.path.join("gold", filename)
 
         self.write(filename, **kwargs)
         differ = ImageDiffer(goldname, filename, allowed=allowed)
         print(differ.message())
-        self.assertFalse(differ.fail(), "{} does not match the gold file.".format(filename))
+        self.assertFalse(
+            differ.fail(), "{} does not match the gold file.".format(filename)
+        )
 
     def sleepIfSlow(self):
         """
@@ -250,17 +286,31 @@ class PeacockImageTestCase(unittest.TestCase):
         t = os.environ.get("PEACOCK_SLEEP_ON_SLOW_MACHINE", 0)
         time.sleep(float(t))
 
+
 class PeacockAppImageTestCase(PeacockImageTestCase):
     """
     Base class for testing complete Peacock gui.
     """
+
     def setUp(self):
         """
         Creates the peacock application.cd
         """
-        args = ["-size", "1024", "768", "-w", os.getcwd(), "-i", "../../common/simple_diffusion.i", "-e", find_moose_test_exe()]
+        args = [
+            "-size",
+            "1024",
+            "768",
+            "-w",
+            os.getcwd(),
+            "-i",
+            "../../common/simple_diffusion.i",
+            "-e",
+            find_moose_test_exe(),
+        ]
         self._app = PeacockApp.PeacockApp(args)
-        self._window = self._app.main_widget.tab_plugin.ExodusViewer.currentWidget().VTKWindowPlugin
+        self._window = (
+            self._app.main_widget.tab_plugin.ExodusViewer.currentWidget().VTKWindowPlugin
+        )
         set_window_size(self._window)
         clean_files()
 
@@ -269,7 +319,9 @@ class PeacockAppImageTestCase(PeacockImageTestCase):
         Helper function for toggling tabs.
         """
         self._app.main_widget.tab_plugin.setCurrentWidget(tab)
-        self._app.main_widget.tab_plugin.currentChanged.emit(self._app.main_widget.tab_plugin.currentIndex())
+        self._app.main_widget.tab_plugin.currentChanged.emit(
+            self._app.main_widget.tab_plugin.currentIndex()
+        )
         process_events(t=1)
 
     def execute(self):

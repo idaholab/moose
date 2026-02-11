@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import logging
 import copy
 import moosetree
@@ -22,7 +22,7 @@ def newToken(name, parent=None, **defaults):
     TODO: Add a default system that has type checking and required checking (only in DEBUG)
     """
     if MooseDocs.LOG_LEVEL == logging.DEBUG:
-        pass # Future consistency checking
+        pass  # Future consistency checking
 
     if parent is not None:
         old = defaults
@@ -31,12 +31,13 @@ def newToken(name, parent=None, **defaults):
 
     def tokenGenerator(parent, **kwargs):
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
-            pass # Future consistency checking
+            pass  # Future consistency checking
         inputs = copy.copy(defaults)
         inputs.update(**kwargs)
         return Token(name, parent, **inputs)
 
     return tokenGenerator
+
 
 class Token(NodeBase):
     """
@@ -47,19 +48,20 @@ class Token(NodeBase):
         *args, **kwarg: (Optional) All arguments and key, value pairs supplied are stored in the
                         settings property and may be retrieved via the various access methods.
     """
+
     def __init__(self, name=None, parent=None, **kwargs):
         for key in list(kwargs):
-            if key.endswith('_'):
+            if key.endswith("_"):
                 kwargs[key[:-1]] = kwargs.pop(key)
-        kwargs.setdefault('recursive', True)
-        kwargs.setdefault('string', None)
+        kwargs.setdefault("recursive", True)
+        kwargs.setdefault("string", None)
         super(Token, self).__init__(name, parent, **kwargs)
 
         # Storage for Lexer Information object
         self._info = None
 
         # Create string on demand
-        string = self.attributes.pop('string', None)
+        string = self.attributes.pop("string", None)
         if string is not None:
             String(self, content=string)
 
@@ -76,14 +78,14 @@ class Token(NodeBase):
     def info(self, value):
         self._info = value
 
-    def text(self, sep=' '):
+    def text(self, sep=" "):
         """
         Convert String objects into a single string.
         """
         strings = []
         for node in moosetree.iterate(self):
-            if node.name in ['Word', 'Number', 'String']:
-                strings.append(node['content'])
+            if node.name in ["Word", "Number", "String"]:
+                strings.append(node["content"])
         return sep.join(strings)
 
     def copy(self, _parent=None, info=False):
@@ -104,10 +106,13 @@ class Token(NodeBase):
 
     def toDict(self):
         """Convert tree into a dict."""
-        return dict(name=self.name,
-                    attributes=self.attributes,
-                    children=[child.toDict() for child in self.children])
+        return dict(
+            name=self.name,
+            attributes=self.attributes,
+            children=[child.toDict() for child in self.children],
+        )
 
-String = newToken('String', content='')
-ErrorToken = newToken('ErrorToken', message='', traceback=None)
-DisabledToken = newToken('DisabledToken')
+
+String = newToken("String", content="")
+ErrorToken = newToken("ErrorToken", message="", traceback=None)
+DisabledToken = newToken("DisabledToken")

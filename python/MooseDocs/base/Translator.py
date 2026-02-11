@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 Module that defines Translator objects for converted AST from Reader to Rendered output from
@@ -29,7 +29,8 @@ from .readers import Reader
 from .renderers import Renderer
 from .executioners import ParallelBarrier
 
-LOG = logging.getLogger('MooseDocs.Translator')
+LOG = logging.getLogger("MooseDocs.Translator")
+
 
 class Translator(mixins.ConfigObject):
     """
@@ -50,16 +51,23 @@ class Translator(mixins.ConfigObject):
     @staticmethod
     def defaultConfig():
         config = mixins.ConfigObject.defaultConfig()
-        config['profile'] = (False, "Perform profiling of tokenization and rendering, " \
-                                    "this runs in serial.")
-        config['destination'] = (os.path.join(os.getenv('HOME'), '.local', 'share', 'moose',
-                                              'site'),
-                                 "The output directory.")
-        config['number_of_suggestions'] = (5, "The number of page names to suggest when a file " \
-                                              "cannot be found.")
+        config["profile"] = (
+            False,
+            "Perform profiling of tokenization and rendering, " "this runs in serial.",
+        )
+        config["destination"] = (
+            os.path.join(os.getenv("HOME"), ".local", "share", "moose", "site"),
+            "The output directory.",
+        )
+        config["number_of_suggestions"] = (
+            5,
+            "The number of page names to suggest when a file " "cannot be found.",
+        )
         return config
 
-    def __init__(self, content, reader, renderer, extensions, executioner=None, **kwargs):
+    def __init__(
+        self, content, reader, renderer, extensions, executioner=None, **kwargs
+    ):
         mixins.ConfigObject.__init__(self, **kwargs)
 
         self.__initialized = False
@@ -112,7 +120,7 @@ class Translator(mixins.ConfigObject):
     @property
     def destination(self):
         """Return the destination directory."""
-        return self.get('destination')
+        return self.get("destination")
 
     def addPage(self, page):
         """Add an additional page to the list of available pages."""
@@ -143,9 +151,9 @@ class Translator(mixins.ConfigObject):
 
     def update(self, **kwargs):
         """Update configuration and handle destination."""
-        dest = kwargs.get('destination', None)
+        dest = kwargs.get("destination", None)
         if dest is not None:
-            kwargs['destination'] = mooseutils.eval_path(dest)
+            kwargs["destination"] = mooseutils.eval_path(dest)
         mixins.ConfigObject.update(self, **kwargs)
 
     def findPages(self, arg, exact=False):
@@ -164,8 +172,9 @@ class Translator(mixins.ConfigObject):
         if isinstance(arg, str):
             items = self.__page_cache.get(arg, None) if not exact else None
             if items is None:
-                func = lambda p: (p.local == arg) or \
-                                 (not exact and p.local.endswith(os.sep + arg.lstrip(os.sep)))
+                func = lambda p: (p.local == arg) or (
+                    not exact and p.local.endswith(os.sep + arg.lstrip(os.sep))
+                )
                 items = [page for page in self.__executioner.getPages() if func(page)]
 
                 # if pages matched string 'arg', cache them so we don't have to repeat this search
@@ -187,16 +196,19 @@ class Translator(mixins.ConfigObject):
         nodes = self.findPages(arg, exact)
         if len(nodes) == 0:
             if throw_on_zero or warn_on_zero:
-                msg = "Unable to locate a page that ends with the name '{}'.".format(arg)
-                num = self.get('number_of_suggestions', 0)
+                msg = "Unable to locate a page that ends with the name '{}'.".format(
+                    arg
+                )
+                num = self.get("number_of_suggestions", 0)
                 if num:
                     if self.__markdown_file_list is None:
                         self.__buildMarkdownFileCache()
 
                     dist = self.__levenshtein_cache.get(arg, None)
                     if dist is None:
-                        dist = mooseutils.levenshteinDistance(arg, self.__markdown_file_list,
-                                                              number=num)
+                        dist = mooseutils.levenshteinDistance(
+                            arg, self.__markdown_file_list, number=num
+                        )
                         self.__levenshtein_cache[arg] = dist
                     msg += " Did you mean one of the following:\n"
                     for d in dist:
@@ -214,12 +226,15 @@ class Translator(mixins.ConfigObject):
             # If multiple Directory objects are found and all have the same local path, this should
             # be fine as they are functionally no different from each other. In any other situation,
             # however, we need to raise an exception here.
-            if all([isinstance(node, pages.Directory) for node in nodes]) \
-               and [node.local for node in nodes].count(nodes[0].local) == len(nodes):
+            if all([isinstance(node, pages.Directory) for node in nodes]) and [
+                node.local for node in nodes
+            ].count(nodes[0].local) == len(nodes):
                 return nodes[0]
-            msg = "Multiple pages with a name that ends with '{}' were found:".format(arg)
+            msg = "Multiple pages with a name that ends with '{}' were found:".format(
+                arg
+            )
             for node in nodes:
-                msg += '\n  {}'.format(node.local)
+                msg += "\n  {}".format(node.local)
             raise exceptions.MooseDocsException(msg)
 
         return nodes[0]
@@ -234,11 +249,13 @@ class Translator(mixins.ConfigObject):
         (i.e., the 'destination' option) prior to setting up the extensions.
         """
         if self.__initialized:
-            msg = "The {} object has already been initialized, this method should not " \
-                  "be called twice."
+            msg = (
+                "The {} object has already been initialized, this method should not "
+                "be called twice."
+            )
             raise exceptions.MooseDocsException(msg, type(self))
 
-        LOG.info('Initializing...')
+        LOG.info("Initializing...")
         t = time.time()
 
         # Attach translator to Reader, Renderer, and Executioner
@@ -247,8 +264,8 @@ class Translator(mixins.ConfigObject):
         self.__executioner.setTranslator(self)
 
         # Call the component init() methods
-        Translator.callFunction(self.__reader, 'init')
-        Translator.callFunction(self.__renderer, 'init')
+        Translator.callFunction(self.__reader, "init")
+        Translator.callFunction(self.__renderer, "init")
 
         # Initialize the extension and call the extend method, then set the extension object
         # on each of the extensions.
@@ -271,22 +288,32 @@ class Translator(mixins.ConfigObject):
 
         # Check that the requirements of active extensions are met
         for ext in self.__extensions:
-            if ext['active']:
+            if ext["active"]:
                 self.__checkRequires(ext)
 
         # Call Extension init() methods
-        self.executeMethod('init')
+        self.executeMethod("init")
 
         # Initialize the Page objects
         self.__executioner.initPages(nodes or self.getPages())
 
-        LOG.info('Initializing complete [%s sec.]', time.time() - t)
+        LOG.info("Initializing complete [%s sec.]", time.time() - t)
         self.__initialized = True
 
-    def execute(self, nodes=None, num_threads=1, read=True, tokenize=True, render=True, write=True):
+    def execute(
+        self,
+        nodes=None,
+        num_threads=1,
+        read=True,
+        tokenize=True,
+        render=True,
+        write=True,
+    ):
         """Perform build for all pages, see executioners."""
         self.__assertInitialize()
-        self.__executioner(nodes or self.getPages(), num_threads, read, tokenize, render, write)
+        self.__executioner(
+            nodes or self.getPages(), num_threads, read, tokenize, render, write
+        )
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""
@@ -304,17 +331,21 @@ class Translator(mixins.ConfigObject):
                 messages.append(msg)
 
         if messages:
-            raise exceptions.MooseDocsException('\n'.join(messages))
+            raise exceptions.MooseDocsException("\n".join(messages))
 
     def __buildMarkdownFileCache(self):
         """Builds a list of markdown files, including the short-hand version for error reports."""
         self.__markdown_file_list = set()
-        for local in [page.local for page in self.__executioner.getPages() if isinstance(page, pages.Source)]:
+        for local in [
+            page.local
+            for page in self.__executioner.getPages()
+            if isinstance(page, pages.Source)
+        ]:
             self.__markdown_file_list.add(local)
             parts = local.split(os.path.sep)
             n = len(parts)
             for i in range(n, 0, -1):
-                self.__markdown_file_list.add(os.path.join(*parts[n-i:n]))
+                self.__markdown_file_list.add(os.path.join(*parts[n - i : n]))
 
     def executePageMethod(self, method, page, args=None):
         """Helper for calling per Page object methods."""
@@ -327,10 +358,10 @@ class Translator(mixins.ConfigObject):
             args = tuple()
 
         if log:
-            LOG.info('Executing {} methods...'.format(method))
+            LOG.info("Executing {} methods...".format(method))
             t = time.time()
 
-        if method.startswith('pre'):
+        if method.startswith("pre"):
             if method in self.__reader.__TRANSLATOR_METHODS__:
                 Translator.callFunction(self.__reader, method, args)
             if method in self.__renderer.__TRANSLATOR_METHODS__:
@@ -340,14 +371,17 @@ class Translator(mixins.ConfigObject):
             if ext.active and (method in ext.__TRANSLATOR_METHODS__):
                 Translator.callFunction(ext, method, args)
 
-        if method.startswith('post'):
+        if method.startswith("post"):
             if method in self.__reader.__TRANSLATOR_METHODS__:
                 Translator.callFunction(self.__reader, method, args)
             if method in self.__renderer.__TRANSLATOR_METHODS__:
                 Translator.callFunction(self.__renderer, method, args)
 
         if log:
-            LOG.info('Executing {} methods complete [%s sec.]'.format(method), time.time() - t)
+            LOG.info(
+                "Executing {} methods complete [%s sec.]".format(method),
+                time.time() - t,
+            )
 
     @staticmethod
     def callFunction(obj, name, args=tuple()):
@@ -357,7 +391,8 @@ class Translator(mixins.ConfigObject):
             try:
                 func(*args)
             except Exception:
-                msg = "Failed to execute '{}' method within the '{}' object.\n" \
-                      .format(name, obj.__class__.__name__)
-                msg += mooseutils.colorText(traceback.format_exc(), 'GREY')
+                msg = "Failed to execute '{}' method within the '{}' object.\n".format(
+                    name, obj.__class__.__name__
+                )
+                msg += mooseutils.colorText(traceback.format_exc(), "GREY")
                 LOG.critical(msg)

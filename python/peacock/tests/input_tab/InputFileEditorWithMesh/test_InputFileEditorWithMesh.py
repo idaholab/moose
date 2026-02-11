@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.InputFileEditorWithMesh import InputFileEditorWithMesh
 from PyQt5.QtWidgets import QMainWindow, QMessageBox, QApplication
@@ -14,6 +14,7 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 import argparse, os
 from mock import patch
+
 
 class BaseTests(Testing.PeacockTester):
     def setUp(self):
@@ -44,7 +45,7 @@ class BaseTests(Testing.PeacockTester):
 
     def newWidget(self):
         main_win = QMainWindow()
-        w = InputFileEditorWithMesh(size=[640,640])
+        w = InputFileEditorWithMesh(size=[640, 640])
         main_win.setCentralWidget(w)
         app_info = ExecutableInfo()
         app_info.setPath(Testing.find_moose_test_exe())
@@ -79,6 +80,7 @@ class BaseTests(Testing.PeacockTester):
             gold_data = f.read()
         self.assertEqual(test_data, gold_data)
 
+
 class Tests(BaseTests):
     qapp = QApplication([])
 
@@ -95,7 +97,7 @@ class Tests(BaseTests):
         tree = w.InputFileEditorPlugin.tree
         b = tree.getBlockInfo("/BCs/left")
         self.assertNotEqual(b, None)
-        self.assertEqual(b.getParamInfo("boundary").value, '3')
+        self.assertEqual(b.getParamInfo("boundary").value, "3")
         w.blockChanged(b)
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(self.highlight_left)
@@ -103,7 +105,7 @@ class Tests(BaseTests):
 
         b = tree.getBlockInfo("/BCs/right")
         self.assertNotEqual(b, None)
-        self.assertEqual(b.getParamInfo("boundary").value, '1')
+        self.assertEqual(b.getParamInfo("boundary").value, "1")
         w.blockChanged(b)
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(self.highlight_right)
@@ -111,13 +113,13 @@ class Tests(BaseTests):
 
         b = tree.getBlockInfo("/BCs/all")
         self.assertNotEqual(b, None)
-        self.assertEqual(b.getParamInfo("boundary").value, '0 1 2 3')
+        self.assertEqual(b.getParamInfo("boundary").value, "0 1 2 3")
         w.blockChanged(b)
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(self.highlight_all)
         self.assertFalse(Testing.gold_diff(self.highlight_all))
 
-        b= tree.getBlockInfo("/Executioner")
+        b = tree.getBlockInfo("/Executioner")
         self.assertNotEqual(b, None)
         w.highlightChanged(b)
         Testing.set_window_size(w.vtkwin)
@@ -132,7 +134,7 @@ class Tests(BaseTests):
         tree = w.InputFileEditorPlugin.tree
         b = tree.getBlockInfo("/BCs/left")
         self.assertNotEqual(b, None)
-        self.assertEqual(b.getParamInfo("boundary").value, 'left')
+        self.assertEqual(b.getParamInfo("boundary").value, "left")
         w.highlightChanged(b)
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(self.highlight_left)
@@ -140,7 +142,7 @@ class Tests(BaseTests):
 
         b = tree.getBlockInfo("/BCs/right")
         self.assertNotEqual(b, None)
-        self.assertEqual(b.getParamInfo("boundary").value, 'right')
+        self.assertEqual(b.getParamInfo("boundary").value, "right")
         w.highlightChanged(b)
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(self.highlight_right)
@@ -148,16 +150,17 @@ class Tests(BaseTests):
 
     def testFromOptions(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('arguments',
-                type=str,
-                metavar="N",
-                nargs="*",
-                )
+        parser.add_argument(
+            "arguments",
+            type=str,
+            metavar="N",
+            nargs="*",
+        )
         InputFileEditorWithMesh.commandLineArgs(parser)
         main_win, w = self.newWidget()
 
         abs_input_file = os.path.abspath(self.input_file)
-        w.initialize(parser.parse_args(['-i', self.input_file]))
+        w.initialize(parser.parse_args(["-i", self.input_file]))
         self.assertEqual(w.InputFileEditorPlugin.tree.input_filename, abs_input_file)
 
         w.InputFileEditorPlugin._clearInputFile()
@@ -220,7 +223,7 @@ class Tests(BaseTests):
         Tests to make sure adding a block to the InputFileEditor
         actually updates the input file.
         """
-        mock_q.return_value = QMessageBox.No # The user doesn't want to ignore changes
+        mock_q.return_value = QMessageBox.No  # The user doesn't want to ignore changes
         main_win, w = self.newWidget()
         tree = w.InputFileEditorPlugin.tree
 
@@ -236,7 +239,7 @@ class Tests(BaseTests):
         self.assertEqual(w.InputFileEditorPlugin.has_changed, True)
         self.assertEqual(w.canClose(), False)
 
-        mock_q.return_value = QMessageBox.Yes # The user wants to ignore changes
+        mock_q.return_value = QMessageBox.Yes  # The user wants to ignore changes
         self.assertEqual(w.canClose(), True)
 
         new_block = "[AuxVariables]\n  [New_0]\n  []\n[]\n"
@@ -282,11 +285,13 @@ class Tests(BaseTests):
         mesh.included = True
         w.blockChanged(mesh)
         Testing.process_events(t=1)
-        w.blockChanged(mesh) # We need to do it again to trigger the original bug
+        w.blockChanged(mesh)  # We need to do it again to trigger the original bug
         bh = w.BlockHighlighterPlugin
         bh.SidesetSelector.Options.setCurrentText("bottom")
 
-        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847), (-2, -2, -1), (0, 0, 0))
+        w.MeshViewerPlugin.onCameraChanged(
+            (-0.7786, 0.2277, 0.5847), (-2, -2, -1), (0, 0, 0)
+        )
         w.vtkwin.onWrite(self.highlight_dup)
         self.assertFalse(Testing.gold_diff(self.highlight_dup))
 
@@ -324,26 +329,29 @@ class Tests(BaseTests):
         main_win, w = self.newWidget()
         sdiffusion = "simple_diffusion.i"
         w.setInputFile(sdiffusion)
-        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847), (-2, -2, -1), (0, 0, 0))
+        w.MeshViewerPlugin.onCameraChanged(
+            (-0.7786, 0.2277, 0.5847), (-2, -2, -1), (0, 0, 0)
+        )
         sdiffusion_image = "meshrender_camera_moved.png"
         Testing.set_window_size(w.vtkwin)
         w.vtkwin.onWrite(sdiffusion_image)
-        self.assertFalse(Testing.gold_diff(sdiffusion_image, .98))
+        self.assertFalse(Testing.gold_diff(sdiffusion_image, 0.98))
 
         other = "spherical_average.i"
         w.setInputFile(other)
         other_image = "meshrender_3d.png"
         w.MeshViewerPlugin.onCameraChanged((0.2, 0.5, 0.8), (-30, 10, -20), (0, 5, 0))
         w.vtkwin.onWrite(other_image)
-        self.assertFalse(Testing.gold_diff(other_image, .93))
+        self.assertFalse(Testing.gold_diff(other_image, 0.93))
 
         w.setInputFile(sdiffusion)
         w.vtkwin.onWrite(sdiffusion_image)
-        self.assertFalse(Testing.gold_diff(sdiffusion_image, .93))
+        self.assertFalse(Testing.gold_diff(sdiffusion_image, 0.93))
 
         w.setInputFile(other)
         w.vtkwin.onWrite(other_image)
-        self.assertFalse(Testing.gold_diff(other_image, .93))
+        self.assertFalse(Testing.gold_diff(other_image, 0.93))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

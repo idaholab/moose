@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import types
@@ -15,6 +15,7 @@ from PyQt5 import QtWidgets, QtCore
 from .ExodusPlugin import ExodusPlugin
 
 from peacock.utils.TextSubWindow import TextSubWindow
+
 
 class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -44,20 +45,20 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Adds output options to the 'Results' menu.
         """
-        self.LiveScript = menu.addAction('Show live script')
+        self.LiveScript = menu.addAction("Show live script")
         self.LiveScript.setCheckable(True)
         self.LiveScript.setChecked(False)
         self.LiveScript.setEnabled(False)
         self.LiveScript.toggled.connect(self._callbackLiveScript)
 
         menu.addSeparator()
-        export = menu.addMenu('Export')
+        export = menu.addMenu("Export")
 
-        self.ExportPNG = export.addAction('PNG')
+        self.ExportPNG = export.addAction("PNG")
         self.ExportPNG.triggered.connect(self._callbackExportPNG)
         self.ExportPNG.setEnabled(False)
 
-        self.ExportPython = export.addAction('Python')
+        self.ExportPython = export.addAction("Python")
         self.ExportPython.triggered.connect(self._callbackExportPython)
         self.ExportPython.setEnabled(False)
 
@@ -105,8 +106,8 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Write a png file of figure.
         """
         dialog = QtWidgets.QFileDialog()
-        dialog.setWindowTitle('Write *.png of figure')
-        dialog.setNameFilter('PNG files (*.png)')
+        dialog.setWindowTitle("Write *.png of figure")
+        dialog.setNameFilter("PNG files (*.png)")
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -121,8 +122,8 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Open dialog and write script.
         """
         dialog = QtWidgets.QFileDialog()
-        dialog.setWindowTitle('Write Python Script')
-        dialog.setNameFilter('Python Files (*.py)')
+        dialog.setWindowTitle("Write Python Script")
+        dialog.setNameFilter("Python Files (*.py)")
         dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)
         dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
         dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
@@ -141,7 +142,10 @@ def main(size=None):
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
     from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
-    widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size), OutputPlugin])
+
+    widget = ExodusPluginManager(
+        plugins=[lambda: VTKWindowPlugin(size=size), OutputPlugin]
+    )
     main_window = QtWidgets.QMainWindow()
     main_window.setCentralWidget(widget)
     menubar = main_window.menuBar()
@@ -150,12 +154,14 @@ def main(size=None):
     main_window.show()
     return widget, widget.VTKWindowPlugin, main_window
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     from peacock.utils import Testing
+
     app = QtWidgets.QApplication(sys.argv)
-    filename = Testing.get_chigger_input('mug_blocks_out.e')
+    filename = Testing.get_chigger_input("mug_blocks_out.e")
     widget, window, main_window = main()
     window.onSetFilename(filename)
-    window.onSetVariable('diffused')
+    window.onSetVariable("diffused")
     window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

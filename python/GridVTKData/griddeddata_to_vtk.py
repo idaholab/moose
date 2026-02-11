@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 from optparse import OptionParser
@@ -15,7 +15,8 @@ import math
 import vtk
 
 # parse command line
-p = OptionParser(usage="""usage: %prog [options] <gridfile> <vtrfile_base>
+p = OptionParser(
+    usage="""usage: %prog [options] <gridfile> <vtrfile_base>
 Converts the griddata file (suitable for PiecewiseMultilinear functions) into vtr format.
 
 Eg
@@ -27,8 +28,9 @@ So in the above example,
   mygrid0.vtr mygrid1.vtr would be produced if there were two TIMEs in mygrid.txt
   etc
 
-""")
-p.add_option("-v", action="store_true",        dest="verbose",  help="Verbose")
+"""
+)
+p.add_option("-v", action="store_true", dest="verbose", help="Verbose")
 
 
 # extract commandline arguments
@@ -42,7 +44,7 @@ if len(args) != 2:
 # extract the data from the grid file
 if opts.verbose:
     sys.stdout.write("Opening " + grid_file + " and extracting all data\n")
-f = open(grid_file, 'r')
+f = open(grid_file, "r")
 x = []
 y = []
 z = []
@@ -50,9 +52,9 @@ t = []
 fcn = []
 for line in f:
     if not line.strip():
-        continue # blank line
+        continue  # blank line
     if line.strip()[0].startswith("#"):
-        continue # comment line
+        continue  # comment line
     if line.split()[0] == "AXIS":
         getting = line.split()[1]
         continue
@@ -71,7 +73,6 @@ for line in f:
     elif getting == "DATA":
         fcn += map(float, line.split())
 f.close()
-
 
 
 # following makes looping easier below
@@ -94,7 +95,6 @@ if len(x) != len(set(x)) or len(y) != len(set(y)) or len(z) != len(set(z)):
     sys.exit(4)
 
 
-
 if opts.verbose:
     sys.stdout.write("Creating the VTR base grid\n")
 # create the vtr grid
@@ -113,7 +113,9 @@ for val in sorted(z):
 
 # create the vtkRectilinearGrid
 grid = vtk.vtkRectilinearGrid()
-grid.SetDimensions(xArray.GetNumberOfTuples(), yArray.GetNumberOfTuples(), zArray.GetNumberOfTuples())
+grid.SetDimensions(
+    xArray.GetNumberOfTuples(), yArray.GetNumberOfTuples(), zArray.GetNumberOfTuples()
+)
 grid.SetXCoordinates(xArray)
 grid.SetYCoordinates(yArray)
 grid.SetZCoordinates(zArray)
@@ -123,17 +125,17 @@ grid.Update()
 # the ordering of points inside the vtkRectilinearGrid might be different
 # from that in the grid file, so a map between them is needed
 if opts.verbose:
-    sys.stdout.write("Creating map from (x,y,z) points to index in griddeddata function values\n")
+    sys.stdout.write(
+        "Creating map from (x,y,z) points to index in griddeddata function values\n"
+    )
 nx = len(x)
 ny = len(y)
 nz = len(z)
-grid_index = {} # given a point, this gives the index in fcn
+grid_index = {}  # given a point, this gives the index in fcn
 for k in range(nz):
     for j in range(ny):
         for i in range(nx):
-            grid_index[(x[i], y[j], z[k])] = i + j*nx + k*nx*ny
-
-
+            grid_index[(x[i], y[j], z[k])] = i + j * nx + k * nx * ny
 
 
 # prepare the function_vals PointData
@@ -147,11 +149,10 @@ grid_time.SetName("grid_time")
 grid_time.InsertNextValue(0)
 
 
-
 for i in range(len(t)):
-    fname = vtr_base + str(i).zfill(int(math.log10(len(t)+1))) + ".vtr"
+    fname = vtr_base + str(i).zfill(int(math.log10(len(t) + 1))) + ".vtr"
     if opts.verbose:
-        sys.stdout.write("Outputting to " + fname + "\n");
+        sys.stdout.write("Outputting to " + fname + "\n")
     writer = vtk.vtkXMLRectilinearGridWriter()
     writer.SetFileName(fname)
 
@@ -162,15 +163,13 @@ for i in range(len(t)):
     # construct the function_vals and insert it
     for ptid in range(grid.GetNumberOfPoints()):
         xyz = grid.GetPoint(ptid)
-        f_vals.InsertValue(ptid, fcn[grid_index[xyz] + i*nx*ny*nz])
+        f_vals.InsertValue(ptid, fcn[grid_index[xyz] + i * nx * ny * nz])
     grid.GetPointData().AddArray(f_vals)
 
     # update and write the file
     grid.Update()
     writer.SetInputConnection(grid.GetProducerPort())
     writer.Write()
-
-
 
 
 sys.exit(0)

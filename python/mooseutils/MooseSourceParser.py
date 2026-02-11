@@ -1,20 +1,24 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import re
 import subprocess
 
 import clang.cindex
-if 'MOOSE_CLANG_LIB' not in os.environ:
-    raise EnvironmentError("Using the MooseSourceParser requires setting 'MOOSE_CLANG_LIB' environment variable to point to the clang library.")
-clang.cindex.Config.set_library_path(os.getenv('MOOSE_CLANG_LIB'))
+
+if "MOOSE_CLANG_LIB" not in os.environ:
+    raise EnvironmentError(
+        "Using the MooseSourceParser requires setting 'MOOSE_CLANG_LIB' environment variable to point to the clang library."
+    )
+clang.cindex.Config.set_library_path(os.getenv("MOOSE_CLANG_LIB"))
+
 
 class MooseSourceParser(object):
     """
@@ -24,13 +28,16 @@ class MooseSourceParser(object):
         app_path[str]: The path that contains the application Makefile (needed for extracting includes).
     """
 
-
     def __init__(self, app_path):
 
         # Check that the supplied path has a Makefile (for getting includes)
-        if not os.path.exists(os.path.join(app_path, 'Makefile')):
-            #TODO: Make this a MooseException and log the exception and also check that the make file os one from MOOSE
-            raise Exception('The supplied application directory does not contain a Makefile: {}'.format(app_path))
+        if not os.path.exists(os.path.join(app_path, "Makefile")):
+            # TODO: Make this a MooseException and log the exception and also check that the make file os one from MOOSE
+            raise Exception(
+                "The supplied application directory does not contain a Makefile: {}".format(
+                    app_path
+                )
+            )
 
         # Extract the includes from the Makefile
         self._includes = self.includes(app_path)
@@ -45,12 +52,12 @@ class MooseSourceParser(object):
 
         # Check that the supplied file exists
         if not os.path.exists(filename):
-            #TODO: Proper exception and logging
-            print('The supplied source/header file does not exist:', filename)
+            # TODO: Proper exception and logging
+            print("The supplied source/header file does not exist:", filename)
             return
 
         # Build the flags to pass to clang
-        includes = ['-x', 'c++', '-std=c++17']
+        includes = ["-x", "c++", "-std=c++17"]
         includes += self._includes
 
         # Build clang translation unit
@@ -66,10 +73,15 @@ class MooseSourceParser(object):
             app_path[str]: A valid moose application or directory with a MOOSE Makefile (e.g., framework).
         """
 
-        p = subprocess.Popen(['make', 'echo_include'], cwd=app_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(
+            ["make", "echo_include"],
+            cwd=app_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         output, err = p.communicate()
-        for match in re.finditer(r'-I(.*?)\s', output):
-            yield match.group(0).strip().strip('\n')
+        for match in re.finditer(r"-I(.*?)\s", output):
+            yield match.group(0).strip().strip("\n")
 
     def method(self, name):
         """
@@ -93,26 +105,31 @@ class MooseSourceParser(object):
 
         return decl, defn
 
-    def dump(self, cursor=None, level = 0, **kwargs):
+    def dump(self, cursor=None, level=0, **kwargs):
         """
         A tool for dumping the cursor tree.
         """
         if cursor == None:
-            cursor = self._translation_unit.cursor,
-        recursive = kwargs.pop('recursive', True)
+            cursor = (self._translation_unit.cursor,)
+        recursive = kwargs.pop("recursive", True)
         for c in cursor.get_children():
-            print(' '*4*level, c.kind, c.spelling, c.extent.start.file, c.extent.start.line)
+            print(
+                " " * 4 * level,
+                c.kind,
+                c.spelling,
+                c.extent.start.file,
+                c.extent.start.line,
+            )
             if recursive and c.get_children():
-                self.dump(c, level+1)
+                self.dump(c, level + 1)
 
     @staticmethod
     def content(cursor):
         source_range = cursor.extent
-        fid = open(source_range.start.file.name, 'r')
-        content = fid.read()[source_range.start.offset:source_range.end.offset]
+        fid = open(source_range.start.file.name, "r")
+        content = fid.read()[source_range.start.offset : source_range.end.offset]
         fid.close()
         return content
-
 
     def find(self, kind, **kwargs):
         """
@@ -129,21 +146,23 @@ class MooseSourceParser(object):
             A list of all cursors matching the kind and optionally the name.
         """
 
-        name = kwargs.pop('name', None)
+        name = kwargs.pop("name", None)
 
         for cursor in self._translation_unit.cursor.walk_preorder():
-            if (hasattr(cursor, 'kind')) and (cursor.kind == kind) and (name == None or cursor.spelling == name):
-                #print(cursor.extent.start.file)
+            if (
+                (hasattr(cursor, "kind"))
+                and (cursor.kind == kind)
+                and (name == None or cursor.spelling == name)
+            ):
+                # print(cursor.extent.start.file)
                 yield cursor
 
 
+if __name__ == "__main__":
 
+    src = "%s/projects/moose/framework/src/kernels/Diffusion.C" % os.environ["HOME"]
 
-if __name__ == '__main__':
-
-    src = '%s/projects/moose/framework/src/kernels/Diffusion.C' % os.environ["HOME"]
-
-    parser = MooseSourceParser('%s/projects/moose/framework' % os.environ["HOME"])
+    parser = MooseSourceParser("%s/projects/moose/framework" % os.environ["HOME"])
     parser.parse(src)
-    decl, defn = parser.method('computeQpResidual')
+    decl, defn = parser.method("computeQpResidual")
     print(decl, defn)

@@ -1,19 +1,20 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 
+
 class FileChecker(object):
-    """ Class that checks files and stores last-modified times. """
+    """Class that checks files and stores last-modified times."""
 
     def __init__(self, input_file_name):
-        """ Establish new dictionaries for files and their corresponding modified times. """
+        """Establish new dictionaries for files and their corresponding modified times."""
         self.__original_times = dict()
         self.__new_times = dict()
         self.__input_file_name = input_file_name
@@ -25,7 +26,7 @@ class FileChecker(object):
         return self.__new_times
 
     def get_all_files(self, job, times):
-        """ Method to get the names and last_modified_times of all files within current test location """
+        """Method to get the names and last_modified_times of all files within current test location"""
         for dirpath, dirnames, filenames in os.walk(job.getTestDir(), followlinks=True):
 
             # When performing a snapshot, don't traverse into directories that have test
@@ -45,7 +46,7 @@ class FileChecker(object):
         return times
 
     def check_changes(self, originalTimes, newTimes):
-        """ Method to compare names of times kept kept in the two dictionaries created filled by get_all_files """
+        """Method to compare names of times kept kept in the two dictionaries created filled by get_all_files"""
         changed = []
         # Are the new mod times different?
         # Check if the key is there before accessing

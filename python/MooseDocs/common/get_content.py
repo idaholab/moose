@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import re
 import copy
@@ -18,9 +18,30 @@ from ..tree import pages
 LOG = logging.getLogger(__name__)
 
 # File extensions to consider when building the content tree
-FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.webm', '.ogv', '.mp4', '.m4v', \
-            '.pdf', '.css', '.js', '.bib', '.woff', '.woff2', '.html', '.ico', 'md.template', \
-            'tar.gz', '.py')
+FILE_EXT = (
+    ".md",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".png",
+    ".svg",
+    ".webm",
+    ".ogv",
+    ".mp4",
+    ".m4v",
+    ".pdf",
+    ".css",
+    ".js",
+    ".bib",
+    ".woff",
+    ".woff2",
+    ".html",
+    ".ico",
+    "md.template",
+    "tar.gz",
+    ".py",
+)
+
 
 def _build_regex(pattern):
     """
@@ -37,31 +58,33 @@ def _build_regex(pattern):
     at the beginning or end of the string.
 
     """
-    out = pattern.replace('.', r'\.')
+    out = pattern.replace(".", r"\.")
 
     # Replace ** or * that is proceeded by the beginning of the string or a forward slash and
     # that is followed by a forward or the end of the string. The replacement is a regex that will
     # mimic the glob ** and * behaviors.
     #    ** becomes (?:.*?) which matches any character
     #    * becomes (?:[^.]?) which matches any character except for the slash
-    out = re.sub(r'(?!<^|/)(\*{2})(?=/|$)', r'(?:.*?)', out, flags=re.MULTILINE)
-    out = re.sub(r'(?!<^|/)(\*{1})(?=/|$)', r'(?:[^/]*?)', out, flags=re.MULTILINE)
+    out = re.sub(r"(?!<^|/)(\*{2})(?=/|$)", r"(?:.*?)", out, flags=re.MULTILINE)
+    out = re.sub(r"(?!<^|/)(\*{1})(?=/|$)", r"(?:[^/]*?)", out, flags=re.MULTILINE)
 
     # The overall regex for searching filenames must be limited to one line
-    return r'^{}$'.format(out)
+    return r"^{}$".format(out)
+
 
 def _find_files(filenames, pattern):
     """
     Locate files matching the given pattern.
     """
     out = set()
-    if '*' in pattern:
+    if "*" in pattern:
         regex = _build_regex(pattern)
-        for match in re.finditer(regex, '\n'.join(filenames), flags=re.MULTILINE):
+        for match in re.finditer(regex, "\n".join(filenames), flags=re.MULTILINE):
             out.add(match.group(0))
     else:
         out.add(pattern)
     return out
+
 
 def _doc_import(root_dir, content=None, optional=False):
     """
@@ -77,8 +100,11 @@ def _doc_import(root_dir, content=None, optional=False):
         if not optional:
             LOG.error('The "root_dir" must be a valid directory: %s', root_dir)
         else:
-            LOG.warning("Part of the content specified in 'config.yml' is not included in documentation since " +
-                        root_dir + ' is not a valid directory')
+            LOG.warning(
+                "Part of the content specified in 'config.yml' is not included in documentation since "
+                + root_dir
+                + " is not a valid directory"
+            )
         return None
 
     # Loop through the base directory and create a set of matching filenames
@@ -102,7 +128,7 @@ def _doc_import(root_dir, content=None, optional=False):
     include = []
     exclude = []
     for item in content:
-        if item.startswith('~'):
+        if item.startswith("~"):
             exclude.append(item[1:])
         else:
             include.append(item)
@@ -118,10 +144,13 @@ def _doc_import(root_dir, content=None, optional=False):
     # Test the files exist
     for fname in copy.copy(output):
         if not os.path.isfile(fname):
-            LOG.error("Unknown file provided in content (it is being removed):\n%s", fname)
+            LOG.error(
+                "Unknown file provided in content (it is being removed):\n%s", fname
+            )
             output.remove(fname)
 
     return sorted(output)
+
 
 def create_file_page(name, filename, in_ext):
     """
@@ -133,6 +162,7 @@ def create_file_page(name, filename, in_ext):
     else:
         return pages.File(name, source=filename, write=ext != ".py")
 
+
 def get_files(items, in_ext):
     """
     Get a list of files to consider given the content configuration.
@@ -140,23 +170,30 @@ def get_files(items, in_ext):
 
     filenames = []
     for value in items:
-        if 'root_dir' not in value:
-            LOG.error('The supplied items must be a list of dict items, each with a "root_dir" and '
-                      'optionally a "content" entry.')
+        if "root_dir" not in value:
+            LOG.error(
+                'The supplied items must be a list of dict items, each with a "root_dir" and '
+                'optionally a "content" entry.'
+            )
 
         # Get path from specified root_dir
-        root = mooseutils.eval_path(value['root_dir'])
+        root = mooseutils.eval_path(value["root_dir"])
         if not os.path.isabs(root):
             root = os.path.join(MooseDocs.ROOT_DIR, root)
 
         # We default external content to be optional because we won't always have
         # all the submodules downloaded
-        files = _doc_import(root, content=value.get('content', None), optional=value.get('external', False))
+        files = _doc_import(
+            root,
+            content=value.get("content", None),
+            optional=value.get("external", False),
+        )
         if files is not None:
             for fname in files:
-                filenames.append((root, fname, value.get('external', False)))
+                filenames.append((root, fname, value.get("external", False)))
 
     return filenames
+
 
 def get_items(options):
     """Helper for building content, see load_config.py"""
@@ -169,11 +206,14 @@ def get_items(options):
                 items.append(dict(root_dir=value, content=None, external=False))
     elif isinstance(options, dict):
         for _, value in options.items():
-            content = value.get('content', None)
-            external = value.get('external', False)
-            items.append(dict(root_dir=value['root_dir'], content=content, external=external))
+            content = value.get("content", None)
+            external = value.get("external", False)
+            items.append(
+                dict(root_dir=value["root_dir"], content=content, external=external)
+            )
 
     return items
+
 
 def get_content(items, in_ext):
     """
@@ -186,23 +226,26 @@ def get_content(items, in_ext):
         out_ext[str]: The extension of rendered result (e.g., '.html').
     """
     if not isinstance(items, list) or any(not isinstance(x, dict) for x in items):
-        LOG.error('The supplied items must be a list of dict items, each with a "root_dir" and '
-                  'optionally a "content" entry.')
+        LOG.error(
+            'The supplied items must be a list of dict items, each with a "root_dir" and '
+            'optionally a "content" entry.'
+        )
         return None
 
     roots = set()
     nodes = dict()
     for root, filename, external in get_files(items, in_ext):
         roots.add(root)
-        key = filename.replace(root, '').strip('/')
-        parts = key.split('/')
+        key = filename.replace(root, "").strip("/")
+        parts = key.split("/")
 
         # Create directory nodes if they don't exist
         for i in range(1, len(parts)):
             dir_key = os.path.join(*parts[:i])
             if dir_key not in nodes:
-                nodes[dir_key] = pages.Directory(dir_key, external=external,
-                                                 source=os.path.join(root, dir_key))
+                nodes[dir_key] = pages.Directory(
+                    dir_key, external=external, source=os.path.join(root, dir_key)
+                )
 
         # Create the file node, if it doesn't already exist. This enforces that the first
         # item in the supplied content lists is the page that is rendered.
@@ -214,7 +257,9 @@ def get_content(items, in_ext):
     # Update the project files
     for root in roots:
         if mooseutils.git_is_repo(root):
-            MooseDocs.PROJECT_FILES.update(mooseutils.git_ls_files(mooseutils.git_root_dir(root)))
+            MooseDocs.PROJECT_FILES.update(
+                mooseutils.git_ls_files(mooseutils.git_root_dir(root))
+            )
         else:
             MooseDocs.PROJECT_FILES.update(mooseutils.list_files(root))
 

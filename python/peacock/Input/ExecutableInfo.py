@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -18,13 +19,16 @@ from .JsonData import JsonData
 from .BlockInfo import BlockInfo
 from .ParameterInfo import ParameterInfo
 
+
 class ExecutableInfo(object):
     """
     Holds the Json of an executable.
     """
+
     SETTINGS_KEY = "ExecutableInfo"
     SETTINGS_KEY_TEST_OBJS = "ExecutableWithTestObjectsInfo"
     CACHE_VERSION = 4
+
     def __init__(self, **kwds):
         super(ExecutableInfo, self).__init__(**kwds)
         self.json_data = None
@@ -85,11 +89,12 @@ class ExecutableInfo(object):
         FileCache.clearAll(ExecutableInfo.SETTINGS_KEY_TEST_OBJS)
 
     def toPickle(self):
-        return {"json_data": self.json_data.toPickle(),
-                "path_map": self.path_map,
-                "path": self.path,
-                "type_to_block_map": self.type_to_block_map,
-                }
+        return {
+            "json_data": self.json_data.toPickle(),
+            "path_map": self.path_map,
+            "path": self.path,
+            "type_to_block_map": self.type_to_block_map,
+        }
 
     def fromPickle(self, data):
         self.json_data = JsonData()
@@ -173,7 +178,7 @@ class ExecutableInfo(object):
             self.path_map[block_info.path] = block_info
         self.path_map["/"] = self.root_info
 
-    def _dumpNode(self, output, entry, level, prefix='  ', only_hard=False):
+    def _dumpNode(self, output, entry, level, prefix="  ", only_hard=False):
         if not only_hard or entry.hard:
             hard = "hard"
             if not entry.hard:
@@ -181,9 +186,11 @@ class ExecutableInfo(object):
             star = "star"
             if not entry.star:
                 star = "not star"
-            output.write("%s%s: %s: %s\n" % (prefix*level, entry.path, hard, star))
+            output.write("%s%s: %s: %s\n" % (prefix * level, entry.path, hard, star))
             for c in entry.children_list:
-                self._dumpNode(output, entry.children[c], level+1, prefix, only_hard=only_hard)
+                self._dumpNode(
+                    output, entry.children[c], level + 1, prefix, only_hard=only_hard
+                )
 
     def dumpDefaultTree(self, hard_only=False):
         output = StringIO()
@@ -193,8 +200,10 @@ class ExecutableInfo(object):
             self._dumpNode(output, self.path_map[c], 0, only_hard=hard_only)
         return output.getvalue()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 2:
         print("Usage: <path_to_exe>")
         exit(1)

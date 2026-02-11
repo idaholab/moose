@@ -1,16 +1,17 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 from .LabelExodusSource import LabelExodusSource
 from .. import base
+
 
 class LabelExodusResult(base.ChiggerResult):
     """
@@ -19,6 +20,7 @@ class LabelExodusResult(base.ChiggerResult):
     Args:
         result[ExodusResult]: The result object to label.
     """
+
     @staticmethod
     def getOptions():
         opt = base.ChiggerResult.getOptions()
@@ -33,6 +35,10 @@ class LabelExodusResult(base.ChiggerResult):
         for src in self._exodus_result:
             sources.append(LabelExodusSource(src, **kwargs))
 
-        super(LabelExodusResult, self).__init__(*sources, renderer=exodus_result.getVTKRenderer(),
-                                                viewport=exodus_result.getOption('viewport'),
-                                                vtkmapper_type=vtk.vtkLabeledDataMapper, **kwargs)
+        super(LabelExodusResult, self).__init__(
+            *sources,
+            renderer=exodus_result.getVTKRenderer(),
+            viewport=exodus_result.getOption("viewport"),
+            vtkmapper_type=vtk.vtkLabeledDataMapper,
+            **kwargs,
+        )

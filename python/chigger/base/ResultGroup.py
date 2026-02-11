@@ -1,14 +1,15 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .ChiggerResult import ChiggerResult
+
 
 class ResultGroup(ChiggerResult):
     """
@@ -71,5 +72,5 @@ class ResultGroup(ChiggerResult):
             args: The arguments to pass into the class.
             kwargs: Key, value pairs to pass into the class.
         """
-        kwargs.setdefault('renderer', self.getVTKRenderer())
+        kwargs.setdefault("renderer", self.getVTKRenderer())
         self._results.append(result(*args, **kwargs))

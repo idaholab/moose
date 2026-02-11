@@ -1,22 +1,32 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QAbstractItemView, QAction, QMenu, QSizePolicy, QMessageBox
+from PyQt5.QtWidgets import (
+    QTreeWidget,
+    QTreeWidgetItem,
+    QAbstractItemView,
+    QAction,
+    QMenu,
+    QSizePolicy,
+    QMessageBox,
+)
 from PyQt5.QtGui import QBrush, QColor
 from PyQt5.QtCore import Qt, pyqtSignal
 from peacock.utils import WidgetUtils
 from peacock.base.MooseWidget import MooseWidget
+
 try:
     from cStringIO import StringIO
 except ImportError:
     from io import StringIO
+
 
 class BlockTree(QTreeWidget, MooseWidget):
     """
@@ -29,6 +39,7 @@ class BlockTree(QTreeWidget, MooseWidget):
         blockClicked[BlockInfo]: Emitted when a block is clicked
         blockDoubleClicked[BlockInfo]: Emitted when a block is double clicked
     """
+
     changed = pyqtSignal(object)
     blockSelected = pyqtSignal(object)
     blockClicked = pyqtSignal(object)
@@ -65,7 +76,9 @@ class BlockTree(QTreeWidget, MooseWidget):
         self.setMouseTracking(False)
         self.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        self.clone_shortcut = WidgetUtils.addShortcut(self, "Ctrl+N", self._newBlockShortcut, shortcut_with_children=True)
+        self.clone_shortcut = WidgetUtils.addShortcut(
+            self, "Ctrl+N", self._newBlockShortcut, shortcut_with_children=True
+        )
         self.populateFromTree()
         self.setup()
         self.add_action = QAction("Add", None)
@@ -174,10 +187,17 @@ class BlockTree(QTreeWidget, MooseWidget):
         if self._current_drag and item and data.hasFormat(self._mime_type):
             current_block = self._item_block_map.get(self._current_drag)
             to_block = self._item_block_map.get(item.__str__())
-            if current_block and to_block and current_block.parent == to_block.parent and to_block.parent.path != "/":
+            if (
+                current_block
+                and to_block
+                and current_block.parent == to_block.parent
+                and to_block.parent.path != "/"
+            ):
                 idx = self.indexOfItem(self._current_drag)
                 super(BlockTree, self).dropEvent(event)
-                idx = self.indexOfItem(self._current_drag) # The parent class should have moved it
+                idx = self.indexOfItem(
+                    self._current_drag
+                )  # The parent class should have moved it
                 self.tree.moveBlock(current_block.path, idx)
         self._current_drag = None
 
@@ -252,11 +272,18 @@ class BlockTree(QTreeWidget, MooseWidget):
         new_child.setText(0, block.name)
         new_child.setToolTip(0, block.toolTip())
         if parent_item == self.root_item:
-            new_child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable )
+            new_child.setFlags(
+                Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsUserCheckable
+            )
             self.addTopLevelItem(new_child)
         else:
             parent_item.addChild(new_child)
-            new_child.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled |Qt.ItemIsUserCheckable )
+            new_child.setFlags(
+                Qt.ItemIsEnabled
+                | Qt.ItemIsSelectable
+                | Qt.ItemIsDragEnabled
+                | Qt.ItemIsUserCheckable
+            )
         state = Qt.Unchecked
         if block.included:
             state = Qt.Checked
@@ -268,7 +295,7 @@ class BlockTree(QTreeWidget, MooseWidget):
 
         if parent_item != self.root_item:
             default_flags = parent_item.flags()
-            parent_item.setFlags(default_flags | Qt.ItemIsDropEnabled )
+            parent_item.setFlags(default_flags | Qt.ItemIsDropEnabled)
         for child_name in block.children_list:
             child = block.children[child_name]
             self._newItem(new_child, child)
@@ -301,7 +328,7 @@ class BlockTree(QTreeWidget, MooseWidget):
 
         self.changed.emit(new_block)
         self._includeParents(new_block)
-        self.blockDoubleClicked.emit(new_block) # start editing right away
+        self.blockDoubleClicked.emit(new_block)  # start editing right away
 
     def _includeParents(self, block):
         """
@@ -365,11 +392,13 @@ class BlockTree(QTreeWidget, MooseWidget):
             self.copyBlock(block)
         elif result == self.remove_action:
             text = "Are you sure you want to delete %s" % block.path
-            button = QMessageBox.question(self, "Confirm remove", text, QMessageBox.Yes, QMessageBox.No)
+            button = QMessageBox.question(
+                self, "Confirm remove", text, QMessageBox.Yes, QMessageBox.No
+            )
             if button == QMessageBox.Yes:
                 self.removeBlock(block)
 
-    def _dumpItem(self, output, item, level=0, sep='  '):
+    def _dumpItem(self, output, item, level=0, sep="  "):
         """
         Dumps an item to a string.
         Input:
@@ -379,11 +408,14 @@ class BlockTree(QTreeWidget, MooseWidget):
             sep[str]: indent string
         """
         b = self._item_block_map.get(item.__str__())
-        output.write("%s%s: %s: %s\n" % (sep*level, item.text(0), b.star, item.checkState(0) == Qt.Checked))
+        output.write(
+            "%s%s: %s: %s\n"
+            % (sep * level, item.text(0), b.star, item.checkState(0) == Qt.Checked)
+        )
         child_count = item.childCount()
         for i in range(child_count):
             child = item.child(i)
-            self._dumpItem(output, child, level+1, sep)
+            self._dumpItem(output, child, level + 1, sep)
 
     def dumpTreeToString(self):
         """
@@ -397,11 +429,13 @@ class BlockTree(QTreeWidget, MooseWidget):
             self._dumpItem(output, child)
         return output.getvalue()
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from InputTree import InputTree
     from ExecutableInfo import ExecutableInfo
     import sys
+
     if len(sys.argv) != 3:
         print("Usage: %s <exe> <input file>" % sys.argv[0])
         sys.exit(1)

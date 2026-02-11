@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtWidgets import QWidget, QSplitter, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -16,6 +16,7 @@ from .CommentEditor import CommentEditor
 from .ParamsTable import ParamsTable
 from .ParamsByGroup import ParamsByGroup
 from .ParamsByType import ParamsByType
+
 
 class BlockEditor(QWidget, MooseWidget):
     """
@@ -34,12 +35,13 @@ class BlockEditor(QWidget, MooseWidget):
         editingFinished(): The user is done editing this block. Typically done by closing the window.
         appliedAndClosed(object): Emit the block when the user hits the "Apply & Close" button
     """
-    needBlockList = pyqtSignal(list) # list of paths that we need children for
-    blockRenamed = pyqtSignal(object, str) # block with changes, old path
-    blockChanged = pyqtSignal(object) # block that has changed
 
-    cloneBlock = pyqtSignal(object) # block to clone
-    removeBlock = pyqtSignal(object) # block to remove
+    needBlockList = pyqtSignal(list)  # list of paths that we need children for
+    blockRenamed = pyqtSignal(object, str)  # block with changes, old path
+    blockChanged = pyqtSignal(object)  # block that has changed
+
+    cloneBlock = pyqtSignal(object)  # block to clone
+    removeBlock = pyqtSignal(object)  # block to remove
     editingFinished = pyqtSignal()
     appliedAndClosed = pyqtSignal(object)
 
@@ -67,9 +69,13 @@ class BlockEditor(QWidget, MooseWidget):
         if block.types:
             self.param_editor = ParamsByType(block, type_to_block_map)
         elif block.parameters:
-            self.param_editor = ParamsByGroup(block, block.orderedParameters(), type_to_block_map)
+            self.param_editor = ParamsByGroup(
+                block, block.orderedParameters(), type_to_block_map
+            )
         else:
-            self.param_editor = ParamsTable(block, block.orderedParameters(), type_to_block_map)
+            self.param_editor = ParamsTable(
+                block, block.orderedParameters(), type_to_block_map
+            )
 
         self.param_editor.needBlockList.connect(self.needBlockList)
         self.param_editor.changed.connect(self._blockChanged)
@@ -86,8 +92,8 @@ class BlockEditor(QWidget, MooseWidget):
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.param_editor)
         self.splitter.addWidget(self.comment_edit)
-        self.splitter.setStretchFactor(0,2)
-        self.splitter.setStretchFactor(1,1)
+        self.splitter.setStretchFactor(0, 2)
+        self.splitter.setStretchFactor(1, 1)
         self.top_layout = WidgetUtils.addLayout(vertical=True)
         self.top_layout.addWidget(self.splitter)
         self.top_layout.addLayout(self.button_layout)
@@ -115,26 +121,40 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.button_layout = WidgetUtils.addLayout()
 
-        self.close_button = WidgetUtils.addButton(self.button_layout, self, "Apply && Close", self._applyAndClose)
+        self.close_button = WidgetUtils.addButton(
+            self.button_layout, self, "Apply && Close", self._applyAndClose
+        )
         self.close_button.setToolTip("Apply any changes and close the window")
 
-        self.apply_button = WidgetUtils.addButton(self.button_layout, self, "Apply", self.applyChanges)
+        self.apply_button = WidgetUtils.addButton(
+            self.button_layout, self, "Apply", self.applyChanges
+        )
         self.apply_button.setEnabled(False)
         self.apply_button.setToolTip("Apply changes made")
 
-        self.reset_button = WidgetUtils.addButton(self.button_layout, self, "Reset", self.resetChanges)
+        self.reset_button = WidgetUtils.addButton(
+            self.button_layout, self, "Reset", self.resetChanges
+        )
         self.reset_button.setEnabled(False)
         self.reset_button.setToolTip("Reset changes to when this window was opened")
 
-        self.new_parameter_button = WidgetUtils.addButton(self.button_layout, self, "Add parameter", self.addUserParamPressed)
+        self.new_parameter_button = WidgetUtils.addButton(
+            self.button_layout, self, "Add parameter", self.addUserParamPressed
+        )
         self.new_parameter_button.setToolTip("Add a non standard parameter")
 
         if self.block.user_added:
-            self.clone_button = WidgetUtils.addButton(self.button_layout, self, "Clone Block", self._cloneBlock)
-            self.clone_shortcut = WidgetUtils.addShortcut(self, "Ctrl+N", self._cloneBlock, shortcut_with_children=True)
+            self.clone_button = WidgetUtils.addButton(
+                self.button_layout, self, "Clone Block", self._cloneBlock
+            )
+            self.clone_shortcut = WidgetUtils.addShortcut(
+                self, "Ctrl+N", self._cloneBlock, shortcut_with_children=True
+            )
             self.clone_button.setToolTip("Clone this block with the same parameters")
 
-            self.remove_button = WidgetUtils.addButton(self.button_layout, self, "Remove Block", self._removeBlock)
+            self.remove_button = WidgetUtils.addButton(
+                self.button_layout, self, "Remove Block", self._removeBlock
+            )
             self.remove_button.setToolTip("Remove this block")
 
     def _findFreeParamName(self, max_params=1000):
@@ -145,7 +165,7 @@ class BlockEditor(QWidget, MooseWidget):
         """
         base = "NewParam"
         for i in range(max_params):
-            param = '%s%s' % (base, i)
+            param = "%s%s" % (base, i)
             if self.param_editor.paramValue(param) == None:
                 return param
 
@@ -168,7 +188,13 @@ class BlockEditor(QWidget, MooseWidget):
         The user wants to remove this block.
         We ask to make sure they want to do this.
         """
-        button = QMessageBox.question(self, "Confirm remove", "Are you sure you want to delete %s" % self.block.path, QMessageBox.Yes, QMessageBox.No)
+        button = QMessageBox.question(
+            self,
+            "Confirm remove",
+            "Are you sure you want to delete %s" % self.block.path,
+            QMessageBox.Yes,
+            QMessageBox.No,
+        )
         if button == QMessageBox.Yes:
             self.removeBlock.emit(self.block)
             self.hide()
@@ -215,11 +241,13 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.editingFinished.emit()
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from InputTree import InputTree
     from ExecutableInfo import ExecutableInfo
     import sys
+
     if len(sys.argv) != 4:
         print("Usage: %s <exe> <input file> <block path>" % sys.argv[0])
         sys.exit(1)

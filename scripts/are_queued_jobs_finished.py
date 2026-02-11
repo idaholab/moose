@@ -3,14 +3,14 @@
 Check if all jobs provided in PBS job file has finished.
   exit(0) if all jobs are finished, exit(1) if not.
 """
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import os
@@ -20,27 +20,33 @@ import argparse
 import subprocess
 from datetime import datetime, timedelta
 
+
 def load_json(job_file):
-    """ return PBS job dictionary """
+    """return PBS job dictionary"""
     if os.path.exists(job_file):
-        with open(job_file, 'r', encoding="utf-8") as pbs_job:
+        with open(job_file, "r", encoding="utf-8") as pbs_job:
             try:
                 return json.load(pbs_job)
             except json.decoder.JSONDecodeError:
-                sys.exit('Not a valid json file')
-    sys.exit(f'File not found: {job_file}')
+                sys.exit("Not a valid json file")
+    sys.exit(f"File not found: {job_file}")
+
 
 def qstat_results(job_id):
-    """ Run qstat and return (stdout, stderr) """
-    with subprocess.Popen(['qstat', '-xfF', 'json', job_id],
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE) as qstat_process:
+    """Run qstat and return (stdout, stderr)"""
+    with subprocess.Popen(
+        ["qstat", "-xfF", "json", job_id],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ) as qstat_process:
         return qstat_process.communicate()
 
+
 def yield_jobs(job_data):
-    """ return key value dictionary pairs """
+    """return key value dictionary pairs"""
     for path_key, meta_data in job_data.items():
         yield path_key, meta_data
+
 
 def not_finished(job_array):
     """
@@ -55,16 +61,16 @@ def not_finished(job_array):
                 continue
 
             # Results file exist (job therefore finished)
-            if os.path.exists(os.path.join(path, '.previous_test_results.json')):
+            if os.path.exists(os.path.join(path, ".previous_test_results.json")):
                 continue
 
             # Job was skipped, or otherwise not launched via PBS
-            if not meta.get('RunPBS', False):
+            if not meta.get("RunPBS", False):
                 continue
 
             # Ask qstat
-            if 'RunPBS' in meta:
-                job_id = meta['RunPBS']['ID'].replace('\n', '')
+            if "RunPBS" in meta:
+                job_id = meta["RunPBS"]["ID"].replace("\n", "")
                 qstat_command_result = qstat_results(job_id)
 
                 # Error running qstat (job finished in any case)
@@ -79,31 +85,42 @@ def not_finished(job_array):
                     continue
 
                 # If Exit_status exists, this job completed
-                if json_out['Jobs'][job_id].get('Exit_status', False):
+                if json_out["Jobs"][job_id].get("Exit_status", False):
                     continue
 
             # If we made it this far, the job is still queued, running, etc
             return True
 
+
 def parse_args(argv):
-    """ parses arguments """
+    """parses arguments"""
     if len(argv) == 0:
         print_usage()
-    parser = argparse.ArgumentParser(description='Check if PBS has completed all jobs')
-    parser.add_argument('-w', '--wait', nargs='?', metavar='int', type=int,
-                        help='the max time to wait in seconds before giving up (a setting of'
-                        ' -1 means forever)')
+    parser = argparse.ArgumentParser(description="Check if PBS has completed all jobs")
+    parser.add_argument(
+        "-w",
+        "--wait",
+        nargs="?",
+        metavar="int",
+        type=int,
+        help="the max time to wait in seconds before giving up (a setting of"
+        " -1 means forever)",
+    )
     return parser.parse_known_args(argv)
 
+
 def print_usage():
-    """ Print usage and then exit(1) """
-    print('Supply a path to json queue file. Multiple files are supported,\n'
-          'in which case all tests in all json files must be finished for\n'
-          'this script to exit with 0.')
+    """Print usage and then exit(1)"""
+    print(
+        "Supply a path to json queue file. Multiple files are supported,\n"
+        "in which case all tests in all json files must be finished for\n"
+        "this script to exit with 0."
+    )
     sys.exit(1)
 
+
 def main(args):
-    """ check if all jobs in all supplied PBS files have finished """
+    """check if all jobs in all supplied PBS files have finished"""
     options, job_list = args
     job_array = []
     for queue_file in job_list:
@@ -113,7 +130,7 @@ def main(args):
             while not_finished(job_array):
                 time.sleep(5)
         except KeyboardInterrupt:
-            return 'Keyboard Interrupt'
+            return "Keyboard Interrupt"
     elif options.wait:
         time_start = datetime.now()
         try:
@@ -123,12 +140,13 @@ def main(args):
                 else:
                     return 0
         except KeyboardInterrupt:
-            return 'Keyboard Interrrupt'
-        return 'Allotted time exceeded'
+            return "Keyboard Interrrupt"
+        return "Allotted time exceeded"
     else:
         if not_finished(job_array):
-            return 'Jobs still running'
+            return "Jobs still running"
     return 0
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main(parse_args(sys.argv[1:])))

@@ -10,8 +10,10 @@ lo = [list(map(float, line.split(","))) for line in f.readlines()[1:]]
 f.close()
 
 plt.figure()
-plt.plot([x[0] for x in lo], [x[4] for x in lo], 'b-', label = 'borehole in lower aquifer')
-plt.plot([x[0] for x in aq], [x[4] for x in aq], 'r-', label = 'borehole in aquitard')
+plt.plot(
+    [x[0] for x in lo], [x[4] for x in lo], "b-", label="borehole in lower aquifer"
+)
+plt.plot([x[0] for x in aq], [x[4] for x in aq], "r-", label="borehole in aquitard")
 plt.legend()
 plt.ylabel("Head change (m)")
 plt.xlabel("x (m)")

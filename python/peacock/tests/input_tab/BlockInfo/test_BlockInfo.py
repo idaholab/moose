@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.utils import Testing
 from peacock.Input.BlockInfo import BlockInfo
 from peacock.Input.ParameterInfo import ParameterInfo
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -33,12 +34,12 @@ class Tests(Testing.PeacockTester):
     def testTypes(self):
         b = BlockInfo(None, "/Foo", False, "")
         self.assertEqual(b.paramValue("type"), None)
-        b.setBlockType("t") # shouldn't do anything
+        b.setBlockType("t")  # shouldn't do anything
         p = ParameterInfo(None, "type")
         b.addParameter(p)
         self.assertEqual(p.parent, b)
         self.assertEqual(b.paramValue("type"), "")
-        b.setBlockType("t") # shouldn't do anything
+        b.setBlockType("t")  # shouldn't do anything
         self.assertEqual(b.paramValue("type"), "t")
         b1 = BlockInfo(None, "/Foo/t", False, "")
         p = ParameterInfo(None, "p")
@@ -153,5 +154,6 @@ class Tests(Testing.PeacockTester):
         o1 = b_copy.dump()
         self.assertEqual(o, o1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

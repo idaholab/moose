@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import os
@@ -16,6 +16,7 @@ import chigger
 import mooseutils
 from .ExodusPlugin import ExodusPlugin
 
+
 class RetinaQVTKRenderWindowInteractor(QVTKRenderWindowInteractor):
     """
     Currently VTK7.1 and Qt5 do not work correctly on retina displays:
@@ -25,6 +26,7 @@ class RetinaQVTKRenderWindowInteractor(QVTKRenderWindowInteractor):
     in a QFrame allowed it to work for now. The idea for this wrapping came from:
         https://github.com/siudej/Eigenvalues/blob/master/qvtk.py
     """
+
     def resizeEvent(self, event):
         """
         Double the size on retina displays.
@@ -38,11 +40,12 @@ class RetinaQVTKRenderWindowInteractor(QVTKRenderWindowInteractor):
         w = self.width()
         h = self.height()
         if (self.parent() is not None) and (w <= self.parent().width()):
-            self.resize(ratio*self.size())
-        self.GetRenderWindow().SetSize(ratio*w, ratio*h)
-        self.GetRenderWindow().GetInteractor().SetSize(ratio*w, ratio*h)
+            self.resize(ratio * self.size())
+        self.GetRenderWindow().SetSize(ratio * w, ratio * h)
+        self.GetRenderWindow().GetInteractor().SetSize(ratio * w, ratio * h)
         self.GetRenderWindow().GetInteractor().ConfigureEvent()
         self.update()
+
 
 class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     """
@@ -59,9 +62,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     setupWindow = QtCore.pyqtSignal(chigger.RenderWindow)
 
     #: pyqtSignal: Emitted with the window has been updated
-    updateWindow = QtCore.pyqtSignal(chigger.RenderWindow,
-                                     chigger.exodus.ExodusReader,
-                                     chigger.exodus.ExodusResult)
+    updateWindow = QtCore.pyqtSignal(
+        chigger.RenderWindow, chigger.exodus.ExodusReader, chigger.exodus.ExodusResult
+    )
 
     #: pyqtSignal: Emitted when the window is reset/cleared
     resetWindow = QtCore.pyqtSignal()
@@ -97,11 +100,13 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         super(VTKWindowPlugin, self).__init__(**kwargs)
 
         # Setup widget
-        self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
-                           QtWidgets.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.MinimumExpanding,
+            QtWidgets.QSizePolicy.MinimumExpanding,
+        )
 
         # Create the QVTK interactor
-        if (vtk.vtkVersion.GetVTKMajorVersion() < 8):
+        if vtk.vtkVersion.GetVTKMajorVersion() < 8:
             self.__qvtkinteractor = RetinaQVTKRenderWindowInteractor(self)
         else:
             self.__qvtkinteractor = QVTKRenderWindowInteractor(self)
@@ -112,9 +117,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._run_start_time = -1
         self._reader = None
         self._result = None
-        self._window = chigger.RenderWindow(vtkwindow=self.__qvtkinteractor.GetRenderWindow(),
-                                            vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(),
-                                            size=size)
+        self._window = chigger.RenderWindow(
+            vtkwindow=self.__qvtkinteractor.GetRenderWindow(),
+            vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(),
+            size=size,
+        )
         self._reader_options = self.getDefaultReaderOptions()
         self._result_options = self.getDefaultResultOptions()
         self._window_options = self.getDefaultWindowOptions()
@@ -127,11 +134,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # Define timers for initialization and updating data
         self._timers = dict()
-        for name in ['update', 'initialize']:
+        for name in ["update", "initialize"]:
             self._timers[name] = QtCore.QTimer()
             self._timers[name].setInterval(1000)
-        self._timers['update'].timeout.connect(self.onWindowRequiresUpdate)
-        self._timers['initialize'].timeout.connect(self.onWindowRequiresUpdate)
+        self._timers["update"].timeout.connect(self.onWindowRequiresUpdate)
+        self._timers["initialize"].timeout.connect(self.onWindowRequiresUpdate)
 
         # Create a "tight" layout and add the QVTK widget
         self._layout = QtWidgets.QHBoxLayout()
@@ -143,10 +150,14 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._cameras = dict()
 
         # Display items for when no file exists
-        self._peacock_logo = chigger.annotations.ImageAnnotation(filename='peacock.png', opacity=0.33)
-        self._peacock_text = chigger.annotations.TextAnnotation(justification='center', font_size=18)
+        self._peacock_logo = chigger.annotations.ImageAnnotation(
+            filename="peacock.png", opacity=0.33
+        )
+        self._peacock_text = chigger.annotations.TextAnnotation(
+            justification="center", font_size=18
+        )
 
-        self.setMainLayoutName('RightLayout')
+        self.setMainLayoutName("RightLayout")
         self.setup()
 
     def onSetFilename(self, filename):
@@ -164,15 +175,15 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         Slot for changing the variable, this is generally called from the FilePlugin signal.
         """
         super(VTKWindowPlugin, self).onSetVariable(variable)
-        self.onReaderOptionsChanged({'variable':self._variable})
-        self.onResultOptionsChanged({'variable':self._variable})
+        self.onReaderOptionsChanged({"variable": self._variable})
+        self.onResultOptionsChanged({"variable": self._variable})
 
     def onSetComponent(self, component):
         """
         Slot for changing the variable component, this is generally called from the FilePlugin signal.
         """
         super(VTKWindowPlugin, self).onSetComponent(component)
-        self.onResultOptionsChanged({'component':self._component})
+        self.onResultOptionsChanged({"component": self._component})
 
     def onReaderOptionsChanged(self, options):
         """
@@ -207,23 +218,27 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         file_exists = os.path.exists(self._filename) if self._filename else False
         if file_exists and (os.path.getmtime(self._filename) < self._run_start_time):
             self._reset()
-            msg = '{} is currently out of date.\nIt will load automatically when it is updated.'
+            msg = "{} is currently out of date.\nIt will load automatically when it is updated."
             self._setLoadingMessage(msg.format(self._filename))
 
-        if (not self._initialized) and file_exists and (os.path.getsize(self._filename) > 0) and \
-           (os.path.getmtime(self._filename) >= self._run_start_time):
+        if (
+            (not self._initialized)
+            and file_exists
+            and (os.path.getsize(self._filename) > 0)
+            and (os.path.getmtime(self._filename) >= self._run_start_time)
+        ):
             self._renderResult()
 
         elif (self._filename is not None) and (not file_exists):
             self._reset()
-            msg = '{} does not currently exist.\nIt will load automatically when it is created.'
+            msg = "{} does not currently exist.\nIt will load automatically when it is created."
             self._setLoadingMessage(msg.format(self._filename))
 
-        elif (self._filename is None):
+        elif self._filename is None:
             self._reset()
-            self._setLoadingMessage('No file selected.')
+            self._setLoadingMessage("No file selected.")
 
-        if self._window.needsUpdate():# and (self._reader is not None):
+        if self._window.needsUpdate():  # and (self._reader is not None):
             self._window.update()
 
             for result in self._window:
@@ -235,7 +250,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             if self._reader is not None:
                 err = self._reader.getErrorObserver()
                 if err:
-                    mooseutils.mooseDebug('Failed to update VTK window.', traceback=True)
+                    mooseutils.mooseDebug(
+                        "Failed to update VTK window.", traceback=True
+                    )
 
     def onCameraChanged(self, view, position, focal):
         """
@@ -272,20 +289,20 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         Adds supplied filter to the result object.
         """
         if self._result:
-            filters = self._result.getOption('filters')
+            filters = self._result.getOption("filters")
             if filter_ not in filters:
                 filters.append(filter_)
-                self.onResultOptionsChanged({'filters':filters})
+                self.onResultOptionsChanged({"filters": filters})
 
     def onRemoveFilter(self, filter_):
         """
         Removes the supplied filter from the result object.
         """
         if self._result:
-            filters = self._result.getOption('filters')
+            filters = self._result.getOption("filters")
             if filter_ in filters:
                 filters.remove(filter_)
-                self.onResultOptionsChanged({'filters':filters})
+                self.onResultOptionsChanged({"filters": filters})
 
     def onCurrentChanged(self, index):
         """
@@ -298,21 +315,21 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # If the tab is active and initialized then start auto updating
         if active and self._initialized:
-            self._adjustTimers(start=['update'], stop=['initialize'])
+            self._adjustTimers(start=["update"], stop=["initialize"])
 
         # If the tab is active and not initialized then start the initialize timer
         elif active and not self._initialized:
-            self._adjustTimers(start=['initialize'], stop=['update'])
+            self._adjustTimers(start=["initialize"], stop=["update"])
 
         # Turn off times if the tab is not active
         else:
-            self._adjustTimers(stop=['initialize', 'update'])
+            self._adjustTimers(stop=["initialize", "update"])
 
     def onWrite(self, filename):
         """
         Produce a *.png image of the figure.
         """
-        if filename.endswith('.py'):
+        if filename.endswith(".py"):
             self.parent().write(filename)
         else:
             self._window.write(filename, dialog=True)
@@ -332,7 +349,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             # Clear all data
             self._window.reset()
             self._window.clear()
-            self._adjustTimers(start=['initialize'], stop=['update'])
+            self._adjustTimers(start=["initialize"], stop=["update"])
             self._result = None
             self._reader = None
             self._initialized = False
@@ -355,7 +372,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._initialized = True
 
         # Read ExodusII file
-        self._reader = chigger.exodus.ExodusReader(self._filename, **self._reader_options)
+        self._reader = chigger.exodus.ExodusReader(
+            self._filename, **self._reader_options
+        )
         self.setupReader.emit(self._reader)
         self._reader.update()
 
@@ -368,9 +387,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Set the interaction mode (2D/3D)
         bmin, bmax = self._result.getBounds()
         if abs(bmax[-1] - bmin[-1]) < 1e-10:
-            self._window.setOption('style', 'interactive2D')
+            self._window.setOption("style", "interactive2D")
         else:
-            self._window.setOption('style', 'interactive')
+            self._window.setOption("style", "interactive")
 
         # Connect the camera to the render event
         self.onAddObserver(vtk.vtkCommand.RenderEvent, self._callbackRenderEvent)
@@ -385,7 +404,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         if data is not None:
             self.onCameraChanged(*data)
 
-        self._adjustTimers(start=['update'], stop=['initialize'])
+        self._adjustTimers(start=["update"], stop=["initialize"])
         self.setEnabled(True)
         self.setEnableWidget.emit(True)
 
@@ -415,11 +434,13 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         output = dict()
 
         window_options, window_sub_options = self._window.options().toScriptString()
-        output['window'] = ['window = chigger.RenderWindow(result)']
-        output['window'] += ['window.setOptions({})'.format(', '.join(window_options))]
+        output["window"] = ["window = chigger.RenderWindow(result)"]
+        output["window"] += ["window.setOptions({})".format(", ".join(window_options))]
         for key, value in window_sub_options.items():
-            output['window'] += ['window.setOptions({}, {})'.format(repr(key), ', '.join(value))]
-        output['window'] += ['window.start()']
+            output["window"] += [
+                "window.setOptions({}, {})".format(repr(key), ", ".join(value))
+            ]
+        output["window"] += ["window.start()"]
 
         # Get the reader and result options
         reader_options, reader_sub_options = self._reader.options().toScriptString()
@@ -427,28 +448,42 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # Remove filters (this is handled by the ExodusPluginManager)
         for opt in result_options:
-            if opt.startswith('filters='):
+            if opt.startswith("filters="):
                 result_options.remove(opt)
 
         # Define the imports
-        output['imports'] = ['import vtk', 'import chigger']
+        output["imports"] = ["import vtk", "import chigger"]
 
         # Define the camera
-        output['camera'] = ['camera = vtk.vtkCamera()']
-        output['camera'] += chigger.utils.print_camera(self._result.getVTKRenderer().GetActiveCamera())
-        result_options.append('camera=camera')
+        output["camera"] = ["camera = vtk.vtkCamera()"]
+        output["camera"] += chigger.utils.print_camera(
+            self._result.getVTKRenderer().GetActiveCamera()
+        )
+        result_options.append("camera=camera")
 
-        output['reader'] = ['reader = chigger.exodus.ExodusReader({})'.format(repr(os.path.relpath(self._reader.filename())))]
+        output["reader"] = [
+            "reader = chigger.exodus.ExodusReader({})".format(
+                repr(os.path.relpath(self._reader.filename()))
+            )
+        ]
         if reader_options:
-            output['reader'] += ['reader.setOptions({})'.format(', '.join(reader_options))]
+            output["reader"] += [
+                "reader.setOptions({})".format(", ".join(reader_options))
+            ]
         for key, value in reader_sub_options.items():
-            output['reader'] += ['reader.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+            output["reader"] += [
+                "reader.setOptions({}, {})".format(repr(key), ", ".join(value))
+            ]
 
-        output['result'] = ['result = chigger.exodus.ExodusResult(reader)']
+        output["result"] = ["result = chigger.exodus.ExodusResult(reader)"]
         if result_options:
-            output['result'] += ['result.setOptions({})'.format(', '.join(result_options))]
+            output["result"] += [
+                "result.setOptions({})".format(", ".join(result_options))
+            ]
         for key, value in result_sub_options.items():
-            output['result'] += ['result.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+            output["result"] += [
+                "result.setOptions({}, {})".format(repr(key), ", ".join(value))
+            ]
 
         return output
 
@@ -479,27 +514,33 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             elif isinstance(options, chigger.utils.Options):
                 chigger_object.setOptions(options)
             else:
-                raise mooseutils.MooseException('Options supplied must be a dict or utils.Options class.')
+                raise mooseutils.MooseException(
+                    "Options supplied must be a dict or utils.Options class."
+                )
 
         else:
             fallback.update(options)
+
 
 def main(size=None):
     """
     Run the VTKWindowPlugin all by its lonesome.
     """
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
+
     widget = ExodusPluginManager(plugins=[lambda: VTKWindowPlugin(size=size)])
     widget.show()
     return widget, widget.VTKWindowPlugin
 
+
 if __name__ == "__main__":
     from peacock.utils import Testing
+
     app = QtWidgets.QApplication(sys.argv)
-    filename = Testing.get_chigger_input('mug_blocks_out.e')
-    filename = 'none.e'
-    widget, window = main(size=[600,600])
-    #window.onSetFilename(filename)
-    #window.onSetVariable('diffused')
-    #window.onWindowRequiresUpdate()
+    filename = Testing.get_chigger_input("mug_blocks_out.e")
+    filename = "none.e"
+    widget, window = main(size=[600, 600])
+    # window.onSetFilename(filename)
+    # window.onSetVariable('diffused')
+    # window.onWindowRequiresUpdate()
     sys.exit(app.exec_())

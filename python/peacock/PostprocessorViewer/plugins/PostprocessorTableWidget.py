@@ -1,13 +1,14 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
+
 
 class PostprocessorTableWidget(QtWidgets.QTabWidget):
     """
@@ -37,7 +38,6 @@ class PostprocessorTableWidget(QtWidgets.QTabWidget):
         """
         self._size = self.size()
         super(PostprocessorTableWidget, self).closeEvent(*args)
-
 
     def initialize(self, data):
         """

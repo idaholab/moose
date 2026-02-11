@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import unittest
 from PyQt5 import QtCore, QtWidgets
 from peacock.PostprocessorViewer.plugins.AxisTabsPlugin import main
 from peacock.utils import Testing
+
 
 class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
     """
@@ -26,18 +27,24 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         """
         Creates the GUI.
         """
-        self._control, self._widget, self._window = main(['../input/white_elephant_jan_2016.csv'])
-        self._tabs = [self._control.XAxisTab, self._control.YAxisTab, self._control.Y2AxisTab]
+        self._control, self._widget, self._window = main(
+            ["../input/white_elephant_jan_2016.csv"]
+        )
+        self._tabs = [
+            self._control.XAxisTab,
+            self._control.YAxisTab,
+            self._control.Y2AxisTab,
+        ]
 
     def plot(self):
 
         # Create plot
         select = self._widget.currentWidget().PostprocessorSelectPlugin
-        var = 'air_temp_set_1'
+        var = "air_temp_set_1"
         select._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Checked)
         select._groups[0]._toggles[var].CheckBox.clicked.emit(True)
 
-        var = 'snow_depth_set_1'
+        var = "snow_depth_set_1"
         select._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Checked)
         select._groups[0]._toggles[var].PlotAxis.setCurrentIndex(1)
         select._groups[0]._toggles[var].CheckBox.clicked.emit(True)
@@ -48,9 +55,9 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         """
 
         for tab in self._tabs:
-            self.assertEqual(tab.Label.text(), '')
-            self.assertEqual(tab.RangeMinimum.text(), '')
-            self.assertEqual(tab.RangeMaximum.text(), '')
+            self.assertEqual(tab.Label.text(), "")
+            self.assertEqual(tab.RangeMinimum.text(), "")
+            self.assertEqual(tab.RangeMaximum.text(), "")
             self.assertFalse(tab.GridToggle.isChecked())
             self.assertFalse(tab.Scale.isChecked())
 
@@ -69,7 +76,7 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         Test that the limits and labels can be customized.
         """
         self.plot()
-        labels = ['xxxxxxxxxx', 'yyyyyyyyy', 'y2y2y2y2y2y2y2y2y2']
+        labels = ["xxxxxxxxxx", "yyyyyyyyy", "y2y2y2y2y2y2y2y2y2"]
         ranges = [[5.0, 25.0], [10.0, 25.2], [1, 100]]
         for i in range(3):
             self._tabs[i].Label.setText(labels[i])
@@ -87,7 +94,7 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         self.assertEqual(list(self._control.axes(0).get_ylim()), ranges[1])
         self.assertEqual(list(self._control.axes(1).get_ylim()), ranges[2])
 
-        self.assertImage('testCustom.png')
+        self.assertImage("testCustom.png")
 
     def testScale(self):
         """
@@ -95,13 +102,13 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         """
 
         self._window.clear()
-        x = [0,    1,   2, 3,  4,   5]
+        x = [0, 1, 2, 3, 4, 5]
         y = [0.01, 0.1, 1, 10, 100, 1000]
-        self._window.axes(0).plot(x, y, '-k')
+        self._window.axes(0).plot(x, y, "-k")
 
         self._tabs[1].Scale.setCheckState(QtCore.Qt.Checked)
         self._tabs[1].Scale.clicked.emit(True)
-        self.assertImage('testScale.png')
+        self.assertImage("testScale.png")
 
     def testGrid(self):
         """
@@ -111,7 +118,7 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         for i in range(2):
             self._tabs[i].GridToggle.setCheckState(QtCore.Qt.Checked)
             self._tabs[i].GridToggle.clicked.emit(True)
-        self.assertImage('testGrid.png')
+        self.assertImage("testGrid.png")
 
     def testRepr(self):
         """
@@ -142,5 +149,5 @@ class TestAxisTabsPlugin(Testing.PeacockImageTestCase):
         self.assertIn("axes0.set_yscale('log')", output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 This script can be used to figure out if a job on a cluster is hung.
@@ -75,7 +75,7 @@ import math
 from tempfile import TemporaryFile
 from time import sleep
 from multiprocessing.pool import ThreadPool
-import threading # for thread locking and thread timers
+import threading  # for thread locking and thread timers
 
 ##################################################################
 # Modify the following variable(s) for your cluster or use one of the versions below
@@ -86,9 +86,10 @@ import threading # for thread locking and thread timers
 # node_name_pattern = re.compile('(b\d{2})')
 # pstack_binary = 'pstack'
 ### FALCON
-node_name_pattern = re.compile(r'(r\di\dn\d{1,2})')
-PSTACK_BINARY = 'gstack'
+node_name_pattern = re.compile(r"(r\di\dn\d{1,2})")
+PSTACK_BINARY = "gstack"
 ##################################################################
+
 
 class Job:
     """
@@ -101,43 +102,51 @@ class Job:
       job.get_stdout()    # retrieve protected stdout
       job.get_stderr()    # retrieve protected stderr
     """
+
     def __init__(self, command):
         self.__command = command
         self.__process = None
         self.__stdout_file = TemporaryFile()
         self.__stderr_file = TemporaryFile()
+
     def get_process(self):
         """
         Return the subprocess object
         """
         return self.__process
+
     def get_stdout(self):
         """
         Return stdout if process has completed
         """
         if self.get_process().poll() is not None:
             self.__stdout_file.seek(0)
-            return self.__stdout_file.read().decode('utf-8')
+            return self.__stdout_file.read().decode("utf-8")
         return None
+
     def get_stderr(self):
         """
         Return stderr if process has completed
         """
         if self.get_process().poll() is not None:
             self.__stderr_file.seek(0)
-            return self.__stderr_file.read().decode('utf-8')
+            return self.__stderr_file.read().decode("utf-8")
         return None
+
     def run(self, exec_timeout=None):
         """
         Execute command and wait for return code
         """
-        with subprocess.Popen(self.__command,
-                              stdout=self.__stdout_file,
-                              stderr=self.__stderr_file,
-                              shell=True,
-                              encoding='utf-8') as self.__process:
+        with subprocess.Popen(
+            self.__command,
+            stdout=self.__stdout_file,
+            stderr=self.__stderr_file,
+            shell=True,
+            encoding="utf-8",
+        ) as self.__process:
             self.__process.wait(timeout=exec_timeout)
             return self.__process.poll()
+
 
 class Scheduler:
     """
@@ -152,6 +161,7 @@ class Scheduler:
     .wait_finish()       blocks until all jobs finish
     .get_finished()      returns
     """
+
     def __init__(self, max_slots=12, exec_timeout=None):
         self.max_slots = int(max_slots)
         self.worker_pool = ThreadPool(processes=self.max_slots)
@@ -171,7 +181,7 @@ class Scheduler:
         blocks until all submitted jobs are finished
         """
         while self.active:
-            sleep(.5)
+            sleep(0.5)
         self.worker_pool.close()
         self.worker_pool.join()
 
@@ -205,12 +215,12 @@ class Scheduler:
             sys.exit(1)
 
 
-
 def __schedule_task(jobs, num_threads):
     schedule_jobs = Scheduler(max_slots=num_threads)
     schedule_jobs.schedule_jobs(jobs)
     schedule_jobs.wait_finish()
     return schedule_jobs.get_finished()
+
 
 def __get_pids(application_name, hosts, num_threads):
     """
@@ -227,6 +237,7 @@ def __get_pids(application_name, hosts, num_threads):
         results[std_out[0]] = std_out[1:]
     return results
 
+
 def __get_stacks(hosts_pids, num_threads):
     """
     Iterate over dictionary of hosts, and PIDs and run
@@ -242,20 +253,25 @@ def __get_stacks(hosts_pids, num_threads):
         results.append(job.get_stdout())
     return results
 
+
 def get_sshpids(application_name, host):
     """
     Generate and return a valid SSH remote ps command
     """
-    ps_grep = f'ps -e | grep {application_name}'
+    ps_grep = f"ps -e | grep {application_name}"
     awk_print = r"awk '{print \$1}'"
     return f'ssh {host} "echo {host}; {ps_grep} | {awk_print}"'
+
 
 def get_sshstack(host, pid):
     """
     Generate and return a valid SSH remote stacktrace command
     """
-    return f'ssh {host} "echo Host: {host} PID: {pid}; ' \
-           f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
+    return (
+        f'ssh {host} "echo Host: {host} PID: {pid}; '
+        f'{PSTACK_BINARY} {pid}; printf "*%.0s" {{1..80}}; echo"'
+    )
+
 
 def generate_traces(job_num, application_name, num_hosts, num_threads):
     """
@@ -263,7 +279,7 @@ def generate_traces(job_num, application_name, num_hosts, num_threads):
     formated results
     """
     hosts = set([])
-    a_job = Job(f'qstat -n {job_num}')
+    a_job = Job(f"qstat -n {job_num}")
     a_job.run()
     results = a_job.get_stdout()
     for i in node_name_pattern.findall(results):
@@ -292,6 +308,7 @@ class BinSearchIndices:
     search. The next value to try is returned each time
     "next" is called.
     """
+
     def __init__(self, lower, upper):
         self.lower = lower
         self.upper = upper
@@ -316,6 +333,7 @@ class BinSearchIndices:
 
         return math.ceil(math.log2(self.upper - self.lower))
 
+
 class ProcessTraces:
     """
     This class reads a series of stack traces from a file
@@ -328,20 +346,28 @@ class ProcessTraces:
         self.unique_stack_traces = {}
         self.filename = None
         self.traces = None
-        self.host_and_frames_re = re.compile('^(Host.*?)\n(.*)', re.M | re.S)
-        self.memory_re = re.compile(r'0x[0-9a-f]*')    # Pattern to match (and remove) memory addresses
-        self.frame_num_re = re.compile(r'^#\d.', re.M) # frame numbers IMPORTANT: Always match 2 characters due to fixed width formatting!
-        self.param_val_re = re.compile(r'(\w+?)=\S+(?=(?:,|\)))') # Pattern to match and ignore parameter values for all parameters of any routine.
+        self.host_and_frames_re = re.compile("^(Host.*?)\n(.*)", re.M | re.S)
+        self.memory_re = re.compile(
+            r"0x[0-9a-f]*"
+        )  # Pattern to match (and remove) memory addresses
+        self.frame_num_re = re.compile(
+            r"^#\d.", re.M
+        )  # frame numbers IMPORTANT: Always match 2 characters due to fixed width formatting!
+        self.param_val_re = re.compile(
+            r"(\w+?)=\S+(?=(?:,|\)))"
+        )  # Pattern to match and ignore parameter values for all parameters of any routine.
 
     def read_tracesfromfile(self, filename):
         """
         Read tracefile, and return a list of traces
         """
         self.filename = filename
-        with open(filename, encoding='utf-8') as t_file:
+        with open(filename, encoding="utf-8") as t_file:
             data = t_file.read()
-            if data == '':
-                raise Exception("Cache file is empty - check your job number and application name")
+            if data == "":
+                raise Exception(
+                    "Cache file is empty - check your job number and application name"
+                )
             self.traces = self.split_traces(data)
         return
 
@@ -354,14 +380,14 @@ class ProcessTraces:
         throw_away = re.compile("^[^#].*", re.M)
         traces = [throw_away.sub("", trace) for trace in traces]
         """
-        trace_regex = re.compile(r'^\**\n', re.M)
+        trace_regex = re.compile(r"^\**\n", re.M)
         return trace_regex.split(trace_string)
 
     def __longest_trace(self):
         """
         Returns the number of lines in the longest trace
         """
-        return max(trace.count('\n') for trace in self.traces)
+        return max(trace.count("\n") for trace in self.traces)
 
     def process_traces(self, num_lines_to_keep, params_are_significant):
         """
@@ -375,7 +401,7 @@ class ProcessTraces:
         else:
             # Set the start and end indices to the same to force a single pass
             bin_search_index = BinSearchIndices(num_lines_to_keep, num_lines_to_keep)
-            last_index = num_lines_to_keep # Setting stopping criteria
+            last_index = num_lines_to_keep  # Setting stopping criteria
 
         last_diveged_index = -1
         last_result_diverged = True
@@ -383,8 +409,11 @@ class ProcessTraces:
         while True:
             num_lines_to_keep = bin_search_index.next_index()
 
-            last_lines_regex = re.compile(fr'(?:.*\n){{{num_lines_to_keep}}}\Z', re.M)
-            print(f"Comparing stacks through frame {num_lines_to_keep}. Estimated steps remaining: {bin_search_index.estimated_steps_remaining()}", end=" ")
+            last_lines_regex = re.compile(rf"(?:.*\n){{{num_lines_to_keep}}}\Z", re.M)
+            print(
+                f"Comparing stacks through frame {num_lines_to_keep}. Estimated steps remaining: {bin_search_index.estimated_steps_remaining()}",
+                end=" ",
+            )
 
             self.unique_stack_traces.clear()
             for trace in self.traces:
@@ -403,12 +432,12 @@ class ProcessTraces:
                     if tmp_trace:
                         trace = tmp_trace.group(0)
 
-                unique = ''
+                unique = ""
                 for back_trace in self.unique_stack_traces:
                     if self.compare_traces(trace, back_trace, params_are_significant):
                         unique = back_trace
 
-                if unique == '':
+                if unique == "":
                     self.unique_stack_traces[trace] = [host_pid]
                 else:
                     self.unique_stack_traces[unique].append(host_pid)
@@ -456,74 +485,112 @@ class ProcessTraces:
         """
         Reports the final results
         """
-        print('\nUnique Stack Traces - frames_kept:', diverged_stack_frame_num)
+        print("\nUnique Stack Traces - frames_kept:", diverged_stack_frame_num)
         for trace, count in results.items():
             print(f'{"*"*80}\nCount: {len(count)}\n')
             if len(count) < 10:
                 print("\n".join(count))
-            print(f'\n{trace}')
+            print(f"\n{trace}")
 
     def compare_traces(self, trace1, trace2, params_are_significant):
         """
         Return True if trace1 == trace2
         """
         # Drop Memory Addresses
-        trace1 = self.memory_re.sub('0x...', trace1)
-        trace2 = self.memory_re.sub('0x...', trace2)
+        trace1 = self.memory_re.sub("0x...", trace1)
+        trace2 = self.memory_re.sub("0x...", trace2)
 
         # Drop Frame Numbers
-        trace1 = self.frame_num_re.sub('#00', trace1)
-        trace2 = self.frame_num_re.sub('#00', trace2)
+        trace1 = self.frame_num_re.sub("#00", trace1)
+        trace2 = self.frame_num_re.sub("#00", trace2)
 
         # Drop parameter values for all routines from the comparison
         if not params_are_significant:
-            trace1 = self.param_val_re.sub(r'\1=<ignored>', trace1)
-            trace2 = self.param_val_re.sub(r'\1=<ignored>', trace2)
+            trace1 = self.param_val_re.sub(r"\1=<ignored>", trace1)
+            trace2 = self.param_val_re.sub(r"\1=<ignored>", trace2)
 
         if trace1 != trace2:
             return False
 
         return True
 
+
 def main():
     """
     Parse arguments, gather hosts and launch SSH commands
     """
-    parser = argparse.ArgumentParser(description="Normally you will run this script with your PBS job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
-                                     "\nHowever, you can also pass in the name of the cache file containing traces from a previous run to process (e.g. find_hung_processes.py -f my_app-opt.1234.cache).")
+    parser = argparse.ArgumentParser(
+        description="Normally you will run this script with your PBS job number AND the name of your executable (e.g. find_hung_processes.py 1234 my_app-opt)."
+        "\nHowever, you can also pass in the name of the cache file containing traces from a previous run to process (e.g. find_hung_processes.py -f my_app-opt.1234.cache)."
+    )
 
-    if '-f' not in sys.argv and '--file' not in sys.argv:
-        parser.add_argument('pbs_job_num', type=int)
-        parser.add_argument('application', type=str)
+    if "-f" not in sys.argv and "--file" not in sys.argv:
+        parser.add_argument("pbs_job_num", type=int)
+        parser.add_argument("application", type=str)
 
-    parser.add_argument('-n', '--hosts', metavar='int', action='store', type=int, default=0,
-                        help='The number of hosts to visit (Default: ALL)')
-    parser.add_argument('-t', '--threads', metavar='int', type=int, default=12,
-                        help='Number of threads used when remoting around gathering data. '
-                        'Default: %(default)s')
+    parser.add_argument(
+        "-n",
+        "--hosts",
+        metavar="int",
+        action="store",
+        type=int,
+        default=0,
+        help="The number of hosts to visit (Default: ALL)",
+    )
+    parser.add_argument(
+        "-t",
+        "--threads",
+        metavar="int",
+        type=int,
+        default=12,
+        help="Number of threads used when remoting around gathering data. "
+        "Default: %(default)s",
+    )
 
-    parser.add_argument('-f', '--file', metavar='str', action='store', type=str, default=None,
-                        help='The existing cache file to process')
-    parser.add_argument('-s', '--stacks', metavar='int', action='store', type=int, default=0,
-                        help='The number of stack frames to keep and compare for '
-                        'uniqueness (Default: ALL)')
-    parser.add_argument('-p', '--param-values', action='store_true', dest="params_are_significant", default=False,
-                        help='Set whether the argument values for each routine/level in the stack trace are significant '
-                        'for the comparison of stack traces between ranks. (Default: all significant)')
+    parser.add_argument(
+        "-f",
+        "--file",
+        metavar="str",
+        action="store",
+        type=str,
+        default=None,
+        help="The existing cache file to process",
+    )
+    parser.add_argument(
+        "-s",
+        "--stacks",
+        metavar="int",
+        action="store",
+        type=int,
+        default=0,
+        help="The number of stack frames to keep and compare for "
+        "uniqueness (Default: ALL)",
+    )
+    parser.add_argument(
+        "-p",
+        "--param-values",
+        action="store_true",
+        dest="params_are_significant",
+        default=False,
+        help="Set whether the argument values for each routine/level in the stack trace are significant "
+        "for the comparison of stack traces between ranks. (Default: all significant)",
+    )
     args = parser.parse_args()
 
     cache_filename = None
     if args.file == None:
         # Autogenerate a filename based on application name and job number
-        cache_filename = f'{args.application}.{args.pbs_job_num}.cache'
+        cache_filename = f"{args.application}.{args.pbs_job_num}.cache"
 
-        traces = generate_traces(args.pbs_job_num, args.application, args.hosts, args.threads)
+        traces = generate_traces(
+            args.pbs_job_num, args.application, args.hosts, args.threads
+        )
 
         # Cache the restuls to a file
-        with open(cache_filename, 'w', encoding='utf-8') as cache_file:
+        with open(cache_filename, "w", encoding="utf-8") as cache_file:
             for trace in traces:
                 cache_file.write(f'{trace}{"*"*80}\n')
-                cache_file.write('\n')
+                cache_file.write("\n")
     else:
         cache_filename = args.file
 
@@ -536,5 +603,6 @@ def main():
     pt.read_tracesfromfile(cache_filename)
     pt.process_traces(args.stacks, args.params_are_significant)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

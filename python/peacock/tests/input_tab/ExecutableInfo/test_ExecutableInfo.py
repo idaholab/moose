@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import unittest
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -85,7 +86,9 @@ class Tests(Testing.PeacockTester):
 
     def testCombined(self):
         e = ExecutableInfo()
-        e.setPath(Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined"))
+        e.setPath(
+            Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined")
+        )
         self.checkPath(e, "/Preconditioning", True, True)
         self.checkPath(e, "/BCs", True, True)
         self.checkPath(e, "/BCs/Pressure", True, True)
@@ -97,5 +100,6 @@ class Tests(Testing.PeacockTester):
         self.checkPath(e, "/AuxVariables/*/InitialCondition", False, False)
         self.checkPath(e, "/Variables/*/InitialCondition", False, False)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

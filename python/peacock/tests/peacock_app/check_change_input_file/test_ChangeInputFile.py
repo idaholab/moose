@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
 import os
 
+
 class TestChangeInputFile(Testing.PeacockAppImageTestCase):
     """
     Tests that if the input file changes the VTKWindow is reset.
     """
+
     qapp = QtWidgets.QApplication([])
 
     def testInputReset(self):
@@ -42,11 +44,26 @@ class TestChangeInputFile(Testing.PeacockAppImageTestCase):
         self.selectTab(exodus)
         Testing.process_events(t=2)
 
-        self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['u'])
-        self.assertEqual([blk_selector.StandardItemModel.item(i).text() for i in range(1, blk_selector.StandardItemModel.rowCount())], ['0'])
+        self.assertEqual(
+            [
+                var_plugin.VariableList.itemText(i)
+                for i in range(var_plugin.VariableList.count())
+            ],
+            ["u"],
+        )
+        self.assertEqual(
+            [
+                blk_selector.StandardItemModel.item(i).text()
+                for i in range(1, blk_selector.StandardItemModel.rowCount())
+            ],
+            ["0"],
+        )
 
         # Change the colormap (to test that the colormap is maintained)
-        idx = [cmap_plugin.ColorMapList.itemText(i) for i in range(cmap_plugin.ColorMapList.count())].index('magma')
+        idx = [
+            cmap_plugin.ColorMapList.itemText(i)
+            for i in range(cmap_plugin.ColorMapList.count())
+        ].index("magma")
         cmap_plugin.ColorMapList.setCurrentIndex(idx)
         cmap_plugin.ColorMapList.currentIndexChanged.emit(idx)
 
@@ -59,16 +76,29 @@ class TestChangeInputFile(Testing.PeacockAppImageTestCase):
         execute.ExecuteOptionsPlugin.setWorkingDir(start_dir)
         self.execute()
         self.selectTab(exodus)
-        self.assertEqual([var_plugin.VariableList.itemText(i) for i in range(var_plugin.VariableList.count())], ['aux', 'not_u', 'u'])
-        self.assertEqual([blk_selector.StandardItemModel.item(i).text() for i in range(1, blk_selector.StandardItemModel.rowCount())], ['0', '1980'])
+        self.assertEqual(
+            [
+                var_plugin.VariableList.itemText(i)
+                for i in range(var_plugin.VariableList.count())
+            ],
+            ["aux", "not_u", "u"],
+        )
+        self.assertEqual(
+            [
+                blk_selector.StandardItemModel.item(i).text()
+                for i in range(1, blk_selector.StandardItemModel.rowCount())
+            ],
+            ["0", "1980"],
+        )
 
         # Check colormap
-        self.assertEqual(self._window._result.getOption('cmap'), 'default')
-        self.assertEqual(cmap_plugin.ColorMapList.currentText(), 'default')
+        self.assertEqual(self._window._result.getOption("cmap"), "default")
+        self.assertEqual(cmap_plugin.ColorMapList.currentText(), "default")
 
         # Check variable
-        self.assertEqual(self._window._result.getOption('variable'), 'aux')
-        self.assertEqual(var_plugin.VariableList.currentText(), 'aux')
+        self.assertEqual(self._window._result.getOption("variable"), "aux")
+        self.assertEqual(var_plugin.VariableList.currentText(), "aux")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

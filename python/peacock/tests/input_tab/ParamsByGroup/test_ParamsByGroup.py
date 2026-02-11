@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.ParamsByGroup import ParamsByGroup
 from peacock.utils import Testing
 from peacock.Input.ParameterInfo import ParameterInfo
 from peacock.Input.BlockInfo import BlockInfo
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -22,7 +23,16 @@ class Tests(Testing.PeacockTester):
         self.block_list_requested = 0
         self.block_children = ["child0", "child1", "child2"]
 
-    def createParam(self, name, value="", cpp_type="string", options=[], required=False, user_added=False, group="Main"):
+    def createParam(
+        self,
+        name,
+        value="",
+        cpp_type="string",
+        options=[],
+        required=False,
+        user_added=False,
+        group="Main",
+    ):
         p = ParameterInfo(None, name)
         p.value = value
         p.cpp_type = cpp_type
@@ -87,9 +97,9 @@ class Tests(Testing.PeacockTester):
         count_before = table.rowCount()
         t.addUserParam("new_param")
         count_after = table.rowCount()
-        self.assertEqual(count_before+1, count_after)
+        self.assertEqual(count_before + 1, count_after)
         row = table.findRow("new_param")
-        self.assertEqual(row, count_after-1)
+        self.assertEqual(row, count_after - 1)
         t.save()
         self.assertNotEqual(t.block.getParamInfo("new_param"), None)
 
@@ -102,5 +112,5 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(row, -1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Testing.run_tests()

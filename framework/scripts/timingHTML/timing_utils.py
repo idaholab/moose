@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys, os, shutil
 from socket import gethostname
@@ -17,6 +17,7 @@ try:
     from sqlite3 import dbapi2 as sqlite
 except:
     pass
+
 
 ################################################################################
 ############### Generating html and json data from database ####################
@@ -29,15 +30,17 @@ class HTMLGen:
         self.ex = self.cr.execute
 
         # used to find moose resources, assume we are in trunk right now
-        self.trunk_dir = '.'
+        self.trunk_dir = "."
         # the generated html goes here
-        self.base_dir = os.path.join(self.trunk_dir, 'html')
+        self.base_dir = os.path.join(self.trunk_dir, "html")
         if not os.path.exists(self.base_dir):
             os.mkdir(self.base_dir)
 
     # generates the html and json data for this app
     def generateHTML(self):
-        self.ex('select distinct test_name from timing where app_name = ?', (self.app_name,))
+        self.ex(
+            "select distinct test_name from timing where app_name = ?", (self.app_name,)
+        )
         tests = self.cr.fetchall()
         tests = [test[0] for test in tests]
 
@@ -49,46 +52,62 @@ class HTMLGen:
         # revision, and other info listed by revision
         base = os.path.join(self.base_dir, self.app_name)
         for test in tests:
-            json = JSON_TEMPLATE.replace('$LABEL$', self.app_name + '.' + test)
+            json = JSON_TEMPLATE.replace("$LABEL$", self.app_name + "." + test)
 
             # fill out revision vs timing
-            self.ex('select revision, seconds, date, scale, load from timing where app_name = ? and test_name = ? order by date',
-                         (self.app_name,test))
+            self.ex(
+                "select revision, seconds, date, scale, load from timing where app_name = ? and test_name = ? order by date",
+                (self.app_name, test),
+            )
             results = self.cr.fetchall()
-            data = ['["' + str(r[0]) + '", ' + str(r[1]) + ']' for r in results]
-            data = '[ ' + ', '.join(data) + ' ]'
-            json = json.replace('$REV_DATA$', data)
+            data = ['["' + str(r[0]) + '", ' + str(r[1]) + "]" for r in results]
+            data = "[ " + ", ".join(data) + " ]"
+            json = json.replace("$REV_DATA$", data)
 
-            data = [ ( self.app_name, test, str(r[0]), str(r[1]), str(datetime.fromtimestamp(r[2])), str(r[3]), str(r[4]) ) for r in results ]
-            data = [ '["' + '","'.join(d) + '"]' for d in data ]
-            data = '[ ' + ', '.join(data) + ' ]'
-            json = json.replace( '$INFO$', data )
+            data = [
+                (
+                    self.app_name,
+                    test,
+                    str(r[0]),
+                    str(r[1]),
+                    str(datetime.fromtimestamp(r[2])),
+                    str(r[3]),
+                    str(r[4]),
+                )
+                for r in results
+            ]
+            data = ['["' + '","'.join(d) + '"]' for d in data]
+            data = "[ " + ", ".join(data) + " ]"
+            json = json.replace("$INFO$", data)
 
             # fill out data vs timing
             # use another select statement because revisions and real dates may not exactly align
-            self.ex('select date, seconds from timing where app_name = ? and test_name = ? order by date',
-                         (self.app_name,test))
+            self.ex(
+                "select date, seconds from timing where app_name = ? and test_name = ? order by date",
+                (self.app_name, test),
+            )
             results = self.cr.fetchall()
-            data = ['[' + str(r[0]*1000) + ', ' + str(r[1]) + ']' for r in results]
-            data = '[ ' + ', '.join(data) + ' ]'
-            json = json.replace('$TIME_DATA$', data)
+            data = ["[" + str(r[0] * 1000) + ", " + str(r[1]) + "]" for r in results]
+            data = "[ " + ", ".join(data) + " ]"
+            json = json.replace("$TIME_DATA$", data)
 
-            fname = os.path.join(base, test + '.json')
-            f = open(fname, 'w')
+            fname = os.path.join(base, test + ".json")
+            f = open(fname, "w")
             f.write(json)
             f.close()
 
     # generates the app.html file that contains the list of checkboxes
     def generateAppHTML(self, tests):
-        tests = [CHECKBOX_TEMPLATE.replace('$TEST$', test) for test in tests]
-        html = '\n'.join(tests) + CHECKBOX_END
+        tests = [CHECKBOX_TEMPLATE.replace("$TEST$", test) for test in tests]
+        html = "\n".join(tests) + CHECKBOX_END
 
         base = os.path.join(self.base_dir, self.app_name)
         if not os.path.exists(base):
             os.mkdir(base)
-        f = open( os.path.join(base, self.app_name + '.html'), 'w' )
+        f = open(os.path.join(base, self.app_name + ".html"), "w")
         f.write(html)
         f.close()
+
 
 # templates to generate html out of
 JSON_TEMPLATE = """{
@@ -107,25 +126,28 @@ JSON_TEMPLATE = """{
 CHECKBOX_TEMPLATE = '<div class="test"><input class="check" type="checkbox" id="$TEST$"></input><label for="$TEST$">$TEST$</label></div>'
 CHECKBOX_END = '\n<br clear="all"/>'
 
+
 ################################################################################
 ####################### Database utility functions #############################
 ################################################################################
 def createDB(fname):
-    print 'Creating empty database at ' + fname
+    print("Creating empty database at " + fname)
     con = sqlite.connect(fname)
     cr = con.cursor()
     cr.execute(CREATE_TABLE)
     con.commit()
 
+
 def dumpDB(fname):
-    print 'Dumping database at ' + fname
+    print("Dumping database at " + fname)
     con = sqlite.connect(fname)
     cr = con.cursor()
     ex = cr.execute
-    ex('select * from timing')
+    ex("select * from timing")
     rows = cr.fetchall()
     for row in rows:
-        print row
+        print(row)
+
 
 CREATE_TABLE = """create table timing
 (
@@ -150,27 +172,27 @@ HELP_STRING = """Usage:
 """
 
 
-if __name__ == '__main__':
-    home = os.environ['HOME']
-    fname = os.path.join(home, 'timingDB/timing.sqlite')
+if __name__ == "__main__":
+    home = os.environ["HOME"]
+    fname = os.path.join(home, "timingDB/timing.sqlite")
     argv = sys.argv[1:]
 
-    if '-h' in argv:
-        argv.remove('-h')
-        print HELP_STRING
+    if "-h" in argv:
+        argv.remove("-h")
+        print(HELP_STRING)
         sys.exit(0)
 
-    if '-c' in argv:
+    if "-c" in argv:
         createDB(fname)
-        argv.remove('-c')
+        argv.remove("-c")
 
-    if '-d' in argv:
+    if "-d" in argv:
         dumpDB(fname)
-        argv.remove('-d')
+        argv.remove("-d")
 
     if len(argv) > 0:
         con = sqlite.connect(fname)
         for app in argv:
-            print "generating json data for " + app + "."
+            print("generating json data for " + app + ".")
             gen = HTMLGen(app, con)
             gen.generateHTML()
