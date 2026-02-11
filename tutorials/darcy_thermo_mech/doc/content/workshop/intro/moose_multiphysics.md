@@ -83,7 +83,7 @@
 
 ## Finite-Element Reactor Fuel Simulation
 
-!media darcy_thermo_mech/simulator.mp4 style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/simulator.mp4 alt=Video showing what is required to create a finite-element nuclear reactor fuel simulator, and then grouping those requirements based on what is within PETSc, libMesh, MOOSE, and example MOOSE-based applications. style=width:70%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -150,12 +150,13 @@ Reactor\\
 !---
 
 !style halign=center
-!media tutorials/darcy_thermo_mech/multiapp_hierarchy.png style=width:70%
+!media tutorials/darcy_thermo_mech/multiapp_hierarchy.png style=width:70% alt=Example of multi-level MultiApp hierarchy.
+
 
 !---
 
 ## The MOOSE ecosystem
 
-!media darcy_thermo_mech/moose_herd_2022.png style=margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_herd_2022.png alt=The MOOSE herd, as of 2022. style=margin-left:auto;margin-right:auto;display:block;
 
 Many are open-source on GitHub. Some are accessible through the [NCRC](https://inl.gov/ncrc/)

@@ -7,9 +7,11 @@ questions and inquiries.
 
 ## Announcements
 
-In addition to the discussion forum, we also use a mailing list for
-announcements (very light traffic): [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce)
+In addition to the discussion forum, we also use a mailing list for announcements (very light traffic):
 
-Gmail Users: Just click the "Join group" button, everyone else must send an email to:
+- [moose-announce - Google Groups](https://groups.google.com/forum/#!forum/moose-announce)
 
-- [mailto:moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
+Gmail Users: Just click the "Join group" button on the page linked above. Others must send an
+email to:
+
+- [moose-announce+subscribe@googlegroups.com](mailto:moose-announce+subscribe@googlegroups.com)
