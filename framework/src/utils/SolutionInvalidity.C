@@ -314,7 +314,9 @@ SolutionInvalidity::transientTable(unsigned int & step_interval) const
       for (unsigned int interval_index : index_range(interval_counts))
       {
         std::string interval_index_str =
-            std::to_string(interval_index) + "-" + std::to_string(interval_index + step_interval);
+            (step_interval > 1) ? std::to_string(interval_index) + "-" +
+                                      std::to_string(interval_index + step_interval - 1)
+                                : std::to_string(interval_index);
 
         interval_sum += interval_counts[interval_index];
         vtable.addRow(info.object_type + " : " + info.message, // Object information
