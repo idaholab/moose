@@ -16,6 +16,8 @@
 #include "MFEMProblem.h"
 #include "MFEMMesh.h"
 
+#include "libmesh/mesh_function.h"
+
 registerMooseObject("MooseApp", MultiAppMFEMlibMeshGeneralFieldTransfer);
 
 namespace Moose::MFEM
@@ -126,21 +128,57 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::transfer(FEProblemBase & to_problem, FE
     mfem_mesh.EnsureNodes();
     _mfem_interpolator.Setup(mfem_mesh);
     for (unsigned v = 0; v < numToVar(); ++v)
-    {
       setlibMeshSolutionValuesFromMFEM(v, *from_mfem_problem_ptr);
-      // Populate target points to pass to GSLib using MultiAppGeneralFieldTransfer::extractOutgoingPoints
-      // interpolate using gslib
-      // setSolutionVectorValues(i, dofobject_to_valsvec, interp_caches);
-      // auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getToVarName(v));
-      // auto & from_var = from_mfem_problem_ptr->getProblemData().gridfunctions.GetRef(getFromVarName(v));
-
-      // to_var = from_var;
-    }
   }
   // TODO: Send from libMesh problem to MFEM problem
   if (to_mfem_problem_ptr && !from_mfem_problem_ptr)
   {
+    for (unsigned v = 0; v < numToVar(); ++v)
+      setMFEMGridFunctionValuesFromlibMesh(v, *to_mfem_problem_ptr);
   }
+}
+
+void
+MultiAppMFEMlibMeshGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem)
+{
+  std::vector<libMesh::MeshFunction> local_meshfuns;
+  local_meshfuns.clear();
+  local_meshfuns.reserve(_from_problems.size());
+
+  // Construct a local mesh function for each origin problem
+  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  {
+    FEProblemBase & from_problem = *_from_problems[i_from];
+    MooseVariableFieldBase & from_var =
+        from_problem.getVariable(0,
+                                 _from_var_names[var_index],
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_ANY);
+
+    System & from_sys = from_var.sys().system();
+    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
+
+    local_meshfuns.emplace_back(from_problem.es(),
+                                *from_sys.current_local_solution,
+                                from_sys.get_dof_map(),
+                                from_var_num);
+    local_meshfuns.back().init();
+    // local_meshfuns.back().enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
+  }
+
+
+  auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
+  mfem::FunctionCoefficient coef(
+      [this, &local_meshfuns](const mfem::Vector & p, mfem::real_t t) -> mfem::real_t
+      {
+        int i_from = 0;
+        const auto from_global_num = getGlobalSourceAppIndex(i_from);
+        const auto local_pt = _from_transforms[from_global_num]->mapBack(pointFromMFEMVector(p));
+        auto val = (local_meshfuns[i_from])(local_pt);
+        return val;
+      });  
+  to_var.ProjectCoefficient(coef);
+
 }
 
 void

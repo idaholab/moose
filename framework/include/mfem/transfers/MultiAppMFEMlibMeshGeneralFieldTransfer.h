@@ -44,7 +44,7 @@ protected:
 
   void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
   void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);
-
+  void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
   void checkSiblingsTransferSupported() const override;
 };
 
