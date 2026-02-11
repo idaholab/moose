@@ -36,6 +36,7 @@ ifeq ($(ALL_MODULES),yes)
         REACTOR                     := yes
         RICHARDS                    := yes
         SCALAR_TRANSPORT            := yes
+        SHIFTED_BOUNDARY_METHOD     := yes
         SOLID_MECHANICS             := yes
         SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
@@ -131,8 +132,12 @@ ifeq ($(FLUID_PROPERTIES),yes)
         MISC                        := yes
 endif
 
+ifeq ($(SOLID_MECHANICS),yes)
+        SHIFTED_BOUNDARY_METHOD     := yes
+endif
+
 # The complete list of all moose modules
-MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_transfer level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport solid_properties stochastic_tools solid_mechanics thermal_hydraulics xfem"
+MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_transfer level_set misc navier_stokes optimization peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport shifted_boundary_method solid_properties stochastic_tools solid_mechanics thermal_hydraulics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -258,10 +263,19 @@ ifeq ($(SOLID_PROPERTIES),yes)
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
+# Depended on by solid_mechanics
+ifeq ($(SHIFTED_BOUNDARY_METHOD),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/shifted_boundary_method
+  APPLICATION_NAME   := shifted_boundary_method
+  SUFFIX             := sbm
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
 # Depended on by contact, fsi, misc, peridynamics, phase_field, porous_flow, xfem
 ifeq ($(SOLID_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
+  DEPEND_MODULES     := shifted_boundary_method
   SUFFIX             := sm
   include $(FRAMEWORK_DIR)/app.mk
 endif
