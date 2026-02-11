@@ -26,7 +26,7 @@ nx = 40
   []
   [box_flux]
     type = ParsedFunction
-    expression = 'if(x<0.2,if(y<0.7,if(y>0.3,0.1,0),0),0)'
+    expression = 'if(x<0.2,if(y<0.7,if(y>0.3,0.2,0),0),0)'
   []
   [f_fn]
     type = ParsedFunction
@@ -70,14 +70,7 @@ nx = 40
 []
 
 [BCs]
-  [inlet_advective_flux]
-    type = ConservativeAdvectionBC
-    variable = 'u'
-    boundary = 'left'
-    velocity_function = 'beta'
-    primal_dirichlet_value = 'box_start'
-  []
-  [inlet_fixed_flux]
+  [inlet_flux]
     type = FunctionNeumannBC
     variable = 'u'
     boundary = 'left'
