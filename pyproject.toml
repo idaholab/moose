@@ -1,7 +1,7 @@
 [tool.black]
 target-version = ['py310', 'py311', 'py312', 'py313']
 required-version = '25.1.0'
-exclude = '''
+extend-exclude = '''
 /(
     submodules
   | framework/contrib/conduit
