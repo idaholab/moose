@@ -11,20 +11,28 @@
 
 #pragma once
 
-#include "MFEMDGBoundaryCondition.h"
+#include "MFEMIntegratedBC.h"
 
-class MFEMDGDiffusionBC : public MFEMDGBoundaryCondition
+class MFEMDGDiffusionBC : public MFEMIntegratedBC
 {
 public:
   static InputParameters validParams();
 
   MFEMDGDiffusionBC(const InputParameters & parameters);
 
-  /// Create MFEM integrator to apply to the RHS of the weak form. Ownership managed by the caller.
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
-
   /// Create MFEM integrator to apply to the LHS of the weak form. Ownership managed by the caller.
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
+  virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() override;
+
+  mfem::LinearFormIntegrator * createLFIntegrator() override { return nullptr; };
+  mfem::BilinearFormIntegrator * createBFIntegrator() override { return nullptr; };
+
+protected:
+  /// Name of (the test variable associated with) the weak form that the kernel is applied to.
+  int _fe_order;
+  mfem::ConstantCoefficient _one;
+  mfem::ConstantCoefficient _zero;
+  mfem::real_t _sigma;
+  mfem::real_t _kappa;
 };
 
 #endif

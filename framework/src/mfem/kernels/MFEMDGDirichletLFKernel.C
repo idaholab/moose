@@ -9,24 +9,23 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMDGBoundaryCondition.h"
+#include "MFEMDGDirichletLFKernel.h"
 #include "MFEMProblem.h"
 
+registerMooseObject("MooseApp", MFEMDGDirichletLFKernel);
+
 InputParameters
-MFEMDGBoundaryCondition::validParams()
+MFEMDGDirichletLFKernel::validParams()
 {
-  InputParameters params = MFEMBoundaryCondition::validParams();
-  params.registerBase("BoundaryCondition");
-  params.addParam<VariableName>("variable",
-                                "Variable labelling the weak form this kernel is added to");
+  InputParameters params = MFEMKernel::validParams();
   params.addParam<mfem::real_t>("sigma", -1.0, "One of the DG penalty params. Typically +/- 1.0");
   params.addParam<mfem::real_t>(
       "kappa", "One of the DG penalty params. Should be positive. Will default to (order+1)^2");
   return params;
 }
 
-MFEMDGBoundaryCondition::MFEMDGBoundaryCondition(const InputParameters & parameters)
-  : MFEMBoundaryCondition(parameters),
+MFEMDGDirichletLFKernel::MFEMDGDirichletLFKernel(const InputParameters & parameters)
+  : MFEMKernel(parameters),
     _fe_order(getMFEMProblem()
                   .getProblemData()
                   .gridfunctions.Get(_test_var_name)
@@ -39,6 +38,12 @@ MFEMDGBoundaryCondition::MFEMDGBoundaryCondition(const InputParameters & paramet
     _kappa((isParamSetByUser("kappa")) ? getParam<mfem::real_t>("kappa")
                                        : (_fe_order + 1) * (_fe_order + 1))
 {
+}
+
+mfem::LinearFormIntegrator *
+MFEMDGDirichletLFKernel::createFaceLFIntegrator()
+{
+  return new mfem::DGDirichletLFIntegrator(_zero, _one, _sigma, _kappa);
 }
 
 #endif

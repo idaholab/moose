@@ -116,13 +116,6 @@ public:
                  InputParameters & parameters) override;
 
   /**
-   * Same as addKernel, but this time for DGKernels
-   */
-  void addDGKernel(const std::string & kernel_name,
-                   const std::string & name,
-                   InputParameters & parameters) override;
-
-  /**
    * Adds a real component kernel to the parent MFEMComplexKernel.
    */
   void addRealComponentToKernel(const std::string & kernel_name,

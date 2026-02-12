@@ -11,14 +11,23 @@
 
 #pragma once
 
-#include "MFEMDGKernel.h"
+#include "MFEMKernel.h"
 
 // all this class needs to do differently is to implement createLFIntegrator
-class MFEMDGDirichletLFKernel : public MFEMDGKernel
+class MFEMDGDirichletLFKernel : public MFEMKernel
 {
 public:
+  static InputParameters validParams();
   MFEMDGDirichletLFKernel(const InputParameters & parameters);
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
+  virtual mfem::LinearFormIntegrator * createFaceLFIntegrator() override;
+
+protected:
+  /// Name of (the test variable associated with) the weak form that the kernel is applied to.
+  int _fe_order;
+  mfem::ConstantCoefficient _one;
+  mfem::ConstantCoefficient _zero;
+  mfem::real_t _sigma;
+  mfem::real_t _kappa;
 };
 
 #endif

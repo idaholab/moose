@@ -58,7 +58,7 @@
     input = dg_diffusion.i
     xmldiff = 'OutputData/DG_Diffusion/Run0/Run0.pvd
                 OutputData/DG_Diffusion/Run0/Cycle000001/proc000000.vtu'
-    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM.'
+    requirement = 'The system shall have the ability to solve a diffusion problem using MFEM with DG kernels.'
     capabilities = 'mfem'
     compute_devices = 'cpu'
     max_parallel = 1 # schemadiff with multiple ranks
