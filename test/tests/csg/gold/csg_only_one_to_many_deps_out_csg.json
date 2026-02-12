@@ -3,7 +3,9 @@
     "cell_inner1_copy_1": {
       "fill": "mat1",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "-inner_surf_copy_1",
+      "region_infix": [
+        "-inner_surf_copy_1"
+      ],
       "region_postfix": [
         "inner_surf_copy_1",
         "-"
@@ -12,7 +14,9 @@
     "cell_inner1_copy_2": {
       "fill": "mat1",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "-inner_surf_copy_1",
+      "region_infix": [
+        "-inner_surf_copy_1"
+      ],
       "region_postfix": [
         "inner_surf_copy_1",
         "-"
@@ -21,7 +25,9 @@
     "cell_inner2_copy_1": {
       "fill": "mat2",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "+inner_surf_copy_1",
+      "region_infix": [
+        "+inner_surf_copy_1"
+      ],
       "region_postfix": [
         "inner_surf_copy_1",
         "+"
@@ -30,7 +36,9 @@
     "cell_inner2_copy_2": {
       "fill": "mat2",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "+inner_surf_copy_1",
+      "region_infix": [
+        "+inner_surf_copy_1"
+      ],
       "region_postfix": [
         "inner_surf_copy_1",
         "+"
@@ -39,7 +47,9 @@
     "cell_lat_fill_copy_1": {
       "fill": "cartesian_lat_copy_1",
       "filltype": "LATTICE",
-      "region_infix": "-lattice_surf_copy_1",
+      "region_infix": [
+        "-lattice_surf_copy_1"
+      ],
       "region_postfix": [
         "lattice_surf_copy_1",
         "-"
@@ -48,7 +58,9 @@
     "cell_lat_fill_copy_2": {
       "fill": "cartesian_lat_copy_2",
       "filltype": "LATTICE",
-      "region_infix": "-lattice_surf_copy_1",
+      "region_infix": [
+        "-lattice_surf_copy_1"
+      ],
       "region_postfix": [
         "lattice_surf_copy_1",
         "-"
@@ -57,7 +69,9 @@
     "cell_outer_copy_1": {
       "fill": "mat3",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "+outer_surf_copy_1",
+      "region_infix": [
+        "+outer_surf_copy_1"
+      ],
       "region_postfix": [
         "outer_surf_copy_1",
         "+"
@@ -66,7 +80,9 @@
     "cell_outer_copy_2": {
       "fill": "mat3",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "+outer_surf_copy_1",
+      "region_infix": [
+        "+outer_surf_copy_1"
+      ],
       "region_postfix": [
         "outer_surf_copy_1",
         "+"
@@ -75,7 +91,9 @@
     "cell_univ_fill_copy_1": {
       "fill": "nested_inner_univ_copy_1",
       "filltype": "UNIVERSE",
-      "region_infix": "-outer_surf_copy_1",
+      "region_infix": [
+        "-outer_surf_copy_1"
+      ],
       "region_postfix": [
         "outer_surf_copy_1",
         "-"
@@ -84,7 +102,9 @@
     "cell_univ_fill_copy_2": {
       "fill": "nested_inner_univ_copy_2",
       "filltype": "UNIVERSE",
-      "region_infix": "-outer_surf_copy_1",
+      "region_infix": [
+        "-outer_surf_copy_1"
+      ],
       "region_postfix": [
         "outer_surf_copy_1",
         "-"
@@ -93,7 +113,9 @@
     "cell_void_copy_1": {
       "fill": "",
       "filltype": "VOID",
-      "region_infix": "+lattice_surf_copy_1",
+      "region_infix": [
+        "+lattice_surf_copy_1"
+      ],
       "region_postfix": [
         "lattice_surf_copy_1",
         "+"
@@ -102,7 +124,9 @@
     "cell_void_copy_2": {
       "fill": "",
       "filltype": "VOID",
-      "region_infix": "+lattice_surf_copy_1",
+      "region_infix": [
+        "+lattice_surf_copy_1"
+      ],
       "region_postfix": [
         "lattice_surf_copy_1",
         "+"

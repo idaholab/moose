@@ -3,8 +3,15 @@
     "inf_square_square_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
-      "region_infix":
-          "(+inf_square_surf_plus_x & -inf_square_surf_minus_x & -inf_square_surf_plus_y & +inf_square_surf_minus_y)",
+      "region_infix": [
+        "+inf_square_surf_plus_x",
+        "&",
+        "-inf_square_surf_minus_x",
+        "&",
+        "-inf_square_surf_plus_y",
+        "&",
+        "+inf_square_surf_minus_y"
+      ],
       "region_postfix": [
         "inf_square_surf_plus_x",
         "+",

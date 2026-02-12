@@ -3,8 +3,23 @@
     "pin1_cell_radial_0_axial_0": {
       "fill": "rgmb_region_1",
       "filltype": "CSG_MATERIAL",
-      "region_infix":
-          "(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5 & +pin1_axial_plane_0 & -pin1_axial_plane_1)",
+      "region_infix": [
+        "+pin1_radial_duct_0_surf_0",
+        "&",
+        "+pin1_radial_duct_0_surf_1",
+        "&",
+        "+pin1_radial_duct_0_surf_2",
+        "&",
+        "+pin1_radial_duct_0_surf_3",
+        "&",
+        "+pin1_radial_duct_0_surf_4",
+        "&",
+        "+pin1_radial_duct_0_surf_5",
+        "&",
+        "+pin1_axial_plane_0",
+        "&",
+        "-pin1_axial_plane_1"
+      ],
       "region_postfix": [
         "pin1_radial_duct_0_surf_0",
         "+",
@@ -34,8 +49,32 @@
     "pin1_void_cell": {
       "fill": "",
       "filltype": "VOID",
-      "region_infix":
-          "((~(+pin1_radial_duct_0_surf_0 & +pin1_radial_duct_0_surf_1 & +pin1_radial_duct_0_surf_2 & +pin1_radial_duct_0_surf_3 & +pin1_radial_duct_0_surf_4 & +pin1_radial_duct_0_surf_5) & +pin1_axial_plane_0 & -pin1_axial_plane_1) | -pin1_axial_plane_0 | +pin1_axial_plane_1)",
+      "region_infix": [
+        [
+          "~",
+          [
+            "+pin1_radial_duct_0_surf_0",
+            "&",
+            "+pin1_radial_duct_0_surf_1",
+            "&",
+            "+pin1_radial_duct_0_surf_2",
+            "&",
+            "+pin1_radial_duct_0_surf_3",
+            "&",
+            "+pin1_radial_duct_0_surf_4",
+            "&",
+            "+pin1_radial_duct_0_surf_5"
+          ],
+          "&",
+          "+pin1_axial_plane_0",
+          "&",
+          "-pin1_axial_plane_1"
+        ],
+        "|",
+        "-pin1_axial_plane_0",
+        "|",
+        "+pin1_axial_plane_1"
+      ],
       "region_postfix": [
         "pin1_radial_duct_0_surf_0",
         "+",
