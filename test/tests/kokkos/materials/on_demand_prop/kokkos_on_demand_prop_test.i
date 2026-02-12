@@ -1,6 +1,10 @@
 [Mesh]
-  dim = 3
-  file = cube.e
+  [square]
+    type = GeneratedMeshGenerator
+    nx = 2
+    ny = 2
+    dim = 2
+  []
 []
 
 [Variables]
@@ -34,16 +38,16 @@
 []
 
 [BCs]
-  [bottom]
+  [left]
+    type = KokkosDirichletBC
+    variable = u
+    boundary = 3
+    value = 0.0
+  []
+  [right]
     type = KokkosDirichletBC
     variable = u
     boundary = 1
-    value = 0.0
-  []
-  [top]
-    type = KokkosDirichletBC
-    variable = u
-    boundary = 2
     value = 1.0
   []
 []
@@ -64,7 +68,6 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -72,5 +75,4 @@
 
 [Outputs]
   exodus = true
-  csv = true
 []

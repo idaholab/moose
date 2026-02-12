@@ -315,14 +315,16 @@ public:
   void copyToDeviceNested();
   /**
    * Copy data from host to device and deallocate host
-   * @param should_free_host Whether the host memory should be freed and error otherwise. Host
-   * memory cannot be freed when there are shallow copies of this array that are still alive.
+   * @param should_free_host Whether the host memory should be freed.
+   * Host memory cannot be freed when there are shallow copies of this array that are still alive.
+   * If \p should_free_host is true, and we cannot free for above reason, it will error.
    */
   void moveToDevice(bool should_free_host = true);
   /**
    * Copy data from device to host and deallocate device
-   * @param should_free_device Whether the device memory should be freed and error otherwise. Device
-   * memory cannot be freed when there are shallow copies of this array that are still alive.
+   * @param should_free_device Whether the device memory should be freed.
+   * Device memory cannot be freed when there are shallow copies of this array that are still alive.
+   * If \p should_free_device is true, and we cannot free for above reason, it will error.
    */
   void moveToHost(bool should_free_device = true);
   /**

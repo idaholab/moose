@@ -81,14 +81,7 @@ protected:
    */
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension> declareKokkosProperty(const std::string & name,
-                                                       const std::vector<unsigned int> & dims = {})
-  {
-    std::string prop_name = name;
-    if (_pars.have_parameter<MaterialPropertyName>(name))
-      prop_name = _pars.get<MaterialPropertyName>(name);
-
-    return declareKokkosPropertyByName<T, dimension>(prop_name, dims);
-  }
+                                                       const std::vector<unsigned int> & dims = {});
   /**
    * Declare an on-demand material property
    * @tparam T The property data type
@@ -100,14 +93,7 @@ protected:
   template <typename T, unsigned int dimension = 0>
   MaterialProperty<T, dimension>
   declareKokkosOnDemandProperty(const std::string & name,
-                                const std::vector<unsigned int> & dims = {})
-  {
-    std::string prop_name = name;
-    if (_pars.have_parameter<MaterialPropertyName>(name))
-      prop_name = _pars.get<MaterialPropertyName>(name);
-
-    return declareKokkosOnDemandPropertyByName<T, dimension>(prop_name, dims);
-  }
+                                const std::vector<unsigned int> & dims = {});
   /**
    * Declare a material property by property name
    * @tparam T The property data type
@@ -227,6 +213,30 @@ private:
    */
   Array<Pair<ContiguousElementID, unsigned int>> _element_side_ids;
 };
+
+template <typename T, unsigned int dimension>
+MaterialProperty<T, dimension>
+MaterialBase::declareKokkosProperty(const std::string & name,
+                                    const std::vector<unsigned int> & dims)
+{
+  std::string prop_name = name;
+  if (_pars.have_parameter<MaterialPropertyName>(name))
+    prop_name = _pars.get<MaterialPropertyName>(name);
+
+  return declareKokkosPropertyByName<T, dimension>(prop_name, dims);
+}
+
+template <typename T, unsigned int dimension>
+MaterialProperty<T, dimension>
+MaterialBase::declareKokkosOnDemandProperty(const std::string & name,
+                                            const std::vector<unsigned int> & dims)
+{
+  std::string prop_name = name;
+  if (_pars.have_parameter<MaterialPropertyName>(name))
+    prop_name = _pars.get<MaterialPropertyName>(name);
+
+  return declareKokkosOnDemandPropertyByName<T, dimension>(prop_name, dims);
+}
 
 template <typename T, unsigned int dimension>
 MaterialProperty<T, dimension>

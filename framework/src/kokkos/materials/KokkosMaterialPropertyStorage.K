@@ -138,7 +138,7 @@ MaterialPropertyStorage::allocateKokkosProperties()
       auto & record = _kokkos_prop_records[name];
 
       if (!record.on_demand || _problem.isMatPropRequested(name))
-        for (auto declarer : record.declarers)
+        for (auto * const declarer : record.declarers)
         {
           auto & blocks =
               declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();

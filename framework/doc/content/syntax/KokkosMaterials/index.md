@@ -116,11 +116,14 @@ In Kokkos-MOOSE, all material property data are stored for each quadrature point
 This is due to the massive parallelization of GPU that prevents storing material properties only for a single element or face.
 If you are unsure whether a material property will be actually requested by another object, you can declare the property as an on-demand property with `declareKokkosOnDemandProperty<type, dimension>(name, dims)`.
 The storage of an on-demand property is only allocated when there is any object consuming the property, aiding in reducing the memory usage and computational cost for unused material properties.
+When accessing an on-demand property in its declaring material, you should always check the validity of the property.
+See the following section on optional properties for more details.
 
 ## Optional Properties
 
 There is no special method and object for weakly coupled material properties in Kokkos-MOOSE.
 Instead, a material property object will simply evaluate to `false` when it is uninitialized or when it holds an on-demand material property not requested by any object.
+Namely, `if (property)` will evaluate to `false` for the above conditions.
 You can query the existence of a material property with `hasKokkosMaterialProperty<type, dimension>(name)` and optionally initialize the material property object to reproduce the same behavior with the optional material properties in the original MOOSE.
 
 See the following source codes of `KokkosVarCouplingMaterial` for an example of optional material properties:

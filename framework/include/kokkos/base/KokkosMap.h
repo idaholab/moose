@@ -116,14 +116,7 @@ public:
   /**
    * Clear the underlying data
    */
-  void clear()
-  {
-    get().clear();
-
-    _keys.destroy();
-    _values.destroy();
-    _offset.destroy();
-  }
+  void clear();
   /**
    * Call host map's operator[]
    * @param key The key
@@ -245,6 +238,17 @@ private:
   friend void dataStore<T1, T2>(std::ostream &, Map<T1, T2> &, void *);
   friend void dataLoad<T1, T2>(std::istream &, Map<T1, T2> &, void *);
 };
+
+template <typename T1, typename T2>
+void
+Map<T1, T2>::clear()
+{
+  get().clear();
+
+  _keys.destroy();
+  _values.destroy();
+  _offset.destroy();
+}
 
 #ifdef MOOSE_KOKKOS_SCOPE
 template <typename T1, typename T2>
