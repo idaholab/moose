@@ -1,15 +1,26 @@
 [tool.black]
 target-version = ['py310', 'py311', 'py312', 'py313']
 required-version = '25.1.0'
-include = '''
-(
-  ^\/python\/moosecontrol\/.*.py$ |
-  ^\/python\/moosepy\/.*.py$ |
-  ^\/python\/TestHarness\/resultsstore\/.*.py$ |
-  ^\/python\/TestHarness\/resultssummary\/.*.py$ |
-  ^\/python\/TestHarness/tests/resultsstore\/.*.py$ |
-  ^\/python\/TestHarness/tests/resultssummary\/.*.py$
-)
+extend-exclude = '''
+/(
+    submodules
+  | framework/contrib/conduit
+  | framework/contrib/mfem
+  | framework/contrib/neml2
+  | framework/contrib/wasp
+  | large_media
+  | libmesh
+  | modules/chemical_reactions/contrib/thermochimica
+  | modules/fluid_properties/contrib/air
+  | modules/fluid_properties/contrib/carbon_dioxide
+  | modules/fluid_properties/contrib/helium
+  | modules/fluid_properties/contrib/nitrogen
+  | modules/fluid_properties/contrib/potassium
+  | modules/fluid_properties/contrib/saline
+  | modules/fluid_properties/contrib/sodium
+  | petsc
+)/ |
+/test/tests/test_harness/validation_badpython.py
 '''
 
 [tool.ruff]

@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 from PyQt5 import QtCore, QtWidgets
 import peacock
 from .PostprocessorPlugin import PostprocessorPlugin
+
 
 class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
     """
@@ -25,7 +26,19 @@ class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
     """
 
     #: list: List of all possible legend locations
-    legend_loc = ['best', 'upper right', 'upper left', 'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center', 'upper center', 'center']
+    legend_loc = [
+        "best",
+        "upper right",
+        "upper left",
+        "lower left",
+        "lower right",
+        "right",
+        "center left",
+        "center right",
+        "lower center",
+        "upper center",
+        "center",
+    ]
 
     #: pyqtSingal: Should be emitted when the axes have been modified.
     axesModified = QtCore.pyqtSignal()
@@ -38,20 +51,19 @@ class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
         self.MainLayout = QtWidgets.QVBoxLayout()
         self.setLayout(self.MainLayout)
 
-
         # Title
         self.TitleLayout = QtWidgets.QHBoxLayout()
-        self.TitleLabel = QtWidgets.QLabel('Title:')
+        self.TitleLabel = QtWidgets.QLabel("Title:")
         self.Title = QtWidgets.QLineEdit()
         self.TitleLayout.addWidget(self.TitleLabel)
         self.TitleLayout.addWidget(self.Title)
 
         # Legend Toggles
         self.LegendLayout = QtWidgets.QGridLayout()
-        self.Legend = QtWidgets.QCheckBox('Legend (Left) ')
+        self.Legend = QtWidgets.QCheckBox("Legend (Left) ")
         self.LegendLocation = QtWidgets.QComboBox()
 
-        self.Legend2 = QtWidgets.QCheckBox('Legend (Right)')
+        self.Legend2 = QtWidgets.QCheckBox("Legend (Right)")
         self.Legend2Location = QtWidgets.QComboBox()
 
         self.LegendLayout.addWidget(self.Legend, 0, 0)
@@ -121,7 +133,7 @@ class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
             output += ["axes0.set_title({})".format(repr(title))]
 
         if output:
-            output.insert(0, '\n# Axes Settings')
+            output.insert(0, "\n# Axes Settings")
 
         return output, []
 
@@ -161,6 +173,7 @@ class AxesSettingsPlugin(QtWidgets.QGroupBox, PostprocessorPlugin):
             qobject.addItem(loc)
         qobject.currentIndexChanged.connect(self.onAxesModified)
 
+
 def main(filenames):
 
     from ..PostprocessorViewer import PostprocessorViewer
@@ -169,10 +182,15 @@ def main(filenames):
     import mooseutils
 
     import matplotlib
-    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
-    matplotlib.rcParams["figure.dpi"] = (100)
 
-    widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxesSettingsPlugin, PostprocessorSelectPlugin])
+    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
+    matplotlib.rcParams["figure.dpi"] = 100
+
+    widget = PostprocessorViewer(
+        mooseutils.PostprocessorReader,
+        timeout=None,
+        plugins=[FigurePlugin, AxesSettingsPlugin, PostprocessorSelectPlugin],
+    )
     widget.onSetFilenames(filenames)
     control = widget.currentWidget().AxesSettingsPlugin
     window = widget.currentWidget().FigurePlugin
@@ -181,8 +199,9 @@ def main(filenames):
 
     return control, widget, window
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    control, widget, window = main(['../../../tests/input/white_elephant_jan_2016.csv'])
+    control, widget, window = main(["../../../tests/input/white_elephant_jan_2016.csv"])
     sys.exit(app.exec_())

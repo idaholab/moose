@@ -13,6 +13,7 @@ from os import getenv
 from os.path import exists, join
 import json
 from glob import glob
+
 try:
     from conda_build.metadata import MetaData
     from conda.cli.python_api import Commands, run_command
@@ -21,7 +22,7 @@ except ImportError:
     sys.exit(0)
 try:
     MOOSE_DIR = getenv("MOOSE_DIR", sys.argv[1])
-    CONDA_PREFIX = getenv('CONDA_PREFIX')
+    CONDA_PREFIX = getenv("CONDA_PREFIX")
     exists(CONDA_PREFIX)
 except TypeError:
     print(0)
@@ -31,17 +32,17 @@ except TypeError:
 def parse_recipe_meta_data(meta_file_path):
     """Construct package version from metadata."""
     meta = MetaData(meta_file_path)
-    pkg_name = meta.meta['package']['name']
-    pkg_version = meta.meta['package']['version']
-    pkg_build = meta.meta['build'].get('string', '*')
-    full_name = '-'.join([pkg_name, pkg_version, pkg_build]) + '.json'
+    pkg_name = meta.meta["package"]["name"]
+    pkg_version = meta.meta["package"]["version"]
+    pkg_build = meta.meta["build"].get("string", "*")
+    full_name = "-".join([pkg_name, pkg_version, pkg_build]) + ".json"
     return full_name, pkg_name, pkg_version, pkg_build
 
 
 def get_recipe_versions():
     """Iterate through all conda/**/meta.yaml files and return package info tuple."""
-    conda_folder = join(MOOSE_DIR, 'conda')
-    recipes = glob(join(conda_folder, '**/meta.yaml'), recursive=True)
+    conda_folder = join(MOOSE_DIR, "conda")
+    recipes = glob(join(conda_folder, "**/meta.yaml"), recursive=True)
     for recipe in recipes:
         yield parse_recipe_meta_data(recipe)
 
@@ -49,13 +50,13 @@ def get_recipe_versions():
 def latest_remote_libmesh_version(output):
     """Extract version number from latest conda libmesh."""
     results = json.loads(output)
-    latest_libmesh = results['moose-libmesh'][-1]
-    return latest_libmesh['version']
+    latest_libmesh = results["moose-libmesh"][-1]
+    return latest_libmesh["version"]
 
 
 def check_remote_conda(pkg_name):
     """Search conda remote for all moose-libmesh package information."""
-    search_tuple = run_command(Commands.SEARCH, ['-f', pkg_name, '--json'])
+    search_tuple = run_command(Commands.SEARCH, ["-f", pkg_name, "--json"])
     if search_tuple[2] > 0:
         return None
     return latest_remote_libmesh_version(search_tuple[0])
@@ -89,11 +90,11 @@ or
 def main():
     """Check to see if user is using conda and environment is current."""
     for full_name, pkg_name, pkg_version, pkg_build in get_recipe_versions():
-        current_conda = join(CONDA_PREFIX, 'conda-meta', full_name)
+        current_conda = join(CONDA_PREFIX, "conda-meta", full_name)
 
         # Just handle libmesh for now. Then if needed, add
         # functionality to handle packages with hashes in its' version.
-        if pkg_name != 'moose-libmesh':
+        if pkg_name != "moose-libmesh":
             continue
 
         if not exists(current_conda):
@@ -106,7 +107,7 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # This script should act as an informational note only, allowing the user to
     # continue as frequently as possible (early versions of Conda do not work)
     try:

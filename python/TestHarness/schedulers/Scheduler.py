@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import sys
 from TestHarness.JobDAG import JobDAG
 from TestHarness.StatusSystem import StatusSystem
@@ -14,11 +14,13 @@ import os, traceback
 from time import sleep
 from timeit import default_timer as clock
 from multiprocessing.pool import ThreadPool
-import threading # for thread locking and thread timers
+import threading  # for thread locking and thread timers
 import pyhit
+
 
 class SchedulerError(Exception):
     pass
+
 
 class Scheduler(MooseObject):
     """
@@ -39,9 +41,15 @@ class Scheduler(MooseObject):
     @staticmethod
     def validParams():
         params = MooseObject.validParams()
-        params.addRequiredParam('average_load',  64.0, "Average load to allow")
-        params.addRequiredParam('max_processes', None, "Hard limit of maxium processes to use")
-        params.addParam('min_reported_time', 10, "The minimum time elapsed before a job is reported as taking to long to run.")
+        params.addRequiredParam("average_load", 64.0, "Average load to allow")
+        params.addRequiredParam(
+            "max_processes", None, "Hard limit of maxium processes to use"
+        )
+        params.addParam(
+            "min_reported_time",
+            10,
+            "The minimum time elapsed before a job is reported as taking to long to run.",
+        )
 
         return params
 
@@ -62,9 +70,9 @@ class Scheduler(MooseObject):
         # The difference is whether or not we allow single jobs to exceed the number of slots.
         self.available_slots, self.soft_limit = self.availableSlots(params)
 
-        self.average_load = params['average_load']
+        self.average_load = params["average_load"]
 
-        self.min_report_time = params['min_reported_time']
+        self.min_report_time = params["min_reported_time"]
 
         # Initialize run_pool based on available slots
         self.run_pool = ThreadPool(processes=self.available_slots)
@@ -131,11 +139,11 @@ class Scheduler(MooseObject):
 
         Needed so that derived schedulers can modify this limit.
         """
-        if params['max_processes'] == None:
+        if params["max_processes"] == None:
             available_slots = 1
             soft_limit = True
         else:
-            available_slots = params['max_processes'] # hard limit
+            available_slots = params["max_processes"]  # hard limit
             soft_limit = False
         return available_slots, soft_limit
 
@@ -146,7 +154,7 @@ class Scheduler(MooseObject):
         self.status_pool.close()
 
     def killRemaining(self, keyboard=False):
-        """ Method to kill running jobs """
+        """Method to kill running jobs"""
         with self.activity_lock:
             for job in self.__active_jobs:
                 job.killProcess()
@@ -155,25 +163,30 @@ class Scheduler(MooseObject):
             self.harness.keyboard_interrupt()
 
     def retrieveJobs(self):
-        """ return all the jobs the scheduler was tasked to perform work for """
+        """return all the jobs the scheduler was tasked to perform work for"""
         return self.__scheduled_jobs
 
     def retrieveDAGs(self):
-        """ return all the dags containing the jobs the scueduler was tasked to perform work for """
+        """return all the dags containing the jobs the scueduler was tasked to perform work for"""
         return self.__dag_bank
 
     def schedulerError(self):
-        """ boolean if the scheduler prematurely exited """
+        """boolean if the scheduler prematurely exited"""
         return self.getErrorState() and not self.maxFailures()
 
     def maxFailures(self):
-        """ Boolean for hitting max failures """
-        return ((self.options.valgrind_mode and self.__failures >= self.options.valgrind_max_fails)
-                or self.__failures >= self.options.max_fails
-                and not self.options.hpc)
+        """Boolean for hitting max failures"""
+        return (
+            (
+                self.options.valgrind_mode
+                and self.__failures >= self.options.valgrind_max_fails
+            )
+            or self.__failures >= self.options.max_fails
+            and not self.options.hpc
+        )
 
     def run(self, job):
-        """ Call derived run method """
+        """Call derived run method"""
         return
 
     def augmentJobs(self, jobs):
@@ -189,7 +202,9 @@ class Scheduler(MooseObject):
         """
         Sort by largest DAG and launch
         """
-        sorted_jobs = sorted(self.__dag_bank, key=lambda x: len(x[1].topological_sort()), reverse=True)
+        sorted_jobs = sorted(
+            self.__dag_bank, key=lambda x: len(x[1].topological_sort()), reverse=True
+        )
         for job_dag, _ in sorted_jobs:
             # Allow derived schedulers access to the jobs before they launch
             # We purposely call this one here so that we augment the Jobs
@@ -236,7 +251,9 @@ class Scheduler(MooseObject):
 
             # Completed all jobs sanity check
             if not error_state and self.__job_bank:
-                raise SchedulerError('Scheduler exiting with different amount of work than what was initially tasked!')
+                raise SchedulerError(
+                    "Scheduler exiting with different amount of work than what was initially tasked!"
+                )
 
             if not error_state:
                 self.run_pool.close()
@@ -253,7 +270,11 @@ class Scheduler(MooseObject):
         """
         # TODO: ThreadPool._state changed between python 3.7 and 3.8, this logic handles both; this
         #       logic should be changed to avoid rely on protected variables.
-        (self.status_pool._state != 'RUN') if sys.version_info[1] > 7 else self.status_pool._state
+        (
+            (self.status_pool._state != "RUN")
+            if sys.version_info[1] > 7
+            else self.status_pool._state
+        )
 
     def schedule(self, testers):
         """
@@ -270,7 +291,7 @@ class Scheduler(MooseObject):
 
         # Whether or not we have parallel scheduling
         root = pyhit.load(testers[0].getSpecFile())
-        parallel_scheduling = root.children[0].get('parallel_scheduling', False)
+        parallel_scheduling = root.children[0].get("parallel_scheduling", False)
 
         # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)
         jobs = JobDAG(self.options, parallel_scheduling)
@@ -278,7 +299,9 @@ class Scheduler(MooseObject):
 
         # job-count to tester-count sanity check
         if j_dag.size() != len(testers):
-            raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
+            raise SchedulerError(
+                "Scheduler was going to run a different amount of testers than what was received (something bad happened)!"
+            )
 
         # Don't need to lock below because this process is serial
         # As testers (jobs) finish, they are removed from job_bank
@@ -308,19 +331,25 @@ class Scheduler(MooseObject):
                 elif job.isHold():
                     if not state:
                         job.setStatus(job.queued)
-                        self.run_pool.apply_async(self.runJob, (job, job_dag,))
+                        self.run_pool.apply_async(
+                            self.runJob,
+                            (
+                                job,
+                                job_dag,
+                            ),
+                        )
 
     def getLoad(self):
-        """ Method to return current load average """
+        """Method to return current load average"""
         loadAverage = 0.0
         try:
             loadAverage = os.getloadavg()[0]
         except AttributeError:
-            pass      # getloadavg() not available in this implementation of os
+            pass  # getloadavg() not available in this implementation of os
         return loadAverage
 
     def satisfyLoad(self):
-        """ Method for controlling load average """
+        """Method for controlling load average"""
         while self.slots_in_use > 1 and self.getLoad() >= self.average_load:
             sleep(1.0)
 
@@ -351,12 +380,12 @@ class Scheduler(MooseObject):
 
             # Check for insufficient slots -soft limit
             elif job_slots > self.available_slots and self.soft_limit:
-                job.addCaveats('OVERSIZED')
+                job.addCaveats("OVERSIZED")
                 can_run = True
 
             # Check for insufficient slots -hard limit (skip this job)
             elif job_slots > self.available_slots and not self.soft_limit:
-                job.addCaveats('insufficient slots')
+                job.addCaveats("insufficient slots")
                 with job.getLock():
                     job.setStatus(job.skip)
 
@@ -365,10 +394,10 @@ class Scheduler(MooseObject):
         return can_run
 
     def handleTimeoutJob(self, job):
-        """ Handle jobs that have timed out """
+        """Handle jobs that have timed out"""
         with job.getLock():
             if job.isRunning():
-                job.setStatus(job.timeout, 'TIMEOUT')
+                job.setStatus(job.timeout, "TIMEOUT")
                 job.killProcess()
 
     def handleJobStatus(self, job, caveats=None):
@@ -380,7 +409,13 @@ class Scheduler(MooseObject):
         # This try catch will get rid of the "Pool not running" errors
         # when we're forced to exit
         try:
-            self.status_pool.apply_async(self.jobStatus, (job,caveats,))
+            self.status_pool.apply_async(
+                self.jobStatus,
+                (
+                    job,
+                    caveats,
+                ),
+            )
         except ValueError:
             pass
 
@@ -422,21 +457,27 @@ class Scheduler(MooseObject):
                     # this job will be reported as 'RUNNING'
                     if clock() - self.last_reported_time >= self.min_report_time:
                         # prevent 'finished' caveat with options expecting to take lengthy amounts of time
-                        if (not self.options.sep_files
-                           and not self.options.hpc
-                           and not self.options.heavy_tests
-                           and not self.options.valgrind_mode):
-                            job.addCaveats('FINISHED')
+                        if (
+                            not self.options.sep_files
+                            and not self.options.hpc
+                            and not self.options.heavy_tests
+                            and not self.options.valgrind_mode
+                        ):
+                            job.addCaveats("FINISHED")
 
                         with self.activity_lock:
                             self.jobs_reported.add(job)
                     # TestHarness has not yet been inactive long enough to warrant a report
                     else:
                         # adjust the next report time based on delta of last report time
-                        adjusted_interval = max(1, self.min_report_time - max(1, clock() - self.last_reported_time))
-                        job.report_timer = threading.Timer(adjusted_interval,
-                                                           self.handleJobStatus,
-                                                           (job,))
+                        adjusted_interval = max(
+                            1,
+                            self.min_report_time
+                            - max(1, clock() - self.last_reported_time),
+                        )
+                        job.report_timer = threading.Timer(
+                            adjusted_interval, self.handleJobStatus, (job,)
+                        )
                         job.report_timer.start()
                         return
 
@@ -455,21 +496,24 @@ class Scheduler(MooseObject):
                         if job in self.__job_bank:
                             self.__job_bank.remove(job)
                         else:
-                            raise SchedulerError('job accountability failure while working with: %s' % (job.getTestName()))
+                            raise SchedulerError(
+                                "job accountability failure while working with: %s"
+                                % (job.getTestName())
+                            )
 
             # Max failure threshold reached, begin shutdown
             if self.maxFailures():
                 self.killRemaining()
 
         except Exception:
-            print('statusWorker Exception: %s' % (traceback.format_exc()))
+            print("statusWorker Exception: %s" % (traceback.format_exc()))
             self.killRemaining()
 
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
 
     def runJob(self, job, jobs):
-        """ Method the run_pool calls when an available thread becomes ready """
+        """Method the run_pool calls when an available thread becomes ready"""
         # Its possible, the queue is just trying to empty. Allow it to do so
         # with out generating overhead
         if self.getErrorState():
@@ -483,9 +527,9 @@ class Scheduler(MooseObject):
 
                     # Setup the long running timer, if any
                     if self.report_long_jobs:
-                        job.report_timer = threading.Timer(self.min_report_time,
-                                                           self.handleJobStatus,
-                                                           (job,))
+                        job.report_timer = threading.Timer(
+                            self.min_report_time, self.handleJobStatus, (job,)
+                        )
                         job.report_timer.start()
                     else:
                         job.report_timer = None
@@ -494,9 +538,9 @@ class Scheduler(MooseObject):
                     self.__active_jobs.add(job)
 
                 if self.enforce_timeout:
-                    timeout_timer = threading.Timer(float(job.getMaxTime()),
-                                                    self.handleTimeoutJob,
-                                                    (job,))
+                    timeout_timer = threading.Timer(
+                        float(job.getMaxTime()), self.handleTimeoutJob, (job,)
+                    )
                     timeout_timer.start()
                 else:
                     timeout_timer = None
@@ -505,19 +549,23 @@ class Scheduler(MooseObject):
                 # python errors in _only_ the Job; exceptions that happen in the Tester
                 # from within the Job will get caught within the Tester
                 try:
-                    self.run(job) # Hand execution over to derived scheduler
+                    self.run(job)  # Hand execution over to derived scheduler
                 except Exception:
                     with job.getLock():
                         trace = traceback.format_exc()
-                        job.setStatus(StatusSystem().error, 'JOB RUN EXCEPTION')
-                        job.appendOutput(f'Encountered an exception while running Job:\n{trace}')
+                        job.setStatus(StatusSystem().error, "JOB RUN EXCEPTION")
+                        job.appendOutput(
+                            f"Encountered an exception while running Job:\n{trace}"
+                        )
 
                 if timeout_timer:
                     timeout_timer.cancel()
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:
-                    self.slots_in_use = max(0, self.slots_in_use - self.getJobSlots(job))
+                    self.slots_in_use = max(
+                        0, self.slots_in_use - self.getJobSlots(job)
+                    )
 
                 with job.getLock():
                     # Stop the long running timer
@@ -531,8 +579,10 @@ class Scheduler(MooseObject):
                     if job in self.__active_jobs:
                         self.__active_jobs.remove(job)
                     else:
-                        job.setStatus(StatusSystem().error, 'SCHEDULER ERROR')
-                        job.appendOutput(f'Failed to remove job from active jobs in Scheduler; did not exist')
+                        job.setStatus(StatusSystem().error, "SCHEDULER ERROR")
+                        job.appendOutput(
+                            f"Failed to remove job from active jobs in Scheduler; did not exist"
+                        )
 
             # Not enough slots to run the job...
             else:
@@ -540,30 +590,30 @@ class Scheduler(MooseObject):
                 if not job.isFinished():
                     with job.getLock():
                         job.setStatus(job.hold)
-                    sleep(.1)
+                    sleep(0.1)
 
             # Job is done (or needs to re-enter the queue)
             self.queueJobs(jobs)
 
         except Exception:
-            print('runWorker Exception: %s' % (traceback.format_exc()))
+            print("runWorker Exception: %s" % (traceback.format_exc()))
             self.killRemaining()
 
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
 
     def appendResultFooter(self, stats: dict) -> str:
-        """ Entrypoint to add additional results to the on screen result footer """
+        """Entrypoint to add additional results to the on screen result footer"""
         return None
 
     def appendResultFileHeader(self) -> dict:
-        """ Entrypoint to add entries to the result file header """
+        """Entrypoint to add entries to the result file header"""
         return {}
 
     def appendResultFileJob(self, job) -> dict:
-        """ Entrypoint to add entries to the result file for a job """
+        """Entrypoint to add entries to the result file for a job"""
         return {}
 
     def appendStats(self) -> dict:
-        """ Entrypoint to add entries to the harness statistics """
+        """Entrypoint to add entries to the harness statistics"""
         return {}

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.utils import Testing
 import os
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -62,7 +63,9 @@ class Tests(Testing.PeacockTester):
         self.checkInputFile("../../common/oversample.i", self.oversample_filename)
 
     def testDate(self):
-        self.checkInputFile("../../common/transient_with_date.i", self.oversample_filename)
+        self.checkInputFile(
+            "../../common/transient_with_date.i", self.oversample_filename
+        )
 
     def testPressure(self):
         """
@@ -72,9 +75,18 @@ class Tests(Testing.PeacockTester):
         """
         image_name = os.path.abspath(self.pressure_filename)
         with Testing.remember_cwd():
-            pressure_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "tensor_mechanics", "test", "tests", "pressure")
+            pressure_dir = os.path.join(
+                os.environ["MOOSE_DIR"],
+                "modules",
+                "tensor_mechanics",
+                "test",
+                "tests",
+                "pressure",
+            )
             exe = Testing.find_moose_test_exe("modules/combined", "combined")
-            self.checkInputFile("pressure_test.i", image_name, exe_path=exe, cwd=pressure_dir)
+            self.checkInputFile(
+                "pressure_test.i", image_name, exe_path=exe, cwd=pressure_dir
+            )
 
     def testGlobalParams(self):
         """
@@ -84,9 +96,22 @@ class Tests(Testing.PeacockTester):
         """
         image_name = os.path.abspath(self.globals_filename)
         with Testing.remember_cwd():
-            reconstruct_dir = os.path.join(os.environ["MOOSE_DIR"], "modules", "phase_field", "test", "tests", "reconstruction")
+            reconstruct_dir = os.path.join(
+                os.environ["MOOSE_DIR"],
+                "modules",
+                "phase_field",
+                "test",
+                "tests",
+                "reconstruction",
+            )
             exe = Testing.find_moose_test_exe("modules/combined", "combined")
-            self.checkInputFile("2phase_reconstruction2.i", image_name, exe_path=exe, cwd=reconstruct_dir)
+            self.checkInputFile(
+                "2phase_reconstruction2.i",
+                image_name,
+                exe_path=exe,
+                cwd=reconstruct_dir,
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

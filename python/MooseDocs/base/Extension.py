@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 """
 An Extension is comprised of Component objects, the objects are used for tokenizeing markdown
 and converting tokens to rendered HTML.
@@ -13,6 +13,7 @@ and converting tokens to rendered HTML.
 from types import ModuleType
 
 from ..common import mixins
+
 
 class Extension(mixins.ConfigObject, mixins.TranslatorObject):
     """
@@ -25,26 +26,42 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
     Inputs:
         kwargs: All key-value pairs are treated as configure options, see ConfigObject.
     """
-    __TRANSLATOR_METHODS__ = ['init', 'initPage',
-                              'preExecute', 'postExecute',
-                              'preRead', 'postRead',
-                              'preTokenize', 'postTokenize',
-                              'preRender', 'postRender',
-                              'preWrite', 'postWrite']
+
+    __TRANSLATOR_METHODS__ = [
+        "init",
+        "initPage",
+        "preExecute",
+        "postExecute",
+        "preRead",
+        "postRead",
+        "preTokenize",
+        "postTokenize",
+        "preRender",
+        "postRender",
+        "preWrite",
+        "postWrite",
+    ]
 
     @staticmethod
     def defaultConfig():
         """Basic Extension configuration options."""
         config = mixins.ConfigObject.defaultConfig()
-        config['active'] = (True, "Toggle for disabling the extension. This only changes "
-                                  "the initial active state, use setActive to control at runtime.")
+        config["active"] = (
+            True,
+            "Toggle for disabling the extension. This only changes "
+            "the initial active state, use setActive to control at runtime.",
+        )
         return config
 
     def __init__(self, **kwargs):
-        mixins.ConfigObject.__init__(self, self.__class__.__name__.split('.')[-1].replace('Extension', '').lower(), **kwargs)
+        mixins.ConfigObject.__init__(
+            self,
+            self.__class__.__name__.split(".")[-1].replace("Extension", "").lower(),
+            **kwargs,
+        )
         mixins.TranslatorObject.__init__(self)
         self.__requires = set()
-        self.__active = self.get('active')
+        self.__active = self.get("active")
 
     @property
     def active(self):

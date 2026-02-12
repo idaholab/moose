@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.ParamsTable import ParamsTable
 from peacock.utils import Testing, InputTesting
@@ -14,6 +14,7 @@ from peacock.Input.ParameterInfo import ParameterInfo
 from peacock.Input.BlockInfo import BlockInfo
 from PyQt5.QtWidgets import QFileDialog, QApplication
 from mock import patch
+
 
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
@@ -28,7 +29,16 @@ class Tests(Testing.PeacockTester):
     def commentsChanged(self):
         self.comments_changed += 1
 
-    def createParam(self, name, value="", cpp_type="string", options=[], required=False, user_added=False, basic_type="String"):
+    def createParam(
+        self,
+        name,
+        value="",
+        cpp_type="string",
+        options=[],
+        required=False,
+        user_added=False,
+        basic_type="String",
+    ):
         p = ParameterInfo(None, name)
         p.value = value
         p.cpp_type = cpp_type
@@ -54,7 +64,7 @@ class Tests(Testing.PeacockTester):
         t = ParamsTable(b, params, tmap)
         t.resize(480, 480)
         t.addName("some name")
-        t.addName("some name") # shouldn't be a problem
+        t.addName("some name")  # shouldn't be a problem
         t.addUserParam("user_param")
         t.needBlockList.connect(lambda paths: self.needBlockList(t, paths))
         t.changed.connect(self.onChanged)
@@ -73,10 +83,16 @@ class Tests(Testing.PeacockTester):
         params.append(self.createParam("p3", cpp_type="FileNameNoExtension"))
         params.append(self.createParam("p4", cpp_type="MeshFileName"))
         params.append(self.createParam("p5", options=options))
-        params.append(self.createParam("p7", cpp_type="vector", options=options, basic_type="Array"))
+        params.append(
+            self.createParam(
+                "p7", cpp_type="vector", options=options, basic_type="Array"
+            )
+        )
         params.append(self.createParam("p8"))
         params.append(self.createParam("p9", cpp_type="VariableName"))
-        params.append(self.createParam("p10", cpp_type="vector<VariableName>", basic_type="Array"))
+        params.append(
+            self.createParam("p10", cpp_type="vector<VariableName>", basic_type="Array")
+        )
         return params
 
     def testEmpty(self):
@@ -135,9 +151,9 @@ class Tests(Testing.PeacockTester):
         count_before = t.rowCount()
         t.addUserParam("new_param")
         count_after = t.rowCount()
-        self.assertEqual(count_before+1, count_after)
+        self.assertEqual(count_before + 1, count_after)
         row = t.findRow("new_param")
-        self.assertEqual(row, count_after-1)
+        self.assertEqual(row, count_after - 1)
         self.assertEqual(t.block.getParamInfo("new_param"), None)
 
         t.reset()
@@ -220,5 +236,6 @@ class Tests(Testing.PeacockTester):
         t.updateWatchers()
         self.assertEqual(combo.count(), 1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

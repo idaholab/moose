@@ -1,17 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import glob
 import json
 
 from . import message
+
 
 class ReporterReader(object):
     r"""
@@ -43,6 +44,7 @@ class ReporterReader(object):
         print('value_name in object object_name was NOT found!')
     ```
     """
+
     def __init__(self, file):
         self._filename = file
         self._data = dict(time_steps=[])
@@ -73,10 +75,12 @@ class ReporterReader(object):
         - part\[int\]: The part
         """
         if part >= self.numParts():
-            message.mooseError('Cannot load part {}; only {} parts exist'.format(part, self.numParts()))
+            message.mooseError(
+                "Cannot load part {}; only {} parts exist".format(part, self.numParts())
+            )
         if part == 0:
             return self._filename
-        return self._filename + '.' + '{}'.format(part).zfill(len(str(self.numParts())))
+        return self._filename + "." + "{}".format(part).zfill(len(str(self.numParts())))
 
     def __getitem__(self, keys):
         r"""
@@ -90,11 +94,11 @@ class ReporterReader(object):
             vals = []
             for key in keys:
                 obj, val = key
-                vals.append(self._data['time_steps'][self._index][obj][val])
+                vals.append(self._data["time_steps"][self._index][obj][val])
             return vals
         else:
             obj, val = keys
-            return self._data['time_steps'][self._index][obj][val]
+            return self._data["time_steps"][self._index][obj][val]
 
     def __bool__(self):
         """
@@ -106,7 +110,7 @@ class ReporterReader(object):
                 print 'No data found!'
         ```
         """
-        return self._index < len(self._data['time_steps'])
+        return self._index < len(self._data["time_steps"])
 
     def __contains__(self, variable):
         r"""
@@ -123,9 +127,9 @@ class ReporterReader(object):
         ```
         """
         obj, val = variable
-        if 'reporters' in self._data:
-            if obj in self._data['reporters']:
-                if val in self._data['reporters'][obj]['values']:
+        if "reporters" in self._data:
+            if obj in self._data["reporters"]:
+                if val in self._data["reporters"][obj]["values"]:
                     return True
         return False
 
@@ -133,13 +137,13 @@ class ReporterReader(object):
         """
         Returns the list of available time indices contained in the data.
         """
-        return [ts['time'] for ts in self._data['time_steps']]
+        return [ts["time"] for ts in self._data["time_steps"]]
 
     def numParts(self):
         """
         Returns the number of parts available
         """
-        return self._data.get('number_of_parts', 1)
+        return self._data.get("number_of_parts", 1)
 
     def clear(self):
         """
@@ -160,9 +164,9 @@ class ReporterReader(object):
         ```
         """
         rnames = []
-        if 'reporters' in self._data:
-            for obj in self._data['reporters']:
-                for val in self._data['reporters'][obj]['values']:
+        if "reporters" in self._data:
+            for obj in self._data["reporters"]:
+                for val in self._data["reporters"][obj]["values"]:
                     rnames.append((obj, val))
         return rnames
 
@@ -189,17 +193,17 @@ class ReporterReader(object):
         info = dict()
         if key is None:
             for k in self._data:
-                if k != 'time_steps' and k != 'reporters':
+                if k != "time_steps" and k != "reporters":
                     info[k] = self._data[k]
 
         elif isinstance(key, str):
-            for k in self._data['reporters'][key]:
-                if k != 'values':
-                    info[k] = self._data['reporters'][key][k]
+            for k in self._data["reporters"][key]:
+                if k != "values":
+                    info[k] = self._data["reporters"][key][k]
 
         elif isinstance(key, tuple):
             obj, val = key
-            info = self._data['reporters'][obj]['values'][val]
+            info = self._data["reporters"][obj]["values"][val]
 
         return info
 
@@ -227,29 +231,31 @@ class ReporterReader(object):
         """
 
         filename = self.partFilename(part)
-        if '*' in filename:
+        if "*" in filename:
             filenames = glob.glob(filename)
             if not len(filenames):
                 self.clear()
-                message.mooseDebug("Could not find any json files with pattern {}.".format(filename))
+                message.mooseDebug(
+                    "Could not find any json files with pattern {}.".format(filename)
+                )
 
             for fname in sorted(filenames):
-                with open(fname, 'r', encoding='utf-8') as fid:
+                with open(fname, "r", encoding="utf-8") as fid:
                     tmp = json.load(fid)
                     for key in tmp:
-                        if key != 'time_steps':
+                        if key != "time_steps":
                             self._data[key] = tmp[key]
-                    self._data['time_steps'].extend(tmp['time_steps'])
+                    self._data["time_steps"].extend(tmp["time_steps"])
 
         elif not os.path.exists(filename):
             self.clear()
             message.mooseDebug("Could not json file {}.".format(filename))
 
         else:
-            with open(filename, 'r', encoding='utf-8') as fid:
+            with open(filename, "r", encoding="utf-8") as fid:
                 self._data = json.load(fid)
 
-        self._data['time_steps'].sort(key=lambda ts : ts['time'])
+        self._data["time_steps"].sort(key=lambda ts: ts["time"])
 
         # Update the time
         if time is not None:
@@ -267,7 +273,7 @@ class ReporterReader(object):
         - (output, imports) The necessary script and include statements to re-create data load.
         """
 
-        imports = ['import mooseutils']
-        output = ['\n# Read Reporter Data']
-        output += ['data = mooseutils.ReporterReader({})'.format(repr(self._filename))]
+        imports = ["import mooseutils"]
+        output = ["\n# Read Reporter Data"]
+        output += ["data = mooseutils.ReporterReader({})".format(repr(self._filename))]
         return output, imports

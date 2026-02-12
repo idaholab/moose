@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import mooseutils
+
 
 def estimateTimeSteps(executioner_node):
     """
@@ -35,10 +36,13 @@ def estimateTimeSteps(executioner_node):
                 if steps and steps.value:
                     cur_steps += int(steps.value)
 
-        return cur_steps + 2 + 1 # The +2 is for setup steps the +1 is so there is always a bit left...
+        return (
+            cur_steps + 2 + 1
+        )  # The +2 is for setup steps the +1 is so there is always a bit left...
     except Exception as e:
         mooseutils.mooseWarning("Problem calculating time steps: %s" % e)
         return 0
+
 
 def findTimeSteps(tree):
     node = tree.getBlockInfo("/Executioner")
@@ -46,10 +50,12 @@ def findTimeSteps(tree):
         return 0
     return estimateTimeSteps(node)
 
+
 if __name__ == "__main__":
     from peacock.utils import Testing
     from InputTree import InputTree
     from ExecutableInfo import ExecutableInfo
+
     exe = Testing.find_moose_test_exe()
     this_dir = os.path.dirname(os.path.abspath(__file__))
     peacock_dir = os.path.dirname(this_dir)

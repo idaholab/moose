@@ -1,20 +1,51 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
-from .mooseutils import colorText, str2bool, find_moose_executable, runExe, check_configuration
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
+from .mooseutils import (
+    colorText,
+    str2bool,
+    find_moose_executable,
+    runExe,
+    check_configuration,
+)
 from .mooseutils import find_moose_executable_recursive, run_executable
 from .mooseutils import touch, unique_list, gold, make_chunks, camel_to_space
-from .mooseutils import text_diff, unidiff, text_unidiff, run_profile, list_files, check_output, run_time
-from .mooseutils import generate_filebase, recursive_update, fuzzyEqual, fuzzyAbsoluteEqual
-from .gitutils import git_is_repo, git_commit, git_commit_message, git_merge_commits, git_ls_files
+from .mooseutils import (
+    text_diff,
+    unidiff,
+    text_unidiff,
+    run_profile,
+    list_files,
+    check_output,
+    run_time,
+)
+from .mooseutils import (
+    generate_filebase,
+    recursive_update,
+    fuzzyEqual,
+    fuzzyAbsoluteEqual,
+)
+from .gitutils import (
+    git_is_repo,
+    git_commit,
+    git_commit_message,
+    git_merge_commits,
+    git_ls_files,
+)
 from .gitutils import git_root_dir, git_init_submodule, git_submodule_info, git_version
 from .gitutils import git_authors, git_lines, git_committers, git_localpath, git_repo
-from .gitutils import git_is_branch, git_is_config, git_remotes, git_add_and_fetch_remote, git_fetch_remote
+from .gitutils import (
+    git_is_branch,
+    git_is_config,
+    git_remotes,
+    git_add_and_fetch_remote,
+    git_fetch_remote,
+)
 from .message import mooseDebug, mooseWarning, mooseMessage, mooseError
 from .MooseException import MooseException
 from .eval_path import eval_path

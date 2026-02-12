@@ -1,14 +1,15 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 from collections import OrderedDict
+
 
 class BasePreferenceWidget(QtWidgets.QWidget):
     """
@@ -60,7 +61,7 @@ class BasePreferenceWidget(QtWidgets.QWidget):
         """
         returns key used for the QSettings value
         """
-        return self._prekey + self._name;
+        return self._prekey + self._name
 
     def label(self):
         """
@@ -74,13 +75,17 @@ class BasePreferenceWidget(QtWidgets.QWidget):
         """
         return self._widget
 
+
 class BoolPreferenceWidget(BasePreferenceWidget):
     """
     Holds a boolean preference, represented by a checkbox.
     """
+
     def __init__(self, name, caption, default, tooltip, prekey):
         checkbox = QtWidgets.QCheckBox()
-        super(BoolPreferenceWidget, self).__init__(name, checkbox, caption, tooltip, default, prekey)
+        super(BoolPreferenceWidget, self).__init__(
+            name, checkbox, caption, tooltip, default, prekey
+        )
 
     def setValue(self, val):
         self._widget.setChecked(bool(val))
@@ -88,15 +93,19 @@ class BoolPreferenceWidget(BasePreferenceWidget):
     def getValue(self):
         return self._widget.isChecked()
 
+
 class IntPreferenceWidget(BasePreferenceWidget):
     """
     Holds an integer preference, represented by a spin box.
     """
+
     def __init__(self, name, caption, default, min_val, max_val, tooltip, prekey):
         spin = QtWidgets.QSpinBox()
         spin.setMinimum(min_val)
         spin.setMaximum(max_val)
-        super(IntPreferenceWidget, self).__init__(name, spin, caption, tooltip, default, prekey)
+        super(IntPreferenceWidget, self).__init__(
+            name, spin, caption, tooltip, default, prekey
+        )
 
     def setValue(self, val):
         self._widget.setValue(int(val))
@@ -104,13 +113,17 @@ class IntPreferenceWidget(BasePreferenceWidget):
     def getValue(self):
         return self._widget.value()
 
+
 class StringPreferenceWidget(BasePreferenceWidget):
     """
     Holds a string preference, represented by a line edit.
     """
+
     def __init__(self, name, caption, default, tooltip, prekey):
         line = QtWidgets.QLineEdit()
-        super(StringPreferenceWidget, self).__init__(name, line, caption, tooltip, default, prekey)
+        super(StringPreferenceWidget, self).__init__(
+            name, line, caption, tooltip, default, prekey
+        )
 
     def setValue(self, val):
         self._widget.setText(str(val))
@@ -118,14 +131,18 @@ class StringPreferenceWidget(BasePreferenceWidget):
     def getValue(self):
         return self._widget.text()
 
+
 class ComboPreferenceWidget(BasePreferenceWidget):
     """
     Holds a string preference from a list of options, represented by a combo box.
     """
+
     def __init__(self, name, caption, default, options, tooltip, prekey):
         combo = QtWidgets.QComboBox()
         combo.addItems(options)
-        super(ComboPreferenceWidget, self).__init__(name, combo, caption, tooltip, default, prekey)
+        super(ComboPreferenceWidget, self).__init__(
+            name, combo, caption, tooltip, default, prekey
+        )
 
     def setValue(self, val):
         idx = self._widget.findText(str(val))
@@ -135,21 +152,25 @@ class ComboPreferenceWidget(BasePreferenceWidget):
     def getValue(self):
         return self._widget.currentText()
 
+
 class ColorPreferenceWidget(BasePreferenceWidget):
     """
     Holds a color preference, represented by a button that opens a QColorDialog
     """
+
     def __init__(self, name, caption, default, tooltip, prekey):
         button = QtWidgets.QPushButton()
         self._color = default.name()
         button.pressed.connect(self._chooseColor)
-        super(ColorPreferenceWidget, self).__init__(name, button, caption, tooltip, self._color, prekey)
+        super(ColorPreferenceWidget, self).__init__(
+            name, button, caption, tooltip, self._color, prekey
+        )
 
     def setValue(self, val):
         self._color = val
         c = QtGui.QColor(val)
         rgb = c.getRgb()
-        self._widget.setStyleSheet('border:none; background:rgb' + str(rgb))
+        self._widget.setStyleSheet("border:none; background:rgb" + str(rgb))
 
     def getValue(self):
         return self._color
@@ -161,10 +182,12 @@ class ColorPreferenceWidget(BasePreferenceWidget):
             self._color = c.name()
             self.setValue(self._color)
 
+
 class Preferences(object):
     """
     Holds a list of widgets corresponding to settable preferences.
     """
+
     def __init__(self, key=""):
         super(Preferences, self).__init__()
         self._widgets = OrderedDict()
@@ -196,22 +219,32 @@ class Preferences(object):
         """
         Convenience function to add an integer preference.
         """
-        self.addWidget(IntPreferenceWidget(name, caption, default, min_val, max_val, tooltip, self._key))
+        self.addWidget(
+            IntPreferenceWidget(
+                name, caption, default, min_val, max_val, tooltip, self._key
+            )
+        )
 
     def addString(self, name, caption, default, tooltip):
         """
         Convenience function to add an string preference.
         """
-        self.addWidget(StringPreferenceWidget(name, caption, default, tooltip, self._key))
+        self.addWidget(
+            StringPreferenceWidget(name, caption, default, tooltip, self._key)
+        )
 
     def addCombo(self, name, caption, default, options, tooltip):
         """
         Convenience function to add an string preference from a list of options.
         """
-        self.addWidget(ComboPreferenceWidget(name, caption, default, options, tooltip, self._key))
+        self.addWidget(
+            ComboPreferenceWidget(name, caption, default, options, tooltip, self._key)
+        )
 
     def addColor(self, name, caption, default, tooltip):
         """
         Convenience function to add a color preference.
         """
-        self.addWidget(ColorPreferenceWidget(name, caption, default, tooltip, self._key))
+        self.addWidget(
+            ColorPreferenceWidget(name, caption, default, tooltip, self._key)
+        )

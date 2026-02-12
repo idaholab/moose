@@ -1,17 +1,18 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
 from chigger import utils
 from .ChiggerResultBase import ChiggerResultBase
 from .ChiggerSourceBase import ChiggerSourceBase
+
 
 class ChiggerResult(ChiggerResultBase):
     """
@@ -29,6 +30,7 @@ class ChiggerResult(ChiggerResultBase):
         *sources: A tuple of ChiggerFilterSourceBase object to render.
         **kwargs: see ChiggerResultBase
     """
+
     # The Base class type that this object to which its ownership is restricted.
     SOURCE_TYPE = ChiggerSourceBase
 
@@ -41,15 +43,16 @@ class ChiggerResult(ChiggerResultBase):
         super(ChiggerResult, self).__init__(**kwargs)
         self._sources = sources
         for src in self._sources:
-            src._parent = self #pylint: disable=protected-access
+            src._parent = self  # pylint: disable=protected-access
 
     def needsUpdate(self):
         """
         Checks if this object or any of the contained ChiggerFilterSourceBase object require update.
         (override)
         """
-        return super(ChiggerResult, self).needsUpdate() or \
-               any([src.needsUpdate() for src in self._sources])
+        return super(ChiggerResult, self).needsUpdate() or any(
+            [src.needsUpdate() for src in self._sources]
+        )
 
     def updateOptions(self, *args):
         """
@@ -146,7 +149,7 @@ class ChiggerResult(ChiggerResultBase):
             if not isinstance(src, self.SOURCE_TYPE):
                 n = src.__class__.__name__
                 t = self.SOURCE_TYPE.__name__
-                msg = 'The supplied source type of {} must be of type {}.'.format(n, t)
+                msg = "The supplied source type of {} must be of type {}.".format(n, t)
                 raise mooseutils.MooseException(msg)
             src.setVTKRenderer(self._vtkrenderer)
             self._vtkrenderer.AddViewProp(src.getVTKActor())

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Plotting the results of gypsum_solubility and the equivalent GWB simulation
 
@@ -30,20 +30,20 @@ gwb_muscovite = [4.999, 5.001, 5.002, 5.002, 5.002, 5.002, 5.002, 5.002]
 gwb_quartz = [2.000, 2.040, 2.063, 2.1, 2.114, 2.133, 2.138, 2.140]
 
 plt.figure()
-plt.plot(temp, albite, 'k-', linewidth = 2.0, label = 'Albite (MOOSE)')
-plt.plot(temp, max_micro, 'r-', linewidth = 2.0, label = 'Microcline (MOOSE)')
-plt.plot(temp, muscovite, 'g-', linewidth = 2.0, label = 'Muscovite (MOOSE)')
-plt.plot(temp, quartz, 'b-', linewidth = 2.0, label = 'Quartz (MOOSE)')
-plt.plot(gwb_temp, gwb_albite, 'ks', label = "Albite (GWB)")
-plt.plot(gwb_temp, gwb_max_micro, 'rs', label = "Microcline (GWB)")
-plt.plot(gwb_temp, gwb_muscovite, 'gs', label = "Muscovite (GWB)")
-plt.plot(gwb_temp, gwb_quartz, 'bs', label = "Quartz (GWB)")
+plt.plot(temp, albite, "k-", linewidth=2.0, label="Albite (MOOSE)")
+plt.plot(temp, max_micro, "r-", linewidth=2.0, label="Microcline (MOOSE)")
+plt.plot(temp, muscovite, "g-", linewidth=2.0, label="Muscovite (MOOSE)")
+plt.plot(temp, quartz, "b-", linewidth=2.0, label="Quartz (MOOSE)")
+plt.plot(gwb_temp, gwb_albite, "ks", label="Albite (GWB)")
+plt.plot(gwb_temp, gwb_max_micro, "rs", label="Microcline (GWB)")
+plt.plot(gwb_temp, gwb_muscovite, "gs", label="Muscovite (GWB)")
+plt.plot(gwb_temp, gwb_quartz, "bs", label="Quartz (GWB)")
 ax = plt.gca()
 ax.set_xlim(ax.get_xlim()[::-1])
 plt.legend()
 plt.xlabel("Temperature (degC)")
 plt.ylabel("precipitate volume (cm$^{3}$)")
-plt.title("Minerals precipitated in a cooling solution");
+plt.title("Minerals precipitated in a cooling solution")
 plt.savefig("../../../doc/content/media/geochemistry/cooling.png")
 
 sys.exit(0)

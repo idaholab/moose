@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from peacock.ExodusViewer.plugins.ExodusPlugin import ExodusPlugin
 from .MeshBlockSelectorWidget import MeshBlockSelectorWidget
+
 
 class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """
@@ -31,9 +32,15 @@ class BlockHighlighterPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.setEnabled(False)
 
         # Block, nodeset, and sideset selector widgets
-        self.BlockSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.BLOCK, 'Blocks:')
-        self.SidesetSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.SIDESET, 'Boundaries:')
-        self.NodesetSelector = MeshBlockSelectorWidget(chigger.exodus.ExodusReader.NODESET, 'Nodesets:')
+        self.BlockSelector = MeshBlockSelectorWidget(
+            chigger.exodus.ExodusReader.BLOCK, "Blocks:"
+        )
+        self.SidesetSelector = MeshBlockSelectorWidget(
+            chigger.exodus.ExodusReader.SIDESET, "Boundaries:"
+        )
+        self.NodesetSelector = MeshBlockSelectorWidget(
+            chigger.exodus.ExodusReader.NODESET, "Nodesets:"
+        )
 
         self.MainLayout.addWidget(self.BlockSelector)
         self.MainLayout.addWidget(self.SidesetSelector)

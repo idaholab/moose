@@ -1,26 +1,31 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from sympy import * # use star so all functions are available to supplied strings
+from sympy import *  # use star so all functions are available to supplied strings
 from sympy.vector import divergence, curl, gradient, Vector, CoordSys3D
 from mms.fparser import print_fparser
 from mms.moosefunction import print_moose
 
-def evaluate(pde, soln, variable='u',
-             scalars=set(),
-             vectors=set(),
-             functions=set(),
-             vectorfunctions=set(),
-             negative=False,
-             transformation='cartesian',
-             coordinate_names=("x", "y", "z"),
-             **kwargs):
+
+def evaluate(
+    pde,
+    soln,
+    variable="u",
+    scalars=set(),
+    vectors=set(),
+    functions=set(),
+    vectorfunctions=set(),
+    negative=False,
+    transformation="cartesian",
+    coordinate_names=("x", "y", "z"),
+    **kwargs,
+):
     """
     Function to evaluate PDEs for the method of manufactured solutions forcing functions.
 
@@ -48,13 +53,13 @@ def evaluate(pde, soln, variable='u',
     """
 
     if len(coordinate_names) != 3:
-        raise SyntaxError('The coordinate_names argument must be of length 3')
+        raise SyntaxError("The coordinate_names argument must be of length 3")
 
-    if transformation != 'cartesian' and transformation != 'cylindrical':
-        raise SyntaxError('transformation must be either cartesian or cylindrical')
+    if transformation != "cartesian" and transformation != "cylindrical":
+        raise SyntaxError("transformation must be either cartesian or cylindrical")
 
     # Define the standard symbols
-    R = CoordSys3D('R', transformation=transformation, variable_names=coordinate_names)
+    R = CoordSys3D("R", transformation=transformation, variable_names=coordinate_names)
 
     # string names of variables
     sx1 = coordinate_names[0]
@@ -72,21 +77,23 @@ def evaluate(pde, soln, variable='u',
     context[coordinate_names[1]] = x2
     context[coordinate_names[2]] = x3
 
-    t = Symbol('t')
+    t = Symbol("t")
     e_i = R.i
     e_j = R.j
     e_k = R.k
-    context.update({'t': t, 'R': R, 'e_i': e_i, 'e_j': e_j, 'e_k': e_k})
+    context.update({"t": t, "R": R, "e_i": e_i, "e_j": e_j, "e_k": e_k})
 
     # Define extra vectors, use _v_ in order to not collide with vector=['v']
     for _v_ in vectors:
         _check_reserved(_v_)
         for _c_ in [sx1, sx2, sx3]:
-            _s_ = '{}_{}'.format(_v_, _c_)
+            _s_ = "{}_{}".format(_v_, _c_)
             context[_s_] = Symbol(_s_)
-        context[_v_] = context['{}_{}'.format(_v_, sx1)] * R.i + \
-                       context['{}_{}'.format(_v_, sx2)] * R.j + \
-                       context['{}_{}'.format(_v_, sx3)] * R.k
+        context[_v_] = (
+            context["{}_{}".format(_v_, sx1)] * R.i
+            + context["{}_{}".format(_v_, sx2)] * R.j
+            + context["{}_{}".format(_v_, sx3)] * R.k
+        )
 
     # Define extra scalars
     for _s_ in scalars:
@@ -102,64 +109,76 @@ def evaluate(pde, soln, variable='u',
     for _vf_ in vectorfunctions:
         _check_reserved(_vf_)
         for _c_ in [sx1, sx2, sx3]:
-            _s_ = '{}_{}'.format(_vf_, _c_)
+            _s_ = "{}_{}".format(_vf_, _c_)
             context[_s_] = Function(_s_)(x1, x2, x3, t)
-        context[_vf_] = context['{}_{}'.format(_vf_, sx1)] * R.i + \
-                        context['{}_{}'.format(_vf_, sx2)] * R.j + \
-                        context['{}_{}'.format(_vf_, sx3)] * R.k
+        context[_vf_] = (
+            context["{}_{}".format(_vf_, sx1)] * R.i
+            + context["{}_{}".format(_vf_, sx2)] * R.j
+            + context["{}_{}".format(_vf_, sx3)] * R.k
+        )
 
     # Define known functions
     for _f_, _v_ in kwargs.items():
         _check_reserved(_f_)
         context[_f_] = eval(_v_, globals(), context)
         if isinstance(context[_f_], Vector):
-            context['{}_{}'.format(_f_, sx1)] = context[_f_].components.get(R.i, 0)
-            context['{}_{}'.format(_f_, sx2)] = context[_f_].components.get(R.j, 0)
-            context['{}_{}'.format(_f_, sx3)] = context[_f_].components.get(R.k, 0)
+            context["{}_{}".format(_f_, sx1)] = context[_f_].components.get(R.i, 0)
+            context["{}_{}".format(_f_, sx2)] = context[_f_].components.get(R.j, 0)
+            context["{}_{}".format(_f_, sx3)] = context[_f_].components.get(R.k, 0)
 
     # Evaluate the supplied solution
     _exact_ = eval(soln, globals(), context)
     context[variable] = _exact_
 
     # Evaluate the PDE
-    pde = pde.replace('grad', 'gradient')
-    pde = pde.replace('div', 'divergence')
+    pde = pde.replace("grad", "gradient")
+    pde = pde.replace("div", "divergence")
     _func_ = eval(pde, globals(), context)
     if negative:
         _func_ = -1 * _func_
 
     # Convert vector exact solution to a list
     if isinstance(_exact_, Vector):
-        _exact_ = [_exact_.components.get(R.i, 0),
-                   _exact_.components.get(R.j, 0),
-                   _exact_.components.get(R.k, 0)]
+        _exact_ = [
+            _exact_.components.get(R.i, 0),
+            _exact_.components.get(R.j, 0),
+            _exact_.components.get(R.k, 0),
+        ]
 
     # Convert vector result to a list
     if isinstance(_func_, Vector):
-        _func_ = [_func_.components.get(R.i, 0),
-                  _func_.components.get(R.j, 0),
-                  _func_.components.get(R.k, 0)]
+        _func_ = [
+            _func_.components.get(R.i, 0),
+            _func_.components.get(R.j, 0),
+            _func_.components.get(R.k, 0),
+        ]
 
     return _func_, _exact_
 
+
 def _check_reserved(var):
     """Error checking for input variables."""
-    if var == 'R':
-        msg = "The variable name 'R' is reserved, it represents the coordinate system, " \
-              "see sympy.vector.CoordSys3D."
+    if var == "R":
+        msg = (
+            "The variable name 'R' is reserved, it represents the coordinate system, "
+            "see sympy.vector.CoordSys3D."
+        )
         raise SyntaxError(msg)
 
-    elif var in ['x', 'y', 'z']:
-        msg = "The variable name '{0}' is reserved, it represents the {0} spatial direction " \
-              "(R.{0}) for the 'R' coordinate system as defined by a sympy.vector.CoordSys3D."
+    elif var in ["x", "y", "z"]:
+        msg = (
+            "The variable name '{0}' is reserved, it represents the {0} spatial direction "
+            "(R.{0}) for the 'R' coordinate system as defined by a sympy.vector.CoordSys3D."
+        )
         raise SyntaxError(msg.format(var))
 
-    elif var == 't':
+    elif var == "t":
         raise SyntaxError("The variable name 't' is reserved, it represents time.")
 
-
-    elif var in ['e_i', 'e_j', 'e_k']:
-        basis = dict(e_i='x', e_j='y', e_k='z')
-        msg = "The variable name '{0}' is reserved, it represents the {1} basis vector " \
-              "(R.{0}) for the 'R' coordinate system as defined by a sympy.vector.CoordSys3D."
+    elif var in ["e_i", "e_j", "e_k"]:
+        basis = dict(e_i="x", e_j="y", e_k="z")
+        msg = (
+            "The variable name '{0}' is reserved, it represents the {1} basis vector "
+            "(R.{0}) for the 'R' coordinate system as defined by a sympy.vector.CoordSys3D."
+        )
         raise SyntaxError(msg.format(var, basis[var]))

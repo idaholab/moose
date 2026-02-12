@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import unittest
 from peacock.utils import Testing
 import os
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -23,7 +24,9 @@ class Tests(Testing.PeacockTester):
     def create_app(self, args):
         self.createPeacockApp(args)
         self.postprocessor = self.app.main_widget.tab_plugin.PostprocessorViewer
-        self.vector_postprocessor = self.app.main_widget.tab_plugin.VectorPostprocessorViewer
+        self.vector_postprocessor = (
+            self.app.main_widget.tab_plugin.VectorPostprocessorViewer
+        )
         self.exe = self.app.main_widget.tab_plugin.ExecuteTabPlugin
         self.input = self.app.main_widget.tab_plugin.InputFileEditorWithMesh
         self.result = self.app.main_widget.tab_plugin.ExodusViewer
@@ -107,12 +110,18 @@ class Tests(Testing.PeacockTester):
 
     def testAllCommandLine(self):
         d = os.getcwd()
-        args = ["-i" , "transient.i",
-                "-e", Testing.find_moose_test_exe(),
-                "-r", "%s/gold/out_transient.e" % d,
-                "-p", "%s/../gold/out_transient.csv" % d,
-                "-v", "%s/../gold/time_data_line_sample_*.csv" % d,
-                ]
+        args = [
+            "-i",
+            "transient.i",
+            "-e",
+            Testing.find_moose_test_exe(),
+            "-r",
+            "%s/gold/out_transient.e" % d,
+            "-p",
+            "%s/../gold/out_transient.csv" % d,
+            "-v",
+            "%s/../gold/time_data_line_sample_*.csv" % d,
+        ]
         self.create_app(args)
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.vector_postprocessor.tabName())
@@ -125,11 +134,11 @@ class Tests(Testing.PeacockTester):
         self.check_postprocessor()
 
     def testOnlyInputFileWithExeInPath(self):
-        input_file = os.path.abspath('transient.i')
+        input_file = os.path.abspath("transient.i")
         dirname = os.path.dirname(Testing.find_moose_test_exe())
         with Testing.remember_cwd():
             os.chdir(dirname)
-            args = ["-i", input_file ]
+            args = ["-i", input_file]
             self.create_app(args)
             tabs = self.app.main_widget.tab_plugin
             self.check_current_tab(tabs, self.input.tabName())
@@ -152,13 +161,17 @@ class Tests(Testing.PeacockTester):
 
     def testAutoRun(self):
         Testing.remove_file("out_transient.e")
-        self.create_app(["--run", "transient.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
+        self.create_app(
+            ["--run", "transient.i", Testing.find_moose_test_exe(), "-w", os.getcwd()]
+        )
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.result.tabName())
         self.check_result()
 
     def testBadMesh(self):
-        self.create_app(["bad_mesh.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
+        self.create_app(
+            ["bad_mesh.i", Testing.find_moose_test_exe(), "-w", os.getcwd()]
+        )
         tabs = self.app.main_widget.tab_plugin
         t = self.input.InputFileEditorPlugin.tree
         self.check_current_tab(tabs, self.input.tabName())
@@ -172,21 +185,21 @@ class Tests(Testing.PeacockTester):
         mesh = t.getBlockInfo("/Mesh")
         mesh.included = False
         self.input.blockChanged(mesh)
-        self.assertEqual(self.input.vtkwin.isEnabled(), False) # still disabled
+        self.assertEqual(self.input.vtkwin.isEnabled(), False)  # still disabled
 
         mesh.included = True
         self.input.blockChanged(mesh)
-        self.assertEqual(self.input.vtkwin.isEnabled(), False) # still disabled
+        self.assertEqual(self.input.vtkwin.isEnabled(), False)  # still disabled
 
         p = mesh.getParamInfo("dim")
-        p.value = '2'
+        p.value = "2"
         self.input.blockChanged(mesh)
-        self.assertEqual(self.input.vtkwin.isEnabled(), True) # Mesh should be good now
+        self.assertEqual(self.input.vtkwin.isEnabled(), True)  # Mesh should be good now
 
         # Disabling the mesh block should disable the mesh view
         mesh.included = False
         self.input.blockChanged(mesh)
-        #self.assertEqual(self.input.vtkwin.isEnabled(), False)
+        # self.assertEqual(self.input.vtkwin.isEnabled(), False)
 
     def testExodusChangedFile(self):
         """
@@ -206,9 +219,9 @@ class Tests(Testing.PeacockTester):
         Testing.process_events(t=2)
 
         self.assertTrue(mesh.isEnabled())
-        mesh.ScaleX.setValue(.9)
-        mesh.ScaleY.setValue(.8)
-        mesh.ScaleZ.setValue(.7)
+        mesh.ScaleX.setValue(0.9)
+        mesh.ScaleY.setValue(0.8)
+        mesh.ScaleZ.setValue(0.7)
         mesh.Representation.setCurrentIndex(1)
         mesh.DisplacementToggle.setChecked(True)
         mesh.DisplacementMagnitude.setValue(2.0)
@@ -283,8 +296,9 @@ class Tests(Testing.PeacockTester):
         # Show result and write file again
         self.app.main_widget.setTab(self.result.tabName())
         Testing.process_events(t=1)
-        self.vtkwin.onWrite('extentsOn.png')
+        self.vtkwin.onWrite("extentsOn.png")
         self.assertFalse(Testing.gold_diff(fname, allowed=0.99))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2)

@@ -1,43 +1,38 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, sys
 import json
 import inspect
 
+
 class Factory:
     def __init__(self):
-        self.objects = {}   # The registered Objects array
-
+        self.objects = {}  # The registered Objects array
 
     def register(self, type, name):
         self.objects[name] = type
 
-
     def validParams(self, type):
         return self.objects[type].validParams()
-
 
     def augmentParams(self, type, params):
         return self.objects[type].augmentParams(params)
 
-
     def create(self, type, *args, **kwargs):
         return self.objects[type](*args, **kwargs)
-
 
     def getClassHierarchy(self, classes):
         if classes != None:
             for aclass in classes:
                 classes.extend(self.getClassHierarchy(aclass.__subclasses__()))
         return classes
-
 
     def loadPlugins(self, base_dirs, plugin_path, attribute):
         for dir in base_dirs:
@@ -47,7 +42,7 @@ class Factory:
 
             sys.path.append(os.path.abspath(dir))
             for file in os.listdir(dir):
-                if file[-2:] == 'py':
+                if file[-2:] == "py":
                     module_name = file[:-3]
                     try:
                         __import__(module_name)
@@ -59,8 +54,12 @@ class Factory:
                                 if isinstance(at, bool) and at:
                                     self.register(obj, name)
                     except Exception as e:
-                        print('\nERROR: Your Plugin Tester "' + module_name + '" failed to import. (skipping)\n\n' + str(e))
-
+                        print(
+                            '\nERROR: Your Plugin Tester "'
+                            + module_name
+                            + '" failed to import. (skipping)\n\n'
+                            + str(e)
+                        )
 
     def printDump(self, root_node_name):
         print("[" + root_node_name + "]")
@@ -71,7 +70,7 @@ class Factory:
             params = self.validParams(name)
 
             for key in sorted(params.desc):
-                default = ''
+                default = ""
                 if params.isValid(key):
                     the_param = params[key]
                     if type(the_param) == list:
@@ -79,10 +78,12 @@ class Factory:
                     else:
                         default = str(the_param)
 
-                print("%4s%-30s = %-30s # %s" % ('', key, default, params.getDescription(key)))
+                print(
+                    "%4s%-30s = %-30s # %s"
+                    % ("", key, default, params.getDescription(key))
+                )
             print("  [../]\n")
         print("[]")
-
 
     def printYaml(self, root_node_name):
         print("**START YAML DATA**")
@@ -100,10 +101,10 @@ class Factory:
 
             params = self.validParams(name)
             for key in params.valid:
-                required = 'No'
+                required = "No"
                 if params.isRequired(key):
-                    required = 'Yes'
-                default = ''
+                    required = "Yes"
+                default = ""
                 if params.isValid(key):
                     default = str(params[key])
 
@@ -119,29 +120,43 @@ class Factory:
         print("**START JSON DATA**")
 
         syntax = {
-            'blocks': {
+            "blocks": {
                 root_node_name: {
-                    'star': {
-                        'subblock_types' : { name : {
-                            'name': name,
-                            'parameters': { key: {
-                                'name': key,
-                                'required': self.validParams(name).isRequired(key),
-                                'default': self.validParams(name).valid[key] if self.validParams(name).isValid(key) else '',
-                                'type': self.validParams(name).basicType(key),
-                                'description': self.validParams(name).getDescription(key)
-                            } for key, value in self.validParams(name).desc.items() }
-                        } for name, object in self.objects.items() }
+                    "star": {
+                        "subblock_types": {
+                            name: {
+                                "name": name,
+                                "parameters": {
+                                    key: {
+                                        "name": key,
+                                        "required": self.validParams(name).isRequired(
+                                            key
+                                        ),
+                                        "default": (
+                                            self.validParams(name).valid[key]
+                                            if self.validParams(name).isValid(key)
+                                            else ""
+                                        ),
+                                        "type": self.validParams(name).basicType(key),
+                                        "description": self.validParams(
+                                            name
+                                        ).getDescription(key),
+                                    }
+                                    for key, value in self.validParams(
+                                        name
+                                    ).desc.items()
+                                },
+                            }
+                            for name, object in self.objects.items()
+                        }
                     }
                 }
             },
-            'global': {
-                'associated_types' : {
-                    "TestName": [ "Tests/*" ]
-                },
-                'parameters': [],
-                'registered_apps': []
-            }
+            "global": {
+                "associated_types": {"TestName": ["Tests/*"]},
+                "parameters": [],
+                "registered_apps": [],
+            },
         }
         print(json.dumps(syntax, sort_keys=True, indent=4))
 

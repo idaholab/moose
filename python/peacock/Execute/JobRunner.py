@@ -1,17 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5.QtCore import pyqtSignal, pyqtSlot, QObject, QProcess
 import re, os
 import mooseutils
 from peacock.base import MooseWidget
 from peacock.utils import TerminalUtils
+
 
 class JobRunner(QObject, MooseWidget):
     """
@@ -27,6 +28,7 @@ class JobRunner(QObject, MooseWidget):
         timeStepUpdated: A new time step has started
         error: Emitted when an error is encountered. Arguments are QProcess code and error description
     """
+
     started = pyqtSignal()
     finished = pyqtSignal(int, str)
     outputAdded = pyqtSignal(str)
@@ -42,13 +44,14 @@ class JobRunner(QObject, MooseWidget):
         self.process.finished.connect(self._jobFinished)
         self.process.started.connect(self.started)
         self.process.error.connect(self._error)
-        self._error_map = { QProcess.FailedToStart: "Failed to start",
-                QProcess.Crashed: "Crashed",
-                QProcess.Timedout: "Timedout",
-                QProcess.WriteError: "Write error",
-                QProcess.ReadError: "Read error",
-                QProcess.UnknownError: "Unknown error",
-                }
+        self._error_map = {
+            QProcess.FailedToStart: "Failed to start",
+            QProcess.Crashed: "Crashed",
+            QProcess.Timedout: "Timedout",
+            QProcess.WriteError: "Write error",
+            QProcess.ReadError: "Read error",
+            QProcess.UnknownError: "Unknown error",
+        }
 
         self.killed = False
         self.setup()
@@ -62,7 +65,7 @@ class JobRunner(QObject, MooseWidget):
             args: A list of string arguments
         """
         self.killed = False
-        self._sendMessage("Running command: %s %s" % (cmd, ' '.join(args)))
+        self._sendMessage("Running command: %s %s" % (cmd, " ".join(args)))
         self._sendMessage("Working directory: %s" % os.getcwd())
         self.process.start(cmd, args)
         self.process.waitForStarted()
@@ -110,7 +113,9 @@ class JobRunner(QObject, MooseWidget):
         self.process.terminate()
         self.process.waitForFinished(1000)
         if self.isRunning():
-            mooseutils.mooseMessage("Failed to terminate job cleanly. Doing a hard kill.")
+            mooseutils.mooseMessage(
+                "Failed to terminate job cleanly. Doing a hard kill."
+            )
             self.process.kill()
             self.process.waitForFinished()
 
@@ -123,12 +128,12 @@ class JobRunner(QObject, MooseWidget):
         while self.process.canReadLine():
             tmp = self.process.readLine().data().decode("utf-8").rstrip()
             lines.append(TerminalUtils.terminalOutputToHtml(tmp))
-            match = re.search(r'Time\sStep\s*([0-9]{1,})', tmp)
+            match = re.search(r"Time\sStep\s*([0-9]{1,})", tmp)
             if match:
                 ts = int(match.group(1))
                 self.timeStepUpdated.emit(ts)
 
-        output = '<pre style="display: inline; margin: 0;">%s</pre>' % '\n'.join(lines)
+        output = '<pre style="display: inline; margin: 0;">%s</pre>' % "\n".join(lines)
         self.outputAdded.emit(output)
 
     def isRunning(self):

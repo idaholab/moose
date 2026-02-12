@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore
 import mooseutils
 from peacock.utils import WidgetUtils
+
 
 class MooseWidget(object):
     """
@@ -38,28 +39,28 @@ class MooseWidget(object):
 
         parent_name = self.objectName()
         if parent_name:
-            parent_name += '/'
+            parent_name += "/"
 
         for member in dir(self):
             if not hasattr(self, member):
                 continue
             attr = getattr(self, member)
-            setup = '_setup' + member
-            slot = '_on' + member[0].upper() + member[1:]
+            setup = "_setup" + member
+            slot = "_on" + member[0].upper() + member[1:]
 
             if isinstance(attr, QtCore.QObject):
                 name = str(parent_name) + member
                 attr.setObjectName(name)
 
                 if hasattr(self, setup):
-                    mooseutils.mooseDebug(name + "::" + setup, color='GREEN')
+                    mooseutils.mooseDebug(name + "::" + setup, color="GREEN")
                     setupMethod = getattr(self, setup)
                     setupMethod(attr)
 
             elif isinstance(attr, QtCore.pyqtBoundSignal):
                 self._signals[member] = attr
                 if hasattr(self, slot):
-                    mooseutils.mooseDebug(member, '-->', slot, color='MAGENTA')
+                    mooseutils.mooseDebug(member, "-->", slot, color="MAGENTA")
                     attr.connect(getattr(self, slot))
 
     def dumpQObjectTree(self):
@@ -72,16 +73,16 @@ class MooseWidget(object):
         """
         Return a unique "key" for saving widget state, see ExodusPlugin.
         """
-        return 'default'
+        return "default"
 
     def hasState(self, *args, **kwargs):
-        key = kwargs.pop('key', self.stateKey())
+        key = kwargs.pop("key", self.stateKey())
         if not args:
             args = [self]
 
         all_state = []
         for widget in args:
-            state = widget.property('state')
+            state = widget.property("state")
             all_state.append((key in state) if state else False)
 
         return all(all_state)
@@ -97,7 +98,7 @@ class MooseWidget(object):
             passed to peacock.utils.WidgetUtils.storeWidget
         """
         self.blockSignals(True)
-        key = kwargs.pop('key', self.stateKey())
+        key = kwargs.pop("key", self.stateKey())
         if args:
             for widget in args:
                 WidgetUtils.storeWidget(widget, key, **kwargs)
@@ -116,7 +117,7 @@ class MooseWidget(object):
         Kwargs:
             passed to peacock.utils.WidgetUtils.storeWidget
         """
-        key = kwargs.pop('key', self.stateKey())
+        key = kwargs.pop("key", self.stateKey())
         if args:
             for widget in args:
                 WidgetUtils.loadWidget(widget, key, **kwargs)

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Execute.ExecuteTabPlugin import ExecuteTabPlugin
 from PyQt5.QtWidgets import QMainWindow, QApplication
@@ -17,6 +17,7 @@ from peacock.Input.InputTree import InputTree
 from peacock.Input import TimeStepEstimate
 import argparse
 import re
+
 
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
@@ -146,5 +147,6 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(ops.mpi_line.text(), "some args")
         self.assertEqual(ops.threads_line.text(), "other args")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

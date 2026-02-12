@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .Input import OutputNames
 from .PythonConsoleWidget import PythonConsoleWidget
@@ -20,6 +20,7 @@ from .Input.InputFileEditorWithMesh import InputFileEditorWithMesh
 from .Execute.ExecuteTabPlugin import ExecuteTabPlugin
 import os
 
+
 class PeacockMainWindow(BasePeacockMainWindow):
     """
     Main Peacock window.
@@ -27,7 +28,13 @@ class PeacockMainWindow(BasePeacockMainWindow):
     This includes all the various tabs as well as some menus
     """
 
-    PLUGINS = [InputFileEditorWithMesh, ExecuteTabPlugin, ExodusViewer, PostprocessorViewer, VectorPostprocessorViewer]
+    PLUGINS = [
+        InputFileEditorWithMesh,
+        ExecuteTabPlugin,
+        ExodusViewer,
+        PostprocessorViewer,
+        VectorPostprocessorViewer,
+    ]
 
     def __init__(self, **kwds):
         super(PeacockMainWindow, self).__init__(plugins=self.PLUGINS, **kwds)
@@ -36,14 +43,24 @@ class PeacockMainWindow(BasePeacockMainWindow):
         self.console = PythonConsoleWidget()
         self.exe_path = ""
         self.input_file_path = ""
-        self.tab_plugin.ExecuteTabPlugin.executableInfoChanged.connect(self._executableChanged)
+        self.tab_plugin.ExecuteTabPlugin.executableInfoChanged.connect(
+            self._executableChanged
+        )
         self.tab_plugin.ExecuteTabPlugin.startJob.connect(self._startJob)
-        self.tab_plugin.ExecuteTabPlugin.needInputFile.connect(self.tab_plugin.InputFileEditorWithMesh.InputFileEditorPlugin.writeInputFile)
-        self.tab_plugin.InputFileEditorWithMesh.inputFileChanged.connect(self._inputFileChanged)
-        self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.workingDirChanged.connect(self.tab_plugin.InputFileEditorWithMesh.onWorkingDirChanged)
-        self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.useTestObjectsChanged.connect(self.tab_plugin.InputFileEditorWithMesh.onUseTestObjectsChanged)
-        self.setPythonVariable('main_window', self)
-        self.setPythonVariable('tabs', self.tab_plugin)
+        self.tab_plugin.ExecuteTabPlugin.needInputFile.connect(
+            self.tab_plugin.InputFileEditorWithMesh.InputFileEditorPlugin.writeInputFile
+        )
+        self.tab_plugin.InputFileEditorWithMesh.inputFileChanged.connect(
+            self._inputFileChanged
+        )
+        self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.workingDirChanged.connect(
+            self.tab_plugin.InputFileEditorWithMesh.onWorkingDirChanged
+        )
+        self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.useTestObjectsChanged.connect(
+            self.tab_plugin.InputFileEditorWithMesh.onUseTestObjectsChanged
+        )
+        self.setPythonVariable("main_window", self)
+        self.setPythonVariable("tabs", self.tab_plugin)
         self.setup()
 
     @staticmethod
@@ -59,7 +76,9 @@ class PeacockMainWindow(BasePeacockMainWindow):
         if options.working_dir:
             # if the input file is set then it will change directory to where
             # it exists. We need to honor the command line switch for the working dir.
-            self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(curr_dir)
+            self.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(
+                curr_dir
+            )
         self._setTitle()
 
     def _showConsole(self):
@@ -163,7 +182,10 @@ class PeacockMainWindow(BasePeacockMainWindow):
         super(PeacockMainWindow, self)._addMenus()
         menubar = self.menuBar()
         debug_menu = menubar.addMenu("Debug")
-        WidgetUtils.addAction(debug_menu, "Show Python Console", self._showConsole, "Ctrl+P", True)
+        WidgetUtils.addAction(
+            debug_menu, "Show Python Console", self._showConsole, "Ctrl+P", True
+        )
+
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication

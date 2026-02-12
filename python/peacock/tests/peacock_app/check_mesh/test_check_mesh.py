@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -21,7 +22,7 @@ class Tests(Testing.PeacockTester):
 
     def testInputFileMesh(self):
         exe_file = Testing.find_moose_test_exe()
-        app = self.createPeacockApp(['../../common/transient.i', exe_file])
+        app = self.createPeacockApp(["../../common/transient.i", exe_file])
         tabs = app.main_widget.tab_plugin
         input_plugin = tabs.InputFileEditorWithMesh
         self.assertEqual(str(tabs.tabText(tabs.currentIndex())), input_plugin.tabName())
@@ -32,5 +33,6 @@ class Tests(Testing.PeacockTester):
         vtkwin.onWrite(self.filename)
         self.assertFalse(Testing.gold_diff(self.filename))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

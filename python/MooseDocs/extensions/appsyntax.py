@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import collections
@@ -27,21 +27,27 @@ from . import command, core, floats, table, autolink, materialicon, modal, alert
 
 LOG = logging.getLogger(__name__)
 
+
 def make_extension(**kwargs):
     return AppSyntaxExtension(**kwargs)
 
-ParameterToken = tokens.newToken('ParameterToken', parameter=None, syntax=None, include_heading=True)
-InputParametersToken = tokens.newToken('InputParametersToken',
-                                       parameters=list(),
-                                       level=2,
-                                       groups=list(),
-                                       hide=list(),
-                                       show=list(),
-                                       visible=list())
 
-SyntaxList = tokens.newToken('SyntaxList')
-SyntaxListItem = tokens.newToken('SyntaxListItem', syntax='', group='', header=False)
-SyntaxLink = tokens.newToken('SyntaxLink', core.Link)
+ParameterToken = tokens.newToken(
+    "ParameterToken", parameter=None, syntax=None, include_heading=True
+)
+InputParametersToken = tokens.newToken(
+    "InputParametersToken",
+    parameters=list(),
+    level=2,
+    groups=list(),
+    hide=list(),
+    show=list(),
+    visible=list(),
+)
+
+SyntaxList = tokens.newToken("SyntaxList")
+SyntaxListItem = tokens.newToken("SyntaxListItem", syntax="", group="", header=False)
+SyntaxLink = tokens.newToken("SyntaxLink", core.Link)
 
 LATEX_PARAMETER = """
 \\DeclareDocumentEnvironment{InputParameter}{mooo}{%
@@ -78,38 +84,63 @@ LATEX_OBJECT = """
 }
 """
 
+
 class AppSyntaxExtension(command.CommandExtension):
 
-    EXTERNAL_MESSAGE = "This page is included from an external application and uses syntax that " \
-                       "is not available in the {} application. As such, it is not possible to " \
-                       "extract information such as the description or parameters from the " \
-                       "associated objects or syntax. These aspects of the page are disabled."
+    EXTERNAL_MESSAGE = (
+        "This page is included from an external application and uses syntax that "
+        "is not available in the {} application. As such, it is not possible to "
+        "extract information such as the description or parameters from the "
+        "associated objects or syntax. These aspects of the page are disabled."
+    )
 
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['executable'] = (None,
-                                "The MOOSE application executable to use for generating syntax.")
-        config['app_name'] = (None,
-                              "The MOOSE application name (e.g., moose_test); if not provided an " \
-                              "attempt will be made to determine the name.")
-        config['sources'] = ([],
-                             "List of source directories to investigate for class information.")
-        config['includes'] = ([],
-                              "List of include directories to investigate for class information.")
-        config['inputs'] = ([],
-                            "List of directories to interrogate for input files using an object.")
-        config['allow-test-objects'] = (False, "Enable documentation for test objects.");
-        config['remove'] = (None, "List or Dictionary of lists of syntax to remove.")
-        config['visible'] = (['required', 'optional'],
-                             "Parameter groups to show as un-collapsed.")
-        config['alias'] = (None, "Dictionary of syntax aliases.")
-        config['unregister'] = (None,
-                                "A `dict` or `dict` of `dict` including syntax to unregister (key='moose_base', value='parent_syntax')")
-        config['markdown'] = (None,
-                             "A `dict` or `dict` of `dict` including markdown files to explicitly set a custom, additional markdown reference (key='syntax', value='file.md')")
-        config['external_icon'] = ('feedback', "Icon name for the alert title when unavailable syntax is located on an external page.")
-        config['external_alert'] = ('warning', "Alert name when unavailable syntax is located on an external page.")
+        config["executable"] = (
+            None,
+            "The MOOSE application executable to use for generating syntax.",
+        )
+        config["app_name"] = (
+            None,
+            "The MOOSE application name (e.g., moose_test); if not provided an "
+            "attempt will be made to determine the name.",
+        )
+        config["sources"] = (
+            [],
+            "List of source directories to investigate for class information.",
+        )
+        config["includes"] = (
+            [],
+            "List of include directories to investigate for class information.",
+        )
+        config["inputs"] = (
+            [],
+            "List of directories to interrogate for input files using an object.",
+        )
+        config["allow-test-objects"] = (False, "Enable documentation for test objects.")
+        config["remove"] = (None, "List or Dictionary of lists of syntax to remove.")
+        config["visible"] = (
+            ["required", "optional"],
+            "Parameter groups to show as un-collapsed.",
+        )
+        config["alias"] = (None, "Dictionary of syntax aliases.")
+        config["unregister"] = (
+            None,
+            "A `dict` or `dict` of `dict` including syntax to unregister (key='moose_base', value='parent_syntax')",
+        )
+        config["markdown"] = (
+            None,
+            "A `dict` or `dict` of `dict` including markdown files to explicitly set a custom, additional markdown reference (key='syntax', value='file.md')",
+        )
+        config["external_icon"] = (
+            "feedback",
+            "Icon name for the alert title when unavailable syntax is located on an external page.",
+        )
+        config["external_alert"] = (
+            "warning",
+            "Alert name when unavailable syntax is located on an external page.",
+        )
         return config
 
     def __init__(self, *args, **kwargs):
@@ -121,7 +152,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self._cache = dict()
         self._object_cache = dict()
         self._syntax_cache = dict()
-        self._external_missing_syntax = set() # page.uid
+        self._external_missing_syntax = set()  # page.uid
 
     def preExecute(self):
         """Populate the application syntax tree."""
@@ -130,7 +161,7 @@ class AppSyntaxExtension(command.CommandExtension):
         if self._app_type is not None:
             return
 
-        if self.active and self.get('executable') is None:
+        if self.active and self.get("executable") is None:
             msg = "No executable defined, the 'appsyntax' extension is being disabled."
             LOG.error(msg)
             self.setActive(False)
@@ -147,17 +178,21 @@ class AppSyntaxExtension(command.CommandExtension):
 
         exe = self.executable
         if exe is None:
-            LOG.error("Failed to locate a valid executable in %s.", self['executable'])
+            LOG.error("Failed to locate a valid executable in %s.", self["executable"])
         else:
             try:
-                self._app_syntax = moosesyntax.get_moose_syntax_tree(exe,
-                                                                     remove=self['remove'],
-                                                                     alias=self['alias'],
-                                                                     unregister=self['unregister'],
-                                                                     markdown=self['markdown'])
+                self._app_syntax = moosesyntax.get_moose_syntax_tree(
+                    exe,
+                    remove=self["remove"],
+                    alias=self["alias"],
+                    unregister=self["unregister"],
+                    markdown=self["markdown"],
+                )
 
-                out = mooseutils.runExe(exe, ['--show-type'])
-                match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
+                out = mooseutils.runExe(exe, ["--show-type"])
+                match = re.search(
+                    r"^MooseApp Type:\s+(?P<type>.*?)$", out, flags=re.MULTILINE
+                )
                 if match:
                     self._app_type = match.group("type")
                 else:
@@ -166,17 +201,23 @@ class AppSyntaxExtension(command.CommandExtension):
                     LOG.error(msg)
 
             except Exception as e:
-                msg = "Failed to load application executable from '{}' with the following error; " \
-                      "application syntax is being disabled.\n".format(exe)
-                msg += '\n{}\n'.format(mooseutils.colorText(traceback.format_exc(), 'GREY'))
-                msg += "This typically indicates that the application is not producing JSON output " \
-                       "correctly, try running the following:\n" \
-                       "    {} --json --allow-test-objects\n".format(exe)
+                msg = (
+                    "Failed to load application executable from '{}' with the following error; "
+                    "application syntax is being disabled.\n".format(exe)
+                )
+                msg += "\n{}\n".format(
+                    mooseutils.colorText(traceback.format_exc(), "GREY")
+                )
+                msg += (
+                    "This typically indicates that the application is not producing JSON output "
+                    "correctly, try running the following:\n"
+                    "    {} --json --allow-test-objects\n".format(exe)
+                )
                 self.setActive(False)
                 LOG.error(msg)
 
         # Enable test objects by removing the test flag (i.e., don't consider them test objects)
-        if self['allow-test-objects'] and (self._app_syntax is not None):
+        if self["allow-test-objects"] and (self._app_syntax is not None):
             for node in moosetree.iterate(self._app_syntax):
                 node.test = False
 
@@ -192,7 +233,8 @@ class AppSyntaxExtension(command.CommandExtension):
         start = time.time()
         LOG.info("Building MOOSE class database...")
         self._database = common.build_class_database(
-            self['sources'], self['includes'], self['inputs'])
+            self["sources"], self["includes"], self["inputs"]
+        )
 
         # Cache the syntax entries, search the tree is very slow
         self._cache = dict()
@@ -228,17 +270,19 @@ class AppSyntaxExtension(command.CommandExtension):
 
     @property
     def executable(self):
-        exe = mooseutils.eval_path(self['executable'])
-        exe = mooseutils.find_moose_executable(exe,
-                                               name=self['app_name'],
-                                               show_error=False)
+        exe = mooseutils.eval_path(self["executable"])
+        exe = mooseutils.find_moose_executable(
+            exe, name=self["app_name"], show_error=False
+        )
         return exe
 
     def find(self, name, page=None, node_type=None, throw_on_missing=True):
 
-        if name.endswith('<RESIDUAL>'):
-            msg = "The use of <RESIDUAL> is no longer needed in the syntax name '%s', it " \
-                  "should be removed."
+        if name.endswith("<RESIDUAL>"):
+            msg = (
+                "The use of <RESIDUAL> is no longer needed in the syntax name '%s', it "
+                "should be removed."
+            )
             LOG.warning(msg, name)
             name = name[0:-10]
 
@@ -251,7 +295,7 @@ class AppSyntaxExtension(command.CommandExtension):
             node = self._cache.get(name, None)
 
         if node is None:
-            if getattr(page, 'external', False):
+            if getattr(page, "external", False):
                 self._external_missing_syntax.add(page.uid)
             elif throw_on_missing:
                 msg = "'{}' syntax was not recognized."
@@ -261,10 +305,14 @@ class AppSyntaxExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         if page.uid in self._external_missing_syntax:
-            brand = self.get('external_alert')
+            brand = self.get("external_alert")
             tok = alert.AlertToken(None, brand=brand)
-            alert.AlertTitle(tok, brand=brand, icon_name=self.get('external_icon'),
-                             string="Disabled Object Syntax")
+            alert.AlertTitle(
+                tok,
+                brand=brand,
+                icon_name=self.get("external_icon"),
+                string="Disabled Object Syntax",
+            )
             alert.AlertContent(tok, string=self.EXTERNAL_MESSAGE.format(self.apptype))
             ast.insert(0, tok)
 
@@ -279,37 +327,41 @@ class AppSyntaxExtension(command.CommandExtension):
         self.addCommand(reader, SyntaxListCommand())
         self.addCommand(reader, SyntaxCompleteCommand())
 
-        renderer.add('InputParametersToken', RenderInputParametersToken())
-        renderer.add('ParameterToken', RenderParameterToken())
-        renderer.add('SyntaxList', RenderSyntaxList())
-        renderer.add('SyntaxListItem', RenderSyntaxListItem())
-        renderer.add('SyntaxLink', RenderSyntaxLink())
+        renderer.add("InputParametersToken", RenderInputParametersToken())
+        renderer.add("ParameterToken", RenderParameterToken())
+        renderer.add("SyntaxList", RenderSyntaxList())
+        renderer.add("SyntaxListItem", RenderSyntaxListItem())
+        renderer.add("SyntaxLink", RenderSyntaxLink())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPreamble(LATEX_PARAMETER)
             renderer.addPreamble(LATEX_OBJECT)
-            renderer.addPackage('xcolor')
+            renderer.addPackage("xcolor")
+
 
 class SyntaxCommandBase(command.CommandComponent):
     NODE_TYPE = None
-    COMMAND = 'syntax'
+    COMMAND = "syntax"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['syntax'] = (None, "The name of the syntax to extract. If the name of the syntax "\
-                                    "is the first item in the settings the 'syntax=' may be " \
-                                    "omitted, e.g., `!syntax parameters /Kernels/Diffusion`.")
+        settings["syntax"] = (
+            None,
+            "The name of the syntax to extract. If the name of the syntax "
+            "is the first item in the settings the 'syntax=' may be "
+            "omitted, e.g., `!syntax parameters /Kernels/Diffusion`.",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
-        if settings['syntax'] is None:
-            args = info['settings'].split()
-            if args and ('=' not in args[0]):
-                settings['syntax'] = args[0]
+        if settings["syntax"] is None:
+            args = info["settings"].split()
+            if args and ("=" not in args[0]):
+                settings["syntax"] = args[0]
 
-        if settings['syntax']:
-            obj = self.extension.find(settings['syntax'], page, self.NODE_TYPE)
+        if settings["syntax"]:
+            obj = self.extension.find(settings["syntax"], page, self.NODE_TYPE)
             if obj is None:
                 return self.createDisabledToken(parent, info, page, settings)
         else:
@@ -318,40 +370,48 @@ class SyntaxCommandBase(command.CommandComponent):
         return self.createTokenFromSyntax(parent, info, page, obj, settings)
 
     def createDisabledToken(self, parent, info, page, settings):
-        tag = 'span' if MarkdownReader.INLINE in info else 'p'
-        tok = tokens.DisabledToken(parent, tag=tag, string=settings['syntax'])
+        tag = "span" if MarkdownReader.INLINE in info else "p"
+        tok = tokens.DisabledToken(parent, tag=tag, string=settings["syntax"])
         return parent
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
         pass
 
+
 class SyntaxCommandHeadingBase(SyntaxCommandBase):
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandBase.defaultSettings()
-        settings['heading'] = ('Input Parameters',
-                               "The heading title for the input parameters table, use 'None' to " \
-                               "remove the heading.")
-        settings['heading-level'] = (2, "Heading level for section title.")
+        settings["heading"] = (
+            "Input Parameters",
+            "The heading title for the input parameters table, use 'None' to "
+            "remove the heading.",
+        )
+        settings["heading-level"] = (2, "Heading level for section title.")
         return settings
 
     def createHeading(self, parent, page, settings):
-        heading = settings['heading']
+        heading = settings["heading"]
         if heading is not None:
-            h = core.Heading(parent, level=int(settings['heading-level']), id_=settings['id'])
+            h = core.Heading(
+                parent, level=int(settings["heading-level"]), id_=settings["id"]
+            )
             self.reader.tokenize(h, heading, page, MarkdownReader.INLINE)
 
+
 class SyntaxDescriptionCommand(SyntaxCommandBase):
-    SUBCOMMAND = 'description'
+    SUBCOMMAND = "description"
     NODE_TYPE = moosesyntax.ObjectNodeBase
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
 
         if obj.description is None:
-            msg = "The class description is missing for %s, it can be added using the " \
-                  "'addClassDescription' method from within the objects validParams function."
+            msg = (
+                "The class description is missing for %s, it can be added using the "
+                "'addClassDescription' method from within the objects validParams function."
+            )
             LOG.warning(msg, obj.fullpath())
-            core.Paragraph(parent, string=str(info[0]), class_='moose-error')
+            core.Paragraph(parent, string=str(info[0]), class_="moose-error")
             return parent
 
         else:
@@ -359,19 +419,31 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
             self.reader.tokenize(p, str(obj.description), page, MarkdownReader.INLINE)
             return parent
 
+
 class SyntaxParametersCommand(SyntaxCommandHeadingBase):
-    SUBCOMMAND = 'parameters'
-    NODE_TYPE = None # allows SyntaxNode objects to report combined action parameters
+    SUBCOMMAND = "parameters"
+    NODE_TYPE = None  # allows SyntaxNode objects to report combined action parameters
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
-        settings['groups'] = (None, "Space separated list of groups, in desired order, to output.")
-        settings['hide'] = (None, "Space separated list of parameters to remove from output.")
-        settings['show'] = (None, "Space separated list of parameters to display in output.")
-        settings['visible'] = (None,
-                               "Space separated list of parameter groups to display with " \
-                               "un-collapsed sections.")
+        settings["groups"] = (
+            None,
+            "Space separated list of groups, in desired order, to output.",
+        )
+        settings["hide"] = (
+            None,
+            "Space separated list of parameters to remove from output.",
+        )
+        settings["show"] = (
+            None,
+            "Space separated list of parameters to display in output.",
+        )
+        settings["visible"] = (
+            None,
+            "Space separated list of parameter groups to display with "
+            "un-collapsed sections.",
+        )
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -380,33 +452,40 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
         if isinstance(obj, moosesyntax.SyntaxNode):
             for action in obj.actions():
                 for param in action.parameters.values():
-                    parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
+                    parameters.append(
+                        ParameterToken(None, parameter=param, syntax=obj.name)
+                    )
         elif obj.parameters:
             for param in obj.parameters.values():
-                parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
+                parameters.append(
+                    ParameterToken(None, parameter=param, syntax=obj.name)
+                )
 
         self.createHeading(parent, page, settings)
-        token = InputParametersToken(parent, syntax=obj.name, parameters=parameters,
-                                     **self.attributes(settings))
-        if settings['groups']:
-            token['groups'] = [group.strip() for group in settings['groups'].split(' ')]
+        token = InputParametersToken(
+            parent, syntax=obj.name, parameters=parameters, **self.attributes(settings)
+        )
+        if settings["groups"]:
+            token["groups"] = [group.strip() for group in settings["groups"].split(" ")]
 
-        if settings['hide']:
-            token['hide'] = [param.strip() for param in settings['hide'].split(' ')]
+        if settings["hide"]:
+            token["hide"] = [param.strip() for param in settings["hide"].split(" ")]
 
-        if settings['show']:
-            token['show'] = [param.strip() for param in settings['show'].split(' ')]
+        if settings["show"]:
+            token["show"] = [param.strip() for param in settings["show"].split(" ")]
 
-        if settings['visible'] is not None:
-            token['visible'] = [group.strip().lower() for group in \
-                                settings['visible'].split(' ')]
+        if settings["visible"] is not None:
+            token["visible"] = [
+                group.strip().lower() for group in settings["visible"].split(" ")
+            ]
         else:
-            token['visible'] = self.extension.get('visible')
+            token["visible"] = self.extension.get("visible")
 
         return parent
 
+
 class SyntaxParameterCommand(SyntaxCommandBase):
-    COMMAND = 'param'
+    COMMAND = "param"
     SUBCOMMAND = None
     NODE_TYPE = None
 
@@ -416,14 +495,14 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         return settings
 
     def createDisabledToken(self, parent, info, page, settings):
-        tag = 'span' if MarkdownReader.INLINE in info else 'p'
-        tokens.DisabledToken(parent, tag=tag, string=settings['_param'])
+        tag = "span" if MarkdownReader.INLINE in info else "p"
+        tokens.DisabledToken(parent, tag=tag, string=settings["_param"])
         return parent
 
     def createToken(self, parent, info, page, settings):
-        obj_syntax, param_name = info[MarkdownReader.INLINE].rsplit('/', 1)
-        settings['syntax'] = obj_syntax
-        settings['_param'] = param_name
+        obj_syntax, param_name = info[MarkdownReader.INLINE].rsplit("/", 1)
+        settings["syntax"] = obj_syntax
+        settings["_param"] = param_name
         return SyntaxCommandBase.createToken(self, parent, info, page, settings)
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -434,28 +513,43 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         elif obj.parameters:
             parameters.update(obj.parameters)
 
-        param_name = settings['_param']
+        param_name = settings["_param"]
         if param_name not in parameters:
-            obj_syntax = settings['syntax']
+            obj_syntax = settings["syntax"]
             results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
-            msg = "Unable to locate the parameter '{}/{}', did you mean:\n".format(obj_syntax, param_name)
+            msg = "Unable to locate the parameter '{}/{}', did you mean:\n".format(
+                obj_syntax, param_name
+            )
             for res in results:
-                msg += '    {}/{}\n'.format(obj_syntax, res)
+                msg += "    {}/{}\n".format(obj_syntax, res)
             raise exceptions.MooseDocsException(msg, param_name, obj_syntax)
 
-        param_token = ParameterToken(None, parameter=parameters[param_name], syntax=obj.name, include_heading=False);
-        modal.ModalLink(parent, string='"{}"'.format(param_name), title=param_name, content=param_token)
+        param_token = ParameterToken(
+            None,
+            parameter=parameters[param_name],
+            syntax=obj.name,
+            include_heading=False,
+        )
+        modal.ModalLink(
+            parent,
+            string='"{}"'.format(param_name),
+            title=param_name,
+            content=param_token,
+        )
         return parent
 
+
 class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
-    SUBCOMMAND = 'children'
+    SUBCOMMAND = "children"
     NODE_TYPE = moosesyntax.ObjectNodeBase
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
-        settings['heading'] = ("Child Objects",
-                               "Heading to include for sections, use 'None' to remove the title.")
+        settings["heading"] = (
+            "Child Objects",
+            "Heading to include for sections, use 'None' to remove the title.",
+        )
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -464,67 +558,86 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
         attr = getattr(item, self.SUBCOMMAND, None)
         if item and attr:
             self.createHeading(parent, page, settings)
-            ul = core.UnorderedList(parent, class_='moose-list-{}'.format(self.SUBCOMMAND))
+            ul = core.UnorderedList(
+                parent, class_="moose-list-{}".format(self.SUBCOMMAND)
+            )
             for filename in attr:
-                filename = os.path.abspath(os.path.join(MooseDocs.ROOT_DIR, str(filename)))
+                filename = os.path.abspath(
+                    os.path.join(MooseDocs.ROOT_DIR, str(filename))
+                )
                 li = core.ListItem(ul)
                 modal.ModalSourceLink(li, src=filename)
 
         return parent
 
+
 class SyntaxInputsCommand(SyntaxChildrenCommand):
-    SUBCOMMAND = 'inputs'
+    SUBCOMMAND = "inputs"
     NODE_TYPE = moosesyntax.ObjectNodeBase
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxChildrenCommand.defaultSettings()
-        settings['heading'] = ("Input Files", settings['heading'][1])
+        settings["heading"] = ("Input Files", settings["heading"][1])
         return settings
 
 
 class SyntaxListCommand(SyntaxCommandHeadingBase):
-    SUBCOMMAND = 'list'
+    SUBCOMMAND = "list"
     NODE_TYPE = moosesyntax.SyntaxNode
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxCommandHeadingBase.defaultSettings()
-        settings['heading'] = ('AUTO',
-                               "The heading title for the input parameters table, use 'None' to " \
-                               "remove the heading.")
-        settings['group-headings'] = (True, "Display group headings.")
+        settings["heading"] = (
+            "AUTO",
+            "The heading title for the input parameters table, use 'None' to "
+            "remove the heading.",
+        )
+        settings["group-headings"] = (True, "Display group headings.")
 
-        settings['groups'] = (None, "List of groups (apps) to include in the complete syntax list.")
-        settings['actions'] = (True, "Include a list of Action objects in syntax.")
-        settings['objects'] = (True, "Include a list of MooseObject objects in syntax.")
-        settings['subsystems'] = (True, "Include a list of sub system syntax in the output.")
+        settings["groups"] = (
+            None,
+            "List of groups (apps) to include in the complete syntax list.",
+        )
+        settings["actions"] = (True, "Include a list of Action objects in syntax.")
+        settings["objects"] = (True, "Include a list of MooseObject objects in syntax.")
+        settings["subsystems"] = (
+            True,
+            "Include a list of sub system syntax in the output.",
+        )
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
 
         primary = SyntaxList(None, **self.attributes(settings))
-        if settings['groups']:
-            groups = settings['groups'].split()
+        if settings["groups"]:
+            groups = settings["groups"].split()
         else:
-            groups = list(set([child.group for child in obj if child.group is not None]))
+            groups = list(
+                set([child.group for child in obj if child.group is not None])
+            )
 
-        if 'MooseApp' in groups:
-            groups.remove('MooseApp')
-            groups.insert(0, 'MooseApp')
+        if "MooseApp" in groups:
+            groups.remove("MooseApp")
+            groups.insert(0, "MooseApp")
 
         for group in groups:
-            if settings['group-headings']:
-                header = SyntaxListItem(primary,
-                                        header=True,
-                                        string=str(mooseutils.camel_to_space(group)))
+            if settings["group-headings"]:
+                header = SyntaxListItem(
+                    primary, header=True, string=str(mooseutils.camel_to_space(group))
+                )
 
             count = 0
-            if settings['actions']:
-                count += self._addItems(primary, info, page, group, obj.actions(), 'Action')
-            if settings['objects']:
-                count += self._addItems(primary, info, page, group, obj.objects(), 'MooseObject')
-            if settings['subsystems']:
+            if settings["actions"]:
+                count += self._addItems(
+                    primary, info, page, group, obj.actions(), "Action"
+                )
+            if settings["objects"]:
+                count += self._addItems(
+                    primary, info, page, group, obj.objects(), "MooseObject"
+                )
+            if settings["subsystems"]:
                 count += self._addItems(primary, info, page, group, obj.syntax())
 
             if count == 0:
@@ -537,18 +650,18 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
         return parent
 
     def createHeading(self, parent, page, settings, **kwargs):
-        if settings['heading'] == 'AUTO':
-            h = ['Objects', 'Actions', 'Subsystems']
-            idx = [settings['objects'], settings['actions'], settings['subsystems']]
+        if settings["heading"] == "AUTO":
+            h = ["Objects", "Actions", "Subsystems"]
+            idx = [settings["objects"], settings["actions"], settings["subsystems"]]
             names = [h[i] for i, v in enumerate(idx) if v]
             if len(names) == 1:
-                settings['heading'] = 'Available {}'.format(*names)
+                settings["heading"] = "Available {}".format(*names)
             elif len(names) == 2:
-                settings['heading'] = 'Available {} and {}'.format(*names)
+                settings["heading"] = "Available {} and {}".format(*names)
             elif len(names) == 3:
-                settings['heading'] = 'Available {}, {}, and {}'.format(*names)
+                settings["heading"] = "Available {}, {}, and {}".format(*names)
             else:
-                settings['heading'] = None
+                settings["heading"] = None
 
         super(SyntaxListCommand, self).createHeading(parent, page, settings)
 
@@ -557,70 +670,94 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
         count = 0
         obj_name_set = set()
         for obj in objects:
-            if (group in obj.groups()) and not (obj.removed or obj.test) and not (obj.name, obj.markdown) in obj_name_set:
+            if (
+                (group in obj.groups())
+                and not (obj.removed or obj.test)
+                and not (obj.name, obj.markdown) in obj_name_set
+            ):
                 obj_name_set.add((obj.name, obj.markdown))
                 count += 1
                 item = SyntaxListItem(parent, group=group, syntax=obj.name)
                 if base:
-                    item['base'] = base
+                    item["base"] = base
                 nodes = self.translator.findPages(obj.markdown)
                 if len(nodes) == 0:
                     tokens.String(item, content=str(obj.name))
                 else:
-                    SyntaxLink(item, string=str(obj.name),
-                               url=str(nodes[0].relativeDestination(page)))
+                    SyntaxLink(
+                        item,
+                        string=str(obj.name),
+                        url=str(nodes[0].relativeDestination(page)),
+                    )
 
-                desc = getattr(obj, 'description', None)
+                desc = getattr(obj, "description", None)
                 if desc:
-                    self.reader.tokenize(item, str(obj.description), page, MarkdownReader.INLINE, info.line)
+                    self.reader.tokenize(
+                        item,
+                        str(obj.description),
+                        page,
+                        MarkdownReader.INLINE,
+                        info.line,
+                    )
 
         return count
 
+
 class SyntaxCompleteCommand(SyntaxListCommand):
-    SUBCOMMAND = 'complete'
+    SUBCOMMAND = "complete"
     NODE_TYPE = moosesyntax.SyntaxNode
 
     @staticmethod
     def defaultSettings():
         settings = SyntaxListCommand.defaultSettings()
-        settings['level'] = (2, "Beginning heading level.")
-        settings['heading'] = (None, settings['heading'][1])
+        settings["level"] = (2, "Beginning heading level.")
+        settings["heading"] = (None, settings["heading"][1])
         return settings
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
         # Always search entire syntax tree for group members when listing root systems by setting
         # `recursive=True`. This is so that top level headers are always rendered even if a system
         # only has actions and/or subsystems available for the group and no child objects.
-        self._addList(parent, info, page, obj, settings, level=settings['level'], recursive=True)
+        self._addList(
+            parent, info, page, obj, settings, level=settings["level"], recursive=True
+        )
         return parent
 
-    def _addList(self, parent, info, page, obj, settings, *, level=None, recursive=False):
-        groups = set(settings['groups'].split()) if settings['groups'] else None
-        h_id = settings['id']
+    def _addList(
+        self, parent, info, page, obj, settings, *, level=None, recursive=False
+    ):
+        groups = set(settings["groups"].split()) if settings["groups"] else None
+        h_id = settings["id"]
         for child in obj.syntax():
             if child.removed or child.test:
                 continue
 
             # get a list of groups this object is a member of to cross-reference w/ those specified
-            cgs = child.groups(actions=True, syntax=True, objects=True, recursive=recursive)
+            cgs = child.groups(
+                actions=True, syntax=True, objects=True, recursive=recursive
+            )
 
             if (groups is None) or (cgs.intersection(groups)):
-                url = os.path.join('syntax', child.markdown)
+                url = os.path.join("syntax", child.markdown)
                 h = core.Heading(parent, level=level, id_=h_id)
-                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')))
+                autolink.AutoLink(h, page=url, string=str(child.fullpath().strip("/")))
 
-            SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child, settings)
+            SyntaxListCommand.createTokenFromSyntax(
+                self, parent, info, page, child, settings
+            )
 
-            self._addList(parent, info, page, child, settings, level=level+1)
+            self._addList(parent, info, page, child, settings, level=level + 1)
 
 
 class RenderSyntaxList(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        div = html.Tag(parent, 'div', token, class_='moose-syntax-list')
+        div = html.Tag(parent, "div", token, class_="moose-syntax-list")
         return div
 
     def createMaterialize(self, parent, token, page):
-        collection = html.Tag(parent, 'ul', class_='moose-syntax-list collection with-header')
+        collection = html.Tag(
+            parent, "ul", class_="moose-syntax-list collection with-header"
+        )
         return collection
 
     def createLatex(self, parent, token, page):
@@ -629,43 +766,52 @@ class RenderSyntaxList(components.RenderComponent):
     def createReveal(self, parent, token, page):
         div = self.createHTML(parent, token, page)
 
-        arrow_div = html.Tag(div, 'div', class_='moose-arrow moose-bounce')
-        arrow_i = html.Tag(arrow_div, 'i', class_='moose-scroll-indicator',
-                           string='keyboard_arrow_down')
-        arrow_i.addClass('material-icons')
-        arrow_i['aria-hidden'] = "true"
+        arrow_div = html.Tag(div, "div", class_="moose-arrow moose-bounce")
+        arrow_i = html.Tag(
+            arrow_div,
+            "i",
+            class_="moose-scroll-indicator",
+            string="keyboard_arrow_down",
+        )
+        arrow_i.addClass("material-icons")
+        arrow_i["aria-hidden"] = "true"
 
         return div
 
+
 class RenderSyntaxListItem(components.RenderComponent):
     def createHTML(self, parent, token, page):
-        #token(0).parent = None # I don't recall why this was here
-        p = html.Tag(parent, 'p', class_='moose-syntax-list-item')
-        html.Tag(p, 'span', string='{}: '.format(token['syntax']),
-                 class_='moose-syntax-list-item-syntax')
-        return html.Tag(p, 'span',
-                        class_='moose-syntax-list-item-details')
+        # token(0).parent = None # I don't recall why this was here
+        p = html.Tag(parent, "p", class_="moose-syntax-list-item")
+        html.Tag(
+            p,
+            "span",
+            string="{}: ".format(token["syntax"]),
+            class_="moose-syntax-list-item-syntax",
+        )
+        return html.Tag(p, "span", class_="moose-syntax-list-item-details")
 
     def createMaterialize(self, parent, token, page):
-        class_ = 'collection-header' if token['header'] else 'collection-item'
-        return html.Tag(parent, 'li', class_=class_)
+        class_ = "collection-header" if token["header"] else "collection-item"
+        return html.Tag(parent, "li", class_=class_)
 
     def createLatex(self, parent, token, page):
-        if token['header']:
+        if token["header"]:
             return None
 
-        title = latex.Brace(string=token(0)['content'])
-        reg = latex.Bracket(string=token['group'])
+        title = latex.Brace(string=token(0)["content"])
+        reg = latex.Bracket(string=token["group"])
         args = [title, reg]
 
-        if token['base']:
-            args.append(latex.Bracket(string=token['base']))
+        if token["base"]:
+            args.append(latex.Bracket(string=token["base"]))
 
         token(0).parent = None
-        env = latex.Environment(parent, 'ObjectDescription', args=args)
+        env = latex.Environment(parent, "ObjectDescription", args=args)
         if len(token) == 0:
             latex.String(env, content="\\textcolor{red}{No Description.}", escape=False)
         return env
+
 
 class RenderInputParametersToken(components.RenderComponent):
 
@@ -676,7 +822,7 @@ class RenderInputParametersToken(components.RenderComponent):
         self._createHTMLHelper(parent, token, page, True)
 
     def _createHTMLHelper(self, parent, token, page, collapse):
-        groups = _get_parameters(token, token['parameters'])
+        groups = _get_parameters(token, token["parameters"])
 
         n_groups = 0
         for group, params in groups.items():
@@ -687,18 +833,21 @@ class RenderInputParametersToken(components.RenderComponent):
             if not params:
                 continue
 
-            if n_groups > 1: # only create a sub-section if more than one exists
-                h = html.Tag(parent, 'h{}'.format(token['level'] + 1),
-                             string=str('{} Parameters'.format(group.title())))
-                if group.lower() in token['visible']:
-                    h['data-details-open'] = 'open'
+            if n_groups > 1:  # only create a sub-section if more than one exists
+                h = html.Tag(
+                    parent,
+                    "h{}".format(token["level"] + 1),
+                    string=str("{} Parameters".format(group.title())),
+                )
+                if group.lower() in token["visible"]:
+                    h["data-details-open"] = "open"
                 else:
-                    h['data-details-open'] = 'close'
+                    h["data-details-open"] = "close"
 
-            ul = html.Tag(parent, 'ul')
+            ul = html.Tag(parent, "ul")
             if collapse:
-                ul.addClass('collapsible')
-                ul['data-collapsible'] = "expandable"
+                ul.addClass("collapsible")
+                ul["data-collapsible"] = "expandable"
 
             for name, param in params.items():
                 self.renderer.render(ul, param, page)
@@ -706,7 +855,7 @@ class RenderInputParametersToken(components.RenderComponent):
 
     def createLatex(self, parent, token, page):
 
-        groups = _get_parameters(token, token['parameters'])
+        groups = _get_parameters(token, token["parameters"])
         for group, params in groups.items():
             if not params:
                 continue
@@ -714,119 +863,139 @@ class RenderInputParametersToken(components.RenderComponent):
             for name, param in params.items():
                 self.renderer.render(parent, param, page)
 
+
 class RenderParameterToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        param = token['parameter']
-        name = param['name']
+        param = token["parameter"]
+        name = param["name"]
 
-        if param['deprecated']:
+        if param["deprecated"]:
             return
 
-        li = html.Tag(parent, 'li')
+        li = html.Tag(parent, "li")
         default = _format_default(param)
 
         if default:
-            html.Tag(li, 'strong', string=name)
-            html.Tag(li, 'span', string=' ({}): '.format(default))
+            html.Tag(li, "strong", string=name)
+            html.Tag(li, "span", string=" ({}): ".format(default))
         else:
-            html.Tag(li, 'strong', string='{}: '.format(name))
+            html.Tag(li, "strong", string="{}: ".format(name))
 
-        desc = param['description']
+        desc = param["description"]
         if desc:
-            html.Tag(li, 'span', string=desc)
+            html.Tag(li, "span", string=desc)
 
     def createMaterialize(self, parent, token, page):
-        param = token['parameter']
-        name = param['name']
+        param = token["parameter"]
+        name = param["name"]
 
-        if param['deprecated']:
+        if param["deprecated"]:
             return
 
         default = _format_default(param)
-        desc = param['description']
+        desc = param["description"]
 
-        if token['include_heading']:
-            li = html.Tag(parent, 'li')
-            header = html.Tag(li, 'div', class_='collapsible-header')
-            body = html.Tag(li, 'div', class_='collapsible-body')
+        if token["include_heading"]:
+            li = html.Tag(parent, "li")
+            header = html.Tag(li, "div", class_="collapsible-header")
+            body = html.Tag(li, "div", class_="collapsible-body")
 
-            html.Tag(header, 'span', class_='moose-parameter-name', string=name)
+            html.Tag(header, "span", class_="moose-parameter-name", string=name)
             if default:
-                html.Tag(header, 'span', class_='moose-parameter-header-default', string=default)
+                html.Tag(
+                    header,
+                    "span",
+                    class_="moose-parameter-header-default",
+                    string=default,
+                )
 
             if desc:
-                html.Tag(header, 'span', class_='moose-parameter-header-description', string=str(desc))
+                html.Tag(
+                    header,
+                    "span",
+                    class_="moose-parameter-header-description",
+                    string=str(desc),
+                )
 
         else:
             body = parent
 
         if default:
-            p = html.Tag(body, 'p', class_='moose-parameter-description-default')
-            html.Tag(p, 'span', string='Default:')
+            p = html.Tag(body, "p", class_="moose-parameter-description-default")
+            html.Tag(p, "span", string="Default:")
             html.String(p, content=default)
 
-        cpp_type = param['cpp_type']
-        p = html.Tag(body, 'p', class_='moose-parameter-description-cpptype')
-        html.Tag(p, 'span', string='C++ Type:')
+        cpp_type = param["cpp_type"]
+        p = html.Tag(body, "p", class_="moose-parameter-description-cpptype")
+        html.Tag(p, "span", string="C++ Type:")
         html.String(p, content=cpp_type, escape=True)
 
-        doc_unit = param['doc_unit']
+        doc_unit = param["doc_unit"]
         # Only display a unit if specified or if the type is likely to have a unit
-        if doc_unit or "double" in cpp_type or "Variable" in cpp_type or "Postprocessor" in cpp_type or "Funct" in cpp_type or "MaterialProperty" in cpp_type:
-            p = html.Tag(body, 'p', class_='moose-parameter-description-doc-unit')
-            html.Tag(p, 'span', string='Unit:')
+        if (
+            doc_unit
+            or "double" in cpp_type
+            or "Variable" in cpp_type
+            or "Postprocessor" in cpp_type
+            or "Funct" in cpp_type
+            or "MaterialProperty" in cpp_type
+        ):
+            p = html.Tag(body, "p", class_="moose-parameter-description-doc-unit")
+            html.Tag(p, "span", string="Unit:")
             # If a unit was specified, always display it
             if doc_unit:
                 html.String(p, content=doc_unit)
             else:
-                html.String(p, content='(no unit assumed)')
+                html.String(p, content="(no unit assumed)")
 
-        if param['doc_range']:
-            p = html.Tag(body, 'p', class_='moose-parameter-description-doc-range')
-            html.Tag(p, 'span', string='Range:')
-            html.String(p, content=param['doc_range'])
+        if param["doc_range"]:
+            p = html.Tag(body, "p", class_="moose-parameter-description-doc-range")
+            html.Tag(p, "span", string="Range:")
+            html.String(p, content=param["doc_range"])
 
-        if param['options']:
-            p = html.Tag(body, 'p', class_='moose-parameter-description-options')
-            html.Tag(p, 'span', string='Options:')
-            html.String(p, content=", ".join(param['options'].split()))
+        if param["options"]:
+            p = html.Tag(body, "p", class_="moose-parameter-description-options")
+            html.Tag(p, "span", string="Options:")
+            html.String(p, content=", ".join(param["options"].split()))
 
-        p = html.Tag(body, 'p', class_='moose-parameter-description-controllable')
-        html.Tag(p, 'span', string='Controllable:')
-        html.String(p, content=('Yes' if param['controllable'] else 'No'))
+        p = html.Tag(body, "p", class_="moose-parameter-description-controllable")
+        html.Tag(p, "span", string="Controllable:")
+        html.String(p, content=("Yes" if param["controllable"] else "No"))
 
-        p = html.Tag(body, 'p', class_='moose-parameter-description')
+        p = html.Tag(body, "p", class_="moose-parameter-description")
         if desc:
-            html.Tag(p, 'span', string='Description:')
+            html.Tag(p, "span", string="Description:")
             html.String(p, content=str(desc))
 
     def createLatex(self, parent, token, page):
-        param = token['parameter']
-        name = param['name']
-        group = param['group_name']
+        param = token["parameter"]
+        name = param["name"]
+        group = param["group_name"]
 
-        if param['deprecated']:
+        if param["deprecated"]:
             return
 
-        if not group and param['required']:
-            group = 'Required'
-        elif not group and not param['required']:
-            group = 'Optional'
+        if not group and param["required"]:
+            group = "Required"
+        elif not group and not param["required"]:
+            group = "Optional"
 
         args = [latex.Brace(string=name), latex.Bracket(string=group), latex.Bracket()]
-        latex.Command(args[2], 'texttt', string=param['cpp_type'])
-        default = _format_default(param) or ''
+        latex.Command(args[2], "texttt", string=param["cpp_type"])
+        default = _format_default(param) or ""
         if default:
             args.append(latex.Bracket(string=default))
 
-        latex.Environment(parent, 'InputParameter',
-                          args=args,
-                          string=param['description'])
+        latex.Environment(
+            parent, "InputParameter", args=args, string=param["description"]
+        )
+
 
 class RenderSyntaxLink(core.RenderLink):
     def createLatex(self, parent, token, page):
         return parent
+
 
 def _get_parameters(token, parameters):
     """
@@ -835,15 +1004,15 @@ def _get_parameters(token, parameters):
 
     # Build the list of groups to display
     groups = collections.OrderedDict()
-    if token['groups']:
-        for group in token['groups']:
+    if token["groups"]:
+        for group in token["groups"]:
             groups[group] = dict()
 
     else:
-        groups['Required'] = dict()
-        groups['Optional'] = dict()
+        groups["Required"] = dict()
+        groups["Optional"] = dict()
         for param in parameters:
-            group = param['parameter']['group_name']
+            group = param["parameter"]["group_name"]
             if group and group not in groups:
                 groups[group] = dict()
 
@@ -851,23 +1020,26 @@ def _get_parameters(token, parameters):
     for param in parameters or []:
 
         # Do nothing if the parameter is hidden or not shown
-        name = param['parameter']['name']
-        if (name == 'type') or \
-           (token['hide'] and name in token['hide']) or \
-           (token['show'] and name not in token['show']):
+        name = param["parameter"]["name"]
+        if (
+            (name == "type")
+            or (token["hide"] and name in token["hide"])
+            or (token["show"] and name not in token["show"])
+        ):
             continue
 
         # Handle the 'ungroup' parameters
-        group = param['parameter']['group_name']
-        if not group and param['parameter']['required']:
-            group = 'Required'
-        elif not group and not param['parameter']['required']:
-            group = 'Optional'
+        group = param["parameter"]["group_name"]
+        if not group and param["parameter"]["required"]:
+            group = "Required"
+        elif not group and not param["parameter"]["required"]:
+            group = "Optional"
 
         if group in groups:
             groups[group][name] = param
 
     return groups
+
 
 def _format_default(parameter):
     """
@@ -878,10 +1050,10 @@ def _format_default(parameter):
         key[str]: The current key.
     """
 
-    ptype = parameter['cpp_type']
-    param = parameter.get('default', '')
+    ptype = parameter["cpp_type"]
+    param = parameter.get("default", "")
 
-    if ptype == 'bool':
-        param = repr(param in ['True', '1'])
+    if ptype == "bool":
+        param = repr(param in ["True", "1"])
 
     return str(param) if param else None

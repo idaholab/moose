@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 Sorted container for storing objects.
 """
+
 
 class Storage(object):
     """
@@ -18,6 +19,7 @@ class Storage(object):
     Inputs:
       s_type: The type of object to store, this is provided for error checking.
     """
+
     def __init__(self, stype=None):
 
         # The type of Element allowed to be stored
@@ -29,7 +31,7 @@ class Storage(object):
         # The objects being stored, a list is used for fast looping, consequently
         self._objects = []
 
-    def add(self, key, obj, location='_end'):
+    def add(self, key, obj, location="_end"):
         """
         Adds the 'obj' class with the given name to the storage container.
 
@@ -48,7 +50,7 @@ class Storage(object):
 
         # Check the type
         if (self._type is not None) and (not isinstance(obj, self._type)):
-            msg = 'Incorrect object provided, expected {} but received {}'
+            msg = "Incorrect object provided, expected {} but received {}"
             msg = msg.format(self._type.__name__, type(obj).__name__)
             raise TypeError(msg)
 
@@ -60,15 +62,15 @@ class Storage(object):
         insert = True
         index = None
         if isinstance(location, str):
-            if location == '_end':
+            if location == "_end":
                 index = len(self._keys)
-            elif location == '_begin':
+            elif location == "_begin":
                 index = 0
-            elif location.startswith('<'):
+            elif location.startswith("<"):
                 index = self._keys.index(location[1:])
-            elif location.startswith('>'):
+            elif location.startswith(">"):
                 index = self._keys.index(location[1:]) + 1
-            elif location.startswith('='):
+            elif location.startswith("="):
                 index = self._keys.index(location[1:])
                 insert = False
             else:
@@ -94,8 +96,11 @@ class Storage(object):
         elif isinstance(key, str):
             index = self._keys.index(key)
         else:
-            raise TypeError("The supplied type must be 'int' or 'str' but {} given." \
-                            .format(type(key).__name__))
+            raise TypeError(
+                "The supplied type must be 'int' or 'str' but {} given.".format(
+                    type(key).__name__
+                )
+            )
 
         return self._objects[index]
 

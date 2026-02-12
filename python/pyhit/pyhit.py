@@ -1,17 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Wrapper for hit parser."""
 import os
 import moosetree
 import hit
 from mooseutils import message
+
 
 class Node(moosetree.Node):
     """
@@ -24,16 +25,19 @@ class Node(moosetree.Node):
     not intended for general use; it is used when creating a tree from a file when loading from a
     file.
     """
+
     def __init__(self, parent=None, hitnode=None, offset=0):
         if isinstance(hitnode, str):
             hitnode = hit.NewSection(hitnode)
         elif hitnode is None:
-            hitnode = hit.NewSection('')
+            hitnode = hit.NewSection("")
         super().__init__(parent, hitnode.path())
-        self.__hitnode = hitnode         # hit.Node object
-        self.__hitblockcomment = None    # hit.Comment object for this block
-        self.__hitparamcomments = dict() # hit.Comment objects for the parameters within this block
-        self.__hitoffset = offset        # hit index used for inserting new hit nodes
+        self.__hitnode = hitnode  # hit.Node object
+        self.__hitblockcomment = None  # hit.Comment object for this block
+        self.__hitparamcomments = (
+            dict()
+        )  # hit.Comment objects for the parameters within this block
+        self.__hitoffset = offset  # hit index used for inserting new hit nodes
         self.__reinitComments()
 
     @property
@@ -43,10 +47,10 @@ class Node(moosetree.Node):
         """
         out = []
         node = self
-        while (node is not None):
+        while node is not None:
             out.append(node.name)
             node = node.parent
-        return '/'.join(reversed(out))
+        return "/".join(reversed(out))
 
     def insert(self, index, name, **kwargs):
         """
@@ -97,7 +101,7 @@ class Node(moosetree.Node):
         """
         comment = self.__hitparamcomments.get(param, self.__hitblockcomment)
         if comment is not None:
-            return str(comment).strip('\n# ')
+            return str(comment).strip("\n# ")
 
     def setComment(self, *args):
         """
@@ -115,7 +119,7 @@ class Node(moosetree.Node):
 
         comment = self.__hitparamcomments.get(param, self.__hitblockcomment)
         if (comment is not None) and (text is not None):
-            comment.setText('# {}'.format(text))
+            comment.setText("# {}".format(text))
 
         if (comment is not None) and (text is None):
             if comment is self.__hitblockcomment:
@@ -125,13 +129,15 @@ class Node(moosetree.Node):
                 comment.remove()
 
         elif (comment is None) and (param is None) and (text is not None):
-            self.parent.__hitnode.insertChild(self.__hitoffset, hit.NewComment('# {}'.format(text)))
+            self.parent.__hitnode.insertChild(
+                self.__hitoffset, hit.NewComment("# {}".format(text))
+            )
             self.__reinitComments()
 
         elif (comment is None) and (param is not None) and (text is not None):
             for child in self.__hitnode.children(hit.NodeType.Field):
                 if child.path() == param:
-                    child.addChild(hit.NewComment('# {}'.format(text), True))
+                    child.addChild(hit.NewComment("# {}".format(text), True))
                     self.__reinitComments()
                     break
 
@@ -283,12 +289,14 @@ class Node(moosetree.Node):
         self.__hitparamcomments.clear()
         for child in self.__hitnode.children(hit.NodeType.Field):
             comment = None
-            if child.children() and (child.children()[0].type() == hit.NodeType.Comment):
+            if child.children() and (
+                child.children()[0].type() == hit.NodeType.Comment
+            ):
                 comment = child.children()[0]
             self.__hitparamcomments[child.path()] = comment
 
         self.__hitblockcomment = None
-        if (self.parent is not None):
+        if self.parent is not None:
             comment = None
             for child in self.parent.__hitnode.children():
                 if child.type() == hit.NodeType.Comment:
@@ -296,6 +304,7 @@ class Node(moosetree.Node):
                 if (child.path() == self.__hitnode.path()) and (comment is not None):
                     self.__hitblockcomment = comment
                     break
+
 
 def load(filename, root=None):
     """
@@ -306,7 +315,7 @@ def load(filename, root=None):
     provided this same node will be returned.
     """
     if os.path.exists(filename):
-        with open(filename, 'r') as fid:
+        with open(filename, "r") as fid:
             content = fid.read()
     elif isinstance(filename, str):
         content = filename
@@ -315,14 +324,16 @@ def load(filename, root=None):
 
     return parse(content, root, filename)
 
+
 def write(filename, root):
     """
     Write the supplied tree in *root* to a text file *filename*.
     """
-    with open(filename, 'w') as fid:
+    with open(filename, "w") as fid:
         fid.write(root.render() + "\n")
 
-def parse(content, root=None, filename=''):
+
+def parse(content, root=None, filename=""):
     """
     Parse a hit tree from a *content* string and return a `pyhit.Node` object.
 
@@ -337,7 +348,8 @@ def parse(content, root=None, filename=''):
     _parse_hit(root, hit_node, filename)
     return root
 
-def tokenize(content, filename=''):
+
+def tokenize(content, filename=""):
     """
     Tokenize a hit tree from a string.
 
@@ -346,6 +358,7 @@ def tokenize(content, filename=''):
     when manipulating the tree.
     """
     return hit.tokenize(filename, content)
+
 
 def _parse_hit(root, hit_node, filename):
     """Internal helper for parsing HIT tree"""

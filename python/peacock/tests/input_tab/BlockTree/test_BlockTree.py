@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import unittest
 from PyQt5.QtCore import Qt, QMimeData
 from PyQt5.QtWidgets import QMenu, QApplication, QMessageBox
@@ -16,6 +16,7 @@ from peacock.Input.InputTree import InputTree
 from peacock.utils import Testing
 from peacock.Input.BlockTree import BlockTree
 from mock import patch
+
 
 class Tests(Testing.PeacockTester):
     qapp = QApplication([])
@@ -33,7 +34,11 @@ class Tests(Testing.PeacockTester):
     def newWidget(self, modules=False):
         app_info = ExecutableInfo()
         if modules:
-            app_info.setPath(Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined"))
+            app_info.setPath(
+                Testing.find_moose_test_exe(
+                    dirname="modules/combined", exe_base="combined"
+                )
+            )
         else:
             app_info.setPath(Testing.find_moose_test_exe())
         tree = InputTree(app_info)
@@ -43,8 +48,8 @@ class Tests(Testing.PeacockTester):
         w.blockSelected.connect(self.blockSelected)
         w.blockClicked.connect(self.blockClicked)
         w.blockDoubleClicked.connect(self.blockDoubleClicked)
-        #w.show()
-        #w.raise_()
+        # w.show()
+        # w.raise_()
         return w
 
     def changed(self, block):
@@ -119,27 +124,31 @@ class Tests(Testing.PeacockTester):
     def testMove(self):
         w = self.newWidget()
         item = w._path_item_map.get("/Variables/u")
-        #b = w.tree.getBlockInfo("/Variables/u")
+        # b = w.tree.getBlockInfo("/Variables/u")
         w.scrollToItem(item)
         point = w.visualItemRect(item).center()
         item1 = w._path_item_map.get("/Variables/v")
-        #b1 = w.tree.getBlockInfo("/Variables/v")
+        # b1 = w.tree.getBlockInfo("/Variables/v")
         w.scrollToItem(item1)
         point1 = w.visualItemRect(item1).bottomLeft()
 
-        #idx = b.parent.children_list.index(b.name)
-        #idx1 = b.parent.children_list.index(b1.name)
+        # idx = b.parent.children_list.index(b.name)
+        # idx1 = b.parent.children_list.index(b1.name)
         w.setCurrentItem(item)
         mime = QMimeData()
         mime.setData(w._mime_type, "some data")
-        ee = QDragEnterEvent(w.mapToGlobal(point), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
+        ee = QDragEnterEvent(
+            w.mapToGlobal(point), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier
+        )
         w.dragEnterEvent(ee)
-        #Testing.process_events(t=1)
-        de = QDropEvent(w.mapToGlobal(point1), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier)
+        # Testing.process_events(t=1)
+        de = QDropEvent(
+            w.mapToGlobal(point1), Qt.MoveAction, mime, Qt.LeftButton, Qt.NoModifier
+        )
         w.dropEvent(de)
         # This doesn't seem to work for some reason
-        #self.assertEqual(idx1, b.parent.children_list.index(b.name))
-        #self.assertEqual(idx, b.parent.children_list.index(b1.name))
+        # self.assertEqual(idx1, b.parent.children_list.index(b.name))
+        # self.assertEqual(idx, b.parent.children_list.index(b1.name))
 
         w.setCurrentItem(None)
         self.assertEqual(w._current_drag, None)
@@ -196,7 +205,6 @@ class Tests(Testing.PeacockTester):
         item = w._path_item_map.get("/Variables/v")
         self.assertEqual(item, None)
 
-
     @patch.object(QMenu, "exec_")
     def testCopy(self, mock_exec):
         w = self.newWidget()
@@ -206,7 +214,7 @@ class Tests(Testing.PeacockTester):
         nchilds = len(v.children_list)
         self.assertEqual(self.changed_count, 0)
         w.copyBlock(b)
-        self.assertEqual(nchilds+1, len(v.children_list))
+        self.assertEqual(nchilds + 1, len(v.children_list))
         self.assertEqual(self.changed_count, 1)
         new_block = w.tree.getBlockInfo("/Variables/New_0")
         self.assertEqual(len(new_block.children_list), 1)
@@ -229,14 +237,14 @@ class Tests(Testing.PeacockTester):
         w._treeContextMenu(point)
 
         # simulate choosing the add menu option
-        self.assertEqual(nchilds+1, len(v.children_list))
+        self.assertEqual(nchilds + 1, len(v.children_list))
         self.assertEqual(self.changed_count, 2)
 
         # /Variables is a star so we can copy it
         b = w.tree.getBlockInfo("/Variables")
         nchilds = len(v.children_list)
         w.copyBlock(b)
-        self.assertEqual(nchilds+1, len(v.children_list))
+        self.assertEqual(nchilds + 1, len(v.children_list))
         self.assertEqual(self.changed_count, 3)
         p = "/Variables/%s" % v.children_list[-1]
         new_block = w.tree.getBlockInfo(p)
@@ -258,12 +266,12 @@ class Tests(Testing.PeacockTester):
         mock_exec.return_value = w.add_action
         w._treeContextMenu(point)
 
-        self.assertEqual(nchilds+1, len(v.children_list))
+        self.assertEqual(nchilds + 1, len(v.children_list))
         self.assertEqual(self.changed_count, 4)
 
         w.setCurrentItem(item)
         w._newBlockShortcut()
-        self.assertEqual(nchilds+2, len(v.children_list))
+        self.assertEqual(nchilds + 2, len(v.children_list))
         self.assertEqual(self.changed_count, 5)
 
         # /Executioner is not a star so we shouldn't be able to copy it
@@ -277,5 +285,6 @@ class Tests(Testing.PeacockTester):
         point = w.visualItemRect(item).center()
         w._treeContextMenu(point)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

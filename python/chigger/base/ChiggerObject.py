@@ -1,15 +1,16 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
 from .. import utils
+
 
 class ChiggerObject(object):
     """
@@ -25,12 +26,12 @@ class ChiggerObject(object):
         All object should define a static getOptions method to add new key, value options. (public)
         """
         opt = utils.Options()
-        opt.add('debug', False, "Enable/disable debug messaging.")
+        opt.add("debug", False, "Enable/disable debug messaging.")
         return opt
 
     def __init__(self, **kwargs):
         super(ChiggerObject, self).__init__()
-        self._options = getattr(self.__class__, 'getOptions')()
+        self._options = getattr(self.__class__, "getOptions")()
         self.__initial_options = kwargs
         self.__needs_initialize = True
         self.__needs_update = True
@@ -45,16 +46,20 @@ class ChiggerObject(object):
         """
         Return True if the object requires an Update method call. (public)
         """
-        mooseutils.mooseDebug("{}.needsUpdate() = {}".format(self.__class__.__name__,
-                                                             self.__needs_update))
+        mooseutils.mooseDebug(
+            "{}.needsUpdate() = {}".format(self.__class__.__name__, self.__needs_update)
+        )
         return self.__needs_update
 
     def needsInitialize(self):
         """
         Return True if the object requires an _initialize method call. (public)
         """
-        mooseutils.mooseDebug("{}.needsInitialize() = {}".format(self.__class__.__name__,
-                                                                 self.__needs_initialize))
+        mooseutils.mooseDebug(
+            "{}.needsInitialize() = {}".format(
+                self.__class__.__name__, self.__needs_initialize
+            )
+        )
         return self.__needs_initialize
 
     def update(self, initialize=True, **kwargs):
@@ -93,7 +98,7 @@ class ChiggerObject(object):
             name[str]: The name of the option to retrieve
             value: The value to set the option to
         """
-        changed = (self._options[name] != value)
+        changed = self._options[name] != value
         if changed:
             self._options[name] = value
             self.setNeedsUpdate(True)
@@ -111,11 +116,12 @@ class ChiggerObject(object):
         """
 
         # Sub-options case
-        changed = [self.needsUpdate()] # default changed status to the current status
+        changed = [self.needsUpdate()]  # default changed status to the current status
         if len(args) > 0:
             for sub in args:
-                if (self._options.hasOption(sub)) and isinstance(self.getOption(sub),
-                                                                 utils.Options):
+                if (self._options.hasOption(sub)) and isinstance(
+                    self.getOption(sub), utils.Options
+                ):
                     changed.append(self._options[sub].update(**kwargs))
                 elif isinstance(sub, utils.Options):
                     changed.append(self._options.update(sub))
@@ -172,14 +178,18 @@ class ChiggerObject(object):
         Inputs:
             value[bool]: The value for the update flag.
         """
-        mooseutils.mooseDebug("{}.setNeedsUpdate({})".format(self.__class__.__name__, value))
+        mooseutils.mooseDebug(
+            "{}.setNeedsUpdate({})".format(self.__class__.__name__, value)
+        )
         self.__needs_update = value
 
     def _setNeedsInitialize(self, value):
         """
         Set the initialize flag for the _initialize method. (protected)
         """
-        mooseutils.mooseDebug("{}._setNeedsInitialize({})".format(self.__class__.__name__, value))
+        mooseutils.mooseDebug(
+            "{}._setNeedsInitialize({})".format(self.__class__.__name__, value)
+        )
         self.__needs_initialize = value
 
     def checkUpdateState(self):

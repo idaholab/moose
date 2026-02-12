@@ -1,17 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import matplotlib.pyplot as plt
 import glob
 import collections
 import pandas
 import numpy as np
+
 
 class ConvergencePlot(object):
     """
@@ -25,31 +26,42 @@ class ConvergencePlot(object):
         xlabel[str]: The label for the x-axis
         ylabel[str]: The label for the y-axis
     """
-    Line = collections.namedtuple('Line', 'x y label')
 
-    def __init__(self, xlabel='x', ylabel='y', fontsize=12, fit=True):
+    Line = collections.namedtuple("Line", "x y label")
 
-        self._figure = plt.figure(figsize=(10,6), facecolor='w')
+    def __init__(self, xlabel="x", ylabel="y", fontsize=12, fit=True):
+
+        self._figure = plt.figure(figsize=(10, 6), facecolor="w")
         self._axes = plt.gca()
 
-        self._axes.set_yscale('log')
-        self._axes.set_xscale('log')
+        self._axes.set_yscale("log")
+        self._axes.set_xscale("log")
 
         # Add axis labels
         plt.xlabel(xlabel, fontsize=fontsize)
         plt.ylabel(ylabel, fontsize=fontsize)
 
         # Adjust tick mark fonts
-        for tick in self._axes.xaxis.get_major_ticks() + self._axes.yaxis.get_major_ticks():
+        for tick in (
+            self._axes.xaxis.get_major_ticks() + self._axes.yaxis.get_major_ticks()
+        ):
             tick.label1.set_fontsize(fontsize)
 
         # Apply grid marks
-        plt.grid(True, which='both', color=[0.8]*3)
+        plt.grid(True, which="both", color=[0.8] * 3)
 
         self.label_to_slope = {}
         self.label_to_intercept = {}
 
-    def plot(self, df, label=None, title=None, num_fitted_points=None, slope_precision=3, **kwargs):
+    def plot(
+        self,
+        df,
+        label=None,
+        title=None,
+        num_fitted_points=None,
+        slope_precision=3,
+        **kwargs,
+    ):
         num_y_columns = len(df.columns) - 1
 
         if label:
@@ -57,9 +69,10 @@ class ConvergencePlot(object):
                 if not isinstance(label, list):
                     raise TypeError("For multiple y-data label must be a list")
 
-
             if isinstance(label, list) and num_y_columns != len(label):
-                raise IOError("The length of the label and the number of y columns must be the same")
+                raise IOError(
+                    "The length of the label and the number of y columns must be the same"
+                )
 
             if not isinstance(label, list):
                 label = [label]
@@ -67,13 +80,13 @@ class ConvergencePlot(object):
         x = np.array(df[df.columns[0]])
         lines = []
 
-        for i in range(1,len(df.columns)):
+        for i in range(1, len(df.columns)):
             y = np.array(df[df.columns[i]])
 
             if label is None:
-                this_label = 'line-{}'.format(len(lines))
+                this_label = "line-{}".format(len(lines))
             else:
-                this_label = label[i-1]
+                this_label = label[i - 1]
 
             if num_fitted_points is not None:
                 coeffs = self._fit(x[-num_fitted_points:], y[-num_fitted_points:])
@@ -82,10 +95,12 @@ class ConvergencePlot(object):
 
             slope = coeffs[0]
             intercept = coeffs[1]
-            self.label_to_slope.update({this_label:slope})
-            self.label_to_intercept.update({this_label:intercept})
+            self.label_to_slope.update({this_label: slope})
+            self.label_to_intercept.update({this_label: intercept})
 
-            this_label = '{}: {:.{precision}f}'.format(this_label, slope, precision=slope_precision)
+            this_label = "{}: {:.{precision}f}".format(
+                this_label, slope, precision=slope_precision
+            )
 
             lines.append(self._axes.plot(x, y, label=this_label, **kwargs)[0])
 

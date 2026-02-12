@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 Tools for parsing key value pairs from a raw string (e.g., 'key=value foo=bar')
@@ -15,8 +15,11 @@ import copy
 
 from .exceptions import MooseDocsException
 
-SETTINGS_RE = re.compile(r'(?P<key>[^\s\\=]+)=(?P<value>.*?)(?=(?:\s[^\s\\=]+=|$))',
-                         flags=re.MULTILINE|re.UNICODE)
+SETTINGS_RE = re.compile(
+    r"(?P<key>[^\s\\=]+)=(?P<value>.*?)(?=(?:\s[^\s\\=]+=|$))",
+    flags=re.MULTILINE | re.UNICODE,
+)
+
 
 def get_settings_as_dict(settings):
     """Return a dict() of the settings without the description."""
@@ -24,6 +27,7 @@ def get_settings_as_dict(settings):
     for key, value in settings.items():
         output[key] = value[0]
     return output
+
 
 def match_settings(known, raw):
     """
@@ -38,16 +42,16 @@ def match_settings(known, raw):
     if not raw:
         return known, unknown
 
-    for match in SETTINGS_RE.finditer(raw.replace('\n', ' ')):
+    for match in SETTINGS_RE.finditer(raw.replace("\n", " ")):
 
-        key = match.group('key').strip()
-        value = match.group('value').strip().replace(r'\=', '=')
+        key = match.group("key").strip()
+        value = match.group("value").strip().replace(r"\=", "=")
 
-        if value.lower() == 'true':
+        if value.lower() == "true":
             value = True
-        elif value.lower() == 'false':
+        elif value.lower() == "false":
             value = False
-        elif value.lower() == 'none':
+        elif value.lower() == "none":
             value = None
         elif value and all([v.isdigit() for v in value]):
             value = float(value)
@@ -58,6 +62,7 @@ def match_settings(known, raw):
             unknown[key] = value
 
     return known, unknown
+
 
 def parse_settings(defaults, local, error_on_unknown=True):
     """
@@ -75,6 +80,6 @@ def parse_settings(defaults, local, error_on_unknown=True):
     if error_on_unknown and unknown:
         msg = "The following key, value settings are unknown:"
         for key, value in unknown.items():
-            msg += '\n{}{}={}'.format(' '*4, key, repr(value))
+            msg += "\n{}{}={}".format(" " * 4, key, repr(value))
         raise MooseDocsException(msg)
     return settings, unknown

@@ -1,15 +1,16 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets
 import peacock
 import mooseutils
+
 
 class PostprocessorPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
     """
@@ -47,7 +48,8 @@ class PostprocessorPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
             output += out
             mooseutils.unique_list(imports, imp)
 
-        return '\n'.join(imports + [''] + output)
+        return "\n".join(imports + [""] + output)
+
 
 def main():
     """
@@ -60,21 +62,35 @@ def main():
     from .plugins.AxisTabsPlugin import AxisTabsPlugin
     from .plugins.OutputPlugin import OutputPlugin
 
-    widget = PostprocessorPluginManager(plugins=[FigurePlugin, MediaControlPlugin, PostprocessorSelectPlugin, AxesSettingsPlugin, AxisTabsPlugin, OutputPlugin])
-    widget.FigurePlugin.setFixedSize(QtCore.QSize(600,600))
+    widget = PostprocessorPluginManager(
+        plugins=[
+            FigurePlugin,
+            MediaControlPlugin,
+            PostprocessorSelectPlugin,
+            AxesSettingsPlugin,
+            AxisTabsPlugin,
+            OutputPlugin,
+        ]
+    )
+    widget.FigurePlugin.setFixedSize(QtCore.QSize(600, 600))
     widget.show()
 
     return widget, widget.FigurePlugin
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import sys
     from .PostprocessorDataWidget import PostprocessorDataWidget
 
     app = QtWidgets.QApplication(sys.argv)
 
-    data = [PostprocessorDataWidget(mooseutils.PostprocessorReader('../tests/input/white_elephant_jan_2016.csv'))]
-    #data = [PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../tests/input/vpp_*.csv')),
+    data = [
+        PostprocessorDataWidget(
+            mooseutils.PostprocessorReader("../tests/input/white_elephant_jan_2016.csv")
+        )
+    ]
+    # data = [PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../tests/input/vpp_*.csv')),
     #        PostprocessorDataWidget(mooseutils.VectorPostprocessorReader('../tests/input/vpp2_*.csv'))]
     widget, _ = main()
-    widget.call('onSetData', data)
+    widget.call("onSetData", data)
     sys.exit(app.exec_())

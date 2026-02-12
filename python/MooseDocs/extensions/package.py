@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 import re
@@ -16,8 +16,10 @@ import MooseDocs
 from ..tree import tokens
 from . import core, command
 
+
 def make_extension(**kwargs):
     return PackageExtension(**kwargs)
+
 
 class PackageExtension(command.CommandExtension):
     """
@@ -26,16 +28,15 @@ class PackageExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
-        packages_config = yaml_load(os.path.join(MooseDocs.MOOSE_DIR,
-                                                 'framework',
-                                                 'doc',
-                                                 'packages_config.yml'))
+        packages_config = yaml_load(
+            os.path.join(MooseDocs.MOOSE_DIR, "framework", "doc", "packages_config.yml")
+        )
 
         config = command.CommandExtension.defaultConfig()
 
         # Assign a key/value for every item in packages_config.yml
         for k, v in packages_config.items():
-            config[k] = (v, 'Default version for %s' % (k))
+            config[k] = (v, "Default version for %s" % (k))
 
         return config
 
@@ -43,6 +44,7 @@ class PackageExtension(command.CommandExtension):
         self.requires(core, command)
         self.addCommand(reader, PackageCodeReplace())
         self.addCommand(reader, PackageTextReplace())
+
 
 class PackageCodeReplace(command.CommandComponent):
     """
@@ -60,30 +62,42 @@ class PackageCodeReplace(command.CommandComponent):
         /path/to/gcc-__GCC__
     """
 
-    COMMAND = 'package'
-    SUBCOMMAND = 'code'
+    COMMAND = "package"
+    SUBCOMMAND = "code"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['max-height'] = ('350px', "The default height for listing content.")
-        settings['language'] = ('bash', "The language to use for highlighting, if not supplied " \
-                                         "it will be inferred from the extension (if possible).")
+        settings["max-height"] = ("350px", "The default height for listing content.")
+        settings["language"] = (
+            "bash",
+            "The language to use for highlighting, if not supplied "
+            "it will be inferred from the extension (if possible).",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
-        content = info['inline'] if 'inline' in info else info['block']
-        content = re.sub(r'__(?P<package>[A-Z][A-Z_]+)__', self._subFunction, content,
-                         flags=re.UNICODE)
-        core.Code(parent, style=f'max-height:{settings["max-height"]}',
-                  language=settings['language'], content=content)
+        content = info["inline"] if "inline" in info else info["block"]
+        content = re.sub(
+            r"__(?P<package>[A-Z][A-Z_]+)__",
+            self._subFunction,
+            content,
+            flags=re.UNICODE,
+        )
+        core.Code(
+            parent,
+            style=f'max-height:{settings["max-height"]}',
+            language=settings["language"],
+            content=content,
+        )
         return parent
 
     def _subFunction(self, match):
-        version = self.extension.get(match.group('package').lower(), None)
+        version = self.extension.get(match.group("package").lower(), None)
         if version is not None:
             return str(version)
         return match.group(0)
+
 
 class PackageTextReplace(command.CommandComponent):
     """
@@ -99,8 +113,9 @@ class PackageTextReplace(command.CommandComponent):
     yields:
         "This is a sentence with gcc-7.3.0"
     """
-    COMMAND = 'package'
-    SUBCOMMAND = '*'
+
+    COMMAND = "package"
+    SUBCOMMAND = "*"
 
     @staticmethod
     def defaultSettings():
@@ -108,6 +123,6 @@ class PackageTextReplace(command.CommandComponent):
         return settings
 
     def createToken(self, parent, info, page, settings):
-        content = self.extension.get(info['subcommand'], dict())
+        content = self.extension.get(info["subcommand"], dict())
         tokens.String(parent, content=str(content))
         return parent

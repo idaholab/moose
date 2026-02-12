@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import re
 import pydoc
 import logging
@@ -17,44 +17,63 @@ from . import core, command
 
 LOG = logging.getLogger(__name__)
 
-PyClass = tokens.newToken('PyClass')
-PyFunction = tokens.newToken('PyFunction')
+PyClass = tokens.newToken("PyClass")
+PyFunction = tokens.newToken("PyFunction")
+
 
 def make_extension(**kwargs):
     """Return the pysyntax extension object."""
     return PySyntaxExtension(**kwargs)
 
+
 class PySyntax(object):
     """Helper class for extracting documentation from a python object."""
+
     class Info(object):
         """Data struct for storing information about a member."""
+
         def __init__(self, name, member):
             self.name = name
-            self.internal = self.name.startswith('__') and self.name.endswith('__')
-            self.private = (not self.internal) and self.name.startswith('_') and ('__' in self.name)
-            self.protected = (not self.private) and (not self.internal) and self.name.startswith('_')
+            self.internal = self.name.startswith("__") and self.name.endswith("__")
+            self.private = (
+                (not self.internal)
+                and self.name.startswith("_")
+                and ("__" in self.name)
+            )
+            self.protected = (
+                (not self.private) and (not self.internal) and self.name.startswith("_")
+            )
             self.public = not any([self.internal, self.private, self.protected])
             self.function = inspect.isfunction(member)
-            self.signature = re.sub(r'self[, ]*', '', str(inspect.signature(member))) if self.function else None
+            self.signature = (
+                re.sub(r"self[, ]*", "", str(inspect.signature(member)))
+                if self.function
+                else None
+            )
             self.documentation = inspect.getdoc(member)
 
         def __eq__(self, rhs):
-            return all([self.internal == rhs.internal,
-                        self.private == rhs.private,
-                        self.protected == rhs.protected,
-                        self.public == rhs.public,
-                        self.function == rhs.function,
-                        self.signature == rhs.signature,
-                        self.documentation == rhs.documentation])
+            return all(
+                [
+                    self.internal == rhs.internal,
+                    self.private == rhs.private,
+                    self.protected == rhs.protected,
+                    self.public == rhs.public,
+                    self.function == rhs.function,
+                    self.signature == rhs.signature,
+                    self.documentation == rhs.documentation,
+                ]
+            )
 
         def __str__(self):
-            out = '{}:\n'.format(self.name, self.signature or self.name)
-            if self.documentation: out += '"{}"\n'.format(self.documentation)
-            out += '  public: {}\n'.format(self.public)
-            out += '  protected: {}\n'.format(self.protected)
-            out += '  private: {}\n'.format(self.private)
-            out += '  internal: {}\n'.format(self.internal)
-            out += '  function: {}\n'.format(self.function)
+            out = "{}:\n".format(self.name, self.signature or self.name)
+            if self.documentation:
+                out += '"{}"\n'.format(self.documentation)
+            out += "  public: {}\n".format(self.public)
+            out += "  protected: {}\n".format(self.protected)
+            out += "  private: {}\n".format(self.private)
+            out += "  internal: {}\n".format(self.internal)
+            out += "  function: {}\n".format(self.function)
             return out
 
     def __init__(self, cls):
@@ -80,17 +99,20 @@ class PySyntax(object):
     def items(self, function=None, **kwargs):
         """Return dict() style generator to name and `Info` objects."""
         default = False if kwargs else True
-        internal = kwargs.get('internal', default)
-        private = kwargs.get('private', default)
-        protected = kwargs.get('protected', default)
-        public = kwargs.get('public', default)
+        internal = kwargs.get("internal", default)
+        private = kwargs.get("private", default)
+        protected = kwargs.get("protected", default)
+        public = kwargs.get("public", default)
 
         for name, info in self._members.items():
-            if any([(internal and info.internal),
+            if any(
+                [
+                    (internal and info.internal),
                     (private and info.private),
                     (protected and info.protected),
-                    (public and info.public)]) and \
-                    ((function is None) or (info.function == function)):
+                    (public and info.public),
+                ]
+            ) and ((function is None) or (info.function == function)):
                 yield name, info
 
     @staticmethod
@@ -103,8 +125,8 @@ class PySyntax(object):
 
         # Sometimes a class signature can be the same as the modules,
         # so check if it can be a class and will prefer that.
-        parts = [part for part in cls_in.split('.') if part]
-        mod = pydoc.safeimport('.'.join(parts[:-1]))
+        parts = [part for part in cls_in.split(".") if part]
+        mod = pydoc.safeimport(".".join(parts[:-1]))
         if mod:
             object = getattr(mod, parts[-1])
             return (
@@ -118,31 +140,40 @@ class PySyntaxExtension(command.CommandExtension):
         self.addCommand(reader, PySyntaxClassCommand())
         self.addCommand(reader, PySyntaxFunctionCommand())
 
-        renderer.add('PyClass', RenderPyClass())
-        renderer.add('PyFunction', RenderPyFunction())
+        renderer.add("PyClass", RenderPyClass())
+        renderer.add("PyFunction", RenderPyFunction())
+
 
 class PySyntaxCommandBase(command.CommandComponent):
-    COMMAND = 'pysyntax'
+    COMMAND = "pysyntax"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['name'] = (None, "The name python object/function to extract documentation.")
-        settings['heading-level'] = (2, "The heading level to use for class documentation.")
-        settings['show-internal'] = (True, "Whether or not to show internal methods")
-        settings['show-private'] = (True, "Whether or not to show private methods")
-        settings['show-protected'] = (True, "Whether or not to show protected methods")
+        settings["name"] = (
+            None,
+            "The name python object/function to extract documentation.",
+        )
+        settings["heading-level"] = (
+            2,
+            "The heading level to use for class documentation.",
+        )
+        settings["show-internal"] = (True, "Whether or not to show internal methods")
+        settings["show-private"] = (True, "Whether or not to show private methods")
+        settings["show-protected"] = (True, "Whether or not to show protected methods")
         return settings
 
     def _addDocumentation(self, parent, page, doc, settings, h_level, **kwargs):
         for name, pyinfo in doc.items(**kwargs):
-            if pyinfo.internal and not settings['show-internal']:
+            if pyinfo.internal and not settings["show-internal"]:
                 continue
-            if pyinfo.private and not settings['show-private']:
+            if pyinfo.private and not settings["show-private"]:
                 continue
-            if pyinfo.protected and not settings['show-protected']:
+            if pyinfo.protected and not settings["show-protected"]:
                 continue
-            h = core.Heading(parent, level=h_level, class_='moose-pysyntax-member-heading')
+            h = core.Heading(
+                parent, level=h_level, class_="moose-pysyntax-member-heading"
+            )
             fname = name + pyinfo.signature if pyinfo.signature is not None else name
             core.Monospace(core.Strong(h), string=fname)
             if pyinfo.documentation is None:
@@ -155,11 +186,15 @@ class PySyntaxCommandBase(command.CommandComponent):
         sec = PyFunction(parent)
         self._addDocumentation(sec, page, doc, settings, h_level)
 
-    def _addClassDocumentation(self, parent, page, name, doc, settings, h_level, **kwargs):
+    def _addClassDocumentation(
+        self, parent, page, name, doc, settings, h_level, **kwargs
+    ):
         """Helper for listing class members"""
         sec = PyClass(parent)
 
-        h = core.Heading(sec, level=h_level, string=name, class_='moose-pysyntax-class-heading')
+        h = core.Heading(
+            sec, level=h_level, string=name, class_="moose-pysyntax-class-heading"
+        )
         core.Monospace(sec, string=name + doc.signature)
 
         if doc.documentation is None:
@@ -170,8 +205,9 @@ class PySyntaxCommandBase(command.CommandComponent):
 
         self._addDocumentation(sec, page, doc, settings, h_level + 1, **kwargs)
 
+
 class PySyntaxClassCommand(PySyntaxCommandBase):
-    SUBCOMMAND = 'class'
+    SUBCOMMAND = "class"
 
     @staticmethod
     def defaultSettings():
@@ -179,8 +215,8 @@ class PySyntaxClassCommand(PySyntaxCommandBase):
         return settings
 
     def createToken(self, parent, info, page, settings):
-        h_level = int(settings['heading-level'])
-        obj = settings.get('name', None)
+        h_level = int(settings["heading-level"])
+        obj = settings.get("name", None)
         if obj is None:
             raise exceptions.MooseDocsException("The 'name' setting is required.")
 
@@ -188,21 +224,24 @@ class PySyntaxClassCommand(PySyntaxCommandBase):
         if not doc.is_class:
             raise exceptions.MooseDocsException("'%s' is not a python class.", obj)
 
-        self._addClassDocumentation(parent, page, obj, doc, settings, h_level, public=True, protected=True)
+        self._addClassDocumentation(
+            parent, page, obj, doc, settings, h_level, public=True, protected=True
+        )
         return parent
 
+
 class PySyntaxFunctionCommand(PySyntaxCommandBase):
-    SUBCOMMAND = 'function'
+    SUBCOMMAND = "function"
 
     @staticmethod
     def defaultSettings():
         settings = PySyntaxCommandBase.defaultSettings()
-        settings['heading-level'] = (2, settings['heading-level'][1])
+        settings["heading-level"] = (2, settings["heading-level"][1])
         return settings
 
     def createToken(self, parent, info, page, settings):
-        h_level = int(settings['heading-level'])
-        obj = settings.get('name', None)
+        h_level = int(settings["heading-level"])
+        obj = settings.get("name", None)
         if obj is None:
             raise exceptions.MooseDocsException("The 'name' setting is required.")
 
@@ -213,16 +252,18 @@ class PySyntaxFunctionCommand(PySyntaxCommandBase):
         self._addFunctionDocumentation(parent, page, doc, settings, h_level)
         return parent
 
+
 class RenderPyClass(components.RenderComponent):
     def createLatex(self, parent, token, page):
         return parent
 
     def createHTML(self, parent, token, page):
-        return html.Tag(parent, 'div', class_='moose-pysyntax-class')
+        return html.Tag(parent, "div", class_="moose-pysyntax-class")
+
 
 class RenderPyFunction(components.RenderComponent):
     def createLatex(self, parent, token, page):
         return parent
 
     def createHTML(self, parent, token, page):
-        return html.Tag(parent, 'div', class_='moose-pysyntax-function')
+        return html.Tag(parent, "div", class_="moose-pysyntax-function")

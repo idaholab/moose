@@ -17,9 +17,10 @@ class TestDuplicate(TestHarnessTestCase):
 
     def testDuplicateOutputs(self):
         """Test for duplicate output files in the same directory."""
+
         def run_test(spec, test_names):
             test_names = sorted(test_names)
-            result = self.runTests('-i', spec, exit_code=132)
+            result = self.runTests("-i", spec, exit_code=132)
             out = result.output
             harness = result.harness
             assert harness is not None
@@ -30,17 +31,17 @@ class TestDuplicate(TestHarnessTestCase):
                 self.assertIn(f'Tests: {", ".join(test_names)}', out)
                 self.assertIn(f'File(s): {", ".join(files)}', out)
 
-        run_test('duplicate_outputs', ['a', 'b', 'c', 'd'])
-        run_test('duplicate_outputs_analyzejacobian', ['a', 'b'])
+        run_test("duplicate_outputs", ["a", "b", "c", "d"])
+        run_test("duplicate_outputs_analyzejacobian", ["a", "b"])
 
     def testDuplicateOutputsOK(self):
         """Test for duplicate output files that are not duplicates due to prereqs."""
-        out = self.runTests('-i', 'duplicate_outputs_ok').output
-        out += self.runTests('-i', 'duplicate_outputs_ok', '--heavy').output
+        out = self.runTests("-i", "duplicate_outputs_ok").output
+        out += self.runTests("-i", "duplicate_outputs_ok", "--heavy").output
 
         # skip case
-        self.assertNotRegex(out, 'skipped_out.e')
+        self.assertNotRegex(out, "skipped_out.e")
         # heavy case
-        self.assertNotRegex(out, 'heavy_out.e')
+        self.assertNotRegex(out, "heavy_out.e")
         # all
-        self.assertNotRegex(out, 'FATAL TEST HARNESS ERROR')
+        self.assertNotRegex(out, "FATAL TEST HARNESS ERROR")

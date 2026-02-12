@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 Module for defining the default Lexer objects that plugin to base.Reader objects.
@@ -21,6 +21,7 @@ from ..tree import tokens
 
 LOG = logging.getLogger(__name__)
 
+
 class Pattern(object):
     """
     Object for storing token creation items.
@@ -30,13 +31,15 @@ class Pattern(object):
          regex: Compiled python re for creating token.
          function: The function to call when a match occurs (components.Component.__call__).
     """
+
     def __init__(self, name, regex, function):
         self.name = name
         self.regex = regex
         self.function = function
 
     def __str__(self):
-        return '{}: re={}; func={}'.format(self.name, self.regex, self.function)
+        return "{}: re={}; func={}".format(self.name, self.regex, self.function)
+
 
 class Grammar(object):
     """
@@ -45,10 +48,11 @@ class Grammar(object):
     applied to the Lexer object and the associated regular expression that define the
     text associated with the Token object.
     """
+
     def __init__(self):
         self.__patterns = common.Storage(Pattern)
 
-    def add(self, name, regex, function, location='_end'):
+    def add(self, name, regex, function, location="_end"):
         """
         Method for adding a Token definition to the Grammar object.
 
@@ -100,7 +104,8 @@ class Grammar(object):
         out = []
         for obj in self.__patterns:
             out.append(str(obj))
-        return 'Grammar:\n' + '\n'.join(out)
+        return "Grammar:\n" + "\n".join(out)
+
 
 class LexerInformation(object):
     """
@@ -111,6 +116,7 @@ class LexerInformation(object):
         pattern[Grammar.Pattern]: Grammar pattern definition, see Grammar.py.
         line[int]: Current line number in supplied parsed text.
     """
+
     def __init__(self, match=None, pattern=None, line=None):
         self.__match = dict()
         self.__pattern = pattern.name
@@ -118,7 +124,7 @@ class LexerInformation(object):
 
         self.__match[0] = match.group(0)
         for i, group in enumerate(match.groups()):
-            self.__match[i+1] = group
+            self.__match[i + 1] = group
         for key, value in match.groupdict().items():
             self.__match[key] = value
 
@@ -181,7 +187,10 @@ class LexerInformation(object):
         """
         Return a reasonable string for debugging.
         """
-        return 'line:{} match:{} pattern:{}'.format(self.__line, self.__match, self.__pattern)
+        return "line:{} match:{} pattern:{}".format(
+            self.__line, self.__match, self.__pattern
+        )
+
 
 class Lexer(object):
     """
@@ -195,6 +204,7 @@ class Lexer(object):
     Generally, this object should not be used. It is designed to provide the general capability
     needed for the RecursiveLexer.
     """
+
     def __init__(self):
         pass
 
@@ -214,8 +224,9 @@ class Lexer(object):
               the entire text to be tokenized and have the errors report upon completion.
         """
         if not isinstance(text, str):
-            msg = "EXCEPTION: {}:{}\n{}".format(page.source, line,
-                                                "The supplied text must be str.")
+            msg = "EXCEPTION: {}:{}\n{}".format(
+                page.source, line, "The supplied text must be str."
+            )
             raise TypeError(msg)
 
         n = len(text)
@@ -229,13 +240,13 @@ class Lexer(object):
                     try:
                         obj = self.buildToken(parent, pattern, info, page)
                     except Exception as e:
-                        obj = tokens.ErrorToken(parent,
-                                                message=str(e),
-                                                traceback=traceback.format_exc())
+                        obj = tokens.ErrorToken(
+                            parent, message=str(e), traceback=traceback.format_exc()
+                        )
 
                     if obj is not None:
                         obj.info = info
-                        line += match.group(0).count('\n')
+                        line += match.group(0).count("\n")
                         pos = match.end()
 
                         break
@@ -247,7 +258,7 @@ class Lexer(object):
 
         # Produce Exception token if text remains that was not matched
         if pos < n:
-            msg = 'Unprocessed text exists.'
+            msg = "Unprocessed text exists."
             tokens.ErrorToken(parent, message=msg)
 
     def buildToken(self, parent, pattern, info, page):
@@ -255,6 +266,7 @@ class Lexer(object):
         Return a token object for the given lexer information.
         """
         return pattern.function(parent, info, page)
+
 
 class RecursiveLexer(Lexer):
     """
@@ -270,6 +282,7 @@ class RecursiveLexer(Lexer):
        defined with the name 'foo', tokenize will automatically be called with the content
        of the 'foo' group using the 'foo' grammar.
     """
+
     def __init__(self, base, *args):
         Lexer.__init__(self)
         self._grammars = collections.OrderedDict()
@@ -306,7 +319,7 @@ class RecursiveLexer(Lexer):
         """
         obj = super(RecursiveLexer, self).buildToken(parent, pattern, info, page)
 
-        if (obj is not None) and (obj is not parent) and obj.get('recursive'):
+        if (obj is not None) and (obj is not parent) and obj.get("recursive"):
             for key, grammar in self._grammars.items():
                 if key in info.keys():
                     text = info[key]

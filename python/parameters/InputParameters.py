@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 from collections import OrderedDict
 import re
 import enum
@@ -14,30 +14,38 @@ import copy
 
 from .Parameter import Parameter
 
+
 class InputParameters(object):
     """
     A warehouse for creating and storing options
     """
+
     __PARAM_TYPE__ = Parameter
 
     class ErrorMode(enum.Enum):
         """Defines the error mode for all instances"""
-        NONE = 0      # disable errors
-        WARNING = 1   # logging.warning
-        ERROR = 2     # logging.error
-        EXCEPTION = 3 # logging.critical and raises InputParametersException
+
+        NONE = 0  # disable errors
+        WARNING = 1  # logging.warning
+        ERROR = 2  # logging.error
+        EXCEPTION = 3  # logging.critical and raises InputParametersException
 
     class InputParameterException(Exception):
         """Custom Exception used in for ErrorMode.EXCEPTION"""
+
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-    LOG = logging.getLogger('InputParameters')
+    LOG = logging.getLogger("InputParameters")
 
     def __init__(self, mode=None):
         self.__parameters = OrderedDict()
-        self.add('_error_mode', default=mode or InputParameters.ErrorMode.WARNING,
-                 vtype=InputParameters.ErrorMode, private=True)
+        self.add(
+            "_error_mode",
+            default=mode or InputParameters.ErrorMode.WARNING,
+            vtype=InputParameters.ErrorMode,
+            private=True,
+        )
 
     def add(self, *args, **kwargs):
         """
@@ -47,18 +55,26 @@ class InputParameters(object):
             see Parameter.py
         """
         if args[0] in self.__parameters:
-            self.__errorHelper("Cannot add parameter, the parameter '{}' already exists.", args[0])
+            self.__errorHelper(
+                "Cannot add parameter, the parameter '{}' already exists.", args[0]
+            )
             return
 
-        if '_' in args[0]:
-            group, subname = args[0].split('_', 1)
-            if (group in self.__parameters) and isinstance(self.__parameters[group].value, InputParameters):
-                self.__errorHelper("Cannot add a parameter with the name '{}', "
-                                   "a sub parameter exists with the name '{}'.", args[0], group)
+        if "_" in args[0]:
+            group, subname = args[0].split("_", 1)
+            if (group in self.__parameters) and isinstance(
+                self.__parameters[group].value, InputParameters
+            ):
+                self.__errorHelper(
+                    "Cannot add a parameter with the name '{}', "
+                    "a sub parameter exists with the name '{}'.",
+                    args[0],
+                    group,
+                )
 
-        default = kwargs.get('default', None)
+        default = kwargs.get("default", None)
         if isinstance(default, InputParameters):
-            kwargs['vtype'] = InputParameters
+            kwargs["vtype"] = InputParameters
 
         self.__parameters[args[0]] = self.__PARAM_TYPE__(*args, **kwargs)
 
@@ -190,7 +206,11 @@ class InputParameters(object):
             value: The value for setting set the parameter
         """
         param = self._getParameter(*args[:-1])
-        if (param is not None) and isinstance(param.value, InputParameters) and isinstance(args[-1], dict):
+        if (
+            (param is not None)
+            and isinstance(param.value, InputParameters)
+            and isinstance(args[-1], dict)
+        ):
             param.value.update(**args[-1])
         elif param is not None:
             param.value = args[-1]
@@ -216,7 +236,7 @@ class InputParameters(object):
         return name in self.__parameters
 
     def update(self, *args, **kwargs):
-        """"
+        """ "
         Update the options given key, value pairs
 
         Inputs:
@@ -226,7 +246,9 @@ class InputParameters(object):
         # Update from InputParameters object
         for opt in args:
             if not isinstance(opt, InputParameters):
-                self.__errorHelper("The supplied arguments must be InputParameters objects or key, value pairs.")
+                self.__errorHelper(
+                    "The supplied arguments must be InputParameters objects or key, value pairs."
+                )
             else:
                 for key in opt.keys():
                     value = opt.get(key)
@@ -259,7 +281,7 @@ class InputParameters(object):
         for key, param in self.__parameters.items():
             if key in keys:
                 out.append(param.toString(prefix=prefix, level=level))
-        return '\n\n'.join(out)
+        return "\n\n".join(out)
 
     def _getParameter(self, *args):
         """
@@ -277,9 +299,11 @@ class InputParameters(object):
             return
 
         opt = self.__parameters.get(args[0])
-        if (opt is None) and ('_' in args[0]):
-            group, subname = args[0].split('_', 1)
-            args = [group, subname] + list(args[1:]) if len(args) > 1 else [group, subname]
+        if (opt is None) and ("_" in args[0]):
+            group, subname = args[0].split("_", 1)
+            args = (
+                [group, subname] + list(args[1:]) if len(args) > 1 else [group, subname]
+            )
             return self._getParameter(*args)
 
         if opt is None:
@@ -288,7 +312,9 @@ class InputParameters(object):
         elif isinstance(opt.value, InputParameters) and len(args) > 1:
             return opt.value._getParameter(*args[1:])
         elif (not isinstance(opt.value, InputParameters)) and len(args) > 1:
-            self.__errorHelper("Extra argument(s) found: {}", ', '.join(str(a) for a in args[1:]))
+            self.__errorHelper(
+                "Extra argument(s) found: {}", ", ".join(str(a) for a in args[1:])
+            )
         else:
             return opt
 
@@ -297,7 +323,7 @@ class InputParameters(object):
         Produce warning, error, or exception based on operation mode.
         """
         msg = text.format(*args, **kwargs)
-        mode = self.get('_error_mode')
+        mode = self.get("_error_mode")
         if mode == InputParameters.ErrorMode.WARNING:
             self.LOG.warning(msg)
         elif mode == InputParameters.ErrorMode.ERROR:

@@ -1,23 +1,28 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import peacock
 from PyQt5 import QtWidgets
+
 
 class ExodusPlugin(peacock.base.Plugin):
     """
     Plugin class for the Exodus volume rendering portion of Peacock.
     """
 
-    def __init__(self, layout='LeftLayout', settings_key="", **kwargs):
-        super(ExodusPlugin, self).__init__(layout=layout, settings_key=settings_key, **kwargs)
+    def __init__(self, layout="LeftLayout", settings_key="", **kwargs):
+        super(ExodusPlugin, self).__init__(
+            layout=layout, settings_key=settings_key, **kwargs
+        )
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.MinimumExpanding
+        )
 
         # Ubiquitous member variables
         self._filename = None
@@ -85,8 +90,8 @@ class ExodusPlugin(peacock.base.Plugin):
         """
         super(ExodusPlugin, self).setup()
 
-        if hasattr(self, 'MainLayout'):
-            self.MainLayout.setContentsMargins(5,5,5,5)
+        if hasattr(self, "MainLayout"):
+            self.MainLayout.setContentsMargins(5, 5, 5, 5)
             self.MainLayout.setSpacing(5)
 
         if isinstance(self, QtWidgets.QGroupBox):

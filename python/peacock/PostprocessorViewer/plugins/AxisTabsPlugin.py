@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 from PyQt5 import QtCore, QtWidgets
@@ -13,21 +13,22 @@ import mooseutils
 from .PostprocessorPlugin import PostprocessorPlugin
 from .AxisSettingsWidget import AxisSettingsWidget
 
+
 class AxisTabsPlugin(QtWidgets.QTabWidget, PostprocessorPlugin):
 
-    #pyqtSignal: Emited when axes has been modified
+    # pyqtSignal: Emited when axes has been modified
     axesModified = QtCore.pyqtSignal()
 
     def __init__(self):
         super(AxisTabsPlugin, self).__init__()
 
-        self.XAxisTab = AxisSettingsWidget('x', 0)
-        self.YAxisTab = AxisSettingsWidget('y', 0)
-        self.Y2AxisTab = AxisSettingsWidget('y', 1)
+        self.XAxisTab = AxisSettingsWidget("x", 0)
+        self.YAxisTab = AxisSettingsWidget("y", 0)
+        self.Y2AxisTab = AxisSettingsWidget("y", 1)
 
-        self.addTab(self.XAxisTab, 'X Axis')
-        self.addTab(self.YAxisTab, 'Y Axis (left)')
-        self.addTab(self.Y2AxisTab, 'Y Axis (right)')
+        self.addTab(self.XAxisTab, "X Axis")
+        self.addTab(self.YAxisTab, "Y Axis (left)")
+        self.addTab(self.Y2AxisTab, "Y Axis (right)")
 
         self.setup()
 
@@ -50,7 +51,9 @@ class AxisTabsPlugin(QtWidgets.QTabWidget, PostprocessorPlugin):
         """
 
         # Create a single list of uniqne names
-        x = []; y = []; y2 = []
+        x = []
+        y = []
+        y2 = []
         for i in range(len(x_vars)):
             mooseutils.unique_list(x, x_vars[i])
             mooseutils.unique_list(y, y_vars[i])
@@ -97,10 +100,15 @@ def main(filenames):
     import mooseutils
 
     import matplotlib
-    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
-    matplotlib.rcParams["figure.dpi"] = (100)
 
-    widget = PostprocessorViewer(mooseutils.PostprocessorReader, timeout=None, plugins=[FigurePlugin, AxisTabsPlugin, PostprocessorSelectPlugin])
+    matplotlib.rcParams["figure.figsize"] = (6.25, 6.25)
+    matplotlib.rcParams["figure.dpi"] = 100
+
+    widget = PostprocessorViewer(
+        mooseutils.PostprocessorReader,
+        timeout=None,
+        plugins=[FigurePlugin, AxisTabsPlugin, PostprocessorSelectPlugin],
+    )
     widget.onSetFilenames(filenames)
     control = widget.currentWidget().AxisTabsPlugin
     window = widget.currentWidget().FigurePlugin
@@ -109,8 +117,9 @@ def main(filenames):
 
     return control, widget, window
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
-    control, widget, window = main(['../../../tests/input/white_elephant_jan_2016.csv'])
+    control, widget, window = main(["../../../tests/input/white_elephant_jan_2016.csv"])
     sys.exit(app.exec_())

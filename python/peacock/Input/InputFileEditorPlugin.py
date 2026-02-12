@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 from PyQt5.QtWidgets import QFileDialog, QPlainTextEdit, QSizePolicy, QMessageBox
 from PyQt5 import QtCore
@@ -16,12 +16,14 @@ from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
 from .CheckInputWidget import CheckInputWidget
 from .InputFileEditor import InputFileEditor
 
+
 class InputFileEditorPlugin(InputFileEditor, Plugin):
     """
     The widget to edit the input file.
     In addition to InputFileEditor, this class adds menus and
     is available as a Plugin.
     """
+
     def __init__(self, **kwds):
         super(InputFileEditorPlugin, self).__init__(**kwds)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -46,13 +48,14 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         self.input_file_view.resize(640, 480)
         self.has_changed = False
 
-        self._preferences.addInt("input/maxRecentlyUsed",
-                "Max number of input files",
-                20,
-                1,
-                50,
-                "Set the maximum number of recent input files that have been used.",
-                )
+        self._preferences.addInt(
+            "input/maxRecentlyUsed",
+            "Max number of input files",
+            20,
+            1,
+            50,
+            "Set the maximum number of recent input files that have been used.",
+        )
 
         self.setup()
 
@@ -60,9 +63,20 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         self.has_changed = True
 
     def _askToSave(self, app_info, reason):
-        if self.has_changed and app_info.valid() and self.tree and self.tree.input_filename and self.tree.incompatibleChanges(app_info):
-            msg = "%s\nYou have unsaved changes in your input file, do you want to save?" % reason
-            reply = QMessageBox.question(self, "Save?", msg, QMessageBox.Save, QMessageBox.Discard)
+        if (
+            self.has_changed
+            and app_info.valid()
+            and self.tree
+            and self.tree.input_filename
+            and self.tree.incompatibleChanges(app_info)
+        ):
+            msg = (
+                "%s\nYou have unsaved changes in your input file, do you want to save?"
+                % reason
+            )
+            reply = QMessageBox.question(
+                self, "Save?", msg, QMessageBox.Save, QMessageBox.Discard
+            )
             if reply == QMessageBox.Save:
                 self._saveInputFile()
 
@@ -89,7 +103,9 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         Ask the user what input file to open.
         """
-        input_name, other = QFileDialog.getOpenFileName(self, "Choose input file", os.getcwd(), "Input File (*.i)")
+        input_name, other = QFileDialog.getOpenFileName(
+            self, "Choose input file", os.getcwd(), "Input File (*.i)"
+        )
         if input_name:
             input_name = os.path.abspath(input_name)
             success = self.setInputFile(input_name)
@@ -109,7 +125,9 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         Ask the user what file to save the input tree to.
         """
-        input_name, other = QFileDialog.getSaveFileName(self, "Choose input file", os.getcwd(), "Input File (*.i)")
+        input_name, other = QFileDialog.getSaveFileName(
+            self, "Choose input file", os.getcwd(), "Input File (*.i)"
+        )
         if input_name:
             input_name = os.path.abspath(input_name)
             self.writeInputFile(input_name)
@@ -168,20 +186,29 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         Input:
             menu[QMenu]: The menu to add the items to.
         """
-        self._open_action = WidgetUtils.addAction(menu, "Open", self._openInputFile, "Ctrl+O")
+        self._open_action = WidgetUtils.addAction(
+            menu, "Open", self._openInputFile, "Ctrl+O"
+        )
         recentMenu = menu.addMenu("Recently opened")
-        self._recently_used_menu = RecentlyUsedMenu(recentMenu,
-                "input/recentlyUsed",
-                "input/maxRecentlyUsed",
-                20,
-                )
+        self._recently_used_menu = RecentlyUsedMenu(
+            recentMenu,
+            "input/recentlyUsed",
+            "input/maxRecentlyUsed",
+            20,
+        )
         self._recently_used_menu.selected.connect(self.setInputFile)
 
         self._save_action = WidgetUtils.addAction(menu, "Save", self._saveInputFile)
-        self._save_as_action = WidgetUtils.addAction(menu, "Save As", self._saveInputFileAs)
+        self._save_as_action = WidgetUtils.addAction(
+            menu, "Save As", self._saveInputFileAs
+        )
         self._clear_action = WidgetUtils.addAction(menu, "Clear", self._clearInputFile)
-        self._check_action = WidgetUtils.addAction(menu, "Check", self._checkInputFile, "Ctrl+K")
-        self._view_file = WidgetUtils.addAction(menu, "View current input file", self._viewInputFile, "Ctrl+V", True)
+        self._check_action = WidgetUtils.addAction(
+            menu, "Check", self._checkInputFile, "Ctrl+K"
+        )
+        self._view_file = WidgetUtils.addAction(
+            menu, "View current input file", self._viewInputFile, "Ctrl+V", True
+        )
         self._menus_initialized = True
         self._setMenuStatus()
 
@@ -202,10 +229,12 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
             if self.block_editor:
                 self.block_editor.raise_()
 
+
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from ExecutableInfo import ExecutableInfo
     import sys
+
     if len(sys.argv) != 3:
         print("Usage: %s <exe> <input file>" % sys.argv[0])
         sys.exit(1)

@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from scipy.optimize import curve_fit
 import numpy as np
+
 
 def linearFit(T, k):
     """
     Linear least-squares fit to data
     """
-    assert len(T) > 1, 'Input lists must have at least two elements'
-    assert len(T) == len(k), 'Input lists must be equal length'
+    assert len(T) > 1, "Input lists must have at least two elements"
+    assert len(T) == len(k), "Input lists must be equal length"
 
     def func(T, a0, a1):
         return a0 + a1 * T
@@ -28,12 +29,13 @@ def linearFit(T, k):
 
     return outputFunc
 
+
 def fourthOrderFit(T, k):
     """
     Fourth-order polynomial least-squares fit to data
     """
-    assert len(T) > 4, 'Input lists must have at least five elements'
-    assert len(T) == len(k), 'Input lists must be equal length'
+    assert len(T) > 4, "Input lists must have at least five elements"
+    assert len(T) == len(k), "Input lists must be equal length"
 
     def func(T, a0, a1, a2, a3, a4):
         return a0 + a1 * T + a2 * T**2 + a3 * T**3 + a4 * T**4
@@ -45,13 +47,14 @@ def fourthOrderFit(T, k):
 
     return outputFunc
 
+
 def maierKellyFit(T, k):
     """
     Maier-Kelly least-squares fit to data
     """
-    assert len(T) > 4, 'Input lists must have at least five elements'
-    assert len(T) == len(k), 'Input lists must be equal length'
-    assert T[0] > 0, 'Temperature cannot be zero'
+    assert len(T) > 4, "Input lists must have at least five elements"
+    assert len(T) == len(k), "Input lists must be equal length"
+    assert T[0] > 0, "Temperature cannot be zero"
 
     def func(T, a0, a1, a2, a3, a4):
         return a0 * np.log(T) + a1 + a2 * T + a3 / T + a4 / T**2
@@ -62,6 +65,7 @@ def maierKellyFit(T, k):
         return func(np.asarray(temperatures), *popt)
 
     return outputFunc
+
 
 def fillMissingValues(temperatures, values, fit_type, missing_value):
     """
@@ -142,7 +146,13 @@ def fillMissingValues(temperatures, values, fit_type, missing_value):
 
         # Add note with original data
         strlist = ", ".join([str(item) for item in values])
-        note = "Missing array values in original database have been filled using a " + fit_type + " fit. Original values are [" + strlist + "]"
+        note = (
+            "Missing array values in original database have been filled using a "
+            + fit_type
+            + " fit. Original values are ["
+            + strlist
+            + "]"
+        )
 
         for i in range(len(temperatures)):
             if values[i] != missing_value:
@@ -150,13 +160,13 @@ def fillMissingValues(temperatures, values, fit_type, missing_value):
                 vals.append(float(values[i]))
 
         # If there is only one value, fill the filled values array with that value
-        if fit_type == 'constant':
+        if fit_type == "constant":
             for i in range(len(temperatures)):
                 if filled_values[i] == missing_value:
                     filled_values[i] = vals[0]
 
         # If there is between two and four values, use a linear fit to fill array
-        elif fit_type == 'linear':
+        elif fit_type == "linear":
             fit = linearFit(temp, vals)
 
             for i in range(len(temperatures)):
@@ -164,10 +174,10 @@ def fillMissingValues(temperatures, values, fit_type, missing_value):
                     filled_values[i] = round(fit(temperatures[i]), dplaces)
 
         else:
-            if fit_type == 'fourth-order':
+            if fit_type == "fourth-order":
                 fit = fourthOrderFit(temp, vals)
 
-            elif fit_type == 'maier-kelly':
+            elif fit_type == "maier-kelly":
                 fit = maierKellyFit(temp, vals)
 
             else:

@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Defines Reader objects that convert raw text into an AST."""
 import os
@@ -21,6 +21,7 @@ from .lexers import RecursiveLexer
 
 LOG = logging.getLogger(__name__)
 
+
 class Reader(mixins.ConfigObject, mixins.ComponentObject):
     """
     Base class for reading (parsing) files into AST.
@@ -33,17 +34,22 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         In general, it is not necessary to deal directly with the Reader beyond construction.
         The reader should be passed into the Translator, which handles all the necessary calls.
     """
-    __TRANSLATOR_METHODS__ = ['init',
-                              'initPage',
-                              'read',
-                              'tokenize',
-                              'preExecute', 'postExecute',
-                              'preRead', 'postRead',
-                              'preTokenize', 'postTokenize']
 
+    __TRANSLATOR_METHODS__ = [
+        "init",
+        "initPage",
+        "read",
+        "tokenize",
+        "preExecute",
+        "postExecute",
+        "preRead",
+        "postRead",
+        "preTokenize",
+        "postTokenize",
+    ]
 
     def __init__(self, lexer, **kwargs):
-        mixins.ConfigObject.__init__(self, 'reader', **kwargs)
+        mixins.ConfigObject.__init__(self, "reader", **kwargs)
         mixins.ComponentObject.__init__(self)
         self.__lexer = lexer
 
@@ -55,7 +61,7 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         """
         return tokens.Token(None)
 
-    def add(self, group, component, location='_end'):
+    def add(self, group, component, location="_end"):
         """
         Add a component to extend the Reader by adding a ReaderComponent.
 
@@ -73,16 +79,19 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         name = component.__class__.__name__
         self.__lexer.add(group, name, component.RE, component, location)
 
-
     def read(self, page):
         """
         Read and return the content of the supplied page.
 
         This is called by the Translator object.
         """
-        if isinstance(page, pages.Source) and page.source and os.path.exists(page.source):
-            LOG.debug('READ %s', page.source)
-            return common.read(page.source).lstrip('\n')
+        if (
+            isinstance(page, pages.Source)
+            and page.source
+            and os.path.exists(page.source)
+        ):
+            LOG.debug("READ %s", page.source)
+            return common.read(page.source).lstrip("\n")
         elif isinstance(page, pages.Text):
             return page.content
 
@@ -101,13 +110,15 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         # Report errors
         if report:
             for token in moosetree.iterate(root):
-                if token.name == 'ErrorToken':
-                    msg = common.report_error(token['message'],
-                                              page.source,
-                                              token.info.line if token.info else None,
-                                              token.info[0] if token.info else token.text(),
-                                              token['traceback'],
-                                              'TOKENIZE ERROR')
+                if token.name == "ErrorToken":
+                    msg = common.report_error(
+                        token["message"],
+                        page.source,
+                        token.info.line if token.info else None,
+                        token.info[0] if token.info else token.text(),
+                        token["traceback"],
+                        "TOKENIZE ERROR",
+                    )
                     LOG.error(msg)
 
     def init(self):
@@ -174,26 +185,30 @@ class Reader(mixins.ConfigObject, mixins.ComponentObject):
         """
         pass
 
+
 class MarkdownReader(Reader):
     """
     Reader designed to work with the 'block' and 'inline' structure of markdown to html conversion.
     """
-    BLOCK = 'block'
-    INLINE = 'inline'
-    EXTENSIONS = ('.md',)
+
+    BLOCK = "block"
+    INLINE = "inline"
+    EXTENSIONS = (".md",)
 
     def __init__(self, **kwargs):
-        Reader.__init__(self,
-                        lexer=RecursiveLexer(MarkdownReader.BLOCK, MarkdownReader.INLINE),
-                        **kwargs)
+        Reader.__init__(
+            self,
+            lexer=RecursiveLexer(MarkdownReader.BLOCK, MarkdownReader.INLINE),
+            **kwargs,
+        )
 
-    def addBlock(self, component, location='_end'):
+    def addBlock(self, component, location="_end"):
         """
         Add a component to the 'block' grammar.
         """
         Reader.add(self, MarkdownReader.BLOCK, component, location)
 
-    def addInline(self, component, location='_end'):
+    def addInline(self, component, location="_end"):
         """
         Add an inline component to the 'inline' grammar.
         """

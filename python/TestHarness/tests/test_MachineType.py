@@ -18,6 +18,7 @@ from TestHarness.util import getMachine
 THIS_MACHINE = getMachine()
 BAD_MACHINE = "arm64" if THIS_MACHINE == "x86_64" else "x86_64"
 
+
 def buildTestSpecs(**kwargs) -> dict:
     """Build a dummy test spec."""
     return {

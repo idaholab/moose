@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 import peacock
@@ -13,8 +13,9 @@ import peacock
 
 class BlockQStyledItemDelegate(QtWidgets.QStyledItemDelegate):
     def paint(self, painter, option, index):
-        self.showDecorationSelected = False;
+        self.showDecorationSelected = False
         super(BlockQStyledItemDelegate, self).paint(painter, option, index)
+
 
 class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
     """
@@ -29,8 +30,10 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
     itemsChanged = QtCore.pyqtSignal()
 
     def __init__(self, block_type, **kwargs):
-        self._initial_status = kwargs.pop('enabled', True) # when true, all boxes are checked
-        self._title = kwargs.pop('title', None)
+        self._initial_status = kwargs.pop(
+            "enabled", True
+        )  # when true, all boxes are checked
+        self._title = kwargs.pop("title", None)
         super(BlockSelectorWidget, self).__init__(**kwargs)
 
         # Setup this widget
@@ -45,7 +48,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         self.MainLayout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.MainLayout)
 
-        self.StandardItemModel = None#QtGui.QStandardItemModel()
+        self.StandardItemModel = None  # QtGui.QStandardItemModel()
         self.ListWidget = QtWidgets.QComboBox()
         self.MainLayout.addWidget(self.ListWidget)
 
@@ -69,7 +72,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
 
         # Create the title item
         title = QtGui.QStandardItem(self._title)
-        title.setFlags(QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+        title.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
         title.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
         title.setBackground(QtGui.QBrush(QtGui.QColor(200, 200, 200)))
         if self._initial_status:
@@ -80,7 +83,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         blocks = reader.getBlockInformation()[self._type]
         for i, block in enumerate(blocks.values()):
             item = QtGui.QStandardItem()
-            item.setFlags(QtCore.Qt.ItemIsUserCheckable|QtCore.Qt.ItemIsEnabled)
+            item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
             item.setData(QtCore.Qt.Unchecked, QtCore.Qt.CheckStateRole)
             item.setData(block.name, QtCore.Qt.UserRole)
             if self._initial_status:
@@ -89,9 +92,9 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
             if block.name.isdigit():
                 item.setText(block.name)
             else:
-                item.setText('{} ({})'.format(block.name, block.number))
+                item.setText("{} ({})".format(block.name, block.number))
 
-            self.StandardItemModel.setItem(i+1, item)
+            self.StandardItemModel.setItem(i + 1, item)
 
         self.ListWidget.setModel(self.StandardItemModel)
         self.ListWidget.setItemDelegate(BlockQStyledItemDelegate())
@@ -128,7 +131,10 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         return key in self._state
 
     def store(self, key):
-        self._state[key] = [self.StandardItemModel.item(i).checkState() for i in range(self.StandardItemModel.rowCount())]
+        self._state[key] = [
+            self.StandardItemModel.item(i).checkState()
+            for i in range(self.StandardItemModel.rowCount())
+        ]
 
     def load(self, key):
         state = self._state.get(key, None)

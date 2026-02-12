@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import os
@@ -35,12 +35,14 @@ class TestVectorPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
         """
 
         # Filenames to load
-        self._filename = '{}_test_*.csv'.format(self.__class__.__name__)
-        self._filename2 = '{}_test2_*.csv'.format(self.__class__.__name__)
+        self._filename = "{}_test_*.csv".format(self.__class__.__name__)
+        self._filename2 = "{}_test2_*.csv".format(self.__class__.__name__)
 
         # Read the data
         filenames = [self._filename, self._filename2]
-        self._control, self._widget, self._window = main(filenames, mooseutils.VectorPostprocessorReader)
+        self._control, self._widget, self._window = main(
+            filenames, mooseutils.VectorPostprocessorReader
+        )
 
     def copyfiles(self, partial=False):
         """
@@ -48,14 +50,26 @@ class TestVectorPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
         """
 
         if partial:
-            shutil.copyfile('../input/vpp_000.csv', '{}_test_000.csv'.format(self.__class__.__name__))
-            shutil.copyfile('../input/vpp_001.csv', '{}_test_001.csv'.format(self.__class__.__name__))
+            shutil.copyfile(
+                "../input/vpp_000.csv",
+                "{}_test_000.csv".format(self.__class__.__name__),
+            )
+            shutil.copyfile(
+                "../input/vpp_001.csv",
+                "{}_test_001.csv".format(self.__class__.__name__),
+            )
         else:
-            for i in [0,1,2,4]:
-                shutil.copyfile('../input/vpp_00{}.csv'.format(i), '{}_test_00{}.csv'.format(self.__class__.__name__, i))
+            for i in [0, 1, 2, 4]:
+                shutil.copyfile(
+                    "../input/vpp_00{}.csv".format(i),
+                    "{}_test_00{}.csv".format(self.__class__.__name__, i),
+                )
 
-            for i in [0,1,3,5,7,9]:
-                shutil.copyfile('../input/vpp2_000{}.csv'.format(i), '{}_test2_000{}.csv'.format(self.__class__.__name__, i))
+            for i in [0, 1, 3, 5, 7, 9]:
+                shutil.copyfile(
+                    "../input/vpp2_000{}.csv".format(i),
+                    "{}_test2_000{}.csv".format(self.__class__.__name__, i),
+                )
 
         for data in self._widget._data:
             data.load()
@@ -73,19 +87,21 @@ class TestVectorPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
         """
         Test that an empty plot is possible.
         """
-        self.assertImage('testEmpty.png')
+        self.assertImage("testEmpty.png")
 
     def testSelect(self):
         """
         Test that plotting from multiple files works.
         """
         self.copyfiles()
-        vars = ['y', 't*x**2']
+        vars = ["y", "t*x**2"]
         for i in range(len(vars)):
-            self._control._groups[i]._toggles[vars[i]].CheckBox.setCheckState(QtCore.Qt.Checked)
+            self._control._groups[i]._toggles[vars[i]].CheckBox.setCheckState(
+                QtCore.Qt.Checked
+            )
             self._control._groups[i]._toggles[vars[i]].CheckBox.clicked.emit(True)
 
-        self.assertImage('testSelect.png')
+        self.assertImage("testSelect.png")
 
     def testUpdateData(self):
         """
@@ -93,31 +109,40 @@ class TestVectorPostprocessorSelectPlugin(Testing.PeacockImageTestCase):
         """
 
         self.copyfiles(partial=True)
-        var = 'y'
+        var = "y"
         self._control._groups[0]._toggles[var].CheckBox.setCheckState(QtCore.Qt.Checked)
         self._control._groups[0]._toggles[var].CheckBox.clicked.emit(True)
-        self.assertImage('testUpdateData0.png')
+        self.assertImage("testUpdateData0.png")
 
         # Reload the data (this would be done via a Timer)
-        time.sleep(1) # need to wait a bit for the modified time to change
+        time.sleep(1)  # need to wait a bit for the modified time to change
         self.copyfiles()
-        self.assertImage('testUpdateData1.png')
+        self.assertImage("testUpdateData1.png")
 
     def testRepr(self):
         """
         Test python scripting.
         """
         self.copyfiles()
-        vars = ['y', 't*x**2']
+        vars = ["y", "t*x**2"]
         for i in range(len(vars)):
-            self._control._groups[i]._toggles[vars[i]].CheckBox.setCheckState(QtCore.Qt.Checked)
+            self._control._groups[i]._toggles[vars[i]].CheckBox.setCheckState(
+                QtCore.Qt.Checked
+            )
             self._control._groups[i]._toggles[vars[i]].CheckBox.clicked.emit(True)
 
         output, imports = self._control.repr()
-        self.assertIn("data = mooseutils.VectorPostprocessorReader('TestVectorPostprocessorSelectPlugin_test_*.csv')", output)
+        self.assertIn(
+            "data = mooseutils.VectorPostprocessorReader('TestVectorPostprocessorSelectPlugin_test_*.csv')",
+            output,
+        )
         self.assertIn("x = data('index (Peacock)')", output)
         self.assertIn("y = data('y')", output)
-        self.assertIn("data = mooseutils.VectorPostprocessorReader('TestVectorPostprocessorSelectPlugin_test2_*.csv')", output)
+        self.assertIn(
+            "data = mooseutils.VectorPostprocessorReader('TestVectorPostprocessorSelectPlugin_test2_*.csv')",
+            output,
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2)

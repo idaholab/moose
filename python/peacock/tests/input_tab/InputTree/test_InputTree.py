@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.Input.InputTree import InputTree
 import os
 from peacock.utils import Testing
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -31,7 +32,9 @@ class Tests(Testing.PeacockTester):
 
     def createExeInfo(self):
         e = ExecutableInfo()
-        e.setPath(Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined"))
+        e.setPath(
+            Testing.find_moose_test_exe(dirname="modules/combined", exe_base="combined")
+        )
         return e
 
     def createTree(self, valid=True, input_file=None):
@@ -89,7 +92,6 @@ class Tests(Testing.PeacockTester):
         self.assertNotEqual(p, None)
         self.assertEqual(p.star, True)
 
-
     def testAddVectorPostprocessor(self):
         """
         Add a new VectorPostprocessor to simple diffusion
@@ -105,7 +107,7 @@ class Tests(Testing.PeacockTester):
         b.setParamValue("start_point", "0 0 0")
         b.setParamValue("end_point", "1 0 0")
 
-        #self.checkFile(t.getInputFileString(), "gold/simple_diffusion_vp.i", True)
+        # self.checkFile(t.getInputFileString(), "gold/simple_diffusion_vp.i", True)
 
     def testBlocks(self):
         t = self.createTree(input_file=self.simple_diffusion)
@@ -183,11 +185,15 @@ class Tests(Testing.PeacockTester):
         app_info.json_data = {"bad_block": None}
         self.assertFalse(app_info.valid())
         self.assertTrue(t.incompatibleChanges(app_info))
-        app_info.path ="foo"
+        app_info.path = "foo"
         self.assertTrue(app_info.valid())
-        self.assertTrue(t.incompatibleChanges(app_info)) # No / which causes an exception
+        self.assertTrue(
+            t.incompatibleChanges(app_info)
+        )  # No / which causes an exception
         app_info.path_map = t.app_info.path_map.copy()
-        self.assertFalse(t.incompatibleChanges(app_info)) # Should be the same, no problems
+        self.assertFalse(
+            t.incompatibleChanges(app_info)
+        )  # Should be the same, no problems
 
         # Simulate removing /BCs/*/<types>/DirichletBC/boundary
         # This should be fine since users can have extra parameters
@@ -217,7 +223,10 @@ class Tests(Testing.PeacockTester):
         del app_info.path_map["/BCs"]
         root.children_list.remove("BCs")
         del root.children["BCs"]
-        self.assertTrue(t.incompatibleChanges(app_info)) # Errors when reading the input file
+        self.assertTrue(
+            t.incompatibleChanges(app_info)
+        )  # Errors when reading the input file
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

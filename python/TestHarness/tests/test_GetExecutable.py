@@ -41,7 +41,7 @@ class TestGetExecutable(TestHarnessTestCase):
 
     def testMethodIsAbsent(self):
         """Test for method that does not exist in test."""
-        test_dir = 'test'
+        test_dir = "test"
         present_methods = self.helperGetPresentMethods(test_dir)
         absent_methods = self.ALL_METHODS - present_methods
         if absent_methods:
@@ -50,12 +50,12 @@ class TestGetExecutable(TestHarnessTestCase):
             # Cannot test for an absent method when all methods are present
             return
 
-        with self.assertRaisesRegex(SystemExit, 'Failed to find MOOSE executable'):
-            self.runTests(f'--{method}')
+        with self.assertRaisesRegex(SystemExit, "Failed to find MOOSE executable"):
+            self.runTests(f"--{method}")
 
     def testMethodIsPresent(self):
         """Test for method that exists in test."""
-        test_dir = 'test'
+        test_dir = "test"
         present_methods = self.helperGetPresentMethods(test_dir)
         if present_methods:
             method = list(present_methods)[0]
@@ -63,8 +63,8 @@ class TestGetExecutable(TestHarnessTestCase):
             # Cannot test for a present method when all methods are absent
             return
 
-        self.runTests(f'--{method}', run=False)
+        self.runTests(f"--{method}", run=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

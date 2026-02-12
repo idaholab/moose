@@ -1,16 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
 from mooseutils import message
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtCore import Qt
+
 
 def addLineEdit(layout, parent, callback, readonly=False):
     line = QtWidgets.QLineEdit(parent)
@@ -21,6 +22,7 @@ def addLineEdit(layout, parent, callback, readonly=False):
     line.setReadOnly(readonly)
     return line
 
+
 def addProgressBar(layout, parent, min_val=0, max_val=100, callback=None):
     bar = QtWidgets.QProgressBar(parent)
     if callback:
@@ -28,6 +30,7 @@ def addProgressBar(layout, parent, min_val=0, max_val=100, callback=None):
     bar.setRange(min_val, max_val)
     layout.addWidget(bar)
     return bar
+
 
 def addButton(layout, parent, name, callback, enabled=True):
     button = QtWidgets.QPushButton(name, parent)
@@ -37,12 +40,14 @@ def addButton(layout, parent, name, callback, enabled=True):
     button.setEnabled(enabled)
     return button
 
+
 def addLabel(layout, parent, name):
     label = QtWidgets.QLabel(name, parent)
     if layout is not None:
         layout.addWidget(label)
     label.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
     return label
+
 
 def addLayout(vertical=False, grid=False):
     if vertical:
@@ -57,6 +62,7 @@ def addLayout(vertical=False, grid=False):
     layout.setContentsMargins(0, 0, 0, 0)
     return layout
 
+
 def addCheckbox(layout, parent, name, callback, reverse=False):
     checkbox = QtWidgets.QCheckBox(name, parent)
     if callback:
@@ -66,6 +72,7 @@ def addCheckbox(layout, parent, name, callback, reverse=False):
     if layout is not None:
         layout.addWidget(checkbox)
     return checkbox
+
 
 def addAction(menu, name, callback, shortcut=None, shortcut_app_level=False):
     action = QtWidgets.QAction(name, menu)
@@ -77,7 +84,10 @@ def addAction(menu, name, callback, shortcut=None, shortcut_app_level=False):
             action.setShortcutContext(Qt.ApplicationShortcut)
     return action
 
-def addShortcut(parent, keys, callback, shortcut_app_level=False, shortcut_with_children=False):
+
+def addShortcut(
+    parent, keys, callback, shortcut_app_level=False, shortcut_with_children=False
+):
     shortcut = QtWidgets.QShortcut(parent)
     shortcut.setKey(keys)
     if shortcut_app_level:
@@ -93,15 +103,34 @@ def addShortcut(parent, keys, callback, shortcut_app_level=False, shortcut_with_
 Global settings grouping for storing/loading GUI state.
 """
 WIDGET_SETTINGS_CACHE = dict()
-WIDGET_SETTINGS_CACHE[QtWidgets.QLineEdit] = [(QtWidgets.QLineEdit.text, QtWidgets.QLineEdit.setText),
-                                              (QtWidgets.QLineEdit.styleSheet, QtWidgets.QLineEdit.setStyleSheet)]
-WIDGET_SETTINGS_CACHE[QtWidgets.QCheckBox] = [(QtWidgets.QCheckBox.isChecked, QtWidgets.QCheckBox.setChecked)]
-WIDGET_SETTINGS_CACHE[QtWidgets.QComboBox] = [(QtWidgets.QComboBox.currentText,
-                                               lambda s, t: QtWidgets.QComboBox.setCurrentIndex(s, QtWidgets.QComboBox.findText(s, t)))]
-WIDGET_SETTINGS_CACHE[QtWidgets.QSlider] = [(QtWidgets.QSlider.sliderPosition, QtWidgets.QSlider.setSliderPosition)]
-WIDGET_SETTINGS_CACHE[QtWidgets.QGroupBox] = [(QtWidgets.QGroupBox.isChecked, QtWidgets.QGroupBox.setChecked)]
-WIDGET_SETTINGS_CACHE[QtWidgets.QSpinBox] = [(QtWidgets.QSpinBox.value, QtWidgets.QSpinBox.setValue)]
-WIDGET_SETTINGS_CACHE[QtWidgets.QDoubleSpinBox] = [(QtWidgets.QDoubleSpinBox.value, QtWidgets.QDoubleSpinBox.setValue)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QLineEdit] = [
+    (QtWidgets.QLineEdit.text, QtWidgets.QLineEdit.setText),
+    (QtWidgets.QLineEdit.styleSheet, QtWidgets.QLineEdit.setStyleSheet),
+]
+WIDGET_SETTINGS_CACHE[QtWidgets.QCheckBox] = [
+    (QtWidgets.QCheckBox.isChecked, QtWidgets.QCheckBox.setChecked)
+]
+WIDGET_SETTINGS_CACHE[QtWidgets.QComboBox] = [
+    (
+        QtWidgets.QComboBox.currentText,
+        lambda s, t: QtWidgets.QComboBox.setCurrentIndex(
+            s, QtWidgets.QComboBox.findText(s, t)
+        ),
+    )
+]
+WIDGET_SETTINGS_CACHE[QtWidgets.QSlider] = [
+    (QtWidgets.QSlider.sliderPosition, QtWidgets.QSlider.setSliderPosition)
+]
+WIDGET_SETTINGS_CACHE[QtWidgets.QGroupBox] = [
+    (QtWidgets.QGroupBox.isChecked, QtWidgets.QGroupBox.setChecked)
+]
+WIDGET_SETTINGS_CACHE[QtWidgets.QSpinBox] = [
+    (QtWidgets.QSpinBox.value, QtWidgets.QSpinBox.setValue)
+]
+WIDGET_SETTINGS_CACHE[QtWidgets.QDoubleSpinBox] = [
+    (QtWidgets.QDoubleSpinBox.value, QtWidgets.QDoubleSpinBox.setValue)
+]
+
 
 def dumpQObjectTree(qobject, level=0):
     """
@@ -114,7 +143,7 @@ def dumpQObjectTree(qobject, level=0):
     """
 
     if level == 0:
-        print('+ ' + qobject.objectName() + ' (' + str(type(qobject)) + ')')
+        print("+ " + qobject.objectName() + " (" + str(type(qobject)) + ")")
 
     children = qobject.children()
     n = len(children)
@@ -122,14 +151,15 @@ def dumpQObjectTree(qobject, level=0):
         child = children[i]
 
         if i == 0:
-            print('|  '*(level+1))
-            prefix = '|  '*(level) + '+--'
+            print("|  " * (level + 1))
+            prefix = "|  " * (level) + "+--"
         else:
-            print('|  '*(level+2))
-            prefix = '|  '*(level+1)
+            print("|  " * (level + 2))
+            prefix = "|  " * (level + 1)
 
-        print(prefix + '+ ' + child.objectName() + ' (' + str(type(child)) + ')')
-        dumpQObjectTree(child, level+1)
+        print(prefix + "+ " + child.objectName() + " (" + str(type(child)) + ")")
+        dumpQObjectTree(child, level + 1)
+
 
 def createIcon(name):
     """
@@ -138,8 +168,11 @@ def createIcon(name):
     Args:
        name[str]: The name of the icon.
     """
-    icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'icons', name))
+    icon_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "icons", name)
+    )
     return QtGui.QIcon(icon_path)
+
 
 def storeWidget(widget, key, **kwargs):
     """
@@ -154,40 +187,46 @@ def storeWidget(widget, key, **kwargs):
     """
 
     # Handle the optional argument and key, value pairs
-    debug = kwargs.pop('debug', message.MOOSE_DEBUG_MODE)
+    debug = kwargs.pop("debug", message.MOOSE_DEBUG_MODE)
 
     # Loop over widget storing pairings
     for wtype, methods in WIDGET_SETTINGS_CACHE.items():
         if isinstance(widget, wtype):
 
             # Debugging information
-            msg = ['Storing State: ' + widget.__class__.__name__ + ' ' + str(widget.objectName())]
-            msg += ['  key = ' + str(key)]
+            msg = [
+                "Storing State: "
+                + widget.__class__.__name__
+                + " "
+                + str(widget.objectName())
+            ]
+            msg += ["  key = " + str(key)]
 
             # Define storage structure for storing state settings
-            state = widget.property('state')
+            state = widget.property("state")
             if not state:
-                widget.setProperty('state', dict())
+                widget.setProperty("state", dict())
 
             # Clear current state
-            state = widget.property('state')
+            state = widget.property("state")
             state[key] = []
 
             # Loop through the values to store
             for s in methods:
                 attr = s[0]
                 state[key].append((s[1], attr(widget)))
-                msg += ['    {} ({})'.format(s[1], attr)]
+                msg += ["    {} ({})".format(s[1], attr)]
 
             # Print debug message
-            message.mooseDebug('\n'.join(msg), color='GREEN', debug=debug)
+            message.mooseDebug("\n".join(msg), color="GREEN", debug=debug)
 
             # Update the stored state
-            widget.setProperty('state', state)
+            widget.setProperty("state", state)
 
     # Call store on children
     for child in widget.children():
         storeWidget(child, key, debug=debug)
+
 
 def loadWidget(widget, key, **kwargs):
     """
@@ -203,16 +242,16 @@ def loadWidget(widget, key, **kwargs):
     """
 
     # Handle optional inputs and convert name to QString
-    debug = kwargs.pop('debug', message.MOOSE_DEBUG_MODE)
-    block = kwargs.pop('block', True)
+    debug = kwargs.pop("debug", message.MOOSE_DEBUG_MODE)
+    block = kwargs.pop("block", True)
 
     # The stored state dict() of the widget
-    state = widget.property('state')
+    state = widget.property("state")
     if not state:
         return
 
-    elif (key not in state) and ('default' in state):
-        key = 'default'
+    elif (key not in state) and ("default" in state):
+        key = "default"
 
     elif key not in state:
         return
@@ -221,15 +260,17 @@ def loadWidget(widget, key, **kwargs):
         widget.blockSignals(True)
 
     # Debug message
-    msg = ['Loading State: ' + widget.__class__.__name__ + ' ' + str(widget.objectName())]
-    msg += ['  key = ' + str(key)]
+    msg = [
+        "Loading State: " + widget.__class__.__name__ + " " + str(widget.objectName())
+    ]
+    msg += ["  key = " + str(key)]
 
     for func in state[key]:
-        msg += [' '*4 + str(func[0]) + '(' + str(func[1]) + ')']
+        msg += [" " * 4 + str(func[0]) + "(" + str(func[1]) + ")"]
         func[0](widget, func[1])
 
     # Print debug message
-    message.mooseDebug('\n'.join(msg), debug=debug, color='YELLOW')
+    message.mooseDebug("\n".join(msg), debug=debug, color="YELLOW")
 
     if block:
         widget.blockSignals(False)

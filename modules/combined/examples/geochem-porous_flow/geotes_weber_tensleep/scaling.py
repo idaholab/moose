@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Plotting the results of scaling.i
 
@@ -31,12 +31,14 @@ quartz_mol = [x[9] for x in data]
 temperature = [x[10] for x in data]
 
 plt.figure()
-plt.semilogy(temperature, anhydrite, 'k-', linewidth = 2.0, label = 'Anhydrite')
-plt.semilogy(temperature, kaolinite, 'r-', linewidth = 2.0, label = 'Kaolinite')
+plt.semilogy(temperature, anhydrite, "k-", linewidth=2.0, label="Anhydrite")
+plt.semilogy(temperature, kaolinite, "r-", linewidth=2.0, label="Kaolinite")
 plt.legend()
 plt.ylabel("Precipitate (cm$^{3}$) per 1$\,$L of formation water")
 plt.xlabel("Temperature")
 plt.title("Minerals precipitated in the heat exchanger")
-plt.savefig("../../../../geochemistry/doc/content/media/geochemistry/geotes_weber_tensleep_scaling.png")
+plt.savefig(
+    "../../../../geochemistry/doc/content/media/geochemistry/geotes_weber_tensleep_scaling.png"
+)
 
 sys.exit(0)

@@ -1,16 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import textwrap
 import inspect
 import logging
 import mooseutils
+
 LOG = logging.getLogger(__file__)
+
 
 class Parameter(object):
     """
@@ -35,49 +37,71 @@ class Parameter(object):
         verify[tuple]: Define a custom verify function and error message. The first item must
                        be a callable function with a single argument, the second item must be a str.
     """
-    def __init__(self, name, default=None, doc=None, vtype=None, allow=None, size=None,
-                 array=False, required=False, private=None, verify=None):
+
+    def __init__(
+        self,
+        name,
+        default=None,
+        doc=None,
+        vtype=None,
+        allow=None,
+        size=None,
+        array=False,
+        required=False,
+        private=None,
+        verify=None,
+    ):
 
         # Force vtype to be a tuple to allow multiple types to be defined
         if isinstance(vtype, type):
             vtype = (vtype,)
 
-        self.__name = name         # option name
-        self.__value = None        # current value
-        self.__default = default   # default value
-        self.__vtype = vtype       # option type
-        self.__allow = allow       # list of allowed values
-        self.__doc = doc           # documentation string
-        self.__array = array       # create an array
-        self.__size = size         # array size
-        self.__required = required # see validate()
-        self.__verify = verify     # verification function
-        self.__set_by_user = False # flag indicating if the parameter was set after construction
+        self.__name = name  # option name
+        self.__value = None  # current value
+        self.__default = default  # default value
+        self.__vtype = vtype  # option type
+        self.__allow = allow  # list of allowed values
+        self.__doc = doc  # documentation string
+        self.__array = array  # create an array
+        self.__size = size  # array size
+        self.__required = required  # see validate()
+        self.__verify = verify  # verification function
+        self.__set_by_user = (
+            False  # flag indicating if the parameter was set after construction
+        )
 
         if not isinstance(self.__name, str):
             msg = "The supplied 'name' argument must be a 'str', but {} was provided."
             raise TypeError(msg.format(type(self.__name)))
 
         # private option, must be after name to allow startswith to work without error
-        self.__private = private if (private is not None) else self.__name.startswith('_')
+        self.__private = (
+            private if (private is not None) else self.__name.startswith("_")
+        )
 
         if (self.__doc is not None) and (not isinstance(self.__doc, str)):
             msg = "The supplied 'doc' argument must be a 'str', but {} was provided."
             raise TypeError(msg.format(type(self.__doc)))
 
-        if (self.__vtype is not None) and (any(not isinstance(v, type) for v in self.__vtype)):
+        if (self.__vtype is not None) and (
+            any(not isinstance(v, type) for v in self.__vtype)
+        ):
             msg = "The supplied 'vtype' argument must be a 'type', but {} was provided."
             raise TypeError(msg.format(type(self.__vtype)))
 
         if (self.__allow is not None) and (not isinstance(self.__allow, tuple)):
-            msg = "The supplied 'allow' argument must be a 'tuple', but {} was provided."
+            msg = (
+                "The supplied 'allow' argument must be a 'tuple', but {} was provided."
+            )
             raise TypeError(msg.format(type(self.__allow)))
 
         if (self.__vtype is not None) and (self.__allow is not None):
             for value in self.__allow:
                 if not isinstance(value, self.__vtype):
-                    msg = "The supplied 'allow' argument must be a 'tuple' of {} items, but a {} " \
-                            "item was provided."
+                    msg = (
+                        "The supplied 'allow' argument must be a 'tuple' of {} items, but a {} "
+                        "item was provided."
+                    )
                     raise TypeError(msg.format(self.__vtype, type(value)))
 
         if (self.__size is not None) and (not isinstance(self.__size, int)):
@@ -89,7 +113,9 @@ class Parameter(object):
             raise TypeError(msg.format(type(self.__required)))
 
         if not isinstance(self.__private, bool):
-            msg = "The supplied 'private' argument must be a 'bool', but {} was provided."
+            msg = (
+                "The supplied 'private' argument must be a 'bool', but {} was provided."
+            )
             raise TypeError(msg.format(type(self.__required)))
 
         if (self.__verify is not None) and (not isinstance(self.__verify, tuple)):
@@ -100,13 +126,25 @@ class Parameter(object):
             msg = "The supplied 'verify' argument must be a 'tuple' with two items a callable function and 'str' error message, but {} with {} items was provided."
             raise TypeError(msg.format(type(self.__verify), len(self.__verify)))
 
-        if (self.__verify is not None) and (not (inspect.isfunction(self.__verify[0]) or inspect.ismethod(self.__verify[0]))):
+        if (self.__verify is not None) and (
+            not (
+                inspect.isfunction(self.__verify[0])
+                or inspect.ismethod(self.__verify[0])
+            )
+        ):
             msg = "The first item in the 'verify' argument tuple must be a callable function with a single argument, but {} was provided"
             raise TypeError(msg.format(type(self.__verify[0])))
 
-        if (self.__verify is not None) and (len(inspect.signature(self.__verify[0]).parameters) != 1):
+        if (self.__verify is not None) and (
+            len(inspect.signature(self.__verify[0]).parameters) != 1
+        ):
             msg = "The first item in the 'verify' argument tuple must be a callable function with a single argument, but {} was provided that has {} arguments."
-            raise TypeError(msg.format(type(self.__verify[0]), len(inspect.signature(self.__verify[0]).parameters)))
+            raise TypeError(
+                msg.format(
+                    type(self.__verify[0]),
+                    len(inspect.signature(self.__verify[0]).parameters),
+                )
+            )
 
         if (self.__verify is not None) and (not isinstance(self.__verify[1], str)):
             msg = "The second item in the 'verify' argument tuple must be a string, but {} was provided"
@@ -117,7 +155,7 @@ class Parameter(object):
 
         if default is not None:
             self.value = default
-            self.__set_by_user = False # override self.value setting of this
+            self.__set_by_user = False  # override self.value setting of this
 
     @property
     def name(self):
@@ -204,41 +242,50 @@ class Parameter(object):
             return 1
         return 0
 
-    def toString(self, prefix='', level=0):
+    def toString(self, prefix="", level=0):
         """Create a string of Parameter information."""
         from .InputParameters import InputParameters
-        is_sub_option = (self.__vtype is not None) and (InputParameters in self.__vtype) and (self.__value is not None)
 
-        out = [mooseutils.colorText(self.__name, 'LIGHT_YELLOW')]
+        is_sub_option = (
+            (self.__vtype is not None)
+            and (InputParameters in self.__vtype)
+            and (self.__value is not None)
+        )
+
+        out = [mooseutils.colorText(self.__name, "LIGHT_YELLOW")]
         if prefix is not None:
-            out[0] = '{} | {}{}'.format(out[0], prefix, self.__name) if prefix else out[0]
+            out[0] = (
+                "{} | {}{}".format(out[0], prefix, self.__name) if prefix else out[0]
+            )
 
         if self.__doc is not None:
             wrapper = textwrap.TextWrapper()
-            wrapper.initial_indent = ' '*2
-            wrapper.subsequent_indent = ' '*2
+            wrapper.initial_indent = " " * 2
+            wrapper.subsequent_indent = " " * 2
             wrapper.width = 100
-            out += [mooseutils.colorText(w, 'GREY') for w in wrapper.wrap(self.__doc)]
+            out += [mooseutils.colorText(w, "GREY") for w in wrapper.wrap(self.__doc)]
 
         if is_sub_option:
-            out += [self.__value.toString(prefix=self.__name + '_', level=level+1)]
+            out += [self.__value.toString(prefix=self.__name + "_", level=level + 1)]
 
         else:
-            out += ['  Value:   {}'.format(repr(self.value))]
+            out += ["  Value:   {}".format(repr(self.value))]
             if self.__default is not None:
-                out += ['  Default: {}'.format(repr(self.__default))]
+                out += ["  Default: {}".format(repr(self.__default))]
 
             if self.__vtype is not None:
-                out += ['  Type(s): {}'.format(tuple([t.__name__ for t in self.__vtype]))]
+                out += [
+                    "  Type(s): {}".format(tuple([t.__name__ for t in self.__vtype]))
+                ]
 
             if self.__allow is not None:
                 wrapper = textwrap.TextWrapper()
-                wrapper.initial_indent = '  Allow:   '
-                wrapper.subsequent_indent = ' '*len(wrapper.initial_indent)
+                wrapper.initial_indent = "  Allow:   "
+                wrapper.subsequent_indent = " " * len(wrapper.initial_indent)
                 wrapper.width = 100 - len(wrapper.initial_indent)
                 out += wrapper.wrap(repr(self.__allow))
 
-        return textwrap.indent('\n'.join(out), ' '*2*level)
+        return textwrap.indent("\n".join(out), " " * 2 * level)
 
     def __check(self, val):
         """
@@ -247,8 +294,10 @@ class Parameter(object):
         This function is used to when setting the default and the value itself.
         """
         if self.__array and not isinstance(val, tuple):
-            msg = "'%s' was defined as an array, which require %s for assignment, but a %s was " \
-                  "provided."
+            msg = (
+                "'%s' was defined as an array, which require %s for assignment, but a %s was "
+                "provided."
+            )
             LOG.warning(msg, self.name, tuple, type(val))
             return None
 
@@ -261,8 +310,10 @@ class Parameter(object):
 
             if self.__size is not None:
                 if len(val) != self.__size:
-                    msg = "'%s' was defined as an array with length %s but a value with length %s " \
-                          "was provided."
+                    msg = (
+                        "'%s' was defined as an array with length %s but a value with length %s "
+                        "was provided."
+                    )
                     LOG.warning(msg, self.name, self.__size, len(val))
                     return None
 

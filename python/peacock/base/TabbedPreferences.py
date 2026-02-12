@@ -1,19 +1,21 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PyQt5 import QtWidgets, QtCore
 from peacock.utils import WidgetUtils
+
 
 class TabbedPreferences(QtWidgets.QWidget):
     """
     For each plugin, store a preference widget in its own tab.
     """
+
     def __init__(self, plugins):
         super(TabbedPreferences, self).__init__()
         self._widgets = []
@@ -23,8 +25,12 @@ class TabbedPreferences(QtWidgets.QWidget):
         self.layout.addWidget(self.tabs)
         self.button_layout = QtWidgets.QHBoxLayout()
         self.layout.addLayout(self.button_layout)
-        self.save_button = WidgetUtils.addButton(self.button_layout, self, "&Save", self.save)
-        self.cancel_button = WidgetUtils.addButton(self.button_layout, self, "&Cancel", self.cancel)
+        self.save_button = WidgetUtils.addButton(
+            self.button_layout, self, "&Save", self.save
+        )
+        self.cancel_button = WidgetUtils.addButton(
+            self.button_layout, self, "&Cancel", self.cancel
+        )
 
         for plugin in plugins:
             w = plugin.preferencesWidget()
@@ -64,5 +70,5 @@ class TabbedPreferences(QtWidgets.QWidget):
         """
         Cancel the changes and close the window
         """
-        self.load() # we want to leave the widgets in a good state
+        self.load()  # we want to leave the widgets in a good state
         self.close()

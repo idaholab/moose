@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 from peacock.BasePeacockMainWindow import BasePeacockMainWindow
 from peacock.utils import Testing
@@ -15,6 +15,7 @@ from peacock.Execute.ExecuteTabPlugin import ExecuteTabPlugin
 import argparse
 from mooseutils import message
 from PyQt5 import QtWidgets
+
 
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
@@ -74,7 +75,9 @@ class Tests(Testing.PeacockTester):
     def testPrefs(self):
         w = self.newWidget()
         w._showPreferences()
-        self.assertEqual(w.settings.tabs.count(), 2) # Only prefs for Execute and Input tabs
+        self.assertEqual(
+            w.settings.tabs.count(), 2
+        )  # Only prefs for Execute and Input tabs
         self.assertEqual(w.settings.isVisible(), True)
         exe_prefs = w.settings.widget(w.tab_plugin.ExecuteTabPlugin.tabName())
         mpiEnabled = exe_prefs.widget("execute/mpiEnabled")
@@ -97,5 +100,6 @@ class Tests(Testing.PeacockTester):
         w.settings.save_button.click()
         self.assertEqual(mpiEnabled.getValue(), False)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     Testing.run_tests()

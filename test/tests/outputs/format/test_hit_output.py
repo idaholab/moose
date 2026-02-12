@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os, sys
 import subprocess
@@ -15,6 +15,7 @@ import unittest
 from FactorySystem import Parser
 import pyhit
 import mooseutils
+
 
 def run_app(args=[]):
     """
@@ -31,7 +32,7 @@ def run_app(args=[]):
     # out WARNING messages that sometime confuse the json parser
     args.insert(1, "-options_left")
     args.insert(2, "0")
-    cmd_line = ' '.join(args)
+    cmd_line = " ".join(args)
     try:
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except OSError as e:
@@ -45,12 +46,13 @@ def run_app(args=[]):
         sys.exit(proc.returncode)
     return stdout_data
 
+
 class TestHITBase(unittest.TestCase):
     def getBlockSections(self, node):
         return {c.name: c for c in node}
 
     def getBlockParams(self, node):
-        return {k:v for k, v in node.params()}
+        return {k: v for k, v in node.params()}
 
     def getInputFileFormat(self, extra=[]):
         """
@@ -60,13 +62,13 @@ class TestHITBase(unittest.TestCase):
         if extra:
             args.extend(["--dump-search"] + extra)
         else:
-            args.append('--dump')
+            args.append("--dump")
         output = run_app(args)
         self.assertIn("### START DUMP DATA ###\n", output)
         self.assertIn("### END DUMP DATA ###\n", output)
 
-        output = output.split('### START DUMP DATA ###\n')[1]
-        output = output.split('### END DUMP DATA ###')[0]
+        output = output.split("### START DUMP DATA ###\n")[1]
+        output = output.split("### END DUMP DATA ###")[0]
 
         self.assertNotEqual(len(output), 0)
         root = pyhit.parse(output)
@@ -112,7 +114,9 @@ class TestInputFileFormat(TestHITBase):
         pc_sections = self.getBlockSections(p)
         pc_star_sections = self.getBlockSections(pc_sections["*"])
         pc_star_star_sections = self.getBlockSections(pc_star_sections["*"])
-        pc_star_star_types_sections = self.getBlockSections(pc_star_star_sections["<types>"])
+        pc_star_star_types_sections = self.getBlockSections(
+            pc_star_star_sections["<types>"]
+        )
         split_params = self.getBlockParams(pc_star_star_types_sections["<Split>"])
         self.assertIn("splitting_type", split_params)
         self.assertIn("petsc_options", split_params)
@@ -137,5 +141,6 @@ class TestInputFileFormatSearch(TestHITBase):
         self.assertIn("initial_steps", params)
         self.assertEqual(len(params.keys()), 1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(__name__, verbosity=2)

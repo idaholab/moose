@@ -1,17 +1,18 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import argparse
 from PyQt5 import QtWidgets
 from .PluginManager import PluginManager
 from .TabPlugin import TabPlugin
 from .TabbedPreferences import TabbedPreferences
+
 
 class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
     """
@@ -24,7 +25,7 @@ class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
 
     def __init__(self, plugins=[], plugin_base=TabPlugin):
         super(TabPluginManager, self).__init__(plugins=plugins, plugin_base=plugin_base)
-        self._description = 'A GUI application (use setDescription within __init__ to change this message).'
+        self._description = "A GUI application (use setDescription within __init__ to change this message)."
         self.setup()
         self._pref_widget = None
 
@@ -80,13 +81,18 @@ class TabPluginManager(QtWidgets.QTabWidget, PluginManager):
         return self._pref_widget
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     from peacock.ExodusViewer.ExodusViewer import ExodusViewer
     from peacock.PostprocessorViewer.PostprocessorViewer import PostprocessorViewer
-    from peacock.PostprocessorViewer.VectorPostprocessorViewer import VectorPostprocessorViewer
+    from peacock.PostprocessorViewer.VectorPostprocessorViewer import (
+        VectorPostprocessorViewer,
+    )
+
     app = QtWidgets.QApplication(sys.argv)
-    main = TabPluginManager(plugins=[ExodusViewer, PostprocessorViewer, VectorPostprocessorViewer])
+    main = TabPluginManager(
+        plugins=[ExodusViewer, PostprocessorViewer, VectorPostprocessorViewer]
+    )
     main.show()
     main.initialize()
     sys.exit(app.exec_())

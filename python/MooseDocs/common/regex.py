@@ -1,14 +1,15 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
 from .exceptions import MooseDocsException
+
 
 def regex(pattern, content, flags=None):
     """
@@ -16,10 +17,10 @@ def regex(pattern, content, flags=None):
     """
     match = re.search(pattern, content, flags=flags)
     if match:
-        if 'content' in match.groupdict():
-            content = match.group('content')
-        elif 'remove' in match.groupdict():
-            content = content[:match.start('remove')] + content[match.end('remove'):]
+        if "content" in match.groupdict():
+            content = match.group("content")
+        elif "remove" in match.groupdict():
+            content = content[: match.start("remove")] + content[match.end("remove") :]
         else:
             content = match.group()
     else:

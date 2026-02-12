@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
 import unittest
@@ -15,6 +15,7 @@ import vtk
 
 from peacock.ExodusViewer.plugins.ClipPlugin import main
 from peacock.utils import Testing
+
 
 class TestClipPlugin(Testing.PeacockImageTestCase):
     """
@@ -28,8 +29,10 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         Creates a window attached to FileControl widget.
         """
 
-        self._filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e')
-        self._widget, self._window = main(size=[600,600])
+        self._filenames = Testing.get_chigger_input_list(
+            "mug_blocks_out.e", "vector_out.e"
+        )
+        self._widget, self._window = main(size=[600, 600])
         self._widget.FilePlugin.onSetFilenames(self._filenames)
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
@@ -53,7 +56,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         self.assertTrue(self._widget.ClipPlugin.ClipSlider.isEnabled())
 
         # Test that things initialize correctly
-        self.assertImage('testInitial.png')
+        self.assertImage("testInitial.png")
 
     def testSelectAxis(self):
         """
@@ -66,16 +69,18 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
 
         # y-axis
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(1)
-        self.assertImage('testSelectAxisY.png')
+        self.assertImage("testSelectAxisY.png")
 
         # z-axis
         camera = vtk.vtkCamera()
         camera.SetViewUp(-0.7786, 0.2277, 0.5847)
         camera.SetPosition(9.2960, -0.4218, 12.6685)
         camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-        self._window.onCameraChanged(camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint())
+        self._window.onCameraChanged(
+            camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint()
+        )
         self._widget.ClipPlugin.ClipDirection.setCurrentIndex(2)
-        self.assertImage('testSelectAxisZ.png')
+        self.assertImage("testSelectAxisZ.png")
 
     def testSlider(self):
         """
@@ -89,7 +94,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         # Update the slider
         self._widget.ClipPlugin.ClipSlider.setSliderPosition(15)
         self._widget.ClipPlugin.ClipSlider.sliderReleased.emit()
-        self.assertImage('testSlide.png')
+        self.assertImage("testSlide.png")
 
     def testSliderState(self):
         """
@@ -117,7 +122,7 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         self.assertEqual(15, self._widget.ClipPlugin.ClipSlider.sliderPosition())
 
         # Test that the y-axis cut looks correct
-        self.assertImage('testStoreSettings.png')
+        self.assertImage("testStoreSettings.png")
 
     def testState(self):
         """
@@ -196,5 +201,6 @@ class TestClipPlugin(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.ClipPlugin.ClipDirection.currentText(), "Y")
         self.assertEqual(self._widget.ClipPlugin.ClipSlider.sliderPosition(), 5)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2)

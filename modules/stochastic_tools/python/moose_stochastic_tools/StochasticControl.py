@@ -19,7 +19,8 @@ import numpy as np
 import pyhit
 from moosecontrol import MooseControl, SubprocessPortRunner
 
-logger = getLogger('StochasticControl')
+logger = getLogger("StochasticControl")
+
 
 @dataclass
 class StochasticRunOptions:
@@ -180,7 +181,7 @@ class StochasticControl(MooseControl):
             command=moose_command,
             moose_control_name=self.web_server_control_name,
             port=moose_port,
-            poll_time=poll_time
+            poll_time=poll_time,
         )
         super().__init__(runner)
 
@@ -602,7 +603,9 @@ class StochasticRunner:
         self._control: StochasticControl = control
         self._result_cache: Optional[_ResultCache] = None
 
-    def parallelWorker(self, func: Callable, x_iter: Iterable) -> Generator[np.ndarray | float, None, None]:
+    def parallelWorker(
+        self, func: Callable, x_iter: Iterable
+    ) -> Generator[np.ndarray | float, None, None]:
         """
         Map-like callable to use as `workers` in SciPy optimizers (emulates
         `multiprocessing.Pool.map`).
