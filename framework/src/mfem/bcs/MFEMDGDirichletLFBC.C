@@ -10,35 +10,43 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDGDirichletLFBC.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMDGDirichletLFBC);
 
 InputParameters
 MFEMDGDirichletLFBC::validParams()
 {
-  InputParameters params = MFEMDGBoundaryCondition::validParams();
+  InputParameters params = MFEMIntegratedBC::validParams();
   params.addClassDescription("Boundary condition for dirichlet lf");
+  params.addParam<mfem::real_t>("sigma", -1.0, "One of the DG penalty params. Typically +/- 1.0");
+  params.addParam<mfem::real_t>(
+      "kappa", "One of the DG penalty params. Should be positive. Will default to (order+1)^2");
   return params;
 }
 
 MFEMDGDirichletLFBC::MFEMDGDirichletLFBC(const InputParameters & parameters)
-  : MFEMDGBoundaryCondition(parameters)
+  : MFEMIntegratedBC(parameters),
+    _fe_order(getMFEMProblem()
+                  .getProblemData()
+                  .gridfunctions.Get(_test_var_name)
+                  ->ParFESpace()
+                  ->FEColl()
+                  ->GetOrder()),
+    _one(1.0),
+    _zero(0.0),
+    _sigma(getParam<mfem::real_t>("sigma")),
+    _kappa((isParamSetByUser("kappa")) ? getParam<mfem::real_t>("kappa")
+                                       : (_fe_order + 1) * (_fe_order + 1))
 {
 }
 
 // Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
 // caller.
 mfem::LinearFormIntegrator *
-MFEMDGDirichletLFBC::createLFIntegrator()
+MFEMDGDirichletLFBC::createFaceLFIntegrator()
 {
   return new mfem::DGDirichletLFIntegrator(_zero, _one, _sigma, _kappa);
-}
-
-// Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
-mfem::BilinearFormIntegrator *
-MFEMDGDirichletLFBC::createBFIntegrator()
-{
-  return nullptr;
 }
 
 #endif
