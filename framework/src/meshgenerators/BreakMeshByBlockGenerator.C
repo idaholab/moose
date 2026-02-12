@@ -156,10 +156,10 @@ BreakMeshByBlockGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   // Max node id is used later to generate new unique node IDs
-  // We need to make sure that max_node_id is the same on all processors so that unique IDs are
-  // consistent across processors
   auto max_node_id = mesh->max_node_id();
-  if (!mesh->is_replicated())
+  // If the mesh is prepared, max_node_id is already the same on all processors so do not need to
+  // communicate.
+  if (!mesh->is_replicated() && !mesh->is_prepared())
     mesh->comm().max(max_node_id);
 #if LIBMESH_ENABLE_UNIQUE_ID
   const auto max_unique_id = mesh->parallel_max_unique_id();
