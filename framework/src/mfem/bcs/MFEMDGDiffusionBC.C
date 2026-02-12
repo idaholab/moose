@@ -10,33 +10,40 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMDGDiffusionBC.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMDGDiffusionBC);
 
 InputParameters
 MFEMDGDiffusionBC::validParams()
 {
-  InputParameters params = MFEMDGBoundaryCondition::validParams();
-  params.addClassDescription("Boundary condition for dirichlet lf");
+  InputParameters params = MFEMIntegratedBC::validParams();
+  params.addClassDescription("Boundary condition for DG Diffusion kernel");
+  params.addParam<mfem::real_t>("sigma", -1.0, "One of the DG penalty params. Typically +/- 1.0");
+  params.addParam<mfem::real_t>(
+      "kappa", "One of the DG penalty params. Should be positive. Will default to (order+1)^2");
   return params;
 }
 
 MFEMDGDiffusionBC::MFEMDGDiffusionBC(const InputParameters & parameters)
-  : MFEMDGBoundaryCondition(parameters)
+  : MFEMIntegratedBC(parameters),
+    _fe_order(getMFEMProblem()
+                  .getProblemData()
+                  .gridfunctions.Get(_test_var_name)
+                  ->ParFESpace()
+                  ->FEColl()
+                  ->GetOrder()),
+    _one(1.0),
+    _zero(0.0),
+    _sigma(getParam<mfem::real_t>("sigma")),
+    _kappa((isParamSetByUser("kappa")) ? getParam<mfem::real_t>("kappa")
+                                       : (_fe_order + 1) * (_fe_order + 1))
 {
-}
-
-// Create a new MFEM integrator to apply to the RHS of the weak form. Ownership managed by the
-// caller.
-mfem::LinearFormIntegrator *
-MFEMDGDiffusionBC::createLFIntegrator()
-{
-  return nullptr;
 }
 
 // Create a new MFEM integrator to apply to LHS of the weak form. Ownership managed by the caller.
 mfem::BilinearFormIntegrator *
-MFEMDGDiffusionBC::createBFIntegrator()
+MFEMDGDiffusionBC::createFaceBFIntegrator()
 {
   return new mfem::DGDiffusionIntegrator(_one, _sigma, _kappa);
 }

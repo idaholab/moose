@@ -34,6 +34,10 @@ public:
   virtual mfem::BilinearFormIntegrator * createBFIntegrator() { return nullptr; }
   virtual mfem::NonlinearFormIntegrator * createNLIntegrator() { return nullptr; }
 
+  // Create a new MFEM DG integrator to apply to the weak form. Ownership managed by the caller.
+  virtual mfem::LinearFormIntegrator * createFaceLFIntegrator() { return nullptr; }
+  virtual mfem::BilinearFormIntegrator * createFaceBFIntegrator() { return nullptr; }
+
   /// Get name of the test variable labelling the weak form this kernel is added to
   const VariableName & getTestVariableName() const { return _test_var_name; }
 

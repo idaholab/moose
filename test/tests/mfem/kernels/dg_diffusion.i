@@ -30,13 +30,10 @@
     type = MFEMDiffusionKernel
     variable = concentration
   []
-  [dg_diff_domain]
+  [dg_domain]
     type = MFEMDomainLFKernel
     variable = concentration
   []
-[]
-
-[DGKernels]
   [dg_diff]
     type = MFEMDGDiffusionKernel
     variable = concentration

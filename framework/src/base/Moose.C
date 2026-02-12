@@ -498,7 +498,6 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_elemental_field_variable", "add_mfem_problem_operator");
   addTaskDependency("add_bc", "add_mfem_problem_operator");
   addTaskDependency("add_kernel", "add_mfem_problem_operator");
-  addTaskDependency("add_dg_kernel", "add_mfem_problem_operator");
 
   // add SubMeshes
   registerMooseObjectTask("add_mfem_submeshes", MFEMSubMesh, false);
@@ -523,7 +522,6 @@ addActionTypes(Syntax & syntax)
   addTaskDependency("add_elemental_field_variable", "add_mfem_fespace_hierarchies");
   // kernels only need fespaces, not hierarchies
   addTaskDependency("add_kernel", "add_mfem_fespaces");
-  addTaskDependency("add_dg_kernel", "add_mfem_fespaces");
 
   // add QuadratureFunctions
   registerMooseObjectTask("add_mfem_quadrature_functions", MFEMQuadratureFunction, false);
