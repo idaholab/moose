@@ -147,13 +147,9 @@ FixedPointSolve::validParams()
 
 FixedPointSolve::FixedPointSolve(Executioner & ex)
   : SolveObject(ex),
-    _has_fixed_point_its(
-        getParam<unsigned int>("fixed_point_max_its") > 1 ||
-        isParamSetByUser("multiapp_fixed_point_convergence") ||
-        getParam<Real>("relaxation_factor") != 1 ||
-        getParam<unsigned int>("fixed_point_min_its") > 1 ||
-        getParam<std::vector<std::string>>("transformed_variables").size() ||
-        getParam<std::vector<PostprocessorName>>("transformed_postprocessors").size()),
+    _has_fixed_point_its(getParam<unsigned int>("fixed_point_max_its") > 1 ||
+                         getParam<unsigned int>("fixed_point_min_its") > 1 ||
+                         isParamSetByUser("multiapp_fixed_point_convergence")),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
@@ -184,6 +180,24 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
                "Relaxation factor must act on at least one 'transformed_variables' or one "
                "'transformed_postprocessors'");
 
+  // Fixed point was not detected, and yet some parameters are passed
+  if (!_has_fixed_point_its &&
+      (getParam<Real>("relaxation_factor") != 1 ||
+       getParam<std::vector<std::string>>("transformed_variables").size() ||
+       getParam<std::vector<PostprocessorName>>("transformed_postprocessors").size()))
+    paramError("fixed_point_min_its",
+               std::string("Parameter(s) ") +
+                   ((getParam<Real>("relaxation_factor") != 1) ? "'relaxation_factor', " : "") +
+                   (getParam<std::vector<std::string>>("transformed_variables").size()
+                        ? "'transformed_variables', "
+                        : "") +
+                   (getParam<std::vector<std::string>>("transformed_postprocessors").size()
+                        ? "'transformed_postprocessors', "
+                        : "") +
+                   " were passed to the Executioner for multiapp fixed point iterations, but fixed "
+                   "point iterations are only activiated if 'fixed_point_min_its', "
+                   "'fixed_point_max_its' or 'multiapp_fixed_point_convergence' are passed");
+
   if (!_app.isUltimateMaster())
   {
     _secondary_relaxation_factor = _app.fixedPointConfig().sub_relaxation_factor;
@@ -213,7 +227,7 @@ FixedPointSolve::initialSetup()
   allocateStorage(true);
 
   // Add to the systems to copy if requested in the Problem
-  if (_problem.needsPreviousMultiAppFixedPointIterationSolver())
+  if (_problem.needsPreviousMultiAppFixedPointIterationSolution())
     for (const auto i : make_range(_problem.numSolverSystems()))
       _systems_to_copy_previous_solutions_for.insert(&_problem.getSolverSystem(i));
   if (_problem.needsPreviousMultiAppFixedPointIterationAuxiliary())

@@ -9178,13 +9178,13 @@ FEProblemBase::needsPreviousNewtonIteration(bool state)
 }
 
 void
-FEProblemBase::needsPreviousMultiAppFixedPointIterationSolver(bool state)
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(bool state)
 {
   _previous_multiapp_fp_nl_solution_required = state;
 }
 
 bool
-FEProblemBase::needsPreviousMultiAppFixedPointIterationSolver() const
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution() const
 {
   return _previous_multiapp_fp_nl_solution_required;
 }

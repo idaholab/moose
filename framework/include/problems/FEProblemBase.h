@@ -2355,25 +2355,28 @@ public:
 
   /**
    * Set a flag that indicated that user required values for the previous multiapp fixed point
-   * iterate
+   * iterate for the solver systems (not auxiliary)
    */
-  void needsPreviousMultiAppFixedPointIterationSolver(bool state);
+  void needsPreviousMultiAppFixedPointIterationSolution(bool state);
 
   /**
-   * Check to see whether we need to compute the variable values of the previous Newton iterate
-   * @return true if the user required values of the previous Newton iterate
+   * Check to see whether we need to compute the variable values of the previous multiapp fixed
+   * point iteration for the solver systems (not auxiliary)
+   * @return true if the user required values of the previous multiapp fixed point iteration
    */
-  bool needsPreviousMultiAppFixedPointIterationSolver() const;
+  bool needsPreviousMultiAppFixedPointIterationSolution() const;
 
   /**
    * Set a flag that indicated that user required values for the previous multiapp fixed point
-   * iterate
+   * iterate for the auxiliary system
    */
   void needsPreviousMultiAppFixedPointIterationAuxiliary(bool state);
 
   /**
-   * Check to see whether we need to compute the variable values of the previous Newton iterate
-   * @return true if the user required values of the previous Newton iterate
+   * Check to see whether we need to compute the variable values of the previous multiapp fixed
+   * point iteration for the auxiliary system
+   * @return true if the user required values of the previous multiapp fixed point iteration from
+   * the auxiliary system
    */
   bool needsPreviousMultiAppFixedPointIterationAuxiliary() const;
 
