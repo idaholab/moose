@@ -33,16 +33,16 @@ public:
 
   virtual mfem::BilinearFormIntegrator * getRealBFIntegrator() override
   {
-    if (_real_kernel)
-      return _transpose ? new mfem::TransposeIntegrator(_real_kernel->createMBFIntegrator()) : _real_kernel->createMBFIntegrator();
+    if (auto real_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(_real_kernel))
+      return _transpose ? new mfem::TransposeIntegrator(real_kernel->createMBFIntegrator()) : real_kernel->createMBFIntegrator();
     else
       return nullptr;
   }
 
   virtual mfem::BilinearFormIntegrator * getImagBFIntegrator() override
   {
-    if (_imag_kernel)
-      return _transpose ? new mfem::TransposeIntegrator(_imag_kernel->createMBFIntegrator()) : _imag_kernel->createMBFIntegrator();
+    if (auto imag_kernel = std::dynamic_pointer_cast<MFEMMixedBilinearFormKernel>(_imag_kernel))
+      return _transpose ? new mfem::TransposeIntegrator(imag_kernel->createMBFIntegrator()) : imag_kernel->createMBFIntegrator();
     else
       return nullptr;
   }
@@ -52,9 +52,6 @@ protected:
   const VariableName _trial_var_name;
   /// Bool controlling whether to add the transpose of the integrator to the system
   bool _transpose;
-
-  std::shared_ptr<MFEMMixedBilinearFormKernel> _real_kernel{nullptr};
-  std::shared_ptr<MFEMMixedBilinearFormKernel> _imag_kernel{nullptr};
 
 };
 
