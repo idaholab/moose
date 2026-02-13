@@ -1,22 +1,52 @@
 [Tests]
+  issues = '#7669 #31454'
+  design = 'ReactionNetwork/AqueousEquilibriumReactions/index.md Physics/AqueousReactionsEquilibrium/index.md'
   [./1species]
     type = 'Exodiff'
     input = '1species.i'
     exodiff = '1species_out.e'
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with a single species with a shorthand action syntax.'
   [../]
+  [1species_physics]
+    type = 'Exodiff'
+    input = '1species_physics.i'
+    exodiff = '1species_physics_out.e'
+    rel_err = 1e-5
+    requirement = 'The system shall be able to use a shorthand physics syntax to create a single species aqueous equilibrium reactions simulation.'
+  []
+  [1species_physics_variables]
+    type = 'Exodiff'
+    prereq = '1species_physics'
+    input = '1species_physics.i'
+    cli_args = "Variables/active=''
+                Physics/AqueousReactionsEquilibrium/all/initial_conditions=1e-2
+                Physics/AqueousReactionsEquilibrium/all/equation_scaling=1
+                Physics/AqueousReactionsEquilibrium/all/verbose=true
+                Physics/AqueousReactionsEquilibrium/all/reactions='2a -> pa2 [K=10]'
+                BCs/left_inflow/type=DirichletBC
+                BCs/left_inflow/variable=a
+                BCs/left_inflow/boundary=left
+                BCs/left_inflow/value=1e-1
+                Outputs/file_base='1species_var_out'"
+    exodiff = '1species_var_out.e'
+    rel_err = 1e-5
+    requirement = 'The system shall be able to use a shorthand physics syntax to create a single species aqueous equilibrium reactions simulation, and have the Physics create the variable.'
+  []
   [./1species_without_action]
     type = 'Exodiff'
     input = '1species_without_action.i'
     exodiff = '1species_out.e'
     prereq = 1species
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with a single species.'
   [../]
   [./2species]
     type = 'Exodiff'
     input = '2species.i'
     exodiff = '2species_out.e'
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution with a shorthand action syntax.'
   [../]
   [./2species_without_action]
     type = 'Exodiff'
@@ -24,6 +54,7 @@
     exodiff = '2species_out.e'
     prereq = 2species
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution.'
   [../]
   [./2species_eqaux]
     type = 'Exodiff'
@@ -31,25 +62,44 @@
     exodiff = '2species_out.e'
     prereq = 2species_without_action
     rel_err = 1e-5
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution using auxiliary field variables for the equilibrium constants.'
   [../]
   [./2species_with_density]
     type = 'Exodiff'
     input = '2species_with_density.i'
     exodiff = '2species_with_density_out.e'
+    requirement = 'The system shall be able to solve for aqueuous equilibrium reactions with two species in solution coupled with advection using the Darcy equation.'
   [../]
+  [2species_with_density_physics]
+    type = 'Exodiff'
+    input = '2species_physics.i'
+    exodiff = '2species_physics_out.e'
+    rel_err = 1e-5
+    requirement = 'The system shall be able to use a shorthand physics syntax to create a two-species aqueous equilibrium reactions simulation.'
+  []
   [./water_dissociation]
     type = CSVDiff
     input = water_dissociation.i
     csvdiff = water_dissociation_out.csv
+    requirement = 'The system shall be able to solve for the dissociation of water into gas using a chemical reaction network formulation.'
   [../]
   [./co2_h2o]
     type = CSVDiff
     input = co2_h2o.i
     csvdiff = co2_h2o_out.csv
+    requirement = 'The system shall be able to solve for the aqueous equilibrium of the dissolution of carbon dioxide in water.'
   [../]
+  [co2_h2o_physics]
+    type = CSVDiff
+    input = co2_h2o_physics.i
+    csvdiff = co2_h2o_physics_out.csv
+    ignore_columns = 'co3-- co3^2-'
+    requirement = 'The system shall be able to use a shorthand physics syntax to create the aqueous equilibrium reactions for a simulation of carbon dioxide dissolved in water.'
+  []
   [./calcium_bicarbonate]
     type = CSVDiff
     input = calcium_bicarbonate.i
     csvdiff = calcium_bicarbonate_out.csv
+    requirement = 'The system shall be able to solve for the aqueous equilibrium of dissolution of calcium and bi-carbonate in water.'
   [../]
 []

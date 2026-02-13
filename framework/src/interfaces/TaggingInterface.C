@@ -46,9 +46,9 @@ TaggingInterface::validParams()
   params.addParam<std::vector<TagName>>("extra_matrix_tags",
                                         "The extra tags for the matrices this Kernel should fill");
 
-  params.addParamNamesToGroup(
-      "vector_tags matrix_tags extra_vector_tags extra_matrix_tags absolute_value_vector_tags",
-      "Contribution to tagged field data");
+  params.addParamNamesToGroup("vector_tags matrix_tags extra_vector_tags extra_matrix_tags "
+                              "absolute_value_vector_tags matrix_only",
+                              "Contribution to tagged field data");
 
   return params;
 }

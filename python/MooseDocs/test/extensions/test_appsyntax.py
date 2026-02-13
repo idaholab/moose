@@ -137,13 +137,13 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), "Optional Parameters")
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), "ul", size=3)
+        self.assertHTMLTag(res(4), "ul", size=2)
 
         self.assertHTMLTag(res(5), "h3")
         self.assertEqual(res(5)["data-details-open"], "close")
         self.assertEqual(res(5).text(), "Contribution To Tagged Field Data Parameters")
 
-        self.assertHTMLTag(res(6), "ul", size=5)
+        self.assertHTMLTag(res(6), "ul", size=6)
 
         self.assertHTMLTag(res(7), "h3")
         self.assertEqual(res(7)["data-details-open"], "close")
@@ -194,13 +194,13 @@ class TestParameters(AppSyntaxTestCase):
         self.assertEqual(res(3).text(), "Optional Parameters")
 
         # This size should match the number of optional parameters for Kernel
-        self.assertHTMLTag(res(4), "ul", size=3, class_="collapsible")
+        self.assertHTMLTag(res(4), "ul", size=2, class_="collapsible")
 
         self.assertHTMLTag(res(5), "h3")
         self.assertEqual(res(5)["data-details-open"], "close")
         self.assertEqual(res(5).text(), "Contribution To Tagged Field Data Parameters")
 
-        self.assertHTMLTag(res(6), "ul", size=5, class_="collapsible")
+        self.assertHTMLTag(res(6), "ul", size=6, class_="collapsible")
 
         self.assertHTMLTag(res(7), "h3")
         self.assertEqual(res(7)["data-details-open"], "close")
