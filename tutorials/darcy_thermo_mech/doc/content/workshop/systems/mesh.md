@@ -52,7 +52,7 @@ MOOSE supports reading and writing a large number of formats and could be extend
 
 ## Generating Meshes in MOOSE
 
-Built-in mesh generation is implemented for lines, rectangles,  rectangular prisms or [extruded reactor geometries](modules/reactor/index.md).
+Built-in mesh generation is implemented for lines, rectangles, or [extruded reactor geometries](modules/reactor/index.md).
 
 !listing face_info_tri.i block=Mesh
 
@@ -77,7 +77,20 @@ Names can be assigned to IDs for existing meshes to ease input file maintenance.
 
 !---
 
-!listing name_on_the_fly.i block=Mesh BCs Materials
+We create a mesh with ids, and give the blocks, identified by their id, names for convenience
+
+!listing inputs/step01_diffusion/mesh.i block=Mesh remove=Mesh/hollow_concrete Mesh/rename_boundaries_step1 Mesh/rename_boundaries_step2 Mesh/rename_boundaries_step3 style=height:150px link=False
+
+!---
+
+## Chaining mesh operations
+
+We can chain the generation of unit cell meshes, stitching to form lattices, extrusion and homogenization to form
+this advanced reactor mesh, entirely using MOOSE mesh generators.
+
+!media tutorial04_meshing/rgmb_abtr_hethom_stepbystep.png
+       style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=Process for producing an extruded homogeneous core for a sodium-cooled fast reactor.
 
 !!mesh-advanced
 

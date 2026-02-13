@@ -82,13 +82,13 @@ Output of `Material` properties is enabled by setting the "outputs" parameter.
 The following example creates additional variables called "real_property", "tensor_property", and "vector_property" that will show up in
 the output file.
 
-!listing output_block.i block=Materials Outputs
+!listing test/tests/bcs/mat_neumann_bc/mat_neumann.i block=Materials
 
 !---
 
 ## Supported Property Types for Output
 
-`Material` properties can be of arbitrary (C++) type, but not all types can be output.
+`Material` properties can be of arbitrary (C++) type. Auxkernels have been created for material output only for specific common types:
 
 | Type | AuxKernel | Variable Name(s) |
 | :- | :- | :- |
