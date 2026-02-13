@@ -27,7 +27,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  ///{@ The old and older states of the stress tensor that the divergence operator operates on
+  ///@{ The old and older states of the stress tensor that the divergence operator operates on
   const MaterialProperty<RankTwoTensor> & _stress_older;
   const MaterialProperty<RankTwoTensor> & _stress_old;
   ///@}

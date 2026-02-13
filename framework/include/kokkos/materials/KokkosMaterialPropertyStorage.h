@@ -142,7 +142,7 @@ private:
   /**
    * Function pointer maps for load/store
    */
-  ///{@
+  ///@{
   static std::unordered_map<std::type_index, PropertyStore> _store_functions;
   static std::unordered_map<std::type_index, PropertyLoad> _load_functions;
   ///@}
