@@ -3,7 +3,9 @@
     "pin1_cell_radial_0": {
       "fill": "rgmb_region_1",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "-pin1_radial_ring_0",
+      "region_infix": [
+        "-pin1_radial_ring_0"
+      ],
       "region_postfix": [
         "pin1_radial_ring_0",
         "-"
@@ -12,7 +14,14 @@
     "pin1_cell_radial_1": {
       "fill": "rgmb_region_2",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "(-pin1_radial_ring_1 & ~(-pin1_radial_ring_0))",
+      "region_infix": [
+        "-pin1_radial_ring_1",
+        "&",
+        "~",
+        [
+          "-pin1_radial_ring_0"
+        ]
+      ],
       "region_postfix": [
         "pin1_radial_ring_1",
         "-",
@@ -25,7 +34,14 @@
     "pin1_cell_radial_2": {
       "fill": "rgmb_region_3",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "(-pin1_radial_ring_2 & ~(-pin1_radial_ring_1))",
+      "region_infix": [
+        "-pin1_radial_ring_2",
+        "&",
+        "~",
+        [
+          "-pin1_radial_ring_1"
+        ]
+      ],
       "region_postfix": [
         "pin1_radial_ring_2",
         "-",
@@ -38,8 +54,22 @@
     "pin1_cell_radial_3": {
       "fill": "rgmb_region_4",
       "filltype": "CSG_MATERIAL",
-      "region_infix":
-          "((+pin1_radial_duct_3_surf_0 & +pin1_radial_duct_3_surf_1 & +pin1_radial_duct_3_surf_2 & +pin1_radial_duct_3_surf_3) & ~(-pin1_radial_ring_2))",
+      "region_infix": [
+        [
+          "+pin1_radial_duct_3_surf_0",
+          "&",
+          "+pin1_radial_duct_3_surf_1",
+          "&",
+          "+pin1_radial_duct_3_surf_2",
+          "&",
+          "+pin1_radial_duct_3_surf_3"
+        ],
+        "&",
+        "~",
+        [
+          "-pin1_radial_ring_2"
+        ]
+      ],
       "region_postfix": [
         "pin1_radial_duct_3_surf_0",
         "+",
@@ -61,8 +91,18 @@
     "pin1_void_cell": {
       "fill": "",
       "filltype": "VOID",
-      "region_infix":
-          "~(+pin1_radial_duct_3_surf_0 & +pin1_radial_duct_3_surf_1 & +pin1_radial_duct_3_surf_2 & +pin1_radial_duct_3_surf_3)",
+      "region_infix": [
+        "~",
+        [
+          "+pin1_radial_duct_3_surf_0",
+          "&",
+          "+pin1_radial_duct_3_surf_1",
+          "&",
+          "+pin1_radial_duct_3_surf_2",
+          "&",
+          "+pin1_radial_duct_3_surf_3"
+        ]
+      ],
       "region_postfix": [
         "pin1_radial_duct_3_surf_0",
         "+",

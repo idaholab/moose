@@ -116,12 +116,12 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
   }
 }
 
-std::string
-CSGRegion::toInfixString() const
+nlohmann::json
+CSGRegion::toInfixJSON() const
 {
-  // Return an empty string if no postfix tokens are defined
+  // Return an empty JSON object if no postfix tokens are defined
   if (_postfix_tokens.empty())
-    return "";
+    return nlohmann::json::parse("[]");
 
   // Build the region string using a stack, iterating through each token within _postfix_tokens
   std::stack<std::string> postfix_stack;
@@ -138,7 +138,8 @@ CSGRegion::toInfixString() const
       // Halfspace: Pop from the stack, update region string, push back
       if (const auto halfspace_ptr = std::get_if<CSGSurface::Halfspace>(&token))
       {
-        region_string = halfspaceSymbol(*halfspace_ptr) + postfix_stack.top();
+        std::string symbol = std::string(1, halfspaceSymbol(*halfspace_ptr));
+        region_string = "\"" + symbol + postfix_stack.top() + "\"";
         postfix_stack.pop();
       }
       // Region operator: Pop 1 or 2 values, update region string, push back
@@ -150,10 +151,10 @@ CSGRegion::toInfixString() const
         {
           region_string = postfix_stack.top();
           postfix_stack.pop();
-          if (region_string[0] == '(')
-            region_string = symbol + region_string;
+          if (region_string[0] == '[')
+            region_string = "\"" + symbol + "\", " + region_string;
           else
-            region_string = symbol + "(" + region_string + ")";
+            region_string = "\"" + symbol + "\", [" + region_string + "]";
         }
         else
         {
@@ -161,19 +162,25 @@ CSGRegion::toInfixString() const
           postfix_stack.pop();
           auto region_string_a = postfix_stack.top();
           postfix_stack.pop();
-          region_string = region_string_a + " " + symbol + " " + region_string_b;
+          region_string = region_string_a + ", \"" + symbol + "\", " + region_string_b;
           // Skip putting parentheses around the region string if the next region operator in the
           // postfix token list is identical
           if (!nextRegionOpIsIdentical(region, i + 1))
-            region_string = "(" + region_string + ")";
+            region_string = "[" + region_string + "]";
         }
       }
       postfix_stack.push(region_string);
     }
   }
 
-  // Top of stack should now have region string we desire
-  return postfix_stack.top();
+  // Top of stack should now have region string we desire. Now, we
+  // parse the string into a JSON object
+  std::string region_string = postfix_stack.top();
+  // Wrap region string in square brackets so that it is always treated as a
+  // list in the output JSON object
+  if (region_string[0] != '[')
+    region_string = "[" + region_string + "]";
+  return nlohmann::json::parse(region_string);
 }
 
 std::vector<std::string>

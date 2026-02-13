@@ -87,12 +87,12 @@ public:
   virtual ~CSGRegion() = default;
 
   /**
-   * @brief gets the infix string representation of the region, which involves converting
+   * @brief gets the infix JSON representation of the region, which involves converting
    *        region representation from postfix to infix notation
    *
-   * @return infix string representation of the region
+   * @return infix JSON representation of the region
    */
-  std::string toInfixString() const;
+  nlohmann::json toInfixJSON() const;
 
   /**
    * @brief gets the list of postfix tokens of the region in string representation
