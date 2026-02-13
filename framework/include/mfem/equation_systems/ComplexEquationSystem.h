@@ -48,6 +48,11 @@ public:
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs() override;
 
+  /// Applies complex BCs to a single trial variable
+  virtual void ApplyComplexEssentialBC(const std::string & var_name,
+                                               mfem::ParComplexGridFunction & trial_gf,
+                                               mfem::Array<int> & global_ess_markers);
+
   /// Add complex kernels
   void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);
 
