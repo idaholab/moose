@@ -845,7 +845,7 @@ public:
    * Get all Kokkos systems that are associated with MOOSE nonlinear and auxiliary systems
    * @returns The array of Kokkos systems
    */
-  ///{@
+  ///@{
   Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() { return _kokkos_systems; }
   const Moose::Kokkos::Array<Moose::Kokkos::System> & getKokkosSystems() const
   {
@@ -858,7 +858,7 @@ public:
    * @param sys_num The system number
    * @returns The Kokkos system
    */
-  ///{@
+  ///@{
   Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num);
   const Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num) const;
   ///@}

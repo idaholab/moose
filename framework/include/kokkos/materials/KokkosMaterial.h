@@ -93,7 +93,7 @@ public:
   /**
    * Shims for hook methods that can be leveraged to implement static polymorphism
    */
-  ///{@
+  ///@{
   template <typename Derived>
   KOKKOS_FUNCTION void
   initQpStatefulPropertiesShim(const Derived & material, const unsigned int qp, Datum & datum) const

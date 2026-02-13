@@ -50,7 +50,7 @@ public:
    * @param tags The vector tags
    * @param dir Copy direction
    */
-  ///{@
+  ///@{
   void sync(const std::set<TagID> & tags, const MemcpyType dir);
   void sync(const std::vector<TagID> & tags, const MemcpyType dir);
   void sync(const TagID tag, const MemcpyType dir);
@@ -108,7 +108,7 @@ public:
    * Get the MOOSE system
    * @returns The MOOSE system
    */
-  ///{@
+  ///@{
   auto & getSystem() { return _system; }
   const auto & getSystem() const { return _system; }
   ///@}

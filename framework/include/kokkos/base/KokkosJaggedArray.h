@@ -103,7 +103,7 @@ private:                                                                        
  * The specialization of the inner array wrapper class for each dimension.
  * @tparam layout The memory layout type
  */
-///{@
+///@{
 template <typename T, unsigned int inner, LayoutType layout>
 class JaggedArrayInnerData;
 
@@ -462,7 +462,7 @@ JaggedArrayBase<T, inner, outer, index_type, layout>::finalize()
  * @tparam index_type The outer array index type
  * @tparam layout The inner array memory layout type
  */
-///{@
+///@{
 template <typename T,
           unsigned int inner,
           unsigned int outer,
