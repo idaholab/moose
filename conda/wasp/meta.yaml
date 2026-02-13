@@ -33,14 +33,14 @@ source:
       - message.patch
 
 build:
-  number: 2
-  string: build_2
+  number: 3
+  string: build_3
 
 outputs:
   - name: moose-wasp-base
     build:
-      number: 2
-      string: build_2
+      number: 3
+      string: build_3
       script: ${RECIPE_DIR}/build_wasp.sh
       script_env:
         - MOOSE_JOBS
@@ -62,7 +62,7 @@ outputs:
 
   - name: moose-pyhit
     build:
-      number: 2
+      number: 3
       script: ${RECIPE_DIR}/build_pyhit.sh
       script_env:
         - MOOSE_JOBS

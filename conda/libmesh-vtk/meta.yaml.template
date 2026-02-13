@@ -6,7 +6,7 @@
 {% set build = __VERSIONER_LIBMESH_VTK_BUILD_NUMBER__ %}
 {% set vtk_version = "__VERSIONER_LIBMESH_VTK_VERSION__" %}
 {% set vtk_friendly_version = vtk_version.split('.')[:2] | join('.') %}
-{% set sha256 = "cee64b98d270ff7302daf1ef13458dff5d5ac1ecb45d47723835f7f7d562c989" %}
+{% set sha256 = "d77d180694faafdc816578b9a53651f6790e799615811bfbb91018661a3bb8f2" %}
 
 package:
   name: moose-libmesh-vtk
