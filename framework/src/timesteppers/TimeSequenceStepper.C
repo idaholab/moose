@@ -36,6 +36,12 @@ TimeSequenceStepper::step()
 {
   TimeSequenceStepperBase::step();
 
+  updateSequence();
+}
+
+void
+TimeSequenceStepper::updateSequence()
+{
   // Get the times again in case there are new ones
   const auto & times = _times.getTimes();
   if (_times.isDynamicTimeSequence())

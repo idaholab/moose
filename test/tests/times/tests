@@ -118,8 +118,7 @@
       [with_input_times]
         type = 'JSONDiff'
         input = 'external_times.i'
-        cli_args = "
-        Times/external_input/times='0.2 0.3' Outputs/file_base=external_times_inputtimes "
+        cli_args = "Times/external_input/times='0.2 0.3' Outputs/file_base=external_times_inputtimes "
         jsondiff = 'external_times_inputtimes.json'
         detail = 'with input times array'
       []

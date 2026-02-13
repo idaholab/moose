@@ -24,6 +24,7 @@ public:
 
   virtual void init() override;
   virtual void step() override;
+  virtual void updateSequence() override;
 
 protected:
   /// A Times object that will provide the sequence of times to hit
