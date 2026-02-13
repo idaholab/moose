@@ -268,6 +268,28 @@ public:
     _data.copyToHost();
   }
   /**
+   * Copy data from host to device and deallocate host
+   */
+  void moveToDevice()
+  {
+    mooseAssert(_finalized, "KokkosJaggedArray not finalized.");
+
+    _dims.moveToDevice();
+    _offsets.moveToDevice();
+    _data.moveToDevice();
+  }
+  /**
+   * Copy data from device to host and deallocate device
+   */
+  void moveToHost()
+  {
+    mooseAssert(_finalized, "KokkosJaggedArray not finalized.");
+
+    _dims.moveToHost();
+    _offsets.moveToHost();
+    _data.moveToHost();
+  }
+  /**
    * Get the underlying data array
    * @returns The data array
    */
@@ -278,6 +300,16 @@ public:
    * @returns Whether the array is finalized
    */
   KOKKOS_FUNCTION bool isFinalized() const { return _finalized; }
+  /**
+   * Get whether the array was allocated on host
+   * @returns Whether the array was allocated on host
+   */
+  KOKKOS_FUNCTION bool isHostAlloc() const { return _data.isHostAlloc(); }
+  /**
+   * Get whether the array was allocated on device
+   * @returns Whether the array was allocated on device
+   */
+  KOKKOS_FUNCTION bool isDeviceAlloc() const { return _data.isDeviceAlloc(); }
   /**
    * Get the total data array size
    * @returns The total data array size

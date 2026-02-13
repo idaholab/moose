@@ -501,7 +501,7 @@ ifneq (,$(findstring mpicxx,$(CXX)))
 endif
 endif
 endif
-applibs :=  $(app_test_LIB) $(app_LIBS) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
+applibs :=  $(app_test_LIB) $(app_LIBS) $(app_KOKKOS_LIB_COMBINED) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
 applibs := $(call uniq,$(applibs))
 
 ifeq ($(libmesh_static),yes)
