@@ -142,13 +142,20 @@ DefaultNonlinearConvergence::checkConvergence(unsigned int iter)
   }
 #endif
 
-  // See if SNESSetFunctionDomainError() has been called.  Note:
-  // SNESSetFunctionDomainError() and SNESGetFunctionDomainError()
-  // were added in different releases of PETSc.
+  // See if SNESSetFunctionDomainError() has been called.
+  // Note: SNESSetFunctionDomainError() and SNESGetFunctionDomainError() were added
+  // in different releases of PETSc. The latter was removed in PETSc 3.25.0.
+#if PETSC_VERSION_LESS_THAN(3, 25, 0)
   PetscBool domainerror;
   LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetFunctionDomainError(snes, &domainerror));
   if (domainerror)
     status = MooseConvergenceStatus::DIVERGED;
+#else
+  SNESConvergedReason reason;
+  LibmeshPetscCallA(_fe_problem.comm().get(), SNESGetConvergedReason(snes, &reason));
+  if (reason == SNES_DIVERGED_FUNCTION_DOMAIN)
+    status = MooseConvergenceStatus::DIVERGED;
+#endif
 
   Real fnorm_old;
   // This is the first residual before any iterations have been done, but after
