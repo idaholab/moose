@@ -14,6 +14,7 @@
 #include "ExternalProblem.h"
 #include "MFEMProblemData.h"
 #include "MFEMMesh.h"
+#include "MFEMRefinementMarker.h"
 
 class MFEMProblem : public ExternalProblem
 {
@@ -107,7 +108,7 @@ public:
                       InputParameters & parameters) override;
 
   /**
-   * Override of ExternalProblem::addElementalFieldVariable to be a no-op because we do not use the
+   * Override of FEProblemBase::addElementalFieldVariable to be a no-op because we do not use the
    * Marker/Indicator objects designed to work with libMesh infrastructure
    */
   void
@@ -286,8 +287,8 @@ public:
   void hRefine();
   void pRefine();
 
-  bool useHRefinement() const;
-  bool usePRefinement() const;
+  bool useHRefinement() const { return (_problem_data._refiner->useHRefinement()); }
+  bool usePRefinement() const { return (_problem_data._refiner->usePRefinement()); }
 
   bool useAMR() const { return _problem_data._use_amr; }
 

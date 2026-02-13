@@ -12,9 +12,6 @@
 #include "MFEMIndicator.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMIndicator);
-
-// static method
 InputParameters
 MFEMIndicator::validParams()
 {
@@ -33,12 +30,6 @@ MFEMIndicator::MFEMIndicator(const InputParameters & params)
     _kernel_name(getParam<std::string>("kernel")),
     _fespace(*getMFEMProblem().getProblemData().gridfunctions.Get(_var_name)->ParFESpace())
 {
-}
-
-mfem::ParFiniteElementSpace &
-MFEMIndicator::getFESpace() const
-{
-  return _fespace;
 }
 
 #endif

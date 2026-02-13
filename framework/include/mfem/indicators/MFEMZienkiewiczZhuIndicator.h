@@ -28,7 +28,7 @@ public:
   /**
    * Override the createEstimator method to use a Zienkiewicz-Zhu estimator.
    */
-  virtual bool createEstimator() override;
+  virtual void createEstimator() override;
 
 protected:
   /// Finite element collection for the smoothed flux

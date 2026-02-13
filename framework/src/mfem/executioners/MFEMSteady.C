@@ -80,10 +80,6 @@ MFEMSteady::init()
 void
 MFEMSteady::execute()
 {
-  // first, we need to set up AMR
-  if (_mfem_problem.useAMR())
-    _mfem_problem.setUpAMR();
-
   if (_app.isRecovering())
   {
     _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
