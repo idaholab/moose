@@ -9,8 +9,7 @@ Virtual base class for element-based error estimators.
 ## Overview
 
 `MFEMIndicator` is responsible for building an `mfem::ErrorEstimator` object using a variable and one of its kernels.
-The error estimator is then passed on to an [MFEMRefinementMarker.md].
-object.
+The error estimator is then passed on to an [MFEMRefinementMarker.md] object.
 
 Broadly speaking, the `mfem::ErrorEstimator` object looks, after a solve step, at one variable and one of its kernels as chosen by the user
 and determines which, if any, regions of the mesh need to be refined further. These recommendations are then

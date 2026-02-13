@@ -73,17 +73,18 @@ MFEMRefinementMarker::setUp()
 }
 
 void
-MFEMRefinementMarker::MarkWithoutRefining(mfem::ParMesh & mesh,
-                                          mfem::Array<mfem::Refinement> & refinements)
+MFEMRefinementMarker::pRefineMarker(mfem::Array<mfem::Refinement> & refinements)
 {
-  // We are doing p-refinement. Increase the counter
-  // and check if we have exceeded the max number of
-  // p-refinement steps
-  _stop_p_ref = (++_p_ref_counter >= _max_p_level);
+  mfem::ParMesh & mesh = _estimator->getParMesh();
 
   // Hand over to the underlying mfem object to find all the
   // places we should increase the polynomial order
   _threshold_refiner->MarkWithoutRefining(mesh, refinements);
+
+  // We are doing p-refinement. Increase the counter
+  // and check if we have exceeded the max number of
+  // p-refinement steps
+  _stop_p_ref = (++_p_ref_counter >= _max_p_level);
 
   // The stopping condition is essentially that the refinements
   // array is empty, i.e. the refiner didn't find anywhere on the mesh
@@ -95,14 +96,16 @@ MFEMRefinementMarker::MarkWithoutRefining(mfem::ParMesh & mesh,
 
 // We poll the refiner to ask if we need to stop h-refinement
 void
-MFEMRefinementMarker::hRefine(mfem::ParMesh & mesh)
+MFEMRefinementMarker::hRefine()
 {
-  // Increase the counter and check if we have exceeded
-  // the max number of refinement steps
-  _stop_h_ref = (++_h_ref_counter >= _max_h_level);
+  mfem::ParMesh & mesh = _estimator->getParMesh();
 
   // Perform h-refinement
   _threshold_refiner->Apply(mesh);
+
+  // Increase the counter and check if we have exceeded
+  // the max number of refinement steps
+  _stop_h_ref = (++_h_ref_counter >= _max_h_level);
 
   // Ask the refiner if we need to stop H-refinement
   _stop_h_ref |= _threshold_refiner->Stop();

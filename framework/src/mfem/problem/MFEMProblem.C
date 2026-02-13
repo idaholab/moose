@@ -14,7 +14,6 @@
 #include "MFEMVariable.h"
 #include "MFEMComplexVariable.h"
 #include "MFEMIndicator.h"
-#include "MFEMRefinementMarker.h"
 #include "MFEMSubMesh.h"
 #include "MFEMFunctorMaterial.h"
 #include "libmesh/string_to_enum.h"
@@ -51,6 +50,8 @@ MFEMProblem::initialSetup()
 {
   FEProblemBase::initialSetup();
   addMFEMNonlinearSolver();
+  if (useAMR())
+    setUpAMR();
 }
 
 void
@@ -81,11 +82,11 @@ MFEMProblem::addIndicator(const std::string & user_object_name,
   mooseAssert(dynamic_cast<const MFEMIndicator *>(&(getUserObjectBase(name))),
               "Cannot add estimator with name '" + name + "'");
 
-  std::shared_ptr<MooseObject> object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
-  std::shared_ptr<MFEMIndicator> estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
+  auto object_ptr = getUserObject<MFEMIndicator>(name).getSharedPtr();
+  auto estimator = std::dynamic_pointer_cast<MFEMIndicator>(object_ptr);
 
   // construct the estimator itself
-  mooseAssert(estimator->createEstimator(), "Couldn't create estimator with name '" + name + "'");
+  estimator->createEstimator();
 }
 
 void
@@ -98,10 +99,8 @@ MFEMProblem::addMarker(const std::string & user_object_name,
   mooseAssert(dynamic_cast<const MFEMRefinementMarker *>(&(getUserObjectBase(name))),
               "Cannot add estimator with refiner '" + name + "'");
 
-  std::shared_ptr<MooseObject> object_ptr =
-      getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
-  std::shared_ptr<MFEMRefinementMarker> refiner =
-      std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
+  auto object_ptr = getUserObject<MFEMRefinementMarker>(name).getSharedPtr();
+  auto refiner = std::dynamic_pointer_cast<MFEMRefinementMarker>(object_ptr);
 
   _problem_data._refiner = refiner;
   _problem_data._use_amr = true;
@@ -738,14 +737,10 @@ void
 MFEMProblem::hRefine()
 {
   if (useAMR())
-  {
-    _problem_data._refiner->hRefine(*_problem_data.pmesh);
-  }
+    _problem_data._refiner->hRefine();
   else
-  {
     mooseError(
         "Called EquationSystemProblemOperator::hRefine(), even though _use_amr is set to false.");
-  }
 }
 
 void
@@ -753,17 +748,11 @@ MFEMProblem::pRefine()
 {
   if (useAMR())
   {
-    mfem::Array<mfem::pRefinement> prefinements;
     mfem::Array<mfem::Refinement> refinements;
-
-    _problem_data._refiner->MarkWithoutRefining(*_problem_data.pmesh, refinements);
-
-    prefinements.SetSize(refinements.Size());
-    for (int i = 0; i < refinements.Size(); i++)
-    {
-      prefinements[i].index = refinements[i].index;
-      prefinements[i].delta = 1; // Increase the element order by 1
-    }
+    _problem_data._refiner->pRefineMarker(refinements);
+    mfem::Array<mfem::pRefinement> prefinements(refinements.Size());
+    for (const auto i : make_range(refinements.Size()))
+      prefinements[i] = mfem::pRefinement(refinements[i].index, 1);
 
     _problem_data._refiner->getFESpace().PRefineAndUpdate(prefinements);
   }
@@ -773,18 +762,6 @@ MFEMProblem::pRefine()
     mooseError(
         "Called EquationSystemProblemOperator::pRefine(), even though _use_amr is set to false.");
   }
-}
-
-bool
-MFEMProblem::useHRefinement() const
-{
-  return (_problem_data._refiner->useHRefinement());
-}
-
-bool
-MFEMProblem::usePRefinement() const
-{
-  return (_problem_data._refiner->usePRefinement());
 }
 
 #endif

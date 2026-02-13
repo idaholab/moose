@@ -28,7 +28,6 @@ public:
   virtual void Solve() = 0;
 
   mfem::Array<int> _block_true_offsets;
-  mfem::Array<int> _global_block_true_offsets;
 
   mfem::BlockVector _true_x, _true_rhs;
 

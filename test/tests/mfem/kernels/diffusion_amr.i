@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.msh
-  dim = 3
   use_amr = true
 []
 

@@ -31,7 +31,7 @@ public:
   /// Computes the auxvariable.
   virtual void execute() override;
 
-  // Updates divergence operator
+  // Updates divergence operator.
   virtual void update() override;
 
 protected:

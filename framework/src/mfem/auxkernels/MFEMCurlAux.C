@@ -46,7 +46,6 @@ MFEMCurlAux::execute()
   if (getMFEMProblem().getMeshChanged())
     update();
 
-  _result_var = 0.0;
   _curl.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 

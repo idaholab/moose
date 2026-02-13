@@ -33,22 +33,16 @@ public:
 
   /// Modifies the input array with all the locations in the mesh where we should increase
   /// the polynomial order
-  void MarkWithoutRefining(mfem::ParMesh & mesh, mfem::Array<mfem::Refinement> & refinements);
+  void pRefineMarker(mfem::Array<mfem::Refinement> & refinements);
 
   /// Refines the mesh wherever the refiner sees fit.
-  void hRefine(mfem::ParMesh & mesh);
+  void hRefine();
 
   /// Checks if H refinement is enabled, and if we should continue.
-  bool useHRefinement() const
-  {
-    return _use_h_refinement and !_stop_h_ref and (_h_ref_counter < _max_h_level);
-  }
+  bool useHRefinement() const { return _use_h_refinement and !_stop_h_ref; }
 
   /// Checks if P refinement is enabled, and if we should continue.
-  bool usePRefinement() const
-  {
-    return _use_p_refinement and !_stop_p_ref and (_p_ref_counter < _max_p_level);
-  }
+  bool usePRefinement() const { return _use_p_refinement and !_stop_p_ref; }
 
   const unsigned & maxHLevel() const { return _max_h_level; }
   const unsigned & maxPLevel() const { return _max_p_level; }
@@ -56,9 +50,9 @@ public:
 protected:
   /// Shared pointer to underlying mfem object
   std::unique_ptr<mfem::ThresholdRefiner> _threshold_refiner;
-  std::string _estimator_name;
+  const std::string & _estimator_name;
 
-  float _error_threshold;
+  const mfem::real_t _error_threshold;
   const unsigned _max_h_level;
   const unsigned _max_p_level;
   unsigned _h_ref_counter{0};
