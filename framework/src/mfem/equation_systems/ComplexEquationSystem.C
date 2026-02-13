@@ -144,33 +144,38 @@ ComplexEquationSystem::BuildMixedBilinearForms()
 void
 ComplexEquationSystem::ApplyEssentialBCs()
 {
-  _ess_tdof_lists.resize(_test_var_names.size());
-  for (const auto i : index_range(_test_var_names))
+  _ess_tdof_lists.resize(_trial_var_names.size());
+  for (const auto i : index_range(_trial_var_names))
   {
-    auto test_var_name = _test_var_names.at(i);
-    if (!_cmplx_essential_bc_map.Has(test_var_name))
-      continue;
-
-    // Set default value of gridfunction used in essential BC. Values
-    // overwritten in applyEssentialBCs
+    const auto & trial_var_name = _trial_var_names.at(i);
     mfem::ParComplexGridFunction & trial_gf(*(_cmplx_var_ess_constraints.at(i)));
-    auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(pmesh, "parallel mesh is null");
-
-    auto bcs = _cmplx_essential_bc_map.GetRef(test_var_name);
-    mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
+    ApplyComplexEssentialBC(trial_var_name, trial_gf, global_ess_markers);
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+  }
+}
+
+void
+ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
+                                               mfem::ParComplexGridFunction & trial_gf,
+                                               mfem::Array<int> & global_ess_markers)
+{
+  if (_cmplx_essential_bc_map.Has(var_name))
+  {
+    auto & bcs = _cmplx_essential_bc_map.GetRef(var_name);
     for (auto & bc : bcs)
     {
+      // Set constrained DoFs values on essential boundaries
       bc->ApplyBC(trial_gf);
-
+      // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
-      for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
-      {
+      // Add these boundary markers to the set of markers labelling all essential boundaries
+      for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
         global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
-      }
     }
-    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
 }
 
