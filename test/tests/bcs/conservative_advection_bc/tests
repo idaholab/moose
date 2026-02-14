@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ConservativeAdvection.md ConservativeAdvectionBC.md'
+  issues = '#11852'
+  [diffusion_advection]
+    type = CSVDiff
+    input = 'no_upwinding_2D.i'
+    csvdiff = 'no_upwinding_2D_out.csv'
+    requirement = 'The system shall be able to solve for an advection-diffusion equation with a source in 2D with fixed flux inlet boundary conditions and open outflow outlet boundary conditions.'
+  []
+[]

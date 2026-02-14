@@ -3,7 +3,15 @@
     "sq1_square_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "(+sq1_surf_plus_x & -sq1_surf_minus_x & -sq1_surf_plus_y & +sq1_surf_minus_y)",
+      "region_infix": [
+        "+sq1_surf_plus_x",
+        "&",
+        "-sq1_surf_minus_x",
+        "&",
+        "-sq1_surf_plus_y",
+        "&",
+        "+sq1_surf_minus_y"
+      ],
       "region_postfix": [
         "sq1_surf_plus_x",
         "+",
@@ -21,7 +29,15 @@
     "sq2_square_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
-      "region_infix": "(+sq2_surf_plus_x & -sq2_surf_minus_x & -sq2_surf_plus_y & +sq2_surf_minus_y)",
+      "region_infix": [
+        "+sq2_surf_plus_x",
+        "&",
+        "-sq2_surf_minus_x",
+        "&",
+        "-sq2_surf_plus_y",
+        "&",
+        "+sq2_surf_minus_y"
+      ],
       "region_postfix": [
         "sq2_surf_plus_x",
         "+",
@@ -39,7 +55,15 @@
     "sq3_square_cell": {
       "fill": "cart_lat_lattice",
       "filltype": "LATTICE",
-      "region_infix": "(+sq3_surf_plus_x & -sq3_surf_minus_x & -sq3_surf_plus_y & +sq3_surf_minus_y)",
+      "region_infix": [
+        "+sq3_surf_plus_x",
+        "&",
+        "-sq3_surf_minus_x",
+        "&",
+        "-sq3_surf_plus_y",
+        "&",
+        "+sq3_surf_minus_y"
+      ],
       "region_postfix": [
         "sq3_surf_plus_x",
         "+",

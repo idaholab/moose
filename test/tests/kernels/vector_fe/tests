@@ -246,12 +246,13 @@
       type = Exodiff
       input = coupled_electrostatics.i
       exodiff = coupled_electrostatics_tet14.e
-      cli_args = 'Mesh/gmg/elem_type=TET14 '
+      # Reduce the size of the penalty to get reproducible results across platforms
+      cli_args = 'Mesh/gmg/elem_type=TET14 BCs/sides/penalty=1e5 '
                  'Outputs/file_base=coupled_electrostatics_tet14'
+      # tolerance increased from inter-platform differences
       abs_zero = 1e-7
+      rel_err = 6e-4
       detail = 'TET14, '
-      # PR #26848. Clang 16 Apple Si is not compatible.
-      capabilities = 'machine=x86_64'
     []
     [tri6]
       type = Exodiff
@@ -377,11 +378,13 @@
       type = Exodiff
       input = grad_div.i
       exodiff = grad_div_tet14.e
+      # tolerance increased from inter-platform differences
       abs_zero = 8e-9
-      cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 '
+      rel_err = 6e-4
+      # Reduce the size of the penalty to get reproducible results across platforms
+      cli_args = 'Mesh/gmg/elem_type=TET14 Mesh/gmg/nx=6 Mesh/gmg/ny=6 BCs/sides/penalty=1e5 '
                  'Outputs/file_base=grad_div_tet14'
       detail = 'TET14, '
-      capabilities = 'machine=x86_64'
     []
     [tri6]
       type = Exodiff

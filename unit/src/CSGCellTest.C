@@ -19,6 +19,19 @@
 namespace CSG
 {
 
+// helper function to convert infix JSON object to string representation
+std::string
+infixJSONToString(nlohmann::json infix_json)
+{
+  auto json_string = infix_json.dump();
+  // Remove quotation marks from string
+  json_string.erase(std::remove(json_string.begin(), json_string.end(), '\"'), json_string.end());
+  // Replace square brackets with parentheses
+  std::replace(json_string.begin(), json_string.end(), '[', '(');
+  std::replace(json_string.begin(), json_string.end(), ']', ')');
+  return json_string;
+}
+
 // helper function to setup the regions used for the cells in all tests
 std::tuple<CSGRegion, CSGRegion, std::string, std::vector<std::string>>
 setupRegions()
@@ -26,7 +39,7 @@ setupRegions()
   static CSG::CSGSphere sphere("sphere_surf", 1.0);
   auto region1 = -sphere;
   auto region2 = +sphere;
-  std::string reg_str_infix = "-sphere_surf";
+  std::string reg_str_infix = "(-sphere_surf)";
   std::vector<std::string> reg_str_postfix{"sphere_surf", "-"};
   return std::make_tuple(region1, region2, reg_str_infix, reg_str_postfix);
 }
@@ -43,7 +56,8 @@ TEST(CSGCellTest, testVoidCell)
   ASSERT_EQ("VOID", cell.getFillType());
   ASSERT_EQ("", cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str_infix, cell.getRegion().toInfixString());
+  auto region_json = cell.getRegion().toInfixJSON();
+  ASSERT_EQ(reg_str_infix, infixJSONToString(region_json));
   ASSERT_EQ(reg_str_postfix, cell.getRegion().toPostfixStringList());
 }
 
@@ -59,7 +73,8 @@ TEST(CSGCellTest, testMaterialCell)
   ASSERT_EQ("CSG_MATERIAL", cell.getFillType());
   ASSERT_EQ(matname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str_infix, cell.getRegion().toInfixString());
+  auto region_json = cell.getRegion().toInfixJSON();
+  ASSERT_EQ(reg_str_infix, infixJSONToString(region_json));
   ASSERT_EQ(reg_str_postfix, cell.getRegion().toPostfixStringList());
 }
 
@@ -76,7 +91,8 @@ TEST(CSGCellTest, testUniverseCell)
   ASSERT_EQ("UNIVERSE", cell.getFillType());
   ASSERT_EQ(uname, cell.getFillName());
   ASSERT_EQ(region1, cell.getRegion());
-  ASSERT_EQ(reg_str_infix, cell.getRegion().toInfixString());
+  auto region_json = cell.getRegion().toInfixJSON();
+  ASSERT_EQ(reg_str_infix, infixJSONToString(region_json));
   ASSERT_EQ(reg_str_postfix, cell.getRegion().toPostfixStringList());
 }
 

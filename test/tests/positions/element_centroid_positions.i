@@ -16,6 +16,14 @@
     block_name = 1
     block_id = 1
   []
+  # a small (somewhat random) rotation along each axis makes all X-coordinates of every point
+  # different, making the sorting of centroids consistent between different architectures
+  [rotate]
+    type = TransformGenerator
+    input = new_block
+    transform = "ROTATE"
+    vector_value = '0.001 0.01 0.1'
+  []
 []
 
 [Positions]

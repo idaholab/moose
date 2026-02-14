@@ -1530,8 +1530,8 @@ protected:
   bool _node_to_active_semilocal_elem_map_built;
 
   /**
-   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes subdomains
-   * defined on other processors as well.
+   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes
+   * subdomains defined on other processors as well.
    */
   std::set<SubdomainID> _mesh_subdomains;
 

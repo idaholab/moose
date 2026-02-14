@@ -267,6 +267,26 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
 }
 
 void
+NonlinearThread::onExternalSide(const Elem * elem, unsigned int side)
+{
+  // Check that we don't have any interface kernels defined on this boundary
+  const auto boundary_ids = _mesh.getBoundaryIDs(elem, side);
+
+  bool has_interface_kernels = false;
+  for (const auto bid : boundary_ids)
+    if (_ik_warehouse && _ik_warehouse->hasActiveBoundaryObjects(bid, _tid))
+      has_interface_kernels = true;
+
+  if (has_interface_kernels)
+    mooseError("Element ",
+               elem->id(),
+               " on side ",
+               side,
+               " is missing a neighbor (hence identified as an external side) but "
+               "has interface kernel(s) defined on the boundary.");
+}
+
+void
 NonlinearThread::computeOnInternalFace(const Elem * neighbor)
 {
   const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);

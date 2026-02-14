@@ -3,8 +3,19 @@
     "cube_box_cell": {
       "fill": "square_material",
       "filltype": "CSG_MATERIAL",
-      "region_infix":
-          "(+inf_square_surf_plus_x & -inf_square_surf_minus_x & -inf_square_surf_plus_y & +inf_square_surf_minus_y & -cube_surf_plus_z & +cube_surf_minus_z)",
+      "region_infix": [
+        "+inf_square_surf_plus_x",
+        "&",
+        "-inf_square_surf_minus_x",
+        "&",
+        "-inf_square_surf_plus_y",
+        "&",
+        "+inf_square_surf_minus_y",
+        "&",
+        "-cube_surf_plus_z",
+        "&",
+        "+cube_surf_minus_z"
+      ],
       "region_postfix": [
         "inf_square_surf_plus_x",
         "+",

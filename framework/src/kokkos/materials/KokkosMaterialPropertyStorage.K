@@ -84,6 +84,7 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
                                                const ::MaterialBase * declarer,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
+                                               const bool on_demand,
                                                std::shared_ptr<MaterialPropertyBase> shell)
 {
   auto & record = _kokkos_prop_records[prop_name];
@@ -103,10 +104,17 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
     mooseError(ss.str());
   }
 
+  if (record.declarers.size() && record.on_demand != on_demand)
+    mooseError("The Kokkos material property '",
+               prop_name,
+               "' is being declared by multiple materials, and some of them are declaring it as an "
+               "on-demand property while others are not.");
+
   if (!record.declarers.size())
   {
     record.dims = dims;
     record.bnd = bnd;
+    record.on_demand = on_demand;
   }
 
   return addKokkosProperty(prop_name, type, 0, declarer, shell);
@@ -129,13 +137,14 @@ MaterialPropertyStorage::allocateKokkosProperties()
     {
       auto & record = _kokkos_prop_records[name];
 
-      for (auto declarer : record.declarers)
-      {
-        auto & blocks =
-            declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
+      if (!record.on_demand || _problem.isMatPropRequested(name))
+        for (auto * const declarer : record.declarers)
+        {
+          auto & blocks =
+              declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
 
-        prop->allocate(mesh, assembly, blocks, record.bnd, {});
-      }
+          prop->allocate(mesh, assembly, blocks, record.bnd, {});
+        }
     }
 }
 

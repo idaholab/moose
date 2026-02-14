@@ -18,5 +18,7 @@
        26 27 28 29 30 31 32 34 35 36 37 38
        39 40 41 42 43 44 45 46 47'
     add_transition_interface = true
+    add_interface_on_two_sides = false
+    split_interface = false
   []
 []

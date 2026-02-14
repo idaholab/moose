@@ -6,8 +6,18 @@
     input = 'equal_value_boundary_constraint_test.i'
     exodiff = 'out.e'
     abs_zero = 1e-9
+    cli_args = "Constraints/y_top/primary=45"
     requirement = "The system shall include the ability to constrain the values on a boundary to a value "
-                  "at a prescribed node."
+                  "at a prescribed node base on the node ID."
+  []
+  [test_primary_node_coord]
+    type = 'Exodiff'
+    input = 'equal_value_boundary_constraint_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-9
+    cli_args = "Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0'"
+    requirement = "The system shall include the ability to constrain the values on a boundary to a value "
+                  "at a prescribed node base on the node coordinates."
   []
   [adaptivity]
     type = 'Exodiff'
@@ -16,5 +26,26 @@
     mesh_mode = REPLICATED
     requirement = "The system shall be able to enforce the equal value boundary constraint in parallel "
                   "with adaptivity."
+  []
+  [set_primary_and_coord_error]
+    type = RunException
+    input = 'equal_value_boundary_constraint_test.i'
+    expect_err = "Both 'primary' and 'primary_node_coord' parameters are set. They are mutually exclusive."
+    cli_args = "Constraints/y_top/primary=45 Constraints/y_top/primary_node_coord='0.3333333333333 1.0 0.0'"
+    requirement = "The system shall report an error when both node ID and node coordinates are set."
+  []
+  [error_not_find_node_id]
+    type = RunException
+    input = 'equal_value_boundary_constraint_test.i'
+    expect_err = "Couldn't find a node ID for the specified primary_node_coord."
+    cli_args = "Constraints/y_top/primary_node_coord='0.37 1.0 0.0'"
+    requirement = "The system shall report an error when it cannot find a node ID for the specified node coordinates."
+  []
+  [error_multiple_primary_nodes]
+    type = RunException
+    input = 'break_mesh_with_evbc.i'
+    expect_err = "Multiple nodes found for the specified primary_node_coord."
+    cli_args = "Constraints/corner/primary_node_coord='0.5 0.5 0.0'"
+    requirement = "The system shall report an error when multiple nodes are found for the specified node coordinates."
   []
 []

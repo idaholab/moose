@@ -9,9 +9,7 @@
 
 #pragma once
 
-#ifdef MOOSE_KOKKOS_SCOPE
-#include "KokkosHeader.h"
-#endif
+#include "KokkosArray.h"
 
 #include "MooseTypes.h"
 
@@ -152,6 +150,12 @@ protected:
    * Device copy of the variable
    */
   const T _copy;
+};
+
+template <typename T>
+struct ArrayDeepCopy<ReferenceWrapper<T>>
+{
+  static constexpr bool value = true;
 };
 
 } // namespace Moose::Kokkos

@@ -43,11 +43,23 @@ Example scheme (implicit-explicit)
 \text{solve }M(u_n, v_n) u_{n+1/2} = 0\\
 \text{then }N(u_{n+1/2}, v_n) v_{n+1} = 0\\
 
+!! Intentional comment to provide extra spacing
+
+[-](https://mooseframework.inl.gov/ style=color:white;)
+
+!! Intentional comment to provide extra spacing
+
 !equation
 \text{solve }M(u_{n,i}, v_{n,i}) u_{n,i+1} = 0\\
 \text{then }N(u_{n,i+1}, v_{n,i}) v_{n,i+1} = 0\\
 \text{then }M(u_{n,i+1}, v_{n,i+1}) u_{n,i+2} = 0\\
 \text{etc }
+
+!! Intentional comment to provide extra spacing
+
+[-](https://mooseframework.inl.gov/ style=color:white;)
+
+!! Intentional comment to provide extra spacing
 
 !equation
 \text{solve }\begin{bmatrix}M(u_n, v_n) \\ N(u_n, v_n)\end{bmatrix} \begin{bmatrix}u_n v_n\end{bmatrix} = \begin{bmatrix}0 0\end{bmatrix} \\
@@ -56,7 +68,7 @@ Example scheme (implicit-explicit)
 
 !col width=39%
 !media images/coupling.png
-       style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
        alt=Diagram showing the different levels of coupling possible between apps.
 
 !row-end!

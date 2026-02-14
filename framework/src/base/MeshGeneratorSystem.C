@@ -25,7 +25,6 @@ MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
   : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
     ParallelObject(app),
     _app(app),
-    _has_bmbb(false),
     _verbose(false),
     _csg_only(false)
 {
@@ -44,9 +43,6 @@ MeshGeneratorSystem::addMeshGenerator(const std::string & type,
   // constructing mesh generators (not "adding" them, where we simply store their parameters)
   if (_app.constructingMeshGenerators())
     createMeshGenerator(name);
-
-  if (type == "BreakMeshByBlockGenerator")
-    _has_bmbb = true;
 }
 
 const MeshGenerator &
@@ -434,7 +430,7 @@ MeshGeneratorSystem::executeMeshGenerators()
 #ifdef DEBUG
       // Assert that the mesh is either marked as not prepared or if it is marked as prepared,
       // that it's *actually* prepared
-      if (!_has_bmbb && !MeshTools::valid_is_prepared(*current_mesh))
+      if (!MeshTools::valid_is_prepared(*current_mesh))
         generator->mooseError("The generated mesh is marked as prepared but is not actually "
                               "prepared. Please edit the '",
                               generator->type(),

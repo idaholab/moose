@@ -47,7 +47,7 @@ value if a function name is not supplied in the input file.
 
 Let's vary the water temperature in time
 
-!style! fontsize=50%
+!style! fontsize=80%
 
 ```cpp
 
@@ -64,7 +64,7 @@ Let's vary the water temperature in time
 
 The same  `BC`  object can accept a function parameter:
 
-!style! fontsize=50%
+!style! fontsize=80%
 
 ```cpp
 
@@ -92,7 +92,7 @@ The same  `BC`  object can accept a function parameter:
 
 Let's vary the power input in space
 
-!style! fontsize=50%
+!style! fontsize=80%
 
 ```cpp
 
@@ -109,7 +109,7 @@ Let's vary the power input in space
 
 This time we have to select a different object:
 
-!style! fontsize=50%
+!style! fontsize=80%
 
 ```cpp
 

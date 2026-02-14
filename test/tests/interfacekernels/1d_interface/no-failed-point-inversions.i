@@ -12,18 +12,12 @@
     block_id = 1
     top_right = '2.0 1.0 0'
   []
-  [interface]
-    input = subdomain1
-    type = SideSetsBetweenSubdomainsGenerator
-    primary_block = '0'
-    paired_block = '1'
-    new_boundary = 'primary0_interface'
-  []
   [break]
     type = BreakMeshByBlockGenerator
-    input = interface
+    input = subdomain1
   []
   displacements = 'disp_x'
+  use_displaced_mesh = false
 []
 
 [AuxVariables]
@@ -73,7 +67,7 @@
     type = PenaltyInterfaceDiffusion
     variable = u
     neighbor_var = v
-    boundary = primary0_interface
+    boundary = Block0_Block1
     penalty = 1e6
   []
 []

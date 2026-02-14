@@ -68,6 +68,21 @@ template <typename T,
 class Array;
 
 /**
+ * The type trait that determines if a template type is Kokkos array
+ */
+///@{
+template <typename>
+struct is_kokkos_array : std::false_type
+{
+};
+
+template <typename T, unsigned int dimension, typename index_type, LayoutType layout>
+struct is_kokkos_array<Array<T, dimension, index_type, layout>> : std::true_type
+{
+};
+///@}
+
+/**
  * The type trait that determines the default behavior of copy constructor and deepCopy()
  * If this type trait is set to true, the copy constructor will call deepCopy(),
  * and the deepCopy() method will copy-construct each entry.
@@ -299,6 +314,20 @@ public:
    */
   void copyToDeviceNested();
   /**
+   * Copy data from host to device and deallocate host
+   * @param should_free_host Whether the host memory should be freed.
+   * Host memory cannot be freed when there are shallow copies of this array that are still alive.
+   * If \p should_free_host is true, and we cannot free for above reason, it will error.
+   */
+  void moveToDevice(bool should_free_host = true);
+  /**
+   * Copy data from device to host and deallocate device
+   * @param should_free_device Whether the device memory should be freed.
+   * Device memory cannot be freed when there are shallow copies of this array that are still alive.
+   * If \p should_free_device is true, and we cannot free for above reason, it will error.
+   */
+  void moveToHost(bool should_free_device = true);
+  /**
    * Deep copy another Kokkos array
    * If ArrayDeepCopy<T>::value is true, it will copy-construct each entry
    * If ArrayDeepCopy<T>::value is false, it will do a memory copy
@@ -423,6 +452,14 @@ private:
    */
   void allocDevice();
 #endif
+  /**
+   * Free host data
+   */
+  void freeHost();
+  /**
+   * Free device data
+   */
+  void freeDevice();
 
   /**
    * Reference counter
@@ -468,6 +505,54 @@ private:
 
 template <typename T, unsigned int dimension, typename index_type>
 void
+ArrayBase<T, dimension, index_type>::freeHost()
+{
+  if (!_is_host_alloc)
+    return;
+
+  if (_is_host_alias)
+  {
+    _host_data = nullptr;
+    _is_host_alias = false;
+  }
+  else
+  {
+    if constexpr (std::is_default_constructible<T>::value)
+      // Allocated by new
+      delete[] _host_data;
+    else
+    {
+      // Allocated by malloc
+      for (index_type i = 0; i < _size; ++i)
+        _host_data[i].~T();
+
+      std::free(_host_data);
+    }
+  }
+
+  _is_host_alloc = false;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::freeDevice()
+{
+  if (!_is_device_alloc)
+    return;
+
+  if (_is_device_alias)
+  {
+    _device_data = nullptr;
+    _is_device_alias = false;
+  }
+  else
+    Moose::Kokkos::free(_device_data);
+
+  _is_device_alloc = false;
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
 ArrayBase<T, dimension, index_type>::destroy()
 {
   if (!_counter)
@@ -480,23 +565,8 @@ ArrayBase<T, dimension, index_type>::destroy()
   }
   else if (_counter.use_count() == 1)
   {
-    if (_is_host_alloc && !_is_host_alias)
-    {
-      if constexpr (std::is_default_constructible<T>::value)
-        // Allocated by new
-        delete[] _host_data;
-      else
-      {
-        // Allocated by malloc
-        for (index_type i = 0; i < _size; ++i)
-          _host_data[i].~T();
-
-        std::free(_host_data);
-      }
-    }
-
-    if (_is_device_alloc && !_is_device_alias)
-      Moose::Kokkos::free(_device_data);
+    freeHost();
+    freeDevice();
   }
 
   _size = 0;
@@ -729,8 +799,9 @@ ArrayBase<T, dimension, index_type>::copyToDevice()
       allocDevice();
     else
       // print error if this array is shared with other arrays
-      mooseError("Kokkos array error: cannot copy from host to device because device side memory "
-                 "was not allocated and array is being shared with other arrays.");
+      mooseError("Kokkos array error: cannot copy from host to device because device memory "
+                 "was not allocated. Cannot allocate device memory for copy because the array is "
+                 "being shared.");
   }
 
   // Copy from host to device
@@ -753,12 +824,44 @@ ArrayBase<T, dimension, index_type>::copyToHost()
       allocHost();
     else
       // print error if this array is shared with other arrays
-      mooseError("Kokkos array error: cannot copy from device to host because host side memory "
-                 "was not allocated and array is being shared with other arrays.");
+      mooseError("Kokkos array error: cannot copy from device to host because host memory "
+                 "was not allocated. Cannot allocate host memory for copy because the array is "
+                 "being shared.");
   }
 
   // Copy from device to host
   copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data, _device_data, _size);
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::moveToDevice(bool should_free_host)
+{
+  static_assert(!is_kokkos_array<T>::value,
+                "moveToDevice() not allowed for a nested array whose data type is another array.");
+
+  if (should_free_host && _counter.use_count() > 1)
+    mooseError("Kokkos array error: cannot move array from host to device because there is at "
+               "least one shallow copy of this array still alive.");
+
+  copyToDevice();
+
+  if (_counter.use_count() == 1)
+    freeHost();
+}
+
+template <typename T, unsigned int dimension, typename index_type>
+void
+ArrayBase<T, dimension, index_type>::moveToHost(bool should_free_device)
+{
+  if (should_free_device && _counter.use_count() > 1)
+    mooseError("Kokkos array error: cannot move array from device to host because there is at "
+               "least one shallow copy of this array still alive.");
+
+  copyToHost();
+
+  if (_counter.use_count() == 1)
+    freeDevice();
 }
 
 template <typename T, unsigned int dimension, typename index_type>
@@ -769,43 +872,47 @@ ArrayBase<T, dimension, index_type>::copyIn(const T * ptr,
                                             index_type offset)
 {
   if (n > _size)
-    mooseError("Kokkos array error: cannot copyin data larger than the array size.");
+    mooseError("Kokkos array error: cannot copy in data larger than the array size.");
 
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
   if (dir == MemcpyType::HOST_TO_HOST)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError(
+          "Kokkos array error: cannot copy in to the array because host memory was not allocated.");
 
     // Copy from host to host
     copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(_host_data + offset, ptr, n);
   }
   else if (dir == MemcpyType::HOST_TO_DEVICE)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy in to the array because device memory was not "
+                 "allocated.");
 
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(_device_data + offset, ptr, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError(
+          "Kokkos array error: cannot copy in to the array because host memory was not allocated.");
 
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(_host_data + offset, ptr, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_DEVICE)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy in to the array because device memory was not "
+                 "allocated.");
 
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(_device_data + offset, ptr, n);
@@ -820,43 +927,47 @@ ArrayBase<T, dimension, index_type>::copyOut(T * ptr,
                                              index_type offset)
 {
   if (n > _size)
-    mooseError("Kokkos array error: cannot copyout data larger than the array size.");
+    mooseError("Kokkos array error: cannot copy out data larger than the array size.");
 
   if (offset > _size)
     mooseError("Kokkos array error: offset cannot be larger than the array size.");
 
   if (dir == MemcpyType::HOST_TO_HOST)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because host memory was not "
+                 "allocated.");
 
     // Copy from host to host
     copyInternal<::Kokkos::HostSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
   else if (dir == MemcpyType::HOST_TO_DEVICE)
   {
-    // If host side memory is not allocated, do nothing
+    // If host side memory is not allocated, print error
     if (!_is_host_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because host memory was not "
+                 "allocated.");
 
     // Copy from host to device
     copyInternal<MemSpace, ::Kokkos::HostSpace>(ptr, _host_data + offset, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_HOST)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because device memory was not "
+                 "allocated.");
 
     // Copy from device to host
     copyInternal<::Kokkos::HostSpace, MemSpace>(ptr, _device_data + offset, n);
   }
   else if (dir == MemcpyType::DEVICE_TO_DEVICE)
   {
-    // If device side memory is not allocated, do nothing
+    // If device side memory is not allocated, print error
     if (!_is_device_alloc)
-      return;
+      mooseError("Kokkos array error: cannot copy out from the array because device memory was not "
+                 "allocated.");
 
     // Copy from device to device
     copyInternal<MemSpace, MemSpace>(ptr, _device_data + offset, n);
@@ -1014,7 +1125,7 @@ dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array,
   dataLoad(stream, from_type_name, nullptr);
 
   if (from_type_name != typeid(T).name())
-    mooseError("Kokkos array error: cannot load an array because the stored array is of type '",
+    mooseError("Kokkos array error: cannot load array because the stored array is of type '",
                MooseUtils::prettyCppType(libMesh::demangle(from_type_name.c_str())),
                "' but the loading array is of type '",
                MooseUtils::prettyCppType(libMesh::demangle(typeid(T).name())),
@@ -1024,7 +1135,7 @@ dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array,
   dataLoad(stream, from_dimension, nullptr);
 
   if (from_dimension != dimension)
-    mooseError("Kokkos array error: cannot load an array because the stored array is ",
+    mooseError("Kokkos array error: cannot load array because the stored array is ",
                from_dimension,
                "D but the loading array is ",
                dimension,
@@ -1040,7 +1151,7 @@ dataLoad(std::istream & stream, Array<T, dimension, index_type, layout> & array,
   }
 
   if (from_n != n)
-    mooseError("Kokkos array error: cannot load an array because the stored array has dimensions (",
+    mooseError("Kokkos array error: cannot load array because the stored array has dimensions (",
                Moose::stringify(from_n),
                ") but the loading array has dimensions (",
                Moose::stringify(n),
@@ -1229,7 +1340,16 @@ public:
     else
       return this->operator[](i0);
   }
-
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[1]) const
+  {
+    return operator()(idx[0]);
+  }
   /**
    * Device BLAS operations
    */
@@ -1368,6 +1488,16 @@ public:
         return this->operator[](i0 * _s[0] + i1);
     }
   }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[2]) const
+  {
+    return operator()(idx[0], idx[1]);
+  }
 #endif
 };
 
@@ -1492,6 +1622,16 @@ public:
       else
         return this->operator[](i0 * _s[0] + i1 * _s[1] + i2);
     }
+  }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[3]) const
+  {
+    return operator()(idx[0], idx[1], idx[2]);
   }
 #endif
 };
@@ -1631,6 +1771,16 @@ public:
       else
         return this->operator[](i0 * _s[0] + i1 * _s[1] + i2 * _s[2] + i3);
     }
+  }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[4]) const
+  {
+    return operator()(idx[0], idx[1], idx[2], idx[3]);
   }
 #endif
 };
@@ -1782,6 +1932,16 @@ public:
       else
         return this->operator[](i0 * _s[0] + i1 * _s[1] + i2 * _s[2] + i3 * _s[3] + i4);
     }
+  }
+  /**
+   * Get an array entry using indices stored in an array
+   * @param idx The array storing the indices
+   * @returns The reference of the entry depending on the architecture this function is being
+   * called on
+   */
+  KOKKOS_FUNCTION T & operator()(const signed_index_type (&idx)[5]) const
+  {
+    return operator()(idx[0], idx[1], idx[2], idx[3], idx[4]);
   }
 #endif
 };

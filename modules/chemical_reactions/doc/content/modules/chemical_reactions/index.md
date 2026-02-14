@@ -130,7 +130,8 @@ The transport of each primary species is calculated using the following `Kernels
   species
 - [`PrimaryDiffusion`](/PrimaryDiffusion.md) Diffusion of primary species
 
-The transport of primary species present in a secondary species is included using:
+The transport of primary species present in a secondary species can be set using
+the [AqueousReactionsEquilibriumPhysics.md], or with the following kernels:
 
 - [`CoupledBEEquilibriumSub`](/CoupledBEEquilibriumSub.md) Rate of change of
   primary species concentration in an equilibrium secondary species
@@ -184,6 +185,10 @@ The total volume fraction of a given mineral species can be calculated using a
 [`TotalMineralVolumeFraction`](/TotalMineralVolumeFraction.md) postprocessor.
 
 ## Reaction network parser id=parser
+
+!alert note
+This reaction parser is not the one used by the [AqueousReactionsEquilibriumPhysics.md].
+See [ReactionNetworkUtils.md] for that parser and its slightly different but more general syntax.
 
 The chemical reactions module includes a reaction network parser in the `Actions` system that enables
 chemical reactions to be specified in a natural form in the input file. The parser then adds all
