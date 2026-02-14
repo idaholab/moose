@@ -1018,7 +1018,7 @@ AuxiliarySystem::variableWiseRelativeSolutionDifferenceNorm(
     _communicator.sum(norm_n);
     diff_norm_n = sqrt(diff_norm_n);
     norm_n = sqrt(norm_n);
-    rel_diff_norms[n] = diff_norm_n / norm_n;
+    rel_diff_norms[n] = diff_norm_n > 0 ? diff_norm_n / norm_n : 0.0;
   }
 }
 
