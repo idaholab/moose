@@ -543,7 +543,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  // Nodal KokkosAuxKernels
+  // Kokkos NodalAuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
         _kokkos_nodal_aux_storage[type].getActiveObjects();
@@ -554,7 +554,7 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
-  // Nodal ElementalAuxKernels
+  // Kokkos ElementalAuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
         _kokkos_elemental_aux_storage[type].getActiveObjects();
