@@ -71,12 +71,12 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
           mooseError("time_sequence must be in ascending order.");
 
       if (times.size() < _current_step + 1)
-        mooseError("The timesequence provided in the restart file must be identical to "
-                   "the one in the old file up to entry number ",
-                   _current_step + 1,
-                   " but there are only ",
-                   times.size(),
-                   " value(s) provided for the timesequence in the restart input.");
+        mooseWarning("The timesequence provided in the restart file must be identical to "
+                     "the one in the old file up to entry number ",
+                     _current_step + 1,
+                     " but there are only ",
+                     times.size(),
+                     " value(s) provided for the timesequence in the restart input.");
 
       // save the restarted time_sequence
       std::vector<Real> saved_time_sequence = _time_sequence;
@@ -87,16 +87,16 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       for (unsigned int j = 0; j <= _current_step; ++j)
       {
         if (!MooseUtils::absoluteFuzzyEqual(times[j], saved_time_sequence[j]))
-          mooseError("The timesequence provided in the restart file must be identical to "
-                     "the one in the old file up to entry number ",
-                     _current_step + 1,
-                     " but entry ",
-                     j + 1,
-                     " is ",
-                     times[j],
-                     " in the restart input but ",
-                     saved_time_sequence[j],
-                     " in the restarted input.");
+          mooseWarning("The timesequence provided in the restart file must be identical to "
+                       "the one in the old file up to entry number ",
+                       _current_step + 1,
+                       " but entry ",
+                       j + 1,
+                       " is ",
+                       times[j],
+                       " in the restart input but ",
+                       saved_time_sequence[j],
+                       " in the restarted input.");
         _time_sequence.push_back(saved_time_sequence[j]);
       }
 
@@ -151,12 +151,14 @@ TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
   // Updating the sequence means replacing the current sequence
   _time_sequence.clear();
 
-  // Move the times into the sequence
-  // Keep all the times + start + end time, and keep things sorted
-  _time_sequence.push_back(start_time);
-
+  // Move the times into the sequence, include the start time if not there already
+  // NOTE: It is debatable whether the start time should be inserted in the sequence
   for (unsigned int j = 0; j < times.size(); ++j)
     _time_sequence.push_back(times[j]);
+  const auto & it_start =
+      std::lower_bound(_time_sequence.begin(), _time_sequence.end(), start_time);
+  if (it_start == _time_sequence.end() || !MooseUtils::absoluteFuzzyEqual(*it_start, start_time))
+    _time_sequence.insert(it_start, start_time);
 }
 
 void
