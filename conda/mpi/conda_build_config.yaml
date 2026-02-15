@@ -69,7 +69,7 @@ moose_cxxcompiler:
 
 moose_libgfortran5:
   - libgfortran5 15.2.0 h68bc16d_17                         # [linux]
-  - libgfortran5 15.2.0 hd16e46c_15                         # [not arm64 and osx]
+  - libgfortran5 15.2.0 hd16e46c_17                         # [not arm64 and osx]
   - libgfortran5 15.2.0 hdae7583_16                         # [arm64]
 
 moose_gcc_impl:                                             # [linux]
@@ -89,7 +89,7 @@ moose_libstdcxx_devel:                                      # [linux]
 
 moose_libcxx:
   - libcxx 21.1.8 ha0f52bf_2                                # [linux]
-  - libcxx 21.1.8 h3d58e20_0                                # [not arm64 and osx]
+  - libcxx 21.1.8 h4fb565c_2                                # [not arm64 and osx]
   - libcxx 21.1.8 hf598326_0                                # [arm64]
 
 moose_libzlib:
@@ -113,7 +113,7 @@ moose_compiler_rt:                                          # [osx]
   - compiler-rt 19.1.7 h855ad52_1                           # [arm64]
 
 moose_clang_osx:                                            # [osx]
-  - clangxx_osx-64 19.1.7 h8a78ed7_30                       # [not arm64 and osx]
+  - clangxx_osx-64 19.1.7 h8a78ed7_31                       # [not arm64 and osx]
   - clangxx_osx-arm64 19.1.7 h75f8d18_30                    # [arm64]
 
 moose_llvm_openmp:                                          # [osx]
