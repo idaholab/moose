@@ -177,32 +177,33 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
 
 {%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
     # Build and install MPICH
-    MPICH_VERSION=4.3.2
+    MPICH_VERSION=5.0.0
     mkdir ${ROOT_BUILD_DIR}/mpich
     cd ${ROOT_BUILD_DIR}/mpich
     curl -L -O http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz
     tar -xf mpich-${MPICH_VERSION}.tar.gz
     mkdir mpich-${MPICH_VERSION}/build
     cd mpich-${MPICH_VERSION}/build
-    ../configure --prefix=${MOOSE_MPICH_DIR} \
+    ../configure \
 {%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-      --enable-shared \
-      --enable-debuginfo \
-      --enable-two-level-namespace \
-      CC=clang \
-      CXX=clang++ \
-      FC=gfortran \
-      F77=gfortran \
-      F90=gfortran \
-      CFLAGS='' \
-      CXXFLAGS='' \
-      FFLAGS='-fallow-argument-mismatch' \
-      FCFLAGS='-fallow-argument-mismatch' \
-      F90FLAGS='' \
-      F77FLAGS='' \
+        --enable-shared \
+        --enable-debuginfo \
+        --enable-two-level-namespace \
+        --enable-mpi-abi \
+        CC=clang \
+        CXX=clang++ \
+        FC=gfortran \
+        F77=gfortran \
+        F90=gfortran \
+        CFLAGS='' \
+        CXXFLAGS='' \
+        FFLAGS='-fallow-argument-mismatch' \
+        FCFLAGS='-fallow-argument-mismatch' \
+        F90FLAGS='' \
+        F77FLAGS='' \
 {%- endif %}
-      --enable-fast=O2 \
-      --with-device=ch3:nemesis
+        --prefix=${MOOSE_MPICH_DIR} \
+        --enable-fast=O2
     make -j ${MOOSE_JOBS}
     make install -j ${MOOSE_JOBS}
 {%- endif %}
