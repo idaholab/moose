@@ -5,101 +5,36 @@
 {#- Optional jinja arguments                                                                  -#}
 {#- ALTERNATE_FROM: Set an alternate from (currently supported: clang, clang_min, gcc_min)    -#}
 
-{#- The minimum version of LLVM/Clang                                                         -#}
-{%- set MIN_CLANG_VERSION = '14.0.6' -%}
-
-{#- The within-container build directory to use                                               -#}
-{%- set ROOT_BUILD_DIR = '/root/build' -%}
-
-{#- The system GCC version based on ALTERNATE_FROM clang or clang_min                         -#}
-{#- Note: harmless if not set                                                                 -#}
-{%- if ALTERNATE_FROM == "clang" %}
-{%- set CLANG_GCC_VERSION = '14' -%}
-{%- elif ALTERNATE_FROM == "clang_min" %}
-{%- set CLANG_GCC_VERSION = '11' -%}
-{%- else %}
-{%- set CLANG_GCC_VERSION = '' -%}
-{%- endif %}
-
-{#- The system GCC version for GCC min                                                        -#}
-{%- if ALTERNATE_FROM == "gcc_min" %}
-{%- set GCC_MIN_VERSION = '9' -%}
-{%- endif %}
-
 {#- The files directory for this definition                                                   -#}
 {%- set FILES_DIR = MOOSE_DIR + '/apptainer/files/mpi' -%}
-{#- The install location for mpich                                                            -#}
-{%- set MPICH_DIR = '/opt/mpich' -%}
-{#- The install location for openmpi                                                          -#}
-{%- set OPENMPI_DIR = '/opt/openmpi' -%}
 
-{%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
 Bootstrap: docker
-From: ghcr.io/idaholab/moose-base/rocky:8.10_0
-{%- elif ALTERNATE_FROM == "rocky9" %}
-Bootstrap: docker
-From: ghcr.io/idaholab/moose-hpcbase/rocky:9.7-gcc13-mpich4.3.2-openmpi5.0.9_0
-{%- else %}
-Bootstrap: oras
-{%- if ALTERNATE_FROM == "cuda" %}
-From: harbor.hpc.inl.gov/moose-hpcbase/rocky-cuda-x86_64:8.10-cuda12.9-0
+{%- if ALTERNATE_FROM == "clang" %}
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang20.1.8-mpich5.0.0_0
+{%- elif ALTERNATE_FROM == "clang_min" %}
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-clang14.0.6-mpich5.0.0_0
+{%- elif ALTERNATE_FROM == "cuda" %}
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-cuda12.9.1-gcc13.3.1-mpich5.0.0-openmpi5.0.9
+{%- elif ALTERNATE_FROM == "gcc_min" %}
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.0_0
 {%- elif ALTERNATE_FROM == "intel" %}
-From: harbor.hpc.inl.gov/moose-hpcbase/rocky-intel-x86_64:8.10_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.2-mpich5.0.0_0
+{%- elif ALTERNATE_FROM == "rocky9" %}
+From: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.9_0
 {%- else %}
-From: harbor.hpc.inl.gov/moose-hpcbase/rocky-x86_64:8.10-4
-{%- endif %}
-# Logan Harbour
-Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.9_0
 {%- endif %}
 
 %environment
     # Fix locale warnings
     export LC_ALL=C
 
-{%- if ALTERNATE_FROM == "gcc_min" %}
-    # Alternate GCC used for Clang compile
-    source /opt/rh/gcc-toolset-{{ GCC_MIN_VERSION }}/enable
-{%- endif %}
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-    # Alternate GCC used for Clang compile
-    source /opt/rh/gcc-toolset-{{ CLANG_GCC_VERSION }}/enable
-{%- endif %}
-{%- if ALTERNATE_FROM == "clang_min" %}
-    # Clang {{ MIN_CLANG_VERSION }}
-    export PATH=/opt/llvm/bin:${PATH}
-    export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
-{%- endif %}
-{%- if ALTERNATE_FROM == "rocky9" %}
     source /moose_env.sh
-{%- endif %}
 
 %post
     umask 022
 
-    # Load jinja vars
-    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
-
-    # Setup the build directory
-    mkdir ${ROOT_BUILD_DIR}
-
-    export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
-
-    # Install prefix for mpich
-    export MOOSE_MPICH_DIR={{ MPICH_DIR }}
-    # Install prefix for openmpi
-    if [ -d "{{ OPENMPI_DIR }}" ]; then
-        export MOOSE_OPENMPI_DIR={{ OPENMPI_DIR }}
-    fi
-
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-    # Version of GCC needed to complement Clang
-    export CLANG_GCC_VERSION={{ CLANG_GCC_VERSION }}
-{%- endif %}
-{%- if ALTERNATE_FROM == "clang_min" %}
-    # Version of clang to install
-    export MIN_CLANG_VERSION={{ MIN_CLANG_VERSION }}
-{%- endif %}
-
+    # Determine rocky version
     grep -q "Rocky" /etc/os-release && IS_ROCKY=1
     if [ -n "$IS_ROCKY" ]; then
         grep 'VERSION=\"8.' /etc/os-release && IS_ROCKY_8=1
@@ -122,143 +57,18 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
     fi
 
     # Additional installs
-    dnf install -y tmux emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
+    dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
         perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils libpng \
         libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
         automake cppunit-devel glpk-devel patchelf lcov bash-completion
 
-{%- if ALTERNATE_FROM == "clang" %}
-    # Installing system Clang, and its GCC GNU dependencies
-    dnf install -y clang.x86_64 clang-devel.x86_64 clang-libs.x86_64 clang-tools-extra.x86_64 \
-                   git-clang-format.x86_64 python3.12-clang.x86_64 clang-analyzer.x86_64 \
-                   libomp.x86_64 lldb
-
-    # Clang will install a newer gcc, and we need to make sure that the version
-    # that it uses is the same one that we expect it to use
-    if ! [ -d /opt/rh/gcc-toolset-${CLANG_GCC_VERSION} ]; then
-        echo "CLANG_GCC_VERSION is not set to the expected version"
-        exit 1
-    fi
-{%- endif %}
-
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-    # Install a different GCC for building Clang
-    dnf install -y gcc-toolset-${CLANG_GCC_VERSION}
-    # Set alternative gcc-toolchain paths required by Clang
-    source /opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/enable
-{%- endif %}
-{%- if ALTERNATE_FROM == "gcc_min" %}
-    # Install gcc min
-    GCC_MIN_VERSION={{ GCC_MIN_VERSION }}
-    dnf install -y gcc-toolset-${GCC_MIN_VERSION}
-    source /opt/rh/gcc-toolset-${GCC_MIN_VERSION}/enable
-{%- endif %}
-
-{%- if ALTERNATE_FROM == "clang_min" %}
-    # Build minimum Clang {{ MIN_CLANG_VERSION }} from source
-    cd ${ROOT_BUILD_DIR}
-    git clone --depth 1 --branch llvmorg-${MIN_CLANG_VERSION} https://github.com/llvm/llvm-project
-    cd llvm-project
-    mkdir llvm-build
-    cd llvm-build
-    cmake ../llvm -G 'Unix Makefiles' \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DLLVM_ENABLE_PROJECTS='clang;clang-tools-extra;compiler-rt;libcxx;libcxxabi;libunwind;openmp;lldb' \
-      -DCMAKE_INSTALL_PREFIX=/opt/llvm  \
-      -DCMAKE_INSTALL_RPATH:STRING=/opt/llvm/lib \
-      -DCMAKE_INSTALL_NAME_DIR:STRING=/opt/llvm/lib \
-      -DCMAKE_BUILD_WITH_INSTALL_RPATH=1 \
-      -DGCC_INSTALL_PREFIX=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root \
-      -DCMAKE_C_COMPILER=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/bin/gcc \
-      -DCMAKE_CXX_COMPILER=/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/bin/g++ \
-      -DCMAKE_CXX_LINK_FLAGS="-L/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/lib -Wl,-rpath,/opt/rh/gcc-toolset-${CLANG_GCC_VERSION}/root/lib"
-    make -j ${MOOSE_JOBS}
-    make install -j ${MOOSE_JOBS}
-
-    # Use Clang {{ MIN_CLANG_VERSION }}
-    export PATH=/opt/llvm/bin:${PATH}
-    export LD_LIBRARY_PATH=/opt/llvm/lib:${LD_LIBRARY_PATH}
-{%- endif %}
-
-{%- if ALTERNATE_FROM == "gcc_min" or ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-    # Build and install MPICH
-    MPICH_VERSION=5.0.0
-    mkdir ${ROOT_BUILD_DIR}/mpich
-    cd ${ROOT_BUILD_DIR}/mpich
-    curl -L -O http://www.mpich.org/static/downloads/${MPICH_VERSION}/mpich-${MPICH_VERSION}.tar.gz
-    tar -xf mpich-${MPICH_VERSION}.tar.gz
-    mkdir mpich-${MPICH_VERSION}/build
-    cd mpich-${MPICH_VERSION}/build
-    ../configure \
-{%- if ALTERNATE_FROM == "clang" or ALTERNATE_FROM == "clang_min" %}
-        --enable-shared \
-        --enable-debuginfo \
-        --enable-two-level-namespace \
-        --enable-mpi-abi \
-        CC=clang \
-        CXX=clang++ \
-        FC=gfortran \
-        F77=gfortran \
-        F90=gfortran \
-        CFLAGS='' \
-        CXXFLAGS='' \
-        FFLAGS='-fallow-argument-mismatch' \
-        FCFLAGS='-fallow-argument-mismatch' \
-        F90FLAGS='' \
-        F77FLAGS='' \
-{%- endif %}
-        --prefix=${MOOSE_MPICH_DIR} \
-        --enable-fast=O2
-    make -j ${MOOSE_JOBS}
-    make install -j ${MOOSE_JOBS}
-{%- endif %}
-
-    # Basic script for setting the MPI environment
-    mkdir /opt/mpi
-{%- if ALTERNATE_FROM != "rocky9" %}
-    USE_MPI_SCRIPT='export LD_LIBRARY_PATH=${MOOSE_MPI_DIR}/lib:${LD_LIBRARY_PATH}
-export MANPATH=${MOOSE_MPI_DIR}/share/man:${MANPATH}
-export PATH=${MOOSE_MPI_DIR}/bin:${PATH}
-export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77'
-{%- endif %}
-
-    # Add script for loading mpich environment
-    if [ -n "$MOOSE_MPICH_DIR" ]; then
-        cat << EOF > /opt/mpi/use-mpich
-#!/bin/bash
-export MOOSE_MPI_DIR=${MOOSE_MPICH_DIR}
-{%- if ALTERNATE_FROM == "rocky9" %}
-source ${MOOSE_MPICH_DIR}/env.sh
-{%- else %}
-${USE_MPI_SCRIPT}
-{%- endif %}
-EOF
-    fi
-
-    # Add script for loading openmpi environment if available
-    if [ -n "$MOOSE_OPENMPI_DIR" ]; then
-        cat << EOF > /opt/mpi/use-openmpi
-#!/bin/bash
-export MOOSE_MPI_DIR=${MOOSE_OPENMPI_DIR}
-{%- if ALTERNATE_FROM == "rocky9" %}
-source ${MOOSE_OPENMPI_DIR}/env.sh
-{%- else %}
-${USE_MPI_SCRIPT}
-{%- endif %}
-EOF
-    fi
-
-    # Clean Up
-    rm -rf ${ROOT_BUILD_DIR}
-    dnf clean all
-
 %test
-    if [ -d {{ MPICH_DIR }} ]; then
-        {{ MPICH_DIR }}/bin/mpiexec --version
+    if [ -n "$MOOSE_MPICH_DIR" ]; then
+        ${MOOSE_MPICH_DIR}/bin/mpiexec --version
     fi
-    if [ -d {{ OPENMPI_DIR }} ]; then
-        {{ OPENMPI_DIR }}/bin/mpiexec --version
-        {{ OPENMPI_DIR }}/bin/ompi_info
+    if [ -n "$MOOSE_OPENMPI_DIR" ]; then
+        ${MOOSE_OPENMPI_DIR}/bin/mpiexec --version
+        ${MOOSE_OPENMPI_DIR}/bin/ompi_info
     fi
 
 %files
