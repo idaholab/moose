@@ -62,6 +62,9 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.
         libpng-devel valgrind cppunit doxygen fftw-devel gsl-devel libtool autoconf \
         automake cppunit-devel glpk-devel patchelf lcov bash-completion
 
+    # Clean after install
+    dnf clean all
+
 %test
     if [ -n "$MOOSE_MPICH_DIR" ]; then
         ${MOOSE_MPICH_DIR}/bin/mpiexec --version
