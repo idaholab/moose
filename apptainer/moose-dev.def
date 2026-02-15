@@ -206,12 +206,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     BUILD_PYTORCH_FLAGS=()
     if [ "$COMPILER" == "g++" ]; then
         BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
-        if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
-            GCC_VERSION="${BASH_REMATCH[0]}"
-        else
-            echo "Failed to parse GCC version"
-            exit 1
-        fi
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
         BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")
