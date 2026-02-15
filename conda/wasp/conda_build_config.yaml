@@ -12,13 +12,13 @@ moose_cmake:
   - cmake 4
 
 moose_cc:
-  - gcc 14.3.0 h0dff253_16                                  # [linux]
+  - gcc 14.3.0 h0dff253_17                                  # [linux]
   - clang 19.1.7 default_h1323312_7                         # [not arm64 and osx]
   - clang 19.1.7 default_hf9bcbb7_7                         # [arm64]
 
 ### If you change these versions, change also conda/mpi/*, conda/seacas/*
 moose_cxx:
-  - gxx 14.3.0 h76987e4_16                                  # [linux]
+  - gxx 14.3.0 h76987e4_17                                  # [linux]
   - clangxx 19.1.7 default_h9089c59_7                       # [not arm64 and osx]
   - clangxx 19.1.7 default_hc995acf_7                       # [arm64]
 

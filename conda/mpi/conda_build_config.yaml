@@ -40,19 +40,19 @@ moose_cmake:
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
-  - gcc 14.3.0 h0dff253_16                                  # [linux]
+  - gcc 14.3.0 h0dff253_17                                  # [linux]
   - clang 19.1.7 default_h1323312_7                         # [not arm64 and osx]
   - clang 19.1.7 default_hf9bcbb7_7                         # [arm64]
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cxx:
-  - gxx 14.3.0 h76987e4_16                                  # [linux]
+  - gxx 14.3.0 h76987e4_17                                  # [linux]
   - clangxx 19.1.7 default_h9089c59_7                       # [not arm64 and osx]
   - clangxx 19.1.7 default_hc995acf_7                       # [arm64]
 
 ### If you change these versions, change also conda/seacas/*
 moose_gfortran:
-  - gfortran 14.3.0 h76987e4_16                             # [linux]
+  - gfortran 14.3.0 h76987e4_17                             # [linux]
   - gfortran 14.3.0 hcc3c99d_0                              # [not arm64 and osx]
   - gfortran 14.3.0 h3ef1dbf_0                              # [arm64]
 
@@ -68,27 +68,27 @@ moose_cxxcompiler:
   - clangxx_osx-arm64                                       # [arm64]
 
 moose_libgfortran5:
-  - libgfortran5 15.2.0 h68bc16d_16                         # [linux]
+  - libgfortran5 15.2.0 h68bc16d_17                         # [linux]
   - libgfortran5 15.2.0 hd16e46c_15                         # [not arm64 and osx]
   - libgfortran5 15.2.0 hdae7583_16                         # [arm64]
 
 moose_gcc_impl:                                             # [linux]
-  - gcc_impl_linux-64 14.3.0 he8b2097_16                    # [linux]
+  - gcc_impl_linux-64                    # [linux]
 
 moose_gfortran_impl:                                        # [linux]
-  - gfortran_impl_linux-64 14.3.0 h1a219da_16               # [linux]
+  - gfortran_impl_linux-64 14.3.0 h1a219da_17               # [linux]
 
 ### Below are pinings created at the time of render
 ### based on above content. If any of the above
 ### content changes, modification will be needed below
 moose_libstdcxx:                                            # [linux]
-  - libstdcxx 15.2.0 h934c35e_16                            # [linux]
+  - libstdcxx 15.2.0 h934c35e_17                            # [linux]
 
 moose_libstdcxx_devel:                                      # [linux]
-  - libstdcxx-devel_linux-64 14.3.0 h9f08a49_116            # [linux]
+  - libstdcxx-devel_linux-64 14.3.0 h9f08a49_117            # [linux]
 
 moose_libcxx:
-  - libcxx 21.1.8 ha0f52bf_0                                # [linux]
+  - libcxx 21.1.8 ha0f52bf_2                                # [linux]
   - libcxx 21.1.8 h3d58e20_0                                # [not arm64 and osx]
   - libcxx 21.1.8 hf598326_0                                # [arm64]
 
@@ -98,7 +98,7 @@ moose_libzlib:
   - libzlib 1.3.1 h8359307_2                                # [arm64]
 
 # Appears that the only reason this needs to be pinned
-# is for graphviz in moose-tools
+# is for psycopg2 in moose-tools
 moose_icu:
   - icu 75.1 he02047a_0                                     # [linux]
   - icu 75.1 h120a0e1_0                                     # [not arm64 and osx]
