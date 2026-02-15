@@ -53,8 +53,8 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.
         dnf install -y redhat-lsb-core.x86_64
     elif [ -n "$IS_ROCKY_9" ]; then
         dnf config-manager --set-enabled crb
-        dnf install -y epel-release
     fi
+    dnf install -y epel-release
 
     # Additional installs
     dnf install -y emacs make cmake diffutils bison flex perl-IO-Compress perl-JSON \
