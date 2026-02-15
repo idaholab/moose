@@ -8,7 +8,7 @@ clang_tools:
   - clang-tools 19
 
 ruff:
-  - ruff 0.14.5
+  - ruff 0.15.1
 
 ### If you change these versions also update conda/mpi/meta.yaml
 ### and conda/wasp/conda_build_config.yaml
