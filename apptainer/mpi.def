@@ -106,6 +106,11 @@ Fingerprints: 841AF5A51549CAFFFB474F65207184EA34A4BD48
         grep 'VERSION=\"9.' /etc/os-release && IS_ROCKY_9=1
     fi
 
+    # Remove apptainer if it's installed
+    if dnf list installed apptainer &> /dev/null; then
+        dnf remove -y apptainer
+    fi
+
     # Enable additional repos
     dnf install -y dnf-plugins-core
     if [ -n "$IS_ROCKY_8" ]; then
