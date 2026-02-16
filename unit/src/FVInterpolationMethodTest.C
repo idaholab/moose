@@ -15,6 +15,7 @@
 #include "FVAdvectedVenkatakrishnanDeferredCorrection.h"
 #include "FVGeometricAverage.h"
 #include "FVHarmonicAverage.h"
+#include "MathFVUtils.h"
 
 #include "gtest/gtest.h"
 
@@ -193,19 +194,26 @@ TEST_F(FVInterpolationMethodTest, advectedVanLeerWeightBasedClampsToLinearWhenRe
   auto & method_unclamped = addObject<FVAdvectedVanLeerWeightBased>(
       "FVAdvectedVanLeerWeightBased", "adv_vanleer_method_unclamped", params_unclamped);
 
-  const Real r_f = 1e6;
-  const Real beta = (r_f + r_f) / (1.0 + r_f);
-
   auto expected_unclamped = [&](const Real mass_flux)
   {
-    const bool elem_is_upwind = mass_flux >= 0.0;
-    const Real w_f = elem_is_upwind ? gc : (1.0 - gc);
+    const Real upwind_mask = mass_flux >= 0.0;
+    const Real downwind_mask = 1.0 - upwind_mask;
+
+    const Real phi_upwind = upwind_mask * elem_value + downwind_mask * neighbor_value;
+    const Real phi_downwind = upwind_mask * neighbor_value + downwind_mask * elem_value;
+    const VectorValue<Real> grad_upwind = upwind_mask * elem_grad + downwind_mask * neighbor_grad;
+
+    const auto r_f = Moose::FV::rFBranchless(
+        phi_upwind, phi_downwind, grad_upwind, face.dCN() * (2.0 * upwind_mask - 1.0));
+    const Real beta = (r_f + abs(r_f)) / (1.0 + std::abs(r_f));
+
+    const Real w_f = upwind_mask * gc + downwind_mask * (1.0 - gc);
     const Real g = beta * (1.0 - w_f);
 
     const Real w_upwind = 1.0 - g;
     const Real w_downwind = g;
-    const Real w_elem = elem_is_upwind ? w_upwind : w_downwind;
-    const Real w_neighbor = elem_is_upwind ? w_downwind : w_upwind;
+    const Real w_elem = upwind_mask * w_upwind + downwind_mask * w_downwind;
+    const Real w_neighbor = upwind_mask * w_downwind + downwind_mask * w_upwind;
     return std::make_pair(w_elem, w_neighbor);
   };
 

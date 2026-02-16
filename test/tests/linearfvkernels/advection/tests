@@ -21,7 +21,7 @@
     test_case = TestAdvection1DVenkatDeferred
     requirement = 'The system shall display second-order convergence for advection problems with Venkatakrishnan deferred-correction interpolation solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
+    capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
   [mms-1d-vanleer]
@@ -30,7 +30,7 @@
     test_case = TestAdvection1DVanLeer
     requirement = 'The system shall display second-order convergence for advection problems with NVD van Leer weight-based interpolation solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
+    capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
   [mms-1d-minmod]
@@ -39,7 +39,7 @@
     test_case = TestAdvection1DMinmod
     requirement = 'The system shall display second-order convergence for advection problems with NVD minmod weight-based interpolation solved using a linear finite volume system on a one-dimensional domain.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
+    capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
   [mms-2d-upwind]
@@ -62,7 +62,7 @@
     test_case = TestAdvection2DVenkatDeferred
     requirement = 'The system shall display second-order convergence for advection problems with Venkatakrishnan deferred-correction interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
+    capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
   [mms-2d-vanleer]
@@ -71,7 +71,7 @@
     test_case = TestAdvection2DVanLeer
     requirement = 'The system shall display second-order convergence for advection problems with NVD van Leer weight-based interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
+    capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
   [mms-2d-minmod]
@@ -80,7 +80,7 @@
     test_case = TestAdvection2DMinmod
     requirement = 'The system shall display second-order convergence for advection problems with NVD minmod weight-based interpolation solved using a linear finite volume system on a two-dimensional orthogonal mesh.'
     required_python_packages = 'pandas matplotlib'
-    installation_type = in_tree # see #26480
+    capabilities = 'installation_type=in_tree' # see #26480
     max_threads = 1 # see libmesh issue #3808
   []
   [mms-2d-upwind-tris]
