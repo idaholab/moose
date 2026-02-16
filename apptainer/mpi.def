@@ -29,7 +29,10 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc13.3.1-mpich5.0.0-openmpi5.0.
     # Fix locale warnings
     export LC_ALL=C
 
-    source /moose_env.sh
+    # Environment from underyling docker image
+    if [ -f "/moose_env.sh" ]; then
+        source /moose_env.sh
+    fi
 
 %post
     umask 022
