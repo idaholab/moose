@@ -52,7 +52,6 @@
   displacements = 'disp_x disp_y'
   crack_front_points_provider = cut_mesh2
   2d = true
-  number_points_from_provider = 2
   crack_direction_method = CurvedCrackFront
   radius_inner = '0.06'
   radius_outer = '0.15'

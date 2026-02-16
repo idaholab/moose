@@ -108,9 +108,9 @@ CrackFrontDefinition::includeCrackFrontDefinitionParams(InputParameters & params
       "crack_front_points_provider",
       "The UserObject provides the crack front points from XFEM GeometricCutObject");
 
-  params.addParam<unsigned int>(
-      "number_points_from_provider",
-      "The number of crack front points, only needed if crack_front_points_provider is used.");
+  params.addParam<unsigned int>("number_points_from_provider",
+                                "The number of crack front points, only needed for "
+                                "crack_front_points_provider that do not use a cut mesh.");
   params.addParam<Real>(
       "crack_front_node_tolerance",
       1e-10,
@@ -164,12 +164,14 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
       paramError("crack_front_points_provider",
                  "CrackFrontDefinition error: since boundary is defined, "
                  "crack_front_points_provider should not be added.");
-    if (!isParamValid("number_points_from_provider"))
-      paramError("number_points_from_provider",
-                 "CrackFrontDefinition error: When crack_front_points_provider is used, the "
-                 "number_points_from_provider must be provided.");
 
-    _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
+    // number_points_from_provider is optional - will be auto-detected in initialSetup()
+    // for mesh-based providers
+    if (isParamValid("number_points_from_provider"))
+      _num_points_from_provider = getParam<unsigned int>("number_points_from_provider");
+    else
+      _num_points_from_provider = 0; // Will be set in initialSetup() for mesh-based providers
+
     _geom_definition_method = CRACK_GEOM_DEFINITION::CRACK_FRONT_POINTS;
   }
   else if (isParamValid("number_points_from_provider"))
@@ -302,6 +304,16 @@ CrackFrontDefinition::initialSetup()
     if (_crack_front_points_provider->usesMesh())
     {
       _use_mesh_cutter = true;
+
+      // Automatically get number of crack front points from mesh-based provider
+      if (_num_points_from_provider == 0)
+      {
+        _num_points_from_provider = _crack_front_points_provider->getNumberOfCrackFrontPoints();
+        mooseInfo("CrackFrontDefinition: Automatically detected ",
+                  _num_points_from_provider,
+                  " crack front points from mesh-based provider");
+      }
+
       if (_direction_method != DIRECTION_METHOD::CURVED_CRACK_FRONT)
         paramError("crack_direction_method",
                    "Using a `crack_front_points_provider` that uses an XFEM cutter mesh also "
@@ -310,6 +322,13 @@ CrackFrontDefinition::initialSetup()
         paramError("crack_mouth_boundary",
                    "'crack_mouth_boundary' cannot be set when using a "
                    "'crack_front_points_provider' that uses an XFEM cutter mesh");
+    }
+    else if (_num_points_from_provider == 0)
+    {
+      paramError(
+          "number_points_from_provider",
+          "CrackFrontDefinition error: When using a non-mesh-based crack_front_points_provider, "
+          "the number_points_from_provider parameter must be provided.");
     }
   }
   if (_crack_front_points_provider != nullptr)
@@ -365,6 +384,9 @@ CrackFrontDefinition::initialize()
   // cutter
   if (_use_mesh_cutter && _is_cutter_modified)
   {
+    // Automatically update the number of crack front points as crack grows
+    _num_points_from_provider = _crack_front_points_provider->getNumberOfCrackFrontPoints();
+
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
     updateCrackFrontGeometry();

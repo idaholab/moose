@@ -78,7 +78,6 @@
     crack_direction_method = CurvedCrackFront
     2d = true
     crack_front_points_provider = cut_mesh2
-    number_points_from_provider = 2
   []
 []
 
