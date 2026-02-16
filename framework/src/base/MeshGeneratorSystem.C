@@ -434,7 +434,7 @@ MeshGeneratorSystem::executeMeshGenerators()
         generator->mooseError("The generated mesh is marked as prepared but is not actually "
                               "prepared. Please edit the '",
                               generator->type(),
-                              "' class to call 'set_isnt_prepared()'");
+                              "' class to call 'unset_is_prepared()'");
 #endif
 
       // Now we need to possibly give this mesh to downstream generators

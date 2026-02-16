@@ -234,6 +234,6 @@ RenameBoundaryGenerator::generate()
     boundary_info.nodeset_name(pair.first) = pair.second;
   }
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

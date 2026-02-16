@@ -130,6 +130,6 @@ ParsedGenerateNodeset::generate()
   boundary_info.nodeset_name(nodeset_ids[0]) = _nodeset_names[0];
 
   // TODO: consider if a new nodeset actually impacts preparedness
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

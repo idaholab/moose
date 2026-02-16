@@ -58,6 +58,6 @@ StitchBoundaryMeshGenerator::generate()
                         use_binary_search,
                         getParam<Real>("stitching_hmin_tolerance_factor"));
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

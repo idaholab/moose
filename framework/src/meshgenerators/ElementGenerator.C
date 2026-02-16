@@ -102,7 +102,7 @@ ElementGenerator::generate()
   }
 
   // We just added an element
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
 
   if (getParam<bool>("create_sidesets"))
     for (const auto i_side : make_range(elem->n_sides()))

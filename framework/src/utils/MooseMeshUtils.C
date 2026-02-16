@@ -99,7 +99,7 @@ changeBoundaryId(MeshBase & mesh,
     boundary_info.remove_id(old_id);
 
   // global information may now be out of sync
-  mesh.set_isnt_prepared();
+  mesh.unset_is_prepared();
 }
 
 std::vector<boundary_id_type>
@@ -270,7 +270,7 @@ changeSubdomainId(MeshBase & mesh, const subdomain_id_type old_id, const subdoma
       elem->subdomain_id() = new_id;
 
   // global cached information may now be out of sync
-  mesh.set_isnt_prepared();
+  mesh.unset_is_prepared();
 }
 
 Point
