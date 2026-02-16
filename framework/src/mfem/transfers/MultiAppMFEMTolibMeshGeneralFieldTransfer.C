@@ -9,59 +9,22 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MultiAppMFEMlibMeshGeneralFieldTransfer.h"
+#include "MultiAppMFEMTolibMeshGeneralFieldTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
 #include "SystemBase.h"
 #include "MFEMProblem.h"
 #include "MFEMMesh.h"
+#include "MFEMVectorFromlibMeshPoint.h"
 
 #include "libmesh/mesh_function.h"
 
-registerMooseObject("MooseApp", MultiAppMFEMlibMeshGeneralFieldTransfer);
+registerMooseObject("MooseApp", MultiAppMFEMTolibMeshGeneralFieldTransfer);
 
-namespace Moose::MFEM
-{
-size_t
-MFEMIndex(const size_t i_dim,
-          const size_t i_point,
-          const size_t num_dims,
-          const size_t num_points,
-          const mfem::Ordering::Type ordering)
-{
-  if (ordering == mfem::Ordering::byNODES)
-  {
-    return i_dim * num_points + i_point;
-  }
-  else // ordering == mfem::Ordering::byVDIM
-  {
-    return i_point * num_dims + i_dim;
-  }
-}
 
-mfem::Vector
-pointsToMFEMVector(const std::vector<Point> & points,
-                   const unsigned int num_dims,
-                   const mfem::Ordering::Type ordering)
-{
-  const unsigned int num_points = points.size();
-  mfem::Vector mfem_points(num_points * num_dims);
-  for (unsigned int i_point = 0; i_point < num_points; i_point++)
-  {
-    for (unsigned int i_dim = 0; i_dim < num_dims; i_dim++)
-    {
-      const size_t idx = MFEMIndex(i_dim, i_point, num_dims, num_points, ordering);
-
-      mfem_points(idx) = points[i_point](i_dim);
-    }
-  }
-
-  return mfem_points;
-}
-}
 
 InputParameters
-MultiAppMFEMlibMeshGeneralFieldTransfer::validParams()
+MultiAppMFEMTolibMeshGeneralFieldTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>(
@@ -72,7 +35,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::validParams()
   return params;
 }
 
-MultiAppMFEMlibMeshGeneralFieldTransfer::MultiAppMFEMlibMeshGeneralFieldTransfer(InputParameters const & params)
+MultiAppMFEMTolibMeshGeneralFieldTransfer::MultiAppMFEMTolibMeshGeneralFieldTransfer(InputParameters const & params)
   : MultiAppTransfer(params),
     _mfem_interpolator(this->comm().get()),
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
@@ -81,108 +44,46 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::MultiAppMFEMlibMeshGeneralFieldTransfer
   auto bad_problem = [this]()
   {
     mooseError(type(),
-               " only works with MFEMProblem based applications. Check that all your inputs "
-               "involved in this transfer are MFEMProblem based");
+               " only works for transfers from MFEMProblem based applications to libMesh based applications. Please check all inputs "
+               "involved in this transfer.");
   };
 
-  // if (hasToMultiApp())
-  // {
-  //   if (!dynamic_cast<MFEMProblem *>(&getToMultiApp()->problemBase()))
-  //     bad_problem();
-  //   for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
-  //     if (getToMultiApp()->hasLocalApp(i) &&
-  //         !dynamic_cast<MFEMProblem *>(&getToMultiApp()->appProblemBase(i)))
-  //       bad_problem();
-  // }
-  // if (hasFromMultiApp())
-  // {
-  //   if (!dynamic_cast<MFEMProblem *>(&getFromMultiApp()->problemBase()))
-  //     bad_problem();
-  //   for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
-  //     if (getFromMultiApp()->hasLocalApp(i) &&
-  //         !dynamic_cast<MFEMProblem *>(&getFromMultiApp()->appProblemBase(i)))
-  //       bad_problem();
-  // }
+  if (hasToMultiApp())
+  {
+    if (!dynamic_cast<MFEMProblem *>(&getToMultiApp()->problemBase()))
+      bad_problem();
+    for (const auto i : make_range(getToMultiApp()->numGlobalApps()))
+      if (getToMultiApp()->hasLocalApp(i) &&
+          !dynamic_cast<FEProblemBase *>(&getToMultiApp()->appProblemBase(i)))
+        bad_problem();
+  }
+  if (hasFromMultiApp())
+  {
+    if (!dynamic_cast<FEProblemBase *>(&getFromMultiApp()->problemBase()))
+      bad_problem();
+    for (const auto i : make_range(getFromMultiApp()->numGlobalApps()))
+      if (getFromMultiApp()->hasLocalApp(i) &&
+          !dynamic_cast<MFEMProblem *>(&getFromMultiApp()->appProblemBase(i)))
+        bad_problem();
+  }
 }
 
 void
-MultiAppMFEMlibMeshGeneralFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_problem)
+MultiAppMFEMTolibMeshGeneralFieldTransfer::transfer(FEProblemBase & to_problem, MFEMProblem & from_problem)
 {
-  auto * to_mfem_problem_ptr = dynamic_cast<MFEMProblem *>(&to_problem); 
-  auto * from_mfem_problem_ptr = dynamic_cast<MFEMProblem *>(&from_problem);
-
   if (numToVar() != numFromVar())
     mooseError("Number of variables transferred must be same in both systems.");
 
-  // TODO: tidy switch statement
-  if (!to_mfem_problem_ptr && !from_mfem_problem_ptr)
-    mooseError("No MFEM problem found in either source or destination app.");    
-
-  if (to_mfem_problem_ptr && from_mfem_problem_ptr)
-    mooseError("No libMesh problem found in either source or destination app.");
-
   // Send from MFEM problem to libMesh problem
-  if (!to_mfem_problem_ptr && from_mfem_problem_ptr)
-  {
-    auto & mfem_mesh = from_mfem_problem_ptr->mesh().getMFEMParMesh();
-    mfem_mesh.EnsureNodes();
-    _mfem_interpolator.Setup(mfem_mesh);
-    for (unsigned v = 0; v < numToVar(); ++v)
-      setlibMeshSolutionValuesFromMFEM(v, *from_mfem_problem_ptr);
-  }
-  // TODO: Send from libMesh problem to MFEM problem
-  if (to_mfem_problem_ptr && !from_mfem_problem_ptr)
-  {
-    for (unsigned v = 0; v < numToVar(); ++v)
-      setMFEMGridFunctionValuesFromlibMesh(v, *to_mfem_problem_ptr);
-  }
+  auto & mfem_mesh = from_problem.mesh().getMFEMParMesh();
+  mfem_mesh.EnsureNodes();
+  _mfem_interpolator.Setup(mfem_mesh);
+  for (unsigned v = 0; v < numToVar(); ++v)
+    setlibMeshSolutionValuesFromMFEM(v, from_problem);
 }
 
 void
-MultiAppMFEMlibMeshGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem)
-{
-  std::vector<libMesh::MeshFunction> local_meshfuns;
-  local_meshfuns.clear();
-  local_meshfuns.reserve(_from_problems.size());
-
-  // Construct a local mesh function for each origin problem
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
-  {
-    FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFieldBase & from_var =
-        from_problem.getVariable(0,
-                                 _from_var_names[var_index],
-                                 Moose::VarKindType::VAR_ANY,
-                                 Moose::VarFieldType::VAR_FIELD_ANY);
-
-    System & from_sys = from_var.sys().system();
-    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
-
-    local_meshfuns.emplace_back(from_problem.es(),
-                                *from_sys.current_local_solution,
-                                from_sys.get_dof_map(),
-                                from_var_num);
-    local_meshfuns.back().init();
-    // local_meshfuns.back().enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
-  }
-
-
-  auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
-  mfem::FunctionCoefficient coef(
-      [this, &local_meshfuns](const mfem::Vector & p, mfem::real_t t) -> mfem::real_t
-      {
-        int i_from = 0;
-        const auto from_global_num = getGlobalSourceAppIndex(i_from);
-        const auto local_pt = _from_transforms[from_global_num]->mapBack(pointFromMFEMVector(p));
-        auto val = (local_meshfuns[i_from])(local_pt);
-        return val;
-      });  
-  to_var.ProjectCoefficient(coef);
-
-}
-
-void
-MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem)
+MultiAppMFEMTolibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem)
 {
   /// The target variables
   std::vector<MooseVariableFieldBase *> _to_variables;  
@@ -296,9 +197,9 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::setlibMeshSolutionValuesFromMFEM(const 
 }
 
 void
-MultiAppMFEMlibMeshGeneralFieldTransfer::execute()
+MultiAppMFEMTolibMeshGeneralFieldTransfer::execute()
 {
-  TIME_SECTION("MultiAppMFEMlibMeshGeneralFieldTransfer::execute", 5, "Copies variables");
+  TIME_SECTION("MultiAppMFEMTolibMeshGeneralFieldTransfer::execute", 5, "Copies variables");
   if (_current_direction == TO_MULTIAPP)
   {
     for (unsigned int i = 0; i < getToMultiApp()->numGlobalApps(); i++)
@@ -306,7 +207,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::execute()
       if (getToMultiApp()->hasLocalApp(i))
       {
         transfer(getToMultiApp()->appProblemBase(i),
-                 getToMultiApp()->problemBase());
+                 static_cast<MFEMProblem &>(getToMultiApp()->problemBase()));
       }
     }
   }
@@ -317,7 +218,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::execute()
       if (getFromMultiApp()->hasLocalApp(i))
       {
         transfer(getFromMultiApp()->problemBase(),
-                 getFromMultiApp()->appProblemBase(i));
+                 static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
       }
     }
   }
@@ -331,7 +232,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::execute()
         if (getToMultiApp()->hasLocalApp(i))
         {
           transfer(getToMultiApp()->appProblemBase(i),
-                   getFromMultiApp()->appProblemBase(i));
+                   static_cast<MFEMProblem &>(getFromMultiApp()->appProblemBase(i)));
           transfers_done++;
         }
       }
@@ -343,7 +244,7 @@ MultiAppMFEMlibMeshGeneralFieldTransfer::execute()
 }
 
 void
-MultiAppMFEMlibMeshGeneralFieldTransfer::checkSiblingsTransferSupported() const
+MultiAppMFEMTolibMeshGeneralFieldTransfer::checkSiblingsTransferSupported() const
 {
   // Check that we are in the supported configuration: same number of source and target apps
   // The allocation of the child apps on the processors must be the same

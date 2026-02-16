@@ -78,7 +78,7 @@
 
 [Transfers]
   [transfer_from_libmesh]
-    type = MultiAppMFEMlibMeshGeneralFieldTransfer
+    type = MultiApplibMeshToMFEMGeneralFieldTransfer
     source_variable = libmesh_scalar_var
     variable = libmesh_scalar_var
     from_multi_app = libmesh_app

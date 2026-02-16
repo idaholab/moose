@@ -26,11 +26,11 @@ class MooseMesh;
 // but MFEMMesh may differ in each subapp
 // */
 
-class MultiAppMFEMlibMeshGeneralFieldTransfer : public MultiAppTransfer
+class MultiAppMFEMTolibMeshGeneralFieldTransfer : public MultiAppTransfer
 {
 public:
   static InputParameters validParams();
-  MultiAppMFEMlibMeshGeneralFieldTransfer(InputParameters const & params);
+  MultiAppMFEMTolibMeshGeneralFieldTransfer(InputParameters const & params);
   void execute() override;
   auto const & getFromVarName(int i) { return _from_var_names.at(i); };
   auto const & getToVarName(int i) { return _to_var_names.at(i); };
@@ -42,9 +42,8 @@ protected:
   std::vector<VariableName> _from_var_names;
   std::vector<AuxVariableName> _to_var_names;
 
-  void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
+  void transfer(FEProblemBase & to_problem, MFEMProblem & from_problem);
   void setlibMeshSolutionValuesFromMFEM(const unsigned int var_index, MFEMProblem & from_problem);
-  void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
   void checkSiblingsTransferSupported() const override;
 };
 
