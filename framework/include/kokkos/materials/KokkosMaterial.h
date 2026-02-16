@@ -177,11 +177,15 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 Material::operator()(ElementInit, const ThreadID tid, const Derived & material) const
 {
+  // When constant option is subdomain, elem is an arbitrary element in each subdomain, and thus
+  // datum is invalid
   auto elem = kokkosElementID(tid);
 
   Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
-  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
+
+  for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
     material.initQpStatefulPropertiesShim(material, qp, datum);
@@ -196,7 +200,9 @@ Material::operator()(SideInit, const ThreadID tid, const Derived & material) con
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
+
+  for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
     material.initQpStatefulPropertiesShim(material, qp, datum);
@@ -211,7 +217,9 @@ Material::operator()(NeighborInit, const ThreadID tid, const Derived & material)
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
+
+  for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
     material.initQpStatefulPropertiesShim(material, qp, datum);
@@ -222,11 +230,15 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 Material::operator()(ElementCompute, const ThreadID tid, const Derived & material) const
 {
+  // When constant option is subdomain, elem is an arbitrary element in each subdomain, and thus
+  // datum is invalid
   auto elem = kokkosElementID(tid);
 
   Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
-  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
+
+  for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
     material.computeQpPropertiesShim(material, qp, datum);
@@ -241,7 +253,9 @@ Material::operator()(SideCompute, const ThreadID tid, const Derived & material) 
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
+
+  for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
     material.computeQpPropertiesShim(material, qp, datum);
@@ -256,7 +270,9 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
 
   Datum datum(elem, side, kokkosAssembly(), kokkosSystems());
 
-  for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
+  const unsigned int num_qps = _constant_option == PropertyConstantOption::NONE ? datum.n_qps() : 1;
+
+  for (unsigned int qp = 0; qp < num_qps; ++qp)
   {
     datum.reinit();
     material.computeQpPropertiesShim(material, qp, datum);

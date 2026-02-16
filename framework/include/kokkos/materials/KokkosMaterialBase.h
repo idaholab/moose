@@ -161,6 +161,11 @@ protected:
   ///@}
 
   /**
+   * Whether this property is constant over element or subdomain
+   */
+  const PropertyConstantOption _constant_option;
+
+  /**
    * TODO: Move to TransientInterface
    */
   ///@{
@@ -261,7 +266,7 @@ MaterialBase::declareKokkosPropertyInternal(const std::string & prop_name,
           : MooseUtils::join(std::vector<std::string>({prop_name, _declare_suffix}), "_");
 
   auto prop = materialData().declareKokkosProperty<T, dimension>(
-      prop_name_modified, dims, this, isBoundaryMaterial(), on_demand);
+      prop_name_modified, dims, this, isBoundaryMaterial(), on_demand, _constant_option);
 
   registerPropName(prop_name_modified, false, 0);
 
