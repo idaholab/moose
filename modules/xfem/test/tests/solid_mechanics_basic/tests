@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6320 #23572'
+  issues = '#6320 #23572 #32418'
   [crack_propagation_ave]
     type = Exodiff
     input = crack_propagation_2d.i

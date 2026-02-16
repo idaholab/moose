@@ -229,10 +229,6 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
 
   if (isParamValid("crack_front_points_provider"))
   {
-    if (!isParamValid("number_points_from_provider"))
-      paramError("number_points_from_provider",
-                 "DomainIntegral error: when crack_front_points_provider is used, "
-                 "number_points_from_provider must be provided.");
     _use_crack_front_points_provider = true;
     _crack_front_points_provider = getParam<UserObjectName>("crack_front_points_provider");
   }
@@ -400,8 +396,12 @@ DomainIntegralAction::act()
     if (_crack_front_points.size() != 0)
       params.set<std::vector<Point>>("crack_front_points") = _crack_front_points;
     if (_use_crack_front_points_provider)
-      params.applyParameters(parameters(),
-                             {"crack_front_points_provider, number_points_from_provider"});
+    {
+      params.set<UserObjectName>("crack_front_points_provider") = _crack_front_points_provider;
+      if (isParamValid("number_points_from_provider"))
+        params.set<unsigned int>("number_points_from_provider") =
+            getParam<unsigned int>("number_points_from_provider");
+    }
     if (_closed_loop)
       params.set<bool>("closed_loop") = _closed_loop;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
@@ -1007,7 +1007,17 @@ DomainIntegralAction::calcNumCrackFrontPoints()
   else if (_crack_front_points.size() != 0)
     num_points = _crack_front_points.size();
   else if (_use_crack_front_points_provider)
-    num_points = getParam<unsigned int>("number_points_from_provider");
+  {
+    if (isParamValid("number_points_from_provider"))
+      num_points = getParam<unsigned int>("number_points_from_provider");
+    else
+      // Actual count determined at runtime by CrackFrontDefinition::initialSetup()
+      // which calls provider->getNumberOfCrackFrontPoints(). Use 0 here so the
+      // action does not create per-point objects that would access crack front data
+      // before it exists. The VectorPostprocessors (JIntegral, InteractionIntegral,
+      // etc.) dynamically size based on the runtime count.
+      num_points = 0;
+  }
   else
     mooseError("Must define either 'boundary' or 'crack_front_points'");
   return num_points;

@@ -61,13 +61,10 @@ public:
 
   /**
     Return the total number of crack front points.
-    This function is currently not called anywhere in the code.
-    Ideally, in a future update, the number of crack front points will be managed by
-    CrackFrontPointsProvider instead of CrackFrontDefinition. In that case,
-    getNumberOfCrackFrontPoints() defined here may be used to override a virtual function defined in
-    CrackFrontPointsProvider
+    Returns the number of crack front points for use by CrackFrontDefinition.
+    Overrides the virtual function defined in CrackFrontPointsProvider.
    */
-  unsigned int getNumberOfCrackFrontPoints() const;
+  virtual unsigned int getNumberOfCrackFrontPoints() const override;
 
 protected:
   /// The cutter mesh has triangluar elements only
@@ -134,6 +131,7 @@ protected:
   /// therefore, they are (1) in the same order as defined in the input and (2) the number of nodes does not change
   std::vector<dof_id_type> _tracked_crack_front_points;
 
+  /// is it using the crack_front_definition
   bool _cfd;
 
   /// Edges at the boundary
@@ -247,6 +245,12 @@ protected:
     Join active boundaries and inactive boundaries to be the new boundary
    */
   void joinBoundary();
+
+  /**
+   * Automatically detect crack front nodes from cutter mesh boundary
+   * Identifies nodes where cutter boundary intersects/terminates in FEM mesh
+   */
+  void detectCrackFrontNodes();
 
   /**
     Parsed functions of front growth

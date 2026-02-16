@@ -1,7 +1,7 @@
 [Tests]
   design = 'MeshCut2DRankTwoTensorNucleation.md'
   [nucleateGrowCrack]
-    issues = '#24714 #27054'
+    issues = '#24714 #27054 #32418'
     type = CSVDiff
     input = nucleate_edge_bulk_crack_2d.i
     csvdiff = 'nucleate_edge_bulk_crack_2d_out_II_KI_1_0011.csv'

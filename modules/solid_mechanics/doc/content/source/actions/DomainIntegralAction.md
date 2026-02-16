@@ -31,4 +31,8 @@ Details on the theory behind the computation of the various fracture integrals a
 | [DomainIntegralQFunction](DomainIntegralQFunction.md) | AuxKernel | Optionally populates AuxVariables with values of the geometry-based q function when `output_q=true` |
 | [DomainIntegralTopologicalQFunction](DomainIntegralTopologicalQFunction.md) | AuxKernel | Optionally populates AuxVariables with values of the topology-based q function when `output_q=true` |
 
+### Output with `crack_front_points_provider`
+
+The `crack_front_points_provider` is an XFEM UserObject for describing the XFEM cut surface which can be a purely geometric description or described by a lower dimensional cutter mesh.  The `DomainInegral` action will create output at crack front nodes on the cutter mesh.  The Postprocessor and AuxKernel output will only be created if `number_points_from_provider` is specified.  By default (`output_vpp=true`), the vectorpostprocessors will always be created and will be dynamically sized as the number of crack front points changes through out the simulation.
+
 !syntax parameters /DomainIntegral/DomainIntegralAction

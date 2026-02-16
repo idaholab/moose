@@ -51,8 +51,6 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
   params.addParam<unsigned int>("n_step_growth", 0, "Number of steps for crack growth");
-  params.addParam<std::vector<dof_id_type>>("crack_front_nodes",
-                                            "Set of nodes to define crack front");
   params.addClassDescription("Creates a UserObject for a mesh cutter in 3D problems");
   return params;
 }
@@ -101,25 +99,22 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
-
-    if (isParamValid("crack_front_nodes"))
-    {
-      _tracked_crack_front_points = getParam<std::vector<dof_id_type>>("crack_front_nodes");
-      _num_crack_front_points = _tracked_crack_front_points.size();
-      _crack_front_points = _tracked_crack_front_points;
-      _cfd = true;
-    }
-    else
-      _cfd = false;
   }
 
-  if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
-       _growth_increment_method == GrowthRateEnum::REPORTER) &&
-      !_cfd)
-    paramError("crack_front_nodes",
-               "Required for any crack growth rate or direction criterion that requires fracture "
-               "integrals.");
+  if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
+      _growth_increment_method == GrowthRateEnum::REPORTER)
+    _cfd = true;
+  else
+    _cfd = false;
 
+  if (_grow)
+  {
+    findBoundaryNodes();
+    findBoundaryEdges();
+    sortBoundaryNodes();
+    findActiveBoundaryNodes();
+    detectCrackFrontNodes();
+  }
   // test element type; only tri3 elements are allowed
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
@@ -136,13 +131,6 @@ CrackMeshCut3DUserObject::initialSetup()
   if (_cfd)
     _crack_front_definition =
         &_fe_problem.getUserObject<CrackFrontDefinition>("crackFrontDefinition");
-
-  if (_grow)
-  {
-    findBoundaryNodes();
-    findBoundaryEdges();
-    sortBoundaryNodes();
-  }
 }
 
 void
@@ -579,6 +567,74 @@ CrackMeshCut3DUserObject::sortBoundaryNodes()
     else
       mooseError("Discontinuity in cutter boundary");
   }
+}
+
+void
+CrackMeshCut3DUserObject::detectCrackFrontNodes()
+{
+  _tracked_crack_front_points.clear();
+
+  unsigned int n_boundary = _boundary.size();
+  unsigned int n_inactive = _inactive_boundary_pos.size();
+
+  // CASE 1: All nodes inactive - cutter mesh outside FEM or mesh disappeared
+  if (n_inactive == n_boundary)
+  {
+    mooseError("All cutter mesh nodes are outside FEM mesh. No crack front detected. "
+               "Adjust cutter mesh geometry to intersect with FEM mesh.");
+  }
+
+  // Check if _active_boundary was populated.  This is a developer error.
+  if (_active_boundary.size() == 0)
+  {
+    mooseError(
+        "No active boundary segments found. This indicates findActiveBoundaryNodes() failed or "
+        "was not called properly. Boundary nodes: ",
+        n_boundary,
+        ", Inactive: ",
+        n_inactive);
+  }
+
+  // CASE 2: All nodes active - entire boundary is crack front (fully embedded)
+  if (n_inactive == 0)
+  {
+    _tracked_crack_front_points = _active_boundary[0];
+    mooseInfo(
+        "Detected ", _tracked_crack_front_points.size(), " crack front nodes (fully embedded)");
+  }
+  // CASE 3: Mixed active/inactive - extract active segment (edge crack)
+  else
+  {
+    // Use active segment as crack front
+    _tracked_crack_front_points = _active_boundary[0];
+    mooseInfo(
+        "Detected ", _tracked_crack_front_points.size(), " crack front nodes from active segment");
+  }
+
+  // Reverse the order to match convention (crack front nodes typically ordered from end to start)
+  std::reverse(_tracked_crack_front_points.begin(), _tracked_crack_front_points.end());
+
+  // Populate related data structures
+  _num_crack_front_points = _tracked_crack_front_points.size();
+  _crack_front_points = _tracked_crack_front_points;
+
+  // Validate minimum size
+  if (_num_crack_front_points < 2)
+  {
+    mooseError("Detected ",
+               _num_crack_front_points,
+               " crack front nodes. Minimum 2 required for crack front definition.");
+  }
+
+  // Note: _cfd remains true (set in constructor). If this method is called, _cfd must stay true.
+  // Any failure case results in mooseError, not setting _cfd = false.
+
+  // Log detected nodes for verification
+  std::ostringstream oss;
+  oss << "Detected crack front nodes: ";
+  for (auto node_id : _tracked_crack_front_points)
+    oss << node_id << " ";
+  mooseInfo(oss.str());
 }
 
 Real
