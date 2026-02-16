@@ -438,13 +438,13 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_vars[0].fieldVariables().size() > 0)
   {
-    computeNodalArrayVars(type);
-    computeNodalVecVars(type);
     computeNodalVars(type);
+    computeNodalVecVars(type);
+    computeNodalArrayVars(type);
     computeMortarNodalVars(type);
-    computeElementalArrayVars(type);
-    computeElementalVecVars(type);
     computeElementalVars(type);
+    computeElementalVecVars(type);
+    computeElementalArrayVars(type);
 
 #ifdef MOOSE_KOKKOS_ENABLED
     kokkosCompute(type);
