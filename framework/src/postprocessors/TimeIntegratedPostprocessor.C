@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TimeIntegratedPostprocessor.h"
+#include "ExplicitMidpoint.h"
+#include "ImplicitMidpoint.h"
+#include "TransientBase.h"
 
 registerMooseObject("MooseApp", TimeIntegratedPostprocessor);
 registerMooseObjectRenamed("MooseApp",
@@ -31,6 +34,14 @@ TimeIntegratedPostprocessor::TimeIntegratedPostprocessor(const InputParameters &
     _pps_value(getPostprocessorValue("value")),
     _pps_value_old(getPostprocessorValueOld("value"))
 {
+  if (!dynamic_cast<TransientBase *>(_app.getExecutioner()))
+    mooseError(
+        "Time integration of postprocessor has only been implemented with a transient executioner");
+  const auto time_integrators =
+      dynamic_cast<TransientBase *>(_app.getExecutioner())->getTimeIntegrators();
+  for (const auto & ti : time_integrators)
+    if (!dynamic_cast<ExplicitMidpoint *>(ti) && !dynamic_cast<ImplicitMidpoint *>(ti))
+      mooseDoOnce(mooseWarning("The time integration coded in this postprocessor uses the midpoint method. The variable time integration, notably with time integrator '" + ti->name()+"' is not using the mid point method. If the postprocessor uses variable values, even indirectly, we would recommend you code the same time integration method for the time-integrated postprocessor."));
 }
 
 void
