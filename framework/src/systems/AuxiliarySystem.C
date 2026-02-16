@@ -386,6 +386,8 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
                   "Attempting to add AuxKernel of type '" + kernel_name + "' and name '" + name +
                       "' to the auxiliary system with invalid _moose_base: " + base);
   }
+  if (parameters.isParamValid("execution_order_group"))
+    _execution_order_groups.insert(parameters.get<int>("execution_order_group"));
 }
 
 void
@@ -471,17 +473,20 @@ AuxiliarySystem::compute(ExecFlagType type)
 
   if (_vars[0].fieldVariables().size() > 0)
   {
-    computeNodalVars(type);
-    computeNodalVecVars(type);
-    computeNodalArrayVars(type);
-    computeMortarNodalVars(type);
-    computeElementalVars(type);
-    computeElementalVecVars(type);
-    computeElementalArrayVars(type);
+    for (const auto group : _execution_order_groups)
+    {
+      computeNodalVars(type, group);
+      computeNodalVecVars(type, group);
+      computeNodalArrayVars(type, group);
+      computeMortarNodalVars(type, group);
+      computeElementalVars(type, group);
+      computeElementalVecVars(type, group);
+      computeElementalArrayVars(type, group);
 
 #ifdef MOOSE_KOKKOS_ENABLED
-    kokkosCompute(type);
+      kokkosCompute(type, group);
 #endif
+    }
 
     if (hasLinearFVGradients())
     {
@@ -491,6 +496,7 @@ AuxiliarySystem::compute(ExecFlagType type)
     }
 
     // compute time derivatives of nodal aux variables _after_ the values were updated
+    // NOTE: don't rely on time derivatives within auxkernels to be updated
     if (_fe_problem.dt() > 0.)
       for (auto & ti : _time_integrators)
         ti->computeTimeDerivatives();
@@ -787,7 +793,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeNodalVars(ExecFlagType type)
+AuxiliarySystem::computeNodalVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalVars", 3);
 
@@ -796,7 +802,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeNodalVecVars(ExecFlagType type)
+AuxiliarySystem::computeNodalVecVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeNodalVecVars", 3);
 
@@ -805,14 +811,14 @@ AuxiliarySystem::computeNodalVecVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeNodalArrayVars(ExecFlagType type)
+AuxiliarySystem::computeNodalArrayVars(ExecFlagType type, int group)
 {
   const MooseObjectWarehouse<ArrayAuxKernel> & nodal = _nodal_array_aux_storage[type];
   computeNodalVarsHelper<ArrayAuxKernel>(nodal);
 }
 
 void
-AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
+AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type, int group)
 {
   TIME_SECTION("computeMortarNodalVars", 3);
 
@@ -870,7 +876,7 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeElementalVars(ExecFlagType type)
+AuxiliarySystem::computeElementalVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeElementalVars", 3);
 
@@ -879,7 +885,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeElementalVecVars(ExecFlagType type)
+AuxiliarySystem::computeElementalVecVars(ExecFlagType type, int group)
 {
   TIME_SECTION("computeElementalVecVars", 3);
 
@@ -888,7 +894,7 @@ AuxiliarySystem::computeElementalVecVars(ExecFlagType type)
 }
 
 void
-AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
+AuxiliarySystem::computeElementalArrayVars(ExecFlagType type, int group)
 {
   const MooseObjectWarehouse<ArrayAuxKernel> & elemental = _elemental_array_aux_storage[type];
   computeElementalVarsHelper<ArrayAuxKernel>(elemental);

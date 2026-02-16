@@ -175,13 +175,13 @@ protected:
   virtual void restoreAdditionalStates() override;
 
   void computeScalarVars(ExecFlagType type);
-  void computeNodalVars(ExecFlagType type);
-  void computeMortarNodalVars(ExecFlagType type);
-  void computeNodalVecVars(ExecFlagType type);
-  void computeNodalArrayVars(ExecFlagType type);
-  void computeElementalVars(ExecFlagType type);
-  void computeElementalVecVars(ExecFlagType type);
-  void computeElementalArrayVars(ExecFlagType type);
+  void computeNodalVars(ExecFlagType type, int group);
+  void computeMortarNodalVars(ExecFlagType type, int group);
+  void computeNodalVecVars(ExecFlagType type, int group);
+  void computeNodalArrayVars(ExecFlagType type, int group);
+  void computeElementalVars(ExecFlagType type, int group);
+  void computeElementalVecVars(ExecFlagType type, int group);
+  void computeElementalArrayVars(ExecFlagType type, int group);
 
   template <typename AuxKernelType>
   void computeElementalVarsHelper(const MooseObjectWarehouse<AuxKernelType> & warehouse);
@@ -243,6 +243,9 @@ protected:
   /// coupling the current value of a variable runs in a later stage than the kernels writing it
   std::map<ExecFlagType, std::vector<KokkosAuxStage>> _kokkos_aux_stages;
 #endif
+
+  /// Execution order groups present within the simulation
+  std::set<int> _execution_order_groups;
 
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
