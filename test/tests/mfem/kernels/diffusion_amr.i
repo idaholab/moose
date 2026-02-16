@@ -1,7 +1,7 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/square.msh
-  use_amr = true
+  nonconforming = true
 []
 
 [Adaptivity]
