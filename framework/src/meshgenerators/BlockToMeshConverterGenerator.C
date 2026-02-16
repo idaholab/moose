@@ -48,7 +48,7 @@ BlockToMeshConverterGenerator::generate()
 
   try
   {
-    MooseMeshUtils::convertBlockToMesh(mesh, new_mesh, _target_blocks);
+    MooseMeshUtils::convertBlockToMesh(*mesh, *new_mesh, _target_blocks);
   }
   catch (MooseException & e)
   {

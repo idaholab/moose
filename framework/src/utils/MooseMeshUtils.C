@@ -649,7 +649,7 @@ buildBoundaryMesh(const ReplicatedMesh & input_mesh, const boundary_id_type boun
 }
 
 void
-createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
+createSubdomainFromSidesets(MeshBase & mesh,
                             std::vector<BoundaryName> boundary_names,
                             const SubdomainID new_subdomain_id,
                             const SubdomainName new_subdomain_name,
@@ -659,25 +659,25 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
   SubdomainID new_block_id = new_subdomain_id;
 
   // Make sure our boundary info and parallel counts are setup
-  if (!mesh->is_prepared())
+  if (!mesh.is_prepared())
   {
-    const bool allow_remote_element_removal = mesh->allow_remote_element_removal();
+    const bool allow_remote_element_removal = mesh.allow_remote_element_removal();
     // We want all of our boundary elements available, so avoid removing them if they haven't
     // already been so
-    mesh->allow_remote_element_removal(false);
-    mesh->prepare_for_use();
-    mesh->allow_remote_element_removal(allow_remote_element_removal);
+    mesh.allow_remote_element_removal(false);
+    mesh.prepare_for_use();
+    mesh.allow_remote_element_removal(allow_remote_element_removal);
   }
 
   // Check that the sidesets are present in the mesh
   for (const auto & sideset : boundary_names)
-    if (!MooseMeshUtils::hasBoundaryName(*mesh, sideset))
+    if (!MooseMeshUtils::hasBoundaryName(mesh, sideset))
       mooseException("The sideset '", sideset, "' was not found within the mesh");
 
-  auto sideset_ids = MooseMeshUtils::getBoundaryIDs(*mesh, boundary_names, true);
+  auto sideset_ids = MooseMeshUtils::getBoundaryIDs(mesh, boundary_names, true);
   std::set<boundary_id_type> sidesets(sideset_ids.begin(), sideset_ids.end());
-  auto side_list = mesh->get_boundary_info().build_side_list();
-  if (!mesh->is_serial() && mesh->comm().size() > 1)
+  auto side_list = mesh.get_boundary_info().build_side_list();
+  if (!mesh.is_serial() && mesh.comm().size() > 1)
   {
     std::vector<Elem *> elements_to_send;
     unsigned short i_need_boundary_elems = 0;
@@ -689,8 +689,8 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
         // Whether we have this boundary information through our locally owned element or a ghosted
         // element, we'll need the boundary elements for parallel consistent addition
         i_need_boundary_elems = 1;
-        auto * elem = mesh->elem_ptr(elem_id);
-        if (elem->processor_id() == mesh->processor_id())
+        auto * elem = mesh.elem_ptr(elem_id);
+        if (elem->processor_id() == mesh.processor_id())
           elements_to_send.push_back(elem);
       }
     }
@@ -703,14 +703,14 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     for (auto * nd : connected_nodes)
       connected_node_ids.insert(nd->id());
 
-    std::vector<unsigned short> need_boundary_elems(mesh->comm().size());
-    mesh->comm().allgather(i_need_boundary_elems, need_boundary_elems);
+    std::vector<unsigned short> need_boundary_elems(mesh.comm().size());
+    mesh.comm().allgather(i_need_boundary_elems, need_boundary_elems);
     std::unordered_map<processor_id_type, decltype(elements_to_send)> push_element_data;
     std::unordered_map<processor_id_type, decltype(connected_nodes)> push_node_data;
 
-    for (const auto pid : index_range(mesh->comm()))
+    for (const auto pid : index_range(mesh.comm()))
       // Don't need to send to self
-      if (pid != mesh->processor_id() && need_boundary_elems[pid])
+      if (pid != mesh.processor_id() && need_boundary_elems[pid])
       {
         if (elements_to_send.size())
           push_element_data[pid] = elements_to_send;
@@ -722,17 +722,15 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     {
       // Node packing specialization already has unpacked node into mesh, so nothing to do
     };
-    Parallel::push_parallel_packed_range(
-        mesh->comm(), push_node_data, mesh.get(), node_action_functor);
+    Parallel::push_parallel_packed_range(mesh.comm(), push_node_data, &mesh, node_action_functor);
     auto elem_action_functor = [](processor_id_type, const auto &)
     {
       // Elem packing specialization already has unpacked elem into mesh, so nothing to do
     };
-    TIMPI::push_parallel_packed_range(
-        mesh->comm(), push_element_data, mesh.get(), elem_action_functor);
+    TIMPI::push_parallel_packed_range(mesh.comm(), push_element_data, &mesh, elem_action_functor);
 
     // now that we've gathered everything, we need to rebuild the side list
-    side_list = mesh->get_boundary_info().build_side_list();
+    side_list = mesh.get_boundary_info().build_side_list();
   }
 
   std::vector<std::pair<dof_id_type, ElemSidePair>> element_sides_on_boundary;
@@ -740,7 +738,7 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
   for (const auto & triple : side_list)
     if (sidesets.count(std::get<2>(triple)))
     {
-      if (auto elem = mesh->query_elem_ptr(std::get<0>(triple)))
+      if (auto elem = mesh.query_elem_ptr(std::get<0>(triple)))
       {
         if (!elem->active())
           mooseError(
@@ -754,8 +752,8 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
       ++counter;
     }
 
-  dof_id_type max_elem_id = mesh->max_elem_id();
-  unique_id_type max_unique_id = mesh->parallel_max_unique_id();
+  dof_id_type max_elem_id = mesh.max_elem_id();
+  unique_id_type max_unique_id = mesh.parallel_max_unique_id();
 
   // Making an important assumption that at least our boundary elements are the same on all
   // processes even in distributed mesh mode (this is reliant on the correct ghosting functors
@@ -783,33 +781,33 @@ createSubdomainFromSidesets(std::unique_ptr<MeshBase> & mesh,
     side_elem->set_id(max_elem_id + i);
     side_elem->set_unique_id(max_unique_id + i);
 
-    // Finally, add the lower-dimensional element to the mesh->
-    mesh->add_elem(side_elem.release());
+    // Finally, add the lower-dimensional element to the mesh.
+    mesh.add_elem(side_elem.release());
   };
 
   // Assign block name, if provided
   if (new_subdomain_name.size())
-    mesh->subdomain_name(new_block_id) = new_subdomain_name;
+    mesh.subdomain_name(new_block_id) = new_subdomain_name;
 
-  const bool skip_partitioning_old = mesh->skip_partitioning();
-  mesh->skip_partitioning(true);
-  mesh->prepare_for_use();
-  mesh->skip_partitioning(skip_partitioning_old);
+  const bool skip_partitioning_old = mesh.skip_partitioning();
+  mesh.skip_partitioning(true);
+  mesh.prepare_for_use();
+  mesh.skip_partitioning(skip_partitioning_old);
 }
 
 void
-convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
-                   std::unique_ptr<MeshBase> & target_mesh,
+convertBlockToMesh(MeshBase & source_mesh,
+                   MeshBase & target_mesh,
                    const std::vector<SubdomainName> & target_blocks)
 {
-  if (!source_mesh->is_replicated())
+  if (!source_mesh.is_replicated())
     mooseError("This generator does not support distributed meshes.");
 
-  const auto target_block_ids = MooseMeshUtils::getSubdomainIDs(*source_mesh, target_blocks);
+  const auto target_block_ids = MooseMeshUtils::getSubdomainIDs(source_mesh, target_blocks);
 
   // Check that the block ids/names exist in the mesh
   std::set<SubdomainID> mesh_blocks;
-  source_mesh->subdomain_ids(mesh_blocks);
+  source_mesh.subdomain_ids(mesh_blocks);
 
   for (const auto i : index_range(target_block_ids))
     if (target_block_ids[i] == Moose::INVALID_BLOCK_ID || !mesh_blocks.count(target_block_ids[i]))
@@ -823,7 +821,7 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
   for (const auto target_block_id : target_block_ids)
   {
 
-    for (auto elem : source_mesh->active_subdomain_elements_ptr_range(target_block_id))
+    for (auto elem : source_mesh.active_subdomain_elements_ptr_range(target_block_id))
     {
       if (elem->level() != 0)
         mooseError("Refined blocks are not supported by this generator. "
@@ -849,7 +847,7 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
           // case where we have already inserted this particular point before
           // then we need to find the already-inserted one and hook it up right
           // to it's respective element
-          copy->set_node(copy_n_index++, target_mesh->node_ptr(old_new_node_map[n.id()]));
+          copy->set_node(copy_n_index++, target_mesh.node_ptr(old_new_node_map[n.id()]));
         }
         else
         {
@@ -859,7 +857,7 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
           // Nodes' IDs are their indexes in the nodes' respective mesh
           // If we set them as invalid they are automatically assigned
           // Add to mesh, auto-assigning a new id.
-          Node * node = target_mesh->add_point(elem->point(i));
+          Node * node = target_mesh.add_point(elem->point(i));
 
           // Add to element copy (manually)
           copy->set_node(copy_n_index++, node);
@@ -871,13 +869,13 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
 
       // it is ok to release the copy element into the mesh because derived meshes class
       // (ReplicatedMesh, DistributedMesh) manage their own elements, will delete them
-      target_mesh->add_elem(copy.release());
+      target_mesh.add_elem(copy.release());
     }
   }
 
   // Move subdomain names
   for (const auto sbd_id : target_block_ids)
-    target_mesh->subdomain_name(sbd_id) = source_mesh->subdomain_name(sbd_id);
+    target_mesh.subdomain_name(sbd_id) = source_mesh.subdomain_name(sbd_id);
 }
 
 void
@@ -1135,5 +1133,18 @@ buildPolyLineMesh(MeshBase & mesh,
   }
 
   buildPolyLineMesh(mesh, points, loop, start_boundary, end_boundary, nums_edges_between_points);
+}
+
+void
+addExternalBoundary(MeshBase & mesh, const BoundaryID extern_bid, bool & has_external_bid)
+{
+  auto & binfo = mesh.get_boundary_info();
+  for (const auto & elem : mesh.active_element_ptr_range())
+    for (const auto & i_side : elem->side_index_range())
+      if (elem->neighbor_ptr(i_side) == nullptr)
+      {
+        has_external_bid = true;
+        binfo.add_side(elem, i_side, extern_bid);
+      }
 }
 }
