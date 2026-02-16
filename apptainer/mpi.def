@@ -18,7 +18,7 @@ From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-cuda12.9.1-gcc13.3.1-mpich5.0.0-
 {%- elif ALTERNATE_FROM == "gcc_min" %}
 From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-gcc9.2.1-mpich5.0.0_0
 {%- elif ALTERNATE_FROM == "intel" %}
-From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.2-mpich5.0.0_0
+From: ghcr.io/idaholab/moose-mpibase/rocky:8.10-oneapi2025.3.2-mpich4.3.2_0
 {%- elif ALTERNATE_FROM == "rocky9" %}
 From: ghcr.io/idaholab/moose-mpibase/rocky:9.7-gcc13.3.1-mpich4.3.2-openmpi5.0.9_0
 {%- else %}
