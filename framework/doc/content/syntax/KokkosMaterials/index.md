@@ -134,6 +134,13 @@ See the following source codes of `KokkosVarCouplingMaterial` for an example of 
 !listing test/src/kokkos/materials/KokkosVarCouplingMaterial.K id=kokkos-var-coupling-mat-source language=cpp
          caption=The `KokkosVarCouplingMaterial` source file.
 
+## Constant Properties
+
+By default, material properties are computed and stored for each quadrature point.
+However, material properties are often constant within an element or subdomain, or vary little in space so that they can be approximated as constant without significant loss of accuracy.
+In this case, you can set the `constant_on` parameter of a material to `ELEMENT` or `SUBDOMAIN`, which makes the material properties declared by the material only computed and stored on per-element or per-subdomain basis.
+This can help save both computational cost and memory usage.
+
 ## Material Property Output
 
 Material property output is not supported by Kokkos-MOOSE yet.
