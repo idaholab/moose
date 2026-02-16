@@ -2,7 +2,7 @@
   design = 'MultiAppMFEMlibMeshGeneralFieldTransfer.md'
   issues = '#31982'
   requirement = 'The system shall have the ability to transfer MFEM solutions to libMesh for '
-  [MFEMtolibMeshTransferL2Quad]
+  [MFEMTransferTolibMeshL2Quad]
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_quads.csv'
@@ -12,7 +12,7 @@
     recover = false
     compute_devices = 'cpu cuda'
   []
-  [MFEMtolibMeshTransferL2Tri]
+  [MFEMTransferTolibMeshL2Tri]
     type = CSVDiff
     input = libmesh_parent_scalar.i
     csvdiff = 'libmesh_parent_scalar_mfem_sub_tris.csv'
