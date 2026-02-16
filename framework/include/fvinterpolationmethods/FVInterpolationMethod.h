@@ -71,7 +71,8 @@ public:
       static_assert(sizeof(Data) <= handle_storage_bytes,
                     "Interpolation handle data too large for storage");
       std::memset(_storage, 0, sizeof(_storage));
-      std::memcpy(_storage, &data, sizeof(Data));
+      if constexpr (!std::is_empty_v<Data>)
+        std::memcpy(_storage, &data, sizeof(Data));
       eval = eval_in;
     }
 
@@ -138,7 +139,8 @@ public:
       static_assert(sizeof(Data) <= handle_storage_bytes,
                     "Interpolation handle data too large for storage");
       std::memset(_storage, 0, sizeof(_storage));
-      std::memcpy(_storage, &data, sizeof(Data));
+      if constexpr (!std::is_empty_v<Data>)
+        std::memcpy(_storage, &data, sizeof(Data));
       eval = eval_in;
     }
 
@@ -222,7 +224,8 @@ public:
       static_assert(sizeof(Data) <= handle_storage_bytes,
                     "Interpolation handle data too large for storage");
       std::memset(_storage, 0, sizeof(_storage));
-      std::memcpy(_storage, &data, sizeof(Data));
+      if constexpr (!std::is_empty_v<Data>)
+        std::memcpy(_storage, &data, sizeof(Data));
       eval = eval_in;
     }
 

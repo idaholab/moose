@@ -34,7 +34,9 @@ def main() -> int:
         default="diagonal-step-2d_out_diag_sample_0001.csv",
         help="Path to the CSV file (default: diagonal-step-2d_out_diag_sample_0001.csv)",
     )
-    parser.add_argument("--x", default="id", help="Column name for the x-axis (default: id)")
+    parser.add_argument(
+        "--x", default="id", help="Column name for the x-axis (default: id)"
+    )
     parser.add_argument(
         "--y",
         default=["u"],
@@ -45,7 +47,9 @@ def main() -> int:
         "--output",
         help="Output image path (default: <csv stem>.png next to the CSV)",
     )
-    parser.add_argument("--title", default=None, help="Plot title (default: CSV filename)")
+    parser.add_argument(
+        "--title", default=None, help="Plot title (default: CSV filename)"
+    )
     parser.add_argument(
         "--show",
         action="store_true",
@@ -60,10 +64,14 @@ def main() -> int:
     cols = _read_csv_columns(csv_path)
 
     if args.x not in cols:
-        raise SystemExit(f"Missing x column '{args.x}'. Available: {', '.join(cols.keys())}")
+        raise SystemExit(
+            f"Missing x column '{args.x}'. Available: {', '.join(cols.keys())}"
+        )
     for y in args.y:
         if y not in cols:
-            raise SystemExit(f"Missing y column '{y}'. Available: {', '.join(cols.keys())}")
+            raise SystemExit(
+                f"Missing y column '{y}'. Available: {', '.join(cols.keys())}"
+            )
 
     try:
         import matplotlib.pyplot as plt
