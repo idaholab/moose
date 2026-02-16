@@ -32,7 +32,7 @@ MFEMMesh::validParams()
   params.addParam<bool>(
       "nc_simplices", true, "For simplicial meshes, enable/disable nonconforming refinement.");
   params.addParam<bool>(
-      "use_amr", false, "Determines whether we enable AMR (forces the mesh to be nonconforming)");
+      "nonconforming", false, "Determines whether ensure the mesh is non-conforming.");
   params.addParam<bool>("reorder_mesh",
                         false,
                         "Determines whether we reorder the mesh to improve dynamic partitioning. "
@@ -82,7 +82,7 @@ MFEMMesh::buildMesh()
   // of quadrilaterals/hexahedra (c.f. MFEM example 6p). The argument
   // (true/false) determines whether a simplex mesh is considered to be
   // non-conforming.
-  if (getParam<bool>("use_amr"))
+  if (getParam<bool>("nonconforming"))
   {
     mfem_ser_mesh.EnsureNCMesh(getParam<bool>("nc_simplices"));
   }
