@@ -85,36 +85,47 @@ MaterialPropertyStorage::declareKokkosProperty(const std::string & prop_name,
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
                                                const bool on_demand,
+                                               const PropertyConstantOption constant_option,
                                                std::shared_ptr<MaterialPropertyBase> shell)
 {
   auto & record = _kokkos_prop_records[prop_name];
 
-  if (record.declarers.size() && record.dims != dims)
+  if (record.declarers.size())
   {
-    std::stringstream ss;
+    if (record.dims != dims)
+    {
+      std::stringstream ss;
 
-    ss << "The declared " << dims.size() << "D Kokkos material property '" << prop_name << "'";
-    if (dims.size())
-      ss << " with dimensions (" << Moose::stringify(dims) << ")";
-    ss << " was already declared as a " << record.dims.size() << "D property";
-    if (record.dims.size())
-      ss << " with dimensions (" << Moose::stringify(record.dims) << ")";
-    ss << ".";
+      ss << "The declared " << dims.size() << "D Kokkos material property '" << prop_name << "'";
+      if (dims.size())
+        ss << " with dimensions (" << Moose::stringify(dims) << ")";
+      ss << " was already declared as a " << record.dims.size() << "D property";
+      if (record.dims.size())
+        ss << " with dimensions (" << Moose::stringify(record.dims) << ")";
+      ss << ".";
 
-    mooseError(ss.str());
+      mooseError(ss.str());
+    }
+
+    if (record.on_demand != on_demand)
+      mooseError(
+          "The Kokkos material property '",
+          prop_name,
+          "' is being declared by multiple materials, and some of them are declaring it as an "
+          "on-demand property while others are not.");
+
+    if (record.constant_option != constant_option)
+      mooseError(
+          "The Kokkos material property '",
+          prop_name,
+          "' is being declared by multiple materials with different 'constant_on' parameters.");
   }
-
-  if (record.declarers.size() && record.on_demand != on_demand)
-    mooseError("The Kokkos material property '",
-               prop_name,
-               "' is being declared by multiple materials, and some of them are declaring it as an "
-               "on-demand property while others are not.");
-
-  if (!record.declarers.size())
+  else
   {
     record.dims = dims;
     record.bnd = bnd;
     record.on_demand = on_demand;
+    record.constant_option = constant_option;
   }
 
   return addKokkosProperty(prop_name, type, 0, declarer, shell);

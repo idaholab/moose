@@ -44,7 +44,11 @@ public:
       _n_qps(side == libMesh::invalid_uint ? assembly.getNumQps(_elem)
                                            : assembly.getNumFaceQps(_elem, side)),
       _qp_offset(side == libMesh::invalid_uint ? assembly.getQpOffset(_elem)
-                                               : assembly.getQpFaceOffset(_elem, side))
+                                               : assembly.getQpFaceOffset(_elem, side)),
+      _elem_property_idx(
+          _side == libMesh::invalid_uint
+              ? _elem.id - assembly.kokkosMesh().getStartingContiguousElementID(_elem.subdomain)
+              : assembly.getElemFacePropertyIndex(_elem, _side))
   {
   }
   /**
@@ -101,6 +105,24 @@ public:
    * @returns The starting offset
    */
   KOKKOS_FUNCTION dof_id_type qpOffset() const { return _qp_offset; }
+  /**
+   * Get the index into the property data storage
+   * @param constant_option The property constant option
+   * @param qp The local quadrature point index
+   * @returns The index
+   */
+  KOKKOS_FUNCTION dof_id_type propertyIdx(const PropertyConstantOption constant_option,
+                                          const unsigned int qp) const
+  {
+    dof_id_type idx = 0;
+
+    if (constant_option == PropertyConstantOption::NONE)
+      idx = _qp_offset + qp;
+    else if (constant_option == PropertyConstantOption::ELEMENT)
+      idx = _elem_property_idx;
+
+    return idx;
+  }
   /**
    * Get whether the current side has a neighbor
    * @returns Whether the current side has a neighbor
@@ -208,6 +230,10 @@ protected:
    * Starting offset into the global quadrature point index
    */
   const dof_id_type _qp_offset = libMesh::DofObject::invalid_id;
+  /**
+   * Index for element-constant material properties
+   */
+  const dof_id_type _elem_property_idx = libMesh::DofObject::invalid_id;
 
 private:
   /**

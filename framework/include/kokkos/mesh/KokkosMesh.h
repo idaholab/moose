@@ -72,6 +72,31 @@ public:
   void update();
 
   /**
+   * Get the number of subdomains
+   * @returns The number of subdomains
+   */
+  auto getNumSubdomains() const { return _maps->_subdomain_id_mapping.size(); }
+  /**
+   * Get the number of local elements types
+   * @returns The number of local element types
+   */
+  auto getNumLocalElementTypes() const { return _maps->_elem_type_id_mapping.size(); }
+  /**
+   * Get the number of local elements
+   * @returns The number of local elements
+   */
+  auto getNumLocalElements() const { return _maps->_local_elem_id_mapping.size(); }
+  /**
+   * Get the number of local elements in a MOOSE subdomain
+   * @param subdomain The MOOSE subdomain ID
+   * @returns The local number of elements in the subdomain
+   */
+  auto getNumSubdomainLocalElements(const SubdomainID subdomain) const
+  {
+    auto range = _maps->_subdomain_elem_id_ranges.at(subdomain);
+    return range.second - range.first;
+  }
+  /**
    * Get the contiguous subdomain ID of a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
    * @returns The contiguous subdomain ID
@@ -106,13 +131,14 @@ public:
    */
   const auto & getContiguousElementMap() const { return _maps->_local_elem_id_mapping; }
   /**
-   * Get the list of contiguous element IDs for a subdomain
+   * Get the range of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
-   * @returns The list of contiguous element IDs in the subdomain
+   * @returns The range of contiguous element IDs in the subdomain
    */
-  const auto & getSubdomainContiguousElementIDs(const SubdomainID subdomain) const
+  auto getSubdomainContiguousElementIDRange(const SubdomainID subdomain) const
   {
-    return _maps->_subdomain_elem_ids.at(subdomain);
+    auto range = _maps->_subdomain_elem_id_ranges.at(subdomain);
+    return libMesh::make_range(range.first, range.second);
   }
   /**
    * Get the contiguous node ID of a node
@@ -122,13 +148,14 @@ public:
   ContiguousNodeID getContiguousNodeID(const Node * node) const;
   /**
    * Get the contiguous node ID map
-   * This list contains the nodes of local elements, so some nodes may belong to other processes
+   * NOTE: This list contains the nodes of local elements, so some nodes may belong to other
+   * processes
    * @returns The contiguous node ID map
    */
   const auto & getContiguousNodeMap() const { return _maps->_local_node_id_mapping; }
   /**
    * Get the list of contiguous node IDs for a subdomain
-   * This list strictly contains the nodes local to the current process
+   * NOTE: This list strictly contains the nodes local to the current process
    * @param subdomain The MOOSE subdomain ID
    * @returns The list of contiguous node IDs in the subdomain
    */
@@ -184,6 +211,15 @@ public:
   KOKKOS_FUNCTION unsigned int getNumNodes(unsigned int elem_type, unsigned int side) const
   {
     return _num_side_nodes[elem_type][side];
+  }
+  /**
+   * Get the starting contiguous element ID of a subdomain
+   * @param subdomain The contiguous subdomain ID
+   * @returns The starting contiguous element ID
+   */
+  KOKKOS_FUNCTION dof_id_type getStartingContiguousElementID(ContiguousSubdomainID subdomain) const
+  {
+    return _starting_elem_id[subdomain];
   }
   /**
    * Get the contiguous node ID for an element
@@ -270,9 +306,10 @@ private:
      */
     std::unordered_map<const Node *, ContiguousNodeID> _local_node_id_mapping;
     /**
-     * List of the contiguous element IDs in each subdomain
+     * Range of the contiguous element IDs in each subdomain
      */
-    std::unordered_map<SubdomainID, std::unordered_set<ContiguousElementID>> _subdomain_elem_ids;
+    std::unordered_map<SubdomainID, std::pair<ContiguousElementID, ContiguousElementID>>
+        _subdomain_elem_id_ranges;
     /**
      * List of the contiguous node IDs in each subdomain
      * This list strictly contains the nodes local to the current process
@@ -292,6 +329,10 @@ private:
    * Neighbor contiguous element IDs of each element
    */
   Array2D<ContiguousElementID> _elem_neighbor;
+  /**
+   * Starting contiguous element ID of each subdomain
+   */
+  Array<ContiguousElementID> _starting_elem_id;
   /**
    * Number of sides of each element type
    */

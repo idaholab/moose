@@ -50,7 +50,7 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_fe_types.create(_num_vars);
-  _var_subdomain_active.create(_num_vars, _mesh.meshSubdomains().size());
+  _var_subdomain_active.create(_num_vars, _mesh.nSubdomains());
 
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
@@ -92,7 +92,7 @@ System::setupDofs()
 {
   auto & sys = _system.system();
 
-  auto num_elems = kokkosMesh().getContiguousElementMap().size();
+  auto num_elems = kokkosMesh().getNumLocalElements();
   auto num_nodes = kokkosMesh().getContiguousNodeMap().size();
 
   _residual_tag_active.create(MAX_TAG);
@@ -483,10 +483,10 @@ System::reinit()
   for (auto tag : _active_solution_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(_mesh.meshSubdomains().size(), _num_vars);
+      _qp_solutions[tag].create(_mesh.nSubdomains(), _num_vars);
 
     if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(_mesh.meshSubdomains().size(), _num_vars);
+      _qp_solutions_grad[tag].create(_mesh.nSubdomains(), _num_vars);
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
@@ -512,7 +512,7 @@ System::reinit()
   _qp_solutions.copyToDevice();
   _qp_solutions_grad.copyToDevice();
 
-  dof_id_type num_elems = kokkosMesh().getContiguousElementMap().size();
+  dof_id_type num_elems = kokkosMesh().getNumLocalElements();
 
   _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
                   num_elems,

@@ -67,8 +67,8 @@ Assembly::init()
 void
 Assembly::initQuadrature()
 {
-  auto num_subdomains = _mesh.nSubdomains();
-  auto num_elem_types = kokkosMesh().getElementTypeMap().size();
+  auto num_subdomains = kokkosMesh().getNumSubdomains();
+  auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
 
   _q_points.create(num_subdomains, num_elem_types);
   _q_points_face.create(num_subdomains, num_elem_types);
@@ -163,6 +163,12 @@ Assembly::initQuadrature()
   _qp_offset_face.create(_mesh.getMaxSidesPerElem(), num_elems);
   _qp_offset_face = libMesh::DofObject::invalid_id;
 
+  _elem_face_property_idx.create(_mesh.getMaxSidesPerElem(), num_elems);
+  _elem_face_property_idx = libMesh::DofObject::invalid_id;
+
+  _n_elem_face_properties.create(num_subdomains);
+  _n_elem_face_properties = 0;
+
   for (auto elem : *_mesh.getActiveLocalElementRange())
   {
     auto eid = kokkosMesh().getContiguousElementID(elem);
@@ -189,6 +195,9 @@ Assembly::initQuadrature()
 
         _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
         _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
+
+        _elem_face_property_idx(side, eid) = _n_elem_face_properties[sid];
+        ++_n_elem_face_properties[sid];
       }
     }
 
@@ -203,6 +212,9 @@ Assembly::initQuadrature()
   _n_subdomain_qps_face.copyToDevice();
   _qp_offset.copyToDevice();
   _qp_offset_face.copyToDevice();
+
+  _elem_face_property_idx.copyToDevice();
+  _n_elem_face_properties.copyToDevice();
 }
 
 void
@@ -230,8 +242,8 @@ Assembly::initShape()
 
   // Cache reference shape data
 
-  auto num_subdomains = _mesh.meshSubdomains().size();
-  auto num_elem_types = kokkosMesh().getElementTypeMap().size();
+  auto num_subdomains = kokkosMesh().getNumSubdomains();
+  auto num_elem_types = kokkosMesh().getNumLocalElementTypes();
 
   _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
   _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());

@@ -83,6 +83,7 @@ public:
    * @param dims The vector containing the size of each dimension
    * @param bnd Whether the property is a face property
    * @param on_demand Whether the property is an on-demand property
+   * @param constant_option Whether the property is constant on element or subdomain
    * @param shell The managed pointer containing the instance of the property
    * @returns The material property
    */
@@ -92,6 +93,7 @@ public:
                                                const std::vector<unsigned int> & dims,
                                                const bool bnd,
                                                const bool on_demand,
+                                               const PropertyConstantOption constant_option,
                                                std::shared_ptr<MaterialPropertyBase> shell);
   /**
    * Get a material property
