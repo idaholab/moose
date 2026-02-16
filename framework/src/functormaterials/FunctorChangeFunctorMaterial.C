@@ -51,7 +51,8 @@ FunctorChangeFunctorMaterialTempl<is_ad>::FunctorChangeFunctorMaterialTempl(
   if (_fe_problem.hasAuxiliaryVariable(getParam<MooseFunctorName>("functor")))
     _fe_problem.needsPreviousMultiAppFixedPointIterationAuxiliary(true);
   if (_fe_problem.hasSolverVariable(getParam<MooseFunctorName>("functor")))
-    _fe_problem.needsPreviousMultiAppFixedPointIterationSolution(true);
+    _fe_problem.needsPreviousMultiAppFixedPointIterationSolution(
+        true, _fe_problem.getSystem(getParam<MooseFunctorName>("functor")).number());
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   addFunctorProperty<GenericReal<is_ad>>(

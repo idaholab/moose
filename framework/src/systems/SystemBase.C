@@ -948,9 +948,9 @@ SystemBase::getVector(TagID tag)
   if (!hasVector(tag))
   {
     if (!_subproblem.vectorTagExists(tag))
-      mooseError("Cannot retreive vector with tag ", tag, " because that tag does not exist");
+      mooseError("Cannot retrieve vector with tag ", tag, " because that tag does not exist");
     else
-      mooseError("Cannot retreive vector with tag ",
+      mooseError("Cannot retrieve vector with tag ",
                  tag,
                  " in system '",
                  name(),
@@ -966,9 +966,9 @@ SystemBase::getVector(TagID tag) const
   if (!hasVector(tag))
   {
     if (!_subproblem.vectorTagExists(tag))
-      mooseError("Cannot retreive vector with tag ", tag, " because that tag does not exist");
+      mooseError("Cannot retrieve vector with tag ", tag, " because that tag does not exist");
     else
-      mooseError("Cannot retreive vector with tag ",
+      mooseError("Cannot retrieve vector with tag ",
                  tag,
                  " in system '",
                  name(),
@@ -1027,9 +1027,9 @@ SystemBase::getMatrix(TagID tag)
   if (!hasMatrix(tag))
   {
     if (!_subproblem.matrixTagExists(tag))
-      mooseError("Cannot retreive matrix with tag ", tag, " because that tag does not exist");
+      mooseError("Cannot retrieve matrix with tag ", tag, " because that tag does not exist");
     else
-      mooseError("Cannot retreive matrix with tag ",
+      mooseError("Cannot retrieve matrix with tag ",
                  tag,
                  " in system '",
                  name(),
@@ -1045,9 +1045,9 @@ SystemBase::getMatrix(TagID tag) const
   if (!hasMatrix(tag))
   {
     if (!_subproblem.matrixTagExists(tag))
-      mooseError("Cannot retreive matrix with tag ", tag, " because that tag does not exist");
+      mooseError("Cannot retrieve matrix with tag ", tag, " because that tag does not exist");
     else
-      mooseError("Cannot retreive matrix with tag ",
+      mooseError("Cannot retrieve matrix with tag ",
                  tag,
                  " in system '",
                  name(),

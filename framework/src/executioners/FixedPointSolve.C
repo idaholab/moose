@@ -227,8 +227,8 @@ FixedPointSolve::initialSetup()
   allocateStorage(true);
 
   // Add to the systems to copy if requested in the Problem
-  if (_problem.needsPreviousMultiAppFixedPointIterationSolution())
-    for (const auto i : make_range(_problem.numSolverSystems()))
+  for (const auto i : make_range(_problem.numSolverSystems()))
+    if (_problem.needsPreviousMultiAppFixedPointIterationSolution(i))
       _systems_to_copy_previous_solutions_for.insert(&_problem.getSolverSystem(i));
   if (_problem.needsPreviousMultiAppFixedPointIterationAuxiliary())
     _systems_to_copy_previous_solutions_for.insert(&_aux);

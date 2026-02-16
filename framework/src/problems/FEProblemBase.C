@@ -477,7 +477,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_jacobian(false),
     _needs_old_newton_iter(false),
     _previous_nl_solution_required(getParam<bool>("previous_nl_solution_required")),
-    _previous_multiapp_fp_nl_solution_required(false),
+    _previous_multiapp_fp_nl_solution_required(_num_nl_sys + _num_linear_sys, false),
     _previous_multiapp_fp_aux_solution_required(false),
     _has_nonlocal_coupling(false),
     _calculate_jacobian_in_uo(false),
@@ -9178,15 +9178,17 @@ FEProblemBase::needsPreviousNewtonIteration(bool state)
 }
 
 void
-FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(bool state)
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(bool needed,
+                                                                const unsigned int solver_sys_num)
 {
-  _previous_multiapp_fp_nl_solution_required = state;
+  _previous_multiapp_fp_nl_solution_required[solver_sys_num] = needed;
 }
 
 bool
-FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution() const
+FEProblemBase::needsPreviousMultiAppFixedPointIterationSolution(
+    const unsigned int solver_sys_num) const
 {
-  return _previous_multiapp_fp_nl_solution_required;
+  return _previous_multiapp_fp_nl_solution_required[solver_sys_num];
 }
 
 void

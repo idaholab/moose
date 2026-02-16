@@ -2356,15 +2356,19 @@ public:
   /**
    * Set a flag that indicated that user required values for the previous multiapp fixed point
    * iterate for the solver systems (not auxiliary)
+   * @param needed the value that should be set to the flag
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
    */
-  void needsPreviousMultiAppFixedPointIterationSolution(bool state);
+  void needsPreviousMultiAppFixedPointIterationSolution(bool needed,
+                                                        const unsigned int solver_sys_num);
 
   /**
    * Check to see whether we need to compute the variable values of the previous multiapp fixed
    * point iteration for the solver systems (not auxiliary)
+   * @param solver_sys_num the index of the solver system for which the previous iteration is needed
    * @return true if the user required values of the previous multiapp fixed point iteration
    */
-  bool needsPreviousMultiAppFixedPointIterationSolution() const;
+  bool needsPreviousMultiAppFixedPointIterationSolution(const unsigned int solver_sys_num) const;
 
   /**
    * Set a flag that indicated that user required values for the previous multiapp fixed point
@@ -3241,7 +3245,7 @@ protected:
   /// Indicates we need to save the previous NL iteration variable values
   bool _previous_nl_solution_required;
   /// Indicates we need to save the previous multiapp fixed-point iteration solver variable values
-  bool _previous_multiapp_fp_nl_solution_required;
+  std::vector<bool> _previous_multiapp_fp_nl_solution_required;
   /// Indicates we need to save the previous multiapp fixed-point iteration auxiliary variable values
   bool _previous_multiapp_fp_aux_solution_required;
 
