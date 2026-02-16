@@ -15,6 +15,7 @@
 #include "SetupInterface.h"
 #include "MooseVariableInterface.h"
 #include "MooseVariableFE.h"
+#include "AuxKernelBase.h"
 #include "ElementUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
@@ -285,6 +286,9 @@ AttribExecutionOrderGroup::initFrom(const MooseObject * obj)
 {
   const auto * uo = dynamic_cast<const UserObject *>(obj);
   _val = uo ? uo->getParam<int>("execution_order_group") : 0;
+  // Not used for now since auxkernels don't use theWarehouse queries
+  const auto * aux = dynamic_cast<const AuxKernelBase *>(obj);
+  _val = aux ? aux->getParam<int>("execution_order_group") : 0;
 }
 bool
 AttribExecutionOrderGroup::isMatch(const Attribute & other) const

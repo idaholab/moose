@@ -34,6 +34,15 @@ AuxKernelBase::validParams()
   exec_enum.addAvailableFlags(EXEC_PRE_DISPLACE);
   exec_enum = {EXEC_LINEAR, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
+  params.addParam<int>(
+      "execution_order_group",
+      0,
+      "Execution order groups are executed in increasing order (e.g., the lowest "
+      "number is executed first). Note that negative group numbers may be used to execute groups "
+      "before the default (0) group. Please refer to the auxkernel documentation "
+      "for ordering of auxkernel execution within a group for example elemental vs nodal or "
+      "between scalar, regular, vector and array auxkernels.");
+  params.addParamNamesToGroup("execute_on execution_order_group", "Execution scheduling");
 
   params.addRequiredParam<AuxVariableName>("variable",
                                            "The name of the variable that this object applies to");
