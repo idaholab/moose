@@ -74,7 +74,9 @@ public:
   CubitElementInfo() = default;
   ~CubitElementInfo() = default;
 
-  CubitElementInfo(libMesh::ElemType elem_type, libMesh::ElemMappingType map_type, int dimension = 3);
+  CubitElementInfo(libMesh::ElemType elem_type,
+                   libMesh::ElemMappingType map_type,
+                   int dimension = 3);
 
   enum CubitElementType
   {
@@ -191,7 +193,8 @@ public:
   /**
    * Call to add each block individually.
    */
-  void addBlockElement(int block_id, libMesh::ElemType elem_type, libMesh::ElemMappingType map_type);
+  void
+  addBlockElement(int block_id, libMesh::ElemType elem_type, libMesh::ElemMappingType map_type);
 
   /**
    * Accessors.

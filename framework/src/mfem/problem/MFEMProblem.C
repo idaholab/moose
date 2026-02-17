@@ -562,9 +562,8 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 
   // Create fespace name. If this already exists, we will reuse this for
   // the mfem variable ("gridfunction").
-  const std::string fespace_name = mfem_family + "_" +
-                                   std::to_string(mfemParMesh().Dimension()) + "D_P" +
-                                   std::to_string(moose_fe_type.order.get_order());
+  const std::string fespace_name = mfem_family + "_" + std::to_string(mfemParMesh().Dimension()) +
+                                   "D_P" + std::to_string(moose_fe_type.order.get_order());
 
   // Set all fespace parameters.
   fespace_params.set<std::string>("fec_name") = fespace_name;
@@ -583,7 +582,8 @@ MFEMProblem::addMFEMFESpaceFromMOOSEVariable(InputParameters & parameters)
 void
 MFEMProblem::displaceMesh()
 {
-  if (ExternalProblem::mesh().type() == "MFEMMesh") {
+  if (ExternalProblem::mesh().type() == "MFEMMesh")
+  {
     auto & mesh = static_cast<MFEMMesh &>(_mesh);
     // Displace mesh
     if (mesh.shouldDisplace())
@@ -597,7 +597,8 @@ MFEMProblem::displaceMesh()
 std::optional<std::reference_wrapper<mfem::ParGridFunction const>>
 MFEMProblem::getMeshDisplacementGridFunction()
 {
-  if (ExternalProblem::mesh().type() == "MFEMMesh") {
+  if (ExternalProblem::mesh().type() == "MFEMMesh")
+  {
     auto & mesh = static_cast<MFEMMesh &>(_mesh);
     // If C++23 transform were available this would be easier
     auto const displacement_variable = mesh.getMeshDisplacementVariable();
