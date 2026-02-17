@@ -41,7 +41,7 @@ protected:
   mfem::FindPointsGSLIB _mfem_interpolator;
   std::vector<VariableName> _from_var_names;
   std::vector<AuxVariableName> _to_var_names;
-
+  void extractOutgoingPoints(mfem::ParFiniteElementSpace & to_fespace, mfem::Vector & vxyz, mfem::Ordering::Type & point_ordering); 
   void transfer(MFEMProblem & to_problem, FEProblemBase & from_problem);
   void setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem);
   void checkSiblingsTransferSupported() const override;
