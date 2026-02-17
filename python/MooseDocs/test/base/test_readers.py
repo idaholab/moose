@@ -9,6 +9,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Test for the Reader objects."""
+
 import unittest
 import re
 import logging

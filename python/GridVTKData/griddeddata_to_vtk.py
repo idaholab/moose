@@ -15,8 +15,7 @@ import math
 import vtk
 
 # parse command line
-p = OptionParser(
-    usage="""usage: %prog [options] <gridfile> <vtrfile_base>
+p = OptionParser(usage="""usage: %prog [options] <gridfile> <vtrfile_base>
 Converts the griddata file (suitable for PiecewiseMultilinear functions) into vtr format.
 
 Eg
@@ -28,17 +27,16 @@ So in the above example,
   mygrid0.vtr mygrid1.vtr would be produced if there were two TIMEs in mygrid.txt
   etc
 
-"""
-)
+""")
 p.add_option("-v", action="store_true", dest="verbose", help="Verbose")
 
 
 # extract commandline arguments
-(opts, args) = p.parse_args()
+opts, args = p.parse_args()
 if len(args) != 2:
     sys.stderr.write("Number of arguments incorrect\n")
     sys.exit(1)
-(grid_file, vtr_base) = args
+grid_file, vtr_base = args
 
 
 # extract the data from the grid file

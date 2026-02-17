@@ -8,4 +8,5 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """MooseDocs command-line commands."""
+
 from .build import command_line_options, main

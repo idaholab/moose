@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Defines Renderer objects that convert AST (from Reader) into an output format."""
+
 import os
 import re
 import logging

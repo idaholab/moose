@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Defines the MooseDocs build command."""
+
 import os
 import sys
 import time

@@ -10,6 +10,7 @@
 """
 python TestPostprocessorPluginManager_test_script.py
 """
+
 import matplotlib.pyplot as plt
 import mooseutils
 

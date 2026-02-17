@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Test pyhit"""
+
 import sys
 
 if __name__ == "__main__":

@@ -11,7 +11,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 sat_data = np.genfromtxt(
     "../../../../../../test/tests/buckley_leverett/gold/bl01_sat_0001.csv",
     delimiter=",",

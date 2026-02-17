@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Helper for defining custom MooseDocs logging."""
+
 import logging
 import traceback
 import multiprocessing

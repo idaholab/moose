@@ -10,6 +10,7 @@
 """
 Defines the "core" extension for translating MooseDocs markdown to HTML and LaTeX.
 """
+
 import re
 import uuid
 import logging

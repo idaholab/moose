@@ -11,6 +11,7 @@
 """
 Tests for Component objects.
 """
+
 import unittest
 import mock
 

@@ -11,6 +11,7 @@ Main program for running MooseDocs. The moosedocs.py script that exists within t
 documentation directory for applications call this in similar fashion to
 MOOSE run_tests.
 """
+
 import argparse
 import logging
 

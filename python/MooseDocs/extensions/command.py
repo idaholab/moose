@@ -8,6 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Extension for adding commands to Markdown syntax."""
+
 import re
 
 from .. import common

@@ -10,6 +10,7 @@
 """
 Module for defining the default Lexer objects that plugin to base.Reader objects.
 """
+
 import collections
 import logging
 import traceback

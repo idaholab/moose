@@ -14,13 +14,10 @@ import subprocess
 import math
 from optparse import OptionParser, OptionValueError
 
-
 # parse command line
-p = OptionParser(
-    usage="""usage: %prog [options] <plan_mesh_vtp> <output_basename>
+p = OptionParser(usage="""usage: %prog [options] <plan_mesh_vtp> <output_basename>
 Creates an exodus and vtk mesh called output_basename.e and output_basename.vtu
-"""
-)
+""")
 p.add_option("-v", action="store_true", dest="verbose", help="Verbose output")
 p.add_option(
     "--seam_thickness",
@@ -46,11 +43,11 @@ p.add_option(
     dest="base_elevation",
     help="Elevation of the base of the model.  Default=%default",
 )
-(opts, args) = p.parse_args()
+opts, args = p.parse_args()
 if len(args) != 2:
     p.print_help()
     sys.exit(1)
-(plan_mesh_vtp, output_base_name) = args
+plan_mesh_vtp, output_base_name = args
 
 if opts.verbose:
     sys.stdout.write("Determining the vertical mesh\n")

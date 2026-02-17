@@ -218,7 +218,7 @@ if __name__ == "__main__":
     # parser.add_option("-t", "--num-threads", action="store", dest="threads", default=4, help="Number of threads to run gcov in parallel [default=4]")
 
     # parser args and exit if they don't have reasonable values
-    (options, args) = parser.parse_args(sys.argv[1:])
+    options, args = parser.parse_args(sys.argv[1:])
     check_args(parser, options, args)
 
     dir = args[0] if len(args) == 1 else "."
