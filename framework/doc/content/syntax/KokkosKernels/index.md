@@ -105,6 +105,24 @@ KokkosDiffusion::computeQpJacobian(const unsigned int i,
 !alert note
 [Every GPU function needs to be inlineable](syntax/Kokkos/index.md#kokkos_execution_space) and thus should be defined in headers.
 
+## Multi-variable Kernels
+
+Unlike the original MOOSE kernels which can only operate on a single variable, Kokkos-MOOSE kernels can operate on multiple variables in parallel.
+Instead of the `variable` parameter, you can specify the `variables` parameter with arbitrarily many variables you want the kernel to operate on.
+In the code, you can obtain which component of the variables you are currently operating on using `datum.comp()`.
+This provides additional parallelism over the variables and potentially enhances performance by providing higher chance of memory coalescing.
+The restrictions are that all variables should reside in the same system and have the same finite element shape function family and order.
+Also, all variables should have the same number of off-diagonal coupling.
+
+Multi-variable kernels can be useful in certain applications where the same kernel applies to multiple variables but using array variables is not desired.
+One example is neutronics, where there are multiple flux variables representing different energy groups that use the same kernel.
+It is desired to keep the flux variable of each group as separate standard variables, so that they can be individually coupled to other objects.
+Using an array variable here makes it cumbersome to access the flux solution of each group.
+
+!alert note
+All other Kokkos-MOOSE residual objects such as [BCs](syntax/KokkosBCs/index.md) and [NodalKernels](syntax/KokkosNodalKernels/index.md), including those using automatic differentiation (AD), also support operating on multiple variables with the same restrictions.
+Vector variable objects currently support only a single variable.
+
 ## Optimized Kernel Objects id=kokkos_kernel_optimized
 
 [Similarly to the original MOOSE](syntax/Kernels/index.md#optimized), Kokkos-MOOSE provides `Moose::Kokkos::KernelValue` and `Moose::Kokkos::KernelGrad` for creating an optimized kernel by factoring out test functions in residual and Jacobian calculations.
@@ -159,6 +177,7 @@ See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffus
 [Like the original MOOSE](syntax/Kernels/index.md#time-derivative), you can create a time-derivative kernel by subclassing `Moose::Kokkos::TimeKernel`.
 For Kokkos-MOOSE, its optimized `Moose::Kokkos::TimeKernelValue` base class is also provided, which is analogous to `Moose::Kokkos::KernelValue`.
 In Kokkos-MOOSE, the dummy `_qp` indexing of the `du_dot_du` term was lifted.
+Instead, the current variable component index `datum.comp()` should be passed as an argument.
 The following shows the conversion of the example presented in the original page into the Kokkos version:
 
 - For `computeQpResidual()` whose original code is:
@@ -182,7 +201,7 @@ return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 the Kokkos version will look like:
 
 ```cpp
-return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du;
+return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du[datum.comp()];
 ```
 
 See the following source codes of `KokkosTimeDerivative` for an example of a time-derivative kernel:
