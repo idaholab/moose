@@ -84,6 +84,7 @@
                'can be combined to be used as input for 3D Delaunay mesh generation'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
       valgrind = none # see #31360
+      capabilities = 'netgen'
     []
   []
   [errors]

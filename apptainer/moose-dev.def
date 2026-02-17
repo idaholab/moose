@@ -125,26 +125,34 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export MOOSE_JOBS={{ MOOSE_JOBS }}
 
     # Pinned versions
-    CODE_SERVER_VERSION=4.108.0
+    CODE_SERVER_VERSION=4.109.2
 {% if PROFILING is defined %}
-    GPERFTOOLS_VERSION=2.17.2
-    GO_VERSION=1.25.5
+    GPERFTOOLS_VERSION=2.18
+    GO_VERSION=1.26.0
 {%- endif %}
-    MINIFORGE_VERSION=25.11.0-1
+    MINIFORGE_VERSION=26.1.0-0
     PYTHON_VERSION=3.14
-    PYTORCH_VERSION=2.9.1
+    PYTORCH_VERSION=2.10.0
 
-    # Special runtime setup for OpenMPI
-    if which ompi_info &> /dev/null; then
+    # Special setup for OpenMPI
+    if [ -d "$MOOSE_OPENMPI_DIR" ]; then
         # MFEM (and maybe other things?) use mpirun. In the case of openmpi,
         # we need to have a clean tmpdir for it to store state (which,
         # for some reason, /tmp doesn't work for this in fakeroot?)
         export TMPDIR=${ROOT_BUILD_DIR}/tmpdir
         mkdir $TMPDIR
-    # Special runtime setup for MPICH
-    else
+    # Special setup for MPICH
+    elif [ -d "$MOOSE_MPICH_DIR" ]; then
         # Required at configure time for MFEM checking petsc
         export MPIR_CVAR_ENABLE_GPU=0
+
+        # When using mpich with hwloc, install hwloc-gui to
+        # get "lstopo-no-graphics", which can be used to
+        # prebuild a topology file to avoid hwloc reading
+        # topology for every run
+        if mpiexec --version | grep -q hwloc; then
+            dnf install -y hwloc-gui
+        fi
     fi
 
     # Install code-server
@@ -206,12 +214,6 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     BUILD_PYTORCH_FLAGS=()
     if [ "$COMPILER" == "g++" ]; then
         BUILD_PYTORCH_CCXXFLAGS+=("-Wno-error=maybe-uninitialized" "-Wno-error=uninitialized" "-Wno-error=restrict")
-        if [[ $(gcc --version) =~ [0-9]+.[0-9]+(.[0-9]+?) ]]; then
-            GCC_VERSION="${BASH_REMATCH[0]}"
-        else
-            echo "Failed to parse GCC version"
-            exit 1
-        fi
     elif [ "$COMPILER" == "clang++" ]; then
         # FBGEMM requires AVX512, which we don't get with clang
         BUILD_PYTORCH_FLAGS+=("-DUSE_FBGEMM:BOOL=OFF")

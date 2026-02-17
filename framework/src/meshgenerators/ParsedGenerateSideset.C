@@ -117,6 +117,6 @@ ParsedGenerateSideset::generate()
   finalize();
   boundary_info.sideset_name(boundary_ids[0]) = _boundary_names[0];
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

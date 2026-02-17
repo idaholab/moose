@@ -97,7 +97,7 @@ MeshRepairGenerator::generate()
     mesh->allow_renumbering(prev_status);
   }
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   return mesh;
 }
 

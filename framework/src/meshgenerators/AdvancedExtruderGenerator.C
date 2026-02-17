@@ -1177,7 +1177,7 @@ AdvancedExtruderGenerator::generate()
   if (_has_top_boundary)
     boundary_info.sideset_name(new_boundary_ids.back()) = new_boundary_names.back();
 
-  mesh->set_isnt_prepared();
+  mesh->unset_is_prepared();
   // Creating the layered meshes creates a lot of leftover nodes, notably in the boundary_info,
   // which will crash both paraview and trigger exodiff. Best to be safe.
   if (extruding_quad_eights)
