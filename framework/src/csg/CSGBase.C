@@ -481,6 +481,35 @@ CSGBase::applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis
 }
 
 void
+CSGBase::applyMonodirectionalTranslation(const CSGObjectVariant & csg_object,
+                                         std::string direction,
+                                         const Real distance)
+{
+  // convert direction string to lowercase:
+  std::transform(direction.begin(),
+                 direction.end(),
+                 direction.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+
+  // convert to the translation vector based on axis
+  Real x = 0.0;
+  Real y = 0.0;
+  Real z = 0.0;
+  if (direction == "x")
+    x = distance;
+  else if (direction == "y")
+    y = distance;
+  else if (direction == "z")
+    z = distance;
+  else
+    mooseError("Invalid direction '",
+               direction,
+               "' provided for monodirectional translation. Must be 'x', 'y', or 'z'.");
+
+  applyTransformation(csg_object, TransformationType::TRANSLATION, {x, y, z});
+}
+
+void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 {
   joinSurfaceList(base->getSurfaceList());
