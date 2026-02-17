@@ -67,6 +67,36 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::MultiApplibMeshToMFEMGeneralFieldTran
 }
 
 void
+MultiApplibMeshToMFEMGeneralFieldTransfer::extractOutgoingPoints(mfem::ParFiniteElementSpace & to_pfespace, mfem::Vector & vxyz, mfem::Ordering::Type & point_ordering)
+{
+  const int NE = to_pfespace.GetParMesh()->GetNE();
+  const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
+  const int dim = to_pfespace.GetParMesh()->Dimension();
+
+  vxyz.SetSize(nsp*NE*dim);
+  for (int i = 0; i < NE; i++)
+  {
+      const mfem::FiniteElement *fe = to_pfespace.GetFE(i);
+      const mfem::IntegrationRule ir = fe->GetNodes();
+      mfem::ElementTransformation *et = to_pfespace.GetElementTransformation(i);
+
+      mfem::DenseMatrix pos;
+      et->Transform(ir, pos);
+      mfem::Vector rowx(vxyz.GetData() + i*nsp, nsp),
+            rowy(vxyz.GetData() + i*nsp + NE*nsp, nsp),
+            rowz;
+      if (dim == 3)
+      {
+        rowz.SetDataAndSize(vxyz.GetData() + i*nsp + 2*NE*nsp, nsp);
+      }
+      pos.GetRow(0, rowx);
+      pos.GetRow(1, rowy);
+      if (dim == 3) { pos.GetRow(2, rowz); }
+  }
+  point_ordering = mfem::Ordering::Type::byNODES;
+}
+
+void
 MultiApplibMeshToMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, FEProblemBase & from_problem)
 {
   if (numToVar() != numFromVar())
@@ -79,10 +109,23 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::transfer(MFEMProblem & to_problem, FE
 void
 MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(const unsigned int var_index, MFEMProblem & to_problem)
 {
+  // Generate list of points where the grid function will be evaluated
+  mfem::ParGridFunction & to_gf = *to_problem.getProblemData().gridfunctions.Get(getToVarName(var_index));
+  mfem::ParFiniteElementSpace & to_pfespace = *to_gf.ParFESpace();
+  mfem::Vector vxyz;
+  mfem::Ordering::Type point_ordering;    
+  extractOutgoingPoints(to_pfespace, vxyz, point_ordering);  
+  const int NE = to_pfespace.GetParMesh()->GetNE();
+  const int nsp = to_pfespace.GetTypicalFE()->GetNodes().GetNPoints();
+  const int dim = to_pfespace.GetParMesh()->Dimension();
+
+  // Evaluate source grid function at target points
+  const int nodes_cnt = vxyz.Size() / dim;
+  const int to_gf_ncomp = to_gf.VectorDim();
+  mfem::Vector interp_vals(nodes_cnt*to_gf_ncomp);
   std::vector<libMesh::MeshFunction> local_meshfuns;
   local_meshfuns.clear();
   local_meshfuns.reserve(_from_problems.size());
-
   // Construct a local mesh function for each origin problem
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
@@ -92,31 +135,45 @@ MultiApplibMeshToMFEMGeneralFieldTransfer::setMFEMGridFunctionValuesFromlibMesh(
                                  _from_var_names[var_index],
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_ANY);
-
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
-
     local_meshfuns.emplace_back(from_problem.es(),
                                 *from_sys.current_local_solution,
                                 from_sys.get_dof_map(),
                                 from_var_num);
     local_meshfuns.back().init();
-    // local_meshfuns.back().enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
+    local_meshfuns.back().enable_out_of_mesh_mode(std::numeric_limits<Real>::infinity());
+  }
+  for (int i = 0; i < interp_vals.Size(); i++)
+  {
+    int i_from = 0;
+    const auto from_global_num = getGlobalSourceAppIndex(i_from);
+    const mfem::Vector p({vxyz[i], vxyz[i+NE*nsp]});
+    const auto local_pt = _from_transforms[from_global_num]->mapBack(pointFromMFEMVector(p));
+    double val = (local_meshfuns[i_from])(local_pt);
+    interp_vals[i] = val;    
   }
 
-
-  auto & to_var = to_problem.getProblemData().gridfunctions.GetRef(getFromVarName(var_index));
-  mfem::FunctionCoefficient coef(
-      [this, &local_meshfuns](const mfem::Vector & p, mfem::real_t t) -> mfem::real_t
+  // Project DoFs to MFEM GridFunction
+  mfem::Array<int> vdofs;
+  mfem::Vector vals;
+  mfem::Vector elem_dof_vals(nsp*to_gf_ncomp);
+  for (int i = 0; i < NE; i++)
+  {
+    to_pfespace.GetElementVDofs(i, vdofs);
+    vals.SetSize(vdofs.Size());
+    for (int j = 0; j < nsp; j++)
+    {
+      for (int d = 0; d < to_gf_ncomp; d++)
       {
-        int i_from = 0;
-        const auto from_global_num = getGlobalSourceAppIndex(i_from);
-        const auto local_pt = _from_transforms[from_global_num]->mapBack(pointFromMFEMVector(p));
-        auto val = (local_meshfuns[i_from])(local_pt);
-        return val;
-      });  
-  to_var.ProjectCoefficient(coef);
-
+        // Arrange values byNodes
+        int idx = to_pfespace.GetOrdering() == mfem::Ordering::Type::byNODES ?
+                  i*nsp*dim + d + j*dim : d*nsp*NE + i*nsp + j;
+        elem_dof_vals(j + d*nsp) = interp_vals(idx);
+      }
+    }
+    to_gf.SetSubVector(vdofs, elem_dof_vals);
+  }  
 }
 
 void
