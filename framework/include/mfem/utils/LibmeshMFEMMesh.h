@@ -156,7 +156,7 @@ protected:
     return _mfem_vertex_index_for_libmesh_corner_node_id.at(libmesh_corner_node_id);
   }
 
-  static const std::vector<int>& getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type);
+  static const std::vector<int> & getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type);
 
 private:
   std::map<int, int> _mfem_element_id_for_libmesh_element_id;
