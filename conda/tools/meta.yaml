@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2026.02.05" %}
+{% set version = "2026.02.16" %}
 
 package:
   name: moose-tools
@@ -34,7 +34,7 @@ requirements:
     - {{ clang_tools }}
     - coverage 7.13.2
     - deepdiff
-    - git-lfs <3.5.1
+    - git-lfs
     - gitpython
     - graphviz
     - h5py
@@ -42,7 +42,7 @@ requirements:
     - livereload
     - lxml
     - mako
-    - matplotlib-base !=3.9.0
+    - matplotlib-base
     - mock
     - numpy
     - packaging

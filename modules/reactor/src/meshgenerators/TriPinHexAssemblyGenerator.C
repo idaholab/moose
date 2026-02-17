@@ -319,7 +319,7 @@ TriPinHexAssemblyGenerator::generate()
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
-  meshes[0]->set_isnt_prepared();
+  meshes[0]->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(meshes[0]);
 }
 

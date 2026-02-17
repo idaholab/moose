@@ -58,6 +58,7 @@ outputs:
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
+        - {{ moose_krb5 }}
         - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
       run:
         - {{ mpi }} {{ mpi_version }}
@@ -83,6 +84,7 @@ outputs:
         - {{ moose_libstdcxx }}                   # [linux]
         - {{ moose_libstdcxx_devel }}             # [linux]
         - {{ moose_icu }}
+        - {{ moose_krb5 }}
         - {{ moose_hdf5 }}=mpi_{{ mpi }}_*
         - {{ moose_libexpat }}
         - libtirpc                                # [linux]

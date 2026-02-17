@@ -125,7 +125,7 @@ CoarsenBlockGenerator::generate()
 
   // element neighbors are not valid
   if (max_c > 0)
-    mesh_ptr->set_isnt_prepared();
+    mesh_ptr->unset_is_prepared();
 
   // flip elements as we were not careful to build them with a positive volume
   MeshTools::Modification::orient_elements(*mesh_ptr);

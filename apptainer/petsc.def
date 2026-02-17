@@ -31,9 +31,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 %environment
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
-    source /opt/mpi/use-mpich
+    source ${MOOSE_MPICH_DIR}/env.sh
+    unset MOOSE_OPENMPI_DIR
 {%- elif MPI_FLAVOUR == "openmpi" %}
-    source /opt/mpi/use-openmpi
+    source ${MOOSE_OPENMPI_DIR}/env.sh
+    unset MOOSE_MPICH_DIR
 {%- endif %}
 
     export PETSC_DIR={{ PETSC_DIR }}
@@ -46,11 +48,11 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
 
     # Set the MPI environment
 {%- if MPI_FLAVOUR == "mpich" %}
-    source /opt/mpi/use-mpich
-    rm -rf /opt/openmpi /opt/mpi/use-openmpi
+    source ${MOOSE_MPICH_DIR}/env.sh
+    rm -rf /opt/openmpi
 {%- elif MPI_FLAVOUR == "openmpi" %}
-    source /opt/mpi/use-openmpi
-    rm -rf /opt/mpich /opt/mpi/use-mpich
+    source ${MOOSE_OPENMPI_DIR}/env.sh
+    rm -rf /opt/mpich
 {%- endif %}
     which mpirun
 

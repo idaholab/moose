@@ -34,7 +34,7 @@ requirements:
     - {{ clang_tools }}
     - coverage 7.13.2
     - deepdiff
-    - git-lfs <3.5.1
+    - git-lfs
     - gitpython
     - graphviz
     - h5py
@@ -42,7 +42,7 @@ requirements:
     - livereload
     - lxml
     - mako
-    - matplotlib-base !=3.9.0
+    - matplotlib-base
     - mock
     - numpy
     - packaging

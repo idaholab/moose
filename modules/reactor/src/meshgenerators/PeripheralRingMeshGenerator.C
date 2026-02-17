@@ -479,7 +479,7 @@ PeripheralRingMeshGenerator::generate()
         _external_boundary_name;
   }
 
-  _input->set_isnt_prepared();
+  _input->unset_is_prepared();
   return dynamic_pointer_cast<MeshBase>(_input);
 }
 

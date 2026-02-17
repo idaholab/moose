@@ -40,12 +40,15 @@ function set_libmesh_env(){
 
 function do_build(){
     rm -rf "${LIBMESH_DIR:?}"
-    mkdir -p "${SRC_DIR:?}/build"; cd "${SRC_DIR:?}/build"
+    mkdir -p "${LIBMESH_DIR:?}/logs" "${SRC_DIR:?}/build"
+    cd "${SRC_DIR:?}/build"
     configure_libmesh --with-vtk-lib="${BUILD_PREFIX}"/libmesh-vtk/lib \
                       --with-vtk-include="${BUILD_PREFIX}"/libmesh-vtk/include/vtk-"${VTK_VERSION}"
+    cp "${SRC_DIR:?}/build/config.log" "${LIBMESH_DIR:?}/logs/"
     CORES=${MOOSE_JOBS:-6}
-    make -j "$CORES"
-    make install -j "$CORES"
+    set -o pipefail
+    make -j "$CORES" 2>&1 | tee "${LIBMESH_DIR:?}/logs/make.log"
+    make install -j "$CORES" 2>&1 | tee "${LIBMESH_DIR:?}/logs/make_install.log"
 }
 
 function sed_replace(){

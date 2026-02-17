@@ -33,7 +33,7 @@ through dependencies so that complex meshes may be built up from a series of sim
 
 ### Mesh Generator development
 
-Mesh generator developers should call `mesh->set_isnt_prepared()` at the end of
+Mesh generator developers should call `mesh->unset_is_prepared()` at the end of
 the `generate` routine unless they are confident that their mesh is indeed
 prepared. Examples of actions that render the mesh unprepared are
 
@@ -48,7 +48,7 @@ prepared. Examples of actions that render the mesh unprepared are
 - Changing boundary IDs. This invalidates global data (e.g. data aggregated
   across all processes) in the `libMesh::BoundaryInfo` object
 
-When in doubt, the mesh is likely not prepared. Calling `set_isnt_prepared` is a
+When in doubt, the mesh is likely not prepared. Calling `unset_is_prepared` is a
 defensive action that at worst will incur an unnecessary `prepare_for_use`,
 which may slow down the simulation setup, and at best may save follow-on mesh
 generators or simulation execution from undesirable behavior.
