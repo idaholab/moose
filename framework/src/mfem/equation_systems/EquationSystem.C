@@ -330,8 +330,13 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
         aux_lf = *_lfs.Get(test_var_name);
         auto blf = _blfs.Get(test_var_name);
-        blf->FormLinearSystem(
-            _ess_tdof_lists.at(j), *(_var_ess_constraints.at(j)), aux_lf, *aux_a, aux_x, aux_rhs, _non_linear);
+        blf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *(_var_ess_constraints.at(j)),
+                              aux_lf,
+                              *aux_a,
+                              aux_x,
+                              aux_rhs,
+                              _non_linear);
         trueX.GetBlock(j) = aux_x;
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
