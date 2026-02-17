@@ -35,11 +35,19 @@
 []
 
 [Transfers]
-  [to_sub]
+  active = 'copy_between_sub'
+  [copy_between_sub]
     type = MultiAppMFEMCopyTransfer
     source_variable = send
     variable = recv
     from_multi_app = send_app
     to_multi_app = recv_app
   []
+  [general_transfer_between_sub]
+    type = MultiAppMFEMGeneralFieldTransfer
+    source_variable = send
+    variable = recv
+    from_multi_app = send_app
+    to_multi_app = recv_app
+  []  
 []
