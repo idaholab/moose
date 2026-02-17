@@ -1,36 +1,66 @@
 [Tests]
-  issues = '#29632'
-  design = MultiAppMFEMCopyTransfer.md
-  [test]
-    requirement = 'The system shall be able to copy MFEM variable data between sub-applications, verified through '
-    [run]
-      type = RunApp
-      input = parent.i
-      capabilities = 'mfem'
-      compute_devices = 'cpu cuda'
-      recover = false
-      detail = 'running the inputs, and '
-    []
-    [verify]
-      type = RunCommand
-      command = '../check.sh
-                recv
-                OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
-                send
-                OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
-      prereq = test/run
-      capabilities = 'mfem'
-      recover = false
-      detail = 'checking the sub-application and parent application outputs against each other.'
+  [MFEMGeneralFieldTransfer]
+    design = MultiAppMFEMGeneralFieldTransfer.md
+    [test]
+      requirement = 'The system shall be able to transfer MFEM variable data between sub-applications via shape function evaluations, verified through '
+      issues = '#31982'
+      [run]
+        type = RunApp
+        input = parent.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        cli_args = 'Transfers/active=general_transfer_between_sub '        
+        detail = 'running the inputs, and '
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  recv
+                  OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
+                  send
+                  OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
+        prereq = MFEMGeneralFieldTransfer/test/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the sub-application and parent application outputs against each other.'
+      []
     []
   []
-  [error]
-    requirement = 'The system shall error if different applications request different devices.'
-    input = parent.i
-    type = RunException
-    expect_err = "Attempted to configure with MFEM devices 'cpu', but we have already configured the MFEM device object with the devices 'cuda'"
-    cli_args = recv_app:Executioner/device=cpu
-    capabilities = mfem
-    compute_devices = cuda
+  [MFEMCopyTransfer]   
+    issues = '#29632'
+    design = MultiAppMFEMCopyTransfer.md
+    [test]
+      requirement = 'The system shall be able to copy MFEM variable data between sub-applications, verified through '
+      [run]
+        type = RunApp
+        input = parent.i
+        capabilities = 'mfem'
+        compute_devices = 'cpu cuda'
+        recover = false
+        detail = 'running the inputs, and '
+      []
+      [verify]
+        type = RunCommand
+        command = '../check.sh
+                  recv
+                  OutputData/DiffusionRecvApp/Run0/Cycle000001/proc000000.vtu
+                  send
+                  OutputData/DiffusionSendApp/Run0/Cycle000001/proc000000.vtu'
+        prereq = test/run
+        capabilities = 'mfem'
+        recover = false
+        detail = 'checking the sub-application and parent application outputs against each other.'
+      []
+    []
+    [error]
+      requirement = 'The system shall error if different applications request different devices.'
+      input = parent.i
+      type = RunException
+      expect_err = "Attempted to configure with MFEM devices 'cpu', but we have already configured the MFEM device object with the devices 'cuda'"
+      cli_args = recv_app:Executioner/device=cpu
+      capabilities = mfem
+      compute_devices = cuda
+    []
   []
 []
