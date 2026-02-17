@@ -517,6 +517,12 @@ public:
    */
   void applyAxisRotation(const CSGObjectVariant & csg_object, std::string axis, const Real angle);
 
+  /**
+   * @brief Scale a CSG object in the specified x, y, and z directions.
+   *
+   * @param csg_object The CSG object to scale (Surface, Cell, Universe, Region, or Lattice)
+   * @param values size 3 vector with scaling values in x, y, and z directions {x, y, z}
+   */
   void applyScaling(const CSGObjectVariant & csg_object, const std::vector<Real> & values)
   {
     applyTransformation(csg_object, TransformationType::SCALE, values);

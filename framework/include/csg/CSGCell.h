@@ -118,6 +118,16 @@ public:
    */
   const CSGRegion & getRegion() const { return _region; }
 
+  /**
+   * @brief Get the list of transformations applied to this cell
+   *
+   * @return const reference to the list of transformations
+   */
+  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  {
+    return _transformations;
+  }
+
   /// Operator overload for checking if two CSGCell objects are equal
   bool operator==(const CSGCell & other) const;
 
@@ -135,16 +145,6 @@ protected:
 
   /// Apply a transformation to the cell (accessed through CSGBase)
   void applyTransformation(TransformationType type, const std::vector<Real> & values);
-
-  /**
-   * @brief Get the list of transformations applied to this cell
-   *
-   * @return const reference to the list of transformations
-   */
-  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
-  {
-    return _transformations;
-  }
 
   /// Name of surface
   std::string _name;

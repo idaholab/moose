@@ -86,6 +86,16 @@ public:
    */
   bool isRoot() const { return _is_root; }
 
+  /**
+   * @brief Get the list of transformations applied to this universe
+   *
+   * @return const reference to the list of transformations
+   */
+  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
+  {
+    return _transformations;
+  }
+
   /// Operator overload for checking if two CSGUniverse objects are equal
   bool operator==(const CSGUniverse & other) const;
 
@@ -118,16 +128,6 @@ protected:
 
   /// Apply a transformation to the universe (accessed through CSGBase)
   void applyTransformation(TransformationType type, const std::vector<Real> & values);
-
-  /**
-   * @brief Get the list of transformations applied to this universe
-   *
-   * @return const reference to the list of transformations
-   */
-  const std::vector<std::pair<TransformationType, std::vector<Real>>> & getTransformations() const
-  {
-    return _transformations;
-  }
 
   /// Name of universe
   std::string _name;
