@@ -448,8 +448,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
             "kokkos_neighbor_material_props", &_mesh, _material_prop_registry, *this)),
 #endif
     _reporter_data(_app),
-    // TODO: delete the following line after apps have been updated to not call getUserObjects
-    _all_user_objects(_app.getExecuteOnEnum()),
     _multi_apps(_app.getExecuteOnEnum()),
     _transient_multi_apps(_app.getExecuteOnEnum()),
     _transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -4577,9 +4575,6 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
 
     if (tid != 0)
       user_object->setPrimaryThreadCopy(uos[0].get());
-
-    // TODO: delete this line after apps have been updated to not call getUserObjects
-    _all_user_objects.addObject(user_object, tid);
 
     theWarehouse().add(user_object);
 

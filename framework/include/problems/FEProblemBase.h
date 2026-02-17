@@ -1330,14 +1330,6 @@ public:
   virtual std::vector<std::shared_ptr<UserObject>> addUserObject(
       const std::string & user_object_name, const std::string & name, InputParameters & parameters);
 
-  // TODO: delete this function after apps have been updated to not call it
-  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
-  {
-    mooseDeprecated(
-        "This function is deprecated, use theWarehouse().query() to construct a query instead");
-    return _all_user_objects;
-  }
-
   /**
    * Get the user object by its name
    * @param name The name of the user object being retrieved
@@ -3071,9 +3063,6 @@ protected:
 
   // Helper class to access Reporter object values
   ReporterData _reporter_data;
-
-  // TODO: delete this after apps have been updated to not call getUserObjects
-  ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;
