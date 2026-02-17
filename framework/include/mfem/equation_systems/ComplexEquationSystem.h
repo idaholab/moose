@@ -37,6 +37,11 @@ public:
   /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms() override;
 
+  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
+  virtual void ApplyComplexEssentialBC(const std::string & var_name,
+                                       mfem::ParComplexGridFunction & trial_gf,
+                                       mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs() override;
 

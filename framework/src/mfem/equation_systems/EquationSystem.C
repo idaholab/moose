@@ -196,7 +196,7 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
       // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       // Add these boundary markers to the set of markers labelling all essential boundaries
-      for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
+      for (const auto it : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
         global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
     }
   }
@@ -209,7 +209,8 @@ EquationSystem::ApplyEssentialBCs()
   for (const auto i : index_range(_trial_var_names))
   {
     const auto & trial_var_name = _trial_var_names.at(i);
-    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    mfem::ParGridFunction & trial_gf = *_var_ess_constraints.at(i);
+    trial_gf = 0;
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
     // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
@@ -263,11 +264,11 @@ EquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   auto & test_var_name = _test_var_names.at(0);
   auto blf = _blfs.Get(test_var_name);
   auto lf = _lfs.Get(test_var_name);
-  mfem::BlockVector aux_x, aux_rhs;
+  mfem::Vector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
   blf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *(_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
+      _ess_tdof_lists.at(0), *_var_ess_constraints.at(0), *lf, aux_a, aux_x, aux_rhs, true);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -305,20 +306,23 @@ EquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
       if (test_var_name == trial_var_name)
       {
         mooseAssert(i == j, "Trial and test variables must have the same ordering.");
-        aux_lf = *_lfs.Get(test_var_name);
         auto blf = _blfs.Get(test_var_name);
-        blf->FormLinearSystem(
-            _ess_tdof_lists.at(j), *(_var_ess_constraints.at(j)), aux_lf, *aux_a, aux_x, aux_rhs);
+        blf->FormLinearSystem(_ess_tdof_lists.at(j),
+                              *_var_ess_constraints.at(j),
+                              *_lfs.Get(test_var_name),
+                              *aux_a,
+                              aux_x,
+                              aux_rhs,
+                              true);
         trueX.GetBlock(j) = aux_x;
       }
       else if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
       {
-        aux_lf = 0.0;
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
         mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
                                           _ess_tdof_lists.at(i),
-                                          *(_var_ess_constraints.at(j)),
-                                          aux_lf,
+                                          *_var_ess_constraints.at(j),
+                                          aux_lf = 0,
                                           *aux_a,
                                           aux_x,
                                           aux_rhs);

@@ -100,34 +100,40 @@ ComplexEquationSystem::BuildBilinearForms()
 }
 
 void
-ComplexEquationSystem::ApplyEssentialBCs()
+ComplexEquationSystem::ApplyComplexEssentialBC(const std::string & var_name,
+                                               mfem::ParComplexGridFunction & trial_gf,
+                                               mfem::Array<int> & global_ess_markers)
 {
-  _ess_tdof_lists.resize(_test_var_names.size());
-  for (const auto i : index_range(_test_var_names))
+  if (_cmplx_essential_bc_map.Has(var_name))
   {
-    auto test_var_name = _test_var_names.at(i);
-    if (!_cmplx_essential_bc_map.Has(test_var_name))
-      continue;
-
-    // Set default value of gridfunction used in essential BC. Values
-    // overwritten in applyEssentialBCs
-    mfem::ParComplexGridFunction & trial_gf(*(_cmplx_var_ess_constraints.at(i)));
-    auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(pmesh, "parallel mesh is null");
-
-    auto bcs = _cmplx_essential_bc_map.GetRef(test_var_name);
-    mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
-    global_ess_markers = 0;
+    auto & bcs = _cmplx_essential_bc_map.GetRef(var_name);
     for (auto & bc : bcs)
     {
+      // Set constrained DoFs values on essential boundaries
       bc->ApplyBC(trial_gf);
-
+      // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
-      for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
-      {
+      // Add these boundary markers to the set of markers labelling all essential boundaries
+      for (const auto it : make_range(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max()))
         global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
-      }
     }
+  }
+}
+
+void
+ComplexEquationSystem::ApplyEssentialBCs()
+{
+  _ess_tdof_lists.resize(_trial_var_names.size());
+  for (const auto i : index_range(_trial_var_names))
+  {
+    const auto & trial_var_name = _trial_var_names.at(i);
+    mfem::ParComplexGridFunction & trial_gf = *_cmplx_var_ess_constraints.at(i);
+    trial_gf = std::complex<mfem::real_t>(0, 0);
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    global_ess_markers = 0;
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
+    ApplyComplexEssentialBC(trial_var_name, trial_gf, global_ess_markers);
     trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
 }
@@ -200,11 +206,11 @@ ComplexEquationSystem::FormSystemOperator(mfem::OperatorHandle & op,
   auto & test_var_name = _test_var_names.at(0);
   auto slf = _slfs.Get(test_var_name);
   auto clf = _clfs.Get(test_var_name);
-  mfem::BlockVector aux_x, aux_rhs;
+  mfem::Vector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
   slf->FormLinearSystem(
-      _ess_tdof_lists.at(0), *(_cmplx_var_ess_constraints.at(0)), *clf, aux_a, aux_x, aux_rhs);
+      _ess_tdof_lists.at(0), *_cmplx_var_ess_constraints.at(0), *clf, aux_a, aux_x, aux_rhs, true);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -223,30 +229,34 @@ ComplexEquationSystem::FormSystemMatrix(mfem::OperatorHandle & op,
 
   // Allocate block operator
   DeleteAllBlocks();
-  _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
+  _h_blocks.SetSize(_test_var_names.size(), _trial_var_names.size());
+  _h_blocks = nullptr;
+  trueRHS.SyncFromBlocks();
+  trueRHS = 0.0;
 
   // Form diagonal blocks.
   for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
-    auto slf = _slfs.Get(test_var_name);
-    auto clf = _clfs.Get(test_var_name);
+
     mfem::Vector aux_x, aux_rhs;
     mfem::OperatorHandle aux_a;
-    slf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_cmplx_var_ess_constraints.at(i)), *clf, aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
 
+    auto slf = _slfs.Get(test_var_name);
+    slf->FormLinearSystem(_ess_tdof_lists.at(i),
+                          *_cmplx_var_ess_constraints.at(i),
+                          *_clfs.Get(test_var_name),
+                          aux_a,
+                          aux_x,
+                          aux_rhs,
+                          true);
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
+    _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
   }
-
   // Sync memory
-  for (const auto i : index_range(_test_var_names))
-  {
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
-    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
-  }
+  trueX.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
 
   // Create monolithic matrix
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));

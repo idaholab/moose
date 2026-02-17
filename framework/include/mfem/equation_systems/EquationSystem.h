@@ -80,9 +80,9 @@ protected:
   bool VectorContainsName(const std::vector<std::string> & the_vector,
                           const std::string & name) const;
 
-  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
+  /// Apply essential BC(s) associated with var_name to set true DoFs of trial_gf and update
   /// markers of all essential boundaries
-  virtual void ApplyEssentialBC(const std::string & test_var_name,
+  virtual void ApplyEssentialBC(const std::string & var_name,
                                 mfem::ParGridFunction & trial_gf,
                                 mfem::Array<int> & global_ess_markers);
   /// Update all essentially constrained true DoF markers and values on boundaries
