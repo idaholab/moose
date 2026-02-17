@@ -32,12 +32,12 @@ void
 EquationSystemProblemOperator::Solve()
 {
   // Assign initial condition as initial guess for non-linear problems
-  if((GetEquationSystem()->_non_linear))
+  if ((GetEquationSystem()->_non_linear))
   {
     for (const auto i : index_range(_trial_variables))
       *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
   }
-  
+
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
   if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
@@ -57,7 +57,7 @@ EquationSystemProblemOperator::Solve()
     _problem_data.nonlinear_solver->Mult(zero_vec, _true_x);
 
   GetEquationSystem()->RecoverFEMSolution(
-    _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
+      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 }
 
 } // namespace Moose::MFEM
