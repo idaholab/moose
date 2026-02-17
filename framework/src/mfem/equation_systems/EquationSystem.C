@@ -445,6 +445,7 @@ CopyVec(const mfem::Vector & x, mfem::Vector & y)
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
+
   static_cast<mfem::Vector &>(_trueBlockSol) = sol;
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
