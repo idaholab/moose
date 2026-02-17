@@ -31,18 +31,21 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 EquationSystemProblemOperator::Solve()
 {
-
+  // Assign initial condition as initial guess for non-linear problems
+  if((GetEquationSystem()->_non_linear))
+  {
+    for (const auto i : index_range(_trial_variables))
+      *(GetEquationSystem()->_var_ess_constraints.at(i)) = *_trial_variables[i];
+  }
+  
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
+
   if (_problem_data.jacobian_solver->isLOR() && GetEquationSystem()->GetTestVarNames().size() > 1)
     mooseError("LOR solve is only supported for single-variable systems");
   _problem_data.jacobian_solver->updateSolver(
       *GetEquationSystem()->_blfs.Get(GetEquationSystem()->GetTestVarNames().at(0)),
       GetEquationSystem()->_ess_tdof_lists.at(0));
-  /*
-    _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
-    _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-    _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
-  */
+
   mfem::Vector zero_vec(_true_rhs.Size());
   zero_vec = 0.0;
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
@@ -54,7 +57,7 @@ EquationSystemProblemOperator::Solve()
     _problem_data.nonlinear_solver->Mult(zero_vec, _true_x);
 
   GetEquationSystem()->RecoverFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
+    _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 }
 
 } // namespace Moose::MFEM
