@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MooseTypes.h"
 #include "MooseEnum.h"
 
 namespace CSG
