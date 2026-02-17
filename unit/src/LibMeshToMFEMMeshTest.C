@@ -33,22 +33,30 @@ protected:
 
   InputParameters getValidParams() { return _factory->getValidParams(_mesh_type); }
 
-  void buildMesh(InputParameters& mesh_params) {
+  void buildMesh(InputParameters & mesh_params)
+  {
     // The input parameters in the third argument won't be used, but
     // we need a dummy value.
     buildMesh(mesh_params, "", _factory->getValidParams("ElementGenerator"));
   }
-  
-  void buildMesh(InputParameters& mesh_params, std::string generator_class, InputParameters generator_params)
+
+  void buildMesh(InputParameters & mesh_params,
+                 std::string generator_class,
+                 InputParameters generator_params)
   {
     _moose_mesh_ptr = _factory->create<M>(_mesh_type, "moose_mesh", mesh_params);
     _app->actionWarehouse().mesh() = _moose_mesh_ptr;
-    if (generator_class != "") {
+    if (generator_class != "")
+    {
       // Rank is not being assigned to elements
-      std::unique_ptr<MeshBase> libmesh = _factory->create<MeshGenerator>(generator_class, "mesh_generator", generator_params)->generate();
+      std::unique_ptr<MeshBase> libmesh =
+          _factory->create<MeshGenerator>(generator_class, "mesh_generator", generator_params)
+              ->generate();
       libmesh->prepare_for_use();
       _moose_mesh_ptr->setMeshBase(std::move(libmesh));
-    } else {
+    }
+    else
+    {
       _moose_mesh_ptr->setMeshBase(_moose_mesh_ptr->buildMeshBaseObject());
     }
     _moose_mesh_ptr->buildMesh();
@@ -248,33 +256,46 @@ INSTANTIATE_TEST_SUITE_P(
 using ElementGeneratorMFEMTest = LibMeshToMFEMMeshTest<MeshGeneratorMesh>;
 
 template <int M, int N>
-void checkTransform(mfem::ElementTransformation& transform, std::array<CoordND<M>, N> ref_coords, std::array<CoordND<M>, N> expected_phys_coords) {
+void
+checkTransform(mfem::ElementTransformation & transform,
+               std::array<CoordND<M>, N> ref_coords,
+               std::array<CoordND<M>, N> expected_phys_coords)
+{
   mfem::DenseMatrix ref_coords_mat(M, N), actual_phys_coords_mat(M, N);
-  for (int i = 0; i < M; ++i) {
-    for (int j = 0; j < N; ++j) {
+  for (int i = 0; i < M; ++i)
+  {
+    for (int j = 0; j < N; ++j)
+    {
       ref_coords_mat(i, j) = ref_coords[j][i];
     }
   }
   transform.Transform(ref_coords_mat, actual_phys_coords_mat);
-  for (int j = 0; j < N; ++j) {
+  for (int j = 0; j < N; ++j)
+  {
     std::string ref_coord;
-    for (int i = 0; i < M; ++i) {
-      if (i > 0) {
+    for (int i = 0; i < M; ++i)
+    {
+      if (i > 0)
+      {
         ref_coord += ", ";
       }
       ref_coord += std::to_string(ref_coords[j][i]);
     }
-    for (int i = 0; i < M; ++i) {
-      EXPECT_DOUBLE_EQ(actual_phys_coords_mat(i, j), expected_phys_coords[j][i]) << "Unexpected element " << i << " of physical coordinate at (" << ref_coord << ") in reference space";
+    for (int i = 0; i < M; ++i)
+    {
+      EXPECT_DOUBLE_EQ(actual_phys_coords_mat(i, j), expected_phys_coords[j][i])
+          << "Unexpected element " << i << " of physical coordinate at (" << ref_coord
+          << ") in reference space";
     }
   }
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckEDGE2) {
+TEST_F(ElementGeneratorMFEMTest, CheckEDGE2)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "EDGE2";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1}; 
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{1., 0., 0.}, {2., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
@@ -284,17 +305,19 @@ TEST_F(ElementGeneratorMFEMTest, CheckEDGE2) {
   std::set<std::set<Coord1D>> expected_elements = {{{1.}, {2.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(1,1);
+  mfem::DenseMatrix jac(1, 1);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0.}, {0.5}, {1.}}}, {{{1.}, {1.5}, {2.}}});
+  checkTransform<1, 3>(
+      *_mfem_mesh_ptr->GetElementTransformation(0), {{{0.}, {0.5}, {1.}}}, {{{1.}, {1.5}, {2.}}});
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckEDGE3) {
+TEST_F(ElementGeneratorMFEMTest, CheckEDGE3)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "EDGE3";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2}; 
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {4., 0., 0.}, {1., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
@@ -304,18 +327,22 @@ TEST_F(ElementGeneratorMFEMTest, CheckEDGE3) {
   std::set<std::set<Coord1D>> expected_elements = {{{0.}, {4.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(1,1);
+  mfem::DenseMatrix jac(1, 1);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0.25}, {0.75}, {1.}}}, {{{0.25}, {2.25}, {4.}}});
+  checkTransform<1, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0.25}, {0.75}, {1.}}},
+                       {{{0.25}, {2.25}, {4.}}});
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckEDGE4) {
+TEST_F(ElementGeneratorMFEMTest, CheckEDGE4)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "EDGE4";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3}; 
-  mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., 0., 0.}, {26., 0., 0.}, {0., 0., 0.}, {7., 0., 0.}};
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {
+      {-1., 0., 0.}, {26., 0., 0.}, {0., 0., 0.}, {7., 0., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
@@ -324,17 +351,20 @@ TEST_F(ElementGeneratorMFEMTest, CheckEDGE4) {
   std::set<std::set<Coord1D>> expected_elements = {{{-1.}, {26.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_NE(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(1,1);
+  mfem::DenseMatrix jac(1, 1);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<1, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0.25}, {0.75}, {1.}}}, {{{-0.578125}, {10.390625}, {26.}}});
+  checkTransform<1, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0.25}, {0.75}, {1.}}},
+                       {{{-0.578125}, {10.390625}, {26.}}});
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckTRI3) {
+TEST_F(ElementGeneratorMFEMTest, CheckTRI3)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "TRI3";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2}; 
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2};
   mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {2., 0., 0.}, {0., 2., 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
@@ -344,18 +374,22 @@ TEST_F(ElementGeneratorMFEMTest, CheckTRI3) {
   std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {2., 0.}, {0., 2.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2,2);
+  mfem::DenseMatrix jac(2, 2);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0., 0.}, {0.5, 0.25}, {1., 0.}}}, {{{0., 0.}, {1., 0.5}, {2., 0.}}});
+  checkTransform<2, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0., 0.}, {0.5, 0.25}, {1., 0.}}},
+                       {{{0., 0.}, {1., 0.5}, {2., 0.}}});
 }
 
-TEST_F(ElementGeneratorMFEMTest, CheckQUAD4) {
+TEST_F(ElementGeneratorMFEMTest, CheckQUAD4)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "QUAD4";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3}; 
-  mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {1., 0., 0.}, {2., 2., 0.}, {0.5, 1.0, 0.}};
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {
+      {0., 0., 0.}, {1., 0., 0.}, {2., 2., 0.}, {0.5, 1.0, 0.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
@@ -364,93 +398,122 @@ TEST_F(ElementGeneratorMFEMTest, CheckQUAD4) {
   std::set<std::set<Coord2D>> expected_elements = {{{0., 0.}, {1., 0.}, {0.5, 1.}, {2., 2.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(2,2);
+  mfem::DenseMatrix jac(2, 2);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<2, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0., 0.5}, {0.75, 1.}, {0.5, 0.5}}}, {{{0.25, 0.5}, {1.625, 1.75}, {.875, 0.75}}});
+  checkTransform<2, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0., 0.5}, {0.75, 1.}, {0.5, 0.5}}},
+                       {{{0.25, 0.5}, {1.625, 1.75}, {.875, 0.75}}});
 }
 
-
-TEST_F(ElementGeneratorMFEMTest, CheckTET4) {
+TEST_F(ElementGeneratorMFEMTest, CheckTET4)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "TET4";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3}; 
-  mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0.0, -1.}};
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {
+      {-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0.0, -1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord3D>> actual_elements =
       getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::TETRAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {{{-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0., -1.}}};
+  std::set<std::set<Coord3D>> expected_elements = {
+      {{-1., -1., 0.}, {1., -1., 0.}, {0., 1., 0.}, {0., 0., -1.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3,3);
+  mfem::DenseMatrix jac(3, 3);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}}, {{{0., 0.5, -.5}, {0., 0.0, 0.}, {0., 0.0, -.5}}});
+  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.125, 0.25, 0.5}}},
+                       {{{0., 0.5, -.5}, {0., 0.0, 0.}, {0., 0.0, -.5}}});
 }
 
-
-TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID5) {
+TEST_F(ElementGeneratorMFEMTest, CheckPYRAMID5)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "PYRAMID5";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4}; 
-  mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1.0, 0.}, {1.5, 0., 2.}};
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {
+      {-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1.0, 0.}, {1.5, 0., 2.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord3D>> actual_elements =
       getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::PYRAMID);
-  std::set<std::set<Coord3D>> expected_elements = {{{-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1., 0.}, {1.5, 0., 2}}};
+  std::set<std::set<Coord3D>> expected_elements = {
+      {{-1., -1., 0.}, {1., -1., 0.}, {1., 1., 0.}, {-1., 1., 0.}, {1.5, 0., 2}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3,3);
+  mfem::DenseMatrix jac(3, 3);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.25, 0.25, 0.75}}}, {{{0.25, 0.5, 1.}, {-0.5, 0., 0.}, {1.375, 0.25, 1.5}}});
+  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.25, 0.25, 0.75}}},
+                       {{{0.25, 0.5, 1.}, {-0.5, 0., 0.}, {1.375, 0.25, 1.5}}});
 }
 
-
-TEST_F(ElementGeneratorMFEMTest, CheckPRISM6) {
+TEST_F(ElementGeneratorMFEMTest, CheckPRISM6)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "PRISM6";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5}; 
-  mg_params.set<std::vector<Point>>("nodal_positions") = {{-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}};
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {
+      {-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord3D>> actual_elements =
       getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::WEDGE);
-  std::set<std::set<Coord3D>> expected_elements = {{{-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}}};
+  std::set<std::set<Coord3D>> expected_elements = {
+      {{-1., -1., -1.}, {1., -1., -1.}, {0.5, 1., -1.}, {0, -1.0, 1.}, {2, -1., 1.}, {2., 1., 1.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3,3);
+  mfem::DenseMatrix jac(3, 3);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0.5, 0.75}}}, {{{0.375, 0.0, 0.}, {0.25, 0.0, -1.}, {1.6875, 0., 0.5}}});
+  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0., 0.5, 0.5}, {0.25, 0.5, 0.}, {0.5, 0.5, 0.75}}},
+                       {{{0.375, 0.0, 0.}, {0.25, 0.0, -1.}, {1.6875, 0., 0.5}}});
 }
 
-
-TEST_F(ElementGeneratorMFEMTest, CheckHEX8) {
+TEST_F(ElementGeneratorMFEMTest, CheckHEX8)
+{
   InputParameters mesh_params = getValidParams();
   InputParameters mg_params = _factory->getValidParams("ElementGenerator");
   mg_params.set<MooseEnum>("elem_type") = "HEX8";
-  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7}; 
-  mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.}, {1., 0., 0.}, {2., 1., 1.}, {1.0, 1.0, 1.}, {0., 0., 1.}, {1., 0., 1.}, {2., 1., 2.}, {1., 1., 2.}};
+  mg_params.set<std::vector<unsigned long>>("element_connectivity") = {0, 1, 2, 3, 4, 5, 6, 7};
+  mg_params.set<std::vector<Point>>("nodal_positions") = {{0., 0., 0.},
+                                                          {1., 0., 0.},
+                                                          {2., 1., 1.},
+                                                          {1.0, 1.0, 1.},
+                                                          {0., 0., 1.},
+                                                          {1., 0., 1.},
+                                                          {2., 1., 2.},
+                                                          {1., 1., 2.}};
   mg_params.set<unsigned short>("subdomain_id") = 1;
   buildMesh(mesh_params, "ElementGenerator", mg_params);
   ASSERT_EQ(_moose_mesh_ptr->nElem(), 1);
   std::set<std::set<Coord3D>> actual_elements =
       getElementSet<3>(_mfem_mesh_ptr, mfem::Element::Type::HEXAHEDRON);
-  std::set<std::set<Coord3D>> expected_elements = {{{0., 0., 0.}, {1., 0., 0.}, {2., 1., 1.}, {1., 1., 1.}, {0., 0., 1.}, {1., 0., 1.}, {2., 1., 2.}, {1., 1., 2.}}};
+  std::set<std::set<Coord3D>> expected_elements = {{{0., 0., 0.},
+                                                    {1., 0., 0.},
+                                                    {2., 1., 1.},
+                                                    {1., 1., 1.},
+                                                    {0., 0., 1.},
+                                                    {1., 0., 1.},
+                                                    {2., 1., 2.},
+                                                    {1., 1., 2.}}};
   EXPECT_EQ(expected_elements, actual_elements);
   EXPECT_EQ(_mfem_mesh_ptr->GetNodes(), nullptr);
-  mfem::DenseMatrix jac(3,3);
+  mfem::DenseMatrix jac(3, 3);
   _mfem_mesh_ptr->GetElementJacobian(0, jac);
   EXPECT_GT(jac.Det(), 0.);
-  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0), {{{0., 0.5, 0.5}, {0.5, 0.5, 1.}, {0.5, 0.5, 0.5}}}, {{{0.5, 0.5, 1.0}, {1., 0.5, 1.5}, {1., 0.5, 1.}}});
+  checkTransform<3, 3>(*_mfem_mesh_ptr->GetElementTransformation(0),
+                       {{{0., 0.5, 0.5}, {0.5, 0.5, 1.}, {0.5, 0.5, 0.5}}},
+                       {{{0.5, 0.5, 1.0}, {1., 0.5, 1.5}, {1., 0.5, 1.}}});
 }
-

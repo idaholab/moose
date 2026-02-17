@@ -5,7 +5,8 @@
 /**
  * CubitFaceInfo
  */
-CubitFaceInfo::CubitFaceInfo(CubitFaceType face_type, int basis_type) : _face_type(face_type), _basis_type(basis_type)
+CubitFaceInfo::CubitFaceInfo(CubitFaceType face_type, int basis_type)
+  : _face_type(face_type), _basis_type(basis_type)
 {
   buildCubitFaceInfo();
 }
@@ -80,13 +81,17 @@ CubitFaceInfo::buildCubitFaceInfo()
   }
 }
 
-
-const std::map<libMesh::ElemMappingType, int> CubitElementInfo::_libmesh_to_mfem_basis_types{ {libMesh::ElemMappingType::RATIONAL_BERNSTEIN_MAP, mfem::BasisType::Positive}, {libMesh::ElemMappingType::LAGRANGE_MAP, mfem::BasisType::ClosedUniform}};
+const std::map<libMesh::ElemMappingType, int> CubitElementInfo::_libmesh_to_mfem_basis_types{
+    {libMesh::ElemMappingType::RATIONAL_BERNSTEIN_MAP, mfem::BasisType::Positive},
+    {libMesh::ElemMappingType::LAGRANGE_MAP, mfem::BasisType::ClosedUniform}};
 
 /**
  * CubitElementInfo
  */
-CubitElementInfo::CubitElementInfo(libMesh::ElemType elem_type, libMesh::ElemMappingType map_type, int dimension) : _basis_type(_libmesh_to_mfem_basis_types.at(map_type))
+CubitElementInfo::CubitElementInfo(libMesh::ElemType elem_type,
+                                   libMesh::ElemMappingType map_type,
+                                   int dimension)
+  : _basis_type(_libmesh_to_mfem_basis_types.at(map_type))
 {
   switch (dimension)
   {
@@ -378,8 +383,9 @@ CubitElementInfo::getWedge6FaceInfo() const
 {
   // Refer to "cell_prism.C" line 127.
   // We are using the same side ordering as used in LibMesh.
-  CubitFaceInfo tri3 = CubitFaceInfo(CubitFaceInfo::FACE_TRI3, _basis_type);   // Faces 0, 4 (LibMesh)
-  CubitFaceInfo quad4 = CubitFaceInfo(CubitFaceInfo::FACE_QUAD4, _basis_type); // Faces 1, 2, 3 (LibMesh)
+  CubitFaceInfo tri3 = CubitFaceInfo(CubitFaceInfo::FACE_TRI3, _basis_type); // Faces 0, 4 (LibMesh)
+  CubitFaceInfo quad4 =
+      CubitFaceInfo(CubitFaceInfo::FACE_QUAD4, _basis_type); // Faces 1, 2, 3 (LibMesh)
 
   return {tri3, quad4, quad4, quad4, tri3};
 }
@@ -492,7 +498,9 @@ CubitBlockInfo::CubitBlockInfo(int dimension)
 }
 
 void
-CubitBlockInfo::addBlockElement(int block_id, libMesh::ElemType elem_type, libMesh::ElemMappingType map_type)
+CubitBlockInfo::addBlockElement(int block_id,
+                                libMesh::ElemType elem_type,
+                                libMesh::ElemMappingType map_type)
 {
   if (hasBlockID(block_id))
     mooseError("Block with ID '", block_id, "' has already been added.");

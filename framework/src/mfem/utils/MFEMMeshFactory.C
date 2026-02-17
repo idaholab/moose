@@ -463,7 +463,8 @@ buildCubitBlockInfo(MeshBase & libmesh, const std::vector<int> & unique_block_id
 
     auto first_element_ptr = *element_range.begin();
 
-    block_info.addBlockElement(block_id, first_element_ptr->type(), first_element_ptr->mapping_type());
+    block_info.addBlockElement(
+        block_id, first_element_ptr->type(), first_element_ptr->mapping_type());
   }
   return block_info;
 }

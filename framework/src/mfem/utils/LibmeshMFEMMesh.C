@@ -164,7 +164,7 @@ LibmeshMFEMMesh::buildMFEMVertices(
     auto & coordinates = coordinates_for_libmesh_node_id.at(libmesh_node_id);
 
     // FIXME: Look at mfem::Mesh::Make1D() to see if we can set just one component of the coordinate
-    
+
     // Set xyz components.
     vertices[ivertex](0) = coordinates[0];
 
@@ -444,7 +444,8 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
   FinalizeTopology();
 
   // Define higher-order FE space.
-  mfem::FiniteElementCollection * finite_element_collection = new mfem::H1_FECollection(block_info.order(), Dim, block_info.basisType());
+  mfem::FiniteElementCollection * finite_element_collection =
+      new mfem::H1_FECollection(block_info.order(), Dim, block_info.basisType());
 
   // NB: the specified ordering is byVDIM.
   // byVDim: XYZ, XYZ, XYZ, XYZ,...
@@ -455,7 +456,7 @@ LibmeshMFEMMesh::handleHigherOrderFESpace(
   Nodes = new mfem::GridFunction(finite_element_space);
   Nodes->MakeOwner(finite_element_collection); // Nodes will destroy 'finite_element_collection'
   own_nodes = 1;                               // and 'finite_element_space'
-  
+
   // Iterate over blocks and libmesh elements.
   for (auto block_id : unique_block_ids)
   {
@@ -611,7 +612,8 @@ const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_quad9 = {1, 2, 3, 4, 5,
 const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_tet10 = {1, 2, 3, 4, 5, 7, 8, 6, 9, 10};
 // const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_tet14 = {};
 // const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_pyramid13 = {};
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_pyramid14 = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_pyramid14 = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
 // const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_wedge15 = {};
 const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_wedge18 = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 13, 14, 15, 10, 11, 12, 16, 17, 18};
@@ -619,54 +621,55 @@ const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_wedge18 = {
 
 // NB: different map used for hex27 to ReadCubit. LibMesh uses a different node
 // ordering to the Exodus/Genesis format.
-const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_hex27 = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 17, 18,
-                                       19, 20, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27};
+const std::vector<int> LibmeshMFEMMesh::_mfem_to_libmesh_hex27 = {
+    1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 17, 18,
+    19, 20, 13, 14, 15, 16, 21, 22, 23, 24, 25, 26, 27};
 
-const std::vector<int>& LibmeshMFEMMesh::getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type) {
-    switch (type)
-    {
+const std::vector<int> &
+LibmeshMFEMMesh::getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type)
+{
+  switch (type)
+  {
     case CubitElementInfo::ELEMENT_SEG3:
-      {
-        return _mfem_to_libmesh_seg3;
-      }
-    case CubitElementInfo::ELEMENT_SEG4:
-      {
-        return _mfem_to_libmesh_seg4;
-      }
-      case CubitElementInfo::ELEMENT_TRI6:
-      {
-        return _mfem_to_libmesh_tri6;
-      }
-      case CubitElementInfo::ELEMENT_QUAD8:
-      {
-        return _mfem_to_libmesh_quad8;
-      }
-      case CubitElementInfo::ELEMENT_QUAD9:
-      {
-        return _mfem_to_libmesh_quad9;
-      }
-      case CubitElementInfo::ELEMENT_TET10:
-      {
-        return _mfem_to_libmesh_tet10;
-      }
-      case CubitElementInfo::ELEMENT_HEX27:
-      {
-        return _mfem_to_libmesh_hex27;
-      }
-      case CubitElementInfo::ELEMENT_WEDGE18:
-      {
-        return _mfem_to_libmesh_wedge18;
-      }
-      case CubitElementInfo::ELEMENT_PYRAMID14:
-      {
-        // return _mfem_to_libmesh_pyramid14;
-        mooseError("H1_FECollection does not currently support Pyramid14.");
-      }
-      default:
-      {
-        mooseError("No higher-order map available for element type ",
-                   type,
-                   ".");
-      }
+    {
+      return _mfem_to_libmesh_seg3;
     }
+    case CubitElementInfo::ELEMENT_SEG4:
+    {
+      return _mfem_to_libmesh_seg4;
+    }
+    case CubitElementInfo::ELEMENT_TRI6:
+    {
+      return _mfem_to_libmesh_tri6;
+    }
+    case CubitElementInfo::ELEMENT_QUAD8:
+    {
+      return _mfem_to_libmesh_quad8;
+    }
+    case CubitElementInfo::ELEMENT_QUAD9:
+    {
+      return _mfem_to_libmesh_quad9;
+    }
+    case CubitElementInfo::ELEMENT_TET10:
+    {
+      return _mfem_to_libmesh_tet10;
+    }
+    case CubitElementInfo::ELEMENT_HEX27:
+    {
+      return _mfem_to_libmesh_hex27;
+    }
+    case CubitElementInfo::ELEMENT_WEDGE18:
+    {
+      return _mfem_to_libmesh_wedge18;
+    }
+    case CubitElementInfo::ELEMENT_PYRAMID14:
+    {
+      // return _mfem_to_libmesh_pyramid14;
+      mooseError("H1_FECollection does not currently support Pyramid14.");
+    }
+    default:
+    {
+      mooseError("No higher-order map available for element type ", type, ".");
+    }
+  }
 }
