@@ -36,12 +36,19 @@
 []
 
 [Transfers]
-  [from_sub]
+  active = 'copy_from_sub'
+  [copy_from_sub]
     type = MultiAppMFEMCopyTransfer
     source_variable = u
     variable = u
     from_multi_app = subapp
   []
+  [general_transfer_from_sub]
+    type = MultiAppMFEMGeneralFieldTransfer
+    source_variable = u
+    variable = u
+    from_multi_app = subapp
+  []  
 []
 
 [Outputs]
