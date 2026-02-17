@@ -20,11 +20,6 @@
 #include <tuple>
 #include <vector>
 
-// TODO: Will need to port over the following from Apollo:
-//   - CubitBlockInfo
-//   - MFEMMesh -> MFEMMooseMesh (?); consider getting rid of the inheritance in this type and use
-//   composition instead
-//   - some methods from CoupledMesh; could these be merged with MFEMMesh/MFEMMooseMesh?
 std::shared_ptr<mfem::ParMesh>
 buildMFEMMesh(MooseMesh & mesh)
 {
@@ -129,6 +124,7 @@ buildMFEMMesh(MooseMesh & mesh)
       break;
     }
     case 2:
+    case 3:
     {
       _mfem_mesh =
           std::make_shared<LibmeshMFEMMesh>(mesh.nElem(),
@@ -467,7 +463,7 @@ buildCubitBlockInfo(MeshBase & libmesh, const std::vector<int> & unique_block_id
 
     auto first_element_ptr = *element_range.begin();
 
-    block_info.addBlockElement(block_id, first_element_ptr->n_nodes());
+    block_info.addBlockElement(block_id, first_element_ptr->type(), first_element_ptr->mapping_type());
   }
   return block_info;
 }

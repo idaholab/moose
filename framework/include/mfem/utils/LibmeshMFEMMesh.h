@@ -120,9 +120,9 @@ protected:
   buildMFEMFaceElement(const int face_type, const int * vertex_ids, const int boundary_id);
 
   /**
-   * Called internally in constructor if the element is second-order.
+   * Called internally in constructor if the element is second-order or higher.
    */
-  void handleQuadraticFESpace(
+  void handleHigherOrderFESpace(
       const CubitBlockInfo & block_info,
       const std::vector<int> & unique_block_ids,
       const std::map<int, std::vector<int>> & libmesh_element_ids_for_block_id,
@@ -156,7 +156,19 @@ protected:
     return _mfem_vertex_index_for_libmesh_corner_node_id.at(libmesh_corner_node_id);
   }
 
+  static const std::vector<int>& getMFEMToLibmeshMap(CubitElementInfo::CubitElementType type);
+
 private:
   std::map<int, int> _mfem_element_id_for_libmesh_element_id;
   std::map<int, int> _mfem_vertex_index_for_libmesh_corner_node_id;
+
+  static const std::vector<int> _mfem_to_libmesh_seg3;
+  static const std::vector<int> _mfem_to_libmesh_seg4;
+  static const std::vector<int> _mfem_to_libmesh_tri6;
+  static const std::vector<int> _mfem_to_libmesh_quad8;
+  static const std::vector<int> _mfem_to_libmesh_quad9;
+  static const std::vector<int> _mfem_to_libmesh_tet10;
+  static const std::vector<int> _mfem_to_libmesh_pyramid14;
+  static const std::vector<int> _mfem_to_libmesh_wedge18;
+  static const std::vector<int> _mfem_to_libmesh_hex27;
 };
