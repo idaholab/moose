@@ -66,11 +66,15 @@
 []
 
 [Kernels]
- active = 'nl'
+  active = 'nl'
   [nl]
     type = MFEMNLDiffusionKernel
     variable = concentration
     coefficient = diffCoeff
+  []
+  [force]
+    type = MFEMDomainLFKernel
+    variable = concentration
   []
 []
 
@@ -85,11 +89,11 @@
 []
 
 [Solver]
-  type = MFEMHypreGMRES
-  preconditioner = boomeramg
-  print_level = 1
-  l_tol = 1e-16
-  l_max_its = 1000
+   type = MFEMHypreGMRES
+   preconditioner = boomeramg
+   print_level = 1
+   l_tol = 1e-16
+   l_max_its = 1000
 []
 
 [Executioner]
