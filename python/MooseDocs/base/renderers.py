@@ -369,15 +369,15 @@ class HTMLRenderer(Renderer):
 
     def _addTitle(self, head, root, page):
         """
-        Add content to <title> tag, if not already done by navigation extension.
+        Add content to <title> tag, if not already done by the navigation extension.
 
         Inputs:
             head[html.Tag]: The <head> tag for the page being generated.
-            ast[tokens.Token]: The root node for the AST.
+            root[tokens.Token]: The root node for the AST.
             page[page.PageNodeBase]: The current page being converted.
         """
 
-        # Locate h1 heading, if it is found extract the rendered text
+        # Locate h1 heading and, if it is found, extract the rendered text
         if 'title' in [child.name for child in head]:
             return
         h = find_heading(page)

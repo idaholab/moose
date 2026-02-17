@@ -1241,7 +1241,6 @@ div.moose-mega-menu-content{
  }
 
  .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
-   /*margin: -57px 824px 0px 0px;*/
    color: white;
  }
 
@@ -1251,7 +1250,6 @@ div.moose-mega-menu-content{
    and (orientation: landscape)
    and (-webkit-min-device-pixel-ratio: 2) {
    .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
-      /*margin: -57px 824px 0px 0px;*/
       color: white;
    }
  }
