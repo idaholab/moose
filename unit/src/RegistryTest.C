@@ -81,9 +81,13 @@ TEST_F(RegistryTest, addDataFilePathNonDataFolder)
   const std::string name = "non_data_folder";
   const std::string path = "files/data_file_tests/data0";
   const std::string folder = std::filesystem::path(path).filename().c_str();
+
+  // Not allowed by default
   EXPECT_MOOSEERROR_MSG(Registry::addDataFilePath(name, path),
                         "While registering data file path '" + path + "' for '" + name +
                             "': The folder must be named 'data' and it is named '" + folder + "'");
+  // Can be allowed
+  Registry::addDataFilePath(name, path, false);
 }
 
 TEST_F(RegistryTest, addDataFilePathMismatch)

@@ -79,7 +79,7 @@
   registerMooseObjectRenamed(app, orig_class, time, new_class)
 
 /// Register a non-MooseApp data file path (folder name must be data)
-#define registerNonAppDataFilePath(name, path) Registry::addDataFilePath(name, path)
+#define registerNonAppDataFilePath(name, path) Registry::addDataFilePath(name, path, false)
 /// Register a data file path for an application. Uses the current file to register
 /// ../../data as a path. The app name must be the APPLICATION_NAME used to build
 /// the app (solid_mechanics instead of SolidMechanicsApp, for example)
@@ -209,8 +209,10 @@ public:
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
   static char addKnownLabel(const std::string & label);
 
-  /// register general search paths (folder name must be data)
-  static void addDataFilePath(const std::string & name, const std::string & in_tree_path);
+  /// register general search paths
+  static void addDataFilePath(const std::string & name,
+                              const std::string & in_tree_path,
+                              const bool require_folder_name_data = true);
   /// register search paths for an application (path determined relative to app_path);
   /// app_path should be passed as __FILE__ from the application source file
   static void addAppDataFilePath(const std::string & app_name, const std::string & app_path);

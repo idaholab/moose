@@ -88,22 +88,27 @@ Registry::addKnownLabel(const std::string & label)
 }
 
 void
-Registry::addDataFilePath(const std::string & name, const std::string & in_tree_path)
+Registry::addDataFilePath(const std::string & name,
+                          const std::string & in_tree_path,
+                          const bool require_folder_name_data /* = true */)
 {
   if (!std::regex_search(name, std::regex("\\w+")))
     mooseError("Unallowed characters in '", name, "'");
 
   // Enforce that the folder is called "data", because we rely on the installed path
   // to be within PREFIX/share/<name>/data (see determineDataFilePath())
-  const std::string folder = std::filesystem::path(in_tree_path).filename().c_str();
-  if (folder != "data")
-    mooseError("While registering data file path '",
-               in_tree_path,
-               "' for '",
-               name,
-               "': The folder must be named 'data' and it is named '",
-               folder,
-               "'");
+  if (require_folder_name_data)
+  {
+    const std::string folder = std::filesystem::path(in_tree_path).filename().c_str();
+    if (folder != "data")
+      mooseError("While registering data file path '",
+                 in_tree_path,
+                 "' for '",
+                 name,
+                 "': The folder must be named 'data' and it is named '",
+                 folder,
+                 "'");
+  }
 
   // Find either the installed or in-tree path
   const auto path = determineDataFilePath(name, in_tree_path);
