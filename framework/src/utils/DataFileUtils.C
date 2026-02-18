@@ -19,20 +19,21 @@
 namespace Moose::DataFileUtils
 {
 Moose::DataFileUtils::Path
-getPath(std::string path, const std::optional<std::string> & base)
+getPath(std::string path, const GetPathOptions & options)
 {
   const auto & data_paths = Registry::getRegistry().getDataFilePaths();
 
-  // Search for "<name>:" prefix which is a data name to limit the search to
-  std::optional<std::string> data_name;
-  std::smatch match;
-  if (std::regex_search(path, match, std::regex("(?:(\\w+):)?(.*)")))
+  // Search for "<name>:" prefix which is an explicit data name to search
+  std::optional<std::pair<std::string, std::string>> explicit_data;
+  if (std::smatch match; std::regex_search(path, match, std::regex("(?:([a-z0-9_]+):)?(.*)")))
   {
+    // Has an explicit data name
     if (match[1].matched)
     {
-      data_name = match[1];
-      if (!data_paths.count(*data_name))
-        mooseError("Data from '", *data_name, "' is not registered to be searched");
+      if (const auto it = data_paths.find(match[1].str()); it != data_paths.end())
+        explicit_data = *it;
+      else
+        mooseError("Data from '", match[1], "' is not registered to be searched");
     }
     path = match[2];
   }
@@ -41,29 +42,57 @@ getPath(std::string path, const std::optional<std::string> & base)
 
   const std::filesystem::path value_path = std::filesystem::path(path);
 
+  // Helper for erroring if the data name is explicitly set
+  const auto if_data_name_error = [&explicit_data](const auto & message)
+  {
+    if (explicit_data)
+      mooseError("Cannot ",
+                 message,
+                 " along with a data name to search (requested "
+                 "to search in '",
+                 explicit_data->first,
+                 "')");
+  };
+
   // File is absolute, no need to search
   if (std::filesystem::path(path).is_absolute())
   {
-    if (data_name)
-      mooseError("Should not specify an absolute path along with a data name to search (requested "
-                 "to search in '",
-                 *data_name,
-                 "')");
+    // Shouldn't provide an absolute path and an explicit data name
+    if_data_name_error("an absolute path");
+
+    // File exists, we're good to go
     if (MooseUtils::checkFileReadable(path, false, false, false))
       return {MooseUtils::canonicalPath(path), Context::ABSOLUTE};
+
+    // If absolute and graceful, return the bad absolute path
+    if (options.graceful)
+      return {MooseUtils::canonicalPath(path), Context::ABSOLUTE_NOT_FOUND};
+
+    // If absolute and not graceful, nothing else to do
     mooseError("The absolute path '", path, "' does not exist or is not readable.");
   }
 
   // Keep track of what was was searched for error context
   std::map<std::string, std::string> not_found;
 
-  // Relative to the base, if provided
-  if (base)
+  // Because no explicit data name is set, we always want to prefer
+  // checking relative paths first before searching the data
+  if (options.base && !explicit_data)
   {
-    const auto relative_to_base = MooseUtils::pathjoin(*base, path);
+    const auto relative_to_base = MooseUtils::pathjoin(*options.base, path);
+
+    // Relative path exists
     if (MooseUtils::checkFileReadable(relative_to_base, false, false, false))
       return {MooseUtils::canonicalPath(relative_to_base), Context::RELATIVE};
-    not_found.emplace("working directory", MooseUtils::canonicalPath(*base));
+
+    // Without an explicit data name set, if we're set to not search all data
+    // there's nothing else to check here so we'll avoid the error at the bottom
+    // and exit immediately
+    if (!options.search_all_data && options.graceful)
+      return {MooseUtils::canonicalPath(relative_to_base), Context::RELATIVE_NOT_FOUND};
+
+    // Mark that we searched the working directory
+    not_found.emplace("working directory", MooseUtils::canonicalPath(*options.base));
   }
 
   // See if we should skip searching data
@@ -71,32 +100,52 @@ getPath(std::string path, const std::optional<std::string> & base)
   // Path starts with ./ so don't search data
   if (path.size() > 1 && path.substr(0, 2) == "./")
   {
+    // Shouldn't provide a relative path and an explicit data name
+    if_data_name_error("a path that starts with './'");
+
+    // Mark that we're not checking data because it is a relative path
     skip_data_reason = "begins with './'";
   }
-  else
+  // Path resolves outside of . so don't search data
+  else if (const std::string proximate = std::filesystem::proximate(path).c_str();
+           (proximate.size() > 1 && proximate.substr(0, 2) == ".."))
   {
-    // Path resolves outside of . so don't search data
-    const std::string proximate = std::filesystem::proximate(path).c_str();
-    if (proximate.size() > 1 && proximate.substr(0, 2) == "..")
-    {
-      skip_data_reason = "resolves behind '.'";
-    }
+    // Shouldn't provide a relative path and an explicit data name
+    if_data_name_error("a relative path");
+
+    // Mark that we're not checking data because it's out of the cwd
+    skip_data_reason = "resolves behind '.'";
   }
 
-  // Search data if we don't have a reason not to
+  // Search the data if we found a reason not to and it's set
+  // to search data or we have an explicit data name to search
   std::map<std::string, std::string> found;
-  if (!skip_data_reason)
-    for (const auto & [name, data_path] : data_paths)
+  if (!skip_data_reason && (options.search_all_data || explicit_data))
+  {
+    const auto check_data_path = [&found, &not_found, &path](const auto & entry)
     {
-      // Explicit search, name doesn't match requested name
-      if (data_name && name != *data_name) // explicit search
-        continue;
+      const auto & [name, data_path] = entry;
       const auto file_path = MooseUtils::pathjoin(data_path, path);
       if (MooseUtils::checkFileReadable(file_path, false, false, false))
         found.emplace(name, MooseUtils::canonicalPath(file_path));
       else
         not_found.emplace(name + " data", data_path);
+    };
+
+    // Explicit search, just searching one
+    if (explicit_data)
+    {
+      check_data_path(*explicit_data);
+      if (found.empty())
+        mooseError("The path '", path, "' was not found in data from '", explicit_data->first, "'");
     }
+    // Search all data paths
+    else
+    {
+      for (const auto & entry : data_paths)
+        check_data_path(entry);
+    }
+  }
 
   // Found exactly one
   if (found.size() == 1)
@@ -139,6 +188,8 @@ getPathExplicit(const std::string & data_name,
                 const std::string & path,
                 const std::optional<std::string> & base)
 {
-  return getPath(data_name + ":" + path, base);
+  GetPathOptions options;
+  options.base = base;
+  return getPath(data_name + ":" + path, options);
 }
 }
